@@ -1,0 +1,10 @@
+#! /usr/bin/python2.7
+"""
+Linux launcher
+
+This is copied directly into the python bin directory and makes the
+'muddery' program available on $PATH.
+"""
+
+from  muddery.muddery_launcher import main
+main()

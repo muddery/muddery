@@ -1,0 +1,6 @@
+# Muddery dependencies, for Linux/Mac platforms
+
+django >= 1.7
+twisted >= 12.0
+mock >= 1.0.1
+pillow
