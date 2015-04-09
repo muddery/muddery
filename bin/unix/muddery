@@ -6,5 +6,5 @@ This is copied directly into the python bin directory and makes the
 'muddery' program available on $PATH.
 """
 
-from  muddery.muddery_launcher import main
-main()
+from  muddery.server import muddery_launcher
+muddery_launcher.main()

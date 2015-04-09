@@ -1,16 +1,11 @@
 """
-Object
-
-The Object is the "naked" base class for things in the game world.
-
-Note that the default Character, Room and Exit does not inherit from
-this Object, but from their respective default implementations in the
-evennia library. If you want to use this class as a parent to change
-the other types, you can do so by adding this as a multiple
-inheritance.
+AutoObj is an object which can load it's data automatically.
 
 """
+
 from evennia import DefaultObject
+import worldloader.loader as loader
+
 
 class Object(DefaultObject):
     """
@@ -155,3 +150,19 @@ class Object(DefaultObject):
 
      """
     pass
+
+
+class AutoObj(DefaultObject):
+    """
+    This object loads attributes from db automatically.
+    """
+    
+    def at_init(self):
+        """
+        Load data at init.
+        """
+        super(AutoObj, self).at_init()
+        
+        # need save before modify m2m fields
+        self.save()
+        loader.load_data(self)

@@ -11,13 +11,13 @@ menu. Run the script with the -h flag to see usage information.
 """
 
 
-from  evennia.server.evennia_launcher import main as evennia_main
+from evennia.server import evennia_launcher
 
 def main():
     """
     Run the evennia main program.
     """
-    evennia_main()
+    evennia_launcher.main()
 
 
 if __name__ == '__main__':

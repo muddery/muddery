@@ -15,6 +15,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 
 from evennia import default_cmds
+import command as muddery_cmds
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
     """
@@ -32,6 +33,9 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+        self.add(muddery_cmds.CmdImportCsv())
+        self.add(muddery_cmds.CmdBatchBuilder())
+        self.add(muddery_cmds.CmdSetDataInfo())
 
 
 class PlayerCmdSet(default_cmds.PlayerCmdSet):

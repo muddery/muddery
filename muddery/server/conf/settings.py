@@ -19,43 +19,12 @@ from evennia.settings_default import *
 # Evennia base server config
 ######################################################################
 
-# This is the name of your game. Make it catchy!
-SERVERNAME = "Test"
-
-# Path to the game directory (use EVENNIA_DIR to refer to the
-# core evennia library)
-GAME_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 # Place to put log files
 LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
 SERVER_LOG_FILE = os.path.join(LOG_DIR, 'server.log')
 PORTAL_LOG_FILE = os.path.join(LOG_DIR, 'portal.log')
 HTTP_LOG_FILE = os.path.join(LOG_DIR, 'http_requests.log')
 
-######################################################################
-# Evennia Database config
-######################################################################
-
-# Database config syntax:
-# ENGINE - path to the the database backend. Possible choices are:
-#            'django.db.backends.sqlite3', (default)
-#            'django.db.backends.mysql',
-#            'django.db.backends.postgresql_psycopg2' (see Issue 241),
-#            'django.db.backends.oracle' (untested).
-# NAME - database name, or path to the db file for sqlite3
-# USER - db admin (unused in sqlite3)
-# PASSWORD - db admin password (unused in sqlite3)
-# HOST - empty string is localhost (unused in sqlite3)
-# PORT - empty string defaults to localhost (unused in sqlite3)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(GAME_DIR, "server", "evennia.db3"),
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': ''
-        }}
 
 ######################################################################
 # Django web features
@@ -86,8 +55,40 @@ TEMPLATE_DIRS = (
     os.path.join(EVENNIA_DIR, "web", "templates", ACTIVE_TEMPLATE),
     os.path.join(EVENNIA_DIR, "web", "templates"),)
 
-# The secret key is randomly seeded upon creation. It is used to sign
-# Django's cookies. Do not share this with anyone. Changing it will
-# log out all active web browsing sessions. Game web client sessions
-# may survive.
-SECRET_KEY = '^}SWUlje/L7`"ocH40mwst2*b3guRiErXM$O?p[%'
+
+######################################################################
+# World data features
+######################################################################
+
+# attribute's category for data info
+WORLD_DATA_INFO_CATEGORY = "data_info"
+
+# data app name
+WORLD_DATA_APP = "worlddata"
+
+# csv files' folder under user's game directory.
+CSV_DATA_FOLDER = "worlddata/csv"
+
+# unique rooms
+WORLD_ROOMS = ("world_rooms",)
+
+# unique exits
+WORLD_EXITS = ("world_exits",)
+
+# unique objects
+WORLD_OBJECTS = ("world_objects",)
+
+# details
+WORLD_DETAILS = ("world_details",)
+
+# normal objects
+PERSONAL_OBJECTS = ("personal_objects",)
+
+# all data models
+WORLD_DATA_MODELS = (WORLD_ROOMS,
+                     WORLD_EXITS,
+                     WORLD_OBJECTS,
+                     WORLD_DETAILS,
+                     PERSONAL_OBJECTS)
+
+BASE_AUTOOBJ_TYPECLASS = "worldloader.objects.AutoObj"
