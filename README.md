@@ -1,11 +1,11 @@
 # Intro
 Muddery is an online text game (like MUD) framework in Python. It bases on Evennia (https://github.com/evennia/evennia) which is a MUD/MU* creation system. Muddery is licensed under 3-clause BSD license.
 
-Our website http://www.muddery.org is under construction.
+Our website is http://www.muddery.org.
 
-Muddery will have following feathers. 
+Muddery is still under construction. It will have following feathers. 
 
-1. Muddery is in Python, so it can run on multiple platforms. Users can install it in several minutes.
+1. Muddery is in Python, so it can run on multiple platforms. Users can install it in just several minutes.
 
 2. Muddery uses webpage as client. The data between server and client are in JSON. The client is responsible for display, so users can customize the display style by modifying the webpage. Muddery can support simple images and sounds, but it does not support Telnet and other common MUD clients. We may build native apps for it in the future.
 
