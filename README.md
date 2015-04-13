@@ -1,5 +1,5 @@
 # Intro
-Muddery is an online text game (like MUD) framework in Python. It bases on Evennia (https://github.com/evennia/evennia) which is a MUD/MU* creation system. Muddery is licensed under 3-clause BSD license.
+Muddery is an online text game (like MUD) framework in Python. It is licensed under 3-clause BSD license. Muddery bases on Evennia (https://github.com/evennia/evennia) which is a MUD/MU* creation system. It is developed from Evennia's game template.
 
 Our website is http://www.muddery.org.
 
