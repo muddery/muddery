@@ -1,7 +1,7 @@
 """
 Commands
 
-Add three commands: @importcsv, @datainfo and @batchbuilder
+Add three commands: @importdata, @datainfo and @batchbuilder
 
 """
 
@@ -9,23 +9,23 @@ import os
 import re
 from django.conf import settings
 from django.db.models.loading import get_model
-from muddery.utils.importer import import_csv, import_csv_all
+from muddery.utils.importer import import_file, import_all
 from muddery.utils.loader import set_obj_data_info
 from muddery.utils.builder import build_all
 from evennia import default_cmds
 
 
 #------------------------------------------------------------
-# import csv tables
+# import data tables
 #------------------------------------------------------------
-class CmdImportCsv(default_cmds.MuxCommand):
+class CmdImportData(default_cmds.MuxCommand):
     """
     Usage:
-      @importcsv
+      @importdata
 
-      If <modelname> is empty, it will import all csv files in settings.WORLD_DATA_MODELS.
+      If <modelname> is empty, it will import all data files in settings.WORLD_DATA_MODELS.
     """
-    key = "@importcsv"
+    key = "@importdata"
     locks = "perm(Builders)"
     help_cateogory = "Builders"
     arg_regex = r"\s.*?|$"
@@ -54,11 +54,11 @@ class CmdImportCsv(default_cmds.MuxCommand):
         for model_name in models:
 
             # make file name
-            file_name = os.path.join(settings.GAME_DIR, settings.CSV_DATA_FOLDER, model_name + ".csv")
+            file_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, model_name + ".csv")
             
             # import data
             try:
-                import_csv(file_name, app_name, model_name)
+                import_file(file_name, model_name)
                 caller.msg("%s imported." % model_name)
                 count += 1
             except Exception, e:
@@ -143,7 +143,7 @@ class CmdBatchBuilder(default_cmds.MuxCommand):
     Usage:
       @batchbuilder
       
-    Build the whole game world with data in CSV files.
+    Build the whole game world with data in files.
     """
     key = "@batchbuilder"
     aliases = ["@batchbld"]
@@ -153,6 +153,6 @@ class CmdBatchBuilder(default_cmds.MuxCommand):
 
     def func(self):
         "Implement the command"
-        import_csv_all(self.caller)
+        import_all(self.caller)
         build_all(self.caller)
 

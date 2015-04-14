@@ -24,8 +24,11 @@ WORLD_DATA_INFO_CATEGORY = "data_info"
 # data app name
 WORLD_DATA_APP = "worlddata"
 
-# csv files' folder under user's game directory.
-CSV_DATA_FOLDER = "worlddata/csv"
+# data file's folder under user's game directory.
+WORLD_DATA_FOLDER = "worlddata/data"
+
+# data file's format, only support csv now.
+WORLD_DATA_FILE_TYPE = "csv"
 
 # unique rooms
 WORLD_ROOMS = ("world_rooms",)
