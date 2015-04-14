@@ -1,0 +1,80 @@
+
+--------------------
+Evennia translations
+--------------------
+
+This folder contains data for translating Evennia's 
+core messages to different languages. Note that commands
+are not covered here at this time. Note that translations
+only cover "core" texts (things "hard coded" from the server)
+and not command returns - the latter each game developer needs to 
+translate manually (since commands will most likely be 
+customized for each game anyway). 
+
+
+Changing server language
+------------------------
+
+First you must compile all available languages. Place yourself
+in Evennia's root (the one  containing locale/) and run:
+
+django-admin.py compilemessages
+
+(it could also be just django-admin depending on your system)
+This will compile the language .po files into .mo files which
+Evennia/Django uses at runtime.
+
+To configure the server to use a different language,
+edit your settings file and add the following: 
+
+ USE_I18N = True 
+ LANGUAGE_CODE = 'en'
+
+Change 'en' to a translated language code (see which are available
+in evennia/locale/). Restart Server and Portal. 
+
+
+
+Creating a new translation
+--------------------------
+
+evennia/locale/ contains translation strings for the core server.
+
+First look to see if there is already data files for 
+your language available to improve upon. If not, you can
+start translate for a new language by placing yourself in 
+Evennia's root directory and run 
+
+  django-admin makemessages -l <language code>
+
+where <language code> is the two-letter locale code for the language 
+you want, like "sv" for Swedish, "es" for Spanish and so on. A new
+folder with the language code will have appeared. 
+
+Note that the command django-admin may not be available in your path. 
+If so, the easiest way is to search for it (it sits in the django 
+source tree) and run it as "python <absolute-path>/django-admin.py".
+
+
+Doing a translation / improving an existing one
+-----------------------------------------------
+
+Go to locale/<language code>/LC_MESSAGES/and edit the *.po file 
+you find there by translating each given English string to the equivalent in 
+the other language. Editing the raw file manually is not necessary -- search 
+the web and you'll find many open-source graphical .po editors available.
+
+Once you have modified the .po file to add/correct the translation therein,
+you must compile it for efficiency. Back in Evennia's root directory, run
+
+  django-admin compilemessages
+
+This will create a binary .mo file which is what Evennia will use. 
+
+
+Let us know! 
+------------
+
+If you did a new translation or improved an old one, please consider sending
+us your updated .po file so we can include it with the main Evennia distribution!
+
