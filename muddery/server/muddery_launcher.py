@@ -15,13 +15,21 @@ import sys
 import shutil
 from argparse import ArgumentParser
 from subprocess import check_output, CalledProcessError, STDOUT
-from evennia.server import evennia_launcher
+
 
 MUDDERY_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import muddery
 MUDDERY_LIB = os.path.join(os.path.dirname(os.path.abspath(muddery.__file__)))
 MUDDERY_TEMPLATE = os.path.join(MUDDERY_LIB, "game_template")
+
+EVENNIA_LIB = os.path.join(MUDDERY_ROOT, "evennia")
+
+# add evennia's path
+sys.path.insert(2, EVENNIA_LIB)
+
+import evennia
+from evennia.server import evennia_launcher
 
 # Game directory structure
 SETTINGFILE = "settings.py"
@@ -170,29 +178,6 @@ def muddery_version():
     return version
 
 MUDDERY_VERSION = muddery_version()
-
-
-def check_main_muddery_dependencies():
-    """
-    Checks and imports the Muddery dependencies. This must be done
-    already before the paths are set up.
-    """
-    
-    error = False
-
-    try:
-        import evennia
-        version = evennia.__version__
-        if version < EVENNIA_MIN:
-            print WARNING_EVENNIA_VERSION.format(tversion=tversion, evennia_min=EVENNIA_MIN)
-    except ImportError:
-        print ERROR_NOEVENNIA
-        error = True
-
-    if error:
-        sys.exit()
-
-    evennia_launcher.check_main_evennia_dependencies()
 
 
 def create_secret_key():
@@ -365,7 +350,7 @@ def main():
     option, service = args.option, args.service
 
     # make sure we have everything
-    check_main_muddery_dependencies()
+    evennia_launcher.check_main_evennia_dependencies()
 
     if not args:
         # show help pane
