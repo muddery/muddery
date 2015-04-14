@@ -40,7 +40,6 @@ SETTINGS_DOTPATH = "server.conf.settings"
 CURRENT_DIR = os.getcwd()
 GAMEDIR = CURRENT_DIR
 
-EVENNIA_MIN = '0.5'
 
 #------------------------------------------------------------
 #
@@ -73,33 +72,13 @@ CREATED_NEW_GAMEDIR = \
 
     """
 
+
 CMDLINE_HELP = \
     """
     Starts or operates the Muddery game server. Also allows for
     initializing a new game directory and manages the game's database.
     You can also pass most standard django-admin arguments and
     options.
-    """
-
-
-WARNING_EVENNIA_VERSION = \
-    """
-    WARNING: Evennia {tversion} found. Muddery recommends
-    v{evennia_min} or higher."
-    """
-
-ERROR_NOEVENNIA = \
-    """
-    ERROR: Evennia does not seem to be installed.
-    """
-
-WARNING_RUNSERVER = \
-    """
-    WARNING: There is no need to run the Django development
-    webserver to test out Muddery web features (the web client
-    will in fact not work since the Django test server knows
-    nothing about MUDs).  Instead, just start Muddery with the
-    webserver component active (this is the default).
     """
 
 

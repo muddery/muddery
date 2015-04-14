@@ -10,7 +10,7 @@ from django.conf import settings
 from evennia.utils import logger
 
 
-def import_csv(file_name, app_name, model_name):
+def import_csv(file_name, model_name):
     """
     Import data from a csv file to the db model
     
@@ -23,6 +23,9 @@ def import_csv(file_name, app_name, model_name):
         # load file
         csvfile = open(file_name, 'r')
         reader = csv.reader(csvfile)
+        
+        # get app name
+        app_name = settings.WORLD_DATA_APP
         
         # get model
         model_obj = get_model(app_name, model_name)
@@ -99,9 +102,31 @@ def import_csv(file_name, app_name, model_name):
         pass
 
 
-def import_csv_all(caller=None):
+def import_file(file_name, model_name):
     """
-    Import all csv files to models.
+    Import data from a data file to the db model
+    
+    Args:
+        file_name: (string) Data file's name.
+        model_name: (string) Db model's name.
+    """
+    
+    type = settings.WORLD_DATA_FILE_TYPE.lower()
+    ext_name = ""
+    if type == "csv":
+        ext_name = ".csv"
+    else:
+        if caller:
+            caller.msg("Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE)
+        return
+
+    if type == "csv":
+        import_csv(file_name, model_name)
+
+
+def import_all(caller=None):
+    """
+    Import all data files to models.
     
     Args:
         caller: (command caller) If provide, running messages will send to the caller.
@@ -117,14 +142,26 @@ def import_csv_all(caller=None):
     models = [model for data_models in settings.WORLD_DATA_MODELS
                     for model in data_models]
     
+    # get file's extension name
+    type = settings.WORLD_DATA_FILE_TYPE.lower()
+    ext_name = ""
+    if type == "csv":
+        ext_name = ".csv"
+    else:
+        if caller:
+            caller.msg("Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE)
+        return
+    
     # import models one by one
     for model_name in models:
         # make file name
-        file_name = os.path.join(settings.GAME_DIR, settings.CSV_DATA_FOLDER, model_name + ".csv")
+        file_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, model_name + ext_name)
         
         # import data
         try:
-            import_csv(file_name, app_name, model_name)
+            if type == "csv":
+                import_csv(file_name, app_name, model_name)
+
             if caller:
                 caller.msg("%s imported" % model_name)
             count += 1

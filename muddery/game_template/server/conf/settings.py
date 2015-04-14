@@ -99,31 +99,8 @@ SECRET_KEY = {secret_key}
 # World data features
 ######################################################################
 
-# attribute's category for data info
-WORLD_DATA_INFO_CATEGORY = "data_info"
-
-# data app name
-WORLD_DATA_APP = "worlddata"
-
+# add data app
 INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
-
-# csv files' folder under user's game directory.
-CSV_DATA_FOLDER = "worlddata/csv"
-
-# unique rooms
-WORLD_ROOMS = ("world_rooms",)
-
-# unique exits
-WORLD_EXITS = ("world_exits",)
-
-# unique objects
-WORLD_OBJECTS = ("world_objects",)
-
-# details
-WORLD_DETAILS = ("world_details",)
-
-# normal objects
-PERSONAL_OBJECTS = ("personal_objects",)
 
 # all data models
 WORLD_DATA_MODELS = (WORLD_ROOMS,
@@ -131,6 +108,3 @@ WORLD_DATA_MODELS = (WORLD_ROOMS,
                      WORLD_OBJECTS,
                      WORLD_DETAILS,
                      PERSONAL_OBJECTS)
-
-BASE_AUTOOBJ_TYPECLASS = "worldloader.objects.AutoObj"
-

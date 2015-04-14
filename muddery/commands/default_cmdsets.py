@@ -33,7 +33,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
-        self.add(muddery_cmds.CmdImportCsv())
+        self.add(muddery_cmds.CmdImportData())
         self.add(muddery_cmds.CmdBatchBuilder())
         self.add(muddery_cmds.CmdSetDataInfo())
 
