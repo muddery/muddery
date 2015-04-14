@@ -24,6 +24,7 @@ __pycache__
 *.pid
 *.restart
 *.db3
+*.DS_Store
 
 # Installer logs
 pip-log.txt
