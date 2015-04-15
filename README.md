@@ -1,4 +1,6 @@
-# Intro
+# Muddery
+
+## Intro
 Muddery is an online text game (like MUD) framework in Python. It is licensed under 3-clause BSD license. Muddery bases on [Evennia](https://github.com/evennia/evennia) which is a MUD/MU* creation system. It is developed from Evennia's game template.
 
 Our website is http://www.muddery.org.
@@ -14,11 +16,10 @@ Muddery is still under construction. It will have following feathers.
 1. Muddery can load the all game world from a series of tables. Game designers who know little about programing also can use Muddery to build their games.
 
 
-# Installation
+## Installation
+First, install [Python](https://www.python.org/)(2.7.x), [pip](https://pypi.python.org/pypi/pip/), [virtualenv](https://pypi.python.org/pypi/virtualenv) and [Git](http://git-scm.com/).
 
-First, install [Python](https://www.python.org/)(2.7.x), [pip](https://pypi.python.org/pypi/pip/), [virtualenv](https://pypi.python.org/pypi/virtualenv) and [Git](http://git-scm.com/). Activate virtualenv.
-
-Go to the place where you want to place Muddery and run
+Activate virtualenv. Go to the place where you want to place Muddery and run
 ```
 git clone https://github.com/muddery/muddery.git
 ```
@@ -42,7 +43,7 @@ pip install -e .
 It will install dependent libs and Muddery into your virtual environment.
 
 
-# Create your game
+## Create your game
 Move to the place where you want to place your game. It should be outside of your Muddery folder. Then run
 ```
 muddery --init game_name
@@ -69,7 +70,7 @@ muddery stop
 to start, reload or stop the server.
 
 
-# Tutorial world
+## Tutorial world
 The tutorial world is developed from Evennia's tutorial world.
 
 Move to the place where you want to place the tutorial world. It should be outside of your Muddery folder. Then run
@@ -85,14 +86,10 @@ muddery migrate
 muddery -i start
 ```
 
-The login the game as superuser or builder. Run
+Then login the game as superuser or builder. Run
 ```
 @datainfo #2=limbo
 @batchbld
 ```
 
 The tutorial world will be loaded into the game.
-
-
-
-
