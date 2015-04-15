@@ -14,6 +14,11 @@ does what you expect it to.
 
 """
 
+from evennia.utils import search
+from muddery.utils import loader
 
 def at_initial_setup():
-    pass
+    # set datainfo to limbo
+    limboobj = search.search_object("#2", exact=True)
+    if limboobj:
+        loader.set_obj_data_info(limboobj[0], "", "limbo")

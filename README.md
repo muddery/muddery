@@ -44,10 +44,10 @@ It will install dependent libs and Muddery into your virtual environment.
 # Create your game
 Move to the place where you want to place your game. It should be outside of your Muddery folder. Then run
 ```
-muddery --init game_name
+muddery --init your_game_name
 ```
 
-This will create a new game project in folder "game_name".
+This will create a new game project in folder "your_game_name".
 
 Move into the game folder and run
 ```
@@ -73,10 +73,8 @@ The tutorial world is developed from Evennia's tutorial world.
 
 Move to the place where you want to place the tutorial world. It should be outside of your Muddery folder. Then run
 ```
-muddery --init game_name
+muddery --example tutorial your_game_name
 ```
-
-Copy ```muddery/examples/tutorial_world/worlddata``` to your game's folder, replace the current ```worlddata```.
 
 Move into the game folder and run
 ```
@@ -86,7 +84,6 @@ muddery -i start
 
 Then login the game as superuser or builder. Run
 ```
-@datainfo #2=limbo
 @batchbld
 ```
 
