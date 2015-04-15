@@ -160,7 +160,7 @@ def import_all(caller=None):
         # import data
         try:
             if type == "csv":
-                import_csv(file_name, app_name, model_name)
+                import_csv(file_name, model_name)
 
             if caller:
                 caller.msg("%s imported" % model_name)

@@ -94,7 +94,6 @@ TEMPLATE_DIRS = (
 # may survive.
 SECRET_KEY = {secret_key}
 
-
 ######################################################################
 # World data features
 ######################################################################
@@ -108,3 +107,5 @@ WORLD_DATA_MODELS = (WORLD_ROOMS,
                      WORLD_OBJECTS,
                      WORLD_DETAILS,
                      PERSONAL_OBJECTS)
+
+AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"

@@ -69,7 +69,7 @@ class CmdImportData(default_cmds.MuxCommand):
 
 
 #------------------------------------------------------------
-# set object's info_db and info_key
+# set object's data model and data key
 #------------------------------------------------------------
 class CmdSetDataInfo(default_cmds.MuxCommand):
     """
@@ -100,10 +100,14 @@ class CmdSetDataInfo(default_cmds.MuxCommand):
                 obj = caller.search(obj_name, location=caller.location)
                 if not obj:
                     caller.msg("Sorry, can not find %s." % obj_name)
-                elif obj.db.info_db and obj.db.info_key:
-                    caller.msg("%s's datainfo is %s" % (obj_name, obj.db.info_db + "." + obj.db.info_key))
                 else:
-                    caller.msg("%s has no datainfo." % obj_name)
+                    model = obj.attributes.get(key="model", category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
+                    key = obj.attributes.get(key="key", category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
+                  
+                    if model or key:
+                        caller.msg("%s's datainfo is %s" % (obj_name, model + "." + key))
+                    else:
+                        caller.msg("%s has no datainfo." % obj_name)
                 return
 
         obj_name = self.lhs

@@ -14,6 +14,7 @@ does what you expect it to.
 
 """
 
+import muddery.server.conf.at_initial_setup as muddery_initial_setup
 
 def at_initial_setup():
-    pass
+    muddery_initial_setup.at_initial_setup()
