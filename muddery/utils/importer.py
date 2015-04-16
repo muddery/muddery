@@ -116,8 +116,10 @@ def import_file(file_name, model_name):
     if type == "csv":
         ext_name = ".csv"
     else:
+        ostring = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
+        print ostring
         if caller:
-            caller.msg("Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE)
+            caller.msg(ostring)
         return
 
     if type == "csv":
@@ -148,8 +150,10 @@ def import_all(caller=None):
     if type == "csv":
         ext_name = ".csv"
     else:
+        ostring = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
+        print ostring
         if caller:
-            caller.msg("Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE)
+            caller.msg(ostring)
         return
     
     # import models one by one
@@ -162,13 +166,20 @@ def import_all(caller=None):
             if type == "csv":
                 import_csv(file_name, model_name)
 
+            ostring = "%s imported" % model_name
+            print ostring
             if caller:
-                caller.msg("%s imported" % model_name)
+                caller.msg(ostring)
+            
             count += 1
         except Exception, e:
+            ostring = "Can not import %s: %s" % (model_name, e)
+            print ostring
             if caller:
-                caller.msg(("Can not import %s: %s") % (model_name, e))
+                caller.msg(ostring)
             continue
-
+    
+    ostring = "Total %d files imported.\n" % count
+    print ostring
     if caller:
-        caller.msg("Total %d files imported.\n" % count)
+        caller.msg(ostring)

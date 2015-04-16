@@ -7,7 +7,7 @@ import django
 import loader
 from django.conf import settings
 from django.db.models.loading import get_model
-from evennia.utils import create, search, logger
+from evennia.utils import create, search
 
 
 def build_objects(model_name, unique, caller=None):
@@ -21,8 +21,10 @@ def build_objects(model_name, unique, caller=None):
                           If not unique, a record can has zero or multiple objects.
         caller: (command caller) If provide, running messages will send to the caller.
     """
+    ostring = "Building %s." % model_name
+    print ostring
     if caller:
-        caller.msg("Building %s." % model_name)
+        caller.msg(ostring)
 
     model_obj = get_model(settings.WORLD_DATA_APP, model_name)
     
@@ -43,24 +45,33 @@ def build_objects(model_name, unique, caller=None):
         if unique:
             if obj_key in current_obj_keys:
                 # This object is duplcated.
+                ostring = "Deleting %s" % obj_key
+                print ostring
                 if caller:
-                    caller.msg("Deleting %s" % obj_key)
+                    caller.msg(ostring)
+        
                 obj.delete()
                 count_remove += 1
                 continue
                 
             if not obj_key in new_obj_names:
                 # This object should be removed
+                ostring = "Deleting %s" % obj_key
+                print ostring
                 if caller:
-                    caller.msg("Deleting %s" % obj_key)
+                    caller.msg(ostring)
+                
                 obj.delete()
                 count_remove += 1
                 continue
         
         # Refresh object.
         loader.load_data(obj)
+        
+        ostring = "%s updated." % obj_key
+        print ostring
         if caller:
-            caller.msg("%s updated." % obj_key)
+            caller.msg(ostring)
         
         current_obj_keys.add(obj_key)
 
@@ -74,12 +85,15 @@ def build_objects(model_name, unique, caller=None):
                 loader.set_obj_data_info(obj, model_name, record.key)
                 count_create += 1
 
+                ostring = "%s created." % record.key
+                print ostring
                 if caller:
-                    caller.msg("%s created." % record.key)
+                    caller.msg(ostring)
 
+    ostring = "Removed %d object(s). Created %d object(s). Total %d objects.\n" % (count_remove, count_create, len(model_obj.objects.all()))
+    print ostring
     if caller:
-        string = "Removed %d object(s). Created %d object(s). Total %d objects.\n" % (count_remove, count_create, len(model_obj.objects.all()))
-        caller.msg(string)
+        caller.msg(ostring)
 
 
 def build_details(model_name, caller=None):
@@ -105,16 +119,17 @@ def build_details(model_name, caller=None):
         
         # Detail's location.
         for location in location_objs:
-            loader.set_obj_detail(location, record.name, record.desc);
+            loader.set_obj_detail(location, record.name, record.desc)
 
             for name in record.name.split(";"):
-                loader.set_obj_detail(location, name, record.desc);
+                loader.set_obj_detail(location, name, record.desc)
                 
             count += 1
 
+    ostring = "Set %d detail(s)." % count
+    print ostring
     if caller:
-        string = "Set %d detail(s)." % count
-        caller.msg(string)
+        caller.msg(ostring)
 
 
 def build_all(caller=None):

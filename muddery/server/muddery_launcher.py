@@ -21,9 +21,7 @@ MUDDERY_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 
 import muddery
 MUDDERY_LIB = os.path.join(os.path.dirname(os.path.abspath(muddery.__file__)))
-MUDDERY_TEMPLATE = os.path.join(MUDDERY_LIB, "game_template")
-MUDDERY_EXAMPLE = os.path.join(MUDDERY_LIB, "examples")
-
+MUDDERY_TEMPLATE = os.path.join(MUDDERY_ROOT, "templates")
 EVENNIA_LIB = os.path.join(MUDDERY_ROOT, "evennia")
 
 # add evennia's path
@@ -134,10 +132,6 @@ MENU = \
     +---------------------------------------------------------------+
     """
 
-ERROR_EXAMPLE = \
-    """
-    ERROR: Should input "muddery --example <example name> <game name>".
-    """
 
 #------------------------------------------------------------
 #
@@ -199,24 +193,7 @@ def create_settings_file():
         f.write(settings_string)
 
 
-def create_game_directory(dirname):
-    """
-    Initialize a new game directory named dirname
-    at the current path. This means copying the
-    template directory from muddery's root.
-    """
-    global GAMEDIR
-    GAMEDIR = os.path.abspath(os.path.join(CURRENT_DIR, dirname))
-    if os.path.exists(GAMEDIR):
-        print "Cannot create new Muddery game dir: '%s' already exists." % dirname
-        sys.exit()
-    # copy template directory
-    shutil.copytree(MUDDERY_TEMPLATE, GAMEDIR)
-    # pre-build settings file in the new GAMEDIR
-    create_settings_file()
-
-
-def create_example_directory(examplename, dirname):
+def create_game_directory(dirname, template):
     """
     Initialize a new game directory named dirname
     at the current path. This means copying the
@@ -228,20 +205,14 @@ def create_example_directory(examplename, dirname):
         print "Cannot create new Muddery game dir: '%s' already exists." % dirname
         sys.exit()
     
-    example_source = os.path.join(MUDDERY_EXAMPLE, examplename, "worlddata")
-    example_target = os.path.join(GAMEDIR, "worlddata")
-
-    if not os.path.exists(example_source):
-        print "Example '%s' does not exist. You should choose an example in muddery/examples/." % examplename
+    template_dir = os.path.join(MUDDERY_TEMPLATE, template)
+    if not os.path.exists(template_dir):
+        print "Template '%s' does not exist. You should choose an example in template/ or leave it blank." % template
         sys.exit()
-        
     # copy template directory
-    shutil.copytree(MUDDERY_TEMPLATE, GAMEDIR)
+    shutil.copytree(template_dir, GAMEDIR)
     # pre-build settings file in the new GAMEDIR
     create_settings_file()
-
-    shutil.rmtree(example_target)
-    shutil.copytree(example_source, example_target)
 
 
 def show_version_info(about=False):
@@ -337,8 +308,8 @@ def main():
     parser.add_argument('-i', '--interactive', action='store_true',
                       dest='interactive', default=False,
                       help="Start given processes in interactive mode.")
-    parser.add_argument('--init', action='store', dest="init", metavar="name",
-                        help="Creates a new game directory 'name' at the current location.")
+    parser.add_argument('--init', action='store', dest="init", metavar="game_name [template]",
+                        help="Creates a new game directory 'game_name' at the current location (from optional template).")
     parser.add_argument('-l', nargs='+', action='store', dest='listsetting', metavar="key",
                       help="List values for server settings. Use 'all' to list all available keys.")
     parser.add_argument('--profiler', action='store_true', dest='profiler', default=False,
@@ -351,8 +322,6 @@ def main():
                         help="Operational mode: 'start', 'stop', 'restart' or 'menu'.")
     parser.add_argument("service", metavar="component", nargs='?', default="all",
                         help="Server component to operate on: 'server', 'portal' or 'all' (default).")
-    parser.add_argument('--example', action='store', dest="example", metavar="example game_name",
-                        help="Creates a example game directory 'game_name' at the current location with example.")
     parser.epilog = "Example django-admin commands: 'migrate', 'flush', 'shell' and 'dbshell'. " \
                     "See the django documentation for more django-admin commands."
 
@@ -370,18 +339,11 @@ def main():
         sys.exit()
     elif args.init:
         # initialization of game directory
-        create_game_directory(args.init)
+        if option == "noop":
+            option = "default"
+        create_game_directory(args.init, option)
         print CREATED_NEW_GAMEDIR.format(gamedir=args.init,
                                          settings_path=os.path.join(args.init, SETTINGS_PATH))
-        sys.exit()
-    elif args.example:
-        # initialization of game directory
-        if option == "noop":
-            print EXAMPLE_ERROR
-        else:
-            create_example_directory(args.example, option)
-            print CREATED_NEW_GAMEDIR.format(gamedir=option,
-                                             settings_path=os.path.join(option, SETTINGS_PATH))
         sys.exit()
 
     if args.show_version:
