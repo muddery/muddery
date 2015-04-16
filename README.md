@@ -73,7 +73,7 @@ The tutorial world is developed from Evennia's tutorial world.
 
 Move to the place where you want to place the tutorial world. It should be outside of your Muddery folder. Then run
 ```
-muddery --example tutorial your_game_name
+muddery --init your_game_name tutorial_world
 ```
 
 Move into the game folder and run
@@ -82,9 +82,4 @@ muddery migrate
 muddery -i start
 ```
 
-Then login the game as superuser or builder. Run
-```
-@batchbld
-```
-
-The tutorial world will be loaded into the game.
+The tutorial world will be setup when the server is initiating.
