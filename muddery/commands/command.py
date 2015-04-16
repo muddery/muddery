@@ -140,17 +140,16 @@ class CmdSetDataInfo(default_cmds.MuxCommand):
 
 
 #------------------------------------------------------------
-# batch builder
+# load world
 #------------------------------------------------------------
-class CmdBatchBuilder(default_cmds.MuxCommand):
+class CmdLoadWorld(default_cmds.MuxCommand):
     """
     Usage:
-      @batchbuilder
+      @loadworld
       
     Build the whole game world with data in files.
     """
-    key = "@batchbuilder"
-    aliases = ["@batchbld"]
+    key = "@loadworld"
     locks = "perm(Builders)"
     help_cateogory = "Builders"
     arg_regex = r"\s.*?|$"
