@@ -3,7 +3,9 @@ Muddery is an online text game (like MUD) framework in Python. It is licensed un
 
 Our website is http://www.muddery.org.
 
-Muddery is still under construction. It will have following feathers. 
+
+#Features
+Muddery is still under construction. It will have following features. 
 
 1. Muddery is in Python, so it can run on multiple platforms. Users can install it in just several minutes.
 
@@ -82,4 +84,4 @@ muddery migrate
 muddery -i start
 ```
 
-The tutorial world will be setup when the server is initiating.
+The tutorial world will be built when the server is initiating.
