@@ -10,9 +10,9 @@ the other types, you can do so by adding this as a multiple
 inheritance.
 
 """
-from evennia import DefaultObject
+from muddery.typeclasses.objects import MudderyObject
 
-class Object(DefaultObject):
+class Object(MudderyObject):
     """
     This is the root typeclass object, implementing an in-game Evennia
     game object, such as having a location, being able to be

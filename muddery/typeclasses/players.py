@@ -24,7 +24,7 @@ several more options for customizing the Guest account system.
 
 from evennia import DefaultPlayer, DefaultGuest
 
-class Player(DefaultPlayer):
+class MudderyPlayer(DefaultPlayer):
     """
     This class describes the actual OOC player (i.e. the user connecting
     to the MUD). It does NOT have visual appearance in the game world (that
@@ -94,7 +94,7 @@ class Player(DefaultPlayer):
     pass
 
 
-class Guest(DefaultGuest):
+class MudderyGuest(DefaultGuest):
     """
     This class is used for guest logins. Unlike Players, Guests and their
     characters are deleted after disconnection.

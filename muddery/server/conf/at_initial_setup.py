@@ -23,5 +23,8 @@ def at_initial_setup():
     if limboobj:
         loader.set_obj_data_info(limboobj[0], "", "limbo")
 
+    # load world data
     importer.import_all()
+    
+    # build world
     builder.build_all()

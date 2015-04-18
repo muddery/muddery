@@ -25,7 +25,7 @@ MUDDERY_TEMPLATE = os.path.join(MUDDERY_ROOT, "templates")
 EVENNIA_LIB = os.path.join(MUDDERY_ROOT, "evennia")
 
 # add evennia's path
-sys.path.insert(2, EVENNIA_LIB)
+sys.path.insert(1, EVENNIA_LIB)
 
 import evennia
 from evennia.server import evennia_launcher

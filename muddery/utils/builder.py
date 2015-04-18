@@ -36,6 +36,7 @@ def build_objects(model_name, unique, caller=None):
 
     # remove objects
     count_remove = 0
+    count_update = 0;
     count_create = 0
     current_obj_keys = set()
     
@@ -65,13 +66,12 @@ def build_objects(model_name, unique, caller=None):
                 count_remove += 1
                 continue
         
-        # Refresh object.
+        # Update object.
+        #ostring = "Updating %s." % obj_key
+        #print ostring
+        #if caller:
+        #    caller.msg(ostring)
         loader.load_data(obj)
-        
-        ostring = "%s updated." % obj_key
-        print ostring
-        if caller:
-            caller.msg(ostring)
         
         current_obj_keys.add(obj_key)
 
@@ -80,17 +80,17 @@ def build_objects(model_name, unique, caller=None):
         for record in model_obj.objects.all():
             if not record.key in current_obj_keys:
                 # Create new objects.
+                ostring = "Creating %s." % record.key
+                print ostring
+                if caller:
+                    caller.msg(ostring)
                 obj = create.create_object(record.typeclass,
                                            record.name)
                 loader.set_obj_data_info(obj, model_name, record.key)
                 count_create += 1
 
-                ostring = "%s created." % record.key
-                print ostring
-                if caller:
-                    caller.msg(ostring)
-
-    ostring = "Removed %d object(s). Created %d object(s). Total %d objects.\n" % (count_remove, count_create, len(model_obj.objects.all()))
+    ostring = "Removed %d object(s). Created %d object(s). Updated %d object(s). Total %d objects.\n"\
+              % (count_remove, count_create, count_update, len(model_obj.objects.all()))
     print ostring
     if caller:
         caller.msg(ostring)

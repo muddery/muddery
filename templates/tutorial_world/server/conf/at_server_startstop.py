@@ -16,13 +16,14 @@ at_server_cold_stop()
 
 """
 
+import muddery.server.conf.at_server_startstop as muddery_server_startstop
 
 def at_server_start():
     """
     This is called every time the server starts up, regardless of
     how it was shut down.
     """
-    pass
+    muddery_server_startstop.at_server_start()
 
 
 def at_server_stop():
@@ -30,21 +31,21 @@ def at_server_stop():
     This is called just before the server is shut down, regardless
     of it is for a reload, reset or shutdown.
     """
-    pass
+    muddery_server_startstop.at_server_stop()
 
 
 def at_server_reload_start():
     """
     This is called only when server starts back up after a reload.
     """
-    pass
+    muddery_server_startstop.at_server_reload_start()
 
 
 def at_server_reload_stop():
     """
     This is called only time the server stops before a reload.
     """
-    pass
+    muddery_server_startstop.at_server_reload_stop()
 
 
 def at_server_cold_start():
@@ -52,7 +53,7 @@ def at_server_cold_start():
     This is called only when the server starts "cold", i.e. after a
     shutdown or a reset.
     """
-    pass
+    muddery_server_startstop.at_server_cold_start()
 
 
 def at_server_cold_stop():
@@ -60,4 +61,4 @@ def at_server_cold_stop():
     This is called only when the server goes down due to a shutdown or
     reset.
     """
-    pass
+    muddery_server_startstop.at_server_cold_stop()

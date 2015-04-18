@@ -14,6 +14,7 @@ services are started last in the Server startup process.
 
 """
 
+import muddery.server.conf.server_services_plugins as muddery_server_services_plugins
 
 def start_plugin_services(server):
     """
@@ -21,4 +22,4 @@ def start_plugin_services(server):
 
     server - a reference to the main server application.
     """
-    pass
+    muddery_server_services_plugins.start_plugin_services(server)

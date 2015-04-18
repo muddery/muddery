@@ -21,7 +21,7 @@ settings file:
 
 """
 
-from evennia.server.serversession import ServerSession as BaseServerSession
+from muddery.server.conf.serversession import ServerSession as BaseServerSession
 
 class ServerSession(BaseServerSession):
     """

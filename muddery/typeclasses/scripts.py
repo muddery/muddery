@@ -15,7 +15,7 @@ just overloads its hooks to have it perform its function.
 from evennia import DefaultScript
 
 
-class Script(DefaultScript):
+class MudderyScript(DefaultScript):
     """
     A script type is customized by redefining some or all of its hook
     methods and variables.
