@@ -9,7 +9,7 @@ creation commands.
 """
 from evennia import DefaultCharacter
 
-class Character(DefaultCharacter):
+class MudderyCharacter(DefaultCharacter):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:

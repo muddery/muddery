@@ -12,9 +12,9 @@ to be modified.
 
 """
 
-from evennia import DefaultChannel
+from muddery.typeclasses.channels import MudderyChannel
 
-class Channel(DefaultChannel):
+class Channel(MudderyChannel):
     """
     Working methods:
         at_channel_creation() - called once, when the channel is created

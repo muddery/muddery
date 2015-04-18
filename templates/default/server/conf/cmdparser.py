@@ -31,6 +31,9 @@ your settings file:
 
 """
 
+import muddery.server.conf.cmdparser as muddery_cmdparser
+
+
 def cmdparser(raw_string, cmdset, caller, match_index=None):
     """
     This function is called by the cmdhandler once it has
@@ -51,4 +54,4 @@ def cmdparser(raw_string, cmdset, caller, match_index=None):
             (possibly) separate multiple matches.
 
     """
-    # Your implementation here
+    muddery_cmdparser(raw_string, cmdset, caller, match_index)

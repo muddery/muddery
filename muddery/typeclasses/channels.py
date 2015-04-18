@@ -14,7 +14,7 @@ to be modified.
 
 from evennia import DefaultChannel
 
-class Channel(DefaultChannel):
+class MudderyChannel(DefaultChannel):
     """
     Working methods:
         at_channel_creation() - called once, when the channel is created

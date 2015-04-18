@@ -39,7 +39,7 @@ can send multiple oob commands with one msg() call))
 """
 
 # import the contents of the default msdp module
-from evennia.server.oob_cmds import *
+from muddery.server.conf.oobfuncs import *
 
 
 # def oob_echo(session, *args, **kwargs):

@@ -5,10 +5,10 @@ Rooms are simple containers that has no location of their own.
 
 """
 
-from evennia import DefaultRoom
+from muddery.typeclasses.rooms import MudderyRoom
 
 
-class Room(DefaultRoom):
+class Room(MudderyRoom):
     """
     Rooms are like any Object, except their location is None
     (which is default). They also use basetype_setup() to

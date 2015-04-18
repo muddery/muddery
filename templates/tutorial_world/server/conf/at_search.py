@@ -26,6 +26,8 @@ one or both of the following lines to your settings.py file:
 
 """
 
+import muddery.server.conf.at_search as muddery_at_search
+
 def at_search_result(msg_obj, ostring, results, global_search=False,
                      nofound_string=None, multimatch_string=None, quiet=False):
     """
@@ -49,7 +51,8 @@ def at_search_result(msg_obj, ostring, results, global_search=False,
     as a list of results ["1-object", "2-object","3-object",...]
     A single match is returned on its own.
     """
-    pass
+    muddery_at_search.at_search_result(msg_obj, ostring, results, global_search,
+                                       nofound_string, multimatch_string, quiet)
 
 
 def at_multimatch_input(ostring):
@@ -87,4 +90,4 @@ def at_multimatch_input(ostring):
      You get the ball.
 
     """
-    pass
+    muddery_at_search.at_multimatch_input(ostring)

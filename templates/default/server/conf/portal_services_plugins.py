@@ -15,10 +15,12 @@ process.
 """
 
 
+import muddery.server.conf.portal_services_plugins as muddery_portal_services_plugins
+
 def start_plugin_services(portal):
     """
     This hook is called by Evennia, last in the Portal startup process.
 
     portal - a reference to the main portal application.
     """
-    pass
+    muddery_portal_services_plugins.start_plugin_services(portal)
