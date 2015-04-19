@@ -207,8 +207,15 @@ def create_game_directory(dirname, template):
     
     template_dir = os.path.join(MUDDERY_TEMPLATE, template)
     if not os.path.exists(template_dir):
-        print "Template '%s' does not exist. You should choose an example in template/ or leave it blank." % template
+        print 'Sorry, template "%s" does not exist.\nThese are available templates:' % template
+        dirs = os.listdir(MUDDERY_TEMPLATE)
+        for dir in dirs:
+            full_path = os.path.join(MUDDERY_TEMPLATE, dir)
+            if os.path.isdir(full_path):
+                print "  %s" % dir
+        print ""
         sys.exit()
+
     # copy template directory
     shutil.copytree(template_dir, GAMEDIR)
     # pre-build settings file in the new GAMEDIR
