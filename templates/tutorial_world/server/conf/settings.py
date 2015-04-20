@@ -24,7 +24,7 @@ from muddery.settings_default import *
 # This is the name of your game. Make it catchy!
 SERVERNAME = {servername}
 
-# Path to the game directory (use EVENNIA_DIR to refer to the
+# Path to the game directory (use MUDDERY_DIR to refer to the
 # core evennia library)
 GAME_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -80,11 +80,13 @@ STATIC_ROOT = os.path.join(GAME_DIR, "web", "static")
 # Directories from which static files will be gathered from.
 STATICFILES_DIRS = (
     os.path.join(GAME_DIR, "web", "static_overrides"),
+    os.path.join(MUDDERY_DIR, "web", "static"),
     os.path.join(EVENNIA_DIR, "web", "static"),)
 
 # We setup the location of the website template as well as the admin site.
 TEMPLATE_DIRS = (
     os.path.join(GAME_DIR, "web", "template_overrides"),
+    os.path.join(MUDDERY_DIR, "web", "templates"),
     os.path.join(EVENNIA_DIR, "web", "templates", ACTIVE_TEMPLATE),
     os.path.join(EVENNIA_DIR, "web", "templates"),)
 
