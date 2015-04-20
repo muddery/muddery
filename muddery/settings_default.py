@@ -13,6 +13,13 @@ always be sure of what you have changed and what is default behaviour.
 
 """
 
+import os
+
+######################################################################
+# Muddery base server config
+######################################################################
+
+MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ######################################################################
 # World data features
