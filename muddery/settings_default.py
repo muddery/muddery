@@ -22,6 +22,14 @@ import os
 MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ######################################################################
+# Django web features
+######################################################################
+
+# The name of the currently selected webclient template. This corresponds to the
+# directory names shown in the webtemplates directory.
+WEBCLIENT_TEMPLATE = 'default'
+
+######################################################################
 # World data features
 ######################################################################
 

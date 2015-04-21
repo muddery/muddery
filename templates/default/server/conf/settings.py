@@ -80,12 +80,14 @@ STATIC_ROOT = os.path.join(GAME_DIR, "web", "static")
 # Directories from which static files will be gathered from.
 STATICFILES_DIRS = (
     os.path.join(GAME_DIR, "web", "static_overrides"),
+    os.path.join(MUDDERY_DIR, "web", "webclient", WEBCLIENT_TEMPLATE, "static"),
     os.path.join(MUDDERY_DIR, "web", "static"),
     os.path.join(EVENNIA_DIR, "web", "static"),)
 
 # We setup the location of the website template as well as the admin site.
 TEMPLATE_DIRS = (
     os.path.join(GAME_DIR, "web", "template_overrides"),
+    os.path.join(MUDDERY_DIR, "web", "webclient", WEBCLIENT_TEMPLATE),
     os.path.join(MUDDERY_DIR, "web", "templates"),
     os.path.join(EVENNIA_DIR, "web", "templates", ACTIVE_TEMPLATE),
     os.path.join(EVENNIA_DIR, "web", "templates"),)
