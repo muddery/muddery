@@ -74,6 +74,8 @@ function webclient_init(){
 function onOpen(evt) {
     // called when client is first connecting
     $("#connecting").remove(); // remove the "connecting ..." message
+    $('#input_box').attr("style", "visibility: hidden;");
+	$('#overlayer').attr("style", "visibility: hidden;");
     doShow("sys", "Using websockets - connected to " + wsurl + ".")
 
     setTimeout(function () {
@@ -88,9 +90,59 @@ function onClose(evt) {
 }
 
 function onMessage(evt) {
-    // called when the Evennia is sending data to client.
-    // Such data is always prepended by a 3-letter marker
-    // OOB, PRT or CMD, defining its operation
+    // called when the Evennia is sending data to client
+	try {
+    	var msg = JSON.parse(evt.data);}
+    catch(err) {
+    	// not JSON packed - a normal text
+        doShow("out", evt.data);
+        return;
+    }
+
+    if (msg.oob) {
+		for (var ind in msg.oob) {
+			try {
+				window[msg.oob[ind][0]](msg.oob[ind][1], msg.oob[ind][2]) }
+			catch(err) {
+				doShow("err", "Could not execute js OOB function '" + msg.oob[ind][0] + "(" + msg.oob[ind][1] + msg.oob[ind][2] + ")'") }
+		}
+    }
+    
+    if (msg.prompt) {
+	    doPrompt("prompt", msg.prompt);
+	}
+	
+	if (msg.clear_links) {
+		doClearLinks();
+	}
+
+	if (msg.text) {
+		if (!msg.type) {
+			doShow("text", msg.text);
+		}
+		else {
+			if (msg.type == "" || msg.type == "text") {
+				doShow("text", msg.text);
+			}
+			//else if (msg.type == "input_link") {
+			//	doInputLink("text", msg.text);
+			//}
+			else if (msg.type == "input_text") {
+				doInputText("text", msg.text);
+			}
+			else if (msg.type == "input_password") {
+				doInputText("password", msg.text);
+			}
+			else if (msg.type == "alert") {
+				doAlert("text", msg.text);
+			}
+			else {
+				doShow("text", msg.text);
+			}
+		}
+	}
+
+    /*
     var inmsg = evt.data;
     if (inmsg.length < 4) return;
     var mode = inmsg.substr(0, 3);
@@ -136,6 +188,7 @@ function onMessage(evt) {
         // normal message
         doShow('out', message);
     }
+    */
 }
 
 function onError(evt) {
@@ -147,11 +200,12 @@ function doSend(){
     // relays data from client to Evennia.
     // If OOB_debug is set, allows OOB test data using the syntax
     // ##OOB[funcname, args, kwargs]
-    outmsg = $("#inputfield").val();
+    outmsg = $("#input_text").val();
     history_add(outmsg);
     HISTORY_POS = 0;
-    $('#inputform')[0].reset();                     // clear input field
-
+    $('#input_text').val("");                     // clear input field
+    doCloseInput();
+    
     if (outmsg.length > 4 && outmsg.substr(0, 5) == "##OOB") {
         // OOB direct input
         var outmsg = outmsg.slice(5);
@@ -241,29 +295,156 @@ function doShow(type, msg){
            return;
        }
     }
-    // output
+    $('#messagewindow').stop(true);
+    $('#messagewindow').scrollTop($('#messagewindow')[0].scrollHeight);
+    
     $("#messagewindow").append(
-        "<div class='msg "+ type +"'>"+ msg +"</div>");
+        "<div class='msg "+ type +"'>"+ msg +"</div>");    
+    var max = 40;
+    while ($("#messagewindow div").size() > max) {
+    	$("#messagewindow div:first").remove();
+    }
     // scroll message window to bottom
+    //$('#messagewindow').scrollTop($('#messagewindow')[0].scrollHeight);
     $('#messagewindow').animate({scrollTop: $('#messagewindow')[0].scrollHeight});
 }
 
-function doPrompt(type, msg){
+function doClearLinks() {
+	$('#messagewindow div a').contents().unwrap();
+}
+
+function doPrompt(type, msg) {
     // Display prompt
     $('#prompt').replaceWith(
             "<div id='prompt' class='msg "+ type +"'>" + msg + "</div>");
 }
 
-function doSetSizes() {
-    // Sets the size of the message window
-    var win_h = $(document).height();
-    //var win_w = $('#wrapper').width();
-    var inp_h = $('#inputform').outerHeight(true);
-    //var inp_w = $('#inputsend').outerWidth(true);
-    $("#messagewindow").css({'height': win_h - inp_h - 1});
-    //$("#inputfield").css({'width': win_w - inp_w - 20});
+function doCancel() {
+	websocket.send(CMD_NOINPUT);
+	doCloseInput();
 }
 
+function doInputText(type, msg) {
+    createInputTextDlg();
+	$('#input_prompt').html(msg);
+	var input = '<div><input type="' + type + '" id="input_text" value="" autocomplete="off"/></div>';
+	var button = '<div>\
+                    <input type="button" id="button_left" value="CANCEL" class="btn" onClick="doCancel()"/>\
+                    <input type="button" id="button_right" value="OK" class="btn btn-primary" onClick="doSend()"/>\
+              	  </div>'
+	$('#input_additional').html(input + button);
+    $('#input_text').focus();
+    doSetSizes();
+}
+
+function doInputCmd(type, msg) {
+    createInputCmdDlg();
+	$('#input_prompt').html(msg);
+	var input = '<div><input type="' + type + '" id="input_text" value="" autocomplete="off"/></div>';
+	var button = '<div>\
+                    <input type="button" id="button_left" value="CANCEL" class="btn" onClick="doCloseInput()"/>\
+                    <input type="button" id="button_right" value="OK" class="btn btn-primary" onClick="doSend()"/>\
+              	  </div>'
+	$('#input_additional').html(input + button);
+    $('#input_text').focus();
+    doSetSizes();
+}
+
+function doInputLink(type, msg) {
+    createInputTextDlg();
+	$('#input_prompt').html(msg);
+	$('#input_additional').html('<p/>');
+	doSetSizes();
+}
+
+function doAlert(type, msg) {
+    createInputTextDlg();
+	$('#input_prompt').html(msg);
+	var button = '<div><br></div>\
+                  <div>\
+                    <center>\
+                      <input type="button" id="button_center" value="OK" class="btn btn-primary" onClick="doCloseInput()"/>\
+                    </center>\
+              	  </div>'
+	$('#input_additional').html(button);
+	doSetSizes();
+}
+
+function doCloseInput() {
+    $('#input_box').remove();
+	$('#overlayer').remove();
+	doSetSizes();
+}
+
+function doSetSizes() {
+    // Sets the size of the message window
+    var win_h = $(window).innerHeight();
+    var win_w = $(window).innerWidth();
+    var close_h = $('#close_button').outerHeight(true);
+    var prom_h = $('#input_prompt').outerHeight(true);
+    var add_h = $('#input_additional').outerHeight(true);
+    $('#input_box').height(close_h + prom_h + add_h);
+    
+    var inp_h = $('#input_box').outerHeight(true);
+    var inp_w = $('#input_box').outerWidth(true);
+    //$("#wrapper").css({'height': win_h - inp_h - 1});
+    $('#input_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+
+    if (win_h > 480) {
+   	 	var head_h = $('#site-title').outerHeight(true);
+   	 	$('#header_bar').show();
+    	$('#wrapper').height(win_h - head_h - 6);
+    }
+    else {
+    	$('#header_bar').hide();
+    	$('#wrapper').height(win_h - 6);
+    }
+    
+    var middle_h = $('#middlewindow').outerHeight(true);
+    var bottom_h = $('#bottomwindow').outerHeight(true);
+    $('#messagewindow').height(middle_h - bottom_h - 2);
+    
+    if (win_w > 960) {
+      	$('#middlewindow').width(960);
+      	$('#bottomwindow').width(960);
+    }
+    else {
+    	$('#middlewindow').width(win_w);
+      	$('#bottomwindow').width(win_w);
+    }
+}
+
+function createInputTextDlg() {
+	var dlg = '<div id="input_box">\
+	<div id="close_button" class="clearfix">\
+	<input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="doCancel()"/>\
+	</div>\
+	<div id="input_prompt">\
+	</div>\
+    <div id="input_additional">\
+    </div>\
+	</div>';
+	
+	var overlayer = '<div class="overlayer" id="overlayer"></div>';
+	
+	$("body").prepend(dlg + overlayer);
+}
+
+function createInputCmdDlg() {
+	var dlg = '<div id="input_box">\
+	<div id="close_button" class="clearfix">\
+	<input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="doCloseInput()"/>\
+	</div>\
+	<div id="input_prompt">\
+	</div>\
+    <div id="input_additional">\
+    </div>\
+	</div>';
+	
+	var overlayer = '<div class="overlayer" id="overlayer"></div>';
+	
+	$("body").prepend(dlg + overlayer);
+}
 
 //
 // Input code
@@ -379,7 +560,7 @@ $.fn.appendCaret = function() {
 $(document).keydown( function(event) {
     // Get the pressed key (normalized by jQuery)
     var code = event.which,
-        inputField = $("#inputfield");
+        inputField = $("#input_text");
 
     // always focus input field no matter which key is pressed
     inputField.focus();

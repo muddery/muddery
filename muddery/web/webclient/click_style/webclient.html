@@ -2,7 +2,8 @@
 {% load staticfiles %}
 <html dir="ltr" lang="en">
   <head>
-    <meta charset="utf-8" />
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="{{encoding}}" />
 
     <title>Muddery web MUD client</title>
 
@@ -37,29 +38,33 @@
 
   </head>
   <body>
-
+    <header class="header" id="header_bar">
+      <div class="site-title" id="site-title">
+        <center>Muddery Webclient</center>
+      </div>
+    </header>
     <div id="wrapper">
-      <div id="messagewindow">
-        <!--javascript kills this when page has finished loading: -->
-        <div id="connecting"> Connecting ...</div>
-        <!--this is supplied by django view - webclient/views.py: -->
-        <div id="noscript"><h3>Javascript Error: The Muddery MUD client requires that you have Javascript activated.</h3>
-          <p>Turn off eventual script blockers and/or switch to a web
-          browser supporting javascript.</p><p>For admins: The error
-          could also be due to not being able to access the online
-          jQuery javascript library. If you are testing the client
-          without an internet connection, you have to previously
-          download the jQuery library from http://code.jquery.com
-          (it's just one file) and then edit webclient.html to point
-          to the local copy.</p>
+      <div id="middlewindow">
+        <div id="messagewindow">
+	      <!--javascript kills this when page has finished loading: -->
+	      <div id="connecting"> Connecting ...</div>
+	      <!--this is supplied by django view - webclient/views.py: -->
+	      <div id="noscript"><h3>Javascript Error: The Muddery webclient requires that you have Javascript activated.</h3>
+			<p>Turn off eventual script blockers and/or switch to a web
+			  browser supporting javascript.</p><p>For admins: The error
+			  could also be due to not being able to access the online
+			  jQuery javascript library. If you are testing the client
+			  without an internet connection, you have to previously
+			  download the jQuery library from http://code.jquery.com
+			  (it's just one file) and then edit webclient.html to point
+			  to the local copy.</p>
+	      </div>
+	    </div>
+	    <div id="bottomwindow">
+          <div id="prompt"></div>
+          <input type="button" id="button_input" value="Input command." class="btn" onClick="doInputCmd('text', 'Please input command:')"/>
         </div>
       </div>
-      <form id="inputform" action="javascript:void(0);">
-        <div id="prompt"></div>
-        <div id="numplayers">Logged in Players: {{num_players_connected}}</div>
-        <div id="inputcontrol"><input type="text" id="inputfield" autocomplete="off"><input id="inputsend" type="button" value="send" onClick="doSend()"/></div>
-      </form>
     </div>
-
   </body>
 </html>
