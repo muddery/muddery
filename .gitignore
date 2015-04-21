@@ -41,6 +41,7 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+*.xcodeproj/
 
 # PyCharm config
 .idea
