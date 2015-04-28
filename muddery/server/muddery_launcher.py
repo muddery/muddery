@@ -2,12 +2,14 @@
 """
 MUDDERY SERVER LAUNCHER SCRIPT
 
+This is adapt from evennia/evennia/server/evennia_launcher.py.
+The licence of Evennia can be found in evennia/LICENSE.txt.
+
 This is the start point for running Muddery.
 
 Sets the appropriate environmental variables and launches the server
 and portal through the evennia_runner. Run without arguments to get a
 menu. Run the script with the -h flag to see usage information.
-
 """
 
 import os
