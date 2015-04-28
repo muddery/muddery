@@ -238,7 +238,8 @@ function doSend(){
     }
     else {
         // normal output
-        websocket.send("CMD" + outmsg); }
+        websocket.send(outmsg);
+    }
 }
 
 function doOOB(cmdstring){
