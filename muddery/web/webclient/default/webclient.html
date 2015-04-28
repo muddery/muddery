@@ -25,10 +25,16 @@
             if ("WebSocket" in window) {
                 <!-- Importing the Muddery websocket webclient component (requires jQuery)  -->
                 var wsurl = "{{websocket_url}}";
-                document.write("\<script src=\"{% static "webclient/js/muddery_websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>")}
+                document.write("\<script src=\"{% static "webclient/js/evennia_websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+                document.write("\<script src=\"{% static "webclient/js/muddery_websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+                document.write("\<script src=\"{% static "webclient/js/muddery_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+                document.write("\<script src=\"{% static "webclient/js/text2html.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");}
             else {
                 <!-- No websocket support in browser. Importing the Muddery ajax webclient component (requires jQuery)  -->
-                document.write("\<script src=\"{% static "webclient/js/muddery_ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>")}
+                document.write("\<script src=\"{% static "webclient/js/evennia_ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+                document.write("\<script src=\"{% static "webclient/js/muddery_ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+                document.write("\<script src=\"{% static "webclient/js/muddery_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+                document.write("\<script src=\"{% static "webclient/js/text2html.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");}
         </script>
     {% else %}
             <!-- websocket not enabled; use ajax -->
@@ -39,7 +45,7 @@
   <body>
 
     <div id="wrapper">
-      <div id="messagewindow">
+      <div id="msg_wnd">
         <!--javascript kills this when page has finished loading: -->
         <div id="connecting"> Connecting ...</div>
         <!--this is supplied by django view - webclient/views.py: -->
