@@ -104,3 +104,142 @@ function display_env(data) {
     
     $("#env_wnd").append(text);
 }
+
+
+function doSetSizes() {
+    // Sets the size of the message window
+    var win_h = $(window).innerHeight();
+    var win_w = $(window).innerWidth();
+    var close_h = $('#close_button').outerHeight(true);
+    var prom_h = $('#input_prompt').outerHeight(true);
+    var add_h = $('#input_additional').outerHeight(true);
+    $('#input_box').height(close_h + prom_h + add_h);
+    
+    var inp_h = $('#input_box').outerHeight(true);
+    var inp_w = $('#input_box').outerWidth(true);
+    //$("#wrapper").css({'height': win_h - inp_h - 1});
+    $('#input_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+
+    if (win_h > 480) {
+   	 	var head_h = $('#site-title').outerHeight(true);
+   	 	$('#header_bar').show();
+    	$('#wrapper').height(win_h - head_h - 6);
+    }
+    else {
+    	$('#header_bar').hide();
+    	$('#wrapper').height(win_h - 6);
+    }
+    
+    var middle_h = $('#middlewindow').outerHeight(true);
+    var bottom_h = $('#bottomwindow').outerHeight(true);
+    $('#msg_wnd').height(middle_h - bottom_h - 2);
+    
+    if (win_w > 960) {
+      	$('#middlewindow').width(960);
+      	$('#bottomwindow').width(960);
+    }
+    else {
+    	$('#middlewindow').width(win_w);
+      	$('#bottomwindow').width(win_w);
+    }
+}
+
+function doCancel() {
+	websocket.send(CMD_NOINPUT);
+	doCloseInput();
+}
+
+function doRequest() {
+    var val = $("#input_text").val();
+    $("#inputfield").val(val);
+    $("#input_text").val("");
+    doSend();
+    doCloseInput();
+}
+
+function doInputText(type, msg) {
+    createInputTextDlg();
+	$('#input_prompt').html(msg);
+	var input = '<div><input type="' + type + '" id="input_text" value="" autocomplete="off"/></div>';
+	var button = '<div>\
+                    <input type="button" id="button_left" value="CANCEL" class="btn" onClick="doCancel()"/>\
+                    <input type="button" id="button_right" value="  OK  " class="btn btn-primary" onClick="doRequest()"/>\
+              	  </div>'
+	$('#input_additional').html(input + button);
+    $('#input_text').focus();
+    doSetSizes();
+}
+
+function doInputCmd(type, msg) {
+    createInputCmdDlg();
+	$('#input_prompt').html(msg);
+	var input = '<div><input type="' + type + '" id="input_text" value="" autocomplete="off"/></div>';
+	var button = '<div>\
+                    <input type="button" id="button_left" value="CANCEL" class="btn" onClick="doCloseInput()"/>\
+                    <input type="button" id="button_right" value="  OK  " class="btn btn-primary" onClick="doRequest()"/>\
+              	  </div>'
+	$('#input_additional').html(input + button);
+    $('#input_text').focus();
+    doSetSizes();
+}
+
+function doInputLink(type, msg) {
+    createInputTextDlg();
+	$('#input_prompt').html(msg);
+	$('#input_additional').html('<p/>');
+	doSetSizes();
+}
+
+function doAlert(type, msg) {
+    createInputTextDlg();
+	$('#input_prompt').html(msg);
+	var button = '<div><br></div>\
+                  <div>\
+                    <center>\
+                      <input type="button" id="button_center" value="  OK  " class="btn btn-primary" onClick="doCloseInput()"/>\
+                    </center>\
+              	  </div>'
+	$('#input_additional').html(button);
+	doSetSizes();
+}
+
+function doCloseInput() {
+    $('#input_box').remove();
+	$('#overlayer').remove();
+	doSetSizes();
+}
+
+function createInputTextDlg() {
+	var dlg = '<div id="input_box">\
+	<div id="close_button" class="clearfix">\
+	<input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="doCancel()"/>\
+	</div>\
+	<div id="input_prompt">\
+	</div>\
+    <div id="input_additional">\
+    </div>\
+	</div>';
+	
+	var overlayer = '<div class="overlayer" id="overlayer"></div>';
+	
+	$("body").prepend(dlg + overlayer);
+}
+
+function createInputCmdDlg() {
+	var dlg = '<div id="input_box">\
+	<div id="close_button" class="clearfix">\
+	<input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="doCloseInput()"/>\
+	</div>\
+	<div id="input_prompt">\
+	</div>\
+    <div id="input_additional">\
+    </div>\
+	</div>';
+	
+	var overlayer = '<div class="overlayer" id="overlayer"></div>';
+	
+	$("body").prepend(dlg + overlayer);
+}
+
+// Callback function - called when the browser window resizes
+$(window).resize(doSetSizes);
