@@ -4,6 +4,7 @@ Muddery webclient (javascript component)
 
 var DISPLAY_MAP = {
     "msg" : display_msg,
+    "out" : display_out,
     "err" : display_err,
     "sys" : display_sys,
     "debug" : display_debug,
@@ -18,6 +19,7 @@ var ENVIROMENT = {
     "players" : [],
     "exits" : [],
 }
+
 
 function display_data(data){
     for (var key in data){
@@ -37,6 +39,12 @@ function display_data(data){
 
 
 function display_msg(data) {
+    data = text2html.parse_html(data);
+    display_text_msg("msg", data);
+}
+
+
+function display_out(data) {
     display_text_msg("out", data);
 }
 

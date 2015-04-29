@@ -6,7 +6,7 @@ function doShow(type, msg){
         }
         catch(err){
             // not JSON packed - a normal text message
-            var data = {"msg": msg};
+            var data = {"out": msg};
         }
     }
     else if (type == "err"){

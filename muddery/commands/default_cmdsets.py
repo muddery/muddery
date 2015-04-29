@@ -16,6 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 import command as muddery_cmds
+import unloggedin
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
     """
@@ -72,6 +73,7 @@ class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+        self.add(unloggedin.CmdUnconnectedLook())
 
 
 class SessionCmdSet(default_cmds.SessionCmdSet):
