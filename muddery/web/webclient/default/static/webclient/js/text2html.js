@@ -1,13 +1,11 @@
 
 var text2html = {
-    MARK_MAP : {
+    mark_map : {
         '{{' : '{',                  // "{"
         '{n' : '',                   // reset            Close the span.
         '{/' : '<br>',               // line break
         '{-' : '    ',               // tab
-        '{_' : '&nbsp;',             // space
-        '{*' : '',                   // invert           Does not support it, remove it only.
-        '{^' : '',                   // blinking text    Does not support it, remove it only.
+        '{_' : '&#8199;',            // space
 
         // Replace ansi colors with html color class names.
         // Let the client choose how it will display colors, if it wishes to.
@@ -52,31 +50,27 @@ var text2html = {
         '{[W' : '<span class="bggray">',     // light grey background
         '{[X' : '<span class="bgblack">',    // pure black background
                        
-        '{lc' : '<a href="#" onclick="websocket.send(\'CMD ',    // link
-        '{lt' : '\'); return false;">',                          // link
-        '{le' : '</a>',                                         // link
-
-    //        xterm256_map = [
-    //        '\{[0-5]{3}', ""),   # {123 - foreground colour
-    //        '\{\[[0-5]{3}', "")   # {[123 - background colour
+        '{lc' : '<a href="#" onclick="sendCommand(\'',      // link
+        '{lt' : '\'); return false;">',                     // link
+        '{le' : '</a>',                                     // link
     },
 
-    REGEXP_HTML : /"|&|'|<|>|  |\x0A/g,
+    regexp_html : /"|&|'|<|>|  |\x0A/g,
 
-    REGEXP_MARK : /\w*/,
+    regexp_mark : /\w*/,
 
-    LAST_CONVERT : "",
+    last_convert : "",
     
-    convert_html: function(match){
-        if (match == "  "){
+    convertHtml: function(match) {
+        if (match == "  ") {
             return "&#8199;&#8199;";
         }
-        else{
+        else {
             var char = match.charCodeAt(0);
-            if (char == 0x0A){
+            if (char == 0x0A) {
                 return "<br>";
             }
-            else{
+            else {
                 var replacement = ["&#"];
                 replacement.push(char);
                 replacement.push(";");
@@ -85,50 +79,50 @@ var text2html = {
         }
     },
 
-    convert_mark: function(match){
+    convertMark: function(match) {
         var replacement = "";
         
         // <span> can contain <string>
-        if (text2html.LAST_CONVERT.substring(0, 5) == "<span" && match != "{h"){
+        if (text2html.last_convert.substring(0, 5) == "<span" && match != "{h") {
             // close span
             replacement = "</span>";
         }
-        else if (text2html.LAST_CONVERT.substring(0, 8) == "<strong>" && match != "{H"){
+        else if (text2html.last_convert.substring(0, 8) == "<strong>" && match != "{H") {
             // close strong
             replacement = "</strong>";
         }
         
-        if (match in text2html.MARK_MAP){
-            text2html.LAST_CONVERT = text2html.MARK_MAP[match];
-            replacement += text2html.LAST_CONVERT;
+        if (match in text2html.mark_map) {
+            text2html.last_convert = text2html.mark_map[match];
+            replacement += text2html.last_convert;
         }
         
         return replacement;
     },
 
-    parse_html: function(string){
+    parseHtml: function(string) {
         // Parses a string, replace markup with html
         
         // Convert html codes.
-        string = string.replace(text2html.REGEXP_HTML, text2html.convert_html);
+        string = string.replace(text2html.regexp_html, text2html.convertHtml);
 
         // Convert marks
-        string = string.replace(text2html.REGEXP_MARK, text2html.convert_mark);
+        string = string.replace(text2html.regexp_mark, text2html.convertMark);
         
         return string;
     },
 };
 
 // Compile RegExps.
-text2html.REGEXP_HTML.compile(text2html.REGEXP_HTML);
+text2html.regexp_html.compile(text2html.regexp_html);
 
 var mark_pattern = new Array();
-for (mark in text2html.MARK_MAP){
+for (mark in text2html.mark_map) {
     mark = mark.replace(/\[/, "\\[");
     mark = mark.replace(/\*/, "\\*");
     mark_pattern.push(mark);
 }
 mark_pattern = mark_pattern.join("|");
 mark_pattern = new RegExp(mark_pattern, "g");
-text2html.REGEXP_MARK.compile(mark_pattern);
+text2html.regexp_mark.compile(mark_pattern);
 

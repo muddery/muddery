@@ -12,11 +12,10 @@
 
     <!-- Importing the online jQuery javascript library -->
     <!--script src="http://code.jquery.com/jquery-1.6.1.js" type="text/javascript" charset="utf-8"></script-->
-    <script src="http://code.jquery.com/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+    <!--script src="http://code.jquery.com/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script-->
 
     <!--for offline testing, download the jquery library from jquery.com-->
-    <!--script src="/media/javascript/jquery-1.11.1.js" type="text/javascript" charset="utf-8"></script-->
-
+    <script src="{% static "webclient/js/jquery-1.11.1.min.js" %}" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
         if(!window.jQuery){document.write("<div class='err'>jQuery library not found or the online version could not be reached.</div>");}
     </script>
@@ -39,7 +38,10 @@
         </script>
     {% else %}
             <!-- websocket not enabled; use ajax -->
+            <script src="{% static "webclient/js/evennia_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
+            <script src="{% static "webclient/js/muddery_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
+            <script src="{% static "webclient/js/text2html.js" %}" type="text/javascript" charset="utf-8"></script>
     {% endif %}
 
   </head>
@@ -66,14 +68,45 @@
 			  to the local copy.</p>
 	      </div>
 	    </div>
-	    <div id="bottomwindow">
-          <div id="prompt"></div>
-          <input type="button" id="button_input" value="Input command." class="btn" onClick="doInputCmd('text', 'Please input command:')"/>
+        <nav id="tab_bar">
+            <ul class="tab_pills">
+                <li id="tab_login" class="pill_active">
+                    <a href="#" onClick="webclient.showLogin()">Login</a>
+                </li>
+                <li id="tab_command">
+                    <a href="#" onClick="webclient.showCommand()">Command</a>
+                </li>
+            </ul>
+        </nav>
+        <div id="tab_content">
+            <form id="page_login">
+                <div>
+                    <div>Please login or register.</div>
+                    <div>
+                        <input type="text" class="input_text" value="" autocomplete="off"/>
+                    </div>
+                    <div>
+                        <input type="password" class="input_text" value="" autocomplete="off"/>
+                    </div>
+                    <div>
+                        <input type="button" class="btn button_left" value="LOGIN" onClick="webclient.doLogin()"/>
+                        <input type="button" class="btn button_left" value="REGISTER" onClick="webclient.doRegister()"/>
+                    </div>
+                </div>
+            </form>
+            <form id="page_command" style="display: none">
+                <div>
+                    <div>Please input command.</div>
+                    <div>
+                        <input type="text" class="input_text" value="" autocomplete="off"/>
+                    </div>
+                    <div>
+                        <input type="button" class="btn button_left" value="SEND" onClick="webclient.doSendCommand()"/>
+                    </div>
+                </div>
+            </form>
         </div>
       </div>
     </div>
-    <form id="inputform" action="javascript:void(0);">
-      <div id="inputcontrol"><input type="text" id="inputfield" autocomplete="off"><input id="inputsend" type="button" value="send" onClick="doSend()"/></div>
-    </form>
   </body>
 </html>
