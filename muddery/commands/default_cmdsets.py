@@ -73,8 +73,11 @@ class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+        self.add(unloggedin.CmdUnconnectedLoginStart())
         self.add(unloggedin.CmdUnconnectedLook())
-        self.add(unloggedin.CmdUnconnectedCreate())
+        self.add(unloggedin.CmdUnconnectedCreateConnect())
+        self.add(unloggedin.CmdUnconnectedConnect())
+        self.add(unloggedin.CmdUnconnectedQuit())
 
 
 class SessionCmdSet(default_cmds.SessionCmdSet):
