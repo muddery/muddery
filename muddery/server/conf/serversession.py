@@ -21,7 +21,10 @@ settings file:
 
 """
 
+import json
 from evennia.server.serversession import ServerSession as BaseServerSession
+from evennia.utils import logger
+
 
 class ServerSession(BaseServerSession):
     """
@@ -32,4 +35,23 @@ class ServerSession(BaseServerSession):
     to the game server. All communication between game and player goes
     through their session(s).
     """
-    pass
+    def data_out(self, text=None, **kwargs):
+        """
+        Send Evennia -> User
+        Convert to JSON.
+        """
+        try:
+            text = json.dumps(text)
+        except Exception, e:
+            text = json.dumps({"err": "There is an error occurred while outputing messages."})
+            logger.log_errmsg("json.dumps failed: %s" % e)
+        
+        # set raw=True
+        if kwargs:
+            kwargs["raw"] = True
+        else:
+            kwargs = {"raw": True}
+
+        return super(ServerSession, self).data_out(text=text, **kwargs)
+    # alias
+    msg = data_out

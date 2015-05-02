@@ -30,6 +30,21 @@ MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBCLIENT_TEMPLATE = 'default'
 
 ######################################################################
+# Evennia pluggable modules
+######################################################################
+
+# The command parser module to use. See the default module for which
+# functions it must implement
+COMMAND_PARSER = "muddery.server.conf.cmdparser.cmdparser"
+
+######################################################################
+# Typeclasses and other paths
+######################################################################
+
+# Server-side session class used.
+SERVER_SESSION_CLASS = "muddery.server.conf.serversession.ServerSession"
+
+######################################################################
 # World data features
 ######################################################################
 
