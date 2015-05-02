@@ -26,6 +26,9 @@ import json
 import evennia.commands.cmdparser as evennia_cmdparser
 from evennia.utils import logger
 
+CMD_LOGINSTART = "__unloggedin_look_command"
+
+
 def cmdparser(raw_string, cmdset, caller, match_index=None):
     """
     This function is called by the cmdhandler once it has
@@ -47,10 +50,14 @@ def cmdparser(raw_string, cmdset, caller, match_index=None):
 
     """
     try:
-        # Decode JSON formated command.
-        data = json.loads(raw_string)
-        cmd = data["cmd"]
-        args = data["args"]
+        if raw_string == CMD_LOGINSTART:
+            cmd = CMD_LOGINSTART
+            args = ""
+        else:
+            # Decode JSON formated command.
+            data = json.loads(raw_string)
+            cmd = data["cmd"]
+            args = data["args"]
         
         # Find the matching command in cmdset.
         for cmdobj in cmdset:

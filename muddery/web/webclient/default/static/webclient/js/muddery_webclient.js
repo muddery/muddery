@@ -288,20 +288,30 @@ var webclient = {
     unselectAllTabs : function() {
         $("#tab_login").removeClass("pill_active");
         $("#page_login").css("display", "none");
+        
         $("#tab_command").removeClass("pill_active");
         $("#page_command").css("display", "none");
+        
+        $("#tab_test").removeClass("pill_active");
+        $("#page_test").css("display", "none");
     },
     
-    showLogin : function() {
+    showLoginPage : function() {
         this.unselectAllTabs();
         $("#tab_login").addClass("pill_active");
         $("#page_login").css("display", "");
     },
     
-    showCommand : function() {
+    showCommandPage : function() {
         this.unselectAllTabs();
         $("#tab_command").addClass("pill_active");
         $("#page_command").css("display", "");
+    },
+    
+    showTestPage : function() {
+        this.unselectAllTabs();
+        $("#tab_test").addClass("pill_active");
+        $("#page_test").css("display", "");
     },
 
     // commands
@@ -309,14 +319,18 @@ var webclient = {
         return JSON.stringify({"cmd" : command, "args" : args});
     },
     
+    // login
     doLogin : function() {
-        var username = $("#page_login :text").val();
+        var playername = $("#page_login :text").val();
         var password = $("#page_login :password").val();
         $("#page_login :password").val("");
         
-        sendCommand("connect " + username + " " + password);
+        var args = {"playername" : playername,
+                    "password" : password};
+        sendCommand(this.cmdString("connect", args));
     },
 
+    // register
     doRegister : function() {
         var playername = $("#page_login :text").val();
         var password = $("#page_login :password").val();
@@ -324,15 +338,31 @@ var webclient = {
 
         var args = {"playername" : playername,
                     "password" : password};
-        sendCommand(this.cmdString("create_account", args));
+        sendCommand(this.cmdString("create_connect", args));
     },
     
+    // look
+    doLook : function() {
+        sendCommand(this.cmdString("look", ""));
+    },
+    
+    // quit
+    doQuit : function() {
+        sendCommand(this.cmdString("quit", ""));
+    },
+    
+    // common command
     doSendCommand : function() {
         var command = $("#page_command :text").val();
         $("#page_command :text").val("");
         
         sendCommand(command);
     },
+    
+    // do test
+    doTest : function() {
+        // test codes
+    }
 }
 
 

@@ -71,11 +71,14 @@
         <nav id="tab_bar">
             <ul class="tab_pills">
                 <li id="tab_login" class="pill_active">
-                    <a href="#" onClick="webclient.showLogin()">Login</a>
+                    <a href="#" onClick="webclient.showLoginPage()">Login</a>
                 </li>
                 <li id="tab_command">
-                    <a href="#" onClick="webclient.showCommand()">Command</a>
+                    <a href="#" onClick="webclient.showCommandPage()">Command</a>
                 </li>
+                <!--li id="tab_test">
+                    <a href="#" onClick="webclient.showTestPage()">Test</a>
+                </li-->
             </ul>
         </nav>
         <div id="tab_content">
@@ -105,6 +108,14 @@
                     </div>
                 </div>
             </form>
+            <!--form id="page_test" style="display: none">
+                <div>
+                    <div>Do test.</div>
+                    <div>
+                        <input type="button" class="btn button_left" value="TEST" onClick="webclient.doTest()"/>
+                    </div>
+                </div>
+            </form-->
         </div>
       </div>
     </div>

@@ -21,7 +21,7 @@ from evennia.commands.default.muxcommand import MuxCommand
 from evennia.commands.cmdhandler import CMD_LOGINSTART
 
 # limit symbol import for API
-__all__ = ("CmdUnconnectedConnect", "CmdUnconnectedCreate",
+__all__ = ("CmdUnconnectedConnect", "CmdUnconnectedCreate", "CmdUnconnectedCreateConnect",
            "CmdUnconnectedQuit", "CmdUnconnectedLook", "CmdUnconnectedHelp")
 
 MULTISESSION_MODE = settings.MULTISESSION_MODE
@@ -77,22 +77,22 @@ def _throttle(session, maxlim=None, timeout=None,
         return False
 
 
-class CmdUnconnectedConnect(MuxCommand):
+class CmdUnconnectedConnect(Command):
     """
     connect to the game
 
-    Usage (at login screen):
-      connect playername password
-      connect "player name" "pass word"
+    Usage:
+        {"cmd":"connect",
+         "args":{
+            "playername":<playername>,
+            "password":<password>
+            }
+        }
 
-    Use the create command to first create an account before logging in.
-
-    If you have spaces in your name, enclose it in quotes.
+    This creates a new player account.
     """
     key = "connect"
-    aliases = ["conn", "con", "co"]
-    locks = "cmd:all()"  # not really needed
-    arg_regex = r"\s.*?|$"
+    locks = "cmd:all()"
 
     def func(self):
         """
@@ -104,56 +104,61 @@ class CmdUnconnectedConnect(MuxCommand):
         """
         session = self.caller
 
+        try:
+            playername = self.args["playername"]
+            password = self.args["password"]
+        except:
+            string = 'Syntax error!'
+            string += '\nUsage:'
+            string += '\n    {"cmd":"create_account",'
+            string += '\n    "args":{'
+            string += '\n        "playername":<playername>,'
+            string += '\n        "password":<password>'
+            string += '\n        }'
+
+            logger.log_errmsg(string)
+            self.caller.msg({"err":string})
+            return
+
         # check for too many login errors too quick.
         if _throttle(session, maxlim=5, timeout=5*60, storage=_LATEST_FAILED_LOGINS):
             # timeout is 5 minutes.
             session.msg("{RYou made too many connection attempts. Try again in a few minutes.{n")
             return
 
-        args = self.args
-        # extract quoted parts
-        parts = [part.strip() for part in re.split(r"\"|\'", args) if part.strip()]
-        if len(parts) == 1:
-            # this was (hopefully) due to no quotes being found, or a guest login
-            parts = parts[0].split(None, 1)
-            # Guest login
-            if len(parts) == 1 and parts[0].lower() == "guest" and settings.GUEST_ENABLED:
-                try:
-                    # Find an available guest name.
-                    for playername in settings.GUEST_LIST:
-                        if not PlayerDB.objects.filter(username__iexact=playername):
-                            break
-                        playername = None
-                    if playername == None:
-                        session.msg("All guest accounts are in use. Please try again later.")
-                        return
-
-                    password = "%016x" % getrandbits(64)
-                    home = ObjectDB.objects.get_id(settings.GUEST_HOME)
-                    permissions = settings.PERMISSION_GUEST_DEFAULT
-                    typeclass = settings.BASE_CHARACTER_TYPECLASS
-                    ptypeclass = settings.BASE_GUEST_TYPECLASS
-                    new_player = _create_player(session, playername, password,
-                                                permissions, ptypeclass)
-                    if new_player:
-                        _create_character(session, new_player, typeclass,
-                                        home, permissions)
-                        session.sessionhandler.login(session, new_player)
-
-                except Exception:
-                    # We are in the middle between logged in and -not, so we have
-                    # to handle tracebacks ourselves at this point. If we don't,
-                    # we won't see any errors at all.
-                    string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
-                    session.msg(string % (traceback.format_exc()))
-                    logger.log_errmsg(traceback.format_exc())
-                finally:
+        # Guest login
+        if playername.lower() == "guest" and settings.GUEST_ENABLED:
+            try:
+                # Find an available guest name.
+                for playername in settings.GUEST_LIST:
+                    if not PlayerDB.objects.filter(username__iexact=playername):
+                        break
+                    playername = None
+                if playername == None:
+                    session.msg("All guest accounts are in use. Please try again later.")
                     return
 
-        if len(parts) != 2:
-            session.msg("\n\r Usage (without <>): connect <name> <password>")
-            return
-        playername, password = parts
+                password = "%016x" % getrandbits(64)
+                home = ObjectDB.objects.get_id(settings.GUEST_HOME)
+                permissions = settings.PERMISSION_GUEST_DEFAULT
+                typeclass = settings.BASE_CHARACTER_TYPECLASS
+                ptypeclass = settings.BASE_GUEST_TYPECLASS
+                new_player = _create_player(session, playername, password,
+                                            permissions, ptypeclass)
+                if new_player:
+                    _create_character(session, new_player, typeclass,
+                                    home, permissions)
+                    session.sessionhandler.login(session, new_player)
+
+            except Exception:
+                # We are in the middle between logged in and -not, so we have
+                # to handle tracebacks ourselves at this point. If we don't,
+                # we won't see any errors at all.
+                string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
+                session.msg(string % (traceback.format_exc()))
+                logger.log_errmsg(traceback.format_exc())
+            finally:
+                return
 
         # Match account name and check password
         player = PlayerDB.objects.get_player_from_name(playername)
@@ -227,8 +232,8 @@ class CmdUnconnectedCreate(Command):
             string += '\n        }'
 
             logger.log_errmsg(string)
-
             self.caller.msg({"err":string})
+            return
 
         # sanity checks
         if not re.findall('^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
@@ -293,6 +298,116 @@ class CmdUnconnectedCreate(Command):
             string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
             session.msg(string % (traceback.format_exc()))
             logger.log_errmsg(traceback.format_exc())
+            
+            
+class CmdUnconnectedCreateConnect(Command):
+    """
+    create a new player account and login
+
+    Usage:
+        {"cmd":"create_connect",
+         "args":{
+            "playername":<playername>,
+            "password":<password>
+            }
+        }
+
+    This creates a new player account.
+    """
+    key = "create_connect"
+    locks = "cmd:all()"
+
+    def func(self):
+        "Do checks, create account and login."
+        session = self.caller
+
+        try:
+            playername = self.args["playername"]
+            password = self.args["password"]
+        except:
+            string = 'Syntax error!'
+            string += '\nUsage:'
+            string += '\n    {"cmd":"create_connect",'
+            string += '\n    "args":{'
+            string += '\n        "playername":<playername>,'
+            string += '\n        "password":<password>'
+            string += '\n        }'
+
+            logger.log_errmsg(string)
+            self.caller.msg({"err":string})
+            return
+
+        # sanity checks
+        if not re.findall('^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
+            # this echoes the restrictions made by django's auth
+            # module (except not allowing spaces, for convenience of
+            # logging in).
+            string = "\n\r Playername can max be 30 characters or fewer. Letters, spaces, digits and @/./+/-/_ only."
+            session.msg(string)
+            return
+        # strip excessive spaces in playername
+        playername = re.sub(r"\s+", " ", playername).strip()
+        if PlayerDB.objects.filter(username__iexact=playername):
+            # player already exists (we also ignore capitalization here)
+            session.msg("Sorry, there is already a player with the name '%s'." % playername)
+            return
+        # Reserve playernames found in GUEST_LIST
+        if settings.GUEST_LIST and playername.lower() in map(str.lower, settings.GUEST_LIST):
+            string = "\n\r That name is reserved. Please choose another Playername."
+            session.msg(string)
+            return
+        if not re.findall('^[\w. @+-]+$', password) or not (3 < len(password)):
+            string = "\n\r Password should be longer than 3 characers. Letters, spaces, digits and @\.\+\-\_ only." \
+                     "\nFor best security, make it longer than 8 characters. You can also use a phrase of" \
+                     "\nmany words if you enclose the password in quotes."
+            session.msg(string)
+            return
+
+        # Check IP and/or name bans
+        bans = ServerConfig.objects.conf("server_bans")
+        if bans and (any(tup[0]==playername.lower() for tup in bans)
+                     or
+                     any(tup[2].match(session.address) for tup in bans if tup[2])):
+            # this is a banned IP or name!
+            string = "{rYou have been banned and cannot continue from here." \
+                     "\nIf you feel this ban is in error, please email an admin.{x"
+            session.msg(string)
+            session.execute_cmd("quit")
+            return
+
+        # everything's ok. Create the new player account.
+        try:
+            permissions = settings.PERMISSION_PLAYER_DEFAULT
+            typeclass = settings.BASE_CHARACTER_TYPECLASS
+            new_player = _create_player(session, playername, password, permissions)
+            if new_player:
+                if MULTISESSION_MODE < 2:
+                    default_home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
+                    _create_character(session, new_player, typeclass,
+                                    default_home, permissions)
+                # tell the caller everything went well.
+                string = "A new account '%s' was created. Welcome!"
+                # if " " in playername:
+                #     string += "\n\nYou can now log in with the command 'connect \"%s\" <your password>'."
+                # else:
+                #     string += "\n\nYou can now log with the command 'connect %s <your password>'."
+                # session.msg(string % (playername, playername))
+
+                # actually do the login. This will call all other hooks:
+                #   session.at_login()
+                #   player.at_init()  # always called when object is loaded from disk
+                #   player.at_pre_login()
+                #   player.at_first_login()  # only once
+                #   player.at_post_login(sessid=sessid)
+                session.sessionhandler.login(session, new_player)
+
+        except Exception:
+            # We are in the middle between logged in and -not, so we have
+            # to handle tracebacks ourselves at this point. If we don't,
+            # we won't see any errors at all.
+            string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
+            session.msg(string % (traceback.format_exc()))
+            logger.log_errmsg(traceback.format_exc())
 
 
 class CmdUnconnectedQuit(MuxCommand):
@@ -300,14 +415,15 @@ class CmdUnconnectedQuit(MuxCommand):
     quit when in unlogged-in state
 
     Usage:
-      quit
+        {"cmd":"quit",
+         "args":""
+        }
 
     We maintain a different version of the quit command
     here for unconnected players for the sake of simplicity. The logged in
     version is a bit more complicated.
     """
     key = "quit"
-    aliases = ["q", "qu"]
     locks = "cmd:all()"
 
     def func(self):
@@ -317,20 +433,21 @@ class CmdUnconnectedQuit(MuxCommand):
         session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
 
 
-class CmdUnconnectedLook(MuxCommand):
+class CmdUnconnectedLook(Command):
     """
     look when in unlogged-in state
 
     Usage:
-      look
+        {"cmd":"look",
+         "args":""
+        }
 
     This is an unconnected version of the look command for simplicity.
 
     This is called by the server and kicks everything in gear.
     All it does is display the connect screen.
     """
-    key = CMD_LOGINSTART
-    aliases = ["look", "l"]
+    key = "look"
     locks = "cmd:all()"
 
     def func(self):
@@ -339,7 +456,29 @@ class CmdUnconnectedLook(MuxCommand):
         if not connection_screen:
             connection_screen = "No connection screen found. Please contact an admin."
         self.caller.msg({"msg":connection_screen})
-        # self.caller.msg(connection_screen)
+
+
+class CmdUnconnectedLoginStart(MuxCommand):
+    """
+    login started unlogged-in state
+
+    Usage:
+        CMD_LOGINSTART
+
+    This is an unconnected version of the look command for simplicity.
+
+    This is called by the server and kicks everything in gear.
+    All it does is display the connect screen.
+    """
+    key = CMD_LOGINSTART
+    locks = "cmd:all()"
+
+    def func(self):
+        "Show the connect screen."
+        connection_screen = utils.random_string_from_module(CONNECTION_SCREEN_MODULE)
+        if not connection_screen:
+            connection_screen = "No connection screen found. Please contact an admin."
+        self.caller.msg({"msg":connection_screen})
 
 
 class CmdUnconnectedHelp(MuxCommand):
@@ -442,6 +581,7 @@ class CmdUnconnectedEncoding(MuxCommand):
             self.session.encoding = encoding
             string = "Your custom text encoding was changed from '%s' to '%s'." % (old_encoding, encoding)
         self.caller.msg(string.strip())
+
 
 class CmdUnconnectedScreenreader(MuxCommand):
     """
