@@ -12,6 +12,51 @@ var webclient = {
     },
 
     login : false,  // Whether player is login or not.
+    
+    doShow : function(type, msg) {
+        var data = null;
+        
+        if (type == "out") {
+            try {
+                var decode = JSON.parse(msg);
+                var type = Object.prototype.toString.call(decode);
+                
+                if (type == "[object Object]") {
+                    // Json object.
+                    data = decode;
+                }
+                else if (type == "[object String]") {
+                    // String
+                    data = {"msg": decode};
+                }
+                else {
+                    // Other types, treat them as normal text messages.
+                    data = {"msg": msg};
+                }
+            }
+            catch(err) {
+                // Not JSON packed, treat it as a normal text message.
+                data = {"msg": msg};
+            }
+        }
+        else if (type == "err") {
+            data = {"err": msg};
+        }
+        else if (type == "sys") {
+            data = {"sys": msg};
+        }
+        else if (type == "prompt") {
+            data = {"prompt": msg};
+        }
+        else if (type == "debug") {
+            data = {"debug": msg};
+        }
+        else {
+            data = {"msg": msg};
+        }
+                    
+        this.displayData(data);
+    },
 
     // display all kinds of data
     displayData : function(data) {
@@ -260,6 +305,10 @@ var webclient = {
     },
 
     // commands
+    cmdString : function(command, args) {
+        return JSON.stringify({"cmd" : command, "args" : args});
+    },
+    
     doLogin : function() {
         var username = $("#page_login :text").val();
         var password = $("#page_login :password").val();
@@ -269,11 +318,13 @@ var webclient = {
     },
 
     doRegister : function() {
-        var username = $("#page_login :text").val();
+        var playername = $("#page_login :text").val();
         var password = $("#page_login :password").val();
         $("#page_login :password").val("");
-        
-        sendCommand("create " + username + " " + password);
+
+        var args = {"playername" : playername,
+                    "password" : password};
+        sendCommand(this.cmdString("create_account", args));
     },
     
     doSendCommand : function() {

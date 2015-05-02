@@ -9,19 +9,10 @@ handler is very generic so you usually don't need to overload this
 unless you have very exotic parsing needs; advanced parsing is best
 done at the Command.parse level.
 
-The default cmdparser understands the following command combinations
-(where [] marks optional parts.)
-
-[cmdname[ cmdname2 cmdname3 ...] [the rest]
-
-A command may consist of any number of space-separated words of any
-length, and contain any character. It may also be empty.
-
 The parser makes use of the cmdset to find command candidates. The
 parser return a list of matches. Each match is a tuple with its first
 three elements being the parsed cmdname (lower case), the remaining
 arguments, and the matched cmdobject from the cmdset.
-
 
 This module is not accessed by default. To tell Evennia to use it
 instead of the default command parser, add the following line to
@@ -30,6 +21,10 @@ your settings file:
     COMMAND_PARSER = "server.conf.cmdparser.cmdparser"
 
 """
+
+import json
+import evennia.commands.cmdparser as evennia_cmdparser
+from evennia.utils import logger
 
 def cmdparser(raw_string, cmdset, caller, match_index=None):
     """
@@ -51,4 +46,20 @@ def cmdparser(raw_string, cmdset, caller, match_index=None):
             (possibly) separate multiple matches.
 
     """
-    # Your implementation here
+    try:
+        # Decode JSON formated command.
+        data = json.loads(raw_string)
+        cmd = data["cmd"]
+        args = data["args"]
+        
+        # Find the matching command in cmdset.
+        for cmdobj in cmdset:
+            if cmdobj.key == cmd:
+                return [(cmd, args, cmdobj,)]
+    
+        # can not find
+        return []
+    except Exception:
+        # Command is not in JSON, call evennia's cmdparser.
+        return evennia_cmdparser.cmdparser(raw_string, cmdset, caller, match_index)
+

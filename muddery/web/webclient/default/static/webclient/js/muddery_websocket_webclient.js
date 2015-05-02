@@ -1,30 +1,10 @@
 
 function doShow(type, msg) {
-    if (type == "out") {
-        try {
-            var data = JSON.parse(msg);
-        }
-        catch(err) {
-            // not JSON packed - a normal text message
-            var data = {"out": msg};
-        }
-    }
-    else if (type == "err") {
-        var data = {"err": msg};
-    }
-    else if (type == "sys") {
-        var data = {"sys": msg};
-    }
-    else if (type == "debug") {
-        var data = {"debug": msg};
-    }
-                
-    webclient.displayData(data);
+    webclient.doShow(type, msg);
 }
 
 function doPrompt(type, msg) {
-    var data = {"prompt": msg};
-    webclient.displayData(data);
+    doShow("prompt", msg);
 }
 
 function sendCommand(command) {

@@ -1,6 +1,8 @@
 """
-Commands that are available from the connect screen.
+This is adapt from evennia/evennia/commands/default/unloggedin.py.
+The licence of Evennia can be found in evennia/LICENSE.txt.
 """
+
 import re
 import traceback
 import time
@@ -14,6 +16,7 @@ from evennia.server.models import ServerConfig
 from evennia.comms.models import ChannelDB
 
 from evennia.utils import create, logger, utils, ansi
+from evennia.commands.command import Command
 from evennia.commands.default.muxcommand import MuxCommand
 from evennia.commands.cmdhandler import CMD_LOGINSTART
 
@@ -190,40 +193,42 @@ class CmdUnconnectedConnect(MuxCommand):
         session.sessionhandler.login(session, player)
 
 
-class CmdUnconnectedCreate(MuxCommand):
+class CmdUnconnectedCreate(Command):
     """
     create a new player account
 
-    Usage (at login screen):
-      create <playername> <password>
-      create "player name" "pass word"
+    Usage:
+        {"cmd":"create_account",
+         "args":{
+            "playername":<playername>,
+            "password":<password>
+            }
+        }
 
     This creates a new player account.
-
-    If you have spaces in your name, enclose it in quotes.
     """
-    key = "create"
-    aliases = ["cre", "cr"]
+    key = "create_account"
     locks = "cmd:all()"
-    arg_regex = r"\s.*?|$"
 
     def func(self):
         "Do checks and create account"
-
         session = self.caller
-        args = self.args.strip()
 
-        # extract quoted parts
-        parts = [part.strip() for part in re.split(r"\"|\'", args) if part.strip()]
-        if len(parts) == 1:
-            # this was (hopefully) due to no quotes being found
-            parts = parts[0].split(None, 1)
-        if len(parts) != 2:
-            string = "\n Usage (without <>): create <name> <password>" \
-                     "\nIf <name> or <password> contains spaces, enclose it in quotes."
-            session.msg(string)
-            return
-        playername, password = parts
+        try:
+            playername = self.args["playername"]
+            password = self.args["password"]
+        except:
+            string = 'Syntax error!'
+            string += '\nUsage:'
+            string += '\n    {"cmd":"create_account",'
+            string += '\n    "args":{'
+            string += '\n        "playername":<playername>,'
+            string += '\n        "password":<password>'
+            string += '\n        }'
+
+            logger.log_errmsg(string)
+
+            self.caller.msg({"err":string})
 
         # sanity checks
         if not re.findall('^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
@@ -333,8 +338,7 @@ class CmdUnconnectedLook(MuxCommand):
         connection_screen = utils.random_string_from_module(CONNECTION_SCREEN_MODULE)
         if not connection_screen:
             connection_screen = "No connection screen found. Please contact an admin."
-        output = json.dumps({"msg":connection_screen})
-        self.caller.msg(output, raw=True)
+        self.caller.msg({"msg":connection_screen})
         # self.caller.msg(connection_screen)
 
 
