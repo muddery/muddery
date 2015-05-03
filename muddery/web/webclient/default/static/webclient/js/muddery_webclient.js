@@ -11,7 +11,7 @@ var webclient = {
         exits : [],
     },
 
-    login : false,  // Whether player is login or not.
+    LOGIN : false,  // Whether player is login or not.
     
     doShow : function(type, msg) {
         var data = null;
@@ -65,6 +65,9 @@ var webclient = {
                 if (key == "msg") {
                     this.displayMsg(data[key]);
                 }
+                else if (key == "alert") {
+                    this.displayAlert(data[key]);
+                }
                 else if (key == "out") {
                     this.displayOut(data[key]);
                 }
@@ -83,6 +86,13 @@ var webclient = {
                 else if (key == "env") {
                     this.displayEnv(data[key]);
                 }
+                else if (key == "login") {
+                    this.onLogin(data[key]);
+                }
+                else if (key == "logout") {
+                    this.onLogout(data[key]);
+                }
+
                 else {
                     this.displayMsg(data[key]);
                 }
@@ -94,8 +104,33 @@ var webclient = {
     },
 
     displayMsg : function(data) {
-        data = text2html.parseHtml(data);
-        this.displayTextMsg("msg", data);
+        this.displayTextMsg("msg", text2html.parseHtml(data));
+    },
+        
+    displayAlert : function(data) {
+        try {
+            var msg = "";
+            var button = "OK";
+            
+            var type = Object.prototype.toString.call(data);
+            if (type == "[object String]") {
+                msg = data;
+            }
+            else {
+                if ("msg" in data) {
+                    msg = data["msg"];
+                }
+                
+                if ("button" in data) {
+                    button = data["button"];
+                }
+            }
+
+            this.showAlert(msg, button);
+        }
+        catch(error) {
+            this.displayErr("Data error.");
+        }
     },
 
     displayOut : function(data) {
@@ -161,6 +196,12 @@ var webclient = {
         text += "<div class='msg out'>"+ this.enviroment["room_desc"] +"</div>";
         
         $("#env_wnd").append(text);
+    },
+    
+    onLogin : function(data) {
+    },
+    
+    onLogout : function(data) {
     },
 
     doSetSizes : function() {
@@ -228,40 +269,39 @@ var webclient = {
     // show boxes
     showInputCmdBox : function(prompt) {
         this.createInputBox();
-        
-        prompt = text2html.parseHtml(prompt);
-        $('#input_prompt').html(prompt);
+
+        $('#input_prompt').html(text2html.parseHtml(prompt));
         
         var input = '<div><input type="text" class="input_text" value="" autocomplete="off"/></div>';
         var button = '<div>\
-                        <input type="button" class="btn button_left" value="CANCEL" onClick="doCloseInput()"/>\
-                        <input type="button" class="btn btn-primary button_right" value="  OK  " onClick="doInputCommand()"/>\
+                        <input type="button" class="btn button_left" value="CANCEL" onClick="webclient.doCloseInput()"/>\
+                        <input type="button" class="btn btn-primary button_right" value="  OK  " onClick="webclient.doInputCommand()"/>\
                       </div>'
         $('#input_additional').html(input + button);
         $('#input_box :text').focus();
         this.doSetSizes();
     },
 
-    showAlert : function(msg) {
+    showAlert : function(msg, button) {
         this.createInputBox();
+
+        $('#input_prompt').html(text2html.parseHtml(msg));
         
-        prompt = text2html.parseHtml(msg);
-        $('#input_prompt').html(msg);
-        
-        var button = '<div><br></div>\
-                      <div>\
-                        <center>\
-                          <input type="button" id="button_center" value="  OK  " class="btn btn-primary" onClick="doCloseInput()"/>\
-                        </center>\
-                      </div>'
-        $('#input_additional').html(button);
+        var html_button = '<div><br></div>\
+                             <div>\
+                                <center>\
+                                    <input type="button" id="button_center" value="A" class="btn btn-primary" onClick="webclient.doCloseInput()"/>\
+                                </center>\
+                            </div>'
+        $('#input_additional').html(html_button);
+        $('#input_additional :input').attr("value", text2html.parseHtml(button));
         this.doSetSizes();
     },
     
     createInputBox : function() {
         var dlg = '<div id="input_box">\
         <div id="close_button" class="clearfix">\
-        <input type="image" id="button_close" class="close" src="/static/this/img/button_close.png" alt="close" onclick="doCloseInput()"/>\
+        <input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="webclient.doCloseInput()"/>\
         </div>\
         <div id="input_prompt">\
         </div>\
@@ -313,56 +353,6 @@ var webclient = {
         $("#tab_test").addClass("pill_active");
         $("#page_test").css("display", "");
     },
-
-    // commands
-    cmdString : function(command, args) {
-        return JSON.stringify({"cmd" : command, "args" : args});
-    },
-    
-    // login
-    doLogin : function() {
-        var playername = $("#page_login :text").val();
-        var password = $("#page_login :password").val();
-        $("#page_login :password").val("");
-        
-        var args = {"playername" : playername,
-                    "password" : password};
-        sendCommand(this.cmdString("connect", args));
-    },
-
-    // register
-    doRegister : function() {
-        var playername = $("#page_login :text").val();
-        var password = $("#page_login :password").val();
-        $("#page_login :password").val("");
-
-        var args = {"playername" : playername,
-                    "password" : password};
-        sendCommand(this.cmdString("create_connect", args));
-    },
-    
-    // look
-    doLook : function() {
-        sendCommand(this.cmdString("look", ""));
-    },
-    
-    // quit
-    doQuit : function() {
-        sendCommand(this.cmdString("quit", ""));
-    },
-    
-    // common command
-    doSendCommand : function() {
-        var command = $("#page_command :text").val();
-        $("#page_command :text").val("");
-        
-        sendCommand(command);
-    },
-    
-    // do test
-    doTest : function() {
-        // test codes
-    }
 }
 
 

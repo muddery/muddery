@@ -20,3 +20,8 @@ function doSetSizes() {
     webclient.doSetSizes();
 }
 
+function onClose(evt) {
+    // called when client is closing
+    CLIENT_HASH = 0;
+    webclient.showAlert("Mud client connection was closed cleanly.", "OK");
+}
