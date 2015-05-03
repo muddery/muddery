@@ -69,7 +69,7 @@ class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
         """
         Populates the cmdset
         """
-        super(UnloggedinCmdSet, self).at_cmdset_creation()
+        # super(UnloggedinCmdSet, self).at_cmdset_creation()
         #
         # any commands you add below will overload the default ones.
         #

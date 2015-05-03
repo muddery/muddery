@@ -28,12 +28,14 @@
                 document.write("\<script src=\"{% static "webclient/js/evennia_websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
                 document.write("\<script src=\"{% static "webclient/js/muddery_websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
                 document.write("\<script src=\"{% static "webclient/js/muddery_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+                document.write("\<script src=\"{% static "webclient/js/muddery_commands.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
                 document.write("\<script src=\"{% static "webclient/js/text2html.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");}
             else {
                 <!-- No websocket support in browser. Importing the Muddery ajax webclient component (requires jQuery)  -->
                 document.write("\<script src=\"{% static "webclient/js/evennia_ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
                 document.write("\<script src=\"{% static "webclient/js/muddery_ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
                 document.write("\<script src=\"{% static "webclient/js/muddery_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+                document.write("\<script src=\"{% static "webclient/js/muddery_commands.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
                 document.write("\<script src=\"{% static "webclient/js/text2html.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");}
         </script>
     {% else %}
@@ -41,6 +43,7 @@
             <script src="{% static "webclient/js/evennia_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
+            <script src="{% static "webclient/js/muddery_commands.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/text2html.js" %}" type="text/javascript" charset="utf-8"></script>
     {% endif %}
 
@@ -76,9 +79,9 @@
                 <li id="tab_command">
                     <a href="#" onClick="webclient.showCommandPage()">Command</a>
                 </li>
-                <!--li id="tab_test">
+                <li id="tab_test">
                     <a href="#" onClick="webclient.showTestPage()">Test</a>
-                </li-->
+                </li>
             </ul>
         </nav>
         <div id="tab_content">
@@ -92,8 +95,8 @@
                         <input type="password" class="input_text" value="" autocomplete="off"/>
                     </div>
                     <div>
-                        <input type="button" class="btn button_left" value="LOGIN" onClick="webclient.doLogin()"/>
-                        <input type="button" class="btn button_left" value="REGISTER" onClick="webclient.doRegister()"/>
+                        <input type="button" class="btn button_left" value="LOGIN" onClick="commands.doLogin()"/>
+                        <input type="button" class="btn button_left" value="REGISTER" onClick="commands.doRegister()"/>
                     </div>
                 </div>
             </form>
@@ -104,18 +107,18 @@
                         <input type="text" class="input_text" value="" autocomplete="off"/>
                     </div>
                     <div>
-                        <input type="button" class="btn button_left" value="SEND" onClick="webclient.doSendCommand()"/>
+                        <input type="button" class="btn button_left" value="SEND" onClick="commands.doSendCommand()"/>
                     </div>
                 </div>
             </form>
-            <!--form id="page_test" style="display: none">
+            <form id="page_test" style="display: none">
                 <div>
                     <div>Do test.</div>
                     <div>
-                        <input type="button" class="btn button_left" value="TEST" onClick="webclient.doTest()"/>
+                        <input type="button" class="btn button_left" value="TEST" onClick="commands.doTest()"/>
                     </div>
                 </div>
-            </form-->
+            </form>
         </div>
       </div>
     </div>
