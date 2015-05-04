@@ -7,5 +7,8 @@ be of use when designing your own game.
 """
 
 def get_muddery_version():
+    """
+    Get muddery's version.
+    """
     import muddery
     return muddery.__version__

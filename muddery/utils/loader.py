@@ -2,12 +2,10 @@
 This module handles loading data from csv files and set data to objects.
 """
 
-import csv
 import ast
-from django.db import models
 from django.db.models.loading import get_model
 from django.conf import settings
-from evennia.utils import create, utils, search, logger
+from evennia.utils import search, logger
 
 
 ################################################################
@@ -19,7 +17,7 @@ from evennia.utils import create, utils, search, logger
 def set_obj_data_info(obj, model, key):
     """
     Set data_info's database. It saves info to attributes of data_info category, then load these data.
-    
+
     Args:
         obj: Object in game.
         model: (string) Db model's name.
@@ -27,7 +25,7 @@ def set_obj_data_info(obj, model, key):
     """
     obj.attributes.add("model", model, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
     obj.attributes.add("key", key, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
-    
+
     if (not model) or (not key):
         return True
 
@@ -37,7 +35,7 @@ def set_obj_data_info(obj, model, key):
 def load_data(obj):
     """
     Load object data from db, and set them to the obj."
-    
+
     Args:
         obj: Object in game.
     """
@@ -62,7 +60,7 @@ def load_data(obj):
     if not model_obj:
         logger.log_errmsg("%s can not open model %s" % (key, model))
         return False
-    
+
     # Get data record.
     data_info = model_obj.objects.filter(key=key)
     if not data_info:
@@ -123,7 +121,7 @@ def load_data(obj):
 def set_obj_typeclass(obj, typeclass):
     """
     Set object's typeclass.
-    
+
     Args:
         obj: Object in game.
         typeclass: (string) Typeclass's name.
@@ -137,7 +135,7 @@ def set_obj_typeclass(obj, typeclass):
     if obj.is_typeclass(typeclass, exact=True):
         # No change.
         return
-    
+
     if not hasattr(obj, 'swap_typeclass'):
         logger.log_errmsg("%s cannot have a type at all!" % get_info_key(obj))
         return
@@ -149,7 +147,7 @@ def set_obj_typeclass(obj, typeclass):
 def set_obj_name(obj, name):
     """
     Set object's name.
-    
+
     Args:
         obj: Object in game.
         name: (string) Name of the object.
@@ -169,11 +167,10 @@ def set_obj_name(obj, name):
         obj.flush_from_cache()
 
 
-
 def set_obj_alias(obj, aliases):
     """
     Set object's alias.
-    
+
     Args:
         obj: Object in game.
         aliases: (string) Aliases of the object.
@@ -201,21 +198,20 @@ def set_obj_alias(obj, aliases):
         obj.flush_from_cache()
 
 
-
 def set_obj_location(obj, location):
     """
     Set object's location.
-    
+
     Args:
         obj: Object in game.
         location: (string) Location's name. Must be the key of data info.
     """
     location_obj = None
-    
+
     if location:
         # If has location, search location object.
         location_obj = search_obj_info_key(location)
-    
+
         if not location_obj:
             logger.log_errmsg("%s can't find location %s!" % (get_info_key(obj), location))
             return
@@ -230,26 +226,25 @@ def set_obj_location(obj, location):
         # Can't set location to itself.
         logger.log_errmsg("%s can't teleport itself to itself!" % get_info_key(obj))
         return
-        
+
     # try the teleport
     obj.move_to(location_obj, quiet=True, to_none=True)
-
 
 
 def set_obj_home(obj, home):
     """
     Set object's home.
-    
+
     Args:
         obj: Object in game.
         home: (string) Home's name. Must be the key of data info.
     """
     home_obj = None
-    
+
     if home:
         # If has home, search home object.
         home_obj = search_obj_info_key(home)
-        
+
         if not home_obj:
             logger.log_errmsg("%s can't find home %s!" % (get_info_key(obj), home))
             return
@@ -264,15 +259,14 @@ def set_obj_home(obj, home):
         # Can't set home to itself.
         logger.log_errmsg("%s can't set home to itself!" % get_info_key(obj))
         return
-        
-    obj.home = home_obj
 
+    obj.home = home_obj
 
 
 def set_obj_desc(obj, desc):
     """
     Set object's description.
-    
+
     Args:
         obj: Object in game.
         desc: (string) Description.
@@ -280,11 +274,10 @@ def set_obj_desc(obj, desc):
     obj.db.desc = desc
 
 
-
 def set_obj_lock(obj, lock):
     """
     Set object's lock.
-    
+
     Args:
         obj: Object in game.
         lock: (string) Object's lock string.
@@ -292,15 +285,14 @@ def set_obj_lock(obj, lock):
     if lock:
         try:
             obj.locks.add(lock)
-        except:
+        except Exception:
             logger.log_errmsg("%s can't set lock %s." % (get_info_key(obj), lock))
-
 
 
 def set_obj_attributes(obj, attributes):
     """
     Set object's attribute.
-    
+
     Args:
         obj: Object in game.
         attributes: (dict) Object's attribues."
@@ -312,15 +304,14 @@ def set_obj_attributes(obj, attributes):
         # Add attributes.
         try:
             obj.attributes.add(key, attributes[key])
-        except:
+        except Exception:
             logger.log_errmsg("%s can't set attribute %s!" % (get_info_key(obj), key))
-
 
 
 def set_obj_destination(obj, destination):
     """
     Set object's destination
-    
+
     Args:
         obj: Object in game.
         destination: (string) Destination's name. Must be the key of data info.
@@ -330,7 +321,7 @@ def set_obj_destination(obj, destination):
     if destination:
         # If has destination, search destination object.
         destination_obj = search_obj_info_key(destination)
-    
+
         if not destination_obj:
             logger.log_errmsg("%s can't find destination %s!" % (get_info_key(obj), destination))
             return
@@ -345,15 +336,14 @@ def set_obj_destination(obj, destination):
         # Can't set destination to itself.
         logger.log_errmsg("%s can't set destination to itself!" % get_info_key(obj))
         return
-        
-    obj.destination = destination_obj
 
+    obj.destination = destination_obj
 
 
 def set_obj_detail(obj, key, detail):
     """
     Set object's detail.
-    
+
     Args:
         obj: Object in game.
         key: (string) Detail's key.
@@ -361,12 +351,12 @@ def set_obj_detail(obj, key, detail):
     """
     if hasattr(obj, "set_detail"):
         obj.set_detail(key, detail)
-        
-        
+
+
 def get_info_key(obj):
     """
     Get an object's data info key.
-    
+
     Args:
         obj: Object in game.
     """
@@ -376,7 +366,7 @@ def get_info_key(obj):
 def search_obj_info_key(key):
     """
     Search objects which have the given key.
-    
+
     Args:
         key: (string) Data info key.
     """
@@ -387,10 +377,9 @@ def search_obj_info_key(key):
 def search_obj_info_model(model):
     """
     Search objects which have the given model.
-    
+
     Args:
         model: (string) Data model's name.
     """
     obj = search.search_object_attribute(key="model", strvalue=model, category=settings.WORLD_DATA_INFO_CATEGORY)
     return obj
-

@@ -51,7 +51,6 @@ var commands = {
     // do test
     doTest : function() {
         // test codes
-        this.showAlert("test", "btn");
     }
 }
 

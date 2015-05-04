@@ -6,7 +6,6 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 import re
 import traceback
 import time
-import json
 from collections import defaultdict
 from random import getrandbits
 from django.conf import settings
@@ -15,14 +14,14 @@ from evennia.objects.models import ObjectDB
 from evennia.server.models import ServerConfig
 from evennia.comms.models import ChannelDB
 
-from evennia.utils import create, logger, utils, ansi
+from evennia.utils import create, logger, utils
 from evennia.commands.command import Command
 from evennia.commands.default.muxcommand import MuxCommand
 from evennia.commands.cmdhandler import CMD_LOGINSTART
 
 # limit symbol import for API
 __all__ = ("CmdUnconnectedConnect", "CmdUnconnectedCreate", "CmdUnconnectedCreateConnect",
-           "CmdUnconnectedQuit", "CmdUnconnectedLook", "CmdUnconnectedHelp")
+           "CmdUnconnectedQuit", "CmdUnconnectedLook")
 
 MULTISESSION_MODE = settings.MULTISESSION_MODE
 CONNECTION_SCREEN_MODULE = settings.CONNECTION_SCREEN_MODULE
@@ -34,7 +33,7 @@ CONNECTION_SCREEN_MODULE = settings.CONNECTION_SCREEN_MODULE
 
 _LATEST_FAILED_LOGINS = defaultdict(list)
 def _throttle(session, maxlim=None, timeout=None,
-                   storage=_LATEST_FAILED_LOGINS):
+              storage=_LATEST_FAILED_LOGINS):
     """
     This will check the session's address against the
     _LATEST_LOGINS dictionary to check they haven't
@@ -107,7 +106,7 @@ class CmdUnconnectedConnect(Command):
         try:
             playername = self.args["playername"]
             password = self.args["password"]
-        except:
+        except Exception:
             string = 'Syntax error!'
             string += '\nUsage:'
             string += '\n    {"cmd":"create_account",'
@@ -147,7 +146,7 @@ class CmdUnconnectedConnect(Command):
                                             permissions, ptypeclass)
                 if new_player:
                     _create_character(session, new_player, typeclass,
-                                    home, permissions)
+                                      home, permissions)
                     session.sessionhandler.login(session, new_player)
 
             except Exception:
@@ -157,8 +156,8 @@ class CmdUnconnectedConnect(Command):
                 string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
                 session.msg({"alert":string % (traceback.format_exc())})
                 logger.log_errmsg(traceback.format_exc())
-            finally:
-                return
+
+            return
 
         # Match account name and check password
         player = PlayerDB.objects.get_player_from_name(playername)
@@ -179,7 +178,7 @@ class CmdUnconnectedConnect(Command):
 
         # Check IP and/or name bans
         bans = ServerConfig.objects.conf("server_bans")
-        if bans and (any(tup[0]==player.name.lower() for tup in bans)
+        if bans and (any(tup[0] == player.name.lower() for tup in bans)
                      or
                      any(tup[2].match(session.address) for tup in bans if tup[2])):
             # this is a banned IP or name!
@@ -196,7 +195,7 @@ class CmdUnconnectedConnect(Command):
         #   player.at_first_login()  # only once
         #   player.at_post_login(sessid=sessid)
         session.sessionhandler.login(session, player)
-        session.msg({"login":playername});
+        session.msg({"login":playername})
 
 
 class CmdUnconnectedCreate(Command):
@@ -223,7 +222,7 @@ class CmdUnconnectedCreate(Command):
         try:
             playername = self.args["playername"]
             password = self.args["password"]
-        except:
+        except Exception:
             string = 'Syntax error!'
             string += '\nUsage:'
             string += '\n    {"cmd":"create_account",'
@@ -237,7 +236,7 @@ class CmdUnconnectedCreate(Command):
             return
 
         # sanity checks
-        if not re.findall('^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
+        if not re.findall(r'^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
             # this echoes the restrictions made by django's auth
             # module (except not allowing spaces, for convenience of
             # logging in).
@@ -255,8 +254,9 @@ class CmdUnconnectedCreate(Command):
             string = "\n\r That name is reserved. Please choose another Playername."
             session.msg({"alert":string})
             return
-        if not re.findall('^[\w. @+-]+$', password) or not (3 < len(password)):
-            string = "\n\r Password should be longer than 3 characers. Letters, spaces, digits and @\.\+\-\_ only." \
+        if not re.findall(r'^[\w. @+-]+$', password) or not (3 < len(password)):
+            string = "\n\r Password should be longer than 3 characers. Letters, spaces, " \
+                     "digits and @\\.\\+\\-\\_ only." \
                      "\nFor best security, make it longer than 8 characters. You can also use a phrase of" \
                      "\nmany words if you enclose the password in quotes."
             session.msg({"alert":string})
@@ -264,7 +264,7 @@ class CmdUnconnectedCreate(Command):
 
         # Check IP and/or name bans
         bans = ServerConfig.objects.conf("server_bans")
-        if bans and (any(tup[0]==playername.lower() for tup in bans)
+        if bans and (any(tup[0] == playername.lower() for tup in bans)
                      or
                      any(tup[2].match(session.address) for tup in bans if tup[2])):
             # this is a banned IP or name!
@@ -283,7 +283,7 @@ class CmdUnconnectedCreate(Command):
                 if MULTISESSION_MODE < 2:
                     default_home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
                     _create_character(session, new_player, typeclass,
-                                    default_home, permissions)
+                                      default_home, permissions)
                 # tell the caller everything went well.
                 session.msg({"created":playername})
 
@@ -294,8 +294,8 @@ class CmdUnconnectedCreate(Command):
             string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
             session.msg({"alert":string % (traceback.format_exc())})
             logger.log_errmsg(traceback.format_exc())
-            
-            
+
+
 class CmdUnconnectedCreateConnect(Command):
     """
     create a new player account and login
@@ -320,7 +320,7 @@ class CmdUnconnectedCreateConnect(Command):
         try:
             playername = self.args["playername"]
             password = self.args["password"]
-        except:
+        except Exception:
             string = 'Syntax error!'
             string += '\nUsage:'
             string += '\n    {"cmd":"create_connect",'
@@ -334,7 +334,7 @@ class CmdUnconnectedCreateConnect(Command):
             return
 
         # sanity checks
-        if not re.findall('^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
+        if not re.findall(r'^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
             # this echoes the restrictions made by django's auth
             # module (except not allowing spaces, for convenience of
             # logging in).
@@ -352,8 +352,9 @@ class CmdUnconnectedCreateConnect(Command):
             string = "\n\r That name is reserved. Please choose another Playername."
             session.msg({"alert":string})
             return
-        if not re.findall('^[\w. @+-]+$', password) or not (3 < len(password)):
-            string = "\n\r Password should be longer than 3 characers. Letters, spaces, digits and @\.\+\-\_ only." \
+        if not re.findall(r'^[\w. @+-]+$', password) or not (3 < len(password)):
+            string = "\n\r Password should be longer than 3 characers. Letters, spaces, " \
+                     "digits and @\\.\\+\\-\\_ only." \
                      "\nFor best security, make it longer than 8 characters. You can also use a phrase of" \
                      "\nmany words if you enclose the password in quotes."
             session.msg({"alert":string})
@@ -361,7 +362,7 @@ class CmdUnconnectedCreateConnect(Command):
 
         # Check IP and/or name bans
         bans = ServerConfig.objects.conf("server_bans")
-        if bans and (any(tup[0]==playername.lower() for tup in bans)
+        if bans and (any(tup[0] == playername.lower() for tup in bans)
                      or
                      any(tup[2].match(session.address) for tup in bans if tup[2])):
             # this is a banned IP or name!
@@ -380,7 +381,7 @@ class CmdUnconnectedCreateConnect(Command):
                 if MULTISESSION_MODE < 2:
                     default_home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
                     _create_character(session, new_player, typeclass,
-                                    default_home, permissions)
+                                      default_home, permissions)
                 # tell the caller everything went well.
                 # string = "A new account '%s' was created. Welcome!"
                 # if " " in playername:
@@ -396,7 +397,7 @@ class CmdUnconnectedCreateConnect(Command):
                 #   player.at_first_login()  # only once
                 #   player.at_post_login(sessid=sessid)
                 session.sessionhandler.login(session, new_player)
-                session.msg({"login":playername});
+                session.msg({"login":playername})
 
         except Exception:
             # We are in the middle between logged in and -not, so we have
@@ -511,7 +512,7 @@ def _create_character(session, new_player, typeclass, home, permissions):
     """
     try:
         new_character = create.create_object(typeclass, key=new_player.key,
-                                  home=home, permissions=permissions)
+                                             home=home, permissions=permissions)
         # set playable character list
         new_player.db._playable_characters.append(new_character)
 

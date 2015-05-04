@@ -24,7 +24,7 @@ your settings file:
 
 import json
 import evennia.commands.cmdparser as evennia_cmdparser
-from evennia.utils import logger
+
 
 CMD_LOGINSTART = "__unloggedin_look_command"
 
@@ -58,12 +58,12 @@ def cmdparser(raw_string, cmdset, caller, match_index=None):
             data = json.loads(raw_string)
             cmd = data["cmd"]
             args = data["args"]
-        
+
         # Find the matching command in cmdset.
         for cmdobj in cmdset:
             if cmdobj.key == cmd:
                 return [(cmd, args, cmdobj,)]
-    
+
         # can not find
         return []
     except Exception:

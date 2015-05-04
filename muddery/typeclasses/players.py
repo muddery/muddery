@@ -22,7 +22,7 @@ several more options for customizing the Guest account system.
 
 """
 
-from evennia import DefaultPlayer, DefaultGuest
+from evennia.players.players import DefaultPlayer, DefaultGuest
 
 class MudderyPlayer(DefaultPlayer):
     """
