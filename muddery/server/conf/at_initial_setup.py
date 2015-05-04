@@ -18,6 +18,10 @@ from evennia.utils import search
 from muddery.utils import loader, builder, importer
 
 def at_initial_setup():
+    """
+    When initiate the server, give an unique id to limbo and build up the default world.
+    """
+
     # set data info to limbo
     limboobj = search.search_object("#2", exact=True)
     if limboobj:
@@ -25,6 +29,6 @@ def at_initial_setup():
 
     # load world data
     importer.import_all()
-    
+
     # build world
     builder.build_all()

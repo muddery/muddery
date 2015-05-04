@@ -5,7 +5,7 @@ Rooms are simple containers that has no location of their own.
 
 """
 
-from evennia import DefaultRoom
+from evennia.objects.objects import DefaultRoom
 
 
 class MudderyRoom(DefaultRoom):

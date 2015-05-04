@@ -15,8 +15,8 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 
 from evennia import default_cmds
-import worlddata
-import unloggedin
+from muddery.commands import worlddata
+from muddery.commands import unloggedin
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
     """
