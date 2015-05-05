@@ -12,7 +12,7 @@ from muddery.utils.importer import import_file, import_all
 from muddery.utils.loader import set_obj_data_info
 from muddery.utils.builder import build_all
 from evennia import default_cmds
-
+from evennia.utils import logger
 
 #------------------------------------------------------------
 # import data tables
@@ -151,6 +151,12 @@ class CmdLoadWorld(default_cmds.MuxCommand):
 
     def func(self):
         "Implement the command"
-        import_all(self.caller)
-        build_all(self.caller)
+        caller = self.caller
+        try:
+            import_all()
+            build_all(caller)
+        except Exception, e:
+            ostring = "Can't build world: %s" % e
+            logger.log_errmsg(ostring)
+            caller.msg(ostring)
 

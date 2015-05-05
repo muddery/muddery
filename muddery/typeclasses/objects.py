@@ -20,4 +20,8 @@ class MudderyObject(DefaultObject):
 
         # need save before modify m2m fields
         self.save()
-        loader.load_data(self)
+
+        try:
+            loader.load_data(self)
+        except Exception, e:
+            logger.log_errmsg("%s can not load data:%s" % (this.dbref, e))
