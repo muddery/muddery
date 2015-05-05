@@ -5,7 +5,7 @@ This module handles importing data from csv files and creating the whole game wo
 from muddery.utils import loader
 from django.conf import settings
 from django.db.models.loading import get_model
-from evennia.utils import create, search
+from evennia.utils import create, search, logger
 
 
 def build_objects(model_name, unique, caller=None):
@@ -64,12 +64,10 @@ def build_objects(model_name, unique, caller=None):
                 count_remove += 1
                 continue
 
-        # Update object.
-        #ostring = "Updating %s." % obj_key
-        #print ostring
-        #if caller:
-        #    caller.msg(ostring)
-        loader.load_data(obj)
+        try:
+            loader.load_data(obj)
+        except Exception, e:
+            logger.log_errmsg("%s can not load data:%s" % (obj.dbref, e))
 
         current_obj_keys.add(obj_key)
 
@@ -82,10 +80,23 @@ def build_objects(model_name, unique, caller=None):
                 print ostring
                 if caller:
                     caller.msg(ostring)
-                obj = create.create_object(record.typeclass,
-                                           record.name)
-                loader.set_obj_data_info(obj, model_name, record.key)
-                count_create += 1
+
+                try:
+                    obj = create.create_object(record.typeclass, record.name)
+                    count_create += 1
+                except Exception, e:
+                    ostring = "Can not create obj %s: %s" % (record.name, e)
+                    logger.log_errmsg(ostring)
+                    if caller:
+                        caller.msg(ostring)
+
+                try:
+                    loader.set_obj_data_info(obj, model_name, record.key)
+                except Exception, e:
+                    ostring = "Can not set data info to obj %s: %s" % (record.name, e)
+                    logger.log_errmsg(ostring)
+                    if caller:
+                        caller.msg(ostring)
 
     ostring = "Removed %d object(s). Created %d object(s). Updated %d object(s). Total %d objects.\n"\
               % (count_remove, count_create, count_update, len(model_obj.objects.all()))

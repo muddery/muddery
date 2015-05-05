@@ -8,6 +8,7 @@ from django.db import models
 from django.db.models.loading import get_model
 from django.conf import settings
 from evennia.utils import logger
+from muddery.utils.exception import MudderyError
 
 
 def import_csv(file_name, model_name):
@@ -24,11 +25,8 @@ def import_csv(file_name, model_name):
         csvfile = open(file_name, 'r')
         reader = csv.reader(csvfile)
 
-        # get app name
-        app_name = settings.WORLD_DATA_APP
-
         # get model
-        model_obj = get_model(app_name, model_name)
+        model_obj = get_model(settings.WORLD_DATA_APP, model_name)
 
         # clear old data
         model_obj.objects.all().delete()
@@ -99,7 +97,7 @@ def import_csv(file_name, model_name):
         pass
 
 
-def import_file(file_name, model_name, caller=None):
+def import_file(file_name, model_name):
     """
     Import data from a data file to the db model
 
@@ -109,26 +107,16 @@ def import_file(file_name, model_name, caller=None):
     """
 
     file_type = settings.WORLD_DATA_FILE_TYPE.lower()
-    ext_name = ""
-    if file_type == "csv":
-        ext_name = ".csv"
-    else:
-        ostring = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
-        print ostring
-        if caller:
-            caller.msg(ostring)
-        return
-
     if file_type == "csv":
         import_csv(file_name, model_name)
+    else:
+        message = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
+        raise MudderyError(message)
 
 
-def import_all(caller=None):
+def import_all():
     """
     Import all data files to models.
-
-    Args:
-        caller: (command caller) If provide, running messages will send to the caller.
     """
 
     # count the number of files loaded
@@ -141,14 +129,11 @@ def import_all(caller=None):
     # get file's extension name
     file_type = settings.WORLD_DATA_FILE_TYPE.lower()
     ext_name = ""
-    if type == "csv":
+    if file_type == "csv":
         ext_name = ".csv"
     else:
-        ostring = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
-        print ostring
-        if caller:
-            caller.msg(ostring)
-        return
+        message = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
+        raise MudderyError(message)
 
     # import models one by one
     for model_name in model_name_list:
@@ -162,18 +147,12 @@ def import_all(caller=None):
 
             ostring = "%s imported" % model_name
             print ostring
-            if caller:
-                caller.msg(ostring)
 
             count += 1
         except Exception, e:
             ostring = "Can not import %s: %s" % (model_name, e)
             print ostring
-            if caller:
-                caller.msg(ostring)
             continue
 
     ostring = "Total %d files imported.\n" % count
     print ostring
-    if caller:
-        caller.msg(ostring)

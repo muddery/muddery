@@ -6,6 +6,7 @@ import ast
 from django.db.models.loading import get_model
 from django.conf import settings
 from evennia.utils import search, logger
+from muddery.utils.exception import MudderyError
 
 
 ################################################################
@@ -23,13 +24,16 @@ def set_obj_data_info(obj, model, key):
         model: (string) Db model's name.
         key: (string) Key of the data info.
     """
+    if not obj:
+        return
+
     obj.attributes.add("model", model, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
     obj.attributes.add("key", key, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
 
     if (not model) or (not key):
-        return True
+        return
 
-    return load_data(obj)
+    load_data(obj)
 
 
 def load_data(obj):
@@ -43,48 +47,34 @@ def load_data(obj):
         return
 
     # Get model and key names.
-    app = settings.WORLD_DATA_APP
-    if not app:
-        return False
-
     model = obj.attributes.get(key="model", category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
     if not model:
-        return False
+        return
 
     key = obj.attributes.get(key="key", category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
     if not key:
-        return False
+        return
 
     # Get db model
-    model_obj = get_model(app, model)
+    model_obj = get_model(settings.WORLD_DATA_APP, model)
     if not model_obj:
-        logger.log_errmsg("%s can not open model %s" % (key, model))
-        return False
+        raise MudderyError("%s can not open model %s" % (key, model))
 
     # Get data record.
     data_info = model_obj.objects.filter(key=key)
     if not data_info:
-        logger.log_errmsg("%s can not find key %s" % (key, key))
-        return False
+        raise MudderyError("%s can not find key %s" % (key, key))
 
     info = data_info[0]
 
-    if info.typeclass:
-        set_obj_typeclass(obj, info.typeclass)
-    if info.name:
-        set_obj_name(obj, info.name)
-    if info.alias:
-        set_obj_alias(obj, info.alias)
-    if info.location:
-        set_obj_location(obj, info.location)
-    if info.home:
-        set_obj_home(obj, info.home)
-    if info.desc:
-        set_obj_desc(obj, info.desc)
-    if info.lock:
-        set_obj_lock(obj, info.lock)
-    if info.destination:
-        set_obj_destination(obj, info.destination)
+    set_obj_typeclass(obj, info.typeclass)
+    set_obj_name(obj, info.name)
+    set_obj_alias(obj, info.alias)
+    set_obj_location(obj, info.location)
+    set_obj_home(obj, info.home)
+    set_obj_desc(obj, info.desc)
+    set_obj_lock(obj, info.lock)
+    set_obj_destination(obj, info.destination)
 
     # Set attributes.
     attributes = {}
@@ -113,9 +103,7 @@ def load_data(obj):
             attributes[field.name] = info.serializable_value(field.name)
 
     set_obj_attributes(obj, attributes)
-
-    return True
-
+    return
 
 
 def set_obj_typeclass(obj, typeclass):
