@@ -74,10 +74,16 @@
         <nav id="tab_bar">
             <ul class="tab_pills">
                 <li id="tab_login" class="pill_active">
-                    <a href="#" onClick="webclient.showLoginPage()">Login</a>
+                    <a href="#" onClick="webclient.showPage('login')">Login</a>
+                </li>
+                <li id="tab_room" style="display: none">
+                    <a href="#" onClick="webclient.showPage('room')">Room</a>
+                </li>
+                <li id="tab_system" style="display: none">
+                    <a href="#" onClick="webclient.showPage('system')">System</a>
                 </li>
                 <li id="tab_command">
-                    <a href="#" onClick="webclient.showCommandPage()">Command</a>
+                    <a href="#" onClick="webclient.showPage('command')">Command</a>
                 </li>
                 <!--li id="tab_test">
                     <a href="#" onClick="webclient.showTestPage()">Test</a>
@@ -86,29 +92,32 @@
         </nav>
         <div id="tab_content">
             <form id="page_login">
+                <div>Please login or register.</div>
                 <div>
-                    <div>Please login or register.</div>
-                    <div>
-                        <input type="text" class="input_text" value="" autocomplete="off"/>
-                    </div>
-                    <div>
-                        <input type="password" class="input_text" value="" autocomplete="off"/>
-                    </div>
-                    <div>
-                        <input type="button" class="btn button_left" value="LOGIN" onClick="commands.doLogin()"/>
-                        <input type="button" class="btn button_left" value="REGISTER" onClick="commands.doRegister()"/>
-                    </div>
+                    <input type="text" class="input_text" value="" autocomplete="off"/>
+                </div>
+                <div>
+                    <input type="password" class="input_text" value="" autocomplete="off"/>
+                </div>
+                <div>
+                    <input type="button" class="btn button_left" value="LOGIN" onClick="commands.doLogin()"/>
+                    <input type="button" class="btn button_left" value="REGISTER" onClick="commands.doRegister()"/>
+                </div>
+            </form>
+            <form id="page_room" style="display: none">
+            </form>
+            <form id="page_system" style="display: none">
+                <div>
+                    <input type="button" class="btn button_left" value="LOGOUT" onClick="commands.doLogout()"/>
                 </div>
             </form>
             <form id="page_command" style="display: none">
+                <div>Please input command.</div>
                 <div>
-                    <div>Please input command.</div>
-                    <div>
-                        <input type="text" class="input_text" value="" autocomplete="off"/>
-                    </div>
-                    <div>
-                        <input type="button" class="btn button_left" value="SEND" onClick="commands.doSendCommand()"/>
-                    </div>
+                    <input type="text" class="input_text" value="" autocomplete="off"/>
+                </div>
+                <div>
+                    <input type="button" class="btn button_left" value="SEND" onClick="commands.doSendCommand()"/>
                 </div>
             </form>
             <!--form id="page_test" style="display: none">

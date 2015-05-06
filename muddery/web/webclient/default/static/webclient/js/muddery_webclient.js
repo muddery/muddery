@@ -199,9 +199,15 @@ var webclient = {
     },
     
     onLogin : function(data) {
+        $("#msg_wnd").empty();
+        this.showLoginTabs();
+        this.showPage("room");
     },
     
     onLogout : function(data) {
+        $("#msg_wnd").empty();
+        this.showUnloginTabs();
+        this.showPage("login");
     },
 
     doSetSizes : function() {
@@ -320,41 +326,36 @@ var webclient = {
         this.doSetSizes();
     },
     
-    // show tabs
-    clearAllTabs : function() {
-        $("li#tab_bar").css("display", "none");
+    // show unlogin tabs
+    showUnloginTabs : function() {
+        $("#tab_bar li").css("display", "none");
+        
+        $("#tab_login").css("display", "");
+        $("#tab_command").css("display", "");
+    },
+    
+    // show login tabs
+    showLoginTabs : function() {
+        $("#tab_bar li").css("display", "none");
+        
+        $("#tab_room").css("display", "");
+        $("#tab_system").css("display", "");
+        $("#tab_command").css("display", "");
     },
     
     unselectAllTabs : function() {
-        $("#tab_login").removeClass("pill_active");
-        $("#page_login").css("display", "none");
-        
-        $("#tab_command").removeClass("pill_active");
-        $("#page_command").css("display", "none");
-        
-        $("#tab_test").removeClass("pill_active");
-        $("#page_test").css("display", "none");
+        $("#tab_bar li").removeClass("pill_active");
+        $("#tab_content form").css("display", "none");
     },
     
-    showLoginPage : function() {
+    showPage : function(pagename) {
         this.unselectAllTabs();
-        $("#tab_login").addClass("pill_active");
-        $("#page_login").css("display", "");
-    },
-    
-    showCommandPage : function() {
-        this.unselectAllTabs();
-        $("#tab_command").addClass("pill_active");
-        $("#page_command").css("display", "");
-    },
-    
-    showTestPage : function() {
-        this.unselectAllTabs();
-        $("#tab_test").addClass("pill_active");
-        $("#page_test").css("display", "");
+        $("#tab_" + pagename).addClass("pill_active");
+        $("#page_" + pagename).css("display", "");
     },
 }
 
+$(window).load(webclient.onLoad);
 
 // Callback function - called when the browser window resizes
 $(window).resize(webclient.doSetSizes);

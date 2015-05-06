@@ -16,7 +16,6 @@ from evennia.comms.models import ChannelDB
 
 from evennia.utils import create, logger, utils
 from evennia.commands.command import Command
-from evennia.commands.default.muxcommand import MuxCommand
 from evennia.commands.cmdhandler import CMD_LOGINSTART
 
 # limit symbol import for API
@@ -185,7 +184,7 @@ class CmdUnconnectedConnect(Command):
             string = "{rYou have been banned and cannot continue from here." \
                      "\nIf you feel this ban is in error, please email an admin.{x"
             session.msg({"alert":string})
-            session.execute_cmd("quit")
+            session.execute_cmd('{"cmd":"quit","args":""}')
             return
 
         # actually do the login. This will call all other hooks:
@@ -271,7 +270,7 @@ class CmdUnconnectedCreate(Command):
             string = "{rYou have been banned and cannot continue from here." \
                      "\nIf you feel this ban is in error, please email an admin.{x"
             session.msg({"alert":string})
-            session.execute_cmd("quit")
+            session.execute_cmd('{"cmd":"quit","args":""}')
             return
 
         # everything's ok. Create the new player account.
@@ -369,7 +368,7 @@ class CmdUnconnectedCreateConnect(Command):
             string = "{rYou have been banned and cannot continue from here." \
                      "\nIf you feel this ban is in error, please email an admin.{x"
             session.msg({"alert":string})
-            session.execute_cmd("quit")
+            session.execute_cmd('{"cmd":"quit","args":""}')
             return
 
         # everything's ok. Create the new player account.
@@ -408,7 +407,7 @@ class CmdUnconnectedCreateConnect(Command):
             logger.log_errmsg(traceback.format_exc())
 
 
-class CmdUnconnectedQuit(MuxCommand):
+class CmdUnconnectedQuit(Command):
     """
     quit when in unlogged-in state
 
@@ -456,7 +455,7 @@ class CmdUnconnectedLook(Command):
         self.caller.msg({"msg":connection_screen})
 
 
-class CmdUnconnectedLoginStart(MuxCommand):
+class CmdUnconnectedLoginStart(Command):
     """
     login started unlogged-in state
 

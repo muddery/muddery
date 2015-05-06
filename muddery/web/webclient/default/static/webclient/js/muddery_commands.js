@@ -35,8 +35,8 @@ var commands = {
         sendCommand(this.cmdString("look", ""));
     },
     
-    // quit
-    doQuit : function() {
+    // logout
+    doLogout : function() {
         sendCommand(this.cmdString("quit", ""));
     },
     
