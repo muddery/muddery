@@ -15,8 +15,9 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 
 from evennia import default_cmds
-from muddery.commands import worlddata
+from muddery.commands import player
 from muddery.commands import unloggedin
+from muddery.commands import worlddata
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
     """
@@ -56,6 +57,7 @@ class PlayerCmdSet(default_cmds.PlayerCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+        self.add(player.CmdQuit())
 
 
 class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
