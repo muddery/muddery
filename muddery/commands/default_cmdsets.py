@@ -15,6 +15,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 
 from evennia import default_cmds
+from muddery.commands import general
 from muddery.commands import player
 from muddery.commands import unloggedin
 from muddery.commands import worlddata
@@ -38,6 +39,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(worlddata.CmdImportData())
         self.add(worlddata.CmdSetDataInfo())
         self.add(worlddata.CmdLoadWorld())
+
+        self.add(general.CmdLook())
 
 
 class PlayerCmdSet(default_cmds.PlayerCmdSet):

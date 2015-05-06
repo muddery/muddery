@@ -193,8 +193,8 @@ class CmdUnconnectedConnect(Command):
         #   player.at_pre_login()
         #   player.at_first_login()  # only once
         #   player.at_post_login(sessid=sessid)
-        session.sessionhandler.login(session, player)
         session.msg({"login":playername})
+        session.sessionhandler.login(session, player)
 
 
 class CmdUnconnectedCreate(Command):
@@ -395,8 +395,8 @@ class CmdUnconnectedCreateConnect(Command):
                 #   player.at_pre_login()
                 #   player.at_first_login()  # only once
                 #   player.at_post_login(sessid=sessid)
-                session.sessionhandler.login(session, new_player)
                 session.msg({"login":playername})
+                session.sessionhandler.login(session, new_player)
 
         except Exception:
             # We are in the middle between logged in and -not, so we have

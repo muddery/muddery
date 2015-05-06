@@ -73,7 +73,7 @@
 	    </div>
         <nav id="tab_bar">
             <ul class="tab_pills">
-                <li id="tab_login" class="pill_active">
+                <li id="tab_login" style="display: none">
                     <a href="#" onClick="webclient.showPage('login')">Login</a>
                 </li>
                 <li id="tab_room" style="display: none">
@@ -82,7 +82,7 @@
                 <li id="tab_system" style="display: none">
                     <a href="#" onClick="webclient.showPage('system')">System</a>
                 </li>
-                <li id="tab_command">
+                <li id="tab_command" style="display: none">
                     <a href="#" onClick="webclient.showPage('command')">Command</a>
                 </li>
                 <!--li id="tab_test">
@@ -91,7 +91,7 @@
             </ul>
         </nav>
         <div id="tab_content">
-            <form id="page_login">
+            <form id="page_login" style="display: none">
                 <div>Please login or register.</div>
                 <div>
                     <input type="text" class="input_text" value="" autocomplete="off"/>
