@@ -208,6 +208,9 @@ var webclient = {
         $("#msg_wnd").empty();
         this.showUnloginTabs();
         this.showPage("login");
+        
+        //reconnect, show the connection screen
+        webclient_init();
     },
 
     doSetSizes : function() {
@@ -274,6 +277,7 @@ var webclient = {
 
     // show boxes
     showInputCmdBox : function(prompt) {
+        this.doCloseInput();
         this.createInputBox();
 
         $('#input_prompt').html(text2html.parseHtml(prompt));
@@ -289,6 +293,7 @@ var webclient = {
     },
 
     showAlert : function(msg, button) {
+        this.doCloseInput();
         this.createInputBox();
 
         $('#input_prompt').html(text2html.parseHtml(msg));
@@ -355,7 +360,14 @@ var webclient = {
     },
 }
 
-$(window).load(webclient.onLoad);
+// Input jQuery callbacks
+$(document).unbind("keydown");
+
+$(window).ready(function(){
+    webclient.showUnloginTabs();
+    webclient.showPage("login");
+});
 
 // Callback function - called when the browser window resizes
+$(window).unbind("resize");
 $(window).resize(webclient.doSetSizes);

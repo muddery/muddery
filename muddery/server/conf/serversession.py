@@ -40,11 +40,13 @@ class ServerSession(BaseServerSession):
         Send Evennia -> User
         Convert to JSON.
         """
-        try:
-            text = json.dumps(text)
-        except Exception, e:
-            text = json.dumps({"err": "There is an error occurred while outputing messages."})
-            logger.log_errmsg("json.dumps failed: %s" % e)
+        raw = kwargs.get("raw", False)
+        if not raw:
+            try:
+                text = json.dumps(text)
+            except Exception, e:
+                text = json.dumps({"err": "There is an error occurred while outputing messages."})
+                logger.log_errmsg("json.dumps failed: %s" % e)
 
         # set raw=True
         if kwargs:
