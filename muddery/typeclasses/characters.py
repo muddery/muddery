@@ -7,9 +7,11 @@ is setup to be the "default" character type created by the default
 creation commands.
 
 """
+
+from muddery.typeclasses.objects import MudderyObject
 from evennia.objects.objects import DefaultCharacter
 
-class MudderyCharacter(DefaultCharacter):
+class MudderyCharacter(MudderyObject, DefaultCharacter):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:

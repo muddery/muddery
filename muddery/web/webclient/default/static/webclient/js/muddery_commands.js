@@ -8,6 +8,13 @@ var commands = {
         return JSON.stringify({"cmd" : command, "args" : args});
     },
     
+    //
+    doClick : function(caller) {
+        var cmd = $(caller).data("cmd");
+        var args = $(caller).data("args");
+        sendCommand(this.cmdString(cmd, args));
+    },
+    
     // login
     doLogin : function() {
         var playername = $("#page_login :text").val();
@@ -31,8 +38,8 @@ var commands = {
     },
     
     // look
-    doLook : function() {
-        sendCommand(this.cmdString("look", ""));
+    doLook : function(object) {
+        sendCommand(this.cmdString("look", object));
     },
     
     // logout
