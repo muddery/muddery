@@ -51,7 +51,7 @@ var text2html = {
         '{[X' : '<span class="bgblack">',    // pure black background
                        
         '{lc' : '<a href="#" onclick="sendCommand(\'',      // link
-        '{lt' : '\'); return false;">',                     // link
+        '{lt' : '\')">',                                    // link
         '{le' : '</a>',                                     // link
     },
 

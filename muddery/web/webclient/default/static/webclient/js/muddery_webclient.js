@@ -3,16 +3,6 @@ Muddery webclient (javascript component)
 */
 
 var webclient = {
-    enviroment : {  // player's current position
-        room_name : "",
-        room_desc : "",
-        objects : [],
-        players : [],
-        exits : [],
-    },
-
-    LOGIN : false,  // Whether player is login or not.
-    
     doShow : function(type, msg) {
         var data = null;
         
@@ -83,8 +73,8 @@ var webclient = {
                 else if (key == "prompt") {
                     this.displayPrompt(data[key]);
                 }
-                else if (key == "env") {
-                    this.displayEnv(data[key]);
+                else if (key == "look_around") {
+                    this.displayLookAround(data[key]);
                 }
                 else if (key == "login") {
                     this.onLogin(data[key]);
@@ -92,7 +82,6 @@ var webclient = {
                 else if (key == "logout") {
                     this.onLogout(data[key]);
                 }
-
                 else {
                     this.displayMsg(data[key]);
                 }
@@ -154,48 +143,99 @@ var webclient = {
     },
 
     displayTextMsg : function(type, msg) {
-        $("#msg_wnd").stop(true);
-        $("#msg_wnd").scrollTop($("#msg_wnd")[0].scrollHeight);
-        $("#msg_wnd").append("<div class='msg "+ type +"'>"+ msg +"</div>");
+        var msg_wnd = $("#msg_wnd");
+        msg_wnd.stop(true);
+        msg_wnd.scrollTop(msg_wnd[0].scrollHeight);
+        msg_wnd.append("<div class='msg "+ type +"'>"+ msg +"</div>");
         
         // remove old messages
+        var divs = msg_wnd.children("div");
         var max = 40;
-        while ($("#msg_wnd div").size() > max) {
-            $("#msg_wnd div:first").remove();
+        var size = divs.size();
+        if (size > max) {
+            divs.slice(0, size - max).remove();
         }
         
         // scroll message window to bottom
         // $("#msg_wnd").scrollTop($("#msg_wnd")[0].scrollHeight);
-        $("#msg_wnd").animate({scrollTop: $("#msg_wnd")[0].scrollHeight});
+        msg_wnd.animate({scrollTop: msg_wnd[0].scrollHeight});
     },
 
-    display_env : function(data) {
-        $("#env_wnd").empty();
+    displayLookAround : function(data) {
+        var tab = $("#tab_room a");
+        var page = $("#page_room");
+
+        ///////////////////////
+        // set room tab
+        ///////////////////////
         
-        if ("room_name" in data) {
-            this.enviroment["room_name"] = data["room_name"];
-        }
-        if ("room_desc" in data) {
-            this.enviroment["room_desc"] = data["room_desc"];
-        }
-        if ("objects" in data) {
-            this.enviroment["objects"] = data["objects"];
-        }
-        if ("players" in data) {
-            this.enviroment["players"] = data["players"];
-        }
-        if ("exits" in data) {
-            this.enviroment["exits"] = data["exits"];
+        // set tab's name to room's name
+        var tab_name = "";
+        if ("name" in data) {
+            tab_name = data["name"];
         }
 
-        var split = "****************************************";
-        var text = "<div class='msg out'>"+ split +"</div>";
-        text += "<div class='msg out'>"+ this.enviroment["room_name"] +"</div>";
-        text += "<div class='msg out'>"+ split +"</div>";
-        text += "<div><br></div>";
-        text += "<div class='msg out'>"+ this.enviroment["room_desc"] +"</div>";
+        if (tab_name.length == 0) {
+            tab_name = "Room";
+        }
+        else if (tab_name.length > 10) {
+            tab_name = tab_name.substring(0, 8) + "...";
+        }
+        tab.text(tab_name);
+
+        ///////////////////////
+        // set room page
+        ///////////////////////
         
-        $("#env_wnd").append(text);
+        // add room's dbref
+        var dbref = "";
+        if ("dbref" in data) {
+            dbref = data["dbref"];
+            page.data("dbref", dbref);
+        }
+        
+        // add room's name
+        var content = "";
+        if ("name" in data && data["name"].length > 0) {
+            content += "<div><span class='cyan'>\>\>\>\>\> " + data["name"] + " \<\<\<\<\<</span></div>";
+        }
+
+        // add room's desc
+        if ("desc" in data && data["desc"].length > 0) {
+            content += "<div>" + text2html.parseHtml(data["desc"]) + "</div>";
+        }
+
+        // add commands
+        if ("commands" in data && data["commands"].length > 0) {
+            content += "<div><br></div>";
+            content += "<div id='room_action'>Action:";
+            for (i = 0; i < data["commands"].length; ++i) {
+                var cmd = data["commands"][i];
+                content += " <a href='#' onclick='commands.doClick(this); return false;'>"
+                content += cmd["name"];
+                content += "</a>";
+            }
+            content += "</div>"
+        }
+
+        /*
+                "exits": [],
+                "players": [],
+                "things": []}
+        */
+            
+        page.html(content);
+        
+        // set commands
+        if ("commands" in data && data["commands"].length > 0) {
+            var links = page.find("#room_action").find("a");
+            for (i = 0; i < data["commands"].length && i < links.size(); ++i) {
+                var cmd = data["commands"][i];
+                if ("cmd" in cmd && "args" in cmd) {
+                    links.eq(i).data({"cmd": cmd["cmd"], "args": cmd["args"]});
+                }
+            }
+        }
     },
     
     onLogin : function(data) {
@@ -341,7 +381,7 @@ var webclient = {
     
     // show login tabs
     showLoginTabs : function() {
-        $("#tab_bar li").css("display", "none");
+        $("#tab_bar").find("li").css("display", "none");
         
         $("#tab_room").css("display", "");
         $("#tab_system").css("display", "");

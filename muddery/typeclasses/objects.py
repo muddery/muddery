@@ -6,6 +6,7 @@ MudderyObject is an object which can load it's data automatically.
 
 """
 
+import json
 from evennia.objects.objects import DefaultObject
 from muddery.utils import loader
 
@@ -28,6 +29,61 @@ class MudderyObject(DefaultObject):
             loader.load_data(self)
         except Exception, e:
             logger.log_errmsg("%s can not load data:%s" % (this.dbref, e))
+
+
+    def get_surroundings(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+
+        # get name, description, commands and all objects in it
+        info = {"dbref": self.dbref,
+                "name": self.name,
+                "desc": self.db.desc,
+                "commands": self.get_available_commands(caller),
+                "exits": [],
+                "players": [],
+                "things": []}
+
+        visible = (cont for cont in self.contents if cont != caller and
+                   cont.access(caller, "view"))
+
+        for cont in visible:
+            if cont.destination:
+                info["exits"].append({"dbref":cont.dbref,
+                                     "name":cont.name})
+            elif cont.player:
+                info["players"].append({"dbref":cont.dbref,
+                                       "name":cont.name})
+            else:
+                info["things"].append({"dbref":cont.dbref,
+                                      "name":cont.name})
+
+        return info
+
+
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+            
+        # get name and description
+        info = {"dbref": self.dbref,
+                "name": self.name,
+                "desc": self.db.desc,
+                "commands": self.get_available_commands(caller)}
+                
+        return info
+            
+            
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        """
+        commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
+        return commands
 
 
     def msg(self, text=None, from_obj=None, sessid=0, **kwargs):
@@ -75,7 +131,7 @@ class MudderyObject(DefaultObject):
                                                         
         # session relay
         kwargs['_nomulti'] = kwargs.get('_nomulti', True)
-                                                            
+
         if self.player:
             # for there to be a session there must be a Player.
             if sessid:

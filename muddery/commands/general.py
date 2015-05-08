@@ -49,7 +49,7 @@ class CmdLook(Command):
     look at location or object
 
     Usage:
-        {"cmd":"connect",
+        {"cmd":"look",
          "args":<object's dbref>
         }
 
@@ -84,7 +84,13 @@ class CmdLook(Command):
             return
 
         # get object's appearance
-        caller.msg(looking_at_obj.return_appearance(caller))
+        appearance = {}
+        if looking_at_obj == caller.location:
+            appearance = {"look_around": looking_at_obj.get_surroundings(caller)}
+        else:
+            appearance = {"look_obj": looking_at_obj.get_appearance(caller)}
+
+        caller.msg(appearance)
 
         # the object's at_desc() method.
         looking_at_obj.at_desc(looker=caller)
