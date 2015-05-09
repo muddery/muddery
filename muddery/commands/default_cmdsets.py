@@ -41,6 +41,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(worlddata.CmdLoadWorld())
 
         self.add(general.CmdLook())
+        self.add(general.CmdGoto())
 
 
 class PlayerCmdSet(default_cmds.PlayerCmdSet):

@@ -482,3 +482,51 @@ class CmdAccess(MuxCommand):
         if hasattr(caller, 'player'):
             string += "\nPlayer {c%s{n: %s" % (caller.player.key, pperms)
         caller.msg(string)
+
+
+#------------------------------------------------------------
+# goto exit
+#------------------------------------------------------------
+
+class CmdGoto(Command):
+    """
+    goto exit
+
+    Usage:
+        {"cmd":"goto",
+         "args":<exit's dbref>
+        }
+    """
+    key = "goto"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Move caller to the exit."
+        caller = self.caller
+
+        if not self.args:
+            string = "Should appoint an exit to go."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        obj = caller.search(self.args, location=caller.location)
+        if not obj:
+            string = "Can not find exit %s" % (self.args)
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+            
+        if obj.access(self.caller, 'traverse'):
+            # we may traverse the exit.
+            obj.at_traverse(caller, obj.destination)
+        else:
+            # exit is locked
+            if obj.db.err_traverse:
+                # if exit has a better error message, let's use it.
+                caller.msg({"alert": self.obj.db.err_traverse})
+            else:
+                # No shorthand error message. Call hook.
+                obj.at_failed_traverse(caller)
+

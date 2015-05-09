@@ -41,10 +41,10 @@ class MudderyObject(DefaultObject):
         info = {"dbref": self.dbref,
                 "name": self.name,
                 "desc": self.db.desc,
-                "commands": self.get_available_commands(caller),
+                "cmds": self.get_available_commands(caller),
                 "exits": [],
-                "players": [],
-                "things": []}
+                "things": [],
+                "players": []}
 
         visible = (cont for cont in self.contents if cont != caller and
                    cont.access(caller, "view"))
@@ -73,7 +73,7 @@ class MudderyObject(DefaultObject):
         info = {"dbref": self.dbref,
                 "name": self.name,
                 "desc": self.db.desc,
-                "commands": self.get_available_commands(caller)}
+                "cmds": self.get_available_commands(caller)}
                 
         return info
             
@@ -82,7 +82,8 @@ class MudderyObject(DefaultObject):
         """
         This returns a list of available commands.
         """
-        commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
+        # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
+        commands = []
         return commands
 
 
