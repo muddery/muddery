@@ -30,4 +30,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     has connected" message echoed to the room
 
     """
-    pass
+    def at_after_move(self, source_location):
+        """
+        We make sure to look around after a move.
+
+        """
+        self.msg({"msg": "Move to %s" % self.location.name})
+        self.execute_cmd('{"cmd": "look", "args": ""}')

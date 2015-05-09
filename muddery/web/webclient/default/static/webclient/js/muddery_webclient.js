@@ -76,6 +76,9 @@ var webclient = {
                 else if (key == "look_around") {
                     this.displayLookAround(data[key]);
                 }
+                else if (key == "look_obj") {
+                    this.displayLookObj(data[key]);
+                }
                 else if (key == "login") {
                     this.onLogin(data[key]);
                 }
@@ -144,8 +147,10 @@ var webclient = {
 
     displayTextMsg : function(type, msg) {
         var msg_wnd = $("#msg_wnd");
-        msg_wnd.stop(true);
-        msg_wnd.scrollTop(msg_wnd[0].scrollHeight);
+        if (msg_wnd.length > 0) {
+            msg_wnd.stop(true);
+            msg_wnd.scrollTop(msg_wnd[0].scrollHeight);
+        }
         msg_wnd.append("<div class='msg "+ type +"'>"+ msg +"</div>");
         
         // remove old messages
@@ -187,6 +192,9 @@ var webclient = {
         // set room page
         ///////////////////////
         
+        var content = "";
+        var element = "";
+        
         // add room's dbref
         var dbref = "";
         if ("dbref" in data) {
@@ -195,49 +203,196 @@ var webclient = {
         }
         
         // add room's name
-        var content = "";
-        if ("name" in data && data["name"].length > 0) {
-            content += "<div><span class='cyan'>\>\>\>\>\> " + data["name"] + " \<\<\<\<\<</span></div>";
+        try {
+            element = data["name"];
         }
+        catch(error) {
+            element = tab_name;
+        }
+        content += "<div><span class='cyan'>\>\>\>\>\> " + element + " \<\<\<\<\<</span></div>";
 
         // add room's desc
-        if ("desc" in data && data["desc"].length > 0) {
-            content += "<div>" + text2html.parseHtml(data["desc"]) + "</div>";
+        try {
+            element = text2html.parseHtml(data["desc"]);
+            content += "<div>" + element + "</div>";
+        }
+        catch(error) {
         }
 
-        // add commands
-        if ("commands" in data && data["commands"].length > 0) {
-            content += "<div><br></div>";
-            content += "<div id='room_action'>Action:";
-            for (i = 0; i < data["commands"].length; ++i) {
-                var cmd = data["commands"][i];
-                content += " <a href='#' onclick='commands.doClick(this); return false;'>"
-                content += cmd["name"];
-                content += "</a>";
+        content += "<div><br></div>";
+        
+        if ("cmds" in data) {
+            if (data["cmds"].length > 0) {
+                content += "<div id='room_cmds'>Actions:</div>";
             }
-            content += "</div>"
         }
-
-        /*
-                "exits": [],
-                "players": [],
-                "things": []}
-        */
-            
+        
+        if ("exits" in data) {
+            if (data["exits"].length > 0) {
+                content += "<div id='room_exits'>Exits:</div>";
+            }
+        }
+        
+        if ("things" in data) {
+            if (data["things"].length > 0) {
+                content += "<div id='room_things'>Things:</div>";
+            }
+        }
+        
+        if ("players" in data) {
+            if (data["players"].length > 0) {
+                content += "<div id='room_players'>Players:</div>";
+            }
+        }
+        
         page.html(content);
         
-        // set commands
-        if ("commands" in data && data["commands"].length > 0) {
-            var links = page.find("#room_action").find("a");
-            for (i = 0; i < data["commands"].length && i < links.size(); ++i) {
-                var cmd = data["commands"][i];
-                if ("cmd" in cmd && "args" in cmd) {
-                    links.eq(i).data({"cmd": cmd["cmd"], "args": cmd["args"]});
+        // add commands
+        if ("cmds" in data) {
+            var room_cmds = $("#room_cmds");
+            for (i = 0; i < data["cmds"].length; ++i) {
+                try {
+                    var cmd = data["cmds"][i];
+                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
+                    element += cmd["name"];
+                    element += "</a>";
+                    room_cmds.append(element);
+                    
+                    room_cmds.find("a:last").data({"cmd": cmd["cmd"], "args": cmd["args"]});
+                }
+                catch(error) {
+                }
+            }
+        }
+
+        // add exits
+        if ("exits" in data) {
+            var room_exits = $("#room_exits");
+            for (i = 0; i < data["exits"].length; ++i) {
+                try {
+                    var exit = data["exits"][i];
+                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
+                    element += exit["name"];
+                    element += "</a>";
+                    room_exits.append(element);
+                    
+                    room_exits.find("a:last").data({"cmd": "goto", "args": exit["dbref"]});
+                }
+                catch(error) {
+                }
+            }
+        }
+        
+        // add things
+        if ("things" in data) {
+            var room_things = $("#room_things");
+            for (i = 0; i < data["things"].length; ++i) {
+                try {
+                    var thing = data["things"][i];
+                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
+                    element += thing["name"];
+                    element += "</a>";
+                    room_things.append(element);
+                    
+                    room_things.find("a:last").data({"cmd": "look", "args": thing["dbref"]});
+                }
+                catch(error) {
+                }
+            }
+        }
+
+        // add players
+        if ("players" in data) {
+            var room_players = $("#room_players");
+            for (i = 0; i < data["players"].length; ++i) {
+                try {
+                    var player = data["players"][i];
+                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
+                    element += player["name"];
+                    element += "</a>";
+                    room_players.append(element);
+                    
+                    room_players.find("a:last").data({"cmd": "look", "args": player["dbref"]});
+                }
+                catch(error) {
                 }
             }
         }
     },
     
+    displayLookObj : function(data) {
+        this.doCloseBox();
+        this.createMessageBox();
+        
+        var page = $("#input_prompt");
+
+        // object's info
+        var content = "";
+        var element = "";
+
+        // add object's dbref
+        var dbref = "";
+        if ("dbref" in data) {
+            dbref = data["dbref"];
+            page.data("dbref", dbref);
+        }
+        
+        // add object's name
+        try {
+            element = data["name"];
+        }
+        catch(error) {
+            element = tab_name;
+        }
+        content += "<div><center><span class='lime'>\>\>\> " + element + " \<\<\<<center></span></div>";
+
+        // add object's desc
+        try {
+            element = text2html.parseHtml(data["desc"]);
+            content += "<div>" + element + "</div>";
+        }
+        catch(error) {
+        }
+
+        content += "<div><br></div>";
+        
+        if ("cmds" in data) {
+            if (data["cmds"].length > 0) {
+                content += "<div id='object_cmds'>Actions:</div>";
+            }
+        }
+
+        page.html(content);
+        
+        // add commands
+        if ("cmds" in data) {
+            var object_cmds = $("#object_cmds");
+            for (i = 0; i < data["cmds"].length; ++i) {
+                try {
+                    var cmd = data["cmds"][i];
+                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
+                    element += cmd["name"];
+                    element += "</a>";
+                    object_cmds.append(element);
+                    
+                    object_cmds.find("a:last").data({"cmd": cmd["cmd"], "args": cmd["args"]});
+                }
+                catch(error) {
+                }
+            }
+        }
+        
+        // button
+        var html_button = '<div><br></div>\
+                             <div>\
+                                <center>\
+                                    <input type="button" id="button_center" value="OK" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
+                                </center>\
+                            </div>'
+        $('#input_additional').html(html_button);
+        this.doSetSizes();
+    },
+
     onLogin : function(data) {
         $("#msg_wnd").empty();
         this.showLoginTabs();
@@ -260,12 +415,12 @@ var webclient = {
         var close_h = $('#close_button').outerHeight(true);
         var prom_h = $('#input_prompt').outerHeight(true);
         var add_h = $('#input_additional').outerHeight(true);
-        $('#input_box').height(close_h + prom_h + add_h);
+        $('#popup_box').height(close_h + prom_h + add_h);
         
-        var inp_h = $('#input_box').outerHeight(true);
-        var inp_w = $('#input_box').outerWidth(true);
+        var inp_h = $('#popup_box').outerHeight(true);
+        var inp_w = $('#popup_box').outerWidth(true);
         //$("#wrapper").css({'height': win_h - inp_h - 1});
-        $('#input_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+        $('#popup_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
 
         if (win_h > 480) {
             var head_h = $('#site-title').outerHeight(true);
@@ -301,58 +456,55 @@ var webclient = {
     },
 
     doCancel : function() {
-        this.doCloseInput();
+        this.doCloseBox();
     },
 
     doInputCommand : function() {
-        var command = $("#input_box :text").val();
-        $("#input_box :text").val("");
+        var command = $("#popup_box :text").val();
+        $("#popup_box :text").val("");
         
         history_add(command);
         HISTORY_POS = 0;
         
         sendCommand(command);
-        this.doCloseInput();
-    },
-
-    // show boxes
-    showInputCmdBox : function(prompt) {
-        this.doCloseInput();
-        this.createInputBox();
-
-        $('#input_prompt').html(text2html.parseHtml(prompt));
-        
-        var input = '<div><input type="text" class="input_text" value="" autocomplete="off"/></div>';
-        var button = '<div>\
-                        <input type="button" class="btn button_left" value="CANCEL" onClick="webclient.doCloseInput()"/>\
-                        <input type="button" class="btn btn-primary button_right" value="  OK  " onClick="webclient.doInputCommand()"/>\
-                      </div>'
-        $('#input_additional').html(input + button);
-        $('#input_box :text').focus();
-        this.doSetSizes();
+        this.doCloseBox();
     },
 
     showAlert : function(msg, button) {
-        this.doCloseInput();
-        this.createInputBox();
+        this.doCloseBox();
+        this.createMessageBox();
 
         $('#input_prompt').html(text2html.parseHtml(msg));
         
         var html_button = '<div><br></div>\
                              <div>\
                                 <center>\
-                                    <input type="button" id="button_center" value="A" class="btn btn-primary" onClick="webclient.doCloseInput()"/>\
+                                    <input type="button" id="button_center" value="';
+        html_button += button;
+        html_button += '" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
                                 </center>\
                             </div>'
         $('#input_additional').html(html_button);
-        $('#input_additional :input').attr("value", text2html.parseHtml(button));
         this.doSetSizes();
     },
     
+    createMessageBox : function() {
+        var dlg = '<div id="popup_box">\
+        <div id="input_prompt">\
+        </div>\
+        <div id="input_additional">\
+        </div>\
+        </div>';
+        
+        var overlayer = '<div class="overlayer" id="overlayer"></div>';
+        
+        $("body").prepend(dlg + overlayer);
+    },
+    
     createInputBox : function() {
-        var dlg = '<div id="input_box">\
+        var dlg = '<div id="popup_box">\
         <div id="close_button" class="clearfix">\
-        <input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="webclient.doCloseInput()"/>\
+        <input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="webclient.doCloseBox()"/>\
         </div>\
         <div id="input_prompt">\
         </div>\
@@ -365,8 +517,8 @@ var webclient = {
         $("body").prepend(dlg + overlayer);
     },
 
-    doCloseInput : function() {
-        $('#input_box').remove();
+    doCloseBox : function() {
+        $('#popup_box').remove();
         $('#overlayer').remove();
         this.doSetSizes();
     },

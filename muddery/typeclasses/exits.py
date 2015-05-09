@@ -33,4 +33,18 @@ class MudderyExit(MudderyObject, DefaultExit):
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
     """
-    pass
+
+    def at_failed_traverse(self, traversing_object):
+        """
+        Overloads the default hook to implement a simple default error message.
+
+        Args:
+            traversing_object (Object): The object that failed traversing us.
+
+        Notes:
+            Using the default exits, this hook will not be called if an
+            Attribute `err_traverse` is defined - this will in that case be
+            read for an error string instead.
+
+        """
+        traversing_object.msg({"alert": "You cannot go there."})
