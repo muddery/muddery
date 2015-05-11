@@ -21,8 +21,7 @@ from subprocess import check_output, CalledProcessError, STDOUT
 
 MUDDERY_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import muddery
-MUDDERY_LIB = os.path.join(os.path.dirname(os.path.abspath(muddery.__file__)))
+MUDDERY_LIB = os.path.join(MUDDERY_ROOT, "muddery")
 MUDDERY_TEMPLATE = os.path.join(MUDDERY_ROOT, "templates")
 EVENNIA_LIB = os.path.join(MUDDERY_ROOT, "evennia")
 
@@ -174,25 +173,57 @@ def create_game_directory(dirname, template):
     at the current path. This means copying the
     template directory from muddery's root.
     """
+    
+    def copy_tree(source, destination):
+        """
+        copy file tree
+        """
+        if not os.path.exists(destination):
+            # If does not exist, create one.
+            os.mkdir(destination)
+        
+        # traverse files and folders
+        names = os.listdir(source)
+        for name in names:
+            srcname = os.path.join(source, name)
+            dstname = os.path.join(destination, name)
+            try:
+                if os.path.isdir(srcname):
+                    # If it is a folder, copy it recursively.
+                    copy_tree(srcname, dstname)
+                else:
+                    # Copy file.
+                    shutil.copy2(srcname, dstname)
+            except Exception, e:
+                print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
+
+
     global GAMEDIR
     GAMEDIR = os.path.abspath(os.path.join(CURRENT_DIR, dirname))
     if os.path.exists(GAMEDIR):
         print "Cannot create new Muddery game dir: '%s' already exists." % dirname
         sys.exit()
 
-    template_dir = os.path.join(MUDDERY_TEMPLATE, template)
-    if not os.path.exists(template_dir):
-        print 'Sorry, template "%s" does not exist.\nThese are available templates:' % template
-        dirs = os.listdir(MUDDERY_TEMPLATE)
-        for dir in dirs:
-            full_path = os.path.join(MUDDERY_TEMPLATE, dir)
-            if os.path.isdir(full_path):
-                print "  %s" % dir
-        print ""
-        sys.exit()
+    template_dir = ""
+    if template:
+        template_dir = os.path.join(MUDDERY_TEMPLATE, template)
+        if not os.path.exists(template_dir):
+            print 'Sorry, template "%s" does not exist.\nThese are available templates:' % template
+            dirs = os.listdir(MUDDERY_TEMPLATE)
+            for dir in dirs:
+                full_path = os.path.join(MUDDERY_TEMPLATE, dir)
+                if os.path.isdir(full_path):
+                    print "  %s" % dir
+            print ""
+            sys.exit()
 
-    # copy template directory
-    shutil.copytree(template_dir, GAMEDIR)
+    # copy default template directory
+    default_template = os.path.join(MUDDERY_LIB, "game_template")
+    shutil.copytree(default_template, GAMEDIR)
+
+    if template_dir:
+        copy_tree(template_dir, GAMEDIR)
+
     # pre-build settings file in the new GAMEDIR
     create_settings_file()
 
@@ -259,7 +290,7 @@ def main():
     elif args.init:
         # initialization of game directory
         if option == "noop":
-            option = "default"
+            option = ""
         create_game_directory(args.init, option)
         print CREATED_NEW_GAMEDIR.format(gamedir=args.init,
                                          settings_path=os.path.join(args.init, SETTINGS_PATH))

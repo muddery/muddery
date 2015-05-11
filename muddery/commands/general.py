@@ -190,29 +190,19 @@ class CmdInventory(MuxCommand):
     view inventory
 
     Usage:
-      inventory
-      inv
-
+        {"cmd":"inventory",
+         "args":""
+        }
+      
     Shows your inventory.
     """
     key = "inventory"
-    aliases = ["inv", "i"]
     locks = "cmd:all()"
-    arg_regex = r"$"
 
     def func(self):
         "check inventory"
-        items = self.caller.contents
-        if not items:
-            string = "You are not carrying anything."
-        else:
-            table = prettytable.PrettyTable(["name", "desc"])
-            table.header = False
-            table.border = False
-            for item in items:
-                table.add_row(["{C%s{n" % item.name, item.db.desc and item.db.desc or ""])
-            string = "{wYou are carrying:\n%s" % table
-        self.caller.msg(string)
+        inv = self.caller.return_inventory()
+        self.caller.msg({"inventory":inv})
 
 
 class CmdGet(MuxCommand):

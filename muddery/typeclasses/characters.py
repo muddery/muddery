@@ -36,4 +36,33 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         """
         self.msg({"msg": "Move to %s" % self.location.name})
-        self.execute_cmd('{"cmd": "look", "args": ""}')
+
+        if self.location:
+            appearance = self.location.get_surroundings(self)
+            self.msg({"look_around":appearance})
+
+
+    def at_post_puppet(self):
+        """
+        Called just after puppeting has been completed and all
+        Player<->Object links have been established.
+
+        """
+        super(MudderyCharacter, self).at_post_puppet()
+
+        # send inventory data to player
+        inv = self.return_inventory()
+        self.msg({"inventory":inv})
+
+
+    def return_inventory(self):
+        """
+        Get inventory's data.
+        """
+        inv = []
+        items = self.contents
+        for item in items:
+            inv.append({"dbref": item.dbref,
+                        "name": item.name,
+                        "desc": item.db.desc})
+        return inv

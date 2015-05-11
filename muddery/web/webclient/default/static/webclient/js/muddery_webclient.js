@@ -79,6 +79,9 @@ var webclient = {
                 else if (key == "look_obj") {
                     this.displayLookObj(data[key]);
                 }
+                else if (key == "inventory") {
+                    this.displayInventory(data[key]);
+                }
                 else if (key == "login") {
                     this.onLogin(data[key]);
                 }
@@ -229,25 +232,81 @@ var webclient = {
         
         if ("exits" in data) {
             if (data["exits"].length > 0) {
-                content += "<div id='room_exits'>Exits:</div>";
+                content += "<div id='room_exits'>Exits:"
+                // add exits
+                for (var i in data["exits"]) {
+                    try {
+                        var exit = data["exits"][i];
+                        element = " <a href='#' onclick='commands.doGotoLink(this); return false;' ";
+                        element += "dbref='" + exit["dbref"] + "'>";
+                        element += exit["name"];
+                        element += "</a>";
+                        content += element;
+                    }
+                    catch(error) {
+                    }
+                }
+                content += "</div>";
             }
         }
         
-        if ("npcs" in data) {
-            if (data["npcs"].length > 0) {
-                content += "<div id='room_npcs'>NPCs:</div>";
+        if ("things" in data) {
+            if (data["things"].length > 0) {
+                content += "<div id='room_things'>Things:"
+                // add things
+                for (var i in data["things"]) {
+                    try {
+                        var thing = data["things"][i];
+                        element = " <a href='#' onclick='commands.doLookLink(this); return false;' ";
+                        element += "dbref='" + thing["dbref"] + "'>";
+                        element += thing["name"];
+                        element += "</a>";
+                        content += element;
+                    }
+                    catch(error) {
+                    }
+                }
+                content += "</div>";
             }
         }
 
-        if ("things" in data) {
-            if (data["things"].length > 0) {
-                content += "<div id='room_things'>Things:</div>";
+        if ("npcs" in data) {
+            if (data["npcs"].length > 0) {
+                content += "<div id='room_npcs'>NPCs:"
+                // add npcs
+                for (var i in data["npcs"]) {
+                    try {
+                        var npc = data["npcs"][i];
+                        element = " <a href='#' onclick='commands.doLookLink(this); return false;' ";
+                        element += "dbref='" + npc["dbref"] + "'>";
+                        element += npc["name"];
+                        element += "</a>";
+                        content += element;
+                    }
+                    catch(error) {
+                    }
+                }
+                content += "</div>";
             }
         }
-        
+
         if ("players" in data) {
             if (data["players"].length > 0) {
-                content += "<div id='room_players'>Players:</div>";
+                content += "<div id='room_players'>Players:"
+                // add players
+                for (var i in data["players"]) {
+                    try {
+                        var player = data["players"][i];
+                        element = " <a href='#' onclick='commands.doLookLink(this); return false;' ";
+                        element += "dbref='" + player["dbref"] + "'>";
+                        element += player["name"];
+                        element += "</a>";
+                        content += element;
+                    }
+                    catch(error) {
+                    }
+                }
+                content += "</div>";
             }
         }
         
@@ -256,87 +315,15 @@ var webclient = {
         // add commands
         if ("cmds" in data) {
             var room_cmds = $("#room_cmds");
-            for (i = 0; i < data["cmds"].length; ++i) {
+            for (var i in data["cmds"]) {
                 try {
                     var cmd = data["cmds"][i];
-                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
+                    element = " <a href='#' onclick='commands.doCommandLink(this); return false;'>"
                     element += cmd["name"];
                     element += "</a>";
                     room_cmds.append(element);
                     
                     room_cmds.find("a:last").data({"cmd": cmd["cmd"], "args": cmd["args"]});
-                }
-                catch(error) {
-                }
-            }
-        }
-
-        // add exits
-        if ("exits" in data) {
-            var room_exits = $("#room_exits");
-            for (i = 0; i < data["exits"].length; ++i) {
-                try {
-                    var exit = data["exits"][i];
-                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
-                    element += exit["name"];
-                    element += "</a>";
-                    room_exits.append(element);
-                    
-                    room_exits.find("a:last").data({"cmd": "goto", "args": exit["dbref"]});
-                }
-                catch(error) {
-                }
-            }
-        }
-        
-        // add npcs
-        if ("npcs" in data) {
-            var room_npcs = $("#room_npcs");
-            for (i = 0; i < data["npcs"].length; ++i) {
-                try {
-                    var npc = data["npcs"][i];
-                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
-                    element += npc["name"];
-                    element += "</a>";
-                    room_npcs.append(element);
-                    
-                    room_npcs.find("a:last").data({"cmd": "look", "args": npc["dbref"]});
-                }
-                catch(error) {
-                }
-            }
-        }
-        
-        // add things
-        if ("things" in data) {
-            var room_things = $("#room_things");
-            for (i = 0; i < data["things"].length; ++i) {
-                try {
-                    var thing = data["things"][i];
-                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
-                    element += thing["name"];
-                    element += "</a>";
-                    room_things.append(element);
-                    
-                    room_things.find("a:last").data({"cmd": "look", "args": thing["dbref"]});
-                }
-                catch(error) {
-                }
-            }
-        }
-
-        // add players
-        if ("players" in data) {
-            var room_players = $("#room_players");
-            for (i = 0; i < data["players"].length; ++i) {
-                try {
-                    var player = data["players"][i];
-                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
-                    element += player["name"];
-                    element += "</a>";
-                    room_players.append(element);
-                    
-                    room_players.find("a:last").data({"cmd": "look", "args": player["dbref"]});
                 }
                 catch(error) {
                 }
@@ -391,7 +378,7 @@ var webclient = {
         // add commands
         if ("cmds" in data) {
             var object_cmds = $("#object_cmds");
-            for (i = 0; i < data["cmds"].length; ++i) {
+            for (var i in data["cmds"]) {
                 try {
                     var cmd = data["cmds"][i];
                     element = " <a href='#' onclick='commands.doClick(this); return false;'>"
@@ -415,6 +402,37 @@ var webclient = {
                             </div>'
         $('#input_additional').html(html_button);
         this.doSetSizes();
+    },
+    
+    displayInventory : function(data) {
+        var page = $("#page_inventory");
+        
+        var content = "<table class='tab_inventory'>";
+        content += "<thead><tr><th>NAME</th><th>DESC</th></tr></thead>";
+        var element = "";
+
+        for (var i in data) {
+            try {
+                var obj = data[i];
+                element = "<tbody><tr><td>";
+                element += " <a href='#' onclick='commands.doLookLink(this); return false;' "
+                element += "dbref='" + obj["dbref"] + "'>";
+                element += obj["name"];
+                element += "</a></td>";
+
+                element += "<td>";
+                element += obj["desc"];
+                element += "</td></tr></tbody>";
+                
+                content += element;
+            }
+            catch(error) {
+            }
+        }
+        
+        content += "</table>";
+        
+        page.html(content);
     },
 
     onLogin : function(data) {
@@ -459,7 +477,7 @@ var webclient = {
         var middle_h = $('#middlewindow').outerHeight(true);
         var total_h = middle_h - 2;
         var tab_bar_h = 30;
-        var tab_content_max_h = 240;
+        var tab_content_max_h = 360;
         if (total_h + tab_bar_h > tab_content_max_h * 2) {
             $('#msg_wnd').height(middle_h - tab_bar_h - tab_content_max_h - 2);
             $('#tab_bar').height(tab_bar_h);
@@ -560,6 +578,7 @@ var webclient = {
         $("#tab_bar").find("li").css("display", "none");
         
         $("#tab_room").css("display", "");
+        $("#tab_inventory").css("display", "");
         $("#tab_system").css("display", "");
         $("#tab_command").css("display", "");
     },

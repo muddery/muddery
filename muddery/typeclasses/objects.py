@@ -32,6 +32,35 @@ class MudderyObject(DefaultObject):
             logger.log_errmsg("%s can not load data:%s" % (this.dbref, e))
 
 
+    def at_object_receive(self, moved_obj, source_location):
+        """
+        Called after an object has been moved into this object.
+
+        Args:
+            moved_obj (Object): The object moved into this one
+            source_location (Object): Where `moved_object` came from.
+
+        """
+        if self.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
+            # send object data to player
+            inv = self.return_inventory()
+            self.msg({"inventory":inv})
+        elif self.is_typeclass(settings.BASE_ROOM_TYPECLASS):
+            # send object data to room
+            appearance = self.get_surroundings(self)
+            self.msg_contents({"look_around":appearance})
+
+        if source_location:
+            if source_location.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
+                # send object data to player
+                inv = source_location.return_inventory()
+                source_location.msg({"inventory":inv})
+            elif source_location.is_typeclass(settings.BASE_ROOM_TYPECLASS):
+                # send object data to room
+                appearance = source_location.get_surroundings(self)
+                source_location.msg_contents({"look_around":appearance})
+
+
     def get_surroundings(self, caller):
         """
         This is a convenient hook for a 'look'
@@ -55,9 +84,9 @@ class MudderyObject(DefaultObject):
             if cont.destination:
                 info["exits"].append({"dbref":cont.dbref,
                                      "name":cont.name})
-            #elif cont.player:
-            #    info["players"].append({"dbref":cont.dbref,
-            #                           "name":cont.name})
+            elif cont.player:
+                info["players"].append({"dbref":cont.dbref,
+                                       "name":cont.name})
             elif cont.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
                 info["npcs"].append({"dbref":cont.dbref,
                                     "name":cont.name})
