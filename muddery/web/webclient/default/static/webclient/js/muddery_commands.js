@@ -8,13 +8,25 @@ var commands = {
         return JSON.stringify({"cmd" : command, "args" : args});
     },
     
+    // functions when user click a command link
     //
-    doClick : function(caller) {
+    doCommandLink : function(caller) {
         var cmd = $(caller).data("cmd");
         var args = $(caller).data("args");
         sendCommand(this.cmdString(cmd, args));
     },
     
+    doLookLink : function(caller) {
+        var dbref = $(caller).attr("dbref");
+        sendCommand(this.cmdString("look", dbref));
+    },
+    
+    doGotoLink : function(caller) {
+        var dbref = $(caller).attr("dbref");
+        sendCommand(this.cmdString("goto", dbref));
+    },
+    
+    // functions when user click a button
     // login
     doLogin : function() {
         var playername = $("#page_login :text").val();
