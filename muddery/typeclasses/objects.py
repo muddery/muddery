@@ -7,6 +7,7 @@ MudderyObject is an object which can load it's data automatically.
 """
 
 import json
+from django.conf import settings
 from evennia.objects.objects import DefaultObject
 from muddery.utils import loader
 
@@ -43,6 +44,7 @@ class MudderyObject(DefaultObject):
                 "desc": self.db.desc,
                 "cmds": self.get_available_commands(caller),
                 "exits": [],
+                "npcs": [],
                 "things": [],
                 "players": []}
 
@@ -53,9 +55,12 @@ class MudderyObject(DefaultObject):
             if cont.destination:
                 info["exits"].append({"dbref":cont.dbref,
                                      "name":cont.name})
-            elif cont.player:
-                info["players"].append({"dbref":cont.dbref,
-                                       "name":cont.name})
+            #elif cont.player:
+            #    info["players"].append({"dbref":cont.dbref,
+            #                           "name":cont.name})
+            elif cont.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
+                info["npcs"].append({"dbref":cont.dbref,
+                                    "name":cont.name})
             else:
                 info["things"].append({"dbref":cont.dbref,
                                       "name":cont.name})
