@@ -233,6 +233,12 @@ var webclient = {
             }
         }
         
+        if ("npcs" in data) {
+            if (data["npcs"].length > 0) {
+                content += "<div id='room_npcs'>NPCs:</div>";
+            }
+        }
+
         if ("things" in data) {
             if (data["things"].length > 0) {
                 content += "<div id='room_things'>Things:</div>";
@@ -277,6 +283,24 @@ var webclient = {
                     room_exits.append(element);
                     
                     room_exits.find("a:last").data({"cmd": "goto", "args": exit["dbref"]});
+                }
+                catch(error) {
+                }
+            }
+        }
+        
+        // add npcs
+        if ("npcs" in data) {
+            var room_npcs = $("#room_npcs");
+            for (i = 0; i < data["npcs"].length; ++i) {
+                try {
+                    var npc = data["npcs"][i];
+                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
+                    element += npc["name"];
+                    element += "</a>";
+                    room_npcs.append(element);
+                    
+                    room_npcs.find("a:last").data({"cmd": "look", "args": npc["dbref"]});
                 }
                 catch(error) {
                 }
