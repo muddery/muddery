@@ -11,19 +11,9 @@ var commands = {
     // functions when user click a command link
     //
     doCommandLink : function(caller) {
-        var cmd = $(caller).data("cmd");
-        var args = $(caller).data("args");
+        var cmd = $(caller).attr("cmd_name");
+        var args = $(caller).attr("cmd_args");
         sendCommand(this.cmdString(cmd, args));
-    },
-    
-    doLookLink : function(caller) {
-        var dbref = $(caller).attr("dbref");
-        sendCommand(this.cmdString("look", dbref));
-    },
-    
-    doGotoLink : function(caller) {
-        var dbref = $(caller).attr("dbref");
-        sendCommand(this.cmdString("goto", dbref));
     },
     
     // functions when user click a button
