@@ -30,12 +30,24 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     has connected" message echoed to the room
 
     """
+    def at_object_creation(self):
+        """
+        Called once, when this object is first created. This is the
+        normal hook to overload for most object types.
+            
+        """
+        super(MudderyCharacter, self).at_object_creation()
+
+        # add default hp
+        self.db.hp = 100
+
+
     def at_after_move(self, source_location):
         """
         We make sure to look around after a move.
 
         """
-        self.msg({"msg": "Move to %s" % self.location.name})
+        self.msg({"msg": "Moving to %s ..." % self.location.name})
 
         if self.location:
             appearance = self.location.get_surroundings(self)
@@ -50,9 +62,13 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         super(MudderyCharacter, self).at_post_puppet()
 
+        # send status to player
+        status = self.return_status()
+        self.msg({"status": status})
+        
         # send inventory data to player
         inv = self.return_inventory()
-        self.msg({"inventory":inv})
+        self.msg({"inventory": inv})
 
 
     def return_inventory(self):
@@ -66,3 +82,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                         "name": item.name,
                         "desc": item.db.desc})
         return inv
+
+    def return_status(self):
+        """
+        Get character's status.
+        """
+        status = {"hp": self.db.hp}
+        
+        return status

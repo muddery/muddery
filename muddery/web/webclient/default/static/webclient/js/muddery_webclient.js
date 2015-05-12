@@ -79,6 +79,9 @@ var webclient = {
                 else if (key == "look_obj") {
                     this.displayLookObj(data[key]);
                 }
+                else if (key == "status") {
+                    this.displayStatus(data[key]);
+                }
                 else if (key == "inventory") {
                     this.displayInventory(data[key]);
                 }
@@ -226,7 +229,22 @@ var webclient = {
         
         if ("cmds" in data) {
             if (data["cmds"].length > 0) {
-                content += "<div id='room_cmds'>Actions:</div>";
+                content += "<div id='room_cmds'>Commands:"
+                // add cmds
+                for (var i in data["cmds"]) {
+                    try {
+                        var cmd = data["cmds"][i];
+                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element += " cmd_name='" + cmd["cmd"] + "'";
+                        element += " cmd_args='" + cmd["args"] + "'>";
+                        element += cmd["name"];
+                        element += "</a>";
+                        content += element;
+                    }
+                    catch(error) {
+                    }
+                }
+                content += "</div>";
             }
         }
         
@@ -237,8 +255,9 @@ var webclient = {
                 for (var i in data["exits"]) {
                     try {
                         var exit = data["exits"][i];
-                        element = " <a href='#' onclick='commands.doGotoLink(this); return false;' ";
-                        element += "dbref='" + exit["dbref"] + "'>";
+                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element += " cmd_name='goto'";
+                        element += " cmd_args='" + exit["dbref"] + "'>";
                         element += exit["name"];
                         element += "</a>";
                         content += element;
@@ -257,8 +276,9 @@ var webclient = {
                 for (var i in data["things"]) {
                     try {
                         var thing = data["things"][i];
-                        element = " <a href='#' onclick='commands.doLookLink(this); return false;' ";
-                        element += "dbref='" + thing["dbref"] + "'>";
+                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element += " cmd_name='look'";
+                        element += " cmd_args='" + thing["dbref"] + "'>";
                         element += thing["name"];
                         element += "</a>";
                         content += element;
@@ -277,8 +297,9 @@ var webclient = {
                 for (var i in data["npcs"]) {
                     try {
                         var npc = data["npcs"][i];
-                        element = " <a href='#' onclick='commands.doLookLink(this); return false;' ";
-                        element += "dbref='" + npc["dbref"] + "'>";
+                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element += " cmd_name='look'";
+                        element += " cmd_args='" + npc["dbref"] + "'>";
                         element += npc["name"];
                         element += "</a>";
                         content += element;
@@ -297,8 +318,9 @@ var webclient = {
                 for (var i in data["players"]) {
                     try {
                         var player = data["players"][i];
-                        element = " <a href='#' onclick='commands.doLookLink(this); return false;' ";
-                        element += "dbref='" + player["dbref"] + "'>";
+                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element += " cmd_name='look'";
+                        element += " cmd_args='" + player["dbref"] + "'>";
                         element += player["name"];
                         element += "</a>";
                         content += element;
@@ -311,24 +333,6 @@ var webclient = {
         }
         
         page.html(content);
-        
-        // add commands
-        if ("cmds" in data) {
-            var room_cmds = $("#room_cmds");
-            for (var i in data["cmds"]) {
-                try {
-                    var cmd = data["cmds"][i];
-                    element = " <a href='#' onclick='commands.doCommandLink(this); return false;'>"
-                    element += cmd["name"];
-                    element += "</a>";
-                    room_cmds.append(element);
-                    
-                    room_cmds.find("a:last").data({"cmd": cmd["cmd"], "args": cmd["args"]});
-                }
-                catch(error) {
-                }
-            }
-        }
     },
     
     displayLookObj : function(data) {
@@ -366,32 +370,29 @@ var webclient = {
         }
 
         content += "<div><br></div>";
-        
+
         if ("cmds" in data) {
             if (data["cmds"].length > 0) {
-                content += "<div id='object_cmds'>Actions:</div>";
+                content += "<div id='object_cmds'>Actions:"
+                // add cmds
+                for (var i in data["cmds"]) {
+                    try {
+                        var cmd = data["cmds"][i];
+                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element += " cmd_name='" + cmd["cmd"] + "'";
+                        element += " cmd_args='" + cmd["args"] + "'>";
+                        element += cmd["name"];
+                        element += "</a>";
+                        content += element;
+                    }
+                    catch(error) {
+                    }
+                }
+                content += "</div>";
             }
         }
 
         page.html(content);
-        
-        // add commands
-        if ("cmds" in data) {
-            var object_cmds = $("#object_cmds");
-            for (var i in data["cmds"]) {
-                try {
-                    var cmd = data["cmds"][i];
-                    element = " <a href='#' onclick='commands.doClick(this); return false;'>"
-                    element += cmd["name"];
-                    element += "</a>";
-                    object_cmds.append(element);
-                    
-                    object_cmds.find("a:last").data({"cmd": cmd["cmd"], "args": cmd["args"]});
-                }
-                catch(error) {
-                }
-            }
-        }
         
         // button
         var html_button = '<div><br></div>\
@@ -405,6 +406,7 @@ var webclient = {
     },
     
     displayInventory : function(data) {
+        // display player's inventory
         var page = $("#page_inventory");
         
         var content = "<table class='tab_inventory'>";
@@ -415,8 +417,9 @@ var webclient = {
             try {
                 var obj = data[i];
                 element = "<tbody><tr><td>";
-                element += " <a href='#' onclick='commands.doLookLink(this); return false;' "
-                element += "dbref='" + obj["dbref"] + "'>";
+                element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
+                element += " cmd_name='look'";
+                element += " cmd_args='" + obj["dbref"] + "'>";
                 element += obj["name"];
                 element += "</a></td>";
 
@@ -434,14 +437,39 @@ var webclient = {
         
         page.html(content);
     },
+    
+    displayStatus : function(data) {
+        // display player's status
+        var page = $("#page_status");
+        
+        var content = "";
+        var element = "";
+        
+        // add player's status
+        content += "<div>";
+        try {
+            element = "<div><span class='white'> HP: ";
+            element += data["hp"].toString();
+            element += "</span><br></div>";
+            
+            content += element;
+        }
+        catch(error) {
+        }
+        
+        content += "</div>";
+        page.html(content);
+    },
 
     onLogin : function(data) {
+        // show login UI
         $("#msg_wnd").empty();
         this.showLoginTabs();
         this.showPage("room");
     },
     
     onLogout : function(data) {
+        // show unlogin UI
         $("#msg_wnd").empty();
         this.showUnloginTabs();
         this.showPage("login");
@@ -578,6 +606,7 @@ var webclient = {
         $("#tab_bar").find("li").css("display", "none");
         
         $("#tab_room").css("display", "");
+        $("#tab_status").css("display", "");
         $("#tab_inventory").css("display", "");
         $("#tab_system").css("display", "");
         $("#tab_command").css("display", "");
