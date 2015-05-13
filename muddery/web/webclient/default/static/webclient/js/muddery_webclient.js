@@ -76,6 +76,12 @@ var webclient = {
                 else if (key == "look_around") {
                     this.displayLookAround(data[key]);
                 }
+                else if (key == "obj_moved_in") {
+                    this.displayObjMovedIn(data[key]);
+                }
+                else if (key == "obj_moved_out") {
+                    this.displayObjMovedOut(data[key]);
+                }
                 else if (key == "look_obj") {
                     this.displayLookObj(data[key]);
                 }
@@ -248,6 +254,7 @@ var webclient = {
             }
         }
         
+        var empty = true;
         if ("exits" in data) {
             if (data["exits"].length > 0) {
                 content += "<div id='room_exits'>Exits:"
@@ -257,10 +264,12 @@ var webclient = {
                         var exit = data["exits"][i];
                         element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
                         element += " cmd_name='goto'";
-                        element += " cmd_args='" + exit["dbref"] + "'>";
+                        element += " cmd_args='" + exit["dbref"] + "'";
+                        element += " dbref='" + exit["dbref"] + "'>";
                         element += exit["name"];
                         element += "</a>";
                         content += element;
+                        empty = false;
                     }
                     catch(error) {
                     }
@@ -269,6 +278,11 @@ var webclient = {
             }
         }
         
+        if (empty) {
+            content += "<div id='room_exits' style='display:none'>Exits:</div>"
+        }
+        
+        empty = true;
         if ("things" in data) {
             if (data["things"].length > 0) {
                 content += "<div id='room_things'>Things:"
@@ -278,10 +292,12 @@ var webclient = {
                         var thing = data["things"][i];
                         element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
                         element += " cmd_name='look'";
-                        element += " cmd_args='" + thing["dbref"] + "'>";
+                        element += " cmd_args='" + thing["dbref"] + "'";
+                        element += " dbref='" + thing["dbref"] + "'>";
                         element += thing["name"];
                         element += "</a>";
                         content += element;
+                        empty = false;
                     }
                     catch(error) {
                     }
@@ -289,7 +305,12 @@ var webclient = {
                 content += "</div>";
             }
         }
+        
+        if (empty) {
+            content += "<div id='room_things' style='display:none'>Things:</div>"
+        }
 
+        empty = true;
         if ("npcs" in data) {
             if (data["npcs"].length > 0) {
                 content += "<div id='room_npcs'>NPCs:"
@@ -299,10 +320,12 @@ var webclient = {
                         var npc = data["npcs"][i];
                         element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
                         element += " cmd_name='look'";
-                        element += " cmd_args='" + npc["dbref"] + "'>";
+                        element += " cmd_args='" + npc["dbref"] + "'";
+                        element += " dbref='" + npc["dbref"] + "'>";
                         element += npc["name"];
                         element += "</a>";
                         content += element;
+                        empty = false;
                     }
                     catch(error) {
                     }
@@ -310,7 +333,12 @@ var webclient = {
                 content += "</div>";
             }
         }
+        
+        if (empty) {
+            content += "<div id='room_npcs' style='display:none'>NPCs:</div>"
+        }
 
+        empty = true;
         if ("players" in data) {
             if (data["players"].length > 0) {
                 content += "<div id='room_players'>Players:"
@@ -320,10 +348,12 @@ var webclient = {
                         var player = data["players"][i];
                         element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
                         element += " cmd_name='look'";
-                        element += " cmd_args='" + player["dbref"] + "'>";
+                        element += " cmd_args='" + player["dbref"] + "'";
+                        element += " dbref='" + player["dbref"] + "'>";
                         element += player["name"];
                         element += "</a>";
                         content += element;
+                        empty = false;
                     }
                     catch(error) {
                     }
@@ -332,7 +362,51 @@ var webclient = {
             }
         }
         
+        if (empty) {
+            content += "<div id='room_players' style='display:none'>Players:</div>"
+        }
+        
         page.html(content);
+    },
+    
+    displayObjMovedIn : function(data) {
+        for (var key in data) {
+            var page = $("#room_" + key);
+            page.css("display", "");
+
+            for (var i in data[key]) {
+                try {
+                    var obj = data[key][i];
+                    element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                    element += " cmd_name='look'";
+                    element += " cmd_args='" + obj["dbref"] + "'";
+                    element += " dbref='" + obj["dbref"] + "'>";
+                    element += obj["name"];
+                    element += "</a>";
+                    page.append(element);
+                }
+                catch(error) {
+                }
+            }
+        }
+    },
+
+    displayObjMovedOut : function(data) {
+        for (var key in data) {
+            var page = $("#room_" + key);
+            for (var i in data[key]) {
+                try {
+                    var obj = data[key][i];
+                    page.find("a[dbref=" + obj["dbref"] + "]").remove();
+                }
+                catch(error) {
+                }
+            }
+            
+            if (page.find("a").length == 0) {
+                page.css("display", "none");
+            }
+        }
     },
     
     displayLookObj : function(data) {
