@@ -42,6 +42,38 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.hp = 100
 
 
+    def at_object_receive(self, moved_obj, source_location):
+        """
+        Called after an object has been moved into this object.
+        
+        Args:
+        moved_obj (Object): The object moved into this one
+        source_location (Object): Where `moved_object` came from.
+        
+        """
+        super(MudderyCharacter, self).at_object_receive(moved_obj, source_location)
+
+        # send latest inventory data to player
+        inv = self.return_inventory()
+        self.msg({"inventory":inv})
+    
+        
+    def at_object_left(self, moved_obj, target_location):
+        """
+        Called after an object has been removed from this object.
+        
+        Args:
+        moved_obj (Object): The object leaving
+        target_location (Object): Where `moved_obj` is going.
+        
+        """
+        super(MudderyCharacter, self).at_object_left(moved_obj, target_location)
+        
+        # send latest inventory data to player
+        inv = self.return_inventory()
+        self.msg({"inventory":inv})
+
+
     def at_after_move(self, source_location):
         """
         We make sure to look around after a move.
@@ -50,7 +82,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.msg({"msg": "Moving to %s ..." % self.location.name})
 
         if self.location:
-            appearance = self.location.get_surroundings(self)
+            appearance = self.location.get_appearance(self)
+            appearance.update(self.location.get_surroundings(self))
             self.msg({"look_around":appearance})
 
 

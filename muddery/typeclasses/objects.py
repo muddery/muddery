@@ -41,24 +41,21 @@ class MudderyObject(DefaultObject):
             source_location (Object): Where `moved_object` came from.
 
         """
-        if self.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
-            # send object data to player
-            inv = self.return_inventory()
-            self.msg({"inventory":inv})
-        elif self.is_typeclass(settings.BASE_ROOM_TYPECLASS):
-            # send object data to room
-            appearance = self.get_surroundings(self)
-            self.msg_contents({"look_around":appearance})
-
+        # Call hook on source location
         if source_location:
-            if source_location.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
-                # send object data to player
-                inv = source_location.return_inventory()
-                source_location.msg({"inventory":inv})
-            elif source_location.is_typeclass(settings.BASE_ROOM_TYPECLASS):
-                # send object data to room
-                appearance = source_location.get_surroundings(self)
-                source_location.msg_contents({"look_around":appearance})
+            source_location.at_object_left(moved_obj, moved_obj.location)
+
+
+    def at_object_left(self, moved_obj, target_location):
+        """
+        Called after an object has been removed from this object.
+        
+        Args:
+        moved_obj (Object): The object leaving
+        target_location (Object): Where `moved_obj` is going.
+        
+        """
+        pass
 
 
     def get_surroundings(self, caller):
@@ -68,11 +65,7 @@ class MudderyObject(DefaultObject):
         """
 
         # get name, description, commands and all objects in it
-        info = {"dbref": self.dbref,
-                "name": self.name,
-                "desc": self.db.desc,
-                "cmds": self.get_available_commands(caller),
-                "exits": [],
+        info = {"exits": [],
                 "npcs": [],
                 "things": [],
                 "players": []}
