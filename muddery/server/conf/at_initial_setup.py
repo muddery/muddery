@@ -15,7 +15,7 @@ does what you expect it to.
 """
 
 from evennia.utils import search, logger
-from muddery.utils import loader, builder, importer
+from muddery.utils import builder, importer, utils
 
 def at_initial_setup():
     """
@@ -23,12 +23,12 @@ def at_initial_setup():
     """
 
     # set data info to limbo
-    limboobj = search.search_object("#2", exact=True)
-
-    try:
-        loader.set_obj_data_info(limboobj[0], "", "limbo")
-    except Exception, e:
-        logger.log_errmsg("Can't set data info to limbo: %s" % e)
+    limbo_obj = search.search_object("#2", exact=True)
+    if limbo_obj:
+        try:
+            utils.set_obj_data_info(limbo_obj[0], "", "limbo")
+        except Exception, e:
+            logger.log_errmsg("Can't set data info to limbo: %s" % e)
 
     try:
         # load world data

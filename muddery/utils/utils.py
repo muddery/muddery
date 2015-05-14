@@ -7,7 +7,8 @@ be of use when designing your own game.
 """
 
 import os
-from evennia.utils import logger
+from django.conf import settings
+from evennia.utils import search, logger
 
 
 def get_muddery_version():
@@ -38,3 +39,40 @@ def copy_tree(source, destination):
                 shutil.copy2(srcname, dst)
         except Exception, e:
             logger.log_errmsg("Can not copy file:%s to %s" % (srcname, dstname))
+
+
+def set_obj_data_info(obj, model, key):
+        """
+        Set data_info's model and key. It puts info into attributes.
+            
+        Args:
+            model: (string) Db model's name.
+            key: (string) Key of the data info.
+        """
+        obj.attributes.add("model", model, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
+        obj.attributes.add("key", key, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
+
+
+def search_obj_info_key(key):
+    """
+    Search objects which have the given key.
+
+    Args:
+    key: (string) Data info key.
+    """
+    if not key:
+        return None
+
+    obj = search.search_object_attribute(key="key", strvalue=key, category=settings.WORLD_DATA_INFO_CATEGORY)
+    return obj
+
+
+def search_obj_info_model(model):
+    """
+    Search objects which have the given model.
+
+    Args:
+    model: (string) Data model's name.
+    """
+    obj = search.search_object_attribute(key="model", strvalue=model, category=settings.WORLD_DATA_INFO_CATEGORY)
+    return obj

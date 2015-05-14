@@ -2,7 +2,7 @@
 This module handles importing data from csv files and creating the whole game world from these data.
 """
 
-from muddery.utils import loader
+from muddery.utils import utils
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import create, search, logger
@@ -30,7 +30,7 @@ def build_objects(model_name, unique, caller=None):
     new_obj_names = set(record.key for record in model_obj.objects.all())
 
     # current objects
-    current_objs = loader.search_obj_info_model(model_name)
+    current_objs = utils.search_obj_info_model(model_name)
 
     # remove objects
     count_remove = 0
@@ -39,7 +39,7 @@ def build_objects(model_name, unique, caller=None):
     current_obj_keys = set()
 
     for obj in current_objs:
-        obj_key = loader.get_info_key(obj)
+        obj_key = obj.get_info_key()
 
         if unique:
             if obj_key in current_obj_keys:
@@ -65,7 +65,7 @@ def build_objects(model_name, unique, caller=None):
                 continue
 
         try:
-            loader.load_data(obj)
+            obj.load_data()
         except Exception, e:
             logger.log_errmsg("%s can not load data:%s" % (obj.dbref, e))
 
@@ -91,7 +91,8 @@ def build_objects(model_name, unique, caller=None):
                         caller.msg(ostring)
 
                 try:
-                    loader.set_obj_data_info(obj, model_name, record.key)
+                    obj.set_data_info(model_name, record.key)
+                    obj.load_data()
                 except Exception, e:
                     ostring = "Can not set data info to obj %s: %s" % (record.name, e)
                     logger.log_errmsg(ostring)
@@ -124,14 +125,12 @@ def build_details(model_name, caller=None):
     # Set details.
     count = 0
     for record in model_detail.objects.all():
-        location_objs = loader.search_obj_info_key(record.location)
+        location_objs = utils.search_obj_info_key(record.location)
 
         # Detail's location.
         for location in location_objs:
-            loader.set_obj_detail(location, record.name, record.desc)
-
             for name in record.name.split(";"):
-                loader.set_obj_detail(location, name, record.desc)
+                location.set_detail(name, record.desc)
 
             count += 1
 

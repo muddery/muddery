@@ -22,13 +22,11 @@ class Migration(migrations.Migration):
                 ('home', models.CharField(max_length=255, blank=True)),
                 ('lock', models.CharField(max_length=255, blank=True)),
                 ('attributes', models.TextField(blank=True)),
-                ('destination', models.CharField(max_length=255, blank=True)),
             ],
             options={
                 'verbose_name': 'Personal Object List',
                 'verbose_name_plural': 'Personal Object List',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='world_details',
@@ -42,7 +40,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'World Detail List',
                 'verbose_name_plural': 'World Detail List',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='world_exits',
@@ -62,7 +59,25 @@ class Migration(migrations.Migration):
                 'verbose_name': 'World Exit List',
                 'verbose_name_plural': 'World Exit List',
             },
-            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='world_npcs',
+            fields=[
+                ('key', models.CharField(max_length=255, serialize=False, primary_key=True)),
+                ('name', models.CharField(max_length=255)),
+                ('alias', models.CharField(max_length=255, blank=True)),
+                ('typeclass', models.CharField(max_length=255)),
+                ('desc', models.TextField(blank=True)),
+                ('location', models.CharField(max_length=255, blank=True)),
+                ('home', models.CharField(max_length=255, blank=True)),
+                ('conversation', models.CharField(max_length=255, blank=True)),
+                ('lock', models.CharField(max_length=255, blank=True)),
+                ('attributes', models.TextField(blank=True)),
+            ],
+            options={
+                'verbose_name': 'World Object List',
+                'verbose_name_plural': 'World Object List',
+            },
         ),
         migrations.CreateModel(
             name='world_objects',
@@ -76,13 +91,11 @@ class Migration(migrations.Migration):
                 ('home', models.CharField(max_length=255, blank=True)),
                 ('lock', models.CharField(max_length=255, blank=True)),
                 ('attributes', models.TextField(blank=True)),
-                ('destination', models.CharField(max_length=255, blank=True)),
             ],
             options={
                 'verbose_name': 'World Object List',
                 'verbose_name_plural': 'World Object List',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='world_rooms',
@@ -96,12 +109,10 @@ class Migration(migrations.Migration):
                 ('home', models.CharField(max_length=255, blank=True)),
                 ('lock', models.CharField(max_length=255, blank=True)),
                 ('attributes', models.TextField(blank=True)),
-                ('destination', models.CharField(max_length=255, blank=True)),
             ],
             options={
                 'verbose_name': 'World Room List',
                 'verbose_name_plural': 'World Room List',
             },
-            bases=(models.Model,),
         ),
     ]

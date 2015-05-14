@@ -18,7 +18,6 @@ class world_rooms(models.Model):
     home = models.CharField(max_length=255, blank=True)
     lock = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
-    destination = models.CharField(max_length=255, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -68,7 +67,31 @@ class world_objects(models.Model):
     home = models.CharField(max_length=255, blank=True)
     lock = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
-    destination = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "World Object List"
+        verbose_name_plural = "World Object List"
+
+
+#------------------------------------------------------------
+#
+# store all npcs
+#
+#------------------------------------------------------------
+class world_npcs(models.Model):
+    "Store all unique objects."
+    
+    key = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
+    alias = models.CharField(max_length=255, blank=True)
+    typeclass = models.CharField(max_length=255)
+    desc = models.TextField(blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    home = models.CharField(max_length=255, blank=True)
+    conversation = models.CharField(max_length=255, blank=True)
+    lock = models.CharField(max_length=255, blank=True)
+    attributes = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -112,7 +135,6 @@ class personal_objects(models.Model):
     home = models.CharField(max_length=255, blank=True)
     lock = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
-    destination = models.CharField(max_length=255, blank=True)
 
     class Meta:
         "Define Django meta options"
