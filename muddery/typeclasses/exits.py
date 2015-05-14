@@ -7,8 +7,11 @@ for allowing Characters to traverse the exit to its destination.
 
 """
 
+from muddery.utils import utils
 from muddery.typeclasses.objects import MudderyObject
+from evennia.utils import logger
 from evennia.objects.objects import DefaultExit
+
 
 class MudderyExit(MudderyObject, DefaultExit):
     """
@@ -48,3 +51,47 @@ class MudderyExit(MudderyObject, DefaultExit):
 
         """
         traversing_object.msg({"alert": "You cannot go there."})
+
+
+    def load_data(self):
+        """
+        Set data_info to the object."
+        """
+        super(MudderyExit, self).load_data()
+        
+        data = self.get_data_record()
+        if not data:
+            return
+
+        self.set_destination(data.destination)
+
+
+    def set_destination(self, destination):
+        """
+        Set object's destination
+        
+        Args:
+        destination: (string) Destination's name. Must be the key of data info.
+        """
+        destination_obj = None
+    
+        if destination:
+            # If has destination, search destination object.
+            destination_obj = utils.search_obj_info_key(destination)
+        
+            if not destination_obj:
+                logger.log_errmsg("%s can't find destination %s!" % (self.get_info_key(), destination))
+                return
+            
+            destination_obj = destination_obj[0]
+    
+        if self.destination == destination_obj:
+            # No change.
+            return
+
+        if self == destination_obj:
+            # Can't set destination to itself.
+            logger.log_errmsg("%s can't set destination to itself!" % self.get_info_key())
+            return
+    
+        self.destination = destination_obj

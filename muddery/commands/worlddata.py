@@ -9,7 +9,6 @@ import os
 from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.utils.importer import import_file, import_all
-from muddery.utils.loader import set_obj_data_info
 from muddery.utils.builder import build_all
 from evennia import default_cmds
 from evennia.utils import logger
@@ -128,7 +127,8 @@ class CmdSetDataInfo(default_cmds.MuxCommand):
                         break
 
         try:
-            set_obj_data_info(obj, model_name, key_name)
+            obj.set_data_info(model_name, key_name)
+            obj.load_data()
             caller.msg("%s's datainfo has been set to %s" % (obj_name, self.rhs))
         except Exception, e:
             caller.msg("Can't set datainfo %s to %s: %s" % (self.rhs, obj_name, e))
@@ -152,6 +152,7 @@ class CmdLoadWorld(default_cmds.MuxCommand):
     def func(self):
         "Implement the command"
         caller = self.caller
+
         try:
             import_all()
             build_all(caller)
@@ -159,4 +160,3 @@ class CmdLoadWorld(default_cmds.MuxCommand):
             ostring = "Can't build world: %s" % e
             logger.log_errmsg(ostring)
             caller.msg(ostring)
-
