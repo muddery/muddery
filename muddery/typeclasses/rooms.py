@@ -32,21 +32,12 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         super(MudderyRoom, self).at_object_receive(moved_obj, source_location)
                 
         # send surrounding changes to player
-        change = {}
-        if moved_obj.destination:
-            change["exits"] = [{"dbref":moved_obj.dbref,
-                                "name":moved_obj.name}]
-        elif moved_obj.player:
-            change["players"] = [{"dbref":moved_obj.dbref,
-                                 "name":moved_obj.name}]
-        elif moved_obj.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
-            change["npcs"] = [{"dbref":moved_obj.dbref,
-                              "name":moved_obj.name}]
-        else:
-            change["things"] = [{"dbref":moved_obj.dbref,
-                                "name":moved_obj.name}]
-
-        self.msg_contents({"obj_moved_in":change}, exclude=moved_obj)
+        type = get_surrounding_type(moved_obj)
+        if type:
+            change = {type: [{"dbref":moved_obj.dbref,
+                             "name":moved_obj.name}]}
+                             
+            self.msg_contents({"obj_moved_in":change}, exclude=moved_obj)
 
 
     def at_object_left(self, moved_obj, target_location):
@@ -61,18 +52,51 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         super(MudderyRoom, self).at_object_left(moved_obj, target_location)
                 
         # send surrounding changes to player
-        change = {}
-        if moved_obj.destination:
-            change["exits"] = [{"dbref":moved_obj.dbref,
-                               "name":moved_obj.name}]
-        elif moved_obj.player:
-            change["players"] = [{"dbref":moved_obj.dbref,
-                                 "name":moved_obj.name}]
-        elif moved_obj.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
-            change["npcs"] = [{"dbref":moved_obj.dbref,
-                              "name":moved_obj.name}]
-        else:
-            change["things"] = [{"dbref":moved_obj.dbref,
-                                "name":moved_obj.name}]
+        type = get_surrounding_type(moved_obj)
+        if type:
+            change = {type: [{"dbref":moved_obj.dbref,
+                             "name":moved_obj.name}]}
 
-        self.msg_contents({"obj_moved_out":change}, exclude=moved_obj)
+            self.msg_contents({"obj_moved_out":change}, exclude=moved_obj)
+
+
+    def get_surroundings(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+            
+        # get name, description, commands and all objects in it
+        info = {"exits": [],
+                "npcs": [],
+                "things": [],
+                "players": [],
+                "offlines": []}
+                
+        visible = (cont for cont in self.contents if cont != caller and
+                   cont.access(caller, "view"))
+                        
+        for cont in visible:
+            type = get_surrounding_type(cont)
+            if type:
+                info[type].append({"dbref":cont.dbref,
+                                  "name":cont.name})
+
+        return info
+
+
+    def get_surrounding_type(self, obj):
+        """
+        Get surrounding's view type.
+        """
+        if obj.destination:
+            return "exits"
+        elif obj.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
+            if obj.has_player:
+                return "players"
+            else
+                return "offlines"
+        elif obj.is_typeclass(settings.BASE_NPC_TYPECLASS):
+            return "npcs"
+        else:
+            return "things"

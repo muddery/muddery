@@ -86,7 +86,9 @@ class CmdLook(Command):
         # get object's appearance
         if looking_at_obj == caller.location:
             appearance = looking_at_obj.get_appearance(caller)
-            appearance.update(looking_at_obj.get_surroundings(caller))
+            surroundings = looking_at_obj.get_surroundings(caller)
+            if surroundings:
+                appearance.update(looking_at_obj.get_surroundings(caller))
             caller.msg({"look_around": appearance})
         else:
             appearance = looking_at_obj.get_appearance(caller)

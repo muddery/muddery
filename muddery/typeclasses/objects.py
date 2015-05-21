@@ -360,31 +360,7 @@ class MudderyObject(DefaultObject):
         This is a convenient hook for a 'look'
         command to call.
         """
-
-        # get name, description, commands and all objects in it
-        info = {"exits": [],
-                "npcs": [],
-                "things": [],
-                "players": []}
-
-        visible = (cont for cont in self.contents if cont != caller and
-                   cont.access(caller, "view"))
-
-        for cont in visible:
-            if cont.destination:
-                info["exits"].append({"dbref":cont.dbref,
-                                     "name":cont.name})
-            elif cont.player:
-                info["players"].append({"dbref":cont.dbref,
-                                       "name":cont.name})
-            elif cont.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
-                info["npcs"].append({"dbref":cont.dbref,
-                                    "name":cont.name})
-            else:
-                info["things"].append({"dbref":cont.dbref,
-                                      "name":cont.name})
-
-        return info
+        pass
 
 
     def get_appearance(self, caller):
