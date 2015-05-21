@@ -65,6 +65,8 @@ BASE_CHANNEL_TYPECLASS = "muddery.typeclasses.channels.MudderyChannel"
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.
 BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
+# Typeclass for NPCs
+BASE_NPC_TYPECLASS = "muddery.typeclasses.npcs.MudderyNPC"
 
 ######################################################################
 # World data features

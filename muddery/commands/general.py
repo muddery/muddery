@@ -9,6 +9,7 @@ from django.conf import settings
 from evennia.utils import utils, prettytable
 from evennia.commands.command import Command
 from evennia.commands.default.muxcommand import MuxCommand
+from muddery.server.dialoguehandler import DIALOGUE_HANDLER
 
 
 # limit symbol import for API
@@ -486,7 +487,8 @@ class CmdGoto(Command):
 
     Usage:
         {"cmd":"goto",
-         "args":<exit's dbref>
+         "args":{"exit":<exit's dbref>,
+                 "exitname":<exit's name>}
         }
     """
     key = "goto"
@@ -505,7 +507,7 @@ class CmdGoto(Command):
 
         obj = caller.search(self.args, location=caller.location)
         if not obj:
-            string = "Can not find exit %s" % (self.args)
+            string = "Can not find exit %s" % (self.args.exitname)
             logger.log_errmsg(string)
             caller.msg({"alert":string})
             return
@@ -521,4 +523,58 @@ class CmdGoto(Command):
             else:
                 # No shorthand error message. Call hook.
                 obj.at_failed_traverse(caller)
+
+
+#------------------------------------------------------------
+# talk to npc
+#------------------------------------------------------------
+
+class CmdTalk(Command):
+    """
+    talk to NPC
+
+    Usage:
+        {"cmd":"talk",
+         "args":{"npc":<npc's dbref>,
+                 "npcname":<npc's name>,
+                 "dialogue":[<talk's dialogue>],
+                 "sentence":[<talk's sentence>]}
+        }
+    """
+    key = "talk"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Talk to NPC."
+        caller = self.caller
+
+        if not self.args:
+            string = "You should talk to someone."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+        
+        if not self.args.npc:
+            string = "You should talk to someone."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        npc = caller.search(self.args.npc, location=caller.location)
+        if not npc:
+            string = "Can not find %s" % (self.args.npcname)
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        dialogue = ""
+        if self.args.hasattr("dialogue"):
+            dialogue = self.args["dialogue"]
+
+        sentence = ""
+        if self.args.hasattr("sentence"):
+            sentence = self.args["sentence"]
+        
+        DIALOGUE_HANDLER.get_next_dialogue
 
