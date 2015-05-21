@@ -1,0 +1,8 @@
+dialogue,sentence,speaker,content,next,condition,action
+dlg_01,1,p,What can you do?,,,
+dlg_01,2,n,I can poison you.,5,hp >= max_hp,
+dlg_01,3,n,I can heal and I can poison you.,"3,4",,
+dlg_01,4,p,Heal me!,6,,hp = max_hp
+dlg_01,5,p,Poison me!,7,,hp /= 2
+dlg_01,6,n,HP is full!,,,
+dlg_01,7,n,HP is cut by 50%.,,,

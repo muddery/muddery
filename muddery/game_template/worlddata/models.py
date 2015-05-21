@@ -89,14 +89,37 @@ class world_npcs(models.Model):
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)
     home = models.CharField(max_length=255, blank=True)
-    conversation = models.CharField(max_length=255, blank=True)
+    dialogue = models.CharField(max_length=255, blank=True)
     lock = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
-        verbose_name = "World Object List"
-        verbose_name_plural = "World Object List"
+        verbose_name = "World NPC List"
+        verbose_name_plural = "World NPC List"
+
+
+
+#------------------------------------------------------------
+#
+# store all dialogues
+#
+#------------------------------------------------------------
+class world_dialogues(models.Model):
+    "Store all unique objects."
+    
+    dialogue = models.CharField(max_length=255, primary_key=True)
+    sentence = models.CharField(max_length=255, primary_key=True)
+    speaker = models.CharField(max_length=255, blank=True)
+    content = models.TextField(blank=True)
+    next = models.CharField(max_length=255, blank=True)
+    condition = models.TextField(blank=True)
+    action = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "World Dialogue List"
+        verbose_name_plural = "World Dialogue List"
 
 
 #------------------------------------------------------------
