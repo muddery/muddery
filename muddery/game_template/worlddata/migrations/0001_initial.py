@@ -11,6 +11,23 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='dialogues',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('dialogue', models.CharField(max_length=255)),
+                ('sentence', models.IntegerField()),
+                ('speaker', models.CharField(max_length=255, blank=True)),
+                ('content', models.TextField(blank=True)),
+                ('next', models.CharField(max_length=255, blank=True)),
+                ('condition', models.TextField(blank=True)),
+                ('action', models.TextField(blank=True)),
+            ],
+            options={
+                'verbose_name': 'World Dialogue List',
+                'verbose_name_plural': 'World Dialogue List',
+            },
+        ),
+        migrations.CreateModel(
             name='personal_objects',
             fields=[
                 ('key', models.CharField(max_length=255, serialize=False, primary_key=True)),
@@ -70,13 +87,13 @@ class Migration(migrations.Migration):
                 ('desc', models.TextField(blank=True)),
                 ('location', models.CharField(max_length=255, blank=True)),
                 ('home', models.CharField(max_length=255, blank=True)),
-                ('conversation', models.CharField(max_length=255, blank=True)),
+                ('dialogue', models.CharField(max_length=255, blank=True)),
                 ('lock', models.CharField(max_length=255, blank=True)),
                 ('attributes', models.TextField(blank=True)),
             ],
             options={
-                'verbose_name': 'World Object List',
-                'verbose_name_plural': 'World Object List',
+                'verbose_name': 'World NPC List',
+                'verbose_name_plural': 'World NPC List',
             },
         ),
         migrations.CreateModel(

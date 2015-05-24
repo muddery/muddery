@@ -38,9 +38,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         super(MudderyCharacter, self).at_object_creation()
 
-        # add default hp
-        self.db.hp = 100
-
 
     def at_object_receive(self, moved_obj, source_location):
         """

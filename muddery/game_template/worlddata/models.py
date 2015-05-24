@@ -99,29 +99,6 @@ class world_npcs(models.Model):
         verbose_name_plural = "World NPC List"
 
 
-
-#------------------------------------------------------------
-#
-# store all dialogues
-#
-#------------------------------------------------------------
-class world_dialogues(models.Model):
-    "Store all unique objects."
-    
-    dialogue = models.CharField(max_length=255, primary_key=True)
-    sentence = models.CharField(max_length=255, primary_key=True)
-    speaker = models.CharField(max_length=255, blank=True)
-    content = models.TextField(blank=True)
-    next = models.CharField(max_length=255, blank=True)
-    condition = models.TextField(blank=True)
-    action = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        verbose_name = "World Dialogue List"
-        verbose_name_plural = "World Dialogue List"
-
-
 #------------------------------------------------------------
 #
 # store all details
@@ -164,3 +141,24 @@ class personal_objects(models.Model):
         verbose_name = "Personal Object List"
         verbose_name_plural = "Personal Object List"
 
+
+#------------------------------------------------------------
+#
+# store all dialogues
+#
+#------------------------------------------------------------
+class dialogues(models.Model):
+    "Store all unique objects."
+    
+    dialogue = models.CharField(max_length=255)
+    sentence = models.IntegerField()
+    speaker = models.CharField(max_length=255, blank=True)
+    content = models.TextField(blank=True)
+    next = models.CharField(max_length=255, blank=True)
+    condition = models.TextField(blank=True)
+    action = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "World Dialogue List"
+        verbose_name_plural = "World Dialogue List"

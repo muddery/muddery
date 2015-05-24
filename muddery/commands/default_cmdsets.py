@@ -43,6 +43,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdLook())
         self.add(general.CmdGoto())
         self.add(general.CmdInventory())
+        self.add(general.CmdTalk())
+        self.add(general.CmdDialogue())
 
 
 class PlayerCmdSet(default_cmds.PlayerCmdSet):

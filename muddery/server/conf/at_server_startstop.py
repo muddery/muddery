@@ -16,13 +16,15 @@ at_server_cold_stop()
 
 """
 
+from muddery.server.dialogue_handler import DIALOGUE_HANDLER
+
 
 def at_server_start():
     """
     This is called every time the server starts up, regardless of
     how it was shut down.
     """
-    pass
+    DIALOGUE_HANDLER.clear()
 
 
 def at_server_stop():

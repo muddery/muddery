@@ -93,17 +93,23 @@ WORLD_EXITS = ("world_exits",)
 # unique objects
 WORLD_OBJECTS = ("world_objects",)
 
+# unique npcs
+WORLD_NPCS = ("world_npcs",)
+
 # details
 WORLD_DETAILS = ("world_details",)
 
 # normal objects
 PERSONAL_OBJECTS = ("personal_objects",)
 
+# dialogues
+DIALOGUES = ("dialogues",)
+
 # all data models
 WORLD_DATA_MODELS = (WORLD_ROOMS,
                      WORLD_EXITS,
                      WORLD_OBJECTS,
+                     WORLD_NPCS,
                      WORLD_DETAILS,
-                     PERSONAL_OBJECTS)
-
-BASE_AUTOOBJ_TYPECLASS = "worldloader.objects.AutoObj"
+                     PERSONAL_OBJECTS,
+                     DIALOGUES)

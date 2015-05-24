@@ -41,7 +41,7 @@ class MudderyNPC(MudderyObject):
         # If the player's hp is lower then 50%, the NPC should use dialogue A,
         # otherwise the NPC should use dialogue B, dialogue A and its conditions
         # need to be put before dialogue B.
-        self.dialogues = data
+        self.dialogue = data
 
 
     def get_available_commands(self, caller):
