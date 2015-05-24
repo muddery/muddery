@@ -44,6 +44,19 @@ var commands = {
         sendCommand(this.cmdString("look", object));
     },
     
+    // talk
+    doTalk : function(object) {
+        sendCommand(this.cmdString("talk", object));
+    },
+    
+    // dialogue
+    doDialogue : function(caller) {
+        var args = {"npc": $(caller).attr("npc"),
+                    "dialogue": $(caller).attr("dialogue"),
+                    "sentence": $(caller).attr("sentence")};
+        sendCommand(this.cmdString("dialogue", args));
+    },
+    
     // logout
     doLogout : function() {
         sendCommand(this.cmdString("quit", ""));

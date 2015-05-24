@@ -85,6 +85,9 @@ var webclient = {
                 else if (key == "look_obj") {
                     this.displayLookObj(data[key]);
                 }
+                else if (key == "dialogue") {
+                    this.displayDialogue(data[key]);
+                }
                 else if (key == "status") {
                     this.displayStatus(data[key]);
                 }
@@ -535,6 +538,10 @@ var webclient = {
         page.html(content);
     },
 
+    displayDialogue : function(data) {
+        this.showDialogue(data);
+    },
+
     onLogin : function(data) {
         // show login UI
         $("#msg_wnd").empty();
@@ -629,6 +636,61 @@ var webclient = {
                                 </center>\
                             </div>'
         $('#input_additional').html(html_button);
+        this.doSetSizes();
+    },
+    
+    showDialogue : function(dialogues) {
+        this.doCloseBox();
+        
+        try {
+            if (dialogues.length == 0) {
+                return;
+            }
+            
+            this.createMessageBox();
+
+            if (dialogues.length == 1) {
+                var content = "";
+                if (dialogues[0].speaker.length > 0) {
+                    content += dialogues[0].speaker + ":<br>";
+                }
+                content += text2html.parseHtml(dialogues[0].content);
+                
+                $('#input_prompt').html(content);
+                
+                var html_button = '<div><br></div>\
+                <div>\
+                <center>\
+                <input type="button" id="button_center" value="NEXT" class="btn btn-primary"';
+        
+                html_button += ' npc="' + dialogues[0].npc + '"';
+                html_button += ' dialogue="' + dialogues[0].dialogue + '"';
+                html_button += ' sentence="' + dialogues[0].sentence + '"';
+                html_button += ' onClick="commands.doDialogue(this); return false;"/>\
+                </center>\
+                </div>'
+                $('#input_additional').html(html_button);
+            }
+            else {
+                var content = "";
+                if (dialogues[0].speaker.length > 0) {
+                    content += dialogues[0].speaker + ":<br>";
+                }
+
+                for (var d in dialogues) {
+                    content += '<a href="#" onclick="commands.doDialogue(this); return false;"';
+                    content += ' args="' + d["dbref"] + '">';
+                    content += text2html.parseHtml(d.content);
+                    content += '</a><br><br>';
+                }
+                
+                $('#input_prompt').html(content);
+            }
+        }
+        catch(error) {
+            this.doCloseBox();
+        }
+
         this.doSetSizes();
     },
     

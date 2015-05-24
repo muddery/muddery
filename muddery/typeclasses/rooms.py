@@ -32,7 +32,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         super(MudderyRoom, self).at_object_receive(moved_obj, source_location)
                 
         # send surrounding changes to player
-        type = get_surrounding_type(moved_obj)
+        type = self.get_surrounding_type(moved_obj)
         if type:
             change = {type: [{"dbref":moved_obj.dbref,
                              "name":moved_obj.name}]}
@@ -52,7 +52,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         super(MudderyRoom, self).at_object_left(moved_obj, target_location)
                 
         # send surrounding changes to player
-        type = get_surrounding_type(moved_obj)
+        type = self.get_surrounding_type(moved_obj)
         if type:
             change = {type: [{"dbref":moved_obj.dbref,
                              "name":moved_obj.name}]}
@@ -77,7 +77,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                    cont.access(caller, "view"))
                         
         for cont in visible:
-            type = get_surrounding_type(cont)
+            type = self.get_surrounding_type(cont)
             if type:
                 info[type].append({"dbref":cont.dbref,
                                   "name":cont.name})
@@ -94,7 +94,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         elif obj.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
             if obj.has_player:
                 return "players"
-            else
+            else:
                 return "offlines"
         elif obj.is_typeclass(settings.BASE_NPC_TYPECLASS):
             return "npcs"

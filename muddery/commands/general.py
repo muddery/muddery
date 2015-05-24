@@ -6,16 +6,16 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 """
 
 from django.conf import settings
-from evennia.utils import utils, prettytable
+from evennia.utils import utils, prettytable, logger
 from evennia.commands.command import Command
 from evennia.commands.default.muxcommand import MuxCommand
-from muddery.server.dialoguehandler import DIALOGUE_HANDLER
+from muddery.server.dialogue_handler import DIALOGUE_HANDLER
 
 
 # limit symbol import for API
 __all__ = ("CmdHome", "CmdLook", "CmdNick",
            "CmdInventory", "CmdGet", "CmdDrop", "CmdGive",
-           "CmdSay", "CmdPose", "CmdAccess")
+           "CmdSay", "CmdPose", "CmdAccess", "CmdGoto", "CmdTalk")
 
 
 class CmdHome(MuxCommand):
@@ -487,8 +487,7 @@ class CmdGoto(Command):
 
     Usage:
         {"cmd":"goto",
-         "args":{"exit":<exit's dbref>,
-                 "exitname":<exit's name>}
+         "args":{"exit":<exit's dbref>}
         }
     """
     key = "goto"
@@ -507,7 +506,7 @@ class CmdGoto(Command):
 
         obj = caller.search(self.args, location=caller.location)
         if not obj:
-            string = "Can not find exit %s" % (self.args.exitname)
+            string = "Can not find exit."
             logger.log_errmsg(string)
             caller.msg({"alert":string})
             return
@@ -531,17 +530,56 @@ class CmdGoto(Command):
 
 class CmdTalk(Command):
     """
-    talk to NPC
+    Begin to talk to a NPC.
 
     Usage:
         {"cmd":"talk",
+         "args":<object's dbref>
+        }
+
+    """
+    key = "talk"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Begin to talk to a NPC."
+        caller = self.caller
+
+        if not self.args:
+            string = "You should talk to someone."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        npc = caller.search(self.args, location=caller.location)
+        if not npc:
+            string = "Can not find the one to talk."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        next = DIALOGUE_HANDLER.get_next_dialogue(caller, npc, "", "")
+
+        caller.msg({"dialogue": next})
+
+
+#------------------------------------------------------------
+# talk to npc
+#------------------------------------------------------------
+
+class CmdDialogue(Command):
+    """
+    Talk to NPC following the dialogue.
+
+    Usage:
+        {"cmd":"dialogue",
          "args":{"npc":<npc's dbref>,
-                 "npcname":<npc's name>,
                  "dialogue":[<talk's dialogue>],
                  "sentence":[<talk's sentence>]}
         }
     """
-    key = "talk"
+    key = "dialogue"
     locks = "cmd:all()"
     help_cateogory = "General"
 
@@ -555,26 +593,30 @@ class CmdTalk(Command):
             caller.msg({"alert":string})
             return
         
-        if not self.args.npc:
+        if not hasattr(self.args, "npc"):
             string = "You should talk to someone."
             logger.log_errmsg(string)
             caller.msg({"alert":string})
             return
 
-        npc = caller.search(self.args.npc, location=caller.location)
+        npc = caller.search(self.args["npc"], location=caller.location)
         if not npc:
-            string = "Can not find %s" % (self.args.npcname)
+            string = "Can not find the one to talk."
             logger.log_errmsg(string)
             caller.msg({"alert":string})
             return
 
         dialogue = ""
-        if self.args.hasattr("dialogue"):
+        if hasattr(self.args, "dialogue"):
             dialogue = self.args["dialogue"]
 
         sentence = ""
-        if self.args.hasattr("sentence"):
+        if hasattr(self.args, "sentence"):
             sentence = self.args["sentence"]
         
-        DIALOGUE_HANDLER.get_next_dialogue
+        next = DIALOGUE_HANDLER.get_next_dialogue(caller,
+                                                  self.args["npc"],
+                                                  self.args["dialogue"],
+                                                  self.args["sentence"])
 
+        caller.msg({"dialogue": next})

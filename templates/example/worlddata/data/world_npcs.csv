@@ -1,1 +1,2 @@
-key,name,alias,typeclass,location,desc,dialog,lock,attributes
+key,name,alias,typeclass,location,desc,dialogue,lock,attributes
+npc_01,NPC,,typeclasses.npcs.NPC,limbo,This is a NPC.,dlg_01,,
