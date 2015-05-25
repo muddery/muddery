@@ -93,10 +93,16 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         super(MudderyCharacter, self).at_post_puppet()
 
         # send status to player
-        status = self.return_status()
-        self.msg({"status": status})
+        self.show_status()
         
         # send inventory data to player
+        self.show_inventory()
+
+
+    def show_inventory(self):
+        """
+        Send inventory data to player.
+        """
         inv = self.return_inventory()
         self.msg({"inventory": inv})
 
@@ -112,6 +118,15 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                         "name": item.name,
                         "desc": item.db.desc})
         return inv
+    
+    
+    def show_status(self):
+        """
+        Send status to player.
+        """
+        status = self.return_status()
+        self.msg({"status": status})
+
 
     def return_status(self):
         """

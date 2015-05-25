@@ -6,6 +6,7 @@ DialogueHandler
 import re
 from django.conf import settings
 from django.db.models.loading import get_model
+from evennia.utils import logger
 
 
 class DialogueHandler(object):
@@ -82,15 +83,16 @@ class DialogueHandler(object):
                       "5"       means current_dlg, sentence: 5
                       ""        means current_dlg, next sentence
         """
-        arg = arg.split(":", 1)
-        base_sentence = 1
+        sentence = ""
+        dialogue = ""
 
-        if len(arg) == 1:
-            sentence = int(arg[0]) if arg[0] else base_sentence
-        elif len(arg) == 2:
-            dialogue = arg[0]
-            sentence = int(arg[1]) if arg[1] else base_sentence
-    
+        arg_list = arg.split(":", 1)
+        if len(arg_list) == 1:
+            sentence = arg_list[0]
+        elif len(arg_list) == 2:
+            dialogue = arg_list[0]
+            sentence = arg_list[1]
+
         if not dialogue and not sentence:
             if current_dlg:
                 dialogue = current_dlg["dialogue"]
@@ -112,13 +114,16 @@ class DialogueHandler(object):
         """
         get npc's next dialogue
         """
-        current_dialogue = self.get_dialogue(current_dialogue, current_sentence)
+        current = self.get_dialogue(current_dialogue, current_sentence)
 
         candidates = []
 
         # get availabel dialogues
-        if current_dialogue:
-            candidates = current_dialogue["next"].split(",")
+        if current:
+            if current["next"]:
+                candidates = current["next"].split(",")
+            else:
+                candidates = [unicode(current["sentence"] + 1)]
 
         if not candidates:
             if npc:
@@ -128,9 +133,9 @@ class DialogueHandler(object):
 
         dialogues = []
         for candidate in candidates:
-            parser = self.dialogue_arg_parser(candidate, current_dialogue)
+            parser = self.dialogue_arg_parser(candidate, current)
             if parser:
-                dlg = self.get_dialogue(parser[0], parser[1])
+                dlg = self.get_dialogue(parser[0], int(parser[1]))
                 if dlg:
                     if self.match_condition(caller, dlg["condition"]):
                         # parser speaker
@@ -146,8 +151,8 @@ class DialogueHandler(object):
                         dialogues.append(dlg)
 
         return dialogues
-                    
-                    
+
+
     def match_condition(self, caller, condition):
         """
         check the condition
@@ -155,14 +160,41 @@ class DialogueHandler(object):
         if not condition:
             return True
 
-        re_words = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*")
-        condition = re_words.sub("caller.\1", condition)
+        condition = self.safe_statement(condition)
         try:
             match = eval(condition, {"caller": caller})
         except Exception, e:
-            return false
+            logger.log_errmsg("match_condition error:%s %s" % (condition, e))
+            return False
             
         return match
+
+
+    def do_dialogue_action(self, caller, dialogue, sentence):
+        """
+        do action
+        """
+        current = self.get_dialogue(dialogue, sentence)
+        if not current:
+            return
+
+        self.do_action(caller, current["action"])
+
+
+    def do_action(self, caller, action):
+        """
+        do action
+        """
+        if not action:
+            return
+
+        action = self.safe_statement(action)
+        try:
+            eval(action, {"caller": caller})
+        except Exception, e:
+            logger.log_errmsg("do_dialogue_action error:%s %s" % (action, e))
+            
+        return
 
 
     def clear(self):
@@ -170,6 +202,24 @@ class DialogueHandler(object):
         clear cache
         """
         self.dialogue_storage = {}
+
+
+    re_words = re.compile(r"([a-zA-Z_][a-zA-Z0-9_]*)")
+    def safe_statement(self, statement):
+        """
+        """
+        return self.re_words.sub(self.sub_statement, statement)
+
+
+    statement_keywords = {"not", "and", "or"}
+    def sub_statement(self, match):
+        """
+        """
+        match = match.group()
+        if match in self.statement_keywords:
+            return match
+
+        return "caller." + match
 
 
 # main dialoguehandler

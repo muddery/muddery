@@ -592,8 +592,8 @@ class CmdDialogue(Command):
             logger.log_errmsg(string)
             caller.msg({"alert":string})
             return
-        
-        if not hasattr(self.args, "npc"):
+
+        if not "npc" in self.args:
             string = "You should talk to someone."
             logger.log_errmsg(string)
             caller.msg({"alert":string})
@@ -606,17 +606,23 @@ class CmdDialogue(Command):
             caller.msg({"alert":string})
             return
 
-        dialogue = ""
-        if hasattr(self.args, "dialogue"):
+        try:
             dialogue = self.args["dialogue"]
+        except Exception, e:
+            dialogue = ""
 
-        sentence = ""
-        if hasattr(self.args, "sentence"):
-            sentence = self.args["sentence"]
-        
+        try:
+            sentence = int(self.args["sentence"])
+        except Exception, e:
+            sentence = 1
+
+        DIALOGUE_HANDLER.do_dialogue_action(caller,
+                                            dialogue,
+                                            sentence)
+
         next = DIALOGUE_HANDLER.get_next_dialogue(caller,
-                                                  self.args["npc"],
-                                                  self.args["dialogue"],
-                                                  self.args["sentence"])
+                                                  npc,
+                                                  dialogue,
+                                                  sentence)
 
         caller.msg({"dialogue": next})

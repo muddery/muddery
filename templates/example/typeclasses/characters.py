@@ -39,3 +39,25 @@ class Character(MudderyCharacter):
         # add default hp
         self.db.max_hp = 100
         self.db.hp = self.db.max_hp
+
+
+    def is_hp_full(self):
+        """
+        """
+        return self.db.hp >= self.db.max_hp
+
+
+    def recover_hp(self):
+        """
+        """
+        self.db.hp = self.db.max_hp
+        self.show_status()
+        return
+
+
+    def poison(self):
+        """
+        """
+        self.db.hp /= 2
+        self.show_status()
+        return

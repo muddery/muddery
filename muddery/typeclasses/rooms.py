@@ -91,12 +91,12 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         """
         if obj.destination:
             return "exits"
-        elif obj.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
+        elif obj.is_typeclass(settings.BASE_CHARACTER_TYPECLASS, exact=False):
             if obj.has_player:
                 return "players"
             else:
                 return "offlines"
-        elif obj.is_typeclass(settings.BASE_NPC_TYPECLASS):
+        elif obj.is_typeclass(settings.BASE_NPC_TYPECLASS, exact=False):
             return "npcs"
         else:
             return "things"
