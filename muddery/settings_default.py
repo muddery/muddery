@@ -52,19 +52,26 @@ TYPECLASS_PATHS = ["muddery.typeclasses"]
 
 # Typeclass for player objects (linked to a character) (fallback)
 BASE_PLAYER_TYPECLASS = "muddery.typeclasses.players.MudderyPlayer"
+
 # Typeclass and base for all objects (fallback)
 BASE_OBJECT_TYPECLASS = "muddery.typeclasses.objects.MudderyObject"
+
 # Typeclass for character objects linked to a player (fallback)
 BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.characters.MudderyCharacter"
+
 # Typeclass for rooms (fallback)
 BASE_ROOM_TYPECLASS = "muddery.typeclasses.rooms.MudderyRoom"
+
 # Typeclass for Exit objects (fallback).
 BASE_EXIT_TYPECLASS = "muddery.typeclasses.exits.MudderyExit"
+
 # Typeclass for Channel (fallback).
 BASE_CHANNEL_TYPECLASS = "muddery.typeclasses.channels.MudderyChannel"
+
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.
 BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
+
 # Typeclass for NPCs
 BASE_NPC_TYPECLASS = "muddery.typeclasses.npcs.MudderyNPC"
 

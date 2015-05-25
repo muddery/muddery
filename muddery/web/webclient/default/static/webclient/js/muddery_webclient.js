@@ -662,13 +662,14 @@ var webclient = {
                 <div>\
                 <center>\
                 <input type="button" id="button_center" value="NEXT" class="btn btn-primary"';
-        
+
                 html_button += ' npc="' + dialogues[0].npc + '"';
                 html_button += ' dialogue="' + dialogues[0].dialogue + '"';
                 html_button += ' sentence="' + dialogues[0].sentence + '"';
                 html_button += ' onClick="commands.doDialogue(this); return false;"/>\
                 </center>\
                 </div>'
+
                 $('#input_additional').html(html_button);
             }
             else {
@@ -677,14 +678,25 @@ var webclient = {
                     content += dialogues[0].speaker + ":<br>";
                 }
 
-                for (var d in dialogues) {
+                for (var i in dialogues) {
                     content += '<a href="#" onclick="commands.doDialogue(this); return false;"';
-                    content += ' args="' + d["dbref"] + '">';
-                    content += text2html.parseHtml(d.content);
-                    content += '</a><br><br>';
+               	 	content += ' npc="' + dialogues[i].npc + '"';
+               		content += ' dialogue="' + dialogues[i].dialogue + '"';
+                	content += ' sentence="' + dialogues[i].sentence + '"';
+                    content += '">';
+                    content += text2html.parseHtml(dialogues[i].content);
+                    content += '</a><br>';
                 }
                 
                 $('#input_prompt').html(content);
+                
+                var html_button = '<div><br></div>\
+                <div>\
+                <center>\
+                <input type="button" id="button_center" value="SELECT ONE" class="btn btn-primary" />\
+                </center>\
+                </div>'
+                $('#input_additional').html(html_button);
             }
         }
         catch(error) {
