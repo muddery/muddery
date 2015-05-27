@@ -570,7 +570,7 @@ class CmdTalk(Command):
 
 class CmdDialogue(Command):
     """
-    Talk to NPC following the dialogue.
+    Talk to NPC, using dialogues stored in db.
 
     Usage:
         {"cmd":"dialogue",
@@ -578,6 +578,9 @@ class CmdDialogue(Command):
                  "dialogue":[<talk's dialogue>],
                  "sentence":[<talk's sentence>]}
         }
+
+    Dialogue and sentence refer to the current sentence.
+    If dialogue or sentence is null, use the npc's default dialogue.
     """
     key = "dialogue"
     locks = "cmd:all()"
@@ -599,6 +602,7 @@ class CmdDialogue(Command):
             caller.msg({"alert":string})
             return
 
+        # Get the npc at the player's location.
         npc = caller.search(self.args["npc"], location=caller.location)
         if not npc:
             string = "Can not find the one to talk."
@@ -606,23 +610,24 @@ class CmdDialogue(Command):
             caller.msg({"alert":string})
             return
 
+        # Get the current sentence.
         try:
             dialogue = self.args["dialogue"]
-        except Exception, e:
-            dialogue = ""
-
-        try:
             sentence = int(self.args["sentence"])
         except Exception, e:
+            dialogue = ""
             sentence = 1
 
+        # Do this sentence's action.
         DIALOGUE_HANDLER.do_dialogue_action(caller,
                                             dialogue,
                                             sentence)
 
+        # Get next sentence.
         next = DIALOGUE_HANDLER.get_next_dialogue(caller,
                                                   npc,
                                                   dialogue,
                                                   sentence)
 
+        # Send next dialogues to the player.
         caller.msg({"dialogue": next})
