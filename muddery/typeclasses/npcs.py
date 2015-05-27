@@ -23,7 +23,8 @@ class MudderyNPC(MudderyObject):
         data = self.get_data_record()
         if not data:
             return
-        
+
+        # set NPC's default dialogues.
         self.set_dialogue(data.dialogue)
 
 
@@ -31,16 +32,8 @@ class MudderyNPC(MudderyObject):
         """
         Set NPC's dialogues.
         """
-        # set dialogue data
-        
-        # dialogue_queue stores dialogues' priority in order.
-        # Dialogues of higher position have higher priorities. It is useful in
-        # conditional dialogues.
-        #
-        # For example:
-        # If the player's hp is lower then 50%, the NPC should use dialogue A,
-        # otherwise the NPC should use dialogue B, dialogue A and its conditions
-        # need to be put before dialogue B.
+        # Set default dialogues.
+        # All dialogues which matches the condition will send to the player.
         self.dialogue = data
 
 
