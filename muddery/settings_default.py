@@ -29,6 +29,16 @@ MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
 # directory names shown in the webtemplates directory.
 WEBCLIENT_TEMPLATE = 'default'
 
+# Context processors define context variables, generally for the template
+# system to use.
+TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.i18n',
+                               'django.core.context_processors.request',
+                               'django.contrib.auth.context_processors.auth',
+                               'django.core.context_processors.media',
+                               'django.core.context_processors.debug',
+                               'muddery.web.utils.general_context.general_context',)
+
+
 ######################################################################
 # Evennia pluggable modules
 ######################################################################
@@ -36,6 +46,7 @@ WEBCLIENT_TEMPLATE = 'default'
 # The command parser module to use. See the default module for which
 # functions it must implement
 COMMAND_PARSER = "muddery.server.conf.cmdparser.cmdparser"
+
 
 ######################################################################
 # Typeclasses and other paths
@@ -74,6 +85,7 @@ BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
 
 # Typeclass for NPCs
 BASE_NPC_TYPECLASS = "muddery.typeclasses.npcs.MudderyNPC"
+
 
 ######################################################################
 # World data features

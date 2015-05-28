@@ -165,5 +165,3 @@ def build_all(caller=None):
 
     for detail_info in settings.WORLD_DETAILS:
         build_details(detail_info, caller)
-
-
