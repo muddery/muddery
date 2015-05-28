@@ -1,9 +1,6 @@
 key,name,alias,typeclass,desc,lock,attributes,location,destination
-exit_01,tutorial,,typeclasses.exits.Exit,"This starts the {gEvennia tutorial{n, using a small solo game to show off some of the server's possibilities.",,,limbo,room_01
-exit_02,exit tutorial,,typeclasses.exits.Exit,,,,room_01,room_02
-exit_03,start again,,typeclasses.exits.Exit,,,,room_02,room_01
-exit_04,exit,,typeclasses.exits.Exit,,,,room_02,limbo
-exit_05,begin adventure,,typeclasses.exits.Exit,,,,room_01,room_03
+exit_04,begin adventure,,typeclasses.exits.Exit,,,,limbo,room_03
+exit_05,exit,,typeclasses.exits.Exit,,,,room_03,limbo
 exit_06,northern path,,typeclasses.exits.Exit,This is a hardly visible footpath leading off through the rain-beaten grass. It seems to circle the trees northward. You would never had noticed it had you not spotted it from up in the tree.,view:tag(tutorial_climbed_tree) ; traverse:tag(tutorial_climbed_tree),,room_03,room_04
 exit_07,back to cliff,,typeclasses.exits.Exit,,,,room_04,room_03
 exit_08,enter,,typeclasses.exits.Exit,,,,room_04,room_05

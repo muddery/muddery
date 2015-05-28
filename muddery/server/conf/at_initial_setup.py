@@ -17,6 +17,10 @@ does what you expect it to.
 from evennia.utils import search, logger
 from muddery.utils import builder, importer, utils
 
+LIMBO_DESC = "Welcome to your new {wMuddery{n-based game! " +\
+             "Visit http://www.muddery.org if you need help, " +\
+             "want to contribute, report issues or just join the community."
+
 def at_initial_setup():
     """
     When initiate the server, give an unique id to limbo and build up the default world.
@@ -25,8 +29,9 @@ def at_initial_setup():
     # set data info to limbo
     limbo_obj = search.search_object("#2", exact=True)
     if limbo_obj:
+        limbo_obj[0].db.desc = LIMBO_DESC
         try:
-            utils.set_obj_data_info(limbo_obj[0], "", "limbo")
+            utils.set_obj_data_info(limbo_obj[0], "world_rooms", "limbo")
         except Exception, e:
             logger.log_errmsg("Can't set data info to limbo: %s" % e)
 

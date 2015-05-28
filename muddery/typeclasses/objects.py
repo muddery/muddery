@@ -368,7 +368,6 @@ class MudderyObject(DefaultObject):
         This is a convenient hook for a 'look'
         command to call.
         """
-            
         # get name and description
         info = {"dbref": self.dbref,
                 "name": self.name,
