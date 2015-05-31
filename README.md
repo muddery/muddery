@@ -71,12 +71,12 @@ muddery stop
 to start, reload or stop the server.
 
 
-# Tutorial world
-The tutorial world is developed from Evennia's tutorial world.
+# Game example
+This example is developed from Evennia's tutorial world.
 
 Move to the place where you want to place the tutorial world. It should be outside of your Muddery folder. Then run
 ```
-muddery --init your_game_name tutorial_world
+muddery --init your_game_name example
 ```
 
 Move into the game folder and run
@@ -85,4 +85,4 @@ muddery migrate
 muddery -i start
 ```
 
-The tutorial world will be built when the server is initiating.
+The game example will be built when the server is initiating.
