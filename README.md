@@ -74,7 +74,7 @@ to start, reload or stop the server.
 # Game example
 This example is developed from Evennia's tutorial world.
 
-Move to the place where you want to place the tutorial world. It should be outside of your Muddery folder. Then run
+Move to the place where you want to place the game example. It should be outside of your Muddery folder. Then run
 ```
 muddery --init your_game_name example
 ```
