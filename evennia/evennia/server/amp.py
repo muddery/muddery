@@ -255,7 +255,9 @@ class AMPProtocol(amp.AMP):
         between server and portal. AMP calls it on both sides,
         so we need to make sure to only trigger resync from the
         portal side.
+
         """
+        self.transport.setTcpNoDelay(True) # this makes for a factor x10 faster sends!
         if hasattr(self.factory, "portal"):
             # only the portal has the 'portal' property, so we know we are
             # on the portal side and can initialize the connection.
@@ -322,7 +324,7 @@ class AMPProtocol(amp.AMP):
                                                    data=part,
                                                    ipart=ipart,
                                                    nparts=nparts)
-                        deferred.addErrback(self.errback, "%s part %i/%i" % (command.key, ipart, part))
+                        deferred.addErrback(self.errback, "%s part %i/%i" % (command.key, ipart, nparts))
                         deferreds.append(deferred)
                 self.lastsend = time() # don't use now here, keep it as up-to-date as possible
                 return deferreds
@@ -345,7 +347,7 @@ class AMPProtocol(amp.AMP):
                 return []
             else:
                 # all parts in place - deserialize it
-                return loads(_MSGBUFFER.pop(hashid) + data)
+                return loads("".join(_MSGBUFFER.pop(hashid)) + data)
 
 
     # Message definition + helper methods to call/create each message type

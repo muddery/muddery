@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='personal_objects',
+            name='common_objects',
             fields=[
                 ('key', models.CharField(max_length=255, serialize=False, primary_key=True)),
                 ('name', models.CharField(max_length=255)),
@@ -41,8 +41,8 @@ class Migration(migrations.Migration):
                 ('attributes', models.TextField(blank=True)),
             ],
             options={
-                'verbose_name': 'Personal Object List',
-                'verbose_name_plural': 'Personal Object List',
+                'verbose_name': 'Common Object List',
+                'verbose_name_plural': 'Common Object List',
             },
         ),
         migrations.CreateModel(

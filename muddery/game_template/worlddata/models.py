@@ -120,11 +120,11 @@ class world_details(models.Model):
 
 #------------------------------------------------------------
 #
-# store all personal objects
+# store all common objects
 #
 #------------------------------------------------------------
-class personal_objects(models.Model):
-    "Store all personal objects."
+class common_objects(models.Model):
+    "Store all common objects."
 
     key = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
@@ -138,8 +138,8 @@ class personal_objects(models.Model):
 
     class Meta:
         "Define Django meta options"
-        verbose_name = "Personal Object List"
-        verbose_name_plural = "Personal Object List"
+        verbose_name = "Common Object List"
+        verbose_name_plural = "Common Object List"
 
 
 #------------------------------------------------------------

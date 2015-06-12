@@ -130,7 +130,7 @@ class DefaultObject(ObjectDB):
     It is recommended to create children of this class using the
     `evennia.create_object()` function rather than to initialize the class
     directly - this will both set things up and efficiently save the object
-    without obj.save() having to be called explicitly.
+    without `obj.save()` having to be called explicitly.
 
     """
     # typeclass setup
@@ -483,8 +483,8 @@ class DefaultObject(ObjectDB):
 
         Args:
             destination (Object): Reference to the object to move to. This
-                 can also be an exit object, in which case the
-                 destination property is used as destination.
+                can also be an exit object, in which case the
+                destination property is used as destination.
             quiet (bool): If true, turn off the calling of the emit hooks
                 (announce_move_to/from etc)
             emit_to_obj (Object): object to receive error messages
@@ -494,13 +494,14 @@ class DefaultObject(ObjectDB):
             to_none (bool): Allow destination to be None. Note that no hooks are run when
                  moving to a None location. If you want to run hooks, run them manually
                  (and make sure they can manage None locations).
-            move_hooks (bool): If False, turn off the calling of move-related hooks (at_before/after_move etc)
-                with quiet=True, this is as quiet a move as can be done.
+            move_hooks (bool): If False, turn off the calling of move-related hooks
+                (at_before/after_move etc) with quiet=True, this is as quiet a move
+                as can be done.
 
         Returns:
             result (bool): True/False depending on if there were problems with the move.
                     This method may also return various error messages to the
-                    emit_to_obj.
+                    `emit_to_obj`.
 
         Notes:
             No access checks are done in this method, these should be handled before
@@ -767,21 +768,24 @@ class DefaultObject(ObjectDB):
         super(ObjectDB, self).delete()
         return True
 
-    def access(self, accessing_obj, access_type='read', default=False, **kwargs):
+    def access(self, accessing_obj, access_type='read', default=False, no_superuser_bypass=False, **kwargs):
         """
         Determines if another object has permission to access this object
         in whatever way.
 
         Args:
-          accessing_obj (Object): Object trying to access this one
-          access_type (str): Type of access sought
-          default (bool): What to return if no lock of access_type was found
+          accessing_obj (Object): Object trying to access this one.
+          access_type (str, optional): Type of access sought.
+          default (bool, optional): What to return if no lock of access_type was found.
+          no_superuser_bypass (bool, optional): If `True`, don't skip
+            lock check for superuser (be careful with this one).
 
         Kwargs:
-          Passed to the at_access hook along with the result.
+          Passed on to the at_access hook along with the result of the access check.
 
         """
-        result = super(DefaultObject, self).access(accessing_obj, access_type=access_type, default=default)
+        result = super(DefaultObject, self).access(accessing_obj, access_type=access_type,
+                                                   default=default, no_superuser_bypass=no_superuser_bypass)
         self.at_access(result, accessing_obj, access_type, **kwargs)
         return result
 
@@ -1149,8 +1153,8 @@ class DefaultObject(ObjectDB):
         normally by calling
         `traversing_object.move_to(target_location)`. It is normally
         only implemented by Exit objects. If it returns False (usually
-        because move_to returned False), at_after_traverse below
-        should not be called and instead at_failed_traverse should be
+        because `move_to` returned False), `at_after_traverse` below
+        should not be called and instead `at_failed_traverse` should be
         called.
 
         Args:
@@ -1339,8 +1343,8 @@ class DefaultObject(ObjectDB):
 
 class DefaultCharacter(DefaultObject):
     """
-    This implements an Object puppeted by a Session and what that
-    means.
+    This implements an Object puppeted by a Session - that is,
+    a character avatar controlled by a player.
 
     """
 
@@ -1500,7 +1504,7 @@ class DefaultExit(DefaultObject):
         exit's name, triggering the movement between rooms.
 
         Args:
-            exiddobj (Object): The DefaultExit object to base the command on.
+            exidbobj (Object): The DefaultExit object to base the command on.
 
         """
 
@@ -1522,6 +1526,7 @@ class DefaultExit(DefaultObject):
         # add command to cmdset
         exit_cmdset.add(cmd)
         return exit_cmdset
+
 
     # Command hooks
     def basetype_setup(self):
@@ -1549,7 +1554,7 @@ class DefaultExit(DefaultObject):
         command handler. If changes need to be done on the fly to the
         cmdset before passing them on to the cmdhandler, this is the
         place to do it. This is called also if the object currently
-        have no cmdsets.
+        has no cmdsets.
 
         Kwargs:
           force_init (bool): If `True`, force a re-build of the cmdset
@@ -1561,6 +1566,13 @@ class DefaultExit(DefaultObject):
             # we are resetting, or no exit-cmdset was set. Create one dynamically.
             self.cmdset.add_default(self.create_exit_cmdset(self), permanent=False)
 
+    def at_init(self):
+        """
+        This is called when this objects is re-loaded from cache. When
+        that happens, we make sure to remove any old _exitset cmdset
+        (this most commonly occurs when renaming an existing exit)
+        """
+        self.cmdset.remove_default()
 
     def at_traverse(self, traversing_object, target_location):
         """
