@@ -160,7 +160,7 @@ def build_all(caller=None):
     for npc_info in settings.WORLD_NPCS:
         build_objects(npc_info, True, caller)
 
-    for object_info in settings.PERSONAL_OBJECTS:
+    for object_info in settings.COMMON_OBJECTS:
         build_objects(object_info, False, caller)
 
     for detail_info in settings.WORLD_DETAILS:

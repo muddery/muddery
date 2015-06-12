@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import world_rooms, world_exits, world_objects, world_details, personal_objects
+from models import world_rooms, world_exits, world_objects, world_details, common_objects
 
 # Register your models here.
 
@@ -52,7 +52,7 @@ class WorldDetailsAdmin(admin.ModelAdmin):
                     'location')
 
 
-class PersonalObjectsAdmin(admin.ModelAdmin):
+class CommonObjectsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
                     'alias',
@@ -69,4 +69,4 @@ admin.site.register(world_rooms, WorldRoomsAdmin)
 admin.site.register(world_exits, WorldExitsAdmin)
 admin.site.register(world_objects, WorldObjectsAdmin)
 admin.site.register(world_details, WorldDetailsAdmin)
-admin.site.register(personal_objects, PersonalObjectsAdmin)
+admin.site.register(common_objects, CommonObjectsAdmin)

@@ -118,8 +118,8 @@ WORLD_NPCS = ("world_npcs",)
 # details
 WORLD_DETAILS = ("world_details",)
 
-# normal objects
-PERSONAL_OBJECTS = ("personal_objects",)
+# common objects
+COMMON_OBJECTS = ("common_objects",)
 
 # dialogues
 DIALOGUES = ("dialogues",)
@@ -130,5 +130,5 @@ WORLD_DATA_MODELS = (WORLD_ROOMS,
                      WORLD_OBJECTS,
                      WORLD_NPCS,
                      WORLD_DETAILS,
-                     PERSONAL_OBJECTS,
+                     COMMON_OBJECTS,
                      DIALOGUES)
