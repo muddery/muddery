@@ -14,6 +14,7 @@ does what you expect it to.
 
 """
 
+from django.conf import settings
 from evennia.utils import search, logger
 from muddery.utils import builder, importer, utils
 
@@ -23,17 +24,8 @@ LIMBO_DESC = "Welcome to your new {wMuddery{n-based game! " +\
 
 def at_initial_setup():
     """
-    When initiate the server, give an unique id to limbo and build up the default world.
+    Build up the default world and set default locations.
     """
-
-    # set data info to limbo
-    limbo_obj = search.search_object("#2", exact=True)
-    if limbo_obj:
-        limbo_obj[0].db.desc = LIMBO_DESC
-        try:
-            utils.set_obj_data_info(limbo_obj[0], "world_rooms", "limbo")
-        except Exception, e:
-            logger.log_errmsg("Can't set data info to limbo: %s" % e)
 
     try:
         # load world data
@@ -41,5 +33,23 @@ def at_initial_setup():
 
         # build world
         builder.build_all()
+        
+        # set limbo's desc
+        limbo_obj = search.search_object("#2", exact=True)
+        if limbo_obj:
+            limbo_obj[0].db.desc = LIMBO_DESC
+
+        # set default locations
+        builder.reset_default_locations()
+        
+        # move the superuser to the start location
+        superuser = search.search_object("#1", exact=True)
+        if superuser:
+            start_location = search.search_object(settings.START_LOCATION, exact=True)
+            if start_location:
+                superuser[0].move_to(start_location[0])
+
     except Exception, e:
-        logger.log_errmsg("Can't build world: %s" % e)
+        ostring = "Can't build world: %s" % e
+        logger.log_errmsg(ostring)
+        print ostring
