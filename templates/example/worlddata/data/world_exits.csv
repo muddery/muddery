@@ -1,6 +1,6 @@
 key,name,alias,typeclass,desc,lock,attributes,location,destination
-exit_04,begin adventure,,typeclasses.exits.Exit,,,,limbo,room_03
-exit_05,exit,,typeclasses.exits.Exit,,,,room_03,limbo
+exit_04,begin adventure,,typeclasses.exits.Exit,,,,room_01,room_03
+exit_05,exit,,typeclasses.exits.Exit,,,,room_03,room_01
 exit_06,northern path,,typeclasses.exits.Exit,This is a hardly visible footpath leading off through the rain-beaten grass. It seems to circle the trees northward. You would never had noticed it had you not spotted it from up in the tree.,view:tag(tutorial_climbed_tree) ; traverse:tag(tutorial_climbed_tree),,room_03,room_04
 exit_07,back to cliff,,typeclasses.exits.Exit,,,,room_04,room_03
 exit_08,enter,,typeclasses.exits.Exit,,,,room_04,room_05
@@ -35,4 +35,4 @@ exit_36,Ancient tomb,,typeclasses.exits.Exit,,,,room_19,room_21
 exit_37,Ancient tomb,,typeclasses.exits.Exit,,,,room_20,room_21
 exit_38,back to antechamber,,typeclasses.exits.Exit,,,,room_21,room_15
 exit_39,Exit tutorial,,typeclasses.exits.Exit,,view:holds(rack_sarcophagus); traverse:holds(rack_sarcophagus),,room_21,room_22
-exit_40,exit back to Limbo,,typeclasses.exits.Exit,,,,room_22,limbo
+exit_40,exit back to Intro,,typeclasses.exits.Exit,,,,room_22,room_01

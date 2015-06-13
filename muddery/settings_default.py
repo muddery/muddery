@@ -86,7 +86,6 @@ BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
 # Typeclass for NPCs
 BASE_NPC_TYPECLASS = "muddery.typeclasses.npcs.MudderyNPC"
 
-
 ######################################################################
 # World data features
 ######################################################################
@@ -132,3 +131,15 @@ WORLD_DATA_MODELS = (WORLD_ROOMS,
                      WORLD_DETAILS,
                      COMMON_OBJECTS,
                      DIALOGUES)
+
+# The default home location used for all objects. This is used as a
+# fallback if an object's normal home location is deleted. It is the
+# key of the room. If it is empty, the home will be set to the first
+# room in WORLD_ROOMS.
+DEFAULT_HOME_KEY = ""
+
+# The start position for new characters. It is the key of the room.
+# If it is empty, the home will be set to the first room in WORLD_ROOMS.
+#  MULTISESSION_MODE = 0, 1 - used by default unloggedin create command
+#  MULTISESSION_MODE = 2,3 - used by default character_create command
+START_LOCATION_KEY = ""

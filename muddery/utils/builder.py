@@ -165,3 +165,51 @@ def build_all(caller=None):
 
     for detail_info in settings.WORLD_DETAILS:
         build_details(detail_info, caller)
+
+
+def reset_default_locations():
+    """
+    Reset default home and start location, get new positions from
+    settings.DEFAULT_HOME_KEY and settings.START_LOCATION_KEY. If they
+    are empty, set them to to the first room in settings.WORLD_ROOMS.
+    """
+
+    # set default home
+    default_home_key = settings.DEFAULT_HOME_KEY
+    if not default_home_key:
+        # get the first room in WORLD_ROOMS
+        try:
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS[0])
+            rooms = model_obj.objects.all()
+            if rooms:
+                default_home_key = rooms[0].key
+        except Exception, e:
+            ostring = "Can not find default_home_key: %s" % e
+            logger.log_errmsg(ostring)
+            print ostring
+
+    if default_home_key:
+        default_home = utils.search_obj_info_key(default_home_key)
+        if default_home:
+            settings.DEFAULT_HOME = default_home[0].dbref
+            print "settings.DEFAULT_HOME set to: %s" % settings.DEFAULT_HOME
+
+    # set start location
+    start_location_key = settings.START_LOCATION_KEY
+    if not start_location_key:
+        # get the first room in WORLD_ROOMS
+        try:
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS[0])
+            rooms = model_obj.objects.all()
+            if rooms:
+                start_location_key = rooms[0].key
+        except Exception, e:
+            ostring = "Can not find start_location_key: %s" % e
+            logger.log_errmsg(ostring)
+            print ostring
+
+    if start_location_key:
+        start_location = utils.search_obj_info_key(start_location_key)
+        if start_location:
+            settings.START_LOCATION = start_location[0].dbref
+            print "settings.START_LOCATION set to: %s" % settings.START_LOCATION

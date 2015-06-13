@@ -17,6 +17,7 @@ at_server_cold_stop()
 """
 
 from muddery.server.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils import builder
 
 
 def at_server_start():
@@ -24,6 +25,11 @@ def at_server_start():
     This is called every time the server starts up, regardless of
     how it was shut down.
     """
+    
+    # reset default locations
+    builder.reset_default_locations()
+    
+    # clear dialogues
     DIALOGUE_HANDLER.clear()
 
 
