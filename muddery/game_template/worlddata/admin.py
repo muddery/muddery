@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import world_rooms, world_exits, world_objects, world_details, common_objects
+from models import world_rooms, world_exits, world_objects, world_npcs, dialogues
 
 # Register your models here.
 
@@ -12,9 +12,7 @@ class WorldRoomsAdmin(admin.ModelAdmin):
                     'location',
                     'home',
                     'lock',
-                    'attributes',
-                    'tutorial_info',
-                    'destination')
+                    'attributes')
 
 
 class WorldExitsAdmin(admin.ModelAdmin):
@@ -27,7 +25,6 @@ class WorldExitsAdmin(admin.ModelAdmin):
                     'home',
                     'lock',
                     'attributes',
-                    'tutorial_info',
                     'destination')
 
 
@@ -40,19 +37,10 @@ class WorldObjectsAdmin(admin.ModelAdmin):
                     'location',
                     'home',
                     'lock',
-                    'attributes',
-                    'tutorial_info',
-                    'destination')
+                    'attributes')
 
 
-class WorldDetailsAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'name',
-                    'desc',
-                    'location')
-
-
-class CommonObjectsAdmin(admin.ModelAdmin):
+class WorldNPCAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
                     'alias',
@@ -60,13 +48,23 @@ class CommonObjectsAdmin(admin.ModelAdmin):
                     'desc',
                     'location',
                     'home',
+                    'dialogue',
                     'lock',
-                    'attributes',
-                    'tutorial_info',
-                    'destination')
+                    'attributes')
+
+
+class WorldDialogueAdmin(admin.ModelAdmin):
+    list_display = ('dialogue',
+                    'sentence',
+                    'speaker',
+                    'content',
+                    'next',
+                    'condition',
+                    'action')
+
 
 admin.site.register(world_rooms, WorldRoomsAdmin)
 admin.site.register(world_exits, WorldExitsAdmin)
 admin.site.register(world_objects, WorldObjectsAdmin)
-admin.site.register(world_details, WorldDetailsAdmin)
-admin.site.register(common_objects, CommonObjectsAdmin)
+admin.site.register(world_npcs, WorldNPCAdmin)
+admin.site.register(dialogues, WorldDialogueAdmin)

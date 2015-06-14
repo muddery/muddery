@@ -28,37 +28,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='common_objects',
-            fields=[
-                ('key', models.CharField(max_length=255, serialize=False, primary_key=True)),
-                ('name', models.CharField(max_length=255)),
-                ('alias', models.CharField(max_length=255, blank=True)),
-                ('typeclass', models.CharField(max_length=255)),
-                ('desc', models.TextField(blank=True)),
-                ('location', models.CharField(max_length=255, blank=True)),
-                ('home', models.CharField(max_length=255, blank=True)),
-                ('lock', models.CharField(max_length=255, blank=True)),
-                ('attributes', models.TextField(blank=True)),
-            ],
-            options={
-                'verbose_name': 'Common Object List',
-                'verbose_name_plural': 'Common Object List',
-            },
-        ),
-        migrations.CreateModel(
-            name='world_details',
-            fields=[
-                ('key', models.CharField(max_length=255, serialize=False, primary_key=True)),
-                ('name', models.CharField(max_length=255)),
-                ('desc', models.TextField(blank=True)),
-                ('location', models.CharField(max_length=255, blank=True)),
-            ],
-            options={
-                'verbose_name': 'World Detail List',
-                'verbose_name_plural': 'World Detail List',
-            },
-        ),
-        migrations.CreateModel(
             name='world_exits',
             fields=[
                 ('key', models.CharField(max_length=255, serialize=False, primary_key=True)),

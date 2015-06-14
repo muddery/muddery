@@ -101,49 +101,6 @@ class world_npcs(models.Model):
 
 #------------------------------------------------------------
 #
-# store all details
-#
-#------------------------------------------------------------
-class world_details(models.Model):
-    "Store all details."
-
-    key = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    desc = models.TextField(blank=True)
-    location = models.CharField(max_length=255, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        verbose_name = "World Detail List"
-        verbose_name_plural = "World Detail List"
-
-
-#------------------------------------------------------------
-#
-# store all common objects
-#
-#------------------------------------------------------------
-class common_objects(models.Model):
-    "Store all common objects."
-
-    key = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    alias = models.CharField(max_length=255, blank=True)
-    typeclass = models.CharField(max_length=255)
-    desc = models.TextField(blank=True)
-    location = models.CharField(max_length=255, blank=True)
-    home = models.CharField(max_length=255, blank=True)
-    lock = models.CharField(max_length=255, blank=True)
-    attributes = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        verbose_name = "Common Object List"
-        verbose_name_plural = "Common Object List"
-
-
-#------------------------------------------------------------
-#
 # store all dialogues
 #
 #------------------------------------------------------------
