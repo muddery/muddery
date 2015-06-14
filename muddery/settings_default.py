@@ -114,12 +114,6 @@ WORLD_OBJECTS = ("world_objects",)
 # unique npcs
 WORLD_NPCS = ("world_npcs",)
 
-# details
-WORLD_DETAILS = ("world_details",)
-
-# common objects
-COMMON_OBJECTS = ("common_objects",)
-
 # dialogues
 DIALOGUES = ("dialogues",)
 
@@ -128,8 +122,6 @@ WORLD_DATA_MODELS = (WORLD_ROOMS,
                      WORLD_EXITS,
                      WORLD_OBJECTS,
                      WORLD_NPCS,
-                     WORLD_DETAILS,
-                     COMMON_OBJECTS,
                      DIALOGUES)
 
 # The default home location used for all objects. This is used as a
