@@ -120,11 +120,20 @@ div {margin:0px;}
   
 /* Main scrolling message area */
 #msg_wnd {
-  height: 100%;
-  width: auto;
-  padding: 0 1em 0 1em;
-  overflow-x: hidden;
-  overflow-y: auto }
+    height: 100%;
+    width: auto;
+    padding: 0 1em 0 1em;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#prompt_bar {
+    height: 18px;
+    width: auto;
+    padding: 0 1em 0 1em;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
 
 #tab_content {
     height: 240px;
