@@ -516,11 +516,26 @@ var webclient = {
     },
     
     displayStatus : function(data) {
+        // refresh prompt bar
+        var bar = $("#prompt_bar");
+        var prompt = "";
+        var element = "";
+        
+        try {
+            element = "<span class='white'> HP: ";
+            element += data["hp"].toString();
+            element += "</span>";
+            
+            prompt += element;
+        }
+        catch(error) {
+        }
+        bar.html(prompt);
+        
         // display player's status
         var page = $("#page_status");
         
         var content = "";
-        var element = "";
         
         // add player's status
         content += "<div>";
@@ -552,6 +567,7 @@ var webclient = {
     onLogout : function(data) {
         // show unlogin UI
         $("#msg_wnd").empty();
+        $("#prompt_bar").empty();
         this.showUnloginTabs();
         this.showPage("login");
         
@@ -584,16 +600,20 @@ var webclient = {
         }
         
         var middle_h = $('#middlewindow').outerHeight(true);
-        var total_h = middle_h - 2;
+        var bottom_bar_h = 18;
+        var total_h = middle_h - bottom_bar_h;
+        var prompt_h = 18;
         var tab_bar_h = 30;
         var tab_content_max_h = 360;
-        if (total_h + tab_bar_h > tab_content_max_h * 2) {
+        if (total_h + prompt_h + tab_bar_h > tab_content_max_h * 2) {
             $('#msg_wnd').height(middle_h - tab_bar_h - tab_content_max_h - 2);
+            $('#prompt').height(prompt_h);
             $('#tab_bar').height(tab_bar_h);
             $('#tab_content').height(tab_content_max_h);
         }
         else {
-            $('#msg_wnd').height(total_h / 2 - tab_bar_h);
+            $('#msg_wnd').height(total_h / 2 - prompt_h - tab_bar_h);
+            $('#prompt').height(prompt_h);
             $('#tab_bar').height(tab_bar_h);
             $('#tab_content').height(total_h / 2);
         }
