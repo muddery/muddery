@@ -7,8 +7,7 @@
 #
 
 from django.conf import settings
-from muddery.utils.utils import get_muddery_version
-import socket
+from muddery.utils import utils
 
 # Determine the site name and server version
 
@@ -16,7 +15,7 @@ try:
     GAME_NAME = settings.SERVERNAME.strip()
 except AttributeError:
     GAME_NAME = "Muddery"
-SERVER_VERSION = get_muddery_version()
+SERVER_VERSION = utils.get_muddery_version()
 
 
 # Setup lists of the most relevant apps so
@@ -32,14 +31,8 @@ WEBSITE = ['Flatpages', 'News', 'Sites']
 # The main context processor function
 WEBCLIENT_ENABLED = settings.WEBCLIENT_ENABLED
 WEBSOCKET_CLIENT_ENABLED = settings.WEBSOCKET_CLIENT_ENABLED
+WEBSOCKET_CLIENT_PORT = settings.WEBSOCKET_CLIENT_PORT
 
-if settings.WEBSOCKET_CLIENT_URL:
-    WSURL = "%s:%s" % (settings.WEBSOCKET_CLIENT_URL, settings.WEBSOCKET_CLIENT_PORT)
-else:
-    # get local IP address
-    localIP = socket.gethostbyname(socket.gethostname())
-    if localIP:
-        WSURL = "ws://%s:%s" % (localIP, settings.WEBSOCKET_CLIENT_PORT)
 
 def general_context(request):
     """
@@ -56,5 +49,5 @@ def general_context(request):
         'evennia_websiteapps':WEBSITE,
         "webclient_enabled" : WEBCLIENT_ENABLED,
         "websocket_enabled" : WEBSOCKET_CLIENT_ENABLED,
-        "websocket_url" : WSURL
+        "websocket_port" : WEBSOCKET_CLIENT_PORT
     }

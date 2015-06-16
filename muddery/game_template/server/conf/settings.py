@@ -40,9 +40,7 @@ ALLOWED_HOSTS = ["*"]
 # webserver (these should not be publicly open)
 WEBSERVER_PORTS = [(8000, 5001)]
 
-# Actual URL for webclient component to reach the websocket.
-# The WEBSOCKET_CLIENT_PORT will be automatically appended to this URL.
-# If it's empty, use local IP address.
+# This setting is no use any more, so set it to blank.
 WEBSOCKET_CLIENT_URL = ""
 
 # Place to put log files
