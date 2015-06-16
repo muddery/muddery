@@ -28,6 +28,23 @@ SERVERNAME = {servername}
 # core evennia library)
 GAME_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# This is a security setting protecting against host poisoning
+# attacks.  It defaults to allowing all. In production, make
+# sure to change this to your actual host addresses/IPs.
+ALLOWED_HOSTS = ["*"]
+
+# The webserver sits behind a Portal proxy. This is a list
+# of tuples (proxyport,serverport) used. The proxyports are what
+# the Portal proxy presents to the world. The serverports are
+# the internal ports the proxy uses to forward data to the Server-side
+# webserver (these should not be publicly open)
+WEBSERVER_PORTS = [(8000, 5001)]
+
+# Actual URL for webclient component to reach the websocket.
+# The WEBSOCKET_CLIENT_PORT will be automatically appended to this URL.
+# If it's empty, use local IP address.
+WEBSOCKET_CLIENT_URL = ""
+
 # Place to put log files
 LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
 SERVER_LOG_FILE = os.path.join(LOG_DIR, 'server.log')

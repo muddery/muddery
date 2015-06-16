@@ -8,6 +8,7 @@
 
 from django.conf import settings
 from muddery.utils.utils import get_muddery_version
+import socket
 
 # Determine the site name and server version
 
@@ -31,7 +32,14 @@ WEBSITE = ['Flatpages', 'News', 'Sites']
 # The main context processor function
 WEBCLIENT_ENABLED = settings.WEBCLIENT_ENABLED
 WEBSOCKET_CLIENT_ENABLED = settings.WEBSOCKET_CLIENT_ENABLED
-WSURL = "%s:%s" % (settings.WEBSOCKET_CLIENT_URL, settings.WEBSOCKET_CLIENT_PORT)
+
+if settings.WEBSOCKET_CLIENT_URL:
+    WSURL = "%s:%s" % (settings.WEBSOCKET_CLIENT_URL, settings.WEBSOCKET_CLIENT_PORT)
+else:
+    # get local IP address
+    localIP = socket.gethostbyname(socket.gethostname())
+    if localIP:
+        WSURL = "ws://%s:%s" % (localIP, settings.WEBSOCKET_CLIENT_PORT)
 
 def general_context(request):
     """
