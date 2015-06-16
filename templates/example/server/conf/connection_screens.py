@@ -22,6 +22,10 @@ CONNECTION_SCREEN = \
 """{b=============================================================={n
     Welcome to {g%s{n, version %s!
     
+    This demo game is based on Muddery, an open-source online text game server. If you are interested in it, please visit our website www.muddery.org.
+    
+    The map of this game is developed from Evennia's tutorial world.
+    
     Please register or login!
 {b=============================================================={n""" \
  % (settings.SERVERNAME, utils.get_muddery_version())
