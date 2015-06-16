@@ -42,15 +42,15 @@ def copy_tree(source, destination):
 
 
 def set_obj_data_info(obj, model, key):
-        """
-        Set data_info's model and key. It puts info into attributes.
+    """
+    Set data_info's model and key. It puts info into attributes.
             
-        Args:
-            model: (string) Db model's name.
-            key: (string) Key of the data info.
-        """
-        obj.attributes.add("model", model, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
-        obj.attributes.add("key", key, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
+    Args:
+        model: (string) Db model's name.
+        key: (string) Key of the data info.
+    """
+    obj.attributes.add("model", model, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
+    obj.attributes.add("key", key, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
 
 
 def search_obj_info_key(key):
