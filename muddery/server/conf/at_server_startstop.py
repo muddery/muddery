@@ -16,7 +16,8 @@ at_server_cold_stop()
 
 """
 
-from muddery.server.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils import builder
 
 
@@ -31,6 +32,9 @@ def at_server_start():
     
     # clear dialogues
     DIALOGUE_HANDLER.clear()
+
+    # reload keys
+    OBJECT_KEY_HANDLER.reload()
 
 
 def at_server_stop():

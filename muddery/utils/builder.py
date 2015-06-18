@@ -3,9 +3,52 @@ This module handles importing data from csv files and creating the whole game wo
 """
 
 from muddery.utils import utils
+from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import create, search, logger
+
+
+def build_object(model_name, object_key, caller=None):
+    """
+    Build objects of a model.
+
+    Args:
+        model_name: (string) The name of the data model.
+        obj_key: (string) The key of the object.
+        caller: (command caller) If provide, running messages will send to the caller.
+    """
+    try:
+        model_obj = get_model(settings.WORLD_DATA_APP, model_name)
+        record = model_obj.objects.filter(key=object_key)
+    except Exception, e:
+        ostring = "Can not load record %s:%s %s" % (model_name, obj_key, e)
+        logger.log_errmsg(ostring)
+        if caller:
+            caller.msg(ostring)
+        return
+    
+    # Create object.
+    try:
+        obj = create.create_object(record.typeclass, record.name)
+    except Exception, e:
+        ostring = "Can not create obj %s: %s" % (record.name, e)
+        logger.log_errmsg(ostring)
+        if caller:
+            caller.msg(ostring)
+        return
+
+    try:
+        obj.set_data_info(model_name, record.key)
+        obj.load_data()
+    except Exception, e:
+        ostring = "Can not set data info to obj %s: %s" % (record.name, e)
+        logger.log_errmsg(ostring)
+        if caller:
+            caller.msg(ostring)
+        return
+
+    return obj
 
 
 def build_objects(model_name, unique, caller=None):
@@ -89,6 +132,7 @@ def build_objects(model_name, unique, caller=None):
                     logger.log_errmsg(ostring)
                     if caller:
                         caller.msg(ostring)
+                    continue
 
                 try:
                     obj.set_data_info(model_name, record.key)
@@ -98,6 +142,7 @@ def build_objects(model_name, unique, caller=None):
                     logger.log_errmsg(ostring)
                     if caller:
                         caller.msg(ostring)
+                    continue
 
     ostring = "Removed %d object(s). Created %d object(s). Updated %d object(s). Total %d objects.\n"\
               % (count_remove, count_create, count_update, len(model_obj.objects.all()))
@@ -147,6 +192,8 @@ def build_all(caller=None):
     Args:
         caller: (command caller) If provide, running messages will send to the caller.
     """
+    
+    OBJECT_KEY_HANDLER.reload()
 
     for room_info in settings.WORLD_ROOMS:
         build_objects(room_info, True, caller)

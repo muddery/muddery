@@ -67,11 +67,63 @@ class world_objects(models.Model):
     home = models.CharField(max_length=255, blank=True)
     lock = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
+    action = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
         verbose_name = "World Object List"
         verbose_name_plural = "World Object List"
+
+
+#------------------------------------------------------------
+#
+# store all spawners
+#
+#------------------------------------------------------------
+class world_spawners(models.Model):
+    "Store all unique spawners."
+
+    key = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
+    alias = models.CharField(max_length=255, blank=True)
+    typeclass = models.CharField(max_length=255)
+    desc = models.TextField(blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    home = models.CharField(max_length=255, blank=True)
+    lock = models.CharField(max_length=255, blank=True)
+    attributes = models.TextField(blank=True)
+    spawn = models.TextField(blank=True)
+    action = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "World Object List"
+        verbose_name_plural = "World Object List"
+
+
+#------------------------------------------------------------
+#
+# store all common objects
+#
+#------------------------------------------------------------
+class common_objects(models.Model):
+    "Store all common objects."
+    
+    key = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
+    alias = models.CharField(max_length=255, blank=True)
+    typeclass = models.CharField(max_length=255)
+    desc = models.TextField(blank=True)
+    max_stack = models.IntegerField(blank=True, default=1)
+    unique = models.BooleanField(blank=True)
+    lock = models.CharField(max_length=255, blank=True)
+    attributes = models.TextField(blank=True)
+    action = models.TextField(blank=True)
+    
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Common Object List"
+        verbose_name_plural = "Common Object List"
 
 
 #------------------------------------------------------------

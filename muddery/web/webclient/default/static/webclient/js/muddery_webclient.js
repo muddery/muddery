@@ -94,6 +94,9 @@ var webclient = {
                 else if (key == "inventory") {
                     this.displayInventory(data[key]);
                 }
+                else if (key == "get_object") {
+                    this.displayGetObject(data[key]);
+                }
                 else if (key == "login") {
                     this.onLogin(data[key]);
                 }
@@ -513,6 +516,10 @@ var webclient = {
         content += "</table>";
         
         page.html(content);
+    },
+    
+    
+    displayGetObject : function(data) {
     },
     
     displayStatus : function(data) {

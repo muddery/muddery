@@ -9,7 +9,7 @@ from django.conf import settings
 from evennia.utils import utils, prettytable, logger
 from evennia.commands.command import Command
 from evennia.commands.default.muxcommand import MuxCommand
-from muddery.server.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 
 
 # limit symbol import for API
@@ -631,3 +631,46 @@ class CmdDialogue(Command):
 
         # Send next dialogues to the player.
         caller.msg({"dialogue": next})
+
+
+#------------------------------------------------------------
+# loot objects
+#------------------------------------------------------------
+
+class CmdLoot(Command):
+    """
+    Loot objects.
+
+    Usage:
+        {"cmd":"loot",
+         "args":<object's dbref>
+        }
+
+    """
+    key = "loot"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Loot objects."
+        caller = self.caller
+
+        if not self.args:
+            string = "You should loot something."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        spawner = caller.search(self.args, location=caller.location)
+        if not spawner:
+            string = "Can not find the object to loot."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        try:
+            spawner.loot(caller)
+        except Exception, e:
+            ostring = "Can not loot %s: %s" % (spawner.get_info_key(), e)
+            logger.log_errmsg(ostring)
+

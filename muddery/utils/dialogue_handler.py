@@ -148,6 +148,7 @@ class DialogueHandler(object):
                 dialogue = current_dlg["dialogue"]
             else:
                 return
+            sentence = int(sentence)
         elif not sentence:
             sentence = 1
 
@@ -181,7 +182,7 @@ class DialogueHandler(object):
             parser = self.dialogue_arg_parser(candidate, current)
             if parser:
                 # get dialogue
-                dlg = self.get_dialogue(parser[0], int(parser[1]))
+                dlg = self.get_dialogue(parser[0], parser[1])
                 if dlg:
                     # check condition
                     if self.match_condition(caller, dlg["condition"]):
