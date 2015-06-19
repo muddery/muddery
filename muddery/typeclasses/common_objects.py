@@ -5,7 +5,7 @@ CommonObject is the object that players can put into their inventory.
 
 from muddery.typeclasses.objects import MudderyObject
 
-class CommonObject(MudderyObject):
+class MudderyCommonObject(MudderyObject):
     """
     This object loads attributes from world data on init automatically.
     """
@@ -14,11 +14,16 @@ class CommonObject(MudderyObject):
         """
             Set data_info to the object."
             """
-        super(CommonObject, self).load_data()
-        
         data = self.get_data_record()
         if not data:
             return
+
+        self.set_typeclass(data.typeclass)
+        self.set_name(data.name)
+        self.set_alias(data.alias)
+        self.set_desc(data.desc)
+        self.set_lock(data.lock)
+        self.set_attributes(data.attributes)
         
         # set common object's info
         self.max_stack = data.max_stack
@@ -33,7 +38,7 @@ class CommonObject(MudderyObject):
         """
         Load world data.
         """
-        super(CommonObject, self).at_init()
+        super(MudderyCommonObject, self).at_init()
 
         # need save before modify m2m fields
         self.save()

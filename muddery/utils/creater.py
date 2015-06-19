@@ -7,7 +7,8 @@ from muddery.utils.builder import build_object
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from evennia.utils import logger
 
-def create_object(self, character, object_list):
+
+def create_object(character, object_list):
     """
     Create objects.
     args:
@@ -18,7 +19,7 @@ def create_object(self, character, object_list):
              ...
             }
     """
-    if not caller:
+    if not character:
         return
 
     accepted_keys = {}
@@ -36,8 +37,8 @@ def create_object(self, character, object_list):
         # find object's info
         new_obj = build_object(model, key)
                     
-        #move the object to the caller
-        if not new_obj.move_to(caller, quiet=True, emit_to_obj=caller):
+        #move the object to the character
+        if not new_obj.move_to(character, quiet=True, emit_to_obj=character):
             new_obj.delete()
             rejected_keys[key] = object_list[key]
             rejected_names[new_obj.name] = object_list[key]
@@ -48,5 +49,5 @@ def create_object(self, character, object_list):
     message = {"get_object":
                     {"accepted": accepted_names,
                      "rejected": rejected_names}}
-    caller.msg(message)
-    caller.show_inventory()
+    character.msg(message)
+    character.show_inventory()

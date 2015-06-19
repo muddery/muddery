@@ -6,7 +6,7 @@ from muddery.utils import utils
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from django.conf import settings
 from django.db.models.loading import get_model
-from evennia.utils import create, search, logger
+from evennia.utils import create, search
 
 
 def build_object(model_name, object_key, caller=None):
@@ -21,11 +21,10 @@ def build_object(model_name, object_key, caller=None):
     try:
         model_obj = get_model(settings.WORLD_DATA_APP, model_name)
         record = model_obj.objects.filter(key=object_key)
+        record = record[0]
     except Exception, e:
         ostring = "Can not load record %s:%s %s" % (model_name, obj_key, e)
-        logger.log_errmsg(ostring)
-        if caller:
-            caller.msg(ostring)
+        print ostring
         return
     
     # Create object.
@@ -33,7 +32,7 @@ def build_object(model_name, object_key, caller=None):
         obj = create.create_object(record.typeclass, record.name)
     except Exception, e:
         ostring = "Can not create obj %s: %s" % (record.name, e)
-        logger.log_errmsg(ostring)
+        print ostring
         if caller:
             caller.msg(ostring)
         return
@@ -43,7 +42,7 @@ def build_object(model_name, object_key, caller=None):
         obj.load_data()
     except Exception, e:
         ostring = "Can not set data info to obj %s: %s" % (record.name, e)
-        logger.log_errmsg(ostring)
+        print ostring
         if caller:
             caller.msg(ostring)
         return
@@ -110,7 +109,7 @@ def build_objects(model_name, unique, caller=None):
         try:
             obj.load_data()
         except Exception, e:
-            logger.log_errmsg("%s can not load data:%s" % (obj.dbref, e))
+            print "%s can not load data:%s" % (obj.dbref, e)
 
         current_obj_keys.add(obj_key)
 
@@ -129,7 +128,7 @@ def build_objects(model_name, unique, caller=None):
                     count_create += 1
                 except Exception, e:
                     ostring = "Can not create obj %s: %s" % (record.name, e)
-                    logger.log_errmsg(ostring)
+                    print ostring
                     if caller:
                         caller.msg(ostring)
                     continue
@@ -139,7 +138,7 @@ def build_objects(model_name, unique, caller=None):
                     obj.load_data()
                 except Exception, e:
                     ostring = "Can not set data info to obj %s: %s" % (record.name, e)
-                    logger.log_errmsg(ostring)
+                    print ostring
                     if caller:
                         caller.msg(ostring)
                     continue
@@ -226,7 +225,6 @@ def reset_default_locations():
                 default_home_key = rooms[0].key
         except Exception, e:
             ostring = "Can not find default_home_key: %s" % e
-            logger.log_errmsg(ostring)
             print ostring
 
     if default_home_key:
@@ -246,7 +244,6 @@ def reset_default_locations():
                 start_location_key = rooms[0].key
         except Exception, e:
             ostring = "Can not find start_location_key: %s" % e
-            logger.log_errmsg(ostring)
             print ostring
 
     if start_location_key:

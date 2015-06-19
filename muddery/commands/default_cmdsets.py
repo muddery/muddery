@@ -45,6 +45,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdInventory())
         self.add(general.CmdTalk())
         self.add(general.CmdDialogue())
+        self.add(general.CmdLoot())
 
 
 class PlayerCmdSet(default_cmds.PlayerCmdSet):
