@@ -1,2 +1,2 @@
 key,name,alias,typeclass,desc,max_stack,unique,lock,attributes,action
-food_01,Bread,,typeclasses.object_spawners.CommonObject,This is a piece of bread.,20,0,,,
+food_01,Bread,,typeclasses.common_objects.CommonObject,This is a piece of bread.,20,0,,,

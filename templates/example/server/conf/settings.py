@@ -134,6 +134,7 @@ WORLD_DATA_MODELS = (WORLD_ROOMS,
                      WORLD_EXITS,
                      WORLD_OBJECTS,
                      WORLD_NPCS,
+                     COMMON_OBJECTS,
                      DIALOGUES)
 
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"

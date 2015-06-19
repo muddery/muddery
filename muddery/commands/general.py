@@ -661,16 +661,16 @@ class CmdLoot(Command):
             caller.msg({"alert":string})
             return
 
-        spawner = caller.search(self.args, location=caller.location)
-        if not spawner:
+        obj = caller.search(self.args, location=caller.location)
+        if not obj:
             string = "Can not find the object to loot."
             logger.log_errmsg(string)
             caller.msg({"alert":string})
             return
 
         try:
-            spawner.loot(caller)
+            obj.loot(caller)
         except Exception, e:
-            ostring = "Can not loot %s: %s" % (spawner.get_info_key(), e)
+            ostring = "Can not loot %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
 

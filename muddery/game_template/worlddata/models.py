@@ -80,8 +80,8 @@ class world_objects(models.Model):
 # store all spawners
 #
 #------------------------------------------------------------
-class world_spawners(models.Model):
-    "Store all unique spawners."
+class object_creaters(models.Model):
+    "Store all object creaters."
 
     key = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
@@ -92,7 +92,7 @@ class world_spawners(models.Model):
     home = models.CharField(max_length=255, blank=True)
     lock = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
-    spawn = models.TextField(blank=True)
+    obj_list = models.TextField(blank=True)
     action = models.TextField(blank=True)
 
     class Meta:
