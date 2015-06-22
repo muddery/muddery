@@ -9,18 +9,23 @@ from django.db.models.loading import get_model
 from evennia.utils import create, search
 
 
-def build_object(model_name, object_key, caller=None):
+def build_object(obj_key, caller=None):
     """
     Build objects of a model.
 
     Args:
-        model_name: (string) The name of the data model.
         obj_key: (string) The key of the object.
         caller: (command caller) If provide, running messages will send to the caller.
     """
+    model_name = OBJECT_KEY_HANDLER.get_model(obj_key)
+    if not model_name:
+        ostring = "Can not find the model of %s." % obj_key
+        print ostring
+        return
+
     try:
         model_obj = get_model(settings.WORLD_DATA_APP, model_name)
-        record = model_obj.objects.filter(key=object_key)
+        record = model_obj.objects.filter(key=obj_key)
         record = record[0]
     except Exception, e:
         ostring = "Can not load record %s:%s %s" % (model_name, obj_key, e)

@@ -490,7 +490,7 @@ var webclient = {
         var page = $("#page_inventory");
         
         var content = "<table class='tab_inventory'>";
-        content += "<thead><tr><th>NAME</th><th>DESC</th></tr></thead>";
+        content += "<thead><tr><th>NAME</th><th>NUM</tn><th>DESC</th></tr></thead>";
         var element = "";
 
         for (var i in data) {
@@ -502,6 +502,10 @@ var webclient = {
                 element += " cmd_args='" + obj["dbref"] + "'>";
                 element += obj["name"];
                 element += "</a></td>";
+
+                element += "<td>";
+                element += obj["number"];
+                element += "</td>";
 
                 element += "<td>";
                 element += obj["desc"];
@@ -520,8 +524,72 @@ var webclient = {
     
     
     displayGetObject : function(data) {
+        this.doCloseBox();
+        this.createMessageBox();
+        
+        var page = $("#input_prompt");
+
+        // object's info
+        var content = "";
+        var element = "";
+        var count = 0;
+
+        // add object's name
+        try {
+            var first = true;
+            var accepted = data["accepted"]
+            for (var key in accepted) {
+                element = key + ": " + accepted[key] + "<br>";
+                
+                if (first) {
+                    content += "You got:<br>";
+                    first = false;
+                }
+                content += element;
+                count += 1;
+            }
+        }
+        catch(error) {
+        }
+
+        try {
+            var first = true;
+            var rejected = data["rejected"];
+            for (var key in rejected) {
+                element = key + ": " + rejected[key] + "<br>";
+                
+                if (first) {
+                    if (count > 0) {
+                        content += "<br>"
+                    }
+                    content += "You can not get:<br>";
+                    first = false;
+                }
+                content += element;
+                count += 1;
+            }
+        }
+        catch(error) {
+        }
+        
+        if (count == 0) {
+            content = "You got nothing.";
+        }
+
+        page.html(content);
+        
+        // button
+        var html_button = '<div><br></div>\
+                             <div>\
+                                <center>\
+                                    <input type="button" id="button_center" value="OK" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
+                                </center>\
+                            </div>'
+        $('#input_additional').html(html_button);
+        this.doSetSizes();
     },
-    
+
+
     displayStatus : function(data) {
         // refresh prompt bar
         var bar = $("#prompt_bar");

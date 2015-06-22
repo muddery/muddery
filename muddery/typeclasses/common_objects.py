@@ -10,10 +10,18 @@ class MudderyCommonObject(MudderyObject):
     This object loads attributes from world data on init automatically.
     """
     
+    def at_object_creation(self):
+        """
+        Set default values.
+        """
+        # set total number
+        self.db.number = 0
+
+
     def load_data(self):
         """
-            Set data_info to the object."
-            """
+        Set data_info to the object."
+        """
         data = self.get_data_record()
         if not data:
             return
@@ -29,9 +37,6 @@ class MudderyCommonObject(MudderyObject):
         self.max_stack = data.max_stack
         self.unique = data.unique
         self.action = data.action
-        
-        # set total number
-        self.db.number = 0
 
 
     def at_init(self):

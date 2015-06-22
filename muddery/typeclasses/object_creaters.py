@@ -4,7 +4,7 @@ CommonObject is the object that players can put into their inventory.
 """
 
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils.creater import create_object
+
 
 class MudderyObjectCreater(MudderyObject):
     """
@@ -69,4 +69,5 @@ class MudderyObjectCreater(MudderyObject):
         """
         Loot objects.
         """
-        create_object(caller, self.obj_list)
+        if caller:
+            caller.receive_objects(self.obj_list)
