@@ -1,2 +1,1 @@
 key,name,alias,typeclass,desc,max_stack,unique,lock,attributes,action
-food_01,Bread,,typeclasses.common_objects.CommonObject,A piece of bread.,20,0,,,

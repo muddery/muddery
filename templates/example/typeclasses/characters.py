@@ -41,6 +41,24 @@ class Character(MudderyCharacter):
         self.db.hp = self.db.max_hp
 
 
+    def take_effect(self, effect):
+        """
+        take item's effect
+        """
+        status_changed = False
+
+        if "hp" in effect:
+            self.db.hp += int(effect["hp"])
+            status_changed = True
+            if self.db.hp < 0:
+                self.db.hp = 0
+            if self.db.hp > self.db.max_hp:
+                self.db.hp = self.db.max_hp
+    
+        if status_changed:
+            self.show_status()
+
+
     def is_hp_full(self):
         """
         """

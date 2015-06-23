@@ -129,6 +129,12 @@ SECRET_KEY = {secret_key}
 # add data app
 INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 
+# unique objects
+WORLD_OBJECTS += ("object_creaters",)
+
+# common objects
+COMMON_OBJECTS += ("foods",)
+
 # all data models
 WORLD_DATA_MODELS = (WORLD_ROOMS,
                      WORLD_EXITS,

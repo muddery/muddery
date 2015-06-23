@@ -7,7 +7,13 @@ from muddery.typeclasses.objects import MudderyObject
 
 class MudderyCommonObject(MudderyObject):
     """
-    This object loads attributes from world data on init automatically.
+    This is a common object. Players can put it in their inventories.
+    
+    There can be a lot of common objects of the same kind in the game, so their haven't
+    home and fixed locations.
+    
+    It has two additional properties: max_stack(int) and unique(bool). They decied the number
+    of the object that a player can put in his inventory.
     """
     
     def at_object_creation(self):
@@ -37,21 +43,6 @@ class MudderyCommonObject(MudderyObject):
         self.max_stack = data.max_stack
         self.unique = data.unique
         self.action = data.action
-
-
-    def at_init(self):
-        """
-        Load world data.
-        """
-        super(MudderyCommonObject, self).at_init()
-
-        # need save before modify m2m fields
-        self.save()
-
-        try:
-            self.load_data()
-        except Exception, e:
-            logger.log_errmsg("%s can not load data:%s" % (self.dbref, e))
 
 
     def get_number(self):
@@ -96,9 +87,69 @@ class MudderyCommonObject(MudderyObject):
             return
 
         if self.db.number < number:
-            raise MudderyError("%s's number below zero." % key)
+            raise MudderyError("%s's number will below zero." % key)
             return
         
         self.db.number -= number
         return
 
+
+class MudderyFood(MudderyCommonObject):
+    """
+    This is a food. Players can use it to change their properties, such as hp, mp,
+    strength, etc.
+    
+    It has an additional property: effect. The format of effect is:
+    <property name>:<effect>,<property name>:<effect>...
+    """
+
+    def load_data(self):
+        """
+        Set data_info to the object."
+        """
+        super(MudderyFood, self).load_data()
+
+        data = self.get_data_record()
+        if not data:
+            return
+
+        self.effect = {}
+        for effect in data.effect.split(","):
+            arg = effect.split(":", 1)
+            if len(arg) == 2:
+                self.effect[arg[0].strip()] = arg[1].strip()
+
+        self.effect_desc = data.effect_desc
+
+
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        "args" must be a string without ' and ", usually it is self.dbref.
+        """
+        # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
+        commands = [{"name":"USE", "cmd":"use", "args":self.dbref}]
+        return commands
+
+
+    def use(self, caller):
+        """
+        Use object.
+        """
+        if not caller:
+            return
+
+        try:
+            caller.take_effect(self.effect)
+            caller.msg({"alert":self.effect_desc})
+        except Exception, e:
+            ostring = "Can not take effect %s: %s" % (self.effect, e)
+            logger.log_errmsg(ostring)
+
+        location = self.location
+
+        self.decrease_num(1)
+        if self.db.number <= 0:
+            self.delete()
+
+        location.show_inventory()

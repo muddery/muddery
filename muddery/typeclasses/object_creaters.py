@@ -29,30 +29,13 @@ class MudderyObjectCreater(MudderyObject):
             number = 0
             arg = obj.split(":", 1)
             if len(arg) == 1:
-                obj_key = arg[0]
+                obj_key = arg[0].strip()
                 number = 1
             elif len(arg) >= 2:
-                obj_key = arg[0]
-                number = int(arg[1])
+                obj_key = arg[0].strip()
+                number = int(arg[1].strip())
 
             self.obj_list[obj_key] = number
-
-
-    def at_init(self):
-        """
-        Load world data.
-        """
-        super(MudderyObjectCreater, self).at_init()
-
-        # need save before modify m2m fields
-        self.save()
-
-        self.obj_list = {}
-
-        try:
-            self.load_data()
-        except Exception, e:
-            print "%s can not load data:%s" % (self.dbref, e)
 
 
     def get_available_commands(self, caller):
