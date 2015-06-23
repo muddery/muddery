@@ -212,8 +212,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                         "number": item.db.number,
                         "desc": item.db.desc})
         return inv
-    
-    
+
+
     def show_status(self):
         """
         Send status to player.
@@ -229,3 +229,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         status = {"hp": self.db.hp}
         
         return status
+
+
+    def take_effect(self, effect):
+        """
+        take item's effect
+        """
+        pass

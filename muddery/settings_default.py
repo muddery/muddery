@@ -109,7 +109,7 @@ WORLD_ROOMS = ("world_rooms",)
 WORLD_EXITS = ("world_exits",)
 
 # unique objects
-WORLD_OBJECTS = ("world_objects", "object_creaters",)
+WORLD_OBJECTS = ("world_objects",)
 
 # unique npcs
 WORLD_NPCS = ("world_npcs",)

@@ -128,6 +128,33 @@ class common_objects(models.Model):
 
 #------------------------------------------------------------
 #
+# store all foods
+#
+#------------------------------------------------------------
+class foods(models.Model):
+    "Store all foods."
+    
+    key = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
+    alias = models.CharField(max_length=255, blank=True)
+    typeclass = models.CharField(max_length=255)
+    desc = models.TextField(blank=True)
+    max_stack = models.IntegerField(blank=True, default=1)
+    unique = models.BooleanField(blank=True)
+    lock = models.CharField(max_length=255, blank=True)
+    attributes = models.TextField(blank=True)
+    action = models.TextField(blank=True)
+    effect = models.TextField(blank=True)
+    effect_desc = models.TextField(blank=True)
+    
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Food List"
+        verbose_name_plural = "Food List"
+
+
+#------------------------------------------------------------
+#
 # store all npcs
 #
 #------------------------------------------------------------

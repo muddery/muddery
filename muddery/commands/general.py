@@ -674,3 +674,44 @@ class CmdLoot(Command):
             ostring = "Can not loot %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
 
+
+#------------------------------------------------------------
+# use objects
+#------------------------------------------------------------
+
+class CmdUse(Command):
+    """
+    Use objects.
+
+    Usage:
+        {"cmd":"use",
+         "args":<object's dbref>
+        }
+
+    """
+    key = "use"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Use objects."
+        caller = self.caller
+
+        if not self.args:
+            string = "You should use something."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        obj = caller.search(self.args, location=caller)
+        if not obj:
+            string = "You don't have the object to use."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        try:
+            obj.use(caller)
+        except Exception, e:
+            ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
+            logger.log_errmsg(ostring)
