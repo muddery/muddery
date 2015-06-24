@@ -50,15 +50,16 @@ class Character(MudderyCharacter):
 
         result = ""
 
+        # take effect
         try:
-            # take effect
             result = self.take_effect(obj.effect)
         except Exception, e:
             ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
 
+        # decrease object's number
+        location = obj.location
         try:
-            # decrease object's number
             obj.decrease_num(1)
             if obj.db.number <= 0:
                 obj.delete()
@@ -66,7 +67,8 @@ class Character(MudderyCharacter):
             ostring = "An error occured when using %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
 
-        self.show_inventory()
+        if location:
+            location.show_inventory()
 
         return result
 
