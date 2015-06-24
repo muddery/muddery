@@ -711,7 +711,11 @@ class CmdUse(Command):
             return
 
         try:
-            obj.use(caller)
+            result = caller.use_object(obj)
         except Exception, e:
             ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
+
+        if not result:
+            result = "No result."
+        caller.msg({"alert":result})

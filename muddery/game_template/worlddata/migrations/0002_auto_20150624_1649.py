@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('typeclass', models.CharField(max_length=255)),
                 ('desc', models.TextField(blank=True)),
                 ('max_stack', models.IntegerField(default=1, blank=True)),
-                ('unique', models.BooleanField()),
+                ('unique', models.BooleanField(default=False)),
                 ('lock', models.CharField(max_length=255, blank=True)),
                 ('attributes', models.TextField(blank=True)),
                 ('action', models.TextField(blank=True)),
@@ -28,6 +28,26 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Common Object List',
                 'verbose_name_plural': 'Common Object List',
+            },
+        ),
+        migrations.CreateModel(
+            name='foods',
+            fields=[
+                ('key', models.CharField(max_length=255, serialize=False, primary_key=True)),
+                ('name', models.CharField(max_length=255)),
+                ('alias', models.CharField(max_length=255, blank=True)),
+                ('typeclass', models.CharField(max_length=255)),
+                ('desc', models.TextField(blank=True)),
+                ('max_stack', models.IntegerField(default=1, blank=True)),
+                ('unique', models.BooleanField(default=False)),
+                ('lock', models.CharField(max_length=255, blank=True)),
+                ('attributes', models.TextField(blank=True)),
+                ('action', models.TextField(blank=True)),
+                ('effect', models.TextField(blank=True)),
+            ],
+            options={
+                'verbose_name': 'Food List',
+                'verbose_name_plural': 'Food List',
             },
         ),
         migrations.CreateModel(

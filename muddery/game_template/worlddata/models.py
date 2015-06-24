@@ -115,7 +115,7 @@ class common_objects(models.Model):
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
     max_stack = models.IntegerField(blank=True, default=1)
-    unique = models.BooleanField(blank=True)
+    unique = models.BooleanField(blank=True, default=False)
     lock = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
     action = models.TextField(blank=True)
@@ -140,12 +140,11 @@ class foods(models.Model):
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
     max_stack = models.IntegerField(blank=True, default=1)
-    unique = models.BooleanField(blank=True)
+    unique = models.BooleanField(blank=True, default=False)
     lock = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
     action = models.TextField(blank=True)
     effect = models.TextField(blank=True)
-    effect_desc = models.TextField(blank=True)
     
     class Meta:
         "Define Django meta options"

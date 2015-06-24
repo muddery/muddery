@@ -119,8 +119,6 @@ class MudderyFood(MudderyCommonObject):
             if len(arg) == 2:
                 self.effect[arg[0].strip()] = arg[1].strip()
 
-        self.effect_desc = data.effect_desc
-
 
     def get_available_commands(self, caller):
         """
@@ -130,26 +128,3 @@ class MudderyFood(MudderyCommonObject):
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
         commands = [{"name":"USE", "cmd":"use", "args":self.dbref}]
         return commands
-
-
-    def use(self, caller):
-        """
-        Use object.
-        """
-        if not caller:
-            return
-
-        try:
-            caller.take_effect(self.effect)
-            caller.msg({"alert":self.effect_desc})
-        except Exception, e:
-            ostring = "Can not take effect %s: %s" % (self.effect, e)
-            logger.log_errmsg(ostring)
-
-        location = self.location
-
-        self.decrease_num(1)
-        if self.db.number <= 0:
-            self.delete()
-
-        location.show_inventory()

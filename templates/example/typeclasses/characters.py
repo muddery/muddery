@@ -41,22 +41,62 @@ class Character(MudderyCharacter):
         self.db.hp = self.db.max_hp
 
 
+    def use_object(self, obj):
+        """
+        Use object.
+        """
+        if not obj:
+            return
+
+        result = ""
+
+        try:
+            # take effect
+            result = self.take_effect(obj.effect)
+        except Exception, e:
+            ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
+            logger.log_errmsg(ostring)
+
+        try:
+            # decrease object's number
+            obj.decrease_num(1)
+            if obj.db.number <= 0:
+                obj.delete()
+        except Exception, e:
+            ostring = "An error occured when using %s: %s" % (obj.get_info_key(), e)
+            logger.log_errmsg(ostring)
+
+        self.show_inventory()
+
+        return result
+
+
     def take_effect(self, effect):
         """
         take item's effect
         """
         status_changed = False
+        result = ""
 
         if "hp" in effect:
-            self.db.hp += int(effect["hp"])
-            status_changed = True
             if self.db.hp < 0:
                 self.db.hp = 0
-            if self.db.hp > self.db.max_hp:
-                self.db.hp = self.db.max_hp
+
+            recover_hp = int(effect["hp"])
+
+            if self.db.hp + recover_hp > self.db.max_hp:
+                recover_hp = self.db.max_hp - self.db.hp
+
+            if recover_hp > 0:
+                self.db.hp += recover_hp
+                status_changed = True
+
+            result += "HP recovered by %s." % recover_hp
     
         if status_changed:
             self.show_status()
+
+        return result
 
 
     def is_hp_full(self):

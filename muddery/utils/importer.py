@@ -36,8 +36,9 @@ def import_csv(file_name, model_name):
 
         # get field types
         # type = 0    means common field
-        # type = 1    means ForeignKey field
-        # type = 2    means ManyToManyField field, not support
+        # type = 1    means Boolean field
+        # type = 2    means ForeignKey field
+        # type = 3    means ManyToManyField field, not support
         # type = -1   means field does not exist
 
         field_types = []
@@ -50,11 +51,13 @@ def import_csv(file_name, model_name):
                 # get field info
                 field = model_obj._meta.get_field(field_name)
 
-                if isinstance(field, models.ForeignKey):
+                if isinstance(field, models.BooleanField):
                     field_type = 1
+                elif isinstance(field, models.ForeignKey):
+                    field_type = 2
                     related_field = field.related_field
                 elif isinstance(field, models.ManyToManyField):
-                    field_type = 2
+                    field_type = 3
                 else:
                     field_type = 0
             except Exception, e:
@@ -79,6 +82,10 @@ def import_csv(file_name, model_name):
                     if field_type == 0:
                         record[field_name] = value
                     elif field_type == 1:
+                        # boolean value
+                        record[field_name] = (int(value) != 0)
+                    elif field_type == 2:
+                        # ForeignKey
                         arg = {}
                         arg[related_field.name] = value
                         record[field_name] = related_field.model.objects.get(**arg)
