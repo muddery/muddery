@@ -231,8 +231,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         return status
 
 
-    def take_effect(self, effect):
+    def use_object(self, obj):
         """
-        take item's effect
+        use an object
         """
         pass
