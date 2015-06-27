@@ -24,6 +24,7 @@ class Migration(migrations.Migration):
                 ('lock', models.CharField(max_length=255, blank=True)),
                 ('attributes', models.TextField(blank=True)),
                 ('action', models.TextField(blank=True)),
+                ('effect', models.TextField(blank=True)),
             ],
             options={
                 'verbose_name': 'Common Object List',

@@ -43,6 +43,7 @@ class MudderyCommonObject(MudderyObject):
         self.max_stack = data.max_stack
         self.unique = data.unique
         self.action = data.action
+        self.effect = data.effect
 
 
     def get_number(self):
@@ -99,7 +100,7 @@ class MudderyFood(MudderyCommonObject):
     This is a food. Players can use it to change their properties, such as hp, mp,
     strength, etc.
     
-    It has an additional property: effect. The format of effect is:
+    Effect field is in the format of:
     <property name>:<effect>,<property name>:<effect>...
     """
 
@@ -109,15 +110,14 @@ class MudderyFood(MudderyCommonObject):
         """
         super(MudderyFood, self).load_data()
 
-        data = self.get_data_record()
-        if not data:
-            return
-
-        self.effect = {}
-        for effect in data.effect.split(","):
-            arg = effect.split(":", 1)
+        # convert self.effect from string to dict
+        effect = {}
+        for arg in self.effect.split(","):
+            arg = arg.split(":", 1)
             if len(arg) == 2:
-                self.effect[arg[0].strip()] = arg[1].strip()
+                effect[arg[0].strip()] = arg[1].strip()
+
+        self.effect = effect
 
 
     def get_available_commands(self, caller):

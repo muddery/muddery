@@ -1,2 +1,2 @@
 key,name,alias,typeclass,location,desc,dialogue,lock,attributes
-npc_01,Guider,,typeclasses.npcs.NPC,room_03,There is a guider standing in front of you.,dlg_01,,
+npc_01,Guider,,typeclasses.npcs.NPC,room_01,There is a guider standing in front of you.,dlg_01,,
