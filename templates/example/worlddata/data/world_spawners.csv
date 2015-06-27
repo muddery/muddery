@@ -1,2 +1,0 @@
-key,name,alias,typeclass,location,desc,lock,attributes,spawn,action
-chest_01,Treasure Chest,,typeclasses.object_spawners.ObjectSpawner,room_03,This is a treasure chect! Open it!,,,food_01:3,
