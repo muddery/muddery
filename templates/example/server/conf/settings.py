@@ -143,6 +143,8 @@ WORLD_DATA_MODELS = (WORLD_ROOMS,
                      COMMON_OBJECTS,
                      DIALOGUES)
 
+EQUIP_TYPES = "equip_types"
+
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 
 # The default home location used for all objects. This is used as a

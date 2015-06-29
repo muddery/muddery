@@ -155,6 +155,25 @@ class foods(models.Model):
 
 #------------------------------------------------------------
 #
+# store all equip_types
+#
+#------------------------------------------------------------
+class equip_types(models.Model):
+    "Store all equip types."
+    
+    type = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
+    desc = models.TextField(blank=True)
+    career = models.CharField(max_length=255, blank=True)
+    
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Equipment List"
+        verbose_name_plural = "Equipment List"
+
+
+#------------------------------------------------------------
+#
 # store all equipments
 #
 #------------------------------------------------------------
@@ -173,6 +192,7 @@ class equipments(models.Model):
     action = models.TextField(blank=True)
     effect = models.TextField(blank=True)
     position = models.CharField(max_length=255, blank=True)
+    type = models.CharField(max_length=255, blank=True)
     
     class Meta:
         "Define Django meta options"

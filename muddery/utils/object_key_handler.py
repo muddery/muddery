@@ -14,7 +14,7 @@ class ObjectKeyHandler(object):
         """
         Initialize handler
         """
-        self.key_model = {}
+        self.clear()
 
 
     def clear(self):
@@ -28,7 +28,7 @@ class ObjectKeyHandler(object):
         """
         Reload data.
         """
-        self.key_model = {}
+        self.clear()
 
         model_names = [model for data_models in settings.WORLD_DATA_MODELS
                        for model in data_models]
