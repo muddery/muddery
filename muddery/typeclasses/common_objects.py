@@ -128,3 +128,38 @@ class MudderyFood(MudderyCommonObject):
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
         commands = [{"name":"USE", "cmd":"use", "args":self.dbref}]
         return commands
+
+
+class MudderyEquipment(MudderyCommonObject):
+    """
+    This is a equipment. Players can equip it to change their properties, such as attack, defence,
+    etc.
+    
+    Effect field is in the format of:
+    <property name>:<effect>,<property name>:<effect>...
+    """
+
+    def load_data(self):
+        """
+        Set data_info to the object."
+        """
+        super(MudderyFood, self).load_data()
+
+        # convert self.effect from string to dict
+        effect = {}
+        for arg in self.effect.split(","):
+            arg = arg.split(":", 1)
+            if len(arg) == 2:
+                effect[arg[0].strip()] = arg[1].strip()
+
+        self.effect = effect
+
+
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        "args" must be a string without ' and ", usually it is self.dbref.
+        """
+        # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
+        commands = [{"name":"EQUIP", "cmd":"equip", "args":self.dbref}]
+        return commands

@@ -40,6 +40,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         super(MudderyCharacter, self).at_object_creation()
 
+        self.db.equipments = {}
+
 
     def at_object_receive(self, moved_obj, source_location):
         """
@@ -233,6 +235,20 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
     def use_object(self, obj):
         """
-        use an object
+        Use an object.
+        """
+        pass
+
+
+    def equip_object(self, obj):
+        """
+        Equip an object.
+        """
+        pass
+
+
+    def take_off_object(self, obj):
+        """
+        Take off an object.
         """
         pass
