@@ -143,7 +143,7 @@ class MudderyEquipment(MudderyCommonObject):
         """
         Set data_info to the object."
         """
-        super(MudderyFood, self).load_data()
+        super(MudderyEquipment, self).load_data()
 
         # convert self.effect from string to dict
         effect = {}
@@ -161,5 +161,6 @@ class MudderyEquipment(MudderyCommonObject):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
-        commands = [{"name":"EQUIP", "cmd":"equip", "args":self.dbref}]
+        commands = [{"name":"EQUIP", "cmd":"equip", "args":self.dbref},
+                    {"name":"TAKE OFF", "cmd":"takeoff", "args":self.dbref}]
         return commands

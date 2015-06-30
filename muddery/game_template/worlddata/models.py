@@ -158,7 +158,7 @@ class foods(models.Model):
 # store all equip_types
 #
 #------------------------------------------------------------
-class equip_types(models.Model):
+class equipment_types(models.Model):
     "Store all equip types."
     
     type = models.CharField(max_length=255, primary_key=True)

@@ -11,7 +11,8 @@ creation commands.
 from muddery.typeclasses.objects import MudderyObject
 from evennia.objects.objects import DefaultCharacter
 from muddery.utils.builder import build_object
-
+from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
+from django.conf import settings
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
     """
@@ -40,7 +41,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         super(MudderyCharacter, self).at_object_creation()
 
-        self.db.equipments = {}
+        equipments = {}
+        for position in settings.EQUIP_POSITIONS:
+            equipments[position] = None
+        self.db.equipments = equipments
 
 
     def at_object_receive(self, moved_obj, source_location):
@@ -230,6 +234,15 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         status = {"hp": self.db.hp}
         
+        equipments = {}
+        for pos in self.db.equipments:
+            if self.db.equipments[pos]:
+                equipments[pos] = self.db.equipments[pos]
+            else:
+                equipments[pos] = ""
+
+        status["equipments"] = equipments
+
         return status
 
 
@@ -244,11 +257,38 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         Equip an object.
         """
-        pass
+        if not obj.location == self:
+            self.msg({"alert":"You do not have that equipment."})
+            raise MudderyError("Do not have object: %s" % obj.key)
+            return
+
+        type = obj.type
+        position = obj.position
+        career = ""
+
+        if not EQUIP_TYPE_HANDLER.can_equip(type, career):
+            self.msg({"alert":"Can not equip that equipment."})
+            raise MudderyError("Can not equip object: %s" % obj.key)
+            return
+
+        take_off_position(position)
+        self.db.equipments[position] = obj
+        self.show_status()
+
+
+    def take_off_position(self, position):
+        """
+        Take off an object from position.
+        """
+        self.db.equipments[position] = None
 
 
     def take_off_object(self, obj):
         """
         Take off an object.
         """
-        pass
+        if not obj.location == self:
+            self.msg({"alert":"You do not have that equipment."})
+            return
+
+        take_off_position(obj.position)

@@ -4,6 +4,7 @@ Object creaters.
 """
 from muddery.typeclasses.common_objects import MudderyCommonObject
 from muddery.typeclasses.common_objects import MudderyFood
+from muddery.typeclasses.common_objects import MudderyEquipment
 
 class CommonObject(MudderyCommonObject):
     """
@@ -12,6 +13,12 @@ class CommonObject(MudderyCommonObject):
 
 
 class Food(MudderyFood):
+    """
+    """
+    pass
+
+
+class Equipment(MudderyEquipment):
     """
     """
     pass
