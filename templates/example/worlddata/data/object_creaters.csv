@@ -1,2 +1,2 @@
 key,name,alias,typeclass,location,desc,lock,attributes,obj_list,action
-creator_01,Treasure Chest,,typeclasses.object_creaters.ObjectCreater,room_01,This is a treasure chest!,,,"food_01:3,food_02:3",
+creator_01,Treasure Chest,,typeclasses.object_creaters.ObjectCreater,room_01,This is a treasure chest!,,,"food_01:3,food_02:3,equip_01:1",

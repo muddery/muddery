@@ -681,7 +681,7 @@ class CmdLoot(Command):
 
 class CmdUse(Command):
     """
-    Use objects.
+    Use an object.
 
     Usage:
         {"cmd":"use",
@@ -694,7 +694,7 @@ class CmdUse(Command):
     help_cateogory = "General"
 
     def func(self):
-        "Use objects."
+        "Use an object."
         caller = self.caller
 
         if not self.args:
@@ -719,3 +719,88 @@ class CmdUse(Command):
         if not result:
             result = "No result."
         caller.msg({"alert":result})
+
+
+#------------------------------------------------------------
+# put on equipment
+#------------------------------------------------------------
+
+class CmdEquip(Command):
+    """
+    Put on an equipment.
+
+    Usage:
+        {"cmd":"equip",
+         "args":<object's dbref>
+        }
+
+    """
+    key = "equip"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Put on an equipment."
+        caller = self.caller
+
+        if not self.args:
+            string = "You should equip something."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        obj = caller.search(self.args, location=caller)
+        if not obj:
+            string = "You don't have that equipment."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        try:
+            caller.equip_object(obj)
+        except Exception, e:
+            ostring = "Can not equip %s: %s" % (obj.get_info_key(), e)
+            logger.log_errmsg(ostring)
+
+
+#------------------------------------------------------------
+# take off equipment
+#------------------------------------------------------------
+
+class CmdTakeOff(Command):
+    """
+    Take off an equipment.
+
+    Usage:
+        {"cmd":"takeoff",
+         "args":<object's dbref>
+        }
+
+    """
+    key = "takeoff"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Take off an equipment."
+        caller = self.caller
+
+        if not self.args:
+            string = "You should take off something."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        obj = caller.search(self.args, location=caller)
+        if not obj:
+            string = "You don't have that equipment."
+            logger.log_errmsg(string)
+            caller.msg({"alert":string})
+            return
+
+        try:
+            caller.take_off_object(obj)
+        except Exception, e:
+            ostring = "Can not take off %s: %s" % (obj.get_info_key(), e)
+            logger.log_errmsg(ostring)
+

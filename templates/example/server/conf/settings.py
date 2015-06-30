@@ -133,7 +133,7 @@ INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 WORLD_OBJECTS += ("object_creaters",)
 
 # common objects
-COMMON_OBJECTS += ("foods",)
+COMMON_OBJECTS += ("foods", "equipments",)
 
 # all data models
 WORLD_DATA_MODELS = (WORLD_ROOMS,
@@ -143,7 +143,7 @@ WORLD_DATA_MODELS = (WORLD_ROOMS,
                      COMMON_OBJECTS,
                      DIALOGUES)
 
-EQUIP_TYPES = "equip_types"
+EQUIP_TYPES = "equipments_types"
 
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 
@@ -158,3 +158,5 @@ DEFAULT_HOME_KEY = "room_01"
 #  MULTISESSION_MODE = 0, 1 - used by default unloggedin create command
 #  MULTISESSION_MODE = 2,3 - used by default character_create command
 START_LOCATION_KEY = "room_01"
+
+EQUIP_POSITIONS = ["head", "chest", "hand", "leg"]

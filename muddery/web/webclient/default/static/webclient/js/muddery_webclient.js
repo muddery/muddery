@@ -624,6 +624,20 @@ var webclient = {
         catch(error) {
         }
         
+                
+        try {
+            element = "<div><br></div><div>"
+            element += "<span class='white'> Equipments: ";
+            for (position in data["equipments"]) {
+                element += "<br>";
+                element += "&nbsp;&nbsp;" + position + ": " + data["equipments"][position];
+            }
+            element += "</span><br></div>";
+            content += element;
+        }
+        catch(error) {
+        }
+        
         content += "</div>";
         page.html(content);
     },

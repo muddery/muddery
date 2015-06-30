@@ -42,8 +42,11 @@ class EquipTypeHandler(object):
         """
         Check if can equip.
         """
-        if not type in self.equip_career:
+        if not equip in self.equip_career:
             return False
+
+        if not self.equip_career[equip]:
+            return True
 
         return career in self.equip_career[equip]
 
