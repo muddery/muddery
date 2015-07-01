@@ -30,12 +30,14 @@ class EquipTypeHandler(object):
         """
         self.clear()
 
-        try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.EQUIP_TYPES)
-            for record in model_obj.objects.all():
-                self.equip_career[record.type] = set(record.career.split(","))
-        except Exception, e:
-            pass
+        for model_name in settings.EQUIPMENT_TYPES:
+            try:
+                model_obj = get_model(settings.WORLD_DATA_APP, model_name)
+                for record in model_obj.objects.all():
+                    self.equip_career[record.type] = set(record.career.split(","))
+            except Exception, e:
+                print "Can not load equipment types: %s" % e
+                pass
 
     
     def can_equip(self, equip, career):

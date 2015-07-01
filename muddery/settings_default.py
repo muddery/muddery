@@ -117,16 +117,22 @@ WORLD_NPCS = ("world_npcs",)
 # common objects
 COMMON_OBJECTS = ("common_objects",)
 
+# all object data models
+OBJECT_DATA_MODELS = (WORLD_ROOMS,
+                      WORLD_EXITS,
+                      WORLD_OBJECTS,
+                      WORLD_NPCS,
+                      COMMON_OBJECTS,)
+
 # dialogues
 DIALOGUES = ("dialogues",)
 
-# all data models
-WORLD_DATA_MODELS = (WORLD_ROOMS,
-                     WORLD_EXITS,
-                     WORLD_OBJECTS,
-                     WORLD_NPCS,
-                     COMMON_OBJECTS,
-                     DIALOGUES)
+# equip types
+EQUIPMENT_TYPES = ("equipment_types",)
+
+# all other data models
+OTHER_DATA_MODELS = (DIALOGUES,
+                     EQUIPMENT_TYPES,)
 
 # The default home location used for all objects. This is used as a
 # fallback if an object's normal home location is deleted. It is the

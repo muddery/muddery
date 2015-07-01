@@ -4,6 +4,7 @@ CommonObject is the object that players can put into their inventory.
 """
 
 from muddery.typeclasses.objects import MudderyObject
+from muddery.utils.exception import MudderyError
 
 class MudderyCommonObject(MudderyObject):
     """
@@ -138,12 +139,25 @@ class MudderyEquipment(MudderyCommonObject):
     Effect field is in the format of:
     <property name>:<effect>,<property name>:<effect>...
     """
+    def at_object_creation(self):
+        """
+        Set default values.
+        """
+        super(MudderyEquipment, self).at_object_creation()
+
+        # set equip status
+        self.db.equipped = False
+
 
     def load_data(self):
         """
         Set data_info to the object."
         """
         super(MudderyEquipment, self).load_data()
+        
+        data = self.get_data_record()
+        if not data:
+            return
 
         # convert self.effect from string to dict
         effect = {}
@@ -153,6 +167,9 @@ class MudderyEquipment(MudderyCommonObject):
                 effect[arg[0].strip()] = arg[1].strip()
 
         self.effect = effect
+        
+        self.type = data.type
+        self.position = data.position
 
 
     def get_available_commands(self, caller):
@@ -161,6 +178,8 @@ class MudderyEquipment(MudderyCommonObject):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
-        commands = [{"name":"EQUIP", "cmd":"equip", "args":self.dbref},
-                    {"name":"TAKE OFF", "cmd":"takeoff", "args":self.dbref}]
+        if self.db.equipped:
+            commands = [{"name":"TAKE OFF", "cmd":"takeoff", "args":self.dbref}]
+        else:
+            commands = [{"name":"EQUIP", "cmd":"equip", "args":self.dbref}]
         return commands
