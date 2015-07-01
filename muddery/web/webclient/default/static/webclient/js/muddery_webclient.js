@@ -246,7 +246,7 @@ var webclient = {
                 for (var i in data["cmds"]) {
                     try {
                         var cmd = data["cmds"][i];
-                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
                         element += " cmd_name='" + cmd["cmd"] + "'";
                         element += " cmd_args='" + cmd["args"] + "'>";
                         element += cmd["name"];
@@ -268,7 +268,7 @@ var webclient = {
                 for (var i in data["exits"]) {
                     try {
                         var exit = data["exits"][i];
-                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
                         element += " cmd_name='goto'";
                         element += " cmd_args='" + exit["dbref"] + "'";
                         element += " dbref='" + exit["dbref"] + "'>";
@@ -296,7 +296,7 @@ var webclient = {
                 for (var i in data["things"]) {
                     try {
                         var thing = data["things"][i];
-                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
                         element += " cmd_name='look'";
                         element += " cmd_args='" + thing["dbref"] + "'";
                         element += " dbref='" + thing["dbref"] + "'>";
@@ -324,7 +324,7 @@ var webclient = {
                 for (var i in data["npcs"]) {
                     try {
                         var npc = data["npcs"][i];
-                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
                         element += " cmd_name='look'";
                         element += " cmd_args='" + npc["dbref"] + "'";
                         element += " dbref='" + npc["dbref"] + "'>";
@@ -352,7 +352,7 @@ var webclient = {
                 for (var i in data["players"]) {
                     try {
                         var player = data["players"][i];
-                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
                         element += " cmd_name='look'";
                         element += " cmd_args='" + player["dbref"] + "'";
                         element += " dbref='" + player["dbref"] + "'>";
@@ -383,7 +383,7 @@ var webclient = {
             for (var i in data[key]) {
                 try {
                     var obj = data[key][i];
-                    element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                    element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
                     element += " cmd_name='look'";
                     element += " cmd_args='" + obj["dbref"] + "'";
                     element += " dbref='" + obj["dbref"] + "'>";
@@ -458,7 +458,7 @@ var webclient = {
                 for (var i in data["cmds"]) {
                     try {
                         var cmd = data["cmds"][i];
-                        element = " <a href='#' onclick='commands.doCommandLink(this); return false;'";
+                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
                         element += " cmd_name='" + cmd["cmd"] + "'";
                         element += " cmd_args='" + cmd["args"] + "'>";
                         element += cmd["name"];
@@ -497,7 +497,7 @@ var webclient = {
             try {
                 var obj = data[i];
                 element = "<tbody><tr><td>";
-                element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
+                element += " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'"
                 element += " cmd_name='look'";
                 element += " cmd_args='" + obj["dbref"] + "'>";
                 element += obj["name"];
@@ -505,6 +505,11 @@ var webclient = {
 
                 element += "<td>";
                 element += obj["number"];
+                if ("equipped" in obj)
+                    if (obj["equipped"]) {
+                        element += " (equipped)";
+                    }
+
                 element += "</td>";
 
                 element += "<td>";

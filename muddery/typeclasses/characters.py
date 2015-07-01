@@ -9,6 +9,7 @@ creation commands.
 """
 
 from muddery.typeclasses.objects import MudderyObject
+from muddery.typeclasses.common_objects import MudderyEquipment
 from evennia.objects.objects import DefaultCharacter
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
@@ -213,10 +214,13 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         inv = []
         items = self.contents
         for item in items:
-            inv.append({"dbref": item.dbref,
-                        "name": item.name,
-                        "number": item.db.number,
-                        "desc": item.db.desc})
+            info = {"dbref": item.dbref,
+                    "name": item.name,
+                    "number": item.db.number,
+                    "desc": item.db.desc}
+            if item.is_typeclass("muddery.typeclasses.common_objects.MudderyEquipment", False):
+                info["equipped"] = item.db.equipped
+            inv.append(info)
         return inv
 
 
@@ -237,7 +241,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         equipments = {}
         for pos in self.db.equipments:
             if self.db.equipments[pos]:
-                equipments[pos] = self.db.equipments[pos]
+                equipments[pos] = self.db.equipments[pos].name
             else:
                 equipments[pos] = ""
 
@@ -259,7 +263,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         if not obj.location == self:
             self.msg({"alert":"You do not have that equipment."})
-            raise MudderyError("Do not have object: %s" % obj.key)
             return
 
         type = obj.type
@@ -268,18 +271,19 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         if not EQUIP_TYPE_HANDLER.can_equip(type, career):
             self.msg({"alert":"Can not equip that equipment."})
-            raise MudderyError("Can not equip object: %s" % obj.key)
             return
 
-        take_off_position(position)
+        self.take_off_position(position)
         self.db.equipments[position] = obj
-        self.show_status()
+        obj.db.equipped = True
 
 
     def take_off_position(self, position):
         """
         Take off an object from position.
         """
+        if self.db.equipments[position]:
+            self.db.equipments[position].db.equipped = False
         self.db.equipments[position] = None
 
 
@@ -291,4 +295,4 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             self.msg({"alert":"You do not have that equipment."})
             return
 
-        take_off_position(obj.position)
+        self.take_off_position(obj.position)

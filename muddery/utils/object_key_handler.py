@@ -30,7 +30,7 @@ class ObjectKeyHandler(object):
         """
         self.clear()
 
-        model_names = [model for data_models in settings.WORLD_DATA_MODELS
+        model_names = [model for data_models in settings.OBJECT_DATA_MODELS
                        for model in data_models]
 
         for model_name in model_names:

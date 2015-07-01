@@ -761,6 +761,12 @@ class CmdEquip(Command):
         except Exception, e:
             ostring = "Can not equip %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
+            caller.msg({"alert":"Can not equip %s." % obj.name})
+            return
+
+        caller.msg({"alert":"OK!"})
+        caller.show_status()
+        caller.show_inventory()
 
 
 #------------------------------------------------------------
@@ -803,4 +809,9 @@ class CmdTakeOff(Command):
         except Exception, e:
             ostring = "Can not take off %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
+            caller.msg({"alert":"Can not take off %s." % obj.name})
+            return
 
+        caller.msg({"alert":"OK!"})
+        caller.show_status()
+        caller.show_inventory()

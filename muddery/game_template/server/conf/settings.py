@@ -120,13 +120,16 @@ SECRET_KEY = {secret_key}
 # add data app
 INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 
-# all data models
-WORLD_DATA_MODELS = (WORLD_ROOMS,
-                     WORLD_EXITS,
-                     WORLD_OBJECTS,
-                     WORLD_NPCS,
-                     COMMON_OBJECTS,
-                     DIALOGUES)
+# all object data models
+OBJECT_DATA_MODELS = (WORLD_ROOMS,
+                      WORLD_EXITS,
+                      WORLD_OBJECTS,
+                      WORLD_NPCS,
+                      COMMON_OBJECTS,)
+
+# all other data models
+OTHER_DATA_MODELS = (DIALOGUES,
+                     EQUIPMENT_TYPES,)
 
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 

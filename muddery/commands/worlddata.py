@@ -21,7 +21,7 @@ class CmdImportData(default_cmds.MuxCommand):
     Usage:
       @importdata
 
-      If <modelname> is empty, it will import all data files in settings.WORLD_DATA_MODELS.
+      If <modelname> is empty, it will import all data files in settings.OBJECT_DATA_MODELS.
     """
     key = "@importdata"
     locks = "perm(Builders)"
@@ -37,19 +37,30 @@ class CmdImportData(default_cmds.MuxCommand):
         count = 0
 
         # get model_name, can specify the model name in args
-        # if no args is given, load all models in settings.WORLD_DATA_MODELS
+        # if no args is given, load all models in settings.OBJECT_DATA_MODELS
         models = self.args
         if models:
             models = [arg.strip() for arg in models.split(',')]
         else:
-            models = [model for data_models in settings.WORLD_DATA_MODELS
+            models = [model for data_models in settings.OBJECT_DATA_MODELS
                       for model in data_models]
+            models += [model for data_models in settings.OTHER_DATA_MODELS
+                       for model in data_models]
+
+		# get file's extension name
+        file_type = settings.WORLD_DATA_FILE_TYPE.lower()
+        ext_name = ""
+        if file_type == "csv":
+            ext_name = ".csv"
+        else:
+            caller.msg("Does not support file type %s." % settings.WORLD_DATA_FILE_TYPE)
+            caller.msg("Total %d files imported." % count)
+            return
 
         # import models one by one
         for model_name in models:
-
             # make file name
-            file_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, model_name + ".csv")
+            file_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, model_name + ext_name)
 
             # import data
             try:
@@ -57,10 +68,10 @@ class CmdImportData(default_cmds.MuxCommand):
                 caller.msg("%s imported." % model_name)
                 count += 1
             except Exception, e:
-                print e
+                caller.msg("Can not import %s." % model_name)
                 continue
 
-        caller.msg("total %d files imported." % count)
+        caller.msg("Total %d files imported." % count)
 
 
 #------------------------------------------------------------
@@ -116,7 +127,7 @@ class CmdSetDataInfo(default_cmds.MuxCommand):
         model_name = ""
 
         if key_name:
-            models = [model for data_models in settings.WORLD_DATA_MODELS
+            models = [model for data_models in settings.OBJECT_DATA_MODELS
                       for model in data_models]
 
             for model in models:

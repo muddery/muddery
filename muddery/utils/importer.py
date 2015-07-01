@@ -130,8 +130,11 @@ def import_all():
     count = 0
 
     # get model name
-    model_name_list = [model for data_models in settings.WORLD_DATA_MODELS
+    model_name_list = [model for data_models in settings.OBJECT_DATA_MODELS
                        for model in data_models]
+
+    model_name_list += [model for data_models in settings.OTHER_DATA_MODELS
+                        for model in data_models]
 
     # get file's extension name
     file_type = settings.WORLD_DATA_FILE_TYPE.lower()
