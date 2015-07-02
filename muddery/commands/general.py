@@ -764,9 +764,11 @@ class CmdEquip(Command):
             caller.msg({"alert":"Can not equip %s." % obj.name})
             return
 
-        caller.msg({"alert":"OK!"})
-        caller.show_status()
-        caller.show_inventory()
+        message = {"alert": "OK!",
+                   "status": caller.return_status(),
+                   "equipments": caller.return_equipments(),
+                   "inventory": caller.return_inventory()}
+        caller.msg(message)
 
 
 #------------------------------------------------------------
@@ -812,6 +814,8 @@ class CmdTakeOff(Command):
             caller.msg({"alert":"Can not take off %s." % obj.name})
             return
 
-        caller.msg({"alert":"OK!"})
-        caller.show_status()
-        caller.show_inventory()
+        message = {"alert": "OK!",
+                   "status": caller.return_status(),
+                   "equipments": caller.return_equipments(),
+                   "inventory": caller.return_inventory()}
+        caller.msg(message)

@@ -48,6 +48,25 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.equipments = equipments
 
 
+    def at_init(self):
+        """
+        called whenever typeclass is cached from memory,
+        at least once every server restart/reload
+        """
+        super(MudderyCharacter, self).at_init()
+
+        # set equipments status
+        equipped = set()
+        equipments = self.db.equipments
+        for position in equipments:
+            if equipments[position]:
+                equipped.add(equipments[position])
+
+        for content in self.contents:
+            if content.dbref in equipped:
+                content.equipped = True
+
+
     def at_object_receive(self, moved_obj, source_location):
         """
         Called after an object has been moved into this object.
@@ -103,6 +122,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # send status to player
         self.show_status()
+        
+        # send equipments to player
+        self.show_equipments()
         
         # send inventory data to player
         self.show_inventory()
@@ -219,7 +241,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     "number": item.db.number,
                     "desc": item.db.desc}
             if item.is_typeclass("muddery.typeclasses.common_objects.MudderyEquipment", False):
-                info["equipped"] = item.db.equipped
+                info["equipped"] = item.equipped
             inv.append(info)
         return inv
 
@@ -236,18 +258,37 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         Get character's status.
         """
-        status = {"hp": self.db.hp}
-        
-        equipments = {}
-        for pos in self.db.equipments:
-            if self.db.equipments[pos]:
-                equipments[pos] = self.db.equipments[pos].name
-            else:
-                equipments[pos] = ""
-
-        status["equipments"] = equipments
+        status = {}
+        status["hp"] = self.db.hp
 
         return status
+
+
+    def show_equipments(self):
+        """
+        Send equipments to player.
+        """
+        equipments = self.return_equipments()
+        self.msg({"equipments": equipments})
+
+
+    def return_equipments(self):
+        """
+        Get equipments' data.
+        """
+        equipments = {}
+        for position in self.db.equipments:
+            info = None
+            if self.db.equipments[position]:
+                dbref = self.db.equipments[position]
+                for obj in self.contents:
+                    if obj.dbref == dbref:
+                        info = {"dbref": obj.dbref,
+                                "name": obj.name,
+                                "desc": obj.db.desc}
+            equipments[position] = info
+
+        return equipments
 
 
     def use_object(self, obj):
@@ -274,8 +315,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             return
 
         self.take_off_position(position)
-        self.db.equipments[position] = obj
-        obj.db.equipped = True
+        self.db.equipments[position] = obj.dbref
+        obj.equipped = True
 
 
     def take_off_position(self, position):
@@ -283,7 +324,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Take off an object from position.
         """
         if self.db.equipments[position]:
-            self.db.equipments[position].db.equipped = False
+            dbref = self.db.equipments[position]
+            
+            for obj in self.contents:
+                if obj.dbref == dbref:
+                    obj.equipped = False
+
         self.db.equipments[position] = None
 
 
@@ -295,4 +341,5 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             self.msg({"alert":"You do not have that equipment."})
             return
 
-        self.take_off_position(obj.position)
+        self.db.equipments[obj.position] = None
+        obj.equipped = False

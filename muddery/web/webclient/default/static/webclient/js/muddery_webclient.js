@@ -91,6 +91,9 @@ var webclient = {
                 else if (key == "status") {
                     this.displayStatus(data[key]);
                 }
+                else if (key == "equipments") {
+                    this.displayEquipments(data[key]);
+                }
                 else if (key == "inventory") {
                     this.displayInventory(data[key]);
                 }
@@ -497,7 +500,7 @@ var webclient = {
             try {
                 var obj = data[i];
                 element = "<tbody><tr><td>";
-                element += " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'"
+                element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
                 element += " cmd_name='look'";
                 element += " cmd_args='" + obj["dbref"] + "'>";
                 element += obj["name"];
@@ -526,8 +529,7 @@ var webclient = {
         
         page.html(content);
     },
-    
-    
+
     displayGetObject : function(data) {
         this.doCloseBox();
         this.createMessageBox();
@@ -594,7 +596,6 @@ var webclient = {
         this.doSetSizes();
     },
 
-
     displayStatus : function(data) {
         // refresh prompt bar
         var bar = $("#prompt_bar");
@@ -613,8 +614,7 @@ var webclient = {
         bar.html(prompt);
         
         // display player's status
-        var page = $("#page_status");
-        
+        var block = $("#block_status");
         var content = "";
         
         // add player's status
@@ -628,23 +628,37 @@ var webclient = {
         }
         catch(error) {
         }
+    
+        content += "</div>";
+        block.html(content);
+    },
         
-                
+    displayEquipments : function(data) {
+        // display player's equipments
+        var block = $("#block_equipments");
+        var content = "";
+
         try {
-            element = "<div><br></div><div>"
-            element += "<span class='white'> Equipments: ";
-            for (position in data["equipments"]) {
+            element = "<div>Equipments: ";
+            for (position in data) {
                 element += "<br>";
-                element += "&nbsp;&nbsp;" + position + ": " + data["equipments"][position];
+                element += "&nbsp;&nbsp;" + position + ": ";
+                if (data[position] != null) {
+                    element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
+                    element += " cmd_name='look'";
+                    element += " cmd_args='" + data[position].dbref + "'>";
+                    element += data[position].name;
+                    element += "</a>"
+                }
             }
-            element += "</span><br></div>";
+            element += "</div>";
             content += element;
         }
         catch(error) {
         }
         
         content += "</div>";
-        page.html(content);
+        block.html(content);
     },
 
     displayDialogue : function(data) {
