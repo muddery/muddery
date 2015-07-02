@@ -144,9 +144,19 @@ class MudderyEquipment(MudderyCommonObject):
         Set default values.
         """
         super(MudderyEquipment, self).at_object_creation()
+    
+        self.equipped = False
 
-        # set equip status
-        self.db.equipped = False
+
+    def at_init(self):
+        """
+        called whenever typeclass is cached from memory,
+        at least once every server restart/reload
+        """
+        super(MudderyEquipment, self).at_init()
+
+        # set status
+        self.equipped = False
 
 
     def load_data(self):
@@ -178,7 +188,7 @@ class MudderyEquipment(MudderyCommonObject):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
-        if self.db.equipped:
+        if self.equipped:
             commands = [{"name":"TAKE OFF", "cmd":"takeoff", "args":self.dbref}]
         else:
             commands = [{"name":"EQUIP", "cmd":"equip", "args":self.dbref}]
