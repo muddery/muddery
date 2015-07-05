@@ -1,2 +1,3 @@
-key,name,alias,typeclass,desc,max_stack,unique,position,type,effect,lock,attributes,action
-equip_01,Hat,,typeclasses.common_objects.Equipment,This is a hat.,1,0,head,cloth,def:10,,,
+key,name,alias,typeclass,desc,max_stack,unique,position,type,lock,attributes,action,effect,attack,defence
+equip_01,Hat,,typeclasses.common_objects.Equipment,This is a hat.,1,0,head,cloth,,,,,,10
+weapon_01,Knife,,typeclasses.common_objects.Equipment,This is a hat.,1,0,head,cloth,,,,,10,

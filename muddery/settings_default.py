@@ -125,14 +125,18 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       COMMON_OBJECTS,)
 
 # dialogues
-DIALOGUES = ("dialogues",)
+DIALOGUES = "dialogues"
 
 # equip types
-EQUIPMENT_TYPES = ("equipment_types",)
+EQUIPMENT_TYPES = "equipment_types"
+
+# character levels
+CHARACTER_LEVELS = "character_level"
 
 # all other data models
 OTHER_DATA_MODELS = (DIALOGUES,
-                     EQUIPMENT_TYPES,)
+                     EQUIPMENT_TYPES,
+                     CHARACTER_LEVELS,)
 
 # The default home location used for all objects. This is used as a
 # fallback if an object's normal home location is deleted. It is the

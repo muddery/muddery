@@ -7,7 +7,10 @@ is setup to be the "default" character type created by the default
 creation commands.
 
 """
+
+from evennia.utils import logger
 from muddery.typeclasses.characters import MudderyCharacter
+
 
 class Character(MudderyCharacter):
     """
@@ -36,9 +39,25 @@ class Character(MudderyCharacter):
         """
         super(Character, self).at_object_creation()
 
-        # add default hp
-        self.db.max_hp = 100
-        self.db.hp = self.db.max_hp
+        # set level data
+        self.db.hp = 100
+        self.db.mp = 100
+
+
+    def return_status(self):
+        """
+        Get character's status.
+        """
+        status = super(Character, self).return_status()
+        status["max_exp"] = self.max_exp
+        status["max_hp"] = self.max_hp
+        status["hp"] = self.db.hp
+        status["max_mp"] = self.max_mp
+        status["mp"] = self.db.mp
+        status["attack"] = self.attack
+        status["defence"] = self.defence
+
+        return status
 
 
     def use_object(self, obj):
@@ -52,7 +71,7 @@ class Character(MudderyCharacter):
 
         # take effect
         try:
-            result = self.take_effect(obj.effect)
+            result = self.take_effect(obj)
         except Exception, e:
             ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
@@ -73,21 +92,29 @@ class Character(MudderyCharacter):
         return result
 
 
-    def take_effect(self, effect):
+    def show_status(self):
+        """
+        Send status to player.
+        """
+        status = self.return_status()
+        self.msg({"status": status})
+
+
+    def take_effect(self, obj):
         """
         take item's effect
         """
         status_changed = False
         result = ""
 
-        if "hp" in effect:
+        if hasattr(obj, "hp"):
+            recover_hp = int(obj.hp)
+                    
             if self.db.hp < 0:
                 self.db.hp = 0
 
-            recover_hp = int(effect["hp"])
-
-            if self.db.hp + recover_hp > self.db.max_hp:
-                recover_hp = self.db.max_hp - self.db.hp
+            if self.db.hp + recover_hp > self.max_hp:
+                recover_hp = self.max_hp - self.db.hp
 
             if recover_hp > 0:
                 self.db.hp += recover_hp
@@ -104,13 +131,13 @@ class Character(MudderyCharacter):
     def is_hp_full(self):
         """
         """
-        return self.db.hp >= self.db.max_hp
+        return self.db.hp >= self.max_hp
 
 
     def recover_hp(self):
         """
         """
-        self.db.hp = self.db.max_hp
+        self.db.hp = self.max_hp
         self.show_status()
         return
 

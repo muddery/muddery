@@ -16,15 +16,9 @@ class MudderyObjectCreater(MudderyObject):
         Set data_info to the object."
         """
         super(MudderyObjectCreater, self).load_data()
-        
-        data = self.get_data_record()
-        if not data:
-            return
-        
-        # set common object's info
-        self.obj_list = {}
 
-        for obj in data.obj_list.split(","):
+        obj_list = {}
+        for obj in self.obj_list.split(","):
             obj_key = ""
             number = 0
             arg = obj.split(":", 1)
@@ -35,7 +29,9 @@ class MudderyObjectCreater(MudderyObject):
                 obj_key = arg[0].strip()
                 number = int(arg[1].strip())
 
-            self.obj_list[obj_key] = number
+            obj_list[obj_key] = number
+    
+        self.obj_list = obj_list
 
 
     def get_available_commands(self, caller):

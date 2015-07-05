@@ -8,9 +8,11 @@ creation commands.
 
 """
 
+from django.db.models.loading import get_model
 from muddery.typeclasses.objects import MudderyObject
 from muddery.typeclasses.common_objects import MudderyEquipment
 from evennia.objects.objects import DefaultCharacter
+from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from django.conf import settings
@@ -41,6 +43,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             
         """
         super(MudderyCharacter, self).at_object_creation()
+        
+        self.db.level = 1
+        self.db.exp = 0
 
         equipments = {}
         for position in settings.EQUIP_POSITIONS:
@@ -54,6 +59,24 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         at least once every server restart/reload
         """
         super(MudderyCharacter, self).at_init()
+
+        # get level informations
+        try:
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_LEVELS)
+            data = model_obj.objects.filter(level=self.db.level)
+            if data:
+                data = data[0]
+                known_fields = set(["level"])
+                for field in data._meta.fields:
+                    if field.name in self.reserved_fields:
+                        print "Can not set reserved field %s!" % field.name
+                        continue
+                    if field.name in known_fields:
+                        continue
+                    setattr(self, field.name, data.serializable_value(field.name))
+
+        except Exception, e:
+            logger.log_errmsg("Can't load character level info %s: %s" % (self.db.level, e))
 
         # set equipments status
         equipped = set()
@@ -258,8 +281,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         Get character's status.
         """
-        status = {}
-        status["hp"] = self.db.hp
+        status = {"level": self.db.level,
+                  "exp": self.db.exp}
 
         return status
 

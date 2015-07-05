@@ -21,6 +21,8 @@ class MudderyObject(DefaultObject):
     This object loads attributes from world data on init automatically.
     """
 
+    reserved_fields = set(["dbref"])
+    
     def at_init(self):
         """
         Load world data.
@@ -107,14 +109,50 @@ class MudderyObject(DefaultObject):
         if not data:
             return
 
-        self.set_typeclass(data.typeclass)
-        self.set_name(data.name)
-        self.set_alias(data.alias)
-        self.set_location(data.location)
-        self.set_home(data.home)
-        self.set_desc(data.desc)
-        self.set_lock(data.lock)
-        self.set_attributes(data.attributes)
+        if hasattr(data, "typeclass"):
+            self.set_typeclass(data.typeclass)
+
+        if hasattr(data, "name"):
+            self.set_name(data.name)
+
+        if hasattr(data, "alias"):
+            self.set_alias(data.alias)
+
+        if hasattr(data, "location"):
+            self.set_location(data.location)
+
+        if hasattr(data, "desc"):
+            self.set_desc(data.desc)
+
+        if hasattr(data, "lock"):
+            self.set_lock(data.lock)
+
+        if hasattr(data, "attributes"):
+            self.set_attributes(data.attributes)
+
+        if hasattr(data, "destination"):
+            self.set_obj_destination(data.destination)
+        
+        # get other fields
+        known_fields = set(["key",
+                            "typeclass",
+                            "name",
+                            "alias",
+                            "location",
+                            "home",
+                            "desc",
+                            "lock",
+                            "attributes",
+                            "destination"])
+
+        for field in data._meta.fields:
+            if field.name in self.reserved_fields:
+                print "Can not set reserved field %s!" % field.name
+                continue
+            if field.name in known_fields:
+                continue
+
+            setattr(self, field.name, data.serializable_value(field.name))
 
 
     def set_typeclass(self, typeclass):
@@ -322,9 +360,9 @@ class MudderyObject(DefaultObject):
         
         destination_obj = destination_obj[0]
     
-        if obj.destination == destination_obj:
+        if self.destination == destination_obj:
             # No change.
-                return
+            return
 
         if self == destination_obj:
             # Can't set destination to itself.

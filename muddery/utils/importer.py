@@ -53,11 +53,13 @@ def import_csv(file_name, model_name):
 
                 if isinstance(field, models.BooleanField):
                     field_type = 1
-                elif isinstance(field, models.ForeignKey):
+                elif isinstance(field, models.IntegerField):
                     field_type = 2
+                elif isinstance(field, models.ForeignKey):
+                    field_type = 3
                     related_field = field.related_field
                 elif isinstance(field, models.ManyToManyField):
-                    field_type = 3
+                    field_type = 4
                 else:
                     field_type = 0
             except Exception, e:
@@ -83,9 +85,14 @@ def import_csv(file_name, model_name):
                         record[field_name] = value
                     elif field_type == 1:
                         # boolean value
-                        record[field_name] = (int(value) != 0)
+                        if value.isdigit():
+                            record[field_name] = (int(value) != 0)
                     elif field_type == 2:
-                        # ForeignKey
+                        # interger value
+                        if value.isdigit():
+                            record[field_name] = int(value)
+                    elif field_type == 3:
+                        # foreignKey
                         arg = {}
                         arg[related_field.name] = value
                         record[field_name] = related_field.model.objects.get(**arg)
@@ -133,8 +140,7 @@ def import_all():
     model_name_list = [model for data_models in settings.OBJECT_DATA_MODELS
                        for model in data_models]
 
-    model_name_list += [model for data_models in settings.OTHER_DATA_MODELS
-                        for model in data_models]
+    model_name_list += [model for model in settings.OTHER_DATA_MODELS]
 
     # get file's extension name
     file_type = settings.WORLD_DATA_FILE_TYPE.lower()

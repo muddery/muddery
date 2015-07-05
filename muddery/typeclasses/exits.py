@@ -53,19 +53,6 @@ class MudderyExit(MudderyObject, DefaultExit):
         traversing_object.msg({"alert": "You cannot go there."})
 
 
-    def load_data(self):
-        """
-        Set data_info to the object."
-        """
-        super(MudderyExit, self).load_data()
-        
-        data = self.get_data_record()
-        if not data:
-            return
-
-        self.set_destination(data.destination)
-
-
     def set_destination(self, destination):
         """
         Set object's destination

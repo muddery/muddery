@@ -710,6 +710,7 @@ class CmdUse(Command):
             caller.msg({"alert":string})
             return
 
+        result = ""
         try:
             result = caller.use_object(obj)
         except Exception, e:
