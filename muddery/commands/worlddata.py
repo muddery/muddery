@@ -44,8 +44,7 @@ class CmdImportData(default_cmds.MuxCommand):
         else:
             models = [model for data_models in settings.OBJECT_DATA_MODELS
                       for model in data_models]
-            models += [model for data_models in settings.OTHER_DATA_MODELS
-                       for model in data_models]
+            models += [model for model in settings.OTHER_DATA_MODELS]
 
 		# get file's extension name
         file_type = settings.WORLD_DATA_FILE_TYPE.lower()

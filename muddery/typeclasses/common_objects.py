@@ -40,11 +40,23 @@ class MudderyCommonObject(MudderyObject):
         self.set_lock(data.lock)
         self.set_attributes(data.attributes)
         
-        # set common object's info
-        self.max_stack = data.max_stack
-        self.unique = data.unique
-        self.action = data.action
-        self.effect = data.effect
+        # get other fields
+        known_fields = set(["key",
+                            "typeclass",
+                            "name",
+                            "alias",
+                            "desc",
+                            "lock",
+                            "attributes"])
+
+        for field in data._meta.fields:
+            if field.name in self.reserved_fields:
+                print "Can not set reserved field %s!" % field.name
+                continue
+            if field.name in known_fields:
+                continue
+
+            setattr(self, field.name, data.serializable_value(field.name))
 
 
     def get_number(self):
@@ -105,22 +117,6 @@ class MudderyFood(MudderyCommonObject):
     <property name>:<effect>,<property name>:<effect>...
     """
 
-    def load_data(self):
-        """
-        Set data_info to the object."
-        """
-        super(MudderyFood, self).load_data()
-
-        # convert self.effect from string to dict
-        effect = {}
-        for arg in self.effect.split(","):
-            arg = arg.split(":", 1)
-            if len(arg) == 2:
-                effect[arg[0].strip()] = arg[1].strip()
-
-        self.effect = effect
-
-
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -157,29 +153,6 @@ class MudderyEquipment(MudderyCommonObject):
 
         # set status
         self.equipped = False
-
-
-    def load_data(self):
-        """
-        Set data_info to the object."
-        """
-        super(MudderyEquipment, self).load_data()
-        
-        data = self.get_data_record()
-        if not data:
-            return
-
-        # convert self.effect from string to dict
-        effect = {}
-        for arg in self.effect.split(","):
-            arg = arg.split(":", 1)
-            if len(arg) == 2:
-                effect[arg[0].strip()] = arg[1].strip()
-
-        self.effect = effect
-        
-        self.type = data.type
-        self.position = data.position
 
 
     def get_available_commands(self, caller):

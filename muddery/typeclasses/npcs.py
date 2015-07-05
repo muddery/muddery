@@ -19,13 +19,9 @@ class MudderyNPC(MudderyObject):
         Set data_info to the object."
         """
         super(MudderyNPC, self).load_data()
-        
-        data = self.get_data_record()
-        if not data:
-            return
 
         # set NPC's default dialogues.
-        self.set_dialogue(data.dialogue)
+        self.set_dialogue(self.dialogue)
 
 
     def set_dialogue(self, data):

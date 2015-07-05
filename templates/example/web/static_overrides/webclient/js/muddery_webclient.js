@@ -627,6 +627,51 @@ var webclient = {
         }
         catch(error) {
         }
+        
+        try {
+            element = "<div><span class='white'> EXP: ";
+            element += data["exp"].toString() + "/" + data["max_exp"].toString();
+            element += "</span><br></div>";
+            content += element;
+        }
+        catch(error) {
+        }
+        
+        try {
+            element = "<div><span class='white'> HP: ";
+            element += data["hp"].toString() + "/" + data["max_hp"].toString();
+            element += "</span><br></div>";
+            content += element;
+        }
+        catch(error) {
+        }
+        
+        try {
+            element = "<div><span class='white'> MP: ";
+            element += data["mp"].toString() + "/" + data["max_mp"].toString();
+            element += "</span><br></div>";
+            content += element;
+        }
+        catch(error) {
+        }
+        
+        try {
+            element = "<div><span class='white'> ATTACK: ";
+            element += data["attack"].toString();
+            element += "</span><br></div>";
+            content += element;
+        }
+        catch(error) {
+        }
+        
+        try {
+            element = "<div><span class='white'> DEFENCE: ";
+            element += data["defence"].toString();
+            element += "</span><br></div>";
+            content += element;
+        }
+        catch(error) {
+        }
     
         content += "</div>";
         block.html(content);

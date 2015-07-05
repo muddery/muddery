@@ -129,7 +129,8 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 
 # all other data models
 OTHER_DATA_MODELS = (DIALOGUES,
-                     EQUIPMENT_TYPES,)
+                     EQUIPMENT_TYPES,
+                     CHARACTER_LEVELS,)
 
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 

@@ -158,8 +158,11 @@ class foods(models.Model):
     attributes = models.TextField(blank=True)
     action = models.TextField(blank=True)
     effect = models.TextField(blank=True)
+    hp = models.IntegerField(blank=True, default=0)
+    mp = models.IntegerField(blank=True, default=0)
 
     # You can add custom fields here.
+    hp = models.IntegerField(blank=True, default=0)
 
     class Meta:
         "Define Django meta options"
@@ -208,11 +211,13 @@ class equipments(models.Model):
     lock = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
     action = models.TextField(blank=True)
-    effect = models.TextField(blank=True)
     position = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=255, blank=True)
+    effect = models.TextField(blank=True)
 
     # You can add custom fields here.
+    attack = models.IntegerField(blank=True, default=0)
+    defence = models.IntegerField(blank=True, default=0)
 
     class Meta:
         "Define Django meta options"
@@ -286,9 +291,12 @@ class character_level(models.Model):
     max_exp = models.IntegerField()
 
     # You can add custom fields here.
+    max_hp = models.IntegerField()
+    max_mp = models.IntegerField()
+    attack = models.IntegerField()
+    defence = models.IntegerField()
 
     class Meta:
         "Define Django meta options"
         verbose_name = "Character Level List"
         verbose_name_plural = "Character Level List"
-

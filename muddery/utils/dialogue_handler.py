@@ -72,16 +72,10 @@ class DialogueHandler(object):
         
         # Get db model
         objects = []
-        for model in settings.DIALOGUES:
-            model_obj = get_model(settings.WORLD_DATA_APP, model)
-            if model_obj:
-                # Get dialogue records.
-                objects = model_obj.objects.filter(dialogue=dialogue)
-                if objects:
-                    break
-        
-        if not objects:
-            return
+        model_obj = get_model(settings.WORLD_DATA_APP, settings.DIALOGUES)
+        if model_obj:
+            # Get dialogue records.
+            objects = model_obj.objects.filter(dialogue=dialogue)
 
         for obj in objects:
             # Add db fields to dict.
