@@ -162,3 +162,5 @@ DEFAULT_HOME_KEY = "room_01"
 START_LOCATION_KEY = "room_01"
 
 EQUIP_POSITIONS = ["head", "chest", "hand", "leg"]
+
+EQUIP_EFFECTS = ["attack", "defence"]

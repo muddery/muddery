@@ -149,3 +149,7 @@ DEFAULT_HOME_KEY = ""
 #  MULTISESSION_MODE = 0, 1 - used by default unloggedin create command
 #  MULTISESSION_MODE = 2,3 - used by default character_create command
 START_LOCATION_KEY = ""
+
+EQUIP_POSITIONS = []
+
+EQUIP_EFFECTS = []

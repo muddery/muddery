@@ -71,26 +71,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         Load initial data.
         """
-        # get level informations
-        try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_LEVELS)
-            data = model_obj.objects.filter(level=self.db.level)
-            if data:
-                data = data[0]
-                known_fields = set(["level"])
-                for field in data._meta.fields:
-                    if field.name in self.reserved_fields:
-                        print "Can not set reserved field %s!" % field.name
-                        continue
-                    if field.name in known_fields:
-                        continue
-                    setattr(self, field.name, data.serializable_value(field.name))
-            else:
-                raise MudderyError("Can not find level data %s" % self.db.level)
-
-        except Exception, e:
-            print "Can't load character level info %s: %s" % (self.db.level, e)
-
         # set equipments status
         equipped = set()
         equipments = self.db.equipments
@@ -101,6 +81,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         for content in self.contents:
             if content.dbref in equipped:
                 content.equipped = True
+
+        # set character's attributes
+        self.after_equipment_changed()
 
 
     def at_object_receive(self, moved_obj, source_location):
@@ -350,9 +333,20 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             self.msg({"alert":"Can not equip that equipment."})
             return
 
-        self.take_off_position(position)
+        # take off old equipment
+        if self.db.equipments[position]:
+            dbref = self.db.equipments[position]
+            
+            for content in self.contents:
+                if content.dbref == dbref:
+                    content.equipped = False
+
+        # put on new equipment
         self.db.equipments[position] = obj.dbref
         obj.equipped = True
+
+        # reset character's attributes
+        self.after_equipment_changed()
 
 
     def take_off_position(self, position):
@@ -368,6 +362,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         self.db.equipments[position] = None
 
+        # reset character's attributes
+        self.after_equipment_changed()
+
 
     def take_off_object(self, obj):
         """
@@ -379,3 +376,47 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         self.db.equipments[obj.position] = None
         obj.equipped = False
+
+        # reset character's attributes
+        self.after_equipment_changed()
+
+
+    def after_equipment_changed(self):
+        """
+        Called after equipments changed. It's time to calculate character's attributes.
+        """
+
+        # set level informations
+        try:
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_LEVELS)
+            data = model_obj.objects.filter(level=self.db.level)
+            if data:
+                data = data[0]
+                known_fields = set(["level"])
+                for field in data._meta.fields:
+                    if field.name in self.reserved_fields:
+                        print "Can not set reserved field %s!" % field.name
+                        continue
+                    if field.name in known_fields:
+                        continue
+                    setattr(self, field.name, data.serializable_value(field.name))
+            else:
+                raise MudderyError("Can not find level data %s" % self.db.level)
+
+        except Exception, e:
+            print "Can't load character level info %s: %s" % (self.db.level, e)
+
+        # find equipments
+        equipped = set()
+        equipments = self.db.equipments
+        for position in equipments:
+            if equipments[position]:
+                equipped.add(equipments[position])
+
+        # add equipment's attributes
+        for content in self.contents:
+            if content.dbref in equipped:
+                for effect in settings.EQUIP_EFFECTS:
+                    value = getattr(self, effect, 0)
+                    value += getattr(content, effect, 0)
+                    setattr(self, effect, value)
