@@ -14,6 +14,7 @@ from evennia.objects.objects import DefaultObject
 from evennia.utils import logger
 from evennia.utils.utils import make_iter
 from muddery.utils import utils
+from muddery.utils.exception import MudderyError
 
 
 class MudderyObject(DefaultObject):
@@ -73,6 +74,7 @@ class MudderyObject(DefaultObject):
             key: (string) Key of the data info.
         """
         utils.set_obj_data_info(self, model, key)
+        self.load_data()
 
 
     def get_data_record(self):

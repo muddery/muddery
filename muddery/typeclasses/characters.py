@@ -15,7 +15,9 @@ from evennia.objects.objects import DefaultCharacter
 from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
+from muddery.utils.exception import MudderyError
 from django.conf import settings
+
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
     """
@@ -52,6 +54,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             equipments[position] = None
         self.db.equipments = equipments
 
+        self.set_init_data()
+
 
     def at_init(self):
         """
@@ -60,6 +64,13 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         super(MudderyCharacter, self).at_init()
 
+        self.set_init_data()
+
+
+    def set_init_data(self):
+        """
+        Load initial data.
+        """
         # get level informations
         try:
             model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_LEVELS)
@@ -74,9 +85,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     if field.name in known_fields:
                         continue
                     setattr(self, field.name, data.serializable_value(field.name))
+            else:
+                raise MudderyError("Can not find level data %s" % self.db.level)
 
         except Exception, e:
-            logger.log_errmsg("Can't load character level info %s: %s" % (self.db.level, e))
+            print "Can't load character level info %s: %s" % (self.db.level, e)
 
         # set equipments status
         equipped = set()
