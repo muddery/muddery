@@ -138,7 +138,6 @@ class CmdSetDataInfo(default_cmds.MuxCommand):
 
         try:
             obj.set_data_info(model_name, key_name)
-            obj.load_data()
             caller.msg("%s's datainfo has been set to %s" % (obj_name, self.rhs))
         except Exception, e:
             caller.msg("Can't set datainfo %s to %s: %s" % (self.rhs, obj_name, e))

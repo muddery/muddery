@@ -25,40 +25,6 @@ class MudderyCommonObject(MudderyObject):
         self.db.number = 0
 
 
-    def load_data(self):
-        """
-        Set data_info to the object."
-        """
-        data = self.get_data_record()
-        if not data:
-            return
-
-        self.set_typeclass(data.typeclass)
-        self.set_name(data.name)
-        self.set_alias(data.alias)
-        self.set_desc(data.desc)
-        self.set_lock(data.lock)
-        self.set_attributes(data.attributes)
-        
-        # get other fields
-        known_fields = set(["key",
-                            "typeclass",
-                            "name",
-                            "alias",
-                            "desc",
-                            "lock",
-                            "attributes"])
-
-        for field in data._meta.fields:
-            if field.name in self.reserved_fields:
-                print "Can not set reserved field %s!" % field.name
-                continue
-            if field.name in known_fields:
-                continue
-
-            setattr(self, field.name, data.serializable_value(field.name))
-
-
     def get_number(self):
         """
         Get object's number.
@@ -140,7 +106,8 @@ class MudderyEquipment(MudderyCommonObject):
         Set default values.
         """
         super(MudderyEquipment, self).at_object_creation()
-    
+
+        # set status
         self.equipped = False
 
 

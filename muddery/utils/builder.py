@@ -44,7 +44,6 @@ def build_object(obj_key, caller=None):
 
     try:
         obj.set_data_info(model_name, record.key)
-        obj.load_data()
     except Exception, e:
         ostring = "Can not set data info to obj %s: %s" % (record.name, e)
         print ostring
@@ -140,7 +139,6 @@ def build_objects(model_name, unique, caller=None):
 
                 try:
                     obj.set_data_info(model_name, record.key)
-                    obj.load_data()
                 except Exception, e:
                     ostring = "Can not set data info to obj %s: %s" % (record.name, e)
                     print ostring

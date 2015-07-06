@@ -51,34 +51,3 @@ class MudderyExit(MudderyObject, DefaultExit):
 
         """
         traversing_object.msg({"alert": "You cannot go there."})
-
-
-    def set_destination(self, destination):
-        """
-        Set object's destination
-        
-        Args:
-        destination: (string) Destination's name. Must be the key of data info.
-        """
-        destination_obj = None
-    
-        if destination:
-            # If has destination, search destination object.
-            destination_obj = utils.search_obj_info_key(destination)
-        
-            if not destination_obj:
-                logger.log_errmsg("%s can't find destination %s!" % (self.get_info_key(), destination))
-                return
-            
-            destination_obj = destination_obj[0]
-    
-        if self.destination == destination_obj:
-            # No change.
-            return
-
-        if self == destination_obj:
-            # Can't set destination to itself.
-            logger.log_errmsg("%s can't set destination to itself!" % self.get_info_key())
-            return
-    
-        self.destination = destination_obj
