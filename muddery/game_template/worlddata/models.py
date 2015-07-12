@@ -292,3 +292,22 @@ class character_level(models.Model):
         verbose_name = "Character Level List"
         verbose_name_plural = "Character Level List"
 
+
+#------------------------------------------------------------
+#
+# local strings
+#
+#------------------------------------------------------------
+class localized_strings(models.Model):
+    "Store all server local strings informations."
+
+    # It must have these fields.
+    origin = models.TextField(primary_key=True)
+    local = models.TextField(blank=True)
+
+    # You can add custom fields here.
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Server Local String"
+        verbose_name_plural = "Server Local Strings"

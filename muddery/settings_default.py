@@ -21,6 +21,7 @@ import os
 
 MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
 ######################################################################
 # Django web features
 ######################################################################
@@ -137,6 +138,10 @@ CHARACTER_LEVELS = "character_level"
 OTHER_DATA_MODELS = (DIALOGUES,
                      EQUIPMENT_TYPES,
                      CHARACTER_LEVELS,)
+
+# local strings
+LOCALIZED_STRINGS_MODEL = "localized_strings"
+LOCALIZED_STRINGS_FOLDER = "languages"
 
 # The default home location used for all objects. This is used as a
 # fallback if an object's normal home location is deleted. It is the

@@ -27,5 +27,7 @@ CONNECTION_SCREEN = \
     The map of this game is developed from Evennia's tutorial world.
     
     Please register or login!
+    
+    {rNotice! This game is for demo only, all players' register info and game data may be lost frequently!{n
 {b=============================================================={n""" \
  % (settings.SERVERNAME, utils.get_muddery_version())

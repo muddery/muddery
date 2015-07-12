@@ -10,6 +10,7 @@ from evennia.utils import utils, prettytable, logger
 from evennia.commands.command import Command
 from evennia.commands.default.muxcommand import MuxCommand
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.localized_strings_handler import LS
 
 
 # limit symbol import for API
@@ -765,7 +766,7 @@ class CmdEquip(Command):
             caller.msg({"alert":"Can not equip %s." % obj.name})
             return
 
-        message = {"alert": "OK!",
+        message = {"alert": LS("Equipped!"),
                    "status": caller.return_status(),
                    "equipments": caller.return_equipments(),
                    "inventory": caller.return_inventory()}
