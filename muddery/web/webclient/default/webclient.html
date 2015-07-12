@@ -76,25 +76,25 @@
         <nav id="tab_bar">
             <ul class="tab_pills">
                 <li id="tab_login" style="display: none">
-                    <a href="#" onClick="webclient.showPage('login')">Login</a>
+                    <a href="#" onclick="webclient.showPage('login')">Login</a>
                 </li>
                 <li id="tab_room" style="display: none">
-                    <a href="#" onClick="webclient.showPage('room')">Room</a>
+                    <a href="#" onclick="webclient.showPage('room')">Room</a>
                 </li>
                 <li id="tab_status" style="display: none">
-                    <a href="#" onClick="webclient.showPage('status')">Status</a>
+                    <a href="#" onclick="webclient.showPage('status')">Status</a>
                 </li>
                 <li id="tab_inventory" style="display: none">
-                    <a href="#" onClick="webclient.showPage('inventory')">Inventory</a>
+                    <a href="#" onclick="webclient.showPage('inventory')">Inventory</a>
                 </li>
                 <li id="tab_system" style="display: none">
-                    <a href="#" onClick="webclient.showPage('system')">System</a>
+                    <a href="#" onclick="webclient.showPage('system')">System</a>
                 </li>
                 <li id="tab_command" style="display: none">
-                    <a href="#" onClick="webclient.showPage('command')">Command</a>
+                    <a href="#" onclick="webclient.showPage('command')">Command</a>
                 </li>
                 <!--li id="tab_test">
-                    <a href="#" onClick="webclient.showTestPage()">Test</a>
+                    <a href="#" onclick="webclient.showTestPage()">Test</a>
                 </li-->
             </ul>
         </nav>
@@ -108,8 +108,8 @@
                     <input type="password" class="input_text" value="" autocomplete="off"/>
                 </div>
                 <div>
-                    <input type="button" class="btn button_left" value="LOGIN" onClick="commands.doLogin()"/>
-                    <input type="button" class="btn button_left" value="REGISTER" onClick="commands.doRegister()"/>
+                    <input type="button" class="btn button_left" value="LOGIN" onclick="commands.doLogin()"/>
+                    <input type="button" class="btn button_left" value="REGISTER" onclick="commands.doRegister()"/>
                 </div>
             </form>
             <form id="page_room" style="display: none">
@@ -123,7 +123,7 @@
             </form>
             <form id="page_system" style="display: none">
                 <div>
-                    <input type="button" class="btn button_left" value="LOGOUT" onClick="commands.doLogout()"/>
+                    <input type="button" class="btn button_left" value="LOGOUT" onclick="commands.doLogout()"/>
                 </div>
             </form>
             <form id="page_command" style="display: none">
@@ -132,14 +132,14 @@
                     <input type="text" class="input_text" value="" autocomplete="off"/>
                 </div>
                 <div>
-                    <input type="button" class="btn button_left" value="SEND" onClick="commands.doSendCommand()"/>
+                    <input type="button" class="btn button_left" value="SEND" onclick="commands.doSendCommand()"/>
                 </div>
             </form>
             <!--form id="page_test" style="display: none">
                 <div>
                     <div>Do test.</div>
                     <div>
-                        <input type="button" class="btn button_left" value="TEST" onClick="commands.doTest()"/>
+                        <input type="button" class="btn button_left" value="TEST" onclick="commands.doTest()"/>
                     </div>
                 </div>
             </form-->

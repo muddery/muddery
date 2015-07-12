@@ -128,6 +128,52 @@ def import_file(file_name, model_name):
         raise MudderyError(message)
 
 
+def import_localized_strings(language=None):
+    """
+    Import localized strings.
+
+    language: All choices can be found here: 
+              # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
+    """
+
+    # get file's extension name
+    file_type = settings.WORLD_DATA_FILE_TYPE.lower()
+    ext_name = ""
+    if file_type == "csv":
+        ext_name = ".csv"
+    else:
+        message = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
+        raise MudderyError(message)
+
+    # if language is empty, load settings.LANGUAGE_CODE
+    if not language:
+        language = settings.LANGUAGE_CODE
+
+    # import all files in LANGUAGE_FOLDER
+    dir_name = os.path.join(settings.GAME_DIR,
+                            settings.WORLD_DATA_FOLDER,
+                            settings.LOCALIZED_STRINGS_FOLDER,
+                            language)
+
+    if os.path.isdir(dir_name):
+        for file_name in os.listdir(dir_name):
+            full_name = os.path.join(dir_name, file_name)
+
+            if os.path.isdir(full_name):
+                # if it is a folder
+                continue
+
+            ext = os.path.splitext(full_name)
+            if not ext_name == ext[1]:
+                # if does not match the ext name
+                continue
+
+            import_csv(full_name, settings.LOCALIZED_STRINGS_MODEL)
+
+            ostring = "%s imported" % file_name
+            print ostring
+
+
 def import_all():
     """
     Import all data files to models.
@@ -170,5 +216,5 @@ def import_all():
             print ostring
             continue
 
-    ostring = "Total %d files imported.\n" % count
-    print ostring
+    # import localized strings
+    import_localized_strings(settings.LANGUAGE_CODE)
