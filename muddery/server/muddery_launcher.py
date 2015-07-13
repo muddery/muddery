@@ -15,6 +15,7 @@ menu. Run the script with the -h flag to see usage information.
 import os
 import sys
 import shutil
+import django.core.management
 from argparse import ArgumentParser
 from subprocess import check_output, CalledProcessError, STDOUT
 
@@ -56,18 +57,13 @@ CREATED_NEW_GAMEDIR = \
     will work out of the box. When ready to continue, 'cd' to your
     game directory and run:
 
-       muddery migrate
-
-    This initializes the database. To start the server for the first
-    time, run:
-
        muddery -i start
 
-    Make sure to create a superuser when asked for it. You should now
-    be able to (by default) connect to your server on server
-    'localhost', port 4000 using a telnet/mud client or
-    http://localhost:8000 using your web browser. If things don't
-    work, check so those ports are open.
+    This starts the server for the first time. Make sure to create
+    a superuser when asked for it. You should now be able to (by
+    default) connect to your server on server 'localhost', port 4000
+    using a telnet/mud client or http://localhost:8000 using your web
+    browser. If things don't work, check so those ports are open.
 
     """
 
@@ -104,6 +100,13 @@ ABOUT_INFO = \
     Use -h for command line options.
     """
 
+
+ERROR_INPUT = \
+"""
+    Command
+    {args} {kwargs}
+    raised an error: '{traceback}'.
+    """
 
 #------------------------------------------------------------
 #
@@ -292,6 +295,23 @@ def main():
         if option == "noop":
             option = ""
         create_game_directory(args.init, option)
+
+        evennia_launcher.init_game_directory(GAMEDIR, check_db=False)
+
+        try:
+            django_args = ["makemigrations"]
+            django_kwargs = {}
+            django.core.management.call_command(*django_args, **django_kwargs)
+        except django.core.management.base.CommandError, exc:
+            print ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs)
+
+        try:
+            django_args = ["migrate"]
+            django_kwargs = {}
+            django.core.management.call_command(*django_args, **django_kwargs)
+        except django.core.management.base.CommandError, exc:
+            print ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs)
+
         print CREATED_NEW_GAMEDIR.format(gamedir=args.init,
                                          settings_path=os.path.join(args.init, SETTINGS_PATH))
         sys.exit()
