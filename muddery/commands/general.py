@@ -74,7 +74,7 @@ class CmdLook(Command):
         else:
             looking_at_obj = caller.location
             if not looking_at_obj:
-                caller.msg({"msg":"You have no location to look at!"})
+                caller.msg({"msg":LS("You have no location to look at!")})
                 return
 
         if not hasattr(looking_at_obj, 'return_appearance'):
@@ -82,7 +82,7 @@ class CmdLook(Command):
             looking_at_obj = looking_at_obj.character
 
         if not looking_at_obj.access(caller, "view"):
-            caller.msg({"msg":"Could not find '%s'." % looking_at_obj.name})
+            caller.msg({"msg":LS("Could not find '%s'.") % looking_at_obj.name})
             return
 
         # get object's appearance
@@ -500,16 +500,12 @@ class CmdGoto(Command):
         caller = self.caller
 
         if not self.args:
-            string = "Should appoint an exit to go."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("Should appoint an exit to go.")})
             return
 
         obj = caller.search(self.args, location=caller.location)
         if not obj:
-            string = "Can not find exit."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("Can not find exit.")})
             return
             
         if obj.access(self.caller, 'traverse'):
@@ -548,16 +544,12 @@ class CmdTalk(Command):
         caller = self.caller
 
         if not self.args:
-            string = "You should talk to someone."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("You should talk to someone.")})
             return
 
         npc = caller.search(self.args, location=caller.location)
         if not npc:
-            string = "Can not find the one to talk."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("Can not find the one to talk.")})
             return
 
         next = DIALOGUE_HANDLER.get_next_dialogue(caller, npc, "", "")
@@ -592,23 +584,17 @@ class CmdDialogue(Command):
         caller = self.caller
 
         if not self.args:
-            string = "You should talk to someone."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("You should talk to someone.")})
             return
 
         if not "npc" in self.args:
-            string = "You should talk to someone."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("You should talk to someone.")})
             return
 
         # Get the npc at the player's location.
         npc = caller.search(self.args["npc"], location=caller.location)
         if not npc:
-            string = "Can not find the one to talk."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("Can not find the one to talk.")})
             return
 
         # Get the current sentence.
@@ -657,16 +643,12 @@ class CmdLoot(Command):
         caller = self.caller
 
         if not self.args:
-            string = "You should loot something."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("You should loot something.")})
             return
 
         obj = caller.search(self.args, location=caller.location)
         if not obj:
-            string = "Can not find the object to loot."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("Can not find the object to loot.")})
             return
 
         try:
@@ -699,16 +681,12 @@ class CmdUse(Command):
         caller = self.caller
 
         if not self.args:
-            string = "You should use something."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("You should use something.")})
             return
 
         obj = caller.search(self.args, location=caller)
         if not obj:
-            string = "You don't have the object to use."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("You don't have this object.")})
             return
 
         result = ""
@@ -719,7 +697,7 @@ class CmdUse(Command):
             logger.log_errmsg(ostring)
 
         if not result:
-            result = "No result."
+            result = LS("No result.")
         caller.msg({"alert":result})
 
 
@@ -746,24 +724,18 @@ class CmdEquip(Command):
         caller = self.caller
 
         if not self.args:
-            string = "You should equip something."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("You should equip something.")})
             return
 
         obj = caller.search(self.args, location=caller)
         if not obj:
-            string = "You don't have that equipment."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("You don't have this equipment.")})
             return
 
         try:
             caller.equip_object(obj)
         except Exception, e:
-            ostring = "Can not equip %s: %s" % (obj.get_info_key(), e)
-            logger.log_errmsg(ostring)
-            caller.msg({"alert":"Can not equip %s." % obj.name})
+            caller.msg({"alert":LS("Can not equip %s.") % obj.name})
             return
 
         message = {"alert": LS("Equipped!"),
@@ -796,27 +768,21 @@ class CmdTakeOff(Command):
         caller = self.caller
 
         if not self.args:
-            string = "You should take off something."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("You should take off something.")})
             return
 
         obj = caller.search(self.args, location=caller)
         if not obj:
-            string = "You don't have that equipment."
-            logger.log_errmsg(string)
-            caller.msg({"alert":string})
+            caller.msg({"alert":LS("You don't have this equipment.")})
             return
 
         try:
             caller.take_off_object(obj)
         except Exception, e:
-            ostring = "Can not take off %s: %s" % (obj.get_info_key(), e)
-            logger.log_errmsg(ostring)
-            caller.msg({"alert":"Can not take off %s." % obj.name})
+            caller.msg({"alert":LS("Can not take off %s.") % obj.name})
             return
 
-        message = {"alert": "OK!",
+        message = {"alert": LS("Took off!"),
                    "status": caller.return_status(),
                    "equipments": caller.return_equipments(),
                    "inventory": caller.return_inventory()}
