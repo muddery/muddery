@@ -8,6 +8,7 @@ creation commands.
 
 """
 
+from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.objects import MudderyObject
 from muddery.typeclasses.common_objects import MudderyEquipment
@@ -16,7 +17,7 @@ from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.exception import MudderyError
-from django.conf import settings
+from muddery.utils import skill_handler
 
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
@@ -420,3 +421,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     value = getattr(self, effect, 0)
                     value += getattr(content, effect, 0)
                     setattr(self, effect, value)
+
+
+    def cast_skill(self, skill_name, target):
+        """
+        Cast a skill.
+        """
+        skill_handler.cast_skill(skill_name, self, target)
