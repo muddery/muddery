@@ -787,3 +787,46 @@ class CmdTakeOff(Command):
                    "equipments": caller.return_equipments(),
                    "inventory": caller.return_inventory()}
         caller.msg(message)
+
+
+#------------------------------------------------------------
+# cast a skill
+#------------------------------------------------------------
+
+class CmdCastSkill(Command):
+    """
+    Cast a skill.
+
+    Usage:
+        {"cmd":"castskill",
+         "args":{"skill_name":<skill's name>,
+                 "target":<skill's target>}
+        }
+
+    """
+    key = "castskill"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Cast a skill."
+        caller = self.caller
+
+        if not self.args:
+            caller.msg({"alert":LS("You should select a skill to cast.")})
+            return
+
+        if not "skill_name" in self.args:
+            caller.msg({"alert":LS("You should select a skill to cast.")})
+            return
+        skill_name = self.args["skill_name"]
+        
+        target = None
+        if "target" in self.args:
+            target = caller.search(self.args["target"])
+
+        try:
+            caller.cast_skill(skill_name, target)
+        except Exception, e:
+            caller.msg({"alert":LS("Can not cast %s.") % skill_name})
+            return
