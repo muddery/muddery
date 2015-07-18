@@ -87,6 +87,9 @@ BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
 # Typeclass for NPCs
 BASE_NPC_TYPECLASS = "muddery.typeclasses.npcs.MudderyNPC"
 
+# Typeclass for skills
+BASE_SKILL_TYPECLASS = "muddery.typeclasses.skills.MudderySkill"
+
 ######################################################################
 # World data features
 ######################################################################
@@ -116,14 +119,14 @@ WORLD_OBJECTS = ("world_objects",)
 WORLD_NPCS = ("world_npcs",)
 
 # common objects
-COMMON_OBJECTS = ("common_objects",)
+COMMON_OBJECTS = ("common_objects", "skills")
 
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_EXITS,
                       WORLD_OBJECTS,
                       WORLD_NPCS,
-                      COMMON_OBJECTS,)
+                      COMMON_OBJECTS)
 
 # dialogues
 DIALOGUES = "dialogues"
@@ -137,7 +140,7 @@ CHARACTER_LEVELS = "character_level"
 # all other data models
 OTHER_DATA_MODELS = (DIALOGUES,
                      EQUIPMENT_TYPES,
-                     CHARACTER_LEVELS,)
+                     CHARACTER_LEVELS)
 
 # local strings
 LOCALIZED_STRINGS_MODEL = "localized_strings"

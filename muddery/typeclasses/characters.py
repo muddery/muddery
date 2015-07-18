@@ -17,7 +17,7 @@ from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.exception import MudderyError
-from muddery.utils import skill_handler
+from muddery.utils.localized_strings_handler import LS
 
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
@@ -54,6 +54,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         for position in settings.EQUIP_POSITIONS:
             equipments[position] = None
         self.db.equipments = equipments
+        
+        self.db.skills = {}
 
         self.set_init_data()
 
@@ -395,10 +397,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                 data = data[0]
                 known_fields = set(["level"])
                 for field in data._meta.fields:
+                    if field.name in known_fields:
+                        continue
                     if field.name in self.reserved_fields:
                         print "Can not set reserved field %s!" % field.name
-                        continue
-                    if field.name in known_fields:
                         continue
                     setattr(self, field.name, data.serializable_value(field.name))
             else:
@@ -423,8 +425,40 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     setattr(self, effect, value)
 
 
-    def cast_skill(self, skill_name, target):
+    def learn_skill(self, skill):
+        """
+        Learn a new skill.
+        args:
+            skill: (string) The key of the skill.
+        """
+        if skill in self.db.skills:
+            self.msg({"alert":LS("You have already learned this skill.")})
+            return
+             
+        skill_obj = build_object(skill)
+        if not skill_obj:
+            self.msg({"alert":LS("Can not learn this skill.")})
+            return
+
+        self.db.skills[skill] = skill_obj
+        skill_obj.set_owner(self)
+
+
+    def has_skill(self, skill):
+        """
+        Whether the character has the skill.
+        args:
+            skill: (string) The key of the skill.
+        """
+        return skill in self.db.skills
+
+
+    def cast_skill(self, skill, target):
         """
         Cast a skill.
         """
-        skill_handler.cast_skill(skill_name, self, target)
+        if not skill in self.db.skills:
+            self.msg({"alert":LS("You do not have this skill.")})
+            return
+        
+        self.db.skills[skill].cast_skill(target)

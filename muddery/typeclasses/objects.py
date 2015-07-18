@@ -22,7 +22,22 @@ class MudderyObject(DefaultObject):
     This object loads attributes from world data on init automatically.
     """
 
-    reserved_fields = set(["dbref"])
+    reserved_fields = set(["id",
+                           "date_created",
+                           "locks",
+                           "tags",
+                           "nattributes",
+                           "dbref",
+                           "is_typeclass",
+                           "delete",
+                           "swap_typeclass",
+                           "db",
+                           "ndb",
+                           "objects",
+                           "attr",
+                           "save",
+                           "delete",
+                           ])
     
     def at_init(self):
         """
@@ -148,10 +163,10 @@ class MudderyObject(DefaultObject):
                             "destination"])
 
         for field in data._meta.fields:
+            if field.name in known_fields:
+                continue
             if field.name in self.reserved_fields:
                 print "Can not set reserved field %s!" % field.name
-                continue
-            if field.name in known_fields:
                 continue
 
             setattr(self, field.name, data.serializable_value(field.name))

@@ -63,7 +63,7 @@ class DialogueHandler(object):
         if not dialogue:
             return
 
-        if hasattr(self.dialogue_storage, dialogue):
+        if dialogue in self.dialogue_storage:
             # already cached
             return
 
@@ -86,6 +86,7 @@ class DialogueHandler(object):
                     "next": obj.next,
                     "condition": obj.condition,
                     "action": obj.action}
+
             # Add to cache.
             self.dialogue_storage[dialogue][obj.sentence] = data
 
@@ -255,7 +256,7 @@ class DialogueHandler(object):
         self.dialogue_storage = {}
 
 
-    re_words = re.compile(r"([a-zA-Z_][a-zA-Z0-9_]*)")
+    re_words = re.compile(r"([a-zA-Z_][a-zA-Z0-9_]*)|(\"(.*?)\")")
     def safe_statement(self, statement):
         """
         Add "caller." before every words.
@@ -269,7 +270,13 @@ class DialogueHandler(object):
         Replace <match> with caller.<match> except key words.
         """
         match = match.group()
+
+        # keep the key words
         if match in self.statement_keywords:
+            return match
+
+        # keep the strings in quotes
+        if match[0] == "\"" and match[-1] == "\"":
             return match
 
         return "caller." + match

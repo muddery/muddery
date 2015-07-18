@@ -249,6 +249,33 @@ class world_npcs(models.Model):
 
 #------------------------------------------------------------
 #
+# store all skills
+#
+#------------------------------------------------------------
+class skills(models.Model):
+    "Store all skills."
+
+    # It must have these fields.
+    key = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
+    typeclass = models.CharField(max_length=255)
+    desc = models.TextField(blank=True)
+    cd = models.IntegerField(blank=True, default=0)
+    passive = models.BooleanField(blank=True, default=False)
+    condition = models.TextField(blank=True)
+    function = models.CharField(max_length=255)
+    effect = models.FloatField(blank=True, default=0)
+
+    # You can add custom fields here.
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Skill"
+        verbose_name_plural = "Skills"
+
+
+#------------------------------------------------------------
+#
 # store all dialogues
 #
 #------------------------------------------------------------

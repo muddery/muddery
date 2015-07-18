@@ -11,3 +11,8 @@ dlg_01,9,n,Your HP is full now!,-1,not is_hp_full(),recover_hp()
 dlg_01,10,p,Please poison me!,,,
 dlg_01,11,n,As you wish.,-1,,poison()
 dlg_01,12,p,It’s great! Bye bye!,-1,,
+dlg_02,1,n,What skill do you want?,"2,3",,
+dlg_02,2,p,Heal,"4,5",,
+dlg_02,3,p,"No, thanks.",-1,,
+dlg_02,4,n,OK,-1,"not has_skill(""skill_heal"")","learn_skill(""skill_heal"")"
+dlg_02,5,n,"You have already learned this skill.",-1,"has_skill(""skill_heal"")",
