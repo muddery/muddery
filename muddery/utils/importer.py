@@ -55,11 +55,13 @@ def import_csv(file_name, model_name):
                     field_type = 1
                 elif isinstance(field, models.IntegerField):
                     field_type = 2
-                elif isinstance(field, models.ForeignKey):
+                elif isinstance(field, models.FloatField):
                     field_type = 3
+                elif isinstance(field, models.ForeignKey):
+                    field_type = 4
                     related_field = field.related_field
                 elif isinstance(field, models.ManyToManyField):
-                    field_type = 4
+                    field_type = 5
                 else:
                     field_type = 0
             except Exception, e:
@@ -92,6 +94,10 @@ def import_csv(file_name, model_name):
                         if value.isdigit():
                             record[field_name] = int(value)
                     elif field_type == 3:
+                        # float value
+                        if value.isdigit():
+                            record[field_name] = float(value)
+                    elif field_type == 4:
                         # foreignKey
                         arg = {}
                         arg[related_field.name] = value
