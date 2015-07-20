@@ -97,6 +97,9 @@ var webclient = {
                 else if (key == "inventory") {
                     this.displayInventory(data[key]);
                 }
+                else if (key == "skills") {
+                    this.displaySkills(data[key]);
+                }
                 else if (key == "get_object") {
                     this.displayGetObject(data[key]);
                 }
@@ -493,7 +496,7 @@ var webclient = {
         var page = $("#page_inventory");
         
         var content = "<table class='tab_inventory'>";
-        content += "<thead><tr><th>NAME</th><th>NUM</tn><th>DESC</th></tr></thead>";
+        content += "<thead><tr><th>NAME</th><th>NUM</th><th>DESC</th></tr></thead>";
         var element = "";
 
         for (var i in data) {
@@ -515,6 +518,38 @@ var webclient = {
 
                 element += "</td>";
 
+                element += "<td>";
+                element += obj["desc"];
+                element += "</td></tr></tbody>";
+                
+                content += element;
+            }
+            catch(error) {
+            }
+        }
+        
+        content += "</table>";
+        
+        page.html(content);
+    },
+    
+    displaySkills : function(data) {
+        // display player's skills
+        var page = $("#page_skills");
+        
+        var content = "<table class='tab_skills'>";
+        content += "<thead><tr><th>NAME</th><th>DESC</th></tr></thead>";
+        var element = "";
+
+        for (var i in data) {
+            try {
+                var obj = data[i];
+                element = "<tbody><tr><td>";
+                element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
+                element += " cmd_name='look'";
+                element += " cmd_args='" + obj["dbref"] + "'>";
+                element += obj["name"];
+                element += "</a></td>";
                 element += "<td>";
                 element += obj["desc"];
                 element += "</td></tr></tbody>";
@@ -883,6 +918,7 @@ var webclient = {
         $("#tab_room").css("display", "");
         $("#tab_status").css("display", "");
         $("#tab_inventory").css("display", "");
+        $("#tab_skills").css("display", "");
         $("#tab_system").css("display", "");
         $("#tab_command").css("display", "");
     },

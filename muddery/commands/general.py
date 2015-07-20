@@ -799,7 +799,13 @@ class CmdCastSkill(Command):
 
     Usage:
         {"cmd":"castskill",
-         "args":{"skill_name":<skill's name>,
+         "args":<skill's dbref>}
+        }
+        
+        or:
+
+        {"cmd":"castskill",
+         "args":{"dbref":<skill's dbref>,
                  "target":<skill's target>}
         }
 
@@ -816,17 +822,21 @@ class CmdCastSkill(Command):
             caller.msg({"alert":LS("You should select a skill to cast.")})
             return
 
-        if not "skill_name" in self.args:
-            caller.msg({"alert":LS("You should select a skill to cast.")})
-            return
-        skill_name = self.args["skill_name"]
+        skill_key = None
+        if isinstance(self.args, basestring):
+            skill_key = self.args
+        else:
+            if not "skill_key" in self.args:
+                caller.msg({"alert":LS("You should select a skill to cast.")})
+                return
+            skill_key = self.args["skill_key"]
         
         target = None
         if "target" in self.args:
             target = caller.search(self.args["target"])
 
         try:
-            caller.cast_skill(skill_name, target)
+            caller.cast_skill(skill_key, target)
         except Exception, e:
-            caller.msg({"alert":LS("Can not cast %s.") % skill_name})
+            caller.msg({"alert":LS("Can not cast this skill.")})
             return

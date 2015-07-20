@@ -7,6 +7,7 @@ import time
 from evennia import TICKER_HANDLER
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
+from muddery.utils.localized_strings_handler import LS
 from skills import skills
 
 
@@ -34,7 +35,7 @@ class MudderySkill(MudderyObject):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
-        commands = [{"name":LS("CAST"), "cmd":"castskill", "args":self.dbref}]
+        commands = [{"name":LS("CAST"), "cmd":"castskill", "args":self.get_info_key()}]
         return commands
 
 
@@ -81,8 +82,8 @@ class MudderySkill(MudderyObject):
         """
         Do cast.
         """
-        function = getattr(skills, self.key)
-        function(self.db.owner, self.db.target, self.effect)
+        function = getattr(skills, self.get_info_key())
+        function(self.db.owner, self.db.target, effect=self.effect)
 
         # reset cd
         if self.cd > 0:
