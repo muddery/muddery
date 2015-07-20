@@ -142,14 +142,13 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         super(MudderyCharacter, self).at_post_puppet()
 
-        # send status to player
-        self.show_status()
-        
-        # send equipments to player
-        self.show_equipments()
-        
-        # send inventory data to player
-        self.show_inventory()
+        # send character's data to player
+        message = {"status": self.return_status(),
+                   "equipments": self.return_equipments(),
+                   "inventory": self.return_inventory(),
+                   "skills": self.return_skills()}
+
+        self.msg(message)
     
     
     def receive_objects(self, obj_list):
@@ -442,6 +441,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         self.db.skills[skill] = skill_obj
         skill_obj.set_owner(self)
+        self.show_skills()
 
 
     def has_skill(self, skill):
@@ -462,3 +462,26 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             return
         
         self.db.skills[skill].cast_skill(target)
+
+
+    def show_skills(self):
+        """
+        Send skills to player.
+        """
+        skills = self.return_skills()
+        self.msg({"skills": skills})
+
+
+    def return_skills(self):
+        """
+        Get skills' data.
+        """
+        skills = []
+        for key in self.db.skills:
+            skill = self.db.skills[key]
+            info = {"dbref": skill.dbref,
+                    "name": skill.name,
+                    "desc": skill.db.desc}
+            skills.append(info)
+
+        return skills
