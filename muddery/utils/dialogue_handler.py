@@ -181,6 +181,9 @@ class DialogueHandler(object):
                 if dlg:
                     # check condition
                     if self.match_condition(caller, dlg["condition"]):
+                        # speakers may be different to different players, so copy it.
+                        dlg = dlg.copy()
+
                         # parse the speaker
                         if dlg["speaker"] == "p":
                             dlg["speaker"] = caller.name
