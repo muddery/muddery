@@ -106,6 +106,9 @@ WORLD_DATA_FOLDER = "worlddata/data"
 # data file's format, only support csv now.
 WORLD_DATA_FILE_TYPE = "csv"
 
+# data file's encoding
+WORLD_DATA_FILE_ENCODING = "utf8"
+
 # unique rooms
 WORLD_ROOMS = ("world_rooms",)
 
