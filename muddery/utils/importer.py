@@ -37,8 +37,10 @@ def import_csv(file_name, model_name):
         # get field types
         # type = 0    means common field
         # type = 1    means Boolean field
-        # type = 2    means ForeignKey field
-        # type = 3    means ManyToManyField field, not support
+        # type = 2    means Integer field
+        # type = 3    means Float field
+        # type = 4    means ForeignKey field
+        # type = 5    means ManyToManyField field, not support
         # type = -1   means field does not exist
 
         field_types = []
@@ -79,7 +81,7 @@ def import_csv(file_name, model_name):
                 for item in zip(title, field_types, values, related_fields):
                     field_name = item[0]
                     field_type = item[1]
-                    value = item[2]
+                    value = item[2].decode(settings.WORLD_DATA_FILE_ENCODING)
                     related_field = item[3]
 
                     # set field values
@@ -107,7 +109,7 @@ def import_csv(file_name, model_name):
                 data = model_obj.objects.create(**record)
                 data.save()
             except Exception, e:
-                logger.log_errmsg("Can't load data: %s" % e)
+                logger.log_errmsg("Can't load %s %s: %s" % (file_name, values, e))
 
             # read next line
             values = reader.next()
