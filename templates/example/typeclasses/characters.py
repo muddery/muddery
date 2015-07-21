@@ -108,24 +108,33 @@ class Character(MudderyCharacter):
         result = ""
 
         if hasattr(obj, "hp"):
-            recover_hp = int(obj.hp)
-                    
-            if self.db.hp < 0:
-                self.db.hp = 0
-
-            if self.db.hp + recover_hp > self.max_hp:
-                recover_hp = self.max_hp - self.db.hp
-
+            recover_hp = self.add_hp(obj.hp)
             if recover_hp > 0:
-                self.db.hp += recover_hp
                 status_changed = True
-
             result += "HP recovered by %s." % recover_hp
-    
+
         if status_changed:
             self.show_status()
 
         return result
+
+
+    def add_hp(self, hp):
+        """
+        Add character's hp.
+        """
+        recover_hp = int(hp)
+                
+        if self.db.hp < 0:
+            self.db.hp = 0
+
+        if self.db.hp + recover_hp > self.max_hp:
+            recover_hp = self.max_hp - self.db.hp
+
+        if recover_hp > 0:
+            self.db.hp += recover_hp
+
+        return recover_hp
 
 
     def is_hp_full(self):

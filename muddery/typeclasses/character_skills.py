@@ -5,6 +5,7 @@ skills
 
 import time
 from evennia import TICKER_HANDLER
+from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS

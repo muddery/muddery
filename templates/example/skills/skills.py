@@ -12,11 +12,17 @@ def skill_example(caller, target, *args, **kwargs):
     print kwargs
 
 
-def skill_heal(caller, target, *args, **kwargs):
+def skill_heal(caller, target, effect=0, *args, **kwargs):
     """
-    It is an example.
+    Heal the target, if target is None, heal the caller.
     """
-    print "caller: %s" % caller
-    print "target: %s" % target
-    print args
-    print kwargs
+    if effect <= 0:
+        return
+
+    if not target:
+        target = caller
+
+    if target:
+        recover_hp = target.add_hp(effect)
+        if recover_hp > 0:
+            target.show_status()
