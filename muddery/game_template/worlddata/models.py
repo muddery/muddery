@@ -264,7 +264,6 @@ class skills(models.Model):
     passive = models.BooleanField(blank=True, default=False)
     condition = models.TextField(blank=True)
     function = models.CharField(max_length=255)
-    effect = models.FloatField(blank=True, default=0)
 
     # You can add custom fields here.
 
