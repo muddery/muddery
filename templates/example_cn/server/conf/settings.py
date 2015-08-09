@@ -151,6 +151,9 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 
 # all other data models
 OTHER_DATA_MODELS = (DIALOGUES,
+                     QUEST,
+                     QUEST_DEPENDENCY,
+                     QUEST_OBJECTIVE,
                      EQUIPMENT_TYPES,
                      CHARACTER_LEVELS)
 

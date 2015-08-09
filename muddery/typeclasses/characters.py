@@ -56,6 +56,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.equipments = equipments
         
         self.db.skills = {}
+        
+        self.db.quests = {}
 
         self.set_init_data()
 

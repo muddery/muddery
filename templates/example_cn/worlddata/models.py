@@ -12,7 +12,6 @@ class world_rooms(models.Model):
     # It must have these fields.
     key = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
-    alias = models.CharField(max_length=255, blank=True)
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)
@@ -38,7 +37,6 @@ class world_exits(models.Model):
     # It must have these fields.
     key = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
-    alias = models.CharField(max_length=255, blank=True)
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)
@@ -65,7 +63,6 @@ class world_objects(models.Model):
     # It must have these fields.
     key = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
-    alias = models.CharField(max_length=255, blank=True)
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)
@@ -92,7 +89,6 @@ class object_creaters(models.Model):
     # It must have these fields.
     key = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
-    alias = models.CharField(max_length=255, blank=True)
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)
@@ -120,7 +116,6 @@ class common_objects(models.Model):
     # It must have these fields.
     key = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
-    alias = models.CharField(max_length=255, blank=True)
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
     max_stack = models.IntegerField(blank=True, default=1)
@@ -149,7 +144,6 @@ class foods(models.Model):
     # It must have these fields.
     key = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
-    alias = models.CharField(max_length=255, blank=True)
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
     max_stack = models.IntegerField(blank=True, default=1)
@@ -203,7 +197,6 @@ class equipments(models.Model):
     # It must have these fields.
     key = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
-    alias = models.CharField(max_length=255, blank=True)
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
     max_stack = models.IntegerField(blank=True, default=1)
@@ -236,7 +229,6 @@ class world_npcs(models.Model):
     # It must have these fields.
     key = models.CharField(max_length=255, primary_key=True)
     name = models.CharField(max_length=255)
-    alias = models.CharField(max_length=255, blank=True)
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)
@@ -281,18 +273,61 @@ class skills(models.Model):
 
 #------------------------------------------------------------
 #
-# store all dialogues
+# store dialogue sentences
 #
 #------------------------------------------------------------
-class dialogues(models.Model):
-    "Store all dialogues."
+class dialogue_sentence(models.Model):
+    "Store dialogue sentences."
 
     # It must have these fields.
-    dialogue = models.CharField(max_length=255, db_index=True)
+    dialogue = models.CharField(max_length=255, primary_key=True)
     sentence = models.IntegerField()
     speaker = models.CharField(max_length=255, blank=True)
     content = models.TextField(blank=True)
-    next = models.CharField(max_length=255, blank=True)
+    action = models.TextField(blank=True)
+
+    # You can add custom fields here.
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Dialogue Sentence"
+        verbose_name_plural = "Dialogue Sentences"
+
+
+#------------------------------------------------------------
+#
+# store dialogue relations
+#
+#------------------------------------------------------------
+class dialogue_chain(models.Model):
+    "Store all dialogues."
+
+    # It must have these fields.
+    dialogue = models.ForeignKey("dialogue_sentence", db_index=True)
+    next = models.ForeignKey("dialogue_sentence", null=True, blank=True)
+    quest = models.ForeignKey("quest", null=True, blank=True)
+    condition = models.TextField(blank=True)
+
+    # You can add custom fields here.
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Dialogue Relation"
+        verbose_name_plural = "Dialogue Relations"
+
+
+#------------------------------------------------------------
+#
+# store all quests
+#
+#------------------------------------------------------------
+class quest(models.Model):
+    "Store all quests."
+
+    # It must have these fields.
+    quest_id = models.IntegerField(primary_key=True)
+    title = models.TextField(blank=True)
+    detail = models.TextField(blank=True)
     condition = models.TextField(blank=True)
     action = models.TextField(blank=True)
 
@@ -300,9 +335,51 @@ class dialogues(models.Model):
 
     class Meta:
         "Define Django meta options"
-        verbose_name = "World Dialogue List"
-        verbose_name_plural = "World Dialogue List"
-        unique_together = (("dialogue", "sentence"),)
+        verbose_name = "Quest"
+        verbose_name_plural = "Quests"
+
+
+#------------------------------------------------------------
+#
+# quest dependencies
+#
+#------------------------------------------------------------
+class quest_dependency(models.Model):
+    "Store quest dependencies."
+
+    # It must have these fields.
+    quest_id = models.ForeignKey(quest)
+    dependency = models.ForeignKey(quest)
+
+    # You can add custom fields here.
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Quest Dependency"
+        verbose_name_plural = "Quest Dependencies"
+
+
+#------------------------------------------------------------
+#
+# quest objectives
+#
+#------------------------------------------------------------
+class quest_objective(models.Model):
+    "Store quest objective."
+
+    # It must have these fields.
+    quest_id = models.ForeignKey(quest)
+    desc = models.TextField(blank=True)
+    type = models.IntegerField()
+    object = models.IntegerField()
+    number = models.IntegerField()
+
+    # You can add custom fields here.
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Quest Objective"
+        verbose_name_plural = "Quest Objectives"
 
 
 #------------------------------------------------------------
