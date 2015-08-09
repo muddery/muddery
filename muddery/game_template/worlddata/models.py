@@ -287,6 +287,7 @@ class dialogues(models.Model):
     speaker = models.CharField(max_length=255, blank=True)
     content = models.TextField(blank=True)
     next = models.CharField(max_length=255, blank=True)
+    quest = models.CharField(max_length=255, blank=True)
     condition = models.TextField(blank=True)
     action = models.TextField(blank=True)
 
@@ -297,6 +298,34 @@ class dialogues(models.Model):
         verbose_name = "World Dialogue List"
         verbose_name_plural = "World Dialogue List"
         unique_together = (("dialogue", "sentence"),)
+
+
+#------------------------------------------------------------
+#
+# store all quests
+#
+#------------------------------------------------------------
+class quests(models.Model):
+    "Store all dramas."
+
+    # It must have these fields.
+    quest = models.CharField(max_length=255, db_index=True)
+    step = models.IntegerField()
+    title = models.TextField(blank=True)
+    detail = models.TextField(blank=True)
+    dependence = models.CharField(max_length=255, blank=True)
+    next = models.CharField(max_length=255, blank=True)
+    condition = models.TextField(blank=True)
+    action = models.TextField(blank=True)
+    objective = models.TextField(blank=True)
+
+    # You can add custom fields here.
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Quest"
+        verbose_name_plural = "Quests"
+        unique_together = (("quest", "step"),)
 
 
 #------------------------------------------------------------

@@ -1,1 +1,2 @@
-key,name,alias,typeclass,location,desc,dialogue,lock,attributes
+key,name,typeclass,location,desc,dialogue,lock,attributes
+npc_royal_lucia_orderly,水手,typeclasses.npcs.NPC,room_royal_lucia_main_deck,皇家露西亚号的水手。,,,,
