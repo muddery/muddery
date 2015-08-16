@@ -552,9 +552,27 @@ class CmdTalk(Command):
             caller.msg({"alert":LS("Can not find the one to talk.")})
             return
 
-        next = DIALOGUE_HANDLER.get_next_dialogue(caller, npc, "", "")
+        sentences = DIALOGUE_HANDLER.get_default_sentences(caller, npc)
 
-        caller.msg({"dialogue": next})
+        if sentences:
+            speaker = sentences[0]["speaker"];
+            if speaker == "n":
+                speaker = npc.name
+            elif speaker == "p":
+                speaker = caller.name
+            elif speaker[0] == '"' and speaker[-1] == '"':
+                speaker = speaker[1:-1]
+
+        dialogues = []
+        for s in sentences:
+            dlg = {"speaker": speaker,
+                   "npc": npc.key,
+                   "dialogue": s["dialogue"],
+                   "sentence": s["sentence"],
+                   "content": s["content"]}
+            dialogues.append(dlg)
+
+        caller.msg({"dialogue": dialogues})
 
 
 #------------------------------------------------------------
@@ -603,21 +621,40 @@ class CmdDialogue(Command):
             sentence = int(self.args["sentence"])
         except Exception, e:
             dialogue = ""
-            sentence = 1
+            sentence = 0
 
-        # Do this sentence's action.
-        DIALOGUE_HANDLER.do_dialogue_action(caller,
-                                            dialogue,
-                                            sentence)
+        if dialogue and sentence:
+            # Do this sentence's action.
+            DIALOGUE_HANDLER.do_dialogue_action(caller,
+                                                dialogue,
+                                                sentence)
 
         # Get next sentence.
-        next = DIALOGUE_HANDLER.get_next_dialogue(caller,
-                                                  npc,
-                                                  dialogue,
-                                                  sentence)
+        sentences = DIALOGUE_HANDLER.get_next_sentences(caller,
+                                                        npc,
+                                                        dialogue,
+                                                        sentence)
+
+        if sentences:
+            speaker = sentences[0]["speaker"];
+            if speaker == "n":
+                speaker = npc.name
+            elif speaker == "p":
+                speaker = caller.name
+            elif speaker[0] == '"' and speaker[-1] == '"':
+                speaker = speaker[1:-1]
+
+        dialogues = []
+        for s in sentences:
+            dlg = {"speaker": speaker,
+                   "npc": npc.key,
+                   "dialogue": s["dialogue"],
+                   "sentence": s["sentence"],
+                   "content": s["content"]}
+            dialogues.append(dlg)
 
         # Send next dialogues to the player.
-        caller.msg({"dialogue": next})
+        caller.msg({"dialogue": dialogues})
 
 
 #------------------------------------------------------------

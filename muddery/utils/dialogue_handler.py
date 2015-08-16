@@ -56,7 +56,7 @@ class DialogueHandler(object):
         self.dialogue_storage = {}
     
     
-    def add_cache(self, dialogue):
+    def load_cache(self, dialogue):
         """
         To reduce database accesses, add a cache.
         """
@@ -71,132 +71,142 @@ class DialogueHandler(object):
         self.dialogue_storage[dialogue] = {}
         
         # Get db model
-        objects = []
-        model_obj = get_model(settings.WORLD_DATA_APP, settings.DIALOGUES)
-        if model_obj:
-            # Get dialogue records.
-            objects = model_obj.objects.filter(dialogue=dialogue)
+        try:
+            model_dialogues = get_model(settings.WORLD_DATA_APP, settings.DIALOGUES)
+            dialogue_record = model_dialogues.objects.get(key=dialogue)
+        except Exception, e:
+            return
 
-        for obj in objects:
-            # Add db fields to dict.
-            data = {"dialogue": obj.dialogue,
-                    "sentence": obj.sentence,
-                    "speaker": obj.speaker,
-                    "content": obj.content,
-                    "next": obj.next,
-                    "condition": obj.condition,
-                    "action": obj.action}
+        sentences = []
+        model_sentences = get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_SENTENCES)
+        if model_sentences:
+            # Get records.
+            sentences = model_sentences.objects.filter(dialogue=dialogue)
 
-            # Add to cache.
-            self.dialogue_storage[dialogue][obj.sentence] = data
+        nexts = []
+        model_nexts = get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_RELATIONS)
+        if model_nexts:
+            # Get records.
+            nexts = model_nexts.objects.filter(dialogue=dialogue)
+        
+        # Add db fields to data object.
+        data = {}
+
+        data["quest"] = dialogue_record.quest
+        data["condition"] = dialogue_record.condition
+
+        data["sentences"] = []
+        for sentence in sentences:
+            data["sentences"].append({"dialogue": dialogue,
+                                      "sentence": len(sentences),
+                                      "ordinal": sentence.ordinal,
+                                      "speaker": sentence.speaker,
+                                      "content": sentence.content,
+                                      "action": sentence.action})
+        data["sentences"].sort(key=lambda x:x["ordinal"])
+
+        data["nexts"] = [next.next.key for next in nexts]
+
+        # Add to cache.
+        self.dialogue_storage[dialogue] = data
 
 
-    def get_dialogue(self, dialogue, sentence):
+    def get_dialogue(self, dialogue):
         """
-        Get specified sentence.
+        Get specified dialogue.
         """
-        if not dialogue and not sentence:
+        if not dialogue:
             return
 
         # load cache
-        self.add_cache(dialogue)
+        self.load_cache(dialogue)
+
+        if not dialogue in self.dialogue_storage:
+            return
+
+        return self.dialogue_storage[dialogue]
+
+
+    def get_sentence(self, dialogue, sentence):
+        """
+        Get specified sentence.
+        """
+        dlg = self.get_dialogue(dialogue)
+        
+        try:
+            return dlg["sentence"][sentence]
+        except Exception, e:
+            pass
+            
+        return
+
+
+    def get_default_sentences(self, caller, npc):
+        """
+        """
+        if not caller:
+            return
+
+        if not npc:
+            return
+
+        sentences = []
+
+        # get npc's default dialogues
+        if npc:
+            for dlg_key in npc.dialogues:
+                npc_dlg = self.get_dialogue(dlg_key)
+                if not npc_dlg:
+                    continue
+
+                if self.in_quest(caller, npc_dlg["quest"]) and\
+                   self.match_condition(caller, npc_dlg["condition"]):
+                     if npc_dlg["sentences"]:
+                        # if has sentence, use it
+                        sentences.append(npc_dlg["sentences"][0])
+
+        return sentences
+
+
+    def get_next_sentences(self, caller, npc, current_dialogue, current_sentence):
+        """
+        """
+        if not caller:
+            return
+
+        if not npc:
+            return
+
+        # get current dialogue
+        dlg = self.get_dialogue(current_dialogue)
+        if not dlg:
+            return
+
+        sentences = []
 
         try:
-            # get data in cache
-            return self.dialogue_storage[dialogue][sentence]
+            # if has next sentence, use next sentence
+            sentences.append(dlg["sentences"][current_sentence + 1])
         except Exception, e:
-            return
-    
+            # get next dialogues
+            for dlg_key in dlg["nexts"]:
+                # get next dialogue
+                next_dlg = self.get_dialogue(dlg_key)
+                if not next_dlg:
+                    continue
 
-    def dialogue_arg_parser(self, arg, current_dlg=None):
+                if self.match_condition(caller, next_dlg["condition"]):
+                     if next_dlg["sentences"]:
+                        # if has next sentence, use next sentence
+                        sentences.append(next_dlg["sentences"][0])
+
+        return sentences
+
+
+    def in_quest(self, caller, quest):
         """
-        parse the arg into (dialogue, sentence,)
-
-        arg: string [<dialogue id>:]<sentence>
-             example: "dlg03:5" means dialogue: dlg03, sentence: 5
-                      "dlg03:"  means dialogue: dlg03, sentence: 1
-                      ":5"      means current_dlg, sentence: 5
-                      "5"       means current_dlg, sentence: 5
-                      ""        means current_dlg, current sentence + 1
-                      "-1"      means no next sentence
-        current_dlg: dict of the current dialogue.
         """
-        sentence = ""
-        dialogue = ""
-
-        # parse the arg
-        arg_list = arg.split(":", 1)
-        if len(arg_list) == 1:
-            sentence = arg_list[0]
-        elif len(arg_list) == 2:
-            dialogue = arg_list[0]
-            sentence = arg_list[1]
-
-        if not dialogue and not sentence:
-            if current_dlg:
-                dialogue = current_dlg["dialogue"]
-                sentence = current_dlg["sentence"] + 1
-            else:
-                return
-        elif not dialogue:
-            if current_dlg:
-                dialogue = current_dlg["dialogue"]
-            else:
-                return
-            sentence = int(sentence)
-        elif not sentence:
-            sentence = 1
-
-        return (dialogue, sentence,)
-
-
-    def get_next_dialogue(self, caller, npc, current_dialogue, current_sentence):
-        """
-        get npc's next dialogue
-        """
-        current = self.get_dialogue(current_dialogue, current_sentence)
-
-        candidates = []
-
-        # get availabel dialogues
-        if current:
-            if current["next"]:
-                candidates = current["next"].split(",")
-            else:
-                candidates = [unicode(current["sentence"] + 1)]
-
-        if not candidates:
-            # get npc's default dialogues.
-            if npc:
-                if npc.dialogue:
-                    dialogues = npc.dialogue.split(",")
-                    candidates = [dialogue + ":" for dialogue in dialogues]
-
-        dialogues = []
-        for candidate in candidates:
-            parser = self.dialogue_arg_parser(candidate, current)
-            if parser:
-                # get dialogue
-                dlg = self.get_dialogue(parser[0], parser[1])
-                if dlg:
-                    # check condition
-                    if self.match_condition(caller, dlg["condition"]):
-                        # speakers may be different to different players, so copy it.
-                        dlg = dlg.copy()
-
-                        # parse the speaker
-                        if dlg["speaker"] == "p":
-                            dlg["speaker"] = caller.name
-                        elif dlg["speaker"] == "n":
-                            dlg["speaker"] = npc.name
-                        else:
-                            dlg["speaker"] = ""
-
-                        # add npc's dbref
-                        dlg["npc"] = npc.dbref
-                        dialogues.append(dlg)
-
-        return dialogues
+        return True
 
 
     def match_condition(self, caller, condition):
@@ -225,7 +235,7 @@ class DialogueHandler(object):
         """
         
         # get dialogue
-        dlg = self.get_dialogue(dialogue, sentence)
+        dlg = self.get_sentence(dialogue, sentence)
         if not dlg:
             return
 

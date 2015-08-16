@@ -5,6 +5,7 @@ MudderyNPC is NPC's base class.
 
 import json
 from django.conf import settings
+from django.db.models.loading import get_model
 from evennia.objects.objects import DefaultObject
 from muddery.typeclasses.objects import MudderyObject
 
@@ -20,17 +21,22 @@ class MudderyNPC(MudderyObject):
         """
         super(MudderyNPC, self).load_data()
 
-        # set NPC's default dialogues.
-        self.set_dialogue(self.dialogue)
+        # load NPC's dialogues.
+        self.load_dialogues()
 
 
-    def set_dialogue(self, data):
+    def load_dialogues(self):
         """
-        Set NPC's dialogues.
+        Load NPC's dialogues.
         """
-        # Set default dialogues.
-        # All dialogues which matches the condition will send to the player.
-        self.dialogue = data
+        dialogues = []
+        model_npc_dialogues = get_model(settings.WORLD_DATA_APP, settings.NPC_DIALOGUES)
+        if model_npc_dialogues:
+            # Get records.
+            npc_key = self.get_info_key()
+            dialogues = model_npc_dialogues.objects.filter(npc=self.get_info_key())
+
+        self.dialogues = [dialogue.dialogue_id for dialogue in dialogues]
 
 
     def get_available_commands(self, caller):
