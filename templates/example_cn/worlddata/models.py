@@ -273,15 +273,57 @@ class skills(models.Model):
 
 #------------------------------------------------------------
 #
+# store all dialogues
+#
+#------------------------------------------------------------
+class dialogues(models.Model):
+    "Store all dialogues."
+
+    # It must have these fields.
+    key = models.CharField(max_length=255, primary_key=True)
+    quest = models.ForeignKey("quest", null=True, blank=True)
+    condition = models.TextField(blank=True)
+    
+    # You can add custom fields here.
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Dialogue"
+        verbose_name_plural = "Dialogues"
+
+
+#------------------------------------------------------------
+#
+# store dialogue relations
+#
+#------------------------------------------------------------
+class dialogue_relations(models.Model):
+    "Store dialogue relations."
+
+    # It must have these fields.
+    dialogue = models.ForeignKey(dialogues)
+    next = models.ForeignKey(dialogues)
+    
+    # You can add custom fields here.
+
+    class Meta:
+        "Define Django meta options"
+        verbose_name = "Dialogue Relation"
+        verbose_name_plural = "Dialogue Relations"
+        unique_together = ("dialogue", "next")
+
+
+#------------------------------------------------------------
+#
 # store dialogue sentences
 #
 #------------------------------------------------------------
-class dialogue_sentence(models.Model):
+class dialogue_sentences(models.Model):
     "Store dialogue sentences."
 
     # It must have these fields.
-    dialogue = models.CharField(max_length=255, primary_key=True)
-    sentence = models.IntegerField()
+    dialogue = models.ForeignKey(dialogues, db_index=True)
+    ordinal = models.IntegerField()
     speaker = models.CharField(max_length=255, blank=True)
     content = models.TextField(blank=True)
     action = models.TextField(blank=True)
@@ -292,28 +334,28 @@ class dialogue_sentence(models.Model):
         "Define Django meta options"
         verbose_name = "Dialogue Sentence"
         verbose_name_plural = "Dialogue Sentences"
+        unique_together = ("dialogue", "ordinal")
 
 
 #------------------------------------------------------------
 #
-# store dialogue relations
+# store npc's dialogue
 #
 #------------------------------------------------------------
-class dialogue_chain(models.Model):
+class npc_dialogues(models.Model):
     "Store all dialogues."
 
     # It must have these fields.
-    dialogue = models.ForeignKey("dialogue_sentence", db_index=True)
-    next = models.ForeignKey("dialogue_sentence", null=True, blank=True)
-    quest = models.ForeignKey("quest", null=True, blank=True)
-    condition = models.TextField(blank=True)
+    npc = models.ForeignKey(world_npcs, db_index=True)
+    dialogue = models.ForeignKey(dialogues, db_index=True)
 
     # You can add custom fields here.
 
     class Meta:
         "Define Django meta options"
-        verbose_name = "Dialogue Relation"
-        verbose_name_plural = "Dialogue Relations"
+        verbose_name = "NPC Dialogue"
+        verbose_name_plural = "NPC Dialogues"
+        unique_together = ("npc", "dialogue")
 
 
 #------------------------------------------------------------

@@ -133,6 +133,9 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 
 # dialogues
 DIALOGUES = "dialogues"
+DIALOGUE_SENTENCES = "dialogue_sentences"
+DIALOGUE_RELATIONS = "dialogue_relations"
+NPC_DIALOGUES = "npc_dialogues"
 
 # quest
 QUEST = "quest"
@@ -151,6 +154,9 @@ CHARACTER_LEVELS = "character_level"
 
 # all other data models
 OTHER_DATA_MODELS = (DIALOGUES,
+                     DIALOGUE_SENTENCES,
+                     DIALOGUE_RELATIONS,
+                     NPC_DIALOGUES,
                      QUEST,
                      QUEST_DEPENDENCY,
                      QUEST_OBJECTIVE,

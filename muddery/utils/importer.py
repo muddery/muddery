@@ -101,15 +101,16 @@ def import_csv(file_name, model_name):
                             record[field_name] = float(value)
                     elif field_type == 4:
                         # foreignKey
-                        arg = {}
-                        arg[related_field.name] = value
-                        record[field_name] = related_field.model.objects.get(**arg)
+                        if value:
+                            arg = {}
+                            arg[related_field.name] = value
+                            record[field_name] = related_field.model.objects.get(**arg)
 
                 # create new record
                 data = model_obj.objects.create(**record)
                 data.save()
             except Exception, e:
-                logger.log_errmsg("Can't load %s %s: %s" % (file_name, values, e))
+                print "Can't load %s %s: %s" % (file_name, values, e)
 
             # read next line
             values = reader.next()
