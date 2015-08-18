@@ -1,12 +1,11 @@
 from django.contrib import admin
-from models import world_rooms, world_exits, world_objects, world_npcs, dialogues
+from models import world_rooms, world_exits, world_objects, world_npcs
 
 # Register your models here.
 
 class WorldRoomsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
-                    'alias',
                     'typeclass',
                     'desc',
                     'location',
@@ -18,7 +17,6 @@ class WorldRoomsAdmin(admin.ModelAdmin):
 class WorldExitsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
-                    'alias',
                     'typeclass',
                     'desc',
                     'location',
@@ -31,7 +29,6 @@ class WorldExitsAdmin(admin.ModelAdmin):
 class WorldObjectsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
-                    'alias',
                     'typeclass',
                     'desc',
                     'location',
@@ -43,7 +40,6 @@ class WorldObjectsAdmin(admin.ModelAdmin):
 class WorldNPCAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
-                    'alias',
                     'typeclass',
                     'desc',
                     'location',
@@ -53,18 +49,7 @@ class WorldNPCAdmin(admin.ModelAdmin):
                     'attributes')
 
 
-class WorldDialogueAdmin(admin.ModelAdmin):
-    list_display = ('dialogue',
-                    'sentence',
-                    'speaker',
-                    'content',
-                    'next',
-                    'condition',
-                    'action')
-
-
 admin.site.register(world_rooms, WorldRoomsAdmin)
 admin.site.register(world_exits, WorldExitsAdmin)
 admin.site.register(world_objects, WorldObjectsAdmin)
 admin.site.register(world_npcs, WorldNPCAdmin)
-admin.site.register(dialogues, WorldDialogueAdmin)

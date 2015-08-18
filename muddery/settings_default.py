@@ -131,20 +131,14 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_NPCS,
                       COMMON_OBJECTS)
 
+# quest
+QUESTS = "quests"
+
 # dialogues
 DIALOGUES = "dialogues"
 DIALOGUE_SENTENCES = "dialogue_sentences"
 DIALOGUE_RELATIONS = "dialogue_relations"
 NPC_DIALOGUES = "npc_dialogues"
-
-# quest
-QUEST = "quest"
-
-# quest dependency
-QUEST_DEPENDENCY = "quest_dependency"
-
-# quest objective
-QUEST_OBJECTIVE = "quest_objective"
 
 # equip types
 EQUIPMENT_TYPES = "equipment_types"
@@ -153,13 +147,11 @@ EQUIPMENT_TYPES = "equipment_types"
 CHARACTER_LEVELS = "character_level"
 
 # all other data models
-OTHER_DATA_MODELS = (DIALOGUES,
+OTHER_DATA_MODELS = (QUESTS,
+                     DIALOGUES,
                      DIALOGUE_SENTENCES,
                      DIALOGUE_RELATIONS,
                      NPC_DIALOGUES,
-                     QUEST,
-                     QUEST_DEPENDENCY,
-                     QUEST_OBJECTIVE,
                      EQUIPMENT_TYPES,
                      CHARACTER_LEVELS)
 

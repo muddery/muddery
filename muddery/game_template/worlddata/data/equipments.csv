@@ -1,1 +1,1 @@
-key,name,alias,typeclass,desc,max_stack,unique,position,type,effect,lock,attributes,action
+key,name,typeclass,desc,max_stack,unique,attributes,effect,position,type
