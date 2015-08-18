@@ -1,3 +1,3 @@
-key,name,alias,typeclass,location,desc,lock,attributes,obj_list,action
-creator_01,Treasure Chest,,typeclasses.object_creaters.ObjectCreater,room_01,This is a treasure chest!,,,"food_01:3,food_02:3,equip_01:1",
-creator_02,Weapon Rack,,typeclasses.object_creaters.ObjectCreater,room_01,This is a weapon rack!,,,"equip_02:1,weapon_01:1",
+key,name,typeclass,desc,location,attributes,obj_list
+creator_01,Treasure Chest,typeclasses.object_creaters.ObjectCreater,This is a treasure chest!,room_01,,"food_01:3,food_02:3,equip_01:1"
+creator_02,Weapon Rack,typeclasses.object_creaters.ObjectCreater,This is a weapon rack!,room_01,,"equip_02:1,weapon_01:1"
