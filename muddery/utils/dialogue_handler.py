@@ -96,13 +96,16 @@ class DialogueHandler(object):
         data["condition"] = dialogue_record.condition
 
         data["sentences"] = []
+        count = 0
         for sentence in sentences:
             data["sentences"].append({"dialogue": dialogue,
-                                      "sentence": len(sentences),
+                                      "sentence": count,
                                       "ordinal": sentence.ordinal,
                                       "speaker": sentence.speaker,
                                       "content": sentence.content,
                                       "action": sentence.action})
+            count += 1
+
         data["sentences"].sort(key=lambda x:x["ordinal"])
 
         data["nexts"] = [next.next.key for next in nexts]
@@ -134,7 +137,7 @@ class DialogueHandler(object):
         dlg = self.get_dialogue(dialogue)
         
         try:
-            return dlg["sentence"][sentence]
+            return dlg["sentences"][sentence]
         except Exception, e:
             pass
             
@@ -247,6 +250,7 @@ class DialogueHandler(object):
         """
         do action
         """
+
         if not action:
             return
 

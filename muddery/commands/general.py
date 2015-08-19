@@ -616,18 +616,19 @@ class CmdDialogue(Command):
             return
 
         # Get the current sentence.
+        dialogue = ""
+        sentence = 0
+
         try:
             dialogue = self.args["dialogue"]
             sentence = int(self.args["sentence"])
-        except Exception, e:
-            dialogue = ""
-            sentence = 0
 
-        if dialogue and sentence:
             # Do this sentence's action.
             DIALOGUE_HANDLER.do_dialogue_action(caller,
                                                 dialogue,
                                                 sentence)
+        except Exception, e:
+            pass
 
         # Get next sentence.
         sentences = DIALOGUE_HANDLER.get_next_sentences(caller,

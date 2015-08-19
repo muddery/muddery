@@ -57,7 +57,7 @@ class common_objects(model_base.common_objects):
 # store all foods
 #
 #------------------------------------------------------------
-class foods(model_base.foods):
+class foods(model_base.common_objects):
     "Store all foods."
     hp = models.IntegerField(blank=True, default=0)
 
