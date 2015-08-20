@@ -133,6 +133,7 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 
 # quest
 QUESTS = "quests"
+QUEST_OBJECTIVES = "quest_objectives"
 
 # dialogues
 DIALOGUES = "dialogues"

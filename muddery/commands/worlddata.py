@@ -123,21 +123,9 @@ class CmdSetDataInfo(default_cmds.MuxCommand):
 
         # set the key:
         key_name = self.rhs
-        model_name = ""
-
-        if key_name:
-            models = [model for data_models in settings.OBJECT_DATA_MODELS
-                      for model in data_models]
-
-            for model in models:
-                model_obj = get_model(settings.WORLD_DATA_APP, model)
-                if model_obj:
-                    if model_obj.objects.filter(key=key_name):
-                        model_name = model
-                        break
 
         try:
-            obj.set_data_info(model_name, key_name)
+            obj.set_data_info(key_name)
             caller.msg("%s's datainfo has been set to %s" % (obj_name, self.rhs))
         except Exception, e:
             caller.msg("Can't set datainfo %s to %s: %s" % (self.rhs, obj_name, e))

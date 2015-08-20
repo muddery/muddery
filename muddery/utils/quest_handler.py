@@ -8,73 +8,6 @@ from django.db.models.loading import get_model
 from evennia.utils import logger
 
 
-class MudderyQuest(MudderyObject):
-    """
-    """
-    def at_object_creation(self):
-        """
-        Set default values.
-        """
-        self.db.finished = {}
-
-
-    def load_data(self):
-        """
-        Set data_info to the object."
-        """
-        super(MudderyObjectCreater, self).load_data()
-
-        self.set_objectives(self.db.objectives)
-
-    
-    def set_objectives(self, obj_string):
-        """
-        """
-        objectives = {}
-        types = set()
-
-        for string in obj_string.split(","):
-            items = string.split(":")
-            
-            obj = {"type" : "",
-                   "obj" : "",
-                   "num" : 0}
-
-            try:
-                obj["type"] = items[0]
-                obj["obj"] = items[1]
-                obj["num"] = int(items[2])
-            except:
-                pass
-
-            obj_id = obj["type"] + ":" + obj["obj"]
-            objectives[obj_id] = obj
-            types.add(obj["type"])
-
-        self.objectives = objectives
-        self.types = types
-    
-
-    def finished(self):
-        """
-        """
-        for key in self.db.objectives:
-            obj_num = self.db.objectives[key]["num"]
-            finished = self.db.finished.get(key, 0)
-    
-            if finished < obj_num:
-                return False
-
-        return True
-
-
-    def at_character_move_in(self):
-        """
-        """
-        if "reach" in self.objectives:
-            if
-
-
 class QuestHandler(object):
     """
     """
@@ -96,10 +29,10 @@ class QuestHandler(object):
         """
         Checks if the given quest is finished.
         """
-        return quest in self.obj.quests_finished
+        return quest in self.obj.quests_finished()
 
 
-    def at_character_move_in(self):
+    def at_character_move_in(self, location):
         """
         """
         pass
