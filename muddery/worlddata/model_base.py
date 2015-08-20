@@ -205,10 +205,9 @@ class skills(models.Model):
 #
 #------------------------------------------------------------
 class quests(models.Model):
-    "Store all dramas."
+    "Store all quests."
     
-    key = models.CharField(max_length=255, db_index=True)
-    step = models.IntegerField()
+    key = models.CharField(max_length=255, primary_key=True)
     title = models.TextField(blank=True)
     detail = models.TextField(blank=True)
     condition = models.TextField(blank=True)
@@ -219,7 +218,28 @@ class quests(models.Model):
         abstract = True
         verbose_name = "Quest"
         verbose_name_plural = "Quests"
-        unique_together = (("key", "step"),)
+
+
+#------------------------------------------------------------
+#
+# store quest objectives
+#
+#------------------------------------------------------------
+class quest_objectives(models.Model):
+    "Store all quest objectives."
+
+    quest = models.ForeignKey("quests", db_index=True)
+    ordinal = models.IntegerField()
+    type = models.CharField(max_length=255)
+    object = models.CharField(max_length=255)
+    number = models.IntegerField()
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Quest Objective"
+        verbose_name_plural = "Quest Objectives"
+        unique_together = ("quest", "ordinal")
 
 
 #------------------------------------------------------------
@@ -249,7 +269,7 @@ class dialogues(models.Model):
 class dialogue_relations(models.Model):
     "Store dialogue relations."
 
-    dialogue = models.ForeignKey("dialogues")
+    dialogue = models.ForeignKey("dialogues", db_index=True)
     next = models.ForeignKey("dialogues")
 
     class Meta:

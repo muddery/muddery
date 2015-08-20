@@ -25,8 +25,7 @@ def build_object(obj_key, caller=None):
 
     try:
         model_obj = get_model(settings.WORLD_DATA_APP, model_name)
-        record = model_obj.objects.filter(key=obj_key)
-        record = record[0]
+        record = model_obj.objects.get(key=obj_key)
     except Exception, e:
         ostring = "Can not load record %s:%s %s" % (model_name, obj_key, e)
         print ostring
@@ -43,7 +42,7 @@ def build_object(obj_key, caller=None):
         return
 
     try:
-        obj.set_data_info(model_name, record.key)
+        obj.set_data_info(record.key)
     except Exception, e:
         ostring = "Can not set data info to obj %s: %s" % (record.name, e)
         print ostring
@@ -138,7 +137,7 @@ def build_objects(model_name, unique, caller=None):
                     continue
 
                 try:
-                    obj.set_data_info(model_name, record.key)
+                    obj.set_data_info(record.key)
                 except Exception, e:
                     ostring = "Can not set data info to obj %s: %s" % (record.name, e)
                     print ostring

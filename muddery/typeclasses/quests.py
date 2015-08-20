@@ -12,106 +12,75 @@ class MudderyQuest(MudderyObject):
         """
         Set default values.
         """
-        # set total number
-        self.db.number = 0
-
-    def at_character_move_in(self):
-        """
-        """
-        pass
+        self.db.finished = {}
+        self.objectives = {}
+        self.obj_types = set()
 
 
-    def at_character_move_out(self):
+    def at_init(self):
         """
+        Load quest data.
         """
-        pass
+        super(MudderyQuest, self).at_init()
 
-
-    def match_condition(self, caller, condition):
-        """
-        check condition
-        """
-        if not condition:
-            return True
-
-        # add "caller" to condition
-        condition = self.safe_statement(condition)
+        # need save before modify m2m fields
+        self.save()
 
         try:
-            # check it
-            match = eval(condition, {"caller": caller})
+            self.load_data()
         except Exception, e:
-            logger.log_errmsg("match_condition error:%s %s" % (condition, e))
-            return False
-
-        return match
+            logger.log_errmsg("%s can not load data:%s" % (self.dbref, e))
 
 
-    def do_dialogue_action(self, caller, dialogue, sentence):
+    def set_data_info(self, quest):
         """
-        do dialogue's action
-        """
-        
-        # get dialogue
-        dlg = self.get_dialogue(dialogue, sentence)
-        if not dlg:
-            return
-
-        # do dialogue's action
-        self.do_action(caller, dlg["action"])
-
-
-    def do_action(self, caller, action):
-        """
-        do action
-        """
-        if not action:
-            return
-
-        # add "caller" to action
-        action = self.safe_statement(action)
-
-        # run action
-        try:
-            eval(action, {"caller": caller})
-        except Exception, e:
-            logger.log_errmsg("do_dialogue_action error:%s %s" % (action, e))
+        Set data_info's model and key. It puts info into attributes.
             
-        return
-
-
-    def clear(self):
+        Args:
+            key: (string) Key of the data info.
         """
-        clear cache
+        self.db.quest = quest
+        self.load_data()
+
+    
+    def load_data(self):
         """
-        self.dialogue_storage = {}
-
-
-    re_words = re.compile(r"([a-zA-Z_][a-zA-Z0-9_]*)|(\"(.*?)\")")
-    def safe_statement(self, statement):
         """
-        Add "caller." before every words.
+        objectives = []
+        model_objectives = get_model(settings.WORLD_DATA_APP, settings.QUEST_OBJECTIVES)
+        if model_objectives:
+            # Get records.
+            objectives = model_objectives.objects.filter(dialogue=self.db.quest)
+
+        for objective in objectives:
+            obj = {"ordinal": objective.ordinal,
+                   "type": objective.type,
+                   "object": objective.object
+                   "number": objective.number}
+            self.objectives[objective.ordinal] = obj
+            self.obj_types.add(objective.type)
+            self.db.finished[objective.ordinal] = 0
+
+
+    def finished(self):
         """
-        return self.re_words.sub(self.sub_statement, statement)
-
-
-    statement_keywords = {"not", "and", "or"}
-    def sub_statement(self, match):
         """
-        Replace <match> with caller.<match> except key words.
+        for key in self.objectives:
+            obj_num = self.objectives[key]["number"]
+            finished = self.db.finished.get(key, 0)
+    
+            if finished < obj_num:
+                return False
+
+        return True
+
+
+    def at_character_move_in(self, location):
         """
-        match = match.group()
+        """
+        for objective in self.objectives:
+            if objective["type"] == "reach":
+                if objective["object"] == location:
+                    self.db.finished[objective["ordinal"] += 1
+                    break
 
-        # keep the key words
-        if match in self.statement_keywords:
-            return match
-
-        # keep the strings in quotes
-        if match[0] == "\"" and match[-1] == "\"":
-            return match
-
-        return "caller." + match
-
-
-# main dialoguehandler
-DIALOGUE_HANDLER = DialogueHandler()

@@ -15,6 +15,7 @@ from evennia.utils import logger
 from evennia.utils.utils import make_iter
 from muddery.utils import utils
 from muddery.utils.exception import MudderyError
+from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 
 
 class MudderyObject(DefaultObject):
@@ -80,15 +81,14 @@ class MudderyObject(DefaultObject):
         pass
     
     
-    def set_data_info(self, model, key):
+    def set_data_info(self, key):
         """
         Set data_info's model and key. It puts info into attributes.
             
         Args:
-            model: (string) Db model's name.
             key: (string) Key of the data info.
         """
-        utils.set_obj_data_info(self, model, key)
+        utils.set_obj_data_info(self, key)
         self.load_data()
 
 
@@ -97,12 +97,12 @@ class MudderyObject(DefaultObject):
         Get object's data record from database.
         """
         # Get model and key names.
-        model = self.attributes.get(key="model", category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
-        if not model:
-            return
-        
         key = self.attributes.get(key="key", category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
         if not key:
+            return
+        
+        model = OBJECT_KEY_HANDLER.get_model(key)
+        if not model:
             return
         
         # Get db model
@@ -111,11 +111,12 @@ class MudderyObject(DefaultObject):
             raise MudderyError("%s can not open model %s" % (key, model))
         
         # Get data record.
-        data = model_obj.objects.filter(key=key)
-        if not data:
+        try:
+            data = model_obj.objects.get(key=key)
+        except Exception, e:
             raise MudderyError("%s can not find key %s" % (key, key))
         
-        return data[0]
+        return data
 
 
     def load_data(self):

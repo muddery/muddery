@@ -393,19 +393,16 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # set level informations
         try:
             model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_LEVELS)
-            data = model_obj.objects.filter(level=self.db.level)
-            if data:
-                data = data[0]
-                known_fields = set(["level"])
-                for field in data._meta.fields:
-                    if field.name in known_fields:
-                        continue
-                    if field.name in self.reserved_fields:
-                        print "Can not set reserved field %s!" % field.name
-                        continue
-                    setattr(self, field.name, data.serializable_value(field.name))
-            else:
-                raise MudderyError("Can not find level data %s" % self.db.level)
+            level_data = model_obj.objects.get(level=self.db.level)
+
+            known_fields = set(["level"])
+            for field in level_data._meta.fields:
+                if field.name in known_fields:
+                    continue
+                if field.name in self.reserved_fields:
+                    print "Can not set reserved field %s!" % field.name
+                    continue
+                setattr(self, field.name, level_data.serializable_value(field.name))
 
         except Exception, e:
             print "Can't load character level info %s: %s" % (self.db.level, e)
