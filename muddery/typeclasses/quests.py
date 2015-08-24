@@ -81,6 +81,6 @@ class MudderyQuest(MudderyObject):
         for objective in self.objectives:
             if objective["type"] == "reach":
                 if objective["object"] == location:
-                    self.db.finished[objective["ordinal"] += 1
+                    self.db.finished[objective["ordinal"]] += 1
                     break
 

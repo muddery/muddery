@@ -57,7 +57,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         
         self.db.skills = {}
         
-        self.db.quests = {}
+        # set quests
+        self.db.finished_quests = set()
+        self.db.current_quests = set()
 
         self.set_init_data()
 
@@ -484,3 +486,17 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             skills.append(info)
 
         return skills
+
+
+    def finished_quest(self, quest):
+        """
+        Whether the character is doing this quest.
+        """
+        return quest in self.finished_quests
+
+
+    def in_quest(self, quest):
+        """
+        Whether the character is doing this quest.
+        """
+        return quest in self.current_quests

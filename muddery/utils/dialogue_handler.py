@@ -92,8 +92,10 @@ class DialogueHandler(object):
         # Add db fields to data object.
         data = {}
 
-        data["quest"] = dialogue_record.quest
         data["condition"] = dialogue_record.condition
+        data["require_quest"] = dialogue_record.require_quest
+        data["provide_quests"] = set()
+        data["provide_quests"].add(dialogue_record.provide_quest)
 
         data["sentences"] = []
         count = 0
@@ -112,6 +114,13 @@ class DialogueHandler(object):
 
         # Add to cache.
         self.dialogue_storage[dialogue] = data
+        
+        # check children's quests
+        for next in data["nexts"]:
+            next_dlg = get_dialogue(next)
+            if next_dlg:
+                if next_dlg["provide_quests"]:
+                    data["provide_quests"].update(next_dlg["provide_quests"])
 
 
     def get_dialogue(self, dialogue):
@@ -198,10 +207,27 @@ class DialogueHandler(object):
                 if not next_dlg:
                     continue
 
-                if self.match_condition(caller, next_dlg["condition"]):
-                     if next_dlg["sentences"]:
-                        # if has next sentence, use next sentence
-                        sentences.append(next_dlg["sentences"][0])
+                if not next_dlg["sentences"]:
+                    continue
+
+                if not self.match_condition(caller, next_dlg["condition"]):
+                    continue
+
+                if next_dlg["require_quest"]:
+                    if not caller.in_quest(next_dlg["require_quest"]):
+                        continue
+
+                if next_dlg["provide_quests"]:
+                    can_provide = False
+                    for provide in next_dlg["provide_quests"]:
+                        if caller.in_quest(provide) or caller.finished_quest(provide):
+                            continue
+                        can_provide = True
+
+                    if not can_provide:
+                        continue
+
+                sentences.append(next_dlg["sentences"][0])
 
         return sentences
 

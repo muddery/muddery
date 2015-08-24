@@ -1,1 +1,2 @@
-key,step,title,detail,condition,action
+key,title,detail,condition,action,provider,provider_type
+quest_royal_lucia_commander,司令在找你,舰队司令在指挥室等你，快去找他吧！,,
