@@ -34,7 +34,7 @@ class MudderyNPC(MudderyObject):
         if model_npc_dialogues:
             # Get records.
             npc_key = self.get_info_key()
-            dialogues = model_npc_dialogues.objects.filter(npc=self.get_info_key())
+            dialogues = model_npc_dialogues.objects.filter(npc=npc_key)
 
         self.dialogues = [dialogue.dialogue_id for dialogue in dialogues]
 

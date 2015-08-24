@@ -1,4 +1,5 @@
-key,quest,condition
-dlg_sailer_01,,
-dlg_sailer_02,,
-dlg_sailer_03,,
+key,condition,require_quest,provide_quest
+dlg_sailer_01,,,
+dlg_sailer_02,,,
+dlg_sailer_03,,,
+dlg_sailer_04,,,quest_royal_lucia_commander
