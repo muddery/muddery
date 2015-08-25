@@ -251,8 +251,9 @@ class dialogues(models.Model):
     "Store all dialogues."
 
     key = models.CharField(max_length=255, primary_key=True)
-    quest = models.ForeignKey("quests", null=True, blank=True)
     condition = models.TextField(blank=True)
+    require_quest = models.ForeignKey("quests", null=True, blank=True)
+    provide_quest = models.ForeignKey("quests", null=True, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -293,6 +294,7 @@ class dialogue_sentences(models.Model):
     speaker = models.CharField(max_length=255, blank=True)
     content = models.TextField(blank=True)
     action = models.TextField(blank=True)
+    accept_quest = models.ForeignKey("quests", null=True, blank=True)
 
     class Meta:
         "Define Django meta options"

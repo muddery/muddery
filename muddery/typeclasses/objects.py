@@ -316,7 +316,7 @@ class MudderyObject(DefaultObject):
         Args:
         desc: (string) Description.
         """
-        self.db.desc = desc
+        self.desc = desc
 
 
     def set_lock(self, lock):
@@ -427,7 +427,7 @@ class MudderyObject(DefaultObject):
         # get name and description
         info = {"dbref": self.dbref,
                 "name": self.name,
-                "desc": self.db.desc,
+                "desc": self.desc,
                 "cmds": self.get_available_commands(caller)}
                 
         return info
