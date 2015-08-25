@@ -105,7 +105,8 @@ class DialogueHandler(object):
                                       "ordinal": sentence.ordinal,
                                       "speaker": sentence.speaker,
                                       "content": sentence.content,
-                                      "action": sentence.action})
+                                      "action": sentence.action,
+                                      "accept_quest": sentence.accept_quest})
             count += 1
 
         data["sentences"].sort(key=lambda x:x["ordinal"])
@@ -218,24 +219,12 @@ class DialogueHandler(object):
                         continue
 
                 if next_dlg["provide_quests"]:
-                    can_provide = False
-                    for provide in next_dlg["provide_quests"]:
-                        if caller.in_quest(provide) or caller.finished_quest(provide):
-                            continue
-                        can_provide = True
-
-                    if not can_provide:
+                    if not caller.is_quest_available(next_dlg["provide_quests"]):
                         continue
 
                 sentences.append(next_dlg["sentences"][0])
 
         return sentences
-
-
-    def in_quest(self, caller, quest):
-        """
-        """
-        return True
 
 
     def match_condition(self, caller, condition):
@@ -258,10 +247,12 @@ class DialogueHandler(object):
         return match
 
 
-    def do_dialogue_action(self, caller, dialogue, sentence):
+    def finish_sentence(self, caller, dialogue, sentence):
         """
-        do dialogue's action
+        A sentence finished, do it's action.
         """
+        if not caller:
+            return
         
         # get dialogue
         dlg = self.get_sentence(dialogue, sentence)
@@ -269,7 +260,11 @@ class DialogueHandler(object):
             return
 
         # do dialogue's action
-        self.do_action(caller, dlg["action"])
+        if dlg["action"]:
+            self.do_action(caller, dlg["action"])
+
+        if dlg["accept_quest"]:
+            caller.accept_quest(dlg["accept_quest"])
 
 
     def do_action(self, caller, action):

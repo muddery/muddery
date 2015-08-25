@@ -1,6 +1,6 @@
-dialogue,ordinal,speaker,content,action
+dialogue,ordinal,speaker,content,action,accept_quest
 dlg_sailer_01,1,n,您好，长官！,
 dlg_sailer_02,1,p,我很好！,
 dlg_sailer_03,1,p,我不好！,
 dlg_sailer_04,1,n,您好，长官！司令让你去指挥室找他。,
-dlg_sailer_04,2,p,好的，我这就去。,
+dlg_sailer_04,2,p,好的，我这就去。,quest_royal_lucia_commander

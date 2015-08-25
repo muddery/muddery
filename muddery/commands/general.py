@@ -335,31 +335,6 @@ class CmdGive(MuxCommand):
         target.msg("%s gives you %s." % (caller.key, to_give.key))
 
 
-class CmdDesc(MuxCommand):
-    """
-    describe yourself
-
-    Usage:
-      desc <description>
-
-    Add a description to yourself. This
-    will be visible to people when they
-    look at you.
-    """
-    key = "desc"
-    locks = "cmd:all()"
-    arg_regex = r"\s|$"
-
-    def func(self):
-        "add the description"
-
-        if not self.args:
-            self.caller.msg("You must add a description.")
-            return
-
-        self.caller.db.desc = self.args.strip()
-        self.caller.msg("You set your description.")
-
 class CmdSay(MuxCommand):
     """
     speak as your character
@@ -623,10 +598,10 @@ class CmdDialogue(Command):
             dialogue = self.args["dialogue"]
             sentence = int(self.args["sentence"])
 
-            # Do this sentence's action.
-            DIALOGUE_HANDLER.do_dialogue_action(caller,
-                                                dialogue,
-                                                sentence)
+            # Finish this sentence
+            DIALOGUE_HANDLER.finish_sentence(caller,
+                                             dialogue,
+                                             sentence)
         except Exception, e:
             pass
 

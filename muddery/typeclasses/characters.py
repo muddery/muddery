@@ -59,7 +59,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         
         # set quests
         self.db.finished_quests = set()
-        self.db.current_quests = set()
+        self.db.current_quests = {}
 
         self.set_init_data()
 
@@ -264,7 +264,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             info = {"dbref": item.dbref,
                     "name": item.name,
                     "number": item.db.number,
-                    "desc": item.db.desc}
+                    "desc": item.desc}
             if item.is_typeclass("muddery.typeclasses.common_objects.MudderyEquipment", False):
                 info["equipped"] = item.equipped
             inv.append(info)
@@ -310,7 +310,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     if obj.dbref == dbref:
                         info = {"dbref": obj.dbref,
                                 "name": obj.name,
-                                "desc": obj.db.desc}
+                                "desc": obj.desc}
             equipments[position] = info
 
         return equipments
@@ -482,21 +482,58 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             skill = self.db.skills[key]
             info = {"dbref": skill.dbref,
                     "name": skill.name,
-                    "desc": skill.db.desc}
+                    "desc": skill.desc}
             skills.append(info)
 
         return skills
+
+
+    def accept_quest(self, key):
+        """
+        Accept a quest.
+        """
+        if key in self.db.current_quests:
+            return
+
+        new_quest = build_object(key)
+        if not new_quest:
+            return
+        
+        self.db.current_quests[key] = new_quest
 
 
     def finished_quest(self, quest):
         """
         Whether the character is doing this quest.
         """
-        return quest in self.finished_quests
+        return quest in self.db.finished_quests
 
 
     def in_quest(self, quest):
         """
         Whether the character is doing this quest.
         """
-        return quest in self.current_quests
+        return quest in self.db.current_quests
+
+
+    def is_quest_available(self, quest):
+        """
+        """
+        if quest in self.db.finished_quests:
+            return False
+
+        return True
+
+
+    def return_quests(self):
+        """
+        Get quests' data.
+        """
+        quests = []
+        for key in self.db.current_quests:
+            quest = self.db.current_quests[key]
+            info = {"name": quest.name,
+                    "desc": quest.desc}
+            quests.append(info)
+
+        return quests
