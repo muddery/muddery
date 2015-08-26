@@ -208,8 +208,9 @@ class quests(models.Model):
     "Store all quests."
     
     key = models.CharField(max_length=255, primary_key=True)
-    title = models.TextField(blank=True)
-    detail = models.TextField(blank=True)
+    name = models.TextField(blank=True)
+    typeclass = models.CharField(max_length=255)
+    desc = models.TextField(blank=True)
     condition = models.TextField(blank=True)
     action = models.TextField(blank=True)
     
@@ -252,7 +253,7 @@ class dialogues(models.Model):
 
     key = models.CharField(max_length=255, primary_key=True)
     condition = models.TextField(blank=True)
-    require_quest = models.ForeignKey("quests", null=True, blank=True)
+    with_quest = models.ForeignKey("quests", null=True, blank=True)
     provide_quest = models.ForeignKey("quests", null=True, blank=True)
 
     class Meta:

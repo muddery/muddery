@@ -120,6 +120,16 @@ class quests(model_base.quests):
 
 #------------------------------------------------------------
 #
+# store quest objectives
+#
+#------------------------------------------------------------
+class quest_objectives(model_base.quest_objectives):
+    "Store all quest objectives."
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all dialogues
 #
 #------------------------------------------------------------

@@ -150,7 +150,7 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       COMMON_OBJECTS)
 
 # all other data models
-OTHER_DATA_MODELS = (QUESTS,
+OTHER_DATA_MODELS = (QUEST_OBJECTIVES,
                      DIALOGUES,
                      DIALOGUE_SENTENCES,
                      DIALOGUE_RELATIONS,

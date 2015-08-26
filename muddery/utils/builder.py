@@ -30,12 +30,12 @@ def build_object(obj_key, caller=None):
         ostring = "Can not load record %s:%s %s" % (model_name, obj_key, e)
         print ostring
         return
-    
+
     # Create object.
     try:
         obj = create.create_object(record.typeclass, record.name)
     except Exception, e:
-        ostring = "Can not create obj %s: %s" % (record.name, e)
+        ostring = "Can not create obj %s: %s" % (obj_key, e)
         print ostring
         if caller:
             caller.msg(ostring)
@@ -44,7 +44,7 @@ def build_object(obj_key, caller=None):
     try:
         obj.set_data_info(record.key)
     except Exception, e:
-        ostring = "Can not set data info to obj %s: %s" % (record.name, e)
+        ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
         print ostring
         if caller:
             caller.msg(ostring)
@@ -130,7 +130,7 @@ def build_objects(model_name, unique, caller=None):
                     obj = create.create_object(record.typeclass, record.name)
                     count_create += 1
                 except Exception, e:
-                    ostring = "Can not create obj %s: %s" % (record.name, e)
+                    ostring = "Can not create obj %s: %s" % (obj_key, e)
                     print ostring
                     if caller:
                         caller.msg(ostring)
@@ -139,7 +139,7 @@ def build_objects(model_name, unique, caller=None):
                 try:
                     obj.set_data_info(record.key)
                 except Exception, e:
-                    ostring = "Can not set data info to obj %s: %s" % (record.name, e)
+                    ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
                     print ostring
                     if caller:
                         caller.msg(ostring)

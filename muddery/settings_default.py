@@ -90,6 +90,9 @@ BASE_NPC_TYPECLASS = "muddery.typeclasses.npcs.MudderyNPC"
 # Typeclass for skills
 BASE_SKILL_TYPECLASS = "muddery.typeclasses.skills.MudderySkill"
 
+# Typeclass for quests
+BASE_QUEST_TYPECLASS = "muddery.typeclasses.quests.MudderyQuest"
+
 ######################################################################
 # World data features
 ######################################################################
@@ -122,7 +125,7 @@ WORLD_OBJECTS = ("world_objects",)
 WORLD_NPCS = ("world_npcs",)
 
 # common objects
-COMMON_OBJECTS = ("common_objects", "skills")
+COMMON_OBJECTS = ("common_objects", "skills", "quests")
 
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
@@ -131,8 +134,7 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_NPCS,
                       COMMON_OBJECTS)
 
-# quest
-QUESTS = "quests"
+# quest data
 QUEST_OBJECTIVES = "quest_objectives"
 
 # dialogues
@@ -148,7 +150,7 @@ EQUIPMENT_TYPES = "equipment_types"
 CHARACTER_LEVELS = "character_level"
 
 # all other data models
-OTHER_DATA_MODELS = (QUESTS,
+OTHER_DATA_MODELS = (QUEST_OBJECTIVES,
                      DIALOGUES,
                      DIALOGUE_SENTENCES,
                      DIALOGUE_RELATIONS,
