@@ -97,7 +97,7 @@ class MudderyObject(DefaultObject):
         Get object's data record from database.
         """
         # Get model and key names.
-        key = self.attributes.get(key="key", category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
+        key = self.get_info_key()
         if not key:
             return
         
@@ -316,7 +316,7 @@ class MudderyObject(DefaultObject):
         Args:
         desc: (string) Description.
         """
-        self.desc = desc
+        self.db.desc = desc
 
 
     def set_lock(self, lock):
@@ -427,7 +427,7 @@ class MudderyObject(DefaultObject):
         # get name and description
         info = {"dbref": self.dbref,
                 "name": self.name,
-                "desc": self.desc,
+                "desc": self.db.desc,
                 "cmds": self.get_available_commands(caller)}
                 
         return info

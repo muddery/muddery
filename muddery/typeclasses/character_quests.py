@@ -3,6 +3,8 @@ Quests
 """
 
 from muddery.typeclasses.objects import MudderyObject
+from django.conf import settings
+from django.db.models.loading import get_model
 
 
 class MudderyQuest(MudderyObject):
@@ -31,31 +33,26 @@ class MudderyQuest(MudderyObject):
         except Exception, e:
             logger.log_errmsg("%s can not load data:%s" % (self.dbref, e))
 
-
-    def set_data_info(self, quest):
-        """
-        Set data_info's model and key. It puts info into attributes.
-            
-        Args:
-            key: (string) Key of the data info.
-        """
-        self.db.quest = quest
-        self.load_data()
-
     
     def load_data(self):
         """
         """
+        super(MudderyQuest, self).load_data()
+
+        key = self.get_info_key()
+        if not key:
+            return
+
         objectives = []
         model_objectives = get_model(settings.WORLD_DATA_APP, settings.QUEST_OBJECTIVES)
         if model_objectives:
             # Get records.
-            objectives = model_objectives.objects.filter(dialogue=self.db.quest)
+            objectives = model_objectives.objects.filter(quest=key)
 
         for objective in objectives:
             obj = {"ordinal": objective.ordinal,
                    "type": objective.type,
-                   "object": objective.object
+                   "object": objective.object,
                    "number": objective.number}
             self.objectives[objective.ordinal] = obj
             self.obj_types.add(objective.type)

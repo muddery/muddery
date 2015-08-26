@@ -37,7 +37,7 @@ def at_initial_setup():
         # set limbo's desc
         limbo_obj = search.search_object("#2", exact=True)
         if limbo_obj:
-            limbo_obj[0].desc = LIMBO_DESC
+            limbo_obj[0].db.desc = LIMBO_DESC
 
         # set default locations
         builder.reset_default_locations()

@@ -150,7 +150,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),
                    "inventory": self.return_inventory(),
-                   "skills": self.return_skills()}
+                   "skills": self.return_skills(),
+                   "quests": self.return_quests()}
 
         self.msg(message)
     
@@ -264,7 +265,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             info = {"dbref": item.dbref,
                     "name": item.name,
                     "number": item.db.number,
-                    "desc": item.desc}
+                    "desc": item.db.desc}
             if item.is_typeclass("muddery.typeclasses.common_objects.MudderyEquipment", False):
                 info["equipped"] = item.equipped
             inv.append(info)
@@ -310,7 +311,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     if obj.dbref == dbref:
                         info = {"dbref": obj.dbref,
                                 "name": obj.name,
-                                "desc": obj.desc}
+                                "desc": obj.db.desc}
             equipments[position] = info
 
         return equipments
@@ -482,7 +483,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             skill = self.db.skills[key]
             info = {"dbref": skill.dbref,
                     "name": skill.name,
-                    "desc": skill.desc}
+                    "desc": skill.db.desc}
             skills.append(info)
 
         return skills
@@ -498,18 +499,19 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         new_quest = build_object(key)
         if not new_quest:
             return
-        
+
         self.db.current_quests[key] = new_quest
+        self.show_quests()
 
 
-    def finished_quest(self, quest):
+    def is_quest_finished(self, quest):
         """
         Whether the character is doing this quest.
         """
         return quest in self.db.finished_quests
 
 
-    def in_quest(self, quest):
+    def is_with_quest(self, quest):
         """
         Whether the character is doing this quest.
         """
@@ -525,6 +527,14 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         return True
 
 
+    def show_quests(self):
+        """
+        Send quests to player.
+        """
+        quests = self.return_quests()
+        self.msg({"quests": quests})
+
+
     def return_quests(self):
         """
         Get quests' data.
@@ -532,8 +542,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         quests = []
         for key in self.db.current_quests:
             quest = self.db.current_quests[key]
-            info = {"name": quest.name,
-                    "desc": quest.desc}
+            info = {"dbref": quest.dbref,
+                    "name": quest.name,
+                    "desc": quest.db.desc}
             quests.append(info)
 
         return quests

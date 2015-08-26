@@ -93,9 +93,8 @@ class DialogueHandler(object):
         data = {}
 
         data["condition"] = dialogue_record.condition
-        data["require_quest"] = dialogue_record.require_quest
-        data["provide_quests"] = set()
-        data["provide_quests"].add(dialogue_record.provide_quest)
+        data["with_quest"] = dialogue_record.with_quest
+        data["provide_quest"] = dialogue_record.provide_quest
 
         data["sentences"] = []
         count = 0
@@ -106,7 +105,7 @@ class DialogueHandler(object):
                                       "speaker": sentence.speaker,
                                       "content": sentence.content,
                                       "action": sentence.action,
-                                      "accept_quest": sentence.accept_quest})
+                                      "accept_quest": sentence.accept_quest_id})
             count += 1
 
         data["sentences"].sort(key=lambda x:x["ordinal"])
@@ -115,13 +114,6 @@ class DialogueHandler(object):
 
         # Add to cache.
         self.dialogue_storage[dialogue] = data
-        
-        # check children's quests
-        for next in data["nexts"]:
-            next_dlg = get_dialogue(next)
-            if next_dlg:
-                if next_dlg["provide_quests"]:
-                    data["provide_quests"].update(next_dlg["provide_quests"])
 
 
     def get_dialogue(self, dialogue):
@@ -172,11 +164,16 @@ class DialogueHandler(object):
                 if not npc_dlg:
                     continue
 
-                if self.in_quest(caller, npc_dlg["quest"]) and\
-                   self.match_condition(caller, npc_dlg["condition"]):
-                     if npc_dlg["sentences"]:
-                        # if has sentence, use it
-                        sentences.append(npc_dlg["sentences"][0])
+                if not self.match_condition(caller, npc_dlg["condition"]):
+                    continue
+
+                if npc_dlg["with_quest"]:
+                    if not caller.is_with_quest(npc_dlg["with_quest"]):
+                        continue
+
+                if npc_dlg["sentences"]:
+                    # if has sentence, use it
+                    sentences.append(npc_dlg["sentences"][0])
 
         return sentences
 
@@ -214,12 +211,12 @@ class DialogueHandler(object):
                 if not self.match_condition(caller, next_dlg["condition"]):
                     continue
 
-                if next_dlg["require_quest"]:
-                    if not caller.in_quest(next_dlg["require_quest"]):
+                if next_dlg["with_quest"]:
+                    if not caller.is_with_quest(next_dlg["with_quest"]):
                         continue
 
-                if next_dlg["provide_quests"]:
-                    if not caller.is_quest_available(next_dlg["provide_quests"]):
+                if next_dlg["provide_quest"]:
+                    if not caller.is_quest_available(next_dlg["provide_quest"]):
                         continue
 
                 sentences.append(next_dlg["sentences"][0])
