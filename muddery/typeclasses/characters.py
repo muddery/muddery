@@ -18,7 +18,7 @@ from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
-
+from muddery.utils.quest_handler import QUEST_HANDLER
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
     """
@@ -511,7 +511,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         return quest in self.db.finished_quests
 
 
-    def is_with_quest(self, quest):
+    def is_quest_in_progress(self, quest):
         """
         Whether the character is doing this quest.
         """
@@ -522,6 +522,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         """
         if quest in self.db.finished_quests:
+            return False
+
+        if not QUEST_HANDLER.match_quest_dependences(self, quest):
             return False
 
         return True

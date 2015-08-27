@@ -124,6 +124,16 @@ class quest_objectives(model_base.quest_objectives):
 
 #------------------------------------------------------------
 #
+# store quest dependency
+#
+#------------------------------------------------------------
+class quest_dependency(model_base.quest_dependency):
+    "Store quest dependency."
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all dialogues
 #
 #------------------------------------------------------------
@@ -159,6 +169,16 @@ class dialogue_sentences(model_base.dialogue_sentences):
 #------------------------------------------------------------
 class npc_dialogues(model_base.npc_dialogues):
     "Store all dialogues."
+    pass
+
+
+#------------------------------------------------------------
+#
+# store dialogue quest dependency
+#
+#------------------------------------------------------------
+class dialogue_quest_dependency(model_base.dialogue_quest_dependency):
+    "Store dialogue quest dependency."
     pass
 
 

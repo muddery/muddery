@@ -1,2 +1,3 @@
 key,name,typeclass,desc,condition,action
-quest_royal_lucia_commander,司令在找你,typeclasses.character_quests.Quest,舰队司令在指挥室等你，快去找他吧！,,
+quest_royal_lucia_01,司令在找你,typeclasses.character_quests.Quest,舰队司令在指挥室等你，快去找他吧！,,
+quest_royal_lucia_02,新任务,typeclasses.character_quests.Quest,有新任务了！,,

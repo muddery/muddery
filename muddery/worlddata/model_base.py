@@ -245,6 +245,25 @@ class quest_objectives(models.Model):
 
 #------------------------------------------------------------
 #
+# store quest dependency
+#
+#------------------------------------------------------------
+class quest_dependency(models.Model):
+    "Store quest dependency."
+
+    quest = models.ForeignKey("quests", db_index=True)
+    dependence = models.ForeignKey("quests")
+    type = models.IntegerField()
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Quest Dependency"
+        verbose_name_plural = "Quest Dependency"
+
+
+#------------------------------------------------------------
+#
 # store all dialogues
 #
 #------------------------------------------------------------
@@ -311,7 +330,7 @@ class dialogue_sentences(models.Model):
 #
 #------------------------------------------------------------
 class npc_dialogues(models.Model):
-    "Store all dialogues."
+    "Store npc's dialogues."
 
     npc = models.ForeignKey("world_npcs", db_index=True)
     dialogue = models.ForeignKey("dialogues", db_index=True)
@@ -322,6 +341,25 @@ class npc_dialogues(models.Model):
         verbose_name = "NPC Dialogue"
         verbose_name_plural = "NPC Dialogues"
         unique_together = ("npc", "dialogue")
+
+
+#------------------------------------------------------------
+#
+# store dialogue quest dependency
+#
+#------------------------------------------------------------
+class dialogue_quest_dependency(models.Model):
+    "Store dialogue quest dependency."
+
+    dialogue = models.ForeignKey("dialogues", db_index=True)
+    dependence = models.ForeignKey("quests")
+    type = models.IntegerField()
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Dialogue Quest Dependency"
+        verbose_name_plural = "Dialogue Quest Dependency"
 
 
 #------------------------------------------------------------

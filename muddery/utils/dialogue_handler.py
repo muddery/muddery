@@ -40,6 +40,7 @@ action:     string, sentence's action. It will be run when the sentence is used.
 """
 
 import re
+from muddery.utils import defines
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -88,13 +89,25 @@ class DialogueHandler(object):
         if model_nexts:
             # Get records.
             nexts = model_nexts.objects.filter(dialogue=dialogue)
-        
+
+        dependences = []
+        model_dependences = get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_QUEST_DEPENDENCY)
+        if model_dependences:
+            # Get records.
+            dependences = model_dependences.objects.filter(dialogue=dialogue)
+
+
         # Add db fields to data object.
         data = {}
 
         data["condition"] = dialogue_record.condition
         data["with_quest"] = dialogue_record.with_quest
         data["provide_quest"] = dialogue_record.provide_quest
+
+        data["dependences"] = []
+        for dependence in dependences:
+            data["dependences"].append({"quest": dependence.dependence_id,
+                                        "type": dependence.type})
 
         data["sentences"] = []
         count = 0
@@ -167,9 +180,8 @@ class DialogueHandler(object):
                 if not self.match_condition(caller, npc_dlg["condition"]):
                     continue
 
-                if npc_dlg["with_quest"]:
-                    if not caller.is_with_quest(npc_dlg["with_quest"]):
-                        continue
+                if not self.match_dependences(caller, npc_dlg["dependences"]):
+                    continue
 
                 if npc_dlg["sentences"]:
                     # if has sentence, use it
@@ -211,9 +223,8 @@ class DialogueHandler(object):
                 if not self.match_condition(caller, next_dlg["condition"]):
                     continue
 
-                if next_dlg["with_quest"]:
-                    if not caller.is_with_quest(next_dlg["with_quest"]):
-                        continue
+                if not self.match_dependences(caller, next_dlg["dependences"]):
+                    continue
 
                 if next_dlg["provide_quest"]:
                     if not caller.is_quest_available(next_dlg["provide_quest"]):
@@ -242,6 +253,33 @@ class DialogueHandler(object):
             return False
 
         return match
+
+
+    def match_dependences(self, caller, dependences):
+        """
+        check dependences
+        """
+        if not caller:
+            return False
+
+        if not dependences:
+            return True
+
+        for dependence in dependences:
+            if dependence["type"] == defines.DEPENDENCE_QUEST_IN_PROGRESS:
+                if not caller.is_quest_in_progress(dependence["quest"]):
+                    return False
+            elif dependence["type"] == defines.DEPENDENCE_QUEST_NOT_IN_PROGRESS:
+                if caller.is_quest_in_progress(dependence["quest"]):
+                    return False
+            elif dependence["type"] == defines.DEPENDENCE_QUEST_FINISHED:
+                if not caller.is_quest_finished(dependence["quest"]):
+                    return False
+            elif dependence["type"] == defines.DEPENDENCE_QUEST_UNFINISHED:
+                if caller.is_quest_finished(dependence["quest"]):
+                    return False
+
+        return True
 
 
     def finish_sentence(self, caller, dialogue, sentence):
