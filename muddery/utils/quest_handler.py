@@ -3,6 +3,7 @@ QuestHandler
 """
 
 import re
+from muddery.utils import defines
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -11,11 +12,11 @@ from evennia.utils import logger
 class QuestHandler(object):
     """
     """
-    def __init__(self, obj):
+    def __init__(self):
         """
         Initialize handler
         """
-        self.obj = obj
+        self.quest_depencences = {}
 
 
     def has_quest(self, quest):
@@ -64,18 +65,73 @@ class QuestHandler(object):
         return match
 
 
-    def do_dialogue_action(self, caller, dialogue, sentence):
+    def load_dependences_cache(self, quest):
         """
-        do dialogue's action
+        To reduce database accesses, add a cache.
         """
-        
-        # get dialogue
-        dlg = self.get_dialogue(dialogue, sentence)
-        if not dlg:
+        if not quest:
             return
 
+        if quest in self.quest_depencences:
+            # already cached
+            return
+
+        # Add cache of the whole dialogue.
+        self.quest_depencences[quest] = []
+        
+        # Get db model
+        dependences = []
+        model_dependences = get_model(settings.WORLD_DATA_APP, settings.QUEST_DEPENDENCY)
+        if model_dependences:
+            # Get records.
+            dependences = model_dependences.objects.filter(quest=quest)
+
+
+        # Add db fields to data object.
+        data = []
+        for dependence in dependences:
+            data.append({"quest": dependence.dependence_id,
+                         "type": dependence.type})
+
+        # Add to cache.
+        self.quest_depencences[quest] = data
+
+
+    def match_quest_dependences(self, caller, quest):
+        """
+        check dependences
+        """
+        if not caller:
+            return False
+
+        if not quest:
+            return False
+
+        self.load_dependences_cache(quest)
+
+        for dependence in self.quest_depencences[quest]:
+            if dependence["type"] == defines.DEPENDENCE_QUEST_IN_PROGRESS:
+                if not caller.is_quest_in_progress(dependence["quest"]):
+                    return False
+            elif dependence["type"] == defines.DEPENDENCE_QUEST_NOT_IN_PROGRESS:
+                if caller.is_quest_in_progress(dependence["quest"]):
+                    return False
+            elif dependence["type"] == defines.DEPENDENCE_QUEST_FINISHED:
+                if not caller.is_quest_finished(dependence["quest"]):
+                    return False
+            elif dependence["type"] == defines.DEPENDENCE_QUEST_UNFINISHED:
+                if caller.is_quest_finished(dependence["quest"]):
+                    return False
+
+        return True
+
+
+    def do_quest_action(self, caller, quest):
+        """
+        do quest's action
+        """
         # do dialogue's action
-        self.do_action(caller, dlg["action"])
+        self.do_action(caller, quest["action"])
 
 
     def do_action(self, caller, action):
@@ -130,5 +186,5 @@ class QuestHandler(object):
         return "caller." + match
 
 
-# main dialoguehandler
-DIALOGUE_HANDLER = DialogueHandler()
+# main questhandler
+QUEST_HANDLER = QuestHandler()

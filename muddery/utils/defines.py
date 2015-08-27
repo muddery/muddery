@@ -1,0 +1,10 @@
+"""
+This module defines constent constant values.
+"""
+
+# quest dependences
+DEPENDENCE_NONE = 0
+DEPENDENCE_QUEST_IN_PROGRESS = 1
+DEPENDENCE_QUEST_NOT_IN_PROGRESS = 2
+DEPENDENCE_QUEST_FINISHED = 3
+DEPENDENCE_QUEST_UNFINISHED = 4
