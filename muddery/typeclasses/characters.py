@@ -524,9 +524,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         if quest in self.db.finished_quests:
             return False
 
-        if not QUEST_HANDLER.match_quest_dependences(self, quest):
-            return False
-
         return True
 
 
