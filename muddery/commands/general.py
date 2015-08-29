@@ -594,16 +594,23 @@ class CmdDialogue(Command):
         dialogue = ""
         sentence = 0
 
+        have_current_dlg = False
         try:
             dialogue = self.args["dialogue"]
             sentence = int(self.args["sentence"])
-
-            # Finish this sentence
-            DIALOGUE_HANDLER.finish_sentence(caller,
-                                             dialogue,
-                                             sentence)
+            have_current_dlg = True
         except Exception, e:
             pass
+
+        if have_current_dlg:
+            try:
+                # Finish this sentence
+                DIALOGUE_HANDLER.finish_sentence(caller,
+                                                 dialogue,
+                                                 sentence)
+            except Exception, e:
+                ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
+                logger.log_errmsg(ostring)
 
         # Get next sentence.
         sentences = DIALOGUE_HANDLER.get_next_sentences(caller,
