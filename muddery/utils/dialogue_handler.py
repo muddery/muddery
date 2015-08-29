@@ -41,7 +41,7 @@ action:     string, sentence's action. It will be run when the sentence is used.
 
 import re
 from muddery.utils import defines
-from muddery.utils.quest_handler import QUEST_HANDLER
+from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -102,7 +102,7 @@ class DialogueHandler(object):
         data = {}
 
         data["condition"] = dialogue_record.condition
-        data["provide_quest"] = dialogue_record.provide_quest
+        data["have_quest"] = dialogue_record.have_quest
 
         data["dependences"] = []
         for dependence in dependences:
@@ -118,7 +118,7 @@ class DialogueHandler(object):
                                       "speaker": sentence.speaker,
                                       "content": sentence.content,
                                       "action": sentence.action,
-                                      "accept_quest": sentence.accept_quest_id})
+                                      "provide_quest": sentence.provide_quest_id})
             count += 1
 
         data["sentences"].sort(key=lambda x:x["ordinal"])
@@ -181,8 +181,8 @@ class DialogueHandler(object):
                     continue
 
                 match = True
-                for dependence in npc_dlg["dependences"]:
-                    if not QUEST_HANDLER.match_dependence(caller, dependence["quest"], dependence["type"]):
+                for dep in npc_dlg["dependences"]:
+                    if not QUEST_DEP_HANDLER.match_dependence(caller, dep["quest"], dep["type"]):
                         match = False
                         break;
                 if not match:
@@ -228,12 +228,8 @@ class DialogueHandler(object):
                 if not self.match_condition(caller, next_dlg["condition"]):
                     continue
 
-                for dependence in next_dlg["dependences"]:
-                    if not QUEST_HANDLER.match_dependence(caller, dependence["quest"], dependence["type"]):
-                        continue
-
-                if next_dlg["provide_quest"]:
-                    if not caller.is_quest_available(next_dlg["provide_quest"]):
+                for dep in next_dlg["dependences"]:
+                    if not QUEST_DEP_HANDLER.match_dependence(caller, dep["quest"], dep["type"]):
                         continue
 
                 sentences.append(next_dlg["sentences"][0])
@@ -277,8 +273,8 @@ class DialogueHandler(object):
         if dlg["action"]:
             self.do_action(caller, dlg["action"])
 
-        if dlg["accept_quest"]:
-            caller.accept_quest(dlg["accept_quest"])
+        if dlg["provide_quest"]:
+            caller.quest.accept(dlg["provide_quest"])
 
 
     def do_action(self, caller, action):

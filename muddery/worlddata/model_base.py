@@ -231,9 +231,9 @@ class quest_objectives(models.Model):
 
     quest = models.ForeignKey("quests", db_index=True)
     ordinal = models.IntegerField()
-    type = models.CharField(max_length=255)
+    type = models.IntegerField()
     object = models.CharField(max_length=255)
-    number = models.IntegerField()
+    number = models.IntegerField(blank=True, default=0)
 
     class Meta:
         "Define Django meta options"
@@ -272,8 +272,7 @@ class dialogues(models.Model):
 
     key = models.CharField(max_length=255, primary_key=True)
     condition = models.TextField(blank=True)
-    with_quest = models.ForeignKey("quests", null=True, blank=True)
-    provide_quest = models.ForeignKey("quests", null=True, blank=True)
+    have_quest = models.ForeignKey("quests", null=True, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -298,7 +297,6 @@ class dialogue_relations(models.Model):
         abstract = True
         verbose_name = "Dialogue Relation"
         verbose_name_plural = "Dialogue Relations"
-        unique_together = ("dialogue", "next")
 
 
 #------------------------------------------------------------
@@ -314,14 +312,13 @@ class dialogue_sentences(models.Model):
     speaker = models.CharField(max_length=255, blank=True)
     content = models.TextField(blank=True)
     action = models.TextField(blank=True)
-    accept_quest = models.ForeignKey("quests", null=True, blank=True)
+    provide_quest = models.ForeignKey("quests", null=True, blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
         verbose_name = "Dialogue Sentence"
         verbose_name_plural = "Dialogue Sentences"
-        unique_together = ("dialogue", "ordinal")
 
 
 #------------------------------------------------------------
@@ -340,7 +337,6 @@ class npc_dialogues(models.Model):
         abstract = True
         verbose_name = "NPC Dialogue"
         verbose_name_plural = "NPC Dialogues"
-        unique_together = ("npc", "dialogue")
 
 
 #------------------------------------------------------------

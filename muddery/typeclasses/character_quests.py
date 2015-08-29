@@ -5,6 +5,7 @@ Quests
 from muddery.typeclasses.objects import MudderyObject
 from django.conf import settings
 from django.db.models.loading import get_model
+from evennia.utils import logger
 
 
 class MudderyQuest(MudderyObject):
@@ -25,15 +26,10 @@ class MudderyQuest(MudderyObject):
         """
         super(MudderyQuest, self).at_init()
 
-        # need save before modify m2m fields
-        self.save()
+        self.objectives = {}
+        self.obj_types = set()
 
-        try:
-            self.load_data()
-        except Exception, e:
-            logger.log_errmsg("%s can not load data:%s" % (self.dbref, e))
 
-    
     def load_data(self):
         """
         """
@@ -43,20 +39,20 @@ class MudderyQuest(MudderyObject):
         if not key:
             return
 
-        objectives = []
+        obj_records = []
         model_objectives = get_model(settings.WORLD_DATA_APP, settings.QUEST_OBJECTIVES)
         if model_objectives:
             # Get records.
-            objectives = model_objectives.objects.filter(quest=key)
+            obj_records = model_objectives.objects.filter(quest=key)
 
-        for objective in objectives:
-            obj = {"ordinal": objective.ordinal,
-                   "type": objective.type,
-                   "object": objective.object,
-                   "number": objective.number}
-            self.objectives[objective.ordinal] = obj
-            self.obj_types.add(objective.type)
-            self.db.finished[objective.ordinal] = 0
+        for obj_record in obj_records:
+            objective = {"ordinal": obj_record.ordinal,
+                         "type": obj_record.type,
+                         "object": obj_record.object,
+                         "number": obj_record.number}
+            self.objectives[obj_record.ordinal] = objective
+            self.db.finished[obj_record.ordinal] = 0
+            self.obj_types.add(obj_record.type)
 
 
     def finished(self):

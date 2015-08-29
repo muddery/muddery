@@ -16,9 +16,11 @@ from evennia.objects.objects import DefaultCharacter
 from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
+from muddery.utils.quest_handler import QuestHandler
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
-from muddery.utils.quest_handler import QUEST_HANDLER
+from evennia.utils.utils import lazy_property
+
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
     """
@@ -39,6 +41,13 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     has connected" message echoed to the room
 
     """
+
+    # initialize all handlers in a lazy fashion
+    @lazy_property
+    def quest(self):
+        return QuestHandler(self)
+
+
     def at_object_creation(self):
         """
         Called once, when this object is first created. This is the
@@ -151,7 +160,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                    "equipments": self.return_equipments(),
                    "inventory": self.return_inventory(),
                    "skills": self.return_skills(),
-                   "quests": self.return_quests()}
+                   "quests": self.quest.return_quests()}
 
         self.msg(message)
     
@@ -487,64 +496,3 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             skills.append(info)
 
         return skills
-
-
-    def accept_quest(self, key):
-        """
-        Accept a quest.
-        """
-        if key in self.db.current_quests:
-            return
-
-        new_quest = build_object(key)
-        if not new_quest:
-            return
-
-        self.db.current_quests[key] = new_quest
-        self.show_quests()
-
-
-    def is_quest_finished(self, quest):
-        """
-        Whether the character is doing this quest.
-        """
-        return quest in self.db.finished_quests
-
-
-    def is_quest_in_progress(self, quest):
-        """
-        Whether the character is doing this quest.
-        """
-        return quest in self.db.current_quests
-
-
-    def is_quest_available(self, quest):
-        """
-        """
-        if quest in self.db.finished_quests:
-            return False
-
-        return True
-
-
-    def show_quests(self):
-        """
-        Send quests to player.
-        """
-        quests = self.return_quests()
-        self.msg({"quests": quests})
-
-
-    def return_quests(self):
-        """
-        Get quests' data.
-        """
-        quests = []
-        for key in self.db.current_quests:
-            quest = self.db.current_quests[key]
-            info = {"dbref": quest.dbref,
-                    "name": quest.name,
-                    "desc": quest.db.desc}
-            quests.append(info)
-
-        return quests

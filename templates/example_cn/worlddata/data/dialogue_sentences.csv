@@ -1,4 +1,4 @@
-dialogue,ordinal,speaker,content,action,accept_quest
+dialogue,ordinal,speaker,content,action,provide_quest
 dlg_sailer_01,1,n,您好，长官！,
 dlg_sailer_02,1,p,我很好！,
 dlg_sailer_03,1,p,我不好！,
