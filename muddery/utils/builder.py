@@ -7,6 +7,7 @@ from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import create, search
+import traceback
 
 
 def build_object(obj_key, caller=None):
@@ -21,6 +22,7 @@ def build_object(obj_key, caller=None):
     if not model_name:
         ostring = "Can not find the model of %s." % obj_key
         print ostring
+        print traceback.print_exc()
         return
 
     try:
@@ -29,6 +31,7 @@ def build_object(obj_key, caller=None):
     except Exception, e:
         ostring = "Can not load record %s:%s %s" % (model_name, obj_key, e)
         print ostring
+        print traceback.print_exc()
         return
 
     # Create object.
@@ -37,6 +40,7 @@ def build_object(obj_key, caller=None):
     except Exception, e:
         ostring = "Can not create obj %s: %s" % (obj_key, e)
         print ostring
+        print traceback.print_exc()
         if caller:
             caller.msg(ostring)
         return
@@ -46,6 +50,7 @@ def build_object(obj_key, caller=None):
     except Exception, e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
         print ostring
+        print traceback.print_exc()
         if caller:
             caller.msg(ostring)
         return
@@ -113,6 +118,7 @@ def build_objects(model_name, unique, caller=None):
             obj.load_data()
         except Exception, e:
             print "%s can not load data:%s" % (obj.dbref, e)
+            print traceback.print_exc()
 
         current_obj_keys.add(obj_key)
 
@@ -132,6 +138,7 @@ def build_objects(model_name, unique, caller=None):
                 except Exception, e:
                     ostring = "Can not create obj %s: %s" % (obj_key, e)
                     print ostring
+                    print traceback.print_exc()
                     if caller:
                         caller.msg(ostring)
                     continue
@@ -141,6 +148,7 @@ def build_objects(model_name, unique, caller=None):
                 except Exception, e:
                     ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
                     print ostring
+                    print traceback.print_exc()
                     if caller:
                         caller.msg(ostring)
                     continue
@@ -228,6 +236,7 @@ def reset_default_locations():
         except Exception, e:
             ostring = "Can not find default_home_key: %s" % e
             print ostring
+            print traceback.print_exc()
 
     if default_home_key:
         default_home = utils.search_obj_info_key(default_home_key)
@@ -247,6 +256,7 @@ def reset_default_locations():
         except Exception, e:
             ostring = "Can not find start_location_key: %s" % e
             print ostring
+            print traceback.print_exc()
 
     if start_location_key:
         start_location = utils.search_obj_info_key(start_location_key)

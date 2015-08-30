@@ -11,6 +11,7 @@ from evennia.commands.command import Command
 from evennia.commands.default.muxcommand import MuxCommand
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.localized_strings_handler import LS
+import traceback
 
 
 # limit symbol import for API
@@ -611,6 +612,7 @@ class CmdDialogue(Command):
             except Exception, e:
                 ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
                 logger.log_errmsg(ostring)
+                logger.log_errmsg(traceback.format_exc())
 
         # Get next sentence.
         sentences = DIALOGUE_HANDLER.get_next_sentences(caller,

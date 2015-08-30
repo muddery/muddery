@@ -18,20 +18,22 @@ class QuestHandler(object):
         Initialize handler
         """
         self.character = character
+        self.current_quests = self.character.db.current_quests
+        self.finished_quests = self.character.db.finished_quests
 
 
     def accept(self, quest):
         """
         Accept a quest.
         """
-        if quest in self.character.db.current_quests:
+        if quest in self.current_quests:
             return
 
         new_quest = build_object(quest)
         if not new_quest:
             return
 
-        self.character.db.current_quests[quest] = new_quest
+        self.current_quests[quest] = new_quest
         self.show_quests()
 
 
@@ -39,20 +41,20 @@ class QuestHandler(object):
         """
         Whether the character finished this quest.
         """
-        return quest in self.character.db.finished_quests
+        return quest in self.finished_quests
 
 
     def is_in_progress(self, quest):
         """
         Whether the character is doing this quest.
         """
-        return quest in self.character.db.current_quests
+        return quest in self.current_quests
 
 
     def is_available(self, quest):
         """
         """
-        if quest in self.character.db.finished_quests:
+        if quest in self.finished_quests:
             return False
 
         return True
@@ -71,14 +73,26 @@ class QuestHandler(object):
         Get quests' data.
         """
         quests = []
-        for key in self.character.db.current_quests:
-            quest = self.character.db.current_quests[key]
+        for key in self.current_quests:
+            quest = self.current_quests[key]
             info = {"dbref": quest.dbref,
                     "name": quest.name,
                     "desc": quest.db.desc}
             quests.append(info)
 
         return quests
+
+
+    def at_talk_finished(self, dialogue):
+        """
+        """
+        status_changed = False
+        for key in self.current_quests:
+            if self.current_quests[key].at_talk_finished(dialogue):
+                status_changed = True
+
+        if status_changed:
+            self.show_quests(self)
 
 
     def at_character_move_in(self, location):
