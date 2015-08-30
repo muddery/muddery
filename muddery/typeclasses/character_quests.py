@@ -17,17 +17,16 @@ class MudderyQuest(MudderyObject):
         """
         self.db.finished = {}
         self.objectives = {}
-        self.obj_types = set()
+        self.obj_unfinished = {}
 
 
     def at_init(self):
         """
         Load quest data.
         """
-        super(MudderyQuest, self).at_init()
-
         self.objectives = {}
-        self.obj_types = set()
+        self.obj_unfinished = {}
+        super(MudderyQuest, self).at_init()
 
 
     def load_data(self):
@@ -51,16 +50,21 @@ class MudderyQuest(MudderyObject):
                          "object": obj_record.object,
                          "number": obj_record.number}
             self.objectives[obj_record.ordinal] = objective
-            self.db.finished[obj_record.ordinal] = 0
-            self.obj_types.add(obj_record.type)
+
+            finished = self.db.finished.get(key, 0)
+            if finished < obj_record.number:
+                if not obj_record.type in self.obj_unfinished:
+                    self.obj_unfinished[obj_record.type] = [obj_record.ordinal]
+                else:
+                    self.obj_unfinished[obj_record.type].append(obj_record.ordinal)
 
 
     def finished(self):
         """
         """
-        for key in self.objectives:
-            obj_num = self.objectives[key]["number"]
-            finished = self.db.finished.get(key, 0)
+        for ordinal in self.objectives:
+            obj_num = self.objectives[ordinal]["number"]
+            finished = self.db.finished.get(ordinal, 0)
     
             if finished < obj_num:
                 return False
@@ -68,12 +72,32 @@ class MudderyQuest(MudderyObject):
         return True
 
 
-    def at_character_move_in(self, location):
+    def at_talk_finished(self, dialogue):
         """
         """
-        for objective in self.objectives:
-            if objective["type"] == "reach":
-                if objective["object"] == location:
-                    self.db.finished[objective["ordinal"]] += 1
-                    break
+        if not OBJECTIVE_TALK in self.obj_unfinished:
+            return False
 
+        status_changed = False
+        index = 0
+        while index < len(self.obj_unfinished[OBJECTIVE_TALK]):
+            ordinal = self.obj_unfinished[OBJECTIVE_TALK][index]
+            index += 1
+
+            if self.objectives[ordinal]["object"] == dialogue:
+                finished = self.db.finished.get(ordinal, 0)
+                finished += 1
+                self.db.finished[ordinal] = finished
+
+                if self.db.finished[ordinal] >= self.objectives[ordinal]["number"]:
+                    # finished
+                    self.obj_unfinished.remove(ordinal)
+                    index -= 1
+
+                    if not self.obj_unfinished[OBJECTIVE_TALK]:
+                        del(self.obj_unfinished[OBJECTIVE_TALK])
+                        break
+
+                status_changed = True
+
+        return status_changed
