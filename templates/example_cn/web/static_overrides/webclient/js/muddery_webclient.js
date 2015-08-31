@@ -573,20 +573,35 @@ var webclient = {
         var page = $("#page_quests");
         
         var content = "<table class='tab_quests'>";
-        content += "<thead><tr><th>名称</th><th>说明</th></tr></thead>";
+        content += "<thead><tr><th>名称</th><th>说明</th><th>目标</th></tr></thead>";
         var element = "";
 
         for (var i in data) {
             try {
-                var obj = data[i];
+                var quest = data[i];
                 element = "<tbody><tr><td>";
                 element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
                 element += " cmd_name='look'";
-                element += " cmd_args='" + obj["dbref"] + "'>";
-                element += obj["name"];
+                element += " cmd_args='" + quest["dbref"] + "'>";
+                element += quest["name"];
                 element += "</a></td>";
                 element += "<td>";
-                element += obj["desc"];
+                element += quest["desc"];
+                element += "</td>";
+                element += "<td>";
+
+                var objectives = ""
+                for (var o in quest["objectives"]) {
+                    if (objectives.length > 0) {
+                        objectives += "<br>";
+                    }
+                    
+                    var obj = quest["objectives"][o];
+                    objectives += obj["target"] + obj["object"];
+                    objectives += obj["achieved"] + "/" + obj["total"];
+                }
+                
+                element += objectives;
                 element += "</td></tr></tbody>";
                 
                 content += element;

@@ -2,7 +2,11 @@
 Quests
 """
 
+from muddery.utils import defines
 from muddery.typeclasses.objects import MudderyObject
+from muddery.utils import script_handler
+from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.localized_strings_handler import LS
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -15,9 +19,9 @@ class MudderyQuest(MudderyObject):
         """
         Set default values.
         """
-        self.db.finished = {}
+        self.db.achieved = {}
         self.objectives = {}
-        self.obj_unfinished = {}
+        self.not_achieved = {}
 
 
     def at_init(self):
@@ -25,7 +29,7 @@ class MudderyQuest(MudderyObject):
         Load quest data.
         """
         self.objectives = {}
-        self.obj_unfinished = {}
+        self.not_achieved = {}
         super(MudderyQuest, self).at_init()
 
 
@@ -51,53 +55,86 @@ class MudderyQuest(MudderyObject):
                          "number": obj_record.number}
             self.objectives[obj_record.ordinal] = objective
 
-            finished = self.db.finished.get(key, 0)
-            if finished < obj_record.number:
-                if not obj_record.type in self.obj_unfinished:
-                    self.obj_unfinished[obj_record.type] = [obj_record.ordinal]
+            achieved = self.db.achieved.get(key, 0)
+            if achieved < obj_record.number:
+                if not obj_record.type in self.not_achieved:
+                    self.not_achieved[obj_record.type] = [obj_record.ordinal]
                 else:
-                    self.obj_unfinished[obj_record.type].append(obj_record.ordinal)
+                    self.not_achieved[obj_record.type].append(obj_record.ordinal)
 
 
-    def finished(self):
+    def return_objectives(self):
+        """
+        """
+        objectives = []
+        for ordinal in self.objectives:
+            obj_num = self.objectives[ordinal]["number"]
+            achieved = self.db.achieved.get(ordinal, 0)
+            
+            if self.objectives[ordinal]["type"] == defines.OBJECTIVE_TALK:
+                target = LS("Talk to")
+                object = DIALOGUE_HANDLER.get_npc_name(self.objectives[ordinal]["object"])
+    
+                objectives.append({"target": target,
+                                   "object": object,
+                                   "achieved": achieved,
+                                   "total": obj_num
+                                   })
+
+        return objectives
+
+
+    def is_achieved(self):
         """
         """
         for ordinal in self.objectives:
             obj_num = self.objectives[ordinal]["number"]
-            finished = self.db.finished.get(ordinal, 0)
+            achieved = self.db.achieved.get(ordinal, 0)
     
-            if finished < obj_num:
+            if achieved < obj_num:
                 return False
 
         return True
 
 
+    def finish(self):
+        """
+        """
+        # do quest's action
+        if self.action:
+            script_handler.do_action(caller, self.action)
+
+
     def at_talk_finished(self, dialogue):
         """
         """
-        if not OBJECTIVE_TALK in self.obj_unfinished:
+        if not defines.OBJECTIVE_TALK in self.not_achieved:
             return False
 
         status_changed = False
         index = 0
-        while index < len(self.obj_unfinished[OBJECTIVE_TALK]):
-            ordinal = self.obj_unfinished[OBJECTIVE_TALK][index]
+        while index < len(self.not_achieved[defines.OBJECTIVE_TALK]):
+            ordinal = self.not_achieved[defines.OBJECTIVE_TALK][index]
             index += 1
 
             if self.objectives[ordinal]["object"] == dialogue:
-                finished = self.db.finished.get(ordinal, 0)
-                finished += 1
-                self.db.finished[ordinal] = finished
+                status_changed = True
 
-                if self.db.finished[ordinal] >= self.objectives[ordinal]["number"]:
-                    # finished
-                    self.obj_unfinished.remove(ordinal)
+                achieved = self.db.achieved.get(ordinal, 0)
+                achieved += 1
+                self.db.achieved[ordinal] = achieved
+
+                if self.db.achieved[ordinal] >= self.objectives[ordinal]["number"]:
+                    # objective achieved
+                    del(self.not_achieved[defines.OBJECTIVE_TALK][ordinal])
                     index -= 1
 
-                    if not self.obj_unfinished[OBJECTIVE_TALK]:
-                        del(self.obj_unfinished[OBJECTIVE_TALK])
+                    if not self.not_achieved[defines.OBJECTIVE_TALK]:
+                        del(self.not_achieved[defines.OBJECTIVE_TALK])
                         break
 
-                status_changed = True
+        # if status_changed:
+        #     if self.is_objectives_achieved():
+        #         self.finish()
 
         return status_changed

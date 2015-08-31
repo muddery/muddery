@@ -39,9 +39,10 @@ action:     string, sentence's action. It will be run when the sentence is used.
             words in the action, like condition.
 """
 
-import re
+
 from muddery.utils import defines
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
+from muddery.utils import script_handler
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -102,7 +103,6 @@ class DialogueHandler(object):
         data = {}
 
         data["condition"] = dialogue_record.condition
-        data["have_quest"] = dialogue_record.have_quest
 
         data["dependences"] = []
         for dependence in dependences:
@@ -118,7 +118,8 @@ class DialogueHandler(object):
                                       "speaker": sentence.speaker,
                                       "content": sentence.content,
                                       "action": sentence.action,
-                                      "provide_quest": sentence.provide_quest_id})
+                                      "provide_quest": sentence.provide_quest_id,
+                                      "finish_quest": sentence.finish_quest_id})
             count += 1
 
         data["sentences"].sort(key=lambda x:x["ordinal"])
@@ -177,7 +178,7 @@ class DialogueHandler(object):
                 if not npc_dlg:
                     continue
 
-                if not self.match_condition(caller, npc_dlg["condition"]):
+                if not script_handler.match_condition(caller, npc_dlg["condition"]):
                     continue
 
                 match = True
@@ -225,7 +226,7 @@ class DialogueHandler(object):
                 if not next_dlg["sentences"]:
                     continue
 
-                if not self.match_condition(caller, next_dlg["condition"]):
+                if not script_handler.match_condition(caller, next_dlg["condition"]):
                     continue
 
                 for dep in next_dlg["dependences"]:
@@ -237,26 +238,6 @@ class DialogueHandler(object):
         return sentences
 
 
-    def match_condition(self, caller, condition):
-        """
-        check condition
-        """
-        if not condition:
-            return True
-
-        # add "caller" to condition
-        condition = self.safe_statement(condition)
-
-        try:
-            # check it
-            match = eval(condition, {"caller": caller})
-        except Exception, e:
-            logger.log_errmsg("match_condition error:%s %s" % (condition, e))
-            return False
-
-        return match
-
-
     def finish_sentence(self, caller, dialogue, sentence):
         """
         A sentence finished, do it's action.
@@ -265,36 +246,40 @@ class DialogueHandler(object):
             return
         
         # get dialogue
-        dlg = self.get_sentence(dialogue, sentence)
+        dlg = self.get_dialogue(dialogue)
         if not dlg:
             return
 
-        # do dialogue's action
-        if dlg["action"]:
-            self.do_action(caller, dlg["action"])
-
-        if dlg["provide_quest"]:
-            caller.quest.accept(dlg["provide_quest"])
-
-
-    def do_action(self, caller, action):
-        """
-        do action
-        """
-
-        if not action:
+        if sentence >= len(dlg["sentences"]):
             return
 
-        # add "caller" to action
-        action = self.safe_statement(action)
+        sen = self.get_sentence(dialogue, sentence)
+        if not sen:
+            return
 
-        # run action
-        try:
-            eval(action, {"caller": caller})
-        except Exception, e:
-            logger.log_errmsg("do_dialogue_action error:%s %s" % (action, e))
-            
-        return
+        # do dialogue's action
+        if sen["action"]:
+            script_handler.do_action(caller, sen["action"])
+
+        if sentence + 1 >= len(dlg["sentences"]):
+            # last sentence
+            self.finish_dialogue(caller, dialogue)
+
+        if sen["finish_quest"]:
+            caller.quest.finish(sen["finish_quest"])
+
+        if sen["provide_quest"]:
+            caller.quest.accept(sen["provide_quest"])
+
+
+    def finish_dialogue(self, caller, dialogue):
+        """
+        A dialogue finished, do it's action.
+        """
+        if not caller:
+            return
+
+        caller.quest.at_talk_finished(dialogue)
 
 
     def clear(self):
@@ -304,30 +289,20 @@ class DialogueHandler(object):
         self.dialogue_storage = {}
 
 
-    re_words = re.compile(r"([a-zA-Z_][a-zA-Z0-9_]*)|(\"(.*?)\")")
-    def safe_statement(self, statement):
+    def get_npc_name(self, dialogue):
         """
-        Add "caller." before every words.
+        Get who say this dialogue.
         """
-        return self.re_words.sub(self.sub_statement, statement)
+        model_npc_dialogues = get_model(settings.WORLD_DATA_APP, settings.NPC_DIALOGUES)
+        if model_npc_dialogues:
+            # Get record.
+            try:
+                record = model_npc_dialogues.objects.get(dialogue=dialogue)
+                return record.npc.name
+            except Exception, e:
+                pass
 
-
-    statement_keywords = {"not", "and", "or"}
-    def sub_statement(self, match):
-        """
-        Replace <match> with caller.<match> except key words.
-        """
-        match = match.group()
-
-        # keep the key words
-        if match in self.statement_keywords:
-            return match
-
-        # keep the strings in quotes
-        if match[0] == "\"" and match[-1] == "\"":
-            return match
-
-        return "caller." + match
+        return ""
 
 
 # main dialoguehandler
