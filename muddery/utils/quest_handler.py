@@ -37,6 +37,21 @@ class QuestHandler(object):
         self.show_quests()
 
 
+    def finish(self, quest):
+        """
+        Finish a quest.
+        """
+        if not quest in self.current_quests:
+            return
+
+        if not self.current_quests[quest].is_achieved:
+            return
+
+        self.current_quests[quest].finish()
+        del(self.current_quests[quest])
+        self.show_quests()
+
+
     def is_finished(self, quest):
         """
         Whether the character finished this quest.
@@ -77,7 +92,8 @@ class QuestHandler(object):
             quest = self.current_quests[key]
             info = {"dbref": quest.dbref,
                     "name": quest.name,
-                    "desc": quest.db.desc}
+                    "desc": quest.db.desc,
+                    "objectives": quest.return_objectives()}
             quests.append(info)
 
         return quests
@@ -92,7 +108,7 @@ class QuestHandler(object):
                 status_changed = True
 
         if status_changed:
-            self.show_quests(self)
+            self.show_quests()
 
 
     def at_character_move_in(self, location):
