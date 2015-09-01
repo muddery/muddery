@@ -5,6 +5,7 @@ QuestHandler
 import re
 from muddery.utils import defines
 from muddery.utils.builder import build_object
+from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -35,6 +36,7 @@ class QuestHandler(object):
 
         self.current_quests[quest] = new_quest
         self.show_quests()
+        self.character.show_location()
 
 
     def finish(self, quest):
@@ -50,6 +52,18 @@ class QuestHandler(object):
         self.current_quests[quest].finish()
         del(self.current_quests[quest])
         self.show_quests()
+        self.character.show_location()
+
+
+    def get_achieved_quests(self):
+        """
+        """
+        quests = set()
+        for quest in self.current_quests:
+            if self.current_quests[quest].is_achieved():
+                quests.add(quest)
+
+        return quests
 
 
     def is_finished(self, quest):
@@ -73,6 +87,13 @@ class QuestHandler(object):
             return False
 
         return True
+
+
+    def match_dependences(self, quest):
+        """
+        check quest's dependences
+        """
+        return QUEST_DEP_HANDLER.match_quest_dependences(self.character, quest)
 
 
     def show_quests(self):
