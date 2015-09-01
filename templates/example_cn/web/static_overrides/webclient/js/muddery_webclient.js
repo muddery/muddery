@@ -339,6 +339,14 @@ var webclient = {
                         element += " dbref='" + npc["dbref"] + "'>";
                         element += npc["name"];
                         element += "</a>";
+                        
+                        if (npc["finish_quest"]) {
+                            element += "[!]";
+                        }
+                        else if (npc["provide_quest"]) {
+                            element += "[?]";
+                        }
+
                         content += element;
                         empty = false;
                     }

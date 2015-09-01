@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.objects.objects import DefaultObject
 from muddery.typeclasses.objects import MudderyObject
+from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 
 
 class MudderyNPC(MudderyObject):
@@ -47,3 +48,13 @@ class MudderyNPC(MudderyObject):
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
         commands = [{"name":"TALK", "cmd":"talk", "args":self.dbref}]
         return commands
+
+
+    def have_quest(self, caller):
+        """
+        check if the npc can finish or provide quests
+        finishing is higher than providing
+        """
+        return DIALOGUE_HANDLER.have_quest(caller, self)
+
+    

@@ -140,11 +140,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         """
         self.msg({"msg": "Moving to %s ..." % self.location.name})
-
-        if self.location:
-            appearance = self.location.get_appearance(self)
-            appearance.update(self.location.get_surroundings(self))
-            self.msg({"look_around":appearance})
+        self.show_location()
 
 
     def at_post_puppet(self):
@@ -165,6 +161,16 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.msg(message)
     
     
+    def show_location(self):
+        """
+        show character's location
+        """
+        if self.location:
+            appearance = self.location.get_appearance(self)
+            appearance.update(self.location.get_surroundings(self))
+            self.msg({"look_around":appearance})
+
+
     def receive_objects(self, obj_list):
         """
         Receive objects.

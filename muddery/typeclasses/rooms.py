@@ -79,8 +79,15 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         for cont in visible:
             type = self.get_surrounding_type(cont)
             if type:
-                info[type].append({"dbref":cont.dbref,
-                                  "name":cont.name})
+                appearance = {"dbref":cont.dbref,
+                              "name":cont.name}
+
+                if type == "npcs":
+                    provide_quest, finish_quest = cont.have_quest(caller)
+                    appearance["provide_quest"] = provide_quest
+                    appearance["finish_quest"] = finish_quest
+
+                info[type].append(appearance)
 
         return info
 

@@ -72,7 +72,7 @@ class QuestDependencyHandler(object):
             return False
 
         for dependence in self.get_quest_dependences(quest):
-            if not match_dependence(caller, dependence["quest"], dependence["type"]):
+            if not self.match_dependence(caller, dependence["quest"], dependence["type"]):
                 return False
 
         return True
