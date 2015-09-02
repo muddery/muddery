@@ -1,3 +1,3 @@
-key,name,typeclass,desc,location,attributes
-npc_01,Guider,typeclasses.npcs.NPC,There is a guider standing in front of you.,room_01,
-npc_02,Skill Master,typeclasses.npcs.NPC,You can learn skills from him.,room_01,
+key,name,typeclass,desc,location
+npc_01,Guider,typeclasses.npcs.NPC,There is a guider standing in front of you.,room_01
+npc_02,Skill Master,typeclasses.npcs.NPC,You can learn skills from him.,room_01

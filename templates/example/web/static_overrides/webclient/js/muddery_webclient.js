@@ -100,6 +100,9 @@ var webclient = {
                 else if (key == "skills") {
                     this.displaySkills(data[key]);
                 }
+                else if (key == "quests") {
+                    this.displayQuests(data[key]);
+                }
                 else if (key == "get_object") {
                     this.displayGetObject(data[key]);
                 }
@@ -336,6 +339,14 @@ var webclient = {
                         element += " dbref='" + npc["dbref"] + "'>";
                         element += npc["name"];
                         element += "</a>";
+                        
+                        if (npc["finish_quest"]) {
+                            element += "[!]";
+                        }
+                        else if (npc["provide_quest"]) {
+                            element += "[?]";
+                        }
+
                         content += element;
                         empty = false;
                     }
@@ -552,6 +563,53 @@ var webclient = {
                 element += "</a></td>";
                 element += "<td>";
                 element += obj["desc"];
+                element += "</td></tr></tbody>";
+                
+                content += element;
+            }
+            catch(error) {
+            }
+        }
+        
+        content += "</table>";
+        
+        page.html(content);
+    },
+
+    displayQuests : function(data) {
+        // display player's quests
+        var page = $("#page_quests");
+        
+        var content = "<table class='tab_quests'>";
+        content += "<thead><tr><th>NAME</th><th>DESC</th><th>OBJECTIVE</th></tr></thead>";
+        var element = "";
+
+        for (var i in data) {
+            try {
+                var quest = data[i];
+                element = "<tbody><tr><td>";
+                element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
+                element += " cmd_name='look'";
+                element += " cmd_args='" + quest["dbref"] + "'>";
+                element += quest["name"];
+                element += "</a></td>";
+                element += "<td>";
+                element += quest["desc"];
+                element += "</td>";
+                element += "<td>";
+
+                var objectives = ""
+                for (var o in quest["objectives"]) {
+                    if (objectives.length > 0) {
+                        objectives += "<br>";
+                    }
+                    
+                    var obj = quest["objectives"][o];
+                    objectives += obj["target"] + obj["object"];
+                    objectives += obj["achieved"] + "/" + obj["total"];
+                }
+                
+                element += objectives;
                 element += "</td></tr></tbody>";
                 
                 content += element;
@@ -964,6 +1022,7 @@ var webclient = {
         $("#tab_status").css("display", "");
         $("#tab_inventory").css("display", "");
         $("#tab_skills").css("display", "");
+        $("#tab_quests").css("display", "");
         $("#tab_system").css("display", "");
         $("#tab_command").css("display", "");
     },
