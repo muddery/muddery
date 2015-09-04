@@ -84,7 +84,7 @@ DATABASES = {{
 ######################################################################
 
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "typeclasses.characters.Character"
+BASE_CHARACTER_TYPECLASS = "typeclasses.player_characters.PlayerCharacter"
 
 
 ######################################################################

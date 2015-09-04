@@ -37,6 +37,14 @@ class MudderyExit(MudderyObject, DefaultExit):
                                         defined, in which case that will simply be echoed.
     """
 
+    def at_init(self):
+        """
+        Load quest data.
+        """
+        self.move_action = ""
+        super(MudderyExit, self).at_init()
+
+
     def at_failed_traverse(self, traversing_object):
         """
         Overloads the default hook to implement a simple default error message.
@@ -51,3 +59,17 @@ class MudderyExit(MudderyObject, DefaultExit):
 
         """
         traversing_object.msg({"alert": "You cannot go there."})
+
+
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        "args" must be a string without ' and ", usually it is self.dbref.
+        """
+        # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
+        move_action = "GOTO"
+        if self.move_action:
+            move_action = self.move_action
+        commands = [{"name":move_action, "cmd":"goto", "args":self.dbref}]
+
+        return commands

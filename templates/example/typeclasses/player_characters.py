@@ -9,10 +9,10 @@ creation commands.
 """
 
 from evennia.utils import logger
-from muddery.typeclasses.characters import MudderyCharacter
+from muddery.typeclasses.player_characters import MudderyPlayerCharacter
 
 
-class Character(MudderyCharacter):
+class PlayerCharacter(MudderyPlayerCharacter):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:
@@ -37,7 +37,7 @@ class Character(MudderyCharacter):
         normal hook to overload for most object types.
             
         """
-        super(Character, self).at_object_creation()
+        super(PlayerCharacter, self).at_object_creation()
 
         # set level data
         self.db.hp = 100
@@ -48,7 +48,7 @@ class Character(MudderyCharacter):
         """
         Get character's status.
         """
-        status = super(Character, self).return_status()
+        status = super(PlayerCharacter, self).return_status()
         status["max_exp"] = self.max_exp
         status["max_hp"] = self.max_hp
         status["hp"] = self.db.hp
@@ -90,14 +90,6 @@ class Character(MudderyCharacter):
             location.show_inventory()
 
         return result
-
-
-    def show_status(self):
-        """
-        Send status to player.
-        """
-        status = self.return_status()
-        self.msg({"status": status})
 
 
     def take_effect(self, obj):

@@ -1,4 +1,4 @@
-key,name,typeclass,desc,location,destination
+key,name,typeclass,desc,move_action,location,destination
 exit_04,begin adventure,typeclasses.exits.Exit,,room_01,room_03
 exit_05,exit,typeclasses.exits.Exit,,room_03,room_01
 exit_06,northern path,typeclasses.exits.Exit,This is a hardly visible footpath leading off through the rain-beaten grass. It seems to circle the trees northward. You would never had noticed it had you not spotted it from up in the tree.,room_03,room_04

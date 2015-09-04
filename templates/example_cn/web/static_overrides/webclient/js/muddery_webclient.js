@@ -278,7 +278,7 @@ var webclient = {
                     try {
                         var exit = data["exits"][i];
                         element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                        element += " cmd_name='goto'";
+                        element += " cmd_name='look'";
                         element += " cmd_args='" + exit["dbref"] + "'";
                         element += " dbref='" + exit["dbref"] + "'>";
                         element += exit["name"];
@@ -713,24 +713,6 @@ var webclient = {
         content += "<div>";
 
         try {
-            element = "<div><span class='white'> LEVEL: ";
-            element += data["level"].toString();
-            element += "</span><br></div>";
-            content += element;
-        }
-        catch(error) {
-        }
-        
-        try {
-            element = "<div><span class='white'> EXP: ";
-            element += data["exp"].toString() + "/" + data["max_exp"].toString();
-            element += "</span><br></div>";
-            content += element;
-        }
-        catch(error) {
-        }
-        
-        try {
             element = "<div><span class='white'> HP: ";
             element += data["hp"].toString() + "/" + data["max_hp"].toString();
             element += "</span><br></div>";
@@ -738,16 +720,7 @@ var webclient = {
         }
         catch(error) {
         }
-        
-        try {
-            element = "<div><span class='white'> MP: ";
-            element += data["mp"].toString() + "/" + data["max_mp"].toString();
-            element += "</span><br></div>";
-            content += element;
-        }
-        catch(error) {
-        }
-        
+
         try {
             element = "<div><span class='white'> ATTACK: ";
             element += data["attack"].toString();
