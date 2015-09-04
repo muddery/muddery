@@ -88,7 +88,8 @@ class MudderyObject(DefaultObject):
         Args:
             key: (string) Key of the data info.
         """
-        utils.set_obj_data_info(self, key)
+        model = OBJECT_KEY_HANDLER.get_model(key)
+        utils.set_obj_data_info(self, key, model)
         self.load_data()
 
 

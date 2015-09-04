@@ -278,7 +278,7 @@ var webclient = {
                     try {
                         var exit = data["exits"][i];
                         element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                        element += " cmd_name='goto'";
+                        element += " cmd_name='look'";
                         element += " cmd_args='" + exit["dbref"] + "'";
                         element += " dbref='" + exit["dbref"] + "'>";
                         element += exit["name"];

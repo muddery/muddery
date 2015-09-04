@@ -41,7 +41,7 @@ def copy_tree(source, destination):
             logger.log_errmsg("Can not copy file:%s to %s" % (srcname, dstname))
 
 
-def set_obj_data_info(obj, key):
+def set_obj_data_info(obj, key, model):
     """
     Set data_info's model and key. It puts info into attributes.
             
@@ -50,6 +50,7 @@ def set_obj_data_info(obj, key):
         key: (string) Key of the data info.
     """
     obj.attributes.add("key", key, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
+    obj.attributes.add("model", model, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
 
 
 def search_obj_info_key(key):

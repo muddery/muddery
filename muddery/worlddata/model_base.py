@@ -34,6 +34,7 @@ class world_exits(models.Model):
     name = models.CharField(max_length=255)
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
+    move_action = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)
     destination = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
