@@ -25,3 +25,5 @@ origin,local
 "You can not cast a passive skill.","不能施放被动技能。"
 "You have already learned this skill.","你已经学习过这项技能了。"
 "Talk to","对话"
+"You should select a target.","你需要指定一个目标。"
+"You are already in a combat.","你已经在战斗中了。"
