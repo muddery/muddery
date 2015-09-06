@@ -383,3 +383,15 @@ class MudderyPlayerCharacter(MudderyCharacter):
             skills.append(info)
 
         return skills
+
+
+    def hurt(self, damage):
+        """
+        """
+        super(MudderyPlayerCharacter, self).hurt(damage)
+
+
+    def die(self):
+        """
+        """
+        super(MudderyPlayerCharacter, self).die()

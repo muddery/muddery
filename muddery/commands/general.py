@@ -9,6 +9,7 @@ from django.conf import settings
 from evennia.utils import utils, prettytable, logger
 from evennia.commands.command import Command
 from evennia.commands.default.muxcommand import MuxCommand
+from evennia import create_script
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.localized_strings_handler import LS
 import traceback
@@ -862,3 +863,63 @@ class CmdCastSkill(Command):
         except Exception, e:
             caller.msg({"alert":LS("Can not cast this skill.")})
             return
+
+
+#------------------------------------------------------------
+# attack a character
+#------------------------------------------------------------
+class CmdAttack(Command):
+    """
+    initiates combat
+
+    Usage:
+        {"cmd":"attack",
+         "args":<object's dbref>}
+        }
+
+
+    This will initiate combat with <target>. If <target is
+    already in combat, you will join the combat. 
+    """
+    key = "attack"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+
+        if not self.args:
+            caller.msg({"alert":LS("You should select a target.")})
+            return
+
+        target = caller.search(self.args)
+        if not target:
+            caller.msg({"alert":LS("You should select a target.")})
+            return
+
+        # set up combat
+        if caller.ndb.combat_handler:
+            # caller is in battle
+            message = {"alert": LS("You are already in a combat.")}
+            caller.msg(message)
+            return
+
+        if target.ndb.combat_handler:
+            # caller is in battle
+            message = {"alert": LS("%s is already in a combat." % target.name)}
+            caller.msg(message)
+            return
+
+        # create a new combat handler
+        chandler = create_script("combat_handler.CombatHandler")
+        chandler.add_character(self.caller)
+        chandler.add_character(target)
+        self.caller.msg("You attack %s! You are in combat." % target)
+        target.msg("%s attacks you! You are in combat." % self.caller)
+
+        # message = {"combat": {"target": target.name}}
+        # caller.msg(message)

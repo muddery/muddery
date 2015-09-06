@@ -10,7 +10,7 @@ from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 
 
-class MudderyNPC(MudderyObject):
+class MudderyNPC(MudderyCharacter):
     """
     Default NPC.
     """

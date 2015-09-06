@@ -1,3 +1,2 @@
 key,name,typeclass,location,desc
-npc_royal_lucia_sailor,水手,typeclasses.npcs.NPC,room_royal_lucia_main_deck,皇家露西亚号的水手。
-npc_royal_lucia_commander,舰队司令,typeclasses.npcs.NPC,room_royal_lucia_command_room,第二舰队的司令。
+mob_zombie,僵尸,typeclasses.monsters.Monster,room_colorfulworld_street,这是一具僵尸！
