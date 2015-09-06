@@ -17,6 +17,7 @@ does what you expect it to.
 from django.conf import settings
 from evennia.utils import search, logger
 from muddery.utils import builder, importer, utils
+import traceback
 
 LIMBO_DESC = "Welcome to your new {wMuddery{n-based game! " +\
              "Visit http://www.muddery.org if you need help, " +\
@@ -51,5 +52,5 @@ def at_initial_setup():
 
     except Exception, e:
         ostring = "Can't build world: %s" % e
-        logger.log_errmsg(ostring)
         print ostring
+        print traceback.format_exc()

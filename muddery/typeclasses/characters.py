@@ -53,6 +53,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.level = 1
         self.db.exp = 0
 
+        self.db.hp = 1
+        self.db.mp = 1
+
         equipments = {}
         for position in settings.EQUIP_POSITIONS:
             equipments[position] = None
@@ -159,3 +162,20 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             return
         
         self.db.skills[skill].cast_skill(target)
+
+
+    def hurt(self, damage):
+        """
+        """
+        self.db.hp -= damage
+        if self.db.hp < 0:
+            self.db.hp = 0
+
+        if self.db.hp <= 0:
+            die()
+
+
+    def die(self):
+        """
+        """
+        pass

@@ -9,56 +9,6 @@ from evennia import create_script
 from muddery.utils.localized_strings_handler import LS
 
 
-class CmdAttack(Command):
-    """
-    initiates combat
-
-    Usage:
-        {"cmd":"attack",
-         "args":{"target":<skill's dbref>}
-        }
-
-
-    This will initiate combat with <target>. If <target is
-    already in combat, you will join the combat. 
-    """
-    key = "attack"
-    locks = "cmd:all()"
-    help_category = "General"
-
-    def func(self):
-        "Handle command"
-        
-        caller = self.caller
-        if not caller:
-            return
-
-        if not self.args:
-            caller.msg({"alert":LS("You should select a target.")})
-            return
-
-        target = None
-        if "target" in self.args:
-            target = caller.search(self.args["target"])
-
-        if not target:
-            caller.msg({"alert":LS("You should select a target.")})
-            return
-
-        # set up combat
-        if caller.combat_handler.is_in_battle():
-            # caller is in battle
-            message = {"alert": LS("You are already in a combat.")}
-            caller.msg(message)
-            return
-            
-        # create a new combat
-        caller.combat_handler.add_opponent(target)
-
-        message = {"combat": {"target": target.name}}
-        caller.msg(message)
-
-
 class CmdHit(Command):
     """
     hit an enemy

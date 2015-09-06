@@ -50,6 +50,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdEquip())
         self.add(general.CmdTakeOff())
         self.add(general.CmdCastSkill())
+        self.add(general.CmdAttack())
 
 
 class PlayerCmdSet(default_cmds.PlayerCmdSet):

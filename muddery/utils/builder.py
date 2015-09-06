@@ -136,7 +136,7 @@ def build_objects(model_name, unique, caller=None):
                     obj = create.create_object(record.typeclass, record.name)
                     count_create += 1
                 except Exception, e:
-                    ostring = "Can not create obj %s: %s" % (obj_key, e)
+                    ostring = "Can not create obj %s: %s" % (record.key, e)
                     print ostring
                     print traceback.print_exc()
                     if caller:
@@ -146,7 +146,7 @@ def build_objects(model_name, unique, caller=None):
                 try:
                     obj.set_data_info(record.key)
                 except Exception, e:
-                    ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
+                    ostring = "Can not set data info to obj %s: %s" % (record.key, e)
                     print ostring
                     print traceback.print_exc()
                     if caller:
