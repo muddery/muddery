@@ -695,9 +695,21 @@ var webclient = {
     },
 
     displayCombat : function(data) {
-        this.displayTextMsg("out", data);
+        this.doCloseBox();
+        this.createCombatBox();
+
+        var html_button = '<div><br></div>\
+                             <div>\
+                                <center>\
+                                    <input type="button" id="button_center" value="';
+        html_button += "HIT";
+        html_button += '" class="btn btn-primary" onClick="webclient.doCloseCombat()"/>\
+                                </center>\
+                            </div>'
+        $('#combat_input').html(html_button);
+        this.doSetSizes();
     },
-    
+
     displayStatus : function(data) {
         // refresh prompt bar
         var bar = $("#prompt_bar");
@@ -824,7 +836,7 @@ var webclient = {
         var inp_h = $('#combat_box').outerHeight(true);
         var inp_w = $('#combat_box').outerWidth(true);
         $('#combat_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
-        
+
         if (win_h > 480) {
             var head_h = $('#site-title').outerHeight(true);
             $('#header_bar').show();
@@ -991,8 +1003,25 @@ var webclient = {
         $("body").prepend(dlg + overlayer);
     },
 
+    createCombatBox : function() {
+        var dlg = '<div id="combat_box">\
+        <div id="combat_input">\
+        </div>\
+        </div>';
+        
+        var overlayer = '<div class="overlayer" id="overlayer"></div>';
+        
+        $("body").prepend(dlg + overlayer);
+    },
+    
     doCloseBox : function() {
         $('#popup_box').remove();
+        $('#overlayer').remove();
+        this.doSetSizes();
+    },
+    
+    doCloseCombat : function() {
+        $('#combat_box').remove();
         $('#overlayer').remove();
         this.doSetSizes();
     },

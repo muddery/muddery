@@ -548,7 +548,7 @@ var webclient = {
         
         page.html(content);
     },
-    
+
     displaySkills : function(data) {
         // display player's skills
         var page = $("#page_skills");
@@ -703,10 +703,10 @@ var webclient = {
                                 <center>\
                                     <input type="button" id="button_center" value="';
         html_button += "HIT";
-        html_button += '" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
+        html_button += '" class="btn btn-primary" onClick="webclient.doCloseCombat()"/>\
                                 </center>\
                             </div>'
-        $('#input_additional').html(html_button);
+        $('#combat_input').html(html_button);
         this.doSetSizes();
     },
 
@@ -780,7 +780,7 @@ var webclient = {
 
     onLogin : function(data) {
         this._self_dbref = data["dbref"];
-    
+
         // show login UI
         $("#msg_wnd").empty();
         this.showLoginTabs();
@@ -802,6 +802,8 @@ var webclient = {
         // Sets the size of the message window
         var win_h = $(window).innerHeight();
         var win_w = $(window).innerWidth();
+
+        // popup box
         var close_h = $('#close_button').outerHeight(true);
         var prom_h = $('#input_prompt').outerHeight(true);
         var add_h = $('#input_additional').outerHeight(true);
@@ -811,6 +813,11 @@ var webclient = {
         var inp_w = $('#popup_box').outerWidth(true);
         //$("#wrapper").css({'height': win_h - inp_h - 1});
         $('#popup_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+
+        // combat box
+        var inp_h = $('#combat_box').outerHeight(true);
+        var inp_w = $('#combat_box').outerWidth(true);
+        $('#combat_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
 
         if (win_h > 480) {
             var head_h = $('#site-title').outerHeight(true);
@@ -977,12 +984,10 @@ var webclient = {
         
         $("body").prepend(dlg + overlayer);
     },
-    
+
     createCombatBox : function() {
         var dlg = '<div id="combat_box">\
-        <div id="input_prompt">\
-        </div>\
-        <div id="input_additional">\
+        <div id="combat_input">\
         </div>\
         </div>';
         
@@ -993,6 +998,12 @@ var webclient = {
 
     doCloseBox : function() {
         $('#popup_box').remove();
+        $('#overlayer').remove();
+        this.doSetSizes();
+    },
+    
+    doCloseCombat : function() {
+        $('#combat_box').remove();
         $('#overlayer').remove();
         this.doSetSizes();
     },

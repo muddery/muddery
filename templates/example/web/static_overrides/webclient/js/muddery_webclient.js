@@ -693,9 +693,21 @@ var webclient = {
         $('#input_additional').html(html_button);
         this.doSetSizes();
     },
-    
+
     displayCombat : function(data) {
-        this.displayTextMsg("out", data);
+        this.doCloseBox();
+        this.createCombatBox();
+
+        var html_button = '<div><br></div>\
+                             <div>\
+                                <center>\
+                                    <input type="button" id="button_center" value="';
+        html_button += "HIT";
+        html_button += '" class="btn btn-primary" onClick="webclient.doCloseCombat()"/>\
+                                </center>\
+                            </div>'
+        $('#combat_input').html(html_button);
+        this.doSetSizes();
     },
 
     displayStatus : function(data) {
@@ -835,6 +847,8 @@ var webclient = {
         // Sets the size of the message window
         var win_h = $(window).innerHeight();
         var win_w = $(window).innerWidth();
+
+        // popup box
         var close_h = $('#close_button').outerHeight(true);
         var prom_h = $('#input_prompt').outerHeight(true);
         var add_h = $('#input_additional').outerHeight(true);
@@ -844,6 +858,11 @@ var webclient = {
         var inp_w = $('#popup_box').outerWidth(true);
         //$("#wrapper").css({'height': win_h - inp_h - 1});
         $('#popup_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+
+        // combat box
+        var inp_h = $('#combat_box').outerHeight(true);
+        var inp_w = $('#combat_box').outerWidth(true);
+        $('#combat_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
 
         if (win_h > 480) {
             var head_h = $('#site-title').outerHeight(true);
@@ -1011,8 +1030,25 @@ var webclient = {
         $("body").prepend(dlg + overlayer);
     },
 
+    createCombatBox : function() {
+        var dlg = '<div id="combat_box">\
+        <div id="combat_input">\
+        </div>\
+        </div>';
+        
+        var overlayer = '<div class="overlayer" id="overlayer"></div>';
+        
+        $("body").prepend(dlg + overlayer);
+    },
+    
     doCloseBox : function() {
         $('#popup_box').remove();
+        $('#overlayer').remove();
+        this.doSetSizes();
+    },
+    
+    doCloseCombat : function() {
+        $('#combat_box').remove();
         $('#overlayer').remove();
         this.doSetSizes();
     },
