@@ -696,6 +696,7 @@ var webclient = {
 
     displayCombat : function(data) {
         this.doCloseBox();
+        this.doCloseCombat();
         this.createCombatBox();
 
         var html_button = '<div><br></div>\
