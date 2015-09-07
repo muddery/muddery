@@ -31,7 +31,7 @@ class CombatHandler(DefaultScript):
         and combat cmdset on a character
         """
         character.ndb.combat_handler = self
-        character.cmdset.add("commands.combat.CombatCmdSet")
+        character.cmdset.add("muddery.commands.combat.CombatCmdSet")
 
 
     def _cleanup_character(self, character):
@@ -42,7 +42,7 @@ class CombatHandler(DefaultScript):
         dbref = character.id 
         del self.db.characters[dbref]
         del character.ndb.combat_handler
-        character.cmdset.delete("commands.combat.CombatCmdSet")
+        character.cmdset.delete("muddery.commands.combat.CombatCmdSet")
 
 
     def at_start(self):
@@ -57,7 +57,7 @@ class CombatHandler(DefaultScript):
 
     def at_stop(self):
         "Called just before the script is stopped/destroyed."
-        for character in list(self.db.characters.values()):
+        for character in self.db.characters.values():
             # note: the list() call above disconnects list from database
             self._cleanup_character(character)
 
@@ -84,6 +84,9 @@ class CombatHandler(DefaultScript):
         "Add combatant to handler"
         self.db.characters[character.id] = character
         self._init_character(character)
+        
+        appearance = self.get_appearance()
+        self.msg_all({"show_combat": appearance})
 
 
     def remove_character(self, character):
@@ -93,6 +96,9 @@ class CombatHandler(DefaultScript):
         if not self.db.characters:
             # if we have no more characters in battle, kill this handler
             self.stop()
+        else:
+            appearance = caller.ndb.combat_handler.get_appearance()
+            self.msg_all({"show_combat": appearance})
 
 
     def msg_all(self, message):
@@ -119,3 +125,18 @@ class CombatHandler(DefaultScript):
             # reset counters before next turn
             for character in self.db.characters.values():
                 self.db.characters[character.id] = character
+
+
+    def get_appearance(self):
+        """
+        Get the combat appearance.
+        """
+        appearance = {"characters":[]}
+        
+        for character in self.db.characters.values():
+            info = {"dbref": character.id,
+                    "name": character.name,
+                    "hp": character.db.hp}
+            appearance["characters"].append(info)
+
+        return appearance

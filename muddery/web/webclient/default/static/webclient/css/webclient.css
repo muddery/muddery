@@ -228,6 +228,21 @@ div {margin:0px;}
 	overflow: hidden;
 }
 
+#combat_box{
+	height: 295px;
+	width: 250px;
+	position: fixed;
+	top: 177px;
+	left: 607px;
+	border-radius: 10px;
+	padding: 10px 20px 20px 20px;
+	background: #000;
+	border: 2px solid #666;
+	display: block;
+	z-index: 999;
+	overflow: hidden;
+}
+
 .input_text {
 	width: 235px;
 	margin: 10px 0 10px 0;

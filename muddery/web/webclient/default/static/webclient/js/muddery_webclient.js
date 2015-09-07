@@ -3,6 +3,8 @@ Muddery webclient (javascript component)
 */
 
 var webclient = {
+    _self_dbref: null,
+
     doShow : function(type, msg) {
         var data = null;
         
@@ -105,6 +107,9 @@ var webclient = {
                 }
                 else if (key == "get_object") {
                     this.displayGetObject(data[key]);
+                }
+                else if (key == "show_combat") {
+                    this.displayCombat(data[key]);
                 }
                 else if (key == "login") {
                     this.onLogin(data[key]);
@@ -689,6 +694,22 @@ var webclient = {
         this.doSetSizes();
     },
 
+    displayCombat : function(data) {
+        this.doCloseBox();
+        this.createCombatBox();
+
+        var html_button = '<div><br></div>\
+                             <div>\
+                                <center>\
+                                    <input type="button" id="button_center" value="';
+        html_button += "HIT";
+        html_button += '" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
+                                </center>\
+                            </div>'
+        $('#input_additional').html(html_button);
+        this.doSetSizes();
+    },
+
     displayStatus : function(data) {
         // refresh prompt bar
         var bar = $("#prompt_bar");
@@ -758,6 +779,8 @@ var webclient = {
     },
 
     onLogin : function(data) {
+        this._self_dbref = data["dbref"];
+    
         // show login UI
         $("#msg_wnd").empty();
         this.showLoginTabs();
@@ -944,6 +967,19 @@ var webclient = {
         <div id="close_button" class="clearfix">\
         <input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="webclient.doCloseBox()"/>\
         </div>\
+        <div id="input_prompt">\
+        </div>\
+        <div id="input_additional">\
+        </div>\
+        </div>';
+        
+        var overlayer = '<div class="overlayer" id="overlayer"></div>';
+        
+        $("body").prepend(dlg + overlayer);
+    },
+    
+    createCombatBox : function() {
+        var dlg = '<div id="combat_box">\
         <div id="input_prompt">\
         </div>\
         <div id="input_additional">\
