@@ -193,7 +193,7 @@ class CmdUnconnectedConnect(Command):
         #   player.at_pre_login()
         #   player.at_first_login()  # only once
         #   player.at_post_login(sessid=sessid)
-        session.msg({"login":playername})
+        session.msg({"login":{"name": playername, "dbref": player.dbref}})
         session.sessionhandler.login(session, player)
 
 
@@ -395,7 +395,7 @@ class CmdUnconnectedCreateConnect(Command):
                 #   player.at_pre_login()
                 #   player.at_first_login()  # only once
                 #   player.at_post_login(sessid=sessid)
-                session.msg({"login":playername})
+                session.msg({"login":{"name": playername, "dbref": player.dbref}})
                 session.sessionhandler.login(session, new_player)
 
         except Exception:

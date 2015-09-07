@@ -42,6 +42,35 @@ class CmdHit(Command):
         self.caller.ndb.combat_handler.check_end_turn()
 
 
+class CmdLook(Command):
+    """
+    look in combat.
+
+    Usage:
+        {"cmd":"look",
+         "args":""
+        }
+
+    Observes your combat.
+    """
+    key = "look"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Handle the looking.
+        """
+        caller = self.caller
+
+        if not caller.ndb.combat_handler:
+            caller.msg({"msg":LS("You are not in combat!")})
+            return
+
+        # get combat's appearance
+        appearance = caller.ndb.combat_handler.get_appearance()
+        caller.msg({"show_combat": appearance})
+
+
 class CombatCmdSet(CmdSet):
     key = "combat_cmdset"
     mergetype = "Replace"
@@ -50,3 +79,4 @@ class CombatCmdSet(CmdSet):
 
     def at_cmdset_creation(self):
         self.add(CmdHit())
+        self.add(CmdLook())

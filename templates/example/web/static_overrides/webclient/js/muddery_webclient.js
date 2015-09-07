@@ -3,6 +3,8 @@ Muddery webclient (javascript component)
 */
 
 var webclient = {
+    _self_dbref: null,
+
     doShow : function(type, msg) {
         var data = null;
         
@@ -105,6 +107,9 @@ var webclient = {
                 }
                 else if (key == "get_object") {
                     this.displayGetObject(data[key]);
+                }
+                else if (key == "show_combat") {
+                    this.displayCombat(data[key]);
                 }
                 else if (key == "login") {
                     this.onLogin(data[key]);
@@ -688,6 +693,10 @@ var webclient = {
         $('#input_additional').html(html_button);
         this.doSetSizes();
     },
+    
+    displayCombat : function(data) {
+        this.displayTextMsg("out", data);
+    },
 
     displayStatus : function(data) {
         // refresh prompt bar
@@ -803,6 +812,8 @@ var webclient = {
     },
 
     onLogin : function(data) {
+        this._self_dbref = data["dbref"];
+
         // show login UI
         $("#msg_wnd").empty();
         this.showLoginTabs();

@@ -3,6 +3,8 @@ Muddery webclient (javascript component)
 */
 
 var webclient = {
+    _self_dbref: null,
+
     doShow : function(type, msg) {
         var data = null;
         
@@ -105,6 +107,9 @@ var webclient = {
                 }
                 else if (key == "get_object") {
                     this.displayGetObject(data[key]);
+                }
+                else if (key == "show_combat") {
+                    this.displayCombat(data[key]);
                 }
                 else if (key == "login") {
                     this.onLogin(data[key]);
@@ -689,6 +694,10 @@ var webclient = {
         this.doSetSizes();
     },
 
+    displayCombat : function(data) {
+        this.displayTextMsg("out", data);
+    },
+    
     displayStatus : function(data) {
         // refresh prompt bar
         var bar = $("#prompt_bar");
@@ -776,6 +785,8 @@ var webclient = {
     },
 
     onLogin : function(data) {
+        this._self_dbref = data["dbref"];
+
         // show login UI
         $("#msg_wnd").empty();
         this.showLoginTabs();
@@ -797,6 +808,8 @@ var webclient = {
         // Sets the size of the message window
         var win_h = $(window).innerHeight();
         var win_w = $(window).innerWidth();
+
+        // popup box
         var close_h = $('#close_button').outerHeight(true);
         var prom_h = $('#input_prompt').outerHeight(true);
         var add_h = $('#input_additional').outerHeight(true);
@@ -807,6 +820,11 @@ var webclient = {
         //$("#wrapper").css({'height': win_h - inp_h - 1});
         $('#popup_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
 
+        // combat box
+        var inp_h = $('#combat_box').outerHeight(true);
+        var inp_w = $('#combat_box').outerWidth(true);
+        $('#combat_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+        
         if (win_h > 480) {
             var head_h = $('#site-title').outerHeight(true);
             $('#header_bar').show();

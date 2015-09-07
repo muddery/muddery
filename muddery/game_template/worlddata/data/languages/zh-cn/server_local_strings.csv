@@ -27,3 +27,5 @@ origin,local
 "Talk to","对话"
 "You should select a target.","你需要指定一个目标。"
 "You are already in a combat.","你已经在战斗中了。"
+"You are not in combat!","你不在战斗中！"
+"%s is already in a combat.","%s正在战斗中。"
