@@ -55,6 +55,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         self.db.hp = 1
         self.db.mp = 1
+        
+        self.max_hp = 1
+        self.max_mp = 1
 
         equipments = {}
         for position in settings.EQUIP_POSITIONS:
@@ -179,3 +182,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         """
         pass
+
+
+    def get_combat_commands(self):
+        """
+        This returns a list of combat commands.
+        """
+        commands = [{"name":"HIT", "cmd":"hit"}]
+        return commands

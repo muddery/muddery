@@ -16,6 +16,12 @@ var commands = {
         sendCommand(this.cmdString(cmd, args));
     },
     
+    doCommandAttack : function(caller) {
+        var cmd = $(caller).attr("cmd_name");
+        var args = webclient.get_current_target();
+        sendCommand(this.cmdString(cmd, args));
+    },
+    
     // functions when user click a button
     // login
     doLogin : function() {

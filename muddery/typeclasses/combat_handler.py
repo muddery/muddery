@@ -86,6 +86,7 @@ class CombatHandler(DefaultScript):
         self._init_character(character)
         
         appearance = self.get_appearance()
+        appearance["commands"] = character.get_combat_commands()
         self.msg_all({"show_combat": appearance})
 
 
@@ -98,6 +99,7 @@ class CombatHandler(DefaultScript):
             self.stop()
         else:
             appearance = caller.ndb.combat_handler.get_appearance()
+            appearance["commands"] = caller.get_combat_commands()
             self.msg_all({"show_combat": appearance})
 
 
@@ -134,8 +136,9 @@ class CombatHandler(DefaultScript):
         appearance = {"characters":[]}
         
         for character in self.db.characters.values():
-            info = {"dbref": character.id,
+            info = {"dbref": character.dbref,
                     "name": character.name,
+                    "max_hp": character.max_hp,
                     "hp": character.db.hp}
             appearance["characters"].append(info)
 

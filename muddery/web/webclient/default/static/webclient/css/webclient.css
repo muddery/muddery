@@ -794,3 +794,85 @@ input[type="submit"].btn.btn-mini {
     padding: 4px 8px 4px 8px;
 }
 
+/*
+combat
+*/
+.fighter_self {
+	padding: 0px;
+	position: absolute;
+	top: 15px;
+    left: 20%;
+}
+
+.fighter_enemy {
+	padding: 0px;
+	position: absolute;
+	top: 15px;
+	right: 20%;
+}
+
+.hp {
+	position: absolute;
+	top: -15px;
+}
+
+#description .bullet {
+	padding: 0px 20px 0px 20px;
+	bottom: 25px;
+	position: absolute;
+	height: 1px;
+	line-height: 1px;
+}
+
+.damageText {
+	position: absolute;
+	bottom: 15px;
+	left: 50%;
+	margin-left: -50%;
+}
+
+#lootButtons {
+	padding-bottom: 0px !important;
+	margin: 20px 0 0 5px;
+	position: relative;
+}
+
+#lootButtons:before {
+	content: "take:";
+	position: absolute;
+	top: -25px;
+	left: 0px;
+}
+
+#dropMenu {
+	background: none repeat scroll 0 0 white;
+	border: 1px solid black;
+	position: absolute;
+	z-index: 100;
+	padding-top: 5px;
+	text-align: left;
+	box-shadow: -1px 3px 2px #666;
+	cursor: default;
+}
+
+#dropMenu:before {
+	content: "drop:";
+	border-bottom: 1px solid black;
+	display: block;
+	margin-bottom: 5px;
+	padding: 0px 0px 5px 5px;
+}
+
+#dropMenu > div {
+	padding: 0px 5px 5px 5px;
+	cursor: pointer;
+}
+
+#dropMenu > div:hover {
+	text-decoration: underline;
+}
+
+.btn-combat {
+	position: absolute;
+	bottom: 15px;
+}
