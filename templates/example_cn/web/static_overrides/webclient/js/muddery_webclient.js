@@ -697,17 +697,43 @@ var webclient = {
     displayCombat : function(data) {
         this.doCloseBox();
         this.doCloseCombat();
-        this.createCombatBox();
 
-        var html_button = '<div><br></div>\
-                             <div>\
-                                <center>\
-                                    <input type="button" id="button_center" value="';
-        html_button += "HIT";
-        html_button += '" class="btn btn-primary" onClick="webclient.doCloseCombat()"/>\
-                                </center>\
-                            </div>'
-        $('#combat_input').html(html_button);
+        $('<div>').addClass('overlayer').attr('id', 'overlayer').prependTo($("body"));
+
+        var box = $('<div>').attr('id', 'combat_box')
+        
+        for (i in data["characters"]) {
+            var fighter = data["characters"][i];
+            var div = $('<div>').attr('id', fighter["dbref"])
+                                .text(fighter["name"])
+                                .data('hp', fighter["hp"])
+                                .data('max_hp', fighter["max_hp"])
+                                .data('dbref', fighter["dbref"]);
+            $('<div>').addClass('hp').text(fighter["hp"] + '/' + fighter["max_hp"]).appendTo(div);
+            
+            if (fighter["dbref"] == this._self_dbref) {
+                div.addClass("fighter_self");
+            }
+            else {
+                div.addClass("fighter_enemy");
+                this._current_target = fighter["dbref"];
+            }
+            
+            div.appendTo(box);
+        }
+        
+        for (var i in data["commands"]) {
+            var command = data["commands"][i];
+            var button = $('<input type="button" class="btn btn-combat">')
+                            .attr('cmd_name', command["cmd"])
+                            .attr('onclick', 'commands.doCommandAttack(this); return false;')
+                            .val(command["name"]);
+
+            button.appendTo(box);
+        }
+
+        box.prependTo($("body"));
+        
         this.doSetSizes();
     },
 
@@ -1004,17 +1030,6 @@ var webclient = {
         $("body").prepend(dlg + overlayer);
     },
 
-    createCombatBox : function() {
-        var dlg = '<div id="combat_box">\
-        <div id="combat_input">\
-        </div>\
-        </div>';
-        
-        var overlayer = '<div class="overlayer" id="overlayer"></div>';
-        
-        $("body").prepend(dlg + overlayer);
-    },
-    
     doCloseBox : function() {
         $('#popup_box').remove();
         $('#overlayer').remove();
@@ -1057,6 +1072,10 @@ var webclient = {
         this.unselectAllTabs();
         $("#tab_" + pagename).addClass("pill_active");
         $("#page_" + pagename).css("display", "");
+    },
+    
+    get_current_target: function() {
+        return this._current_target;
     },
 }
 

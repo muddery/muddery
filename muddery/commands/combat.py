@@ -30,6 +30,8 @@ class CmdHit(Command):
         target = self.caller.search(self.args)
         if not target:
             return
+
+        """
         ok = self.caller.ndb.combat_handler.add_action("hit", 
                                                        self.caller, 
                                                        target) 
@@ -40,6 +42,7 @@ class CmdHit(Command):
 
         # tell the handler to check if turn is over
         self.caller.ndb.combat_handler.check_end_turn()
+        """
 
 
 class CmdLook(Command):
@@ -68,6 +71,7 @@ class CmdLook(Command):
 
         # get combat's appearance
         appearance = caller.ndb.combat_handler.get_appearance()
+        appearance["commands"] = caller.get_combat_commands()
         caller.msg({"show_combat": appearance})
 
 
