@@ -58,6 +58,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         
         self.max_hp = 1
         self.max_mp = 1
+        
+        self.attack = 0
+        self.defence = 0
 
         equipments = {}
         for position in settings.EQUIP_POSITIONS:
@@ -177,6 +180,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         if self.db.hp <= 0:
             die()
 
+        return
+
 
     def die(self):
         """
@@ -188,5 +193,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         This returns a list of combat commands.
         """
-        commands = [{"name":"HIT", "cmd":"hit"}]
+        commands = []
+        for key in self.db.skills:
+            skill = self.db.skills[key]
+            command = {"name": skill.name,
+                       "cmd": skill.get_info_key()}
+            commands.append(command)
         return commands

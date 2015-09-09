@@ -42,6 +42,8 @@ class PlayerCharacter(MudderyPlayerCharacter):
         # set level data
         self.db.hp = 100
 
+        self.learn_skill("skill_hit")
+
 
     def return_status(self):
         """

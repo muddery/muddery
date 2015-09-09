@@ -1,2 +1,2 @@
 key,name,typeclass,desc,cd,passive,condition,function,effect
-skill_heal,HEAL,typeclasses.character_skills.Skill,Heal your self.,1,0,,skill_heal,15
+skill_hit,攻击,typeclasses.character_skills.Skill,攻击敌人,1,0,,skill_hit,1

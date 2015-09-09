@@ -702,7 +702,7 @@ var webclient = {
 
         var box = $('<div>').attr('id', 'combat_box')
         
-        for (i in data["characters"]) {
+        for (var i in data["characters"]) {
             var fighter = data["characters"][i];
             var div = $('<div>').attr('id', fighter["dbref"])
                                 .text(fighter["name"])
@@ -721,10 +721,11 @@ var webclient = {
             
             div.appendTo(box);
         }
-        
+
         for (var i in data["commands"]) {
             var command = data["commands"][i];
             var button = $('<input type="button" class="btn btn-combat">')
+                            .css({'left': 20 + i * 60})
                             .attr('cmd_name', command["cmd"])
                             .attr('onclick', 'commands.doCommandAttack(this); return false;')
                             .val(command["name"]);
