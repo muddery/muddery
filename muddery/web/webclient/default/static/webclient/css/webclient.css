@@ -229,7 +229,7 @@ div {margin:0px;}
 }
 
 #combat_box{
-	height: 295px;
+	height: 200px;
 	width: 250px;
 	position: fixed;
 	top: 177px;
@@ -800,15 +800,15 @@ combat
 .fighter_self {
 	padding: 0px;
 	position: absolute;
-	top: 15px;
-    left: 20%;
+	top: 40px;
+    left: 12%;
 }
 
 .fighter_enemy {
 	padding: 0px;
 	position: absolute;
-	top: 15px;
-	right: 20%;
+	top: 40px;
+	right: 12%;
 }
 
 .hp {
@@ -874,5 +874,5 @@ combat
 
 .btn-combat {
 	position: absolute;
-	bottom: 15px;
+	bottom: 22px;
 }

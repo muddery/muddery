@@ -4,7 +4,6 @@ Muddery webclient (javascript component)
 
 var webclient = {
     _self_dbref: null,
-    _current_target: null,
 
     doShow : function(type, msg) {
         var data = null;
@@ -587,7 +586,7 @@ var webclient = {
         var page = $("#page_quests");
         
         var content = "<table class='tab_quests'>";
-        content += "<thead><tr><th>NAME</th><th>DESC</th><th>OBJECTIVE</th></tr></thead>";
+        content += "<thead><tr><th>名称</th><th>说明</th><th>目标</th></tr></thead>";
         var element = "";
 
         for (var i in data) {
@@ -717,14 +716,16 @@ var webclient = {
             }
             else {
                 div.addClass("fighter_enemy");
+                this._current_target = fighter["dbref"];
             }
             
             div.appendTo(box);
         }
-        
+
         for (var i in data["commands"]) {
             var command = data["commands"][i];
             var button = $('<input type="button" class="btn btn-combat">')
+                            .css({'left': 20 + i * 60})
                             .attr('cmd_name', command["cmd"])
                             .attr('onclick', 'commands.doCommandAttack(this); return false;')
                             .val(command["name"]);

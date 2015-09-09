@@ -822,13 +822,13 @@ class CmdCastSkill(Command):
 
     Usage:
         {"cmd":"castskill",
-         "args":<skill's dbref>}
+         "args":<skill's key>}
         }
         
         or:
 
         {"cmd":"castskill",
-         "args":{"dbref":<skill's dbref>,
+         "args":{"skill":<skill's key>,
                  "target":<skill's target>}
         }
 
@@ -849,10 +849,10 @@ class CmdCastSkill(Command):
         if isinstance(self.args, basestring):
             skill_key = self.args
         else:
-            if not "skill_key" in self.args:
+            if not "skill" in self.args:
                 caller.msg({"alert":LS("You should select a skill to cast.")})
                 return
-            skill_key = self.args["skill_key"]
+            skill_key = self.args["skill"]
         
         target = None
         if "target" in self.args:

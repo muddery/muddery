@@ -31,7 +31,7 @@ class CombatHandler(DefaultScript):
         and combat cmdset on a character
         """
         character.ndb.combat_handler = self
-        character.cmdset.add("muddery.commands.combat.CombatCmdSet")
+        character.cmdset.add("muddery.commands.default_cmdsets.CombatCmdSet")
 
 
     def _cleanup_character(self, character):
@@ -42,7 +42,7 @@ class CombatHandler(DefaultScript):
         dbref = character.id 
         del self.db.characters[dbref]
         del character.ndb.combat_handler
-        character.cmdset.delete("muddery.commands.combat.CombatCmdSet")
+        character.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
 
 
     def at_start(self):

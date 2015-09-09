@@ -14,7 +14,9 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 """
 
+from evennia import CmdSet
 from evennia import default_cmds
+from muddery.commands import combat
 from muddery.commands import general
 from muddery.commands import player
 from muddery.commands import unloggedin
@@ -114,3 +116,14 @@ class SessionCmdSet(default_cmds.SessionCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+
+
+class CombatCmdSet(CmdSet):
+    key = "combat_cmdset"
+    mergetype = "Replace"
+    priority = 10 
+    no_exits = True
+
+    def at_cmdset_creation(self):
+        self.add(general.CmdCastSkill())
+        self.add(combat.CmdCombatInfo())

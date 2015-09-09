@@ -3,65 +3,28 @@ Battle commands.
 """
 
 from evennia import Command
-from evennia import CmdSet
-from evennia import default_cmds
-from evennia import create_script
+from muddery.commands import general
 from muddery.utils.localized_strings_handler import LS
 
 
-class CmdHit(Command):
+class CmdCombatInfo(Command):
     """
-    hit an enemy
+    Get combat info.
 
     Usage:
-      hit <target>
-
-    Strikes the given enemy with your current weapon.
-    """
-    key = "hit"
-    locks = "cmd:all()"
-    help_category = "combat"
-
-    def func(self):
-        "Implements the command"
-        if not self.args:
-            self.caller.msg("Usage: hit <target>")
-            return 
-        target = self.caller.search(self.args)
-        if not target:
-            return
-
-        """
-        ok = self.caller.ndb.combat_handler.add_action("hit", 
-                                                       self.caller, 
-                                                       target) 
-        if ok:
-            self.caller.msg("You add 'hit' to the combat queue")
-        else:
-            self.caller.msg("You can only queue two actions per turn!")
-
-        # tell the handler to check if turn is over
-        self.caller.ndb.combat_handler.check_end_turn()
-        """
-
-
-class CmdLook(Command):
-    """
-    look in combat.
-
-    Usage:
-        {"cmd":"look",
+        {"cmd":"combat_info",
          "args":""
         }
 
     Observes your combat.
     """
-    key = "look"
+    key = "combat_info"
+    aliases = ["look"]
     locks = "cmd:all()"
 
     def func(self):
         """
-        Handle the looking.
+        Handle the combat info.
         """
         caller = self.caller
 
@@ -75,12 +38,36 @@ class CmdLook(Command):
         caller.msg({"show_combat": appearance})
 
 
-class CombatCmdSet(CmdSet):
-    key = "combat_cmdset"
-    mergetype = "Replace"
-    priority = 10 
-    no_exits = True
+#------------------------------------------------------------
+# cast a skill
+#------------------------------------------------------------
 
-    def at_cmdset_creation(self):
-        self.add(CmdHit())
-        self.add(CmdLook())
+class CmdCombatSkill(general.CmdCastSkill):
+    """
+    Cast a skill.
+
+    Usage:
+        {"cmd":"combat_skill",
+         "args":<skill's key>}
+        }
+        
+        or:
+
+        {"cmd":"combat_skill",
+         "args":{"skill":<skill's key>,
+                 "target":<skill's target>}
+        }
+
+    """
+    key = "combat_skill"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Cast a skill."
+        super(CmdCombatSkill, self).func()
+        
+        # get combat's appearance
+        appearance = caller.ndb.combat_handler.get_appearance()
+        appearance["commands"] = caller.get_combat_commands()
+        caller.msg({"show_combat": appearance})
