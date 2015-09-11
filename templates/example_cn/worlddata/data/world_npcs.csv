@@ -1,2 +1,4 @@
 key,name,typeclass,location,desc
-mob_zombie,僵尸,typeclasses.monsters.Monster,room_colorfulworld_street,这是一具僵尸！
+mob_zombie1,僵尸,typeclasses.monsters.Monster,room_colorfulworld_street,这是一具僵尸！
+mob_zombie2,僵尸,typeclasses.monsters.Monster,room_colorfulworld_hole,这是一具僵尸！
+mob_zombie3,僵尸,typeclasses.monsters.Monster,room_colorfulworld_alley,这是一具僵尸！

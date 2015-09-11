@@ -42,7 +42,9 @@ def skill_hit(caller, target, effect=0, *args, **kwargs):
     damage = round(damage)
     target.hurt(damage)
 
-    return {"character": target.dbref,
-            "hurt": damage,
-            "hp": target.db.hp,
-            "max_hp": target.max_hp}
+    return [{"type": "attacked",
+             "caller": caller.dbref,
+             "target": target.dbref,
+             "hurt": damage,
+             "hp": target.db.hp,
+             "max_hp": target.max_hp}]

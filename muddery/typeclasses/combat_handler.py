@@ -5,6 +5,7 @@ Combat handler.
 import random
 from evennia import DefaultScript
 from muddery.utils.combat_rules import resolve_combat
+import traceback
 
 
 class CombatHandler(DefaultScript):
@@ -17,6 +18,8 @@ class CombatHandler(DefaultScript):
     def at_script_creation(self):
         "Called when script is first created"
 
+        print "at_script_creation"
+        
         self.desc = "handles combat"
         self.interval = 0  # keep running until the battle ends
         self.persistent = True   
@@ -30,13 +33,10 @@ class CombatHandler(DefaultScript):
         This initializes handler back-reference 
         and combat cmdset on a character
         """
+        print "_init_character: %s" % character
+
         character.ndb.combat_handler = self
         character.cmdset.add("muddery.commands.default_cmdsets.CombatCmdSet")
-    
-        message = {"joined_combat": True,
-                   "combat_info": self.get_appearance(),
-                   "combat_commands": character.get_combat_commands()}
-        character.msg(message)
 
 
     def _cleanup_character(self, character):
@@ -44,6 +44,8 @@ class CombatHandler(DefaultScript):
         Remove character from handler and clean 
         it of the back-reference and cmdset
         """
+        print "_cleanup_character: %s" % character
+        
         del self.db.characters[character.dbref]
         del character.ndb.combat_handler
         character.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
@@ -89,14 +91,30 @@ class CombatHandler(DefaultScript):
 
     def add_character(self, character):
         "Add combatant to handler"
+        print "add_character: %s" % character
+        
         self.db.characters[character.dbref] = character
         self._init_character(character)
         
-        self.msg_all_combat_info()
+        # notify character
+        character.msg({"joined_combat": True})
+        message = {"combat_info": self.get_appearance(),
+                   "combat_commands": character.get_combat_commands()}
+        character.msg(message)
+        
+        # notify other characters
+        info = {"type": "joined",
+                "dbref": character.dbref,
+                "name": character.name,
+                "max_hp": character.max_hp,
+                "hp": character.db.hp}
+        self.msg_all_combat_process([info])
 
 
     def remove_character(self, character):
         "Remove combatant from handler"
+        print "remove_character: %s" % character
+        
         if character.dbref in self.db.characters:
             self._cleanup_character(character)
         if not self.db.characters:
@@ -123,20 +141,22 @@ class CombatHandler(DefaultScript):
         if not skill:
             return
 
-        if not caller.dbref in self.db.characters:
+        if not caller in self.db.characters:
             return
-        
+        caller = self.db.characters[caller]
+
         if target:
             if not target in self.db.characters:
                 return
             target = self.db.characters[target]
-        
+
         try:
-            result = caller.cast_skill(skill_key, target)
-            message = {"combat_process": result}
-            character.msg(message)
+            result = caller.cast_skill(skill, target)
+            if result:
+                self.msg_all_combat_process(result)
         except Exception, e:
-            caller.msg({"alert":LS("Can not cast this skill.")})
+            print "Can not cast skill %s: %s" % (skill, e)
+            print traceback.format_exc()
             return
 
         if len(self.db.characters) < 2:
@@ -157,6 +177,8 @@ class CombatHandler(DefaultScript):
                     "max_hp": character.max_hp,
                     "hp": character.db.hp}
             appearance["characters"].append(info)
+
+        print "get_appearance: %s" % appearance
 
         return appearance
 

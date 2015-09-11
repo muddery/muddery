@@ -4,6 +4,7 @@ Battle commands.
 
 from evennia import Command
 from muddery.utils.localized_strings_handler import LS
+import traceback
 
 
 class CmdCombatInfo(Command):
@@ -68,12 +69,13 @@ class CmdCombatSkill(Command):
     def func(self):
         "Cast a skill."
         caller = self.caller
-        
+
         if not self.args:
             caller.msg({"alert":LS("You should select a skill to cast.")})
             return
-        
+
         skill_key = None
+        target = None
         if isinstance(self.args, basestring):
             skill_key = self.args
         else:
@@ -81,17 +83,12 @@ class CmdCombatSkill(Command):
                 caller.msg({"alert":LS("You should select a skill to cast.")})
                 return
             skill_key = self.args["skill"]
-        
-        target = None
-        if "target" in self.args:
-            target = caller.search(self.args["target"])
-        
+            target = self.args["target"]
+
         try:
-            result = caller.cast_skill(skill_key, target)
+            result = caller.ndb.combat_handler.cast_skill(skill_key, caller.dbref, target)
         except Exception, e:
+            print "Can not cast skill %s: %s" % (skill_key, e)
+            print traceback.format_exc()
             caller.msg({"alert":LS("Can not cast this skill.")})
             return
-        
-        # get combat's appearance
-        caller.ndb.combat_handler.msg_all_combat_process(result)
-        caller.ndb.combat_handler.msg_all_combat_info()

@@ -3,8 +3,6 @@ Muddery webclient (javascript component)
 */
 
 var webclient = {
-    _self_dbref: null,
-
     doShow : function(type, msg) {
         var data = null;
         
