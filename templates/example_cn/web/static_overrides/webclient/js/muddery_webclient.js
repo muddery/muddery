@@ -108,14 +108,29 @@ var webclient = {
                 else if (key == "get_object") {
                     this.displayGetObject(data[key]);
                 }
-                else if (key == "show_combat") {
-                    this.displayCombat(data[key]);
+                else if (key == "joined_combat") {
+                    this.displayJoinedCombat();
+                }
+                else if (key == "left_combat") {
+                    this.displayLeftCombat();
+                }
+                else if (key == "combat_info") {
+                    this.displayCombatInfo(data[key]);
+                }
+                else if (key == "combat_commands") {
+                    this.displayCombatCommands(data[key]);
+                }
+                else if (key == "combat_process") {
+                    this.displayCombatProcess(data[key]);
                 }
                 else if (key == "login") {
                     this.onLogin(data[key]);
                 }
                 else if (key == "logout") {
                     this.onLogout(data[key]);
+                }
+                else if (key == "puppet") {
+                    this.onPuppet(data[key]);
                 }
                 else {
                     this.displayMsg(data[key]);
@@ -694,48 +709,88 @@ var webclient = {
         this.doSetSizes();
     },
 
-    displayCombat : function(data) {
+    displayJoinedCombat : function(data) {
         this.doCloseBox();
         this.doCloseCombat();
 
         $('<div>').addClass('overlayer').attr('id', 'overlayer').prependTo($("body"));
 
-        var box = $('<div>').attr('id', 'combat_box')
-        
-        for (var i in data["characters"]) {
-            var fighter = data["characters"][i];
-            var div = $('<div>').attr('id', fighter["dbref"])
-                                .text(fighter["name"])
-                                .data('hp', fighter["hp"])
-                                .data('max_hp', fighter["max_hp"])
-                                .data('dbref', fighter["dbref"]);
-            $('<div>').addClass('hp').text(fighter["hp"] + '/' + fighter["max_hp"]).appendTo(div);
-            
-            if (fighter["dbref"] == this._self_dbref) {
-                div.addClass("fighter_self");
-            }
-            else {
-                div.addClass("fighter_enemy");
-                this._current_target = fighter["dbref"];
-            }
-            
-            div.appendTo(box);
-        }
-
-        for (var i in data["commands"]) {
-            var command = data["commands"][i];
-            var button = $('<input type="button" class="btn btn-combat">')
-                            .css({'left': 20 + i * 60})
-                            .attr('cmd_name', command["cmd"])
-                            .attr('onclick', 'commands.doCommandAttack(this); return false;')
-                            .val(command["name"]);
-
-            button.appendTo(box);
-        }
-
+        var box = $('<div>').attr('id', 'combat_box');
+        $('<div>').attr('id', 'combat_characters').appendTo(box);
+        $('<div>').attr('id', 'combat_commands').appendTo(box);
         box.prependTo($("body"));
         
         this.doSetSizes();
+    },
+
+
+    displayLeftCombat : function(data) {
+        this.doCloseCombat();
+    },
+
+
+    displayCombatInfo : function(data) {
+        var characters = $('#combat_characters');
+        if (characters) {
+            var content = $('<div>');
+            for (var i in data["characters"]) {
+                var fighter = data["characters"][i];
+                var div = $('<div>').attr('id', 'fighter_' + fighter["dbref"])
+                                    .text(fighter["name"])
+                                    .data('dbref', fighter["dbref"]);
+                $('<div>').addClass('hp')
+                          .attr('id', 'status_' + fighter["dbref"])
+                          .text(fighter["hp"] + '/' + fighter["max_hp"])
+                          .appendTo(div);
+                
+                if (fighter["dbref"] == this._self_dbref) {
+                    div.addClass("fighter_self");
+                }
+                else {
+                    div.addClass("fighter_enemy");
+                    this._current_target = fighter["dbref"];
+                }
+                
+                div.appendTo(content);
+            }
+            
+            characters.html(content);
+        }
+    },
+    
+    
+    displayCombatCommands : function(data) {
+        var commands = $('#combat_commands');
+        if (commands) {
+            var content = $('<div>');
+            for (var i in data) {
+                var command = data[i];
+                var button = $('<input>').addClass('btn')
+                                         .addClass('btn-combat')
+                                         .attr('type', 'button')
+                                         .attr('key', command["key"])
+                                         .attr('onclick', 'webclient.doCombatSkill(this); return false;')
+                                         .css({'left': 20 + i * 60})
+                                         .val(command["name"]);
+                
+                button.appendTo(content);
+            }
+            
+            commands.html(content);
+        }
+    },
+
+
+    displayCombatProcess : function(data) {
+        var fighter = $('status_' + data["character"]);
+        if (fighter) {
+            fighter.text(data["hp"] + '/' + data["max_hp"]).appendTo(div);
+        }
+    },
+
+    
+    doCombatSkill : function(caller) {
+        commands.doCombatSkill(caller)
     },
 
     displayStatus : function(data) {
@@ -825,8 +880,6 @@ var webclient = {
     },
 
     onLogin : function(data) {
-        this._self_dbref = data["dbref"];
-
         // show login UI
         $("#msg_wnd").empty();
         this.showLoginTabs();
@@ -842,6 +895,10 @@ var webclient = {
         
         //reconnect, show the connection screen
         webclient_init();
+    },
+    
+    onPuppet : function(data) {
+        this._self_dbref = data;
     },
 
     doSetSizes : function() {

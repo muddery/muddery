@@ -32,6 +32,11 @@ class CombatHandler(DefaultScript):
         """
         character.ndb.combat_handler = self
         character.cmdset.add("muddery.commands.default_cmdsets.CombatCmdSet")
+    
+        message = {"joined_combat": True,
+                   "combat_info": self.get_appearance(),
+                   "combat_commands": character.get_combat_commands()}
+        character.msg(message)
 
 
     def _cleanup_character(self, character):
@@ -39,10 +44,12 @@ class CombatHandler(DefaultScript):
         Remove character from handler and clean 
         it of the back-reference and cmdset
         """
-        dbref = character.id 
-        del self.db.characters[dbref]
+        del self.db.characters[character.dbref]
         del character.ndb.combat_handler
         character.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
+
+        message = {"left_combat": True}
+        character.msg(message)
 
 
     def at_start(self):
@@ -82,25 +89,21 @@ class CombatHandler(DefaultScript):
 
     def add_character(self, character):
         "Add combatant to handler"
-        self.db.characters[character.id] = character
+        self.db.characters[character.dbref] = character
         self._init_character(character)
         
-        appearance = self.get_appearance()
-        appearance["commands"] = character.get_combat_commands()
-        self.msg_all({"show_combat": appearance})
+        self.msg_all_combat_info()
 
 
     def remove_character(self, character):
         "Remove combatant from handler"
-        if character.id in self.db.characters:
+        if character.dbref in self.db.characters:
             self._cleanup_character(character)
         if not self.db.characters:
             # if we have no more characters in battle, kill this handler
             self.stop()
         else:
-            appearance = caller.ndb.combat_handler.get_appearance()
-            appearance["commands"] = caller.get_combat_commands()
-            self.msg_all({"show_combat": appearance})
+            self.msg_all_combat_info()
 
 
     def msg_all(self, message):
@@ -109,7 +112,7 @@ class CombatHandler(DefaultScript):
             character.msg(message)
 
 
-    def set_action(self, action, character, target):
+    def cast_skill(self, skill, caller, target):
         """
         Called by combat commands to register an action with the handler.
 
@@ -117,16 +120,29 @@ class CombatHandler(DefaultScript):
         It then resets everything and starts the next turn. It
         is called by at_repeat().
         """
-        resolve_combat(self, action, character, target)
+        if not skill:
+            return
+
+        if not caller.dbref in self.db.characters:
+            return
+        
+        if target:
+            if not target in self.db.characters:
+                return
+            target = self.db.characters[target]
+        
+        try:
+            result = caller.cast_skill(skill_key, target)
+            message = {"combat_process": result}
+            character.msg(message)
+        except Exception, e:
+            caller.msg({"alert":LS("Can not cast this skill.")})
+            return
 
         if len(self.db.characters) < 2:
             # if we have less than 2 characters in battle, kill this handler
             self.msg_all("Combat has ended")
             self.stop()
-        else:
-            # reset counters before next turn
-            for character in self.db.characters.values():
-                self.db.characters[character.id] = character
 
 
     def get_appearance(self):
@@ -143,3 +159,20 @@ class CombatHandler(DefaultScript):
             appearance["characters"].append(info)
 
         return appearance
+
+
+    def msg_all_combat_process(self, process):
+        """
+        """
+        for character in self.db.characters.values():
+            if character.has_player:
+                character.msg({"combat_process": process})
+
+
+    def msg_all_combat_info(self):
+        """
+        """
+        appearance = self.get_appearance()
+        for character in self.db.characters.values():
+            if character.has_player:
+                character.msg({"combat_info": appearance})

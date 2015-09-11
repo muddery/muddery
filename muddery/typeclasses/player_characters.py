@@ -95,6 +95,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Player<->Object links have been established.
 
         """
+        self.msg({"puppet": self.dbref})
+
         super(MudderyCharacter, self).at_post_puppet()
 
         # send character's data to player

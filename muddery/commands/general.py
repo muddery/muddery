@@ -920,6 +920,3 @@ class CmdAttack(Command):
         chandler.add_character(target)
         self.caller.msg("You attack %s! You are in combat." % target)
         target.msg("%s attacks you! You are in combat." % self.caller)
-
-        # message = {"combat": {"target": target.name}}
-        # caller.msg(message)
