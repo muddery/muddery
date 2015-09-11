@@ -178,7 +178,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             self.db.hp = 0
 
         if self.db.hp <= 0:
-            die()
+            self.die()
 
         return
 
@@ -197,6 +197,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         for key in self.db.skills:
             skill = self.db.skills[key]
             command = {"name": skill.name,
-                       "cmd": skill.get_info_key()}
+                       "key": skill.get_info_key()}
             commands.append(command)
         return commands

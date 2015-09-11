@@ -38,8 +38,11 @@ def skill_hit(caller, target, effect=0, *args, **kwargs):
     if not target:
         return
 
-    if target:
-        damage = caller.attack / (caller.attack + target.defence) * caller.attack
-        target.hurt(damage)
-        if damage > 0:
-            target.show_status()
+    damage = float(caller.attack) / (caller.attack + target.defence) * caller.attack
+    damage = round(damage)
+    target.hurt(damage)
+
+    return {"character": target.dbref,
+            "hurt": damage,
+            "hp": target.db.hp,
+            "max_hp": target.max_hp}

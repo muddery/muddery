@@ -69,12 +69,14 @@ class MudderySkill(MudderyObject):
                 return
 
         try:
-            self.cast()
+            result = self.cast()
         except Exception, e:
-            ostring = "Can not cast skill %s: %s" % (self.key, e)
+            ostring = "Can not cast skill %s: %s" % (self.get_info_key(), e)
             logger.log_errmsg(ostring)
             if self.db.owner:
                 self.db.owner.msg({"alert":LS("Can not cast this skill!")})
+
+        return result
 
 
     def cast(self):
@@ -82,11 +84,13 @@ class MudderySkill(MudderyObject):
         Do cast.
         """
         function = getattr(skills, self.get_info_key())
-        function(self.db.owner, self.db.target, effect=self.effect)
+        result = function(self.db.owner, self.db.target, effect=self.effect)
 
         # reset cd
         if self.cd > 0:
             self.db.cd_end_time = time.time() + self.cd
+
+        return result
 
 
     def set_auto_cast(self, target):
@@ -118,7 +122,7 @@ class MudderySkill(MudderyObject):
         try:
             self.cast()
         except Exception, e:
-            ostring = "Can not cast skill %s: %s" % (self.key, e)
+            ostring = "Can not cast skill %s: %s" % (self.get_info_key(), e)
             logger.log_errmsg(ostring)
             caller.msg({"alert":LS("Can not cast this skill!")})
 
@@ -133,7 +137,7 @@ class MudderySkill(MudderyObject):
         try:
             self.cast()
         except Exception, e:
-            ostring = "Can not cast skill %s: %s" % (self.key, e)
+            ostring = "Can not cast skill %s: %s" % (self.get_info_key(), e)
             logger.log_errmsg(ostring)
             if self.db.owner:
                 self.db.owner.msg({"alert":LS("Can not cast this skill!")})

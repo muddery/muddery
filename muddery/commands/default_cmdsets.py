@@ -125,5 +125,5 @@ class CombatCmdSet(CmdSet):
     no_exits = True
 
     def at_cmdset_creation(self):
-        self.add(general.CmdCastSkill())
+        self.add(combat.CmdCombatSkill())
         self.add(combat.CmdCombatInfo())
