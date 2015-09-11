@@ -19,7 +19,7 @@ var commands = {
     doCombatSkill : function(caller) {
         var cmd = "combat_skill";
         var args = {"skill": $(caller).attr("key"),
-                    "target": webclient.get_current_target()};
+                    "target": combat.get_current_target()};
         sendCommand(this.cmdString(cmd, args));
     },
     

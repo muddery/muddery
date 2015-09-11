@@ -166,8 +166,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         if not skill in self.db.skills:
             self.msg({"alert":LS("You do not have this skill.")})
             return
-        
-        self.db.skills[skill].cast_skill(target)
+
+        return self.db.skills[skill].cast_skill(target)
 
 
     def hurt(self, damage):
