@@ -19,7 +19,6 @@ class CmdCombatInfo(Command):
     Observes your combat.
     """
     key = "combat_info"
-    aliases = ["look"]
     locks = "cmd:all()"
 
     def func(self):
@@ -28,13 +27,11 @@ class CmdCombatInfo(Command):
         """
         caller = self.caller
 
-        if not caller.ndb.combat_handler:
+        if not caller.is_in_combat():
             caller.msg({"msg":LS("You are not in combat!")})
             return
 
         # get combat's appearance
-        caller.msg({"joined_combat": True});
-        
         appearance = caller.ndb.combat_handler.get_appearance()
         message = {"combat_info": appearance,
                    "combat_commands": caller.get_combat_commands()}

@@ -21,6 +21,8 @@ var combat = {
         $('<div>').attr('id', 'combat_commands').appendTo(box);
         box.prependTo($("body"));
 
+        this._current_target = null;
+    
         webclient.doSetSizes();
     },
 

@@ -110,7 +110,7 @@ var webclient = {
                 else if (key == "joined_combat") {
                     combat.createCombat();
                 }
-                else if (key == "left_combat") {
+                else if (key == "combat_finish") {
                     combat.closeCombat();
                 }
                 else if (key == "combat_info") {
