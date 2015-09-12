@@ -68,6 +68,7 @@ class CmdLook(Command):
         """
         caller = self.caller
         args = self.args
+
         if args:
             # Use search to handle duplicate/nonexistant results.
             looking_at_obj = caller.search(args)
@@ -94,6 +95,13 @@ class CmdLook(Command):
             if surroundings:
                 appearance.update(looking_at_obj.get_surroundings(caller))
             caller.msg({"look_around": appearance})
+            
+            if caller.is_in_combat():
+                caller.msg({"joined_combat": True})
+                appearance = caller.ndb.combat_handler.get_appearance()
+                message = {"combat_info": appearance,
+                           "combat_commands": caller.get_combat_commands()}
+                caller.msg(message)
         else:
             appearance = looking_at_obj.get_appearance(caller)
             caller.msg({"look_obj": appearance})
@@ -902,13 +910,13 @@ class CmdAttack(Command):
             return
 
         # set up combat
-        if caller.ndb.combat_handler:
+        if caller.is_in_combat():
             # caller is in battle
             message = {"alert": LS("You are already in a combat.")}
             caller.msg(message)
             return
 
-        if target.ndb.combat_handler:
+        if target.is_in_combat():
             # caller is in battle
             message = {"alert": LS("%s is already in a combat." % target.name)}
             caller.msg(message)
@@ -916,8 +924,8 @@ class CmdAttack(Command):
 
         # create a new combat handler
         chandler = create_script("combat_handler.CombatHandler")
-        chandler.add_character(self.caller)
         chandler.add_character(target)
+        chandler.add_character(self.caller)
         
         self.caller.msg("You attack %s! You are in combat." % target)
         target.msg("%s attacks you! You are in combat." % self.caller)

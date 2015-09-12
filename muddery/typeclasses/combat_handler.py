@@ -4,7 +4,6 @@ Combat handler.
 
 import random
 from evennia import DefaultScript
-from muddery.utils.combat_rules import resolve_combat
 import traceback
 
 
@@ -17,9 +16,6 @@ class CombatHandler(DefaultScript):
 
     def at_script_creation(self):
         "Called when script is first created"
-
-        print "at_script_creation"
-        
         self.desc = "handles combat"
         self.interval = 0  # keep running until the battle ends
         self.persistent = True   
@@ -33,8 +29,6 @@ class CombatHandler(DefaultScript):
         This initializes handler back-reference 
         and combat cmdset on a character
         """
-        print "_init_character: %s" % character
-
         character.ndb.combat_handler = self
         character.cmdset.add("muddery.commands.default_cmdsets.CombatCmdSet")
 
@@ -44,8 +38,6 @@ class CombatHandler(DefaultScript):
         Remove character from handler and clean 
         it of the back-reference and cmdset
         """
-        print "_cleanup_character: %s" % character
-        
         del self.db.characters[character.dbref]
         del character.ndb.combat_handler
         character.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
@@ -91,8 +83,6 @@ class CombatHandler(DefaultScript):
 
     def add_character(self, character):
         "Add combatant to handler"
-        print "add_character: %s" % character
-        
         self.db.characters[character.dbref] = character
         self._init_character(character)
         
@@ -113,8 +103,6 @@ class CombatHandler(DefaultScript):
 
     def remove_character(self, character):
         "Remove combatant from handler"
-        print "remove_character: %s" % character
-        
         if character.dbref in self.db.characters:
             self._cleanup_character(character)
         if not self.db.characters:
@@ -132,11 +120,12 @@ class CombatHandler(DefaultScript):
 
     def cast_skill(self, skill, caller, target):
         """
-        Called by combat commands to register an action with the handler.
+        Called by combat commands to cast a skill to the target.
 
-        This resolves all actions by calling the rules module. 
-        It then resets everything and starts the next turn. It
-        is called by at_repeat().
+        args:
+            skill - (string) skill's key
+            caller - (string) caller's dbref
+            target - (string) target's dbref
         """
         if not skill:
             return
@@ -159,11 +148,22 @@ class CombatHandler(DefaultScript):
             print traceback.format_exc()
             return
 
-        if len(self.db.characters) < 2:
-            # if we have less than 2 characters in battle, kill this handler
-            self.msg_all("Combat has ended")
-            self.stop()
+        alive = 0
+        for character in self.db.characters.values():
+            if character.is_alive() > 0:
+                alive += 1
 
+        if alive < 2:
+            # if we have less than 2 characters alive, kill this handler
+            self.finish()
+
+
+    def finish(self):
+        """
+        """
+        self.msg_all({"combat_finish": ""})
+        self.stop()
+    
 
     def get_appearance(self):
         """
@@ -177,8 +177,6 @@ class CombatHandler(DefaultScript):
                     "max_hp": character.max_hp,
                     "hp": character.db.hp}
             appearance["characters"].append(info)
-
-        print "get_appearance: %s" % appearance
 
         return appearance
 

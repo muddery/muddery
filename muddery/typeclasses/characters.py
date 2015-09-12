@@ -170,6 +170,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         return self.db.skills[skill].cast_skill(target)
 
 
+    def is_in_combat(self):
+        """
+        """
+        return bool(self.ndb.combat_handler)
+
+
     def hurt(self, damage):
         """
         """
@@ -187,6 +193,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         """
         pass
+
+
+    def is_alive(self):
+        """
+        """
+        return self.db.hp > 0
 
 
     def get_combat_commands(self):
