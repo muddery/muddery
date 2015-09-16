@@ -87,6 +87,9 @@ BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
 # Typeclass for NPCs
 BASE_NPC_TYPECLASS = "muddery.typeclasses.npcs.MudderyNPC"
 
+# Typeclass for monsters
+BASE_MONSTER_TYPECLASS = "muddery.typeclasses.monsters.MudderyMonster"
+
 # Typeclass for skills
 BASE_SKILL_TYPECLASS = "muddery.typeclasses.skills.MudderySkill"
 

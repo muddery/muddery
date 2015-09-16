@@ -263,3 +263,17 @@ def reset_default_locations():
         if start_location:
             settings.START_LOCATION = start_location[0].dbref
             print "settings.START_LOCATION set to: %s" % settings.START_LOCATION
+
+
+def delete_object(obj_dbref):
+    # helper function for deleting a single object
+    obj = search.search_object(obj_dbref)
+    if not obj:
+        ostring = "Can not find object %s." % obj_dbref
+        print ostring
+
+    # do the deletion
+    okay = obj[0].delete()
+    if not okay:
+        ostring = "Can not delete %s." % obj_dbref
+        print ostring
