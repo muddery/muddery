@@ -108,10 +108,10 @@ var webclient = {
                     this.displayGetObject(data[key]);
                 }
                 else if (key == "joined_combat") {
-                    combat.createCombat();
+                    combat.createCombat(data[key]);
                 }
                 else if (key == "combat_finish") {
-                    combat.closeCombat();
+                    combat.finishCombat(data[key]);
                 }
                 else if (key == "combat_info") {
                     combat.displayCombatInfo(data[key]);

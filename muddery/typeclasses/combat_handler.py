@@ -3,8 +3,10 @@ Combat handler.
 """
 
 import random
-from evennia import DefaultScript
 import traceback
+from django.conf import settings
+from evennia import DefaultScript
+from muddery.utils import builder
 
 
 class CombatHandler(DefaultScript):
@@ -18,10 +20,13 @@ class CombatHandler(DefaultScript):
         "Called when script is first created"
         self.desc = "handles combat"
         self.interval = 0  # keep running until the battle ends
-        self.persistent = True   
+        self.persistent = True
 
         # store all combatants
         self.db.characters = {}
+
+        # if battle is finished
+        self.db.finished = False
 
 
     def _init_character(self, character):
@@ -42,9 +47,6 @@ class CombatHandler(DefaultScript):
         del character.ndb.combat_handler
         character.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
 
-        message = {"left_combat": True}
-        character.msg(message)
-
 
     def at_start(self):
         """
@@ -58,6 +60,9 @@ class CombatHandler(DefaultScript):
 
     def at_stop(self):
         "Called just before the script is stopped/destroyed."
+        if not self.db.finished:
+            self.msg_all({"combat_finish": {"stopped": True}})
+
         for character in self.db.characters.values():
             # note: the list() call above disconnects list from database
             self._cleanup_character(character)
@@ -108,8 +113,6 @@ class CombatHandler(DefaultScript):
         if not self.db.characters:
             # if we have no more characters in battle, kill this handler
             self.stop()
-        else:
-            self.msg_all_combat_info()
 
 
     def msg_all(self, message):
@@ -150,7 +153,7 @@ class CombatHandler(DefaultScript):
 
         alive = 0
         for character in self.db.characters.values():
-            if character.is_alive() > 0:
+            if character.is_alive():
                 alive += 1
 
         if alive < 2:
@@ -161,7 +164,29 @@ class CombatHandler(DefaultScript):
     def finish(self):
         """
         """
-        self.msg_all({"combat_finish": ""})
+        winner = []
+        for character in self.db.characters.values():
+            if character.is_alive():
+                winner.append({"dbref": character.dbref,
+                               "name": character.name})
+        
+        self.msg_all({"combat_finish": {"winner": winner}})
+        
+        # delete dead npcs
+        for character in self.db.characters.values():
+            if not character.is_alive():
+                if not character.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
+                    self._cleanup_character(character)
+                    
+                    # notify its location
+                    location = character.location
+                    builder.delete_object(character.dbref)
+                    if location:
+                        for content in location.contents:
+                            if content.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
+                                content.show_location();
+        
+        self.db.finished = True
         self.stop()
     
 

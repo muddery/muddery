@@ -5,12 +5,14 @@ Muddery webclient (javascript component)
 var combat = {
     _self_dbref: null,
     _current_target: null,
+    _finished: false,
+    _result: null,
     
     setSelf: function(dbref) {
         this._self_dbref = dbref;
     },
 
-    createCombat: function() {
+    createCombat: function(data) {
         this.closeCombat();
 
         var layer = $('<div>').addClass('overlayer').attr('id', 'overlayer');
@@ -22,8 +24,66 @@ var combat = {
         box.prependTo($("body"));
 
         this._current_target = null;
+        this._finished = false;
     
         webclient.doSetSizes();
+    },
+
+    
+    finishCombat: function(data) {
+        this._finished = true;
+        this._result = data;
+        
+        setTimeout(combat.showCombatResult, 1000);
+    },
+
+
+    showCombatResult: function() {
+        var self = combat;
+
+        $('#combat_characters').remove();
+        $('#combat_commands').remove();
+        
+        var box = $('#combat_box');
+        var result = $('<div>').attr('id', 'combat_result');
+        
+        if ("stopped" in self._result) {
+            result.text("Combat stopped !");
+        }
+        else if ("winner" in self._result) {
+            var win = false;
+            for (var i in self._result.winner) {
+                if (self._result.winner[i].dbref == self._self_dbref) {
+                    win = true;
+                    break;
+                }
+            }
+            
+            if (win) {
+                result.text("You win !");
+            }
+            else {
+                result.text("You lost !");
+            }
+        }
+        
+        result.appendTo(box);
+        
+        var button = $('<input>').attr('type', 'button')
+                                 .attr('id', 'button_center')
+                                 .attr('onClick', 'combat.closeCombat()')
+                                 .val('OK')
+                                 .addClass('btn btn-primary');
+    
+        var div = $('<div>');
+        div.append($('<div><br></div>'));
+        div.append($('<center>').append(button));
+        box.append(div);
+        
+        // popup box
+        var result_h = result.outerHeight(true);
+        var div_h = div.outerHeight(true);
+        box.height(result_h + div_h);
     },
 
 
@@ -136,6 +196,10 @@ var combat = {
 
     
     doCombatSkill: function(caller) {
+        if (this._finished) {
+            return;
+        }
+
         commands.doCombatSkill(caller)
     },
     
