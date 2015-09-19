@@ -20,17 +20,6 @@ class MudderyQuest(MudderyObject):
         Set default values.
         """
         self.db.achieved = {}
-        self.objectives = {}
-        self.not_achieved = {}
-
-
-    def at_init(self):
-        """
-        Load quest data.
-        """
-        self.objectives = {}
-        self.not_achieved = {}
-        super(MudderyQuest, self).at_init()
 
 
     def load_data(self):
@@ -38,6 +27,9 @@ class MudderyQuest(MudderyObject):
         """
         super(MudderyQuest, self).load_data()
 
+        self.objectives = {}
+        self.not_achieved = {}
+        
         key = self.get_info_key()
         if not key:
             return

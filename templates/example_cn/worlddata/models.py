@@ -100,6 +100,16 @@ class world_npcs(model_base.world_npcs):
 
 #------------------------------------------------------------
 #
+# store common characters
+#
+#------------------------------------------------------------
+class common_characters(model_base.common_characters):
+    "Store all common characters."
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all skills
 #
 #------------------------------------------------------------
@@ -135,6 +145,16 @@ class quest_objectives(model_base.quest_objectives):
 #------------------------------------------------------------
 class quest_dependency(model_base.quest_dependency):
     "Store quest dependency."
+    pass
+
+
+#------------------------------------------------------------
+#
+# store event data
+#
+#------------------------------------------------------------
+class event_data(model_base.event_data):
+    "Store event data."
     pass
 
 

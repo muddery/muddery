@@ -9,6 +9,7 @@ for allowing Characters to traverse the exit to its destination.
 
 from muddery.utils import utils
 from muddery.typeclasses.objects import MudderyObject
+from muddery.utils.localized_strings_handler import LS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultExit
 
@@ -36,15 +37,6 @@ class MudderyExit(MudderyObject, DefaultExit):
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
     """
-
-    def at_init(self):
-        """
-        Load quest data.
-        """
-        self.move_action = ""
-        super(MudderyExit, self).at_init()
-
-
     def at_failed_traverse(self, traversing_object):
         """
         Overloads the default hook to implement a simple default error message.
@@ -67,9 +59,9 @@ class MudderyExit(MudderyObject, DefaultExit):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
-        move_action = "GOTO"
-        if self.move_action:
-            move_action = self.move_action
-        commands = [{"name":move_action, "cmd":"goto", "args":self.dbref}]
+        verb = getattr(self, "verb", LS("GOTO"))
+        if not verb:
+            verb = LS("GOTO")
+        commands = [{"name":verb, "cmd":"goto", "args":self.dbref}]
 
         return commands

@@ -128,7 +128,7 @@ WORLD_OBJECTS = ("world_objects",)
 WORLD_NPCS = ("world_npcs",)
 
 # common objects
-COMMON_OBJECTS = ("common_objects", "skills", "quests")
+COMMON_OBJECTS = ("common_objects", "common_characters", "skills", "quests")
 
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
@@ -140,6 +140,9 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 # quest data
 QUEST_OBJECTIVES = "quest_objectives"
 QUEST_DEPENDENCY = "quest_dependency"
+
+# event data
+EVENT_DATA = "event_data"
 
 # dialogues
 DIALOGUES = "dialogues"
@@ -157,6 +160,7 @@ CHARACTER_LEVELS = "character_level"
 # all other data models
 OTHER_DATA_MODELS = (QUEST_OBJECTIVES,
                      QUEST_DEPENDENCY,
+                     EVENT_DATA,
                      DIALOGUES,
                      DIALOGUE_SENTENCES,
                      DIALOGUE_RELATIONS,
@@ -180,6 +184,8 @@ DEFAULT_HOME_KEY = ""
 #  MULTISESSION_MODE = 0, 1 - used by default unloggedin create command
 #  MULTISESSION_MODE = 2,3 - used by default character_create command
 START_LOCATION_KEY = ""
+
+DEFAULT_PLAYER_CHARACTER_KEY = "player"
 
 EQUIP_POSITIONS = []
 

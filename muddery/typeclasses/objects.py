@@ -39,7 +39,19 @@ class MudderyObject(DefaultObject):
                            "save",
                            "delete",
                            ])
-    
+
+
+    def at_object_creation(self):
+        """
+            Called once, when this object is first created. This is the
+            normal hook to overload for most object types.
+            
+            """
+        super(MudderyObject, self).at_object_creation()
+        
+        self.db.FIRST_CREATE = True
+
+
     def at_init(self):
         """
         Load world data.
@@ -53,6 +65,13 @@ class MudderyObject(DefaultObject):
             self.load_data()
         except Exception, e:
             logger.log_errmsg("%s can not load data:%s" % (self.dbref, e))
+
+
+    def set_initial_data(self):
+        """
+        Initialize this object after data loaded.
+        """
+        pass
 
 
     def at_object_receive(self, moved_obj, source_location):
@@ -91,6 +110,11 @@ class MudderyObject(DefaultObject):
         model = OBJECT_KEY_HANDLER.get_model(key)
         utils.set_obj_data_info(self, key, model)
         self.load_data()
+
+        # initialize with data
+        if self.db.FIRST_CREATE:
+            self.set_initial_data()
+            del self.db.FIRST_CREATE
 
 
     def get_data_record(self):

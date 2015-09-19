@@ -12,7 +12,6 @@ from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.typeclasses.common_objects import MudderyEquipment
-from evennia.objects.objects import DefaultCharacter
 from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
@@ -309,7 +308,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         obj.equipped = True
 
         # reset character's attributes
-        self.after_equipment_changed()
+        self.refresh_data()
 
 
     def take_off_position(self, position):
@@ -342,26 +341,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         # reset character's attributes
         self.after_equipment_changed()
-
-
-    def learn_skill(self, skill):
-        """
-        Learn a new skill.
-        args:
-            skill: (string) The key of the skill.
-        """
-        if skill in self.db.skills:
-            self.msg({"alert":LS("You have already learned this skill.")})
-            return
-             
-        skill_obj = build_object(skill)
-        if not skill_obj:
-            self.msg({"alert":LS("Can not learn this skill.")})
-            return
-
-        self.db.skills[skill] = skill_obj
-        skill_obj.set_owner(self)
-        self.show_skills()
 
 
     def show_skills(self):

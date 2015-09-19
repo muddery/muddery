@@ -175,16 +175,7 @@ class CombatHandler(DefaultScript):
         # delete dead npcs
         for character in self.db.characters.values():
             if not character.is_alive():
-                if not character.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
-                    self._cleanup_character(character)
-                    
-                    # notify its location
-                    location = character.location
-                    builder.delete_object(character.dbref)
-                    if location:
-                        for content in location.contents:
-                            if content.is_typeclass(settings.BASE_CHARACTER_TYPECLASS):
-                                content.show_location();
+                character.die()
         
         self.db.finished = True
         self.stop()

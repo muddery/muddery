@@ -42,13 +42,20 @@ def at_initial_setup():
 
         # set default locations
         builder.reset_default_locations()
-        
-        # move the superuser to the start location
+
         superuser = search.search_object("#1", exact=True)
         if superuser:
+            superuser = superuser[0]
+
+            # move the superuser to the start location
             start_location = search.search_object(settings.START_LOCATION, exact=True)
             if start_location:
-                superuser[0].move_to(start_location[0])
+                start_location = start_location[0]
+                superuser.move_to(start_location)
+
+            # set superuser's data
+            superuser.set_data_info(settings.DEFAULT_PLAYER_CHARACTER_KEY)
+            superuser.set_level(1)
 
     except Exception, e:
         ostring = "Can't build world: %s" % e
