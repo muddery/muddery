@@ -31,20 +31,6 @@ class PlayerCharacter(MudderyPlayerCharacter):
                     has connected" message echoed to the room
 
     """
-    def at_object_creation(self):
-        """
-        Called once, when this object is first created. This is the
-        normal hook to overload for most object types.
-            
-        """
-        super(PlayerCharacter, self).at_object_creation()
-
-        # set level data
-        self.db.hp = 100
-
-        self.learn_skill("skill_hit")
-
-
     def return_status(self):
         """
         Get character's status.

@@ -144,7 +144,8 @@ class CmdUnconnectedConnect(Command):
                 new_player = _create_player(session, playername, password,
                                             permissions, ptypeclass)
                 if new_player:
-                    _create_character(session, new_player, typeclass,
+                    _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
+                                      session, new_player, typeclass,
                                       home, permissions)
                     session.sessionhandler.login(session, new_player)
 
@@ -281,7 +282,8 @@ class CmdUnconnectedCreate(Command):
             if new_player:
                 if MULTISESSION_MODE < 2:
                     default_home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
-                    _create_character(session, new_player, typeclass,
+                    _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
+                                      session, new_player, typeclass,
                                       default_home, permissions)
                 # tell the caller everything went well.
                 session.msg({"created":playername})
@@ -379,7 +381,8 @@ class CmdUnconnectedCreateConnect(Command):
             if new_player:
                 if MULTISESSION_MODE < 2:
                     default_home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
-                    _create_character(session, new_player, typeclass,
+                    _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
+                                      session, new_player, typeclass,
                                       default_home, permissions)
                 # tell the caller everything went well.
                 # string = "A new account '%s' was created. Welcome!"
@@ -504,7 +507,7 @@ def _create_player(session, playername, password, permissions, typeclass=None):
     return new_player
 
 
-def _create_character(session, new_player, typeclass, home, permissions):
+def _create_character(character_key, level, session, new_player, typeclass, home, permissions):
     """
     Helper function, creates a character based on a player's name.
     This is meant for Guest and MULTISESSION_MODE < 2 situations.
@@ -512,6 +515,11 @@ def _create_character(session, new_player, typeclass, home, permissions):
     try:
         new_character = create.create_object(typeclass, key=new_player.key,
                                              home=home, permissions=permissions)
+
+        # set character info
+        new_character.set_data_info(character_key)
+        new_character.set_level(level)
+
         # set playable character list
         new_player.db._playable_characters.append(new_character)
 

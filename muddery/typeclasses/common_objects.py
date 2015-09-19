@@ -101,24 +101,10 @@ class MudderyEquipment(MudderyCommonObject):
     Effect field is in the format of:
     <property name>:<effect>,<property name>:<effect>...
     """
-    def at_object_creation(self):
+    def load_data(self):
         """
-        Set default values.
         """
-        super(MudderyEquipment, self).at_object_creation()
-
-        # set status
-        self.equipped = False
-
-
-    def at_init(self):
-        """
-        called whenever typeclass is cached from memory,
-        at least once every server restart/reload
-        """
-        super(MudderyEquipment, self).at_init()
-
-        # set status
+        super(MudderyEquipment, self).load_data()
         self.equipped = False
 
 

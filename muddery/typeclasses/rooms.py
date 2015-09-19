@@ -8,6 +8,8 @@ Rooms are simple containers that has no location of their own.
 from django.conf import settings
 from muddery.typeclasses.objects import MudderyObject
 from evennia.objects.objects import DefaultRoom
+from muddery.utils.event_handler import EventHandler
+from evennia.utils.utils import lazy_property
 
 
 class MudderyRoom(MudderyObject, DefaultRoom):
@@ -20,6 +22,13 @@ class MudderyRoom(MudderyObject, DefaultRoom):
     See examples/object.py for a list of
     properties and methods available on all Objects.
     """
+
+    # initialize all handlers in a lazy fashion
+    @lazy_property
+    def event(self):
+        return EventHandler(self)
+
+
     def at_object_receive(self, moved_obj, source_location):
         """
         Called after an object has been moved into this object.
@@ -35,9 +44,12 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         type = self.get_surrounding_type(moved_obj)
         if type:
             change = {type: [{"dbref":moved_obj.dbref,
-                             "name":moved_obj.name}]}
-                             
+                              "name":moved_obj.name}]}
             self.msg_contents({"obj_moved_in":change}, exclude=moved_obj)
+
+        # trigger event
+        if moved_obj.has_player:
+            self.event.at_character_move_in(moved_obj)
 
 
     def at_object_left(self, moved_obj, target_location):

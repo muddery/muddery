@@ -34,7 +34,7 @@ class world_exits(models.Model):
     name = models.CharField(max_length=255)
     typeclass = models.CharField(max_length=255)
     desc = models.TextField(blank=True)
-    move_action = models.TextField(blank=True)
+    verb = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)
     destination = models.CharField(max_length=255, blank=True)
     attributes = models.TextField(blank=True)
@@ -177,6 +177,26 @@ class world_npcs(models.Model):
 
 #------------------------------------------------------------
 #
+# store common characters
+#
+#------------------------------------------------------------
+class common_characters(models.Model):
+    "Store common characters."
+
+    key = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
+    typeclass = models.CharField(max_length=255)
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Common Character List"
+        verbose_name_plural = "Common Character List"
+
+
+#------------------------------------------------------------
+#
 # store all skills
 #
 #------------------------------------------------------------
@@ -261,6 +281,25 @@ class quest_dependency(models.Model):
         abstract = True
         verbose_name = "Quest Dependency"
         verbose_name_plural = "Quest Dependency"
+
+
+#------------------------------------------------------------
+#
+# store event data
+#
+#------------------------------------------------------------
+class event_data(models.Model):
+    "Store event data."
+
+    key = models.CharField(max_length=255, db_index=True)
+    trigger = models.IntegerField()
+    type = models.IntegerField()
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Event Data"
+        verbose_name_plural = "Event Data"
 
 
 #------------------------------------------------------------
@@ -368,7 +407,8 @@ class dialogue_quest_dependency(models.Model):
 class character_level(models.Model):
     "Store all character level informations."
 
-    level = models.IntegerField(primary_key=True)
+    character = models.CharField(max_length=255, db_index=True)
+    level = models.IntegerField()
     max_exp = models.IntegerField()
 
     class Meta:
@@ -376,6 +416,7 @@ class character_level(models.Model):
         abstract = True
         verbose_name = "Character Level List"
         verbose_name_plural = "Character Level List"
+        unique_together = ("character", "level")
 
 
 #------------------------------------------------------------

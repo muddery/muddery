@@ -8,6 +8,7 @@ creation commands.
 
 """
 
+import traceback
 from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.objects import MudderyObject
@@ -16,7 +17,6 @@ from evennia.objects.objects import DefaultCharacter
 from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
-from muddery.utils.quest_handler import QuestHandler
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
 from evennia.utils.utils import lazy_property
@@ -55,7 +55,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         self.db.hp = 1
         self.db.mp = 1
-        
+
         self.max_hp = 1
         self.max_mp = 1
         
@@ -73,22 +73,70 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.finished_quests = set()
         self.db.current_quests = {}
 
-        self.set_init_data()
 
-
-    def at_init(self):
+    def load_data(self):
         """
-        called whenever typeclass is cached from memory,
-        at least once every server restart/reload
+        Set data_info to the object."
         """
-        super(MudderyCharacter, self).at_init()
+        # set default values
+        self.max_hp = 1
+        self.max_mp = 1
+        
+        self.attack = 0
+        self.defence = 0
+        
+        super(MudderyCharacter, self).load_data()
+        
+        self.refresh_data()
 
-        self.set_init_data()
 
-
-    def set_init_data(self):
+    def set_level(self, level):
         """
-        Load initial data.
+        Set character's level.
+        """
+        if self.db.level == level:
+            return
+
+        self.db.level = level
+        self.refresh_data()
+
+
+    def refresh_data(self):
+        """
+        Refresh character's data, calculate character's attributes.
+        """
+        # load level data
+        self.load_level_data()
+        
+        # load equips data
+        self.load_equip_data()
+
+
+    def load_level_data(self):
+        """
+        Load character's level data.
+        """
+        try:
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_LEVELS)
+            level_data = model_obj.objects.get(character=self.get_info_key(), level=self.db.level)
+
+            known_fields = set(["id",
+                                "character",
+                                "level"])
+            for field in level_data._meta.fields:
+                if field.name in known_fields:
+                    continue
+                if field.name in self.reserved_fields:
+                    print "Can not set reserved field %s!" % field.name
+                    continue
+                setattr(self, field.name, level_data.serializable_value(field.name))
+        except Exception, e:
+            print "Can't load character level info %s: %s" % (self.db.level, e)
+
+
+    def set_equips(self):
+        """
+        Load equipments data.
         """
         # set equipments status
         equipped = set()
@@ -102,7 +150,32 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                 content.equipped = True
 
         # set character's attributes
-        self.after_equipment_changed()
+        self.refresh_data()
+
+
+    def load_equip_data(self):
+        """
+        """
+        # find equipments
+        equipped = set([equip_id for equip_id in self.db.equipments.values() if equip_id])
+
+        # add equipment's attributes
+        for content in self.contents:
+            if content.dbref in equipped:
+                for effect in settings.EQUIP_EFFECTS:
+                    value = getattr(self, effect, 0)
+                    value += getattr(content, effect, 0)
+                    setattr(self, effect, value)
+
+
+    def set_initial_data(self):
+        """
+        Initialize this object after data loaded.
+        """
+        super(MudderyCharacter, self).set_initial_data()
+
+        # set initial data
+        self.db.hp = self.max_hp
 
 
     def use_object(self, obj):
@@ -112,42 +185,23 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         pass
 
 
-    def after_equipment_changed(self):
+    def learn_skill(self, skill):
         """
-        Called after equipments changed. It's time to calculate character's attributes.
+        Learn a new skill.
+        args:
+        skill: (string) The key of the skill.
         """
-
-        # set level informations
-        try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_LEVELS)
-            level_data = model_obj.objects.get(level=self.db.level)
-
-            known_fields = set(["level"])
-            for field in level_data._meta.fields:
-                if field.name in known_fields:
-                    continue
-                if field.name in self.reserved_fields:
-                    print "Can not set reserved field %s!" % field.name
-                    continue
-                setattr(self, field.name, level_data.serializable_value(field.name))
-
-        except Exception, e:
-            print "Can't load character level info %s: %s" % (self.db.level, e)
-
-        # find equipments
-        equipped = set()
-        equipments = self.db.equipments
-        for position in equipments:
-            if equipments[position]:
-                equipped.add(equipments[position])
-
-        # add equipment's attributes
-        for content in self.contents:
-            if content.dbref in equipped:
-                for effect in settings.EQUIP_EFFECTS:
-                    value = getattr(self, effect, 0)
-                    value += getattr(content, effect, 0)
-                    setattr(self, effect, value)
+        if skill in self.db.skills:
+            self.msg({"alert":LS("You have already learned this skill.")})
+            return
+                
+        skill_obj = build_object(skill)
+        if not skill_obj:
+            self.msg({"alert":LS("Can not learn this skill.")})
+            return
+                                
+        self.db.skills[skill] = skill_obj
+        skill_obj.set_owner(self)
 
 
     def has_skill(self, skill):

@@ -21,4 +21,16 @@ class MudderyMonster(MudderyCharacter):
         """
         commands = [{"name":"ATTACK", "cmd":"attack", "args":self.dbref}]
         return commands
-    
+
+
+    def die(self):
+        """
+        """
+        # delete itself and notify its location
+        location = character.location
+        builder.delete_object(character.dbref)
+        
+        if location:
+            for content in location.contents:
+                if content.has_player:
+                    content.show_location();

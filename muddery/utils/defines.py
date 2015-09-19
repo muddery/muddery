@@ -16,3 +16,11 @@ DEPENDENCE_QUEST_NOT_ACCEPTED = 7
 OBJECTIVE_NONE = 0
 OBJECTIVE_TALK = 1      # object: dialogue_id
 OBJECTIVE_ARRIVE = 2    # object: room_id
+
+# event trigger types
+EVENT_TRIGGER_NONE = 0
+EVENT_TRIGGER_ARRIVE = 1        # object: room_id
+
+# event types
+EVENT_NONE = 0
+EVENT_ATTACK = 1
