@@ -173,10 +173,15 @@ class CombatHandler(DefaultScript):
         self.msg_all({"combat_finish": {"winner": winner}})
         
         # delete dead npcs
+        kill_characters = []
         for character in self.db.characters.values():
             if not character.is_alive():
-                character.die()
-        
+                kill_characters.append(character)
+
+        for kill in kill_characters:
+            self._cleanup_character(kill)
+            kill.die()
+
         self.db.finished = True
         self.stop()
     

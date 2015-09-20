@@ -421,6 +421,45 @@ class character_level(models.Model):
 
 #------------------------------------------------------------
 #
+# character skills
+#
+#------------------------------------------------------------
+class character_skill(models.Model):
+    "Store all character skill informations."
+
+    character = models.CharField(max_length=255, db_index=True)
+    skill = models.ForeignKey("skills")
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Character Skill List"
+        verbose_name_plural = "Character Skill List"
+        unique_together = ("character", "skill")
+
+
+#------------------------------------------------------------
+#
+# event mobs
+#
+#------------------------------------------------------------
+class event_mobs(models.Model):
+    "Store all event mobs."
+
+    key = models.CharField(max_length=255, db_index=True)
+    mob = models.CharField(max_length=255)
+    level = models.IntegerField()
+    odds = models.FloatField()
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Event Mob"
+        verbose_name_plural = "Event Mobs"
+
+
+#------------------------------------------------------------
+#
 # local strings
 #
 #------------------------------------------------------------

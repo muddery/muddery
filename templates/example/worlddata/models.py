@@ -221,6 +221,26 @@ class character_level(model_base.character_level):
 
 #------------------------------------------------------------
 #
+# character skills
+#
+#------------------------------------------------------------
+class character_skill(model_base.character_skill):
+    "Store all character skill informations."
+    pass
+
+
+#------------------------------------------------------------
+#
+# event mobs
+#
+#------------------------------------------------------------
+class event_mobs(model_base.event_mobs):
+    "Store all event mobs."
+    pass
+
+
+#------------------------------------------------------------
+#
 # local strings
 #
 #------------------------------------------------------------

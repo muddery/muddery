@@ -144,6 +144,9 @@ QUEST_DEPENDENCY = "quest_dependency"
 # event data
 EVENT_DATA = "event_data"
 
+# room mobs
+EVENT_MOBS = "event_mobs"
+
 # dialogues
 DIALOGUES = "dialogues"
 DIALOGUE_SENTENCES = "dialogue_sentences"
@@ -157,17 +160,22 @@ EQUIPMENT_TYPES = "equipment_types"
 # character levels
 CHARACTER_LEVELS = "character_level"
 
+# character skills
+CHARACTER_SKILLS = "character_skill"
+
 # all other data models
 OTHER_DATA_MODELS = (QUEST_OBJECTIVES,
                      QUEST_DEPENDENCY,
                      EVENT_DATA,
+                     EVENT_MOBS,
                      DIALOGUES,
                      DIALOGUE_SENTENCES,
                      DIALOGUE_RELATIONS,
                      NPC_DIALOGUES,
                      DIALOGUE_QUEST_DEPENDENCY,
                      EQUIPMENT_TYPES,
-                     CHARACTER_LEVELS)
+                     CHARACTER_LEVELS,
+                     CHARACTER_SKILLS)
 
 # local strings
 LOCALIZED_STRINGS_MODEL = "localized_strings"
