@@ -4,6 +4,7 @@ skills
 """
 
 import time
+import traceback
 from evennia import TICKER_HANDLER
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
@@ -73,8 +74,10 @@ class MudderySkill(MudderyObject):
         except Exception, e:
             ostring = "Can not cast skill %s: %s" % (self.get_info_key(), e)
             logger.log_errmsg(ostring)
+            print traceback.format_exc()
             if self.db.owner:
                 self.db.owner.msg({"alert":LS("Can not cast this skill!")})
+            return
 
         return result
 

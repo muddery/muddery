@@ -138,13 +138,15 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 OTHER_DATA_MODELS = (QUEST_OBJECTIVES,
                      QUEST_DEPENDENCY,
                      EVENT_DATA,
+                     EVENT_MOBS,
                      DIALOGUES,
                      DIALOGUE_SENTENCES,
                      DIALOGUE_RELATIONS,
                      NPC_DIALOGUES,
                      DIALOGUE_QUEST_DEPENDENCY,
                      EQUIPMENT_TYPES,
-                     CHARACTER_LEVELS)
+                     CHARACTER_LEVELS,
+                     CHARACTER_SKILLS)
 
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 

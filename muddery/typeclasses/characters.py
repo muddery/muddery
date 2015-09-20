@@ -173,6 +173,16 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Initialize this object after data loaded.
         """
         super(MudderyCharacter, self).set_initial_data()
+        
+        # default skills
+        skill_records = []
+        model_skills = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_SKILLS)
+        if model_skills:
+            # Get records.
+            skill_records = model_skills.objects.filter(character=self.get_info_key)
+
+        for skill_record in skill_records:
+            self.learn_skill(skill_record.skill_id)
 
         # set initial data
         self.db.hp = self.max_hp
@@ -236,9 +246,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.hp -= damage
         if self.db.hp < 0:
             self.db.hp = 0
-
-        if self.db.hp <= 0:
-            self.die()
 
         return
 

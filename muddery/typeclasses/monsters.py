@@ -4,10 +4,11 @@ MudderyMob is mob's base class.
 """
 
 import json
+import traceback
 from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.characters import MudderyCharacter
-
+from muddery.utils.builder import delete_object
 
 class MudderyMonster(MudderyCharacter):
     """
@@ -27,8 +28,8 @@ class MudderyMonster(MudderyCharacter):
         """
         """
         # delete itself and notify its location
-        location = character.location
-        builder.delete_object(character.dbref)
+        location = self.location
+        delete_object(self.dbref)
         
         if location:
             for content in location.contents:

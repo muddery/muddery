@@ -1,8 +1,8 @@
 character,level,max_exp,max_hp,max_mp,attack,defence
 player,1,100,100,100,10,10
-mob_robot_a,1,100,100,100,5,5
-mob_robot_a,2,100,120,100,10,10
-mob_robot_a,3,100,150,100,15,15
+mob_robot_a,1,20,20,100,5,5
+mob_robot_a,2,30,30,100,10,10
+mob_robot_a,3,40,40,100,15,15
 mob_zombie1,1,100,100,100,5,5
 mob_zombie2,1,100,100,100,5,5
 mob_zombie3,1,100,100,100,5,5
