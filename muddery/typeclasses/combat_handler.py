@@ -43,8 +43,11 @@ class CombatHandler(DefaultScript):
         Remove character from handler and clean 
         it of the back-reference and cmdset
         """
+        print "_cleanup_character"
+
         del self.db.characters[character.dbref]
         del character.ndb.combat_handler
+        character.stop_auto_battle_skill()
         character.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
 
 
@@ -56,10 +59,13 @@ class CombatHandler(DefaultScript):
         """
         for character in self.db.characters.values():
             self._init_character(character)
+        self.start_combat()
 
 
     def at_stop(self):
         "Called just before the script is stopped/destroyed."
+        print "combat at_stop"
+        print "self.db.characters: %s" % self.db.characters
         if not self.db.finished:
             self.msg_all({"combat_finish": {"stopped": True}})
 
@@ -68,46 +74,49 @@ class CombatHandler(DefaultScript):
             self._cleanup_character(character)
 
 
-    def at_repeat(self, *args):
-        """
-        This is called every self.interval seconds or when force_repeat
-        is called (because everyone has entered their commands).       
-
-        We let this method take optional arguments (using *args) so we can separate
-        between the timeout (no argument) and the controlled turn-end
-        where we send an argument.
-        """
-        return
-
-        if not args:
-            self.msg_all("Turn timer timed out. Continuing.")
-        self.end_turn()
-
-
     # Combat-handler methods
 
-    def add_character(self, character):
+
+#    def add_character(self, character):
+#        "Add combatant to handler"
+#        self.db.characters[character.dbref] = character
+#        self._init_character(character)
+#
+#        # notify character
+#        character.msg({"joined_combat": True})
+#        message = {"combat_info": self.get_appearance(),
+#                   "combat_commands": character.get_combat_commands()}
+#        character.msg(message)
+#
+#        # notify other characters
+#        info = {"type": "joined",
+#                "dbref": character.dbref,
+#                "name": character.name,
+#                "max_hp": character.max_hp,
+#                "hp": character.db.hp}
+#        self.msg_all_combat_process([info])
+
+
+    def add_characters(self, characters):
         "Add combatant to handler"
-        self.db.characters[character.dbref] = character
-        self._init_character(character)
+        for character in characters:
+            self.db.characters[character.dbref] = character
+            self._init_character(character)
         
-        # notify character
-        character.msg({"joined_combat": True})
-        message = {"combat_info": self.get_appearance(),
-                   "combat_commands": character.get_combat_commands()}
-        character.msg(message)
-        
-        # notify other characters
-        info = {"type": "joined",
-                "dbref": character.dbref,
-                "name": character.name,
-                "max_hp": character.max_hp,
-                "hp": character.db.hp}
-        self.msg_all_combat_process([info])
+        for character in characters:
+            if character.has_player:
+                # notify character
+                character.msg({"joined_combat": True})
+                message = {"combat_info": self.get_appearance(),
+                           "combat_commands": character.get_combat_commands()}
+                character.msg(message)
+
+        self.start_combat()
 
 
     def remove_character(self, character):
         "Remove combatant from handler"
+        print "remove_character"
         if character.dbref in self.db.characters:
             self._cleanup_character(character)
         if not self.db.characters:
@@ -130,16 +139,17 @@ class CombatHandler(DefaultScript):
             caller - (string) caller's dbref
             target - (string) target's dbref
         """
+        print "cast_skill %s %s %s" % (skill, caller, target)
         if not skill:
-            return
+            return False
 
         if not caller in self.db.characters:
-            return
+            return False
         caller = self.db.characters[caller]
 
         if target:
             if not target in self.db.characters:
-                return
+                return False
             target = self.db.characters[target]
 
         try:
@@ -149,7 +159,7 @@ class CombatHandler(DefaultScript):
         except Exception, e:
             print "Can not cast skill %s: %s" % (skill, e)
             print traceback.format_exc()
-            return
+            return False
 
         alive = 0
         for character in self.db.characters.values():
@@ -159,6 +169,15 @@ class CombatHandler(DefaultScript):
         if alive < 2:
             # if we have less than 2 characters alive, kill this handler
             self.finish()
+
+        return True
+
+
+    def start_combat(self):
+        """
+        """
+        for character in self.db.characters.values():
+            character.start_auto_battle_skill()
 
 
     def finish(self):
@@ -183,6 +202,7 @@ class CombatHandler(DefaultScript):
             kill.die()
 
         self.db.finished = True
+        print "combat finish"
         self.stop()
     
 
@@ -200,6 +220,12 @@ class CombatHandler(DefaultScript):
             appearance["characters"].append(info)
 
         return appearance
+
+
+    def get_all_characters(self):
+        """
+        """
+        return self.db.characters.values()
 
 
     def msg_all_combat_process(self, process):

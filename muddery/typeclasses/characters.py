@@ -9,6 +9,7 @@ creation commands.
 """
 
 import traceback
+import random
 from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.objects import MudderyObject
@@ -20,6 +21,7 @@ from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
 from evennia.utils.utils import lazy_property
+from evennia import TICKER_HANDLER
 
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
@@ -56,12 +58,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.hp = 1
         self.db.mp = 1
 
-        self.max_hp = 1
-        self.max_mp = 1
-        
-        self.attack = 0
-        self.defence = 0
-
         equipments = {}
         for position in settings.EQUIP_POSITIONS:
             equipments[position] = None
@@ -74,6 +70,18 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.current_quests = {}
 
 
+    def at_object_delete(self):
+        """
+        Called just before the database object is permanently
+        delete()d from the database. If this method returns False,
+        deletion is aborted.
+
+        """
+        print "TICKER_HANDLER remove: %s" % self.name
+        TICKER_HANDLER.remove(self)
+        return True
+
+
     def load_data(self):
         """
         Set data_info to the object."
@@ -84,6 +92,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         
         self.attack = 0
         self.defence = 0
+        
+        self.skill_cd = 0
         
         super(MudderyCharacter, self).load_data()
         
@@ -232,6 +242,128 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             return
 
         return self.db.skills[skill].cast_skill(target)
+
+
+    def cast_battle_skill(self, skill, target):
+        """
+        Cast a skill in battle.
+        """
+        print "cast_battle_skill: %s" % self.name
+        if self.db.GLOBAL_COOLING_DOWN:
+            self.msg({"msg":LS("This skill is not ready yet!")})
+            return
+
+        if self.db.skills[skill].is_cooling_down():
+            self.msg({"msg":LS("This skill is not ready yet!")})
+            return
+    
+        if self.ndb.combat_handler.cast_skill(skill, self.dbref, target):
+            # set global cd
+            if settings.GLOBAL_CD > 0:
+                self.db.GLOBAL_COOLING_DOWN = True
+                TICKER_HANDLER.add(self, settings.GLOBAL_CD, hook_key="skill_cooled_down")
+
+
+    def skill_cooled_down(self):
+        """
+        """
+        print "global_cooled_down"
+        del self.db.GLOBAL_COOLING_DOWN
+        
+        TICKER_HANDLER.remove(self)
+
+        print 1
+        # auto cast next skill
+        auto_battle_skill = getattr(self, "auto_battle_skill", False)
+        if not auto_battle_skill:
+            return
+
+        print 2
+        if not self.ndb.combat_handler:
+            return
+
+        print 3
+        if not self.skill_target:
+            self.skill_target = self.find_skill_target()
+        elif not self.skill_target.is_alive():
+            self.skill_target = self.find_skill_target()
+
+        print 4
+        if not self.skill_target:
+            return
+
+        print 5
+        available_skill = self.get_available_skills()
+        if not available_skill:
+            return
+
+        print 6
+        skill = random.choice(available_skill)
+        if not skill:
+            return
+
+        print 7
+        self.cast_battle_skill(skill, self.skill_target.dbref)
+
+
+    def get_available_skills(self):
+        """
+        """
+        skills = [skill for skill in self.db.skills if not self.db.skills[skill].is_cooling_down()]
+        return skills
+
+
+    def find_skill_target(self):
+        """
+        """
+        if not self.ndb.combat_handler:
+            return
+
+        target = None
+        characters = self.ndb.combat_handler.get_all_characters()
+        for character in characters:
+            if character.is_alive() and character.dbref != self.dbref:
+                target = character
+                break;
+
+        return target
+
+
+    def start_auto_battle_skill(self):
+        """
+        """
+        print "start_auto_battle_skill: %s" % self.name
+        
+        # select target
+        self.skill_target = self.find_skill_target()
+        if not self.skill_target:
+            print "if not self.skill_target: %s" % self.name
+            return
+
+        self.auto_battle_skill = True
+
+        if self.db.GLOBAL_COOLING_DOWN:
+            print "self.db.GLOBAL_COOLING_DOWN: %s" % self.name
+            return
+
+        available_skill = self.get_available_skills()
+        if not available_skill:
+            print "not available_skill: %s" % self.name
+            return
+        
+        skill = random.choice(available_skill)
+        if not skill:
+            print "not skill: %s" % self.name
+            return
+        
+        self.cast_battle_skill(skill, self.skill_target.dbref)
+
+
+    def stop_auto_battle_skill(self):
+        """
+        """
+        print "stop_auto_battle_skill"
+        self.auto_battle_skill = False
 
 
     def is_in_combat(self):

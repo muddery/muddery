@@ -177,6 +177,8 @@ DEFAULT_HOME_KEY = "room_intro"
 #  MULTISESSION_MODE = 2,3 - used by default character_create command
 START_LOCATION_KEY = "room_intro"
 
+DEFAULT_PLAYER_CHARACTER_HOME = "room_colorfulworld_hole"
+
 EQUIP_POSITIONS = ["head", "chest", "hand", "leg"]
 
 EQUIP_EFFECTS = ["attack", "defence"]

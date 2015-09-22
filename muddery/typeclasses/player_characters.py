@@ -12,13 +12,13 @@ from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.typeclasses.common_objects import MudderyEquipment
-from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.quest_handler import QuestHandler
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
 from evennia.utils.utils import lazy_property
+from evennia.utils import logger
 
 
 class MudderyPlayerCharacter(MudderyCharacter):
@@ -366,13 +366,12 @@ class MudderyPlayerCharacter(MudderyCharacter):
         return skills
 
 
-    def hurt(self, damage):
-        """
-        """
-        super(MudderyPlayerCharacter, self).hurt(damage)
-
-
     def die(self):
         """
         """
         super(MudderyPlayerCharacter, self).die()
+
+        home = self.search(self.home, global_search=True)
+        if home:
+            self.move_to(home, quiet=True)
+            caller.msg("You are back to %s." % home.name)
