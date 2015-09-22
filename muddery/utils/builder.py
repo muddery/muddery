@@ -244,6 +244,17 @@ def reset_default_locations():
             settings.DEFAULT_HOME = default_home[0].dbref
             print "settings.DEFAULT_HOME set to: %s" % settings.DEFAULT_HOME
 
+    # set player's default home
+    default_player_home_key = settings.DEFAULT_PLAYER_HOME_KEY
+    if not default_player_home_key:
+        # set to the DEFAULT_HOME
+        settings.DEFAULT_PLAYER_HOME = settings.DEFAULT_HOME
+    else:
+        default_player_home = utils.search_obj_info_key(default_player_home_key)
+        if default_player_home:
+            settings.DEFAULT_PLAYER_HOME = default_player_home[0].dbref
+            print "settings.DEFAULT_PLAYER_HOME set to: %s" % settings.DEFAULT_PLAYER_HOME
+    
     # set start location
     start_location_key = settings.START_LOCATION_KEY
     if not start_location_key:

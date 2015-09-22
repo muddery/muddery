@@ -924,8 +924,7 @@ class CmdAttack(Command):
 
         # create a new combat handler
         chandler = create_script("combat_handler.CombatHandler")
-        chandler.add_character(target)
-        chandler.add_character(self.caller)
+        chandler.add_characters([target, self.caller])
         
         self.caller.msg("You attack %s! You are in combat." % target)
         target.msg("%s attacks you! You are in combat." % self.caller)

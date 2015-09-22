@@ -27,6 +27,8 @@ class MudderyMonster(MudderyCharacter):
     def die(self):
         """
         """
+        super(MudderyMonster, self).die()
+        
         # delete itself and notify its location
         location = self.location
         delete_object(self.dbref)

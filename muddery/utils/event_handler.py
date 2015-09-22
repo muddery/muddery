@@ -92,5 +92,4 @@ class EventHandler(object):
 
             # create a new combat handler
             chandler = create_script("combat_handler.CombatHandler")
-            chandler.add_character(mob)
-            chandler.add_character(character)
+            chandler.add_characters([mob, character])

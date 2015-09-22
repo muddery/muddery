@@ -281,7 +281,7 @@ class CmdUnconnectedCreate(Command):
             new_player = _create_player(session, playername, password, permissions)
             if new_player:
                 if MULTISESSION_MODE < 2:
-                    default_home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
+                    default_home = ObjectDB.objects.get_id(settings.DEFAULT_PLAYER_HOME)
                     _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
                                       session, new_player, typeclass,
                                       default_home, permissions)
@@ -380,7 +380,7 @@ class CmdUnconnectedCreateConnect(Command):
             new_player = _create_player(session, playername, password, permissions)
             if new_player:
                 if MULTISESSION_MODE < 2:
-                    default_home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
+                    default_home = ObjectDB.objects.get_id(settings.DEFAULT_PLAYER_HOME)
                     _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
                                       session, new_player, typeclass,
                                       default_home, permissions)
