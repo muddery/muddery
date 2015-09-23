@@ -7,6 +7,7 @@ import traceback
 from django.conf import settings
 from evennia import DefaultScript
 from muddery.utils import builder
+from evennia import TICKER_HANDLER
 
 
 class CombatHandler(DefaultScript):
@@ -43,9 +44,6 @@ class CombatHandler(DefaultScript):
         Remove character from handler and clean 
         it of the back-reference and cmdset
         """
-        print "_cleanup_character"
-
-        del self.db.characters[character.dbref]
         del character.ndb.combat_handler
         character.stop_auto_battle_skill()
         character.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
@@ -64,8 +62,6 @@ class CombatHandler(DefaultScript):
 
     def at_stop(self):
         "Called just before the script is stopped/destroyed."
-        print "combat at_stop"
-        print "self.db.characters: %s" % self.db.characters
         if not self.db.finished:
             self.msg_all({"combat_finish": {"stopped": True}})
 
@@ -116,9 +112,9 @@ class CombatHandler(DefaultScript):
 
     def remove_character(self, character):
         "Remove combatant from handler"
-        print "remove_character"
         if character.dbref in self.db.characters:
             self._cleanup_character(character)
+            del self.db.characters[character.dbref]
         if not self.db.characters:
             # if we have no more characters in battle, kill this handler
             self.stop()
@@ -139,7 +135,6 @@ class CombatHandler(DefaultScript):
             caller - (string) caller's dbref
             target - (string) target's dbref
         """
-        print "cast_skill %s %s %s" % (skill, caller, target)
         if not skill:
             return False
 
@@ -158,7 +153,6 @@ class CombatHandler(DefaultScript):
                 self.msg_all_combat_process(result)
         except Exception, e:
             print "Can not cast skill %s: %s" % (skill, e)
-            print traceback.format_exc()
             return False
 
         alive = 0
@@ -177,7 +171,8 @@ class CombatHandler(DefaultScript):
         """
         """
         for character in self.db.characters.values():
-            character.start_auto_battle_skill()
+            if not character.has_player:
+                character.start_auto_battle_skill()
 
 
     def finish(self):
@@ -192,17 +187,14 @@ class CombatHandler(DefaultScript):
         self.msg_all({"combat_finish": {"winner": winner}})
         
         # delete dead npcs
-        kill_characters = []
-        for character in self.db.characters.values():
-            if not character.is_alive():
-                kill_characters.append(character)
+        kills = [c for c in self.db.characters.values() if not c.is_alive()]
 
-        for kill in kill_characters:
+        for kill in kills:
             self._cleanup_character(kill)
+            del self.db.characters[kill.dbref]
             kill.die()
 
         self.db.finished = True
-        print "combat finish"
         self.stop()
     
 
@@ -225,6 +217,9 @@ class CombatHandler(DefaultScript):
     def get_all_characters(self):
         """
         """
+        if not self.db.characters:
+            return []
+
         return self.db.characters.values()
 
 

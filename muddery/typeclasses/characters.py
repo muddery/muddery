@@ -77,8 +77,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         deletion is aborted.
 
         """
-        print "TICKER_HANDLER remove: %s" % self.name
-        TICKER_HANDLER.remove(self)
+        super(MudderyCharacter, self).at_object_delete()
+
+        if self.db.GLOBAL_COOLING_DOWN or self.db.AUTO_BATTLE_SKILL:
+            TICKER_HANDLER.remove(self)
+
         return True
 
 
@@ -248,7 +251,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         Cast a skill in battle.
         """
-        print "cast_battle_skill: %s" % self.name
         if self.db.GLOBAL_COOLING_DOWN:
             self.msg({"msg":LS("This skill is not ready yet!")})
             return
@@ -257,52 +259,49 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             self.msg({"msg":LS("This skill is not ready yet!")})
             return
     
-        if self.ndb.combat_handler.cast_skill(skill, self.dbref, target):
-            # set global cd
+        result = self.ndb.combat_handler.cast_skill(skill, self.dbref, target)
+        if result and self.ndb.combat_handler:
+            # still in combat, set global cd
             if settings.GLOBAL_CD > 0:
                 self.db.GLOBAL_COOLING_DOWN = True
                 TICKER_HANDLER.add(self, settings.GLOBAL_CD, hook_key="skill_cooled_down")
+        return result
 
 
     def skill_cooled_down(self):
         """
         """
-        print "global_cooled_down"
         del self.db.GLOBAL_COOLING_DOWN
-        
-        TICKER_HANDLER.remove(self)
+        TICKER_HANDLER.remove(self, settings.GLOBAL_CD)
 
-        print 1
-        # auto cast next skill
-        auto_battle_skill = getattr(self, "auto_battle_skill", False)
-        if not auto_battle_skill:
+
+    def cast_next_skill(self):
+        """
+        """
+        if not self.db.AUTO_BATTLE_SKILL:
             return
 
-        print 2
         if not self.ndb.combat_handler:
+            # combat finished, stop ticker
+            TICKER_HANDLER.remove(self, settings.AUTO_BATTLE_SKILL_CD)
             return
 
-        print 3
         if not self.skill_target:
             self.skill_target = self.find_skill_target()
         elif not self.skill_target.is_alive():
             self.skill_target = self.find_skill_target()
 
-        print 4
         if not self.skill_target:
             return
 
-        print 5
         available_skill = self.get_available_skills()
         if not available_skill:
             return
 
-        print 6
         skill = random.choice(available_skill)
         if not skill:
             return
 
-        print 7
         self.cast_battle_skill(skill, self.skill_target.dbref)
 
 
@@ -319,51 +318,33 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         if not self.ndb.combat_handler:
             return
 
-        target = None
         characters = self.ndb.combat_handler.get_all_characters()
         for character in characters:
             if character.is_alive() and character.dbref != self.dbref:
-                target = character
-                break;
+                return character
 
-        return target
+        return
 
 
     def start_auto_battle_skill(self):
         """
         """
-        print "start_auto_battle_skill: %s" % self.name
-        
         # select target
         self.skill_target = self.find_skill_target()
         if not self.skill_target:
-            print "if not self.skill_target: %s" % self.name
             return
 
-        self.auto_battle_skill = True
+        self.db.AUTO_BATTLE_SKILL = True
 
-        if self.db.GLOBAL_COOLING_DOWN:
-            print "self.db.GLOBAL_COOLING_DOWN: %s" % self.name
-            return
-
-        available_skill = self.get_available_skills()
-        if not available_skill:
-            print "not available_skill: %s" % self.name
-            return
-        
-        skill = random.choice(available_skill)
-        if not skill:
-            print "not skill: %s" % self.name
-            return
-        
-        self.cast_battle_skill(skill, self.skill_target.dbref)
+        self.cast_next_skill()
+        TICKER_HANDLER.add(self, settings.AUTO_BATTLE_SKILL_CD, hook_key="cast_next_skill")
 
 
     def stop_auto_battle_skill(self):
         """
         """
-        print "stop_auto_battle_skill"
-        self.auto_battle_skill = False
+        del self.db.AUTO_BATTLE_SKILL
+        TICKER_HANDLER.remove(self, settings.AUTO_BATTLE_SKILL_CD)
 
 
     def is_in_combat(self):

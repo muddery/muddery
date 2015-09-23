@@ -84,27 +84,31 @@ def import_csv(file_name, model_name):
                     value = item[2].decode(settings.WORLD_DATA_FILE_ENCODING)
                     related_field = item[3]
 
-                    # set field values
-                    if field_type == 0:
-                        record[field_name] = value
-                    elif field_type == 1:
-                        # boolean value
-                        if value.isdigit():
-                            record[field_name] = (int(value) != 0)
-                    elif field_type == 2:
-                        # interger value
-                        if value.isdigit():
-                            record[field_name] = int(value)
-                    elif field_type == 3:
-                        # float value
-                        if value.isdigit():
-                            record[field_name] = float(value)
-                    elif field_type == 4:
-                        # foreignKey
-                        if value:
-                            arg = {}
-                            arg[related_field.name] = value
-                            record[field_name] = related_field.model.objects.get(**arg)
+                    try:
+                        # set field values
+                        if field_type == 0:
+                            # default
+                            record[field_name] = value
+                        elif field_type == 1:
+                            # boolean value
+                            if value:
+                                record[field_name] = (int(value) != 0)
+                        elif field_type == 2:
+                            # interger value
+                            if value:
+                                record[field_name] = int(value)
+                        elif field_type == 3:
+                            # float value
+                            if value:
+                                record[field_name] = float(value)
+                        elif field_type == 4:
+                            # foreignKey
+                            if value:
+                                arg = {}
+                                arg[related_field.name] = value
+                                record[field_name] = related_field.model.objects.get(**arg)
+                    except Exception, e:
+                        print "value error: %s - '%s'" % (field_name, value)
 
                 # create new record
                 data = model_obj.objects.create(**record)

@@ -5,7 +5,6 @@ skills
 
 import time
 import traceback
-from evennia import TICKER_HANDLER
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
@@ -92,6 +91,7 @@ class MudderySkill(MudderyObject):
         If this skill is cooling down.
         """
         if self.cd > 0:
-            if time.time() < self.db.cd_end_time:
-                return True
+            if self.db.cd_end_time:
+                if time.time() < self.db.cd_end_time:
+                    return True
         return False
