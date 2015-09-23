@@ -83,9 +83,7 @@ class CmdCombatSkill(Command):
             target = self.args["target"]
 
         try:
-            result = caller.ndb.combat_handler.cast_skill(skill_key, caller.dbref, target)
+            result = caller.cast_battle_skill(skill_key, target)
         except Exception, e:
-            print "Can not cast skill %s: %s" % (skill_key, e)
-            print traceback.format_exc()
             caller.msg({"alert":LS("Can not cast this skill.")})
             return

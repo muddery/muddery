@@ -370,8 +370,13 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         """
         super(MudderyPlayerCharacter, self).die()
+        
+        self.msg({"msg": "You die."})
+        
+        self.db.hp = self.max_hp
+        self.show_status()
 
         home = self.search(self.home, global_search=True)
         if home:
             self.move_to(home, quiet=True)
-            caller.msg("You are back to %s." % home.name)
+            self.msg({"msg": "You are back to %s." % home.name})

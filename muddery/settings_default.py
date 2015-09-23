@@ -208,3 +208,7 @@ SKILL_FOLDER = "skills"
 SKILL_FILES = []
 
 GLOBAL_CD = 1.0
+
+# AUTO_BATTLE_SKILL_CD must be bigger than GLOBAL_CD
+# They can not be equal!
+AUTO_BATTLE_SKILL_CD = 1.5

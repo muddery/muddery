@@ -928,3 +928,23 @@ class CmdAttack(Command):
         
         self.caller.msg("You attack %s! You are in combat." % target)
         target.msg("%s attacks you! You are in combat." % self.caller)
+
+
+#------------------------------------------------------------
+# cast a skill
+#------------------------------------------------------------
+
+class CmdCombatSkill(Command):
+    """
+    Just ignore it.
+
+    """
+    key = "combat_skill"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        """
+        If the character is not in combat, ignore this command.
+        """
+        pass
