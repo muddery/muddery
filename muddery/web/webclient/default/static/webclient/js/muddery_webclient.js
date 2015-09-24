@@ -584,7 +584,7 @@ var webclient = {
         var page = $("#page_quests");
         
         var content = "<table class='tab_quests'>";
-        content += "<thead><tr><th>名称</th><th>说明</th><th>目标</th></tr></thead>";
+        content += "<thead><tr><th>NAME</th><th>DESC</th><th>OBJECTIVE</th></tr></thead>";
         var element = "";
 
         for (var i in data) {

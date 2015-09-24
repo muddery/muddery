@@ -45,8 +45,10 @@ class CombatHandler(DefaultScript):
         it of the back-reference and cmdset
         """
         del character.ndb.combat_handler
-        character.stop_auto_battle_skill()
+        character.skill.stop_auto_combat_skill()
         character.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
+        if character.has_player:
+            character.show_status()
 
 
     def at_start(self):
@@ -148,7 +150,7 @@ class CombatHandler(DefaultScript):
             target = self.db.characters[target]
 
         try:
-            result = caller.cast_skill(skill, target)
+            result = caller.skill.cast_skill(skill, target)
             if result:
                 self.msg_all_combat_process(result)
         except Exception, e:
@@ -169,14 +171,16 @@ class CombatHandler(DefaultScript):
 
     def start_combat(self):
         """
+        Start a combat, make all NPCs to cast skills automatically.
         """
         for character in self.db.characters.values():
             if not character.has_player:
-                character.start_auto_battle_skill()
+                character.skill.start_auto_combat_skill()
 
 
     def finish(self):
         """
+        Finish a combat. Send results to players, and kill all failed characters.
         """
         winner = []
         for character in self.db.characters.values():
@@ -216,6 +220,7 @@ class CombatHandler(DefaultScript):
 
     def get_all_characters(self):
         """
+        Get all characters in combat.
         """
         if not self.db.characters:
             return []
@@ -225,6 +230,7 @@ class CombatHandler(DefaultScript):
 
     def msg_all_combat_process(self, process):
         """
+        Send combat process to all player characters.
         """
         for character in self.db.characters.values():
             if character.has_player:
@@ -233,6 +239,7 @@ class CombatHandler(DefaultScript):
 
     def msg_all_combat_info(self):
         """
+        Send combat info to all player characters.
         """
         appearance = self.get_appearance()
         for character in self.db.characters.values():

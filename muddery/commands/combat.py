@@ -83,7 +83,7 @@ class CmdCombatSkill(Command):
             target = self.args["target"]
 
         try:
-            result = caller.cast_battle_skill(skill_key, target)
+            result = caller.skill.cast_combat_skill(skill_key, target)
         except Exception, e:
-            caller.msg({"alert":LS("Can not cast this skill.")})
+            caller.msg({"msg":LS("Can not cast this skill.")})
             return

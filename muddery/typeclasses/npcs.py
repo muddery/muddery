@@ -6,7 +6,7 @@ MudderyNPC is NPC's base class.
 import json
 from django.conf import settings
 from django.db.models.loading import get_model
-from muddery.typeclasses.objects import MudderyObject
+from muddery.typeclasses.characters import MudderyCharacter
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 
 

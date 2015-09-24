@@ -1,0 +1,2 @@
+key,name,typeclass,desc
+player,Player,typeclasses.player_characters.MudderyPlayerCharacter,This is a player.

@@ -3,6 +3,7 @@ This model handle scripts.
 """
 
 import re
+import traceback
 from evennia.utils import logger
 
 
@@ -42,6 +43,7 @@ def do_action(caller, action):
         eval(action, {"caller": caller})
     except Exception, e:
         logger.log_errmsg("do_dialogue_action error:%s %s" % (action, e))
+        print traceback.format_exc()
         
     return
 
