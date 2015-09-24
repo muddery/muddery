@@ -16,12 +16,12 @@ from muddery.typeclasses.objects import MudderyObject
 from muddery.typeclasses.common_objects import MudderyEquipment
 from evennia.objects.objects import DefaultCharacter
 from evennia.utils import logger
+from evennia.utils.utils import lazy_property
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
-from evennia.utils.utils import lazy_property
-from evennia import TICKER_HANDLER
+from muddery.utils.skill_handler import SkillHandler
 
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
@@ -43,6 +43,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     has connected" message echoed to the room
 
     """
+
+    # initialize all handlers in a lazy fashion
+    @lazy_property
+    def skill(self):
+        return SkillHandler(self)
+
 
     def at_object_creation(self):
         """
@@ -195,7 +201,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             skill_records = model_skills.objects.filter(character=self.get_info_key)
 
         for skill_record in skill_records:
-            self.learn_skill(skill_record.skill_id)
+            self.skill.learn_skill(skill_record.skill_id)
 
         # set initial data
         self.db.hp = self.max_hp
@@ -211,150 +217,34 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     def learn_skill(self, skill):
         """
         Learn a new skill.
-        args:
-        skill: (string) The key of the skill.
         """
-        if skill in self.db.skills:
-            self.msg({"alert":LS("You have already learned this skill.")})
-            return
-                
-        skill_obj = build_object(skill)
-        if not skill_obj:
-            self.msg({"alert":LS("Can not learn this skill.")})
-            return
-                                
-        self.db.skills[skill] = skill_obj
-        skill_obj.set_owner(self)
+        self.skill.learn_skill(skill)
 
 
     def has_skill(self, skill):
         """
         Whether the character has the skill.
-        args:
-            skill: (string) The key of the skill.
         """
-        return skill in self.db.skills
+        self.skill.has_skill(skill)
 
 
     def cast_skill(self, skill, target):
         """
         Cast a skill.
         """
-        if not skill in self.db.skills:
-            self.msg({"alert":LS("You do not have this skill.")})
-            return
-
-        return self.db.skills[skill].cast_skill(target)
-
-
-    def cast_battle_skill(self, skill, target):
-        """
-        Cast a skill in battle.
-        """
-        if self.db.GLOBAL_COOLING_DOWN:
-            self.msg({"msg":LS("This skill is not ready yet!")})
-            return
-
-        if self.db.skills[skill].is_cooling_down():
-            self.msg({"msg":LS("This skill is not ready yet!")})
-            return
-    
-        result = self.ndb.combat_handler.cast_skill(skill, self.dbref, target)
-        if result and self.ndb.combat_handler:
-            # still in combat, set global cd
-            if settings.GLOBAL_CD > 0:
-                self.db.GLOBAL_COOLING_DOWN = True
-                TICKER_HANDLER.add(self, settings.GLOBAL_CD, hook_key="skill_cooled_down")
-        return result
-
-
-    def skill_cooled_down(self):
-        """
-        """
-        del self.db.GLOBAL_COOLING_DOWN
-        TICKER_HANDLER.remove(self, settings.GLOBAL_CD)
-
-
-    def cast_next_skill(self):
-        """
-        """
-        if not self.db.AUTO_BATTLE_SKILL:
-            return
-
-        if not self.ndb.combat_handler:
-            # combat finished, stop ticker
-            TICKER_HANDLER.remove(self, settings.AUTO_BATTLE_SKILL_CD)
-            return
-
-        if not self.skill_target:
-            self.skill_target = self.find_skill_target()
-        elif not self.skill_target.is_alive():
-            self.skill_target = self.find_skill_target()
-
-        if not self.skill_target:
-            return
-
-        available_skill = self.get_available_skills()
-        if not available_skill:
-            return
-
-        skill = random.choice(available_skill)
-        if not skill:
-            return
-
-        self.cast_battle_skill(skill, self.skill_target.dbref)
-
-
-    def get_available_skills(self):
-        """
-        """
-        skills = [skill for skill in self.db.skills if not self.db.skills[skill].is_cooling_down()]
-        return skills
-
-
-    def find_skill_target(self):
-        """
-        """
-        if not self.ndb.combat_handler:
-            return
-
-        characters = self.ndb.combat_handler.get_all_characters()
-        for character in characters:
-            if character.is_alive() and character.dbref != self.dbref:
-                return character
-
-        return
-
-
-    def start_auto_battle_skill(self):
-        """
-        """
-        # select target
-        self.skill_target = self.find_skill_target()
-        if not self.skill_target:
-            return
-
-        self.db.AUTO_BATTLE_SKILL = True
-
-        self.cast_next_skill()
-        TICKER_HANDLER.add(self, settings.AUTO_BATTLE_SKILL_CD, hook_key="cast_next_skill")
-
-
-    def stop_auto_battle_skill(self):
-        """
-        """
-        del self.db.AUTO_BATTLE_SKILL
-        TICKER_HANDLER.remove(self, settings.AUTO_BATTLE_SKILL_CD)
+        self.skill.cast_skill(skill, target)
 
 
     def is_in_combat(self):
         """
+        If is in combat.
         """
         return bool(self.ndb.combat_handler)
 
 
     def hurt(self, damage):
         """
+        Be hurted.
         """
         self.db.hp -= damage
         if self.db.hp < 0:
@@ -365,12 +255,14 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
     def die(self):
         """
+        This character die.
         """
         pass
 
 
     def is_alive(self):
         """
+        If this character is alive.
         """
         return self.db.hp > 0
 

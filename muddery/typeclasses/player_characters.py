@@ -373,6 +373,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         
         self.msg({"msg": "You die."})
         
+        # Reborn at its home.
         self.db.hp = self.max_hp
         self.show_status()
 
