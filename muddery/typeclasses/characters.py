@@ -60,7 +60,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         
         self.db.level = 1
         self.db.exp = 0
-
         self.db.hp = 1
         self.db.mp = 1
 
@@ -96,6 +95,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Set data_info to the object."
         """
         # set default values
+        self.max_exp = 1
         self.max_hp = 1
         self.max_mp = 1
         

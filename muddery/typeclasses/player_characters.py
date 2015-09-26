@@ -247,7 +247,14 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Get character's status.
         """
         status = {"level": self.db.level,
-                  "exp": self.db.exp}
+                  "max_exp": self.max_exp,
+                  "exp": self.db.exp,
+                  "max_hp": self.max_hp,
+                  "hp": self.db.hp,
+                  "max_mp": self.max_mp,
+                  "mp": self.db.mp,
+                  "attack": self.attack,
+                  "defence": self.defence}
 
         return status
 

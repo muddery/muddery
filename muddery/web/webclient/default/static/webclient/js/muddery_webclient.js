@@ -106,8 +106,20 @@ var webclient = {
                 else if (key == "get_object") {
                     this.displayGetObject(data[key]);
                 }
-                else if (key == "show_combat") {
-                    this.displayCombat(data[key]);
+                else if (key == "joined_combat") {
+                    combat.createCombat(data[key]);
+                }
+                else if (key == "combat_finish") {
+                    combat.finishCombat(data[key]);
+                }
+                else if (key == "combat_info") {
+                    combat.displayCombatInfo(data[key]);
+                }
+                else if (key == "combat_commands") {
+                    combat.displayCombatCommands(data[key]);
+                }
+                else if (key == "combat_process") {
+                    combat.displayCombatProcess(data[key]);
                 }
                 else if (key == "login") {
                     this.onLogin(data[key]);
@@ -115,12 +127,16 @@ var webclient = {
                 else if (key == "logout") {
                     this.onLogout(data[key]);
                 }
+                else if (key == "puppet") {
+                    this.onPuppet(data[key]);
+                }
                 else {
                     this.displayMsg(data[key]);
                 }
             }
             catch(error) {
                 this.displayErr("Data error.");
+                console.error(error);
             }
         }
     },
@@ -152,6 +168,7 @@ var webclient = {
         }
         catch(error) {
             this.displayErr("Data error.");
+            console.error(error);
         }
     },
 
@@ -692,50 +709,6 @@ var webclient = {
         this.doSetSizes();
     },
 
-    displayCombat : function(data) {
-        this.doCloseBox();
-        this.doCloseCombat();
-
-        $('<div>').addClass('overlayer').attr('id', 'overlayer').prependTo($("body"));
-
-        var box = $('<div>').attr('id', 'combat_box')
-        
-        for (var i in data["characters"]) {
-            var fighter = data["characters"][i];
-            var div = $('<div>').attr('id', fighter["dbref"])
-                                .text(fighter["name"])
-                                .data('hp', fighter["hp"])
-                                .data('max_hp', fighter["max_hp"])
-                                .data('dbref', fighter["dbref"]);
-            $('<div>').addClass('hp').text(fighter["hp"] + '/' + fighter["max_hp"]).appendTo(div);
-            
-            if (fighter["dbref"] == this._self_dbref) {
-                div.addClass("fighter_self");
-            }
-            else {
-                div.addClass("fighter_enemy");
-                this._current_target = fighter["dbref"];
-            }
-            
-            div.appendTo(box);
-        }
-
-        for (var i in data["commands"]) {
-            var command = data["commands"][i];
-            var button = $('<input type="button" class="btn btn-combat">')
-                            .css({'left': 20 + i * 60})
-                            .attr('cmd_name', command["cmd"])
-                            .attr('onclick', 'commands.doCommandAttack(this); return false;')
-                            .val(command["name"]);
-
-            button.appendTo(box);
-        }
-
-        box.prependTo($("body"));
-        
-        this.doSetSizes();
-    },
-
     displayStatus : function(data) {
         // refresh prompt bar
         var bar = $("#prompt_bar");
@@ -760,8 +733,26 @@ var webclient = {
         content += "<div>";
 
         try {
-            element = "<div><span class='white'> LEVEL: ";
-            element += data["level"].toString();
+            element = "<div><span class='white'> HP: ";
+            element += data["hp"].toString() + "/" + data["max_hp"].toString();
+            element += "</span><br></div>";
+            content += element;
+        }
+        catch(error) {
+        }
+
+        try {
+            element = "<div><span class='white'> ATTACK: ";
+            element += data["attack"].toString();
+            element += "</span><br></div>";
+            content += element;
+        }
+        catch(error) {
+        }
+        
+        try {
+            element = "<div><span class='white'> DEFENCE: ";
+            element += data["defence"].toString();
             element += "</span><br></div>";
             content += element;
         }
@@ -805,8 +796,6 @@ var webclient = {
     },
 
     onLogin : function(data) {
-        this._self_dbref = data["dbref"];
-
         // show login UI
         $("#msg_wnd").empty();
         this.showLoginTabs();
@@ -822,6 +811,10 @@ var webclient = {
         
         //reconnect, show the connection screen
         webclient_init();
+    },
+    
+    onPuppet : function(data) {
+        combat.setSelf(data);
     },
 
     doSetSizes : function() {
@@ -1053,10 +1046,6 @@ var webclient = {
         this.unselectAllTabs();
         $("#tab_" + pagename).addClass("pill_active");
         $("#page_" + pagename).css("display", "");
-    },
-    
-    get_current_target: function() {
-        return this._current_target;
     },
 }
 
