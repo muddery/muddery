@@ -31,19 +31,6 @@ class PlayerCharacter(MudderyPlayerCharacter):
                     has connected" message echoed to the room
 
     """
-    def return_status(self):
-        """
-        Get character's status.
-        """
-        status = super(PlayerCharacter, self).return_status()
-        status["max_hp"] = self.max_hp
-        status["hp"] = self.db.hp
-        status["attack"] = self.attack
-        status["defence"] = self.defence
-
-        return status
-
-
     def use_object(self, obj):
         """
         Use object.
