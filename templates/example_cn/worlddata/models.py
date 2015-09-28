@@ -79,13 +79,7 @@ class equipment_types(model_base.equipment_types):
 #------------------------------------------------------------
 class equipments(model_base.equipments):
     "Store all equipments."
-    attack = models.IntegerField(blank=True, default=0)
-    defence = models.IntegerField(blank=True, default=0)
-
-    class Meta:
-        "Define Django meta options"
-        verbose_name = "Equipment List"
-        verbose_name_plural = "Equipment List"
+    pass
 
 
 #------------------------------------------------------------
@@ -215,10 +209,7 @@ class dialogue_quest_dependency(model_base.dialogue_quest_dependency):
 #------------------------------------------------------------
 class character_level(model_base.character_level):
     "Store all character level informations."
-    max_hp = models.IntegerField()
-    max_mp = models.IntegerField()
-    attack = models.IntegerField()
-    defence = models.IntegerField()
+    pass
 
 
 #------------------------------------------------------------
