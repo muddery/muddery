@@ -145,6 +145,8 @@ class equipments(common_objects):
 
     position = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=255, blank=True)
+    attack = models.IntegerField(blank=True, default=0)
+    defence = models.IntegerField(blank=True, default=0)
 
     class Meta:
         "Define Django meta options"
@@ -410,6 +412,10 @@ class character_level(models.Model):
     character = models.CharField(max_length=255, db_index=True)
     level = models.IntegerField()
     max_exp = models.IntegerField()
+    max_hp = models.IntegerField()
+    max_mp = models.IntegerField()
+    attack = models.IntegerField()
+    defence = models.IntegerField()
 
     class Meta:
         "Define Django meta options"
