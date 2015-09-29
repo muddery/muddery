@@ -146,7 +146,7 @@ class CmdUnconnectedConnect(Command):
                 if new_player:
                     _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
                                       session, new_player, typeclass,
-                                      home, permissions)
+                                      home, permissions, "GUEST")
                     session.sessionhandler.login(session, new_player)
 
             except Exception:
@@ -206,6 +206,7 @@ class CmdUnconnectedCreate(Command):
         {"cmd":"create_account",
          "args":{
             "playername":<playername>,
+            "nickname":<nickname>,
             "password":<password>
             }
         }
@@ -221,6 +222,7 @@ class CmdUnconnectedCreate(Command):
 
         try:
             playername = self.args["playername"]
+            nickname = self.args["nickname"]
             password = self.args["password"]
         except Exception:
             string = 'Syntax error!'
@@ -228,6 +230,7 @@ class CmdUnconnectedCreate(Command):
             string += '\n    {"cmd":"create_account",'
             string += '\n    "args":{'
             string += '\n        "playername":<playername>,'
+            string += '\n        "nickname":<nickname>,'
             string += '\n        "password":<password>'
             string += '\n        }'
 
@@ -254,6 +257,16 @@ class CmdUnconnectedCreate(Command):
             string = "\n\r That name is reserved. Please choose another Playername."
             session.msg({"alert":string})
             return
+        
+        # sanity checks
+        if not (0 < len(nickname) <= 30):
+            # Nickname's length
+            string = "\n\r Nickname can max be 30 characters or fewer."
+            session.msg({"alert":string})
+            return
+        # strip excessive spaces in playername
+        nickname = re.sub(r"\s+", " ", nickname).strip()
+
         if not re.findall(r'^[\w. @+-]+$', password) or not (3 < len(password)):
             string = "\n\r Password should be longer than 3 characers. Letters, spaces, " \
                      "digits and @\\.\\+\\-\\_ only." \
@@ -284,7 +297,7 @@ class CmdUnconnectedCreate(Command):
                     default_home = ObjectDB.objects.get_id(settings.DEFAULT_PLAYER_HOME)
                     _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
                                       session, new_player, typeclass,
-                                      default_home, permissions)
+                                      default_home, permissions, nickname)
                 # tell the caller everything went well.
                 session.msg({"created":playername})
 
@@ -305,6 +318,7 @@ class CmdUnconnectedCreateConnect(Command):
         {"cmd":"create_connect",
          "args":{
             "playername":<playername>,
+            "nickname":<nickname>,
             "password":<password>
             }
         }
@@ -320,6 +334,7 @@ class CmdUnconnectedCreateConnect(Command):
 
         try:
             playername = self.args["playername"]
+            nickname = self.args["nickname"]
             password = self.args["password"]
         except Exception:
             string = 'Syntax error!'
@@ -327,6 +342,7 @@ class CmdUnconnectedCreateConnect(Command):
             string += '\n    {"cmd":"create_connect",'
             string += '\n    "args":{'
             string += '\n        "playername":<playername>,'
+            string += '\n        "nickname":<nickname>,'
             string += '\n        "password":<password>'
             string += '\n        }'
 
@@ -353,6 +369,24 @@ class CmdUnconnectedCreateConnect(Command):
             string = "\n\r That name is reserved. Please choose another Playername."
             session.msg({"alert":string})
             return
+
+        # sanity checks
+        if not (0 < len(nickname) <= 30):
+            # Nickname's length
+            string = "\n\r Nickname can max be 30 characters or fewer."
+            session.msg({"alert":string})
+            return
+        # strip excessive spaces in playername
+        nickname = re.sub(r"\s+", " ", nickname).strip()
+
+        if not re.findall(r'^[\w. @+-]+$', password) or not (3 < len(password)):
+            string = "\n\r Password should be longer than 3 characers. Letters, spaces, " \
+                     "digits and @\\.\\+\\-\\_ only." \
+                     "\nFor best security, make it longer than 8 characters. You can also use a phrase of" \
+                     "\nmany words if you enclose the password in quotes."
+            session.msg({"alert":string})
+            return
+
         if not re.findall(r'^[\w. @+-]+$', password) or not (3 < len(password)):
             string = "\n\r Password should be longer than 3 characers. Letters, spaces, " \
                      "digits and @\\.\\+\\-\\_ only." \
@@ -383,7 +417,7 @@ class CmdUnconnectedCreateConnect(Command):
                     default_home = ObjectDB.objects.get_id(settings.DEFAULT_PLAYER_HOME)
                     _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
                                       session, new_player, typeclass,
-                                      default_home, permissions)
+                                      default_home, permissions, nickname)
                 # tell the caller everything went well.
                 # string = "A new account '%s' was created. Welcome!"
                 # if " " in playername:
@@ -507,7 +541,7 @@ def _create_player(session, playername, password, permissions, typeclass=None):
     return new_player
 
 
-def _create_character(character_key, level, session, new_player, typeclass, home, permissions):
+def _create_character(character_key, level, session, new_player, typeclass, home, permissions, nickname):
     """
     Helper function, creates a character based on a player's name.
     This is meant for Guest and MULTISESSION_MODE < 2 situations.
@@ -530,6 +564,12 @@ def _create_character(character_key, level, session, new_player, typeclass, home
         # If no description is set, set a default description
         if not new_character.db.desc:
             new_character.db.desc = "This is a Player."
+
+        # Add nickname
+        if not nickname:
+            nickname = character_key
+        new_character.set_nickname(nickname)
+        
         # We need to set this to have @ic auto-connect to this character
         new_player.db._last_puppet = new_character
     except Exception, e:

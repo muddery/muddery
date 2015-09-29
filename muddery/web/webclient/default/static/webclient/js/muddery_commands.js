@@ -26,9 +26,9 @@ var commands = {
     // functions when user click a button
     // login
     doLogin : function() {
-        var playername = $("#page_login :text").val();
-        var password = $("#page_login :password").val();
-        $("#page_login :password").val("");
+        var playername = $("#login_name").val();
+        var password = $("#login_password").val();
+        $("#login_password").val("");
         
         var args = {"playername" : playername,
                     "password" : password};
@@ -37,11 +37,13 @@ var commands = {
 
     // register
     doRegister : function() {
-        var playername = $("#page_login :text").val();
-        var password = $("#page_login :password").val();
-        $("#page_login :password").val("");
+        var playername = $("#reg_name").val();
+        var nickname = $("#reg_nickname").val();
+        var password = $("#reg_password").val();
+        $("#reg_password").val("");
 
         var args = {"playername" : playername,
+                    "nickname" : nickname,
                     "password" : password};
         sendCommand(this.cmdString("create_connect", args));
     },

@@ -241,6 +241,13 @@ class MudderyObject(DefaultObject):
             self.flush_from_cache()
 
 
+    def get_name(self):
+        """
+        Get player character's name.
+        """
+        return self.name
+
+
     def set_alias(self, aliases):
         """
         Set object's alias.
