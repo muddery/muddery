@@ -79,6 +79,9 @@
                 <li id="tab_login" style="display: none">
                     <a href="#" onclick="webclient.showPage('login')">Login</a>
                 </li>
+                <li id="tab_register" style="display: none">
+                    <a href="#" onclick="webclient.showPage('register')">Register</a>
+                </li>
                 <li id="tab_room" style="display: none">
                     <a href="#" onclick="webclient.showPage('room')">Room</a>
                 </li>
@@ -107,15 +110,48 @@
         </nav>
         <div id="tab_content">
             <form id="page_login" style="display: none">
-                <div>Please login or register.</div>
-                <div>
-                    <input type="text" class="input_text" value="" autocomplete="off"/>
-                </div>
-                <div>
-                    <input type="password" class="input_text" value="" autocomplete="off"/>
-                </div>
+                <div>Please login.</div>
+                <table>
+                    <tr>
+                        <td>NAME: </td>
+                        <td>
+                            <input id="login_name" type="text" class="input_text" value="" autocomplete="off"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>PASSWORD: </td>
+                        <td>
+                            <input id="login_password" type="password" class="input_text" value="" autocomplete="off"/>
+                        </td>
+                    </tr>
+                </table>
                 <div>
                     <input type="button" class="btn button_left" value="LOGIN" onclick="commands.doLogin()"/>
+                </div>
+            </form>
+            <form id="page_register" style="display: none">
+                <div>Please register.</div>
+                <table>
+                    <tr>
+                        <td>NAME: </td>
+                        <td>
+                            <input id="reg_name" type="text" class="input_text" value="" autocomplete="off"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>NICKNAME: </td>
+                        <td>
+                            <input id="reg_nickname" type="text" class="input_text" value="" autocomplete="off"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>PASSWORD: </td>
+                        <td>
+                            <input id="reg_password" type="password" class="input_text" value="" autocomplete="off"/>
+                        </td>
+                    </tr>
+                </table>
+                <div>
                     <input type="button" class="btn button_left" value="REGISTER" onclick="commands.doRegister()"/>
                 </div>
             </form>

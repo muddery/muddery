@@ -186,7 +186,7 @@ class CombatHandler(DefaultScript):
         for character in self.db.characters.values():
             if character.is_alive():
                 winner.append({"dbref": character.dbref,
-                               "name": character.name})
+                               "name": character.get_name()})
         
         self.msg_all({"combat_finish": {"winner": winner}})
         
@@ -210,7 +210,7 @@ class CombatHandler(DefaultScript):
         
         for character in self.db.characters.values():
             info = {"dbref": character.dbref,
-                    "name": character.name,
+                    "name": character.get_name(),
                     "max_hp": character.max_hp,
                     "hp": character.db.hp}
             appearance["characters"].append(info)

@@ -44,7 +44,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         type = self.get_surrounding_type(moved_obj)
         if type:
             change = {type: [{"dbref":moved_obj.dbref,
-                              "name":moved_obj.name}]}
+                              "name":moved_obj.get_name()}]}
             self.msg_contents({"obj_moved_in":change}, exclude=moved_obj)
 
         # trigger event
@@ -67,7 +67,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         type = self.get_surrounding_type(moved_obj)
         if type:
             change = {type: [{"dbref":moved_obj.dbref,
-                             "name":moved_obj.name}]}
+                             "name":moved_obj.get_name()}]}
 
             self.msg_contents({"obj_moved_out":change}, exclude=moved_obj)
 
@@ -92,7 +92,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
             type = self.get_surrounding_type(cont)
             if type:
                 appearance = {"dbref":cont.dbref,
-                              "name":cont.name}
+                              "name":cont.get_name()}
 
                 if type == "npcs":
                     provide_quest, finish_quest = cont.have_quest(caller)

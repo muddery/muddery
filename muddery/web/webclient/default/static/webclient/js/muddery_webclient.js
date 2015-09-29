@@ -1020,6 +1020,7 @@ var webclient = {
     showUnloginTabs : function() {
         $("#tab_bar li").css("display", "none");
         
+        $("#tab_register").css("display", "");
         $("#tab_login").css("display", "");
         $("#tab_command").css("display", "");
     },

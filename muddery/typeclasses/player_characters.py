@@ -47,6 +47,16 @@ class MudderyPlayerCharacter(MudderyCharacter):
         return QuestHandler(self)
 
 
+    def at_object_creation(self):
+        """
+        Called once, when this object is first created. This is the
+        normal hook to overload for most object types.
+            
+        """
+        super(MudderyPlayerCharacter, self).at_object_creation()
+        self.db.nickname = ""
+
+
     def at_object_receive(self, moved_obj, source_location):
         """
         Called after an object has been moved into this object.
@@ -106,7 +116,35 @@ class MudderyPlayerCharacter(MudderyCharacter):
                    "quests": self.quest.return_quests()}
 
         self.msg(message)
+
+
+    def set_nickname(self, nickname):
+        """
+        Set player character's nickname.
+        """
+        self.db.nick_name = nickname
+
+
+    def get_name(self):
+        """
+        Get player character's name.
+        """
+        return self.db.nick_name
+
+
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        # get name and description
+        info = {"dbref": self.dbref,
+                "name": self.get_name(),
+                "desc": self.db.desc,
+                "cmds": self.get_available_commands(caller)}
     
+        return info
+
     
     def show_location(self):
         """

@@ -1,2 +1,2 @@
-character,level,max_exp,max_hp,max_mp
-player,1,1,1,1
+character,level,max_exp,max_hp,max_mp,attack,defence
+player,1,1,1,1,1,1
