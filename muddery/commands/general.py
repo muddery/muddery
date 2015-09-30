@@ -632,9 +632,9 @@ class CmdDialogue(Command):
         if sentences:
             speaker = sentences[0]["speaker"];
             if speaker == "n":
-                speaker = npc.name
+                speaker = npc.get_name()
             elif speaker == "p":
-                speaker = caller.name
+                speaker = caller.get_name()
             elif speaker[0] == '"' and speaker[-1] == '"':
                 speaker = speaker[1:-1]
 

@@ -85,7 +85,8 @@ class MudderyObject(DefaultObject):
         """
         # Call hook on source location
         if source_location:
-            source_location.at_object_left(moved_obj, moved_obj.location)
+            if source_location != self:
+                source_location.at_object_left(moved_obj, moved_obj.location)
 
 
     def at_object_left(self, moved_obj, target_location):

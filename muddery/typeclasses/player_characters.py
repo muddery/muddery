@@ -8,6 +8,7 @@ creation commands.
 
 """
 
+import traceback
 from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.characters import MudderyCharacter
@@ -114,8 +115,26 @@ class MudderyPlayerCharacter(MudderyCharacter):
                    "inventory": self.return_inventory(),
                    "skills": self.return_skills(),
                    "quests": self.quest.return_quests()}
-
         self.msg(message)
+
+        # notify its location
+        if self.location:
+            change = {"dbref": self.dbref,
+                      "name": self.get_name()}
+            self.location.msg_contents({"player_online":change}, exclude=self)
+
+
+    def at_pre_unpuppet(self):
+        """
+        Called just before beginning to un-connect a puppeting from
+        this Player.
+        
+        """
+        # notify its location
+        if self.location:
+            change = {"dbref": self.dbref,
+                      "name": self.get_name()}
+            self.location.msg_contents({"player_offline":change}, exclude=self)
 
 
     def set_nickname(self, nickname):
@@ -142,10 +161,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 "name": self.get_name(),
                 "desc": self.db.desc,
                 "cmds": self.get_available_commands(caller)}
-    
+
         return info
 
-    
+
     def show_location(self):
         """
         show character's location
