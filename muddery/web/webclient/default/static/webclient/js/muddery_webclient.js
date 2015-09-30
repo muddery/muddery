@@ -82,6 +82,12 @@ var webclient = {
                 else if (key == "obj_moved_out") {
                     this.displayObjMovedOut(data[key]);
                 }
+                else if (key == "player_online") {
+                    this.displayPlayerOnline(data[key]);
+                }
+                else if (key == "player_offline") {
+                    this.displayPlayerOffline(data[key]);
+                }
                 else if (key == "look_obj") {
                     this.displayLookObj(data[key]);
                 }
@@ -452,6 +458,36 @@ var webclient = {
         }
     },
     
+    displayPlayerOnline : function(data) {
+        var page = $("#room_players");
+        page.css("display", "");
+
+        try {
+            element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
+            element += " cmd_name='look'";
+            element += " cmd_args='" + data["dbref"] + "'";
+            element += " dbref='" + data["dbref"] + "'>";
+            element += data["name"];
+            element += "</a>";
+            page.append(element);
+        }
+        catch(error) {
+        }
+    },
+    
+    displayPlayerOffline : function(data) {
+        var page = $("#room_players");
+        try {
+            page.find("a[dbref=" + data["dbref"] + "]").remove();
+        }
+        catch(error) {
+        }
+        
+        if (page.find("a").length == 0) {
+            page.css("display", "none");
+        }
+    },
+
     displayLookObj : function(data) {
         this.doCloseBox();
         this.createMessageBox();

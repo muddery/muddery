@@ -5,6 +5,7 @@ Rooms are simple containers that has no location of their own.
 
 """
 
+import traceback
 from django.conf import settings
 from muddery.typeclasses.objects import MudderyObject
 from evennia.objects.objects import DefaultRoom
@@ -43,9 +44,9 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         # send surrounding changes to player
         type = self.get_surrounding_type(moved_obj)
         if type:
-            change = {type: [{"dbref":moved_obj.dbref,
-                              "name":moved_obj.get_name()}]}
-            self.msg_contents({"obj_moved_in":change}, exclude=moved_obj)
+            change = {type: [{"dbref": moved_obj.dbref,
+                              "name": moved_obj.get_name()}]}
+            self.msg_contents({"obj_moved_in": change}, exclude=moved_obj)
 
         # trigger event
         if moved_obj.has_player:
@@ -66,10 +67,9 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         # send surrounding changes to player
         type = self.get_surrounding_type(moved_obj)
         if type:
-            change = {type: [{"dbref":moved_obj.dbref,
-                             "name":moved_obj.get_name()}]}
-
-            self.msg_contents({"obj_moved_out":change}, exclude=moved_obj)
+            change = {type: [{"dbref": moved_obj.dbref,
+                              "name": moved_obj.get_name()}]}
+            self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
 
 
     def get_surroundings(self, caller):
