@@ -41,6 +41,13 @@ class EventHandler(object):
     def at_character_move_in(self, character):
         """
         """
+        if not character:
+            return
+
+        if character.player.is_superuser:
+            # ban events on suerusers
+            return
+
         if defines.EVENT_TRIGGER_ARRIVE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_ARRIVE]:
                 event["function"](event["data"], character)
