@@ -150,11 +150,12 @@ class CombatHandler(DefaultScript):
             target = self.db.characters[target]
 
         try:
-            result = caller.skill.cast_skill(skill, target)
+            result, cd = caller.skill.cast_skill(skill, target)
             if result:
-                self.msg_all_combat_process(result)
+                self.msg_all_combat_skill(result, cd, caller)
         except Exception, e:
             print "Can not cast skill %s: %s" % (skill, e)
+            print traceback.format_exc()
             return False
 
         alive = 0
@@ -173,6 +174,17 @@ class CombatHandler(DefaultScript):
         """
         Start a combat, make all NPCs to cast skills automatically.
         """
+        if self.db.characters:
+            alive = 0
+            for character in self.db.characters.values():
+                if character.is_alive():
+                    alive += 1
+
+            if alive < 2:
+                # if we have less than 2 characters alive, kill this handler
+                self.finish()
+                return
+
         for character in self.db.characters.values():
             if not character.has_player:
                 character.skill.start_auto_combat_skill()
@@ -235,6 +247,19 @@ class CombatHandler(DefaultScript):
         for character in self.db.characters.values():
             if character.has_player:
                 character.msg({"combat_process": process})
+
+
+    def msg_all_combat_skill(self, result, cd, caller):
+        """
+        Send combat skill result to all player characters.
+        """
+        for character in self.db.characters.values():
+            if character.has_player:
+                if character == caller:
+                    character.msg({"combat_process": result,
+                                   "combat_skill_cd": cd})
+                else:
+                    character.msg({"combat_process": result})
 
 
     def msg_all_combat_info(self):

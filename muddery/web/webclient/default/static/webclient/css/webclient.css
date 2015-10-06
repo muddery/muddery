@@ -876,3 +876,47 @@ combat
 	position: absolute;
 	bottom: 22px;
 }
+
+/* combat button */
+
+div.btn-combat {
+	position: absolute;
+    bottom: 22px;
+	padding: 4px 12px;
+	margin-bottom: 0;
+	font-size: 13px;
+	line-height: 18px;
+	text-align: center;
+	vertical-align: middle;
+	text-shadow: 0 1px 1px rgba(255,255,255,0.75);
+	border: 1px solid white;
+	width: 60px;
+    height: 18px;
+	cursor: pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+div.btn-combat:hover {
+	text-decoration: underline;
+}
+
+div.btn-combat.disabled, div.button.disabled:hover {
+	cursor: default;
+	border-color: #b2b2b2;
+	color: #b2b2b2;
+	text-decoration: none;
+}
+
+div.btn-combat div.cooldown {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: -1;
+	height: 100%;
+	background-color: #666666;
+}
