@@ -127,6 +127,9 @@ var webclient = {
                 else if (key == "combat_process") {
                     combat.displayCombatProcess(data[key]);
                 }
+                else if (key == "combat_skill_cd") {
+                    combat.displaySkillCD(data[key]);
+                }
                 else if (key == "login") {
                     this.onLogin(data[key]);
                 }

@@ -7,6 +7,7 @@ var combat = {
     _current_target: null,
     _finished: false,
     _result: null,
+    _skill_cd_time: {},
     
     setSelf: function(dbref) {
         this._self_dbref = dbref;
@@ -29,7 +30,7 @@ var combat = {
         webclient.doSetSizes();
     },
 
-    
+
     finishCombat: function(data) {
         this._finished = true;
         this._result = data;
@@ -123,16 +124,18 @@ var combat = {
     displayCombatCommands: function(data) {
         var commands = $('#combat_commands');
         if (commands) {
-            var content = $('<div>');
+            var content = $('<div>').attr('id', 'combat_btns');
             for (var i in data) {
                 var command = data[i];
-                var button = $('<input>').addClass('btn')
-                                         .addClass('btn-combat')
+                var button = $('<div>').addClass('btn-combat')
                                          .attr('type', 'button')
                                          .attr('key', command.key)
+                                         .attr('id', 'combat_btn_' + command.key)
                                          .attr('onclick', 'combat.doCombatSkill(this); return false;')
                                          .css({'left': 20 + i * 60})
-                                         .val(command.name);
+                                         .text(command.name);
+                
+                button.append($("<div>").addClass('cooldown'));
                 
                 button.appendTo(content);
             }
@@ -194,10 +197,57 @@ var combat = {
         */
     },
 
+
+    displaySkillCD: function(data) {
+        // set skill's cd
+        var cd = data["cd"];
+        var key = data["skill"];
+        var btn = $('#combat_btn_' + key);
+        this.set_button_cd(btn, cd);
+                
+        var gcd = data["gcd"];
+        $('#combat_btns').each(function(){
+            combat.set_button_cd($(this), cd);
+        });
+    },
+
+
+    set_button_cd: function(btn, cd) {
+        var key = btn.attr('key');
+        var current_time = (new Date()).valueOf();
+        var cd_time = current_time + cd * 1000;
+
+        var current_cd_time = combat._skill_cd_time[key];
+        if (!current_cd_time) {
+            current_cd_time = 0;
+        }
+
+        if (current_cd_time >= cd_time) {
+            return;
+        }
+
+        $('div.cooldown', btn).stop(true, true);
+        if (current_cd_time < current_time) {
+            $('div.cooldown', btn).width('100%');
+        }
+        $('div.cooldown', btn).animate({width: '0%'}, cd * 1000, 'linear');
+
+        combat._skill_cd_time[key] = cd_time;
+    },
+
     
     doCombatSkill: function(caller) {
         if (this._finished) {
             return;
+        }
+
+        var key = $(caller).attr('key');
+        var cd_time = this._skill_cd_time[key];
+        if (cd_time) {
+            var current_time = (new Date()).valueOf();
+            if (cd_time > current_time) {
+                return;
+            }
         }
 
         commands.doCombatSkill(caller)

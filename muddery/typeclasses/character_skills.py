@@ -5,6 +5,7 @@ skills
 
 import time
 import traceback
+from django.conf import settings
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
@@ -55,35 +56,41 @@ class MudderySkill(MudderyObject):
         """
         Cast this skill.
         """
+        owner = self.db.owner
+
         if self.passive:
-            if self.db.owner:
-                self.db.owner.msg({"alert":LS("You can not cast a passive skill.")})
+            if owner:
+                owner.msg({"alert":LS("You can not cast a passive skill.")})
             return
 
         self.db.target = target
 
         if self.cd > 0:
             if time.time() < self.db.cd_end_time:
-                if self.db.owner:
-                    self.db.owner.msg({"msg":LS("This skill is not ready yet!")})
+                if owner:
+                    owner.msg({"msg":LS("This skill is not ready yet!")})
                 return
 
         try:
             function = getattr(skills, self.get_info_key())
-            result = function(self.db.owner, self.db.target, effect=self.effect)
+            result = function(owner, self.db.target, effect=self.effect)
 
             # set cd
             if self.cd > 0:
                 self.db.cd_end_time = time.time() + self.cd
+
+            cd_info = {"skill": self.get_info_key(),
+                       "cd": self.cd,
+                       "gcd": settings.GLOBAL_CD}
         except Exception, e:
             ostring = "Can not cast skill %s: %s" % (self.get_info_key(), e)
             logger.log_errmsg(ostring)
             print traceback.format_exc()
-            if self.db.owner:
-                self.db.owner.msg({"msg":LS("Can not cast this skill!")})
+            if owner:
+                owner.msg({"msg": LS("Can not cast this skill!")})
             return
 
-        return result
+        return result, cd_info
 
 
     def is_cooling_down(self):
