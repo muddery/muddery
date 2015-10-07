@@ -178,12 +178,14 @@ class MudderyPlayerCharacter(MudderyCharacter):
     def receive_objects(self, obj_list):
         """
         Receive objects.
-        obj_list: (dict) a list of object keys and there numbers.
+        obj_list: (list) a list of object keys and there numbers.
+                  .object object's key
+                  .number object's number
         """
         accepted_keys = {}
         accepted_names = {}
         rejected_keys = {}
-        rejected_names = {}
+        reject_reason = {}
 
         # check what the character has now
         inventory = {}
@@ -197,8 +199,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
             else:
                 inventory[key] = item
 
-        for key in obj_list:
-            number = obj_list[key]
+        for obj in obj_list:
+            key = obj["object"]
+            available = obj["number"]
+            number = available
             accepted = 0
             name = ""
             unique = False
@@ -220,14 +224,17 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     accepted += add
 
             # if does not have this kind of object, or stack is full
+            reason = ""
             while number > 0:
                 if unique:
                     # can not have more than one unique objects
+                    reason = LS("Can not get more %s.") % name
                     break
                         
                 # create a new content
                 new_obj = build_object(key)
                 if not new_obj:
+                    reason = LS("Can not get %s.") % name
                     break
 
                 name = new_obj.name
@@ -236,6 +243,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 # move the new object to the character
                 if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
                     new_obj.delete()
+                    reason = LS("Can not get %s.") % name
                     break
 
                 add = number
@@ -253,13 +261,13 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 accepted_keys[key] = accepted
                 accepted_names[name] = accepted
 
-            if accepted < obj_list[key]:
-                rejected_keys[key] = obj_list[key] - accepted
-                rejected_names[name] = obj_list[key] - accepted
+            if accepted < available:
+                rejected_keys[key] = available - accepted
+                reject_reason[name] = reason
 
         message = {"get_object":
                         {"accepted": accepted_names,
-                         "rejected": rejected_names}}
+                         "rejected": reject_reason}}
         self.msg(message)
         self.show_inventory()
 
@@ -349,7 +357,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         if not obj.location == self:
             self.msg({"alert":"You do not have that equipment."})
-            return
+            return False
 
         type = obj.type
         position = obj.position
@@ -357,7 +365,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         if not EQUIP_TYPE_HANDLER.can_equip(type, career):
             self.msg({"alert":"Can not equip that equipment."})
-            return
+            return False
 
         # take off old equipment
         if self.db.equipments[position]:
@@ -373,6 +381,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         # reset character's attributes
         self.refresh_data()
+        
+        return True
 
 
     def take_off_position(self, position):

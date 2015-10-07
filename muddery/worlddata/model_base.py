@@ -1,5 +1,6 @@
 from django.db import models
 
+KEY_LENGTH = 255
 
 #------------------------------------------------------------
 #
@@ -9,9 +10,9 @@ from django.db import models
 class world_rooms(models.Model):
     "Store all unique rooms."
 
-    key = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    typeclass = models.CharField(max_length=255)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    name = models.CharField(max_length=KEY_LENGTH)
+    typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
     attributes = models.TextField(blank=True)
 
@@ -30,13 +31,13 @@ class world_rooms(models.Model):
 class world_exits(models.Model):
     "Store all unique exits."
 
-    key = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    typeclass = models.CharField(max_length=255)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    name = models.CharField(max_length=KEY_LENGTH)
+    typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
     verb = models.TextField(blank=True)
-    location = models.CharField(max_length=255, blank=True)
-    destination = models.CharField(max_length=255, blank=True)
+    location = models.CharField(max_length=KEY_LENGTH, blank=True)
+    destination = models.CharField(max_length=KEY_LENGTH, blank=True)
     attributes = models.TextField(blank=True)
 
     class Meta:
@@ -54,11 +55,11 @@ class world_exits(models.Model):
 class world_objects(models.Model):
     "Store all unique objects."
 
-    key = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    typeclass = models.CharField(max_length=255)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    name = models.CharField(max_length=KEY_LENGTH)
+    typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
-    location = models.CharField(max_length=255, blank=True)
+    location = models.CharField(max_length=KEY_LENGTH, blank=True)
     attributes = models.TextField(blank=True)
 
     class Meta:
@@ -73,16 +74,10 @@ class world_objects(models.Model):
 # store all object creaters
 #
 #------------------------------------------------------------
-class object_creaters(models.Model):
+class object_creaters(world_objects):
     "Store all object creaters."
 
-    key = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    typeclass = models.CharField(max_length=255)
-    desc = models.TextField(blank=True)
-    location = models.CharField(max_length=255, blank=True)
-    attributes = models.TextField(blank=True)
-    obj_list = models.TextField(blank=True)
+    verb = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -93,15 +88,36 @@ class object_creaters(models.Model):
 
 #------------------------------------------------------------
 #
+# store objects loot list
+#
+#------------------------------------------------------------
+class object_loot_list(models.Model):
+    "Store all object creaters."
+
+    provider = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    object = models.CharField(max_length=KEY_LENGTH)
+    number = models.IntegerField(blank=True, default=0)
+    odds = models.FloatField(blank=True, default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Object Creater"
+        verbose_name_plural = "Object Creaters"
+        unique_together = ("provider", "object")
+
+
+#------------------------------------------------------------
+#
 # store all common objects
 #
 #------------------------------------------------------------
 class common_objects(models.Model):
     "Store all common objects."
 
-    key = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    typeclass = models.CharField(max_length=255)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    name = models.CharField(max_length=KEY_LENGTH)
+    typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
     max_stack = models.IntegerField(blank=True, default=1)
     unique = models.BooleanField(blank=True, default=False)
@@ -123,10 +139,10 @@ class common_objects(models.Model):
 class equipment_types(models.Model):
     "Store all equip types."
 
-    type = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
+    type = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    name = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
-    career = models.CharField(max_length=255, blank=True)
+    career = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -143,8 +159,8 @@ class equipment_types(models.Model):
 class equipments(common_objects):
     "Store all equipments."
 
-    position = models.CharField(max_length=255, blank=True)
-    type = models.CharField(max_length=255, blank=True)
+    position = models.CharField(max_length=KEY_LENGTH, blank=True)
+    type = models.CharField(max_length=KEY_LENGTH, blank=True)
     attack = models.IntegerField(blank=True, default=0)
     defence = models.IntegerField(blank=True, default=0)
 
@@ -163,11 +179,11 @@ class equipments(common_objects):
 class world_npcs(models.Model):
     "Store all NPCs."
 
-    key = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    typeclass = models.CharField(max_length=255)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    name = models.CharField(max_length=KEY_LENGTH)
+    typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
-    location = models.CharField(max_length=255, blank=True)
+    location = models.CharField(max_length=KEY_LENGTH, blank=True)
     attributes = models.TextField(blank=True)
 
     class Meta:
@@ -185,9 +201,9 @@ class world_npcs(models.Model):
 class common_characters(models.Model):
     "Store common characters."
 
-    key = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    typeclass = models.CharField(max_length=255)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    name = models.CharField(max_length=KEY_LENGTH)
+    typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
 
     class Meta:
@@ -205,14 +221,14 @@ class common_characters(models.Model):
 class skills(models.Model):
     "Store all skills."
 
-    key = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-    typeclass = models.CharField(max_length=255)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    name = models.CharField(max_length=KEY_LENGTH)
+    typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
     cd = models.IntegerField(blank=True, default=0)
     passive = models.BooleanField(blank=True, default=False)
     condition = models.TextField(blank=True)
-    function = models.CharField(max_length=255)
+    function = models.CharField(max_length=KEY_LENGTH)
     effect = models.FloatField(blank=True, default=0)
 
     class Meta:
@@ -230,9 +246,9 @@ class skills(models.Model):
 class quests(models.Model):
     "Store all quests."
     
-    key = models.CharField(max_length=255, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
     name = models.TextField(blank=True)
-    typeclass = models.CharField(max_length=255)
+    typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
     condition = models.TextField(blank=True)
     action = models.TextField(blank=True)
@@ -255,7 +271,7 @@ class quest_objectives(models.Model):
     quest = models.ForeignKey("quests", db_index=True)
     ordinal = models.IntegerField()
     type = models.IntegerField()
-    object = models.CharField(max_length=255)
+    object = models.CharField(max_length=KEY_LENGTH)
     number = models.IntegerField(blank=True, default=0)
 
     class Meta:
@@ -293,7 +309,7 @@ class quest_dependency(models.Model):
 class event_data(models.Model):
     "Store event data."
 
-    key = models.CharField(max_length=255, db_index=True)
+    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
     trigger = models.IntegerField()
     type = models.IntegerField()
 
@@ -312,7 +328,7 @@ class event_data(models.Model):
 class dialogues(models.Model):
     "Store all dialogues."
 
-    key = models.CharField(max_length=255, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
     condition = models.TextField(blank=True)
     have_quest = models.ForeignKey("quests", null=True, blank=True)
 
@@ -351,7 +367,7 @@ class dialogue_sentences(models.Model):
 
     dialogue = models.ForeignKey("dialogues", db_index=True)
     ordinal = models.IntegerField()
-    speaker = models.CharField(max_length=255, blank=True)
+    speaker = models.CharField(max_length=KEY_LENGTH, blank=True)
     content = models.TextField(blank=True)
     action = models.TextField(blank=True)
     provide_quest = models.ForeignKey("quests", null=True, blank=True)
@@ -409,7 +425,7 @@ class dialogue_quest_dependency(models.Model):
 class character_level(models.Model):
     "Store all character level informations."
 
-    character = models.CharField(max_length=255, db_index=True)
+    character = models.CharField(max_length=KEY_LENGTH, db_index=True)
     level = models.IntegerField()
     max_exp = models.IntegerField()
     max_hp = models.IntegerField()
@@ -433,7 +449,7 @@ class character_level(models.Model):
 class character_skill(models.Model):
     "Store all character skill informations."
 
-    character = models.CharField(max_length=255, db_index=True)
+    character = models.CharField(max_length=KEY_LENGTH, db_index=True)
     skill = models.ForeignKey("skills")
 
     class Meta:
@@ -452,8 +468,8 @@ class character_skill(models.Model):
 class event_mobs(models.Model):
     "Store all event mobs."
 
-    key = models.CharField(max_length=255, db_index=True)
-    mob = models.CharField(max_length=255)
+    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    mob = models.CharField(max_length=KEY_LENGTH)
     level = models.IntegerField()
     odds = models.FloatField(blank=True, default=0)
 

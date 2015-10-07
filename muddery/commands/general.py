@@ -687,6 +687,7 @@ class CmdLoot(Command):
         except Exception, e:
             ostring = "Can not loot %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
+            logger.log_errmsg(traceback.format_exc())
 
 
 #------------------------------------------------------------
@@ -764,7 +765,8 @@ class CmdEquip(Command):
             return
 
         try:
-            caller.equip_object(obj)
+            if not caller.equip_object(obj):
+                return
         except Exception, e:
             caller.msg({"alert":LS("Can not equip %s.") % obj.name})
             return

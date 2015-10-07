@@ -721,7 +721,6 @@ var webclient = {
                     if (count > 0) {
                         content += "<br>"
                     }
-                    content += "You can not get:<br>";
                     first = false;
                 }
                 content += element;

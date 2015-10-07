@@ -44,6 +44,16 @@ class object_creaters(model_base.object_creaters):
 
 #------------------------------------------------------------
 #
+# store objects loot list
+#
+#------------------------------------------------------------
+class object_loot_list(model_base.object_loot_list):
+    "Store all object creaters."
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all common objects
 #
 #------------------------------------------------------------
