@@ -136,9 +136,6 @@ WORLD_DATA_FILE_ENCODING = "utf8"
 # add data app
 INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 
-# unique objects
-WORLD_OBJECTS += ("object_creaters",)
-
 # common objects
 COMMON_OBJECTS += ("foods", "equipments",)
 
@@ -150,7 +147,8 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       COMMON_OBJECTS)
 
 # all other data models
-OTHER_DATA_MODELS = (QUEST_OBJECTIVES,
+OTHER_DATA_MODELS = (OBJECT_LOOT_LIST,
+                     QUEST_OBJECTIVES,
                      QUEST_DEPENDENCY,
                      EVENT_DATA,
                      EVENT_MOBS,

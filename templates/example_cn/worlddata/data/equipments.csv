@@ -1,4 +1,4 @@
-key,name,typeclass,desc,max_stack,unique,effect,position,type,attack,defence
-equip_01,Hat,typeclasses.common_objects.Equipment,This is a hat.,1,0,,head,cloth,,10
-equip_02,Helm,typeclasses.common_objects.Equipment,This is a helm.,1,1,,head,plate,,40
-weapon_01,Knife,typeclasses.common_objects.Equipment,This is a small knife.,1,0,,hand,dagger,10,
+key,name,typeclass,desc,max_stack,unique,position,type,attack,defence
+equip_01,Hat,typeclasses.common_objects.Equipment,This is a hat.,1,0,head,cloth,,10
+equip_02,Helm,typeclasses.common_objects.Equipment,This is a helm.,1,1,head,plate,,40
+weapon_wood_stick,木棍,typeclasses.common_objects.Equipment,这条木棍不粗，但感觉挺结实的。,1,1,hand,weapon,10,

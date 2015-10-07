@@ -1,0 +1,3 @@
+provider,object,number,odds
+creator_01,Treasure Chest,typeclasses.object_creaters.ObjectCreater,This is a treasure chest!,room_01,"food_01:3,food_02:3,equip_01:1"
+creator_02,Weapon Rack,typeclasses.object_creaters.ObjectCreater,This is a weapon rack!,room_01,"equip_02:1,weapon_01:1"

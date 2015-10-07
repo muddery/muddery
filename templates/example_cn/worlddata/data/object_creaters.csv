@@ -1,1 +1,2 @@
-key,name,typeclass,location,desc,obj_list
+key,name,typeclass,desc,location,verb
+creator_alley_box_01,木箱,typeclasses.object_creaters.ObjectCreater,一个木箱,room_colorfulworld_alley,检查

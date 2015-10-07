@@ -108,14 +108,32 @@ var webclient = {
                 else if (key == "get_object") {
                     this.displayGetObject(data[key]);
                 }
-                else if (key == "show_combat") {
-                    this.displayCombat(data[key]);
+                else if (key == "joined_combat") {
+                    combat.createCombat(data[key]);
+                }
+                else if (key == "combat_finish") {
+                    combat.finishCombat(data[key]);
+                }
+                else if (key == "combat_info") {
+                    combat.displayCombatInfo(data[key]);
+                }
+                else if (key == "combat_commands") {
+                    combat.displayCombatCommands(data[key]);
+                }
+                else if (key == "combat_process") {
+                    combat.displayCombatProcess(data[key]);
+                }
+                else if (key == "combat_skill_cd") {
+                    combat.displaySkillCD(data[key]);
                 }
                 else if (key == "login") {
                     this.onLogin(data[key]);
                 }
                 else if (key == "logout") {
                     this.onLogout(data[key]);
+                }
+                else if (key == "puppet") {
+                    this.onPuppet(data[key]);
                 }
                 else {
                     this.displayMsg(data[key]);
@@ -667,7 +685,6 @@ var webclient = {
                     if (count > 0) {
                         content += "<br>"
                     }
-                    content += "You can not get:<br>";
                     first = false;
                 }
                 content += element;
