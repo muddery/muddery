@@ -813,6 +813,8 @@ class CmdTakeOff(Command):
             caller.take_off_object(obj)
         except Exception, e:
             caller.msg({"alert":LS("Can not take off %s.") % obj.name})
+            logger.log_errmsg("Can not take off %s: %s" % (obj.name, e))
+            logger.log_errmsg(traceback.format_exc())
             return
 
         message = {"alert": LS("Took off!"),
@@ -950,3 +952,48 @@ class CmdCombatSkill(Command):
         If the character is not in combat, ignore this command.
         """
         pass
+
+        
+#------------------------------------------------------------
+# unlock exit
+#------------------------------------------------------------
+
+class CmdUnlockExit(Command):
+    """
+    Unlock an exit.
+
+    Usage:
+        {"cmd":"unlock_exit",
+         "args":<object's dbref>
+        }
+
+    """
+    key = "unlock_exit"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Take off an equipment."
+        caller = self.caller
+
+        if not self.args:
+            caller.msg({"alert":LS("You should unlock something.")})
+            return
+
+        obj = caller.search(self.args, location=caller)
+        if not obj:
+            caller.msg({"alert":LS("Can not find this exit.")})
+            return
+
+        try:
+            if not caller.unlock_exit(obj):
+                caller.msg({"alert":LS("Can not open this exit.") % obj.name})
+                return
+        except Exception, e:
+            caller.msg({"alert": LS("Can not open this exit.")})
+            logger.log_errmsg("Can not open exit %s: %s" % (obj.name, e))
+            logger.log_errmsg(traceback.format_exc())
+            return
+
+        appearance = obj.get_appearance(caller)
+        caller.msg({"look_obj": appearance})

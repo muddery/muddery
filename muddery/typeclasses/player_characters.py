@@ -56,6 +56,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         super(MudderyPlayerCharacter, self).at_object_creation()
         self.db.nickname = ""
+        self.db.unlocked_exits = set()
 
 
     def at_object_receive(self, moved_obj, source_location):
@@ -299,6 +300,15 @@ class MudderyPlayerCharacter(MudderyCharacter):
         return inv
 
 
+    def have_object(self, obj_key):
+        """
+        """
+        for item in self.contents:
+            if item.get_info_key() == obj_key:
+                return True
+        return False
+
+
     def show_status(self):
         """
         Send status to player.
@@ -399,7 +409,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.db.equipments[position] = None
 
         # reset character's attributes
-        self.after_equipment_changed()
+        self.refresh_data()
 
 
     def take_off_object(self, obj):
@@ -414,7 +424,30 @@ class MudderyPlayerCharacter(MudderyCharacter):
         obj.equipped = False
 
         # reset character's attributes
-        self.after_equipment_changed()
+        self.refresh_data()
+
+
+    def unlock_exit(self, exit):
+        """
+        Unlock an exit.
+        """
+        exit_key = exit.get_info_key()
+        if self.is_exit_unlocked(exit_key):
+            return True
+
+        if not exit.can_unlock(self):
+            self.msg({"msg": LS("Can not open this exit.")})
+            return False
+
+        self.db.unlocked_exits.add(exit_key)
+        return True
+
+
+    def is_exit_unlocked(self, exit_key):
+        """
+        Whether the exit is unlocked.
+        """
+        return exit_key in self.db.unlocked_exits
 
 
     def show_skills(self):
@@ -433,7 +466,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         for key in self.db.skills:
             skill = self.db.skills[key]
             info = {"dbref": skill.dbref,
-                    "name": skill.name,
+                    "name": skill.get_name(),
                     "desc": skill.db.desc}
             skills.append(info)
 

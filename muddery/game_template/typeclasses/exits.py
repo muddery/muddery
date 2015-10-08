@@ -7,6 +7,7 @@ for allowing Characters to traverse the exit to its destination.
 
 """
 from muddery.typeclasses.exits import MudderyExit
+from muddery.typeclasses.exits import MudderyLockedExit
 
 class Exit(MudderyExit):
     """
@@ -30,5 +31,12 @@ class Exit(MudderyExit):
         at_failed_traverse(traveller) - called if traversal failed for some reason. Will
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
+    """
+    pass
+
+
+class LockedExit(MudderyLockedExit):
+    """
+    Exit with lock.
     """
     pass

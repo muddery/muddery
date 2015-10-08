@@ -55,7 +55,7 @@ class world_exits(models.Model):
 class exit_locks(models.Model):
     "Store all exit locks."
 
-    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
     condition = models.TextField(blank=True)
     verb = models.TextField(blank=True)
     message_lock = models.TextField(blank=True)

@@ -13,6 +13,8 @@ from muddery.utils import script_handler
 from muddery.utils.localized_strings_handler import LS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultExit
+from django.conf import settings
+from django.db.models.loading import get_model
 
 
 class MudderyExit(MudderyObject, DefaultExit):
@@ -68,29 +70,59 @@ class MudderyExit(MudderyObject, DefaultExit):
         return commands
 
 
-class MudderyLockedExit(MudderyObject, DefaultExit):
+class MudderyLockedExit(MudderyExit):
     """
     """
     def load_data(self):
         """
         Set data_info to the object."
         """
-        super(MudderyObjectCreater, self).load_data()
+        super(MudderyLockedExit, self).load_data()
 
-        lock_list = []
         try:
             model_obj = get_model(settings.WORLD_DATA_APP, settings.EXIT_LOCKS)
-            lock_records = model_obj.objects.filter(key=self.get_info_key())
+            lock_record = model_obj.objects.get(key=self.get_info_key())
 
-            for lock_record in lock_records:
-                lock = {"condition": lock_record.condition,
-                        "verb": lock_record.verb,
-                        "message_lock": lock_record.message_lock}
-                lock_list.append(lock)
+            lock = {"condition": lock_record.condition,
+                    "verb": lock_record.verb,
+                    "message_lock": lock_record.message_lock}
+            self.exit_lock = lock
         except Exception, e:
             print "Can't load lock info %s: %s" % (self.get_info_key(), e)
 
-        self.lock_list = lock_list
+
+    def can_unlock(self, caller):
+        """
+        Unlock an exit.
+        """
+        return script_handler.match_condition(caller, self.exit_lock["condition"])
+
+
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        # get name and description
+        if caller.is_exit_unlocked(self.get_info_key()):
+            return super(MudderyLockedExit, self).get_appearance(caller)
+
+        can_unlock = script_handler.match_condition(caller, self.exit_lock["condition"])
+        desc = self.exit_lock["message_lock"]
+
+        cmds = []
+        if can_unlock:
+            verb = self.exit_lock["verb"]
+            if not verb:
+                verb = LS("UNLOCK")
+            cmds = [{"name":verb, "cmd":"unlock_exit", "args":self.dbref}]
+        
+        info = {"dbref": self.dbref,
+                "name": self.name,
+                "desc": desc,
+                "cmds": cmds}
+                
+        return info
 
 
     def get_available_commands(self, caller):
@@ -98,16 +130,15 @@ class MudderyLockedExit(MudderyObject, DefaultExit):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        can_pass = True
-        for lock in self.lock_list:
-            if not script_handler.match_condition(lock["condition"]):
-                can_pass = False
-                break
-    
-        if can_pass:
-            verb = getattr(self, "verb", LS("GOTO"))
-            if not verb:
-                verb = LS("GOTO")
-            commands = [{"name":verb, "cmd":"goto", "args":self.dbref}]
+        if caller.is_exit_unlocked(self.get_info_key()):
+            return super(MudderyLockedExit, self).get_available_commands(caller)
 
-        return commands
+        cmds = []
+        can_unlock = script_handler.match_condition(caller, self.exit_lock["condition"])
+        if can_unlock:
+            verb = self.exit_lock["verb"]
+            if not verb:
+                verb = LS("UNLOCK")
+            cmds = [{"name":verb, "cmd":"unlock", "args":self.dbref}]
+
+        return cmds
