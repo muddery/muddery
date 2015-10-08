@@ -32,3 +32,7 @@ origin,local
 "LOOT","拾取"
 "Can not get more %s.","无法获取更多%s。"
 "Can not get %s.","无法获取%s。"
+"Can not open this exit.","无法打开通道。"
+"UNLOCK","打开"
+"You should unlock something.","你需要指定打开的东西。"
+"Can not find this exit.","无法找到这个出口。"
