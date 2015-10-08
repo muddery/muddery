@@ -1,2 +1,2 @@
 key,condition,verb,message_lock
-exit_colorfulworld_street_1,have_object("weapon_wood_stick"),移开障碍,通向大街的道路被一堆路障挡住了，找个工具移开它吧。
+exit_colorfulworld_street_1,have_object("weapon_wood_stick"),用力撬动,通向外面的道路被一块巨大的广告版堵住了，希望能找到合适的工具挪动它。

@@ -1,2 +1,2 @@
 key,name,typeclass,desc,location,verb
-creator_alley_box_01,木箱,typeclasses.object_creaters.ObjectCreater,一个木箱,room_colorfulworld_alley,检查
+creator_alley_pile_01,杂物堆,typeclasses.object_creaters.ObjectCreater,在小巷的一尽头杂乱地堆着一些木棍和木板,room_colorfulworld_alley,检查
