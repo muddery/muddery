@@ -1,0 +1,2 @@
+key,condition,verb,message_lock
+exit_colorfulworld_street_1,have_object("weapon_wood_stick"),移开障碍,通向大街的道路被一堆路障挡住了，找个工具移开它吧。

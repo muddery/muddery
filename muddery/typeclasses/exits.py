@@ -9,6 +9,7 @@ for allowing Characters to traverse the exit to its destination.
 
 from muddery.utils import utils
 from muddery.typeclasses.objects import MudderyObject
+from muddery.utils import script_handler
 from muddery.utils.localized_strings_handler import LS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultExit
@@ -63,5 +64,50 @@ class MudderyExit(MudderyObject, DefaultExit):
         if not verb:
             verb = LS("GOTO")
         commands = [{"name":verb, "cmd":"goto", "args":self.dbref}]
+
+        return commands
+
+
+class MudderyLockedExit(MudderyObject, DefaultExit):
+    """
+    """
+    def load_data(self):
+        """
+        Set data_info to the object."
+        """
+        super(MudderyObjectCreater, self).load_data()
+
+        lock_list = []
+        try:
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.EXIT_LOCKS)
+            lock_records = model_obj.objects.filter(key=self.get_info_key())
+
+            for lock_record in lock_records:
+                lock = {"condition": lock_record.condition,
+                        "verb": lock_record.verb,
+                        "message_lock": lock_record.message_lock}
+                lock_list.append(lock)
+        except Exception, e:
+            print "Can't load lock info %s: %s" % (self.get_info_key(), e)
+
+        self.lock_list = lock_list
+
+
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        "args" must be a string without ' and ", usually it is self.dbref.
+        """
+        can_pass = True
+        for lock in self.lock_list:
+            if not script_handler.match_condition(lock["condition"]):
+                can_pass = False
+                break
+    
+        if can_pass:
+            verb = getattr(self, "verb", LS("GOTO"))
+            if not verb:
+                verb = LS("GOTO")
+            commands = [{"name":verb, "cmd":"goto", "args":self.dbref}]
 
         return commands

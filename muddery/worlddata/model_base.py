@@ -49,6 +49,26 @@ class world_exits(models.Model):
 
 #------------------------------------------------------------
 #
+# store exit locks
+#
+#------------------------------------------------------------
+class exit_locks(models.Model):
+    "Store all exit locks."
+
+    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    condition = models.TextField(blank=True)
+    verb = models.TextField(blank=True)
+    message_lock = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Exit Lock"
+        verbose_name_plural = "Exit Locks"
+
+
+#------------------------------------------------------------
+#
 # store all objects
 #
 #------------------------------------------------------------
