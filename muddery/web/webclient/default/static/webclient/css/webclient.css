@@ -691,20 +691,20 @@ input[type="submit"].btn.btn-mini {
     border-bottom-color: #aaa;
 }
 
-.tab_pills {
+#tab_pills {
     display: table;
     padding: 0;
     margin: 0;
 }
 
-.tab_pills > li {
+#tab_pills > li {
     list-style: none;
     line-height: 24px;
     float:left;
     position: relative;
 }
 
-.tab_pills > li > a {
+#tab_pills > li > a {
     text-decoration: none;
     list-style: none;
     display: block;
@@ -719,7 +719,7 @@ input[type="submit"].btn.btn-mini {
     background-color : #aaa;
 }
 
-.tab_pills > .pill_active > a {
+#tab_pills > .pill_active > a {
     border-color: #aaa;
     color: #ccc;
     background-color : #000;

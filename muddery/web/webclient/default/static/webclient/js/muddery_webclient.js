@@ -890,7 +890,10 @@ var webclient = {
         var bottom_bar_h = 18;
         var total_h = middle_h - bottom_bar_h;
         var prompt_h = 18;
-        var tab_bar_h = 30;
+        var tab_bar_h = $('#tab_pills').outerHeight(true) - 1;
+        if (tab_bar_h < 30) {
+            tab_bar_h = 30;
+        }
         var tab_content_max_h = 360;
         if (total_h + prompt_h + tab_bar_h > tab_content_max_h * 2) {
             $('#msg_wnd').height(middle_h - tab_bar_h - tab_content_max_h - 2);
