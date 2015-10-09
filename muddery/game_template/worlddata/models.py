@@ -34,11 +34,11 @@ class world_objects(model_base.world_objects):
 
 #------------------------------------------------------------
 #
-# store all object creaters
+# store all object creators
 #
 #------------------------------------------------------------
-class object_creaters(model_base.object_creaters):
-    "Store all object creaters."
+class object_creators(model_base.object_creators):
+    "Store all object creators."
     pass
 
 
@@ -48,7 +48,7 @@ class object_creaters(model_base.object_creaters):
 #
 #------------------------------------------------------------
 class object_loot_list(model_base.object_loot_list):
-    "Store all object creaters."
+    "Store all object creators."
     pass
 
 

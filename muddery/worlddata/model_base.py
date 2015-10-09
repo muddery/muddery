@@ -91,19 +91,19 @@ class world_objects(models.Model):
 
 #------------------------------------------------------------
 #
-# store all object creaters
+# store all object creators
 #
 #------------------------------------------------------------
-class object_creaters(world_objects):
-    "Store all object creaters."
+class object_creators(world_objects):
+    "Store all object creators."
 
     verb = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Object Creater"
-        verbose_name_plural = "Object Creaters"
+        verbose_name = "Object Creator"
+        verbose_name_plural = "Object Creators"
 
 
 #------------------------------------------------------------
@@ -112,18 +112,19 @@ class object_creaters(world_objects):
 #
 #------------------------------------------------------------
 class object_loot_list(models.Model):
-    "Store all object creaters."
+    "Store all object creators."
 
     provider = models.CharField(max_length=KEY_LENGTH, db_index=True)
     object = models.CharField(max_length=KEY_LENGTH)
     number = models.IntegerField(blank=True, default=0)
     odds = models.FloatField(blank=True, default=0)
+    condition = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Object Creater"
-        verbose_name_plural = "Object Creaters"
+        verbose_name = "Object Creator"
+        verbose_name_plural = "Object Creators"
         unique_together = ("provider", "object")
 
 
@@ -330,8 +331,9 @@ class event_data(models.Model):
     "Store event data."
 
     key = models.CharField(max_length=KEY_LENGTH, db_index=True)
-    trigger = models.IntegerField()
     type = models.IntegerField()
+    trigger = models.IntegerField()
+    condition = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"

@@ -122,7 +122,7 @@ WORLD_ROOMS = ("world_rooms",)
 WORLD_EXITS = ("world_exits",)
 
 # unique objects
-WORLD_OBJECTS = ("world_objects", "object_creaters")
+WORLD_OBJECTS = ("world_objects", "object_creators")
 
 # unique npcs
 WORLD_NPCS = ("world_npcs",)
@@ -220,3 +220,6 @@ GLOBAL_CD = 1.0
 # AUTO_BATTLE_SKILL_CD must be bigger than GLOBAL_CD
 # They can not be equal!
 AUTO_CAST_SKILL_CD = 1.5
+
+# In solo mode, a player can not see or affect other players.
+SOLO_MODE = False

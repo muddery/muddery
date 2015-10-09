@@ -59,6 +59,22 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.db.unlocked_exits = set()
 
 
+    def move_to(self, destination, quiet=False,
+                emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True):
+        """
+        Moves this object to a new location.
+        """
+        if settings.SOLO_MODE:
+            quiet = True
+        
+        return super(MudderyPlayerCharacter, self).move_to(destination,
+                                                           quiet,
+                                                           emit_to_obj,
+                                                           use_destination,
+                                                           to_none,
+                                                           move_hooks)
+
+
     def at_object_receive(self, moved_obj, source_location):
         """
         Called after an object has been moved into this object.
@@ -68,7 +84,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         source_location (Object): Where `moved_object` came from.
         
         """
-        super(MudderyCharacter, self).at_object_receive(moved_obj, source_location)
+        super(MudderyPlayerCharacter, self).at_object_receive(moved_obj, source_location)
 
         # send latest inventory data to player
         inv = self.return_inventory()
@@ -84,7 +100,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         target_location (Object): Where `moved_obj` is going.
         
         """
-        super(MudderyCharacter, self).at_object_left(moved_obj, target_location)
+        super(MudderyPlayerCharacter, self).at_object_left(moved_obj, target_location)
         
         # send latest inventory data to player
         inv = self.return_inventory()
@@ -108,7 +124,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         self.msg({"puppet": self.dbref})
 
-        super(MudderyCharacter, self).at_post_puppet()
+        super(MudderyPlayerCharacter, self).at_post_puppet()
 
         # send character's data to player
         message = {"status": self.return_status(),
@@ -119,10 +135,11 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.msg(message)
 
         # notify its location
-        if self.location:
-            change = {"dbref": self.dbref,
-                      "name": self.get_name()}
-            self.location.msg_contents({"player_online":change}, exclude=self)
+        if not settings.SOLO_MODE:
+            if self.location:
+                change = {"dbref": self.dbref,
+                          "name": self.get_name()}
+                self.location.msg_contents({"player_online":change}, exclude=self)
 
 
     def at_pre_unpuppet(self):
@@ -131,11 +148,12 @@ class MudderyPlayerCharacter(MudderyCharacter):
         this Player.
         
         """
-        # notify its location
-        if self.location:
-            change = {"dbref": self.dbref,
-                      "name": self.get_name()}
-            self.location.msg_contents({"player_offline":change}, exclude=self)
+        if not settings.SOLO_MODE:
+            # notify its location
+            if self.location:
+                change = {"dbref": self.dbref,
+                          "name": self.get_name()}
+                self.location.msg_contents({"player_offline":change}, exclude=self)
 
 
     def set_nickname(self, nickname):
@@ -471,6 +489,13 @@ class MudderyPlayerCharacter(MudderyCharacter):
             skills.append(info)
 
         return skills
+
+
+    def is_quest_in_progress(self, quest):
+        """
+        Whether the character is doing this quest.
+        """
+        return self.quest.is_in_progress(quest)
 
 
     def die(self):

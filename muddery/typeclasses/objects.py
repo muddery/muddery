@@ -74,6 +74,38 @@ class MudderyObject(DefaultObject):
         pass
 
 
+    def at_post_puppet(self):
+        """
+        Called just after puppeting has been completed and all
+        Player<->Object links have been established.
+
+        """
+        self.msg("\nYou become {c%s{n.\n" % self.name)
+        self.execute_cmd("look")
+        if not settings.SOLO_MODE:
+            if self.location:
+                self.location.msg_contents("%s has entered the game." % self.name, exclude=[self])
+
+
+    def at_post_unpuppet(self, player, sessid=None):
+        """
+        We stove away the character when the player goes ooc/logs off,
+        otherwise the character object will remain in the room also
+        after the player logged off ("headless", so to say).
+
+        Args:
+            player (Player): The player object that just disconnected
+                from this object.
+            sessid (int): Session id controlling the connection that
+                just disconnected.
+        """
+        if self.location: # have to check, in case of multiple connections closing
+            if not settings.SOLO_MODE:
+                self.location.msg_contents("%s has left the game." % self.name, exclude=[self])
+            self.db.prelogout_location = self.location
+            self.location = None
+
+
     def at_object_receive(self, moved_obj, source_location):
         """
         Called after an object has been moved into this object.

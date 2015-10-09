@@ -51,11 +51,12 @@ def at_initial_setup():
             start_location = search.search_object(settings.START_LOCATION, exact=True)
             if start_location:
                 start_location = start_location[0]
-                superuser.move_to(start_location)
+                superuser.move_to(start_location, quiet=True)
 
             # set superuser's data
             superuser.set_data_info(settings.DEFAULT_PLAYER_CHARACTER_KEY)
             superuser.set_level(1)
+            superuser.set_nickname("superuser")
 
     except Exception, e:
         ostring = "Can't build world: %s" % e

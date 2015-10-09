@@ -1,10 +1,10 @@
 """
-Object creaters.
+Object creators.
 
 """
-from muddery.typeclasses.object_creaters import MudderyObjectCreater
+from muddery.typeclasses.object_creators import MudderyObjectCreator
 
-class ObjectCreater(MudderyObjectCreater):
+class ObjectCreator(MudderyObjectCreator):
     """
     """
     pass

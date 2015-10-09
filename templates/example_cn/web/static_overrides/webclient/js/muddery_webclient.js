@@ -701,7 +701,7 @@ var webclient = {
                 element = key + ": " + accepted[key] + "<br>";
                 
                 if (first) {
-                    content += "You got:<br>";
+                    content += "你获得了：<br>";
                     first = false;
                 }
                 content += element;
@@ -731,7 +731,7 @@ var webclient = {
         }
         
         if (count == 0) {
-            content = "You got nothing.";
+            content = "没有获得任何东西。";
         }
 
         page.html(content);
