@@ -838,6 +838,7 @@ var webclient = {
         $("#msg_wnd").empty();
         this.showLoginTabs();
         this.showPage("room");
+        this.doSetSizes();
     },
     
     onLogout : function(data) {
@@ -846,6 +847,7 @@ var webclient = {
         $("#prompt_bar").empty();
         this.showUnloginTabs();
         this.showPage("login");
+        this.doSetSizes();
         
         //reconnect, show the connection screen
         webclient_init();
@@ -1097,6 +1099,7 @@ $(document).unbind("keydown");
 $(window).ready(function(){
     webclient.showUnloginTabs();
     webclient.showPage("login");
+    this.doSetSizes();
 });
 
 // Callback function - called when the browser window resizes
