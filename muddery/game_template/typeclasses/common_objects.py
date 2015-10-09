@@ -1,5 +1,5 @@
 """
-Object creaters.
+Object creators.
 
 """
 from muddery.typeclasses.common_objects import MudderyCommonObject

@@ -72,7 +72,7 @@ class MudderySkill(MudderyObject):
                 return
 
         try:
-            function = getattr(skills, self.get_info_key())
+            function = getattr(skills, self.function)
             result = function(owner, self.db.target, effect=self.effect)
 
             # set cd

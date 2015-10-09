@@ -7,9 +7,10 @@ import random
 from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.objects import MudderyObject
+from muddery.utils import script_handler
 
 
-class MudderyObjectCreater(MudderyObject):
+class MudderyObjectCreator(MudderyObject):
     """
     This object loads attributes from world data on init automatically.
     """
@@ -18,7 +19,7 @@ class MudderyObjectCreater(MudderyObject):
         """
         Set data_info to the object."
         """
-        super(MudderyObjectCreater, self).load_data()
+        super(MudderyObjectCreator, self).load_data()
 
         loot_list = []
         try:
@@ -28,7 +29,8 @@ class MudderyObjectCreater(MudderyObject):
             for loot_record in loot_records:
                 loot_object = {"object": loot_record.object,
                                "number": loot_record.number,
-                               "odds": loot_record.odds}
+                               "odds": loot_record.odds,
+                               "condition": loot_record.condition}
                 loot_list.append(loot_object)
         except Exception, e:
             print "Can't load loot info %s: %s" % (self.get_info_key(), e)
@@ -54,7 +56,8 @@ class MudderyObjectCreater(MudderyObject):
         Loot objects.
         """
         rand = random.random()
-        obj_list = [obj for obj in self.loot_list if obj["odds"] > rand]
-        
+        obj_list = [obj for obj in self.loot_list if obj["odds"] > rand and\
+                                                     script_handler.match_condition(caller, obj["condition"])]
+
         if caller:
             caller.receive_objects(obj_list)

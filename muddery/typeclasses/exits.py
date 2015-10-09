@@ -7,6 +7,7 @@ for allowing Characters to traverse the exit to its destination.
 
 """
 
+import traceback
 from muddery.utils import utils
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils import script_handler
@@ -40,6 +41,25 @@ class MudderyExit(MudderyObject, DefaultExit):
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
     """
+    def at_before_traverse(self, traversing_object):
+        """
+        Called just before an object uses this object to traverse to
+        another object (i.e. this object is a type of Exit)
+
+        Args:
+            traversing_object (Object): The object traversing us.
+
+        Notes:
+            The target destination should normally be available as
+            `self.destination`.
+            
+            If this method returns False/None, the traverse is cancelled
+            before it is even started.
+
+        """
+        return True
+
+
     def at_failed_traverse(self, traversing_object):
         """
         Overloads the default hook to implement a simple default error message.
@@ -89,6 +109,25 @@ class MudderyLockedExit(MudderyExit):
             self.exit_lock = lock
         except Exception, e:
             print "Can't load lock info %s: %s" % (self.get_info_key(), e)
+
+
+    def at_before_traverse(self, traversing_object):
+        """
+        Called just before an object uses this object to traverse to
+        another object (i.e. this object is a type of Exit)
+
+        Args:
+            traversing_object (Object): The object traversing us.
+
+        Notes:
+            The target destination should normally be available as
+            `self.destination`.
+            
+            If this method returns False/None, the traverse is cancelled
+            before it is even started.
+
+        """
+        return traversing_object.is_exit_unlocked(self.get_info_key())
 
 
     def can_unlock(self, caller):

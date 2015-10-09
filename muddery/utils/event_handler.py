@@ -6,6 +6,7 @@ import re
 import random
 from muddery.utils import defines
 from muddery.utils.builder import build_object
+from muddery.utils import script_handler
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -32,8 +33,10 @@ class EventHandler(object):
             if not event_record.trigger in self.events:
                 self.events[event_record.trigger] = []
 
+            event = {"condition": event_record.condition}
+
             if event_record.type == defines.EVENT_ATTACK:
-                event = self.create_event_attack()
+                self.create_event_attack(event)
 
             self.events[event_record.trigger].append(event)
 
@@ -45,12 +48,13 @@ class EventHandler(object):
             return
 
         if character.player.is_superuser:
-            # ban events on suerusers
+            # ban events on superusers
             return
 
         if defines.EVENT_TRIGGER_ARRIVE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_ARRIVE]:
-                event["function"](event["data"], character)
+                if script_handler.match_condition(character, event["condition"]):
+                    event["function"](event["data"], character)
 
 
     def at_character_move_out(self):
@@ -59,11 +63,11 @@ class EventHandler(object):
         pass
 
 
-    def create_event_attack(self):
+    def create_event_attack(self, event):
         """
         """
-        event = {"type": defines.EVENT_ATTACK,
-                 "function": self.do_attack}
+        event["type"] = defines.EVENT_ATTACK
+        event["function"] = self.do_attack
 
         mob_records = []
         model_mobs = get_model(settings.WORLD_DATA_APP, settings.EVENT_MOBS)

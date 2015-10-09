@@ -185,3 +185,5 @@ EQUIP_EFFECTS = ["attack", "defence"]
 SKILL_FOLDER = "skills"
 
 SKILL_FILES = ["skills"]
+
+SOLO_MODE = True

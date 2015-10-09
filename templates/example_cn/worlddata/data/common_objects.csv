@@ -1,1 +1,2 @@
 key,name,typeclass,desc,max_stack,unique,effect,action
+guardhouse_key,铜钥匙,typeclasses.common_objects.CommonObject,小巧的钥匙圈上扣着一把铜质的钥匙，它是用来开哪扇门的呢？,1,1,,

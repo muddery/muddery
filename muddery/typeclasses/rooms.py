@@ -40,13 +40,14 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         
         """
         super(MudderyRoom, self).at_object_receive(moved_obj, source_location)
-                
-        # send surrounding changes to player
-        type = self.get_surrounding_type(moved_obj)
-        if type:
-            change = {type: [{"dbref": moved_obj.dbref,
-                              "name": moved_obj.get_name()}]}
-            self.msg_contents({"obj_moved_in": change}, exclude=moved_obj)
+
+        if not settings.SOLO_MODE:
+            # send surrounding changes to player
+            type = self.get_surrounding_type(moved_obj)
+            if type:
+                change = {type: [{"dbref": moved_obj.dbref,
+                                  "name": moved_obj.get_name()}]}
+                self.msg_contents({"obj_moved_in": change}, exclude=moved_obj)
 
         # trigger event
         if moved_obj.has_player:
@@ -63,13 +64,14 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         
         """
         super(MudderyRoom, self).at_object_left(moved_obj, target_location)
-                
-        # send surrounding changes to player
-        type = self.get_surrounding_type(moved_obj)
-        if type:
-            change = {type: [{"dbref": moved_obj.dbref,
-                              "name": moved_obj.get_name()}]}
-            self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
+
+        if not settings.SOLO_MODE:
+            # send surrounding changes to player
+            type = self.get_surrounding_type(moved_obj)
+            if type:
+                change = {type: [{"dbref": moved_obj.dbref,
+                                  "name": moved_obj.get_name()}]}
+                self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
 
 
     def get_surroundings(self, caller):
@@ -87,7 +89,10 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                 
         visible = (cont for cont in self.contents if cont != caller and
                    cont.access(caller, "view"))
-                        
+
+        if settings.SOLO_MODE:
+            visible = (cont for cont in visible if not cont.has_player)
+
         for cont in visible:
             type = self.get_surrounding_type(cont)
             if type:
