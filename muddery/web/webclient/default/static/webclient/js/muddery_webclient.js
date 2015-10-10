@@ -975,7 +975,9 @@ var webclient = {
                 <center>\
                 <input type="button" id="button_center" value="NEXT" class="btn btn-primary"';
 
-                html_button += ' npc="' + dialogues[0].npc + '"';
+                if ("npc" in dialogues[0]) {
+                    html_button += ' npc="' + dialogues[0].npc + '"';
+                }
                 html_button += ' dialogue="' + dialogues[0].dialogue + '"';
                 html_button += ' sentence="' + dialogues[0].sentence + '"';
                 html_button += ' onClick="commands.doDialogue(this); return false;"/>\

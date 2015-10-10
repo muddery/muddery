@@ -539,19 +539,14 @@ class CmdTalk(Command):
 
         sentences = DIALOGUE_HANDLER.get_default_sentences(caller, npc)
 
+        speaker = ""
         if sentences:
-            speaker = sentences[0]["speaker"];
-            if speaker == "n":
-                speaker = npc.name
-            elif speaker == "p":
-                speaker = caller.name
-            elif speaker[0] == '"' and speaker[-1] == '"':
-                speaker = speaker[1:-1]
+            speaker = DIALOGUE_HANDLER.get_dialogue_speaker(caller, npc, sentences[0]["speaker"])
 
         dialogues = []
         for s in sentences:
             dlg = {"speaker": speaker,
-                   "npc": npc.key,
+                   "npc": npc.dbref,
                    "dialogue": s["dialogue"],
                    "sentence": s["sentence"],
                    "content": s["content"]}
@@ -566,7 +561,7 @@ class CmdTalk(Command):
 
 class CmdDialogue(Command):
     """
-    Talk to NPC, using dialogues stored in db.
+    Continue dialogue, using dialogues stored in db.
 
     Usage:
         {"cmd":"dialogue",
@@ -576,29 +571,23 @@ class CmdDialogue(Command):
         }
 
     Dialogue and sentence refer to the current sentence.
-    If dialogue or sentence is null, use the npc's default dialogue.
     """
     key = "dialogue"
     locks = "cmd:all()"
     help_cateogory = "General"
 
     def func(self):
-        "Talk to NPC."
+        "Continue dialogues."
         caller = self.caller
 
         if not self.args:
             caller.msg({"alert":LS("You should talk to someone.")})
             return
 
-        if not "npc" in self.args:
-            caller.msg({"alert":LS("You should talk to someone.")})
-            return
-
-        # Get the npc at the player's location.
-        npc = caller.search(self.args["npc"], location=caller.location)
-        if not npc:
-            caller.msg({"alert":LS("Can not find the one to talk.")})
-            return
+        npc = None
+        if "npc" in self.args:
+            if self.args["npc"]:
+                npc = caller.search(self.args["npc"], location=caller.location)
 
         # Get the current sentence.
         dialogue = ""
@@ -625,26 +614,22 @@ class CmdDialogue(Command):
 
         # Get next sentence.
         sentences = DIALOGUE_HANDLER.get_next_sentences(caller,
-                                                        npc,
                                                         dialogue,
                                                         sentence)
 
+        speaker = ""
         if sentences:
-            speaker = sentences[0]["speaker"];
-            if speaker == "n":
-                speaker = npc.get_name()
-            elif speaker == "p":
-                speaker = caller.get_name()
-            elif speaker[0] == '"' and speaker[-1] == '"':
-                speaker = speaker[1:-1]
+            speaker = DIALOGUE_HANDLER.get_dialogue_speaker(caller, npc, sentences[0]["speaker"])
 
         dialogues = []
         for s in sentences:
             dlg = {"speaker": speaker,
-                   "npc": npc.key,
                    "dialogue": s["dialogue"],
                    "sentence": s["sentence"],
                    "content": s["content"]}
+            if npc:
+                dlg["npc"] = npc.dbref
+
             dialogues.append(dlg)
 
         # Send next dialogues to the player.

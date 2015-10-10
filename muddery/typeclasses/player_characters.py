@@ -493,9 +493,16 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
     def is_quest_in_progress(self, quest):
         """
-        Whether the character is doing this quest.
+        If the character is doing this quest.
         """
         return self.quest.is_in_progress(quest)
+
+
+    def can_provide_quest(self, quest):
+        """
+        If can provide this quest to the character.
+        """
+        return self.quest.can_provide(quest)
 
 
     def die(self):

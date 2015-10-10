@@ -80,10 +80,16 @@ class QuestHandler(object):
         return quest in self.current_quests
 
 
-    def is_available(self, quest):
+    def can_provide(self, quest):
         """
         """
-        if quest in self.finished_quests:
+        if self.character.quest.is_finished(quest):
+            return False
+
+        if self.character.quest.is_in_progress(quest):
+            return False
+
+        if not self.character.quest.match_dependences(quest):
             return False
 
         return True

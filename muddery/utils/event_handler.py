@@ -7,6 +7,7 @@ import random
 from muddery.utils import defines
 from muddery.utils.builder import build_object
 from muddery.utils import script_handler
+from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -27,16 +28,20 @@ class EventHandler(object):
         model_events = get_model(settings.WORLD_DATA_APP, settings.EVENT_DATA)
         if model_events:
             # Get records.
-            event_records = model_events.objects.filter(key=owner.get_info_key)
+            event_records = model_events.objects.filter(object=owner.get_info_key())
 
         for event_record in event_records:
             if not event_record.trigger in self.events:
                 self.events[event_record.trigger] = []
 
-            event = {"condition": event_record.condition}
+            event = {"key": event_record.key,
+                     "object": event_record.object,
+                     "condition": event_record.condition}
 
             if event_record.type == defines.EVENT_ATTACK:
                 self.create_event_attack(event)
+            elif event_record.type == defines.EVENT_DIALOGUE:
+                self.create_event_dialogue(event)
 
             self.events[event_record.trigger].append(event)
 
@@ -73,7 +78,7 @@ class EventHandler(object):
         model_mobs = get_model(settings.WORLD_DATA_APP, settings.EVENT_MOBS)
         if model_mobs:
             # Get records.
-            mob_records = model_mobs.objects.filter(key=self.owner.get_info_key)
+            mob_records = model_mobs.objects.filter(key=event["key"])
 
         data = []
         for mob_record in mob_records:
@@ -104,3 +109,36 @@ class EventHandler(object):
             # create a new combat handler
             chandler = create_script("combat_handler.CombatHandler")
             chandler.add_characters([mob, character])
+
+
+    def create_event_dialogue(self, event):
+        """
+        """
+        event["type"] = defines.EVENT_DIALOGUE
+        event["function"] = self.do_dialogue
+
+        try:
+            model_dialogues = get_model(settings.WORLD_DATA_APP, settings.EVENT_DIALOGUES)
+            if model_dialogues:
+                # Get record.
+                dialogue_record = model_dialogues.objects.get(key=event["key"])
+                event["data"] = dialogue_record.dialogue
+        except Exception, e:
+            print "Can't load event dialogue %s: %s" % (event["key"], e)
+
+        return event
+
+
+    def do_dialogue(self, data, character):
+        """
+        """
+        sentence = DIALOGUE_HANDLER.get_sentence(data, 0)
+
+        if sentence:
+            speaker = DIALOGUE_HANDLER.get_dialogue_speaker(character, None, sentence)
+            dlg = {"speaker": speaker,
+                   "dialogue": sentence["dialogue"],
+                   "sentence": sentence["sentence"],
+                   "content": sentence["content"]}
+
+            character.msg({"dialogue": [dlg]})

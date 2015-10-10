@@ -195,13 +195,10 @@ class DialogueHandler(object):
         return sentences
 
 
-    def get_next_sentences(self, caller, npc, current_dialogue, current_sentence):
+    def get_next_sentences(self, caller, current_dialogue, current_sentence):
         """
         """
         if not caller:
-            return
-
-        if not npc:
             return
 
         # get current dialogue
@@ -235,6 +232,24 @@ class DialogueHandler(object):
                 sentences.append(next_dlg["sentences"][0])
 
         return sentences
+
+        
+    def get_dialogue_speaker(self, caller, npc, speaker_str):
+        """
+        Get the speaker's text.
+        """
+        speaker = ""
+        try:
+            if speaker_str == "n":
+                speaker = npc.get_name()
+            elif speaker_str == "p":
+                speaker = caller.get_name()
+            elif speaker_str[0] == '"' and speaker_str[-1] == '"':
+                speaker = speaker_str[1:-1]
+        except:
+            pass
+
+        return speaker
 
 
     def finish_sentence(self, caller, dialogue, sentence):
@@ -369,9 +384,7 @@ class DialogueHandler(object):
 
             if not provide_quest and sen["provide_quest"]:
                 quest_key = sen["provide_quest"]
-                if not caller.quest.is_finished(quest_key) and\
-                   not caller.quest.is_in_progress(quest_key) and\
-                   caller.quest.match_dependences(quest_key):
+                if caller.quest.can_provide(quest_key):
                     provide_quest = True
                     if not achieved_quests:
                         return (provide_quest, finish_quest)

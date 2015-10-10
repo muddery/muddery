@@ -60,9 +60,13 @@ var commands = {
     
     // dialogue
     doDialogue : function(caller) {
-        var args = {"npc": $(caller).attr("npc"),
-                    "dialogue": $(caller).attr("dialogue"),
+        var args = {"dialogue": $(caller).attr("dialogue"),
                     "sentence": $(caller).attr("sentence")};
+                    
+        var npc = $(caller).attr("npc");
+        if (npc) {
+            args["npc"] = npc;
+        }
         sendCommand(this.cmdString("dialogue", args));
     },
     
