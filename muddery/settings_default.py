@@ -150,6 +150,9 @@ EVENT_DATA = "event_data"
 # room mobs
 EVENT_MOBS = "event_mobs"
 
+# event dialogues
+EVENT_DIALOGUES = "event_dialogues"
+
 # exit locks
 EXIT_LOCKS = "exit_locks"
 
@@ -175,6 +178,7 @@ OTHER_DATA_MODELS = (OBJECT_LOOT_LIST,
                      QUEST_DEPENDENCY,
                      EVENT_DATA,
                      EVENT_MOBS,
+                     EVENT_DIALOGUES,
                      EXIT_LOCKS,
                      DIALOGUES,
                      DIALOGUE_SENTENCES,

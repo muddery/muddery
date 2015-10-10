@@ -24,3 +24,4 @@ EVENT_TRIGGER_ARRIVE = 1        # object: room_id
 # event types
 EVENT_NONE = 0
 EVENT_ATTACK = 1
+EVENT_DIALOGUE = 2

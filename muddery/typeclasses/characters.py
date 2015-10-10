@@ -198,7 +198,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         model_skills = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_SKILLS)
         if model_skills:
             # Get records.
-            skill_records = model_skills.objects.filter(character=self.get_info_key)
+            skill_records = model_skills.objects.filter(character=self.get_info_key())
 
         for skill_record in skill_records:
             self.skill.learn_skill(skill_record.skill_id)

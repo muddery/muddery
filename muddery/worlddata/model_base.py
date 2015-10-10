@@ -330,7 +330,8 @@ class quest_dependency(models.Model):
 class event_data(models.Model):
     "Store event data."
 
-    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    object = models.CharField(max_length=KEY_LENGTH, db_index=True)
     type = models.IntegerField()
     trigger = models.IntegerField()
     condition = models.TextField(blank=True)
@@ -500,6 +501,24 @@ class event_mobs(models.Model):
         abstract = True
         verbose_name = "Event Mob"
         verbose_name_plural = "Event Mobs"
+
+        
+#------------------------------------------------------------
+#
+# event dialogues
+#
+#------------------------------------------------------------
+class event_dialogues(models.Model):
+    "Store all event dialogues."
+
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    dialogue = models.CharField(max_length=KEY_LENGTH)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Event Dialogues"
+        verbose_name_plural = "Event Dialogues"
 
 
 #------------------------------------------------------------

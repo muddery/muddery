@@ -1,8 +1,4 @@
 dialogue,ordinal,speaker,content,action,provide_quest,finish_quest
-dlg_sailer_01,1,n,您好，长官！,,,
-dlg_sailer_02,1,p,我很好！,,,
-dlg_sailer_03,1,p,我不好！,,,
-dlg_sailer_04,1,n,长官，司令让你去指挥室找他。,,,
-dlg_sailer_05,1,p,好的，我这就去。,,quest_royal_lucia_01,
-dlg_sailer_06,1,p,稍等一会儿。,,,
-dlg_commander_01,1,n,呵呵！,,quest_royal_lucia_02,quest_royal_lucia_01
+dlg_street_find_servivor,1,"","眼前的景象让你吓了一跳，原本游人如织的街道现在已是满目疮痍、空无一人，像是经历了一次大灾难。",,,
+dlg_street_find_servivor,2,"","人们都去哪里了？我该去哪里？",,,
+dlg_street_find_servivor,3,"","你平复了一下心情，决定先在四周找找有没有其他幸存者。",,quest_find_survivor,
