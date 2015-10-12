@@ -44,7 +44,8 @@ class MudderyQuest(MudderyObject):
             objective = {"ordinal": obj_record.ordinal,
                          "type": obj_record.type,
                          "object": obj_record.object,
-                         "number": obj_record.number}
+                         "number": obj_record.number,
+                         "desc": obj_record.desc}
             self.objectives[obj_record.ordinal] = objective
 
             achieved = self.db.achieved.get(key, 0)
@@ -60,18 +61,22 @@ class MudderyQuest(MudderyObject):
         """
         objectives = []
         for ordinal in self.objectives:
-            obj_num = self.objectives[ordinal]["number"]
-            achieved = self.db.achieved.get(ordinal, 0)
-            
-            if self.objectives[ordinal]["type"] == defines.OBJECTIVE_TALK:
-                target = LS("Talk to")
-                object = DIALOGUE_HANDLER.get_npc_name(self.objectives[ordinal]["object"])
-    
-                objectives.append({"target": target,
-                                   "object": object,
-                                   "achieved": achieved,
-                                   "total": obj_num
-                                   })
+            desc = self.objectives[ordinal]["desc"]
+            if desc:
+                objectives.append({"desc": self.objectives[ordinal]["desc"]})
+            else:
+                obj_num = self.objectives[ordinal]["number"]
+                achieved = self.db.achieved.get(ordinal, 0)
+                
+                if self.objectives[ordinal]["type"] == defines.OBJECTIVE_TALK:
+                    target = LS("Talk to")
+                    object = DIALOGUE_HANDLER.get_npc_name(self.objectives[ordinal]["object"])
+        
+                    objectives.append({"target": target,
+                                       "object": object,
+                                       "achieved": achieved,
+                                       "total": obj_num,
+                                       })
 
         return objectives
 

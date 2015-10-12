@@ -664,8 +664,13 @@ var webclient = {
                     }
                     
                     var obj = quest["objectives"][o];
-                    objectives += obj["target"] + obj["object"];
-                    objectives += obj["achieved"] + "/" + obj["total"];
+                    if ("desc" in obj) {
+                        objectives += obj.desc;
+                    }
+                    else {
+                        objectives += obj.target + obj.object;
+                        objectives += obj.achieved + "/" + obj.total;
+                    }
                 }
                 
                 element += objectives;
