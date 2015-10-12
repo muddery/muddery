@@ -294,6 +294,7 @@ class quest_objectives(models.Model):
     type = models.IntegerField()
     object = models.CharField(max_length=KEY_LENGTH)
     number = models.IntegerField(blank=True, default=0)
+    desc = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
