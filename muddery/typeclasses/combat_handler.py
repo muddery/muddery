@@ -95,13 +95,20 @@ class CombatHandler(DefaultScript):
 #        self.msg_all_combat_process([info])
 
 
-    def add_characters(self, characters):
-        "Add combatant to handler"
-        for character in characters:
-            self.db.characters[character.dbref] = character
-            self._init_character(character)
+    def add_teams(self, teams):
+        """
+        Add combatant to handler
         
-        for character in characters:
+        args:
+            teams: {<team id>: [<characters>]}
+        """
+        for team in teams:
+            for character in teams[team]:
+                character.set_team(team)
+                self.db.characters[character.dbref] = character
+                self._init_character(character)
+        
+        for character in self.db.characters.values():
             if character.has_player:
                 # notify character
                 character.msg({"joined_combat": True})
@@ -204,11 +211,18 @@ class CombatHandler(DefaultScript):
         
         # delete dead npcs
         kills = [c for c in self.db.characters.values() if not c.is_alive()]
-
+        
+        # find who kills opponents
+        killers = {}
+        for kill in kills:
+            team = kill.get_team()
+            killers[kill.dbref] = [character for character in self.db.characters.values()
+                                    if character.get_team() != team]
+        
         for kill in kills:
             self._cleanup_character(kill)
             del self.db.characters[kill.dbref]
-            kill.die()
+            kill.die(killers[kill.dbref])
 
         self.db.finished = True
         self.stop()

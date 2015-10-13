@@ -105,7 +105,8 @@ class MudderyLockedExit(MudderyExit):
 
             lock = {"condition": lock_record.condition,
                     "verb": lock_record.verb,
-                    "message_lock": lock_record.message_lock}
+                    "message_lock": lock_record.message_lock,
+                    "auto_unlock": lock_record.auto_unlock}
             self.exit_lock = lock
         except Exception, e:
             print "Can't load lock info %s: %s" % (self.get_info_key(), e)
@@ -147,7 +148,10 @@ class MudderyLockedExit(MudderyExit):
             return super(MudderyLockedExit, self).get_appearance(caller)
 
         can_unlock = script_handler.match_condition(caller, self.exit_lock["condition"])
-        desc = self.exit_lock["message_lock"]
+        if can_unlock and self.exit_lock["auto_unlock"]:
+            # auto unlock the exit
+            caller.unlock_exit(self)
+            return super(MudderyLockedExit, self).get_appearance(caller)
 
         cmds = []
         if can_unlock:
@@ -158,7 +162,7 @@ class MudderyLockedExit(MudderyExit):
         
         info = {"dbref": self.dbref,
                 "name": self.name,
-                "desc": desc,
+                "desc": self.exit_lock["message_lock"],
                 "cmds": cmds}
                 
         return info

@@ -6,6 +6,7 @@ import re
 from muddery.utils import defines
 from muddery.utils.builder import build_object
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
+from muddery.utils.localized_strings_handler import LS
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -35,6 +36,7 @@ class QuestHandler(object):
             return
 
         self.current_quests[quest] = new_quest
+        self.character.msg({"msg": LS("Accepted quest {c%s{n.") % new_quest.get_name()})
         self.show_quests()
         self.character.show_location()
 
@@ -51,6 +53,7 @@ class QuestHandler(object):
 
         self.current_quests[quest].finish()
         del(self.current_quests[quest])
+        self.finished_quests.add(quest)
         self.show_quests()
         self.character.show_location()
 

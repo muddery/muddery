@@ -46,7 +46,8 @@ var combat = {
         $('#combat_commands').remove();
         
         var box = $('#combat_box');
-        var result = $('<div>').attr('id', 'combat_result');
+        var result = $('<center>').attr('id', 'combat_result')
+                                  .css('line-height', '150px');
         
         if ("stopped" in self._result) {
             result.text("Combat stopped !");
@@ -82,9 +83,11 @@ var combat = {
         box.append(div);
         
         // popup box
+        /*
         var result_h = result.outerHeight(true);
         var div_h = div.outerHeight(true);
         box.height(result_h + div_h);
+        */
     },
 
 

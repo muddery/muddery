@@ -10,8 +10,7 @@ class WorldRoomsAdmin(admin.ModelAdmin):
                     'desc',
                     'location',
                     'home',
-                    'lock',
-                    'attributes')
+                    'lock')
 
 
 class WorldExitsAdmin(admin.ModelAdmin):
@@ -22,7 +21,6 @@ class WorldExitsAdmin(admin.ModelAdmin):
                     'location',
                     'home',
                     'lock',
-                    'attributes',
                     'destination')
 
 
@@ -33,8 +31,7 @@ class WorldObjectsAdmin(admin.ModelAdmin):
                     'desc',
                     'location',
                     'home',
-                    'lock',
-                    'attributes')
+                    'lock')
 
 
 class WorldNPCAdmin(admin.ModelAdmin):
@@ -45,8 +42,7 @@ class WorldNPCAdmin(admin.ModelAdmin):
                     'location',
                     'home',
                     'dialogue',
-                    'lock',
-                    'attributes')
+                    'lock')
 
 
 admin.site.register(world_rooms, WorldRoomsAdmin)

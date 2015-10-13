@@ -8,6 +8,7 @@ from muddery.utils import defines
 from muddery.utils.builder import build_object
 from muddery.utils import script_handler
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils import utils
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -48,6 +49,7 @@ class EventHandler(object):
 
     def at_character_move_in(self, character):
         """
+        Called when a character moves in a room.
         """
         if not character:
             return
@@ -62,14 +64,41 @@ class EventHandler(object):
                     event["function"](event["data"], character)
 
 
-    def at_character_move_out(self):
+    def at_character_move_out(self, character):
         """
+        Called when a character moves out of a room.
         """
         pass
 
 
+    def at_character_die(self, character, killers):
+        """
+        Called when a character is killed.
+        """
+        if not character:
+            return
+
+        if character.player:
+            if character.player.is_superuser:
+                # ban events on superusers
+                return
+
+        if defines.EVENT_TRIGGER_DIE in self.events:
+            for event in self.events[defines.EVENT_TRIGGER_DIE]:
+                if script_handler.match_condition(character, event["condition"]):
+                    for killer in killers:
+                        event["function"](event["data"], character)
+
+        if defines.EVENT_TRIGGER_KILL in self.events:
+            for event in self.events[defines.EVENT_TRIGGER_KILL]:
+                if script_handler.match_condition(character, event["condition"]):
+                    for killer in killers:
+                        event["function"](event["data"], killer)
+
+
     def create_event_attack(self, event):
         """
+        Create a combat event.
         """
         event["type"] = defines.EVENT_ATTACK
         event["function"] = self.do_attack
@@ -93,6 +122,7 @@ class EventHandler(object):
 
     def do_attack(self, data, character):
         """
+        Start a combat.
         """
         rand = random.random()
         for item in data:
@@ -108,11 +138,12 @@ class EventHandler(object):
 
             # create a new combat handler
             chandler = create_script("combat_handler.CombatHandler")
-            chandler.add_characters([mob, character])
+            chandler.add_teams({1: [mob], 2: [character]})
 
 
     def create_event_dialogue(self, event):
         """
+        Create a dialogue event.
         """
         event["type"] = defines.EVENT_DIALOGUE
         event["function"] = self.do_dialogue
@@ -122,7 +153,9 @@ class EventHandler(object):
             if model_dialogues:
                 # Get record.
                 dialogue_record = model_dialogues.objects.get(key=event["key"])
-                event["data"] = dialogue_record.dialogue
+                data = {"dialogue": dialogue_record.dialogue,
+                        "npc": dialogue_record.npc}
+                event["data"] = data
         except Exception, e:
             print "Can't load event dialogue %s: %s" % (event["key"], e)
 
@@ -131,14 +164,24 @@ class EventHandler(object):
 
     def do_dialogue(self, data, character):
         """
+        Start a dialogue.
         """
-        sentence = DIALOGUE_HANDLER.get_sentence(data, 0)
+        sentence = DIALOGUE_HANDLER.get_sentence(data["dialogue"], 0)
 
         if sentence:
-            speaker = DIALOGUE_HANDLER.get_dialogue_speaker(character, None, sentence)
+            npc = None
+            if data["npc"]:
+                npc = utils.search_obj_info_key(data["npc"])
+                if npc:
+                    npc = npc[0]
+
+            speaker = DIALOGUE_HANDLER.get_dialogue_speaker(character, npc, sentence["speaker"])
             dlg = {"speaker": speaker,
                    "dialogue": sentence["dialogue"],
                    "sentence": sentence["sentence"],
                    "content": sentence["content"]}
+
+            if npc:
+                dlg["npc"] = npc.dbref
 
             character.msg({"dialogue": [dlg]})

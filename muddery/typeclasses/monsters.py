@@ -24,10 +24,10 @@ class MudderyMonster(MudderyCharacter):
         return commands
 
 
-    def die(self):
+    def die(self, killers):
         """
         """
-        super(MudderyMonster, self).die()
+        super(MudderyMonster, self).die(killers)
         
         # delete itself and notify its location
         location = self.location

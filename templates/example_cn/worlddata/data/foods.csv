@@ -1,3 +1,2 @@
 key,name,typeclass,desc,max_stack,unique,effect,hp,mp
-food_01,Bread,typeclasses.common_objects.Food,A piece of bread.,10,0,,10,
-food_02,Milk,typeclasses.common_objects.Food,A bottle of milk.,10,0,,,10
+food_01,一块面包,typeclasses.common_objects.Food,这是一块面包，可以帮你回复少许。,10,1,,10,

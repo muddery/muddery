@@ -383,7 +383,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Equip an object.
         """
-        if not obj.location == self:
+        if obj.location != self:
             self.msg({"alert":"You do not have that equipment."})
             return False
 
@@ -434,7 +434,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Take off an object.
         """
-        if not obj.location == self:
+        if obj.location != self:
             self.msg({"alert":"You do not have that equipment."})
             return
 
@@ -505,10 +505,18 @@ class MudderyPlayerCharacter(MudderyCharacter):
         return self.quest.can_provide(quest)
 
 
-    def die(self):
+    def is_quest_finished(self, quest):
         """
+        If this quest is finished.
         """
-        super(MudderyPlayerCharacter, self).die()
+        return self.quest.is_finished(quest)
+
+
+    def die(self, killers):
+        """
+        This character is killed. Move it to it's home.
+        """
+        super(MudderyPlayerCharacter, self).die(killers)
         
         self.msg({"msg": "You die."})
         

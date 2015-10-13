@@ -19,7 +19,9 @@ OBJECTIVE_ARRIVE = 2    # object: room_id
 
 # event trigger types
 EVENT_TRIGGER_NONE = 0
-EVENT_TRIGGER_ARRIVE = 1        # object: room_id
+EVENT_TRIGGER_ARRIVE = 1    # object: room_id
+EVENT_TRIGGER_DIE = 2       # character die, object: killer_mob_id
+EVENT_TRIGGER_KILL = 3      # kill a mob, object: mob_id
 
 # event types
 EVENT_NONE = 0

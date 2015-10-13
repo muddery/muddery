@@ -336,7 +336,7 @@ class CmdGive(MuxCommand):
         if target == caller:
             caller.msg("You keep %s to yourself." % to_give.key)
             return
-        if not to_give.location == caller:
+        if to_give.location != caller:
             caller.msg("You are not holding %s." % to_give.key)
             return
         # give object
@@ -913,7 +913,7 @@ class CmdAttack(Command):
 
         # create a new combat handler
         chandler = create_script("combat_handler.CombatHandler")
-        chandler.add_characters([target, self.caller])
+        chandler.add_teams({1: [target], 2:[self.caller]})
         
         self.caller.msg("You attack %s! You are in combat." % target)
         target.msg("%s attacks you! You are in combat." % self.caller)

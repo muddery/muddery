@@ -14,7 +14,6 @@ class world_rooms(models.Model):
     name = models.CharField(max_length=KEY_LENGTH)
     typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
-    attributes = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -38,7 +37,6 @@ class world_exits(models.Model):
     verb = models.TextField(blank=True)
     location = models.CharField(max_length=KEY_LENGTH, blank=True)
     destination = models.CharField(max_length=KEY_LENGTH, blank=True)
-    attributes = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -59,6 +57,7 @@ class exit_locks(models.Model):
     condition = models.TextField(blank=True)
     verb = models.TextField(blank=True)
     message_lock = models.TextField(blank=True)
+    auto_unlock = models.BooleanField(blank=True, default=False)
 
     class Meta:
         "Define Django meta options"
@@ -80,7 +79,6 @@ class world_objects(models.Model):
     typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=KEY_LENGTH, blank=True)
-    attributes = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -142,7 +140,6 @@ class common_objects(models.Model):
     desc = models.TextField(blank=True)
     max_stack = models.IntegerField(blank=True, default=1)
     unique = models.BooleanField(blank=True, default=False)
-    attributes = models.TextField(blank=True)
     effect = models.TextField(blank=True)
 
     class Meta:
@@ -205,7 +202,7 @@ class world_npcs(models.Model):
     typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=KEY_LENGTH, blank=True)
-    attributes = models.TextField(blank=True)
+    condition = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -514,6 +511,7 @@ class event_dialogues(models.Model):
 
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
     dialogue = models.CharField(max_length=KEY_LENGTH)
+    npc = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
