@@ -1,2 +1,2 @@
 key,name,typeclass,desc,max_stack,unique,effect,hp,mp
-food_01,一块面包,typeclasses.common_objects.Food,这是一块面包，可以帮你回复少许。,10,1,,10,
+food_01,面包,typeclasses.common_objects.Food,面包可以帮你恢复少许生命。,10,1,,10,

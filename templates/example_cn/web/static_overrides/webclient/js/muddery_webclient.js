@@ -157,7 +157,7 @@ var webclient = {
     displayAlert : function(data) {
         try {
             var msg = "";
-            var button = "OK";
+            var button = "确定";
             
             var type = Object.prototype.toString.call(data);
             if (type == "[object String]") {
@@ -301,7 +301,7 @@ var webclient = {
         var empty = true;
         if ("exits" in data) {
             if (data["exits"].length > 0) {
-                content += "<div id='room_exits'>Exits:"
+                content += "<div id='room_exits'>出口："
                 // add exits
                 for (var i in data["exits"]) {
                     try {
@@ -329,7 +329,7 @@ var webclient = {
         empty = true;
         if ("things" in data) {
             if (data["things"].length > 0) {
-                content += "<div id='room_things'>Things:"
+                content += "<div id='room_things'>物体："
                 // add things
                 for (var i in data["things"]) {
                     try {
@@ -357,7 +357,7 @@ var webclient = {
         empty = true;
         if ("npcs" in data) {
             if (data["npcs"].length > 0) {
-                content += "<div id='room_npcs'>NPCs:"
+                content += "<div id='room_npcs'>人物："
                 // add npcs
                 for (var i in data["npcs"]) {
                     try {
@@ -393,7 +393,7 @@ var webclient = {
         empty = true;
         if ("players" in data) {
             if (data["players"].length > 0) {
-                content += "<div id='room_players'>Players:"
+                content += "<div id='room_players'>玩家："
                 // add players
                 for (var i in data["players"]) {
                     try {
@@ -495,8 +495,19 @@ var webclient = {
         this.doCloseBox();
         this.createMessageBox();
         
-        var page = $("#input_prompt");
+        var page = $('#input_prompt');
 
+        var button = $('<div>').attr('id', 'close_button')
+                               .appendTo(page)
+
+        var input = $('<input>').addClass('close')
+                                .attr('type', 'image')
+                                .attr('id', 'button_close')
+                                .attr('src', resource.close_button)
+                                .attr('alt', 'close')
+                                .attr('onclick', 'webclient.doCloseBox()')
+                                .appendTo(button)
+        
         // object's info
         var content = "";
         var element = "";
@@ -515,7 +526,9 @@ var webclient = {
         catch(error) {
             element = tab_name;
         }
+
         content += "<div><center><span class='lime'>\>\>\> " + element + " \<\<\<<center></span></div>";
+        content += "<div><br></div>";
 
         // add object's desc
         try {
@@ -529,7 +542,7 @@ var webclient = {
 
         if ("cmds" in data) {
             if (data["cmds"].length > 0) {
-                content += "<div id='object_cmds'>Actions:"
+                content += "<div id='object_cmds'>动作："
                 // add cmds
                 for (var i in data["cmds"]) {
                     try {
@@ -548,9 +561,10 @@ var webclient = {
             }
         }
 
-        page.html(content);
+        page.append(content);
         
         // button
+        /*
         var html_button = '<div><br></div>\
                              <div>\
                                 <center>\
@@ -558,6 +572,7 @@ var webclient = {
                                 </center>\
                             </div>'
         $('#input_additional').html(html_button);
+        */
         this.doSetSizes();
     },
     
@@ -583,7 +598,7 @@ var webclient = {
                 element += obj["number"];
                 if ("equipped" in obj)
                     if (obj["equipped"]) {
-                        element += " (equipped)";
+                        element += " (已装备)";
                     }
 
                 element += "</td>";
@@ -669,7 +684,7 @@ var webclient = {
                     }
                     else {
                         objectives += obj.target + obj.object;
-                        objectives += obj.achieved + "/" + obj.total;
+                        objectives += " " + obj.achieved + "/" + obj.total;
                     }
                 }
                 
@@ -745,7 +760,7 @@ var webclient = {
         var html_button = '<div><br></div>\
                              <div>\
                                 <center>\
-                                    <input type="button" id="button_center" value="OK" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
+                                    <input type="button" id="button_center" value="确定" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
                                 </center>\
                             </div>'
         $('#input_additional').html(html_button);
@@ -759,7 +774,7 @@ var webclient = {
         var element = "";
         
         try {
-            element = "<span class='white'> HP: ";
+            element = "<span class='white'> 生命：";
             element += data["hp"].toString();
             element += "</span>";
             prompt += element;
@@ -776,7 +791,7 @@ var webclient = {
         content += "<div>";
 
         try {
-            element = "<div><span class='white'> HP: ";
+            element = "<div><span class='white'> 生命：";
             element += data["hp"].toString() + "/" + data["max_hp"].toString();
             element += "</span><br></div>";
             content += element;
@@ -785,7 +800,7 @@ var webclient = {
         }
 
         try {
-            element = "<div><span class='white'> ATTACK: ";
+            element = "<div><span class='white'> 攻击：";
             element += data["attack"].toString();
             element += "</span><br></div>";
             content += element;
@@ -794,7 +809,7 @@ var webclient = {
         }
         
         try {
-            element = "<div><span class='white'> DEFENCE: ";
+            element = "<div><span class='white'> 防御：";
             element += data["defence"].toString();
             element += "</span><br></div>";
             content += element;
@@ -812,10 +827,10 @@ var webclient = {
         var content = "";
 
         try {
-            element = "<div>Equipments: ";
+            element = "<div>装备：";
             for (position in data) {
                 element += "<br>";
-                element += "&nbsp;&nbsp;" + position + ": ";
+                element += "&nbsp;&nbsp;" + position + "：";
                 if (data[position] != null) {
                     element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
                     element += " cmd_name='look'";
@@ -978,7 +993,7 @@ var webclient = {
                 var html_button = '<div><br></div>\
                 <div>\
                 <center>\
-                <input type="button" id="button_center" value="NEXT" class="btn btn-primary"';
+                <input type="button" id="button_center" value="继续" class="btn btn-primary"';
 
                 if ("npc" in dialogues[0]) {
                     html_button += ' npc="' + dialogues[0].npc + '"';

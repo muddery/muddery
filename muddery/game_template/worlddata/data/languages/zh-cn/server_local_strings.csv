@@ -25,6 +25,7 @@ origin,local
 "You can not cast a passive skill.","不能施放被动技能。"
 "You have already learned this skill.","你已经学习过这项技能了。"
 "Talk to","对话"
+"Get","获取"
 "You should select a target.","你需要指定一个目标。"
 "You are already in a combat.","你已经在战斗中了。"
 "You are not in combat!","你不在战斗中！"
@@ -37,3 +38,5 @@ origin,local
 "You should unlock something.","你需要指定打开的东西。"
 "Can not find this exit.","无法找到这个出口。"
 "Accepted quest {c%s{n.","接受任务{c%s{n。"
+"Quest {c%s{n finished.","任务{c%s{n已完成。"
+"You become {c%s{n.","你登录了{c%s{n。"

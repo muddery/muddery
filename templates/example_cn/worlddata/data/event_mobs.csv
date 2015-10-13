@@ -1,6 +1,5 @@
 key,mob,level,odds
 event_colorfulworld_street,mob_robot_a,1,0.5
-event_colorfulworld_conv_store,mob_robot_a,1,0.5
 event_colorfulworld_gift_shop,mob_robot_a,1,0.5
 event_colorfulworld_photo_studio,mob_robot_a,1,0.5
 event_colorfulworld_storeroom,mob_wu,1,1

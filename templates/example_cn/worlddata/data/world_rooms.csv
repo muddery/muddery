@@ -4,7 +4,7 @@ room_colorfulworld_hole,电缆井,typeclasses.rooms.Room,四周一片漆黑，�
 room_colorfulworld_alley,小巷,typeclasses.rooms.Room,这是一条狭长的小巷，没有路灯，显得很昏暗。它一端是死路，另一端一直向前延伸出去，应该可以通向大路吧。
 room_colorfulworld_street,大街,typeclasses.rooms.Room,这是游乐园的“缤纷世界”购物街，沿着街两侧有整排的商店。这原本喧闹繁华的地方，现在却是一片死寂。四周商店的门窗都被打烂了，地上还散落着不少鞋子和衣物。地上、墙上有好几片暗红色，像是血迹。天哪！在街角还有一个人倒在血泊中！
 room_colorfulworld_conv_store,便利店,typeclasses.rooms.Room,便利店门歪歪扭扭地倒在一旁，店里一片狼藉，货架东倒西歪地躺着，货物全都散落在地上，大多数已经被踩烂了。
-room_colorfulworld_storeroom,储藏室,typeclasses.rooms.Room,储藏室的空间不大，一侧的货架上整齐地摆放着一箱箱货物，有各种食品、饮料，还有一箱创可贴。
+room_colorfulworld_storeroom,储藏室,typeclasses.rooms.Room,储藏室的空间不大，一侧的货架上整齐地摆放着一箱箱货物。
 room_colorfulworld_gift_shop,礼品店,typeclasses.rooms.Room,礼品店里空无一人，橱窗全碎了，货物撒落得到处都是，门框边上还留着几个血手印。
 room_colorfulworld_photo_studio,照相馆,typeclasses.rooms.Room,原本照相馆里有很多人排队和卡通人偶合影，现在里面已是没有了人影，卡通人偶都倒落在地上，已经残破不全，暗淡的光线从窗口斜射进来，照在它们扭曲的身体上，显得狰狞可怖。
 room_colorfulworld_printing_room,冲印室,typeclasses.rooms.Room,冲印室里摆放着两台冲印机，一旁的柜子里放着各种不知名的药水。

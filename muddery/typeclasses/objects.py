@@ -18,6 +18,7 @@ from muddery.utils import utils
 from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.event_handler import EventHandler
+from muddery.utils.localized_strings_handler import LS
 
 
 class MudderyObject(DefaultObject):
@@ -88,7 +89,7 @@ class MudderyObject(DefaultObject):
         Player<->Object links have been established.
 
         """
-        self.msg("\nYou become {c%s{n.\n" % self.name)
+        self.msg("\n" + LS("You become {c%s{n.") % self.name + "\n")
         self.execute_cmd("look")
         if not settings.SOLO_MODE:
             if self.location:

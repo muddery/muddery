@@ -495,7 +495,18 @@ var webclient = {
         this.doCloseBox();
         this.createMessageBox();
         
-        var page = $("#input_prompt");
+        var page = $('#input_prompt');
+        
+        var button = $('<div>').attr('id', 'close_button')
+                               .appendTo(page)
+
+        var input = $('<input>').addClass('close')
+                                .attr('type', 'image')
+                                .attr('id', 'button_close')
+                                .attr('src', resource.close_button)
+                                .attr('alt', 'close')
+                                .attr('onclick', 'webclient.doCloseBox()')
+                                .appendTo(button)
 
         // object's info
         var content = "";
@@ -516,6 +527,7 @@ var webclient = {
             element = tab_name;
         }
         content += "<div><center><span class='lime'>\>\>\> " + element + " \<\<\<<center></span></div>";
+        content += "<div><br></div>"
 
         // add object's desc
         try {
@@ -665,7 +677,7 @@ var webclient = {
                     
                     var obj = quest["objectives"][o];
                     objectives += obj["target"] + obj["object"];
-                    objectives += obj["achieved"] + "/" + obj["total"];
+                    objectives += " " + obj["achieved"] + "/" + obj["total"];
                 }
                 
                 element += objectives;
