@@ -62,6 +62,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.exp = 0
         self.db.hp = 1
         self.db.mp = 1
+        self.db.team = 0
 
         equipments = {}
         for position in settings.EQUIP_POSITIONS:
@@ -150,7 +151,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     continue
                 setattr(self, field.name, level_data.serializable_value(field.name))
         except Exception, e:
-            print "Can't load character level info %s: %s" % (self.db.level, e)
+            print "Can't load character %s's level info %s: %s" % (self.get_info_key(), self.db.level, e)
 
 
     def set_equips(self):
@@ -242,6 +243,20 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         return bool(self.ndb.combat_handler)
 
 
+    def set_team(self, team_id):
+        """
+        Set character's team id in combat.
+        """
+        self.db.team = team_id
+
+
+    def get_team(self):
+        """
+        Get character's team id in combat.
+        """
+        return self.db.team
+
+
     def hurt(self, damage):
         """
         Be hurted.
@@ -253,11 +268,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         return
 
 
-    def die(self):
+    def die(self, killers):
         """
         This character die.
         """
-        pass
+        # trigger event
+        self.event.at_character_die(self, killers)
 
 
     def is_alive(self):

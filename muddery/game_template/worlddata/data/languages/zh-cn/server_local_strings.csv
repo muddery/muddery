@@ -36,3 +36,4 @@ origin,local
 "UNLOCK","打开"
 "You should unlock something.","你需要指定打开的东西。"
 "Can not find this exit.","无法找到这个出口。"
+"Accepted quest {c%s{n.","接受任务{c%s{n。"

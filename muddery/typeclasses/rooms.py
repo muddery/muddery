@@ -8,9 +8,8 @@ Rooms are simple containers that has no location of their own.
 import traceback
 from django.conf import settings
 from muddery.typeclasses.objects import MudderyObject
+from muddery.utils import script_handler
 from evennia.objects.objects import DefaultRoom
-from muddery.utils.event_handler import EventHandler
-from evennia.utils.utils import lazy_property
 
 
 class MudderyRoom(MudderyObject, DefaultRoom):
@@ -23,12 +22,6 @@ class MudderyRoom(MudderyObject, DefaultRoom):
     See examples/object.py for a list of
     properties and methods available on all Objects.
     """
-
-    # initialize all handlers in a lazy fashion
-    @lazy_property
-    def event(self):
-        return EventHandler(self)
-
 
     def at_object_receive(self, moved_obj, source_location):
         """
@@ -96,14 +89,20 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         for cont in visible:
             type = self.get_surrounding_type(cont)
             if type:
-                appearance = {"dbref":cont.dbref,
-                              "name":cont.get_name()}
+                appearance = {}
 
                 if type == "npcs":
+                    # only show NPCs who match the condition
+                    if not script_handler.match_condition(caller, cont.condition):
+                        continue
+
                     provide_quest, finish_quest = cont.have_quest(caller)
                     appearance["provide_quest"] = provide_quest
                     appearance["finish_quest"] = finish_quest
 
+                appearance["dbref"] = cont.dbref,
+                appearance["name"] = cont.get_name()
+                
                 info[type].append(appearance)
 
         return info

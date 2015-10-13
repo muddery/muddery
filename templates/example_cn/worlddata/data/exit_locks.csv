@@ -1,2 +1,3 @@
-key,condition,verb,message_lock
-exit_colorfulworld_street_1,have_object("weapon_wood_stick"),用力撬动,通向外面的道路被一块巨大的广告版堵住了，希望能找到合适的工具挪动它。
+key,condition,verb,message_lock,auto_unlock
+exit_colorfulworld_street_1,have_object("weapon_wood_stick"),用力撬动,通向外面的道路被一块巨大的广告版堵住了，希望能找到合适的工具挪动它。,0
+exit_colorfulworld_gate_path,is_quest_finished("quest_find_guardhouse_binder"),,那里太远了，我就在附近找找看吧。,1

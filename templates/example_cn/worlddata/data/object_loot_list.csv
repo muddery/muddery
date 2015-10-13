@@ -1,3 +1,5 @@
 provider,object,number,odds,condition
 creator_alley_pile_01,weapon_wood_stick,1,1,
-creator_street_body_01,guardhouse_key,1,1,is_quest_in_progress("find_guardhouse_key") and not have_object("guardhouse_key")
+creator_street_body_01,obj_guardhouse_key,1,1,is_quest_in_progress("quest_find_guardhouse_key") and not have_object("obj_guardhouse_key")
+creator_storeroom_01,food_01,1,1,
+creator_storeroom_02,obj_binder,1,1,

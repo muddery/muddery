@@ -13,9 +13,11 @@ from django.db.models.loading import get_model
 from evennia.objects.objects import DefaultObject
 from evennia.utils import logger
 from evennia.utils.utils import make_iter
+from evennia.utils.utils import lazy_property
 from muddery.utils import utils
 from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
+from muddery.utils.event_handler import EventHandler
 
 
 class MudderyObject(DefaultObject):
@@ -39,6 +41,12 @@ class MudderyObject(DefaultObject):
                            "save",
                            "delete",
                            ])
+
+
+    # initialize all handlers in a lazy fashion
+    @lazy_property
+    def event(self):
+        return EventHandler(self)
 
 
     def at_object_creation(self):

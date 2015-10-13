@@ -177,7 +177,7 @@ def import_localized_strings(language=None):
                 continue
 
             ext = os.path.splitext(full_name)
-            if not ext_name == ext[1]:
+            if ext_name != ext[1]:
                 # if does not match the ext name
                 continue
 
