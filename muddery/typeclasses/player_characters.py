@@ -374,7 +374,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                         info = {"dbref": obj.dbref,
                                 "name": obj.name,
                                 "desc": obj.db.desc}
-            equipments[position] = info
+            equipments[LS(position)] = info
 
         return equipments
 

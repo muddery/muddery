@@ -77,7 +77,27 @@ class MudderyQuest(MudderyObject):
                                        "achieved": achieved,
                                        "total": obj_num,
                                        })
-
+                elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_OBJECT:
+                    target = LS("Get")
+                    object = ""
+                    
+                    for model_name in settings.COMMON_OBJECTS:
+                        model = get_model(settings.WORLD_DATA_APP, model_name)
+                        if model:
+                            # Get record.
+                            try:
+                                record = model.objects.get(key=self.objectives[ordinal]["object"])
+                                object = record.name
+                                break
+                            except Exception, e:
+                                pass
+        
+                    objectives.append({"target": target,
+                                       "object": object,
+                                       "achieved": achieved,
+                                       "total": obj_num,
+                                       })
+                        
         return objectives
 
 

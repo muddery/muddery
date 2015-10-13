@@ -11,7 +11,7 @@ from evennia.utils import logger
 from muddery.utils.exception import MudderyError
 
 
-def import_csv(file_name, model_name):
+def import_csv(file_name, model_name, clear=True):
     """
     Import data from a csv file to the db model
 
@@ -28,8 +28,9 @@ def import_csv(file_name, model_name):
         # get model
         model_obj = get_model(settings.WORLD_DATA_APP, model_name)
 
-        # clear old data
-        model_obj.objects.all().delete()
+        if clear:
+            # clear old data
+            model_obj.objects.all().delete()
 
         # read title
         title = reader.next()
@@ -181,7 +182,7 @@ def import_localized_strings(language=None):
                 # if does not match the ext name
                 continue
 
-            import_csv(full_name, settings.LOCALIZED_STRINGS_MODEL)
+            import_csv(full_name, settings.LOCALIZED_STRINGS_MODEL, clear=False)
 
             ostring = "%s imported" % file_name
             print ostring

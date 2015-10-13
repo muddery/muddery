@@ -1,2 +1,2 @@
 key,name,typeclass,location,desc,condition
-npc_wu,陌生人,typeclasses.npcs.NPC,room_colorfulworld_storeroom,"这个人身材高大，但身上受了伤，活动有些不灵活。",is_quest_finished("quest_find_survivor")
+npc_wu,保安,typeclasses.npcs.NPC,room_colorfulworld_storeroom,"这个人身材高大，但身上受了伤，活动有些不灵活。",is_quest_finished("quest_find_survivor")

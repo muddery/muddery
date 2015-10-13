@@ -36,6 +36,7 @@ class QuestHandler(object):
             return
 
         self.current_quests[quest] = new_quest
+
         self.character.msg({"msg": LS("Accepted quest {c%s{n.") % new_quest.get_name()})
         self.show_quests()
         self.character.show_location()
@@ -51,9 +52,12 @@ class QuestHandler(object):
         if not self.current_quests[quest].is_achieved:
             return
 
+        name = self.current_quests[quest].get_name()
         self.current_quests[quest].finish()
         del(self.current_quests[quest])
         self.finished_quests.add(quest)
+        
+        self.character.msg({"msg": LS("Quest {c%s{n finished.") % name})
         self.show_quests()
         self.character.show_location()
 
