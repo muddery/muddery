@@ -496,9 +496,12 @@ var webclient = {
         this.createMessageBox();
         
         var page = $('#input_prompt');
+        
+        var title = $('<div>').addClass('clearfix')
+                              .appendTo(page);
 
         var button = $('<div>').attr('id', 'close_button')
-                               .appendTo(page)
+                               .appendTo(title)
 
         var input = $('<input>').addClass('close')
                                 .attr('type', 'image')
@@ -527,8 +530,8 @@ var webclient = {
             element = tab_name;
         }
 
-        content += "<div><center><span class='lime'>\>\>\> " + element + " \<\<\<<center></span></div>";
-        content += "<div><br></div>";
+        var name = "<div><center><span class='lime'>\>\>\> " + element + " \<\<\<<center></span></div>";
+        title.append(name);
 
         // add object's desc
         try {

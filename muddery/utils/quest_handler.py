@@ -135,10 +135,24 @@ class QuestHandler(object):
 
     def at_talk_finished(self, dialogue):
         """
+        Called when the owner finishes a dialogue.
         """
         status_changed = False
         for key in self.current_quests:
             if self.current_quests[key].at_talk_finished(dialogue):
+                status_changed = True
+
+        if status_changed:
+            self.show_quests()
+
+
+    def at_get_object(self, obj_key, number):
+        """
+        Called when the owner gets an object.
+        """
+        status_changed = False
+        for key in self.current_quests:
+            if self.current_quests[key].at_get_object(obj_key, number):
                 status_changed = True
 
         if status_changed:

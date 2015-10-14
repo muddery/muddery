@@ -5,6 +5,8 @@ CommonObject is the object that players can put into their inventory.
 
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
+from muddery.utils.localized_strings_handler import LS
+
 
 class MudderyCommonObject(MudderyObject):
     """
@@ -89,7 +91,7 @@ class MudderyFood(MudderyCommonObject):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
-        commands = [{"name":"USE", "cmd":"use", "args":self.dbref}]
+        commands = [{"name":LS("USE"), "cmd":"use", "args":self.dbref}]
         return commands
 
 
@@ -115,7 +117,7 @@ class MudderyEquipment(MudderyCommonObject):
         """
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
         if self.equipped:
-            commands = [{"name":"TAKE OFF", "cmd":"takeoff", "args":self.dbref}]
+            commands = [{"name":LS("TAKE OFF"), "cmd":"takeoff", "args":self.dbref}]
         else:
-            commands = [{"name":"EQUIP", "cmd":"equip", "args":self.dbref}]
+            commands = [{"name":LS("EQUIP"), "cmd":"equip", "args":self.dbref}]
         return commands

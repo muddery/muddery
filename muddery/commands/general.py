@@ -712,6 +712,7 @@ class CmdUse(Command):
         except Exception, e:
             ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
+            logger.log_errmsg(traceback.format_exc())
 
         if not result:
             result = LS("No result.")
@@ -982,3 +983,56 @@ class CmdUnlockExit(Command):
 
         appearance = obj.get_appearance(caller)
         caller.msg({"look_obj": appearance})
+
+
+#------------------------------------------------------------
+# connect
+#------------------------------------------------------------
+class CmdConnect(Command):
+    """
+    connect to the game when the player has already connectd, doing nothing.
+
+    Usage:
+        {"cmd":"connect"}
+    """
+    key = "connect"
+    locks = "cmd:all()"
+
+    def func(self):
+        pass
+
+
+
+#------------------------------------------------------------
+# create
+#------------------------------------------------------------
+class CmdCreate(Command):
+    """
+    create an account when the player has already connectd, doing nothing.
+
+    Usage:
+        {"cmd":"create_account"}
+    """
+    key = "create_account"
+    locks = "cmd:all()"
+
+    def func(self):
+        pass
+
+
+
+#------------------------------------------------------------
+# create and connect
+#------------------------------------------------------------
+class CmdCreateConnect(Command):
+    """
+    create an account when the player has already connectd, doing nothing.
+
+    Usage:
+        {"cmd":"create_connect"}
+    """
+    key = "create_connect"
+    locks = "cmd:all()"
+
+    def func(self):
+        pass

@@ -124,6 +124,7 @@ class MudderyQuest(MudderyObject):
 
     def at_talk_finished(self, dialogue):
         """
+        Called when the owner finishes a dialogue.
         """
         if not defines.OBJECTIVE_TALK in self.not_achieved:
             return False
@@ -131,10 +132,12 @@ class MudderyQuest(MudderyObject):
         status_changed = False
         index = 0
         while index < len(self.not_achieved[defines.OBJECTIVE_TALK]):
+            # get all talking objectives
             ordinal = self.not_achieved[defines.OBJECTIVE_TALK][index]
             index += 1
 
             if self.objectives[ordinal]["object"] == dialogue:
+                # if the objective is this dialogue
                 status_changed = True
 
                 achieved = self.db.achieved.get(ordinal, 0)
@@ -143,8 +146,8 @@ class MudderyQuest(MudderyObject):
 
                 if self.db.achieved[ordinal] >= self.objectives[ordinal]["number"]:
                     # objective achieved
-                    del(self.not_achieved[defines.OBJECTIVE_TALK][ordinal])
                     index -= 1
+                    del(self.not_achieved[defines.OBJECTIVE_TALK][index])
 
                     if not self.not_achieved[defines.OBJECTIVE_TALK]:
                         del(self.not_achieved[defines.OBJECTIVE_TALK])
@@ -153,5 +156,38 @@ class MudderyQuest(MudderyObject):
         # if status_changed:
         #     if self.is_objectives_achieved():
         #         self.finish()
+
+        return status_changed
+
+
+    def at_get_object(self, object_key, number):
+        """
+        Called when the owner gets an object.
+        """
+        if not defines.OBJECTIVE_OBJECT in self.not_achieved:
+            return False
+
+        status_changed = False
+        index = 0
+        while index < len(self.not_achieved[defines.OBJECTIVE_OBJECT]):
+            # get all object objectives
+            ordinal = self.not_achieved[defines.OBJECTIVE_OBJECT][index]
+            index += 1
+
+            if self.objectives[ordinal]["object"] == object_key:
+                status_changed = True
+
+                achieved = self.db.achieved.get(ordinal, 0)
+                achieved += number
+                self.db.achieved[ordinal] = achieved
+
+                if self.db.achieved[ordinal] >= self.objectives[ordinal]["number"]:
+                    # objective achieved
+                    index -= 1
+                    del(self.not_achieved[defines.OBJECTIVE_OBJECT][index])
+
+                    if not self.not_achieved[defines.OBJECTIVE_OBJECT]:
+                        del(self.not_achieved[defines.OBJECTIVE_OBJECT])
+                        break
 
         return status_changed

@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.localized_strings_handler import LS
 
 
 class MudderyNPC(MudderyCharacter):
@@ -45,7 +46,7 @@ class MudderyNPC(MudderyCharacter):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
-        commands = [{"name":"TALK", "cmd":"talk", "args":self.dbref}]
+        commands = [{"name":LS("TALK"), "cmd":"talk", "args":self.dbref}]
         return commands
 
 
