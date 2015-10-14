@@ -411,6 +411,7 @@ class npc_dialogues(models.Model):
 
     npc = models.ForeignKey("world_npcs", db_index=True)
     dialogue = models.ForeignKey("dialogues", db_index=True)
+    default = models.BooleanField(blank=True, default=False)
 
     class Meta:
         "Define Django meta options"

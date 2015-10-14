@@ -537,7 +537,7 @@ class CmdTalk(Command):
             caller.msg({"alert":LS("Can not find the one to talk.")})
             return
 
-        sentences = DIALOGUE_HANDLER.get_default_sentences(caller, npc)
+        sentences = DIALOGUE_HANDLER.get_sentences(caller, npc)
 
         speaker = ""
         if sentences:

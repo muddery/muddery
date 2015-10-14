@@ -14,10 +14,10 @@ exit_colorfulworld_street_4,大街,typeclasses.exits.Exit,离开照相馆，回�
 exit_colorfulworld_printing_room_1,冲印室,typeclasses.exits.Exit,照相馆大厅后面是一间冲印室。,进入,room_colorfulworld_photo_studio,room_colorfulworld_printing_room
 exit_colorfulworld_photo_studio_2,照相馆,typeclasses.exits.Exit,离开冲印室。,离开,room_colorfulworld_printing_room,room_colorfulworld_photo_studio
 exit_colorfulworld_gate_path,游乐园大门,typeclasses.exits.LockedExit,前往游乐园大门和度假村。,前往,room_colorfulworld_street,room_colorfulworld_to_gate
-exit_path_colorfulworld_gate,缤纷世界,typeclasses.exits.Exit,前往游乐园的缤纷世界。,前往,room_colorfulworld_to_gate,room_colorfulworld_street
+exit_path_colorfulworld_gate,缤纷天地,typeclasses.exits.Exit,前往游乐园的缤纷天地。,前往,room_colorfulworld_to_gate,room_colorfulworld_street
 exit_path_gate,游乐园大门,typeclasses.exits.Exit,前往游乐园大门。,前往,room_colorfulworld_to_gate,room_gate_fountain
-exit_path_colorfulworld_1,缤纷世界,typeclasses.exits.Exit,前往缤纷世界。,前往,room_gate_fountain,room_colorfulworld_to_gate
+exit_path_colorfulworld_1,缤纷天地,typeclasses.exits.Exit,前往缤纷天地。,前往,room_gate_fountain,room_colorfulworld_to_gate
 exit_path_village,度假村,typeclasses.exits.Exit,前往度假村。,前往,room_colorfulworld_to_gate,room_village_gate
-exit_path_colorfulworld_2,缤纷世界,typeclasses.exits.Exit,前往度假村。,前往,room_village_gate,room_colorfulworld_to_gate
+exit_path_colorfulworld_2,缤纷天地,typeclasses.exits.Exit,前往度假村。,前往,room_village_gate,room_colorfulworld_to_gate
 exit_gate_gate,游乐园大门,typeclasses.exits.Exit,前往游乐园大门。,前往,room_gate_fountain,room_gate_gate
 exit_gate_fountain,喷水池,typeclasses.exits.Exit,前往喷水池。,前往,room_gate_gate,room_gate_fountain

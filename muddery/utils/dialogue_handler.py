@@ -160,7 +160,7 @@ class DialogueHandler(object):
         return
 
 
-    def get_default_sentences(self, caller, npc):
+    def get_sentences(self, caller, npc):
         """
         """
         if not caller:
@@ -180,6 +180,7 @@ class DialogueHandler(object):
             if not script_handler.match_condition(caller, npc_dlg["condition"]):
                 continue
 
+            # get dependeces
             match = True
             for dep in npc_dlg["dependences"]:
                 if not QUEST_DEP_HANDLER.match_dependence(caller, dep["quest"], dep["type"]):
@@ -192,6 +193,14 @@ class DialogueHandler(object):
                 # if has sentence, use it
                 sentences.append(npc_dlg["sentences"][0])
 
+        if not sentences:
+            # use default sentences
+            # default sentences should not have condition and dependences
+            for dlg_key in npc.default_dialogues:
+                npc_dlg = self.get_dialogue(dlg_key)
+                if npc_dlg:
+                    sentences.append(npc_dlg["sentences"][0])
+            
         return sentences
 
 

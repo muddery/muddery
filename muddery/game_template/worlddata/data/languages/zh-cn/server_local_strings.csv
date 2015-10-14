@@ -46,3 +46,5 @@ origin,local
 "HP recovered by %s.","生命回复%s。"
 "USE","使用"
 "Moving to %s ...","移动到%s。。。"
+"You died.","你死了。"
+"You are back to %s.","你回到了%s。"

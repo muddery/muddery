@@ -39,10 +39,10 @@ div {margin:0px;}
 }
 
 .site-title {
-	font-size: 32px;
+	font-size: 2.0em;
 	line-height: 25px;
 	font-weight: bold;
-	padding: 0.5em 0 0.5em 0;
+	padding: 0.5em 0 0.2em 0;
 }
 
 /* Utility messages (green) */
@@ -884,7 +884,7 @@ div.btn-combat {
     bottom: 22px;
 	padding: 4px 12px;
 	margin-bottom: 0;
-	font-size: 13px;
+	font-size: 14px;
 	line-height: 18px;
 	text-align: center;
 	vertical-align: middle;
