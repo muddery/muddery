@@ -495,6 +495,7 @@ class event_mobs(models.Model):
     mob = models.CharField(max_length=KEY_LENGTH)
     level = models.IntegerField()
     odds = models.FloatField(blank=True, default=0)
+    desc = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"

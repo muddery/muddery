@@ -797,17 +797,22 @@ input[type="submit"].btn.btn-mini {
 /*
 combat
 */
+#combat_desc {
+    font-size: 1.0em;
+    line-height: 1.4em;
+}
+
 .fighter_self {
 	padding: 0px;
 	position: absolute;
-	top: 40px;
+	top: 100px;
     left: 12%;
 }
 
 .fighter_enemy {
 	padding: 0px;
 	position: absolute;
-	top: 40px;
+	top: 100px;
 	right: 12%;
 }
 
