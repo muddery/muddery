@@ -79,6 +79,7 @@ class world_objects(models.Model):
     typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=KEY_LENGTH, blank=True)
+    condition = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"

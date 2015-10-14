@@ -1,5 +1,5 @@
-key,name,typeclass,desc,location,verb
-creator_alley_pile_01,杂物堆,typeclasses.object_creators.ObjectCreator,在小巷的尽头杂乱地堆着一些木棍和木板,room_colorfulworld_alley,检查
-creator_street_body_01,尸体,typeclasses.object_creators.ObjectCreator,这个人身穿保安的制服面朝下躺着，周围流了很多血，他的身体冰凉，应该已经死了。,room_colorfulworld_street,搜索
-creator_storeroom_01,纸箱,typeclasses.object_creators.ObjectCreator,一个纸箱，好像是放食品的。,room_colorfulworld_storeroom,检查
-creator_storeroom_02,纸箱,typeclasses.object_creators.ObjectCreator,一个纸箱，上面画着一个十字。,room_colorfulworld_storeroom,检查
+key,name,typeclass,desc,location,verb,condition
+creator_alley_pile_01,杂物堆,typeclasses.object_creators.ObjectCreator,在小巷的尽头杂乱地堆着一些木棍和木板,room_colorfulworld_alley,检查,
+creator_street_body_01,尸体,typeclasses.object_creators.ObjectCreator,这个人身穿保安的制服面朝下躺着，周围流了很多血，他的身体冰凉，应该已经死了。,room_colorfulworld_street,搜索,is_quest_in_progress("quest_find_guardhouse_key")
+creator_storeroom_01,纸箱,typeclasses.object_creators.ObjectCreator,一个纸箱，好像是放食品的。,room_colorfulworld_storeroom,检查,
+creator_storeroom_02,纸箱,typeclasses.object_creators.ObjectCreator,一个纸箱，上面画着一个十字。,room_colorfulworld_storeroom,检查,
