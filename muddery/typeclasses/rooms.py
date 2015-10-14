@@ -87,15 +87,17 @@ class MudderyRoom(MudderyObject, DefaultRoom):
             visible = (cont for cont in visible if not cont.has_player)
 
         for cont in visible:
+            # only show objects that match the condition
+            if hasattr(cont, "condition"):
+                if not script_handler.match_condition(caller, cont.condition):
+                    continue
+                        
             type = self.get_surrounding_type(cont)
             if type:
                 appearance = {}
 
                 if type == "npcs":
-                    # only show NPCs who match the condition
-                    if not script_handler.match_condition(caller, cont.condition):
-                        continue
-
+                    # add quest status
                     provide_quest, finish_quest = cont.have_quest(caller)
                     appearance["provide_quest"] = provide_quest
                     appearance["finish_quest"] = finish_quest
