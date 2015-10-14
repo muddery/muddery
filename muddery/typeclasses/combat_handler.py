@@ -95,13 +95,15 @@ class CombatHandler(DefaultScript):
 #        self.msg_all_combat_process([info])
 
 
-    def add_teams(self, teams):
+    def set_combat(self, teams, desc):
         """
         Add combatant to handler
         
         args:
             teams: {<team id>: [<characters>]}
         """
+        self.db.desc = desc
+
         for team in teams:
             for character in teams[team]:
                 character.set_team(team)
@@ -232,7 +234,8 @@ class CombatHandler(DefaultScript):
         """
         Get the combat appearance.
         """
-        appearance = {"characters":[]}
+        appearance = {"characters": [],
+                      "desc": self.db.desc}
         
         for character in self.db.characters.values():
             info = {"dbref": character.dbref,

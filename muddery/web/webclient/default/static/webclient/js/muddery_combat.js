@@ -20,6 +20,7 @@ var combat = {
         layer.prependTo($("body"));
         
         var box = $('<div>').attr('id', 'combat_box');
+        $('<div>').attr('id', 'combat_desc').appendTo(box);
         $('<div>').attr('id', 'combat_characters').appendTo(box);
         $('<div>').attr('id', 'combat_commands').appendTo(box);
         box.prependTo($("body"));
@@ -42,6 +43,7 @@ var combat = {
     showCombatResult: function() {
         var self = combat;
 
+        $('#combat_desc').remove();
         $('#combat_characters').remove();
         $('#combat_commands').remove();
         
@@ -92,12 +94,17 @@ var combat = {
 
 
     closeCombat: function() {
-        $('#overlayer').remove();
+        if ($('#popup_box').size() == 0) {
+            $('#overlayer').remove();
+        }
         $('#combat_box').remove();
     },
 
 
     displayCombatInfo: function(data) {
+        var desc = $('#combat_desc');
+        desc.text(data.desc);
+        
         var characters = $('#combat_characters');
         for (var i in data.characters) {
             var fighter = data.characters[i];

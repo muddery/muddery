@@ -113,7 +113,8 @@ class EventHandler(object):
         for mob_record in mob_records:
             mob = {"mob": mob_record.mob,
                    "level": mob_record.level,
-                   "odds": mob_record.odds}
+                   "odds": mob_record.odds,
+                   "desc": mob_record.desc}
             data.append(mob)
         event["data"] = data
 
@@ -138,7 +139,7 @@ class EventHandler(object):
 
             # create a new combat handler
             chandler = create_script("combat_handler.CombatHandler")
-            chandler.add_teams({1: [mob], 2: [character]})
+            chandler.set_combat({1: [mob], 2: [character]}, item["desc"])
 
 
     def create_event_dialogue(self, event):

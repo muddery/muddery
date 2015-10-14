@@ -1,8 +1,10 @@
 dialogue,ordinal,speaker,content,action,provide_quest,finish_quest
 dlg_hello,1,n,"你好！",,,
+dlg_alley_soliloquy,1,p,"头好晕啊，只记得我和朋友们在游乐园里玩，突然人群骚乱起来，大家都喊叫着四散奔逃，我也跟着乱跑，进了一个胡同之后不知怎么就摔晕过去了，也不知晕了多少时候。",,,
+dlg_alley_soliloquy,2,p,"到底发生了什么？",,,
 dlg_street_find_servivor,1,,"眼前的景象让你吓了一跳，原本游人如织的街道现在已是满目疮痍、空无一人，像是经历了一次大灾难。",,,
 dlg_street_find_servivor,2,,"人们都去哪里了？我该去哪里？",,,
-dlg_street_find_servivor,3,,"你平复了一下心情，决定先在四周找找有没有其他幸存者。",,quest_find_survivor,
+dlg_street_find_servivor,3,,"你平复了一下惊讶的心情，决定先在四周找找有没有其他幸存者。",,quest_find_survivor,
 dlg_colorfulworld_find_survivor,1,"""陌生人""","该死的机器人，我要和你同归于尽！",,,
 dlg_colorfulworld_find_survivor,2,p,"我可不是什么机器人啊！你疯了吗？",,,
 dlg_colorfulworld_find_survivor,3,"""陌生人""","我。。。是我认错了吗？对不起！",,,
@@ -14,7 +16,7 @@ dlg_colorfulworld_wu_01,2,p,"就是餐厅里端盘子的那些机器人？像个
 dlg_colorfulworld_wu_01,3,n,"不是，那些只是低级机器人，造反的是高级人形机器人。他们看上去和真人一模一样，宾馆的服务员、商店的营业员，10个里面有8个是机器人。",,,
 dlg_colorfulworld_wu_01,4,p,"什么？那些都是机器人？我完全看不出他们是机器人啊！",,,
 dlg_colorfulworld_wu_01,5,n,"就是它们。因为游客只偏爱圆筒一样会卖萌的机器人，对和真人一模一样的机器人反而没有卖点，所以公司决定把仿真机器人当做普通服务员用，减少工资成本。但不知什么原因，它们突然开始一起攻击游客，把整个游乐园都占领了。",,,
-dlg_colorfulworld_wu_01,6,p,"我想起来了，我和朋友们在游乐园里玩，突然前面的人群骚乱起来，大家都喊叫着四散奔逃，我跑进了一个胡同，然后就摔晕过去了。",,,
+dlg_colorfulworld_wu_01,6,p,"太可怕了！",,,
 dlg_colorfulworld_wu_01,7,n,"你能帮我一下吗？在警卫室里有专门对付机器人的工具，都锁在柜子里。不过钥匙被给我弄丢了，你能帮我找找吗？我的脚受伤了，走不动了。",,,
 dlg_colorfulworld_wu_01,8,p,"好吧，我去找找看。",,quest_find_guardhouse_key,
 dlg_colorfulworld_wu_02,1,n,"钥匙找到了吗？",,,
@@ -29,3 +31,5 @@ dlg_colorfulworld_wu_03,7,p,"好的。",,quest_find_binder,quest_find_guardhouse
 dlg_colorfulworld_wu_04,1,n,"绷带找到了吗？",,,
 dlg_colorfulworld_wu_04,2,p,"还没。",,,
 dlg_colorfulworld_wu_05,1,n,"太好了，谢谢你！",,,quest_find_binder
+dlg_colorfulworld_wu_06,1,n,"客官，演示游戏的剧情暂时只编到了这里。",,,
+dlg_colorfulworld_wu_06,2,p,"知道了，后面的内容我会自己脑补的。",,,
