@@ -54,6 +54,9 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdCastSkill())
         self.add(general.CmdAttack())
         self.add(general.CmdUnlockExit())
+        self.add(general.CmdConnect())
+        self.add(general.CmdCreate())
+        self.add(general.CmdCreateConnect())
         self.add(combat.CmdCombatSkill())
 
 

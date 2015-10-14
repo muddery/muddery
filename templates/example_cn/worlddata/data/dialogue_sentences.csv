@@ -1,4 +1,5 @@
 dialogue,ordinal,speaker,content,action,provide_quest,finish_quest
+dlg_hello,1,n,"你好！",,,
 dlg_street_find_servivor,1,,"眼前的景象让你吓了一跳，原本游人如织的街道现在已是满目疮痍、空无一人，像是经历了一次大灾难。",,,
 dlg_street_find_servivor,2,,"人们都去哪里了？我该去哪里？",,,
 dlg_street_find_servivor,3,,"你平复了一下心情，决定先在四周找找有没有其他幸存者。",,quest_find_survivor,
@@ -24,7 +25,7 @@ dlg_colorfulworld_wu_03,3,p,"他。。。已经死了。",,,
 dlg_colorfulworld_wu_03,4,n,"哦，太可惜了。",,,
 dlg_colorfulworld_wu_03,5,p,"你能站起来吗？我们去警卫室。",,,
 dlg_colorfulworld_wu_03,6,n,"我的脚还在流血，你能帮我包扎一下吗？这个储藏室里可能就有绷带。",,,
-dlg_colorfulworld_wu_03,7,p,"好的。",,quest_find_guardhouse_binder,quest_find_guardhouse_key
+dlg_colorfulworld_wu_03,7,p,"好的。",,quest_find_binder,quest_find_guardhouse_key
 dlg_colorfulworld_wu_04,1,n,"绷带找到了吗？",,,
 dlg_colorfulworld_wu_04,2,p,"还没。",,,
-dlg_colorfulworld_wu_05,1,n,"太好了，谢谢你！",,,quest_find_guardhouse_binder
+dlg_colorfulworld_wu_05,1,n,"太好了，谢谢你！",,,quest_find_binder

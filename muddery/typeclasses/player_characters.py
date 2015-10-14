@@ -112,7 +112,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         We make sure to look around after a move.
 
         """
-        self.msg({"msg": "Moving to %s ..." % self.location.name})
+        self.msg({"msg": LS("Moving to %s ...") % self.location.name})
         self.show_location()
 
 
@@ -283,6 +283,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
             if accepted < available:
                 rejected_keys[key] = available - accepted
                 reject_reason[name] = reason
+
+            # call quest handler
+            self.quest.at_get_object(key, accepted)
 
         message = {"get_object":
                         {"accepted": accepted_names,

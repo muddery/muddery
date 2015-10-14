@@ -10,6 +10,8 @@ creation commands.
 
 from evennia.utils import logger
 from muddery.typeclasses.player_characters import MudderyPlayerCharacter
+from muddery.utils.localized_strings_handler import LS
+import traceback
 
 
 class PlayerCharacter(MudderyPlayerCharacter):
@@ -46,6 +48,7 @@ class PlayerCharacter(MudderyPlayerCharacter):
         except Exception, e:
             ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
+            logger.log_errmsg(traceback.format_exc())
 
         # decrease object's number
         location = obj.location
@@ -74,7 +77,7 @@ class PlayerCharacter(MudderyPlayerCharacter):
             recover_hp = self.add_hp(obj.hp)
             if recover_hp > 0:
                 status_changed = True
-            result += "HP recovered by %s." % recover_hp
+            result += LS("HP recovered by %s.") % int(recover_hp)
 
         if status_changed:
             self.show_status()
