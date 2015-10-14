@@ -521,7 +521,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         super(MudderyPlayerCharacter, self).die(killers)
         
-        self.msg({"msg": "You die."})
+        self.msg({"msg": LS("You died.")})
         
         # Reborn at its home.
         self.db.hp = self.max_hp
@@ -530,4 +530,4 @@ class MudderyPlayerCharacter(MudderyCharacter):
         home = self.search(self.home, global_search=True)
         if home:
             self.move_to(home, quiet=True)
-            self.msg({"msg": "You are back to %s." % home.name})
+            self.msg({"msg": LS("You are back to %s.") % home.name})
