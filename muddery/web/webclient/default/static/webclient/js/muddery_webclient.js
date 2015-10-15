@@ -770,14 +770,15 @@ var webclient = {
         var br = $("<div>").append($("<br>"));
         $('#input_additional').append(br);
 
-		var center = $("<div>").append($("<center>"));
+        var div = $("<div>");
+		var center = $("<center>").appendTo(div);
         var html_button = $("<input>").addClass("btn btn-primary")
         							  .attr("type", "button")
         							  .attr("id", "button_center")
         							  .attr("onClick", "webclient.doCloseBox()")
         							  .val(LS("OK"))
         							  .appendTo(center);
-        $('#input_additional').append(center);
+        $('#input_additional').append(div);
         this.doSetSizes();
     },
 
