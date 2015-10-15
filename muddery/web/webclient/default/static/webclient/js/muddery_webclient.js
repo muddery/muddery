@@ -329,7 +329,7 @@ var webclient = {
         empty = true;
         if ("things" in data) {
             if (data["things"].length > 0) {
-                content += "<div id='room_things'>" + LS("Things:");
+                content += "<div id='room_things'>" + LS("Objects:");
                 // add things
                 for (var i in data["things"]) {
                     try {
