@@ -64,10 +64,10 @@ var combat = {
             }
             
             if (win) {
-                result.text("You win !");
+                result.text(LS("You win !"));
             }
             else {
-                result.text("You lost !");
+                result.text(LS("You lost !"));
             }
         }
         
