@@ -13,10 +13,11 @@ from evennia.players.models import PlayerDB
 from evennia.objects.models import ObjectDB
 from evennia.server.models import ServerConfig
 from evennia.comms.models import ChannelDB
-
 from evennia.utils import create, logger, utils
 from evennia.commands.command import Command
 from evennia.commands.cmdhandler import CMD_LOGINSTART
+from muddery.utils.localized_strings_handler import LS
+
 
 # limit symbol import for API
 __all__ = ("CmdUnconnectedConnect", "CmdUnconnectedCreate", "CmdUnconnectedCreateConnect",
@@ -167,11 +168,7 @@ class CmdUnconnectedConnect(Command):
 
         if not (player and pswd):
             # No playername or password match
-            string = "Wrong login information given.\nIf you have spaces in your name or " \
-                     "password, don't forget to enclose it in quotes. Also capitalization matters." \
-                     "\nIf you are new you should first create a new account " \
-                     "using the 'create' command."
-            session.msg({"alert":string})
+            session.msg({"alert": LS("Incorrect username or password.")})
             # this just updates the throttle
             _throttle(session, storage=_LATEST_FAILED_LOGINS)
             return

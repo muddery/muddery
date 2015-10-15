@@ -22,6 +22,9 @@
 
     {% if websocket_enabled %}
         <script language="javascript" type="text/javascript">
+            document.write("\<script src=\"{% static "webclient/js/lang/zh/strings.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+            document.write("\<script src=\"{% static "webclient/js/local_string.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+            
             if ("WebSocket" in window) {
                 <!-- Importing the Muddery websocket webclient component (requires jQuery)  -->
                 var wsurl = "ws://" + this.location.hostname + ":{{websocket_port}}";
@@ -43,6 +46,8 @@
         </script>
     {% else %}
             <!-- websocket not enabled; use ajax -->
+            <script src="{% static "webclient/js/lang/zh/strings.js" %}" type="text/javascript" charset="utf-8"></script>
+            <script src="{% static "webclient/js/local_string.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/evennia_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
@@ -80,6 +85,9 @@
         </div>
         <nav id="tab_bar">
             <ul id="tab_pills">
+                <li id="tab_connect" style="display: none">
+                    <a href="#" onclick="webclient.showPage('connect')">连接</a>
+                </li>
                 <li id="tab_login" style="display: none">
                     <a href="#" onclick="webclient.showPage('login')">登录</a>
                 </li>
@@ -113,6 +121,12 @@
             </ul>
         </nav>
         <div id="tab_content">
+            <form id="page_connect" style="display: none">
+                <div>请连接到服务器。</div>
+                <div>
+                    <input type="button" class="btn button_left" value="连接" onclick="doConnect()"/>
+                </div>
+            </form>
             <form id="page_login" style="display: none">
                 <div>请登录。</div>
                 <table>

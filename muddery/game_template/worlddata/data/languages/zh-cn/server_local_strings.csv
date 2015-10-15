@@ -48,3 +48,4 @@ origin,local
 "Moving to %s ...","移动到%s。。。"
 "You died.","你死了。"
 "You are back to %s.","你回到了%s。"
+"Incorrect username or password.","错误的用户名或密码。"

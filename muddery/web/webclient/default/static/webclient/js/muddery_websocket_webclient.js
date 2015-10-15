@@ -1,4 +1,6 @@
 
+var CLIENT_CONNECTED = false
+
 function doShow(type, msg) {
     webclient.doShow(type, msg);
 }
@@ -20,8 +22,32 @@ function doSetSizes() {
     webclient.doSetSizes();
 }
 
+function onOpen(evt) {
+    // called when client is first connecting
+    $("#connecting").remove(); // remove the "connecting ..." message
+    doShow("sys", "Using websockets - connected to " + wsurl + ".")
+
+    setTimeout(function () {
+        $("#numplayers").fadeOut('slow', doSetSizes);
+    }, 10000);
+    
+    CLIENT_CONNECTED = true;
+    webclient.onConnectionOpen();
+}
+
 function onClose(evt) {
     // called when client is closing
     CLIENT_HASH = 0;
-    webclient.showAlert("Mud client connection was closed cleanly.", "OK");
+    CLIENT_CONNECTED = false;
+    webclient.onConnectionClose();
+    webclient.showAlert(LS("The client connection was closed cleanly."), "OK");
+}
+
+function doConnect() {
+    webclient_init();
+
+    // set an idle timer to avoid proxy servers to time out on us (every 3 minutes)
+    setInterval(function() {
+        doSend("idle")
+    }, 60000*3);
 }

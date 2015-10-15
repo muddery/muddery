@@ -22,6 +22,9 @@
 
     {% if websocket_enabled %}
         <script language="javascript" type="text/javascript">
+            document.write("\<script src=\"{% static "webclient/js/lang/en/strings.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+            document.write("\<script src=\"{% static "webclient/js/local_string.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+            
             if ("WebSocket" in window) {
                 <!-- Importing the Muddery websocket webclient component (requires jQuery)  -->
                 var wsurl = "ws://" + this.location.hostname + ":{{websocket_port}}";
@@ -37,12 +40,14 @@
             document.write("\<script src=\"{% static "webclient/js/muddery_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/muddery_commands.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/muddery_combat.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-            document.write("\<script src=\"{% static "webclient/js/resources.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>")
+            document.write("\<script src=\"{% static "webclient/js/resources.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/text2html.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/utils.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
         </script>
     {% else %}
             <!-- websocket not enabled; use ajax -->
+            <script src="{% static "webclient/js/lang/en/strings.js" %}" type="text/javascript" charset="utf-8"></script>
+            <script src="{% static "webclient/js/local_string.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/evennia_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
@@ -80,6 +85,9 @@
         </div>
         <nav id="tab_bar">
             <ul id="tab_pills">
+                <li id="tab_connect" style="display: none">
+                    <a href="#" onclick="webclient.showPage('connect')">Connect</a>
+                </li>
                 <li id="tab_login" style="display: none">
                     <a href="#" onclick="webclient.showPage('login')">Login</a>
                 </li>
@@ -113,6 +121,12 @@
             </ul>
         </nav>
         <div id="tab_content">
+            <form id="page_connect" style="display: none">
+                <div>Please connect to the server.</div>
+                <div>
+                    <input type="button" class="btn button_left" value="CONNECT" onclick="doConnect()"/>
+                </div>
+            </form>
             <form id="page_login" style="display: none">
                 <div>Please login.</div>
                 <table>
