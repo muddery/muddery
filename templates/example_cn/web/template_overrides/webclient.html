@@ -39,6 +39,7 @@
             document.write("\<script src=\"{% static "webclient/js/muddery_combat.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/resources.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/text2html.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+            document.write("\<script src=\"{% static "webclient/js/utils.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
         </script>
     {% else %}
             <!-- websocket not enabled; use ajax -->
@@ -48,6 +49,7 @@
             <script src="{% static "webclient/js/muddery_commands.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/resources.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/text2html.js" %}" type="text/javascript" charset="utf-8"></script>
+            <script src="{% static "webclient/js/utils.js" %}" type="text/javascript" charset="utf-8"></script>
     {% endif %}
 
   </head>

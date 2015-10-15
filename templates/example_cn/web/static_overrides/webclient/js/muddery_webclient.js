@@ -239,8 +239,8 @@ var webclient = {
         if (tab_name.length == 0) {
             tab_name = "Room";
         }
-        else if (tab_name.length > 10) {
-            tab_name = tab_name.substring(0, 8) + "...";
+        else {
+            tab_name = util.truncate_string(tab_name, 10, true);
         }
         tab.text(tab_name);
 
@@ -419,6 +419,8 @@ var webclient = {
         }
         
         page.html(content);
+        
+        this.doSetSizes();
     },
     
     displayObjMovedIn : function(data) {
