@@ -23,7 +23,9 @@ var commands = {
         sendCommand(this.cmdString(cmd, args));
     },
     
+    
     // functions when user click a button
+
     // login
     doLogin : function() {
         var playername = $("#login_name").val();
@@ -37,6 +39,10 @@ var commands = {
 
     // register
     doRegister : function() {
+        if (!CLIENT_CONNECTED) {
+            doConnect();
+        }
+        
         var playername = $("#reg_name").val();
         var nickname = $("#reg_nickname").val();
         var password = $("#reg_password").val();
@@ -76,7 +82,7 @@ var commands = {
     },
     
     // common command
-    doSendCommand : function() {
+    doSendCommand: function() {
         var command = $("#page_command :text").val();
         $("#page_command :text").val("");
         
@@ -86,7 +92,7 @@ var commands = {
     // do test
     doTest : function() {
         // test codes
-    }
+    },
 }
 
 

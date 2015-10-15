@@ -157,7 +157,7 @@ var webclient = {
     displayAlert : function(data) {
         try {
             var msg = "";
-            var button = "OK";
+            var button = LS("OK");
             
             var type = Object.prototype.toString.call(data);
             if (type == "[object String]") {
@@ -301,7 +301,7 @@ var webclient = {
         var empty = true;
         if ("exits" in data) {
             if (data["exits"].length > 0) {
-                content += "<div id='room_exits'>Exits:"
+                content += "<div id='room_exits'>" + LS("Exits:");
                 // add exits
                 for (var i in data["exits"]) {
                     try {
@@ -329,7 +329,7 @@ var webclient = {
         empty = true;
         if ("things" in data) {
             if (data["things"].length > 0) {
-                content += "<div id='room_things'>Things:"
+                content += "<div id='room_things'>" + LS("Things:");
                 // add things
                 for (var i in data["things"]) {
                     try {
@@ -357,7 +357,7 @@ var webclient = {
         empty = true;
         if ("npcs" in data) {
             if (data["npcs"].length > 0) {
-                content += "<div id='room_npcs'>NPCs:"
+                content += "<div id='room_npcs'>" + LS("NPCs:");
                 // add npcs
                 for (var i in data["npcs"]) {
                     try {
@@ -393,7 +393,7 @@ var webclient = {
         empty = true;
         if ("players" in data) {
             if (data["players"].length > 0) {
-                content += "<div id='room_players'>Players:"
+                content += "<div id='room_players'>" + LS("Players:");
                 // add players
                 for (var i in data["players"]) {
                     try {
@@ -498,9 +498,12 @@ var webclient = {
         this.createMessageBox();
         
         var page = $('#input_prompt');
-        
+
+        var title = $('<div>').addClass('clearfix')
+                              .appendTo(page);
+
         var button = $('<div>').attr('id', 'close_button')
-                               .appendTo(page)
+                               .appendTo(title)
 
         var input = $('<input>').addClass('close')
                                 .attr('type', 'image')
@@ -528,8 +531,9 @@ var webclient = {
         catch(error) {
             element = tab_name;
         }
-        content += "<div><center><span class='lime'>\>\>\> " + element + " \<\<\<<center></span></div>";
-        content += "<div><br></div>"
+
+        var name = "<div><center><span class='lime'>\>\>\> " + element + " \<\<\<<center></span></div>";
+        title.append(name);
 
         // add object's desc
         try {
@@ -543,7 +547,7 @@ var webclient = {
 
         if ("cmds" in data) {
             if (data["cmds"].length > 0) {
-                content += "<div id='object_cmds'>Actions:"
+                content += "<div id='object_cmds'>" + LS("Actions:");
                 // add cmds
                 for (var i in data["cmds"]) {
                     try {
@@ -562,9 +566,10 @@ var webclient = {
             }
         }
 
-        page.html(content);
+        page.append(content);
         
         // button
+        /*
         var html_button = '<div><br></div>\
                              <div>\
                                 <center>\
@@ -572,6 +577,7 @@ var webclient = {
                                 </center>\
                             </div>'
         $('#input_additional').html(html_button);
+        */
         this.doSetSizes();
     },
     
@@ -580,7 +586,9 @@ var webclient = {
         var page = $("#page_inventory");
         
         var content = "<table class='tab_inventory'>";
-        content += "<thead><tr><th>NAME</th><th>NUM</th><th>DESC</th></tr></thead>";
+        content += "<thead><tr><th>" + LS("NAME") + "</th>";
+        content += "<th>" + LS("NUM") + "</th>";
+        content += "<th>" + LS("DESC") + "</th></tr></thead>";
         var element = "";
 
         for (var i in data) {
@@ -597,7 +605,7 @@ var webclient = {
                 element += obj["number"];
                 if ("equipped" in obj)
                     if (obj["equipped"]) {
-                        element += " (equipped)";
+                        element += LS(" (equipped)");
                     }
 
                 element += "</td>";
@@ -622,9 +630,10 @@ var webclient = {
         var page = $("#page_skills");
         
         var content = "<table class='tab_skills'>";
-        content += "<thead><tr><th>NAME</th><th>DESC</th></tr></thead>";
-        var element = "";
+        content += "<thead><tr><th>" + LS("NAME") + "</th>";
+        content += "<th>" + LS("DESC") + "</th></tr></thead>";
 
+        var element = "";
         for (var i in data) {
             try {
                 var obj = data[i];
@@ -654,9 +663,11 @@ var webclient = {
         var page = $("#page_quests");
         
         var content = "<table class='tab_quests'>";
-        content += "<thead><tr><th>NAME</th><th>DESC</th><th>OBJECTIVE</th></tr></thead>";
-        var element = "";
+        content += "<thead><tr><th>" + LS("NAME") + "</th>";
+        content += "<th>" + LS("DESC") + "</th>";
+        content += "<th>" + LS("OBJECTIVE") + "</th></tr></thead>";
 
+        var element = "";
         for (var i in data) {
             try {
                 var quest = data[i];
@@ -678,8 +689,13 @@ var webclient = {
                     }
                     
                     var obj = quest["objectives"][o];
-                    objectives += obj["target"] + obj["object"];
-                    objectives += " " + obj["achieved"] + "/" + obj["total"];
+                    if ("desc" in obj) {
+                        objectives += obj.desc;
+                    }
+                    else {
+                        objectives += obj.target + obj.object;
+                        objectives += " " + obj.achieved + "/" + obj.total;
+                    }
                 }
                 
                 element += objectives;
@@ -715,7 +731,7 @@ var webclient = {
                 element = key + ": " + accepted[key] + "<br>";
                 
                 if (first) {
-                    content += "You got:<br>";
+                    content += LS("You got:") + "<br>";
                     first = false;
                 }
                 content += element;
@@ -745,19 +761,23 @@ var webclient = {
         }
         
         if (count == 0) {
-            content = "You got nothing.";
+            content = LS("You got nothing.");
         }
 
         page.html(content);
         
         // button
-        var html_button = '<div><br></div>\
-                             <div>\
-                                <center>\
-                                    <input type="button" id="button_center" value="OK" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
-                                </center>\
-                            </div>'
-        $('#input_additional').html(html_button);
+        var br = $("<div>").append($("<br>"));
+        $('#input_additional').append(br);
+
+		var center = $("<div>").append($("<center>"));
+        var html_button = $("<input>").addClass("btn btn-primary")
+        							  .attr("type", "button")
+        							  .attr("id", "button_center")
+        							  .attr("onClick", "webclient.doCloseBox()")
+        							  .val(LS("OK"))
+        							  .appendTo(center);
+        $('#input_additional').append(center);
         this.doSetSizes();
     },
 
@@ -768,7 +788,7 @@ var webclient = {
         var element = "";
         
         try {
-            element = "<span class='white'> HP: ";
+            element = "<span class='white'> " + LS("HP: ");
             element += data["hp"].toString();
             element += "</span>";
             prompt += element;
@@ -785,7 +805,7 @@ var webclient = {
         content += "<div>";
 
         try {
-            element = "<div><span class='white'> HP: ";
+            element = "<div><span class='white'> " + LS("HP: ");
             element += data["hp"].toString() + "/" + data["max_hp"].toString();
             element += "</span><br></div>";
             content += element;
@@ -794,7 +814,7 @@ var webclient = {
         }
 
         try {
-            element = "<div><span class='white'> ATTACK: ";
+            element = "<div><span class='white'> " + LS("ATTACK: ");
             element += data["attack"].toString();
             element += "</span><br></div>";
             content += element;
@@ -803,7 +823,7 @@ var webclient = {
         }
         
         try {
-            element = "<div><span class='white'> DEFENCE: ";
+            element = "<div><span class='white'> " + LS("DEFENCE: ");
             element += data["defence"].toString();
             element += "</span><br></div>";
             content += element;
@@ -821,10 +841,10 @@ var webclient = {
         var content = "";
 
         try {
-            element = "<div>Equipments: ";
+            element = "<div>" + LS("Equipments: ");
             for (position in data) {
                 element += "<br>";
-                element += "&nbsp;&nbsp;" + position + ": ";
+                element += "&nbsp;&nbsp;" + position + LS(": ");
                 if (data[position] != null) {
                     element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
                     element += " cmd_name='look'";
@@ -987,7 +1007,9 @@ var webclient = {
                 var html_button = '<div><br></div>\
                 <div>\
                 <center>\
-                <input type="button" id="button_center" value="NEXT" class="btn btn-primary"';
+                <input type="button" id="button_center" value="';
+                html_button += LS("NEXT");
+                html_button += '" class="btn btn-primary"';
 
                 if ("npc" in dialogues[0]) {
                     html_button += ' npc="' + dialogues[0].npc + '"';
@@ -1075,6 +1097,13 @@ var webclient = {
         this.doSetSizes();
     },
     
+    // show connect tabs
+    showConnectTabs : function() {
+        $("#tab_bar li").css("display", "none");
+        
+        $("#tab_connect").css("display", "");
+    },
+    
     // show unlogin tabs
     showUnloginTabs : function() {
         $("#tab_bar li").css("display", "none");
@@ -1106,6 +1135,18 @@ var webclient = {
         this.unselectAllTabs();
         $("#tab_" + pagename).addClass("pill_active");
         $("#page_" + pagename).css("display", "");
+    },
+    
+    onConnectionOpen: function() {
+        this.showUnloginTabs();
+        this.showPage("login");
+        this.doSetSizes();
+    },
+    
+    onConnectionClose: function() {
+        this.showConnectTabs();
+        this.showPage("connect");
+        this.doSetSizes();
     },
 }
 
