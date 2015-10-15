@@ -708,7 +708,7 @@ input[type="submit"].btn.btn-mini {
     text-decoration: none;
     list-style: none;
     display: block;
-    padding: 7px 12px 5px 12px;
+    padding: 7px 5px 5px 5px;
     margin: 4px 2px 0px 0px;
     line-height: 14px;
     border-style: solid;
