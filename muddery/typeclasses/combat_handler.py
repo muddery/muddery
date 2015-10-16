@@ -137,7 +137,7 @@ class CombatHandler(DefaultScript):
             character.msg(message)
 
 
-    def cast_skill(self, skill, caller, target):
+    def cast_skill_manually(self, skill, caller, target):
         """
         Called by combat commands to cast a skill to the target.
 
@@ -159,9 +159,9 @@ class CombatHandler(DefaultScript):
             target = self.db.characters[target]
 
         try:
-            result, cd = caller.skill.cast_skill(skill, target)
-            if result:
-                self.msg_all_combat_skill(result, cd, caller)
+            rtn = caller.skill.cast_skill_manually(skill, target)
+            if rtn:
+                self.msg_all_combat_skill(rtn["result"], rtn["cd_info"], caller)
         except Exception, e:
             print "Can not cast skill %s: %s" % (skill, e)
             print traceback.format_exc()

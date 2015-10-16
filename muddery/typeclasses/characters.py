@@ -57,7 +57,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             
         """
         super(MudderyCharacter, self).at_object_creation()
-        
+
+        # set default values
         self.db.level = 1
         self.db.exp = 0
         self.db.hp = 1
@@ -74,21 +75,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # set quests
         self.db.finished_quests = set()
         self.db.current_quests = {}
-
-
-    def at_object_delete(self):
-        """
-        Called just before the database object is permanently
-        delete()d from the database. If this method returns False,
-        deletion is aborted.
-
-        """
-        super(MudderyCharacter, self).at_object_delete()
-
-        if self.db.GLOBAL_COOLING_DOWN or self.db.AUTO_BATTLE_SKILL:
-            TICKER_HANDLER.remove(self)
-
-        return True
 
 
     def load_data(self):
@@ -137,6 +123,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Load character's level data.
         """
         try:
+            # get data from db
             model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_LEVELS)
             level_data = model_obj.objects.get(character=self.get_info_key(), level=self.db.level)
 
@@ -175,6 +162,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
     def load_equip_data(self):
         """
+        Add equipment's attributes to the character
         """
         # find equipments
         equipped = set([equip_id for equip_id in self.db.equipments.values() if equip_id])
@@ -229,11 +217,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.skill.has_skill(skill)
 
 
-    def cast_skill(self, skill, target):
+    def cast_skill_manually(self, skill, target):
         """
         Cast a skill.
         """
-        self.skill.cast_skill(skill, target)
+        self.skill.cast_skill_manually(skill, target)
 
 
     def is_in_combat(self):
@@ -268,19 +256,19 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         return
 
 
+    def is_alive(self):
+        """
+        If this character is alive.
+        """
+        return self.db.hp > 0
+
+
     def die(self, killers):
         """
         This character die.
         """
         # trigger event
         self.event.at_character_die(self, killers)
-
-
-    def is_alive(self):
-        """
-        If this character is alive.
-        """
-        return self.db.hp > 0
 
 
     def get_combat_commands(self):
@@ -290,6 +278,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         commands = []
         for key in self.db.skills:
             skill = self.db.skills[key]
+            if skill.passive:
+                # exclude passive skills
+                continue
+
             command = {"name": skill.name,
                        "key": skill.get_info_key()}
             commands.append(command)

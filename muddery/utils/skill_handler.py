@@ -77,7 +77,7 @@ class SkillHandler(object):
         return skill in self.skills
 
 
-    def cast_skill(self, skill, target):
+    def cast_skill_manually(self, skill, target):
         """
         Cast a skill.
         """
@@ -85,7 +85,7 @@ class SkillHandler(object):
             self.msg({"alert":LS("You do not have this skill.")})
             return
 
-        return self.skills[skill].cast_skill(target)
+        return self.skills[skill].cast_skill_manually(target)
 
 
     def cast_combat_skill(self, skill, target):
@@ -110,7 +110,7 @@ class SkillHandler(object):
             return
 
         # Cast skill.
-        result = self.owner.ndb.combat_handler.cast_skill(skill, self.owner.dbref, target)
+        result = self.owner.ndb.combat_handler.cast_skill_manually(skill, self.owner.dbref, target)
         if result:
             # Cast successed, set GCD
             if settings.GLOBAL_CD > 0:

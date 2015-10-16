@@ -1,5 +1,8 @@
 """
-skills
+Skills
+
+Each skill is a skill object stored in the character. The skill object stores all data and
+actions of a skill.
 
 """
 
@@ -15,7 +18,7 @@ from skills import skills
 
 class MudderySkill(MudderyObject):
     """
-    This is a skill.
+    A skill of the character.
     """
     
     def at_object_creation(self):
@@ -33,6 +36,9 @@ class MudderySkill(MudderyObject):
         """
         This returns a list of available commands.
         """
+        if self.passive:
+            return
+
         commands = [{"name":LS("CAST"), "cmd":"castskill", "args":self.get_info_key()}]
         return commands
 
@@ -44,10 +50,25 @@ class MudderySkill(MudderyObject):
         self.db.owner = owner
     
         if self.passive:
-            self.cast()
+            # Cast passive skill when a character owns this skill.
+            self.cast_skill()
         else:
+            # Set skill cd.
             if self.cd > 0:
                 self.db.cd_end_time = time.time() + self.cd
+
+
+    def cast_skill_manually(self, target):
+        """
+        Cast this skill manually. Can not cast passive skill in this way.
+        """
+        if self.passive:
+            owner = self.db.owner
+            if owner:
+                owner.msg({"alert":LS("You can not cast a passive skill.")})
+            return
+    
+        return self.cast_skill(target)
 
 
     def cast_skill(self, target):
@@ -56,18 +77,15 @@ class MudderySkill(MudderyObject):
         """
         owner = self.db.owner
 
-        if self.passive:
-            if owner:
-                owner.msg({"alert":LS("You can not cast a passive skill.")})
-            return
-
         if self.cd > 0:
+            # skill is in cd.
             if time.time() < self.db.cd_end_time:
                 if owner:
                     owner.msg({"msg":LS("This skill is not ready yet!")})
                 return
 
         try:
+            # call skill's function
             function = getattr(skills, self.function)
             result = function(owner, target, effect=self.effect)
 
@@ -75,9 +93,9 @@ class MudderySkill(MudderyObject):
             if self.cd > 0:
                 self.db.cd_end_time = time.time() + self.cd
 
-            cd_info = {"skill": self.get_info_key(),
-                       "cd": self.cd,
-                       "gcd": settings.GLOBAL_CD}
+            cd_info = {"skill": self.get_info_key(),    # skill's key
+                       "cd": self.cd,                   # skill's cd
+                       "gcd": settings.GLOBAL_CD}       # global cd
         except Exception, e:
             ostring = "Can not cast skill %s: %s" % (self.get_info_key(), e)
             logger.log_errmsg(ostring)
@@ -86,7 +104,8 @@ class MudderySkill(MudderyObject):
                 owner.msg({"msg": LS("Can not cast this skill!")})
             return
 
-        return result, cd_info
+        return {"result": result,
+                "cd_info": cd_info}
 
 
     def is_cooling_down(self):
