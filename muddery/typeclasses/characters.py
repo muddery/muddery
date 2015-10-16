@@ -268,7 +268,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         This character die.
         """
         # trigger event
-        self.event.at_character_die(self, killers)
+        self.event.at_character_die()
+        self.event.at_character_kill(killers)
 
 
     def get_combat_commands(self):
