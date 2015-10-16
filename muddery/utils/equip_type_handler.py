@@ -1,5 +1,5 @@
 """
-Equipment type handler.
+This handles the relations of equipment types and character careers.
 """
 
 from django.conf import settings
@@ -8,7 +8,7 @@ from django.db.models.loading import get_model
 
 class EquipTypeHandler(object):
     """
-    The model maintains two tables of equip_type->careers and career->equip_types.
+    The model maintains a dict of equip_type to careers.
     """
     def __init__(self):
         """
@@ -41,7 +41,7 @@ class EquipTypeHandler(object):
     
     def can_equip(self, equip, career):
         """
-        Check if can equip.
+        Check if the equipment's type matchs career.
         """
         if not equip in self.equip_career:
             return False

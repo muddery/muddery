@@ -1,5 +1,5 @@
 """
-EventHandler
+EventHandler handles all events. The handler sets on every object.
 """
 
 import re
@@ -20,11 +20,12 @@ class EventHandler(object):
     """
     def __init__(self, owner):
         """
-        Initialize handler
+        Initialize the handler.
         """
         self.owner = owner
         self.events = {}
 
+        # Load events.
         event_records = []
         model_events = get_model(settings.WORLD_DATA_APP, settings.EVENT_DATA)
         if model_events:
@@ -49,18 +50,20 @@ class EventHandler(object):
 
     def at_character_move_in(self, character):
         """
-        Called when a character moves in a room.
+        Called when a character moves in the event handler's owner, usually a room.
         """
         if not character:
             return
 
-        if character.player.is_superuser:
+        if character.player and character.player.is_superuser:
             # ban events on superusers
             return
 
         if defines.EVENT_TRIGGER_ARRIVE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_ARRIVE]:
+                # If has arrive event.
                 if script_handler.match_condition(character, event["condition"]):
+                    # If matches the condition.
                     event["function"](event["data"], character)
 
 
@@ -71,34 +74,47 @@ class EventHandler(object):
         pass
 
 
-    def at_character_die(self, character, killers):
+    def at_character_die(self):
         """
         Called when a character is killed.
         """
-        if not character:
+        owner = self.owner
+
+        if not owner:
             return
 
-        if character.player:
-            if character.player.is_superuser:
-                # ban events on superusers
-                return
+        if owner.player and owner.player.is_superuser:
+            # ban events on superusers
+            return
 
         if defines.EVENT_TRIGGER_DIE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_DIE]:
-                if script_handler.match_condition(character, event["condition"]):
-                    for killer in killers:
-                        event["function"](event["data"], character)
+                #If has die event.
+                if script_handler.match_condition(owner, event["condition"]):
+                    # If matches the condition, run event on the owner.
+                    event["function"](event["data"], owner)
 
+
+    def at_character_kill(self, killers):
+        """
+        Called when a character kills others.
+        This event is set on the character who is killed, and take effect on the killer!
+        """
         if defines.EVENT_TRIGGER_KILL in self.events:
             for event in self.events[defines.EVENT_TRIGGER_KILL]:
-                if script_handler.match_condition(character, event["condition"]):
-                    for killer in killers:
+                # If has kill event.
+                for killer in killers:
+                    if killer.player and killer.player.is_superuser:
+                        # ban events on superusers
+                        continue
+
+                    if script_handler.match_condition(killer, event["condition"]):
                         event["function"](event["data"], killer)
 
 
     def create_event_attack(self, event):
         """
-        Create a combat event.
+        Create a combat event, load combat infos.
         """
         event["type"] = defines.EVENT_ATTACK
         event["function"] = self.do_attack
@@ -127,10 +143,13 @@ class EventHandler(object):
         """
         rand = random.random()
         for item in data:
+            # If matches the odds, put the character in combat.
+            # There can be several mods with different odds.
             if rand >= item["odds"]:
                 rand -= item["odds"]
                 continue
 
+            # Create mob.
             mob = build_object(item["mob"])
             if not mob:
                 return
@@ -139,12 +158,14 @@ class EventHandler(object):
 
             # create a new combat handler
             chandler = create_script("combat_handler.CombatHandler")
+            
+            # set teams and desc
             chandler.set_combat({1: [mob], 2: [character]}, item["desc"])
 
 
     def create_event_dialogue(self, event):
         """
-        Create a dialogue event.
+        Create a dialogue event, load dialog info.
         """
         event["type"] = defines.EVENT_DIALOGUE
         event["function"] = self.do_dialogue
@@ -167,6 +188,7 @@ class EventHandler(object):
         """
         Start a dialogue.
         """
+        # Get sentence.
         sentence = DIALOGUE_HANDLER.get_sentence(data["dialogue"], 0)
 
         if sentence:
