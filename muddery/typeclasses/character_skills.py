@@ -26,8 +26,6 @@ class MudderySkill(MudderyObject):
         
         # set status
         self.db.owner = None
-        self.db.target = None
-        self.db.auto_cast = False
         self.db.cd_end_time = 0
 
 
@@ -63,8 +61,6 @@ class MudderySkill(MudderyObject):
                 owner.msg({"alert":LS("You can not cast a passive skill.")})
             return
 
-        self.db.target = target
-
         if self.cd > 0:
             if time.time() < self.db.cd_end_time:
                 if owner:
@@ -73,7 +69,7 @@ class MudderySkill(MudderyObject):
 
         try:
             function = getattr(skills, self.function)
-            result = function(owner, self.db.target, effect=self.effect)
+            result = function(owner, target, effect=self.effect)
 
             # set cd
             if self.cd > 0:
