@@ -12,7 +12,7 @@ from muddery.utils.builder import delete_object
 
 class MudderyMonster(MudderyCharacter):
     """
-    Default mob.
+    Default mob. Monsters are hostile to players, they can be attacked.
     """
 
     def get_available_commands(self, caller):
@@ -26,6 +26,7 @@ class MudderyMonster(MudderyCharacter):
 
     def die(self, killers):
         """
+        The monster die.
         """
         super(MudderyMonster, self).die(killers)
         
