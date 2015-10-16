@@ -301,6 +301,14 @@ class MudderyPlayerCharacter(MudderyCharacter):
         return rejected_keys
 
 
+    def search_inventory(self, obj_key):
+        """
+        Search specified object in the inventory.
+        """
+        result = [item for item in self.contents if item.get_info_key() == obj_key]
+        return result
+
+
     def show_inventory(self):
         """
         Send inventory data to player.
@@ -314,8 +322,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Get inventory's data.
         """
         inv = []
-        items = self.contents
-        for item in items:
+        for item in self.contents:
             info = {"dbref": item.dbref,        # item's dbref
                     "name": item.name,          # item's name
                     "number": item.db.number,   # item's number

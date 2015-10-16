@@ -25,7 +25,15 @@ class MudderyQuest(MudderyObject):
         """
         Set achieved objectives to empty.
         """
+        self.db.owner = None
         self.db.achieved = {}
+
+
+    def set_owner(self, owner):
+        """
+        Set the owner of the skill.
+        """
+        self.db.owner = owner
 
 
     def load_data(self):
@@ -134,10 +142,45 @@ class MudderyQuest(MudderyObject):
         """
         Finish a quest, do its action.
         """
+        owner = self.db.owner
+
         # do quest's action
         if self.action:
             script_handler.do_action(caller, self.action)
 
+        # remove objective objects
+        changed = False
+        for ordinal in self.objectives:
+            if self.objectives[ordinal]["type"] == defines.OBJECTIVE_OBJECT:
+                # decrease object's number
+                decrease = self.objectives[ordinal]["number"]
+                objects = owner.search_inventory(self.objectives[ordinal]["object"])
+                
+                for obj in objects:
+                    try:
+                        obj_num = obj.get_number()
+                        if obj_num >= decrease:
+                            obj.decrease_num(decrease)
+                            decrease = 0
+                        else:
+                            obj.decrease_num(obj_num)
+                            decrease -= obj_num
+
+                        if obj.get_number() <= 0:
+                            obj.delete()
+                        
+                        changed = True
+                    except Exception, e:
+                        ostring = "An error occured when achieve %s: %s" % (obj.get_info_key(), e)
+                        logger.log_errmsg(ostring)
+                        break
+            
+                    if decrease <= 0:
+                        break
+
+        if changed:
+            owner.show_inventory()
+                
 
     def at_talk_finished(self, dialogue):
         """
