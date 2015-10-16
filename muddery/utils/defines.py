@@ -26,5 +26,5 @@ EVENT_TRIGGER_KILL = 3      # kill a mob, object: mob_id
 
 # event types
 EVENT_NONE = 0
-EVENT_ATTACK = 1
-EVENT_DIALOGUE = 2
+EVENT_ATTACK = 1        # event to begin a combat
+EVENT_DIALOGUE = 2      # event to begin a dialogue

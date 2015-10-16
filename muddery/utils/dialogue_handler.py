@@ -3,40 +3,6 @@ DialogueHandler
 
 The DialogueHandler maintains a pool of dialogues.
 
-All dialogues are stored in WORLD_DATA_APP's DIALOGUES like this:
-+----------+----------+---------+---------+------+-----------+---------+
-| dialogue | sentence | speaker | content | next | condition | action  |
-+----------+----------+---------+---------+------+-----------+---------+
-| dia_01   | 1        | p       | Hello!  | 2    | hp > 0    | hp += 1 |
-+----------+----------+---------+---------+------+-----------+---------+
-
-dialogue:   string, is the dialogue's id. A dialogue can have several sentences.
-sentence:   number, the serial number of sentence. It may not be continuous.
-speaker:    string, "p" refers to the player, "n" refers to the NPC, others refers to blank.
-content:    string, sentence's content, it can contains color marks.
-next:       string, refers to next sentences, in format of
-            "[<dialogue id>:]<sentence>, [<dialogue id>:]<sentence>, [<dialogue id>:]<sentence> ..."
-            Example:
-              "dlg03:5" means dialogue: dlg03, sentence: 5
-              "dlg03:"  means dialogue: dlg03, sentence: 1
-              ":5"      means current_dlg, sentence: 5
-              "5"       means current_dlg, sentence: 5
-              ""        means current_dlg, current sentence + 1
-              "-1"      means no next sentence
-            It can be a series of sentences. Only the ones which matches the condition will be display.
-            If there are several sentences can display, all these sentences will send to the player for
-            selection.
-condition:  string, sentence's condition. The condition is a logical expression.
-            The sentence will not display, if the condition is not matched.
-            "caller." will be add before every words in the condition. For example,
-            "hp" will become "caller.hp". Dialogue can use caller's variables and methords
-            in this way. Dialogue can only use first level variables, for "db.hp" will become
-            "caller.db.caller.hp". And it is safe because "os.system" will become
-            "caller.os.caller.system".
-action:     string, sentence's action. It will be run when the sentence is used. If there
-            are several sentences provided to the player at the same time, it will only run
-            the one which the player select. It is a statement. "caller." will be add to every
-            words in the action, like condition.
 """
 
 
@@ -54,7 +20,7 @@ class DialogueHandler(object):
     """
     def __init__(self):
         """
-        Initialize handler
+        Initialize the handler.
         """
         self.dialogue_storage = {}
     
@@ -137,10 +103,11 @@ class DialogueHandler(object):
         if not dialogue:
             return
 
-        # load cache
+        # Load cache.
         self.load_cache(dialogue)
 
         if not dialogue in self.dialogue_storage:
+            # Can not find dialogue.
             return
 
         return self.dialogue_storage[dialogue]
@@ -151,17 +118,18 @@ class DialogueHandler(object):
         Get specified sentence.
         """
         dlg = self.get_dialogue(dialogue)
-        
+
         try:
             return dlg["sentences"][sentence]
         except Exception, e:
             pass
-            
+
         return
 
 
     def get_sentences(self, caller, npc):
         """
+        Get NPC's sentences.
         """
         if not caller:
             return
@@ -171,16 +139,18 @@ class DialogueHandler(object):
 
         sentences = []
 
-        # get npc's default dialogues
+        # Get npc's dialogues.
         for dlg_key in npc.dialogues:
+            # Get all dialogues.
             npc_dlg = self.get_dialogue(dlg_key)
             if not npc_dlg:
                 continue
 
+            # Match conditions.
             if not script_handler.match_condition(caller, npc_dlg["condition"]):
                 continue
 
-            # get dependeces
+            # Match dependeces.
             match = True
             for dep in npc_dlg["dependences"]:
                 if not QUEST_DEP_HANDLER.match_dependence(caller, dep["quest"], dep["type"]):
@@ -190,12 +160,12 @@ class DialogueHandler(object):
                 continue
 
             if npc_dlg["sentences"]:
-                # if has sentence, use it
+                # If has sentence, use it.
                 sentences.append(npc_dlg["sentences"][0])
 
         if not sentences:
-            # use default sentences
-            # default sentences should not have condition and dependences
+            # Use default sentences.
+            # Default sentences should not have condition and dependences.
             for dlg_key in npc.default_dialogues:
                 npc_dlg = self.get_dialogue(dlg_key)
                 if npc_dlg:
@@ -206,11 +176,12 @@ class DialogueHandler(object):
 
     def get_next_sentences(self, caller, current_dialogue, current_sentence):
         """
+        Get current sentence's next sentences.
         """
         if not caller:
             return
 
-        # get current dialogue
+        # Get current dialogue.
         dlg = self.get_dialogue(current_dialogue)
         if not dlg:
             return
@@ -218,12 +189,12 @@ class DialogueHandler(object):
         sentences = []
 
         try:
-            # if has next sentence, use next sentence
+            # If has next sentence, use next sentence.
             sentences.append(dlg["sentences"][current_sentence + 1])
         except Exception, e:
-            # get next dialogues
+            # Else get next dialogues.
             for dlg_key in dlg["nexts"]:
-                # get next dialogue
+                # Get next dialogue.
                 next_dlg = self.get_dialogue(dlg_key)
                 if not next_dlg:
                     continue
@@ -246,6 +217,9 @@ class DialogueHandler(object):
     def get_dialogue_speaker(self, caller, npc, speaker_str):
         """
         Get the speaker's text.
+        'p' means player.
+        'n' means NPC.
+        Use string in quotes directly.
         """
         speaker = ""
         try:
@@ -314,7 +288,7 @@ class DialogueHandler(object):
 
     def get_npc_name(self, dialogue):
         """
-        Get who say this dialogue.
+        Get who says this dialogue.
         """
         model_npc_dialogues = get_model(settings.WORLD_DATA_APP, settings.NPC_DIALOGUES)
         if model_npc_dialogues:
@@ -330,8 +304,8 @@ class DialogueHandler(object):
 
     def have_quest(self, caller, npc):
         """
-        check if the npc can finish or provide quests
-        finishing is higher than providing
+        Check if the npc can finish or provide quests.
+        Finishing is higher than providing.
         """
         provide_quest = False
         finish_quest = False
@@ -364,7 +338,7 @@ class DialogueHandler(object):
 
     def dialogue_have_quest(self, caller, npc, dialogue, achieved_quests):
         """
-        find quests by recursion
+        Find quests by recursion.
         """
         provide_quest = False
         finish_quest = False
