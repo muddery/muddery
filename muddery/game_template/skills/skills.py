@@ -1,5 +1,5 @@
 """
-Skills
+Example skills.
 """
 
 def skill_example(caller, target, *args, **kwargs):
@@ -30,7 +30,7 @@ def skill_heal(caller, target, effect=0, *args, **kwargs):
 
 def skill_hit(caller, target, effect=0, *args, **kwargs):
     """
-    Heal the target, if target is None, heal the caller.
+    Hit the target.
     """
     if not caller:
         return
@@ -38,13 +38,16 @@ def skill_hit(caller, target, effect=0, *args, **kwargs):
     if not target:
         return
 
+    # calculate the damage
     damage = float(caller.attack) / (caller.attack + target.defence) * caller.attack
     damage = round(damage)
+    
+    # hurt target
     target.hurt(damage)
 
-    return [{"type": "attacked",
-             "caller": caller.dbref,
-             "target": target.dbref,
-             "hurt": damage,
-             "hp": target.db.hp,
-             "max_hp": target.max_hp}]
+    return [{"type": "attacked",            # attack result
+             "caller": caller.dbref,        # caller's dbref
+             "target": target.dbref,        # target's dbref
+             "hurt": damage,                # damage
+             "hp": target.db.hp,            # current hp of the target
+             "max_hp": target.max_hp}]      # max hp of the target

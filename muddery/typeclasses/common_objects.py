@@ -90,7 +90,6 @@ class MudderyFood(MudderyCommonObject):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
         commands = [{"name":LS("USE"), "cmd":"use", "args":self.dbref}]
         return commands
 
@@ -105,6 +104,7 @@ class MudderyEquipment(MudderyCommonObject):
     """
     def load_data(self):
         """
+        Load equipments data.
         """
         super(MudderyEquipment, self).load_data()
         self.equipped = False
@@ -115,7 +115,6 @@ class MudderyEquipment(MudderyCommonObject):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
         if self.equipped:
             commands = [{"name":LS("TAKE OFF"), "cmd":"takeoff", "args":self.dbref}]
         else:

@@ -75,6 +75,7 @@ class CmdLook(Command):
             if not looking_at_obj:
                 return
         else:
+            # Observes the caller's location
             looking_at_obj = caller.location
             if not looking_at_obj:
                 caller.msg({"msg":LS("You have no location to look at!")})
@@ -85,24 +86,35 @@ class CmdLook(Command):
             looking_at_obj = looking_at_obj.character
 
         if not looking_at_obj.access(caller, "view"):
+            # The caller does not have the permission to look.
             caller.msg({"msg":LS("Could not find '%s'.") % looking_at_obj.name})
             return
 
-        # get object's appearance
         if looking_at_obj == caller.location:
+            # Get the location's appearance.
             appearance = looking_at_obj.get_appearance(caller)
+            
+            # Get other objects' apearance in the location.
             surroundings = looking_at_obj.get_surroundings(caller)
             if surroundings:
                 appearance.update(looking_at_obj.get_surroundings(caller))
+
             caller.msg({"look_around": appearance})
             
             if caller.is_in_combat():
+                # If the caller is in combat, add combat info.
+                # This happens when a player is in combat and he logout and login again.
+
+                # Send "joined_combat" message first. It will set the player to combat status.
                 caller.msg({"joined_combat": True})
+                
+                # Send combat infos.
                 appearance = caller.ndb.combat_handler.get_appearance()
                 message = {"combat_info": appearance,
                            "combat_commands": caller.get_combat_commands()}
                 caller.msg(message)
         else:
+            # Get the object's appearance.
             appearance = looking_at_obj.get_appearance(caller)
             caller.msg({"look_obj": appearance})
 
@@ -490,11 +502,13 @@ class CmdGoto(Command):
 
         obj = caller.search(self.args, location=caller.location)
         if not obj:
+            # Can not find exit.
             caller.msg({"alert":LS("Can not find exit.")})
             return
             
         if obj.access(self.caller, 'traverse'):
             # we may traverse the exit.
+            # MudderyLockedExit handles locks in at_before_traverse().
             obj.at_traverse(caller, obj.destination)
         else:
             # exit is locked
@@ -512,7 +526,7 @@ class CmdGoto(Command):
 
 class CmdTalk(Command):
     """
-    Begin to talk to a NPC.
+    Begin a talk with an NPC.
 
     Usage:
         {"cmd":"talk",
@@ -525,7 +539,7 @@ class CmdTalk(Command):
     help_cateogory = "General"
 
     def func(self):
-        "Begin to talk to a NPC."
+        "Talk to an NPC."
         caller = self.caller
 
         if not self.args:
@@ -534,22 +548,25 @@ class CmdTalk(Command):
 
         npc = caller.search(self.args, location=caller.location)
         if not npc:
+            # Can not find the NPC in the caller's location.
             caller.msg({"alert":LS("Can not find the one to talk.")})
             return
 
+        # Get NPC's sentences.
         sentences = DIALOGUE_HANDLER.get_sentences(caller, npc)
 
+        # Get the spearker's name to display.
         speaker = ""
         if sentences:
             speaker = DIALOGUE_HANDLER.get_dialogue_speaker(caller, npc, sentences[0]["speaker"])
 
         dialogues = []
         for s in sentences:
-            dlg = {"speaker": speaker,
-                   "npc": npc.dbref,
-                   "dialogue": s["dialogue"],
-                   "sentence": s["sentence"],
-                   "content": s["content"]}
+            dlg = {"speaker": speaker,          # speaker's name
+                   "npc": npc.dbref,            # NPC's dbref
+                   "dialogue": s["dialogue"],   # dialogue's key
+                   "sentence": s["sentence"],   # sentence's ordinal
+                   "content": s["content"]}     # sentence's content
             dialogues.append(dlg)
 
         caller.msg({"dialogue": dialogues})
@@ -561,13 +578,13 @@ class CmdTalk(Command):
 
 class CmdDialogue(Command):
     """
-    Continue dialogue, using dialogues stored in db.
+    Continue a dialogue, using dialogues stored in db.
 
     Usage:
         {"cmd":"dialogue",
          "args":{"npc":<npc's dbref>,
-                 "dialogue":[<talk's dialogue>],
-                 "sentence":[<talk's sentence>]}
+                 "dialogue":[<current dialogue>],
+                 "sentence":[<current sentence>]}
         }
 
     Dialogue and sentence refer to the current sentence.
@@ -577,7 +594,7 @@ class CmdDialogue(Command):
     help_cateogory = "General"
 
     def func(self):
-        "Continue dialogues."
+        "Continue a dialogue."
         caller = self.caller
 
         if not self.args:
@@ -587,6 +604,7 @@ class CmdDialogue(Command):
         npc = None
         if "npc" in self.args:
             if self.args["npc"]:
+                # get NPC
                 npc = caller.search(self.args["npc"], location=caller.location)
 
         # Get the current sentence.
@@ -603,7 +621,7 @@ class CmdDialogue(Command):
 
         if have_current_dlg:
             try:
-                # Finish this sentence
+                # Finish current sentence
                 DIALOGUE_HANDLER.finish_sentence(caller,
                                                  dialogue,
                                                  sentence)
@@ -617,22 +635,23 @@ class CmdDialogue(Command):
                                                         dialogue,
                                                         sentence)
 
+        # Get speaker's name.
         speaker = ""
         if sentences:
             speaker = DIALOGUE_HANDLER.get_dialogue_speaker(caller, npc, sentences[0]["speaker"])
 
         dialogues = []
         for s in sentences:
-            dlg = {"speaker": speaker,
-                   "dialogue": s["dialogue"],
-                   "sentence": s["sentence"],
-                   "content": s["content"]}
+            dlg = {"speaker": speaker,          # speaker's name
+                   "dialogue": s["dialogue"],   # dialogue's key
+                   "sentence": s["sentence"],   # sentence's ordinal
+                   "content": s["content"]}     # sentence's content
             if npc:
-                dlg["npc"] = npc.dbref
+                dlg["npc"] = npc.dbref          # NPC's dbref, if has NPC.
 
             dialogues.append(dlg)
 
-        # Send next dialogues to the player.
+        # Send dialogues to the player.
         caller.msg({"dialogue": dialogues})
 
 
@@ -642,7 +661,7 @@ class CmdDialogue(Command):
 
 class CmdLoot(Command):
     """
-    Loot objects.
+    Loot from a specified object.
 
     Usage:
         {"cmd":"loot",
@@ -664,10 +683,12 @@ class CmdLoot(Command):
 
         obj = caller.search(self.args, location=caller.location)
         if not obj:
+            # Can not find the specified object.
             caller.msg({"alert":LS("Can not find the object to loot.")})
             return
 
         try:
+            # do loot
             obj.loot(caller)
         except Exception, e:
             ostring = "Can not loot %s: %s" % (obj.get_info_key(), e)
@@ -703,17 +724,20 @@ class CmdUse(Command):
 
         obj = caller.search(self.args, location=caller)
         if not obj:
+            # If the caller does not have this object.
             caller.msg({"alert":LS("You don't have this object.")})
             return
 
         result = ""
         try:
+            # Use the object and get the result.
             result = caller.use_object(obj)
         except Exception, e:
             ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
             logger.log_errmsg(ostring)
             logger.log_errmsg(traceback.format_exc())
 
+        # Send result to the player.
         if not result:
             result = LS("No result.")
         caller.msg({"alert":result})
@@ -747,16 +771,19 @@ class CmdEquip(Command):
 
         obj = caller.search(self.args, location=caller)
         if not obj:
+            # If the caller does not have this equipment.
             caller.msg({"alert":LS("You don't have this equipment.")})
             return
 
         try:
+            # equip
             if not caller.equip_object(obj):
                 return
         except Exception, e:
             caller.msg({"alert":LS("Can not equip %s.") % obj.name})
             return
 
+        # Send lastest status to the player.
         message = {"alert": LS("Equipped!"),
                    "status": caller.return_status(),
                    "equipments": caller.return_equipments(),
@@ -792,10 +819,12 @@ class CmdTakeOff(Command):
 
         obj = caller.search(self.args, location=caller)
         if not obj:
+            # If the caller does not have this equipment.
             caller.msg({"alert":LS("You don't have this equipment.")})
             return
 
         try:
+            # Take off the equipment.
             caller.take_off_object(obj)
         except Exception, e:
             caller.msg({"alert":LS("Can not take off %s.") % obj.name})
@@ -803,6 +832,7 @@ class CmdTakeOff(Command):
             logger.log_errmsg(traceback.format_exc())
             return
 
+        # Send lastest status to the player.
         message = {"alert": LS("Took off!"),
                    "status": caller.return_status(),
                    "equipments": caller.return_equipments(),
@@ -816,7 +846,7 @@ class CmdTakeOff(Command):
 
 class CmdCastSkill(Command):
     """
-    Cast a skill.
+    Cast a skill when the caller is not in combat.
 
     Usage:
         {"cmd":"castskill",
@@ -845,19 +875,23 @@ class CmdCastSkill(Command):
 
         skill_key = None
         if isinstance(self.args, basestring):
+            # If the args is a skill's key.
             skill_key = self.args
         else:
+            # If the args is skill's key and target.
             if not "skill" in self.args:
                 caller.msg({"alert":LS("You should select a skill to cast.")})
                 return
             skill_key = self.args["skill"]
-        
+
+        # Get target
         target = None
         if "target" in self.args:
             target = caller.search(self.args["target"])
 
         try:
-            caller.cast_skill(skill_key, target)
+            # Cast skill.
+            caller.cast_skill_manually(skill_key, target)
         except Exception, e:
             caller.msg({"alert":LS("Can not cast this skill.")})
             return
@@ -914,32 +948,14 @@ class CmdAttack(Command):
 
         # create a new combat handler
         chandler = create_script("combat_handler.CombatHandler")
+        
+        # set combat team and desc
         chandler.set_combat({1: [target], 2:[self.caller]}, "")
         
         self.caller.msg("You attack %s! You are in combat." % target)
         target.msg("%s attacks you! You are in combat." % self.caller)
 
 
-#------------------------------------------------------------
-# cast a skill
-#------------------------------------------------------------
-
-class CmdCombatSkill(Command):
-    """
-    Just ignore it.
-
-    """
-    key = "combat_skill"
-    locks = "cmd:all()"
-    help_cateogory = "General"
-
-    def func(self):
-        """
-        If the character is not in combat, ignore this command.
-        """
-        pass
-
-        
 #------------------------------------------------------------
 # unlock exit
 #------------------------------------------------------------
@@ -972,6 +988,7 @@ class CmdUnlockExit(Command):
             return
 
         try:
+            # Unlock the exit.
             if not caller.unlock_exit(obj):
                 caller.msg({"alert":LS("Can not open this exit.") % obj.name})
                 return
@@ -981,8 +998,29 @@ class CmdUnlockExit(Command):
             logger.log_errmsg(traceback.format_exc())
             return
 
+        # The exit may have different appearance after unlocking.
+        # Send the lastest appearance to the caller.
         appearance = obj.get_appearance(caller)
         caller.msg({"look_obj": appearance})
+
+
+#------------------------------------------------------------
+# cast a skill
+#------------------------------------------------------------
+
+class CmdCombatSkill(Command):
+    """
+    The skill command in combat, ignore it to avoid wrong command messages.
+    """
+    key = "combat_skill"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        """
+        If the character is not in combat, ignore this command.
+        """
+        pass
 
 
 #------------------------------------------------------------
@@ -990,7 +1028,8 @@ class CmdUnlockExit(Command):
 #------------------------------------------------------------
 class CmdConnect(Command):
     """
-    connect to the game when the player has already connectd, doing nothing.
+    Connect to the game when the player has already connectd, 
+    ignore it to avoid wrong command messages.
 
     Usage:
         {"cmd":"connect"}
@@ -999,6 +1038,9 @@ class CmdConnect(Command):
     locks = "cmd:all()"
 
     def func(self):
+        """
+        Just ignore it.
+        """
         pass
 
 
@@ -1008,7 +1050,8 @@ class CmdConnect(Command):
 #------------------------------------------------------------
 class CmdCreate(Command):
     """
-    create an account when the player has already connectd, doing nothing.
+    create an account when the player has already connectd,
+    ignore it to avoid wrong command messages.
 
     Usage:
         {"cmd":"create_account"}
@@ -1017,6 +1060,9 @@ class CmdCreate(Command):
     locks = "cmd:all()"
 
     def func(self):
+        """
+        Just ignore it.
+        """
         pass
 
 
@@ -1026,7 +1072,8 @@ class CmdCreate(Command):
 #------------------------------------------------------------
 class CmdCreateConnect(Command):
     """
-    create an account when the player has already connectd, doing nothing.
+    create an account when the player has already connectd,
+    ignore it to avoid wrong command messages.
 
     Usage:
         {"cmd":"create_connect"}
@@ -1035,4 +1082,7 @@ class CmdCreateConnect(Command):
     locks = "cmd:all()"
 
     def func(self):
+        """
+        Just ignore it.
+        """
         pass

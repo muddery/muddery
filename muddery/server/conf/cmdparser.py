@@ -54,7 +54,7 @@ def cmdparser(raw_string, cmdset, caller, match_index=None):
             cmd = CMD_LOGINSTART
             args = ""
         else:
-            # Decode JSON formated command.
+            # Parse JSON formated command.
             data = json.loads(raw_string)
             cmd = data["cmd"]
             args = data["args"]

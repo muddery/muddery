@@ -99,6 +99,7 @@ class CmdSetDataInfo(default_cmds.MuxCommand):
             caller.msg(string)
             return
 
+        # parse agrs
         if not self.rhs:
             if self.args == self.lhs:
                 # no "="

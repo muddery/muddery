@@ -54,6 +54,9 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdCastSkill())
         self.add(general.CmdAttack())
         self.add(general.CmdUnlockExit())
+        
+        # Add empty login cmd and skill cmd to the normal cmdset to
+        # avoid wrong cmd messages.
         self.add(general.CmdConnect())
         self.add(general.CmdCreate())
         self.add(general.CmdCreateConnect())
@@ -124,6 +127,10 @@ class SessionCmdSet(default_cmds.SessionCmdSet):
 
 
 class CombatCmdSet(CmdSet):
+    """
+    When players are in combat, the combat cmdset will replace the normal cmdset.
+    The normal cmdset will be recoverd when the combat is over.
+    """
     key = "combat_cmdset"
     mergetype = "Replace"
     priority = 10 
