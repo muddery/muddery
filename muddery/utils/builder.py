@@ -18,6 +18,7 @@ def build_object(obj_key, caller=None):
         obj_key: (string) The key of the object.
         caller: (command caller) If provide, running messages will send to the caller.
     """
+    # Get object's model name.
     model_name = OBJECT_KEY_HANDLER.get_model(obj_key)
     if not model_name:
         ostring = "Can not find the model of %s." % obj_key
@@ -26,6 +27,7 @@ def build_object(obj_key, caller=None):
         return
 
     try:
+        # Get record.
         model_obj = get_model(settings.WORLD_DATA_APP, model_name)
         record = model_obj.objects.get(key=obj_key)
     except Exception, e:
@@ -46,6 +48,7 @@ def build_object(obj_key, caller=None):
         return
 
     try:
+        # Set data info.
         obj.set_data_info(record.key)
     except Exception, e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
@@ -60,7 +63,7 @@ def build_object(obj_key, caller=None):
 
 def build_objects(model_name, unique, caller=None):
     """
-    Build objects of a model.
+    Build all objects in a model.
 
     Args:
         model_name: (string) The name of the data model.
@@ -74,6 +77,7 @@ def build_objects(model_name, unique, caller=None):
     if caller:
         caller.msg(ostring)
 
+    # get model
     model_obj = get_model(settings.WORLD_DATA_APP, model_name)
 
     # new objects
@@ -196,23 +200,27 @@ def build_details(model_name, caller=None):
 
 def build_all(caller=None):
     """
-    Load csv data and build the world.
+    Build all objects in the world.
 
     Args:
         caller: (command caller) If provide, running messages will send to the caller.
     """
-    
+    # Reset object key's info.
     OBJECT_KEY_HANDLER.reload()
 
+    # Build rooms.
     for room_info in settings.WORLD_ROOMS:
         build_objects(room_info, True, caller)
 
+    # Build exits.
     for exit_info in settings.WORLD_EXITS:
         build_objects(exit_info, True, caller)
 
+    # Build objects.
     for object_info in settings.WORLD_OBJECTS:
         build_objects(object_info, True, caller)
 
+    # Build NPCs.
     for npc_info in settings.WORLD_NPCS:
         build_objects(npc_info, True, caller)
 
@@ -223,11 +231,10 @@ def reset_default_locations():
     settings.DEFAULT_HOME_KEY and settings.START_LOCATION_KEY. If they
     are empty, set them to to the first room in settings.WORLD_ROOMS.
     """
-
-    # set default home
+    # Set default home.
     default_home_key = settings.DEFAULT_HOME_KEY
     if not default_home_key:
-        # get the first room in WORLD_ROOMS
+        # If does not have the default_home_key, get the first room in WORLD_ROOMS.
         try:
             model_obj = get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS[0])
             rooms = model_obj.objects.all()
@@ -239,26 +246,29 @@ def reset_default_locations():
             print traceback.print_exc()
 
     if default_home_key:
+        # If get default_home_key.
         default_home = utils.search_obj_info_key(default_home_key)
         if default_home:
+            # Set default home.
             settings.DEFAULT_HOME = default_home[0].dbref
             print "settings.DEFAULT_HOME set to: %s" % settings.DEFAULT_HOME
 
-    # set player's default home
+    # Set player's default home.
     default_player_home_key = settings.DEFAULT_PLAYER_HOME_KEY
     if not default_player_home_key:
-        # set to the DEFAULT_HOME
+        # If does not have the default_player_home_key, set to the DEFAULT_HOME
         settings.DEFAULT_PLAYER_HOME = settings.DEFAULT_HOME
     else:
         default_player_home = utils.search_obj_info_key(default_player_home_key)
         if default_player_home:
+            # Set player's default home.
             settings.DEFAULT_PLAYER_HOME = default_player_home[0].dbref
             print "settings.DEFAULT_PLAYER_HOME set to: %s" % settings.DEFAULT_PLAYER_HOME
     
-    # set start location
+    # Set start location.
     start_location_key = settings.START_LOCATION_KEY
     if not start_location_key:
-        # get the first room in WORLD_ROOMS
+        # If does not have the start_location_key, get the first room in WORLD_ROOMS
         try:
             model_obj = get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS[0])
             rooms = model_obj.objects.all()
@@ -270,6 +280,7 @@ def reset_default_locations():
             print traceback.print_exc()
 
     if start_location_key:
+        # If get start_location_key.
         start_location = utils.search_obj_info_key(start_location_key)
         if start_location:
             settings.START_LOCATION = start_location[0].dbref
