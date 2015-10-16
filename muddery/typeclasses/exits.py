@@ -92,6 +92,8 @@ class MudderyExit(MudderyObject, DefaultExit):
 
 class MudderyLockedExit(MudderyExit):
     """
+    Characters must unlock these exits to pass it.
+    The view and commands of locked exits are different from unlocked exits.
     """
     def load_data(self):
         """
@@ -103,10 +105,10 @@ class MudderyLockedExit(MudderyExit):
             model_obj = get_model(settings.WORLD_DATA_APP, settings.EXIT_LOCKS)
             lock_record = model_obj.objects.get(key=self.get_info_key())
 
-            lock = {"condition": lock_record.condition,
-                    "verb": lock_record.verb,
-                    "message_lock": lock_record.message_lock,
-                    "auto_unlock": lock_record.auto_unlock}
+            lock = {"condition": lock_record.condition,         # the condition of unlock
+                    "verb": lock_record.verb,                   # the unlock's name
+                    "message_lock": lock_record.message_lock,   # the view of the exit when locked
+                    "auto_unlock": lock_record.auto_unlock}     # if the lock can be unlocked automatically
             self.exit_lock = lock
         except Exception, e:
             print "Can't load lock info %s: %s" % (self.get_info_key(), e)
@@ -128,6 +130,7 @@ class MudderyLockedExit(MudderyExit):
             before it is even started.
 
         """
+        # Only can pass exits which have already unlockde.
         return traversing_object.is_exit_unlocked(self.get_info_key())
 
 
@@ -135,6 +138,7 @@ class MudderyLockedExit(MudderyExit):
         """
         Unlock an exit.
         """
+        # Only can unlock exits which match there conditions.
         return script_handler.match_condition(caller, self.exit_lock["condition"])
 
 
@@ -143,18 +147,23 @@ class MudderyLockedExit(MudderyExit):
         This is a convenient hook for a 'look'
         command to call.
         """
-        # get name and description
+        # Get name and description.
         if caller.is_exit_unlocked(self.get_info_key()):
+            # If is unlocked, use common appearance.
             return super(MudderyLockedExit, self).get_appearance(caller)
 
         can_unlock = script_handler.match_condition(caller, self.exit_lock["condition"])
+
         if can_unlock and self.exit_lock["auto_unlock"]:
-            # auto unlock the exit
+            # Automatically unlock the exit when a character looking at it.
             caller.unlock_exit(self)
+            
+            # If is unlocked, use common appearance.
             return super(MudderyLockedExit, self).get_appearance(caller)
 
         cmds = []
         if can_unlock:
+            # show unlock command
             verb = self.exit_lock["verb"]
             if not verb:
                 verb = LS("UNLOCK")
@@ -174,11 +183,13 @@ class MudderyLockedExit(MudderyExit):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         if caller.is_exit_unlocked(self.get_info_key()):
+            # If is unlocked, use common commands.
             return super(MudderyLockedExit, self).get_available_commands(caller)
 
         cmds = []
         can_unlock = script_handler.match_condition(caller, self.exit_lock["condition"])
         if can_unlock:
+            # show unlock command
             verb = self.exit_lock["verb"]
             if not verb:
                 verb = LS("UNLOCK")

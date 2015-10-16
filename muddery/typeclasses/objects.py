@@ -26,6 +26,7 @@ class MudderyObject(DefaultObject):
     This object loads attributes from world data on init automatically.
     """
 
+    # these fields are reserved, can not used for other purpose.
     reserved_fields = set(["id",
                            "date_created",
                            "locks",
@@ -43,7 +44,6 @@ class MudderyObject(DefaultObject):
                            "delete",
                            ])
 
-
     # initialize all handlers in a lazy fashion
     @lazy_property
     def event(self):
@@ -52,12 +52,13 @@ class MudderyObject(DefaultObject):
 
     def at_object_creation(self):
         """
-            Called once, when this object is first created. This is the
-            normal hook to overload for most object types.
+        Called once, when this object is first created. This is the
+        normal hook to overload for most object types.
             
-            """
+        """
         super(MudderyObject, self).at_object_creation()
         
+        # Call set_initial_data() when this object is first created.
         self.db.FIRST_CREATE = True
 
 
@@ -71,6 +72,7 @@ class MudderyObject(DefaultObject):
         self.save()
 
         try:
+            # Load db data.
             self.load_data()
         except Exception, e:
             logger.log_errmsg("%s can not load data:%s" % (self.dbref, e))
@@ -89,9 +91,12 @@ class MudderyObject(DefaultObject):
         Player<->Object links have been established.
 
         """
+        # Send puppet info to the player and look around.
         self.msg("\n" + LS("You become {c%s{n.") % self.name + "\n")
         self.execute_cmd("look")
+
         if not settings.SOLO_MODE:
+            # Notify other players in this location.
             if self.location:
                 self.location.msg_contents("%s has entered the game." % self.name, exclude=[self])
 
@@ -110,7 +115,10 @@ class MudderyObject(DefaultObject):
         """
         if self.location: # have to check, in case of multiple connections closing
             if not settings.SOLO_MODE:
+                # Notify other players in this location.
                 self.location.msg_contents("%s has left the game." % self.name, exclude=[self])
+
+            # Save last location.
             self.db.prelogout_location = self.location
             self.location = None
 
@@ -149,8 +157,11 @@ class MudderyObject(DefaultObject):
         Args:
             key: (string) Key of the data info.
         """
+        # Save data info's key and model
         model = OBJECT_KEY_HANDLER.get_model(key)
         utils.set_obj_data_info(self, key, model)
+        
+        # Load data.
         self.load_data()
 
         # initialize with data
@@ -232,11 +243,14 @@ class MudderyObject(DefaultObject):
 
         for field in data._meta.fields:
             if field.name in known_fields:
+                # know fields have been already added.
                 continue
+
             if field.name in self.reserved_fields:
                 print "Can not set reserved field %s!" % field.name
                 continue
 
+            # Set data.
             setattr(self, field.name, data.serializable_value(field.name))
 
 
@@ -257,7 +271,8 @@ class MudderyObject(DefaultObject):
         if not hasattr(self, 'swap_typeclass'):
             logger.log_errmsg("%s cannot have a type at all!" % self.get_info_key())
             return
-    
+
+        # Set new typeclass.
         self.swap_typeclass(typeclass, clean_attributes=False)
 
 
@@ -498,7 +513,7 @@ class MudderyObject(DefaultObject):
         This is a convenient hook for a 'look'
         command to call.
         """
-        # get name and description
+        # Get name, description and available commands.
         info = {"dbref": self.dbref,
                 "name": self.name,
                 "desc": self.db.desc,
@@ -512,7 +527,6 @@ class MudderyObject(DefaultObject):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
         commands = []
         return commands
 
@@ -533,6 +547,7 @@ class MudderyObject(DefaultObject):
         All extra kwargs will be passed on to the protocol.
         
         """
+        # Send messages to the client. Messages are in format of JSON.
         raw = kwargs.get("raw", False)
         if not raw:
             try:

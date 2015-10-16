@@ -21,6 +21,7 @@ class MudderyObjectCreator(MudderyObject):
         """
         super(MudderyObjectCreator, self).load_data()
 
+        # Load loot list.
         loot_list = []
         try:
             model_obj = get_model(settings.WORLD_DATA_APP, settings.OBJECT_LOOT_LIST)
@@ -56,8 +57,11 @@ class MudderyObjectCreator(MudderyObject):
         Loot objects.
         """
         rand = random.random()
+
+        # Get objects that matches odds and conditions .
         obj_list = [obj for obj in self.loot_list if obj["odds"] > rand and\
                                                      script_handler.match_condition(caller, obj["condition"])]
 
         if caller:
+            # Send to the caller.
             caller.receive_objects(obj_list)

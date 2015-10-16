@@ -1,7 +1,7 @@
 """
-Characters
+Player Characters
 
-Characters are (by default) Objects setup to be puppeted by Players.
+Player Characters are (by default) Objects setup to be puppeted by Players.
 They are what you "see" in game. The Character class in this module
 is setup to be the "default" character type created by the default
 creation commands.
@@ -55,6 +55,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
             
         """
         super(MudderyPlayerCharacter, self).at_object_creation()
+
+        # Set default data.
         self.db.nickname = ""
         self.db.unlocked_exits = set()
 
@@ -65,6 +67,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Moves this object to a new location.
         """
         if settings.SOLO_MODE:
+            # If in solo mode, move quietly.
             quiet = True
         
         return super(MudderyPlayerCharacter, self).move_to(destination,
@@ -87,8 +90,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         super(MudderyPlayerCharacter, self).at_object_receive(moved_obj, source_location)
 
         # send latest inventory data to player
-        inv = self.return_inventory()
-        self.msg({"inventory":inv})
+        self.msg({"inventory": self.return_inventory()})
     
         
     def at_object_left(self, moved_obj, target_location):
@@ -103,8 +105,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         super(MudderyPlayerCharacter, self).at_object_left(moved_obj, target_location)
         
         # send latest inventory data to player
-        inv = self.return_inventory()
-        self.msg({"inventory":inv})
+        self.msg({"inventory": self.return_inventory()})
 
 
     def at_after_move(self, source_location):
@@ -122,6 +123,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Player<->Object links have been established.
 
         """
+        # Send puppet info to the client.
         self.msg({"puppet": self.dbref})
 
         super(MudderyPlayerCharacter, self).at_post_puppet()
@@ -167,6 +169,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Get player character's name.
         """
+        # Use nick name instead of normal name.
         return self.db.nick_name
 
 
@@ -175,7 +178,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         This is a convenient hook for a 'look'
         command to call.
         """
-        # get name and description
+        # get name, description and available commands.
         info = {"dbref": self.dbref,
                 "name": self.get_name(),
                 "desc": self.db.desc,
@@ -201,10 +204,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
                   .object object's key
                   .number object's number
         """
-        accepted_keys = {}
-        accepted_names = {}
-        rejected_keys = {}
-        reject_reason = {}
+        accepted_keys = {}      # the keys of objects that have been accepted
+        accepted_names = {}     # the names of objects that have been accepted
+        rejected_keys = {}      # the keys of objects that have been rejected
+        reject_reason = {}      # the reasons of why objects have been rejected
 
         # check what the character has now
         inventory = {}
@@ -265,6 +268,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     reason = LS("Can not get %s.") % name
                     break
 
+                # Get the number that actually added.
                 add = number
                 if add > new_obj.max_stack:
                     add = new_obj.max_stack
@@ -287,6 +291,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
             # call quest handler
             self.quest.at_get_object(key, accepted)
 
+        # Send results to the player.
         message = {"get_object":
                         {"accepted": accepted_names,
                          "rejected": reject_reason}}
@@ -311,10 +316,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
         inv = []
         items = self.contents
         for item in items:
-            info = {"dbref": item.dbref,
-                    "name": item.name,
-                    "number": item.db.number,
-                    "desc": item.db.desc}
+            info = {"dbref": item.dbref,        # item's dbref
+                    "name": item.name,          # item's name
+                    "number": item.db.number,   # item's number
+                    "desc": item.db.desc}       # item's desc
             if item.is_typeclass("muddery.typeclasses.common_objects.MudderyEquipment", False):
                 info["equipped"] = item.equipped
             inv.append(info)
@@ -323,6 +328,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
     def have_object(self, obj_key):
         """
+        If the character has specified object.
         """
         for item in self.contents:
             if item.get_info_key() == obj_key:
@@ -369,6 +375,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         equipments = {}
         for position in self.db.equipments:
+            # in order of positions
             info = None
             if self.db.equipments[position]:
                 dbref = self.db.equipments[position]
@@ -398,7 +405,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
             self.msg({"alert":"Can not equip that equipment."})
             return False
 
-        # take off old equipment
+        # Take off old equipment
         if self.db.equipments[position]:
             dbref = self.db.equipments[position]
             
@@ -406,8 +413,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 if content.dbref == dbref:
                     content.equipped = False
 
-        # put on new equipment
+        # Put on new equipment, store object's dbref.
         self.db.equipments[position] = obj.dbref
+        
+        # Set object's attribute 'equipped' to True
         obj.equipped = True
 
         # reset character's attributes
@@ -421,6 +430,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Take off an object from position.
         """
         if self.db.equipments[position]:
+            # Set object's attribute 'equipped' to False
             dbref = self.db.equipments[position]
             
             for obj in self.contents:
@@ -442,6 +452,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
             return
 
         self.db.equipments[obj.position] = None
+        
+        # Set object's attribute 'equipped' to False
         obj.equipped = False
 
         # reset character's attributes
@@ -450,7 +462,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
     def unlock_exit(self, exit):
         """
-        Unlock an exit.
+        Unlock an exit. Add exit's key to character's unlock list.
         """
         exit_key = exit.get_info_key()
         if self.is_exit_unlocked(exit_key):
@@ -523,10 +535,11 @@ class MudderyPlayerCharacter(MudderyCharacter):
         
         self.msg({"msg": LS("You died.")})
         
-        # Reborn at its home.
+        # Recover all hp.
         self.db.hp = self.max_hp
         self.show_status()
 
+        # Reborn at its home.
         home = self.search(self.home, global_search=True)
         if home:
             self.move_to(home, quiet=True)

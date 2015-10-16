@@ -13,7 +13,7 @@ from muddery.utils.localized_strings_handler import LS
 
 class MudderyNPC(MudderyCharacter):
     """
-    Default NPC.
+    Default NPC. NPCs are friendly to players, they can not be attacked.
     """
 
     def load_data(self):
@@ -46,15 +46,14 @@ class MudderyNPC(MudderyCharacter):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
         commands = [{"name":LS("TALK"), "cmd":"talk", "args":self.dbref}]
         return commands
 
 
     def have_quest(self, caller):
         """
-        check if the npc can finish or provide quests
-        finishing is higher than providing
+        If the npc can finish or provide quests.
+        Finishing is higher than providing.
         """
         return DIALOGUE_HANDLER.have_quest(caller, self)
 

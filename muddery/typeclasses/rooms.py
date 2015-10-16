@@ -79,7 +79,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                 "things": [],
                 "players": [],
                 "offlines": []}
-                
+
         visible = (cont for cont in self.contents if cont != caller and
                    cont.access(caller, "view"))
 
