@@ -1,5 +1,5 @@
 """
-QuestDependencyHandler
+QuestDependencyHandler deals quest's dependencies.
 """
 
 from muddery.utils import defines
@@ -10,6 +10,7 @@ from evennia.utils import logger
 
 class QuestDependencyHandler(object):
     """
+    This class handels the relation of quest.
     """
     def __init__(self):
         """
@@ -63,7 +64,7 @@ class QuestDependencyHandler(object):
 
     def match_quest_dependences(self, caller, quest):
         """
-        check quest's dependences
+        If the quest matches its dependences.
         """
         if not caller:
             return False
@@ -72,6 +73,7 @@ class QuestDependencyHandler(object):
             return False
 
         for dependence in self.get_quest_dependences(quest):
+            # match each dependence
             if not self.match_dependence(caller, dependence["quest"], dependence["type"]):
                 return False
 
@@ -111,7 +113,7 @@ class QuestDependencyHandler(object):
 
     def can_provide_quest(self, caller, quest):
         """
-        whether can provide quest
+        whether can provide quest or not
         """
         if not caller:
             return False

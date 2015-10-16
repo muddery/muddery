@@ -1,5 +1,5 @@
 """
-Object key handler.
+Object key handler, stores key's model name.
 """
 
 from django.conf import settings
@@ -30,6 +30,7 @@ class ObjectKeyHandler(object):
         """
         self.clear()
 
+        # Get model names.
         model_names = [model for data_models in settings.OBJECT_DATA_MODELS
                        for model in data_models]
 
@@ -37,6 +38,7 @@ class ObjectKeyHandler(object):
             try:
                 model_obj = get_model(settings.WORLD_DATA_APP, model_name)
                 for record in model_obj.objects.all():
+                    # Set key's model name.
                     self.key_model[record.key] = model_name
             except Exception, e:
                 pass
@@ -44,7 +46,7 @@ class ObjectKeyHandler(object):
     
     def add_key(self, key, model):
         """
-        Add a key.
+        Add a new key.
         """
         self.key_model[key] = model
 

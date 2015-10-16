@@ -9,12 +9,21 @@ from evennia.utils import logger
 
 def match_condition(caller, condition):
     """
-    check condition
+    Check condition.
+    
+    Condition is a logical expression. "caller." will be add before every words
+    in the condition, except the ones in quotes.
+    
+    For example, "hp" will become "caller.hp". So condition can use caller's
+    variables and methords in this way.
+    
+    Condition only can use first level variables, for "db.hp" will become
+    "caller.db.caller.hp".
     """
     if not condition:
         return True
 
-    # add "caller" to condition
+    # add "caller." to condition
     condition = safe_statement(condition)
 
     try:

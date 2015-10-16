@@ -1,5 +1,5 @@
 """
-This module handles importing data from files to models.
+This module imports data from files to db.
 """
 
 import os
@@ -17,8 +17,8 @@ def import_csv(file_name, model_name, clear=True):
 
     Args:
         file_name: (string) CSV file's name.
-        app_name: (string) Db app's name.
-        model_name: (string) Db model's name.
+        model_name: (string) db model's name.
+        clear: (boolean) clear old data or not.
     """
     try:
         # load file
@@ -125,18 +125,19 @@ def import_csv(file_name, model_name, clear=True):
         pass
 
 
-def import_file(file_name, model_name):
+def import_file(file_name, model_name, clear=True):
     """
     Import data from a data file to the db model
 
     Args:
         file_name: (string) Data file's name.
         model_name: (string) Db model's name.
+        clear: (boolean) clear old data or not.
     """
 
     file_type = settings.WORLD_DATA_FILE_TYPE.lower()
     if file_type == "csv":
-        import_csv(file_name, model_name)
+        import_csv(file_name, model_name, clear)
     else:
         message = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
         raise MudderyError(message)
@@ -182,7 +183,7 @@ def import_localized_strings(language=None):
                 # if does not match the ext name
                 continue
 
-            import_csv(full_name, settings.LOCALIZED_STRINGS_MODEL, clear=False)
+            import_file(full_name, settings.LOCALIZED_STRINGS_MODEL, clear=False)
 
             ostring = "%s imported" % file_name
             print ostring
