@@ -1,5 +1,5 @@
 """
-Skill handler
+Skill handler handles a character's skills.
 
 """
 
@@ -16,7 +16,7 @@ from muddery.utils.localized_strings_handler import LS
 
 class SkillHandler(object):
     """
-    Skill handler handles character's skills.
+    Skill handler handles a character's skills.
     """
 
     def __init__(self, owner):
@@ -26,7 +26,7 @@ class SkillHandler(object):
         self.owner = owner
         self.skills = owner.db.skills
         
-        # TICKER_HANDLER need pk.
+        # TICKER_HANDLER needs pk.
         self.pk = "SKILL"
         
         # always begin with GCD
@@ -72,14 +72,14 @@ class SkillHandler(object):
 
     def has_skill(self, skill):
         """
-        Whether the character has the skill.
+        If the character has the skill or not.
         """
         return skill in self.skills
 
 
     def cast_skill_manually(self, skill, target):
         """
-        Cast a skill.
+        Cast a skill positively.
         """
         if not skill in self.skills:
             self.msg({"alert":LS("You do not have this skill.")})
@@ -116,7 +116,7 @@ class SkillHandler(object):
             if settings.GLOBAL_CD > 0:
                 self.GLOBAL_COOLING_DOWN = True
                 
-                # Set timer.
+                # Set timer of GCD.
                 TICKER_HANDLER.add(self, settings.GLOBAL_CD, hook_key="global_cooled_down")
 
         return result
@@ -181,7 +181,7 @@ class SkillHandler(object):
 
     def choose_skill_target(self):
         """
-        Choose a target.
+        Choose a target automatically.
         """
         if not self.owner:
             return
@@ -208,7 +208,7 @@ class SkillHandler(object):
         # Cast a skill immediately
         self.auto_cast_skill()
 
-        # Set timer.
+        # Set timer of auto cast.
         TICKER_HANDLER.add(self, settings.AUTO_CAST_SKILL_CD, hook_key="auto_cast_skill")
 
 

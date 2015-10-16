@@ -47,12 +47,14 @@ class LocalizedStringsHandler(object):
         Translate origin string to local string.
         """
         try:
+            # Get local string.
             local = self.dict[origin]
             if local:
                 return local
         except:
             pass
 
+        # Else return origin string.
         return origin
 
 
@@ -63,5 +65,6 @@ LOCALIZED_STRINGS_HANDLER = LocalizedStringsHandler()
 # translater
 def LS(origin):
     """
+    This function returns the localized string.
     """
     return LOCALIZED_STRINGS_HANDLER.translate(origin)

@@ -1,5 +1,5 @@
 """
-QuestHandler
+QuestHandler handles a character's quests.
 """
 
 import re
@@ -14,6 +14,7 @@ from evennia.utils import logger
 
 class QuestHandler(object):
     """
+    Handles a character's quests.
     """
     def __init__(self, character):
         """
@@ -31,6 +32,7 @@ class QuestHandler(object):
         if quest in self.current_quests:
             return
 
+        # Create quest object.
         new_quest = build_object(quest)
         if not new_quest:
             return
@@ -52,9 +54,15 @@ class QuestHandler(object):
         if not self.current_quests[quest].is_achieved:
             return
 
+        # Get quest's name.
         name = self.current_quests[quest].get_name()
+        
+        # Call finish function in the quest.
         self.current_quests[quest].finish()
+        
+        # Delete the quest.
         del(self.current_quests[quest])
+
         self.finished_quests.add(quest)
         
         self.character.msg({"msg": LS("Quest {c%s{n finished.") % name})
@@ -64,6 +72,7 @@ class QuestHandler(object):
 
     def get_achieved_quests(self):
         """
+        Get all quests that their objectives are achieved.
         """
         quests = set()
         for quest in self.current_quests:
@@ -82,13 +91,14 @@ class QuestHandler(object):
 
     def is_in_progress(self, quest):
         """
-        Whether the character is doing this quest.
+        If the character is doing this quest.
         """
         return quest in self.current_quests
 
 
     def can_provide(self, quest):
         """
+        If can provide this quest to the owner.
         """
         if self.character.quest.is_finished(quest):
             return False
@@ -136,6 +146,7 @@ class QuestHandler(object):
     def at_talk_finished(self, dialogue):
         """
         Called when the owner finishes a dialogue.
+        Call relative hooks.
         """
         status_changed = False
         for key in self.current_quests:
@@ -149,6 +160,7 @@ class QuestHandler(object):
     def at_get_object(self, obj_key, number):
         """
         Called when the owner gets an object.
+        Call relative hooks.
         """
         status_changed = False
         for key in self.current_quests:

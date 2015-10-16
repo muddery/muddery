@@ -20,6 +20,9 @@ def get_muddery_version():
 
 
 def copy_tree(source, destination):
+    """
+    Deep copy a folder.
+    """
     names = os.listdir(source)
 
     if not os.path.exists(destination):
