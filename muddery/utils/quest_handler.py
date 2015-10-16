@@ -16,13 +16,13 @@ class QuestHandler(object):
     """
     Handles a character's quests.
     """
-    def __init__(self, character):
+    def __init__(self, owner):
         """
         Initialize handler
         """
-        self.character = character
-        self.current_quests = self.character.db.current_quests
-        self.finished_quests = self.character.db.finished_quests
+        self.owner = owner
+        self.current_quests = owner.db.current_quests
+        self.finished_quests = owner.db.finished_quests
 
 
     def accept(self, quest):
@@ -37,11 +37,12 @@ class QuestHandler(object):
         if not new_quest:
             return
 
+        new_quest.set_owner(self.owner)
         self.current_quests[quest] = new_quest
 
-        self.character.msg({"msg": LS("Accepted quest {c%s{n.") % new_quest.get_name()})
+        self.owner.msg({"msg": LS("Accepted quest {c%s{n.") % new_quest.get_name()})
         self.show_quests()
-        self.character.show_location()
+        self.owner.show_location()
 
 
     def finish(self, quest):
@@ -65,9 +66,9 @@ class QuestHandler(object):
 
         self.finished_quests.add(quest)
         
-        self.character.msg({"msg": LS("Quest {c%s{n finished.") % name})
+        self.owner.msg({"msg": LS("Quest {c%s{n finished.") % name})
         self.show_quests()
-        self.character.show_location()
+        self.owner.show_location()
 
 
     def get_achieved_quests(self):
@@ -100,13 +101,13 @@ class QuestHandler(object):
         """
         If can provide this quest to the owner.
         """
-        if self.character.quest.is_finished(quest):
+        if self.owner.quest.is_finished(quest):
             return False
 
-        if self.character.quest.is_in_progress(quest):
+        if self.owner.quest.is_in_progress(quest):
             return False
 
-        if not self.character.quest.match_dependences(quest):
+        if not self.owner.quest.match_dependences(quest):
             return False
 
         return True
@@ -116,7 +117,7 @@ class QuestHandler(object):
         """
         check quest's dependences
         """
-        return QUEST_DEP_HANDLER.match_quest_dependences(self.character, quest)
+        return QUEST_DEP_HANDLER.match_quest_dependences(self.owner, quest)
 
 
     def show_quests(self):
@@ -124,7 +125,7 @@ class QuestHandler(object):
         Send quests to player.
         """
         quests = self.return_quests()
-        self.character.msg({"quests": quests})
+        self.owner.msg({"quests": quests})
 
 
     def return_quests(self):
