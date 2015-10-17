@@ -54,7 +54,6 @@ This will create a new game project in folder "your_game_name".
 
 Move into the game folder and run
 ```
-muddery migrate
 muddery -i start
 ```
 
@@ -81,7 +80,6 @@ muddery --init your_game_name example
 
 Move into the game folder and run
 ```
-muddery migrate
 muddery -i start
 ```
 
