@@ -24,6 +24,7 @@ These are commands that common players can use.
 ```
 Observe your location or objects in your vicinity.
 
+
 * inventory
 ```
 {"cmd":"inventory",
@@ -32,13 +33,15 @@ Observe your location or objects in your vicinity.
 ```
 Show everything in your inventory.
 
+
 * goto
 ```
 {"cmd":"goto",
- "args":<exit's dbref>}
+ "args":<exit's dbref>
 }
 ```
 Tranvese an exit, go to the destination of the exit.
+
 
 * talk
 ```
@@ -47,6 +50,7 @@ Tranvese an exit, go to the destination of the exit.
 }
 ```
 Talk to an NPC, show all available dialogues.
+
 
 * dialogue.
 ```
@@ -59,6 +63,7 @@ Talk to an NPC, show all available dialogues.
 This command finishes current sentence and get next sentences.
 `dialogue` and `sentence` in args refer to the current sentence.
 
+
 * loot
 ```
 {"cmd":"loot",
@@ -66,6 +71,7 @@ This command finishes current sentence and get next sentences.
 }
 ```
 This command pick out random objects from the loot list and give them to the character.
+
 
 * use
 ```
@@ -76,6 +82,7 @@ This command pick out random objects from the loot list and give them to the cha
 Use the specified object.
 Different objects can have different results.
 
+
 * equip
 ```
 {"cmd":"equip",
@@ -84,6 +91,7 @@ Different objects can have different results.
 ```
 Put on an equipment and add its attributes to the character.
 
+
 * take off
 ```
 {"cmd":"takeoff",
@@ -91,6 +99,7 @@ Put on an equipment and add its attributes to the character.
 }
 ```
 Take off an equipment and remove its attributes from the character.
+
 
 * cast skill
 ```
@@ -107,6 +116,7 @@ or
 ```
 Cast a skill when the caller is not in combat. If does not have target, cast it to the caller itself.
 
+
 * attack
 ```
 {"cmd":"attack",
@@ -114,6 +124,7 @@ Cast a skill when the caller is not in combat. If does not have target, cast it 
 }
 ```
 This will initiate a combat with the target. If the target is already in combat, the caller will join its combat.
+
 
 * unlock_exit
 ```
@@ -175,6 +186,7 @@ Gracefully disconnect your current session from the game.
 ```
 Connect to the game.
 
+
 * create account
 ```
 {"cmd":"create_account",
@@ -186,6 +198,7 @@ Connect to the game.
 }
 ```
 Create a new player account.
+
 
 * create account and login
 ```
@@ -199,6 +212,7 @@ Create a new player account.
 ```
 Create a new player account and login.
 
+
 * look
 ```
 {"cmd":"look",
@@ -206,6 +220,3 @@ Create a new player account and login.
 }
 ```
 Look when in unlogged-in state. It will display the connect screen.
-
-
-
