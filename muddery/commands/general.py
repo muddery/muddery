@@ -213,14 +213,14 @@ class CmdNick(MuxCommand):
 
 class CmdInventory(MuxCommand):
     """
-    view inventory
+    observe inventory
 
     Usage:
         {"cmd":"inventory",
          "args":""
         }
       
-    Shows your inventory.
+    Show everything in your inventory.
     """
     key = "inventory"
     locks = "cmd:all()"
@@ -481,12 +481,14 @@ class CmdAccess(MuxCommand):
 
 class CmdGoto(Command):
     """
-    goto exit
+    tranvese an exit
 
     Usage:
         {"cmd":"goto",
-         "args":{"exit":<exit's dbref>}
+         "args":<exit's dbref>}
         }
+
+    Tranvese an exit, go to the destination of the exit.
     """
     key = "goto"
     locks = "cmd:all()"
@@ -526,13 +528,14 @@ class CmdGoto(Command):
 
 class CmdTalk(Command):
     """
-    Begin a talk with an NPC.
+    Talk to an NPC.
 
     Usage:
         {"cmd":"talk",
-         "args":<object's dbref>
+         "args":<NPC's dbref>
         }
 
+    Begin a talk with an NPC. Show all available dialogues of this NPC.
     """
     key = "talk"
     locks = "cmd:all()"
@@ -578,16 +581,17 @@ class CmdTalk(Command):
 
 class CmdDialogue(Command):
     """
-    Continue a dialogue, using dialogues stored in db.
+    Continue a dialogue.
 
     Usage:
         {"cmd":"dialogue",
          "args":{"npc":<npc's dbref>,
-                 "dialogue":[<current dialogue>],
-                 "sentence":[<current sentence>]}
+                 "dialogue":<current dialogue>,
+                 "sentence":<current sentence>}
         }
 
-    Dialogue and sentence refer to the current sentence.
+    Dialogue and sentence refer to the current sentence. This command finishes
+    current sentence and get next sentences.
     """
     key = "dialogue"
     locks = "cmd:all()"
@@ -668,6 +672,8 @@ class CmdLoot(Command):
          "args":<object's dbref>
         }
 
+    This command pick out random objects from the loot list and give
+    them to the character.
     """
     key = "loot"
     locks = "cmd:all()"
@@ -709,6 +715,8 @@ class CmdUse(Command):
          "args":<object's dbref>
         }
 
+    Call caller's use_object function with specified object.
+    Different objects can have different results.
     """
     key = "use"
     locks = "cmd:all()"
@@ -755,7 +763,7 @@ class CmdEquip(Command):
         {"cmd":"equip",
          "args":<object's dbref>
         }
-
+    Put on an equipment and add its attributes to the character.
     """
     key = "equip"
     locks = "cmd:all()"
@@ -803,7 +811,7 @@ class CmdTakeOff(Command):
         {"cmd":"takeoff",
          "args":<object's dbref>
         }
-
+    Take off an equipment and remove its attributes from the character.
     """
     key = "takeoff"
     locks = "cmd:all()"
@@ -859,7 +867,7 @@ class CmdCastSkill(Command):
          "args":{"skill":<skill's key>,
                  "target":<skill's target>}
         }
-
+    
     """
     key = "castskill"
     locks = "cmd:all()"
@@ -909,9 +917,8 @@ class CmdAttack(Command):
          "args":<object's dbref>}
         }
 
-
-    This will initiate combat with <target>. If <target is
-    already in combat, you will join the combat. 
+    This will initiate a combat with the target. If the target is
+    already in combat, the caller will join its combat.
     """
     key = "attack"
     locks = "cmd:all()"
@@ -968,7 +975,7 @@ class CmdUnlockExit(Command):
         {"cmd":"unlock_exit",
          "args":<object's dbref>
         }
-
+    A character must unlock a LockedExit before tranvese it.
     """
     key = "unlock_exit"
     locks = "cmd:all()"
