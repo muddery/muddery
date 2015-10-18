@@ -485,7 +485,7 @@ class CmdGoto(Command):
 
     Usage:
         {"cmd":"goto",
-         "args":<exit's dbref>}
+         "args":<exit's dbref>
         }
 
     Tranvese an exit, go to the destination of the exit.
