@@ -88,7 +88,6 @@ class CmdUnconnectedConnect(Command):
             }
         }
 
-    This creates a new player account.
     """
     key = "connect"
     locks = "cmd:all()"
@@ -208,7 +207,6 @@ class CmdUnconnectedCreate(Command):
             }
         }
 
-    This creates a new player account.
     """
     key = "create_account"
     locks = "cmd:all()"
@@ -320,7 +318,6 @@ class CmdUnconnectedCreateConnect(Command):
             }
         }
 
-    This creates a new player account.
     """
     key = "create_connect"
     locks = "cmd:all()"

@@ -36,9 +36,6 @@ class CmdQuit(Command):
          "args":""
         }
 
-    Switch:
-      all - disconnect all connected sessions
-
     Gracefully disconnect your current session from the
     game. Use the /all switch to disconnect from all sessions.
     """
