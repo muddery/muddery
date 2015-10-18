@@ -1,8 +1,5 @@
 # Commands
 
-This folder holds modules for implementing one's own commands and
-command sets. 
-
 In Muddery, all commands are in format of JSON. It has two parts:
 ```
 {"cmd":  <command's key>,
