@@ -57,7 +57,7 @@ Talk to an NPC, show all available dialogues.
          "sentence":<current sentence>}
 }
 ```
-This command finishes current sentence and get next sentences.
+This command finishes current sentence and get next sentences.<br>
 `dialogue` and `sentence` in args refer to the current sentence.
 
 
@@ -76,7 +76,7 @@ This command pick out random objects from the loot list and give them to the cha
  "args":<object's dbref>
 }
 ```
-Use the specified object.
+Use the specified object.<br>
 Different objects can have different results.
 
 
