@@ -157,6 +157,7 @@ var combat = {
 
     displayCombatProcess: function(data) {
         for (var i in data) {
+            /*
             if (data[i].type == "joined") {
                 var result = $('#fighter_' + data[i].dbref.slice(1));
                 if (result.length == 0) {
@@ -183,7 +184,8 @@ var combat = {
                     div.appendTo(characters);
                 }
             }
-            else if (data[i].type == "attacked") {
+            else */
+            if (data[i].type == "attacked") {
                 var caller = $('#fighter_' + data[i].caller.slice(1));
                 if (data[i].caller == this._self_dbref) {
                     caller.animate({left: '50%'}, 100);
