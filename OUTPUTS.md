@@ -124,13 +124,13 @@ These data send to the client whenever the character's equipments change or the 
                         "args": "<COMMAND_ARGS>"}]}
 }
 ```
-When a player send a `look` command to the server to looking at an object, the server will send back these data. These data is the object's appearance.
-`name` is the name of the object that the player is looking at.
-`desc` is the description of the object that the player is looking at.
-`dbref` is the dbref of the object that the player is looking at.
-`cmds` is a list of commands that the player can do on the object.
-    `cmd` is the key of the command.
-    `name` is the name of the command to display.
+When a player send a `look` command to the server to looking at an object, the server will send back these data. These data is the object's appearance.<br>
+`name` is the name of the object that the player is looking at.<br>
+`desc` is the description of the object that the player is looking at.<br>
+`dbref` is the dbref of the object that the player is looking at.<br>
+`cmds` is a list of commands that the player can do on the object.<br>
+    `cmd` is the key of the command.<br>
+    `name` is the name of the command to display.<br>
     `args` is the args of the command, usually is the dbref of the object.
 
 
