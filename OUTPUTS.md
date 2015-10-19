@@ -74,7 +74,8 @@ These data send to the client whenever the character's data change or the player
                 "<EQUIPMENT_POS>": {"dbref": "<DBREF>", "name": "<NAME>", "desc": "<DESC>"}}
 }
 ```
-These data send to the client whenever the character's equipments change or the player login. If there is no equipment on the position, the value will be set to `nil`. If there is an equipment, the value will be the equipment's `name`, `dbref` and `desc`.
+These data send to the client whenever the character's equipments change or the player login.<br>
+If there is no equipment on the position, the value will be set to `nil`. If there is an equipment, the value will be the equipment's `name`, `dbref` and `desc`.
 
 
 ### inventory
@@ -86,7 +87,8 @@ These data send to the client whenever the character's equipments change or the 
 			    "equipped": <IS_EQUIPPED>}]
 }
 ```
-`Inventory` contains a list of objects which are in your inventory. Each item has object's `name`, `dbref`, `number` and `desc`. If the item is an equipment, it will has an additional attribute `equipped`. This attribute shows whether the equipment is equipped.
+`Inventory` contains a list of objects which are in your inventory. Each item has object's `name`, `dbref`, `number` and `desc`.<br>
+If the item is an equipment, it will has an additional attribute `equipped`. This attribute shows whether the equipment is equipped.
 
 
 ### skills
@@ -111,7 +113,8 @@ These data send to the client whenever the character's equipments change or the 
 			 				 "achieved": <ACHIEVED_NUMBER>}]}]
 }
 ```
-`Quests` contains a list of quests that the character is doing. It has `name`, `dbref` and `desc`. The `objectives` is a list of quest objectives. The value can be the objective's desc or the objective's detail information.
+`Quests` contains a list of quests that the character is doing. It has `name`, `dbref` and `desc`.<br>
+The `objectives` is a list of quest objectives. The value can be the objective's desc or the objective's detail information.
 
 
 ### look_obj
@@ -147,12 +150,12 @@ When a player send a `look` command to the server to looking at an object, the s
                  "offlines": [{"name": "<OFFLINE_PLAYER_NAME>", "dbref": "<OFFLINE_PLAYER_DBREF>"}]}
 }
 ```
-When a player send a `look` command to the server to looking at a room, the server will send back these data. These data is the room's appearance and all objects that in this room.
-These data are similar to the `look`, but the room has more data about other objects in it.
-`exits` are a list of exits.
-`things` are a list of common objects in the room.
-`npcs` are a list of NPCs in the room.
-`players` are online players while `offlines` are offline players.
-This only return available objects to players. Objects that does not match the condition will not be sent to the players.
+When a player send a `look` command to the server to looking at a room, the server will send back these data. These data is the room's appearance and all objects that in this room.<br>
+These data are similar to the `look`, but the room has more data about other objects in it.<br>
+`exits` are a list of exits.<br>
+`things` are a list of common objects in the room.<br>
+`npcs` are a list of NPCs in the room.<br>
+`players` are online players while `offlines` are offline players.<br>
+This only return available objects to players. Objects that does not match the condition will not be sent to the players.<br>
 When a player login or moves into a room, these data will be sent to the player automatically.
 
