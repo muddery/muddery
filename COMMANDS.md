@@ -1,6 +1,6 @@
 # Commands
 
-In Muddery, all commands are in format of JSON. It has two parts:
+Players can send commands to the server. In Muddery, all commands are in format of JSON. It has two parts:
 ```
 {"cmd":  <command's key>,
  "args": <object's dbref>
