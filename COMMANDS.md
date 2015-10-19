@@ -1,5 +1,4 @@
-Commands
-===
+# Commands
 
 Players can send commands to the server. In Muddery, all commands are in format of JSON. It has two parts:
 ```
@@ -12,10 +11,9 @@ Players can send commands to the server. In Muddery, all commands are in format 
 
 These are commands that common players can use.
 
-Common Commands
----
+## Common Commands
 
-## look
+### look
 ```
 {"cmd":"look",
  "args":<object's dbref>
@@ -24,7 +22,7 @@ Common Commands
 Observe your location or objects in your vicinity.
 
 
-## inventory
+### inventory
 ```
 {"cmd":"inventory",
  "args":""
@@ -33,7 +31,7 @@ Observe your location or objects in your vicinity.
 Show everything in your inventory.
 
 
-## goto
+### goto
 ```
 {"cmd":"goto",
  "args":<exit's dbref>
@@ -42,7 +40,7 @@ Show everything in your inventory.
 Tranvese an exit, go to the destination of the exit.
 
 
-## talk
+### talk
 ```
 {"cmd":"talk",
  "args":<NPC's dbref>
@@ -51,7 +49,7 @@ Tranvese an exit, go to the destination of the exit.
 Talk to an NPC, show all available dialogues.
 
 
-## dialogue.
+### dialogue.
 ```
 {"cmd":"dialogue",
  "args":{"npc":<npc's dbref>,
@@ -63,7 +61,7 @@ This command finishes current sentence and get next sentences.
 `dialogue` and `sentence` in args refer to the current sentence.
 
 
-## loot
+### loot
 ```
 {"cmd":"loot",
  "args":<object's dbref>
@@ -72,7 +70,7 @@ This command finishes current sentence and get next sentences.
 This command pick out random objects from the loot list and give them to the character.
 
 
-## use
+### use
 ```
 {"cmd":"use",
  "args":<object's dbref>
@@ -82,7 +80,7 @@ Use the specified object.
 Different objects can have different results.
 
 
-## equip
+### equip
 ```
 {"cmd":"equip",
  "args":<object's dbref>
@@ -91,7 +89,7 @@ Different objects can have different results.
 Put on an equipment and add its attributes to the character.
 
 
-## take off
+### take off
 ```
 {"cmd":"takeoff",
  "args":<object's dbref>
@@ -100,7 +98,7 @@ Put on an equipment and add its attributes to the character.
 Take off an equipment and remove its attributes from the character.
 
 
-## cast skill
+### cast skill
 ```
 {"cmd":"castskill",
  "args":<skill's key>}
@@ -116,7 +114,7 @@ or
 Cast a skill when the caller is not in combat. If does not have target, cast it to the caller itself.
 
 
-## attack
+### attack
 ```
 {"cmd":"attack",
  "args":<object's dbref>}
@@ -125,7 +123,7 @@ Cast a skill when the caller is not in combat. If does not have target, cast it 
 This will initiate a combat with the target. If the target is already in combat, the caller will join its combat.
 
 
-## unlock_exit
+### unlock_exit
 ```
 {"cmd":"unlock_exit",
  "args":<object's dbref>
@@ -134,10 +132,9 @@ This will initiate a combat with the target. If the target is already in combat,
 A character must unlock a LockedExit before tranvese it.
 
 
-Combat Commands
----
+## Combat Commands
 
-## combat info
+### combat info
 ```
 {"cmd":"combat_info",
  "args":""
@@ -146,7 +143,7 @@ Combat Commands
 Observes your combat, get combat informtions.
 
 
-## combat skill
+### combat skill
 ```
 {"cmd":"combat_skill",
  "args":<skill's key>}
@@ -162,10 +159,9 @@ or
 Cast a skill when the caller is in combat. If does not have target, cast it to the caller itself.
 
 
-Player Commands
----
+## Player Commands
 
-## quit
+### quit
 ```
 {"cmd":"quit",
  "args":""
@@ -174,10 +170,9 @@ Player Commands
 Gracefully disconnect your current session from the game.
 
 
-Unloggedin Commands
----
+## Unloggedin Commands
 
-## connect account
+### connect account
 ```
 {"cmd":"connect",
  "args":{
@@ -189,7 +184,7 @@ Unloggedin Commands
 Connect to the game.
 
 
-## create account
+### create account
 ```
 {"cmd":"create_account",
  "args":{
@@ -202,7 +197,7 @@ Connect to the game.
 Create a new player account.
 
 
-## create account and login
+### create account and login
 ```
 {"cmd":"create_connect",
  "args":{
@@ -215,7 +210,7 @@ Create a new player account.
 Create a new player account and login.
 
 
-## look
+### look
 ```
 {"cmd":"look",
  "args":""
