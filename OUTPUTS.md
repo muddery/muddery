@@ -12,14 +12,15 @@ CMD{"login": {"dbref": "#16", "name": "USERNAME"}}
 
 The key of JSON data represents the data type. Possible data type and data format are as follows:
 
-# msg
+
+## msg
 ```
 {"msg": "{RHello!{n My friend!"}
 ```
 It is a common message with color tags. The client should translate these color tags to real color effect.
 
 
-# alert
+## alert
 ```
 {"alert": "{RWARNING!{n"}
 ```
@@ -31,28 +32,28 @@ or
 It can show a message with color tags on an alert window. In the second format, the data provide texts which can be show on the confirm button.
 
 
-# login
+## login
 ```
 {"login": {"name": "<USERNAME>", "dbref": "<PLAYER_DBREF>"}}
 ```
 This message confirm the login of the player. When a player login, the server will send the username and the player's dbref to the client.
 
 
-# puppet
+## puppet
 ```
 {"puppet": "<CHARACTER_DBREF>"}
 ```
 When a player puppets a character, usually right after the player login, this message will send the character's dbref to the client.
 
 
-# logout
+## logout
 ```
 {"logout": ""}
 ```
 This message confirm the logout of the player. When a player sends a logout command to the server and the server confirms the logout, this message will be sent to the client.
 
 
-# status
+## status
 ```
 {"status": {"attack": 10,
             "defence": 10,
@@ -68,7 +69,7 @@ This message confirm the logout of the player. When a player sends a logout comm
 These data send to the client whenever the character's data change or the player login. It includes `hp`, `mp`, `exp` and other attributes.
 
 
-# equipments
+## equipments
 ```
 {"equipments": {"<EQUIPMENT_POS>": null,
                 "<EQUIPMENT_POS>": {"dbref": "<DBREF>", "name": "<NAME>", "desc": "<DESC>"}}
@@ -77,7 +78,7 @@ These data send to the client whenever the character's data change or the player
 These data send to the client whenever the character's equipments change or the player login. If there is no equipment on the position, the value will be set to `nil`. If there is an equipment, the value will be the equipment's `name`, `dbref` and `desc`.
 
 
-# inventory
+## inventory
 ```
 {"inventory": [{"name": "<OBJ_NAME>",
 				"dbref": "<OBJ_DBREF>",
@@ -89,7 +90,7 @@ These data send to the client whenever the character's equipments change or the 
 `Inventory` contains a list of objects which are in your inventory. Each item has object's `name`, `dbref`, `number` and `desc`. If the item is an equipment, it will has an additional attribute `equipped`. This attribute shows whether the equipment is equipped.
 
 
-# skills
+## skills
 ```
 {"skills": [{"name": "<SKILL_NAME>",
 			 "dbref": "<SKILL_DBREF>",
@@ -98,7 +99,7 @@ These data send to the client whenever the character's equipments change or the 
 `Skills` contains a list of skills that the character has. Each item has skill's `name`, `dbref`, and `desc`.
 
 
-# quests
+## quests
 ```
 {"quests": [{"name": "QUEST_NAME",
 			 "dbref": "QUEST_DBREF",
@@ -114,7 +115,7 @@ These data send to the client whenever the character's equipments change or the 
 `Quests` contains a list of quests that the character is doing. It has `name`, `dbref` and `desc`. The `objectives` is a list of quest objectives. The value can be the objective's desc or the objective's detail information.
 
 
-# look_obj
+## look_obj
 ```
 {"look_obj": {"name": "<OBJ_NAME>",
               "desc": "<OBJ_DESC>",
@@ -134,7 +135,7 @@ When a player send a `look` command to the server to looking at an object, the s
     `args` is the args of the command, usually is the dbref of the object.
 
 
-# look_around
+## look_around
 ```
 {"look_around": {"name": "<ROOM_NAME>",
                  "desc": "<ROOM_DESC>",
