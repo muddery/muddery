@@ -1,15 +1,15 @@
 # Output Messages
 
-In Muddery, all data sent from the server to the client are strings in format of
+In Muddery, all data send from the server to the client are strings in format of
 ```
 CMD<JSON data>
 ```
-It begins with 'CMD' and follows a string of JSON data. For example:
+It begins with 'CMD' and follows JSON data. For example:
 ```
 CMD{"login": {"dbref": "#16", "name": "USERNAME"}}
 ```
 
-The key of JSON data represents the data type. Possible data type and data format are as follows:
+The keys of JSON data represent the message type. Possible message types and data formats are as follows:
 
 
 ### msg
@@ -273,7 +273,7 @@ When a player joins a combat or looks at a combat, this message will be sent to 
                      "target": <TARGET_DBREF>,
                      "hurt": <TARGET_HURT>,
                      "max_hp": <TARGET_MAX_HP>,
-                     "hp": <TARGET_HP>,}]}
+                     "hp": <TARGET_HP>}]}
 ```
 When a character in combat casts a skill, the result of the skill will be sent to the client.<br>
 `caller` is the character who casts the skill.<br>
