@@ -37,7 +37,7 @@ Show everything in your inventory.
  "args":<exit's dbref>
 }
 ```
-Tranvese an exit, go to the destination of the exit.
+Traverse an exit, go to the destination of the exit.
 
 
 ### talk
@@ -140,7 +140,7 @@ A character must unlock a LockedExit before tranvese it.
  "args":""
 }
 ```
-Observes your combat, get combat informtions.
+Observes your combat, get combat informations.
 
 
 ### combat skill
