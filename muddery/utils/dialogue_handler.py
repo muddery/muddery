@@ -58,11 +58,11 @@ class DialogueHandler(object):
             # Get records.
             nexts = model_nexts.objects.filter(dialogue=dialogue)
 
-        dependences = []
-        model_dependences = get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_QUEST_DEPENDENCY)
-        if model_dependences:
+        dependencies = []
+        model_dependencies = get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_QUEST_DEPENDENCY)
+        if model_dependencies:
             # Get records.
-            dependences = model_dependences.objects.filter(dialogue=dialogue)
+            dependencies = model_dependencies.objects.filter(dialogue=dialogue)
 
 
         # Add db fields to data object.
@@ -70,10 +70,10 @@ class DialogueHandler(object):
 
         data["condition"] = dialogue_record.condition
 
-        data["dependences"] = []
-        for dependence in dependences:
-            data["dependences"].append({"quest": dependence.dependence_id,
-                                        "type": dependence.type})
+        data["dependencies"] = []
+        for dependency in dependencies:
+            data["dependencies"].append({"quest": dependency.dependency_id,
+                                         "type": dependency.type})
 
         data["sentences"] = []
         count = 0
@@ -152,8 +152,8 @@ class DialogueHandler(object):
 
             # Match dependeces.
             match = True
-            for dep in npc_dlg["dependences"]:
-                if not QUEST_DEP_HANDLER.match_dependence(caller, dep["quest"], dep["type"]):
+            for dep in npc_dlg["dependencies"]:
+                if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
                     match = False
                     break;
             if not match:
@@ -165,7 +165,7 @@ class DialogueHandler(object):
 
         if not sentences:
             # Use default sentences.
-            # Default sentences should not have condition and dependences.
+            # Default sentences should not have condition and dependencies.
             for dlg_key in npc.default_dialogues:
                 npc_dlg = self.get_dialogue(dlg_key)
                 if npc_dlg:
@@ -205,8 +205,8 @@ class DialogueHandler(object):
                 if not script_handler.match_condition(caller, next_dlg["condition"]):
                     continue
 
-                for dep in next_dlg["dependences"]:
-                    if not QUEST_DEP_HANDLER.match_dependence(caller, dep["quest"], dep["type"]):
+                for dep in next_dlg["dependencies"]:
+                    if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
                         continue
 
                 sentences.append(next_dlg["sentences"][0])
@@ -352,8 +352,8 @@ class DialogueHandler(object):
             return (provide_quest, finish_quest)
 
         match = True
-        for dep in npc_dlg["dependences"]:
-            if not QUEST_DEP_HANDLER.match_dependence(caller, dep["quest"], dep["type"]):
+        for dep in npc_dlg["dependencies"]:
+            if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
                 match = False
                 break;
         if not match:

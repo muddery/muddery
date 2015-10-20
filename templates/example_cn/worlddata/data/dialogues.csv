@@ -3,9 +3,9 @@ dlg_hello,
 dlg_alley_soliloquy,
 dlg_street_find_servivor,
 dlg_colorfulworld_find_survivor,
-dlg_colorfulworld_wu_01,can_provide_quest("quest_find_guardhouse_key")
-dlg_colorfulworld_wu_02,is_quest_in_progress("quest_find_guardhouse_key") and not have_object("obj_guardhouse_key")
-dlg_colorfulworld_wu_03,is_quest_in_progress("quest_find_guardhouse_key") and have_object("obj_guardhouse_key")
-dlg_colorfulworld_wu_04,is_quest_in_progress("quest_find_binder") and not have_object("obj_binder")
-dlg_colorfulworld_wu_05,is_quest_in_progress("quest_find_binder") and have_object("obj_binder")
+dlg_colorfulworld_wu_01,
+dlg_colorfulworld_wu_02,
+dlg_colorfulworld_wu_03,
+dlg_colorfulworld_wu_04,
+dlg_colorfulworld_wu_05,
 dlg_colorfulworld_wu_06,
