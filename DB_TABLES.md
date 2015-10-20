@@ -8,6 +8,7 @@ World objects are unique in the world. If you add an object to these tables, thi
 
 ### world_rooms
 key | name | typeclass | desc
+--- | --- | --- | ---
 room_house | HOUSE | typeclasses.rooms.Room | This is a house in your game.
 room_street | STREET | typeclasses.rooms.Room | This is a street in front of house.
 
