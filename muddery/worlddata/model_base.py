@@ -311,7 +311,7 @@ class quest_dependency(models.Model):
     "Store quest dependency."
 
     quest = models.ForeignKey("quests", db_index=True)
-    dependence = models.ForeignKey("quests")
+    dependency = models.ForeignKey("quests")
     type = models.IntegerField()
 
     class Meta:
@@ -430,7 +430,7 @@ class dialogue_quest_dependency(models.Model):
     "Store dialogue quest dependency."
 
     dialogue = models.ForeignKey("dialogues", db_index=True)
-    dependence = models.ForeignKey("quests")
+    dependency = models.ForeignKey("quests")
     type = models.IntegerField()
 
     class Meta:

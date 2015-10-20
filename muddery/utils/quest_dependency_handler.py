@@ -19,18 +19,18 @@ class QuestDependencyHandler(object):
         self.quest_depencences = {}
 
 
-    def get_quest_dependences(self, quest):
+    def get_quest_dependencies(self, quest):
         """
-        Get quest's dependences.
+        Get quest's dependencies.
         """
         if not quest:
             return
 
-        self.load_dependences_cache(quest)
+        self.load_dependencies_cache(quest)
         return self.quest_depencences[quest]
 
 
-    def load_dependences_cache(self, quest):
+    def load_dependencies_cache(self, quest):
         """
         To reduce database accesses, add a cache.
         """
@@ -45,26 +45,26 @@ class QuestDependencyHandler(object):
         self.quest_depencences[quest] = []
         
         # Get db model
-        dependences = []
-        model_dependences = get_model(settings.WORLD_DATA_APP, settings.QUEST_DEPENDENCY)
-        if model_dependences:
+        dependencies = []
+        model_dependencies = get_model(settings.WORLD_DATA_APP, settings.QUEST_DEPENDENCY)
+        if model_dependencies:
             # Get records.
-            dependences = model_dependences.objects.filter(quest=quest)
+            dependencies = model_dependencies.objects.filter(quest=quest)
 
 
         # Add db fields to data object.
         data = []
-        for dependence in dependences:
-            data.append({"quest": dependence.dependence_id,
-                         "type": dependence.type})
+        for dependency in dependencies:
+            data.append({"quest": dependency.dependency_id,
+                         "type": dependency.type})
 
         # Add to cache.
         self.quest_depencences[quest] = data
 
 
-    def match_quest_dependences(self, caller, quest):
+    def match_quest_dependencies(self, caller, quest):
         """
-        If the quest matches its dependences.
+        If the quest matches its dependencies.
         """
         if not caller:
             return False
@@ -72,58 +72,50 @@ class QuestDependencyHandler(object):
         if not quest:
             return False
 
-        for dependence in self.get_quest_dependences(quest):
-            # match each dependence
-            if not self.match_dependence(caller, dependence["quest"], dependence["type"]):
+        for dependency in self.get_quest_dependencies(quest):
+            # match each dependency
+            if not self.match_dependency(caller, dependency["quest"], dependency["type"]):
                 return False
 
         return True
 
 
-    def match_dependence(self, caller, quest, dependence_type):
+    def match_dependency(self, caller, quest, dependency_type):
         """
-        check a dependence
+        check a dependency
         """
-        if dependence_type == defines.DEPENDENCE_QUEST_CAN_PROVIDE:
-            if not this.can_provide_quest(caller, quest):
+        if dependency_type == defines.DEPENDENCY_QUEST_CAN_PROVIDE:
+            if not caller.quest.can_provide(quest):
                 return False
-        elif dependence_type == defines.DEPENDENCE_QUEST_IN_PROGRESS:
+        elif dependency_type == defines.DEPENDENCY_QUEST_IN_PROGRESS:
             if not caller.quest.is_in_progress(quest):
                 return False
-        elif dependence_type == defines.DEPENDENCE_QUEST_NOT_IN_PROGRESS:
+        elif dependency_type == defines.DEPENDENCY_QUEST_NOT_IN_PROGRESS:
             if caller.quest.is_in_progress(quest):
                 return False
-        elif dependence_type == defines.DEPENDENCE_QUEST_FINISHED:
+        elif dependency_type == defines.DEPENDENCY_QUEST_ACHIEVED:
+            if not caller.quest.is_achieved(quest):
+                return False
+        elif dependency_type == defines.DEPENDENCY_QUEST_NOT_ACHIEVED:
+            if not caller.quest.is_in_progress(quest):
+                return False
+            if caller.quest.is_achieved(quest):
+                return False
+        elif dependency_type == defines.DEPENDENCY_QUEST_FINISHED:
             if not caller.quest.is_finished(quest):
                 return False
-        elif dependence_type == defines.DEPENDENCE_QUEST_UNFINISHED:
+        elif dependency_type == defines.DEPENDENCY_QUEST_NOT_FINISHED:
             if caller.quest.is_finished(quest):
                 return False
-        elif dependence_type == defines.DEPENDENCE_QUEST_ACCEPTED:
+        elif dependency_type == defines.DEPENDENCY_QUEST_ACCEPTED:
             if not caller.quest.is_finished(quest) and \
                not caller.quest.is_in_progress(quest):
                 return False
-        elif dependence_type == defines.DEPENDENCE_QUEST_NOT_ACCEPTED:
+        elif dependency_type == defines.DEPENDENCY_QUEST_NOT_ACCEPTED:
             if caller.quest.is_finished(quest) or \
                caller.quest.is_in_progress(quest):
                 return False
 
-        return True
-
-
-    def can_provide_quest(self, caller, quest):
-        """
-        whether can provide quest or not
-        """
-        if not caller:
-            return False
-                    
-        if not quest:
-            return False
-                
-        if caller.quest.is_finished(dependence["quest"]):
-            return False
-            
         return True
 
 

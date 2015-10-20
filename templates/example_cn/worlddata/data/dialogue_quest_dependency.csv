@@ -1,1 +1,6 @@
-dialogue,dependence,type
+dialogue,dependency,type
+dlg_colorfulworld_wu_01,quest_find_guardhouse_key,1
+dlg_colorfulworld_wu_02,quest_find_guardhouse_key,7
+dlg_colorfulworld_wu_03,quest_find_guardhouse_key,6
+dlg_colorfulworld_wu_04,quest_find_binder,7
+dlg_colorfulworld_wu_05,quest_find_binder,6

@@ -83,9 +83,19 @@ class QuestHandler(object):
         return quests
 
 
+    def is_achieved(self, quest):
+        """
+        Whether the character achieved this quest or not.
+        """
+        if not quest in self.current_quests:
+            return False
+
+        return self.current_quests[quest].is_achieved()
+
+
     def is_finished(self, quest):
         """
-        Whether the character finished this quest.
+        Whether the character finished this quest or not.
         """
         return quest in self.finished_quests
 
@@ -107,17 +117,17 @@ class QuestHandler(object):
         if self.owner.quest.is_in_progress(quest):
             return False
 
-        if not self.owner.quest.match_dependences(quest):
+        if not self.owner.quest.match_dependencies(quest):
             return False
 
         return True
 
 
-    def match_dependences(self, quest):
+    def match_dependencies(self, quest):
         """
-        check quest's dependences
+        check quest's dependencies
         """
-        return QUEST_DEP_HANDLER.match_quest_dependences(self.owner, quest)
+        return QUEST_DEP_HANDLER.match_quest_dependencies(self.owner, quest)
 
 
     def show_quests(self):
