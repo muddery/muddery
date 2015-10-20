@@ -4,7 +4,7 @@ In muddery, the whole game world is build on a series of tables. When the server
 
 ## World Objects
 
-World objects are unique in the world. If you add an object to these tables, this object will appear in the location you specified. If you remove an object from these tables, this object will be remove from the game world too.
+World objects are unique in the world. We use `key` to identify them. If you add an object to these tables, this object will appear in the location you specified. If you remove an object from these tables, this object will be remove from the game world too.
 
 ### world_rooms
 key | name | typeclass | desc
@@ -33,3 +33,65 @@ Characters must traverse exits to move from one room to another. Exits link room
 `location` is the room where the exit sets. The exit opens on this side. It must be a key of world_rooms.<br>
 `destination` is the room where the exit leads to. It must be a key of world_rooms.
 
+### world_objects
+key | name | typeclass | desc | location | condition
+--- | --- | --- | --- | --- | --- | ---
+object_box | BOX | typeclasses.objects.Object | An empty box. | room_house
+
+You can add objects to rooms in this way. Player can see these objects and use them if they have relative commands.
+`key` is the unique id of the object. This must be unique in all tables.<br>
+`name` is the name of the object that shows to players.<br>
+`typeclass` is the typeclass of the object.<br>
+`desc` is the appearance of the object when players look at it.<br>
+`location` is the room where the object stay.<br>
+`condition` Players only can see objects that match the condition. The condition's syntax will be explained in another document.
+
+### object_creators
+key | name | typeclass | desc | location | condition | verb
+creator_basket | BASKET | typeclasses.object_creators.ObjectCreator | This is a basket full of apples. | | PICK
+`object_creators` inherits from `world_objects`, so its fields is similare to `world_objects`.
+It has one more field `verb`, it discribs the action of loot and will show to players.
+
+### world_npcs
+key | name | typeclass | desc | location | condition
+--- | --- | --- | --- | --- | --- | ---
+npc_boy | BOY | typeclasses.npcs.NPC | room_street | This is a boy. | 
+
+You can add NPCs in this way.
+`key` is the unique id of the NPC. This must be unique in all tables.<br>
+`name` is the name of the NPC that shows to players.<br>
+`typeclass` is the typeclass of the NPC.<br>
+`desc` is the appearance of the NPC when players look at it.<br>
+`location` is the room where the NPC stay.<br>
+`condition` Players only can see NPCs that match the condition. The condition's syntax will be explained in another document.
+
+## Common Objects
+
+Common objects are not unique in the game world. There can be a lot of common objects of have the same key.
+
+### common_objects
+key | name | typeclass | desc | max_stack | unique | effect | action
+--- | --- | --- | --- | --- | --- | --- | --- | ---
+obj_apple | APPLE | typeclasses.common_objects.CommonObject | This is a red apple. | 10 | 0 | 0 | 
+
+Common objects are objects that players can put them into their inventories.
+`key` is the unique id of the object. This must be unique in all tables.<br>
+`name` is the name of the object that shows to players.<br>
+`typeclass` is the typeclass of the object.<br>
+`desc` is the appearance of the object when players look at it.<br>
+`max_stack` limits the max number of objects in a pile. For example, if the `max_stack` of apples is 10, the max number of a pile of apples is 10. If you have 11 apples, they will be divided into 2 piles. 
+`unique` determines whether players can have more than one pile of this object. `0` means `NO` and `1` means `YES`.
+`effect` is a float value that can provide as an argument when players use this object.
+`action` is a short script that runs when players use this object. The action's syntax will be explained in another document.
+It does not have `location` field because common objects can appear everywhere. 
+
+### common_characters
+key | name | typeclass | desc
+--- | --- | --- | ---
+mob_rogue | ROGUE | typeclasses.monsters.Monster | This is a rogue. He is dangerous.
+
+Common characters are characters that can appear everywhere.
+`key` is the unique id of the character. This must be unique in all tables.<br>
+`name` is the name of the character that shows to players.<br>
+`typeclass` is the typeclass of the character.<br>
+`desc` is the appearance of the character when players look at it.<br>
