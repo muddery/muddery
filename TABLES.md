@@ -36,6 +36,18 @@ Characters must traverse exits to move from one room to another. Exits link room
 `location` is the room where the exit sets. The exit opens on this side. It must be a key of world_rooms.<br>
 `destination` is the room where the exit leads to. It must be a key of world_rooms.<br>
 
+### exit_locks
+key | condition | verb | message_lock | auto_unlock
+--- | --- | --- | --- | ---
+exit_lock | have_object("obj_apple") | UNLOCK | Use apple to unlock it. | 0
+
+There is a special kind of exits. They are locked and players need to unlock it first to traverse it. Their appearance can be different after unlocked.<br>
+`key` is the key of the exit.<br>
+`condition` is the condition of unlock. Players who matches the condition can unlock the exit. The condition's syntax will be explained in another document.<br>
+`verb` is the name of the action of unlock. This shows to players to make the action looks better. If it is empty, the system will use a default verb.<br>
+`message_lock` is the appearance of the exit when it is locked.<br>
+`auto_unlock` If an exit is auto_unlock, players needn't do the unlock action, the exit can unlock itself automatically for players who match the condition.<br>
+
 ### world_objects
 key | name | typeclass | desc | location | condition
 --- | --- | --- | --- | --- | --- | ---
@@ -56,6 +68,19 @@ creator_bag | BAG | typeclasses.object_creators.ObjectCreator | This bag is full
 
 `object_creators` inherits from `world_objects`, so its fields is similare to `world_objects`.<br>
 It has one more field `verb`, it discribs the action of loot and will show to players.<br>
+
+### object_loot_list
+provider | object | number | odds | condition
+--- | --- | --- | --- | ---
+creator_basket | obj_apple | 1 | 1 |
+creator_bag | obj_potato | 1 | 1 |
+
+Object creators provide objects according to this loot list.<br>
+`provider` is the key of an object creator.<br>
+`object` is the key of an common object that provided by this object creator. An object creator can provide several objects.<br>
+`number` is the number of the objects providing.<br>
+`odds` is the odds of the drop. It is a float number between 0 to 1.<br>
+`condition` is the condition of the drop. Players only can get objects that match the condition. The condition's syntax will be explained in another document.<br>
 
 ### world_npcs
 key | name | typeclass | desc | location | condition
@@ -232,7 +257,7 @@ All events are in this table.<br>
 `trigger` is how the event can be triggered. It can be arriving, killing or other values. They are defined in `units/defines.py`.<br>
 `object` is the object's key of the trigger target. For example, if the trigger is arriving a room, the object is the key of the room.<br>
 `type` is the type of the event. It can be a dialogue or a fight. They are defined in `units/defines.py`.<br>
-`condition` it the condition of the event. The condition's syntax will be explained in another document.<br>
+`condition` is the condition of the event. The condition's syntax will be explained in another document.<br>
 
 ### event_dialogues
 key | dialogue | npc
@@ -283,7 +308,7 @@ Character's skills are special objects. When a player casts a skill, the skill o
 `desc` is the description of the skill.<br>
 `cd` is the cool down time in seconds.<br>
 `passive` is whether the skill is passive or not. `0` means `NO` and `1` means `YES`. If it is a passive skill, players can not cast it manually.<br>
-`condition` it the condition of the skill. Players only can cast skills that match the condition. The condition's syntax will be explained in another document.<br>
+`condition` is the condition of the skill. Players only can cast skills that match the condition. The condition's syntax will be explained in another document.<br>
 `function` is the function name of the skill. The function must be defined in skill models. Skill model's position is defined by `SKILL_FOLDER` and `SKILL_FILES` in `settings.py`.<br>
 `effect` is a float value that can provide as an argument when players use this object.<br>
 
@@ -297,3 +322,31 @@ Characters can have default skills. All default skills are in this table.<br>
 `character` is the key of the character. If it is a player, the key should be `DEFAULT_PLAYER_CHARACTER_KEY` in `settings.py`.<br>
 `skill` is the key of a skill.<br>
 
+## Equipments
+
+Player characters can wear equipments to increase their attributes. Every equipment has a position. Equipments only can be put on their positions. Every equipment has a type too. This type relates to character's career. Equipments only can be put on characters with right career. 
+
+### equipments
+key | name | typeclass | desc | max_stack | unique | position | type | attack | defence
+--- | --- | --- | --- | --- | --- | --- | --- | --- | ---
+equip_armor | ARMOR | typeclasses.common_objects.Equipment | This is an armor. | 1 | 0 | body | plate | | 10
+
+`key` is the unique id of the equipment. This must be unique in all tables.<br>
+`name` is the name of the equipment that shows to players.<br>
+`typeclass` is the typeclass of the equipment.<br>
+`desc` is the appearance of the equipment when players look at it.<br>
+`max_stack` limits the max number of objects in a pile. It is like the `max_stack` in common_objects.<br>
+`unique` determines whether players can have more than one pile of this object. It is like the `unique` in common_objects.<br>
+`position` is the position to wear.<br>
+`type` is the type of the equipment.<br>
+`attack` and `defence` are attributes add to characters.<br>
+
+### equipment_types
+type | name | career
+--- | --- | ---
+plate | PLATE |
+
+This table describes the relations between equipment types and character careers.<br>
+`type` is the key of the equipment type.<br>
+`name` is the name of the equipment type that shows to players.<br>
+`career` is the related career. If it is empty, equipments of this type can be put on every kind of characters.<br>
