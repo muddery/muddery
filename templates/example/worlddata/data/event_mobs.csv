@@ -1,1 +1,2 @@
-key,mob,level,odds
+key,mob,level,odds,desc
+event_fight,mob_rogue,1,0.7,A rogue is attacking you!

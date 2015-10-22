@@ -79,7 +79,6 @@ class common_objects(model_base.common_objects):
 #------------------------------------------------------------
 class foods(model_base.common_objects):
     "Store all foods."
-
     hp = models.IntegerField(blank=True, default=0)
 
 
@@ -100,10 +99,6 @@ class equipment_types(model_base.equipment_types):
 #------------------------------------------------------------
 class equipments(model_base.equipments):
     "Store all equipments."
-    attack = models.IntegerField(blank=True, default=0)
-    defence = models.IntegerField(blank=True, default=0)
-
-
 
 
 #------------------------------------------------------------
@@ -233,10 +228,7 @@ class dialogue_quest_dependency(model_base.dialogue_quest_dependency):
 #------------------------------------------------------------
 class character_level(model_base.character_level):
     "Store all character level informations."
-    max_hp = models.IntegerField()
-    max_mp = models.IntegerField()
-    attack = models.IntegerField()
-    defence = models.IntegerField()
+    pass
 
 
 #------------------------------------------------------------
@@ -256,6 +248,16 @@ class character_skill(model_base.character_skill):
 #------------------------------------------------------------
 class event_mobs(model_base.event_mobs):
     "Store all event mobs."
+    pass
+
+
+#------------------------------------------------------------
+#
+# event dialogues
+#
+#------------------------------------------------------------
+class event_dialogues(model_base.event_dialogues):
+    "Store all event dialogues."
     pass
 
 

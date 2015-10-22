@@ -1,1 +1,3 @@
-quest,ordinal,type,object,number
+quest,ordinal,type,object,number,desc
+quest_apple,1,3,obj_apple,1,Get an apple.
+quest_potato,1,3,obj_potato,1,,

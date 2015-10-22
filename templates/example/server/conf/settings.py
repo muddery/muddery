@@ -152,6 +152,7 @@ OTHER_DATA_MODELS = (OBJECT_LOOT_LIST,
                      QUEST_DEPENDENCY,
                      EVENT_DATA,
                      EVENT_MOBS,
+                     EVENT_DIALOGUES,
                      EXIT_LOCKS,
                      DIALOGUES,
                      DIALOGUE_SENTENCES,
@@ -168,13 +169,13 @@ AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 # fallback if an object's normal home location is deleted. It is the
 # key of the room. If it is empty, the home will be set to the first
 # room in WORLD_ROOMS.
-DEFAULT_HOME_KEY = "room_01"
+DEFAULT_HOME_KEY = "room_house"
 
 # The start position for new characters. It is the key of the room.
 # If it is empty, the home will be set to the first room in WORLD_ROOMS.
 #  MULTISESSION_MODE = 0, 1 - used by default unloggedin create command
 #  MULTISESSION_MODE = 2,3 - used by default character_create command
-START_LOCATION_KEY = "room_01"
+START_LOCATION_KEY = "room_house"
 
 EQUIP_POSITIONS = ["head", "chest", "hand", "leg"]
 

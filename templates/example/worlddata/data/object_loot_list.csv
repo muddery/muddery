@@ -1,1 +1,3 @@
-provider,object,number,odds
+provider,object,number,odds,condition
+creator_basket,obj_apple,1,1,
+creator_bag,obj_potato,1,1,

@@ -1,3 +1,8 @@
-npc,dialogue
-npc_01,dlg_01
-npc_02,dlg_11
+npc,dialogue,default
+npc_boy,dlg_hello,1
+npc_boy,dlg_apple,
+npc_boy,dlg_no_apple,
+npc_boy,dlg_has_apple,
+npc_boy,dlg_potato,
+npc_boy,dlg_no_potato,
+npc_boy,dlg_has_potato,

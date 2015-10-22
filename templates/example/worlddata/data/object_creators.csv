@@ -1,3 +1,3 @@
-key,name,typeclass,desc,location,obj_list
-creator_01,Treasure Chest,typeclasses.object_creators.ObjectCreator,This is a treasure chest!,room_01,"food_01:3,food_02:3,equip_01:1"
-creator_02,Weapon Rack,typeclasses.object_creators.ObjectCreator,This is a weapon rack!,room_01,"equip_02:1,weapon_01:1"
+key,name,typeclass,desc,location,condition,verb
+creator_basket,BASKET,typeclasses.object_creators.ObjectCreator,This basket is full of apples.,room_house,,PICK
+creator_bag,BAG,typeclasses.object_creators.ObjectCreator,This bag is full of potato.,room_kitchen,,PICK

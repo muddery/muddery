@@ -63,8 +63,9 @@ You can add objects to rooms in this way. Player can see these objects and use t
 
 ### object_creators
 key | name | typeclass | desc | location | condition | verb
-creator_basket | BASKET | typeclasses.object_creators.ObjectCreator | This basket is full of apples. | | PICK
-creator_bag | BAG | typeclasses.object_creators.ObjectCreator | This bag is full of potato. | | PICK
+--- | --- | --- | --- | --- | --- | ---
+creator_basket | BASKET | typeclasses.object_creators.ObjectCreator | This basket is full of apples. | room_house | | PICK
+creator_bag | BAG | typeclasses.object_creators.ObjectCreator | This bag is full of potato. | room_kitchen | | PICK
 
 `object_creators` inherits from `world_objects`, so its fields is similare to `world_objects`.<br>
 It has one more field `verb`, it discribs the action of loot and will show to players.<br>
@@ -85,7 +86,7 @@ Object creators provide objects according to this loot list.<br>
 ### world_npcs
 key | name | typeclass | desc | location | condition
 --- | --- | --- | --- | --- | --- | ---
-npc_boy | BOY | typeclasses.npcs.NPC | room_street | This is a boy. | 
+npc_boy | BOY | typeclasses.npcs.NPC | This is a boy. | room_street |
 
 You can add NPCs in this way.<br>
 `key` is the unique id of the NPC. This must be unique in all tables.<br>
@@ -174,11 +175,7 @@ key | condition
 --- | ---
 dlg_hello |
 dlg_apple | 
-dlg_no_apple |
-dlg_has_apple |
 dlg_potato |
-dlg_no_potato |
-dlg_has_potato |
 
 This table has all dialogues' key and their conditions.<br>
 `key` is the key of the dialogues. It must be unique in this table.<br>

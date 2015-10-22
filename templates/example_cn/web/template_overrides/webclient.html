@@ -22,9 +22,9 @@
 
     {% if websocket_enabled %}
         <script language="javascript" type="text/javascript">
-            document.write("\<script src=\"{% static "webclient/js/lang/zh/strings.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/local_string.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-            
+            document.write("\<script src=\"{% static "webclient/js/lang/zh/strings.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+
             if ("WebSocket" in window) {
                 <!-- Importing the Muddery websocket webclient component (requires jQuery)  -->
                 var wsurl = "ws://" + this.location.hostname + ":{{websocket_port}}";

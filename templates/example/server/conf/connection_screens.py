@@ -20,13 +20,9 @@ from muddery.utils import utils
 
 CONNECTION_SCREEN = \
 """{b=============================================================={n
-    Welcome to the demo game of Muddery! This version is created on Sep. 1, 2015.
+    Welcome to the demo game of Muddery! This version is created on Oct. 23, 2015.
     
     This demo game is based on Muddery, an open-source online text game server. If you are interested in it, please visit our website www.muddery.org.
-    
-    The map of this game is developed from Evennia's tutorial world.
-    
-    Please register or login!
     
     {rNotice! This game is for demo only, all players' register info and game data may be lost frequently!{n
 {b=============================================================={n"""
