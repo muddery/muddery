@@ -1,2 +1,2 @@
 key,name,typeclass,desc
-player,Player,typeclasses.player_characters.PlayerCharacter,This is a player.
+mob_rogue,ROGUE,typeclasses.monsters.Monster,This is a rogue. He is dangerous.

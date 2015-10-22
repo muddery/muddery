@@ -1,1 +1,3 @@
 character,skill
+player,skill_hit
+mob_rogue,skill_hit

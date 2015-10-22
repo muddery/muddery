@@ -1,1 +1,2 @@
-key,type,trigger
+key,trigger,object,type,condition
+event_dialogue,1,room_kitchen,2,

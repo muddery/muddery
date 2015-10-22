@@ -693,7 +693,7 @@ var webclient = {
                         objectives += obj.desc;
                     }
                     else {
-                        objectives += obj.target + obj.object;
+                        objectives += obj.target + " " + obj.object;
                         objectives += " " + obj.achieved + "/" + obj.total;
                     }
                 }

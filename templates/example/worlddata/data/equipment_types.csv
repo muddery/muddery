@@ -1,4 +1,2 @@
-type,name,desc,career
-cloth,cloth,cloth,
-plate,plate,plate,
-dagger,dagger,dagger,
+type,name,career
+plate,PLATE,

@@ -1,16 +1,9 @@
 key,condition
-dlg_01,
-dlg_02,
-dlg_03,
-dlg_04,
-dlg_05,is_hp_full()
-dlg_06,not is_hp_full()
-dlg_07,
-dlg_08,
-dlg_09,
-dlg_10,
-dlg_11,
-dlg_12,
-dlg_13,"not has_skill(""skill_heal"")"
-dlg_14,"has_skill(""skill_heal"")"
-dlg_15,
+dlg_hello,
+dlg_apple,
+dlg_no_apple,
+dlg_has_apple,
+dlg_potato,
+dlg_no_potato,
+dlg_has_potato,
+dlg_event,
