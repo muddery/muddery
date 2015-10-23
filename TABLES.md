@@ -69,8 +69,8 @@ You can add objects to rooms in this way. Player can see these objects and use t
 ### object_creators
 key | name | typeclass | desc | location | condition | verb
 --- | --- | --- | --- | --- | --- | ---
-creator_basket | BASKET | typeclasses.object_creators.ObjectCreator | This basket is full of apples. | room_house | | SEARCH
-creator_bag | BAG | typeclasses.object_creators.ObjectCreator | This bag is full of potato. | room_cellar | | SEARCH
+creator_basket | BASKET | typeclasses.object_creators.ObjectCreator | A basket of apples. | room_house | | SEARCH
+creator_bag | BAG | typeclasses.object_creators.ObjectCreator | A bag of potatoes. | room_cellar | | SEARCH
 creator_rack | RACK | typeclasses.object_creators.ObjectCreator | This is a rack. | room_dungeon | | LOOT
 
 `object_creators` inherits from `world_objects`, so its fields is similare to `world_objects`.<br>
@@ -286,6 +286,8 @@ It is the data of how events trigger fights.<br>
 `desc` is the description of this fight. It will show to players.<br>
 
 ## character's data
+
+Character's attributes and skills are stored in these tables.
 
 ### character_level
 character | level | max_exp | max_hp | max_mp | attack | defence

@@ -153,8 +153,7 @@ When a player send a `look` command to the server to looking at an object, the s
                  "exits": [{"name": <exit's name>, "dbref": <exit's dbref>}],
                  "things": [{"name": <thing's name>, "dbref": <thing's dbref>}],
                  "npcs": [{"name": <NPC's name>, "dbref": <NPC's dbref>}],
-                 "players": [{"name": <player's name>, "dbref": <player's dbref>}],
-                 "offlines": [{"name": <offline player's name>, "dbref": <offline player's dbref>}]}}
+                 "players": [{"name": <player's name>, "dbref": <player's dbref>}]}}
 ```
 When a player send a `look` command to the server to looking at a room, the server will send back these data. These data is the room's appearance and all objects that in this room.<br>
 These data are similar to the `look`, but the room has more data about other objects in it.<br>

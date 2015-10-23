@@ -101,6 +101,8 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                     provide_quest, finish_quest = cont.have_quest(caller)
                     appearance["provide_quest"] = provide_quest
                     appearance["finish_quest"] = finish_quest
+                elif type == "offlines":
+                    continue
 
                 appearance["dbref"] = cont.dbref
                 appearance["name"] = cont.get_name()
