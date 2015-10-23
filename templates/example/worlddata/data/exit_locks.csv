@@ -1,2 +1,2 @@
 key,condition,verb,message_lock,auto_unlock
-exit_lock,have_object("obj_apple"),UNLOCK,Use apple to unlock it.,0
+exit_house_to_street,have_object("obj_apple"),UNLOCK,Use apple to unlock it.,0

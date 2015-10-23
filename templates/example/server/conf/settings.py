@@ -169,13 +169,13 @@ AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 # fallback if an object's normal home location is deleted. It is the
 # key of the room. If it is empty, the home will be set to the first
 # room in WORLD_ROOMS.
-DEFAULT_HOME_KEY = "room_house"
+DEFAULT_HOME_KEY = "room_street"
 
 # The start position for new characters. It is the key of the room.
 # If it is empty, the home will be set to the first room in WORLD_ROOMS.
 #  MULTISESSION_MODE = 0, 1 - used by default unloggedin create command
 #  MULTISESSION_MODE = 2,3 - used by default character_create command
-START_LOCATION_KEY = "room_house"
+START_LOCATION_KEY = "room_street"
 
 EQUIP_POSITIONS = ["head", "chest", "hand", "leg"]
 

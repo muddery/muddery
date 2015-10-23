@@ -1,2 +1,2 @@
-key,name,typeclass,desc,location
-object_box,BOX,typeclasses.objects.Object,An empty box.,room_house
+key,name,typeclass,desc,location,condition
+object_box,BOX,typeclasses.objects.Object,An empty box.,room_house,
