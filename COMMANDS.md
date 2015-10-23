@@ -9,7 +9,7 @@ Players can send commands to the server. In Muddery, all commands are in format 
 
 `cmd` is the unique key of a command. `args` is the command's args.
 
-These are commands that common players can use.
+These are main commands that normal players can use.
 
 ## Common Commands
 

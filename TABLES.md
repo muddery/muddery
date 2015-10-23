@@ -2,6 +2,8 @@
 
 In muddery, the whole game world is build on a series of tables. When the server starts up for the first time, the server will load these data and build the world. If you have modified some tables after the server start, you, as a builder, can use `@loadworld` command to rebuild the world and use `@reload` command to refresh data.
 
+Here are main tables and example data. They are from out game example. You can use `muddery --init game_folder example` to install it.
+
 ## World Objects
 
 World objects are unique in the world. We use `key` to identify them. If you add an object to these tables, this object will appear in the location you specified. If you remove an object from these tables, this object will be remove from the game world too.
@@ -10,8 +12,9 @@ World objects are unique in the world. We use `key` to identify them. If you add
 key | name | typeclass | desc
 --- | --- | --- | ---
 room_house | HOUSE | typeclasses.rooms.Room | This is a house.
-room_kitchen | KITCHEN | typeclasses.rooms.Room | This is a kitchen.
+room_cellar | CELLAR | typeclasses.rooms.Room | This is a cellar.
 room_street | STREET | typeclasses.rooms.Room | This is a street.
+room_dungeon | DUNGEON | typeclasses.rooms.Room | This is a dungeon.
 
 Rooms are basic areas in the game. They build up the whole map of the game world.<br>
 `key` is the unique id of the room. This must be unique in all tables.<br>
@@ -22,10 +25,12 @@ Rooms are basic areas in the game. They build up the whole map of the game world
 ### world_exits
 key | name | typeclass | desc | verb | location | destination
 --- | --- | --- | --- | --- | --- | ---
-exit_house_to_kitchen | DOOR | typeclasses.exits.Exit | Go to the kitchen. | Go To | room_house | room_kitchen
-exit_kitchen_to_house | DOOR | typeclasses.exits.Exit | Leave the kitchen. | Leave | room_kitchen | room_house
-exit_house_to_street | DOOR | typeclasses.exits.Exit | Go to the street. | Go Out | room_house | room_street
-exit_street_to_house | DOOR | typeclasses.exits.Exit | Enter the house. | Enter | room_street | room_house
+exit_house_to_cellar | CELLAR | typeclasses.exits.Exit | Go to the cellar. | Go To | room_house | room_cellar
+exit_cellar_to_house | HOUSE | typeclasses.exits.Exit | Leave the cellar. | Leave | room_cellar | room_house
+exit_house_to_street | STREET | typeclasses.exits.Exit | Go to the street. | Go Out | room_house | room_street
+exit_street_to_house | HOUSE | typeclasses.exits.Exit | Enter the house. | Enter | room_street | room_house
+exit_street_to_dungeon | DUNGEON | typeclasses.exits.Exit | Go to the dungeon. | Go | room_street | room_dungeon
+exit_dungeon_to_street | STREET | typeclasses.exits.Exit | Back to the street. | Back | room_dungeon | room_street
 
 Characters must traverse exits to move from one room to another. Exits link rooms together. Exits are oneway, so if you want to move in and move out, you need to build two exits on each side.<br>
 `key` is the unique id of the exit. This must be unique in all tables.<br>
@@ -51,7 +56,7 @@ There is a special kind of exits. They are locked and players need to unlock it 
 ### world_objects
 key | name | typeclass | desc | location | condition
 --- | --- | --- | --- | --- | --- | ---
-object_box | BOX | typeclasses.objects.Object | An empty box. | room_house
+object_box | BOX | typeclasses.objects.Object | An empty box. | room_house |
 
 You can add objects to rooms in this way. Player can see these objects and use them if they have relative commands.<br>
 `key` is the unique id of the object. This must be unique in all tables.<br>
@@ -64,8 +69,9 @@ You can add objects to rooms in this way. Player can see these objects and use t
 ### object_creators
 key | name | typeclass | desc | location | condition | verb
 --- | --- | --- | --- | --- | --- | ---
-creator_basket | BASKET | typeclasses.object_creators.ObjectCreator | This basket is full of apples. | room_house | | PICK
-creator_bag | BAG | typeclasses.object_creators.ObjectCreator | This bag is full of potato. | room_kitchen | | PICK
+creator_basket | BASKET | typeclasses.object_creators.ObjectCreator | This basket is full of apples. | room_house | | SEARCH
+creator_bag | BAG | typeclasses.object_creators.ObjectCreator | This bag is full of potato. | room_cellar | | SEARCH
+creator_rack | RACK | typeclasses.object_creators.ObjectCreator | This is a rack. | room_dungeon | | LOOT
 
 `object_creators` inherits from `world_objects`, so its fields is similare to `world_objects`.<br>
 It has one more field `verb`, it discribs the action of loot and will show to players.<br>
@@ -75,6 +81,8 @@ provider | object | number | odds | condition
 --- | --- | --- | --- | ---
 creator_basket | obj_apple | 1 | 1 |
 creator_bag | obj_potato | 1 | 1 |
+creator_rack | equip_armor | 1 | 1 |
+creator_rack | weapon_sword | 1 | 1 |
 
 Object creators provide objects according to this loot list.<br>
 `provider` is the key of an object creator.<br>
@@ -135,8 +143,8 @@ Quests are special objects stored in characters. One quest object represents a q
 ### quests
 key | name | typeclass | desc | condition | action
 --- | --- | --- | --- | --- | --- 
-quest_apple | APPLE | typeclasses.character_quests.Quest | Get an apple. | |
-quest_potato | POTATO | typeclasses.character_quests.Quest | Get a potato. | |
+quest_apple | APPLE | typeclasses.character_quests.Quest | Find an apple. | |
+quest_potato | POTATO | typeclasses.character_quests.Quest | Find a potato. | |
 
 Quests are objects stored in characters.
 `key` is the unique id of the quest. This must be unique in all tables.<br>
@@ -149,7 +157,7 @@ Quests are objects stored in characters.
 ### quest_objectives
 quest | ordinal | type | object | number | desc
 --- | --- | --- | --- | --- | --- 
-quest_apple | 1 | 3 | obj_apple | 1 | Get an apple.
+quest_apple | 1 | 3 | obj_apple | 1 | Find an apple.
 quest_potato | 1 | 3 | obj_potato | 1 |
 
 `quest_objectives` are objectives of quests. A quest can have several objectives. A quest is achieved while all its objectives are achieved.<br>
@@ -176,6 +184,7 @@ key | condition
 dlg_hello |
 dlg_apple | 
 dlg_potato |
+dlg_event |
 
 This table has all dialogues' key and their conditions.<br>
 `key` is the key of the dialogues. It must be unique in this table.<br>
@@ -185,9 +194,9 @@ This table has all dialogues' key and their conditions.<br>
 dialogue | ordinal | speaker | content | action | provide_quest | finish_quest
 --- | --- | --- | --- | --- | --- | ---
 dlg_hello | 1 | n | Hello! | | |
-dlg_apple | 1 | n | Can you give me an apple? | | |
+dlg_apple | 1 | n | Can you find me an apple? | | |
 dlg_apple | 2 | p | OK! | | quest_apple |
-dlg_potato | 1 | n | Can you give me a potato? | | |
+dlg_potato | 1 | n | Can you find me a potato? | | |
 dlg_potato | 2 | p | OK! | | quest_potato |
 dlg_event | 1 | "voice" | Welcome! | | |
 
@@ -216,9 +225,10 @@ dialogue | dependency | type
 dlg_apple | quest_apple | 1
 dlg_no_apple | quest_apple | 7
 dlg_has_apple | quest_apple | 6
-dlg_potato | quest_apple | 1
-dlg_no_potato | quest_apple | 7
-dlg_has_potato | quest_apple | 6
+dlg_potato | quest_potato | 1
+dlg_potato | quest_apple | 8
+dlg_no_potato | quest_potato | 7
+dlg_has_potato | quest_potato | 6
 
 This table sets the dependencies of quests. A dialogue is available while all its dependencies are matched.<br>
 `quest` is the key of the quest that have this objective.<br>
@@ -230,11 +240,7 @@ npc | dialogue | default
 --- | --- | ---
 npc_boy | dlg_hello | 1
 npc_boy | dlg_apple | 
-npc_boy | dlg_no_apple |
-npc_boy | dlg_has_apple |
 npc_boy | dlg_potato |
-npc_boy | dlg_no_potato |
-npc_boy | dlg_has_potato |
 
 This table are used to add dialogues to NPCs. An NPC's dialogues are all listed here.<br>
 `npc` is the key of an NPC.<br>
@@ -247,7 +253,8 @@ Player's actions can trigger events, such as moving into a special room or killi
 ### event_data
 key | trigger | object | type | condition
 --- | --- | --- | --- | ---
-event_dialogue | 1 | room_kitchen | 2 |
+event_dialogue | 1 | room_cellar | 2 |
+event_fight | 1 | room_dungeon | 1
 
 All events are in this table.<br>
 `key` is the key of the event. It must be unique in this table.<br>
@@ -269,7 +276,7 @@ It is the data of how events trigger dialogues.<br>
 ### event_mobs
 key | mob | level | odds | desc
 --- | --- | --- | --- | ---
-event_fight | mob_rogue | 1 | 0.7 | A rogue is attacking you!
+event_fight | mob_rogue | 1 | 1 | A rogue is attacking you!
 
 It is the data of how events trigger fights.<br>
 `key` is the key of the event.<br>
@@ -286,6 +293,7 @@ character | level | max_exp | max_hp | max_mp | attack | defence
 player | 1 | 100 | 100 | 100 | 10 | 10
 player | 2 | 120 | 120 | 100 | 12 | 12
 player | 3 | 150 | 150 | 100 | 15 | 15
+npc_boy | 1 | 1 | 1 | 1 | 1 | 1
 mob_rogue | 1 | 20 | 20 | 100 | 5 | 5
 
 Character's attribute can increase with level up.
@@ -326,7 +334,8 @@ Player characters can wear equipments to increase their attributes. Every equipm
 ### equipments
 key | name | typeclass | desc | max_stack | unique | position | type | attack | defence
 --- | --- | --- | --- | --- | --- | --- | --- | --- | ---
-equip_armor | ARMOR | typeclasses.common_objects.Equipment | This is an armor. | 1 | 0 | body | plate | | 10
+equip_armor | ARMOR | typeclasses.common_objects.Equipment | This is an armor. | 1 | 1 | chest | plate | | 10
+weapon_sword | SWORD | typeclasses.common_objects.Equipment | This is a sword. | 1 | 1 | hand | weapon | 10 |
 
 `key` is the unique id of the equipment. This must be unique in all tables.<br>
 `name` is the name of the equipment that shows to players.<br>
@@ -342,6 +351,7 @@ equip_armor | ARMOR | typeclasses.common_objects.Equipment | This is an armor. |
 type | name | career
 --- | --- | ---
 plate | PLATE |
+weapon | WEAPON |
 
 This table describes the relations between equipment types and character careers.<br>
 `type` is the key of the equipment type.<br>
