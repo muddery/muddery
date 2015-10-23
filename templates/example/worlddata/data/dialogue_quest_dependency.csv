@@ -2,6 +2,7 @@ dialogue,dependency,type
 dlg_apple,quest_apple,1
 dlg_no_apple,quest_apple,7
 dlg_has_apple,quest_apple,6
-dlg_potato,quest_apple,1
-dlg_no_potato,quest_apple,7
-dlg_has_potato,quest_apple,6
+dlg_potato,quest_potato,1
+dlg_potato,quest_apple,8
+dlg_no_potato,quest_potato,7
+dlg_has_potato,quest_potato,6

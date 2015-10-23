@@ -71,7 +71,7 @@ LANGUAGE_CODE = 'en-us'
 DATABASES = {{
     'default': {{
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(GAME_DIR, "server", "evennia.db3"),
+        'NAME': os.path.join(GAME_DIR, "server", "muddery.db3"),
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
@@ -181,6 +181,4 @@ EQUIP_POSITIONS = ["head", "chest", "hand", "leg"]
 
 EQUIP_EFFECTS = ["attack", "defence"]
 
-SKILL_FOLDER = "skills"
-
-SKILL_FILES = ["skills"]
+SOLO_MODE = True

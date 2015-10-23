@@ -296,7 +296,7 @@ Character's attribute can increase with level up.
 ### skills
 key | name | typeclass | desc | cd | passive | condition | function | effect
 --- | --- | --- | --- | --- | --- | --- | --- | ---
-skill_hit | HIT | typeclasses.character_skills.Skill | Hit an enemy. | 1 | 0 | skill_hit | 1
+skill_hit | HIT | typeclasses.character_skills.Skill | Hit an enemy. | 1 | 0 | | skill_hit | 1
 
 Character's skills are special objects. When a player casts a skill, the skill object calls a skill function. Skill function model's position is defined by `SKILL_FOLDER` and `SKILL_FILES` in `settings.py`. If a skill casted successfully, the result of the skill and the CD will be sent to the client.<br>
 `key` is the unique id of the object. This must be unique in all tables.<br>
@@ -334,7 +334,7 @@ equip_armor | ARMOR | typeclasses.common_objects.Equipment | This is an armor. |
 `desc` is the appearance of the equipment when players look at it.<br>
 `max_stack` limits the max number of objects in a pile. It is like the `max_stack` in common_objects.<br>
 `unique` determines whether players can have more than one pile of this object. It is like the `unique` in common_objects.<br>
-`position` is the position to wear.<br>
+`position` is the position to wear. Positions are defined by `EQUIP_POSITIONS` in `settings.py`.<br>
 `type` is the type of the equipment.<br>
 `attack` and `defence` are attributes add to characters.<br>
 

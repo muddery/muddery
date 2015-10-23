@@ -1,2 +1,3 @@
 key,trigger,object,type,condition
-event_dialogue,1,room_kitchen,2,
+event_dialogue,1,room_cellar,2,
+event_fight,1,room_dungeon,1
