@@ -71,7 +71,7 @@ LANGUAGE_CODE = 'en-us'
 DATABASES = {{
     'default': {{
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(GAME_DIR, "server", "evennia.db3"),
+        'NAME': os.path.join(GAME_DIR, "server", "muddery.db3"),
         'USER': '',
         'PASSWORD': '',
         'HOST': '',

@@ -1,7 +1,15 @@
 dialogue,ordinal,speaker,content,action,provide_quest,finish_quest
 dlg_hello,1,n,Hello!,,,
-dlg_apple,1,n,Can you give me an apple?,,,
+dlg_apple,1,n,Can you find me an apple?,,,
 dlg_apple,2,p,OK!,,quest_apple,
-dlg_potato,1,n,Can you give me a potato?,,,
+dlg_no_apple,1,n,Do you have an apple?,,,
+dlg_no_apple,2,p,No.,,,
+dlg_has_apple,1,p,Here is your apple.,,,
+dlg_has_apple,2,n,Thank you!,,,quest_apple
+dlg_potato,1,n,Can you find me a potato?,,,
 dlg_potato,2,p,OK!,,quest_potato,
+dlg_no_potato,1,n,Do you have a potato?,,,
+dlg_no_potato,2,p,No.,,,
+dlg_has_potato,1,p,Here is your potato.,,,
+dlg_has_potato,2,n,Thank you!,,,quest_potato
 dlg_event,1,"""voice""",Welcome!,,,

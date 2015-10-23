@@ -1,3 +1,4 @@
 key,name,typeclass,desc,location,condition,verb
 creator_basket,BASKET,typeclasses.object_creators.ObjectCreator,This basket is full of apples.,room_house,,PICK
-creator_bag,BAG,typeclasses.object_creators.ObjectCreator,This bag is full of potato.,room_kitchen,,PICK
+creator_bag,BAG,typeclasses.object_creators.ObjectCreator,This bag is full of potato.,room_cellar,,PICK
+creator_rack,RACK,typeclasses.object_creators.ObjectCreator,This is a rack.,room_dungeon,,LOOT
