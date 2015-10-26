@@ -12,4 +12,4 @@ dlg_no_potato,1,n,Do you have a potato?,,,
 dlg_no_potato,2,p,No.,,,
 dlg_has_potato,1,p,Here is your potato.,,,
 dlg_has_potato,2,n,Thank you!,,,quest_potato
-dlg_event,1,"""voice""",Welcome!,,,
+dlg_event,1,"""Mysterious Voice""",Welcome!,,,
