@@ -3,15 +3,17 @@
 Players can send commands to the server. In Muddery, all commands are in format of JSON. It has two parts:
 ```
 {"cmd":  <command's key>,
- "args": <object's dbref>
+ "args": <command's arguments>
 }
 ```
 
-`cmd` is the unique key of a command. `args` is the command's args.
+`cmd` is the unique key of a command. `args` is the command's arguments.
 
-These are main commands that normal players can use.
+Here are main commands that normal players can use.
 
 ## Common Commands
+
+These commands are available when a character is in common state (not in combat).
 
 ### look
 ```
@@ -19,7 +21,7 @@ These are main commands that normal players can use.
  "args":<object's dbref>
 }
 ```
-Observe your location or objects in your vicinity.
+Observe your location or other objects.
 
 
 ### inventory
@@ -37,7 +39,7 @@ Show everything in your inventory.
  "args":<exit's dbref>
 }
 ```
-Traverse an exit, go to the destination of the exit.
+Traverse an exit, go to the destination.
 
 
 ### talk
@@ -49,16 +51,16 @@ Traverse an exit, go to the destination of the exit.
 Talk to an NPC, show all available dialogues.
 
 
-### dialogue.
+### dialogue
 ```
 {"cmd":"dialogue",
  "args":{"npc":<npc's dbref>,
-         "dialogue":<current dialogue>,
-         "sentence":<current sentence>}
+         "dialogue":<current dialogue's key>,
+         "sentence":<current sentence's ordinal>}
 }
 ```
 This command finishes current sentence and get next sentences.<br>
-`dialogue` and `sentence` in args refer to the current sentence.
+`dialogue` and `sentence` in args are used to specify the current sentence.
 
 
 ### loot
@@ -67,7 +69,7 @@ This command finishes current sentence and get next sentences.<br>
  "args":<object's dbref>
 }
 ```
-This command pick out random objects from the loot list and give them to the character.
+This command picks out objects from the loot list and give them to the player.
 
 
 ### use
@@ -111,13 +113,13 @@ or
          "target":<skill's target>}
 }
 ```
-Cast a skill when the caller is not in combat. If does not have target, cast it to the caller itself.
+Cast a skill when a character is not in combat. If no target, cast it to the character itself.
 
 
 ### attack
 ```
 {"cmd":"attack",
- "args":<object's dbref>}
+ "args":<target's dbref>}
 }
 ```
 This will initiate a combat with the target. If the target is already in combat, the caller will join its combat.
@@ -133,6 +135,8 @@ A character must unlock a LockedExit before tranvese it.
 
 
 ## Combat Commands
+
+These commands are available in combat.
 
 ### combat info
 ```
@@ -156,10 +160,12 @@ or
          "target":<skill's target>}
 }
 ```
-Cast a skill when the caller is in combat. If does not have target, cast it to the caller itself.
+Cast a skill when a character is in combat. If no target, cast it to the character itself.
 
 
 ## Player Commands
+
+These commands are used to control the player.
 
 ### quit
 ```
@@ -167,10 +173,12 @@ Cast a skill when the caller is in combat. If does not have target, cast it to t
  "args":""
 }
 ```
-Gracefully disconnect your current session from the game.
+Gracefully disconnect your character from the game.
 
 
 ## Unloggedin Commands
+
+These commands are available when a player have not logged in.
 
 ### connect account
 ```

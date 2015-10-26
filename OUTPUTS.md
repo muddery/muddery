@@ -4,12 +4,12 @@ In Muddery, all data send from the server to the client are strings in format of
 ```
 CMD<JSON data>
 ```
-It begins with 'CMD' and follows JSON data. For example:
+It begins with `CMD` and follows JSON data. For example:
 ```
 CMD{"login": {"dbref": "#16", "name": "USERNAME"}}
 ```
 
-The keys of JSON data represent the message type. Possible message types and data formats are as follows:
+The keys of JSON data represent the message type. Available message types and data formats are as follows:
 
 
 ### msg
@@ -23,7 +23,7 @@ It is a common message with color tags. The client should translate these color 
 ```
 {"err": <error_message>}
 ```
-It sends an error message to the client.
+It is an error message.
 
 
 ### alert
@@ -42,7 +42,7 @@ It can show a message with color tags on an alert window. In the second format, 
 ```
 {"login": {"name": <username>, "dbref": <player's dbref>}}
 ```
-This message confirm the login of the player. When a player login, the server will send the username and the player's dbref to the client.
+This message confirm the login of the player. After login, the server sends the username and the player's dbref to the client.
 
 
 ### puppet
@@ -71,7 +71,7 @@ This message confirm the logout of the player. When a player sends a logout comm
             "max_mp": <character's max mp>,
             "mp": <current mp>}}
 ```
-These data send to the client whenever the character's data change or the player login. It includes `hp`, `mp`, `exp` and other attributes.
+These are character's attributes, include `hp`, `mp`, `exp` and other values. These data are sent to the client whenever the a player logs in or a character's attributes change.
 
 
 ### equipments
@@ -79,9 +79,8 @@ These data send to the client whenever the character's data change or the player
 {"equipments": {<equipment_pos_1>: null,
                 <equipment_pos_2>: {"dbref": <dbref>, "name": <name>, "desc": <desc>}}}
 ```
-These data send to the client whenever the character's equipments change or the player login.<br>
-If there is no equipment on the position, the value will be set to `nil`. If there is an equipment, the value will be the equipment's `name`, `dbref` and `desc`.
-
+These are equipments that a character wears. Keys are positions. If there is an equipment on a position, the value is the equipment's `name`, `dbref` and `desc`. If there is no equipment, the value is `null`. <br>
+These data are sent to the client whenever a player logs in or a character's equipments change.
 
 ### inventory
 ```
@@ -91,7 +90,7 @@ If there is no equipment on the position, the value will be set to `nil`. If the
                 "desc": <object's desc>,
                 "equipped": <is equipped>}]}
 ```
-`Inventory` contains a list of objects which are in your inventory. Each item has object's `name`, `dbref`, `number` and `desc`.<br>
+This is a list of objects in character's inventory. Each item has object's `name`, `dbref`, `number` and `desc`.<br>
 If the item is an equipment, it will has an additional attribute `equipped`. This attribute shows whether the equipment is equipped.
 
 
@@ -101,7 +100,7 @@ If the item is an equipment, it will has an additional attribute `equipped`. Thi
              "dbref": <skill's dbref>,
              "desc": <skill's desc>}]}
 ```
-`Skills` contains a list of skills that the character has. Each item has skill's `name`, `dbref`, and `desc`.
+This is a list of skills that a character owns. Each item has skill's `name`, `dbref`, and `desc`.
 
 
 ### quests
@@ -135,9 +134,9 @@ The `objectives` is a list of quest objectives. The value can be the objective's
                         "args": <command's args>}]}}
 ```
 When a player send a `look` command to the server to looking at an object, the server will send back these data. These data is the object's appearance.<br>
-`name` is the name of the object that the player is looking at.<br>
-`desc` is the description of the object that the player is looking at.<br>
-`dbref` is the dbref of the object that the player is looking at.<br>
+`name` is the name of the object.<br>
+`desc` is the description of the object.<br>
+`dbref` is the dbref of the object.<br>
 `cmds` is a list of commands that the player can do on the object.<br>
     `cmd` is the key of the command.<br>
     `name` is the name of the command to display.<br>
@@ -155,13 +154,13 @@ When a player send a `look` command to the server to looking at an object, the s
                  "npcs": [{"name": <NPC's name>, "dbref": <NPC's dbref>}],
                  "players": [{"name": <player's name>, "dbref": <player's dbref>}]}}
 ```
-When a player send a `look` command to the server to looking at a room, the server will send back these data. These data is the room's appearance and all objects that in this room.<br>
-These data are similar to the `look`, but the room has more data about other objects in it.<br>
+When a player send a `look` command to the server to looking at his location, the server will send back these data. These data is the room's appearance and all objects that in this room.<br>
+These data are similar to the `look_obj`, but the room has more data about other objects in it.<br>
 `exits` are a list of exits.<br>
 `things` are a list of common objects in the room.<br>
 `npcs` are a list of NPCs in the room.<br>
-`players` are online players while `offlines` are offline players.<br>
-This only return available objects to players. Objects that does not match the condition will not be sent to the players.<br>
+`players` are online players in the room.<br>
+Objects that does not match the condition will not be sent to the players.<br>
 When a player login or moves into a room, these data will be sent to the player automatically.
 
 
@@ -186,8 +185,8 @@ If a player is talking to an NPC, `npc` is set to the NPC's dbref.
 {"get_object": {"accepted": {<object's name>: <object's number>},
                  "rejected": {<object's name>: <reject reason>}}}
 ```
-It is the loot result, when a player uses a loot command.
-`accepted` is a list of accepted objects and their numbers.
+It is the loot result, when a player uses a `loot` command.<br>
+`accepted` is a list of accepted objects and their numbers.<br>
 `rejected` is a list of rejected objects and their reasons.
 
 
@@ -197,7 +196,7 @@ It is the loot result, when a player uses a loot command.
                                      "dbref": <object's dbref>}]}}
 ```
 The server sends this message to a player whenever any object moves into the player's location.<br>
-`<OBJ_TYPE>` is the type of the object, it can be `exits`, `things`, `npcs`, or `players`.
+`<object's type>` is the type of the object, it can be `exits`, `things`, `npcs`, or `players`.
 
 
 ### obj_moved_out
@@ -206,7 +205,7 @@ The server sends this message to a player whenever any object moves into the pla
                                      "dbref": <object's dbref>}]}}
 ```
 The server sends this message to a player whenever any object moves out of the player's location.<br>
-`<OBJ_TYPE>` is the type of the object, it can be `exits`, `things`, `npcs`, or `players`.
+`<object's type>` is the type of the object, it can be `exits`, `things`, `npcs`, or `players`.
 
 
 ### player_online
@@ -284,7 +283,7 @@ When a character in combat casts a skill, the result of the skill will be sent t
 ```
 {"combat_skill_cd": {"skill": <skill's key>,
                      "gcd": <GCD time>,
-                     "cd": <CD time>}}
+                     "cd": <skill CD time>}}
 ```
 When a character in combat casts a skill, the cd of the skill will be sent to the client.<br>
 `gcd` is global cd in seconds. In gcd, a character can not cast any skill.<br>
