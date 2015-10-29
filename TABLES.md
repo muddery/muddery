@@ -44,7 +44,7 @@ Characters must traverse exits to move from one room to another. Exits link room
 ### exit_locks
 key | condition | verb | message_lock | auto_unlock
 --- | --- | --- | --- | ---
-exit_lock | have_object("obj_apple") | UNLOCK | Use apple to unlock it. | 0
+exit_lock | have_object("obj_key") | UNLOCK | Use a key to unlock it. | 0
 
 It is a special kind of exits. They are locked and players need to unlock it first to traverse it. Their appearance can be different after unlocked. These are additional data of `world_exits`.<br>
 `key` is the `key` of an exit.<br>
