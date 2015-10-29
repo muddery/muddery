@@ -122,7 +122,7 @@ WORLD_ROOMS = ("world_rooms",)
 WORLD_EXITS = ("world_exits",)
 
 # unique objects
-WORLD_OBJECTS = ("world_objects", "object_creators")
+WORLD_OBJECTS = ("world_objects",)
 
 # unique npcs
 WORLD_NPCS = ("world_npcs",)
@@ -138,6 +138,7 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       COMMON_OBJECTS)
 
 # object loot list
+OBJECT_CREATORS = "object_creators"
 OBJECT_LOOT_LIST = "object_loot_list"
 
 # quest data
@@ -173,7 +174,8 @@ CHARACTER_LEVELS = "character_level"
 CHARACTER_SKILLS = "character_skill"
 
 # all other data models
-OTHER_DATA_MODELS = (OBJECT_LOOT_LIST,
+OTHER_DATA_MODELS = (OBJECT_CREATORS,
+                     OBJECT_LOOT_LIST,
                      QUEST_OBJECTIVES,
                      QUEST_DEPENDENCY,
                      EVENT_DATA,

@@ -46,8 +46,8 @@ key | condition | verb | message_lock | auto_unlock
 --- | --- | --- | --- | ---
 exit_lock | have_object("obj_apple") | UNLOCK | Use apple to unlock it. | 0
 
-There is a special kind of exits. They are locked and players need to unlock it first to traverse it. Their appearance can be different after unlocked. These are additional data of `world_exits`.<br>
-`key` is a `key` in `world_exits`.<br>
+It is a special kind of exits. They are locked and players need to unlock it first to traverse it. Their appearance can be different after unlocked. These are additional data of `world_exits`.<br>
+`key` is the `key` of an exit.<br>
 `condition` is the condition of unlock. Players who matches the condition can unlock the exit. The condition's syntax will be explained in another document.<br>
 `verb` is the name of the action of unlock. This shows to players to make the action looks better. If it is empty, the system will use a default verb.<br>
 `message_lock` is the appearance of the exit when it is locked.<br>
@@ -57,6 +57,10 @@ There is a special kind of exits. They are locked and players need to unlock it 
 key | name | typeclass | desc | location | condition
 --- | --- | --- | --- | --- | --- | ---
 object_box | BOX | typeclasses.objects.Object | An empty box. | room_house |
+creator_box | BOX | typeclasses.object_creators.ObjectCreator | A small box. | room_house |
+creator_basket | BASKET | typeclasses.object_creators.ObjectCreator | A basket of apples. | room_house |
+creator_bag | BAG | typeclasses.object_creators.ObjectCreator | A bag of potatoes. | room_cellar |
+creator_rack | RACK | typeclasses.object_creators.ObjectCreator | This is a rack. | room_dungeon |
 
 You can add objects to rooms by adding data to this table.<br>
 `key` is the unique id of an object. This must be unique in all tables.<br>
@@ -64,17 +68,20 @@ You can add objects to rooms by adding data to this table.<br>
 `typeclass` is the typeclass of the object.<br>
 `desc` is the appearance of the object when players look at it.<br>
 `location` is the room where the object stay. It must be a `key` in `world_rooms`.<br>
-`condition` Players only can see objects that match the condition. The condition's syntax will be explained in another document.<br>
+`condition` Players can only see objects that match the condition. The condition's syntax will be explained in another document.<br>
 
 ### object_creators
-key | name | typeclass | desc | location | condition | verb
---- | --- | --- | --- | --- | --- | ---
-creator_basket | BASKET | typeclasses.object_creators.ObjectCreator | A basket of apples. | room_house | | SEARCH
-creator_bag | BAG | typeclasses.object_creators.ObjectCreator | A bag of potatoes. | room_cellar | | SEARCH
-creator_rack | RACK | typeclasses.object_creators.ObjectCreator | This is a rack. | room_dungeon | | LOOT
+key | verb | loot_condition
+--- | --- | ---
+creator_box | SEARCH |
+creator_basket | SEARCH | is_quest_in_progress("quest_apple")
+creator_bag | SEARCH | is_quest_in_progress("quest_potato")
+creator_rack | LOOT |
 
-`object_creators` inherits from `world_objects`, so its fields is similare to `world_objects`.<br>
-It has one more field `verb`, it describes the action of loot that shows to players.<br>
+These are additional data for object creators.<br>
+`key` is the `key` of an object creator.<br>
+`verb` describes the action of loot that shows to players.<br>
+`loot_condition` Players can only loot objects that match the condition. The condition's syntax will be explained in another document.<br>
 
 ### object_loot_list
 provider | object | number | odds | condition
@@ -89,7 +96,7 @@ Object creators provide objects according to this loot list.<br>
 `object` is the `key` of an common object that provided by this object creator. An object creator can provide several objects.<br>
 `number` is the number of the objects provided.<br>
 `odds` is the odds of the drop. It is a float number between 0 to 1.<br>
-`condition` is the condition of the drop. Players only can get objects that match the condition. The condition's syntax will be explained in another document.<br>
+`condition` is the condition of the drop. Players can only get objects that match the condition. The condition's syntax will be explained in another document.<br>
 
 ### world_npcs
 key | name | typeclass | desc | location | condition
@@ -102,7 +109,7 @@ You can add NPCs by adding data to this table.<br>
 `typeclass` is the typeclass of the NPC.<br>
 `desc` is the appearance of the NPC when players look at it.<br>
 `location` is the room where the NPC stay. It must be a `key` in `world_rooms`.<br>
-`condition` Players only can see NPCs that match the condition. The condition's syntax will be explained in another document.<br>
+`condition` Players can only see NPCs that match the condition. The condition's syntax will be explained in another document.<br>
 
 ## Common Objects
 
@@ -151,7 +158,7 @@ Quests are objects stored in characters.
 `name` is the name of the quest that shows to players.<br>
 `typeclass` is the typeclass of the quest.<br>
 `desc` is the appearance of the quest when players look at it.<br>
-`condition` Players only can accept quests that match the condition. The condition's syntax will be explained in another document.<br>
+`condition` Players can only accept quests that match the condition. The condition's syntax will be explained in another document.<br>
 `action` is a short script that runs when players finish a quest. The action's syntax will be explained in another document.<br>
 
 ### quest_objectives
@@ -176,7 +183,7 @@ This table sets the dependencies of quests. A quest is available while all its d
 `type` is the dependency's type. They are defined in `units/defines.py`.<br>
 
 ## Dialogues
-Dialogues are basic units of a talk. They can have branches, so players can choose what they want to say. Dialogues also have conditions, so an NPC can talk different things to players. A dialogue has several sentences which are indivisible. A dialogue only can start from the first sentence.
+Dialogues are basic units of a talk. They can have branches, so players can choose what they want to say. Dialogues also have conditions, so an NPC can talk different things to players. A dialogue has several sentences which are indivisible. A dialogue can only start from the first sentence.
 
 ### dialugues
 key | condition
@@ -188,7 +195,7 @@ dlg_event |
 
 This table has all dialogues' key and their conditions.<br>
 `key` is the key of the dialogues. It must be unique in this table.<br>
-`condition` Players only can see dialugues that match the condition. The condition's syntax will be explained in another document.<br>
+`condition` Players can only see dialugues that match the condition. The condition's syntax will be explained in another document.<br>
 
 ### dialogue_sentences
 dialogue | ordinal | speaker | content | action | provide_quest | finish_quest
@@ -245,7 +252,7 @@ npc_boy | dlg_potato |
 You can add dialogues to NPCs by adding data to this table.<br>
 `npc` is the `key` of an NPC.<br>
 `dialogue` is the `key` of a dialogue.<br>
-`default` is whether this dialogue is default or not. `0` means `NO` and `1` means `YES`. If an NPC can show non-default dialogues, it will not show default dialogues. Default dialogues only can be shown when other dialogues are not available.<br>
+`default` is whether this dialogue is default or not. `0` means `NO` and `1` means `YES`. If an NPC can show non-default dialogues, it will not show default dialogues. Default dialogues can only be shown when other dialogues are not available.<br>
 
 ## Events
 Player's actions can trigger events, such as moving into a special room or killing a special NPC. The event can lead to a dialogue or begin a fight.
@@ -315,7 +322,7 @@ Character's skills are special objects. When a player casts a skill, the skill o
 `desc` is the description of the skill.<br>
 `cd` is the cool down time in seconds.<br>
 `passive` is whether the skill is passive or not. `0` means `NO` and `1` means `YES`. If it is a passive skill, players can not cast it manually.<br>
-`condition` is the condition of the skill. Players only can cast skills that match the condition. The condition's syntax will be explained in another document.<br>
+`condition` is the condition of the skill. Players can only cast skills that match the condition. The condition's syntax will be explained in another document.<br>
 `function` is the name of the skill function. The function must be defined in skill models. Skill function model's position is defined by `SKILL_FOLDER` and `SKILL_FILES` in `settings.py`.<br>
 `effect` is a float value that can provide as an argument when players cast this skill.<br>
 

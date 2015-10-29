@@ -1,3 +1,4 @@
 key,name,typeclass,desc,max_stack,unique,effect,action
+obj_key,KEY,typeclasses.common_objects.CommonObject,A key.,1,1,0,
 obj_apple,APPLE,typeclasses.common_objects.CommonObject,An apple.,10,0,0,
 obj_potato,POTATO,typeclasses.common_objects.CommonObject,A potato.,10,0,0,

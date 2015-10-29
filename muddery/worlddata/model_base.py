@@ -93,10 +93,12 @@ class world_objects(models.Model):
 # store all object creators
 #
 #------------------------------------------------------------
-class object_creators(world_objects):
+class object_creators(models.Model):
     "Store all object creators."
 
+    key = models.ForeignKey("world_objects", db_index=True)
     verb = models.TextField(blank=True)
+    loot_condition = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"

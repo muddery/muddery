@@ -1,7 +1,7 @@
 key,name,typeclass,desc,verb,location,destination
 exit_game_start,开始游戏,typeclasses.exits.Exit,欢迎您进入游戏！,进入,room_intro,room_colorfulworld_hole
 exit_colorfulworld_alley_1,爬出去,typeclasses.exits.Exit,电缆井不深，应该可以爬出去。,爬出去,room_colorfulworld_hole,room_colorfulworld_alley
-exit_colorfulworld_street_1,大街,typeclasses.exits.LockedExit,广告板被撬动了，留出了一道通往外面的缝，正好可以让一个人通过。,出去,room_colorfulworld_alley,room_colorfulworld_street
+exit_colorfulworld_street_1,大街,typeclasses.exits.LockedExit,广告板被撬动了，露出了一条通往外面的缝，正好可以让一个人通过。,出去,room_colorfulworld_alley,room_colorfulworld_street
 exit_colorfulworld_alley_2,小巷,typeclasses.exits.Exit,进入街旁昏暗的小巷。,前往,room_colorfulworld_street,room_colorfulworld_alley
 exit_colorfulworld_conv_store_1,便利店,typeclasses.exits.Exit,街旁的一家便利店，大门倒落在一边。,进入,room_colorfulworld_street,room_colorfulworld_conv_store
 exit_colorfulworld_street_2,大街,typeclasses.exits.Exit,离开便利店，回到大街上。,离开,room_colorfulworld_conv_store,room_colorfulworld_street

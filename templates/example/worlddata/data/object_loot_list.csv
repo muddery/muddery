@@ -1,4 +1,5 @@
 provider,object,number,odds,condition
+creator_box,obj_key,1,1,
 creator_basket,obj_apple,1,1,
 creator_bag,obj_potato,1,1,
 creator_rack,equip_armor,1,1,
