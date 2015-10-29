@@ -147,7 +147,8 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       COMMON_OBJECTS)
 
 # all other data models
-OTHER_DATA_MODELS = (OBJECT_LOOT_LIST,
+OTHER_DATA_MODELS = (OBJECT_CREATORS,
+                     OBJECT_LOOT_LIST,
                      QUEST_OBJECTIVES,
                      QUEST_DEPENDENCY,
                      EVENT_DATA,

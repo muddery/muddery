@@ -520,8 +520,8 @@ class MudderyObject(DefaultObject):
                 "cmds": self.get_available_commands(caller)}
                 
         return info
-            
-            
+
+
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.

@@ -1,4 +1,5 @@
-key,name,typeclass,desc,location,condition,verb
-creator_basket,BASKET,typeclasses.object_creators.ObjectCreator,A basket of apples.,room_house,,SEARCH
-creator_bag,BAG,typeclasses.object_creators.ObjectCreator,A bag of potatoes.,room_cellar,,SEARCH
-creator_rack,RACK,typeclasses.object_creators.ObjectCreator,This is a rack.,room_dungeon,,LOOT
+key,verb,loot_condition
+creator_box,SEARCH,
+creator_basket,SEARCH,is_quest_in_progress("quest_apple")
+creator_bag,SEARCH,is_quest_in_progress("quest_potato")
+creator_rack,LOOT,

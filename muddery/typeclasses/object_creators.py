@@ -6,6 +6,7 @@ CommonObject is the object that players can put into their inventory.
 import random
 from django.conf import settings
 from django.db.models.loading import get_model
+from django.core.exceptions import ObjectDoesNotExist
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils import script_handler
 
@@ -20,6 +21,19 @@ class MudderyObjectCreator(MudderyObject):
         Set data_info to the object."
         """
         super(MudderyObjectCreator, self).load_data()
+        
+        # Load creator info.
+        creator_info = []
+        try:
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.OBJECT_CREATORS)
+            creator_record = model_obj.objects.get(key=self.get_info_key())
+
+            self.verb = creator_record.verb
+            self.loot_condition = creator_record.loot_condition
+        except ObjectDoesNotExist:
+            pass
+        except Exception, e:
+            print "Can't load creator info %s: %s" % (self.get_info_key(), e)
 
         # Load loot list.
         loot_list = []
@@ -44,6 +58,9 @@ class MudderyObjectCreator(MudderyObject):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
+        if not script_handler.match_condition(caller, self.loot_condition):
+            return []
+
         verb = self.verb
         if not verb:
             verb = LS("LOOT");
