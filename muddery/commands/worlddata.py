@@ -10,6 +10,7 @@ from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.utils.importer import import_file, import_all
 from muddery.utils.builder import build_all
+from muddery.utils.exception import MudderyError
 from evennia import default_cmds
 from evennia.utils import logger
 import traceback
@@ -47,26 +48,14 @@ class CmdImportData(default_cmds.MuxCommand):
                       for model in data_models]
             models += [model for model in settings.OTHER_DATA_MODELS]
 
-		# get file's extension name
-        file_type = settings.WORLD_DATA_FILE_TYPE.lower()
-        ext_name = ""
-        if file_type == "csv":
-            ext_name = ".csv"
-        else:
-            caller.msg("Does not support file type %s." % settings.WORLD_DATA_FILE_TYPE)
-            caller.msg("Total %d files imported." % count)
-            return
-
         # import models one by one
         for model_name in models:
-            # make file name
-            file_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, model_name + ext_name)
-
-            # import data
             try:
-                import_file(file_name, model_name)
+                import_file(model_name)
                 caller.msg("%s imported." % model_name)
                 count += 1
+            except MudderyError, e:
+                caller.msg(e)
             except Exception, e:
                 caller.msg("Can not import %s." % model_name)
                 continue

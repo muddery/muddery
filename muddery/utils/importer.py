@@ -3,6 +3,7 @@ This module imports data from files to db.
 """
 
 import os
+import glob
 import csv
 from django.db import models
 from django.db.models.loading import get_model
@@ -125,22 +126,28 @@ def import_csv(file_name, model_name, clear=True):
         pass
 
 
-def import_file(file_name, model_name, clear=True):
+def import_file(model_name, clear=True):
     """
     Import data from a data file to the db model
 
     Args:
-        file_name: (string) Data file's name.
         model_name: (string) Db model's name.
         clear: (boolean) clear old data or not.
     """
+    file_search = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, model_name + ".*")
+    file_names = glob.glob(file_search)
 
-    file_type = settings.WORLD_DATA_FILE_TYPE.lower()
-    if file_type == "csv":
-        import_csv(file_name, model_name, clear)
-    else:
-        message = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
-        raise MudderyError(message)
+    for file_name in file_names:
+        full_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, file_name)
+
+        # get file's extension name
+        ext_name = os.path.splitext(file_name)[1].lower()
+
+        if ext_name == ".csv":
+            import_csv(full_name, model_name, clear)
+        else:
+            message = "Does not support file type %s" % ext_name[1:]
+            raise MudderyError(message)
 
 
 def import_localized_strings(language=None):
@@ -150,16 +157,6 @@ def import_localized_strings(language=None):
     language: All choices can be found here: 
               # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
     """
-
-    # get file's extension name
-    file_type = settings.WORLD_DATA_FILE_TYPE.lower()
-    ext_name = ""
-    if file_type == "csv":
-        ext_name = ".csv"
-    else:
-        message = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
-        raise MudderyError(message)
-
     # if language is empty, load settings.LANGUAGE_CODE
     if not language:
         language = settings.LANGUAGE_CODE
@@ -178,12 +175,15 @@ def import_localized_strings(language=None):
                 # if it is a folder
                 continue
 
-            ext = os.path.splitext(full_name)
-            if ext_name != ext[1]:
-                # if does not match the ext name
-                continue
+            # get file's extension name
+            ext_name = os.path.splitext(file_name)[1].lower()
 
-            import_file(full_name, settings.LOCALIZED_STRINGS_MODEL, clear=False)
+            if ext_name == ".csv":
+                import_csv(full_name, settings.LOCALIZED_STRINGS_MODEL, True)
+            else:
+                message = "Does not support file type %s" % ext_name[1:]
+                raise MudderyError(message)
+                continue
 
             ostring = "%s imported" % file_name
             print ostring
@@ -203,33 +203,34 @@ def import_all():
 
     model_name_list += [model for model in settings.OTHER_DATA_MODELS]
 
-    # get file's extension name
-    file_type = settings.WORLD_DATA_FILE_TYPE.lower()
-    ext_name = ""
-    if file_type == "csv":
-        ext_name = ".csv"
-    else:
-        message = "Does not support file type %s" % settings.WORLD_DATA_FILE_TYPE
-        raise MudderyError(message)
-
     # import models one by one
     for model_name in model_name_list:
         # make file name
-        file_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, model_name + ext_name)
+        file_search = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, model_name + ".*")
+        file_names = glob.glob(file_search)
 
-        # import data
-        try:
-            if file_type == "csv":
-                import_csv(file_name, model_name)
+        for file_name in file_names:
+            full_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, file_name)
 
-            ostring = "%s imported" % model_name
-            print ostring
+            # get file's extension name
+            ext_name = os.path.splitext(file_name)[1].lower()
 
-            count += 1
-        except Exception, e:
-            ostring = "Can not import %s: %s" % (model_name, e)
-            print ostring
-            continue
+            # import data
+            try:
+                if ext_name == ".csv":
+                    import_csv(full_name, model_name)
+                else:
+                    message = "Does not support file type %s" % ext_name[1:]
+                    raise MudderyError(message)
+
+                ostring = "%s imported" % model_name
+                print ostring
+
+                count += 1
+            except Exception, e:
+                ostring = "Can not import %s: %s" % (model_name, e)
+                print ostring
+                continue
 
     # import localized strings
     import_localized_strings(settings.LANGUAGE_CODE)
