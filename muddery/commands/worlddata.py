@@ -8,7 +8,7 @@ Add three commands: @importdata, @datainfo and @batchbuilder
 import os
 from django.conf import settings
 from django.db.models.loading import get_model
-from muddery.utils.importer import import_file, import_all
+from muddery.utils.importer import import_model, import_all
 from muddery.utils.builder import build_all
 from muddery.utils.exception import MudderyError
 from evennia import default_cmds
@@ -51,7 +51,7 @@ class CmdImportData(default_cmds.MuxCommand):
         # import models one by one
         for model_name in models:
             try:
-                import_file(model_name)
+                import_model(model_name)
                 caller.msg("%s imported." % model_name)
                 count += 1
             except MudderyError, e:
