@@ -169,7 +169,3 @@ START_LOCATION_KEY = ""
 EQUIP_POSITIONS = []
 
 EQUIP_EFFECTS = []
-
-SKILL_FOLDER = "skills"
-
-SKILL_FILES = ["skills"]

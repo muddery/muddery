@@ -137,7 +137,7 @@ WORLD_DATA_FILE_ENCODING = "utf8"
 INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 
 # common objects
-COMMON_OBJECTS += ("foods", "equipments",)
+COMMON_OBJECTS += ("foods",)
 
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
