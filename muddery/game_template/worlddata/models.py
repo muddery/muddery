@@ -24,6 +24,16 @@ class world_exits(model_base.world_exits):
 
 #------------------------------------------------------------
 #
+# store exit locks
+#
+#------------------------------------------------------------
+class exit_locks(model_base.exit_locks):
+    "Store all exit locks."
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all objects
 #
 #------------------------------------------------------------
@@ -69,7 +79,7 @@ class common_objects(model_base.common_objects):
 #------------------------------------------------------------
 class foods(model_base.common_objects):
     "Store all foods."
-    pass
+    hp = models.IntegerField(blank=True, default=0)
 
 
 #------------------------------------------------------------
@@ -89,7 +99,6 @@ class equipment_types(model_base.equipment_types):
 #------------------------------------------------------------
 class equipments(model_base.equipments):
     "Store all equipments."
-    pass
 
 
 #------------------------------------------------------------
@@ -238,7 +247,7 @@ class character_skill(model_base.character_skill):
 #
 #------------------------------------------------------------
 class event_mobs(model_base.event_mobs):
-    "Store all room mobs."
+    "Store all event mobs."
     pass
 
 
