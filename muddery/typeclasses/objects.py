@@ -274,6 +274,9 @@ class MudderyObject(DefaultObject):
 
         # Set new typeclass.
         self.swap_typeclass(typeclass, clean_attributes=False)
+        if typeclass != self.typeclass_path:
+            logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_info_key(), typeclass))
+            return
 
 
     def set_name(self, name):
