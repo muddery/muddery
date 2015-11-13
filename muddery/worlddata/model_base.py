@@ -14,6 +14,8 @@ class world_rooms(models.Model):
     name = models.CharField(max_length=KEY_LENGTH)
     typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
+    position = models.TextField(blank=True)
+    on_map = models.BooleanField(blank=True, default=True)
 
     class Meta:
         "Define Django meta options"
@@ -37,6 +39,8 @@ class world_exits(models.Model):
     verb = models.TextField(blank=True)
     location = models.CharField(max_length=KEY_LENGTH, blank=True)
     destination = models.CharField(max_length=KEY_LENGTH, blank=True)
+    condition = models.TextField(blank=True)
+    on_map = models.BooleanField(blank=True, default=True)
 
     class Meta:
         "Define Django meta options"
