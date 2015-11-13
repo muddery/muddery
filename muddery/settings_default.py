@@ -226,3 +226,6 @@ AUTO_CAST_SKILL_CD = 1.5
 
 # In solo mode, a player can not see or affect other players.
 SOLO_MODE = False
+
+# Characters who have equal or higher permission can bypass events.
+PERMISSION_BYPASS_EVENTS = {"Builders", "Wizards", "Immortals"}

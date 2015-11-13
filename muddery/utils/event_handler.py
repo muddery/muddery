@@ -14,6 +14,7 @@ from django.db.models.loading import get_model
 from evennia.utils import logger
 from evennia import create_script
 
+PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_EVENTS}
 
 class EventHandler(object):
     """
@@ -55,9 +56,14 @@ class EventHandler(object):
         if not character:
             return
 
-        if character.player and character.player.is_superuser:
-            # ban events on superusers
-            return
+        if character.player:
+            if character.player.is_superuser:
+                # superusers can bypass events
+                return
+            for perm in character.player.permissions.all():
+                if perm in PERMISSION_BYPASS_EVENTS:
+                    # has permission to bypass events
+                    return
 
         if defines.EVENT_TRIGGER_ARRIVE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_ARRIVE]:
@@ -83,9 +89,14 @@ class EventHandler(object):
         if not owner:
             return
 
-        if owner.player and owner.player.is_superuser:
-            # ban events on superusers
-            return
+        if owner.player:
+            if owner.player.is_superuser:
+                # superusers can bypass events
+                return
+            for perm in owner.player.permissions.all():
+                if perm in PERMISSION_BYPASS_EVENTS:
+                    # has permission to bypass events
+                    return
 
         if defines.EVENT_TRIGGER_DIE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_DIE]:
@@ -104,9 +115,15 @@ class EventHandler(object):
             for event in self.events[defines.EVENT_TRIGGER_KILL]:
                 # If has kill event.
                 for killer in killers:
-                    if killer.player and killer.player.is_superuser:
-                        # ban events on superusers
-                        continue
+                    if killer.player:
+                        if killer.player.is_superuser:
+                            # superusers can bypass events
+                            continue
+                        for perm in killer.player.permissions.all():
+                            if perm in PERMISSION_BYPASS_EVENTS:
+                                # has permission to bypass events
+                                continue
+
 
                     if script_handler.match_condition(killer, event["condition"]):
                         event["function"](event["data"], killer)
