@@ -8,19 +8,37 @@ actions of a skill.
 
 import time
 import traceback
+import importlib
 from django.conf import settings
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
-from skills import skills
 
 
 class MudderySkill(MudderyObject):
     """
     A skill of the character.
     """
-    
+
+    _skill_modues = {}
+
+    @classmethod
+    def load_skill_modules(cls):
+        """
+        Load all available skills.
+        """
+        for module_name in settings.SKILL_MODULES:
+            try:
+                module = importlib.import_module(module_name)
+                skills = [skill for skill in dir(module) if skill[0] != '_']
+
+                for skill in skills:
+                    cls._skill_modues[skill] = getattr(module, skill, None)
+            except ImportError:
+                print "Can not import skill module %s." % module_name
+
+
     def at_object_creation(self):
         """
         Set default values.
@@ -30,6 +48,18 @@ class MudderySkill(MudderyObject):
         # set status
         self.db.owner = None
         self.db.cd_end_time = 0
+
+
+    def set_initial_data(self):
+        """
+        Initialize this object after data loaded.
+        """
+        super(MudderySkill, self).set_initial_data()
+
+        # search skill method
+        self.method_call = None
+        if self.method in self._skill_modues:
+            self.method_call = self._skill_modues[self.method]
 
 
     def get_available_commands(self, caller):
@@ -84,10 +114,15 @@ class MudderySkill(MudderyObject):
                     owner.msg({"msg":LS("This skill is not ready yet!")})
                 return
 
+        if not self.method_call:
+            print "Can not find skill method: %s" % self.get_info_key()
+            if owner:
+                owner.msg({"msg": LS("Can not cast this skill!")})
+            return
+
         try:
-            # call skill's function
-            function = getattr(skills, self.function)
-            result = function(owner, target, effect=self.effect)
+            # call skill method
+            result = self.method_call(owner, target, effect=self.effect)
 
             # set cd
             if self.cd > 0:

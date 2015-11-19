@@ -21,6 +21,7 @@ from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
+from muddery.typeclasses.character_skills import MudderySkill
 from muddery.utils import builder
 
 
@@ -47,6 +48,9 @@ def at_server_start():
 
     # reload local strings
     LOCALIZED_STRINGS_HANDLER.reload()
+
+    # reload skill modules
+    MudderySkill.load_skill_modules()
 
 
 def at_server_stop():

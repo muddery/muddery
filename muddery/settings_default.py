@@ -214,9 +214,8 @@ EQUIP_POSITIONS = []
 
 EQUIP_EFFECTS = []
 
-SKILL_FOLDER = "skills"
-
-SKILL_FILES = []
+# all skill modules
+SKILL_MODULES = ("skills.skills",)
 
 GLOBAL_CD = 1.0
 

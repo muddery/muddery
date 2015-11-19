@@ -20,7 +20,7 @@ class MudderyMonster(MudderyCharacter):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        commands = [{"name":"ATTACK", "cmd":"attack", "args":self.dbref}]
+        commands = [{"name":LS("ATTACK"), "cmd":"attack", "args":self.dbref}]
         return commands
 
 

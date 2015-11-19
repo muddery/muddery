@@ -1,2 +1,2 @@
-key,name,typeclass,desc,cd,passive,condition,function,effect
+key,name,typeclass,desc,cd,passive,condition,method,effect
 skill_normal_hit,普通攻击,typeclasses.character_skills.Skill,攻击敌人，伤害一般。,1,0,,skill_hit,1

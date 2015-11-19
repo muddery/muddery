@@ -17,6 +17,7 @@ does what you expect it to.
 from django.conf import settings
 from evennia.utils import search, logger
 from muddery.utils import builder, importer, utils
+from muddery.typeclasses.character_skills import MudderySkill
 import traceback
 
 LIMBO_DESC = "Welcome to your new {wMuddery{n-based game! " +\
@@ -31,6 +32,9 @@ def at_initial_setup():
     try:
         # load world data
         importer.import_all()
+
+        # reload skill modules
+        MudderySkill.load_skill_modules()
 
         # build world
         builder.build_all()
