@@ -253,7 +253,7 @@ class skills(models.Model):
     cd = models.IntegerField(blank=True, default=0)
     passive = models.BooleanField(blank=True, default=False)
     condition = models.TextField(blank=True)
-    function = models.CharField(max_length=KEY_LENGTH)
+    method = models.CharField(max_length=KEY_LENGTH)
     effect = models.FloatField(blank=True, default=0)
 
     class Meta:
