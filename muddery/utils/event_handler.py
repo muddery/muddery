@@ -49,6 +49,29 @@ class EventHandler(object):
             self.events[event_record.trigger].append(event)
 
 
+    def can_bypass(self, character):
+        """
+        If the character can bypass the event.
+        """
+        if not character:
+            return False
+
+        if character.player:
+            if character.player.is_superuser:
+                # superusers can bypass events
+                return True
+            for perm in character.player.permissions.all():
+                if perm in PERMISSION_BYPASS_EVENTS:
+                    # has permission to bypass events
+                    return True
+
+
+    #########################
+    #
+    # Event triggers
+    #
+    #########################
+
     def at_character_move_in(self, character):
         """
         Called when a character moves in the event handler's owner, usually a room.
@@ -56,14 +79,8 @@ class EventHandler(object):
         if not character:
             return
 
-        if character.player:
-            if character.player.is_superuser:
-                # superusers can bypass events
-                return
-            for perm in character.player.permissions.all():
-                if perm in PERMISSION_BYPASS_EVENTS:
-                    # has permission to bypass events
-                    return
+        if self.can_bypass(character):
+            return
 
         if defines.EVENT_TRIGGER_ARRIVE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_ARRIVE]:
@@ -89,14 +106,8 @@ class EventHandler(object):
         if not owner:
             return
 
-        if owner.player:
-            if owner.player.is_superuser:
-                # superusers can bypass events
-                return
-            for perm in owner.player.permissions.all():
-                if perm in PERMISSION_BYPASS_EVENTS:
-                    # has permission to bypass events
-                    return
+        if self.can_bypass(character):
+            return
 
         if defines.EVENT_TRIGGER_DIE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_DIE]:
@@ -115,19 +126,41 @@ class EventHandler(object):
             for event in self.events[defines.EVENT_TRIGGER_KILL]:
                 # If has kill event.
                 for killer in killers:
-                    if killer.player:
-                        if killer.player.is_superuser:
-                            # superusers can bypass events
-                            continue
-                        for perm in killer.player.permissions.all():
-                            if perm in PERMISSION_BYPASS_EVENTS:
-                                # has permission to bypass events
-                                continue
-
+                    if self.can_bypass(killers):
+                        continue
 
                     if script_handler.match_condition(killer, event["condition"]):
                         event["function"](event["data"], killer)
 
+
+    def at_character_traverse(self, character):
+        """
+        Called before a character traverses an exit.
+        If returns true, the character can pass the exit, else the character can not pass the exit.
+        """
+        if not character:
+            return True
+
+        if self.can_bypass(character):
+            return True
+
+        triggered = False
+        if defines.EVENT_TRIGGER_TRAVERSE in self.events:
+            for event in self.events[defines.EVENT_TRIGGER_TRAVERSE]:
+                # If has traverse event.
+                if script_handler.match_condition(character, event["condition"]):
+                    # If matches the condition.
+                    triggered = True
+                    event["function"](event["data"], character)
+
+        return not triggered
+
+
+    #########################
+    #
+    # Event actions
+    #
+    #########################
 
     def create_event_attack(self, event):
         """
