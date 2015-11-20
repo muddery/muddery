@@ -56,10 +56,10 @@ class MudderySkill(MudderyObject):
         """
         super(MudderySkill, self).set_initial_data()
 
-        # search skill method
-        self.method_call = None
-        if self.method in self._skill_modues:
-            self.method_call = self._skill_modues[self.method]
+        # search skill function
+        self.function_call = None
+        if self.function in self._skill_modues:
+            self.function_call = self._skill_modues[self.function]
 
 
     def get_available_commands(self, caller):
@@ -114,15 +114,15 @@ class MudderySkill(MudderyObject):
                     owner.msg({"msg":LS("This skill is not ready yet!")})
                 return
 
-        if not self.method_call:
-            print "Can not find skill method: %s" % self.get_info_key()
+        if not self.function_call:
+            print "Can not find skill function: %s" % self.get_info_key()
             if owner:
                 owner.msg({"msg": LS("Can not cast this skill!")})
             return
 
         try:
-            # call skill method
-            result = self.method_call(owner, target, effect=self.effect)
+            # call skill function
+            result = self.function_call(owner, target, effect=self.effect)
 
             # set cd
             if self.cd > 0:
