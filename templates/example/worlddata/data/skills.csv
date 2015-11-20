@@ -1,2 +1,2 @@
-key,name,typeclass,desc,cd,passive,condition,method,effect
+key,name,typeclass,desc,cd,passive,condition,function,effect
 skill_hit,HIT,typeclasses.character_skills.Skill,Hit an enemy.,1,0,,skill_hit,1
