@@ -57,6 +57,10 @@ class MudderyExit(MudderyObject, DefaultExit):
             before it is even started.
 
         """
+        # trigger event
+        if traversing_object.has_player:
+            return self.event.at_character_traverse(traversing_object)
+        
         return True
 
 
@@ -130,6 +134,9 @@ class MudderyLockedExit(MudderyExit):
             before it is even started.
 
         """
+        if not super(MudderyLockedExit, self).at_character_traverse(traversing_object):
+            return False
+
         # Only can pass exits which have already unlockde.
         return traversing_object.is_exit_unlocked(self.get_info_key())
 

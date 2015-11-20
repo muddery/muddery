@@ -511,7 +511,8 @@ class CmdGoto(Command):
         if obj.access(self.caller, 'traverse'):
             # we may traverse the exit.
             # MudderyLockedExit handles locks in at_before_traverse().
-            obj.at_traverse(caller, obj.destination)
+            if obj.at_before_traverse(self.caller):
+                obj.at_traverse(caller, obj.destination)
         else:
             # exit is locked
             if obj.db.err_traverse:

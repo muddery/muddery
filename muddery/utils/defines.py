@@ -23,9 +23,11 @@ OBJECTIVE_OBJECT = 3    # object: object_id
 
 # event trigger types
 EVENT_TRIGGER_NONE = 0
-EVENT_TRIGGER_ARRIVE = 1    # object: room_id
-EVENT_TRIGGER_DIE = 2       # character die, object: killer_mob_id
-EVENT_TRIGGER_KILL = 3      # kill a mob, object: mob_id
+EVENT_TRIGGER_ARRIVE = 1    # at attriving a room. object: room_id
+EVENT_TRIGGER_DIE = 2       # character die. object: killer_mob_id
+EVENT_TRIGGER_KILL = 3      # kill a mob. object: mob_id
+EVENT_TRIGGER_TRAVERSE = 4  # before traverse an exit. object: exit_id
+
 
 # event types
 EVENT_NONE = 0
