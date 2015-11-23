@@ -72,7 +72,6 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         This is a convenient hook for a 'look'
         command to call.
         """
-            
         # get name, description, commands and all objects in it
         info = {"exits": [],
                 "npcs": [],
@@ -98,9 +97,10 @@ class MudderyRoom(MudderyObject, DefaultRoom):
 
                 if type == "npcs":
                     # add quest status
-                    provide_quest, finish_quest = cont.have_quest(caller)
-                    appearance["provide_quest"] = provide_quest
-                    appearance["finish_quest"] = finish_quest
+                    if hasattr(cont, "have_quest"):
+                        provide_quest, finish_quest = cont.have_quest(caller)
+                        appearance["provide_quest"] = provide_quest
+                        appearance["finish_quest"] = finish_quest
                 elif type == "offlines":
                     continue
 
@@ -118,12 +118,13 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         """
         if obj.destination:
             return "exits"
-        elif obj.is_typeclass(settings.BASE_CHARACTER_TYPECLASS, exact=False):
-            if obj.has_player:
-                return "players"
+        elif obj.is_typeclass(settings.BASE_GENERAL_CHARACTER_TYPECLASS, exact=False):
+            if obj.is_typeclass(settings.BASE_CHARACTER_TYPECLASS, exact=False):
+                if obj.has_player:
+                    return "players"
+                else:
+                    return "offlines"
             else:
-                return "offlines"
-        elif obj.is_typeclass(settings.BASE_NPC_TYPECLASS, exact=False):
-            return "npcs"
+                return "npcs"
         else:
             return "things"

@@ -20,6 +20,7 @@ from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
+from evennia import TICKER_HANDLER
 
 
 class MudderyPlayerCharacter(MudderyCharacter):
@@ -190,9 +191,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
-        "args" must be a string without ' and ", usually it is self.dbref.
         """
-        commands = [{"name":LS("ATTACK"), "cmd":"attack", "args":self.dbref}]
+        commands = []
+        if self.is_alive():
+            commands.append({"name":LS("ATTACK"), "cmd":"attack", "args":self.dbref})
         return commands
 
 
@@ -203,7 +205,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         if self.location:
             appearance = self.location.get_appearance(self)
             appearance.update(self.location.get_surroundings(self))
-            self.msg({"look_around":appearance})
+            self.msg({"look_around": appearance})
 
 
     def receive_objects(self, obj_list):
@@ -550,13 +552,29 @@ class MudderyPlayerCharacter(MudderyCharacter):
         super(MudderyPlayerCharacter, self).die(killers)
         
         self.msg({"msg": LS("You died.")})
-        
+
+        if settings.PLAYER_REBORN_CD <= 0:
+            # Reborn immediately
+            self.reborn()
+        else:
+            # Set reborn timer.
+            TICKER_HANDLER.add(self, settings.PLAYER_REBORN_CD, hook_key="reborn")
+
+            self.msg({"msg": LS("You will be reborn at {c%s{n in {c%s{n seconds.") %
+                        (self.home.get_name(), settings.PLAYER_REBORN_CD)})
+
+
+    def reborn(self):
+        """
+        Reborn after being killed.
+        """
+        TICKER_HANDLER.remove(self, settings.PLAYER_REBORN_CD)
+
         # Recover all hp.
         self.db.hp = self.max_hp
         self.show_status()
 
         # Reborn at its home.
-        home = self.search(self.home, global_search=True)
-        if home:
-            self.move_to(home, quiet=True)
-            self.msg({"msg": LS("You are back to %s.") % home.name})
+        if self.home:
+            self.move_to(self.home, quiet=True)
+            self.msg({"msg": LS("You are reborn at {c%s{n.") % self.home.get_name()})

@@ -134,7 +134,7 @@ class MudderyLockedExit(MudderyExit):
             before it is even started.
 
         """
-        if not super(MudderyLockedExit, self).at_character_traverse(traversing_object):
+        if not super(MudderyLockedExit, self).at_before_traverse(traversing_object):
             return False
 
         # Only can pass exits which have already unlockde.

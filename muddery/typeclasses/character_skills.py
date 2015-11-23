@@ -36,7 +36,7 @@ class MudderySkill(MudderyObject):
                 for skill in skills:
                     cls._skill_modues[skill] = getattr(module, skill, None)
             except ImportError:
-                print "Can not import skill module %s." % module_name
+                logger.log_errmsg("Can not import skill module %s." % module_name)
 
 
     def at_object_creation(self):
@@ -50,11 +50,11 @@ class MudderySkill(MudderyObject):
         self.db.cd_end_time = 0
 
 
-    def set_initial_data(self):
+    def load_data(self):
         """
-        Initialize this object after data loaded.
+        Set data_info to the object.
         """
-        super(MudderySkill, self).set_initial_data()
+        super(MudderySkill, self).load_data()
 
         # search skill function
         self.function_call = None
@@ -115,7 +115,7 @@ class MudderySkill(MudderyObject):
                 return
 
         if not self.function_call:
-            print "Can not find skill function: %s" % self.get_info_key()
+            logger.log_errmsg("Can not find skill function: %s" % self.get_info_key())
             if owner:
                 owner.msg({"msg": LS("Can not cast this skill!")})
             return

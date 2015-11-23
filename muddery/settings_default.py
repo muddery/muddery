@@ -84,6 +84,9 @@ BASE_CHANNEL_TYPECLASS = "muddery.typeclasses.channels.MudderyChannel"
 # but create custom variations of scripts on a per-case basis instead.
 BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
 
+# Typeclass for general characters, include NPCs, mobs and player characters.
+BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.characters.MudderyCharacter"
+
 # Typeclass for NPCs
 BASE_NPC_TYPECLASS = "muddery.typeclasses.npcs.MudderyNPC"
 
@@ -228,3 +231,9 @@ SOLO_MODE = False
 
 # Characters who have equal or higher permission can bypass events.
 PERMISSION_BYPASS_EVENTS = {"Builders", "Wizards", "Immortals"}
+
+# Player's reborn time after being killed.
+PLAYER_REBORN_CD = 10
+
+# NPC's reborn time after being killed.
+NPC_REBORN_CD = 10

@@ -106,7 +106,7 @@ class EventHandler(object):
         if not owner:
             return
 
-        if self.can_bypass(character):
+        if self.can_bypass(owner):
             return
 
         if defines.EVENT_TRIGGER_DIE in self.events:
@@ -199,18 +199,8 @@ class EventHandler(object):
                 rand -= item["odds"]
                 continue
 
-            # Create mob.
-            mob = build_object(item["mob"])
-            if not mob:
-                return
-
-            mob.set_level(item["level"])
-
-            # create a new combat handler
-            chandler = create_script("combat_handler.CombatHandler")
-            
-            # set teams and desc
-            chandler.set_combat({1: [mob], 2: [character]}, item["desc"])
+            # Attack mob.
+            character.attack_target_image(item["mob"], item["level"], item["desc"])
 
 
     def create_event_dialogue(self, event):
