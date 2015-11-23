@@ -4,6 +4,7 @@ Battle commands.
 
 from evennia import Command
 from muddery.utils.localized_strings_handler import LS
+from evennia.utils import logger
 import traceback
 
 
@@ -87,6 +88,10 @@ class CmdCombatSkill(Command):
             skill_key = self.args["skill"]
             target = self.args["target"]
 
+            if target:
+                # Set caller's target.
+                caller.set_target(target)
+
         try:
             # Cast skill.
             # The results of the skill will be sent to relative players
@@ -94,4 +99,6 @@ class CmdCombatSkill(Command):
             result = caller.skill.cast_combat_skill(skill_key, target)
         except Exception, e:
             caller.msg({"msg":LS("Can not cast this skill.")})
+            logger.log_errmsg("Cast skill %s error: %s" % (skill_key, e))
+            logger.log_errmsg(traceback.format_exc())
             return

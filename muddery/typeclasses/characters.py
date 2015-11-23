@@ -15,6 +15,7 @@ from django.db.models.loading import get_model
 from muddery.typeclasses.objects import MudderyObject
 from muddery.typeclasses.common_objects import MudderyEquipment
 from evennia.objects.objects import DefaultCharacter
+from evennia import create_script
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 from muddery.utils.builder import build_object
@@ -77,9 +78,19 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.current_quests = {}
 
 
+    def at_init(self):
+        """
+        Init the character.
+        """
+        super(MudderyCharacter, self).at_init()
+
+        # clear target
+        self.target = None
+
+
     def load_data(self):
         """
-        Set data_info to the object."
+        Set data_info to the object.
         """
         # set default values
         self.max_exp = 1
@@ -134,11 +145,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                 if field.name in known_fields:
                     continue
                 if field.name in self.reserved_fields:
-                    print "Can not set reserved field %s!" % field.name
+                    logger.log_errmsg("Can not set reserved field %s!" % field.name)
                     continue
                 setattr(self, field.name, level_data.serializable_value(field.name))
         except Exception, e:
-            print "Can't load character %s's level info %s: %s" % (self.get_info_key(), self.db.level, e)
+            logger.log_errmsg("Can't load character %s's level info %s: %s" % (self.get_info_key(), self.db.level, e))
 
 
     def set_equips(self):
@@ -203,6 +214,25 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         pass
 
 
+    def at_after_move(self, source_location):
+        """
+        Called after move has completed, regardless of quiet mode or
+        not.  Allows changes to the object due to the location it is
+        now in.
+
+        Args:
+        source_location (Object): Wwhere we came from. This may be `None`.
+
+        """
+        pass
+
+
+    ########################################
+    #
+    # Skill methods.
+    #
+    ########################################
+
     def learn_skill(self, skill):
         """
         Learn a new skill.
@@ -221,8 +251,132 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         Cast a skill.
         """
+        self.target = target
         self.skill.cast_skill_manually(skill, target)
 
+
+    ########################################
+    #
+    # Attack a target.
+    #
+    ########################################
+
+    def set_target(self, target):
+        """
+        Set character's target.
+        """
+        self.target = target
+
+
+    def clear_target(self):
+        """
+        Clear character's target.
+        """
+        self.target = None
+
+
+    def attack_target(self, target, desc=""):
+        """
+        Attack a target.
+        Args:
+            target (object): The target object.
+        """
+        if self.is_in_combat():
+            # already in battle
+            logger.log_errmsg("%s is already in battle." % self.dbref)
+            return
+
+        # search target
+        if not target:
+            logger.log_errmsg("Can not find the target.")
+            return
+
+        if not target.is_typeclass(settings.BASE_GENERAL_CHARACTER_TYPECLASS, exact=False):
+            # Target is not a character.
+            logger.log_errmsg("Can not attack the target %s." % target.dbref)
+            return
+
+        if target.is_in_combat():
+            # obj is already in battle
+            logger.log_errmsg("%s is already in battle." % target.dbref)
+            return
+
+        # create a new combat handler
+        chandler = create_script("combat_handler.CombatHandler")
+                        
+        # set combat team and desc
+        chandler.set_combat({1: [target], 2:[self]}, desc)
+
+
+    def attack_current_target(self, desc=""):
+        """
+        Attack current target.
+        Args:
+            target (string): The dbref of the target.
+        """
+        self.attack_target(self.target, desc)
+
+
+    def attack_target_dbref(self, target_dbref, desc=""):
+        """
+        Attack a target by dbref.
+        Args:
+            target_dbref (string): The dbref of the target.
+        """
+        target = self.search(target_dbref)
+        self.attack_target(target, desc)
+
+
+    def attack_target_key(self, target_key, desc=""):
+        """
+        Attack a target.
+        Args:
+            target_key (string): The info key of the target.
+        """
+        target = self.search(target_dbref)
+        self.attack_target(target, desc)
+
+
+    def attack_clone_current_target(self, desc=""):
+        """
+        Attack current target.
+        Args:
+            target (string): The dbref of the target.
+        """
+        self.attack_clone_target(self.target.get_info_key(), self.target.db.level)
+
+
+    def attack_clone_target(self, target_key, target_level=0, desc=""):
+        """
+        Attack the image of a target. This creates a new character object for attack.
+        The origin target will not be affected.
+        Args:
+            target_key (string): The info key of the target.
+        """
+        if target_level == 0:
+            # find the target and get level
+            obj = self.search_obj_info_key(target_key)
+            if not obj:
+                logger.log_errmsg("Can not find the target %s." % target_key)
+                return
+            target_level = obj.db.level
+
+        # Create a target.
+        target = build_object(target_key)
+        if not target:
+            logger.log_errmsg("Can not create the target %s." % target_key)
+            return
+
+        target.set_level(target_level)
+
+        self.attack_target(target, desc)
+
+
+    ########################################
+    #
+    # Combat methods.
+    #
+    ########################################
 
     def is_in_combat(self):
         """

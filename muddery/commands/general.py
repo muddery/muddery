@@ -69,6 +69,10 @@ class CmdLook(Command):
         caller = self.caller
         args = self.args
 
+        if not caller.is_alive():
+            caller.msg({"alert":LS("You are died.")})
+            return
+
         if args:
             # Use search to handle duplicate/nonexistant results.
             looking_at_obj = caller.search(args)
@@ -91,6 +95,9 @@ class CmdLook(Command):
             return
 
         if looking_at_obj == caller.location:
+            # Clear caller's target.
+            caller.clear_target()
+
             # Get the location's appearance.
             appearance = looking_at_obj.get_appearance(caller)
             
@@ -114,6 +121,9 @@ class CmdLook(Command):
                            "combat_commands": caller.get_combat_commands()}
                 caller.msg(message)
         else:
+            # Set caller's target
+            caller.set_target(looking_at_obj)
+
             # Get the object's appearance.
             appearance = looking_at_obj.get_appearance(caller)
             caller.msg({"look_obj": appearance})
@@ -498,6 +508,10 @@ class CmdGoto(Command):
         "Move caller to the exit."
         caller = self.caller
 
+        if not caller.is_alive():
+            caller.msg({"alert":LS("You are died.")})
+            return
+
         if not self.args:
             caller.msg({"alert":LS("Should appoint an exit to go.")})
             return
@@ -555,6 +569,9 @@ class CmdTalk(Command):
             # Can not find the NPC in the caller's location.
             caller.msg({"alert":LS("Can not find the one to talk.")})
             return
+
+        # Set caller's target.
+        caller.set_target(npc)
 
         # Get NPC's sentences.
         sentences = DIALOGUE_HANDLER.get_sentences(caller, npc)
@@ -727,6 +744,10 @@ class CmdUse(Command):
         "Use an object."
         caller = self.caller
 
+        if not caller.is_alive():
+            caller.msg({"alert":LS("You are died.")})
+            return
+
         if not self.args:
             caller.msg({"alert":LS("You should use something.")})
             return
@@ -878,6 +899,10 @@ class CmdCastSkill(Command):
         "Cast a skill."
         caller = self.caller
 
+        if not caller.is_alive():
+            caller.msg({"alert":LS("You are died.")})
+            return
+
         if not self.args:
             caller.msg({"alert":LS("You should select a skill to cast.")})
             return
@@ -932,6 +957,10 @@ class CmdAttack(Command):
         if not caller:
             return
 
+        if not caller.is_alive():
+            caller.msg({"alert":LS("You are died.")})
+            return
+
         if not self.args:
             caller.msg({"alert":LS("You should select a target.")})
             return
@@ -940,6 +969,17 @@ class CmdAttack(Command):
         if not target:
             caller.msg({"alert":LS("You should select a target.")})
             return
+
+        if not target.is_alive():
+            caller.msg({"alert":LS("%s is died." % target.get_name())})
+            return
+
+        if caller.location != target.location:
+            caller.msg({"alert":LS("You can not attack %s." % target.get_name())})
+            return
+
+        # Set caller's target.
+        caller.set_target(target)
 
         # set up combat
         if caller.is_in_combat():

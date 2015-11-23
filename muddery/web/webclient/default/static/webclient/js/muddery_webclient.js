@@ -415,7 +415,7 @@ var webclient = {
         }
         
         if (empty) {
-            content += "<div id='room_players' style='display:none'>Players:</div>"
+            content += "<div id='room_players' style='display:none'>" + LS("Players:") + "</div>";
         }
         
         page.html(content);
