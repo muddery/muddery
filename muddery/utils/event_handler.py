@@ -158,7 +158,7 @@ class EventHandler(object):
 
     #########################
     #
-    # Event actions
+    # Event attack
     #
     #########################
 
@@ -200,7 +200,7 @@ class EventHandler(object):
                 continue
 
             # Attack mob.
-            character.attack_target_image(item["mob"], item["level"], item["desc"])
+            character.attack_clone_target(item["mob"], item["level"], item["desc"])
 
 
     def create_event_dialogue(self, event):
