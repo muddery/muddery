@@ -5,10 +5,12 @@ Rooms are simple containers that has no location of their own.
 
 """
 
+import ast
 import traceback
 from django.conf import settings
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils import script_handler
+from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
 
 
@@ -22,6 +24,31 @@ class MudderyRoom(MudderyObject, DefaultRoom):
     See examples/object.py for a list of
     properties and methods available on all Objects.
     """
+    def at_init(self):
+        """
+        Load world data.
+        """
+        self.position = None
+        super(MudderyRoom, self).at_init()
+
+
+    def load_data(self):
+        """
+        Set data_info to the object.
+        """
+        try:
+            super(MudderyRoom, self).load_data()
+
+            # search skill function
+            self.position_org = self.position
+            self.position = None
+            if self.position_org:
+                temp = ast.literal_eval(self.position_org)
+                self.position = ast.literal_eval(self.position_org)
+
+        except Exception, e:
+            logger.log_tracemsg("load_data error: %s" % e)
+
 
     def at_object_receive(self, moved_obj, source_location):
         """
@@ -67,6 +94,14 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                 self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
 
 
+    def get_neighbours(self):
+        """
+        Get this room's neighbour rooms.
+        """
+        neighbours = [cont.destination for cont in self.contents if cont.destination]
+        return neighbours
+
+
     def get_surroundings(self, caller):
         """
         This is a convenient hook for a 'look'
@@ -101,6 +136,12 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                         provide_quest, finish_quest = cont.have_quest(caller)
                         appearance["provide_quest"] = provide_quest
                         appearance["finish_quest"] = finish_quest
+                elif type == "exits":
+                    # get exits destination
+                    if cont.destination:
+                        dest = {"name": cont.destination.get_name(),
+                                "position": cont.destination.position}
+                        appearance["destination"] = dest
                 elif type == "offlines":
                     continue
 

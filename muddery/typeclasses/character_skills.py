@@ -133,8 +133,7 @@ class MudderySkill(MudderyObject):
                        "gcd": settings.GLOBAL_CD}       # global cd
         except Exception, e:
             ostring = "Can not cast skill %s: %s" % (self.get_info_key(), e)
-            logger.log_errmsg(ostring)
-            print traceback.format_exc()
+            logger.log_tracemsg(ostring)
             if owner:
                 owner.msg({"msg": LS("Can not cast this skill!")})
             return

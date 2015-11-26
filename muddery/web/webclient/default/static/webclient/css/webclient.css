@@ -924,3 +924,50 @@ div.btn-combat div.cooldown {
 	height: 100%;
 	background-color: #666666;
 }
+
+#map_button {
+ 	position: fixed;
+ 	top: 10px;
+ 	right: 10px;
+ 	z-index: 10;
+}
+
+input.btn-map {
+	display: inline-block;
+	border: 1px solid #bbb;
+	border-radius: 4px;
+	padding: 4px 12px;
+	margin-bottom: 0;
+	font-size: 13px;
+	line-height: 18px;
+	text-align: center;
+	vertical-align: middle;
+	height: 100%;
+	background-color: #666666;
+	cursor: pointer;
+	color: #333;
+	text-shadow: 0 1px 1px rgba(255,255,255,0.75);
+	background-color: #f5f5f5;
+}
+
+#map_box{
+    height: 200px;
+    width: 250px;
+    position: fixed;
+    top: 177px;
+    left: 607px;
+    border-radius: 10px;
+    padding: 10px 20px 20px 20px;
+    background: #000;
+    border: 2px solid #666;
+    display: block;
+    z-index: 999;
+    overflow: hidden;
+}
+
+#map_svg {
+    top: 0px;
+    left: 0px;
+    z-index: -1;
+    position: absolute;
+}

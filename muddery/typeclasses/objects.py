@@ -75,7 +75,7 @@ class MudderyObject(DefaultObject):
             # Load db data.
             self.load_data()
         except Exception, e:
-            logger.log_errmsg("%s can not load data:%s" % (self.dbref, e))
+            logger.log_tracemsg("%s can not load data:%s" % (self.dbref, e))
 
 
     def set_initial_data(self):

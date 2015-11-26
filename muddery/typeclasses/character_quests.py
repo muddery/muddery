@@ -172,7 +172,7 @@ class MudderyQuest(MudderyObject):
                         changed = True
                     except Exception, e:
                         ostring = "An error occured when achieve %s: %s" % (obj.get_info_key(), e)
-                        logger.log_errmsg(ostring)
+                        logger.log_tracemsg(ostring)
                         break
             
                     if decrease <= 0:

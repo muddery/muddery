@@ -43,4 +43,4 @@ class MudderyMonster(MudderyCharacter):
                     if content.has_player:
                         content.show_location()
         except Exception, e:
-            logger.log_errmsg("die error: %s" % e)
+            logger.log_tracemsg("die error: %s" % e)

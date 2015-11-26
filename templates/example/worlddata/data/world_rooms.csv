@@ -1,5 +1,5 @@
-key,name,typeclass,desc,position,on_map
-room_house,HOUSE,typeclasses.rooms.Room,This is a house.,,
-room_cellar,CELLAR,typeclasses.rooms.Room,This is a cellar.,,
-room_street,STREET,typeclasses.rooms.Room,This is a street.,,
-room_dungeon,DUNGEON,typeclasses.rooms.Room,This is a dungeon.,,
+key,name,typeclass,desc,position
+room_house,HOUSE,typeclasses.rooms.Room,This is a house.,
+room_cellar,CELLAR,typeclasses.rooms.Room,This is a cellar.,
+room_street,STREET,typeclasses.rooms.Room,This is a street.,
+room_dungeon,DUNGEON,typeclasses.rooms.Room,This is a dungeon.,

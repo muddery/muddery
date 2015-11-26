@@ -63,7 +63,7 @@ class MudderyPlayer(DefaultPlayer):
                 text = json.dumps(text)
             except Exception, e:
                 text = json.dumps({"err": "There is an error occurred while outputing messages."})
-                logger.log_errmsg("json.dumps failed: %s" % e)
+                logger.log_tracemsg("json.dumps failed: %s" % e)
 
         # set raw=True
         if kwargs:

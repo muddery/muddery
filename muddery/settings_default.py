@@ -148,7 +148,7 @@ QUEST_DEPENDENCY = "quest_dependency"
 # event data
 EVENT_DATA = "event_data"
 
-# room mobs
+# event mobs
 EVENT_MOBS = "event_mobs"
 
 # event dialogues
@@ -232,8 +232,8 @@ SOLO_MODE = False
 # Characters who have equal or higher permission can bypass events.
 PERMISSION_BYPASS_EVENTS = {"Builders", "Wizards", "Immortals"}
 
-# Player's reborn time after being killed.
+# Player's reborn time after being killed. If it is below 0, players will be reborn immediately.
 PLAYER_REBORN_CD = 10
 
-# NPC's reborn time after being killed.
+# NPC's reborn time after being killed. If it is below 0, npcs will not be reborn.
 NPC_REBORN_CD = 10
