@@ -18,6 +18,7 @@ from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property
+from muddery.utils import utils
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.exception import MudderyError
@@ -355,7 +356,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         if target_level == 0:
             # find the target and get level
-            obj = self.search_obj_info_key(target_key)
+            obj = utils.search_obj_info_key(target_key)
             if not obj:
                 logger.log_errmsg("Can not find the target %s." % target_key)
                 return

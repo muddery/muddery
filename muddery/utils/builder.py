@@ -7,6 +7,7 @@ from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import create, search
+from evennia.utils import logger
 import traceback
 
 
@@ -24,6 +25,8 @@ def build_object(obj_key, caller=None):
         ostring = "Can not find the model of %s." % obj_key
         print ostring
         print traceback.print_exc()
+        if caller:
+            caller.msg(ostring)
         return
 
     try:
@@ -34,6 +37,8 @@ def build_object(obj_key, caller=None):
         ostring = "Can not load record %s:%s %s" % (model_name, obj_key, e)
         print ostring
         print traceback.print_exc()
+        if caller:
+            caller.msg(ostring)
         return
 
     # Create object.
@@ -121,8 +126,11 @@ def build_objects(model_name, unique, caller=None):
         try:
             obj.load_data()
         except Exception, e:
-            print "%s can not load data:%s" % (obj.dbref, e)
+            ostring = "%s can not load data:%s" % (obj.dbref, e)
+            print ostring
             print traceback.print_exc()
+            if caller:
+                caller.msg(ostring)
 
         current_obj_keys.add(obj_key)
 

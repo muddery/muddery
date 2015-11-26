@@ -47,8 +47,7 @@ class PlayerCharacter(MudderyPlayerCharacter):
             result = self.take_effect(obj)
         except Exception, e:
             ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
-            logger.log_errmsg(ostring)
-            logger.log_errmsg(traceback.format_exc())
+            logger.log_tracemsg(ostring)
 
         # decrease object's number
         location = obj.location

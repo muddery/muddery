@@ -99,6 +99,5 @@ class CmdCombatSkill(Command):
             result = caller.skill.cast_combat_skill(skill_key, target)
         except Exception, e:
             caller.msg({"msg":LS("Can not cast this skill.")})
-            logger.log_errmsg("Cast skill %s error: %s" % (skill_key, e))
-            logger.log_errmsg(traceback.format_exc())
+            logger.log_tracemsg("Cast skill %s error: %s" % (skill_key, e))
             return

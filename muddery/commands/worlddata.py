@@ -147,5 +147,4 @@ class CmdLoadWorld(default_cmds.MuxCommand):
         except Exception, e:
             ostring = "Can't build world: %s" % e
             caller.msg(ostring)
-            logger.log_errmsg(ostring)
-            logger.log_errmsg(traceback.format_exc())
+            logger.log_tracemsg(ostring)

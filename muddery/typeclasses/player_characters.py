@@ -13,6 +13,7 @@ from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.typeclasses.common_objects import MudderyEquipment
+from muddery.utils import utils
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.quest_handler import QuestHandler
@@ -60,6 +61,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         # Set default data.
         self.db.nickname = ""
         self.db.unlocked_exits = set()
+        self.db.revealed_map = set()
 
 
     def move_to(self, destination, quiet=False,
@@ -134,7 +136,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
                    "equipments": self.return_equipments(),
                    "inventory": self.return_inventory(),
                    "skills": self.return_skills(),
-                   "quests": self.quest.return_quests()}
+                   "quests": self.quest.return_quests(),
+                   "revealed_map": self.get_revealed_map()}
         self.msg(message)
 
         # notify its location
@@ -198,14 +201,100 @@ class MudderyPlayerCharacter(MudderyCharacter):
         return commands
 
 
+    def get_revealed_map(self):
+        """
+        Get the map that the character has revealed.
+        Return value:
+            {
+                "rooms": {room1's key: (name, position),
+                          room2's key: (name, position),
+                          ...},
+                "paths": {room1's key: {room2's key,
+                                        room3's key},
+                          room2's key: {room3's key,
+                                        room4's key},
+                          ...}
+            }
+        """
+        rooms = {}
+        neighbours = set()
+        paths = {}
+
+        for room_key in self.db.revealed_map:
+            # get room's information
+            room = utils.search_obj_info_key(room_key)
+            if room:
+                room = room[0]
+                rooms[room_key] = (room.get_name(), room.position)
+
+                for neighbour in room.get_neighbours():
+                    # get all neighbours
+                    neighbour_key = neighbour.get_info_key()
+                    neighbours.add(neighbour_key)
+
+                    if room_key > neighbour_key:
+                        if room_key in paths:
+                            paths[room_key][neighbour_key] = True
+                        else:
+                            paths[room_key] = {neighbour_key: True}
+                    else:
+                        if neighbour_key in paths:
+                            paths[neighbour_key][room_key] = True
+                        else:
+                            paths[neighbour_key] = {room_key: True}
+
+        for neighbour_key in neighbours:
+            # add neighbours to rooms
+            if not neighbour_key in rooms:
+                neighbour = utils.search_obj_info_key(neighbour_key)
+                if neighbour:
+                    neighbour = neighbour[0]
+                    rooms[neighbour_key] = (neighbour.get_name(), neighbour.position)
+
+        return {"rooms": rooms, "paths": paths}
+
+
     def show_location(self):
         """
         show character's location
         """
         if self.location:
+            location_key = self.location.get_info_key()
+
+            msg = {"current_location": location_key}
+
+            reveal_map = None
+            if not location_key in self.db.revealed_map:
+                # reveal map
+                self.db.revealed_map.add(self.location.get_info_key())
+
+                rooms = {location_key: (self.location.get_name(), self.location.position)}
+                paths = {}
+
+                for neighbour in self.location.get_neighbours():
+                    # get all neighbours
+                    neighbour_key = neighbour.get_info_key()
+                    rooms[neighbour_key] = (neighbour.get_name(), neighbour.position)
+
+                    if location_key > neighbour_key:
+                        if location_key in paths:
+                            paths[location_key][neighbour_key] = True
+                        else:
+                            paths[location_key] = {neighbour_key: True}
+                    else:
+                        if neighbour_key in paths:
+                            paths[neighbour_key][location_key] = True
+                        else:
+                            paths[neighbour_key] = {location_key: True}
+
+                msg["reveal_map"] = {"rooms": rooms, "paths": paths}
+
+            # get appearance
             appearance = self.location.get_appearance(self)
             appearance.update(self.location.get_surroundings(self))
-            self.msg({"look_around": appearance})
+            msg["look_around"] = appearance
+
+            self.msg(msg)
 
 
     def receive_objects(self, obj_list):

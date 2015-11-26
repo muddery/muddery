@@ -1,7 +1,7 @@
-key,name,typeclass,desc,verb,location,destination,condition,on_map
-exit_house_to_cellar,CELLAR,typeclasses.exits.Exit,Go to the cellar.,Go To,room_house,room_cellar,,
-exit_cellar_to_house,HOUSE,typeclasses.exits.Exit,Leave the cellar.,Leave,room_cellar,room_house,,
-exit_house_to_street,STREET,typeclasses.exits.LockedExit,Go to the street.,Go Out,room_house,room_street,,
-exit_street_to_house,HOUSE,typeclasses.exits.Exit,Enter the house.,Enter,room_street,room_house,,
-exit_street_to_dungeon,DUNGEON,typeclasses.exits.Exit,Go to the dungeon.,Go,room_street,room_dungeon,,
-exit_dungeon_to_street,STREET,typeclasses.exits.Exit,Back to the street.,Back,room_dungeon,room_street,,
+key,name,typeclass,desc,verb,location,destination,condition
+exit_house_to_cellar,CELLAR,typeclasses.exits.Exit,Go to the cellar.,Go To,room_house,room_cellar,
+exit_cellar_to_house,HOUSE,typeclasses.exits.Exit,Leave the cellar.,Leave,room_cellar,room_house,
+exit_house_to_street,STREET,typeclasses.exits.LockedExit,Go to the street.,Go Out,room_house,room_street,
+exit_street_to_house,HOUSE,typeclasses.exits.Exit,Enter the house.,Enter,room_street,room_house,
+exit_street_to_dungeon,DUNGEON,typeclasses.exits.Exit,Go to the dungeon.,Go,room_street,room_dungeon,
+exit_dungeon_to_street,STREET,typeclasses.exits.Exit,Back to the street.,Back,room_dungeon,room_street,

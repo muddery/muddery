@@ -97,16 +97,7 @@ class CmdLook(Command):
         if looking_at_obj == caller.location:
             # Clear caller's target.
             caller.clear_target()
-
-            # Get the location's appearance.
-            appearance = looking_at_obj.get_appearance(caller)
-            
-            # Get other objects' apearance in the location.
-            surroundings = looking_at_obj.get_surroundings(caller)
-            if surroundings:
-                appearance.update(looking_at_obj.get_surroundings(caller))
-
-            caller.msg({"look_around": appearance})
+            caller.show_location()
             
             if caller.is_in_combat():
                 # If the caller is in combat, add combat info.
@@ -649,8 +640,7 @@ class CmdDialogue(Command):
                                                  sentence)
             except Exception, e:
                 ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
-                logger.log_errmsg(ostring)
-                logger.log_errmsg(traceback.format_exc())
+                logger.log_tracemsg(ostring)
 
         # Get next sentence.
         sentences = DIALOGUE_HANDLER.get_next_sentences(caller,
@@ -716,8 +706,7 @@ class CmdLoot(Command):
             obj.loot(caller)
         except Exception, e:
             ostring = "Can not loot %s: %s" % (obj.get_info_key(), e)
-            logger.log_errmsg(ostring)
-            logger.log_errmsg(traceback.format_exc())
+            logger.log_tracemsg(ostring)
 
 
 #------------------------------------------------------------
@@ -764,8 +753,7 @@ class CmdUse(Command):
             result = caller.use_object(obj)
         except Exception, e:
             ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
-            logger.log_errmsg(ostring)
-            logger.log_errmsg(traceback.format_exc())
+            logger.log_tracemsg(ostring)
 
         # Send result to the player.
         if not result:
@@ -858,8 +846,7 @@ class CmdTakeOff(Command):
             caller.take_off_object(obj)
         except Exception, e:
             caller.msg({"alert":LS("Can not take off %s.") % obj.name})
-            logger.log_errmsg("Can not take off %s: %s" % (obj.name, e))
-            logger.log_errmsg(traceback.format_exc())
+            logger.log_tracemsg("Can not take off %s: %s" % (obj.name, e))
             return
 
         # Send lastest status to the player.
@@ -1042,8 +1029,7 @@ class CmdUnlockExit(Command):
                 return
         except Exception, e:
             caller.msg({"alert": LS("Can not open this exit.")})
-            logger.log_errmsg("Can not open exit %s: %s" % (obj.name, e))
-            logger.log_errmsg(traceback.format_exc())
+            logger.log_tracemsg("Can not open exit %s: %s" % (obj.name, e))
             return
 
         # The exit may have different appearance after unlocking.

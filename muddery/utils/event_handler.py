@@ -126,7 +126,7 @@ class EventHandler(object):
             for event in self.events[defines.EVENT_TRIGGER_KILL]:
                 # If has kill event.
                 for killer in killers:
-                    if self.can_bypass(killers):
+                    if self.can_bypass(killer):
                         continue
 
                     if script_handler.match_condition(killer, event["condition"]):

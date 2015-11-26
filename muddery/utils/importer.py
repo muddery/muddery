@@ -166,8 +166,8 @@ def import_model(model_name, clear=True):
     Import data from a data file to the db model
 
     Args:
-    model_name: (string) db model's name.
-    clear: (boolean) clear old data or not.
+        model_name: (string) db model's name.
+        clear: (boolean) clear old data or not.
     """
     file_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, model_name)
     import_file(file_name, model_name, widecard=True, clear=clear)

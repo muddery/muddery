@@ -51,8 +51,7 @@ def do_action(caller, action):
     try:
         eval(action, {"caller": caller})
     except Exception, e:
-        logger.log_errmsg("do_dialogue_action error:%s %s" % (action, e))
-        print traceback.format_exc()
+        logger.log_tracemsg("do_dialogue_action error:%s %s" % (action, e))
         
     return
 

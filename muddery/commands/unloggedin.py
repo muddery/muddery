@@ -155,7 +155,7 @@ class CmdUnconnectedConnect(Command):
                 # we won't see any errors at all.
                 string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
                 session.msg({"alert":string % (traceback.format_exc())})
-                logger.log_errmsg(traceback.format_exc())
+                logger.log_tracemsg()
 
             return
 
@@ -302,7 +302,7 @@ class CmdUnconnectedCreate(Command):
             # we won't see any errors at all.
             string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
             session.msg({"alert":string % (traceback.format_exc())})
-            logger.log_errmsg(traceback.format_exc())
+            logger.log_tracemsg()
 
 
 class CmdUnconnectedCreateConnect(Command):
@@ -435,7 +435,7 @@ class CmdUnconnectedCreateConnect(Command):
             # we won't see any errors at all.
             string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
             session.msg({"alert":string % (traceback.format_exc())})
-            logger.log_errmsg(traceback.format_exc())
+            logger.log_tracemsg(traceback.format_exc())
 
 
 class CmdUnconnectedQuit(Command):

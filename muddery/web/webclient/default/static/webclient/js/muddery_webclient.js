@@ -130,6 +130,15 @@ var webclient = {
                 else if (key == "combat_skill_cd") {
                     combat.displaySkillCD(data[key]);
                 }
+                else if (key == "current_location") {
+                    map.setCurrentLocation(data[key]);
+                }
+                else if (key == "reveal_map") {
+                    map.revealMap(data[key]);
+                }
+                else if (key == "revealed_map") {
+                    map.setData(data[key]);
+                }
                 else if (key == "login") {
                     this.onLogin(data[key]);
                 }
@@ -913,6 +922,11 @@ var webclient = {
         var inp_w = $('#combat_box').outerWidth(true);
         $('#combat_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
 
+        // map box
+        var inp_h = $('#map_box').outerHeight(true);
+        var inp_w = $('#map_box').outerWidth(true);
+        $('#map_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+
         if (win_h > 480) {
             var head_h = $('#site-title').outerHeight(true);
             $('#header_bar').show();
@@ -1097,6 +1111,12 @@ var webclient = {
         $('#overlayer').remove();
         this.doSetSizes();
     },
+
+    doCloseMap : function() {
+        $('#map_box').remove();
+        $('#overlayer').remove();
+        this.doSetSizes();
+    },
     
     // show connect tabs
     showConnectTabs : function() {
@@ -1112,6 +1132,8 @@ var webclient = {
         $("#tab_register").css("display", "");
         $("#tab_login").css("display", "");
         $("#tab_command").css("display", "");
+
+        $("#map_button").css("display", "none");
     },
     
     // show login tabs
@@ -1125,6 +1147,8 @@ var webclient = {
         $("#tab_quests").css("display", "");
         $("#tab_system").css("display", "");
         $("#tab_command").css("display", "");
+
+        $("#map_button").css("display", "");
     },
     
     unselectAllTabs : function() {
