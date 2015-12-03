@@ -6,7 +6,7 @@ import re
 import random
 from muddery.utils import defines
 from muddery.utils.builder import build_object
-from muddery.utils import script_handler
+from muddery.utils.script_handler import SCRIPT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils import utils
 from django.conf import settings
@@ -85,7 +85,7 @@ class EventHandler(object):
         if defines.EVENT_TRIGGER_ARRIVE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_ARRIVE]:
                 # If has arrive event.
-                if script_handler.match_condition(character, event["condition"]):
+                if SCRIPT_HANDLER.match_condition(character, self.owner, event["condition"]):
                     # If matches the condition.
                     event["function"](event["data"], character)
 
@@ -112,7 +112,7 @@ class EventHandler(object):
         if defines.EVENT_TRIGGER_DIE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_DIE]:
                 #If has die event.
-                if script_handler.match_condition(owner, event["condition"]):
+                if SCRIPT_HANDLER.match_condition(owner, None, event["condition"]):
                     # If matches the condition, run event on the owner.
                     event["function"](event["data"], owner)
 
@@ -129,7 +129,7 @@ class EventHandler(object):
                     if self.can_bypass(killer):
                         continue
 
-                    if script_handler.match_condition(killer, event["condition"]):
+                    if SCRIPT_HANDLER.match_condition(killer, self.owner, event["condition"]):
                         event["function"](event["data"], killer)
 
 
@@ -148,7 +148,7 @@ class EventHandler(object):
         if defines.EVENT_TRIGGER_TRAVERSE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_TRAVERSE]:
                 # If has traverse event.
-                if script_handler.match_condition(character, event["condition"]):
+                if SCRIPT_HANDLER.match_condition(character, self.owner, event["condition"]):
                     # If matches the condition.
                     triggered = True
                     event["function"](event["data"], character)

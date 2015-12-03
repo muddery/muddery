@@ -433,16 +433,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         return inv
 
 
-    def have_object(self, obj_key):
-        """
-        If the character has specified object.
-        """
-        for item in self.contents:
-            if item.get_info_key() == obj_key:
-                return True
-        return False
-
-
     def show_status(self):
         """
         Send status to player.
@@ -611,27 +601,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
             skills.append(info)
 
         return skills
-
-
-    def is_quest_in_progress(self, quest):
-        """
-        If the character is doing this quest.
-        """
-        return self.quest.is_in_progress(quest)
-
-
-    def can_provide_quest(self, quest):
-        """
-        If can provide this quest to the character.
-        """
-        return self.quest.can_provide(quest)
-
-
-    def is_quest_finished(self, quest):
-        """
-        If this quest is finished.
-        """
-        return self.quest.is_finished(quest)
 
 
     def die(self, killers):

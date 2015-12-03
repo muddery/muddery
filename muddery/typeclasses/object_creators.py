@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db.models.loading import get_model
 from django.core.exceptions import ObjectDoesNotExist
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils import script_handler
+from muddery.utils.script_handler import SCRIPT_HANDLER
 
 
 class MudderyObjectCreator(MudderyObject):
@@ -58,7 +58,7 @@ class MudderyObjectCreator(MudderyObject):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        if not script_handler.match_condition(caller, self.loot_condition):
+        if not SCRIPT_HANDLER.match_condition(caller, self, self.loot_condition):
             return []
 
         verb = self.verb
@@ -77,7 +77,7 @@ class MudderyObjectCreator(MudderyObject):
 
         # Get objects that matches odds and conditions .
         obj_list = [obj for obj in self.loot_list if obj["odds"] > rand and\
-                                                     script_handler.match_condition(caller, obj["condition"])]
+                                                     SCRIPT_HANDLER.match_condition(caller, self, obj["condition"])]
 
         if caller:
             # Send to the caller.

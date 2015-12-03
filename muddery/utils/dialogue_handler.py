@@ -8,7 +8,7 @@ The DialogueHandler maintains a pool of dialogues.
 
 from muddery.utils import defines
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
-from muddery.utils import script_handler
+from muddery.utils.script_handler import SCRIPT_HANDLER
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -147,7 +147,7 @@ class DialogueHandler(object):
                 continue
 
             # Match conditions.
-            if not script_handler.match_condition(caller, npc_dlg["condition"]):
+            if not SCRIPT_HANDLER.match_condition(caller, npc, npc_dlg["condition"]):
                 continue
 
             # Match dependeces.
@@ -174,7 +174,7 @@ class DialogueHandler(object):
         return sentences
 
 
-    def get_next_sentences(self, caller, current_dialogue, current_sentence):
+    def get_next_sentences(self, caller, npc, current_dialogue, current_sentence):
         """
         Get current sentence's next sentences.
         """
@@ -202,7 +202,7 @@ class DialogueHandler(object):
                 if not next_dlg["sentences"]:
                     continue
 
-                if not script_handler.match_condition(caller, next_dlg["condition"]):
+                if not SCRIPT_HANDLER.match_condition(caller, npc, next_dlg["condition"]):
                     continue
 
                 for dep in next_dlg["dependencies"]:
@@ -235,7 +235,7 @@ class DialogueHandler(object):
         return speaker
 
 
-    def finish_sentence(self, caller, dialogue, sentence):
+    def finish_sentence(self, caller, npc, dialogue, sentence):
         """
         A sentence finished, do it's action.
         """
@@ -256,7 +256,7 @@ class DialogueHandler(object):
 
         # do dialogue's action
         if sen["action"]:
-            script_handler.do_action(caller, sen["action"])
+            SCRIPT_HANDLER.do_action(caller, npc, sen["action"])
 
         if sentence + 1 >= len(dlg["sentences"]):
             # last sentence
@@ -348,7 +348,7 @@ class DialogueHandler(object):
         if not npc_dlg:
             return (provide_quest, finish_quest)
 
-        if not script_handler.match_condition(caller, npc_dlg["condition"]):
+        if not SCRIPT_HANDLER.match_condition(caller, npc, npc_dlg["condition"]):
             return (provide_quest, finish_quest)
 
         match = True

@@ -9,7 +9,7 @@ import ast
 import traceback
 from django.conf import settings
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils import script_handler
+from muddery.utils.script_handler import SCRIPT_HANDLER
 from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
 
@@ -123,7 +123,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         for cont in visible:
             # only show objects that match the condition
             if hasattr(cont, "condition"):
-                if not script_handler.match_condition(caller, cont.condition):
+                if not SCRIPT_HANDLER.match_condition(caller, self, cont.condition):
                     continue
                         
             type = self.get_surrounding_type(cont)

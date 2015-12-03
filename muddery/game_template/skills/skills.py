@@ -19,8 +19,7 @@ def skill_heal(caller, target, effect=0, *args, **kwargs):
     if effect <= 0:
         return
 
-    if not target:
-        target = caller
+    target = caller
 
     if target:
         recover_hp = target.add_hp(effect)

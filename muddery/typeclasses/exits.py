@@ -10,7 +10,7 @@ for allowing Characters to traverse the exit to its destination.
 import traceback
 from muddery.utils import utils
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils import script_handler
+from muddery.utils.script_handler import SCRIPT_HANDLER
 from muddery.utils.localized_strings_handler import LS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultExit
@@ -146,7 +146,7 @@ class MudderyLockedExit(MudderyExit):
         Unlock an exit.
         """
         # Only can unlock exits which match there conditions.
-        return script_handler.match_condition(caller, self.exit_lock["condition"])
+        return SCRIPT_HANDLER.match_condition(caller, self, self.exit_lock["condition"])
 
 
     def get_appearance(self, caller):
@@ -159,7 +159,7 @@ class MudderyLockedExit(MudderyExit):
             # If is unlocked, use common appearance.
             return super(MudderyLockedExit, self).get_appearance(caller)
 
-        can_unlock = script_handler.match_condition(caller, self.exit_lock["condition"])
+        can_unlock = SCRIPT_HANDLER.match_condition(caller, self, self.exit_lock["condition"])
 
         if can_unlock and self.exit_lock["auto_unlock"]:
             # Automatically unlock the exit when a character looking at it.
@@ -194,7 +194,7 @@ class MudderyLockedExit(MudderyExit):
             return super(MudderyLockedExit, self).get_available_commands(caller)
 
         cmds = []
-        can_unlock = script_handler.match_condition(caller, self.exit_lock["condition"])
+        can_unlock = SCRIPT_HANDLER.match_condition(caller, self, self.exit_lock["condition"])
         if can_unlock:
             # show unlock command
             verb = self.exit_lock["verb"]

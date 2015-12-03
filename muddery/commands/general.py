@@ -636,6 +636,7 @@ class CmdDialogue(Command):
             try:
                 # Finish current sentence
                 DIALOGUE_HANDLER.finish_sentence(caller,
+                                                 npc,
                                                  dialogue,
                                                  sentence)
             except Exception, e:
@@ -644,6 +645,7 @@ class CmdDialogue(Command):
 
         # Get next sentence.
         sentences = DIALOGUE_HANDLER.get_next_sentences(caller,
+                                                        npc,
                                                         dialogue,
                                                         sentence)
 

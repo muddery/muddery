@@ -25,6 +25,7 @@ dlg_colorfulworld_wu_03,6,n,"我的脚还在流血，你能帮找些绷带来吗
 dlg_colorfulworld_wu_03,7,p,"好的。",,quest_find_binder,quest_find_guardhouse_key
 dlg_colorfulworld_wu_04,1,n,"绷带找到了吗？",,,
 dlg_colorfulworld_wu_04,2,p,"还没。",,,
-dlg_colorfulworld_wu_05,1,n,"太好了，你找到绷带了，谢谢你！我自己来包扎一下。",,,quest_find_binder
+dlg_colorfulworld_wu_05,1,n,"太好了，你找到绷带了，我自己包扎一下。",,,quest_find_binder
+dlg_colorfulworld_wu_05,2,n,"谢谢你，教你一些急救技能吧！",learn_skill("skill_normal_heal"),,
 dlg_colorfulworld_wu_06,1,n,"客官，演示游戏的剧情暂时只编到了这里。",,,
 dlg_colorfulworld_wu_06,2,p,"知道了，后面的内容我会自己脑补的。",,,

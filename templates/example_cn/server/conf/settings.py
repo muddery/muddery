@@ -185,3 +185,6 @@ EQUIP_POSITIONS = ["head", "chest", "hand", "leg"]
 EQUIP_EFFECTS = ["attack", "defence"]
 
 SOLO_MODE = True
+
+# Handler deals with condition scripts and action scripts
+SCRIPT_HANDLER = "utils.script_handler.ScriptHandler"
