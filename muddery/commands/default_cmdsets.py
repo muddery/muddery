@@ -14,6 +14,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 """
 
+import traceback
 from evennia import CmdSet
 from evennia import default_cmds
 from muddery.commands import combat

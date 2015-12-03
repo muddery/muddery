@@ -234,13 +234,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     #
     ########################################
 
-    def learn_skill(self, skill):
-        """
-        Learn a new skill.
-        """
-        self.skill.learn_skill(skill)
-
-
     def has_skill(self, skill):
         """
         Whether the character has the skill.

@@ -68,6 +68,7 @@ class SkillHandler(object):
 
         if self.owner.has_player:
             self.owner.show_skills()
+            self.owner.msg({"msg":LS("You learned skill {c%s{n.") % skill_obj.get_name()})
 
 
     def has_skill(self, skill):

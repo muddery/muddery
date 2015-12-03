@@ -1,5 +1,5 @@
 """
-NPCs
+Monsters
 
 """
 from muddery.typeclasses.monsters import MudderyMonster

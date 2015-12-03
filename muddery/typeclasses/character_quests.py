@@ -8,7 +8,7 @@ in the character. It controls quest's objectives.
 
 from muddery.utils import defines
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils import script_handler
+from muddery.utils.script_handler import SCRIPT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.localized_strings_handler import LS
 from django.conf import settings
@@ -146,7 +146,7 @@ class MudderyQuest(MudderyObject):
 
         # do quest's action
         if self.action:
-            script_handler.do_action(caller, self.action)
+            SCRIPT_HANDLER.do_action(caller, None, self.action)
 
         # remove objective objects
         changed = False
