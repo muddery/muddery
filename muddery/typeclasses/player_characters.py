@@ -301,8 +301,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Receive objects.
         obj_list: (list) a list of object keys and there numbers.
-                  .object object's key
-                  .number object's number
+                         list item: {"object": object's key
+                                     "number": object's number}
         """
         accepted_keys = {}      # the keys of objects that have been accepted
         accepted_names = {}     # the names of objects that have been accepted

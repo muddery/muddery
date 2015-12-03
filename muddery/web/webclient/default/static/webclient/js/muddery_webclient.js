@@ -722,6 +722,46 @@ var webclient = {
     },
 
     displayGetObject : function(data) {
+        // show accepted objects
+        try {
+            var first = true;
+            var accepted = data["accepted"]
+            for (var key in accepted) {
+                if (first) {
+                    this.displayMsg(LS("You got:"));
+                    first = false;
+                }
+
+                this.displayMsg(key + ": " + accepted[key]);
+            }
+        }
+        catch(error) {
+        }
+
+        // show rejected objects
+        try {
+            var first = true;
+            var rejected = data["rejected"];
+            for (var key in rejected) {
+                if (first) {
+                    this.displayMsg(LS("You can not get:"));
+                    first = false;
+                }
+
+                this.displayMsg(key + ": " + rejected[key]);
+            }
+        }
+        catch(error) {
+        }
+
+        // If there is no other boxes, show getting object box.
+        var box = $('#popup_box');
+        if (box.length == 0) {
+            this.displayGetObjectBox(data);
+        }
+    },
+
+    displayGetObjectBox : function(data) {
         this.doCloseBox();
         this.createMessageBox();
         

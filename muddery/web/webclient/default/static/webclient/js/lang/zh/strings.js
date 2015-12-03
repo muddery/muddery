@@ -15,6 +15,7 @@ var LOCAL_STRING = {
     "OBJECTIVE": "目标",
     " (equipped)": " (已装备)",
     "You got:": "你获得了：",
+    "You can not get:": "你无法获得：",
     "You got nothing.": "没有获得任何东西。",
     "HP: ": "生命：",
     "ATTACK: ": "攻击：",
