@@ -10,6 +10,9 @@ def func(character, obj, *args)
 
 """
 
+from muddery.utils import utils
+
+
 def example(caller, obj, *args):
     """
     This is an example.
@@ -51,3 +54,22 @@ def give_object(character, obj, *args):
                  "number": number}]
 
     character.receive_objects(obj_list)
+
+
+def teleport_to(character, obj, *args):
+    """
+    Teleport the character to specified room.
+    args: target room's key
+    """
+    if not character:
+        return
+
+    if not args:
+        return
+
+    destination = utils.search_obj_info_key(args[0])
+    if not destination:
+        return
+    destination = destination[0]
+
+    character.move_to(destination)
