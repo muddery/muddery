@@ -154,3 +154,5 @@ class ScriptHandlerDefault(ScriptHandler):
 
         # self.add_action("learn_skill", script_actions.learn_skill)
         self.add_action("give_object", script_actions.give_object)
+        self.add_action("teleport_to", script_actions.teleport_to)
+
