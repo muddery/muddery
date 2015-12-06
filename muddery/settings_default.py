@@ -171,10 +171,10 @@ DIALOGUE_QUEST_DEPENDENCY = "dialogue_quest_dependency"
 EQUIPMENT_TYPES = "equipment_types"
 
 # character levels
-CHARACTER_LEVELS = "character_level"
+CHARACTER_MODELS = "character_models"
 
 # character skills
-CHARACTER_SKILLS = "character_skill"
+CHARACTER_SKILLS = "character_skills"
 
 # all other data models
 OTHER_DATA_MODELS = (OBJECT_CREATORS,
@@ -191,7 +191,7 @@ OTHER_DATA_MODELS = (OBJECT_CREATORS,
                      NPC_DIALOGUES,
                      DIALOGUE_QUEST_DEPENDENCY,
                      EQUIPMENT_TYPES,
-                     CHARACTER_LEVELS,
+                     CHARACTER_MODELS,
                      CHARACTER_SKILLS)
 
 # local strings
