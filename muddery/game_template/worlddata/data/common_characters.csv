@@ -1,2 +1,2 @@
-key,name,typeclass,desc
-player,Player,muddery.typeclasses.player_characters.MudderyPlayerCharacter,This is a player.
+key,name,typeclass,desc,model
+player,Player,muddery.typeclasses.player_characters.MudderyPlayerCharacter,This is a player.,player

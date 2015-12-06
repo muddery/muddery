@@ -2,5 +2,5 @@ character,level,max_exp,max_hp,max_mp,attack,defence
 player,1,100,100,100,10,10
 player,2,120,120,100,12,12
 player,3,150,150,100,15,15
-npc_boy,1,1,1,1,1,1
+common_npc,1,1,1,1,1,1
 mob_rogue,1,20,20,100,5,5

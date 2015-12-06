@@ -207,6 +207,7 @@ class world_npcs(models.Model):
     typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=KEY_LENGTH, blank=True)
+    model = models.CharField(max_length=KEY_LENGTH)
     condition = models.TextField(blank=True)
 
     class Meta:
@@ -228,6 +229,7 @@ class common_characters(models.Model):
     name = models.CharField(max_length=KEY_LENGTH)
     typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
+    model = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -449,7 +451,7 @@ class dialogue_quest_dependency(models.Model):
 # character levels
 #
 #------------------------------------------------------------
-class character_level(models.Model):
+class character_models(models.Model):
     "Store all character level informations."
 
     character = models.CharField(max_length=KEY_LENGTH, db_index=True)
@@ -473,7 +475,7 @@ class character_level(models.Model):
 # character skills
 #
 #------------------------------------------------------------
-class character_skill(models.Model):
+class character_skills(models.Model):
     "Store all character skill informations."
 
     character = models.CharField(max_length=KEY_LENGTH, db_index=True)

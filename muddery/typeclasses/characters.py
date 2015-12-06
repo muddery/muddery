@@ -124,33 +124,39 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Refresh character's data, calculate character's attributes.
         """
         # load level data
-        self.load_level_data()
+        self.load_model_data()
         
         # load equips data
         self.load_equip_data()
 
 
-    def load_level_data(self):
+    def load_model_data(self):
         """
         Load character's level data.
         """
         try:
             # get data from db
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_LEVELS)
-            level_data = model_obj.objects.get(character=self.get_info_key(), level=self.db.level)
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_MODELS)
+
+            model_name = getattr(self, "model", None)
+            if not model_name:
+                model_name = self.get_info_key()
+
+            model_data = model_obj.objects.get(character=model_name, level=self.db.level)
 
             known_fields = set(["id",
                                 "character",
                                 "level"])
-            for field in level_data._meta.fields:
+            for field in model_data._meta.fields:
                 if field.name in known_fields:
                     continue
                 if field.name in self.reserved_fields:
                     logger.log_errmsg("Can not set reserved field %s!" % field.name)
                     continue
-                setattr(self, field.name, level_data.serializable_value(field.name))
+                setattr(self, field.name, model_data.serializable_value(field.name))
         except Exception, e:
-            logger.log_errmsg("Can't load character %s's level info %s: %s" % (self.get_info_key(), self.db.level, e))
+            logger.log_errmsg("Can't load character %s's level info (%s, %s): %s" %
+                              (self.get_info_key(), model_name, self.db.level, e))
 
 
     def set_equips(self):
@@ -353,6 +359,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             if not obj:
                 logger.log_errmsg("Can not find the target %s." % target_key)
                 return
+            obj = obj[0]
+
             target_level = obj.db.level
 
         # Create a target.

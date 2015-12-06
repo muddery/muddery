@@ -226,7 +226,7 @@ class dialogue_quest_dependency(model_base.dialogue_quest_dependency):
 # character levels
 #
 #------------------------------------------------------------
-class character_level(model_base.character_level):
+class character_models(model_base.character_models):
     "Store all character level informations."
     pass
 
@@ -236,7 +236,7 @@ class character_level(model_base.character_level):
 # character skills
 #
 #------------------------------------------------------------
-class character_skill(model_base.character_skill):
+class character_skills(model_base.character_skills):
     "Store all character skill informations."
     pass
 
