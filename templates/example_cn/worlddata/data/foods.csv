@@ -1,2 +1,3 @@
 key,name,typeclass,desc,max_stack,unique,effect,hp,mp
-food_01,面包,typeclasses.common_objects.Food,面包可以帮你恢复少许生命。,10,1,,10,
+food_bread,面包,typeclasses.common_objects.Food,面包可以帮你恢复少许生命。,10,1,,10,
+food_apple,苹果,typeclasses.common_objects.Food,苹果可以帮你恢复一些生命。,20,1,,20,

@@ -1,1 +1,4 @@
 quest,dependency,type
+quest_find_guardhouse_key,quest_find_survivor,8
+quest_find_binder,quest_find_guardhouse_key,8
+quest_find_screw,quest_find_binder,8

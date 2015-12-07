@@ -17,9 +17,10 @@ DEPENDENCY_QUEST_NOT_FINISHED = 9       # quest accepted but not finished
 
 # quest objective types
 OBJECTIVE_NONE = 0
-OBJECTIVE_TALK = 1      # object: dialogue_id
-OBJECTIVE_ARRIVE = 2    # object: room_id
-OBJECTIVE_OBJECT = 3    # object: object_id
+OBJECTIVE_TALK = 1      # finish a dialogue, object: dialogue_id
+OBJECTIVE_ARRIVE = 2    # arrive a room, object: room_id
+OBJECTIVE_OBJECT = 3    # get some objects, object: object_id
+OBJECTIVE_KILL = 4      # kill some characters, object: character_id
 
 # event trigger types
 EVENT_TRIGGER_NONE = 0

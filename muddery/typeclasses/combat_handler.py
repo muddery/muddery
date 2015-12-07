@@ -209,8 +209,6 @@ class CombatHandler(DefaultScript):
                 winner.append({"dbref": character.dbref,
                                "name": character.get_name()})
         
-        self.msg_all({"combat_finish": {"winner": winner}})
-        
         # delete dead npcs
         kills = [c for c in self.db.characters.values() if not c.is_alive()]
         
@@ -220,7 +218,26 @@ class CombatHandler(DefaultScript):
             team = kill.get_team()
             killers[kill.dbref] = [character for character in self.db.characters.values()
                                     if character.get_team() != team]
-        
+
+        # loot
+        loots = {}
+        for kill in kills:
+            for killer in killers[kill.dbref]:
+                if killer.has_player:
+                    obj_list = kill.loot(killer)
+                    if obj_list:
+                        if not killer in loots:
+                            loots[killer] = obj_list
+                        else:
+                            loots[killer].extend(obj_list)
+
+        # add object list
+        for killer in loots:
+            killer.receive_objects(loots[killer])
+
+        self.msg_all({"combat_finish": {"winner": winner}})
+
+        # remove dead character
         for kill in kills:
             self._cleanup_character(kill)
             del self.db.characters[kill.dbref]

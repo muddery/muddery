@@ -7,6 +7,7 @@ var combat = {
     _current_target: null,
     _finished: false,
     _result: null,
+    _loot: null,
     _skill_cd_time: {},
     
     setSelf: function(dbref) {
@@ -31,6 +32,9 @@ var combat = {
         webclient.doSetSizes();
     },
 
+    displayGetObject: function(data) {
+        this._loot = data;
+    },
 
     finishCombat: function(data) {
         this._finished = true;
@@ -38,7 +42,6 @@ var combat = {
         
         setTimeout(combat.showCombatResult, 1000);
     },
-
 
     showCombatResult: function() {
         var self = combat;
@@ -48,50 +51,125 @@ var combat = {
         $('#combat_commands').remove();
         
         var box = $('#combat_box');
-        var result = $('<center>').attr('id', 'combat_result')
-                                  .css('line-height', '150px');
-        
-        if ("stopped" in self._result) {
-            result.text("Combat stopped !");
+
+        var messages = $('<div>').attr('id', 'combat_messages');
+
+        // get objects
+        var loot = $('<div>').attr('id', 'combat_loot');
+
+        // object's info
+        var content = "";
+        var element = "";
+        var count = 0;
+
+        if (self._loot) {
+            // add object's name
+            try {
+                var first = true;
+                var accepted = self._loot["accepted"]
+                for (var key in accepted) {
+                    element = key + ": " + accepted[key] + "<br>";
+
+                    if (first) {
+                        content += LS("You got:") + "<br>";
+                        first = false;
+                    }
+                    content += element;
+                    count += 1;
+                }
+            }
+            catch(error) {
+            }
+
+            try {
+                var first = true;
+                var rejected = self._loot["rejected"];
+                for (var key in rejected) {
+                    element = key + ": " + rejected[key] + "<br>";
+
+                    if (first) {
+                        if (count > 0) {
+                            content += "<br>"
+                        }
+                        first = false;
+                    }
+                    content += element;
+                    count += 1;
+                }
+            }
+            catch(error) {
+            }
+
+            loot.html(content);
         }
-        else if ("winner" in self._result) {
-            var win = false;
-            for (var i in self._result.winner) {
-                if (self._result.winner[i].dbref == self._self_dbref) {
-                    win = true;
-                    break;
+
+        if (count == 0) {
+            // get nothing
+            var result = $('<center>').attr('id', 'combat_result')
+            .css('line-height', '150px');
+
+            if ("stopped" in self._result) {
+                result.text("Combat stopped !");
+            }
+            else if ("winner" in self._result) {
+                var win = false;
+                for (var i in self._result.winner) {
+                    if (self._result.winner[i].dbref == self._self_dbref) {
+                        win = true;
+                        break;
+                    }
+                }
+
+                if (win) {
+                    result.text(LS("You win !"));
+                }
+                else {
+                    result.text(LS("You lost !"));
                 }
             }
             
-            if (win) {
-                result.text(LS("You win !"));
-            }
-            else {
-                result.text(LS("You lost !"));
-            }
+            result.appendTo(messages);
         }
-        
-        result.appendTo(box);
-        
+        else {
+            // get objects
+            var result = $('<center>').attr('id', 'combat_result')
+                                      .css('line-height', '20px');
+            
+            if ("stopped" in self._result) {
+                result.text("Combat stopped !");
+            }
+            else if ("winner" in self._result) {
+                var win = false;
+                for (var i in self._result.winner) {
+                    if (self._result.winner[i].dbref == self._self_dbref) {
+                        win = true;
+                        break;
+                    }
+                }
+                
+                if (win) {
+                    result.text(LS("You win !"));
+                }
+                else {
+                    result.text(LS("You lost !"));
+                }
+            }
+            
+            result.appendTo(messages);
+            loot.appendTo(messages);
+        }
+
+        messages.appendTo(box);
+
+        var center = $('<center>');
         var button = $('<input>').attr('type', 'button')
                                  .attr('id', 'button_center')
                                  .attr('onClick', 'combat.closeCombat()')
                                  .val('OK')
                                  .addClass('btn btn-primary');
-    
-        var div = $('<div>');
-        div.append($('<div><br></div>'));
-        div.append($('<center>').append(button));
-        box.append(div);
-        
-        // popup box
-        /*
-        var result_h = result.outerHeight(true);
-        var div_h = div.outerHeight(true);
-        box.height(result_h + div_h);
-        */
+        button.appendTo(center);
+        center.appendTo(box);
     },
-
 
     closeCombat: function() {
         if ($('#popup_box').size() == 0) {
@@ -99,7 +177,6 @@ var combat = {
         }
         $('#combat_box').remove();
     },
-
 
     displayCombatInfo: function(data) {
         var desc = $('#combat_desc');
@@ -129,8 +206,7 @@ var combat = {
             div.appendTo(characters);
         }
     },
-    
-    
+
     displayCombatCommands: function(data) {
         var commands = $('#combat_commands');
         if (commands) {
@@ -142,7 +218,7 @@ var combat = {
                                          .attr('key', command.key)
                                          .attr('id', 'combat_btn_' + command.key)
                                          .attr('onclick', 'combat.doCombatSkill(this); return false;')
-                                         .css({'left': 20 + i * 60})
+                                         .css({'left': 20 + i * 80})
                                          .text(command.name);
                 
                 button.append($("<div>").addClass('cooldown'));
@@ -153,7 +229,6 @@ var combat = {
             commands.html(content);
         }
     },
-
 
     displayCombatProcess: function(data) {
         for (var i in data) {
@@ -199,6 +274,10 @@ var combat = {
                 var target = $('#status_' + data[i].target.slice(1));
                 target.text(data[i].hp + '/' + data[i].max_hp)
             }
+            else if (data[i].type == "healed") {
+                var target = $('#status_' + data[i].target.slice(1));
+                target.text(data[i].hp + '/' + data[i].max_hp)
+            }
         }
         
         /*
@@ -208,7 +287,6 @@ var combat = {
         }
         */
     },
-
 
     displaySkillCD: function(data) {
         // set skill's cd
@@ -222,7 +300,6 @@ var combat = {
             combat.set_button_cd($(this), cd);
         });
     },
-
 
     set_button_cd: function(btn, cd) {
         var key = btn.attr('key');
@@ -246,7 +323,6 @@ var combat = {
 
         combat._skill_cd_time[key] = cd_time;
     },
-
     
     doCombatSkill: function(caller) {
         if (this._finished) {
@@ -264,8 +340,11 @@ var combat = {
 
         commands.doCombatSkill(caller)
     },
-    
-        
+
+    is_in_combat: function() {
+        return this._finished;
+    },
+
     get_current_target: function() {
         return this._current_target;
     },

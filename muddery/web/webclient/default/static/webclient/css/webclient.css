@@ -224,8 +224,23 @@ div {margin:0px;}
 	background: #000;
 	border: 2px solid #666;
 	display: block;
-	z-index: 999;
+	z-index: 1001;
 	overflow: hidden;
+}
+
+#dialogue_box{
+    height: 295px;
+    width: 250px;
+    position: fixed;
+    top: 177px;
+    left: 607px;
+    border-radius: 10px;
+    padding: 10px 20px 20px 20px;
+    background: #000;
+    border: 2px solid #666;
+    display: block;
+    z-index: 999;
+    overflow: hidden;
 }
 
 #combat_box{
@@ -239,8 +254,12 @@ div {margin:0px;}
 	background: #000;
 	border: 2px solid #666;
 	display: block;
-	z-index: 999;
+	z-index: 1000;
 	overflow: hidden;
+}
+
+#combat_messages{
+    height: 175px;
 }
 
 .input_text {
@@ -887,7 +906,7 @@ combat
 div.btn-combat {
 	position: absolute;
     bottom: 22px;
-	padding: 4px 12px;
+	padding: 4px 4px;
 	margin-bottom: 0;
 	font-size: 14px;
 	line-height: 18px;
@@ -961,7 +980,7 @@ input.btn-map {
     background: #000;
     border: 2px solid #666;
     display: block;
-    z-index: 999;
+    z-index: 2000;
     overflow: hidden;
 }
 

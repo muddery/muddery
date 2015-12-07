@@ -754,10 +754,18 @@ var webclient = {
         catch(error) {
         }
 
-        // If there is no other boxes, show getting object box.
-        var box = $('#popup_box');
-        if (box.length == 0) {
-            this.displayGetObjectBox(data);
+        var combat_box = $('#combat_box');
+        if (combat_box.length == 0) {
+            // If not in combat.
+            var popup_box = $('#popup_box');
+            if (popup_box.length == 0) {
+                // If there is no other boxes, show getting object box.
+                this.displayGetObjectBox(data);
+            }
+        }
+        else {
+            // If in combat, show objects in the combat box.
+            combat.displayGetObject(data);
         }
     },
 
@@ -957,6 +965,16 @@ var webclient = {
         //$("#wrapper").css({'height': win_h - inp_h - 1});
         $('#popup_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
 
+        var close_h = $('#close_button').outerHeight(true);
+        var prom_h = $('#input_prompt').outerHeight(true);
+        var add_h = $('#input_additional').outerHeight(true);
+        $('#dialogue_box').height(close_h + prom_h + add_h);
+
+        var inp_h = $('#dialogue_box').outerHeight(true);
+        var inp_w = $('#dialogue_box').outerWidth(true);
+        //$("#wrapper").css({'height': win_h - inp_h - 1});
+        $('#dialogue_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+
         // combat box
         var inp_h = $('#combat_box').outerHeight(true);
         var inp_w = $('#combat_box').outerWidth(true);
@@ -1041,14 +1059,14 @@ var webclient = {
     },
     
     showDialogue : function(dialogues) {
-        this.doCloseBox();
+        this.doCloseDialogue();
         
         try {
             if (dialogues.length == 0) {
                 return;
             }
             
-            this.createMessageBox();
+            this.createDialogueBox();
 
             if (dialogues.length == 1) {
                 var content = "";
@@ -1105,25 +1123,36 @@ var webclient = {
             }
         }
         catch(error) {
-            this.doCloseBox();
+            this.doCloseDialogue();
         }
 
         this.doSetSizes();
     },
     
     createMessageBox : function() {
-        var dlg = '<div id="popup_box">\
-        <div id="input_prompt">\
-        </div>\
-        <div id="input_additional">\
-        </div>\
-        </div>';
+        var dlg = $('<div>').attr('id', 'popup_box');
+        dlg.append($('<div>').attr('id', 'input_prompt'));
+        dlg.append($('<div>').attr('id', 'input_additional'));
+
+        var overlayer = $('<div>').addClass('overlayer')
+                                  .attr('id', 'overlayer');
         
-        var overlayer = '<div class="overlayer" id="overlayer"></div>';
-        
-        $("body").prepend(dlg + overlayer);
+        $("body").prepend(overlayer);
+        $("body").prepend(dlg);
     },
-    
+
+    createDialogueBox : function() {
+        var dlg = $('<div>').attr('id', 'dialogue_box');
+        dlg.append($('<div>').attr('id', 'input_prompt'));
+        dlg.append($('<div>').attr('id', 'input_additional'));
+
+        var overlayer = $('<div>').addClass('overlayer')
+        .attr('id', 'overlayer');
+
+        $("body").prepend(overlayer);
+        $("body").prepend(dlg);
+    },
+
     createInputBox : function() {
         var dlg = '<div id="popup_box">\
         <div id="close_button" class="clearfix">\
@@ -1142,6 +1171,12 @@ var webclient = {
 
     doCloseBox : function() {
         $('#popup_box').remove();
+        $('#overlayer').remove();
+        this.doSetSizes();
+    },
+
+    doCloseDialogue : function() {
+        $('#dialogue_box').remove();
         $('#overlayer').remove();
         this.doSetSizes();
     },

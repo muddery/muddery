@@ -26,6 +26,13 @@ def skill_heal(caller, target, effect=0, *args, **kwargs):
         if recover_hp > 0:
             target.show_status()
 
+    return [{"type": "healed",              # heal result
+             "caller": caller.dbref,        # caller's dbref
+             "target": target.dbref,        # target's dbref
+             "effect": effect,              # effect
+             "hp": target.db.hp,            # current hp of the target
+             "max_hp": target.max_hp}]      # max hp of the target
+
 
 def skill_hit(caller, target, effect=0, *args, **kwargs):
     """
@@ -47,6 +54,6 @@ def skill_hit(caller, target, effect=0, *args, **kwargs):
     return [{"type": "attacked",            # attack result
              "caller": caller.dbref,        # caller's dbref
              "target": target.dbref,        # target's dbref
-             "hurt": damage,                # damage
+             "effect": damage,              # effect
              "hp": target.db.hp,            # current hp of the target
              "max_hp": target.max_hp}]      # max hp of the target
