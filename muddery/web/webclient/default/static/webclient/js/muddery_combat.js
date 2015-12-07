@@ -28,6 +28,9 @@ var combat = {
 
         this._current_target = null;
         this._finished = false;
+        this._result = null;
+        this._loot = null;
+        this._skill_cd_time = {};
     
         webclient.doSetSizes();
     },

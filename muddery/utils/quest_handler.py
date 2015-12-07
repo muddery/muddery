@@ -93,6 +93,15 @@ class QuestHandler(object):
         return self.current_quests[quest].is_achieved()
 
 
+    def is_not_achieved(self, quest):
+        """
+        Whether the character achieved this quest or not.
+        """
+        if not quest in self.current_quests:
+            return False
+        return not self.current_quests[quest].is_achieved()
+
+
     def is_finished(self, quest):
         """
         Whether the character finished this quest or not.
