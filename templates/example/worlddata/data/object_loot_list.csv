@@ -1,4 +1,4 @@
-provider,object,number,odds,condition
+provider,object,number,odds,quest,condition
 creator_box,obj_key,1,1,
 creator_basket,obj_apple,1,1,
 creator_bag,obj_potato,1,1,

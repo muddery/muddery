@@ -45,6 +45,7 @@ class MudderyObjectCreator(MudderyObject):
                 loot_object = {"object": loot_record.object,
                                "number": loot_record.number,
                                "odds": loot_record.odds,
+                               "quest": loot_record.quest,
                                "condition": loot_record.condition}
                 loot_list.append(loot_object)
         except Exception, e:
@@ -73,11 +74,27 @@ class MudderyObjectCreator(MudderyObject):
         """
         Loot objects.
         """
-        rand = random.random()
+
+        def can_loot(self, looter, obj):
+            """
+            help function to decide which objects can be looted.
+            """
+            rand = random.random()
+            if obj["odds"] < rand:
+                return False
+
+            if obj["quest"]:
+                if not looter.quest.is_not_achieved(obj["quest"]):
+                    return False
+
+            if not SCRIPT_HANDLER.match_condition(looter, self, obj["condition"]):
+                return False
+
+            return True
+
 
         # Get objects that matches odds and conditions .
-        obj_list = [obj for obj in self.loot_list if obj["odds"] > rand and\
-                                                     SCRIPT_HANDLER.match_condition(caller, self, obj["condition"])]
+        obj_list = [obj for obj in self.loot_list if can_loot(self, caller, obj)]
 
         if caller:
             # Send to the caller.

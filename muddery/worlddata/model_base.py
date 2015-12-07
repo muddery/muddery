@@ -121,6 +121,7 @@ class object_loot_list(models.Model):
     object = models.CharField(max_length=KEY_LENGTH)
     number = models.IntegerField(blank=True, default=0)
     odds = models.FloatField(blank=True, default=0)
+    quest = models.CharField(max_length=KEY_LENGTH)
     condition = models.TextField(blank=True)
 
     class Meta:
