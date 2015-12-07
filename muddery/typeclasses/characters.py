@@ -24,6 +24,7 @@ from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.skill_handler import SkillHandler
+from muddery.utils.script_handler import SCRIPT_HANDLER
 
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
@@ -104,7 +105,25 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.skill_cd = 0
         
         super(MudderyCharacter, self).load_data()
-        
+
+        # Load loot list.
+        loot_list = []
+        try:
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.OBJECT_LOOT_LIST)
+            loot_records = model_obj.objects.filter(provider=self.get_info_key())
+
+            for loot_record in loot_records:
+                loot_object = {"object": loot_record.object,
+                               "number": loot_record.number,
+                               "odds": loot_record.odds,
+                               "condition": loot_record.condition}
+                loot_list.append(loot_object)
+        except Exception, e:
+            print "Can't load loot info %s: %s" % (self.get_info_key(), e)
+
+        self.loot_list = loot_list
+
+        # refresh data
         self.refresh_data()
 
 
@@ -443,3 +462,16 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                        "key": skill.get_info_key()}
             commands.append(command)
         return commands
+
+
+    def loot(self, looter):
+        """
+        Loot objects.
+        """
+        rand = random.random()
+
+        # Get objects that matches odds and conditions .
+        obj_list = [obj for obj in self.loot_list if obj["odds"] > rand and\
+                                                     SCRIPT_HANDLER.match_condition(looter, self, obj["condition"])]
+
+        return obj_list

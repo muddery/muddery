@@ -2,3 +2,4 @@ quest,ordinal,type,object,number,desc
 quest_find_survivor,1,2,room_colorfulworld_storeroom,1,找到幸存者
 quest_find_guardhouse_key,1,3,obj_guardhouse_key,1,
 quest_find_binder,1,3,obj_binder,1,
+quest_find_screw,1,3,obj_screw,3,
