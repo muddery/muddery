@@ -33,37 +33,6 @@ class PlayerCharacter(MudderyPlayerCharacter):
                     has connected" message echoed to the room
 
     """
-    def use_object(self, obj):
-        """
-        Use object.
-        """
-        if not obj:
-            return
-
-        result = ""
-
-        # take effect
-        try:
-            result = self.take_effect(obj)
-        except Exception, e:
-            ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
-            logger.log_tracemsg(ostring)
-
-        # decrease object's number
-        location = obj.location
-        try:
-            obj.decrease_num(1)
-            if obj.db.number <= 0:
-                obj.delete()
-        except Exception, e:
-            ostring = "An error occured when using %s: %s" % (obj.get_info_key(), e)
-            logger.log_errmsg(ostring)
-
-        if location:
-            location.show_inventory()
-
-        return result
-
 
     def take_effect(self, obj):
         """
