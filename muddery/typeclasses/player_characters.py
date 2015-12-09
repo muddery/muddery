@@ -459,7 +459,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         # remove used object
         obj_list = [{"object": obj.get_info_key(),
                      "number": 1}]
-        owner.remove_objects(obj_list)
+        self.remove_objects(obj_list)
                                                                                 
         return result
 
