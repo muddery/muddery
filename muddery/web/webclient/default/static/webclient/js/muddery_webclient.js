@@ -1241,12 +1241,40 @@ var webclient = {
         this.showUnloginTabs();
         this.showPage("login");
         this.doSetSizes();
+
+        webclient.doAutoLoginCheck();
     },
     
     onConnectionClose: function() {
         this.showConnectTabs();
         this.showPage("connect");
         this.doSetSizes();
+    },
+
+    doAutoLoginCheck : function() {
+        setTimeout(function(){
+            if($.cookie("is_save_password")) {
+                $("#login_name").val($.cookie("login_name"));
+                $("#login_password").val($.cookie("login_password"));
+                $("#cb_save_password").attr("checked", "true");
+
+                if($.cookie("is_auto_login")) {
+                    $("#cb_auto_login").attr("checked", "true");
+
+                    var args = {"playername" : $.cookie("login_name"),
+                                "password" : $.cookie("login_password")};
+                    sendCommand(JSON.stringify({"cmd" : "connect", "args" : args}));
+                }
+            } else {
+                $("#cb_save_password").attr("checked", "false");
+                $.cookie("is_auto_login", '', {expires: -1});
+                $("#cb_auto_login").removeAttr("checked");
+            }
+
+            if(!$.cookie("is_auto_login")) {
+                $("#cb_auto_login").removeAttr("checked");
+            }
+        }, 1);
     },
 }
 
