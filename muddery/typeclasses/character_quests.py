@@ -149,38 +149,14 @@ class MudderyQuest(MudderyObject):
             SCRIPT_HANDLER.do_action(caller, None, self.action)
 
         # remove objective objects
-        changed = False
+        obj_list = []
         for ordinal in self.objectives:
             if self.objectives[ordinal]["type"] == defines.OBJECTIVE_OBJECT:
-                # decrease object's number
-                decrease = self.objectives[ordinal]["number"]
-                objects = owner.search_inventory(self.objectives[ordinal]["object"])
-                
-                for obj in objects:
-                    try:
-                        obj_num = obj.get_number()
-                        if obj_num >= decrease:
-                            obj.decrease_num(decrease)
-                            decrease = 0
-                        else:
-                            obj.decrease_num(obj_num)
-                            decrease -= obj_num
+                obj_list.append({"object": self.objectives[ordinal]["object"],
+                                 "number": self.objectives[ordinal]["number"]})
+        if obj_list:
+            owner.remove_objects(obj_list)
 
-                        if obj.get_number() <= 0:
-                            obj.delete()
-                        
-                        changed = True
-                    except Exception, e:
-                        ostring = "An error occured when achieve %s: %s" % (obj.get_info_key(), e)
-                        logger.log_tracemsg(ostring)
-                        break
-            
-                    if decrease <= 0:
-                        break
-
-        if changed:
-            owner.show_inventory()
-                
 
     def at_talk_finished(self, dialogue):
         """

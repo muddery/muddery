@@ -34,9 +34,9 @@ def learn_skill(character, obj, *args):
     character.skill.learn_skill(args[0])
 
 
-def give_object(character, obj, *args):
+def give_objects(character, obj, *args):
     """
-    Teach the character a skill.
+    Give some objects to the character.
     args: object's key and object's number
     """
     if not character:
@@ -54,6 +54,28 @@ def give_object(character, obj, *args):
                  "number": number}]
 
     character.receive_objects(obj_list)
+
+
+def remove_objects(character, obj, *args):
+    """
+    Remove some objects from the character.
+    args: object's key and object's number
+    """
+    if not character:
+        return
+
+    if not args:
+        return
+
+    obj_key = args[0]
+    number = 1
+    if len(args) > 1:
+        number = args[1]
+
+    obj_list = [{"object": obj_key,
+                 "number": number}]
+
+    character.remove_objects(obj_list)
 
 
 def teleport_to(character, obj, *args):

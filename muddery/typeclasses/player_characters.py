@@ -299,7 +299,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
     def receive_objects(self, obj_list):
         """
-        Receive objects.
+        Add objects to the inventory.
         obj_list: (list) a list of object keys and there numbers.
                          list item: {"object": object's key
                                      "number": object's number}
@@ -399,6 +399,69 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.show_inventory()
 
         return rejected_keys
+
+
+    def remove_objects(self, obj_list):
+        """
+        Remove objects from the inventory.
+        obj_list: (list) a list of object keys and there numbers.
+                         list item: {"object": object's key
+                                     "number": object's number}
+        """
+        changed = False
+        for item in obj_list:
+            # decrease object's number
+            decrease = item["number"]
+            objects = self.search_inventory(item["object"])
+
+            for obj in objects:
+                try:
+                    obj_num = obj.get_number()
+                    if obj_num >= decrease:
+                        obj.decrease_num(decrease)
+                        decrease = 0
+                    else:
+                        obj.decrease_num(obj_num)
+                        decrease -= obj_num
+
+                    if obj.get_number() <= 0:
+                        obj.delete()
+
+                    changed = True
+                except Exception, e:
+                    ostring = "Can not remove object %s: %s" % (obj.get_info_key(), e)
+                    logger.log_tracemsg(ostring)
+                    break
+
+                if decrease <= 0:
+                    break
+
+        if changed:
+            self.show_inventory()
+
+
+    def use_object(self, obj):
+        """
+        Use an object.
+        """
+        if not obj:
+            return
+
+        result = ""
+
+        # take effect
+        try:
+            result = self.take_effect(obj)
+        except Exception, e:
+            ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
+            logger.log_tracemsg(ostring)
+
+        # remove used object
+        obj_list = [{"object": obj.get_info_key(),
+                     "number": 1}]
+        owner.remove_objects(obj_list)
+                                                                                
+        return result
 
 
     def search_inventory(self, obj_key):
