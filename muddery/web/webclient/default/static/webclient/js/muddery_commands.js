@@ -35,6 +35,8 @@ var commands = {
         var args = {"playername" : playername,
                     "password" : password};
         sendCommand(this.cmdString("connect", args));
+
+        commands.doAutoLoginConfig(playername, password);
     },
 
     // register
@@ -78,6 +80,7 @@ var commands = {
     
     // logout
     doLogout : function() {
+        $.cookie("is_auto_login", '', {expires: -1});
         sendCommand(this.cmdString("quit", ""));
     },
     
@@ -92,6 +95,32 @@ var commands = {
     // do test
     doTest : function() {
         // test codes
+    },
+
+    doAutoLoginConfig : function(playername, password) {
+        if($("#cb_save_password").is(":checked")) {
+            $.cookie("login_name", playername);
+            $.cookie("login_password", password);
+
+            if($("#cb_auto_login").is(":checked")) {
+                $.cookie("is_auto_login", 'true');
+            } else {
+                $.cookie("is_auto_login", '', {expires: -1});
+            }
+        }
+    },
+
+    doSetSavePassword : function() {
+        console.log("doSetSavePassword");
+        if($("#cb_save_password").is(":checked")) {
+            $.cookie("is_save_password", 'true');
+        } else {
+            $.cookie("login_name", '', {expires: -1});
+            $.cookie("login_password", '', {expires: -1});
+            $.cookie("is_save_password", '', {expires: -1});
+            $.cookie("is_auto_login", '', {expires: -1});
+            $("#cb_auto_login").removeAttr("checked");
+        }
     },
 }
 

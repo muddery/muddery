@@ -16,6 +16,7 @@
 
     <!--for offline testing, download the jquery library from jquery.com-->
     <script src="{% static "webclient/js/jquery-1.11.1.min.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "webclient/js/jquery.cookie.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/d3.v3.min.js" %}" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
         if(!window.jQuery){document.write("<div class='err'>jQuery library not found or the online version could not be reached.</div>");}
@@ -148,10 +149,14 @@
                             <input id="login_password" type="password" class="input_text" value="" autocomplete="off"/>
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            记住密码: <input id="cb_save_password" type="checkbox" onclick="commands.doSetSavePassword()"/><br/>
+                            自动登录: <input id="cb_auto_login" type="checkbox"/>
+                        </td>
+                        <td><input type="button" class="btn button_left" value="登录" onclick="commands.doLogin()"/></td>
+                    </tr>
                 </table>
-                <div>
-                    <input type="button" class="btn button_left" value="登录" onclick="commands.doLogin()"/>
-                </div>
             </form>
             <form id="page_register" style="display: none">
                 <div>请注册。</div>
