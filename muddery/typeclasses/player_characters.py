@@ -425,6 +425,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
                         decrease -= obj_num
 
                     if obj.get_number() <= 0:
+                        # if it is an equipment, take off it first
+                        if getattr(obj, "equipped", False):
+                            self.take_off_equipment(obj)
+
                         obj.delete()
 
                     changed = True
@@ -552,18 +556,17 @@ class MudderyPlayerCharacter(MudderyCharacter):
     def equip_object(self, obj):
         """
         Equip an object.
+        args: obj(object): the equipment object.
         """
         if obj.location != self:
-            self.msg({"alert":"You do not have that equipment."})
-            return False
+            raise MudderyError(LS("Can not find this equipment."))
 
         type = obj.type
         position = obj.position
         career = ""
 
         if not EQUIP_TYPE_HANDLER.can_equip(type, career):
-            self.msg({"alert":"Can not equip that equipment."})
-            return False
+            raise MudderyError(LS("Can not use this equipment."))
 
         # Take off old equipment
         if self.db.equipments[position]:
@@ -581,43 +584,61 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         # reset character's attributes
         self.refresh_data()
-        
-        return True
+
+        message = {"status": self.return_status(),
+                   "equipments": self.return_equipments(),
+                   "inventory": self.return_inventory()}
+        self.msg(message)
+
+        return
 
 
     def take_off_position(self, position):
         """
         Take off an object from position.
         """
-        if self.db.equipments[position]:
-            # Set object's attribute 'equipped' to False
-            dbref = self.db.equipments[position]
-            
-            for obj in self.contents:
-                if obj.dbref == dbref:
-                    obj.equipped = False
+        if not self.db.equipments[position]:
+            raise MudderyError(LS("Can not find this equipment."))
+
+        # Set object's attribute 'equipped' to False
+        dbref = self.db.equipments[position]
+
+        for obj in self.contents:
+            if obj.dbref == dbref:
+                obj.equipped = False
+                find = True
 
         self.db.equipments[position] = None
 
         # reset character's attributes
         self.refresh_data()
 
+        message = {"status": self.return_status(),
+                   "equipments": self.return_equipments(),
+                   "inventory": self.return_inventory()}
+        self.msg(message)
 
-    def take_off_object(self, obj):
-        """
-        Take off an object.
-        """
-        if obj.location != self:
-            self.msg({"alert":"You do not have that equipment."})
-            return
 
-        self.db.equipments[obj.position] = None
+    def take_off_equipment(self, equipment):
+        """
+        Take off an equipment.
+        args: equipment(object): the equipment object.
+        """
+        if equipment.location != self:
+            raise MudderyError(LS("Can not find this equipment."))
+
+        self.db.equipments[equipment.position] = None
         
         # Set object's attribute 'equipped' to False
-        obj.equipped = False
+        equipment.equipped = False
 
         # reset character's attributes
         self.refresh_data()
+
+        message = {"status": self.return_status(),
+                   "equipments": self.return_equipments(),
+                   "inventory": self.return_inventory()}
+        self.msg(message)
 
 
     def unlock_exit(self, exit):

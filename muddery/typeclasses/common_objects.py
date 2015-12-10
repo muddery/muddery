@@ -76,6 +76,17 @@ class MudderyCommonObject(MudderyObject):
         return
 
 
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        "args" must be a string without ' and ", usually it is self.dbref.
+        """
+        commands = []
+        if self.location:
+            commands.append({"name":LS("DISCARD"), "cmd":"discard", "args":self.dbref})
+        return commands
+
+
 class MudderyFood(MudderyCommonObject):
     """
     This is a food. Players can use it to change their properties, such as hp, mp,
@@ -91,6 +102,8 @@ class MudderyFood(MudderyCommonObject):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         commands = [{"name":LS("USE"), "cmd":"use", "args":self.dbref}]
+        if self.location:
+            commands.append({"name":LS("DISCARD"), "cmd":"discard", "args":self.dbref})
         return commands
 
 
@@ -119,4 +132,9 @@ class MudderyEquipment(MudderyCommonObject):
             commands = [{"name":LS("TAKE OFF"), "cmd":"takeoff", "args":self.dbref}]
         else:
             commands = [{"name":LS("EQUIP"), "cmd":"equip", "args":self.dbref}]
+
+            # Can not discard when equipped
+            if self.location:
+                commands.append({"name":LS("DISCARD"), "cmd":"discard", "args":self.dbref})
+
         return commands

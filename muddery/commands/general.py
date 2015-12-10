@@ -12,6 +12,7 @@ from evennia.commands.default.muxcommand import MuxCommand
 from evennia import create_script
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.localized_strings_handler import LS
+from muddery.utils.exception import MudderyError
 import traceback
 
 
@@ -764,6 +765,54 @@ class CmdUse(Command):
 
 
 #------------------------------------------------------------
+# discard objects
+#------------------------------------------------------------
+
+class CmdDiscard(Command):
+    """
+    Discard an object.
+
+    Usage:
+        {"cmd":"discard",
+         "args":<object's dbref>
+        }
+
+    Call caller's remove_objects function with specified object.
+    """
+    key = "discard"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Use an object."
+        caller = self.caller
+
+        if not caller.is_alive():
+            caller.msg({"alert":LS("You are died.")})
+            return
+
+        if not self.args:
+            caller.msg({"alert":LS("You should discard something.")})
+            return
+
+        obj = caller.search(self.args, location=caller)
+        if not obj:
+            # If the caller does not have this object.
+            caller.msg({"alert":LS("You don't have this object.")})
+            return
+
+        # remove used object
+        obj_list = [{"object": obj.get_info_key(),
+                     "number": 1}]
+        try:
+            caller.remove_objects(obj_list)
+        except Exception, e:
+            caller.msg({"alert": LS("Can not discard this object.")})
+            logger.log_tracemsg("Can not discard object %s: %s" % (obj.get_info_key(), e))
+            return
+
+
+#------------------------------------------------------------
 # put on equipment
 #------------------------------------------------------------
 
@@ -797,17 +846,16 @@ class CmdEquip(Command):
 
         try:
             # equip
-            if not caller.equip_object(obj):
-                return
+            caller.equip_object(obj)
+        except MudderyError, e:
+            caller.msg({"alert":e})
         except Exception, e:
-            caller.msg({"alert":LS("Can not equip %s.") % obj.name})
+            caller.msg({"alert": LS("Can not use this equipment.")})
+            logger.log_tracemsg("Can not use equipment %s: %s" % (obj.get_info_key(), e))
             return
 
         # Send lastest status to the player.
-        message = {"alert": LS("Equipped!"),
-                   "status": caller.return_status(),
-                   "equipments": caller.return_equipments(),
-                   "inventory": caller.return_inventory()}
+        message = {"alert": LS("Equipped!")}
         caller.msg(message)
 
 
@@ -845,17 +893,16 @@ class CmdTakeOff(Command):
 
         try:
             # Take off the equipment.
-            caller.take_off_object(obj)
+            caller.take_off_equipment(obj)
+        except MudderyError, e:
+            caller.msg({"alert":e})
         except Exception, e:
-            caller.msg({"alert":LS("Can not take off %s.") % obj.name})
-            logger.log_tracemsg("Can not take off %s: %s" % (obj.name, e))
+            caller.msg({"alert":LS("Can not take off this equipment.")})
+            logger.log_tracemsg("Can not take off %s: %s" % (obj.get_info_key(), e))
             return
 
         # Send lastest status to the player.
-        message = {"alert": LS("Took off!"),
-                   "status": caller.return_status(),
-                   "equipments": caller.return_equipments(),
-                   "inventory": caller.return_inventory()}
+        message = {"alert": LS("Taken off!")}
         caller.msg(message)
 
 
