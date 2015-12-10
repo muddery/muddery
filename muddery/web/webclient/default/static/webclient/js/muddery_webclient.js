@@ -3,6 +3,7 @@ Muddery webclient (javascript component)
 */
 
 var webclient = {
+    cache_room_exits : null,
     doShow : function(type, msg) {
         var data = null;
         
@@ -312,6 +313,7 @@ var webclient = {
             if (data["exits"].length > 0) {
                 content += "<div id='room_exits'>" + LS("Exits:");
                 // add exits
+                cache_room_exits = new Array();
                 for (var i in data["exits"]) {
                     try {
                         var exit = data["exits"][i];
@@ -323,6 +325,7 @@ var webclient = {
                         element += "</a>";
                         content += element;
                         empty = false;
+                        cache_room_exits.push(data["exits"][i]);
                     }
                     catch(error) {
                     }
@@ -503,6 +506,62 @@ var webclient = {
     },
 
     displayLookObj : function(data) {
+
+        //if cmds contains goto, display all actions of current exit
+        var is_exit_goto = false;
+        if ("cmds" in data) {
+            for (var i in data["cmds"]) {
+                var cmd = data["cmds"][i];
+                if(cmd["cmd"] == "goto"){
+                    is_exit_goto = true;
+                    break;
+                }
+            }
+        }
+
+        if(is_exit_goto){
+            content_exits = "";
+            if (cache_room_exits) {
+                if (cache_room_exits.length > 0) {
+                    // add exits
+                    for (var i in cache_room_exits) {
+                        try {
+                            var exit = cache_room_exits[i];
+                            element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
+                            element += " cmd_name='look'";
+                            element += " cmd_args='" + exit["dbref"] + "'";
+                            element += " dbref='" + exit["dbref"] + "'>";
+                            element += exit["name"];
+                            element += "</a>";
+                            content_exits += element;
+
+                            if(exit["name"]==data["name"]){
+                                content_exits += "[";
+                                for (var i in data["cmds"]) {
+                                    try {
+                                        var cmd = data["cmds"][i];
+                                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
+                                        element += " cmd_name='" + cmd["cmd"] + "'";
+                                        element += " cmd_args='" + cmd["args"] + "'>";
+                                        element += cmd["name"];
+                                        element += "</a>";
+                                        content_exits += element;
+                                    }
+                                    catch(error) {
+                                    }
+                                }
+                                content_exits += "]";
+                            }
+                        }
+                        catch(error) {
+                        }
+                    }
+                }
+            }
+            $('#room_exits').html(LS("Exits:") + content_exits);
+            return;
+        }
+
         this.doCloseBox();
         this.createMessageBox();
         
