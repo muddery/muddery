@@ -3,6 +3,7 @@ Muddery webclient (javascript component)
 */
 
 var webclient = {
+    cache_room_exits : null,
     doShow : function(type, msg) {
         var data = null;
         
@@ -312,6 +313,7 @@ var webclient = {
             if (data["exits"].length > 0) {
                 content += "<div id='room_exits'>" + LS("Exits:");
                 // add exits
+                cache_room_exits = new Array();
                 for (var i in data["exits"]) {
                     try {
                         var exit = data["exits"][i];
@@ -323,6 +325,7 @@ var webclient = {
                         element += "</a>";
                         content += element;
                         empty = false;
+                        cache_room_exits.push(data["exits"][i]);
                     }
                     catch(error) {
                     }
@@ -503,6 +506,66 @@ var webclient = {
     },
 
     displayLookObj : function(data) {
+
+        //if cmds contains goto, display all actions of current exit
+        var is_goto = false;
+        var is_exit = false;
+
+        if ("cmds" in data) {
+            for (var i in data["cmds"]) {
+                var cmd = data["cmds"][i];
+                if(cmd["cmd"] == "goto"){
+                    is_goto = true;
+                }
+            }
+        }
+
+        if(is_goto){
+            content_exits = "";
+            if (cache_room_exits) {
+                if (cache_room_exits.length > 0) {
+                    // add exits
+                    for (var i in cache_room_exits) {
+                        try {
+                            var exit = cache_room_exits[i];
+                            element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
+                            element += " cmd_name='look'";
+                            element += " cmd_args='" + exit["dbref"] + "'";
+                            element += " dbref='" + exit["dbref"] + "'>";
+                            element += exit["name"];
+                            element += "</a>";
+                            content_exits += element;
+
+                            if(exit["dbref"] == data["dbref"]){
+                                is_exit = true;
+                                content_exits += "[";
+                                for (var i in data["cmds"]) {
+                                    try {
+                                        var cmd = data["cmds"][i];
+                                        exit_element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
+                                        exit_element += " cmd_name='" + cmd["cmd"] + "'";
+                                        exit_element += " cmd_args='" + cmd["args"] + "'>";
+                                        exit_element += cmd["name"];
+                                        exit_element += "</a>";
+                                        content_exits += exit_element;
+                                    }
+                                    catch(error) {
+                                    }
+                                }
+                                content_exits += "]";
+                            }
+                        }
+                        catch(error) {
+                        }
+                    }
+                }
+            }
+            $('#room_exits').html(LS("Exits:") + content_exits);
+            if(is_exit && is_goto){
+                return;
+            }
+        }
+
         this.doCloseBox();
         this.createMessageBox();
         
@@ -1266,7 +1329,7 @@ var webclient = {
                     sendCommand(JSON.stringify({"cmd" : "connect", "args" : args}));
                 }
             } else {
-                $("#cb_save_password").attr("checked", "false");
+                $("#cb_save_password").removeAttr("checked");
                 $.cookie("is_auto_login", '', {expires: -1});
                 $("#cb_auto_login").removeAttr("checked");
             }
