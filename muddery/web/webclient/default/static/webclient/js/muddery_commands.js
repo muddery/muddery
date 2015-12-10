@@ -111,7 +111,6 @@ var commands = {
     },
 
     doSetSavePassword : function() {
-        console.log("doSetSavePassword");
         if($("#cb_save_password").is(":checked")) {
             $.cookie("is_save_password", 'true');
         } else {
