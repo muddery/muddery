@@ -508,18 +508,19 @@ var webclient = {
     displayLookObj : function(data) {
 
         //if cmds contains goto, display all actions of current exit
-        var is_exit_goto = false;
+        var is_goto = false;
+        var is_exit = false;
+
         if ("cmds" in data) {
             for (var i in data["cmds"]) {
                 var cmd = data["cmds"][i];
                 if(cmd["cmd"] == "goto"){
-                    is_exit_goto = true;
-                    break;
+                    is_goto = true;
                 }
             }
         }
 
-        if(is_exit_goto){
+        if(is_goto){
             content_exits = "";
             if (cache_room_exits) {
                 if (cache_room_exits.length > 0) {
@@ -535,17 +536,18 @@ var webclient = {
                             element += "</a>";
                             content_exits += element;
 
-                            if(exit["name"]==data["name"]){
+                            if(exit["dbref"] == data["dbref"]){
+                                is_exit = true;
                                 content_exits += "[";
                                 for (var i in data["cmds"]) {
                                     try {
                                         var cmd = data["cmds"][i];
-                                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                                        element += " cmd_name='" + cmd["cmd"] + "'";
-                                        element += " cmd_args='" + cmd["args"] + "'>";
-                                        element += cmd["name"];
-                                        element += "</a>";
-                                        content_exits += element;
+                                        exit_element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
+                                        exit_element += " cmd_name='" + cmd["cmd"] + "'";
+                                        exit_element += " cmd_args='" + cmd["args"] + "'>";
+                                        exit_element += cmd["name"];
+                                        exit_element += "</a>";
+                                        content_exits += exit_element;
                                     }
                                     catch(error) {
                                     }
@@ -559,7 +561,9 @@ var webclient = {
                 }
             }
             $('#room_exits').html(LS("Exits:") + content_exits);
-            return;
+            if(is_exit && is_goto){
+                return;
+            }
         }
 
         this.doCloseBox();
