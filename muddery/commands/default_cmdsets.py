@@ -50,6 +50,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdDialogue())
         self.add(general.CmdLoot())
         self.add(general.CmdUse())
+        self.add(general.CmdDiscard())
         self.add(general.CmdEquip())
         self.add(general.CmdTakeOff())
         self.add(general.CmdCastSkill())
