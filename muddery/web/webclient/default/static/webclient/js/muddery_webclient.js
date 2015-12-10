@@ -1266,7 +1266,7 @@ var webclient = {
                     sendCommand(JSON.stringify({"cmd" : "connect", "args" : args}));
                 }
             } else {
-                $("#cb_save_password").attr("checked", "false");
+                $("#cb_save_password").removeAttr("checked");
                 $.cookie("is_auto_login", '', {expires: -1});
                 $("#cb_auto_login").removeAttr("checked");
             }
