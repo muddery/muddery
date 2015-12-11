@@ -24,7 +24,7 @@ CONNECTION_SCREEN = \
 
   这是一款很小的单人游戏，游戏情节很短，仅用于展示 Muddery 系统的特性。由于会不定期地更改游戏代码及数据库结构，{r用户的游戏信息可能会丢失，如果原用户名无法登陆，请重新注册{n，敬请谅解。
  
-  Muddery 是一个用Python编写的开源的在线文字游戏框架，更多信息欢迎访问网站 {whttp://www.muddery.org/cn{n 。
+  Muddery 是一个用Python编写的开源的在线文字游戏框架，更多信息欢迎访问网站 {whttp://cn.muddery.org{n 。
 {b=============================================================={n"""
 
 # % (settings.SERVERNAME, utils.get_muddery_version())

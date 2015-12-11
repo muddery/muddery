@@ -21,6 +21,7 @@ from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
+from muddery.utils import defines
 from evennia import TICKER_HANDLER
 
 
@@ -389,7 +390,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 reject_reason[name] = reason
 
             # call quest handler
-            self.quest.at_get_object(key, accepted)
+            self.quest.at_objective(defines.OBJECTIVE_OBJECT, key, accepted)
 
         # Send results to the player.
         message = {"get_object":

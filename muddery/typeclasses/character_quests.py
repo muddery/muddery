@@ -18,8 +18,7 @@ from evennia.utils import logger
 
 class MudderyQuest(MudderyObject):
     """
-    This class controls quest's objectives. Hooks like at_talk_finished() and
-    at_get_object() are called when a character doing such things.
+    This class controls quest's objectives. Hooks are called when a character doing some things.
     """
     def at_object_creation(self):
         """
@@ -91,17 +90,17 @@ class MudderyQuest(MudderyObject):
                 if self.objectives[ordinal]["type"] == defines.OBJECTIVE_TALK:
                     # talking
                     target = LS("Talk to")
-                    object = DIALOGUE_HANDLER.get_npc_name(self.objectives[ordinal]["object"])
+                    name = DIALOGUE_HANDLER.get_npc_name(self.objectives[ordinal]["object"])
         
                     objectives.append({"target": target,
-                                       "object": object,
+                                       "object": name,
                                        "achieved": achieved,
                                        "total": obj_num,
                                        })
                 elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_OBJECT:
                     # getting
                     target = LS("Get")
-                    object = ""
+                    name = ""
                     
                     # Get the name of the objective object.
                     for model_name in settings.COMMON_OBJECTS:
@@ -110,17 +109,54 @@ class MudderyQuest(MudderyObject):
                             # Get record.
                             try:
                                 record = model.objects.get(key=self.objectives[ordinal]["object"])
-                                object = record.name
+                                name = record.name
                                 break
                             except Exception, e:
                                 pass
         
                     objectives.append({"target": target,
-                                       "object": object,
+                                       "object": name,
                                        "achieved": achieved,
                                        "total": obj_num,
                                        })
-                        
+                elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_KILL:
+                    # getting
+                    target = LS("Kill")
+                    name = ""
+
+                    # Get the name of the objective character.
+                    for model_name in settings.COMMON_OBJECTS:
+                        # find in common objects
+                        model = get_model(settings.WORLD_DATA_APP, model_name)
+                        if model:
+                            # Get record.
+                            try:
+                                record = model.objects.get(key=self.objectives[ordinal]["object"])
+                                name = record.name
+                                break
+                            except Exception, e:
+                                pass
+
+                    if not name:
+                        # find in world_npcs
+                        for model_name in settings.WORLD_NPCS:
+                            # find in common objects
+                            model = get_model(settings.WORLD_DATA_APP, model_name)
+                            if model:
+                                # Get record.
+                                try:
+                                    record = model.objects.get(key=self.objectives[ordinal]["object"])
+                                    name = record.name
+                                    break
+                                except Exception, e:
+                                    pass
+
+                    objectives.append({"target": target,
+                                       "object": name,
+                                       "achieved": achieved,
+                                       "total": obj_num,
+                                       })
+
         return objectives
 
 
@@ -158,74 +194,43 @@ class MudderyQuest(MudderyObject):
             owner.remove_objects(obj_list)
 
 
-    def at_talk_finished(self, dialogue):
+    def at_objective(self, type, object_key, number=1):
         """
-        Called when the owner finishes a dialogue.
+        Called when the owner may finish some objectives.
+        
+        args:
+            type: objective's type defined in defines.py
+            object_key(string): the key of the relative object
+            number(int): the number of the object
         """
-        if not defines.OBJECTIVE_TALK in self.not_achieved:
+        if not type in self.not_achieved:
             return False
 
         status_changed = False
         index = 0
-        while index < len(self.not_achieved[defines.OBJECTIVE_TALK]):
-            # get all talking objectives
-            ordinal = self.not_achieved[defines.OBJECTIVE_TALK][index]
-            index += 1
 
-            if self.objectives[ordinal]["object"] == dialogue:
-                # if the objective is this dialogue
-                status_changed = True
-
-                # add achievements
-                achieved = self.db.achieved.get(ordinal, 0)
-                achieved += 1
-                self.db.achieved[ordinal] = achieved
-
-                if self.db.achieved[ordinal] >= self.objectives[ordinal]["number"]:
-                    # objective achieved
-                    index -= 1
-                    del(self.not_achieved[defines.OBJECTIVE_TALK][index])
-
-                    if not self.not_achieved[defines.OBJECTIVE_TALK]:
-                        del(self.not_achieved[defines.OBJECTIVE_TALK])
-                        break
-
-        # if status_changed:
-        #     if self.is_objectives_achieved():
-        #         self.finish()
-
-        return status_changed
-
-
-    def at_get_object(self, object_key, number):
-        """
-        Called when the owner gets an object.
-        """
-        if not defines.OBJECTIVE_OBJECT in self.not_achieved:
-            return False
-
-        status_changed = False
-        index = 0
-        while index < len(self.not_achieved[defines.OBJECTIVE_OBJECT]):
-            # get all object objectives
-            ordinal = self.not_achieved[defines.OBJECTIVE_OBJECT][index]
+        # search all object objectives
+        while index < len(self.not_achieved[type]):
+            ordinal = self.not_achieved[type][index]
             index += 1
 
             if self.objectives[ordinal]["object"] == object_key:
-                # if the object is the objective
+                # if this object matches an objective
                 status_changed = True
 
+                # add achieved number
                 achieved = self.db.achieved.get(ordinal, 0)
                 achieved += number
                 self.db.achieved[ordinal] = achieved
 
                 if self.db.achieved[ordinal] >= self.objectives[ordinal]["number"]:
-                    # objective achieved
+                    # if this objective is achieved, remove it
                     index -= 1
-                    del(self.not_achieved[defines.OBJECTIVE_OBJECT][index])
-
-                    if not self.not_achieved[defines.OBJECTIVE_OBJECT]:
-                        del(self.not_achieved[defines.OBJECTIVE_OBJECT])
+                    del(self.not_achieved[type][index])
+                                                                    
+                    if not self.not_achieved[type]:
+                        # if all objectives are achieved
+                        del(self.not_achieved[type])
                         break
-
+                                                                                
         return status_changed
