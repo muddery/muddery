@@ -7,6 +7,7 @@ import traceback
 from django.conf import settings
 from evennia import DefaultScript
 from muddery.utils import builder
+from muddery.utils import defines
 from evennia import TICKER_HANDLER
 
 
@@ -241,11 +242,10 @@ class CombatHandler(DefaultScript):
                         winner.receive_objects(loots)
 
             # call quest handler
-            """
             for winner in winners:
                 if winner.has_player:
-                    winner.quest.at_character_kill(losers)
-            """
+                    for loser in losers:
+                        winner.quest.at_objective(defines.OBJECTIVE_KILL, loser.get_info_key())
 
             # send result to players
             msg = []

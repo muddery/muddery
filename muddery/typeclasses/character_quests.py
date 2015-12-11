@@ -90,17 +90,17 @@ class MudderyQuest(MudderyObject):
                 if self.objectives[ordinal]["type"] == defines.OBJECTIVE_TALK:
                     # talking
                     target = LS("Talk to")
-                    object = DIALOGUE_HANDLER.get_npc_name(self.objectives[ordinal]["object"])
+                    name = DIALOGUE_HANDLER.get_npc_name(self.objectives[ordinal]["object"])
         
                     objectives.append({"target": target,
-                                       "object": object,
+                                       "object": name,
                                        "achieved": achieved,
                                        "total": obj_num,
                                        })
                 elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_OBJECT:
                     # getting
                     target = LS("Get")
-                    object = ""
+                    name = ""
                     
                     # Get the name of the objective object.
                     for model_name in settings.COMMON_OBJECTS:
@@ -109,17 +109,54 @@ class MudderyQuest(MudderyObject):
                             # Get record.
                             try:
                                 record = model.objects.get(key=self.objectives[ordinal]["object"])
-                                object = record.name
+                                name = record.name
                                 break
                             except Exception, e:
                                 pass
         
                     objectives.append({"target": target,
-                                       "object": object,
+                                       "object": name,
                                        "achieved": achieved,
                                        "total": obj_num,
                                        })
-                        
+                elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_KILL:
+                    # getting
+                    target = LS("Kill")
+                    name = ""
+
+                    # Get the name of the objective character.
+                    for model_name in settings.COMMON_OBJECTS:
+                        # find in common objects
+                        model = get_model(settings.WORLD_DATA_APP, model_name)
+                        if model:
+                            # Get record.
+                            try:
+                                record = model.objects.get(key=self.objectives[ordinal]["object"])
+                                name = record.name
+                                break
+                            except Exception, e:
+                                pass
+
+                    if not name:
+                        # find in world_npcs
+                        for model_name in settings.WORLD_NPCS:
+                            # find in common objects
+                            model = get_model(settings.WORLD_DATA_APP, model_name)
+                            if model:
+                                # Get record.
+                                try:
+                                    record = model.objects.get(key=self.objectives[ordinal]["object"])
+                                    name = record.name
+                                    break
+                                except Exception, e:
+                                    pass
+
+                    objectives.append({"target": target,
+                                       "object": name,
+                                       "achieved": achieved,
+                                       "total": obj_num,
+                                       })
+
         return objectives
 
 
