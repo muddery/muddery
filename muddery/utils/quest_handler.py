@@ -163,28 +163,28 @@ class QuestHandler(object):
         return quests
 
 
-    def at_talk_finished(self, dialogue):
+    def at_objective(self, type, object_key, number=1):
         """
-        Called when the owner finishes a dialogue.
+        Called when the owner may finish some objectives.
         Call relative hooks.
         """
         status_changed = False
         for key in self.current_quests:
-            if self.current_quests[key].at_talk_finished(dialogue):
+            if self.current_quests[key].at_objective(type, object_key, number):
                 status_changed = True
 
         if status_changed:
             self.show_quests()
 
 
-    def at_get_object(self, obj_key, number):
+    def at_character_kill(self, character_key):
         """
-        Called when the owner gets an object.
+        Called when the owner kills a character.
         Call relative hooks.
         """
         status_changed = False
         for key in self.current_quests:
-            if self.current_quests[key].at_get_object(obj_key, number):
+            if self.current_quests[key].at_character_kill(obj_key, number):
                 status_changed = True
 
         if status_changed:
