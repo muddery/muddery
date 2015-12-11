@@ -167,15 +167,30 @@ class CombatHandler(DefaultScript):
             print traceback.format_exc()
             return False
 
-        alive = 0
-        for character in self.db.characters.values():
-            if character.is_alive():
-                alive += 1
-
-        if alive < 2:
-            # if we have less than 2 characters alive, kill this handler
+        if self.can_finish():
+            # if this is only one team left, kill this handler
             self.finish()
 
+        return True
+
+
+    def can_finish(self):
+        """
+        Check if can finish this combat. The combat finishes when a team's members
+        are all dead.
+
+        Return True or False
+        """
+        if not self.db.characters:
+            return False
+
+        teams = set()
+        for character in self.db.characters.values():
+            if character.is_alive():
+                teams.add(character.get_team())
+                if len(teams) > 1:
+                    return False
+                            
         return True
 
 
@@ -183,16 +198,10 @@ class CombatHandler(DefaultScript):
         """
         Start a combat, make all NPCs to cast skills automatically.
         """
-        if self.db.characters:
-            alive = 0
-            for character in self.db.characters.values():
-                if character.is_alive():
-                    alive += 1
-
-            if alive < 2:
-                # if we have less than 2 characters alive, kill this handler
-                self.finish()
-                return
+        if self.can_finish():
+            # if this is only one team left, kill this handler
+            self.finish()
+            return
 
         for character in self.db.characters.values():
             if not character.has_player:
@@ -203,49 +212,58 @@ class CombatHandler(DefaultScript):
         """
         Finish a combat. Send results to players, and kill all failed characters.
         """
-        winner = []
-        for character in self.db.characters.values():
-            if character.is_alive():
-                winner.append({"dbref": character.dbref,
-                               "name": character.get_name()})
-        
-        # delete dead npcs
-        kills = [c for c in self.db.characters.values() if not c.is_alive()]
-        
-        # find who kills opponents
-        killers = {}
-        for kill in kills:
-            team = kill.get_team()
-            killers[kill.dbref] = [character for character in self.db.characters.values()
-                                    if character.get_team() != team]
+        if self.db.characters:
+            # get winners and losers
+            winner_team = None
+            for character in self.db.characters.values():
+                if character.is_alive():
+                    winner_team = character.get_team()
+                    break
 
-        # loot
-        loots = {}
-        for kill in kills:
-            for killer in killers[kill.dbref]:
-                if killer.has_player:
-                    obj_list = kill.loot(killer)
-                    if obj_list:
-                        if not killer in loots:
-                            loots[killer] = obj_list
-                        else:
-                            loots[killer].extend(obj_list)
+            winners = [c for c in self.db.characters.values() if c.get_team() == winner_team]
+            losers = [c for c in self.db.characters.values() if c.get_team() != winner_team]
 
-        # add object list
-        for killer in loots:
-            killer.receive_objects(loots[killer])
+            # loot
+            for winner in winners:
+                if winner.has_player:
+                    # get object list
+                    loots = None
+                    for loser in losers:
+                        obj_list = loser.loot(winner)
+                        if obj_list:
+                            if not loots:
+                                loots = obj_list
+                            else:
+                                loots.extend(obj_list)
 
-        self.msg_all({"combat_finish": {"winner": winner}})
+                    if loots:
+                        # give objects to winner
+                        winner.receive_objects(loots)
 
-        # remove dead character
-        for kill in kills:
-            self._cleanup_character(kill)
-            del self.db.characters[kill.dbref]
-            kill.die(killers[kill.dbref])
+            # call quest handler
+            """
+            for winner in winners:
+                if winner.has_player:
+                    winner.quest.at_character_kill(losers)
+            """
+
+            # send result to players
+            msg = []
+            for winner in winners:
+                msg.append({"dbref": winner.dbref,
+                            "name": winner.get_name()})
+
+            self.msg_all({"combat_finish": {"winner": msg}})
+
+            # remove dead character
+            for loser in losers:
+                self._cleanup_character(loser)
+                del self.db.characters[loser.dbref]
+                loser.die(winners)
 
         self.db.finished = True
         self.stop()
-    
+
 
     def get_appearance(self):
         """
