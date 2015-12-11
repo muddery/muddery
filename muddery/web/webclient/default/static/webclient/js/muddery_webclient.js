@@ -275,163 +275,73 @@ var webclient = {
         catch(error) {
             element = tab_name;
         }
-        content += "<div><span class='cyan'>\>\>\>\>\> " + element + " \<\<\<\<\<</span></div>";
+        page.html("");
+        uimgr.divRoomTabName(element).appendTo(page);
 
         // add room's desc
         try {
             element = text2html.parseHtml(data["desc"]);
-            content += "<div>" + element + "</div>";
+            uimgr.divEmpty(element).appendTo(page);
         }
         catch(error) {
         }
 
-        content += "<div><br></div>";
-        
+        uimgr.divBR().appendTo(page);
+
         if ("cmds" in data) {
             if (data["cmds"].length > 0) {
-                content += "<div id='room_cmds'>Commands:"
-                // add cmds
-                for (var i in data["cmds"]) {
-                    try {
-                        var cmd = data["cmds"][i];
-                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                        element += " cmd_name='" + cmd["cmd"] + "'";
-                        element += " cmd_args='" + cmd["args"] + "'>";
-                        element += cmd["name"];
-                        element += "</a>";
-                        content += element;
-                    }
-                    catch(error) {
-                    }
-                }
-                content += "</div>";
+                uimgr.divRoomCmds(data["cmds"]).appendTo(page);
             }
         }
-        
+
         var empty = true;
         if ("exits" in data) {
             if (data["exits"].length > 0) {
-                content += "<div id='room_exits'>" + LS("Exits:");
-                // add exits
-                cache_room_exits = new Array();
-                for (var i in data["exits"]) {
-                    try {
-                        var exit = data["exits"][i];
-                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                        element += " cmd_name='look'";
-                        element += " cmd_args='" + exit["dbref"] + "'";
-                        element += " dbref='" + exit["dbref"] + "'>";
-                        element += exit["name"];
-                        element += "</a>";
-                        content += element;
-                        empty = false;
-                        cache_room_exits.push(data["exits"][i]);
-                    }
-                    catch(error) {
-                    }
-                }
-                content += "</div>";
+                uimgr.divRoomExits(data["exits"]).appendTo(page);
+                empty = false;
             }
         }
-        
+
         if (empty) {
-            content += "<div id='room_exits' style='display:none'>Exits:</div>"
+            uimgr.divRoomExits("").appendTo(page);
         }
-        
+
         empty = true;
         if ("things" in data) {
             if (data["things"].length > 0) {
-                content += "<div id='room_things'>" + LS("Objects:");
-                // add things
-                for (var i in data["things"]) {
-                    try {
-                        var thing = data["things"][i];
-                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                        element += " cmd_name='look'";
-                        element += " cmd_args='" + thing["dbref"] + "'";
-                        element += " dbref='" + thing["dbref"] + "'>";
-                        element += thing["name"];
-                        element += "</a>";
-                        content += element;
-                        empty = false;
-                    }
-                    catch(error) {
-                    }
-                }
-                content += "</div>";
+                uimgr.divRoomThings(data["things"]).appendTo(page);
+                empty = false;
             }
         }
-        
+
         if (empty) {
-            content += "<div id='room_things' style='display:none'>Things:</div>"
+            uimgr.divRoomThings("").appendTo(page);
         }
 
         empty = true;
         if ("npcs" in data) {
             if (data["npcs"].length > 0) {
-                content += "<div id='room_npcs'>" + LS("NPCs:");
-                // add npcs
-                for (var i in data["npcs"]) {
-                    try {
-                        var npc = data["npcs"][i];
-                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                        element += " cmd_name='look'";
-                        element += " cmd_args='" + npc["dbref"] + "'";
-                        element += " dbref='" + npc["dbref"] + "'>";
-                        element += npc["name"];
-                        element += "</a>";
-                        
-                        if (npc["finish_quest"]) {
-                            element += "[!]";
-                        }
-                        else if (npc["provide_quest"]) {
-                            element += "[?]";
-                        }
-
-                        content += element;
-                        empty = false;
-                    }
-                    catch(error) {
-                    }
-                }
-                content += "</div>";
+                uimgr.divRoomNpcs(data["npcs"]).appendTo(page);
+                empty = false;
             }
         }
-        
+
         if (empty) {
-            content += "<div id='room_npcs' style='display:none'>NPCs:</div>"
+            uimgr.divRoomNpcs("").appendTo(page);
         }
 
         empty = true;
         if ("players" in data) {
             if (data["players"].length > 0) {
-                content += "<div id='room_players'>" + LS("Players:");
-                // add players
-                for (var i in data["players"]) {
-                    try {
-                        var player = data["players"][i];
-                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                        element += " cmd_name='look'";
-                        element += " cmd_args='" + player["dbref"] + "'";
-                        element += " dbref='" + player["dbref"] + "'>";
-                        element += player["name"];
-                        element += "</a>";
-                        content += element;
-                        empty = false;
-                    }
-                    catch(error) {
-                    }
-                }
-                content += "</div>";
+                uimgr.divRoomPlayers(data["players"]).appendTo(page);
+                empty = false;
             }
         }
-        
+
         if (empty) {
-            content += "<div id='room_players' style='display:none'>" + LS("Players:") + "</div>";
+            uimgr.divRoomPlayers("").appendTo(page);
         }
-        
-        page.html(content);
-        
+
         this.doSetSizes();
     },
     
@@ -443,13 +353,9 @@ var webclient = {
             for (var i in data[key]) {
                 try {
                     var obj = data[key][i];
-                    element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                    element += " cmd_name='look'";
-                    element += " cmd_args='" + obj["dbref"] + "'";
-                    element += " dbref='" + obj["dbref"] + "'>";
-                    element += obj["name"];
-                    element += "</a>";
-                    page.append(element);
+                    var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, obj["name"],
+                        {"cmd_name": "look", "cmd_args": obj["dbref"], "dbref": obj["dbref"], "style":"margin-left:10px;"});
+                    page.append(aHrefElement);
                 }
                 catch(error) {
                 }
@@ -480,13 +386,9 @@ var webclient = {
         page.css("display", "");
 
         try {
-            element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-            element += " cmd_name='look'";
-            element += " cmd_args='" + data["dbref"] + "'";
-            element += " dbref='" + data["dbref"] + "'>";
-            element += data["name"];
-            element += "</a>";
-            page.append(element);
+            var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, data["name"],
+                {"cmd_name": "look", "cmd_args": data["dbref"], "dbref": data["dbref"], "style":"margin-left:10px;"});
+            page.append(aHrefElement);
         }
         catch(error) {
         }
@@ -521,38 +423,32 @@ var webclient = {
         }
 
         if(is_goto){
-            content_exits = "";
-            if (cache_room_exits) {
-                if (cache_room_exits.length > 0) {
+            var page = $("#room_exits");
+            page.html(LS("Exits:"));
+            if (webclient.cache_room_exits) {
+                if (webclient.cache_room_exits.length > 0) {
                     // add exits
-                    for (var i in cache_room_exits) {
+                    for (var i in webclient.cache_room_exits) {
                         try {
-                            var exit = cache_room_exits[i];
-                            element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                            element += " cmd_name='look'";
-                            element += " cmd_args='" + exit["dbref"] + "'";
-                            element += " dbref='" + exit["dbref"] + "'>";
-                            element += exit["name"];
-                            element += "</a>";
-                            content_exits += element;
+                            var exit = webclient.cache_room_exits[i];
+                            var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, exit["name"],
+                                {"cmd_name": "look", "cmd_args": exit["dbref"], "dbref": exit["dbref"], "style":"margin-left:10px;"});
+                            aHrefElement.appendTo(page);
 
                             if(exit["dbref"] == data["dbref"]){
+                                page.append('[');
                                 is_exit = true;
-                                content_exits += "[";
                                 for (var i in data["cmds"]) {
                                     try {
                                         var cmd = data["cmds"][i];
-                                        exit_element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                                        exit_element += " cmd_name='" + cmd["cmd"] + "'";
-                                        exit_element += " cmd_args='" + cmd["args"] + "'>";
-                                        exit_element += cmd["name"];
-                                        exit_element += "</a>";
-                                        content_exits += exit_element;
+                                        var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, cmd["name"],
+                                            {"cmd_name": cmd["cmd"], "cmd_args": cmd["args"], "style":"margin-left:10px;"});
+                                        aHrefElement.appendTo(page);
                                     }
                                     catch(error) {
                                     }
                                 }
-                                content_exits += "]";
+                                page.append(']');
                             }
                         }
                         catch(error) {
@@ -560,7 +456,6 @@ var webclient = {
                     }
                 }
             }
-            $('#room_exits').html(LS("Exits:") + content_exits);
             if(is_exit && is_goto){
                 return;
             }
@@ -586,7 +481,6 @@ var webclient = {
                                 .appendTo(button)
 
         // object's info
-        var content = "";
         var element = "";
 
         // add object's dbref
@@ -604,42 +498,25 @@ var webclient = {
             element = tab_name;
         }
 
-        var name = "<div><center><span class='lime'>\>\>\> " + element + " \<\<\<<center></span></div>";
+        var name = uimgr.divRoomCenterTabName(element);
         title.append(name);
 
         // add object's desc
         try {
             element = text2html.parseHtml(data["desc"]);
-            content += "<div>" + element + "</div>";
+            uimgr.divEmpty(element).appendTo(page);
         }
         catch(error) {
         }
 
-        content += "<div><br></div>";
+        uimgr.divBR().appendTo(page);
 
         if ("cmds" in data) {
             if (data["cmds"].length > 0) {
-                content += "<div id='object_cmds'>" + LS("Actions:");
-                // add cmds
-                for (var i in data["cmds"]) {
-                    try {
-                        var cmd = data["cmds"][i];
-                        element = " <a href='#' onclick='webclient.doCloseBox(); commands.doCommandLink(this); return false;'";
-                        element += " cmd_name='" + cmd["cmd"] + "'";
-                        element += " cmd_args='" + cmd["args"] + "'>";
-                        element += cmd["name"];
-                        element += "</a>";
-                        content += element;
-                    }
-                    catch(error) {
-                    }
-                }
-                content += "</div>";
+                uimgr.divObjectCmds(data["cmds"]).appendTo(page);
             }
         }
 
-        page.append(content);
-        
         // button
         /*
         var html_button = '<div><br></div>\
