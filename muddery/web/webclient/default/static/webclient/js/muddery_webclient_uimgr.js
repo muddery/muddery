@@ -4,8 +4,10 @@ Muddery webclient_uimgr (javascript component)
 
 var uimgr = {
     CONST_A_HREF_ONCLICK : "webclient.doCloseBox(); commands.doCommandLink(this); return false;",
-    divEmpty : function(element="", args=null) {
+    divEmpty : function(element, args) {
         var divEmptyElement = $("<div>");
+        var element = arguments[0]?arguments[0]:"";
+        var args = arguments[1]?arguments[1]:new Array();
         if(typeof(element) == 'string'){
             for(key in args){
                 divEmptyElement.attr(key, args[key]);
@@ -32,20 +34,20 @@ var uimgr = {
         return aHrefElement;
     },
     divRoomTabName : function(element) {
-        var divRoomTabName = uimgr.divEmpty();
-        var roomTabName = $("<span>").text("\>\>\>\>\> " + element +  " \<\<\<\<\<");
-        roomTabName.attr("class", "cyan");
-        roomTabName.appendTo(divRoomTabName)
-        return divRoomTabName;
+        var divRoomTabNameElement = uimgr.divEmpty();
+        var roomTabNameElement = $("<span>").text("\>\>\>\>\> " + element +  " \<\<\<\<\<");
+        roomTabNameElement.attr("class", "cyan");
+        roomTabNameElement.appendTo(divRoomTabNameElement)
+        return divRoomTabNameElement;
     },
     divRoomCenterTabName : function(element) {
-        var divRoomTabName = uimgr.divEmpty();
+        var divRoomTabNameElement = uimgr.divEmpty();
         var centerElement = $("<center>");
-        var roomTabName = $("<span>").text("\>\>\>\>\> " + element +  " \<\<\<\<\<");
-        roomTabName.attr("class", "cyan");
-        roomTabName.appendTo(centerElement);
-        centerElement.appendTo(divRoomTabName);
-        return divRoomTabName;
+        var roomTabNameElement = $("<span>").text("\>\>\>\>\> " + element +  " \<\<\<\<\<");
+        roomTabNameElement.attr("class", "cyan");
+        roomTabNameElement.appendTo(centerElement);
+        centerElement.appendTo(divRoomTabNameElement);
+        return divRoomTabNameElement;
     },
     divRoomCommon : function(room_id, room_title) {
         var divRoomCommonElement = uimgr.divEmpty();
