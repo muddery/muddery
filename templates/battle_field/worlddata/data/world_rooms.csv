@@ -1,0 +1,8 @@
+key,name,typeclass,desc,position
+room_intro,欢迎！,typeclasses.rooms.Room,进入杀戮场吧，胜者只有一个！走进这些门吧，只有活到最后的人才能出来！,
+room_market,市场,typeclasses.rooms.Room,很久以前这里是繁华的市场，现在只剩一片破败，到处都积着厚厚的尘土。,"(-1.7,-1)"
+room_temple,破庙,typeclasses.rooms.Room,这里是一座破庙，大门倒在一旁，房顶连同一大片墙都坍塌了，里面的佛像也残破不全。,"(1.7,-1)"
+room_tower,钟楼,typeclasses.rooms.Room,钟楼还矗立着，但钟已经不知去向。屋瓦上长满了杂草，有两只乌鸦站在上面，不时发出凄惨的叫声。,"(0,2)"
+room_dock,码头,typeclasses.rooms.Room,码头已经很久没有使用了，岸边一条船也没有，水边长满了芦苇。,"(-1.7,1)"
+room_house,民宅,typeclasses.rooms.Room,这一片民宅显然被大火烧过，墙壁被熏得黑黑的，房顶全被烧穿了，木头的柱子、房梁都被烧成了一段段木炭。,"(0,-2)"
+room_graveyard,墓地,typeclasses.rooms.Room,墓地里满是坟头，墓碑大多倒塌了，长满了杂草，不时有野狗穿梭其间。,"(1.7,1)"

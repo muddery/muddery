@@ -1,0 +1,4 @@
+dialogue,ordinal,speaker,content,action,provide_quest,finish_quest
+dlg_tele_dock,1,n,"传送到码头","teleport_to(""room_dock"")",,
+dlg_tele_house,1,n,"传送到民宅","teleport_to(""room_house"")",,
+dlg_tele_graveyard,1,n,"传送到墓地","teleport_to(""room_graveyard"")",,

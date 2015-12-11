@@ -1,0 +1,4 @@
+npc,dialogue,default
+npc_teleporter,dlg_tele_dock
+npc_teleporter,dlg_tele_house
+npc_teleporter,dlg_tele_graveyard
