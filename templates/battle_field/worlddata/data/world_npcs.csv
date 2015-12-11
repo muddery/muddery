@@ -1,0 +1,2 @@
+key,name,typeclass,desc,model,location,condition
+npc_teleporter,传送师,typeclasses.npcs.NPC,传送师能把你送进战场,npc_common,room_intro,
