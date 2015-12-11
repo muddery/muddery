@@ -217,8 +217,11 @@ var webclient = {
             msg_wnd.stop(true);
             msg_wnd.scrollTop(msg_wnd[0].scrollHeight);
         }
-        msg_wnd.append("<div class='msg "+ type +"'>"+ msg +"</div>");
-        
+
+        uimgr.divEmpty("", {"class":"msg " + type})
+            .append(msg)
+            .appendTo(msg_wnd);
+
         // remove old messages
         var divs = msg_wnd.children("div");
         var max = 40;
@@ -533,45 +536,7 @@ var webclient = {
     displayInventory : function(data) {
         // display player's inventory
         var page = $("#page_inventory");
-        
-        var content = "<table class='tab_inventory'>";
-        content += "<thead><tr><th>" + LS("NAME") + "</th>";
-        content += "<th>" + LS("NUM") + "</th>";
-        content += "<th>" + LS("DESC") + "</th></tr></thead>";
-        var element = "";
-
-        for (var i in data) {
-            try {
-                var obj = data[i];
-                element = "<tbody><tr><td>";
-                element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
-                element += " cmd_name='look'";
-                element += " cmd_args='" + obj["dbref"] + "'>";
-                element += obj["name"];
-                element += "</a></td>";
-
-                element += "<td>";
-                element += obj["number"];
-                if ("equipped" in obj)
-                    if (obj["equipped"]) {
-                        element += LS(" (equipped)");
-                    }
-
-                element += "</td>";
-
-                element += "<td>";
-                element += obj["desc"];
-                element += "</td></tr></tbody>";
-                
-                content += element;
-            }
-            catch(error) {
-            }
-        }
-        
-        content += "</table>";
-        
-        page.html(content);
+        uimgr.tableInventory(data).appendTo(page);
     },
 
     displaySkills : function(data) {

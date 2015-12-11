@@ -12,22 +12,21 @@ var uimgr = {
             for(key in args){
                 divEmptyElement.attr(key, args[key]);
             }
-            divEmptyElement.text(element)
+            divEmptyElement.text(element);
             return divEmptyElement;
         }
     },
     divBR : function() {
         var divElement = uimgr.divEmpty();
-        var BRElement = $("<br>");
-        BRElement.appendTo(divElement);
+        var BRElement = $("<br>")
+            .appendTo(divElement);
         return divElement;
     },
     aHref : function(href, onclick, name, args) {
-        var aHrefElement = $("<a>");
-        aHrefElement.attr("href", href);
-        aHrefElement.attr("onclick", onclick);
-
-        aHrefElement.text(name);
+        var aHrefElement = $("<a>")
+            .attr("href", href)
+            .attr("onclick", onclick)
+            .text(name);
         for(key in args){
             aHrefElement.attr(key, args[key]);
         }
@@ -35,24 +34,24 @@ var uimgr = {
     },
     divRoomTabName : function(element) {
         var divRoomTabNameElement = uimgr.divEmpty();
-        var roomTabNameElement = $("<span>").text("\>\>\>\>\> " + element +  " \<\<\<\<\<");
-        roomTabNameElement.attr("class", "cyan");
-        roomTabNameElement.appendTo(divRoomTabNameElement)
+        var roomTabNameElement = $("<span>").text("\>\>\>\>\> " + element +  " \<\<\<\<\<")
+            .attr("class", "cyan")
+            .appendTo(divRoomTabNameElement);
         return divRoomTabNameElement;
     },
     divRoomCenterTabName : function(element) {
         var divRoomTabNameElement = uimgr.divEmpty();
         var centerElement = $("<center>");
-        var roomTabNameElement = $("<span>").text("\>\>\>\>\> " + element +  " \<\<\<\<\<");
-        roomTabNameElement.attr("class", "cyan");
-        roomTabNameElement.appendTo(centerElement);
+        var roomTabNameElement = $("<span>").text("\>\>\>\>\> " + element +  " \<\<\<\<\<")
+            .attr("class", "cyan")
+            .appendTo(centerElement);
         centerElement.appendTo(divRoomTabNameElement);
         return divRoomTabNameElement;
     },
     divRoomCommon : function(room_id, room_title) {
-        var divRoomCommonElement = uimgr.divEmpty();
-        divRoomCommonElement.attr("id", room_id);
-        divRoomCommonElement.text(room_title);
+        var divRoomCommonElement = uimgr.divEmpty()
+            .attr("id", room_id)
+            .text(room_title);
         return divRoomCommonElement;
     },
     divRoomCmds : function(data_cmds) {
@@ -159,9 +158,9 @@ var uimgr = {
         return divRoomPlayersElement;
     },
     divObjectCommon : function(obj_id, obj_title) {
-        var divObjectCommonElement = uimgr.divEmpty();
-        divObjectCommonElement.attr("id", obj_id);
-        divObjectCommonElement.text(obj_title);
+        var divObjectCommonElement = uimgr.divEmpty()
+            .attr("id", obj_id)
+            .text(obj_title);
         return divObjectCommonElement;
     },
     divObjectCmds : function(data_cmds) {
@@ -178,5 +177,42 @@ var uimgr = {
             }
         }
         return divObjectCmdsElement;
+    },
+    tableInventory : function(data) {
+        var tableInventoryElement = $("<table>")
+            .attr("class", "tab_inventory");
+        var tableHeadElement = $("<thead>").appendTo(tableInventoryElement);
+        var tableHeadTRElement = $("<tr>").appendTo(tableHeadElement)
+            .append($("<th>").text(LS("NAME")))
+            .append($("<th>").text(LS("NUM")))
+            .append($("<th>").text(LS("DESC")));
+
+        for (var i in data) {
+            try {
+                var obj = data[i];
+                var tbodyElement = $("<tbody>").appendTo(tableInventoryElement);
+                var trElement = $("<tr>").appendTo(tbodyElement);
+                var tdElement = $("<td>").appendTo(trElement);
+                var aHrefElement = $("<a>").appendTo(tdElement)
+                    .attr("href", "#")
+                    .attr("onclick", "commands.doCommandLink(this); return false;")
+                    .attr("cmd_name", "look")
+                    .attr("cmd_args", obj["dbref"])
+                    .text(obj["name"]);
+
+                tdElement = $("<td>").appendTo(trElement);
+                tdElement.append(obj["number"]);
+                if("equipped" in obj) {
+                    if(obj["equipped"]) {
+                        tdElement.append(LS(" (equipped)"));
+                    }
+                }
+                tdElement = $("<td>").appendTo(trElement)
+                    .append(obj["desc"]);
+            }
+            catch(error) {
+            }
+        }
+        return tableInventoryElement;
     },
 }
