@@ -9,6 +9,7 @@ The DialogueHandler maintains a pool of dialogues.
 from muddery.utils import defines
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.utils import defines
 from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.utils import logger
@@ -272,11 +273,14 @@ class DialogueHandler(object):
     def finish_dialogue(self, caller, dialogue):
         """
         A dialogue finished, do it's action.
+        args:
+            caller(object): the dialogue caller
+            dialogue(string): dialogue's key
         """
         if not caller:
             return
 
-        caller.quest.at_talk_finished(dialogue)
+        caller.quest.at_objective(defines.OBJECTIVE_TALK, dialogue)
 
 
     def clear(self):
