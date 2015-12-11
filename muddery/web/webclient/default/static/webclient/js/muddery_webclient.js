@@ -217,8 +217,11 @@ var webclient = {
             msg_wnd.stop(true);
             msg_wnd.scrollTop(msg_wnd[0].scrollHeight);
         }
-        msg_wnd.append("<div class='msg "+ type +"'>"+ msg +"</div>");
-        
+
+        uimgr.divEmpty("", {"class":"msg " + type})
+            .append(msg)
+            .appendTo(msg_wnd);
+
         // remove old messages
         var divs = msg_wnd.children("div");
         var max = 40;
@@ -532,133 +535,20 @@ var webclient = {
     
     displayInventory : function(data) {
         // display player's inventory
-        var page = $("#page_inventory");
-        
-        var content = "<table class='tab_inventory'>";
-        content += "<thead><tr><th>" + LS("NAME") + "</th>";
-        content += "<th>" + LS("NUM") + "</th>";
-        content += "<th>" + LS("DESC") + "</th></tr></thead>";
-        var element = "";
-
-        for (var i in data) {
-            try {
-                var obj = data[i];
-                element = "<tbody><tr><td>";
-                element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
-                element += " cmd_name='look'";
-                element += " cmd_args='" + obj["dbref"] + "'>";
-                element += obj["name"];
-                element += "</a></td>";
-
-                element += "<td>";
-                element += obj["number"];
-                if ("equipped" in obj)
-                    if (obj["equipped"]) {
-                        element += LS(" (equipped)");
-                    }
-
-                element += "</td>";
-
-                element += "<td>";
-                element += obj["desc"];
-                element += "</td></tr></tbody>";
-                
-                content += element;
-            }
-            catch(error) {
-            }
-        }
-        
-        content += "</table>";
-        
-        page.html(content);
+        var page = $("#page_inventory").html("");
+        uimgr.tableInventory(data).appendTo(page);
     },
 
     displaySkills : function(data) {
         // display player's skills
-        var page = $("#page_skills");
-        
-        var content = "<table class='tab_skills'>";
-        content += "<thead><tr><th>" + LS("NAME") + "</th>";
-        content += "<th>" + LS("DESC") + "</th></tr></thead>";
-
-        var element = "";
-        for (var i in data) {
-            try {
-                var obj = data[i];
-                element = "<tbody><tr><td>";
-                element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
-                element += " cmd_name='look'";
-                element += " cmd_args='" + obj["dbref"] + "'>";
-                element += obj["name"];
-                element += "</a></td>";
-                element += "<td>";
-                element += obj["desc"];
-                element += "</td></tr></tbody>";
-                
-                content += element;
-            }
-            catch(error) {
-            }
-        }
-        
-        content += "</table>";
-        
-        page.html(content);
+        var page = $("#page_skills").html("");
+        uimgr.tableSkills(data).appendTo(page);
     },
 
     displayQuests : function(data) {
         // display player's quests
-        var page = $("#page_quests");
-        
-        var content = "<table class='tab_quests'>";
-        content += "<thead><tr><th>" + LS("NAME") + "</th>";
-        content += "<th>" + LS("DESC") + "</th>";
-        content += "<th>" + LS("OBJECTIVE") + "</th></tr></thead>";
-
-        var element = "";
-        for (var i in data) {
-            try {
-                var quest = data[i];
-                element = "<tbody><tr><td>";
-                element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
-                element += " cmd_name='look'";
-                element += " cmd_args='" + quest["dbref"] + "'>";
-                element += quest["name"];
-                element += "</a></td>";
-                element += "<td>";
-                element += quest["desc"];
-                element += "</td>";
-                element += "<td>";
-
-                var objectives = ""
-                for (var o in quest["objectives"]) {
-                    if (objectives.length > 0) {
-                        objectives += "<br>";
-                    }
-                    
-                    var obj = quest["objectives"][o];
-                    if ("desc" in obj) {
-                        objectives += obj.desc;
-                    }
-                    else {
-                        objectives += obj.target + " " + obj.object;
-                        objectives += " " + obj.achieved + "/" + obj.total;
-                    }
-                }
-                
-                element += objectives;
-                element += "</td></tr></tbody>";
-                
-                content += element;
-            }
-            catch(error) {
-            }
-        }
-        
-        content += "</table>";
-        
-        page.html(content);
+        var page = $("#page_quests").html("");
+        uimgr.tableQuests(data).appendTo(page);
     },
 
     displayGetObject : function(data) {
