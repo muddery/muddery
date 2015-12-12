@@ -12,6 +12,7 @@ value - which may change as Evennia is developed. This way you can
 always be sure of what you have changed and what is default behaviour.
 
 """
+from builtins import range
 
 import os
 import sys
@@ -71,9 +72,12 @@ WEBSOCKET_CLIENT_ENABLED = True
 WEBSOCKET_CLIENT_PORT = 8001
 # Interface addresses to listen to. If 0.0.0.0, listen to all. Use :: for IPv6.
 WEBSOCKET_CLIENT_INTERFACE = '0.0.0.0'
-# Actual URL for webclient component to reach the websocket.
-# The WEBSOCKET_CLIENT_PORT will be automatically appended to this URL.
-WEBSOCKET_CLIENT_URL = "ws://localhost"
+# Actual URL for webclient component to reach the websocket. You only need
+# to set this if you know you need it, like using some sort of proxy setup.
+# If given it must be on the form "ws://hostname" (WEBSOCKET_CLIENT_PORT will
+# be automatically appended). If left at None, the client will itself
+# figure out this url based on the server's hostname.
+WEBSOCKET_CLIENT_URL = None
 # Activate SSH protocol communication (SecureShell)
 SSH_ENABLED = False
 # Ports to use for SSH
@@ -183,7 +187,7 @@ IDMAPPER_CACHE_MAXSIZE = 200      # (MB)
 # accept, as a DoS countermeasure. If the rate exceeds this number, incoming
 # connections will be queued to this rate, so none will be lost.
 # Must be set to a value > 0.
-MAX_CONNECTION_RATE = 5
+MAX_CONNECTION_RATE = 2
 # Determine how many commands per second a given Session is allowed
 # to send to the Portal via a connected protocol. Too high rate will
 # drop the command and echo a warning. Note that this will also cap
@@ -233,13 +237,16 @@ CONN_MAX_AGE = 3600 * 7
 # The command parser module to use. See the default module for which
 # functions it must implement
 COMMAND_PARSER = "evennia.commands.cmdparser.cmdparser"
-# The handler that outputs errors when searching
-# objects using object.search().
-SEARCH_AT_RESULT = "evennia.commands.cmdparser.at_search_result"
-# The parser used in order to separate multiple
-# object matches (so you can separate between same-named
-# objects without using dbrefs).
-SEARCH_AT_MULTIMATCH_INPUT = "evennia.commands.cmdparser.at_multimatch_input"
+# On a multi-match when search objects or commands, the user has the
+# ability to search again with an index marker that differentiates
+# the results. If multiple "box" objects are found, they can by
+# default use 1-box, 2-box etc to refine the search. Below you
+# can change the index separator character used.
+SEARCH_MULTIMATCH_SEPARATOR = '-'
+# The handler that outputs errors when using any API-level search
+# (not manager methods). This function should correctly report errors
+# both for command- and object-searches.
+SEARCH_AT_RESULT = "evennia.utils.utils.at_search_result"
 # The module holding text strings for the connection screen.
 # This module should contain one or more variables
 # with strings defining the look of the screen.
@@ -296,11 +303,6 @@ CMDSET_CHARACTER = "commands.default_cmdsets.CharacterCmdSet"
 CMDSET_PLAYER = "commands.default_cmdsets.PlayerCmdSet"
 # Location to search for cmdsets if full path not given
 CMDSET_PATHS = ["commands", "evennia", "contribs"]
-
-# Line editor path. Points to a line editor class that commands may use to give
-# users extended editing control. See the default path for a reference implementation
-# and usage.
-LINE_EDITOR = 'evennia.commands.default.lineeditor.LineEditor'
 
 ######################################################################
 # Typeclasses and other paths
@@ -386,7 +388,9 @@ INLINEFUNC_ENABLED = False
 # Only functions defined globally (and not starting with '_') in
 # these modules will be considered valid inlinefuncs. The list
 # is loaded from left-to-right, same-named functions will overload
-INLINEFUNC_MODULES = ["evennia.utils.inlinefunc", "server.conf.inlinefunc"]
+INLINEFUNC_MODULES = ["evennia.utils.inlinefunc",
+                      "evennia.utils.nested_inlinefuncs",
+                      "server.conf.inlinefunc"]
 
 ######################################################################
 # Default Player setup and access
@@ -593,6 +597,7 @@ STATICFILES_IGNORE_PATTERNS = ('README.md',)
 ACTIVE_TEMPLATE = 'prosimii'
 # We setup the location of the website template as well as the admin site.
 TEMPLATE_DIRS = (
+    os.path.join(GAME_DIR, "web", "template_overrides", ACTIVE_TEMPLATE),
     os.path.join(GAME_DIR, "web", "template_overrides"),
     os.path.join(EVENNIA_DIR, "web", "templates", ACTIVE_TEMPLATE),
     os.path.join(EVENNIA_DIR, "web", "templates"),)

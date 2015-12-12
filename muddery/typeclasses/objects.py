@@ -247,7 +247,7 @@ class MudderyObject(DefaultObject):
                 continue
 
             if field.name in self.reserved_fields:
-                print "Can not set reserved field %s!" % field.name
+                logger.log_errmsg("Can not set reserved field %s!" % field.name)
                 continue
 
             # Set data.
@@ -534,21 +534,23 @@ class MudderyObject(DefaultObject):
         return commands
 
 
-    def msg(self, text=None, from_obj=None, sessid=0, **kwargs):
+    def msg(self, text=None, from_obj=None, session=None, **kwargs):
         """
         Emits something to a session attached to the object.
-        
+
         Args:
-        text (str, optional): The message to send
-        from_obj (obj, optional): object that is sending. If
-        given, at_msg_send will be called
-        sessid (int or list, optional): sessid or list of
-        sessids to relay to, if any. If set, will
-        force send regardless of MULTISESSION_MODE.
+            text (str, optional): The message to send
+            from_obj (obj, optional): object that is sending. If
+                given, at_msg_send will be called
+            session (Session or list, optional): Session or list of
+                Sessions to relay data to, if any. If set, will
+                force send to these sessions. If unset, who receives the
+                message depends on the MULTISESSION_MODE.
+
         Notes:
-        `at_msg_receive` will be called on this Object.
-        All extra kwargs will be passed on to the protocol.
-        
+            `at_msg_receive` will be called on this Object.
+            All extra kwargs will be passed on to the protocol.
+
         """
         # Send messages to the client. Messages are in format of JSON.
         raw = kwargs.get("raw", False)
@@ -558,6 +560,8 @@ class MudderyObject(DefaultObject):
             except Exception, e:
                 text = json.dumps({"err": "There is an error occurred while outputing messages."})
                 logger.log_errmsg("json.dumps failed: %s" % e)
+        else:
+            text = to_str(text, force_string=True) if text != None else ""
 
         # set raw=True
         if kwargs:
@@ -565,28 +569,20 @@ class MudderyObject(DefaultObject):
         else:
             kwargs = {"raw": True}
 
+        # try send hooks
         if from_obj:
-            # call hook
             try:
                 from_obj.at_msg_send(text=text, to_obj=self, **kwargs)
             except Exception:
-                log_trace()
+                logger.log_trace()
         try:
             if not self.at_msg_receive(text=text, **kwargs):
                 # if at_msg_receive returns false, we abort message to this object
                 return
         except Exception:
-            log_trace()
+            logger.log_trace()
                                                         
-        # session relay
-        kwargs['_nomulti'] = kwargs.get('_nomulti', True)
-
-        if self.player:
-            # for there to be a session there must be a Player.
-            if sessid:
-                sessions = make_iter(self.player.get_session(sessid))
-            else:
-                # Send to all sessions connected to this object
-                sessions = [self.player.get_session(sessid) for sessid in self.sessid.get()]
-            if sessions:
-                sessions[0].msg(text=text, session=sessions, **kwargs)
+        # relay to session(s)
+        sessions = make_iter(session) if session else self.sessions.all()
+        for session in sessions:
+            session.msg(text=text, **kwargs)

@@ -10,6 +10,7 @@ etc. If the client does not support TTYPE, this will be ignored.
 All data will be stored on the protocol's protocol_flags dictionary,
 under the 'TTYPE' key.
 """
+from builtins import object
 
 # telnet option codes
 TTYPE = chr(24)
@@ -30,14 +31,20 @@ class Ttype(object):
     """
     Handles ttype negotiations. Called and initiated by the
     telnet protocol.
+
     """
     def __init__(self, protocol):
         """
-        initialize ttype by storing protocol on ourselves and calling
+        Initialize ttype by storing protocol on ourselves and calling
         the client to see if it supporst ttype.
 
-        the ttype_step indicates how far in the data retrieval we've
-        gotten.
+        Args:
+            protocol (Protocol): The protocol instance.
+
+        Notes:
+            The `self.ttype_step` indicates how far in the data
+            retrieval we've gotten.
+
         """
         self.ttype_step = 0
         self.protocol = protocol
@@ -52,19 +59,27 @@ class Ttype(object):
     def wont_ttype(self, option):
         """
         Callback if ttype is not supported by client.
+
+        Args:
+            option (Option): Not used.
+
         """
         self.protocol.protocol_flags['TTYPE']["init_done"] = True
         self.protocol.handshake_done()
 
     def will_ttype(self, option):
         """
-        Handles negotiation of the ttype protocol once the
-        client has confirmed that it will respond with the ttype
-        protocol.
+        Handles negotiation of the ttype protocol once the client has
+        confirmed that it will respond with the ttype protocol.
 
-        The negotiation proceeds in several steps, each returning a
-        certain piece of information about the client. All data is
-        stored on protocol.protocol_flags under the TTYPE key.
+        Args:
+            option (Option): Not used.
+
+        Notes:
+            The negotiation proceeds in several steps, each returning a
+            certain piece of information about the client. All data is
+            stored on protocol.protocol_flags under the TTYPE key.
+
         """
         options = self.protocol.protocol_flags.get('TTYPE')
 
@@ -75,8 +90,6 @@ class Ttype(object):
             option = "".join(option).lstrip(IS)
         except TypeError:
             pass
-
-        #print "incoming TTYPE option:", option
 
         if self.ttype_step == 0:
             # just start the request chain
@@ -139,7 +152,6 @@ class Ttype(object):
                     self.protocol.protocol_flags['TTYPE'][option.upper()] = True
 
             self.protocol.protocol_flags['TTYPE']['init_done'] = True
-            # print "TTYPE final:", self.protocol.protocol_flags['TTYPE']
             # we must sync ttype once it'd done
             self.protocol.handshake_done()
         self.ttype_step += 1

@@ -18,6 +18,7 @@ in-situ, e.g `obj.db.mynestedlist[3][5] = 3` would never be saved and
 be out of sync with the database.
 
 """
+from builtins import object, int
 
 from functools import update_wrapper
 from collections import defaultdict, MutableSequence, MutableSet, MutableMapping
@@ -25,7 +26,6 @@ try:
     from cPickle import dumps, loads
 except ImportError:
     from pickle import dumps, loads
-from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.models import ContentType
 from evennia.server.models import ServerConfig
@@ -52,8 +52,14 @@ else:
 
 def _TO_DATESTRING(obj):
     """
-    this will only be called with valid database objects. Returns datestring
-    on correct form.
+    Creates datestring hash.
+
+    Args:
+        obj (Object): Database object.
+
+    Returns:
+        datestring (str): A datestring hash.
+
     """
     try:
         return _GA(obj, "db_date_created").strftime(_DATESTRING)
@@ -108,14 +114,14 @@ class _SaverMutable(object):
         elif self._db_obj:
             self._db_obj.value = self
         else:
-            logger.log_errmsg("_SaverMutable %s has no root Attribute to save to." % self)
+            logger.log_err("_SaverMutable %s has no root Attribute to save to." % self)
 
     def _convert_mutables(self, data):
         "converts mutables to Saver* variants and assigns .parent property"
         def process_tree(item, parent):
             "recursively populate the tree, storing parents"
             dtype = type(item)
-            if dtype in (basestring, int, long, float, bool, tuple):
+            if dtype in (basestring, int, float, bool, tuple):
                 return item
             elif dtype == list:
                 dat = _SaverList(parent=parent)
@@ -209,8 +215,14 @@ class _SaverSet(_SaverMutable, MutableSet):
 def pack_dbobj(item):
     """
     Check and convert django database objects to an internal representation.
-    This either returns the original input item or a tuple
-      ("__packed_dbobj__", key, creation_time, id)
+
+    Args:
+        item (any): A database entity to pack
+
+    Returns:
+        packed (any or tuple): Either returns the original input item
+            or the packing tuple `("__packed_dbobj__", key, creation_time, id)`.
+
     """
     _init_globals()
     obj = item
@@ -224,10 +236,18 @@ def pack_dbobj(item):
 
 def unpack_dbobj(item):
     """
-    Check and convert internal representations back to Django database models.
-    The fact that item is a packed dbobj should be checked before this call.
-    This either returns the original input or converts the internal store back
-    to a database representation (its typeclass is returned if applicable).
+    Check and convert internal representations back to Django database
+    models.
+
+    Args:
+        item (packed_dbobj): The fact that item is a packed dbobj
+            should be checked before this call.
+
+    Returns:
+        unpacked (any): Either the original input or converts the
+            internal store back to a database representation (its
+            typeclass is returned if applicable).
+
     """
     _init_globals()
     try:
@@ -244,16 +264,23 @@ def unpack_dbobj(item):
 
 def to_pickle(data):
     """
-    This prepares data on arbitrary form to be pickled. It handles any nested
-    structure and returns data on a form that is safe to pickle (including
-    having converted any database models to their internal representation).
-    We also convert any Saver*-type objects back to their normal
-    representations, they are not pickle-safe.
+    This prepares data on arbitrary form to be pickled. It handles any
+    nested structure and returns data on a form that is safe to pickle
+    (including having converted any database models to their internal
+    representation).  We also convert any Saver*-type objects back to
+    their normal representations, they are not pickle-safe.
+
+    Args:
+        data (any): Data to pickle.
+
+    Returns:
+        data (any): Pickled data.
+
     """
     def process_item(item):
         "Recursive processor and identification of data"
         dtype = type(item)
-        if dtype in (basestring, int, long, float, bool):
+        if dtype in (basestring, int, float, bool):
             return item
         elif dtype == tuple:
             return tuple(process_item(val) for val in item)
@@ -281,19 +308,24 @@ def from_pickle(data, db_obj=None):
     object was removed (or changed in-place) in the database, None will be
     returned.
 
-    db_obj - this is the model instance (normally an Attribute) that
-             _Saver*-type iterables (_SaverList etc) will save to when they
-             update. It must have a 'value' property that saves assigned data
-             to the database. Skip if not serializing onto a given object.
+    Args_
+        data (any): Pickled data to unpickle.
+        db_obj (Atribute, any): This is the model instance (normally
+            an Attribute) that _Saver*-type iterables (_SaverList etc)
+            will save to when they update. It must have a 'value' property
+            that saves assigned data to the database. Skip if not
+            serializing onto a given object.  If db_obj is given, this
+            function will convert lists, dicts and sets to their
+            _SaverList, _SaverDict and _SaverSet counterparts.
 
-    If db_obj is given, this function will convert lists, dicts and sets
-    to their _SaverList, _SaverDict and _SaverSet counterparts.
+    Returns:
+        data (any): Unpickled data.
 
     """
     def process_item(item):
         "Recursive processor and identification of data"
         dtype = type(item)
-        if dtype in (basestring, int, long, float, bool):
+        if dtype in (basestring, int, float, bool):
             return item
         elif _IS_PACKED_DBOBJ(item):
             # this must be checked before tuple
@@ -316,7 +348,7 @@ def from_pickle(data, db_obj=None):
     def process_tree(item, parent):
         "Recursive processor, building a parent-tree from iterable data"
         dtype = type(item)
-        if dtype in (basestring, int, long, float, bool):
+        if dtype in (basestring, int, float, bool):
             return item
         elif _IS_PACKED_DBOBJ(item):
             # this must be checked before tuple

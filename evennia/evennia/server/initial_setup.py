@@ -5,13 +5,14 @@ other things.
 
 Everything starts at handle_setup()
 """
+from __future__ import print_function
 
 import django
 from django.conf import settings
 from django.utils.translation import ugettext as _
 from evennia.players.models import PlayerDB
 from evennia.server.models import ServerConfig
-from evennia.utils import create
+from evennia.utils import create, logger
 
 
 ERROR_NO_SUPERUSER = \
@@ -46,6 +47,7 @@ WARNING_POSTGRESQL_FIX = \
 def create_config_values():
     """
     Creates the initial config values.
+
     """
     ServerConfig.objects.conf("site_name", settings.SERVERNAME)
     ServerConfig.objects.conf("idle_timeout", settings.IDLE_TIMEOUT)
@@ -53,6 +55,7 @@ def create_config_values():
 def get_god_player():
     """
     Creates the god user and don't take no for an answer.
+
     """
     try:
         god_player = PlayerDB.objects.get(id=1)
@@ -64,9 +67,10 @@ def get_god_player():
 def create_objects():
     """
     Creates the #1 player and Limbo room.
+
     """
 
-    print " Creating objects (Player #1 and Limbo room) ..."
+    logger.log_info("Creating objects (Player #1 and Limbo room) ...")
 
     # Set the initial User's account object's username on the #1 object.
     # This object is pure django and only holds name, email and password.
@@ -102,7 +106,11 @@ def create_objects():
 
     god_player.attributes.add("_first_login", True)
     god_player.attributes.add("_last_puppet", god_character)
-    god_player.db._playable_characters.append(god_character)
+
+    try:
+        god_player.db._playable_characters.append(god_character)
+    except AttributeError:
+        god_player.db_playable_characters = [god_character]
 
     room_typeclass = settings.BASE_ROOM_TYPECLASS
     limbo_obj = create.create_object(room_typeclass, _('Limbo'), nohome=True)
@@ -122,8 +130,9 @@ def create_objects():
 def create_channels():
     """
     Creates some sensible default channels.
+
     """
-    print " Creating default channels ..."
+    logger.log_info("Creating default channels ...")
 
     goduser = get_god_player()
     for channeldict in settings.DEFAULT_CHANNELS:
@@ -137,6 +146,7 @@ def at_initial_setup():
     setup. Called very last in the sequence. It tries to import and
     srun a module settings.AT_INITIAL_SETUP_HOOK_MODULE and will fail
     silently if this does not exist or fails to load.
+
     """
     modname = settings.AT_INITIAL_SETUP_HOOK_MODULE
     if not modname:
@@ -145,28 +155,34 @@ def at_initial_setup():
         mod = __import__(modname, fromlist=[None])
     except (ImportError, ValueError):
         return
-    print " Running at_initial_setup() hook."
+    logger.log_info(" Running at_initial_setup() hook.")
     if mod.__dict__.get("at_initial_setup", None):
         mod.at_initial_setup()
 
 
 def reset_server():
     """
-    We end the initialization by resetting the server. This
-    makes sure the first login is the same as all the following
-    ones, particularly it cleans all caches for the special objects.
-    It also checks so the warm-reset mechanism works as it should.
+    We end the initialization by resetting the server. This makes sure
+    the first login is the same as all the following ones,
+    particularly it cleans all caches for the special objects.  It
+    also checks so the warm-reset mechanism works as it should.
+
     """
     from evennia.server.sessionhandler import SESSIONS
-    print " Initial setup complete. Restarting Server once."
+    logger.log_info(" Initial setup complete. Restarting Server once.")
     SESSIONS.server.shutdown(mode='reset')
 
 
 def handle_setup(last_step):
     """
-    Main logic for the module. It allows for restarting
-    the initialization at any point if one of the modules
-    should crash.
+    Main logic for the module. It allows for restarting the
+    initialization at any point if one of the modules should crash.
+
+    Args:
+        last_step (int): The last stored successful step, for starting
+            over on errors. If `< 0`, initialization has finished and no
+            steps need to be redone.
+
     """
 
     if last_step < 0:
@@ -183,14 +199,11 @@ def handle_setup(last_step):
                    at_initial_setup,
                    reset_server]
 
-    #print " Initial setup: %s steps." % (len(setup_queue))
-
     # step through queue, from last completed function
     for num, setup_func in enumerate(setup_queue[last_step:]):
         # run the setup function. Note that if there is a
         # traceback we let it stop the system so the config
         # step is not saved.
-        #print "%s..." % num
 
         try:
             setup_func()

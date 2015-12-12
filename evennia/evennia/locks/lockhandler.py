@@ -103,6 +103,8 @@ restricted @perm command sets them, but otherwise they are identical
 to any other identifier you can use.
 
 """
+from __future__ import print_function
+from builtins import object
 
 import re
 import inspect
@@ -143,7 +145,7 @@ def _cache_lockfuncs():
             for tup in (tup for tup in inspect.getmembers(mod) if callable(tup[1])):
                 _LOCKFUNCS[tup[0]] = tup[1]
         else:
-            logger.log_errmsg("Couldn't load %s from PERMISSION_FUNC_MODULES." % modulepath)
+            logger.log_err("Couldn't load %s from PERMISSION_FUNC_MODULES." % modulepath)
 
 #
 # pre-compiled regular expressions
@@ -364,7 +366,7 @@ class LockHandler(object):
             return self.locks.get(access_type, ["", "", ""])[2]
         return str(self)
 
-    def delete(self, access_type):
+    def remove(self, access_type):
         """
         Remove a particular lock from the handler
 
@@ -381,6 +383,7 @@ class LockHandler(object):
             self._save_locks()
             return True
         return False
+    delete = remove # alias for historical reasons
 
     def clear(self):
         """
@@ -503,6 +506,8 @@ class LockHandler(object):
              or (hasattr(accessing_obj, 'player') and hasattr(accessing_obj.player, 'is_superuser') and accessing_obj.player.is_superuser)
              or (hasattr(accessing_obj, 'get_player') and (not accessing_obj.get_player() or accessing_obj.get_player().is_superuser))):
                 return True
+        if not ":" in lockstring:
+            lockstring = "%s:%s" % ("_dummy", lockstring)
 
         locks = self._parse_lockstring(lockstring)
 
@@ -538,10 +543,10 @@ def _test():
 
     #obj1.locks.add("edit:attr(test)")
 
-    print "comparing obj2.permissions (%s) vs obj1.locks (%s)" % (obj2.permissions, obj1.locks)
-    print obj1.locks.check(obj2, 'owner')
-    print obj1.locks.check(obj2, 'edit')
-    print obj1.locks.check(obj2, 'examine')
-    print obj1.locks.check(obj2, 'delete')
-    print obj1.locks.check(obj2, 'get')
-    print obj1.locks.check(obj2, 'listen')
+    print("comparing obj2.permissions (%s) vs obj1.locks (%s)" % (obj2.permissions, obj1.locks))
+    print(obj1.locks.check(obj2, 'owner'))
+    print(obj1.locks.check(obj2, 'edit'))
+    print(obj1.locks.check(obj2, 'examine'))
+    print(obj1.locks.check(obj2, 'delete'))
+    print(obj1.locks.check(obj2, 'get'))
+    print(obj1.locks.check(obj2, 'listen'))

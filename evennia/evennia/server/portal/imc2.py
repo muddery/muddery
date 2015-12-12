@@ -1,6 +1,8 @@
 """
 IMC2 client module. Handles connecting to and communicating with an IMC2 server.
 """
+from builtins import object
+from future.utils import listitems
 
 from time import time
 from twisted.internet import task
@@ -21,6 +23,7 @@ from django.utils.translation import ugettext as _
 class IMC2Mud(object):
     """
     Stores information about other games connected to our current IMC2 network.
+
     """
     def __init__(self, packet):
         self.name = packet.origin
@@ -37,12 +40,13 @@ class IMC2Mud(object):
 class IMC2MudList(dict):
     """
     Keeps track of other MUDs connected to the IMC network.
+
     """
     def get_mud_list(self):
         """
         Returns a sorted list of connected Muds.
         """
-        muds = self.items()
+        muds = listitems(self)
         muds.sort()
         return [value for key, value in muds]
 
@@ -50,6 +54,10 @@ class IMC2MudList(dict):
         """
         This grabs relevant info from the packet and stuffs it in the
         Mud list for later retrieval.
+
+        Args:
+            packet (Packet): incoming packet.
+
         """
         mud = IMC2Mud(packet)
         self[mud.name] = mud
@@ -57,6 +65,10 @@ class IMC2MudList(dict):
     def remove_mud_from_packet(self, packet):
         """
         Removes a mud from the Mud list when given a packet.
+
+        Args:
+            packet (Packet): Incoming packet.
+
         """
         mud = IMC2Mud(packet)
         try:
@@ -71,6 +83,7 @@ class IMC2Channel(object):
     Stores information about channels available on the network.
     """
     def __init__(self, packet):
+        "Initialize channel."
         self.localname = packet.optional_data.get('localname', None)
         self.name = packet.optional_data.get('channel', None)
         self.level = packet.optional_data.get('level', None)
@@ -87,8 +100,9 @@ class IMC2ChanList(dict):
     def get_channel_list(self):
         """
         Returns a sorted list of cached channels.
+
         """
-        channels = self.items()
+        channels = listitems(self)
         channels.sort()
         return [value for key, value in channels]
 
@@ -96,6 +110,10 @@ class IMC2ChanList(dict):
         """
         This grabs relevant info from the packet and stuffs it in the
         channel list for later retrieval.
+
+        Args:
+            packet (Packet): incoming packet.
+
         """
         channel = IMC2Channel(packet)
         self[channel.name] = channel
@@ -103,6 +121,10 @@ class IMC2ChanList(dict):
     def remove_channel_from_packet(self, packet):
         """
         Removes a channel from the Channel list when given a packet.
+
+        Args:
+            packet (Packet): incoming packet.
+
         """
         channel = IMC2Channel(packet)
         try:
@@ -120,8 +142,10 @@ class IMC2Bot(telnet.StatefulTelnetProtocol, Session):
     """
     Provides the abstraction for the IMC2 protocol. Handles connection,
     authentication, and all necessary packets.
+
     """
     def __init__(self):
+        "Initialize bot."
         self.is_authenticated = False
         # only support plaintext passwords
         self.auth_type = "plaintext"
@@ -130,37 +154,49 @@ class IMC2Bot(telnet.StatefulTelnetProtocol, Session):
         self.imc2_chanlist = IMC2ChanList()
 
     def _send_packet(self, packet):
-        "Helper function to send packets across the wire"
+        """
+        Helper function to send packets across the wire.
+
+        Args:
+            packet (Packet): Outgoing packet.
+
+        """
         packet.imc2_protocol = self
         packet_str = utils.to_str(packet.assemble(self.factory.mudname,
                          self.factory.client_pwd, self.factory.server_pwd))
         self.sendLine(packet_str)
 
     def _isalive(self):
-        "Send an isalive packet"
+        "Send an isalive packet."
         self._send_packet(pck.IMC2PacketIsAlive())
 
     def _keepalive(self):
-        "Send a keepalive packet"
+        "Send a keepalive packet."
         # send to channel?
         self._send_packet(pck.IMC2PacketKeepAliveRequest())
 
     def _channellist(self):
-        "Sync the network channel list"
+        "Sync the network channel list."
         checked_networks = []
         if not self.network in checked_networks:
             self._send_packet(pck.IMC2PacketIceRefresh())
             checked_networks.append(self.network)
 
     def _prune(self):
-        "Prune active channel list"
+        "Prune active channel list."
         t0 = time()
         for name, mudinfo in self.imc2_mudlist.items():
             if t0 - mudinfo.last_updated > 3599:
                 del self.imc2_mudlist[name]
 
     def _whois_reply(self, packet):
-        "handle reply from server from an imcwhois request"
+        """
+        Handle reply from server from an imcwhois request.
+
+        Args:
+            packet (Packet): Data packet.
+
+        """
         # packet.target potentially contains the id of an character to target
         # not using that here
         response_text = imc2_ansi.parse_ansi(packet.optional_data.get('text', 'Unknown'))
@@ -171,19 +207,30 @@ class IMC2Bot(telnet.StatefulTelnetProtocol, Session):
     def _format_tell(self, packet):
         """
         Handle tells over IMC2 by formatting the text properly
+
+        Args:
+            packet (Packet): Data packet.
+
         """
         return _("{c%(sender)s@%(origin)s{n {wpages (over IMC):{n %(msg)s") % {"sender": packet.sender,
                                                         "origin": packet.origin,
                                                         "msg": packet.optional_data.get('text', 'ERROR: No text provided.')}
 
     def _imc_login(self, line):
-        "Connect and identify to imc network"
+        """
+        Connect and identify to imc network as per the
+        `self.auth_type` setting.
+
+        Args:
+            line (str): Incoming text.
+
+        """
 
         if self.auth_type == "plaintext":
             # Only support Plain text passwords.
             # SERVER Sends: PW <servername> <serverpw> version=<version#> <networkname>
 
-            logger.log_infomsg("IMC2: AUTH< %s" % line)
+            logger.log_info("IMC2: AUTH< %s" % line)
 
             line_split = line.split(' ')
             pw_present = line_split[0] == 'PW'
@@ -191,21 +238,21 @@ class IMC2Bot(telnet.StatefulTelnetProtocol, Session):
 
             if "reject" in line_split:
                 auth_message = _("IMC2 server rejected connection.")
-                logger.log_infomsg(auth_message)
+                logger.log_info(auth_message)
                 return
 
             if pw_present:
                 self.server_name = line_split[1]
                 self.network_name = line_split[4]
             elif autosetup_present:
-                logger.log_infomsg(_("IMC2: Autosetup response found."))
+                logger.log_info(_("IMC2: Autosetup response found."))
                 self.server_name = line_split[1]
                 self.network_name = line_split[3]
             self.is_authenticated = True
             self.sequence = int(time())
 
             # Log to stdout and notify over MUDInfo.
-            logger.log_infomsg('IMC2: Authenticated to %s' % self.factory.network)
+            logger.log_info('IMC2: Authenticated to %s' % self.factory.network)
 
             # Ask to see what other MUDs are connected.
             self._send_packet(pck.IMC2PacketKeepAliveRequest())
@@ -218,6 +265,7 @@ class IMC2Bot(telnet.StatefulTelnetProtocol, Session):
     def connectionMade(self):
         """
         Triggered after connecting to the IMC2 network.
+
         """
 
         self.stopping = False
@@ -228,7 +276,7 @@ class IMC2Bot(telnet.StatefulTelnetProtocol, Session):
         self.uid = int(self.factory.uid)
         self.logged_in = True
         self.factory.sessionhandler.connect(self)
-        logger.log_infomsg("IMC2 bot connected to %s." % self.network)
+        logger.log_info("IMC2 bot connected to %s." % self.network)
         # Send authentication packet. The reply will be caught by lineReceived
         self._send_packet(pck.IMC2PacketAuthPlaintext())
 
@@ -239,6 +287,9 @@ class IMC2Bot(telnet.StatefulTelnetProtocol, Session):
         Triggered when text is received from the IMC2 network. Figures out
         what to do with the packet. This deals with the following
 
+        Args:
+            line (str): Incoming text.
+
         """
         line = line.strip()
 
@@ -246,8 +297,6 @@ class IMC2Bot(telnet.StatefulTelnetProtocol, Session):
             # we are not authenticated yet. Deal with this.
             self._imc_login(line)
             return
-
-        #logger.log_infomsg("IMC2: RECV> %s" % line)
 
         # Parse the packet and encapsulate it for easy access
         packet = pck.IMC2Packet(self.mudname, packet_str=line)
@@ -278,24 +327,31 @@ class IMC2Bot(telnet.StatefulTelnetProtocol, Session):
 
     def data_in(self, text=None, **kwargs):
         """
-        Data IMC2 -> Evennia
+        Data IMC2 -> Evennia.
+
+        Kwargs:
+            text (str): Incoming text.
+            kwargs (any): Other data from protocol.
+
         """
         text = "bot_data_in " + text
         self.sessionhandler.data_in(self, text=text, **kwargs)
 
     def data_out(self, text=None, **kwargs):
         """
-        Evennia -> IMC2
+        Evennia -> IMC2.
 
-        Keywords
-           packet_type:
-            broadcast - send to everyone on IMC channel
-            tell - send a tell (see target keyword)
-            whois - get whois information (see target keyword)
-          sender - used by tell to identify the sender
-          target - key identifier of target to tells or whois. If not
-                   given "Unknown" will be used.
-          destination - used by tell to specify mud destination to send to
+        Kwargs:
+           text (str): Outgoing text.
+           packet_type (str):
+                - broadcast: Send to everyone on IMC channel.
+                - tell: Send a tell (see target keyword).
+                - whois: Get whois information (see target keyword).
+           sender (str): Used by tell to identify the mud sending.
+           target (str): Key identifier of target to tells or whois. If not
+               given "Unknown" will be used.
+          destination (str): Used by tell to specify mud
+            destination to send to.
 
         """
 
@@ -338,6 +394,7 @@ class IMC2BotFactory(protocol.ReconnectingClientFactory):
     """
     Creates instances of the IMC2Protocol. Should really only ever
     need to create one connection. Tied in via evennia/server.py.
+
     """
     initialDelay = 1
     factor = 1.5
@@ -345,6 +402,7 @@ class IMC2BotFactory(protocol.ReconnectingClientFactory):
 
     def __init__(self, sessionhandler, uid=None, network=None, channel=None,
                  port=None, mudname=None, client_pwd=None, server_pwd=None):
+        "Initialize the bot factory."
         self.uid = uid
         self.network = network
         sname, host = network.split(".", 1)
@@ -362,7 +420,16 @@ class IMC2BotFactory(protocol.ReconnectingClientFactory):
         self.task_channellist = None
 
     def buildProtocol(self, addr):
-        "Build the protocol"
+        """
+        Build the protocol.
+
+        Args:
+            addr (str): Protocl address.
+
+        Returns:
+            protocol (Protocol): The new protocol.
+
+        """
         protocol = IMC2Bot()
         protocol.factory = self
         protocol.network = self.network
@@ -373,16 +440,30 @@ class IMC2BotFactory(protocol.ReconnectingClientFactory):
         return protocol
 
     def clientConnectionFailed(self, connector, reason):
+        """
+        Called when Client could not connect.
+
+        Args:
+            connector (Connector): Reprsents the connection.
+            reason (str): Reason for the failure.
+        """
         self.retry(connector)
 
     def clientConnectionLost(self, connector, reason):
+        """
+        Called when Client looses connection.
+
+        Args:
+            connector (Connector): Reprsents the connection.
+            reason (str): Reason for the failure.
+        """
         if not self.bot.stopping:
             self.retry(connector)
 
     def start(self):
         "Connect session to sessionhandler"
         def errback(fail):
-            logger.log_errmsg(fail.value)
+            logger.log_err(fail.value)
 
         if self.port:
             service = internet.TCPClient(self.network, int(self.port), self)

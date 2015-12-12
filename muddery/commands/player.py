@@ -46,18 +46,18 @@ class CmdQuit(Command):
         "hook function"
         player = self.player
 
-        nsess = len(player.get_all_sessions())
+        nsess = len(player.sessions.all())
         if nsess == 2:
             player.msg({"msg":"{RQuitting{n. One session is still connected.",
                        "logout":""},
-                       sessid=self.sessid)
+                       session=self.session)
         elif nsess > 2:
             player.msg({"msg":"{RQuitting{n. %i session are still connected." % (nsess-1),
                        "logout":""},
-                       sessid=self.sessid)
+                       session=self.session)
         else:
             # we are quitting the last available session
             player.msg({"msg":"{RQuitting{n. Hope to see you again, soon.",
                        "logout":""},
-                       sessid=self.sessid)
-        player.disconnect_session_from_player(self.sessid)
+                       session=self.session)
+        player.disconnect_session_from_player(self.session)

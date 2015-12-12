@@ -23,6 +23,7 @@ update() on the channelhandler. Or use Channel.objects.delete() which
 does this for you.
 
 """
+from builtins import object
 
 from evennia.comms.models import ChannelDB
 from evennia.commands import cmdset, command
@@ -80,6 +81,18 @@ class ChannelCommand(command.Command):
             self.msg(string % channelkey)
             return
         channel.msg(msg, senders=self.caller, online=True)
+
+    def get_extra_info(self, caller, **kwargs):
+        """
+        Let users know that this command is for communicating on a channel.
+
+        Args:
+            caller (TypedObject): A Character or Player who has entered an ambiguous command.
+
+        Returns:
+            A string with identifying information to disambiguate the object, conventionally with a preceding space.
+        """
+        return _(" (channel)")
 
 
 class ChannelHandler(object):

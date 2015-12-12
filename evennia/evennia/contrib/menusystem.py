@@ -3,6 +3,10 @@ Evennia menu system.
 
 Contribution - Griatch 2011
 
+> Note that the evennia/utils/evmenu.py module is probably a better and
+more flexible implementation of a menu system than this. Try that
+first.
+
 This module offers the ability for admins to let their game be fully
 or partly menu-driven. Menu choices can be numbered or use arbitrary
 keys. There are also some formatting options, such a putting options
@@ -36,14 +40,13 @@ example of usage.
 For a simple demonstration, add `CmdMenuTest` from this module to the default cmdset.
 
 """
+from builtins import object, range
+
 from types import MethodType
 from evennia import syscmdkeys
 
 from evennia import Command, CmdSet, utils
 from evennia import default_cmds, logger
-
-# imported only to make it available during execution of code blocks
-import evennia
 
 CMD_NOMATCH = syscmdkeys.CMD_NOMATCH
 CMD_NOINPUT = syscmdkeys.CMD_NOINPUT
@@ -71,7 +74,7 @@ class CmdMenuNode(Command):
         if self.callback:
             try:
                 self.callback()
-            except Exception, e:
+            except Exception as e:
                 self.caller.msg("%s\n{rThere was an error with this selection.{n" % e)
         else:
             self.caller.msg("{rThis option is not available.{n")
@@ -280,7 +283,7 @@ class MenuNode(object):
             text (str, optional): The text that will be displayed at
                 top when viewing this node.
         Kwargs:
-            links (list): A liist of keys for unique menunodes this is connected to.
+            links (list): A list of keys for unique menunodes this is connected to.
                 The actual keys will not printed - keywords will be
                 used (or a number)
             linktexts (list)- A list of texts to describe the links. Must
@@ -398,7 +401,7 @@ class MenuNode(object):
             else:
                 # this is the operable command, it moves us to the next node.
                 cmd = CmdMenuNode()
-                cmd.key = str(i + 1)
+                cmd.set_key(str(i + 1))
                 cmd.link = link
                 def _callback(self):
                     self.menutree.goto(self.link)
@@ -406,7 +409,7 @@ class MenuNode(object):
             # also custom commands get access to the menutree.
             cmd.menutree = menutree
             if self.keywords[i] and cmd.key not in (CMD_NOMATCH, CMD_NOINPUT):
-                cmd.aliases = [self.keywords[i]]
+                cmd.set_aliases(self.keywords[i])
             self.cmdset.add(cmd)
 
     def __str__(self):

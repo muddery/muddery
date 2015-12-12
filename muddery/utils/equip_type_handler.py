@@ -4,6 +4,7 @@ This handles the relations of equipment types and character careers.
 
 from django.conf import settings
 from django.db.models.loading import get_model
+from evennia.utils import logger
 
 
 class EquipTypeHandler(object):
@@ -35,7 +36,7 @@ class EquipTypeHandler(object):
             for record in model_obj.objects.all():
                 self.equip_career[record.type] = set(record.career.split(","))
         except Exception, e:
-            print "Can not load equipment types: %s" % e
+            logger.log_errmsg("Can not load equipment types: %s" % e)
             pass
 
     

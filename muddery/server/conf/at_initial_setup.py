@@ -14,6 +14,8 @@ does what you expect it to.
 
 """
 
+from __future__ import print_function
+
 from django.conf import settings
 from evennia.utils import search, logger
 from muddery.utils import builder, importer, utils
@@ -64,5 +66,5 @@ def at_initial_setup():
 
     except Exception, e:
         ostring = "Can't build world: %s" % e
-        print ostring
-        print traceback.format_exc()
+        print(ostring)
+        print(traceback.format_exc())

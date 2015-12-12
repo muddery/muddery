@@ -17,12 +17,13 @@ the Evennia API.  It is also a severe security risk and should
 therefore always be limited to superusers only.
 
 """
-from traceback import format_exc
+from builtins import range
+
 from django.conf import settings
 from evennia.utils.batchprocessors import BATCHCMD, BATCHCODE
 from evennia.commands.cmdset import CmdSet
 from evennia.commands.default.muxcommand import MuxCommand
-from evennia.utils import utils
+from evennia.utils import logger, utils
 
 # limit symbols for API inclusion
 __all__ = ("CmdBatchCommands", "CmdBatchCode")
@@ -118,7 +119,7 @@ def batch_cmd_exec(caller):
     try:
         caller.execute_cmd(command)
     except Exception:
-        caller.msg(format_code(format_exc()))
+        logger.log_trace()
         return False
     return True
 
@@ -239,7 +240,7 @@ class CmdBatchCommands(MuxCommand):
 
         try:
             commands = BATCHCMD.parse_file(python_path)
-        except UnicodeDecodeError, err:
+        except UnicodeDecodeError as err:
             caller.msg(_UTF8_ERROR % (python_path, err))
             return
         except IOError as err:
@@ -346,7 +347,7 @@ class CmdBatchCode(MuxCommand):
         #parse indata file
         try:
             codes = BATCHCODE.parse_file(python_path, debug=debug)
-        except UnicodeDecodeError, err:
+        except UnicodeDecodeError as err:
             caller.msg(_UTF8_ERROR % (python_path, err))
             return
         except IOError:

@@ -19,32 +19,60 @@ self.msg() and similar methods to reroute returns to the correct
 method. Otherwise all text will be returned to all connected sessions.
 
 """
+from builtins import range
+
 import time
 from django.conf import settings
 from evennia.server.sessionhandler import SESSIONS
 from evennia.commands.default.muxcommand import MuxPlayerCommand
 from evennia.utils import utils, create, search, prettytable
 
-MAX_NR_CHARACTERS = settings.MAX_NR_CHARACTERS
-MULTISESSION_MODE = settings.MULTISESSION_MODE
+_MAX_NR_CHARACTERS = settings.MAX_NR_CHARACTERS
+_MULTISESSION_MODE = settings.MULTISESSION_MODE
 
 # limit symbol import for API
 __all__ = ("CmdOOCLook", "CmdIC", "CmdOOC", "CmdPassword", "CmdQuit",
            "CmdCharCreate", "CmdOption", "CmdSessions", "CmdWho",
            "CmdColorTest", "CmdQuell")
 
-# force max nr chars to 1 if mode is 0 or 1
-MAX_NR_CHARACTERS = MULTISESSION_MODE < 2 and 1 or MAX_NR_CHARACTERS
-BASE_PLAYER_TYPECLASS = settings.BASE_PLAYER_TYPECLASS
 
-PERMISSION_HIERARCHY = settings.PERMISSION_HIERARCHY
-PERMISSION_HIERARCHY_LOWER = [perm.lower() for perm in PERMISSION_HIERARCHY]
+class MuxPlayerLookCommand(MuxPlayerCommand):
+    """
+    Custom parent (only) parsing for OOC looking, sets a "playable"
+    property on the command based on the parsing.
+
+    """
+    def parse(self):
+        "Custom parsing"
+
+        super(MuxPlayerLookCommand, self).parse()
+
+        if _MULTISESSION_MODE < 2:
+            # only one character allowed - not used in this mode
+            self.playable = None
+            return
+
+        playable = self.player.db._playable_characters
+        if playable is not None:
+            # clean up list if character object was deleted in between
+            if None in playable:
+                playable = [character for character in playable if character]
+                self.player.db._playable_characters = playable
+        # store playable property
+        if self.args:
+            self.playable = dict((utils.to_str(char.key.lower()), char)
+                         for char in playable).get(self.args.lower(), None)
+        else:
+            self.playable = playable
+
 
 # Obs - these are all intended to be stored on the Player, and as such,
 # use self.player instead of self.caller, just to be sure. Also self.msg()
 # is used to make sure returns go to the right session
 
-class CmdOOCLook(MuxPlayerCommand):
+# note that this is inheriting from MuxPlayerLookCommand,
+# and has the .playable property.
+class CmdOOCLook(MuxPlayerLookCommand):
     """
     look while out-of-character
 
@@ -64,92 +92,16 @@ class CmdOOCLook(MuxPlayerCommand):
     locks = "cmd:all()"
     help_category = "General"
 
-    def look_target(self):
-        "Hook method for when an argument is given."
-        player = self.player
-        key = self.args.lower()
-        chars = dict((utils.to_str(char.key.lower()), char)
-                       for char in player.db._playable_characters)
-        looktarget = chars.get(key)
-        if looktarget:
-            self.msg(looktarget.return_appearance(player))
-        else:
-            self.msg("No such character.")
-        return
-
-    def no_look_target(self):
-        "Hook method for default look without a specified target"
-        # caller is always a player at this point.
-        player = self.player
-        sessid = self.sessid
-        # get all our characters and sessions
-        characters = player.db._playable_characters
-        if None in characters:
-            # clean up list if character object was deleted in between
-            characters = [character for character in characters if character]
-            player.db._playable_characters = characters
-
-        sessions = player.get_all_sessions()
-        is_su = player.is_superuser
-
-        # text shown when looking in the ooc area
-        string = "Account {g%s{n (you are Out-of-Character)" % (player.key)
-
-        nsess = len(sessions)
-        string += nsess == 1 and "\n\n{wConnected session:{n" or "\n\n{wConnected sessions (%i):{n" % nsess
-        for isess, sess in enumerate(sessions):
-            csessid = sess.sessid
-            addr = "%s (%s)" % (sess.protocol_key, isinstance(sess.address, tuple) and str(sess.address[0]) or str(sess.address))
-            string += "\n %s %s" % (sessid == csessid and "{w%s{n" % (isess + 1) or (isess + 1), addr)
-        string += "\n\n {whelp{n - more commands"
-        string += "\n {wooc <Text>{n - talk on public channel"
-
-        if is_su or len(characters) < MAX_NR_CHARACTERS:
-            if not characters:
-                string += "\n\n You don't have any characters yet. See {whelp @charcreate{n for creating one."
-            else:
-                string += "\n {w@charcreate <name> [=description]{n - create new character"
-
-        if characters:
-            string_s_ending = len(characters) > 1 and "s" or ""
-            string += "\n {w@ic <character>{n - enter the game ({w@ooc{n to get back here)"
-            if is_su:
-                string += "\n\nAvailable character%s (%i/unlimited):" % (string_s_ending, len(characters))
-            else:
-                string += "\n\nAvailable character%s%s:"  % (string_s_ending,
-                         MAX_NR_CHARACTERS > 1 and " (%i/%i)" % (len(characters), MAX_NR_CHARACTERS) or "")
-
-            for char in characters:
-                csessid = char.sessid.get()
-                if csessid:
-                    # character is already puppeted
-                    sessi = player.get_session(csessid)
-                    for sess in utils.make_iter(sessi):
-                        sid = sess in sessions and sessions.index(sess) + 1
-                        if sess and sid:
-                            string += "\n - {G%s{n [%s] (played by you in session %i)" % (char.key, ", ".join(char.permissions.all()), sid)
-                        else:
-                            string += "\n - {R%s{n [%s] (played by someone else)" % (char.key, ", ".join(char.permissions.all()))
-                else:
-                    # character is "free to puppet"
-                    string += "\n - %s [%s]" % (char.key, ", ".join(char.permissions.all()))
-        string = ("-" * 68) + "\n" + string + "\n" + ("-" * 68)
-        self.msg(string)
-
     def func(self):
         "implement the ooc look command"
-        if MULTISESSION_MODE < 2:
+
+        if _MULTISESSION_MODE < 2:
             # only one character allowed
-            string = "You are out-of-character (OOC).\nUse {w@ic{n to get back into the game."
-            self.msg(string)
+            self.msg("You are out-of-character (OOC).\nUse {w@ic{n to get back into the game.")
             return
-        if utils.inherits_from(self.caller, "evennia.objects.objects.Object"):
-            # An object of some type is calling. Use default look instead.
-            super(CmdOOCLook, self).func()
-        elif self.args:
-            self.look_target()
-        else:
-            self.no_look_target()
+
+        # call on-player look helper method
+        self.msg(self.player.at_look(target=self.playable, session=self.session))
 
 
 class CmdCharCreate(MuxPlayerCommand):
@@ -176,10 +128,13 @@ class CmdCharCreate(MuxPlayerCommand):
             return
         key = self.lhs
         desc = self.rhs
+
+        charmax = _MAX_NR_CHARACTERS if _MULTISESSION_MODE > 1 else 1
+
         if not player.is_superuser and \
             (player.db._playable_characters and
-                len(player.db._playable_characters) >= MAX_NR_CHARACTERS):
-            self.msg("You may only create a maximum of %i characters." % MAX_NR_CHARACTERS)
+                len(player.db._playable_characters) >= charmax):
+            self.msg("You may only create a maximum of %i characters." % charmax)
             return
         # create the character
         from evennia.objects.models import ObjectDB
@@ -233,7 +188,7 @@ class CmdIC(MuxPlayerCommand):
         Main puppet method
         """
         player = self.player
-        sessid = self.sessid
+        session = self.session
 
         new_character = None
         if not self.args:
@@ -250,13 +205,15 @@ class CmdIC(MuxPlayerCommand):
                 self.msg("That is not a valid character choice.")
                 return
         try:
-            player.puppet_object(sessid, new_character)
+            player.puppet_object(session, new_character)
             player.db._last_puppet = new_character
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             self.msg("{rYou cannot become {C%s{n: %s" % (new_character.name, exc))
 
 
-class CmdOOC(MuxPlayerCommand):
+# note that this is inheriting from MuxPlayerLookCommand,
+# and as such has the .playable property.
+class CmdOOC(MuxPlayerLookCommand):
     """
     stop puppeting and go ooc
 
@@ -277,9 +234,9 @@ class CmdOOC(MuxPlayerCommand):
         "Implement function"
 
         player = self.player
-        sessid = self.sessid
+        session = self.session
 
-        old_char = player.get_puppet(sessid)
+        old_char = player.get_puppet(session)
         if not old_char:
             string = "You are already OOC."
             self.msg(string)
@@ -289,10 +246,17 @@ class CmdOOC(MuxPlayerCommand):
 
         # disconnect
         try:
-            player.unpuppet_object(sessid)
+            player.unpuppet_object(session)
             self.msg("\n{GYou go OOC.{n\n")
-            player.execute_cmd("look", sessid=sessid)
-        except RuntimeError, exc:
+
+            if _MULTISESSION_MODE < 2:
+                # only one character allowed
+                self.msg("You are out-of-character (OOC).\nUse {w@ic{n to get back into the game.")
+                return
+
+            self.msg(player.at_look(target=self.playable, session=session))
+
+        except RuntimeError as exc:
             self.msg("{rCould not unpuppet from {c%s{n: %s" % (old_char, exc))
 
 class CmdSessions(MuxPlayerCommand):
@@ -312,7 +276,7 @@ class CmdSessions(MuxPlayerCommand):
     def func(self):
         "Implement function"
         player = self.player
-        sessions = player.get_all_sessions()
+        sessions = player.sessions.all()
 
         table = prettytable.PrettyTable(["{wsessid",
                                          "{wprotocol",
@@ -320,9 +284,8 @@ class CmdSessions(MuxPlayerCommand):
                                          "{wpuppet/character",
                                          "{wlocation"])
         for sess in sorted(sessions, key=lambda x: x.sessid):
-            sessid = sess.sessid
-            char = player.get_puppet(sessid)
-            table.add_row([str(sessid), str(sess.protocol_key),
+            char = player.get_puppet(sess)
+            table.add_row([str(sess.sessid), str(sess.protocol_key),
                            type(sess.address) == tuple and sess.address[0] or sess.address,
                            char and str(char) or "None",
                            char and str(char.location) or "N/A"])
@@ -516,19 +479,19 @@ class CmdQuit(MuxPlayerCommand):
         player = self.player
 
         if 'all' in self.switches:
-            player.msg("{RQuitting{n all sessions. Hope to see you soon again.", sessid=self.sessid)
-            for session in player.get_all_sessions():
-                player.disconnect_session_from_player(session.sessid)
+            player.msg("{RQuitting{n all sessions. Hope to see you soon again.", session=self.session)
+            for session in player.sessions.all():
+                player.disconnect_session_from_player(session)
         else:
-            nsess = len(player.get_all_sessions())
+            nsess = len(player.sessions.all())
             if nsess == 2:
-                player.msg("{RQuitting{n. One session is still connected.", sessid=self.sessid)
+                player.msg("{RQuitting{n. One session is still connected.", session=self.session)
             elif nsess > 2:
-                player.msg("{RQuitting{n. %i session are still connected." % (nsess-1), sessid=self.sessid)
+                player.msg("{RQuitting{n. %i session are still connected." % (nsess-1), session=self.session)
             else:
                 # we are quitting the last available session
-                player.msg("{RQuitting{n. Hope to see you again, soon.", sessid=self.sessid)
-            player.disconnect_session_from_player(self.sessid)
+                player.msg("{RQuitting{n. Hope to see you again, soon.", session=self.session)
+            player.disconnect_session_from_player(self.session)
 
 
 
@@ -575,21 +538,17 @@ class CmdColorTest(MuxPlayerCommand):
             ap = ansi.ANSI_PARSER
             # ansi colors
             # show all ansi color-related codes
-            col1 = ["%s%s{n" % (code, code.replace("{", "{{")) for code, _ in ap.ext_ansi_map[6:14]]
-            col2 = ["%s%s{n" % (code, code.replace("{", "{{")) for code, _ in ap.ext_ansi_map[14:22]]
-            col3 = ["%s%s{n" % (code.replace("\\",""), code.replace("{", "{{").replace("\\", "")) for code, _ in ap.ext_ansi_map[-8:]]
+            col1 = ["%s%s|n" % (code, code.replace("|", "||")) for code, _ in ap.ext_ansi_map[6:14]]
+            col2 = ["%s%s|n" % (code, code.replace("|", "||")) for code, _ in ap.ext_ansi_map[14:22]]
+            col3 = ["%s%s|n" % (code.replace("\\",""), code.replace("|", "||").replace("\\", "")) for code, _ in ap.ext_ansi_map[-8:]]
             col2.extend(["" for i in range(len(col1)-len(col2))])
-            #hi = "%ch"
-            #col2 = ["%s%s{n" % (code, code.replace("%", "%%")) for code, _ in ap.mux_ansi_map[6:]]
-            #col3 = ["%s%s{n" % (hi + code, (hi + code).replace("%", "%%")) for code, _ in ap.mux_ansi_map[3:-2]]
             table = utils.format_table([col1, col2, col3])
             string = "ANSI colors:"
             for row in table:
                 string += "\n " + " ".join(row)
-            #print string
             self.msg(string)
-            self.msg("{{X : black. {{/ : return, {{- : tab, {{_ : space, {{* : invert")
-            self.msg("To combine background and foreground, add background marker last, e.g. {{r{{[b.")
+            self.msg("||X : black. ||/ : return, ||- : tab, ||_ : space, ||* : invert, ||u : underline")
+            self.msg("To combine background and foreground, add background marker last, e.g. ||r||[B.")
 
         elif self.args.startswith("x"):
             # show xterm256 table
@@ -598,11 +557,11 @@ class CmdColorTest(MuxPlayerCommand):
                 for ig in range(6):
                     for ib in range(6):
                         # foreground table
-                        table[ir].append("{%i%i%i%s{n" % (ir, ig, ib, "{{%i%i%i" % (ir, ig, ib)))
+                        table[ir].append("|%i%i%i%s|n" % (ir, ig, ib, "||%i%i%i" % (ir, ig, ib)))
                         # background table
-                        table[6+ir].append("{[%i%i%i{%i%i%i%s{n" % (ir, ig, ib,
+                        table[6+ir].append("|[%i%i%i|%i%i%i%s|n" % (ir, ig, ib,
                                                             5 - ir, 5 - ig, 5 - ib,
-                                                        "{{[%i%i%i" % (ir, ig, ib)))
+                                                        "||[%i%i%i" % (ir, ig, ib)))
             table = self.table_format(table)
             string = "Xterm256 colors (if not all hues show, your client might not report that it can handle xterm256):"
             for row in table:
@@ -611,7 +570,7 @@ class CmdColorTest(MuxPlayerCommand):
             #self.msg("(e.g. %%123 and %%[123 also work)")
         else:
             # malformed input
-            self.msg("Usage: @color ansi|xterm256")
+            self.msg("Usage: @color ansi||xterm256")
 
 
 class CmdQuell(MuxPlayerCommand):
@@ -638,8 +597,8 @@ class CmdQuell(MuxPlayerCommand):
 
     def _recache_locks(self, player):
         "Helper method to reset the lockhandler on an already puppeted object"
-        if self.sessid:
-            char = player.get_puppet(self.sessid)
+        if self.session:
+            char = self.session.puppet
             if char:
                 # we are already puppeting an object. We need to reset
                 # the lock caches (otherwise the superuser status change
@@ -662,7 +621,7 @@ class CmdQuell(MuxPlayerCommand):
                 self.msg("Already quelling Player%s permissions." % permstr)
                 return
             player.attributes.add('_quell', True)
-            puppet = player.get_puppet(self.sessid)
+            puppet = self.session.puppet
             if puppet:
                 cpermstr = " (%s)" % ", ".join(puppet.permissions.all())
                 cpermstr = "Quelling to current puppet's permissions%s." % cpermstr

@@ -2,6 +2,8 @@
 This module imports data from files to db.
 """
 
+from __future__ import print_function
+
 import os
 import glob
 from django.db import models
@@ -136,13 +138,13 @@ def import_file(file_name, model_name, widecard=True, clear=True):
                                         arg[related_field.name] = value
                                         record[field_name] = related_field.model.objects.get(**arg)
                             except Exception, e:
-                                print "value error: %s - '%s'" % (field_name, value)
+                                print("value error: %s - '%s'" % (field_name, value))
 
                         # create new record
                         data = model_obj.objects.create(**record)
                         data.save()
                     except Exception, e:
-                        print "Can not load %s %s: %s" % (file_name, values, e)
+                        print("Can not load %s %s: %s" % (file_name, values, e))
 
                     # read next line
                     values = reader.next()
@@ -153,12 +155,12 @@ def import_file(file_name, model_name, widecard=True, clear=True):
 
             break
     except Exception, e:
-        print "Can not import file %s" % file_name
+        print("Can not import file %s" % file_name)
 
     if imported:
-        print "%s imported." % file_name
+        print("%s imported." % file_name)
     else:
-        print "Can not import file %s" % file_name
+        print("Can not import file %s" % file_name)
 
 
 def import_model(model_name, clear=True):

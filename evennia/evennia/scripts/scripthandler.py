@@ -5,6 +5,7 @@ added to all game objects. You access it through the property
 `scripts` on the game object.
 
 """
+from builtins import object
 
 from evennia.scripts.models import ScriptDB
 from evennia.utils import create
@@ -74,7 +75,7 @@ class ScriptHandler(object):
             script = create.create_script(scriptclass, key=key, obj=self.obj,
                                       autostart=autostart)
         if not script:
-            logger.log_errmsg("Script %s could not be created and/or started." % scriptclass)
+            logger.log_err("Script %s could not be created and/or started." % scriptclass)
             return False
         return True
 

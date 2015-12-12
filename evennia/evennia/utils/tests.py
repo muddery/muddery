@@ -1,3 +1,5 @@
+from builtins import range
+
 import re
 
 try:
@@ -174,7 +176,6 @@ class TestCrop(TestCase):
 
 class TestDedent(TestCase):
     def test_dedent(self):
-        #print "Did TestDedent run?"
         # Empty string, return empty string
         self.assertEqual("", utils.dedent(""))
         # No leading whitespace
@@ -229,3 +230,127 @@ class TestMLen(TestCase):
 
     def test_dict(self):
         self.assertEqual(utils.m_len({'hello': True, 'Goodbye': False}), 2)
+
+
+from .text2html import TextToHTMLparser
+
+class TestTextToHTMLparser(TestCase):
+    def setUp(self):
+        self.parser = TextToHTMLparser()
+
+    def tearDown(self):
+        del self.parser
+
+    def test_url_scheme_ftp(self):
+        self.assertEqual(self.parser.convert_urls('ftp.example.com'),
+            '<a href="ftp.example.com" target="_blank">ftp.example.com</a>')
+
+    def test_url_scheme_www(self):
+        self.assertEqual(self.parser.convert_urls('www.example.com'),
+            '<a href="www.example.com" target="_blank">www.example.com</a>')
+
+    def test_url_scheme_ftpproto(self):
+        self.assertEqual(self.parser.convert_urls('ftp://ftp.example.com'),
+            '<a href="ftp://ftp.example.com" target="_blank">ftp://ftp.example.com</a>')
+
+    def test_url_scheme_http(self):
+        self.assertEqual(self.parser.convert_urls('http://example.com'),
+            '<a href="http://example.com" target="_blank">http://example.com</a>')
+
+    def test_url_scheme_https(self):
+        self.assertEqual(self.parser.convert_urls('https://example.com'),
+            '<a href="https://example.com" target="_blank">https://example.com</a>')
+
+    def test_url_chars_slash(self):
+        self.assertEqual(self.parser.convert_urls('www.example.com/homedir'),
+            '<a href="www.example.com/homedir" target="_blank">www.example.com/homedir</a>')
+
+    def test_url_chars_colon(self):
+        self.assertEqual(self.parser.convert_urls('https://example.com:8000/login/'),
+            '<a href="https://example.com:8000/login/" target="_blank">https://example.com:8000/login/</a>')
+
+    def test_url_chars_querystring(self):
+        self.assertEqual(self.parser.convert_urls('https://example.com/submitform?field1=val1+val3&field2=val2'),
+            '<a href="https://example.com/submitform?field1=val1+val3&field2=val2" target="_blank">https://example.com/submitform?field1=val1+val3&field2=val2</a>')
+
+    def test_url_chars_anchor(self):
+        self.assertEqual(self.parser.convert_urls('http://www.example.com/menu#section_1'),
+            '<a href="http://www.example.com/menu#section_1" target="_blank">http://www.example.com/menu#section_1</a>')
+
+    def test_url_chars_exclam(self):
+        self.assertEqual(self.parser.convert_urls('https://groups.google.com/forum/?fromgroups#!categories/evennia/ainneve'),
+            '<a href="https://groups.google.com/forum/?fromgroups#!categories/evennia/ainneve" target="_blank">https://groups.google.com/forum/?fromgroups#!categories/evennia/ainneve</a>')
+
+    def test_url_edge_leadingw(self):
+        self.assertEqual(self.parser.convert_urls('wwww.example.com'),
+            'w<a href="www.example.com" target="_blank">www.example.com</a>')
+
+    def test_url_edge_following_period_eol(self):
+        self.assertEqual(self.parser.convert_urls('www.example.com.'),
+            '<a href="www.example.com" target="_blank">www.example.com</a>.')
+
+    def test_url_edge_following_period(self):
+        self.assertEqual(self.parser.convert_urls('see www.example.com. '),
+            'see <a href="www.example.com" target="_blank">www.example.com</a>. ')
+
+    def test_url_edge_brackets(self):
+        self.assertEqual(self.parser.convert_urls('[http://example.com/]'),
+            '[<a href="http://example.com/" target="_blank">http://example.com/</a>]')
+
+    def test_url_edge_multiline(self):
+        self.assertEqual(self.parser.convert_urls('  * http://example.com/info\n  * bullet'),
+            '  * <a href="http://example.com/info" target="_blank">http://example.com/info</a>\n  * bullet')
+
+    def test_url_edge_following_htmlentity(self):
+        self.assertEqual(self.parser.convert_urls('http://example.com/info&lt;span&gt;'),
+            '<a href="http://example.com/info" target="_blank">http://example.com/info</a>&lt;span&gt;')
+
+    def test_url_edge_surrounded_spans(self):
+        self.assertEqual(self.parser.convert_urls('</span>http://example.com/<span class="red">'),
+            '</span><a href="http://example.com/" target="_blank">http://example.com/</a><span class="red">')
+
+
+from evennia.utils import nested_inlinefuncs
+
+class TestNestedInlineFuncs(TestCase):
+    "Test the nested inlinefunc module"
+    def test_nofunc(self):
+        self.assertEqual(nested_inlinefuncs.parse_inlinefunc(
+            "as$382ewrw w we w werw,|44943}"),
+            "as$382ewrw w we w werw,|44943}")
+
+    def test_incomplete(self):
+        self.assertEqual(nested_inlinefuncs.parse_inlinefunc(
+            "testing $blah{without an ending."),
+            "testing $blah{without an ending.")
+
+    def test_single_func(self):
+        self.assertEqual(nested_inlinefuncs.parse_inlinefunc(
+            "this is a test with $pad(centered, 20) text in it."),
+            "this is a test with       centered       text in it.")
+
+    def test_nested(self):
+        self.assertEqual(nested_inlinefuncs.parse_inlinefunc(
+            "this $crop(is a test with $pad(padded, 20) text in $pad(pad2, 10) a crop, 80)"),
+            "this is a test with        padded        text in    pad2    a crop")
+
+    def test_escaped(self):
+        self.assertEqual(nested_inlinefuncs.parse_inlinefunc(
+            "this should be $pad('''escaped,''' and '''instead,''' cropped $crop(with a long,5) text., 80)"),
+            "this should be                    escaped, and instead, cropped with  text.                    ")
+
+    def test_escaped2(self):
+        self.assertEqual(nested_inlinefuncs.parse_inlinefunc(
+            'this should be $pad("""escaped,""" and """instead,""" cropped $crop(with a long,5) text., 80)'),
+            "this should be                    escaped, and instead, cropped with  text.                    ")
+
+from evennia.utils import evform
+
+class TestEvForm(TestCase):
+    def test_form(self):
+        self.assertEqual(unicode(evform._test()),
+            u'.------------------------------------------------.\n|                                                |\n|  Name: \x1b[1m\x1b[32mTom\x1b[1m\x1b[32m \x1b[1m\x1b[32mthe\x1b[1m\x1b[32m \x1b[0m       Player: \x1b[1m\x1b[33mGriatch\x1b[0m        \x1b[1m\x1b[32m\x1b[1m\x1b[32m\x1b[1m\x1b[32m\x1b[1m\x1b[32m\x1b[0m  |\n|        \x1b[1m\x1b[32mBouncer\x1b[0m\x1b[0m                                 |\n|                                                |\n >----------------------------------------------<\n|                                                |\n| Desc:  A sturdy \x1b[0m      STR: 12 \x1b[0m    DEX: 10 \x1b[0m     |\n|        fellow\x1b[0m         INT: 5  \x1b[0m    STA: 18 \x1b[0m     |\n|                       LUC: 10     MAG: 3       |\n|                                                |\n >----------------------------------------------<\n|          |                                     |\n| HP|MV |M\x1b[0m | Skill       |Value     |Exp        \x1b[0m |\n| ~~+~~~+~ | ~~~~~~~~~~~~+~~~~~~~~~~+~~~~~~~~~~~ |\n| **|***\x1b[0m|*\x1b[0m | Shooting    |12        |550/1200   \x1b[0m\x1b[0m |\n|   |**\x1b[0m |*\x1b[0m | Herbalism   |14        |990/1400   \x1b[0m\x1b[0m |\n|   |   |*\x1b[0m | Smithing    |9         |205/900    \x1b[0m |\n|          |                                     |\n ------------------------------------------------\n')
+    def test_ansi_escape(self):
+        # note that in a msg() call, the result would be the  correct |-----,
+        # in a print, ansi only gets called once, so ||----- is the result
+        self.assertEqual(unicode(evform.EvForm(form={"FORM":"\n||-----"})), "||-----")

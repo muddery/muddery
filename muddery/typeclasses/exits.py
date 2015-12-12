@@ -7,6 +7,8 @@ for allowing Characters to traverse the exit to its destination.
 
 """
 
+from __future__ import print_function
+
 import traceback
 from muddery.utils import utils
 from muddery.typeclasses.objects import MudderyObject
@@ -115,7 +117,7 @@ class MudderyLockedExit(MudderyExit):
                     "auto_unlock": lock_record.auto_unlock}     # if the lock can be unlocked automatically
             self.exit_lock = lock
         except Exception, e:
-            print "Can't load lock info %s: %s" % (self.get_info_key(), e)
+            logger.log_errmsg("Can't load lock info %s: %s" % (self.get_info_key(), e))
 
 
     def at_before_traverse(self, traversing_object):

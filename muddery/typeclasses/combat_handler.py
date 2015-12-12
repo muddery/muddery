@@ -2,13 +2,15 @@
 Combat handler.
 """
 
+from __future__ import print_function
+
 import random
 import traceback
 from django.conf import settings
 from evennia import DefaultScript
-from muddery.utils import builder
-from muddery.utils import defines
 from evennia import TICKER_HANDLER
+from evennia.utils import logger
+from muddery.utils import builder, defines
 
 
 class CombatHandler(DefaultScript):
@@ -164,8 +166,7 @@ class CombatHandler(DefaultScript):
             if rtn:
                 self.msg_all_combat_skill(rtn["result"], rtn["cd_info"], caller)
         except Exception, e:
-            print "Can not cast skill %s: %s" % (skill, e)
-            print traceback.format_exc()
+            logger.log_tracemsg("Can not cast skill %s: %s" % (skill, e))
             return False
 
         if self.can_finish():

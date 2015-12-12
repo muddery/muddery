@@ -134,6 +134,8 @@ into (when including its borders and at least one line of text), the
 form will raise an error.
 
 """
+from __future__ import print_function
+from builtins import object, range
 
 import re
 import copy
@@ -146,9 +148,17 @@ from evennia.utils.ansi import ANSIString
 # as an identifier). These should be listed in regex form.
 
 INVALID_FORMCHARS = r"\s\/\|\\\*\_\-\#\<\>\~\^\:\;\.\,"
+# if there is an ansi-escape (||) we have to replace this with ||| to make sure
+# to properly escape down the line
+_ANSI_ESCAPE = re.compile(r"\|\|")
+
 
 def _to_ansi(obj, regexable=False):
     "convert to ANSIString"
+    if isinstance(obj, basestring):
+        # since ansi will be parsed twice (here and in the normal ansi send), we have to
+        # escape the |-structure twice.
+        obj = _ANSI_ESCAPE.sub(r"||||", obj)
     if isinstance(obj, dict):
         return dict((key, _to_ansi(value, regexable=regexable)) for key, value in obj.items())
     elif hasattr(obj, "__iter__"):
@@ -168,17 +178,17 @@ class EvForm(object):
         """
         Initiate the form
 
-        keywords:
-            filename - path to template file
-            form - dictionary of {"CELLCHAR":char,
-                                  "TABLECHAR":char,
-                                  "FORM":templatestring}
+        Kwargs:
+            filename (str): Path to template file.
+            cells (dict): A dictionary mapping of {id:text}
+            tables (dict): A dictionary mapping of {id:EvTable}.
+            form (dict): A dictionary of {"CELLCHAR":char,
+                                          "TABLECHAR":char,
+                                          "FORM":templatestring}
                     if this is given, filename is not read.
-            cells - a dictionary mapping of {id:text}
-            tables -  dictionary mapping of {id:EvTable}
-
-        other kwargs are fed as options to the EvCells and EvTables
-        (see `evtable.EvCell` and `evtable.EvTable` for more info).
+        Notes:
+            Other kwargs are fed as options to the EvCells and EvTables
+            (see `evtable.EvCell` and `evtable.EvTable` for more info).
 
         """
         self.filename = filename
@@ -204,8 +214,9 @@ class EvForm(object):
 
     def _parse_rectangles(self, cellchar, tablechar, form, **kwargs):
         """
-        Parse a form for rectangular formfields identified by
-        formchar enclosing an identifier.
+        Parse a form for rectangular formfields identified by formchar
+        enclosing an identifier.
+
         """
 
         # update options given at creation with new input - this
@@ -244,8 +255,6 @@ class EvForm(object):
                     ix0 = match.end()
                 else:
                     break
-        #print "cell_coords:", cell_coords
-        #print "table_coords:", table_coords
 
         # get rectangles and assign EvCells
         for key, (iy, leftix, rightix) in cell_coords.items():
@@ -254,7 +263,6 @@ class EvForm(object):
             dy_up = 0
             if iy > 0:
                 for i in range(1,iy):
-                    #print "dy_up:", [form[iy-i][ix] for ix in range(leftix, rightix)]
                     if all(form[iy-i][ix] == cellchar for ix in range(leftix, rightix)):
                         dy_up += 1
                     else:
@@ -263,7 +271,6 @@ class EvForm(object):
             dy_down = 0
             if iy < nform-1:
                 for i in range(1,nform-iy-1):
-                    #print "dy_down:", [form[iy+i][ix]for ix in range(leftix, rightix)]
                     if all(form[iy+i][ix] == cellchar for ix in range(leftix, rightix)):
                         dy_down += 1
                     else:
@@ -278,13 +285,10 @@ class EvForm(object):
             # we have all the coordinates we need. Create EvCell.
             data = self.cells_mapping.get(key, "")
             #if key == "1":
-            #    print "creating cell '%s' (%s):" % (key, data)
-            #    print "iy=%s, iyup=%s, iydown=%s, leftix=%s, rightix=%s, width=%s, height=%s" % (iy, iyup, iydown, leftix, rightix, width, height)
 
             options = { "pad_left":0, "pad_right":0, "pad_top":0, "pad_bottom":0, "align":"l", "valign":"t", "enforce_size":True}
             options.update(custom_options)
             #if key=="4":
-            #print "options:", options
 
             mapping[key] = (iyup, leftix, width, height, EvCell(data, width=width, height=height,**options))
 
@@ -295,7 +299,6 @@ class EvForm(object):
             dy_up = 0
             if iy > 0:
                 for i in range(1,iy):
-                    #print "dy_up:", [form[iy-i][ix] for ix in range(leftix, rightix)]
                     if all(form[iy-i][ix] == tablechar for ix in range(leftix, rightix)):
                         dy_up += 1
                     else:
@@ -304,7 +307,6 @@ class EvForm(object):
             dy_down = 0
             if iy < nform-1:
                 for i in range(1,nform-iy-1):
-                    #print "dy_down:", [form[iy+i][ix]for ix in range(leftix, rightix)]
                     if all(form[iy+i][ix] == tablechar for ix in range(leftix, rightix)):
                         dy_down += 1
                     else:
@@ -318,13 +320,10 @@ class EvForm(object):
 
             # we have all the coordinates we need. Create Table.
             table = self.tables_mapping.get(key, None)
-            #print "creating table '%s' (%s):" % (key, data)
-            #print "iy=%s, iyup=%s, iydown=%s, leftix=%s, rightix=%s, width=%s, height=%s" % (iy, iyup, iydown, leftix, rightix, width, height)
 
             options = { "pad_left":0, "pad_right":0, "pad_top":0, "pad_bottom":0,
                         "align":"l", "valign":"t", "enforce_size":True}
             options.update(custom_options)
-            #print "options:", options
 
             if table:
                 table.reformat(width=width, height=height, **options)
@@ -337,6 +336,7 @@ class EvForm(object):
     def _populate_form(self, raw_form, mapping):
         """
         Insert cell contents into form at given locations
+
         """
         form = copy.copy(raw_form)
         for key, (iy0, ix0, width, height, cell_or_table) in mapping.items():
@@ -352,11 +352,13 @@ class EvForm(object):
         """
         Add mapping for form.
 
-        cells - a dictionary of {identifier:celltext}
-        tables - a dictionary of {identifier:table}
+        Args:
+            cells (dict): A dictionary of {identifier:celltext}
+            tables (dict): A dictionary of {identifier:table}
 
-        kwargs will be forwarded to tables/cells. See
-        evtable.EvCell and evtable.EvTable for info.
+        Notes:
+            kwargs will be forwarded to tables/cells. See
+            `evtable.EvCell` and `evtable.EvTable` for info.
 
         """
         # clean kwargs (these cannot be overridden)
@@ -373,7 +375,15 @@ class EvForm(object):
 
     def reload(self, filename=None, form=None, **kwargs):
         """
-        Creates the form from a stored file name
+        Creates the form from a stored file name.
+
+        Args:
+            filename (str): The file to read from.
+            form (dict): A mapping for the form.
+
+        Notes:
+            Kwargs are passed through to Cel creation.
+
         """
         # clean kwargs (these cannot be overridden)
         kwargs.pop("enforce_size", None)
@@ -441,5 +451,5 @@ def _test():
                      "B": tableB})
 
     # unicode is required since the example contains non-ascii characters
-    print unicode(form)
+    #print(unicode(form))
     return form

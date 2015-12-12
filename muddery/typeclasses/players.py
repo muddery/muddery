@@ -42,20 +42,23 @@ class MudderyPlayer(DefaultPlayer):
 
     Can be set using BASE_PLAYER_TYPECLASS.
     """
-    def msg(self, text=None, from_obj=None, sessid=None, **kwargs):
+    def msg(self, text=None, from_obj=None, session=None, **kwargs):
         """
         Evennia -> User
         This is the main route for sending data back to the user from the
         server.
-        
+
         Args:
-        text (str, optional): data to send
-        from_obj (Object or Player, optional): object sending. If given,
-        its at_msg_send() hook will be called.
-        sessid (int or list, optional): session id or ids to receive this
-        send. If given, overrules MULTISESSION_MODE.
+            text (str, optional): text data to send
+            from_obj (Object or Player, optional): Object sending. If given,
+                its at_msg_send() hook will be called.
+            session (Session or list, optional): Session object or a list of
+                Sessions to receive this send. If given, overrules the
+                default send behavior for the current
+                MULTISESSION_MODE.
         Notes:
-        All other keywords are passed on to the protocol.
+            All other keywords are passed on to the protocol.
+
         """
         raw = kwargs.get("raw", False)
         if not raw:
@@ -64,13 +67,15 @@ class MudderyPlayer(DefaultPlayer):
             except Exception, e:
                 text = json.dumps({"err": "There is an error occurred while outputing messages."})
                 logger.log_tracemsg("json.dumps failed: %s" % e)
+        else:
+            text = to_str(text, force_string=True) if text else ""
 
         # set raw=True
         if kwargs:
             kwargs["raw"] = True
         else:
             kwargs = {"raw": True}
-        
+
         if from_obj:
             # call hook
             try:
@@ -79,23 +84,9 @@ class MudderyPlayer(DefaultPlayer):
                 pass
 
         # session relay
-        if sessid:
-            # this could still be an iterable if sessid is an iterable
-            sessions = self.get_session(sessid)
-            if sessions:
-                # this is a special instruction to ignore MULTISESSION_MODE
-                # and only relay to this given session.
-                kwargs["_nomulti"] = True
-                for session in make_iter(sessions):
-                    session.msg(text=text, **kwargs)
-                return
-
-        # we only send to the first of any connected sessions - the sessionhandler
-        # will disperse this to the other sessions based on MULTISESSION_MODE.
-        sessions = self.get_all_sessions()
-        if sessions:
-            sessions[0].msg(text=text, **kwargs)
-
+        sessions = make_iter(session) if session else self.sessions.all()
+        for session in sessions:
+            session.msg(text=text, **kwargs)
 
 
 class MudderyGuest(DefaultGuest):

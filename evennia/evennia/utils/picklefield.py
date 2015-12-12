@@ -28,6 +28,7 @@ Pickle field implementation for Django.
 Modified for Evennia by Griatch.
 
 """
+from builtins import object
 from ast import literal_eval
 
 from copy import deepcopy
@@ -44,6 +45,7 @@ from django.forms.util import flatatt
 from django.utils.html import format_html
 
 from evennia.utils.dbserialize import from_pickle, to_pickle
+from future.utils import with_metaclass
 
 try:
     from django.utils.encoding import force_text
@@ -167,7 +169,7 @@ class PickledFormField(CharField):
             raise ValidationError(self.error_messages['invalid'])
 
 
-class PickledObjectField(_get_subfield_superclass()):
+class PickledObjectField(with_metaclass(models.SubfieldBase, _get_subfield_superclass())):
     """
     A field that will accept *any* python object and store it in the
     database. PickledObjectField will optionally compress its values if
@@ -177,7 +179,6 @@ class PickledObjectField(_get_subfield_superclass()):
     can still do lookups using None). This way, it is still possible to
     use the ``isnull`` lookup type correctly.
     """
-    __metaclass__ = models.SubfieldBase  # for django < 1.3
 
     def __init__(self, *args, **kwargs):
         self.compress = kwargs.pop('compress', False)

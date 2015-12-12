@@ -7,13 +7,14 @@ make sure to homogenize self.caller to always be the player object
 for easy handling.
 
 """
+from past.builtins import cmp
 from django.conf import settings
 from evennia.comms.models import ChannelDB, Msg
 #from evennia.comms import irc, imc2, rss
 from evennia.players.models import PlayerDB
 from evennia.players import bots
 from evennia.comms.channelhandler import CHANNELHANDLER
-from evennia.utils import create, utils, prettytable, evtable
+from evennia.utils import create, utils, evtable
 from evennia.utils.utils import make_iter
 from evennia.commands.default.muxcommand import MuxCommand, MuxPlayerCommand
 
@@ -267,13 +268,11 @@ class CmdChannels(MuxPlayerCommand):
         # all channels we have available to listen to
         channels = [chan for chan in ChannelDB.objects.get_all_channels()
                     if chan.access(caller, 'listen')]
-        #print channels
         if not channels:
             self.msg("No channels available.")
             return
         # all channel we are already subscribed to
         subs = ChannelDB.objects.get_subscriptions(caller)
-        #print subs
 
         if self.cmdstring == "comlist":
             # just display the subscribed channels with no extra info
@@ -519,17 +518,15 @@ class CmdChannelCreate(MuxPlayerCommand):
         channame = lhs
         aliases = None
         if ';' in lhs:
-            channame, aliases = [part.strip().lower()
-                                 for part in lhs.split(';', 1) if part.strip()]
-            aliases = [alias.strip().lower()
-                       for alias in aliases.split(';') if alias.strip()]
+            channame, aliases = lhs.split(';', 1)
+            aliases = [alias.strip().lower() for alias in aliases.split(';')]
         channel = ChannelDB.objects.channel_search(channame)
         if channel:
             self.msg("A channel with that name already exists.")
             return
         # Create and set the channel up
         lockstring = "send:all();listen:all();control:id(%s)" % caller.id
-        new_chan = create.create_channel(channame,
+        new_chan = create.create_channel(channame.strip(),
                                          aliases,
                                          description,
                                          locks=lockstring)
@@ -743,7 +740,7 @@ class CmdPage(MuxPlayerCommand):
                 rstrings.append("You are not allowed to page %s." % pobj)
                 continue
             pobj.msg("%s %s" % (header, message))
-            if hasattr(pobj, 'sessions') and not pobj.sessions:
+            if hasattr(pobj, 'sessions') and not pobj.sessions.count():
                 received.append("{C%s{n" % pobj.name)
                 rstrings.append("%s is offline. They will see your message if they list their pages later." % received[-1])
             else:

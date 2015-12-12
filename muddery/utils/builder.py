@@ -2,12 +2,13 @@
 This module handles importing data from csv files and creating the whole game world from these data.
 """
 
+from __future__ import print_function
+
 from muddery.utils import utils
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from django.conf import settings
 from django.db.models.loading import get_model
-from evennia.utils import create, search
-from evennia.utils import logger
+from evennia.utils import create, search, logger
 import traceback
 
 
@@ -23,8 +24,8 @@ def build_object(obj_key, caller=None):
     model_name = OBJECT_KEY_HANDLER.get_model(obj_key)
     if not model_name:
         ostring = "Can not find the model of %s." % obj_key
-        print ostring
-        print traceback.print_exc()
+        print(ostring)
+        print(traceback.print_exc())
         if caller:
             caller.msg(ostring)
         return
@@ -35,8 +36,8 @@ def build_object(obj_key, caller=None):
         record = model_obj.objects.get(key=obj_key)
     except Exception, e:
         ostring = "Can not load record %s:%s %s" % (model_name, obj_key, e)
-        print ostring
-        print traceback.print_exc()
+        print(ostring)
+        print(traceback.print_exc())
         if caller:
             caller.msg(ostring)
         return
@@ -46,8 +47,8 @@ def build_object(obj_key, caller=None):
         obj = create.create_object(record.typeclass, record.name)
     except Exception, e:
         ostring = "Can not create obj %s: %s" % (obj_key, e)
-        print ostring
-        print traceback.print_exc()
+        print(ostring)
+        print(traceback.print_exc())
         if caller:
             caller.msg(ostring)
         return
@@ -57,8 +58,8 @@ def build_object(obj_key, caller=None):
         obj.set_data_info(record.key)
     except Exception, e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
-        print ostring
-        print traceback.print_exc()
+        print(ostring)
+        print(traceback.print_exc())
         if caller:
             caller.msg(ostring)
         return
@@ -78,7 +79,7 @@ def build_objects(model_name, unique, caller=None):
         caller: (command caller) If provide, running messages will send to the caller.
     """
     ostring = "Building %s." % model_name
-    print ostring
+    print(ostring)
     if caller:
         caller.msg(ostring)
 
@@ -104,7 +105,7 @@ def build_objects(model_name, unique, caller=None):
             if obj_key in current_obj_keys:
                 # This object is duplcated.
                 ostring = "Deleting %s" % obj_key
-                print ostring
+                print(ostring)
                 if caller:
                     caller.msg(ostring)
 
@@ -115,7 +116,7 @@ def build_objects(model_name, unique, caller=None):
             if not obj_key in new_obj_names:
                 # This object should be removed
                 ostring = "Deleting %s" % obj_key
-                print ostring
+                print(ostring)
                 if caller:
                     caller.msg(ostring)
 
@@ -127,8 +128,8 @@ def build_objects(model_name, unique, caller=None):
             obj.load_data()
         except Exception, e:
             ostring = "%s can not load data:%s" % (obj.dbref, e)
-            print ostring
-            print traceback.print_exc()
+            print(ostring)
+            print(traceback.print_exc())
             if caller:
                 caller.msg(ostring)
 
@@ -140,7 +141,7 @@ def build_objects(model_name, unique, caller=None):
             if not record.key in current_obj_keys:
                 # Create new objects.
                 ostring = "Creating %s." % record.key
-                print ostring
+                print(ostring)
                 if caller:
                     caller.msg(ostring)
 
@@ -149,8 +150,8 @@ def build_objects(model_name, unique, caller=None):
                     count_create += 1
                 except Exception, e:
                     ostring = "Can not create obj %s: %s" % (record.key, e)
-                    print ostring
-                    print traceback.print_exc()
+                    print(ostring)
+                    print(traceback.print_exc())
                     if caller:
                         caller.msg(ostring)
                     continue
@@ -159,15 +160,15 @@ def build_objects(model_name, unique, caller=None):
                     obj.set_data_info(record.key)
                 except Exception, e:
                     ostring = "Can not set data info to obj %s: %s" % (record.key, e)
-                    print ostring
-                    print traceback.print_exc()
+                    print(ostring)
+                    print(traceback.print_exc())
                     if caller:
                         caller.msg(ostring)
                     continue
 
     ostring = "Removed %d object(s). Created %d object(s). Updated %d object(s). Total %d objects.\n"\
               % (count_remove, count_create, count_update, len(model_obj.objects.all()))
-    print ostring
+    print(ostring)
     if caller:
         caller.msg(ostring)
 
@@ -201,7 +202,7 @@ def build_details(model_name, caller=None):
             count += 1
 
     ostring = "Set %d detail(s)." % count
-    print ostring
+    print(ostring)
     if caller:
         caller.msg(ostring)
 
@@ -250,8 +251,8 @@ def reset_default_locations():
                 default_home_key = rooms[0].key
         except Exception, e:
             ostring = "Can not find default_home_key: %s" % e
-            print ostring
-            print traceback.print_exc()
+            print(ostring)
+            print(traceback.print_exc())
 
     if default_home_key:
         # If get default_home_key.
@@ -259,7 +260,7 @@ def reset_default_locations():
         if default_home:
             # Set default home.
             settings.DEFAULT_HOME = default_home[0].dbref
-            print "settings.DEFAULT_HOME set to: %s" % settings.DEFAULT_HOME
+            print("settings.DEFAULT_HOME set to: %s" % settings.DEFAULT_HOME)
 
     # Set player's default home.
     default_player_home_key = settings.DEFAULT_PLAYER_HOME_KEY
@@ -271,7 +272,7 @@ def reset_default_locations():
         if default_player_home:
             # Set player's default home.
             settings.DEFAULT_PLAYER_HOME = default_player_home[0].dbref
-            print "settings.DEFAULT_PLAYER_HOME set to: %s" % settings.DEFAULT_PLAYER_HOME
+            print("settings.DEFAULT_PLAYER_HOME set to: %s" % settings.DEFAULT_PLAYER_HOME)
     
     # Set start location.
     start_location_key = settings.START_LOCATION_KEY
@@ -284,15 +285,15 @@ def reset_default_locations():
                 start_location_key = rooms[0].key
         except Exception, e:
             ostring = "Can not find start_location_key: %s" % e
-            print ostring
-            print traceback.print_exc()
+            print(ostring)
+            print(traceback.print_exc())
 
     if start_location_key:
         # If get start_location_key.
         start_location = utils.search_obj_info_key(start_location_key)
         if start_location:
             settings.START_LOCATION = start_location[0].dbref
-            print "settings.START_LOCATION set to: %s" % settings.START_LOCATION
+            print("settings.START_LOCATION set to: %s" % settings.START_LOCATION)
 
 
 def delete_object(obj_dbref):
@@ -300,10 +301,10 @@ def delete_object(obj_dbref):
     obj = search.search_object(obj_dbref)
     if not obj:
         ostring = "Can not find object %s." % obj_dbref
-        print ostring
+        print(ostring)
 
     # do the deletion
     okay = obj[0].delete()
     if not okay:
         ostring = "Can not delete %s." % obj_dbref
-        print ostring
+        print(ostring)

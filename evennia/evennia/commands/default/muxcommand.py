@@ -100,7 +100,6 @@ class MuxCommand(Command):
         switches = []
         if args and len(args) > 1 and args[0] == "/":
             # we have a switch, or a set of switches. These end with a space.
-            #print "'%s'" % args
             switches = args[1:].split(None, 1)
             if len(switches) > 1:
                 switches, args = switches
@@ -189,6 +188,6 @@ class MuxPlayerCommand(MuxCommand):
             self.caller = self.caller.player
         elif utils.inherits_from(self.caller, "evennia.players.players.DefaultPlayer"):
             # caller was already a Player
-            self.character = self.caller.get_puppet(self.sessid)
+            self.character = self.caller.get_puppet(self.session)
         else:
             self.character = None

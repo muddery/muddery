@@ -29,6 +29,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from __future__ import print_function
+from builtins import object, range
+
 __version__ = "trunk"
 
 import copy
@@ -1008,8 +1011,6 @@ class PrettyTable(object):
         if self.rowcount == 0 and (not options["print_empty"] or not options["border"]):
             return ""
 
-        #print "prettytable:", self._rows
-
         # Get the rows we need to print, taking into account slicing, sorting, etc.
         rows = self._get_rows(options)
 
@@ -1146,7 +1147,7 @@ class PrettyTable(object):
             dHeight = row_height - len(lines)
             if dHeight:
                 if valign == "m":
-                  lines = [""] * int(dHeight / 2) + lines + [""] * (dHeight - int(dHeight / 2))
+                  lines = [""] * (dHeight // 2) + lines + [""] * (dHeight - (dHeight // 2))
                 elif valign == "b":
                   lines = [""] * dHeight + lines
                 else:
@@ -1372,10 +1373,7 @@ def from_csv(fp, field_names = None, **kwargs):
     if field_names:
         table.field_names = field_names
     else:
-        if py3k:
-            table.field_names = [x.strip() for x in next(reader)]
-        else:
-            table.field_names = [x.strip() for x in reader.next()]
+        table.field_names = [x.strip() for x in next(reader)]
 
     for row in reader:
         table.add_row([x.strip() for x in row])

@@ -12,6 +12,8 @@ and portal through the evennia_runner. Run without arguments to get a
 menu. Run the script with the -h flag to see usage information.
 """
 
+from __future__ import print_function
+
 import os
 import sys
 import shutil
@@ -204,20 +206,20 @@ def create_game_directory(dirname, template):
     global GAMEDIR
     GAMEDIR = os.path.abspath(os.path.join(CURRENT_DIR, dirname))
     if os.path.exists(GAMEDIR):
-        print "Cannot create new Muddery game dir: '%s' already exists." % dirname
+        print("Cannot create new Muddery game dir: '%s' already exists." % dirname)
         sys.exit()
 
     template_dir = ""
     if template:
         template_dir = os.path.join(MUDDERY_TEMPLATE, template)
         if not os.path.exists(template_dir):
-            print 'Sorry, template "%s" does not exist.\nThese are available templates:' % template
+            print('Sorry, template "%s" does not exist.\nThese are available templates:' % template)
             dirs = os.listdir(MUDDERY_TEMPLATE)
             for dir in dirs:
                 full_path = os.path.join(MUDDERY_TEMPLATE, dir)
                 if os.path.isdir(full_path):
-                    print "  %s" % dir
-            print ""
+                    print("  %s" % dir)
+            print("")
             sys.exit()
 
     # copy default template directory
@@ -288,7 +290,7 @@ def main():
 
     if not args:
         # show help pane
-        print CMDLINE_HELP
+        print(CMDLINE_HELP)
         sys.exit()
     elif args.init:
         # initialization of game directory
@@ -303,22 +305,22 @@ def main():
             django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
         except django.core.management.base.CommandError, exc:
-            print ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs)
+            print(ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
         try:
             django_args = ["migrate"]
             django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
         except django.core.management.base.CommandError, exc:
-            print ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs)
+            print(ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
-        print CREATED_NEW_GAMEDIR.format(gamedir=args.init,
-                                         settings_path=os.path.join(args.init, SETTINGS_PATH))
+        print(CREATED_NEW_GAMEDIR.format(gamedir=args.init,
+                                         settings_path=os.path.join(args.init, SETTINGS_PATH)))
         sys.exit()
 
     if args.show_version:
         # show the version info
-        print show_version_info(option == "help")
+        print(show_version_info(option == "help"))
         sys.exit()
 
     if args.altsettings:
@@ -329,7 +331,7 @@ def main():
         evennia_launcher.main()
     else:
         # no input; print muddery info
-        print ABOUT_INFO
+        print(ABOUT_INFO)
 
 
 if __name__ == '__main__':

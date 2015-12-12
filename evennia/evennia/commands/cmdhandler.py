@@ -31,18 +31,15 @@ command line. The processing of a command works as follows:
 12. We have a unique cmdobject, primed for use. Call all hooks:
    `at_pre_cmd()`, `cmdobj.parse()`, `cmdobj.func()` and finally `at_post_cmd()`.
 13. Return deferred that will fire with the return from `cmdobj.func()` (unused by default).
-
-
 """
 
+from collections import defaultdict
 from weakref import WeakValueDictionary
 from copy import copy
-from traceback import format_exc
 from twisted.internet.defer import inlineCallbacks, returnValue
 from django.conf import settings
 from evennia.comms.channelhandler import CHANNELHANDLER
 from evennia.utils import logger, utils
-from evennia.commands.cmdparser import at_multimatch_cmd
 from evennia.utils.utils import string_suggestions, to_unicode
 
 from django.utils.translation import ugettext as _
@@ -50,6 +47,11 @@ from django.utils.translation import ugettext as _
 __all__ = ("cmdhandler",)
 _GA = object.__getattribute__
 _CMDSET_MERGE_CACHE = WeakValueDictionary()
+
+# tracks recursive calls by each caller
+# to avoid infinite loops (commands calling themselves)
+_COMMAND_NESTING = defaultdict(lambda: 0)
+_COMMAND_RECURSION_LIMIT = 10
 
 # This decides which command parser is to be used.
 # You have to restart the server for changes to take effect.
@@ -71,24 +73,36 @@ CMD_CHANNEL = "__send_to_channel_command"
 # (is expected to display the login screen)
 CMD_LOGINSTART = "__unloggedin_look_command"
 
+# Function for handling multiple command matches.
+_SEARCH_AT_RESULT = utils.variable_from_module(*settings.SEARCH_AT_RESULT.rsplit('.', 1))
+
 # Output strings
 
-_ERROR_UNTRAPPED = "{traceback}\n" \
-                  "Above traceback is from an untrapped error. " \
-                  "Please file a bug report."
+_ERROR_UNTRAPPED = """
+An untrapped error occurred. Please file a bug report detailing the
+steps to reproduce. Server log time stamp is '{timestamp}'.
+"""
 
-_ERROR_CMDSETS = "{traceback}\n" \
-                "Above traceback is from a cmdset merger error. " \
-                "Please file a bug report."
+_ERROR_CMDSETS = """
+A cmdset merger error occurred. Please file a bug report detailing the
+steps to reproduce. Server log time stamp is '{timestamp}'.
+"""
 
-_ERROR_NOCMDSETS = "No command sets found! This is a sign of a critical bug." \
-                  "\nThe error was logged. If disconnecting/reconnecting doesn't" \
-                  "\nsolve the problem, try to contact the server admin through" \
-                  "\nsome other means for assistance."
+_ERROR_NOCMDSETS = """
+No command sets found! This is a sign of a critical bug.  If
+disconnecting/reconnecting doesn't" solve the problem, try to contact
+the server admin through" some other means for assistance. Server log
+time stamp is '{timestamp}'.
+"""
 
-_ERROR_CMDHANDLER = "{traceback}\n"\
-                   "Above traceback is from a Command handler bug." \
-                   "Please file a bug report with the Evennia project."
+_ERROR_CMDHANDLER = """
+A command handler bug occurred. Please file a bug report with the
+Evennia project. Include the relvant traceback from the server log at
+time stamp '{timestamp}'.
+"""
+
+_ERROR_RECURSION_LIMIT = "Command recursion limit ({recursion_limit}) " \
+                         "reached for '{raw_string}' ({cmdclass})."
 
 
 def _msg_err(receiver, string):
@@ -96,11 +110,11 @@ def _msg_err(receiver, string):
     Helper function for returning an error to the caller.
 
     Args:
-        receiver (Object): object to get the error message
-        string (str): string with a {traceback} format marker inside it.
+        receiver (Object): object to get the error message.
+        string (str): string which will be shown to the user.
 
     """
-    receiver.msg(string.format(traceback=format_exc(), _nomulti=True))
+    receiver.msg(string.format(_nomulti=True, timestamp=logger.timeformat()).strip())
 
 
 # custom Exceptions
@@ -108,7 +122,6 @@ def _msg_err(receiver, string):
 class NoCmdSets(Exception):
     "No cmdsets found. Critical error."
     pass
-
 
 class ExecSystemCommand(Exception):
     "Run a system command"
@@ -123,8 +136,7 @@ class ErrorReported(Exception):
 # Helper function
 
 @inlineCallbacks
-def get_and_merge_cmdsets(caller, session, player, obj,
-                          callertype, sessid=None):
+def get_and_merge_cmdsets(caller, session, player, obj, callertype):
     """
     Gather all relevant cmdsets and merge them.
 
@@ -139,7 +151,6 @@ def get_and_merge_cmdsets(caller, session, player, obj,
         obj (Object or None): The Object associated with caller, if any.
         callertype (str): This identifies caller as either "player", "object" or "session"
             to avoid having to do this check internally.
-        sessid (int, optional): Session ID. This is not used at the moment.
 
     Returns:
         cmdset (Deferred): This deferred fires with the merged cmdset
@@ -286,7 +297,6 @@ def get_and_merge_cmdsets(caller, session, player, obj,
                 tempmergers = {}
                 for cmdset in cmdsets:
                     prio = cmdset.priority
-                    #print cmdset.key, prio
                     if prio in tempmergers:
                         # merge same-prio cmdset together separately
                         tempmergers[prio] = yield cmdset + tempmergers[prio]
@@ -299,8 +309,6 @@ def get_and_merge_cmdsets(caller, session, player, obj,
                 # Merge all command sets into one, beginning with the lowest-prio one
                 cmdset = cmdsets[0]
                 for merging_cmdset in cmdsets[1:]:
-                    #print "<%s(%s,%s)> onto <%s(%s,%s)>" % (merging_cmdset.key, merging_cmdset.priority, merging_cmdset.mergetype,
-                    #                                        cmdset.key, cmdset.priority, cmdset.mergetype)
                     cmdset = yield merging_cmdset + cmdset
                 # store the full sets for diagnosis
                 cmdset.merged_from = cmdsets
@@ -311,7 +319,6 @@ def get_and_merge_cmdsets(caller, session, player, obj,
 
         for cset in (cset for cset in local_obj_cmdsets if cset):
             cset.duplicates = cset.old_duplicates
-        #print "merged set:", cmdset.key
         returnValue(cmdset)
     except ErrorReported:
         raise
@@ -322,8 +329,9 @@ def get_and_merge_cmdsets(caller, session, player, obj,
 
 # Main command-handler function
 
+
 @inlineCallbacks
-def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sessid=None, **kwargs):
+def cmdhandler(called_by, raw_string, _testing=False, callertype="session", session=None, **kwargs):
     """
     This is the main mechanism that handles any string sent to the engine.
 
@@ -343,7 +351,7 @@ def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sess
             cmdset and the Objects and so on. Merge order is the same
             order, so that Object cmdsets are merged in last, giving them
             precendence for same-name and same-prio commands.
-        sessid (int, optional): Relevant if callertype is "player" - the session id will help
+        session (Session, optional): Relevant if callertype is "player" - the session will help
             retrieve the correct cmdsets from puppeted objects.
 
     Kwargs:
@@ -370,17 +378,22 @@ def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sess
             cmd (Command): command object
             cmdname (str): name of command
             args (str): extra text entered after the identified command
+
         Returns:
             deferred (Deferred): this will fire with the return of the
                 command's `func` method.
+
+        Raises:
+            RuntimeError: If command recursion limit was reached.
+
         """
+        global _COMMAND_NESTING
         try:
             # Assign useful variables to the instance
             cmd.caller = caller
             cmd.cmdstring = cmdname
             cmd.args = args
             cmd.cmdset = cmdset
-            cmd.sessid = session.sessid if session else sessid
             cmd.session = session
             cmd.player = player
             cmd.raw_string = unformatted_raw_string
@@ -400,6 +413,13 @@ def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sess
             # assign custom kwargs to found cmd object
             for key, val in kwargs.items():
                 setattr(cmd, key, val)
+
+            _COMMAND_NESTING[called_by] += 1
+            if _COMMAND_NESTING[called_by] > _COMMAND_RECURSION_LIMIT:
+                err = _ERROR_RECURSION_LIMIT.format(recursion_limit=_COMMAND_RECURSION_LIMIT,
+                                                    raw_string=unformatted_raw_string,
+                                                    cmdclass=cmd.__class__)
+                raise RuntimeError(err)
 
             # pre-command hook
             abort = yield cmd.at_pre_cmd()
@@ -423,6 +443,8 @@ def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sess
                 caller.ndb.last_cmd = yield copy(cmd)
             else:
                 caller.ndb.last_cmd = None
+            _COMMAND_NESTING[called_by] -= 1
+
             # return result to the deferred
             returnValue(ret)
 
@@ -433,17 +455,15 @@ def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sess
 
     raw_string = to_unicode(raw_string, force_string=True)
 
-    session, player, obj = None, None, None
+    session, player, obj = session, None, None
     if callertype == "session":
         session = called_by
         player = session.player
-        if player:
-            obj = yield player.get_puppet(session.sessid)
+        obj = session.puppet
     elif callertype == "player":
         player = called_by
-        if sessid:
-            session = player.get_session(sessid)
-            obj = yield player.get_puppet(sessid)
+        if session:
+            obj = yield session.puppet
     elif callertype == "object":
         obj = called_by
     else:
@@ -459,7 +479,7 @@ def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sess
         try:  # catch special-type commands
 
             cmdset = yield get_and_merge_cmdsets(caller, session, player, obj,
-                                                  callertype, sessid)
+                                                  callertype)
             if not cmdset:
                 # this is bad and shouldn't happen.
                 raise NoCmdSets
@@ -486,7 +506,7 @@ def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sess
                     syscmd.matches = matches
                 else:
                     # fall back to default error handling
-                    sysarg = yield at_multimatch_cmd(caller, matches)
+                    sysarg = yield _SEARCH_AT_RESULT([match[2] for match in matches], caller, query=match[0])
                 raise ExecSystemCommand(syscmd, sysarg)
 
             if len(matches) == 1:
@@ -526,7 +546,7 @@ def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sess
                 if syscmd:
                     # replace system command with custom version
                     cmd = syscmd
-                cmd.sessid = session.sessid if session else None
+                cmd.session = session
                 sysarg = "%s:%s" % (cmdname, args)
                 raise ExecSystemCommand(cmd, sysarg)
 
@@ -539,7 +559,7 @@ def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sess
             # catch it here and don't pass it on.
             pass
 
-        except ExecSystemCommand, exc:
+        except ExecSystemCommand as exc:
             # Not a normal command: run a system command, if available,
             # or fall back to a return string.
             syscmd = exc.syscmd
@@ -554,7 +574,7 @@ def cmdhandler(called_by, raw_string, _testing=False, callertype="session", sess
 
         except NoCmdSets:
             # Critical error.
-            logger.log_errmsg("No cmdsets found: %s" % caller)
+            logger.log_err("No cmdsets found: %s" % caller)
             error_to.msg(_ERROR_NOCMDSETS, _nomulti=True)
 
         except Exception:

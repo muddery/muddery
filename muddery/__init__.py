@@ -12,6 +12,7 @@ See www.muddery.org for full documentation.
 
 """
 
+from __future__ import print_function
 
 def _create_version():
     """
@@ -26,7 +27,7 @@ def _create_version():
         with open(os.path.join(root, "VERSION.txt"), 'r') as f:
             version = f.read().strip()
     except IOError as err:
-        print err
+        print(err)
     try:
         rev = check_output("git rev-parse --short HEAD", shell=True, cwd=root, stderr=STDOUT).strip()
         version = "%s (rev %s)" % (version, rev)

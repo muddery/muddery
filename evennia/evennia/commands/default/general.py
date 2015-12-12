@@ -58,29 +58,16 @@ class CmdLook(MuxCommand):
         """
         Handle the looking.
         """
-        caller = self.caller
-        args = self.args
-        if args:
-            # Use search to handle duplicate/nonexistant results.
-            looking_at_obj = caller.search(args, use_nicks=True)
-            if not looking_at_obj:
+        if not self.args:
+            target = self.caller.location
+            if not target:
+                self.caller.msg("You have no location to look at!")
                 return
         else:
-            looking_at_obj = caller.location
-            if not looking_at_obj:
-                caller.msg("You have no location to look at!")
+            target = self.caller.search(self.args)
+            if not target:
                 return
-
-        if not hasattr(looking_at_obj, 'return_appearance'):
-            # this is likely due to us having a player instead
-            looking_at_obj = looking_at_obj.character
-        if not looking_at_obj.access(caller, "view"):
-            caller.msg("Could not find '%s'." % args)
-            return
-        # get object's appearance
-        caller.msg(looking_at_obj.return_appearance(caller))
-        # the object's at_desc() method.
-        looking_at_obj.at_desc(looker=caller)
+        self.msg(self.caller.at_look(target))
 
 
 class CmdNick(MuxCommand):
@@ -233,7 +220,6 @@ class CmdGet(MuxCommand):
         if not self.args:
             caller.msg("Get what?")
             return
-        #print "general/get:", caller, caller.location, self.args, caller.location.contents
         obj = caller.search(self.args, location=caller.location)
         if not obj:
             return

@@ -1,9 +1,9 @@
 """
-import sys
-
 Building and world design commands
-
 """
+from builtins import range
+
+import re
 from django.conf import settings
 from django.db.models import Q
 from evennia.objects.models import ObjectDB
@@ -12,6 +12,7 @@ from evennia.commands.default.muxcommand import MuxCommand
 from evennia.commands.cmdhandler import get_and_merge_cmdsets
 from evennia.utils import create, utils, search
 from evennia.utils.utils import inherits_from
+from evennia.utils.eveditor import EvEditor
 from evennia.utils.spawner import spawn
 from evennia.utils.ansi import raw
 
@@ -137,9 +138,9 @@ class CmdSetObjAlias(MuxCommand):
             # no =, so we just list aliases on object.
             aliases = obj.aliases.all()
             if aliases:
-                caller.msg("Aliases for '%s': %s" % (obj.key, ", ".join(aliases)))
+                caller.msg("Aliases for '%s': %s" % (obj.get_display_name(caller), ", ".join(aliases)))
             else:
-                caller.msg("No aliases exist for '%s'." % obj.key)
+                caller.msg("No aliases exist for '%s'." % obj.get_display_name(caller))
             return
 
         if not obj.access(caller, 'edit'):
@@ -150,7 +151,7 @@ class CmdSetObjAlias(MuxCommand):
             # we have given an empty =, so delete aliases
             old_aliases = obj.aliases.all()
             if old_aliases:
-                caller.msg("Cleared aliases from %s: %s" % (obj.key, ", ".join(old_aliases)))
+                caller.msg("Cleared aliases from %s: %s" % (obj.get_display_name(caller), ", ".join(old_aliases)))
                 obj.aliases.clear()
             else:
                 caller.msg("No aliases to clear.")
@@ -174,7 +175,7 @@ class CmdSetObjAlias(MuxCommand):
         obj.at_cmdset_get(force_init=True)
 
         # report all aliases on the object
-        caller.msg("Alias(es) for '%s' set to %s." % (obj.key, str(obj.aliases)))
+        caller.msg("Alias(es) for '%s' set to %s." % (obj.get_display_name(caller), str(obj.aliases)))
 
 
 class CmdCopy(ObjManipCommand):
@@ -488,7 +489,7 @@ class CmdCreate(ObjManipCommand):
 
             # create object (if not a valid typeclass, the default
             # object typeclass will automatically be used)
-            lockstring = "control:id(%s);examine:perm(Builders);delete:id(%s) or perm(Wizards)" % (caller.id, caller.id)
+            lockstring = "control:id(%s);delete:id(%s) or perm(Wizards)" % (caller.id, caller.id)
             obj = create.create_object(typeclass, name, caller,
                                        home=caller, aliases=aliases,
                                        locks=lockstring, report_to=caller)
@@ -531,7 +532,7 @@ class CmdDesc(MuxCommand):
 
     def edit_handler(self):
         if self.rhs:
-            self.msg("{rYou may specify a description, or use the edit switch, "
+            self.msg("{rYou may specify a value, or use the edit switch, "
                      "but not both.{n")
             return
         if self.args:
@@ -541,24 +542,20 @@ class CmdDesc(MuxCommand):
         if not obj:
             return
 
-        def load():
+        def load(caller):
             return obj.db.desc or ""
 
-        def save():
+        def save(caller, buf):
             """
             Save line buffer to the desc prop. This should
             return True if successful and also report its status to the user.
             """
-            obj.db.desc = self.editor.buffer
-            self.caller.msg("Saved.")
+            obj.db.desc = buf
+            caller.msg("Saved.")
             return True
 
-        self.editor = utils.get_line_editor()(
-            self.caller,
-            loadfunc=load,
-            savefunc=save,
-            key="desc",
-        )
+        # launch the editor
+        EvEditor(self.caller, loadfunc=load, savefunc=save, key="desc")
         return
 
     def func(self):
@@ -586,7 +583,7 @@ class CmdDesc(MuxCommand):
             desc = self.args
 
         obj.db.desc = desc
-        caller.msg("The description was set on %s." % obj.key)
+        caller.msg("The description was set on %s." % obj.get_display_name(caller))
 
 
 class CmdDestroy(MuxCommand):
@@ -1095,7 +1092,8 @@ class CmdName(ObjManipCommand):
     Usage:
       @name obj = name;alias1;alias2
 
-    Rename an object to something new.
+    Rename an object to something new. Use *obj to
+    rename a player.
 
     """
 
@@ -1109,12 +1107,30 @@ class CmdName(ObjManipCommand):
 
         caller = self.caller
         if not self.args:
-            string = "Usage: @name <obj> = <newname>[;alias;alias;...]"
-            caller.msg(string)
+            caller.msg("Usage: @name <obj> = <newname>[;alias;alias;...]")
             return
 
         if self.lhs_objs:
             objname = self.lhs_objs[0]['name']
+            if objname.startswith("*"):
+                # player mode
+                obj = caller.player.search(objname.lstrip("*"))
+                if obj:
+                    if self.rhs_objs[0]['aliases']:
+                        caller.msg("Players can't have aliases.")
+                        return
+                    newname = self.rhs
+                    if not newname:
+                        caller.msg("No name defined!")
+                        return
+                    if not obj.access(caller, "edit"):
+                        caller.mgs("You don't have right to edit this player %s." % obj)
+                        return
+                    obj.username = newname
+                    obj.save()
+                    caller.msg("Player's name changed to '%s'." % newname)
+                    return
+            # object search, also with *
             obj = caller.search(objname)
             if not obj:
                 return
@@ -1126,6 +1142,9 @@ class CmdName(ObjManipCommand):
             aliases = None
         if not newname and not aliases:
             caller.msg("No names or aliases defined!")
+            return
+        if not obj.access(caller, "edit"):
+            caller.msg("You don't have the right to edit %s." % obj)
             return
         # change the name and set aliases:
         if newname:
@@ -1330,10 +1349,11 @@ def _convert_from_string(cmd, strobj):
             return _LITERAL_EVAL(strobj)
         except (SyntaxError, ValueError):
             # treat as string
-            string = "{RNote: Value was converted to string. If you don't want this, "
-            string += "use proper Python syntax, like enclosing strings in quotes.{n"
+            strobj = utils.to_str(strobj)
+            string = "{RNote: name \"{r%s{R\" was converted to a string. " \
+                     "Make sure this is acceptable." % strobj
             cmd.caller.msg(string)
-            return utils.to_str(strobj)
+            return strobj
     else:
         # fall back to old recursive solution (does not support
         # nested lists/dicts)
@@ -1348,6 +1368,9 @@ class CmdSetAttribute(ObjManipCommand):
       @set <obj>/<attr> =
       @set <obj>/<attr>
       @set *<player>/attr = <value>
+
+    Switch:
+        edit: Open the line editor (string values only)
 
     Sets attributes on objects. The second form clears
     a previously set attribute while the last form
@@ -1428,6 +1451,25 @@ class CmdSetAttribute(ObjManipCommand):
                     "to put quotes around all strings inside lists and "
                     "dicts.{n")
 
+    def edit_handler(self, obj, attr):
+        "Activate the line editor"
+        def load(caller):
+            "Called for the editor to load the buffer"
+            old_value = obj.attributes.get(attr)
+            if old_value is not None and not isinstance(old_value, basestring):
+                typ = type(old_value).__name__
+                self.caller.msg("{RWARNING! Saving this buffer will overwrite the "\
+                                "current attribute (of type %s) with a string!{n" % typ)
+                return str(old_value)
+            return old_value
+        def save(caller, buf):
+            "Called when editor saves its buffer."
+            obj.attributes.add(attr, buf)
+            caller.msg("Saved Attribute %s." % attr)
+        # start the editor
+        EvEditor(self.caller, load, save, key="%s/%s" % (obj, attr))
+
+
     def func(self):
         "Implement the set attribute - a limited form of @py."
 
@@ -1452,6 +1494,14 @@ class CmdSetAttribute(ObjManipCommand):
             return
 
         string = ""
+        if "edit" in self.switches:
+            # edit in the line editor
+            if len(attrs) > 1:
+                caller.msg("The Line editor can only be applied " \
+                           "to one attribute at a time.")
+                return
+            self.edit_handler(obj, attrs[0])
+            return
         if not value:
             if self.rhs is None:
                 # no = means we inspect the attribute(s)
@@ -1626,8 +1676,7 @@ class CmdWipe(ObjManipCommand):
             return
         if not attrs:
             # wipe everything
-            for attr in obj.get_all_attributes():
-                attr.delete()
+            obj.attributes.clear()
             string = "Wiped all attributes on %s." % obj.name
         else:
             for attrname in attrs:
@@ -1654,7 +1703,7 @@ class CmdLock(ObjManipCommand):
     object.
 
     Lockstring is on the form
-       'access_type:[NOT] func1(args)[ AND|OR][ NOT] func2(args) ...]
+       access_type:[NOT] func1(args)[ AND|OR][ NOT] func2(args) ...]
     Where func1, func2 ... valid lockfuncs with or without arguments.
     Separator expressions need not be capitalized.
 
@@ -1681,6 +1730,7 @@ class CmdLock(ObjManipCommand):
             string = "@lock <object>[ = <lockstring>] or @lock[/switch] object/<access_type>"
             caller.msg(string)
             return
+
         if '/' in self.lhs:
             # call on the form @lock obj/access_type
             objname, access_type = [p.strip() for p in self.lhs.split('/', 1)]
@@ -1688,6 +1738,7 @@ class CmdLock(ObjManipCommand):
             if not obj:
                 return
             lockdef = obj.locks.get(access_type)
+            string = ""
             if lockdef:
                 if 'del' in self.switches:
                     if not obj.access(caller, 'control'):
@@ -1695,6 +1746,8 @@ class CmdLock(ObjManipCommand):
                         return
                     obj.locks.delete(access_type)
                     string = "deleted lock %s" % lockdef
+                else:
+                    string = lockdef
             else:
                 string = "%s has no lock of access type '%s'." % (obj, access_type)
             caller.msg(string)
@@ -1702,6 +1755,13 @@ class CmdLock(ObjManipCommand):
 
         if self.rhs:
             # we have a = separator, so we are assigning a new lock
+            if self.switches:
+                swi = ", ".join(self.switches)
+                caller.msg("Switch(es) {w%s{n can not be used with a "\
+                           "lock assignment. Use e.g. " \
+                           "{w@lock/del objname/locktype{n instead." % swi)
+                return
+
             objname, lockdef = self.lhs, self.rhs
             obj = caller.search(objname)
             if not obj:
@@ -1710,9 +1770,10 @@ class CmdLock(ObjManipCommand):
                 caller.msg("You are not allowed to do that.")
                 return
             ok = False
+            lockdef = re.sub(r"\'|\"", "", lockdef)
             try:
                 ok = obj.locks.add(lockdef)
-            except LockException, e:
+            except LockException as e:
                 caller.msg(str(e))
             if ok:
                 caller.msg("Added lock '%s' to %s." % (lockdef, obj))
@@ -1804,11 +1865,9 @@ class CmdExamine(ObjManipCommand):
         string = "\n{wName/key{n: {c%s{n (%s)" % (obj.name, obj.dbref)
         if hasattr(obj, "aliases") and obj.aliases.all():
             string += "\n{wAliases{n: %s" % (", ".join(utils.make_iter(str(obj.aliases))))
-        if hasattr(obj, "sessid") and obj.sessid.count():
-            string += "\n{wsession{n: %s" % obj.sessid.get()
-        elif hasattr(obj, "sessions") and obj.sessions:
+        if hasattr(obj, "sessions") and obj.sessions:
             string += "\n{wsession(s){n: %s" % (", ".join(str(sess.sessid)
-                                                for sess in obj.sessions))
+                                                for sess in obj.sessions.all()))
         if hasattr(obj, "has_player") and obj.has_player:
             string += "\n{wPlayer{n: {c%s{n" % obj.player.name
             perms = obj.player.permissions.all()
@@ -1848,8 +1907,8 @@ class CmdExamine(ObjManipCommand):
 
 
         if not (len(obj.cmdset.all()) == 1 and obj.cmdset.current.key == "_EMPTY_CMDSET"):
-            stored_cmdsets = obj.cmdset.all()
-            stored_cmdsets.sort(key=lambda x: x.priority, reverse=True)
+            # all() returns a 'stack', so make a copy to sort.
+            stored_cmdsets = sorted(obj.cmdset.all(), key=lambda x: x.priority, reverse=True)
             string += "\n{wStored Cmdset(s){n:\n %s" % ("\n ".join("%s [%s] (%s, prio %s)" % \
                                       (cmdset.path, cmdset.key, cmdset.mergetype, cmdset.priority)
                                        for cmdset in stored_cmdsets if cmdset.key != "_EMPTY_CMDSET"))
@@ -1860,16 +1919,16 @@ class CmdExamine(ObjManipCommand):
             # if we merge on the object level.
             if hasattr(obj, "player") and obj.player:
                 all_cmdsets.extend([(cmdset.key, cmdset) for cmdset in  obj.player.cmdset.all()])
-                if obj.sessid.count():
+                if obj.sessions.count():
                     # if there are more sessions than one on objects it's because of multisession mode 3.
                     # we only show the first session's cmdset here (it is -in principle- possible that
                     # different sessions have different cmdsets but for admins who want such madness
                     # it is better that they overload with their own CmdExamine to handle it).
-                    all_cmdsets.extend([(cmdset.key, cmdset) for cmdset in obj.player.get_session(obj.sessid.get()[0]).cmdset.all()])
+                    all_cmdsets.extend([(cmdset.key, cmdset) for cmdset in obj.player.sessions.all()[0].cmdset.all()])
             else:
                 try:
                     # we have to protect this since many objects don't have sessions.
-                    all_cmdsets.extend([(cmdset.key, cmdset) for cmdset in obj.get_session(obj.sessid.get()).cmdset.all()])
+                    all_cmdsets.extend([(cmdset.key, cmdset) for cmdset in obj.get_session(obj.sessions.get()).cmdset.all()])
                 except (TypeError, AttributeError):
                     pass
             all_cmdsets = [cmdset for cmdset in dict(all_cmdsets).values()]
@@ -1941,7 +2000,7 @@ class CmdExamine(ObjManipCommand):
                 obj = caller.location
                 if not obj.access(caller, 'examine'):
                 #If we don't have special info access, just look at the object instead.
-                    caller.execute_cmd('look %s' % obj.name)
+                    self.msg(caller.at_look(obj))
                     return
                 # using callback for printing result whenever function returns.
                 get_and_merge_cmdsets(obj, self.session, self.player, obj, "object").addCallback(get_cmdset_callback)
@@ -1971,7 +2030,7 @@ class CmdExamine(ObjManipCommand):
             if not obj.access(caller, 'examine'):
                 #If we don't have special info access, just look
                 # at the object instead.
-                caller.execute_cmd('look %s' % obj_name)
+                self.msg(caller.at_look(obj))
                 continue
 
             if obj_attrs:
@@ -1979,7 +2038,7 @@ class CmdExamine(ObjManipCommand):
                     # we are only interested in specific attributes
                     caller.msg(self.format_attributes(obj, attrname, crop=False))
             else:
-                if hasattr(obj, "sessid") and obj.sessid.count():
+                if obj.sessions.count():
                     mergemode = "session"
                 elif self.player_mode:
                     mergemode = "player"
@@ -2071,8 +2130,7 @@ class CmdFind(MuxCommand):
                 string += "\n   {RNo match found for '%s' in #dbref interval.{n" % (searchstring)
             else:
                 result=result[0]
-                string += "\n{g   %s(%s) - %s{n" % (result.key, result.dbref,
-                                                    result.path)
+                string += "\n{g   %s - %s{n" % (result.get_display_name(caller), result.path)
         else:
             # Not a player/dbref search but a wider search; build a queryset.
             # Searchs for key and aliases
@@ -2104,10 +2162,10 @@ class CmdFind(MuxCommand):
                 if nresults > 1:
                     string = "{w%i Matches{n(#%i-#%i%s):" % (nresults, low, high, restrictions)
                     for res in results:
-                        string += "\n   {g%s(%s) - %s{n" % (res.key, res.dbref, res.path)
+                        string += "\n   {g%s - %s{n" % (res.get_display_name(caller), res.path)
                 else:
                     string = "{wOne Match{n(#%i-#%i%s):" % (low, high, restrictions)
-                    string += "\n   {g%s(%s) - %s{n" % (results[0].key, results[0].dbref, results[0].path)
+                    string += "\n   {g%s - %s{n" % (results[0].get_display_name(caller), results[0].path)
             else:
                 string = "{wMatch{n(#%i-#%i%s):" % (low, high, restrictions)
                 string += "\n   {RNo matches found for '%s'{n" % searchstring
@@ -2265,18 +2323,18 @@ class CmdScript(MuxCommand):
             # no rhs means we want to operate on all scripts
             scripts = obj.scripts.all()
             if not scripts:
-                string += "No scripts defined on %s." % obj.key
+                string += "No scripts defined on %s." % obj.get_display_name(caller)
             elif not self.switches:
                 # view all scripts
                 from evennia.commands.default.system import format_script_list
                 string += format_script_list(scripts)
             elif "start" in self.switches:
                 num = sum([obj.scripts.start(script.key) for script in scripts])
-                string += "%s scripts started on %s." % (num, obj.key)
+                string += "%s scripts started on %s." % (num, obj.get_display_name(caller))
             elif "stop" in self.switches:
                 for script in scripts:
-                    string += "Stopping script %s on %s." % (script.key,
-                                                             obj.key)
+                    string += "Stopping script %s on %s." % (script.get_display_name(caller),
+                                                             obj.get_display_name(caller))
                     script.stop()
                 string = string.strip()
             obj.scripts.validate()
@@ -2285,9 +2343,13 @@ class CmdScript(MuxCommand):
                 # adding a new script, and starting it
                 ok = obj.scripts.add(self.rhs, autostart=True)
                 if not ok:
-                    string += "\nScript %s could not be added and/or started on %s." % (self.rhs, obj.key)
+                    string += "\nScript %s could not be added and/or started on %s." % (
+                        self.rhs, obj.get_display_name(caller)
+                    )
                 else:
-                    string = "Script {w%s{n successfully added and started on %s." % (self.rhs, obj.key)
+                    string = "Script {w%s{n successfully added and started on %s." % (
+                        self.rhs, obj.get_display_name(caller)
+                    )
 
             else:
                 paths = [self.rhs] + ["%s.%s" % (prefix, self.rhs)
@@ -2351,13 +2413,12 @@ class CmdTag(MuxCommand):
             category = None
             if ":" in tag:
                 tag, category = [part.strip() for part in tag.split(":", 1)]
-            #print "tag search:", tag, search_category
             objs = search.search_tag(tag, category=category)
             nobjs = len(objs)
             if nobjs > 0:
                 catstr = " (category: '{w%s{n')" % category if category else \
                                 ("" if nobjs == 1 else " (may have different tag categories)")
-                matchstr = ", ".join("{w%s{n(#%i)" % (o.key, o.dbid) for o in objs)
+                matchstr = ", ".join(o.get_display_name(self.caller) for o in objs)
 
                 string = "Found {w%i{n object%s with tag '{w%s{n'%s:\n %s" % (nobjs,
                                                        "s" if nobjs > 1 else "",
@@ -2511,6 +2572,6 @@ class CmdSpawn(MuxCommand):
             prototype["location"] = self.caller.location
 
         for obj in spawn(prototype):
-            self.caller.msg("Spawned %s." % obj.key)
+            self.caller.msg("Spawned %s." % obj.get_display_name(self.caller))
 
 

@@ -8,6 +8,8 @@ creation commands.
 
 """
 
+from __future__ import print_function
+
 import traceback
 import random
 from django.conf import settings
@@ -120,7 +122,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                                "condition": loot_record.condition}
                 loot_list.append(loot_object)
         except Exception, e:
-            print "Can't load loot info %s: %s" % (self.get_info_key(), e)
+            logger.log_errmsg("Can't load loot info %s: %s" % (self.get_info_key(), e))
 
         self.loot_list = loot_list
 

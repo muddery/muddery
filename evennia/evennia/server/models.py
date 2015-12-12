@@ -8,6 +8,8 @@ Config values should usually be set through the
 manager's conf() method.
 
 """
+from builtins import object
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -30,8 +32,9 @@ class ServerConfig(WeakSharedMemoryModel):
     On-the fly storage of global settings.
 
     Properties defined on ServerConfig:
-      key - main identifier
-      value - value stored in key. This is a pickled storage.
+
+      - key: Main identifier
+      - value: Value stored in key. This is a pickled storage.
 
     """
 
@@ -87,7 +90,7 @@ class ServerConfig(WeakSharedMemoryModel):
         "Setter. Allows for self.value = value"
         if utils.has_parent('django.db.models.base.Model', value):
             # we have to protect against storing db objects.
-            logger.log_errmsg("ServerConfig cannot store db objects! (%s)" % value)
+            logger.log_err("ServerConfig cannot store db objects! (%s)" % value)
             return
         self.db_value = pickle.dumps(value)
         self.save()
@@ -98,7 +101,7 @@ class ServerConfig(WeakSharedMemoryModel):
         self.delete()
     value = property(__value_get, __value_set, __value_del)
 
-    class Meta:
+    class Meta(object):
         "Define Django meta options"
         verbose_name = "Server Config value"
         verbose_name_plural = "Server Config values"
@@ -112,7 +115,12 @@ class ServerConfig(WeakSharedMemoryModel):
 
     def store(self, key, value):
         """
-        Wrap the storage (handles pickling)
+        Wrap the storage.
+
+        Args:
+            key (str): The name of this store.
+            value (str): The data to store with this `key`.
+
         """
         self.key = key
         self.value = value
