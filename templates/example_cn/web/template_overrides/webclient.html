@@ -10,7 +10,7 @@
 
     <!--CSS style sheet -->
     <link rel="stylesheet" type="text/css" media="screen" href="{% static "webclient/css/webclient.css" %}">
-    {% bootstrap_css %}
+    <link rel="stylesheet" href="{% static "webclient/css/bootstrap.min.css" %}">
     <!-- Importing the online jQuery javascript library -->
     <!--script src="http://code.jquery.com/jquery-1.6.1.js" type="text/javascript" charset="utf-8"></script-->
     <!--script src="http://code.jquery.com/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script-->
@@ -18,10 +18,10 @@
     <!--for offline testing, download the jquery library from jquery.com-->
     <script src="{% static "webclient/js/jquery-1.11.1.min.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/jquery.cookie.js" %}" type="text/javascript" charset="utf-8"></script>
-    {% bootstrap_javascript %}
+    <script src="{% static "webclient/js/bootstrap.min.js" %}"></script>
     <script src="{% static "webclient/js/d3.v3.min.js" %}" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
-    if(!window.jQuery){document.write("<div class='err'>jQuery library not found or the online version could not be reached.</div>");}
+        if(!window.jQuery){document.write("<div class='err'>jQuery library not found or the online version could not be reached.</div>");}
     </script>
 
     {% if websocket_enabled %}
@@ -72,9 +72,6 @@
         <center><h3>Muddery 演示游戏</h3></div>
     </div>
 </header>
-<div id="map_button">
-    <input type="button" class="btn-map" value="地图" onclick="map.showMap()"/>
-</div>
 <div id="wrapper">
     <div id="middlewindow" style="height: 100%; width: auto;margin-left: auto;margin-right: auto;">
         <div class="panel panel-default">
@@ -96,50 +93,6 @@
         </div>
         <div id="prompt_bar">
         </div>
-        <nav id="tab_bar" class="navbar navbar-default">
-            <ul id="tab_pills" class="nav navbar-nav">
-                <li id="tab_connect" class="active" style="display: none">
-                    <a href="#" onclick="webclient.showPage('connect')">连接</a>
-                </li>
-                <li id="tab_login" style="display: none">
-                    <a href="#" onclick="webclient.showPage('login')">登录</a>
-                </li>
-                <li id="tab_register" style="display: none">
-                    <a href="#" onclick="webclient.showPage('register')">注册</a>
-                </li>
-                <li id="tab_room" style="display: none">
-                    <a href="#" onclick="webclient.showPage('room')">房间</a>
-                </li>
-                <li id="tab_status" style="display: none">
-                    <a href="#" onclick="webclient.showPage('status')">状态</a>
-                </li>
-                <li id="tab_inventory" style="display: none">
-                    <a href="#" onclick="webclient.showPage('inventory')">背包</a>
-                </li>
-                <li id="tab_skills" style="display: none">
-                    <a href="#" onclick="webclient.showPage('skills')">技能</a>
-                </li>
-                <li id="tab_quests" style="display: none">
-                    <a href="#" onclick="webclient.showPage('quests')">任务</a>
-                </li>
-                <li id="tab_system" class="dropdown" style="display: none">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" onclick="webclient.showMenuSystem()">系统 <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li id="page_system"><a href="#" onclick="commands.doLogout()">退出</a></li>
-                        <!--<li role="separator" class="divider"></li>-->
-                    </ul>
-                </li>
-                <!--li id="tab_test" role="presentation">
-                    <a href="#" onclick="webclient.showTestPage()">Test</a>
-                </li-->
-            </ul>
-            <form id="page_command" class="navbar-form navbar-right" role="search">
-                <div class="form-group">
-                    <input type="text" placeholder="" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
-                </div>
-                <input type="button" class="btn btn-default" value="发送" onclick="commands.doSendCommand()"/>
-            </form>
-        </nav>
         <div id="tab_content">
             <form id="page_connect" style="display: none">
                 <div>请连接到服务器。</div>
@@ -210,20 +163,6 @@
             </form>
             <form id="page_quests" style="display: none">
             </form>
-            <!--<form id="page_system" style="display: none">-->
-            <!--<div>-->
-            <!--<input type="button" class="btn btn-default" value="退出" onclick="commands.doLogout()"/>-->
-            <!--</div>-->
-            <!--</form>-->
-            <!--<form id="page_command" style="display: none">-->
-            <!--<div>Please input command.</div>-->
-            <!--<div>-->
-            <!--<input type="text" placeholder="" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>-->
-            <!--</div>-->
-            <!--<div>-->
-            <!--<input type="button" class="btn btn-default" value="发送" onclick="commands.doSendCommand()"/>-->
-            <!--</div>-->
-            <!--</form>-->
             <!--form id="page_test" style="display: none">
                 <div>
                     <div>Do test.</div>
@@ -232,8 +171,56 @@
                     </div>
                 </div>
             </form-->
+            <nav id="tab_bar">
+                <ul id="tab_pills"  class="nav nav-tabs">
+                    <li id="tab_connect" role="presentation" class="active" style="display: none">
+                        <a href="#" onclick="webclient.showPage('connect')">连接</a>
+                    </li>
+                    <li id="tab_login" role="presentation" style="display: none">
+                        <a href="#" onclick="webclient.showPage('login')">登录</a>
+                    </li>
+                    <li id="tab_register" role="presentation" style="display: none">
+                        <a href="#" onclick="webclient.showPage('register')">注册</a>
+                    </li>
+                    <li id="tab_room" role="presentation" style="display: none">
+                        <a href="#" onclick="webclient.showPage('room')">房间</a>
+                    </li>
+                    <li id="tab_status" role="presentation" style="display: none">
+                        <a href="#" onclick="webclient.showPage('status')">状态</a>
+                    </li>
+                    <li id="tab_inventory" role="presentation" style="display: none">
+                        <a href="#" onclick="webclient.showPage('inventory')">背包</a>
+                    </li>
+                    <li id="tab_skills" role="presentation" style="display: none">
+                        <a href="#" onclick="webclient.showPage('skills')">技能</a>
+                    </li>
+                    <li id="tab_quests" role="presentation" style="display: none">
+                        <a href="#" onclick="webclient.showPage('quests')">任务</a>
+                    </li>
+                    <li id="tab_map" role="presentation" style="display: none">
+                        <a id="map_button" href="#" onclick="map.showMap()">地图</a>
+                    </li>
+                    <li id="tab_system" role="presentation" class="dropdown" style="display: none">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" onclick="webclient.showMenuSystem()">系统 <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li id="page_system"><a href="#" onclick="commands.doLogout()">退出</a></li>
+                            <!--<li role="separator" class="divider"></li>-->
+                        </ul>
+                    </li>
+                    <li id="tab_command">
+                        <div class="form-group" style="float:left;">
+                            <input type="text" placeholder="" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
+                        </div>
+                        <input type="button" class="btn btn-default" value="发送" onclick="commands.doSendCommand()"/>
+                    </li>
+                    <!--li id="tab_test" role="presentation">
+                        <a href="#" onclick="webclient.showTestPage()">Test</a>
+                    </li-->
+                </ul>
+            </nav>
         </div>
     </div>
 </div>
 </body>
 </html>
+e
