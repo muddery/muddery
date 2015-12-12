@@ -846,7 +846,7 @@ var webclient = {
             $('#tab_bar').height(tab_bar_h);
             $('#tab_content').height(total_h / 2);
         }
-        
+
         if (win_w > 960) {
             $('#middlewindow').width(960);
         }
@@ -1050,6 +1050,7 @@ var webclient = {
         $("#tab_inventory").css("display", "");
         $("#tab_skills").css("display", "");
         $("#tab_quests").css("display", "");
+        $("#tab_map").css("display", "");
         $("#tab_system").css("display", "");
         $("#tab_command").css("display", "");
 
