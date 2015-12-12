@@ -3,10 +3,13 @@ CommonObject is the object that players can put into their inventory.
 
 """
 
+from __future__ import print_function
+
 import random
 from django.conf import settings
 from django.db.models.loading import get_model
 from django.core.exceptions import ObjectDoesNotExist
+from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.script_handler import SCRIPT_HANDLER
 
@@ -33,7 +36,7 @@ class MudderyObjectCreator(MudderyObject):
         except ObjectDoesNotExist:
             pass
         except Exception, e:
-            print "Can't load creator info %s: %s" % (self.get_info_key(), e)
+            logger.log_errmsg("Can't load creator info %s: %s" % (self.get_info_key(), e))
 
         # Load loot list.
         loot_list = []
@@ -49,7 +52,7 @@ class MudderyObjectCreator(MudderyObject):
                                "condition": loot_record.condition}
                 loot_list.append(loot_object)
         except Exception, e:
-            print "Can't load loot info %s: %s" % (self.get_info_key(), e)
+            logger.log_errmsg("Can't load loot info %s: %s" % (self.get_info_key(), e))
 
         self.loot_list = loot_list
 

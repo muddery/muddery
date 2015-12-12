@@ -15,19 +15,18 @@ Install is simple:
 
 To your settings file, add/edit the line:
 
-CMDSET_UNLOGGEDIN = "contrib.menu_login.UnloggedInCmdSet"
+CMDSET_UNLOGGEDIN = "contrib.menu_login.UnloggedinCmdSet"
 
 That's it. Reload the server and try to log in to see it.
 
 You will want to change the login "graphic", which defaults to give
 information about commands which are not used in this version of the
 login. You can change the screen used by editing
-`mygame/server/conf/connection_screens.py`.
+`$GAME_DIR/server/conf/connection_screens.py`.
 
 """
 
 import re
-import traceback
 from django.conf import settings
 from evennia import managers
 from evennia import utils, logger, create_player
@@ -235,9 +234,8 @@ class CmdPasswordCreate(Command):
             # We are in the middle between logged in and -not, so we have
             # to handle tracebacks ourselves at this point. If we don't, we
             # won't see any errors at all.
-            string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
-            self.caller.msg(string % (traceback.format_exc()))
-            logger.log_errmsg(traceback.format_exc())
+            self.caller.msg("An error occurred. Please e-mail an admin if the problem persists.")
+            logger.log_trace()
 
 
 # Menu entry 3 - help screen
@@ -323,13 +321,13 @@ node3 = MenuNode("node3", text=LOGIN_SCREEN_HELP,
 
 # access commands
 
-class UnloggedInCmdSet(CmdSet):
+class UnloggedinCmdSet(CmdSet):
     "Cmdset for the unloggedin state"
     key = "DefaultUnloggedin"
     priority = 0
 
     def at_cmdset_creation(self):
-        "Called when cmdset is first  created"
+        "Called when cmdset is first created."
         self.add(CmdUnloggedinLook())
 
 
@@ -337,7 +335,7 @@ class CmdUnloggedinLook(Command):
     """
     An unloggedin version of the look command. This is called by the server
     when the player first connects. It sets up the menu before handing off
-    to the menu's own look command..
+    to the menu's own look command.
     """
     key = CMD_LOGINSTART
     # obs, this should NOT have aliases for look or l, this will clash with the menu version!

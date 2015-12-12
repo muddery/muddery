@@ -92,7 +92,7 @@ class CmdBoot(MuxCommand):
 
         for session in boot_list:
             session.msg(feedback)
-            pobj.disconnect_session_from_player(session.sessid)
+            pobj.disconnect_session_from_player(session)
 
 
 # regex matching IP addresses with wildcards, eg. 233.122.4.*
@@ -198,7 +198,6 @@ class CmdBan(MuxCommand):
             # replace * with regex form and compile it
             ipregex = ban.replace('.', '\.')
             ipregex = ipregex.replace('*', '[0-9]{1,3}')
-            #print "regex:",ipregex
             ipregex = re.compile(r"%s" % ipregex)
             bantup = ("", ban, ipregex, now, reason)
         # save updated banlist

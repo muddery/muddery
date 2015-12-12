@@ -7,6 +7,8 @@ sets up all the networking features.  (this is done automatically
 by game/evennia.py).
 
 """
+from __future__ import print_function
+from builtins import object
 
 import time
 import sys
@@ -74,17 +76,19 @@ AMP_ENABLED = AMP_HOST and AMP_PORT and AMP_INTERFACE
 _IDLE_TIMEOUT = settings.IDLE_TIMEOUT
 def _portal_maintenance():
     """
-    The maintenance function handles repeated checks and updates
-    that the server needs to do. It is called every minute.
+    The maintenance function handles repeated checks and updates that
+    the server needs to do. It is called every minute.
+
     """
     # check for idle sessions
     now = time.time()
 
     reason = "Idle timeout exceeded, disconnecting."
-    for session in [sess for sess in PORTAL_SESSIONS.sessions.values()
+    for session in [sess for sess in PORTAL_SESSIONS.values()
                     if (now - sess.cmd_last) > _IDLE_TIMEOUT]:
         session.data_out(reason)
         PORTAL_SESSIONS.disconnect(session)
+
 if _IDLE_TIMEOUT > 0:
     # only start the maintenance task if we care about idling.
     _maintenance_task = LoopingCall(_portal_maintenance)
@@ -97,16 +101,18 @@ if _IDLE_TIMEOUT > 0:
 class Portal(object):
 
     """
-    The main Portal server handler. This object sets up the database and
-    tracks and interlinks all the twisted network services that make up
-    Portal.
+    The main Portal server handler. This object sets up the database
+    and tracks and interlinks all the twisted network services that
+    make up Portal.
+
     """
 
     def __init__(self, application):
         """
         Setup the server.
 
-        application - an instantiated Twisted application
+        Args:
+            application (Application): An instantiated Twisted application
 
         """
         sys.path.append('.')
@@ -125,29 +131,37 @@ class Portal(object):
 
     def set_restart_mode(self, mode=None):
         """
-        This manages the flag file that tells the runner if the server should
-        be restarted or is shutting down. Valid modes are True/False and None.
-        If mode is None, no change will be done to the flag file.
+        This manages the flag file that tells the runner if the server
+        should be restarted or is shutting down.
+
+        Args:
+            mode (bool or None): Valid modes are True/False and None.
+                If mode is None, no change will be done to the flag file.
+
         """
         if mode is None:
             return
         with open(PORTAL_RESTART, 'w') as f:
-            print "writing mode=%(mode)s to %(portal_restart)s" % {'mode': mode, 'portal_restart': PORTAL_RESTART}
+            print("writing mode=%(mode)s to %(portal_restart)s" % {'mode': mode, 'portal_restart': PORTAL_RESTART})
             f.write(str(mode))
 
     def shutdown(self, restart=None, _reactor_stopping=False):
         """
         Shuts down the server from inside it.
 
-        restart - True/False sets the flags so the server will be
-                  restarted or not. If None, the current flag setting
-                  (set at initialization or previous runs) is used.
-        _reactor_stopping - this is set if server is already in the process of
-                  shutting down; in this case we don't need to stop it again.
+        Args:
+            restart (bool or None, optional): True/False sets the
+                flags so the server will be restarted or not. If None, the
+                current flag setting (set at initialization or previous
+                runs) is used.
+            _reactor_stopping (bool, optional): This is set if server
+                is already in the process of shutting down; in this case
+                we don't need to stop it again.
 
         Note that restarting (regardless of the setting) will not work
         if the Portal is currently running in daemon mode. In that
         case it always needs to be restarted manually.
+
         """
         if _reactor_stopping and hasattr(self, "shutdown_complete"):
             # we get here due to us calling reactor.stop below. No need
@@ -177,8 +191,8 @@ application = service.Application('Portal')
 # and is where we store all the other services.
 PORTAL = Portal(application)
 
-print '-' * 50
-print ' %(servername)s Portal (%(version)s) started.' % {'servername': SERVERNAME, 'version': VERSION}
+print('-' * 50)
+print(' %(servername)s Portal (%(version)s) started.' % {'servername': SERVERNAME, 'version': VERSION})
 
 if AMP_ENABLED:
 
@@ -188,7 +202,7 @@ if AMP_ENABLED:
 
     from evennia.server import amp
 
-    print '  amp (to Server): %s' % AMP_PORT
+    print('  amp (to Server): %s' % AMP_PORT)
 
     factory = amp.AmpClientFactory(PORTAL)
     amp_client = internet.TCPClient(AMP_HOST, AMP_PORT, factory)
@@ -218,7 +232,7 @@ if TELNET_ENABLED:
             telnet_service.setName('EvenniaTelnet%s' % pstring)
             PORTAL.services.addService(telnet_service)
 
-            print '  telnet%s: %s' % (ifacestr, port)
+            print('  telnet%s: %s' % (ifacestr, port))
 
 
 if SSL_ENABLED:
@@ -243,7 +257,7 @@ if SSL_ENABLED:
             ssl_service.setName('EvenniaSSL%s' % pstring)
             PORTAL.services.addService(ssl_service)
 
-            print "  ssl%s: %s" % (ifacestr, port)
+            print("  ssl%s: %s" % (ifacestr, port))
 
 
 if SSH_ENABLED:
@@ -266,7 +280,7 @@ if SSH_ENABLED:
             ssh_service.setName('EvenniaSSH%s' % pstring)
             PORTAL.services.addService(ssh_service)
 
-            print "  ssl%s: %s" % (ifacestr, port)
+            print("  ssl%s: %s" % (ifacestr, port))
 
 
 if WEBSERVER_ENABLED:
@@ -318,14 +332,14 @@ if WEBSERVER_ENABLED:
                                                interface=interface)
             proxy_service.setName('EvenniaWebProxy%s' % pstring)
             PORTAL.services.addService(proxy_service)
-            print "  webproxy%s:%s (<-> %s)%s" % (ifacestr, proxyport, serverport, webclientstr)
+            print("  webproxy%s:%s (<-> %s)%s" % (ifacestr, proxyport, serverport, webclientstr))
 
 
 for plugin_module in PORTAL_SERVICES_PLUGIN_MODULES:
     # external plugin services to start
     plugin_module.start_plugin_services(PORTAL)
 
-print '-' * 50  # end of terminal output
+print('-' * 50)  # end of terminal output
 
 if os.name == 'nt':
     # Windows only: Set PID file manually

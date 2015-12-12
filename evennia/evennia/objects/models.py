@@ -13,6 +13,7 @@ Attributes are separate objects that store values persistently onto
 the database object. Like everything else, they can be accessed
 transparently through the decorating TypeClass.
 """
+from builtins import object
 
 from django.conf import settings
 from django.db import models
@@ -64,7 +65,7 @@ class ContentsHandler(object):
             objects (list): the Objects inside this location
 
         """
-        pks = self._pkcache.keys()
+        pks = list(self._pkcache)
         if exclude:
             pks = [pk for pk in pks if pk not in [excl.pk for excl in make_iter(exclude)]]
         try:
@@ -120,31 +121,32 @@ class ObjectDB(TypedObject):
     type class with new database-stored variables.
 
     The TypedObject supplies the following (inherited) properties:
-      key - main name
-      name - alias for key
-      typeclass_path - the path to the decorating typeclass
-      typeclass - auto-linked typeclass
-      date_created - time stamp of object creation
-      permissions - perm strings
-      locks - lock definitions (handler)
-      dbref - #id of object
-      db - persistent attribute storage
-      ndb - non-persistent attribute storage
+
+      - key - main name
+      - name - alias for key
+      - db_typeclass_path - the path to the decorating typeclass
+      - db_date_created - time stamp of object creation
+      - permissions - perm strings
+      - locks - lock definitions (handler)
+      - dbref - #id of object
+      - db - persistent attribute storage
+      - ndb - non-persistent attribute storage
 
     The ObjectDB adds the following properties:
-      player - optional connected player (always together with sessid)
-      sessid - optional connection session id (always together with player)
-      location - in-game location of object
-      home - safety location for object (handler)
 
-      scripts - scripts assigned to object (handler from typeclass)
-      cmdset - active cmdset on object (handler from typeclass)
-      aliases - aliases for this object (property)
-      nicks - nicknames for *other* things in Evennia (handler)
-      sessions - sessions connected to this object (see also player)
-      has_player - bool if an active player is currently connected
-      contents - other objects having this object as location
-      exits - exits from this object
+      - player - optional connected player (always together with sessid)
+      - sessid - optional connection session id (always together with player)
+      - location - in-game location of object
+      - home - safety location for object (handler)
+      - scripts - scripts assigned to object (handler from typeclass)
+      - cmdset - active cmdset on object (handler from typeclass)
+      - aliases - aliases for this object (property)
+      - nicks - nicknames for *other* things in Evennia (handler)
+      - sessions - sessions connected to this object (see also player)
+      - has_player - bool if an active player is currently connected
+      - contents - other objects having this object as location
+      - exits - exits from this object
+
     """
     #
     # ObjectDB Database model setup
@@ -264,12 +266,12 @@ class ObjectDB(TypedObject):
 
         except RuntimeError:
             errmsg = "Error: %s.location = %s creates a location loop." % (self.key, location)
-            logger.log_errmsg(errmsg)
-            raise #RuntimeError(errmsg)
-        except Exception, e:
+            logger.log_trace(errmsg)
+            raise
+        except Exception as e:
             errmsg = "Error (%s): %s is not a valid location." % (str(e), location)
-            logger.log_errmsg(errmsg)
-            raise #Exception(errmsg)
+            logger.log_trace(errmsg)
+            raise
 
     def __location_del(self):
         "Cleanly delete the location reference"
@@ -301,7 +303,7 @@ class ObjectDB(TypedObject):
                 logger.log_warn("db_location direct save triggered contents_cache.init() for all objects!")
                 [o.contents_cache.init() for o in self.__dbclass__.get_all_cached_instances()]
 
-    class Meta:
+    class Meta(object):
         "Define Django meta options"
         verbose_name = "Object"
         verbose_name_plural = "Objects"

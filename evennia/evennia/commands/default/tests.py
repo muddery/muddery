@@ -55,7 +55,6 @@ class CommandTest(EvenniaTest):
         cmdobj.cmdstring = cmdobj.key
         cmdobj.args = args
         cmdobj.cmdset = cmdset
-        cmdobj.sessid = 1
         cmdobj.session = SESSIONS.session_from_sessid(1)
         cmdobj.player = self.player
         cmdobj.raw_string = cmdobj.key + " " + args
@@ -70,7 +69,7 @@ class CommandTest(EvenniaTest):
             cmdobj.at_post_cmd()
             # clean out prettytable sugar
             stored_msg = [args[0] for name, args, kwargs in receiver.msg.mock_calls]
-            returned_msg = "|".join(_RE.sub("", mess) for mess in stored_msg)
+            returned_msg = "||".join(_RE.sub("", mess) for mess in stored_msg)
             returned_msg = ansi.parse_ansi(returned_msg, strip_ansi=noansi).strip()
             if msg is not None:
                 if msg == "" and returned_msg or not returned_msg.startswith(msg.strip()):
@@ -174,7 +173,7 @@ class TestPlayer(CommandTest):
         self.call(player.CmdOOC(), "", "You go OOC.", caller=self.player)
 
     def test_ic(self):
-        self.player.unpuppet_object(self.session.sessid)
+        self.player.unpuppet_object(self.session)
         self.call(player.CmdIC(), "Char", "You become Char.", caller=self.player, receiver=self.char1)
 
     def test_password(self):

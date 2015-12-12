@@ -4,10 +4,12 @@ The base Command class.
 All commands in Evennia inherit from the 'Command' class in this module.
 
 """
+from builtins import range
 
 import re
 from evennia.locks.lockhandler import LockHandler
 from evennia.utils.utils import is_iter, fill, lazy_property
+from future.utils import with_metaclass
 
 
 def _init_command(mcs, **kwargs):
@@ -61,7 +63,7 @@ def _init_command(mcs, **kwargs):
     mcs.lock_storage = ";".join(temp)
 
     if hasattr(mcs, 'arg_regex') and isinstance(mcs.arg_regex, basestring):
-        mcs.arg_regex = re.compile(r"%s" % mcs.arg_regex, re.I)
+        mcs.arg_regex = re.compile(r"%s" % mcs.arg_regex, re.I + re.UNICODE)
     if not hasattr(mcs, "auto_help"):
         mcs.auto_help = True
     if not hasattr(mcs, 'is_exit'):
@@ -87,7 +89,7 @@ class CommandMeta(type):
 #    parsing errors.
 
 
-class Command(object):
+class Command(with_metaclass(CommandMeta, object)):
     """
     Base command
 
@@ -109,6 +111,7 @@ class Command(object):
                 help entries and lists)
     cmd.obj - the object on which this command is defined. If a default command,
                  this is usually the same as caller.
+    cmd.rawstring - the full raw string input, including any args and no parsing.
 
     The following class properties can/should be defined on your child class:
 
@@ -126,8 +129,6 @@ class Command(object):
     system to create the help entry for the command, so it's a good idea to
     format it similar to this one)
     """
-    # Tie our metaclass, for some convenience cleanup
-    __metaclass__ = CommandMeta
 
     # the main way to call this command (e.g. 'look')
     key = "command"
@@ -147,7 +148,8 @@ class Command(object):
 
     # auto-set (by Evennia on command instantiation) are:
     #   obj - which object this command is defined on
-    #   sessid - which session-id (if any) is responsible for triggering this command
+    #   session - which session is responsible for triggering this command. Only set
+    #             if triggered by a player.
 
     def __init__(self, **kwargs):
         """
@@ -184,7 +186,8 @@ class Command(object):
         """
         try:
             # first assume input is a command (the most common case)
-            return cmd.key in self._matchset
+            return self._matchset.intersection(cmd._matchset)
+            #return cmd.key in self._matchset
         except AttributeError:
             # probably got a string
             return cmd in self._matchset
@@ -215,6 +218,53 @@ class Command(object):
 
         """
         return any(query in keyalias for keyalias in self._keyaliases)
+
+    def _optimize(self):
+        """
+        Optimize the key and aliases for lookups.
+        """
+        # optimization - a set is much faster to match against than a list
+        self._matchset = set([self.key] + self.aliases)
+        # optimization for looping over keys+aliases
+        self._keyaliases = tuple(self._matchset)
+
+    def set_key(self, new_key):
+        """
+        Update key.
+
+        Args:
+            new_key (str): The new key.
+
+        Notes:
+            This is necessary to use to make sure the optimization
+            caches are properly updated as well.
+
+        """
+        self.key = new_key.lower()
+        self._optimize()
+
+    def set_aliases(self, new_aliases):
+        """
+        Update aliases.
+
+        Args:
+            new_aliases (list):
+
+        Notes:
+            This is necessary to use to make sure the optimization
+            caches are properly updated as well.
+
+        """
+        if not is_iter(new_aliases):
+            try:
+                self.aliases = [str(alias).strip().lower()
+                                for alias in self.aliases.split(',')]
+            except Exception:
+                self.aliases = []
+        self.aliases = list(set(alias for alias in self.aliases
+                            if alias and alias != self.key))
+        self._optimize()
+
 
     def match(self, cmdname):
         """
@@ -248,22 +298,18 @@ class Command(object):
         return self.lockhandler.check(srcobj, access_type, default=default)
 
     def msg(self, msg="", to_obj=None, from_obj=None,
-            sessid=None, all_sessions=False, **kwargs):
+            session=None, **kwargs):
         """
         This is a shortcut instad of calling msg() directly on an
         object - it will detect if caller is an Object or a Player and
-        also appends self.sessid automatically.
+        also appends self.session automatically.
 
         Args:
             msg (str, optional): Text string of message to send.
             to_obj (Object, optional): Target object of message. Defaults to self.caller.
             from_obj (Object, optional): Source of message. Defaults to to_obj.
-            sessid (int, optional): Supply data only to a unique
-                session id (normally not used - this is only potentially
-                useful if to_obj is a Player object different from
-                self.caller or self.caller.player).
-            all_sessions (bool): Default is to send only to the session
-               connected to the target object
+            session (Session, optional): Supply data only to a unique
+                session.
 
         Kwargs:
             kwargs (any): These are all passed on to the message mechanism. Common
@@ -272,26 +318,12 @@ class Command(object):
         """
         from_obj = from_obj or self.caller
         to_obj = to_obj or from_obj
-        if not sessid:
-            if hasattr(to_obj, "sessid"):
-                # this is the case when to_obj is e.g. a Character
-                toobj_sessions = to_obj.sessid.get()
-
-                # If to_obj has more than one session MULTISESSION_MODE=3
-                # we need to send to every session.
-                #(setting it to None, does it)
-                session_tosend = None
-                if len(toobj_sessions) == 1:
-                    session_tosend=toobj_sessions[0]
-                sessid = all_sessions and None or session_tosend
-            elif to_obj == self.caller:
-                # this is the case if to_obj is the calling Player
-                sessid = all_sessions and None or self.sessid
+        if not session:
+            if to_obj == self.caller:
+                session = self.session
             else:
-                # if to_obj is a different Player, all their sessions
-                # will be notified unless sessid was given specifically
-                sessid = None
-        to_obj.msg(msg, from_obj=from_obj, sessid=sessid, **kwargs)
+                session = to_obj.sessions.get()
+        to_obj.msg(msg, from_obj=from_obj, session=session, **kwargs)
 
     # Common Command hooks
 
@@ -348,3 +380,25 @@ class Command(object):
         string += fill("current cmdset (self.cmdset): {w%s{n\n" % (self.cmdset.key if self.cmdset.key else self.cmdset.__class__))
 
         self.caller.msg(string)
+
+    def get_extra_info(self, caller, **kwargs):
+        """
+        Display some extra information that may help distinguish this
+        command from others, for instance, in a disambiguity prompt.
+
+        If this command is a potential match in an ambiguous
+        situation, one distinguishing feature may be its attachment to
+        a nearby object, so we include this if available.
+
+        Args:
+            caller (TypedObject): The caller who typed an ambiguous
+            term handed to the search function.
+
+        Returns:
+            A string with identifying information to disambiguate the
+            object, conventionally with a preceding space.
+
+        """
+        if hasattr(self, 'obj') and self.obj != caller:
+            return " (%s)" % self.obj.get_display_name(caller).strip()
+        return ""

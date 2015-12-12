@@ -6,10 +6,11 @@ leave caching unexpectedly (no use of WeakRefs).
 
 Also adds `cache_size()` for monitoring the size of the cache.
 """
+from __future__ import absolute_import, division
+from builtins import object
+from future.utils import listitems, listvalues, with_metaclass
 
 import os, threading, gc, time
-#from twisted.internet import reactor
-#from twisted.internet.threads import blockingCallFromThread
 from weakref import WeakValueDictionary
 from twisted.internet.reactor import callFromThread
 from django.core.exceptions import ObjectDoesNotExist, FieldError
@@ -17,9 +18,9 @@ from django.db.models.signals import post_save
 from django.db.models.base import Model, ModelBase
 from django.db.models.signals import pre_delete, post_syncdb
 from evennia.utils import logger
-from evennia.utils.utils import dbref, get_evennia_pids, to_str,calledby
+from evennia.utils.utils import dbref, get_evennia_pids, to_str
 
-from manager import SharedMemoryManager
+from .manager import SharedMemoryManager
 
 AUTO_FLUSH_MIN_INTERVAL = 60.0 * 5 # at least 5 mins between cache flushes
 
@@ -53,18 +54,16 @@ class SharedMemoryModelBase(ModelBase):
         or try to retrieve one from the class-wide cache by inferring the pk value from
         `args` and `kwargs`. If instance caching is enabled for this class, the cache is
         populated whenever possible (ie when it is possible to infer the pk value).
+
         """
         def new_instance():
             return super(SharedMemoryModelBase, cls).__call__(*args, **kwargs)
 
         instance_key = cls._get_cache_key(args, kwargs)
         # depending on the arguments, we might not be able to infer the PK, so in that case we create a new instance
-        #print "SharedMemoryModelBase.__call__ 1: calledby:", calledby(3)
-        #print "SharedMemoryModelBase.__call__ 2: instance_key:", instance_key
         if instance_key is None:
             return new_instance()
         cached_instance = cls.get_cached_instance(instance_key)
-        #print "SharedMemoryModelBase.__call__ 3: cached_instance:", cached_instance
         if cached_instance is None:
             cached_instance = new_instance()
             cls.cache_instance(cached_instance, new=True)
@@ -75,6 +74,7 @@ class SharedMemoryModelBase(ModelBase):
         """
         Prepare the cache, making sure that proxies of the same db base
         share the same cache.
+
         """
         # the dbmodel is either the proxy base or ourselves
         dbmodel = cls._meta.proxy_for_model if cls._meta.proxy else cls
@@ -89,15 +89,17 @@ class SharedMemoryModelBase(ModelBase):
         """
         Field shortcut creation:
 
-        Takes field names `db_*` and creates property wrappers named without the
-        `db_` prefix. So db_key -> key
+        Takes field names `db_*` and creates property wrappers named
+        without the `db_` prefix. So db_key -> key
 
-        This wrapper happens on the class level, so there is no overhead when creating objects.
-        If a class already has a wrapper of the given name, the automatic creation is skipped.
+        This wrapper happens on the class level, so there is no
+        overhead when creating objects.  If a class already has a
+        wrapper of the given name, the automatic creation is skipped.
 
         Notes:
-            Remember to document this auto-wrapping in the class header, this could seem very
-            much like magic to the user otherwise.
+            Remember to document this auto-wrapping in the class
+            header, this could seem very much like magic to the user
+            otherwise.
         """
 
         attrs["typename"] = cls.__name__
@@ -109,7 +111,6 @@ class SharedMemoryModelBase(ModelBase):
             "Helper method to create property wrappers with unique names (must be in separate call)"
             def _get(cls, fname):
                 "Wrapper for getting database field"
-                #print "_get:", fieldname, wrappername,_GA(cls,fieldname)
                 if _GA(cls, "_is_deleted"):
                     raise ObjectDoesNotExist("Cannot access %s: Hosting object was already deleted." % fname)
                 return _GA(cls, fieldname)
@@ -188,38 +189,34 @@ class SharedMemoryModelBase(ModelBase):
         if cls.__name__ in ("ServerConfig", "TypeNick"):
             return
         # dynamically create the wrapper properties for all fields not already handled (manytomanyfields are always handlers)
-        for fieldname, field in ((fname, field) for fname, field in attrs.items()
+        for fieldname, field in ((fname, field) for fname, field in listitems(attrs)
                                   if fname.startswith("db_") and type(field).__name__ != "ManyToManyField"):
             foreignkey = type(field).__name__ == "ForeignKey"
-            #print fieldname, type(field).__name__, field
             wrappername = "dbid" if fieldname == "id" else fieldname.replace("db_", "", 1)
-            #print fieldname, wrappername
             if wrappername not in attrs:
                 # makes sure not to overload manually created wrappers on the model
-                #print "wrapping %s -> %s" % (fieldname, wrappername)
                 create_wrapper(cls, fieldname, wrappername, editable=field.editable, foreignkey=foreignkey)
 
         return super(SharedMemoryModelBase, cls).__new__(cls, name, bases, attrs)
 
 
-class SharedMemoryModel(Model):
+class SharedMemoryModel(with_metaclass(SharedMemoryModelBase, Model)):
     """
     Base class for idmapped objects. Inherit from `this`.
     """
-    # CL: setting abstract correctly to allow subclasses to inherit the default
-    # manager.
-    __metaclass__ = SharedMemoryModelBase
 
     objects = SharedMemoryManager()
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
     @classmethod
     def _get_cache_key(cls, args, kwargs):
         """
-        This method is used by the caching subsystem to infer the PK value from the constructor arguments.
-        It is used to decide if an instance has to be built or is already in the cache.
+        This method is used by the caching subsystem to infer the PK
+        value from the constructor arguments.  It is used to decide if
+        an instance has to be built or is already in the cache.
+
         """
         result = None
         # Quick hack for my composites work for now.
@@ -248,9 +245,11 @@ class SharedMemoryModel(Model):
     @classmethod
     def get_cached_instance(cls, id):
         """
-        Method to retrieve a cached instance by pk value. Returns None when not found
-        (which will always be the case when caching is disabled for this class). Please
-        note that the lookup will be done even when instance caching is disabled.
+        Method to retrieve a cached instance by pk value. Returns None
+        when not found (which will always be the case when caching is
+        disabled for this class). Please note that the lookup will be
+        done even when instance caching is disabled.
+
         """
         return cls.__dbclass__.__instance_cache__.get(id)
 
@@ -261,9 +260,9 @@ class SharedMemoryModel(Model):
 
         Args:
             instance (Class instance): the instance to cache.
-            new (bool, optional): this is the first time this
-                instance is cached (i.e. this is not an update
-                operation like after a db save).
+            new (bool, optional): this is the first time this instance is
+                cached (i.e. this is not an update operation like after a
+                db save).
 
         """
         pk = instance._get_pk_val()
@@ -281,13 +280,15 @@ class SharedMemoryModel(Model):
     def get_all_cached_instances(cls):
         """
         Return the objects so far cached by idmapper for this class.
+
         """
-        return cls.__dbclass__.__instance_cache__.values()
+        return listvalues(cls.__dbclass__.__instance_cache__)
 
     @classmethod
     def _flush_cached_by_key(cls, key, force=True):
         """
         Remove the cached reference.
+
         """
         try:
             if force or not cls._idmapper_recache_protection:
@@ -312,6 +313,7 @@ class SharedMemoryModel(Model):
         """
         This will clean safe objects from the cache. Use `force`
         keyword to remove all objects, safe or not.
+
         """
         if force:
             cls.__dbclass__.__instance_cache__ = {}
@@ -326,6 +328,7 @@ class SharedMemoryModel(Model):
         """
         Flush this instance from the instance cache. Use
         `force` to override recache_protection for the object.
+
         """
         pk = self._get_pk_val()
         if pk and (force or not self._idmapper_recache_protection):
@@ -334,12 +337,14 @@ class SharedMemoryModel(Model):
     def set_recache_protection(self, mode=True):
         """
         Set if this instance should be allowed to be recached.
+
         """
         self._idmapper_recache_protection = bool(mode)
 
     def delete(self, *args, **kwargs):
         """
         Delete the object, clearing cache.
+
         """
         self.flush_from_cache()
         self._is_deleted = True
@@ -349,12 +354,11 @@ class SharedMemoryModel(Model):
         """
         Central database save operation.
 
-        Arguments as per Django documentation
-
-        Calls:
-            self.at_<fieldname>_postsave(new)
-            # this is a wrapper set by oobhandler:
-            self._oob_at_<fieldname>_postsave()
+        Notes:
+            Arguments as per Django documentation.
+            Calls `self.at_<fieldname>_postsave(new)`
+            (this is a wrapper set by oobhandler:
+            self._oob_at_<fieldname>_postsave())
 
         """
 
@@ -400,6 +404,7 @@ class SharedMemoryModel(Model):
 class WeakSharedMemoryModelBase(SharedMemoryModelBase):
     """
     Uses a WeakValue dictionary for caching instead of a regular one.
+
     """
     def _prepare(cls):
         super(WeakSharedMemoryModelBase, cls)._prepare()
@@ -407,12 +412,12 @@ class WeakSharedMemoryModelBase(SharedMemoryModelBase):
         cls._idmapper_recache_protection = False
 
 
-class WeakSharedMemoryModel(SharedMemoryModel):
+class WeakSharedMemoryModel(with_metaclass(WeakSharedMemoryModelBase, SharedMemoryModel)):
     """
     Uses a WeakValue dictionary for caching instead of a regular one
+
     """
-    __metaclass__ = WeakSharedMemoryModelBase
-    class Meta:
+    class Meta(object):
         abstract = True
 
 
@@ -424,6 +429,7 @@ def flush_cache(**kwargs):
     is `True`.
 
     Uses a signal so we make sure to catch cascades.
+
     """
     def class_hierarchy(clslist):
         """Recursively yield a class hierarchy"""
@@ -435,9 +441,7 @@ def flush_cache(**kwargs):
             else:
                 yield cls
 
-    #print "start flush ..."
     for cls in class_hierarchy([SharedMemoryModel]):
-        #print cls
         cls.flush_instance_cache()
     # run the python garbage collector
     return gc.collect()
@@ -448,6 +452,7 @@ post_syncdb.connect(flush_cache)
 def flush_cached_instance(sender, instance, **kwargs):
     """
     Flush the idmapper cache only for a given instance.
+
     """
     # XXX: Is this the best way to make sure we can flush?
     if not hasattr(instance, 'flush_cached_instance'):
@@ -459,6 +464,7 @@ pre_delete.connect(flush_cached_instance)
 def update_cached_instance(sender, instance, **kwargs):
     """
     Re-cache the given instance in the idmapper cache.
+
     """
     if not hasattr(instance, 'cache_instance'):
         return
@@ -481,6 +487,7 @@ def conditional_flush(max_rmem, force=False):
             cache is flushed.
         force (bool, optional): forces a flush, regardless of timeout.
             Defaults to `False`.
+
     """
     global LAST_FLUSH
 
@@ -514,8 +521,8 @@ def conditional_flush(max_rmem, force=False):
 
     if ((now - LAST_FLUSH) < AUTO_FLUSH_MIN_INTERVAL) and not force:
         # too soon after last flush.
-        logger.log_warnmsg("Warning: Idmapper flush called more than "\
-                            "once in %s min interval. Check memory usage." % (AUTO_FLUSH_MIN_INTERVAL/60.0))
+        logger.log_warn("Warning: Idmapper flush called more than "\
+                        "once in %s min interval. Check memory usage." % (AUTO_FLUSH_MIN_INTERVAL/60.0))
         return
 
     if os.name == "nt":
@@ -546,6 +553,7 @@ def cache_size(mb=True):
 
     Returns:
       total_num, {objclass:total_num, ...}
+
     """
     numtotal = [0] # use mutable to keep reference through recursion
     classdict = {}

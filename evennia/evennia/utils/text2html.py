@@ -8,10 +8,12 @@ snippet #577349 on http://code.activestate.com.
 
 (extensively modified by Griatch 2010)
 """
+from __future__ import absolute_import
+from builtins import object
 
 import re
 import cgi
-from ansi import *
+from .ansi import *
 
 
 class TextToHTMLparser(object):
@@ -79,11 +81,20 @@ class TextToHTMLparser(object):
     re_uline = re.compile("(?:%s)(.*?)(?=%s)" % (ANSI_UNDERLINE.replace("[", r"\["), fgstop))
     re_string = re.compile(r'(?P<htmlchars>[<&>])|(?P<space> [ \t]+)|(?P<lineend>\r\n|\r|\n)', re.S|re.M|re.I)
     re_link =  re.compile(r'\{lc(.*?)\{lt(.*?)\{le', re.DOTALL)
+    re_url = re.compile(r'((?:ftp|www|https?)\W+(?:(?!\.(?:\s|$)|&\w+;)[^"\',;$*^\\(){}<>\[\]\s])+)(\.(?:\s|$)|&\w+;|)')
 
     def re_color(self, text):
         """
-        Replace ansi colors with html color class names.
-        Let the client choose how it will display colors, if it wishes to.  """
+        Replace ansi colors with html color class names.  Let the
+        client choose how it will display colors, if it wishes to.
+
+        Args:
+            text (str): the string with color to replace.
+
+        Returns:
+            text (str): Re-colored text.
+
+        """
         for colorname, regex in self.re_fgs:
             text = regex.sub(r'''<span class="%s">\1</span>''' % colorname, text)
         for bgname, regex in self.re_bgs:
@@ -91,19 +102,56 @@ class TextToHTMLparser(object):
         return self.re_normal.sub("", text)
 
     def re_bold(self, text):
-        "Clean out superfluous hilights rather than set <strong>to make it match the look of telnet."
+        """
+        Clean out superfluous hilights rather than set <strong>to make
+        it match the look of telnet.
+
+        Args:
+            text (str): Text to process.
+
+        Returns:
+            text (str): Processed text.
+
+        """
         return self.re_hilite.sub(r'<strong>\1</strong>', text)
 
     def re_underline(self, text):
-        "Replace ansi underline with html underline class name."
+        """
+        Replace ansi underline with html underline class name.
+
+        Args:
+            text (str): Text to process.
+
+        Returns:
+            text (str): Processed text.
+
+        """
         return self.re_uline.sub(r'<span class="underline">\1</span>', text)
 
     def remove_bells(self, text):
-        "Remove ansi specials"
+        """
+        Remove ansi specials
+
+        Args:
+            text (str): Text to process.
+
+        Returns:
+            text (str): Processed text.
+
+        """
         return text.replace('\07', '')
 
     def remove_backspaces(self, text):
-        "Removes special escape sequences"
+        """
+        Removes special escape sequences
+
+        Args:
+            text (str): Text to process.
+
+        Returns:
+            text (str): Processed text.
+
+        """
         backspace_or_eol = r'(.\010)|(\033\[K)'
         n = 1
         while n > 0:
@@ -111,42 +159,83 @@ class TextToHTMLparser(object):
         return text
 
     def convert_linebreaks(self, text):
-        "Extra method for cleaning linebreaks"
+        """
+        Extra method for cleaning linebreaks
+
+        Args:
+            text (str): Text to process.
+
+        Returns:
+            text (str): Processed text.
+
+        """
         return text.replace(r'\n', r'<br>')
 
     def convert_urls(self, text):
-        "Replace urls (http://...) by valid HTML"
-        regexp = r"((ftp|www|http)(\W+\S+[^).,:;?\]\}(\<span\>) \r\n$\"\']+))"
+        """
+        Replace urls (http://...) by valid HTML.
+
+        Args:
+            text (str): Text to process.
+
+        Returns:
+            text (str): Processed text.
+
+        """
         # -> added target to output prevent the web browser from attempting to
         # change pages (and losing our webclient session).
-        return re.sub(regexp, r'<a href="\1" target="_blank">\1</a>', text)
+        return self.re_url.sub(r'<a href="\1" target="_blank">\1</a>\2', text)
 
     def convert_links(self, text):
         """
-        Replaces links with HTML code
+        Replaces links with HTML code.
+
+        Args:
+            text (str): Text to process.
+
+        Returns:
+            text (str): Processed text.
+
         """
         html = "<a href='#' onclick='websocket.send(\"CMD\\1\"); return false;'>\\2</a>"
         repl = self.re_link.sub(html, text)
         return repl
 
-    def do_sub(self, m):
-        "Helper method to be passed to re.sub."
-        c = m.groupdict()
-        if c['htmlchars']:
-            return cgi.escape(c['htmlchars'])
-        if c['lineend']:
+    def do_sub(self, match):
+        """
+        Helper method to be passed to re.sub,
+        for handling all substitutions.
+
+        Args:
+            match (re.Matchobject): Match for substitution.
+
+        Returns:
+            text (str): Processed text.
+
+        """
+        cdict = match.groupdict()
+        if cdict['htmlchars']:
+            return cgi.escape(cdict['htmlchars'])
+        if cdict['lineend']:
             return '<br>'
-        elif c['space'] == '\t':
+        elif cdict['space'] == '\t':
             return ' ' * self.tabstop
-        elif c['space']:
-            t = m.group().replace('\t', '&nbsp;' * self.tabstop)
-            t = t.replace(' ', '&nbsp;')
-            return t
+        elif cdict['space']:
+            text = match.group().replace('\t', '&nbsp;' * self.tabstop)
+            text = text.replace(' ', '&nbsp;')
+            return text
 
     def parse(self, text, strip_ansi=False):
         """
-        Main access function, converts a text containing
-        ANSI codes into html statements.
+        Main access function, converts a text containing ANSI codes
+        into html statements.
+
+        Args:
+            text (str): Text to process.
+            strip_ansi (bool, optional):
+
+        Returns:
+            text (str): Parsed text.
         """
         # parse everything to ansi first
         text = parse_ansi(text, strip_ansi=strip_ansi, xterm256=False, mxp=True)

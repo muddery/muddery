@@ -3,6 +3,7 @@
 System commands
 
 """
+from __future__ import division
 
 import traceback
 import os
@@ -116,7 +117,7 @@ class CmdShutdown(MuxCommand):
         announcement = "\nServer is being SHUT DOWN!\n"
         if self.args:
             announcement += "%s\n" % self.args
-        logger.log_infomsg('Server shutdown by %s.' % self.caller.name)
+        logger.log_info('Server shutdown by %s.' % self.caller.name)
         SESSIONS.announce_all(announcement)
         SESSIONS.server.shutdown(mode='shutdown')
         SESSIONS.portal_shutdown()
@@ -177,7 +178,7 @@ class CmdPy(MuxCommand):
                           'inherits_from': utils.inherits_from}
 
         try:
-            self.msg(">>> %s" % pycode, raw=True, sessid=self.sessid)
+            self.msg(">>> %s" % pycode, raw=True, session=self.session)
         except TypeError:
             self.msg(">>> %s" % pycode, raw=True)
 
@@ -194,23 +195,23 @@ class CmdPy(MuxCommand):
                 t0 = timemeasure()
                 ret = eval(pycode_compiled, {}, available_vars)
                 t1 = timemeasure()
-                duration = " (%.4f ms)" % ((t1 - t0) * 1000)
+                duration = " (runtime ~ %.4f ms)" % ((t1 - t0) * 1000)
             else:
                 ret = eval(pycode_compiled, {}, available_vars)
             if mode == "eval":
-                ret = "{n<<< %s%s" % (str(ret), duration)
+                ret = "<<< %s%s" % (str(ret), duration)
             else:
-                ret = "{n<<< Done.%s" % duration
+                ret = "<<< Done (use self.msg() if you want to catch output)%s" % duration
         except Exception:
             errlist = traceback.format_exc().split('\n')
             if len(errlist) > 4:
                 errlist = errlist[4:]
-            ret = "\n".join("{n<<< %s" % line for line in errlist if line)
+            ret = "\n".join("<<< %s" % line for line in errlist if line)
 
         try:
-            self.msg(ret, sessid=self.sessid)
+            self.msg(ret, session=self.session, raw=True)
         except TypeError:
-            self.msg(ret)
+            self.msg(ret, raw=True)
 
 
 # helper function. Kept outside so it can be imported and run
@@ -488,9 +489,6 @@ class CmdService(MuxCommand):
             return
 
         # get all services
-        sessions = caller.sessions
-        if not sessions:
-            return
         service_collection = SESSIONS.server.services
 
         if not switches or switches[0] == "list":
@@ -690,7 +688,7 @@ class CmdServerLoad(MuxCommand):
             if has_psutil:
                 loadavg = psutil.cpu_percent()
                 _mem = psutil.virtual_memory()
-                rmem = _mem.used  / (1000 * 1000)
+                rmem = _mem.used  / (1000.0 * 1000)
                 pmem = _mem.percent
 
                 if "mem" in self.switches:

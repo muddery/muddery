@@ -2,13 +2,14 @@
 This module implements the ssh (Secure SHell) protocol for encrypted
 connections.
 
-This depends on a generic session module that implements
-the actual login procedure of the game, tracks
-sessions etc.
+This depends on a generic session module that implements the actual
+login procedure of the game, tracks sessions etc.
 
 Using standard ssh client,
 
 """
+from __future__ import print_function
+from builtins import object
 import os
 
 from twisted.cred.checkers import credentials
@@ -41,11 +42,16 @@ class SshProtocol(Manhole, session.Session):
     Each player connecting over ssh gets this protocol assigned to
     them.  All communication between game and player goes through
     here.
+
     """
     def __init__(self, starttuple):
         """
         For setting up the player.  If player is not None then we'll
         login automatically.
+
+        Args:
+            starttuple (tuple): A (player, factory) tuple.
+
         """
         self.authenticated_player = starttuple[0]
         # obs must not be called self.factory, that gets overwritten!
@@ -54,6 +60,11 @@ class SshProtocol(Manhole, session.Session):
     def terminalSize(self, width, height):
         """
         Initialize the terminal and connect to the new session.
+
+        Args:
+            width (int): Width of terminal.
+            height (int): Height of terminal.
+
         """
         # Clear the previous input line, redraw it at the new
         # cursor position
@@ -74,8 +85,8 @@ class SshProtocol(Manhole, session.Session):
 
     def connectionMade(self):
         """
-        This is called when the connection is first
-        established.
+        This is called when the connection is first established.
+
         """
         recvline.HistoricRecvLine.connectionMade(self)
         self.keyHandlers[CTRL_C] = self.handle_INT
@@ -87,8 +98,9 @@ class SshProtocol(Manhole, session.Session):
 
     def handle_INT(self):
         """
-        Handle ^C as an interrupt keystroke by resetting the current input
-        variables to their initial state.
+        Handle ^C as an interrupt keystroke by resetting the current
+        input variables to their initial state.
+
         """
         self.lineBuffer = []
         self.lineBufferIndex = 0
@@ -100,6 +112,7 @@ class SshProtocol(Manhole, session.Session):
     def handle_EOF(self):
         """
         Handles EOF generally used to exit.
+
         """
         if self.lineBuffer:
             self.terminal.write('\a')
@@ -110,6 +123,7 @@ class SshProtocol(Manhole, session.Session):
         """
         Handle a 'form feed' byte - generally used to request a screen
         refresh/redraw.
+
         """
         self.terminal.eraseDisplay()
         self.terminal.cursorHome()
@@ -117,14 +131,18 @@ class SshProtocol(Manhole, session.Session):
     def handle_QUIT(self):
         """
         Quit, end, and lose the connection.
+
         """
         self.terminal.loseConnection()
 
     def connectionLost(self, reason=None):
         """
-        This is executed when the connection is lost for
-        whatever reason. It can also be called directly,
-        from the disconnect method.
+        This is executed when the connection is lost for whatever
+        reason. It can also be called directly, from the disconnect
+        method.
+
+        Args:
+            reason (str): Motivation for loosing connection.
 
         """
         insults.TerminalProtocol.connectionLost(self, reason)
@@ -133,25 +151,35 @@ class SshProtocol(Manhole, session.Session):
 
     def getClientAddress(self):
         """
-        Returns the client's address and port in a tuple. For example
-        ('127.0.0.1', 41917)
+        Get client address.
+
+        Returns:
+            address_and_port (tuple): The client's address and port in
+                a tuple. For example `('127.0.0.1', 41917)`.
+
         """
         return self.terminal.transport.getPeer()
 
     def lineReceived(self, string):
         """
-        Communication Player -> Evennia. Any line return indicates a
+        Communication User -> Evennia. Any line return indicates a
         command for the purpose of the MUD.  So we take the user input
         and pass it on to the game engine.
+
+        Args:
+            string (str): Input text.
+
         """
         self.sessionhandler.data_in(self, string)
 
     def lineSend(self, string):
         """
-        Communication Evennia -> Player
-        Any string sent should already have been
-        properly formatted and processed
-        before reaching this point.
+        Communication Evennia -> User.  Any string sent should
+        already have been properly formatted and processed before
+        reaching this point.
+
+        Args:
+            string (str): Output text.
 
         """
         for line in string.split('\n'):
@@ -163,7 +191,11 @@ class SshProtocol(Manhole, session.Session):
 
     def disconnect(self, reason="Connection closed. Goodbye for now."):
         """
-        Disconnect from server
+        Disconnect from server.
+
+        Args:
+            reason (str): Motivation for disconnect.
+
         """
         if reason:
             self.data_out(reason)
@@ -171,17 +203,18 @@ class SshProtocol(Manhole, session.Session):
 
     def data_out(self, text=None, **kwargs):
         """
-        Data Evennia -> Player access hook. 'data' argument is a dict
+        Data Evennia -> User access hook. 'data' argument is a dict
         parsed for string settings.
 
-        ssh flags:
-            raw=True - leave all ansi markup and tokens unparsed
-            nomarkup=True - remove all ansi markup
+        Kwargs:
+            text (str): Text to send.
+            raw (bool): Leave all ansi markup and tokens unparsed
+            nomarkup (bool): Remove all ansi markup.
 
         """
         try:
             text = utils.to_str(text if text else "", encoding=self.encoding)
-        except Exception, e:
+        except Exception as e:
             self.lineSend(str(e))
             return
         raw = kwargs.get("raw", False)
@@ -199,6 +232,10 @@ class ExtraInfoAuthServer(SSHUserAuthServer):
 
         Used mostly for setting up the transport so we can query
         username and password later.
+
+        Args:
+            packet (Packet): Auth packet.
+
         """
         password = common.getNS(packet[1:])[0]
         c = credentials.UsernamePassword(self.user, password)
@@ -212,15 +249,26 @@ class PlayerDBPasswordChecker(object):
     Checks the django db for the correct credentials for
     username/password otherwise it returns the player or None which is
     useful for the Realm.
+
     """
     credentialInterfaces = (credentials.IUsernamePassword,)
 
     def __init__(self, factory):
+        """
+        Initialize the factory.
+
+        Args:
+            factory (SSHFactory): Checker factory.
+
+        """
         self.factory = factory
         super(PlayerDBPasswordChecker, self).__init__()
 
     def requestAvatarId(self, c):
-        "Generic credentials"
+        """
+        Generic credentials.
+
+        """
         up = credentials.IUsernamePassword(c, None)
         username = up.username
         password = up.password
@@ -235,6 +283,7 @@ class PassAvatarIdTerminalRealm(TerminalRealm):
     """
     Returns an avatar that passes the avatarId through to the
     protocol.  This is probably not the best way to do it.
+
     """
 
     def _getAvatar(self, avatarId):
@@ -251,10 +300,11 @@ class PassAvatarIdTerminalRealm(TerminalRealm):
         return user
 
 
-class TerminalSessionTransport_getPeer:
+class TerminalSessionTransport_getPeer(object):
     """
     Taken from twisted's TerminalSessionTransport which doesn't
     provide getPeer to the transport.  This one does.
+    j
     """
     def __init__(self, proto, chainedProtocol, avatar, width, height):
         self.proto = proto
@@ -290,7 +340,7 @@ def getKeyPair(pubkeyfile, privkeyfile):
 
     if not (os.path.exists(pubkeyfile) and os.path.exists(privkeyfile)):
         # No keypair exists. Generate a new RSA keypair
-        print "  Generating SSH RSA keypair ...",
+        print("  Generating SSH RSA keypair ...", end=' ')
         from Crypto.PublicKey import RSA
 
         KEY_LENGTH = 1024
@@ -301,7 +351,7 @@ def getKeyPair(pubkeyfile, privkeyfile):
         # save keys for the future.
         file(pubkeyfile, 'w+b').write(publicKeyString)
         file(privkeyfile, 'w+b').write(privateKeyString)
-        print " done."
+        print(" done.")
     else:
         publicKeyString = file(pubkeyfile).read()
         privateKeyString = file(privkeyfile).read()
@@ -334,9 +384,9 @@ def makeFactory(configdict):
         publicKey, privateKey = getKeyPair(pubkeyfile, privkeyfile)
         factory.publicKeys = {'ssh-rsa': publicKey}
         factory.privateKeys = {'ssh-rsa': privateKey}
-    except Exception, e:
-        print " getKeyPair error: %(e)s\n WARNING: Evennia could not auto-generate SSH keypair. Using conch default keys instead." % {'e': e}
-        print " If this error persists, create game/%(pub)s and game/%(priv)s yourself using third-party tools." % {'pub': pubkeyfile, 'priv': privkeyfile}
+    except Exception as e:
+        print(" getKeyPair error: %(e)s\n WARNING: Evennia could not auto-generate SSH keypair. Using conch default keys instead." % {'e': e})
+        print(" If this error persists, create game/%(pub)s and game/%(priv)s yourself using third-party tools." % {'pub': pubkeyfile, 'priv': privkeyfile})
 
     factory.services = factory.services.copy()
     factory.services['ssh-userauth'] = ExtraInfoAuthServer

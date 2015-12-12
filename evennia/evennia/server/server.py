@@ -7,6 +7,8 @@ sets up all the networking features.  (this is done automatically
 by game/evennia.py).
 
 """
+from __future__ import print_function
+from builtins import object
 import time
 import sys
 import os
@@ -211,7 +213,7 @@ class Evennia(object):
             #from evennia.players.models import PlayerDB
             for i, prev, curr in ((i, tup[0], tup[1]) for i, tup in enumerate(settings_compare) if i in mismatches):
                 # update the database
-                print " %s:\n '%s' changed to '%s'. Updating unchanged entries in database ..." % (settings_names[i], prev, curr)
+                print(" %s:\n '%s' changed to '%s'. Updating unchanged entries in database ..." % (settings_names[i], prev, curr))
                 if i == 0:
                     ObjectDB.objects.filter(db_cmdset_storage__exact=prev).update(db_cmdset_storage=curr)
                 if i == 1:
@@ -245,18 +247,18 @@ class Evennia(object):
         if not last_initial_setup_step:
             # None is only returned if the config does not exist,
             # i.e. this is an empty DB that needs populating.
-            print ' Server started for the first time. Setting defaults.'
+            print(' Server started for the first time. Setting defaults.')
             initial_setup.handle_setup(0)
-            print '-' * 50
+            print('-' * 50)
         elif int(last_initial_setup_step) >= 0:
             # a positive value means the setup crashed on one of its
             # modules and setup will resume from this step, retrying
             # the last failed module. When all are finished, the step
             # is set to -1 to show it does not need to be run again.
-            print ' Resuming initial setup from step %(last)s.' % \
-                {'last': last_initial_setup_step}
+            print(' Resuming initial setup from step %(last)s.' % \
+                {'last': last_initial_setup_step})
             initial_setup.handle_setup(int(last_initial_setup_step))
-            print '-' * 50
+            print('-' * 50)
 
     def run_init_hooks(self):
         """
@@ -268,7 +270,6 @@ class Evennia(object):
         #update eventual changed defaults
         self.update_defaults()
 
-        #print "run_init_hooks:", ObjectDB.get_all_cached_instances()
         [o.at_init() for o in ObjectDB.get_all_cached_instances()]
         [p.at_init() for p in PlayerDB.get_all_cached_instances()]
 
@@ -367,7 +368,7 @@ class Evennia(object):
                 yield [(p.unpuppet_all(), p.at_server_shutdown())
                                        for p in PlayerDB.get_all_cached_instances()]
                 yield ObjectDB.objects.clear_all_sessids()
-            yield [(s.pause(), s.at_server_reload()) for s in ScriptDB.get_all_cached_instances()]
+            yield [(s.pause(), s.at_server_shutdown()) for s in ScriptDB.get_all_cached_instances()]
             ServerConfig.objects.conf("server_restart_mode", "reset")
             self.at_server_cold_stop()
 
@@ -431,10 +432,15 @@ class Evennia(object):
         This is called only when the server starts "cold", i.e. after a
         shutdown or a reset.
         """
+        # We need to do this just in case the server was killed in a way where
+        # the normal cleanup operations did not have time to run.
+        from evennia.objects.models import ObjectDB
+        ObjectDB.objects.clear_all_sessids()
+
         if GUEST_ENABLED:
             for guest in PlayerDB.objects.all().filter(db_typeclass_path=settings.BASE_GUEST_TYPECLASS):
-                for character in filter(None, guest.db._playable_characters):
-                    character.delete()
+                for character in guest.db._playable_characters:
+                    if character: character.delete()
                 guest.delete()
         if SERVER_STARTSTOP_MODULE:
             SERVER_STARTSTOP_MODULE.at_server_cold_start()
@@ -463,8 +469,8 @@ application = service.Application('Evennia')
 # and is where we store all the other services.
 EVENNIA = Evennia(application)
 
-print '-' * 50
-print ' %(servername)s Server (%(version)s) started.' % {'servername': SERVERNAME, 'version': VERSION}
+print('-' * 50)
+print(' %(servername)s Server (%(version)s) started.' % {'servername': SERVERNAME, 'version': VERSION})
 
 if AMP_ENABLED:
 
@@ -475,7 +481,7 @@ if AMP_ENABLED:
     ifacestr = ""
     if AMP_INTERFACE != '127.0.0.1':
         ifacestr = "-%s" % AMP_INTERFACE
-    print '  amp (to Portal)%s: %s' % (ifacestr, AMP_PORT)
+    print('  amp (to Portal)%s: %s' % (ifacestr, AMP_PORT))
 
     from evennia.server import amp
 
@@ -508,7 +514,7 @@ if WEBSERVER_ENABLED:
         webserver.setName('EvenniaWebServer%s' % serverport)
         EVENNIA.services.addService(webserver)
 
-        print "  webserver: %s" % serverport
+        print("  webserver: %s" % serverport)
 
 ENABLED = []
 if IRC_ENABLED:
@@ -524,13 +530,13 @@ if RSS_ENABLED:
     ENABLED.append('rss')
 
 if ENABLED:
-    print "  " + ", ".join(ENABLED) + " enabled."
+    print("  " + ", ".join(ENABLED) + " enabled.")
 
 for plugin_module in SERVER_SERVICES_PLUGIN_MODULES:
     # external plugin protocols
     plugin_module.start_plugin_services(EVENNIA)
 
-print '-' * 50  # end of terminal output
+print('-' * 50)  # end of terminal output
 
 # clear server startup mode
 ServerConfig.objects.conf("server_starting_mode", delete=True)

@@ -6,21 +6,25 @@ connection actually happens (so it's the same for telnet, web, ssh etc).
 It is stored on the Server side (as opposed to protocol-specific sessions which
 are stored on the Portal side)
 """
+from builtins import object
 
 import re
+import weakref
 from time import time
 from django.utils import timezone
 from django.conf import settings
 from evennia.comms.models import ChannelDB
 from evennia.utils import logger
 from evennia.utils.inlinefunc import parse_inlinefunc
-from evennia.utils.utils import make_iter
+from evennia.utils.nested_inlinefuncs import parse_inlinefunc as parse_nested_inlinefunc
+from evennia.utils.utils import make_iter, lazy_property
 from evennia.commands.cmdhandler import cmdhandler
 from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.server.session import Session
 
 _IDLE_COMMAND = settings.IDLE_COMMAND
 _GA = object.__getattribute__
+_SA = object.__setattr__
 _ObjectDB = None
 _ANSI = None
 _INLINEFUNC_ENABLED = settings.INLINEFUNC_ENABLED
@@ -28,6 +32,121 @@ _RE_SCREENREADER_REGEX = re.compile(r"%s" % settings.SCREENREADER_REGEX_STRIP, r
 
 # i18n
 from django.utils.translation import ugettext as _
+
+
+# Handlers for Session.db/ndb operation
+
+class NDbHolder(object):
+    "Holder for allowing property access of attributes"
+    def __init__(self, obj, name, manager_name='attributes'):
+        _SA(self, name, _GA(obj, manager_name))
+        _SA(self, 'name', name)
+
+    def __getattribute__(self, attrname):
+        if attrname == 'all':
+            # we allow to overload our default .all
+            attr = _GA(self, _GA(self, 'name')).get("all")
+            return attr if attr else _GA(self, "all")
+        return _GA(self, _GA(self, 'name')).get(attrname)
+
+    def __setattr__(self, attrname, value):
+        _GA(self, _GA(self, 'name')).add(attrname, value)
+
+    def __delattr__(self, attrname):
+        _GA(self, _GA(self, 'name')).remove(attrname)
+
+    def get_all(self):
+        return _GA(self, _GA(self, 'name')).all()
+    all = property(get_all)
+
+
+class NAttributeHandler(object):
+    """
+    NAttributeHandler version without recache protection.
+    This stand-alone handler manages non-database saving.
+    It is similar to `AttributeHandler` and is used
+    by the `.ndb` handler in the same way as `.db` does
+    for the `AttributeHandler`.
+    """
+    def __init__(self, obj):
+        """
+        Initialized on the object
+        """
+        self._store = {}
+        self.obj = weakref.proxy(obj)
+
+    def has(self, key):
+        """
+        Check if object has this attribute or not.
+
+        Args:
+            key (str): The Nattribute key to check.
+
+        Returns:
+            has_nattribute (bool): If Nattribute is set or not.
+
+        """
+        return key in self._store
+
+    def get(self, key):
+        """
+        Get the named key value.
+
+        Args:
+            key (str): The Nattribute key to get.
+
+        Returns:
+            the value of the Nattribute.
+
+        """
+        return self._store.get(key, None)
+
+    def add(self, key, value):
+        """
+        Add new key and value.
+
+        Args:
+            key (str): The name of Nattribute to add.
+            value (any): The value to store.
+
+        """
+        self._store[key] = value
+
+    def remove(self, key):
+        """
+        Remove Nattribute from storage.
+
+        Args:
+            key (str): The name of the Nattribute to remove.
+
+        """
+        if key in self._store:
+            del self._store[key]
+
+    def clear(self):
+        """
+        Remove all NAttributes from handler.
+
+        """
+        self._store = {}
+
+    def all(self, return_tuples=False):
+        """
+        List the contents of the handler.
+
+        Args:
+            return_tuples (bool, optional): Defines if the Nattributes
+                are returns as a list of keys or as a list of `(key, value)`.
+
+        Returns:
+            nattributes (list): A list of keys `[key, key, ...]` or a
+                list of tuples `[(key, value), ...]` depending on the
+                setting of `return_tuples`.
+
+        """
+        if return_tuples:
+            return [(key, value) for (key, value) in self._store.items() if not key.startswith("_")]
+        return [key for key in self._store if not key.startswith("_")]
 
 
 #------------------------------------------------------------
@@ -60,12 +179,13 @@ class ServerSession(Session):
 
     def at_sync(self):
         """
-        This is called whenever a session has been resynced with the portal.
-        At this point all relevant attributes have already been set and
-        self.player been assigned (if applicable).
+        This is called whenever a session has been resynced with the
+        portal.  At this point all relevant attributes have already
+        been set and self.player been assigned (if applicable).
 
-        Since this is often called after a server restart we need to set up
-        the session as it was.
+        Since this is often called after a server restart we need to
+        set up the session as it was.
+
         """
         global _ObjectDB
         if not _ObjectDB:
@@ -83,7 +203,7 @@ class ServerSession(Session):
             # done in the default @ic command but without any
             # hooks, echoes or access checks.
             obj = _ObjectDB.objects.get(id=self.puid)
-            obj.sessid.add(self.sessid)
+            obj.sessions.add(self)
             obj.player = self.player
             self.puid = obj.id
             self.puppet = obj
@@ -94,7 +214,9 @@ class ServerSession(Session):
         """
         Hook called by sessionhandler when the session becomes authenticated.
 
-        player - the player associated with the session
+        Args:
+            player (Player): The player associated with the session.
+
         """
         self.player = player
         self.uid = self.player.id
@@ -115,12 +237,12 @@ class ServerSession(Session):
     def at_disconnect(self):
         """
         Hook called by sessionhandler when disconnecting this session.
+
         """
         if self.logged_in:
-            sessid = self.sessid
             player = self.player
             if self.puppet:
-                player.unpuppet_object(sessid)
+                player.unpuppet_object(self)
             uaccount = player
             uaccount.last_login = timezone.now()
             uaccount.save()
@@ -136,21 +258,32 @@ class ServerSession(Session):
     def get_player(self):
         """
         Get the player associated with this session
+
+        Returns:
+            player (Player): The associated Player.
+
         """
         return self.logged_in and self.player
 
     def get_puppet(self):
         """
-        Returns the in-game character associated with this session.
-        This returns the typeclass of the object.
+        Get the in-game character associated with this session.
+
+        Returns:
+            puppet (Object): The puppeted object, if any.
+
         """
         return self.logged_in and self.puppet
     get_character = get_puppet
 
     def get_puppet_or_player(self):
         """
-        Returns session if not logged in; puppet if one exists,
-        otherwise return the player.
+        Get puppet or player.
+
+        Returns:
+            controller (Object or Player): The puppet if one exists,
+                otherwise return the player.
+
         """
         if self.logged_in:
             return self.puppet if self.puppet else self.player
@@ -159,6 +292,12 @@ class ServerSession(Session):
     def log(self, message, channel=True):
         """
         Emits session info to the appropriate outputs and info channels.
+
+        Args:
+            message (str): The message to log.
+            channel (bool, optional): Log to the CHANNEL_CONNECTINFO channel
+                in addition to the server log.
+
         """
         if channel:
             try:
@@ -167,13 +306,14 @@ class ServerSession(Session):
                 cchan.msg("[%s]: %s" % (cchan.key, message))
             except Exception:
                 pass
-        logger.log_infomsg(message)
+        logger.log_info(message)
 
     def get_client_size(self):
         """
         Return eventual eventual width and height reported by the
         client. Note that this currently only deals with a single
-        client window (windowID==0) as in traditional telnet session
+        client window (windowID==0) as in a traditional telnet session.
+
         """
         flags = self.protocol_flags
         width = flags.get('SCREENWIDTH', {}).get(0, settings.CLIENT_DEFAULT_WIDTH)
@@ -182,25 +322,36 @@ class ServerSession(Session):
 
     def update_session_counters(self, idle=False):
         """
-        Hit this when the user enters a command in order to update idle timers
-        and command counters.
+        Hit this when the user enters a command in order to update
+        idle timers and command counters.
+
         """
+        # Idle time used for timeout calcs.
+        self.cmd_last = time()
+
         # Store the timestamp of the user's last command.
         if not idle:
             # Increment the user's command counter.
             self.cmd_total += 1
             # Player-visible idle time, not used in idle timeout calcs.
-            self.cmd_last_visible = time()
+            self.cmd_last_visible = self.cmd_last
 
     def data_in(self, text=None, **kwargs):
         """
-        Send User->Evennia. This will in effect
-        execute a command string on the server.
+        Send data User->Evennia. This will in effect execute a command
+        string on the server.
 
-        Note that oob data is already sent to the
+        Note that oob data is already sent separately to the
         oobhandler at this point.
 
+        Kwargs:
+            text (str): A text to relay
+            kwargs (any): Other parameters from the protocol.
+
         """
+        #from evennia.server.profiling.timetrace import timetrace
+        #text = timetrace(text, "ServerSession.data_in")
+
         #explicitly check for None since text can be an empty string, which is
         #also valid
         if text is not None:
@@ -212,14 +363,14 @@ class ServerSession(Session):
                 return
             if self.player:
                 # nick replacement
-                puppet = self.player.get_puppet(self.sessid)
+                puppet = self.puppet
                 if puppet:
                     text = puppet.nicks.nickreplace(text,
                                   categories=("inputline", "channel"), include_player=True)
                 else:
                     text = self.player.nicks.nickreplace(text,
                                 categories=("inputline", "channels"), include_player=False)
-            cmdhandler(self, text, callertype="session", sessid=self.sessid)
+            cmdhandler(self, text, callertype="session", session=self)
             self.update_session_counters()
 
     execute_cmd = data_in  # alias
@@ -227,29 +378,38 @@ class ServerSession(Session):
     def data_out(self, text=None, **kwargs):
         """
         Send Evennia -> User
+
+        Kwargs:
+            text (str): A text to relay
+            kwargs (any): Other parameters to the protocol.
+
         """
+        #from evennia.server.profiling.timetrace import timetrace
+        #text = timetrace(text, "ServerSession.data_out")
+
         text = text if text else ""
         if _INLINEFUNC_ENABLED and not "raw" in kwargs:
             text = parse_inlinefunc(text, strip="strip_inlinefunc" in kwargs, session=self)
+            text = parse_nested_inlinefunc(text, strip="strip_inlinefunc" in kwargs, session=self)
         if self.screenreader:
             global _ANSI
             if not _ANSI:
                 from evennia.utils import ansi as _ANSI
             text = _ANSI.parse_ansi(text, strip_ansi=True, xterm256=False, mxp=False)
             text = _RE_SCREENREADER_REGEX.sub("", text)
-        session = kwargs.pop('session', None)
-        session = session or self
-        self.sessionhandler.data_out(session, text=text, **kwargs)
+        self.sessionhandler.data_out(self, text=text, **kwargs)
     # alias
     msg = data_out
 
     def __eq__(self, other):
+        "Handle session comparisons"
         return self.address == other.address
 
     def __str__(self):
         """
         String representation of the user session class. We use
         this a lot in the server logs.
+
         """
         symbol = ""
         if self.logged_in and hasattr(self, "player") and self.player:
@@ -264,20 +424,29 @@ class ServerSession(Session):
         return "%s%s@%s" % (self.uname, symbol, address)
 
     def __unicode__(self):
-        """
-        Unicode representation
-        """
+        "Unicode representation"
         return u"%s" % str(self)
 
     # Dummy API hooks for use during non-loggedin operation
 
     def at_cmdset_get(self, **kwargs):
-        "dummy hook all objects with cmdsets need to have"
+        """
+        A dummy hook all objects with cmdsets need to have
+        """
+
         pass
 
     # Mock db/ndb properties for allowing easy storage on the session
     # (note that no databse is involved at all here. session.db.attr =
     # value just saves a normal property in memory, just like ndb).
+
+    @lazy_property
+    def nattributes(self):
+        return NAttributeHandler(self)
+
+    @lazy_property
+    def attributes(self):
+        return self.nattributes
 
     #@property
     def ndb_get(self):
@@ -286,28 +455,23 @@ class ServerSession(Session):
         to this is guaranteed to be cleared when a server is shutdown.
         Syntax is same as for the _get_db_holder() method and
         property, e.g. obj.ndb.attr = value etc.
+
         """
         try:
             return self._ndb_holder
         except AttributeError:
-            class NdbHolder(object):
-                "Holder for storing non-persistent attributes."
-                def all(self):
-                    return [val for val in self.__dict__.keys()
-                            if not val.startswith['_']]
-
-                def __getattribute__(self, key):
-                    # return None if no matching attribute was found.
-                    try:
-                        return object.__getattribute__(self, key)
-                    except AttributeError:
-                        return None
-            self._ndb_holder = NdbHolder()
+            self._ndb_holder = NDbHolder(self, "nattrhandler", manager_name="nattributes")
             return self._ndb_holder
 
     #@ndb.setter
     def ndb_set(self, value):
-        "Stop accidentally replacing the db object"
+        """
+        Stop accidentally replacing the db object
+
+        Args:
+            value (any): A value to store in the ndb.
+
+        """
         string = "Cannot assign directly to ndb object! "
         string = "Use ndb.attr=value instead."
         raise Exception(string)
@@ -322,5 +486,5 @@ class ServerSession(Session):
     # Mock access method for the session (there is no lock info
     # at this stage, so we just present a uniform API)
     def access(self, *args, **kwargs):
-        "Dummy method."
+        "Dummy method to mimic the logged-in API."
         return True

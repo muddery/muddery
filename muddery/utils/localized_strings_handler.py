@@ -38,7 +38,7 @@ class LocalizedStringsHandler(object):
                 # Add db fields to dict.
                 self.dict[record.origin] = record.local
         except Exception, e:
-            print "Can not load server local string: %s" % e
+            logger.log_errmsg("Can not load server local string: %s" % e)
             pass
 
 

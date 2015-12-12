@@ -63,6 +63,10 @@ can then implement separate sets for different situations. For
 example, you can have a 'On a boat' set, onto which you then tack on
 the 'Fishing' set. Fishing from a boat? No problem!
 """
+from builtins import object
+import sys
+from importlib import import_module
+from inspect import trace
 from django.conf import settings
 from evennia.utils import logger, utils
 from evennia.commands.cmdset import CmdSet
@@ -97,6 +101,7 @@ def import_cmdset(path, cmdsetobj, emit_to_obj=None, no_logging=False):
     path - This is the full path to the cmdset object on python dot-form
 
     Args:
+        path (str): The path to the command set to load.
         cmdsetobj (CmdSet): The database object/typeclass on which this cmdset is to be
             assigned (this can be also channels and exits, as well as players
             but there will always be such an object)
@@ -106,52 +111,80 @@ def import_cmdset(path, cmdsetobj, emit_to_obj=None, no_logging=False):
             This can be useful if import_cmdset is just used to check if
             this is a valid python path or not.
     Returns:
-        cmdset (CmdSet): If an error was encountered, `commands.cmdsethandler._ErrorCmdSet`
-            is returned for the benefit of the handler.
+        cmdset (CmdSet): The imported command set. If an error was
+            encountered, `commands.cmdsethandler._ErrorCmdSet` is returned
+            for the benefit of the handler.
 
     """
-
     python_paths = [path] + ["%s.%s" % (prefix, path)
                                     for prefix in _CMDSET_PATHS if not path.startswith(prefix)]
     errstring = ""
     for python_path in python_paths:
+
+        if "." in  path:
+            modpath, classname = python_path.rsplit(".", 1)
+        else:
+            raise ImportError("The path '%s' is not on the form modulepath.ClassName" % path)
+
         try:
-            #print "importing %s: _CACHED_CMDSETS=%s" % (python_path, _CACHED_CMDSETS)
-            wanted_cache_key = python_path
-            cmdsetclass = _CACHED_CMDSETS.get(wanted_cache_key, None)
+            # first try to get from cache
+            cmdsetclass = _CACHED_CMDSETS.get(python_path, None)
+
             if not cmdsetclass:
-                #print "cmdset '%s' not in cache. Reloading %s on %s." % (wanted_cache_key, python_path, cmdsetobj)
-                # Not in cache. Reload from disk.
-                modulepath, classname = python_path.rsplit('.', 1)
-                module = __import__(modulepath, fromlist=[True])
-                cmdsetclass = module.__dict__[classname]
-                _CACHED_CMDSETS[wanted_cache_key] = cmdsetclass
+                try:
+                    module = import_module(modpath, package="evennia")
+                except ImportError:
+                    if len(trace()) > 2:
+                        # error in module, make sure to not hide it.
+                        exc = sys.exc_info()
+                        raise exc[1], None, exc[2]
+                    else:
+                        # try next suggested path
+                        errstring += _("\n(Unsuccessfully tried '%s')." % python_path)
+                        continue
+                try:
+                    cmdsetclass = getattr(module, classname)
+                except AttributeError:
+                    if len(trace()) > 2:
+                        # Attribute error within module, don't hide it
+                        exc = sys.exc_info()
+                        raise exc[1], None, exc[2]
+                    else:
+                        errstring += _("\n(Unsuccessfully tried '%s')." % python_path)
+                        continue
+                _CACHED_CMDSETS[python_path] = cmdsetclass
+
             #instantiate the cmdset (and catch its errors)
             if callable(cmdsetclass):
                 cmdsetclass = cmdsetclass(cmdsetobj)
             errstring = ""
             return cmdsetclass
-        except ImportError, e:
-            #logger.log_trace()
-            errstring += _("Error loading cmdset {path}: {error}")
+        except ImportError as e:
+            logger.log_trace()
+            errstring += _("\nError loading cmdset {path}: \"{error}\"")
             errstring = errstring.format(path=python_path, error=e)
+            break
         except KeyError:
-            #logger.log_trace()
-            errstring += _("Error in loading cmdset: No cmdset class '{classname}' in {path}.")
+            logger.log_trace()
+            errstring += _("\nError in loading cmdset: No cmdset class '{classname}' in {path}.")
             errstring = errstring.format(classname=classname, path=python_path)
-        except SyntaxError, e:
-            #logger.log_trace()
-            errstring += _("SyntaxError encountered when loading cmdset '{path}': {error}.")
+            break
+        except SyntaxError as e:
+            logger.log_trace()
+            errstring += _("\nSyntaxError encountered when loading cmdset '{path}': \"{error}\".")
             errstring = errstring.format(path=python_path, error=e)
-        except Exception, e:
-            #logger.log_trace()
-            errstring += _("Compile/Run error when loading cmdset '{path}': {error}.")
+            break
+        except Exception as e:
+            logger.log_trace()
+            errstring += _("\nCompile/Run error when loading cmdset '{path}': \"{error}\".")
             errstring = errstring.format(path=python_path, error=e)
+            break
 
     if errstring:
         # returning an empty error cmdset
+        errstring = errstring.strip()
         if not no_logging:
-            logger.log_errmsg(errstring)
+            logger.log_err(errstring)
             if emit_to_obj and not ServerConfig.objects.conf("server_starting_mode"):
                 emit_to_obj.msg(errstring)
         err_cmdset = _ErrorCmdSet()
@@ -210,7 +243,6 @@ class CmdSetHandler(object):
         mergelist = []
         if len(self.cmdset_stack) > 1:
             # We have more than one cmdset in stack; list them all
-            #print self.cmdset_stack, self.mergetype_stack
             for snum, cmdset in enumerate(self.cmdset_stack):
                 mergetype = self.mergetype_stack[snum]
                 permstring = "non-perm"
@@ -277,7 +309,6 @@ class CmdSetHandler(object):
         if init_mode:
             # reimport all permanent cmdsets
             storage = self.obj.cmdset_storage
-            #print "cmdset_storage:", self.obj.cmdset_storage
             if storage:
                 self.cmdset_stack = []
                 for pos, path in enumerate(storage):
@@ -307,8 +338,8 @@ class CmdSetHandler(object):
         is set as the default one (it will then end up at the bottom of the stack)
 
         Args:
-          cmdset (CmdSet or str): Can be a cmdset object or the python path
-            to such an object.
+            cmdset (CmdSet or str): Can be a cmdset object or the python path
+                to such an object.
             emit_to_obj (Object, optional): An object to receive error messages.
             permanent (bool, optional): This cmdset will remain across a server reboot.
             default_cmdset (Cmdset, optional): Insert this to replace the

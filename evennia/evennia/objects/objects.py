@@ -5,8 +5,9 @@ These are the (default) starting points for all in-game visible
 entities.
 
 """
+from builtins import object
+from future.utils import listvalues, with_metaclass
 
-import traceback
 from django.conf import settings
 
 from evennia.typeclasses.models import TypeclassBase
@@ -17,9 +18,9 @@ from evennia.scripts.scripthandler import ScriptHandler
 from evennia.commands import cmdset, command
 from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.commands import cmdhandler
-from evennia.utils.logger import log_trace, log_errmsg
+from evennia.utils import logger
 from evennia.utils.utils import (variable_from_module, lazy_property,
-                             make_iter, to_str, to_unicode)
+                                 make_iter, to_str, to_unicode)
 
 _MULTISESSION_MODE = settings.MULTISESSION_MODE
 
@@ -32,7 +33,7 @@ _SESSID_MAX = 16 if _MULTISESSION_MODE in (1, 3) else 1
 
 from django.utils.translation import ugettext as _
 
-class SessidHandler(object):
+class ObjectSessionHandler(object):
     """
     Handles the get/setting of the sessid
     comma-separated integer field
@@ -46,54 +47,90 @@ class SessidHandler(object):
 
         """
         self.obj = obj
-        self._cache = set()
+        self._sessid_cache = set()
         self._recache()
 
     def _recache(self):
-        self._cache = list(set(int(val) for val in (self.obj.db_sessid or "").split(",") if val))
+        self._sessid_cache = list(set(int(val) for val in (self.obj.db_sessid or "").split(",") if val))
 
-    def get(self):
+    def get(self, sessid=None):
         """
-        Get the session ids.
+        Get the sessions linked to this Object.
+
+        Args:
+            sessid (int, optional): A specific session id.
 
         Returns:
-            session (list): A cached list of one or more session ids.
+            sessions (list): The sessions connected to this object. If `sessid` is given,
+                this is a list of one (or zero) elements.
 
         Notes:
             Aliased to `self.all()`.
 
         """
-        return self._cache
-    all = get # alias
+        global _SESSIONS
+        if not _SESSIONS:
+            from evennia.server.sessionhandler import SESSIONS as _SESSIONS
+        if sessid:
+            return [_SESSIONS[sessid]] if sessid in self._sessid_cache and sessid in _SESSIONS else []
+        else:
+            return [_SESSIONS[sessid] for sessid in self._sessid_cache if sessid in _SESSIONS]
 
-    def add(self, sessid):
+    def all(self):
         """
-        Add sessid to handler.
+        Alias to get(), returning all sessions.
+
+        Returns:
+            sessions (list): All sessions.
+
+        """
+        return self.get()
+
+    def add(self, session):
+        """
+        Add session to handler.
 
         Args:
-            sessid (int): Session id to add.
+            session (Session or int): Session or session id to add.
+
+        Notes:
+            We will only add a session/sessid if this actually also exists
+            in the the core sessionhandler.
 
         """
-        _cache = self._cache
-        if sessid not in _cache:
-            if len(_cache) >= _SESSID_MAX:
+        global _SESSIONS
+        if not _SESSIONS:
+            from evennia.server.sessionhandler import SESSIONS as _SESSIONS
+        try:
+            sessid = session.sessid
+        except AttributeError:
+            sessid = session
+
+        sessid_cache = self._sessid_cache
+        if sessid in _SESSIONS and sessid not in sessid_cache:
+            if len(sessid_cache) >= _SESSID_MAX:
                 return
-            _cache.append(sessid)
-            self.obj.db_sessid = ",".join(str(val) for val in _cache)
+            sessid_cache.append(sessid)
+            self.obj.db_sessid = ",".join(str(val) for val in sessid_cache)
             self.obj.save(update_fields=["db_sessid"])
 
-    def remove(self, sessid):
+    def remove(self, session):
         """
-        Remove sessid from handler.
+        Remove session from handler.
 
         Args:
-            sessid (int): Session id to remove.
+            sessid (Session or int): Session or session id to remove.
 
         """
-        _cache = self._cache
-        if sessid in _cache:
-            _cache.remove(sessid)
-            self.obj.db_sessid =  ",".join(str(val) for val in _cache)
+        try:
+            sessid = session.sessid
+        except AttributeError:
+            sessid = session
+
+        sessid_cache = self._sessid_cache
+        if sessid in sessid_cache:
+            sessid_cache.remove(sessid)
+            self.obj.db_sessid =  ",".join(str(val) for val in sessid_cache)
             self.obj.save(update_fields=["db_sessid"])
 
     def clear(self):
@@ -101,7 +138,7 @@ class SessidHandler(object):
         Clear all handled sessids.
 
         """
-        self._cache = []
+        self._sessid_cache = []
         self.obj.db_sessid = None
         self.obj.save(update_fields=["db_sessid"])
 
@@ -111,8 +148,9 @@ class SessidHandler(object):
 
         Returns:
             sesslen (int): Number of sessions handled.
+
         """
-        return len(self._cache)
+        return len(self._sessid_cache)
 
 
 
@@ -120,7 +158,7 @@ class SessidHandler(object):
 # Base class to inherit from.
 #
 
-class DefaultObject(ObjectDB):
+class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
     """
     This is the root typeclass object, representing all entities that
     have an actual presence in-game. DefaultObjects generally have a
@@ -133,8 +171,6 @@ class DefaultObject(ObjectDB):
     without `obj.save()` having to be called explicitly.
 
     """
-    # typeclass setup
-    __metaclass__ = TypeclassBase
     objects = ObjectManager()
 
     # on-object properties
@@ -152,19 +188,8 @@ class DefaultObject(ObjectDB):
         return NickHandler(self)
 
     @lazy_property
-    def sessid(self):
-        return SessidHandler(self)
-
-    @property
     def sessions(self):
-        """
-        Retrieve sessions connected to this object.
-
-        """
-        # if the player is not connected, this will simply be an empty list.
-        if self.db_player:
-            return self.db_player.get_all_sessions()
-        return []
+        return ObjectSessionHandler(self)
 
     @property
     def has_player(self):
@@ -173,7 +198,7 @@ class DefaultObject(ObjectDB):
         currently connected to this object.
 
         """
-        return any(self.sessions)
+        return self.sessions.count()
 
     @property
     def is_superuser(self):
@@ -203,7 +228,6 @@ class DefaultObject(ObjectDB):
         """
         return self.contents_cache.get(exclude=exclude)
     contents = property(contents_get)
-
 
     @property
     def exits(self):
@@ -335,7 +359,8 @@ class DefaultObject(ObjectDB):
                                                  exact=exact)
         if quiet:
             return results
-        return  _AT_SEARCH_RESULT(self, searchdata, results, global_search, nofound_string, multimatch_string)
+        return  _AT_SEARCH_RESULT(results, self, query=searchdata,
+                nofound_string=nofound_string, multimatch_string=multimatch_string)
 
     def search_player(self, searchdata, quiet=False):
         """
@@ -370,9 +395,9 @@ class DefaultObject(ObjectDB):
 
         if quiet:
             return results
-        return _AT_SEARCH_RESULT(self, searchdata, results, global_search=True)
+        return _AT_SEARCH_RESULT(results, self, query=searchdata)
 
-    def execute_cmd(self, raw_string, sessid=None, **kwargs):
+    def execute_cmd(self, raw_string, session=None, **kwargs):
         """
         Do something as this object. This method is a copy of the
         `execute_cmd` method on the session. This is never called
@@ -382,7 +407,8 @@ class DefaultObject(ObjectDB):
 
         Args:
             raw_string (string): Raw command input
-            sessid (int, optional): Session id to return results to
+            session (Session, optional): Session to
+                return results to
 
         Kwargs:
             Other keyword arguments will be added to the found command
@@ -407,10 +433,10 @@ class DefaultObject(ObjectDB):
         raw_string = to_unicode(raw_string)
         raw_string = self.nicks.nickreplace(raw_string,
                      categories=("inputline", "channel"), include_player=True)
-        return cmdhandler.cmdhandler(self, raw_string, callertype="object", sessid=sessid, **kwargs)
+        return cmdhandler.cmdhandler(self, raw_string, callertype="object", session=session, **kwargs)
 
 
-    def msg(self, text=None, from_obj=None, sessid=0, **kwargs):
+    def msg(self, text=None, from_obj=None, session=None, **kwargs):
         """
         Emits something to a session attached to the object.
 
@@ -418,40 +444,56 @@ class DefaultObject(ObjectDB):
             text (str, optional): The message to send
             from_obj (obj, optional): object that is sending. If
                 given, at_msg_send will be called
-            sessid (int or list, optional): sessid or list of
-                sessids to relay to, if any. If set, will
-                force send regardless of MULTISESSION_MODE.
+            session (Session or list, optional): Session or list of
+                Sessions to relay data to, if any. If set, will
+                force send to these sessions. If unset, who receives the
+                message depends on the MULTISESSION_MODE.
+
         Notes:
             `at_msg_receive` will be called on this Object.
             All extra kwargs will be passed on to the protocol.
 
         """
         text = to_str(text, force_string=True) if text != None else ""
+        # try send hooks
         if from_obj:
-            # call hook
             try:
                 from_obj.at_msg_send(text=text, to_obj=self, **kwargs)
             except Exception:
-                log_trace()
+                logger.log_trace()
         try:
             if not self.at_msg_receive(text=text, **kwargs):
                 # if at_msg_receive returns false, we abort message to this object
                 return
         except Exception:
-            log_trace()
+            logger.log_trace()
 
-        # session relay
-        kwargs['_nomulti'] = kwargs.get('_nomulti', True)
+        # relay to session(s)
+        sessions = make_iter(session) if session else self.sessions.all()
+        for session in sessions:
+            session.msg(text=text, **kwargs)
 
-        if self.player:
-            # for there to be a session there must be a Player.
-            if sessid:
-                sessions = make_iter(self.player.get_session(sessid))
-            else:
-                # Send to all sessions connected to this object
-                sessions = [self.player.get_session(sessid) for sessid in self.sessid.get()]
-            if sessions:
-                sessions[0].msg(text=text, session=sessions, **kwargs)
+    def for_contents(self, func, exclude=None, **kwargs):
+        """
+        Runs a function on every object contained within this one.
+
+        Args:
+            func (callable): Function to call. This must have the
+                formal call sign func(obj, **kwargs), where obj is the
+                object currently being processed and `**kwargs` are
+                passed on from the call to `for_contents`.
+            exclude (list, optional): A list of object not to call the
+                function on.
+
+        Kwargs:
+            Keyword arguments will be passed to the function for all objects.
+        """
+        contents = self.contents
+        if exclude:
+            exclude = make_iter(exclude)
+            contents = [obj for obj in contents if obj not in exclude]
+        for obj in contents:
+            func(obj, **kwargs)
 
     def msg_contents(self, message, exclude=None, from_obj=None, **kwargs):
         """
@@ -469,12 +511,9 @@ class DefaultObject(ObjectDB):
             messaged objects.
 
         """
-        contents = self.contents
-        if exclude:
-            exclude = make_iter(exclude)
-            contents = [obj for obj in contents if obj not in exclude]
-        for obj in contents:
+        def msg(obj, message, from_obj, **kwargs):
             obj.msg(message, from_obj=from_obj, **kwargs)
+        self.for_contents(msg, exclude=exclude, from_obj=from_obj, message=message, **kwargs)
 
     def move_to(self, destination, quiet=False,
                 emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True):
@@ -520,10 +559,8 @@ class DefaultObject(ObjectDB):
         """
         def logerr(string=""):
             "Simple log helper method"
-            trc = traceback.format_exc()
-            errstring = "%s%s" % (trc, string)
-            log_trace()
-            self.msg(errstring)
+            logger.log_trace()
+            self.msg(string)
 
         errtxt = _("Couldn't perform move ('%s'). Contact an admin.")
         if not emit_to_obj:
@@ -548,8 +585,6 @@ class DefaultObject(ObjectDB):
                     return
             except Exception:
                 logerr(errtxt % "at_before_move()")
-                #emit_to_obj.msg(errtxt % "at_before_move()")
-                #logger.log_trace()
                 return False
 
         # Save the old location
@@ -569,8 +604,6 @@ class DefaultObject(ObjectDB):
                 source_location.at_object_leave(self, destination)
             except Exception:
                 logerr(errtxt % "at_object_leave()")
-                #emit_to_obj.msg(errtxt % "at_object_leave()")
-                #logger.log_trace()
                 return False
 
         if not quiet:
@@ -579,17 +612,14 @@ class DefaultObject(ObjectDB):
                 self.announce_move_from(destination)
             except Exception:
                 logerr(errtxt % "at_announce_move()")
-                #emit_to_obj.msg(errtxt % "at_announce_move()" )
-                #logger.log_trace()
                 return False
 
         # Perform move
         try:
-            #print "move_to location:", destination
             self.location = destination
         except Exception:
             emit_to_obj.msg(errtxt % "location change")
-            log_trace()
+            logger.log_trace()
             return False
 
         if not quiet:
@@ -598,8 +628,6 @@ class DefaultObject(ObjectDB):
                 self.announce_move_to(source_location)
             except Exception:
                 logerr(errtxt % "announce_move_to()")
-                #emit_to_obj.msg(errtxt % "announce_move_to()")
-                #logger.log_trace()
                 return  False
 
         if move_hooks:
@@ -609,8 +637,6 @@ class DefaultObject(ObjectDB):
                 destination.at_object_receive(self, source_location)
             except Exception:
                 logerr(errtxt % "at_object_receive()")
-                #emit_to_obj.msg(errtxt % "at_object_receive()")
-                #logger.log_trace()
                 return False
 
         # Execute eventual extra commands on this object after moving it
@@ -620,8 +646,6 @@ class DefaultObject(ObjectDB):
                 self.at_after_move(source_location)
             except Exception:
                 logerr(errtxt % "at_after_move")
-                #emit_to_obj.msg(errtxt % "at_after_move()")
-                #logger.log_trace()
                 return False
         return True
 
@@ -649,7 +673,7 @@ class DefaultObject(ObjectDB):
                 default_home = None
         except Exception:
             string = _("Could not find default home '(#%d)'.")
-            log_errmsg(string % default_home_id)
+            logger.log_err(string % default_home_id)
             default_home = None
 
         for obj in self.contents:
@@ -665,7 +689,7 @@ class DefaultObject(ObjectDB):
                 string += "now has a null location."
                 obj.location = None
                 obj.msg(_("Something went wrong! You are dumped into nowhere. Contact an admin."))
-                log_errmsg(string % (obj.name, obj.dbid))
+                logger.log_err(string % (obj.name, obj.dbid))
                 return
 
             if obj.has_player:
@@ -734,7 +758,7 @@ class DefaultObject(ObjectDB):
 
         if not self.at_object_delete():
             # this is an extra pre-check
-            # run before deletio field-related properties
+            # run before deletion field-related properties
             # is kicked into gear.
             self.delete_iter = 0
             return False
@@ -743,13 +767,13 @@ class DefaultObject(ObjectDB):
 
         # See if we need to kick the player off.
 
-        for session in self.sessions:
+        for session in self.sessions.all():
             session.msg(_("Your character %s has been destroyed.") % self.key)
             # no need to disconnect, Player just jumps to OOC mode.
         # sever the connection (important!)
         if self.player:
-            for sessid in self.sessid.all():
-                self.player.unpuppet_object(sessid)
+            for session in self.sessions.all():
+                self.player.unpuppet_object(session)
         self.player = None
 
         for script in _ScriptDB.objects.get_all_scripts_on_obj(self):
@@ -857,9 +881,12 @@ class DefaultObject(ObjectDB):
             if cdict.get("location"):
                 cdict["location"].at_object_receive(self, None)
                 self.at_after_move(None)
+            if cdict.get("tags"):
+                # this should be a list of tags
+                self.tags.add(cdict["tags"])
             if cdict.get("attributes"):
                 # this should be a dict of attrname:value
-                keys, values = cdict["attributes"].keys(), cdict["attributes"].values()
+                keys, values = list(cdict["attributes"]), listvalues(cdict["attributes"])
                 self.attributes.batch_add(keys, values)
             if cdict.get("nattributes"):
                 # this should be a dict of nattrname:value
@@ -953,14 +980,14 @@ class DefaultObject(ObjectDB):
         """
         pass
 
-    def at_pre_puppet(self, player, sessid=None):
+    def at_pre_puppet(self, player, session=None):
         """
         Called just before a Player connects to this object to puppet
         it.
 
         Args:
             player (Player): This is the connecting player.
-            sessid (int): Session id controlling the connection.
+            session (Session): Session controlling the connection.
         """
         pass
 
@@ -980,7 +1007,7 @@ class DefaultObject(ObjectDB):
         """
         pass
 
-    def at_post_unpuppet(self, player, sessid=None):
+    def at_post_unpuppet(self, player, session=None):
         """
         Called just after the Player successfully disconnected from
         this object, severing all connections.
@@ -988,7 +1015,7 @@ class DefaultObject(ObjectDB):
         Args:
             player (Player): The player object that just disconnected
                 from this object.
-            sessid (int): Session id controlling the connection that
+            session (Session): Session id controlling the connection that
                 just disconnected.
 
         """
@@ -1261,7 +1288,7 @@ class DefaultObject(ObjectDB):
                                                     con.access(looker, "view"))
         exits, users, things = [], [], []
         for con in visible:
-            key = con.key
+            key = con.get_display_name(looker)
             if con.destination:
                 exits.append(key)
             elif con.has_player:
@@ -1269,7 +1296,7 @@ class DefaultObject(ObjectDB):
             else:
                 things.append(key)
         # get description, build string
-        string = "{c%s{n\n" % self.key
+        string = "{c%s{n\n" % self.get_display_name(looker)
         desc = self.db.desc
         if desc:
             string += "%s" % desc
@@ -1278,6 +1305,28 @@ class DefaultObject(ObjectDB):
         if users or things:
             string += "\n{wYou see:{n " + ", ".join(users + things)
         return string
+
+    def at_look(self, target):
+        """
+        Called when this object performs a look. It allows to
+        customize just what this means. It will not itself
+        send any data.
+
+        Args:
+            target (Object): The target being looked at. This is
+                commonly an object or the current location. It will
+                be checked for the "view" type access.
+
+        Returns:
+            lookstring (str): A ready-processed look string
+                potentially ready to return to the looker.
+
+        """
+        if not target.access(self, "view"):
+            return "Could not find '%s'." % target
+        # the target's at_desc() method.
+        target.at_desc(looker=self)
+        return target.return_appearance(self)
 
     def at_desc(self, looker=None):
         """
@@ -1369,16 +1418,16 @@ class DefaultCharacter(DefaultObject):
         We make sure to look around after a move.
 
         """
-        self.execute_cmd('look')
+        self.msg(self.at_look(self.location))
 
-    def at_pre_puppet(self, player, sessid=None):
+    def at_pre_puppet(self, player, session=None):
         """
         This implementation recovers the character again after having been "stoved
         away" to the `None` location in `at_post_unpuppet`.
 
         Args:
             player (Player): This is the connecting player.
-            sessid (int): Session id controlling the connection.
+            session (Session): Session controlling the connection.
 
         """
         if self.db.prelogout_location:
@@ -1392,7 +1441,7 @@ class DefaultCharacter(DefaultObject):
             self.db.prelogout_location = self.location
             self.location.at_object_receive(self, self.location)
         else:
-            player.msg("{r%s has no location and no home is set.{n" % self, sessid=sessid)
+            player.msg("{r%s has no location and no home is set.{n" % self, session=session)
 
     def at_post_puppet(self):
         """
@@ -1401,11 +1450,13 @@ class DefaultCharacter(DefaultObject):
 
         """
         self.msg("\nYou become {c%s{n.\n" % self.name)
-        self.execute_cmd("look")
-        if self.location:
-            self.location.msg_contents("%s has entered the game." % self.name, exclude=[self])
+        self.msg(self.at_look(self.location))
 
-    def at_post_unpuppet(self, player, sessid=None):
+        def message(obj, from_obj):
+            obj.msg("%s has entered the game." % self.get_display_name(obj), from_obj=from_obj)
+        self.location.for_contents(message, exclude=[self], from_obj=self)
+
+    def at_post_unpuppet(self, player, session=None):
         """
         We stove away the character when the player goes ooc/logs off,
         otherwise the character object will remain in the room also
@@ -1414,13 +1465,17 @@ class DefaultCharacter(DefaultObject):
         Args:
             player (Player): The player object that just disconnected
                 from this object.
-            sessid (int): Session id controlling the connection that
+            session (Session): Session controlling the connection that
                 just disconnected.
         """
-        if self.location: # have to check, in case of multiple connections closing
-            self.location.msg_contents("%s has left the game." % self.name, exclude=[self])
-            self.db.prelogout_location = self.location
-            self.location = None
+        if not self.sessions.count():
+            # only remove this char from grid if no sessions control it anymore.
+            if self.location:
+                def message(obj, from_obj):
+                    obj.msg("%s has left the game." % self.get_display_name(obj), from_obj=from_obj)
+                self.location.for_contents(message, exclude=[self], from_obj=self)
+                self.db.prelogout_location = self.location
+                self.location = None
 
 #
 # Base Room object
@@ -1472,6 +1527,21 @@ class ExitCommand(command.Command):
             else:
                 # No shorthand error message. Call hook.
                 self.obj.at_failed_traverse(self.caller)
+
+    def get_extra_info(self, caller, **kwargs):
+        """
+        Shows a bit of information on where the exit leads.
+
+        Args:
+            caller (Object): The object (usually a character) that entered an ambiguous command.
+
+        Returns:
+            A string with identifying information to disambiguate the command, conventionally with a preceding space.
+        """
+        if self.obj.destination:
+            return " (exit to %s)" % self.obj.destination.get_display_name(caller)
+        else:
+            return " (%s)" % self.obj.get_display_name(caller)
 
 #
 # Base Exit object

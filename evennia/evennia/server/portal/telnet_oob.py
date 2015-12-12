@@ -2,9 +2,8 @@
 
 Telnet OOB (Out of band communication)
 
-This implements the following telnet oob protocols:
-MSDP (Mud Server Data Protocol)
-GMCP (Generic Mud Communication Protocol)
+This implements the following telnet oob protocols: MSDP (Mud Server
+Data Protocol) GMCP (Generic Mud Communication Protocol)
 
 This implements the MSDP protocol as per
 http://tintin.sourceforge.net/msdp/ and the GMCP protocol as per
@@ -14,11 +13,12 @@ Following the lead of KaVir's protocol snippet, we first check if
 client supports MSDP and if not, we fallback to GMCP with a MSDP
 header where applicable.
 
-OOB manages out-of-band
-communication between the client and server, for updating health bars
-etc. See also GMCP which is another standard doing the same thing.
+OOB manages out-of-band communication between the client and server,
+for updating health bars etc. See also GMCP which is another standard
+doing the same thing.
 
 """
+from builtins import object
 import re
 import json
 from evennia.utils.utils import to_str
@@ -63,9 +63,12 @@ class TelnetOOB(object):
 
     def __init__(self, protocol):
         """
-        Initiates by storing the protocol
-        on itself and trying to determine
-        if the client supports MSDP.
+        Initiates by storing the protocol on itself and trying to
+        determine if the client supports MSDP.
+
+        Args:
+            protocol (Protocol): The active protocol.
+
         """
         self.protocol = protocol
         self.protocol.protocol_flags['OOB'] = False
@@ -80,23 +83,46 @@ class TelnetOOB(object):
         self.oob_reported = {}
 
     def no_msdp(self, option):
-        "No msdp supported or wanted"
+        """
+        Client reports No msdp supported or wanted.
+
+        Args:
+            options (Option): Not used.
+
+        """
         # no msdp, check GMCP
         self.protocol.handshake_done()
 
     def do_msdp(self, option):
-        "MSDP supported by client"
+        """
+        Client reports that it supports msdp.
+
+        Args:
+            option (Option): Not used.
+
+        """
         self.MSDP = True
         self.protocol.protocol_flags['OOB'] = True
         self.protocol.handshake_done()
 
     def no_gmcp(self, option):
-        "Neither MSDP nor GMCP supported"
+        """
+        If this is reached, it means neither MSDP nor GMCP is
+        supported.
+
+        Args:
+            option (Option): Not used.
+
+        """
         self.protocol.handshake_done()
 
     def do_gmcp(self, option):
         """
         Called when client confirms that it can do MSDP or GMCP.
+
+        Args:
+            option (Option): Not used.
+
         """
         self.GMCP = True
         self.protocol.protocol_flags['OOB'] = True
@@ -106,17 +132,19 @@ class TelnetOOB(object):
 
     def encode_msdp(self, cmdname, *args, **kwargs):
         """
-        handle return data from cmdname by converting it to
-        a proper msdp structure. These are the combinations we
-        support:
+        handle return data from cmdname by converting it to a proper
+        msdp structure. These are the combinations we support:
 
-        cmdname string    ->  cmdname string
-        cmdname *args  -> cmdname MSDP_ARRAY
-        cmdname **kwargs -> cmdname MSDP_TABLE
+        Args:
+            cmdname (str): Name of OOB command.
+            args, kwargs (any): Arguments to OOB command.
 
-        # send 'raw' data structures
-        MSDP_ARRAY *args -> MSDP_ARRAY
-        MSDP_TABLE **kwargs -> MSDP_TABLE
+        Examples:
+            cmdname string    ->  cmdname string
+            cmdname *args  -> cmdname MSDP_ARRAY
+            cmdname **kwargs -> cmdname MSDP_TABLE
+            MSDP_ARRAY *args -> MSDP_ARRAY
+            MSDP_TABLE **kwargs -> MSDP_TABLE
 
         """
         msdp_string = ""
@@ -133,19 +161,25 @@ class TelnetOOB(object):
             else:
                 msdp_string = "%s%s%s" % (MSDP_VAR. cmdname, "".join(
                     ["%s%s%s%s" % (MSDP_VAR, key, MSDP_VAL, val) for key, val in kwargs.items()]))
-        #print "encode msdp result:", cmdname, args, kwargs, "->", msdp_string
         return force_str(msdp_string)
 
     def encode_gmcp(self, cmdname, *args, **kwargs):
         """
-        Gmcp messages are on one of the following outgoing forms:
+        Encode GMCP messages.
 
-        cmdname string -> cmdname string
-        cmdname *args -> cmdname [arg, arg, arg, ...]
-        cmdname **kwargs -> cmdname {key:arg, key:arg, ...}
+        Args:
+            cmdname (str): GMCP OOB command name.
+            args, kwargs (any): Arguments to OOB command.
 
-        cmdname is generally recommended to be a string on the form
-        Module.Submodule.Function
+        Notes:
+            Gmcp messages are on one of the following outgoing forms:
+
+            - cmdname string -> cmdname string
+            - cmdname *args -> cmdname [arg, arg, arg, ...]
+            - cmdname **kwargs -> cmdname {key:arg, key:arg, ...}
+
+            cmdname is generally recommended to be a string on the form
+            Module.Submodule.Function
         """
         if cmdname in ("SEND", "REPORT", "UNREPORT", "LIST"):
             # we wrap the standard MSDP commands in a MSDP.submodule
@@ -160,16 +194,19 @@ class TelnetOOB(object):
             gmcp_string = "%s %s" % (cmdname, json.dumps(args))
         elif kwargs:
             gmcp_string = "%s %s" % (cmdname, json.dumps(kwargs))
-        #print "gmcp_encode", cmdname, args, kwargs, "->", gmcp_string
         return force_str(gmcp_string).strip()
 
     def decode_msdp(self, data):
         """
-        Decodes incoming MSDP data
+        Decodes incoming MSDP data.
 
-        cmdname var  --> cmdname arg
-        cmdname array --> cmdname *args
-        cmdname table --> cmdname **kwargs
+        Args:
+            data (str or list): MSDP data.
+
+        Notes:
+            cmdname var  --> cmdname arg
+            cmdname array --> cmdname *args
+            cmdname table --> cmdname **kwargs
 
         """
         tables = {}
@@ -195,8 +232,6 @@ class TelnetOOB(object):
             parts = msdp_regex_val.split(varval)
             variables[parts[0]] = tuple(parts[1:]) if len(parts) > 1 else ("", )
 
-        #print "OOB: MSDP decode:", data, "->", variables, arrays, tables
-
         # send to the sessionhandler
         if data:
             for varname, var in variables.items():
@@ -211,17 +246,20 @@ class TelnetOOB(object):
 
     def decode_gmcp(self, data):
         """
-        Decodes incoming GMCP data on the form 'varname <structure>'
+        Decodes incoming GMCP data on the form 'varname <structure>'.
 
-        cmdname string -> cmdname arg
-        cmdname [arg, arg,...] -> cmdname *args
-        cmdname {key:arg, key:arg, ...} -> cmdname **kwargs
+        Args:
+            data (str or list): GMCP data.
+
+        Notes:
+            cmdname string -> cmdname arg
+            cmdname [arg, arg,...] -> cmdname *args
+            cmdname {key:arg, key:arg, ...} -> cmdname **kwargs
 
         """
         if hasattr(data, "__iter__"):
             data = "".join(data)
 
-        #print "decode_gmcp:", data
         if data:
             splits = data.split(None, 1)
             cmdname = splits[0]
@@ -240,7 +278,6 @@ class TelnetOOB(object):
                         args = tuple(struct)
                 else:
                     args = (struct,)
-                #print "gmcp decode:", data, "->", cmdname, args, kwargs
                 self.protocol.data_in(oob=(cmdname, args, kwargs))
 
     # access methods
@@ -248,8 +285,12 @@ class TelnetOOB(object):
     def data_out(self, cmdname, *args, **kwargs):
         """
         Return a msdp-valid subnegotiation across the protocol.
+
+        Args:
+            cmdname (str): OOB-command name.
+            args, kwargs (any): Arguments to OOB command.
+
         """
-        #print "data_out:", encoded_oob
         if self.MSDP:
             encoded_oob = self.encode_msdp(cmdname, *args, **kwargs)
             self.protocol._write(IAC + SB + MSDP + encoded_oob + IAC + SE)

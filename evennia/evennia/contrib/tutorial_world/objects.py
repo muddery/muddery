@@ -18,6 +18,7 @@ Weapon
 WeaponRack
 
 """
+from future.utils import listvalues
 
 import random
 
@@ -523,7 +524,7 @@ class CmdShiftRoot(Command):
         self.obj.db.root_pos = root_pos
 
         # Check victory condition
-        if root_pos.values().count(0) == 0: # no roots in middle position
+        if listvalues(root_pos).count(0) == 0: # no roots in middle position
             # This will affect the cmd: lock of CmdPressButton
             self.obj.db.button_exposed = True
             self.caller.msg("Holding aside the root you think you notice something behind it ...")
@@ -534,7 +535,7 @@ class CmdPressButton(Command):
     Presses a button.
     """
     key = "press"
-    aliases = ["press button", "button", "push", "push button"]
+    aliases = ["press button", "button", "push button"]
     # only accessible if the button was found and there is light. This checks
     # the Attribute button_exposed on the Wall object so that
     # you can only push the button when the puzzle is solved. It also

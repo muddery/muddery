@@ -219,7 +219,7 @@ class EventHandler(object):
                         "npc": dialogue_record.npc}
                 event["data"] = data
         except Exception, e:
-            print "Can't load event dialogue %s: %s" % (event["key"], e)
+            logger.log_errmsg("Can't load event dialogue %s: %s" % (event["key"], e))
 
         return event
 

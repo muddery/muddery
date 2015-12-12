@@ -19,7 +19,7 @@ Installation is simple:
 To your settings file, add/edit the line:
 
 ```python
-CMDSET_UNLOGGEDIN = "contrib.email-login.UnloggedinCmdSet"
+CMDSET_UNLOGGEDIN = "contrib.email_login.UnloggedinCmdSet"
 ```
 
 That's it. Reload the server and try to log in to see it.
@@ -30,7 +30,6 @@ the module given by settings.CONNECTION_SCREEN_MODULE.
 
 """
 import re
-import traceback
 from django.conf import settings
 from evennia.players.models import PlayerDB
 from evennia.objects.models import ObjectDB
@@ -208,15 +207,15 @@ its and @/./+/-/_ only.") # this echoes the restrictions made by django's auth m
                 new_player = create.create_player(playername, email, password,
                                                      permissions=permissions)
 
-            except Exception, e:
+            except Exception as e:
                 session.msg("There was an error creating the default Player/Character:\n%s\n If this problem persists, contact an admin." % e)
                 logger.log_trace()
                 return
 
-            # This needs to be called so the engine knows this player is
+            # This needs to be set so the engine knows this player is
             # logging in for the first time. (so it knows to call the right
             # hooks during login later)
-            utils.init_new_player(new_player)
+            new_player.db.FIRST_LOGIN = True
 
             # join the new player to the public channel
             pchanneldef = settings.CHANNEL_PUBLIC
@@ -224,7 +223,7 @@ its and @/./+/-/_ only.") # this echoes the restrictions made by django's auth m
                 pchannel = ChannelDB.objects.get_channel(pchanneldef[0])
                 if not pchannel.connect(new_player):
                     string = "New player '%s' could not connect to public channel!" % new_player.key
-                    logger.log_errmsg(string)
+                    logger.log_err(string)
 
             if MULTISESSION_MODE < 2:
                 # if we only allow one character, create one with the same name as Player
@@ -257,9 +256,8 @@ its and @/./+/-/_ only.") # this echoes the restrictions made by django's auth m
             # We are in the middle between logged in and -not, so we have
             # to handle tracebacks ourselves at this point. If we don't,
             # we won't see any errors at all.
-            string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
-            session.msg(string % (traceback.format_exc()))
-            logger.log_errmsg(traceback.format_exc())
+            session.msg("An error occurred. Please e-mail an admin if the problem persists.")
+            logger.log_trace()
 
 class CmdUnconnectedQuit(MuxCommand):
     """

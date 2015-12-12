@@ -2,6 +2,8 @@
 This module parse data files to lines.
 """
 
+from __future__ import print_function
+
 import csv
 
 try:
@@ -34,10 +36,10 @@ def xls_reader(file_name):
         file_name: (string) xls file's name.
     """
     if not xlrd:
-        print '**********************************************************'
-        print 'You need to install "xlrd" first to import xls/xlsx files!'
-        print 'You can use "pip install xlrd" to install it!             '
-        print '**********************************************************'
+        print('**********************************************************')
+        print('You need to install "xlrd" first to import xls/xlsx files!')
+        print('You can use "pip install xlrd" to install it!             ')
+        print('**********************************************************')
         return
 
     # load file

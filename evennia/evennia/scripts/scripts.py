@@ -12,6 +12,7 @@ from evennia.typeclasses.models import TypeclassBase
 from evennia.scripts.models import ScriptDB
 from evennia.scripts.manager import ScriptManager
 from evennia.utils import logger
+from future.utils import with_metaclass
 
 __all__ = ["DefaultScript", "DoNothing", "Store"]
 
@@ -62,7 +63,7 @@ class ExtendedLoopingCall(LoopingCall):
         assert not self.running, ("Tried to start an already running "
                                   "ExtendedLoopingCall.")
         if interval < 0:
-            raise ValueError, "interval must be >= 0"
+            raise ValueError("interval must be >= 0")
         self.running = True
         d = self.deferred = Deferred()
         self.starttime = self.clock.seconds()
@@ -109,10 +110,11 @@ class ExtendedLoopingCall(LoopingCall):
         """
         assert self.running, ("Tried to fire an ExtendedLoopingCall "
                               "that was not running.")
-        if self.call is not None:
-            self.call.cancel()
-            self.call.callback()
-            self()
+        self.call.cancel()
+        self.call = None
+        self.starttime = self.clock.seconds()
+        self()
+
 
     def next_call_time(self):
         """
@@ -131,13 +133,12 @@ class ExtendedLoopingCall(LoopingCall):
             return interval - (total_runtime % self.interval)
         return None
 
-class ScriptBase(ScriptDB):
+class ScriptBase(with_metaclass(TypeclassBase, ScriptDB)):
     """
     Base class for scripts. Don't inherit from this, inherit from the
     class `DefaultScript` below instead.
 
     """
-    __metaclass__ = TypeclassBase
     objects = ScriptManager()
 
 
@@ -206,7 +207,7 @@ class DefaultScript(ScriptBase):
             self.db_obj.msg(estring)
         except Exception:
             pass
-        logger.log_errmsg(estring)
+        logger.log_err(estring)
 
     def _step_callback(self):
         """
@@ -225,7 +226,6 @@ class DefaultScript(ScriptBase):
         callcount = self.ndb._task.callcount
         maxcount = self.db_repeats
         if maxcount > 0 and maxcount <= callcount:
-            #print "stopping script!"
             self.stop()
 
     def _step_task(self):
@@ -379,6 +379,52 @@ class DefaultScript(ScriptBase):
 
             self._start_task()
             return True
+
+    def restart(self, interval=None, repeats=None, start_delay=None):
+        """
+        Restarts an already existing/running Script from the
+        beginning, optionally using different settings. This will
+        first call the stop hooks, and then the start hooks again.
+
+        Args:
+            interval (int, optional): Allows for changing the interval
+                of the Script. Given in seconds.  if `None`, will use the
+                already stored interval.
+            repeats (int, optional): The number of repeats. If unset, will
+                use the previous setting.
+            start_delay (bool, optional): If we should wait `interval` seconds
+                before starting or not. If `None`, re-use the previous setting.
+
+        """
+        try:
+            self.at_stop()
+        except Exception:
+            logger.log_trace()
+        self._stop_task()
+        self.is_active = False
+        if interval is not None:
+            self.interval = interval
+        if repeats is not None:
+            self.repeats = repeats
+        if start_delay is not None:
+            self.start_delay = start_delay
+        self.start()
+
+    def reset_callcount(self, value=0):
+        """
+        Reset the count of the number of calls done.
+
+        Args:
+            value (int, optional): The repeat value to reset to. Default
+                is to set it all the way back to 0.
+
+        Notes:
+            This is only useful if repeats != 0.
+
+        """
+        task = self.ndb._task
+        if task:
+            task.callcount = max(0, int(value))
 
     def force_repeat(self):
         """
