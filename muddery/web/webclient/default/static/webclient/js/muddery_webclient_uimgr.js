@@ -268,9 +268,6 @@ var uimgr = {
             .append($("<th>").text(LS("DESC")))
             .append($("<th>").text(LS("OBJECTIVE")));
 
-
-        console.log(JSON.stringify(data))
-
         for (var i in data) {
             try {
                 var quest = data[i];
