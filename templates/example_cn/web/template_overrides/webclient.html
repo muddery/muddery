@@ -21,7 +21,7 @@
     <script src="{% static "webclient/js/bootstrap.min.js" %}"></script>
     <script src="{% static "webclient/js/d3.v3.min.js" %}" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
-        if(!window.jQuery){document.write("<div class='err'>jQuery library not found or the online version could not be reached.</div>");}
+    if(!window.jQuery){document.write("<div class='err'>jQuery library not found or the online version could not be reached.</div>");}
     </script>
 
     {% if websocket_enabled %}
@@ -72,6 +72,9 @@
         <center><h5>Muddery 演示游戏</h5></div>
     </div>
 </header>
+<div id="map_button">
+    <input type="button" class="btn-map" value="地图" onclick="map.showMap()"/>
+</div>
 <div id="wrapper">
     <div id="middlewindow" style="height: 100%; width: auto;margin-left: auto;margin-right: auto;">
         <div id="prompt_bar">
