@@ -1057,14 +1057,20 @@ var webclient = {
     },
     
     unselectAllTabs : function() {
+        $("#tab_bar li").removeClass("active")
         $("#tab_bar li").removeClass("pill_active");
         $("#tab_content form").css("display", "none");
     },
     
     showPage : function(pagename) {
         this.unselectAllTabs();
+        $("#tab_" + pagename).addClass("active");
         $("#tab_" + pagename).addClass("pill_active");
         $("#page_" + pagename).css("display", "");
+    },
+
+    showMenuSystem : function() {
+        $("#page_system").css("display", "");
     },
     
     onConnectionOpen: function() {
