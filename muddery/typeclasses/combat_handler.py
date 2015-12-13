@@ -186,13 +186,16 @@ class CombatHandler(DefaultScript):
         if not self.db.characters:
             return False
 
+        if not len(self.db.characters):
+            return False
+
         teams = set()
         for character in self.db.characters.values():
             if character.is_alive():
                 teams.add(character.get_team())
                 if len(teams) > 1:
                     return False
-                            
+
         return True
 
 
