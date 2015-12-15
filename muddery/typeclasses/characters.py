@@ -76,10 +76,13 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.equipments = equipments
         
         self.db.skills = {}
-        
+
         # set quests
         self.db.finished_quests = set()
         self.db.current_quests = {}
+
+        # set attributes
+        self.db.attributes = {}
 
 
     def at_init(self):

@@ -132,7 +132,7 @@ class ScriptHandler(object):
             env_local = {"env": self.actions,
                          "character": character,
                          "obj": obj}
-            eval(action, {}, env_local)
+            exec(action, {}, env_local)
         except Exception, e:
             logger.log_tracemsg("do_action error:%s %s" % (action, e))
             
@@ -151,9 +151,15 @@ class ScriptHandlerDefault(ScriptHandler):
         self.add_condition("can_provide_quest", script_conditions.can_provide_quest)
         self.add_condition("is_quest_finished", script_conditions.is_quest_finished)
         self.add_condition("have_object", script_conditions.have_object)
+        self.add_condition("get_attr", script_actions.get_attr)
+        self.add_condition("has_attr", script_conditions.has_attr)
+        self.add_condition("is_attr", script_conditions.is_attr)
 
         # self.add_action("learn_skill", script_actions.learn_skill)
         self.add_action("give_objects", script_actions.give_objects)
         self.add_action("remove_objects", script_actions.remove_objects)
         self.add_action("teleport_to", script_actions.teleport_to)
+        self.add_action("set_attr", script_actions.set_attr)
+        self.add_action("get_attr", script_actions.get_attr)
+        self.add_action("remove_attr", script_actions.remove_attr)
 

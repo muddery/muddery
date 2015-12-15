@@ -70,3 +70,40 @@ def have_object(character, obj, *args):
         if item.get_info_key() == args[0]:
             return True
     return False
+
+
+def has_attr(character, obj, *args):
+    """
+    Does this attribute exist.
+    args:
+        args[0]: attribute key
+    """
+    if not character:
+        return False
+
+    if not args:
+        return False
+
+    key = args[0]
+    return character.custom_attr.has(key)
+
+
+def is_attr(character, obj, *args):
+    """
+    Does this attribute match the value.
+    args:
+        args[0]: attribute key
+        args[1]: attribute value
+    """
+    if not character:
+        return False
+
+    if not args:
+        return False
+
+    if len(args) < 2:
+        return False
+
+    key = args[0]
+    value = args[1]
+    return character.custom_attr.is_value(key, value)
