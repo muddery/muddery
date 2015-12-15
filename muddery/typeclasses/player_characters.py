@@ -13,15 +13,15 @@ from django.conf import settings
 from django.db.models.loading import get_model
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.typeclasses.common_objects import MudderyEquipment
-from muddery.utils import utils
+from muddery.utils import defines, utils
 from muddery.utils.builder import build_object
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.quest_handler import QuestHandler
+from muddery.utils.attribute_handler import AttributeHandler
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
-from muddery.utils import defines
 from evennia import TICKER_HANDLER
 
 
@@ -49,6 +49,11 @@ class MudderyPlayerCharacter(MudderyCharacter):
     @lazy_property
     def quest(self):
         return QuestHandler(self)
+
+
+    @lazy_property
+    def custom_attr(self):
+        return AttributeHandler(self)
 
 
     def at_object_creation(self):

@@ -59,7 +59,9 @@ def give_objects(character, obj, *args):
 def remove_objects(character, obj, *args):
     """
     Remove some objects from the character.
-    args: object's key and object's number
+    args:
+        args[0]: object's key
+        args[1]: object's number
     """
     if not character:
         return
@@ -95,3 +97,62 @@ def teleport_to(character, obj, *args):
     destination = destination[0]
 
     character.move_to(destination)
+
+
+def set_attr(character, obj, *args):
+    """
+    Set the character's attribute.
+    args:
+        args[0]: attribute key
+        args[1](optional): attribute value
+    """
+    if not character:
+        return
+
+    if not args:
+        return
+
+    key = args[0]
+    value = None
+    if len(args) > 1:
+        value = args[1]
+
+    character.custom_attr.set(key, value)
+
+
+def get_attr(character, obj, *args):
+    """
+    Get the character's attribute.
+        args:
+        args[0]: attribute key
+        args[1](optional): default value
+    """
+    if not character:
+        return
+
+    if not args:
+        return
+
+    key = args[0]
+    default = None
+    if len(args) > 1:
+        default = args[1]
+
+    return character.custom_attr.get(key, default)
+
+
+def remove_attr(character, obj, *args):
+    """
+    Remove the character's attribute.
+    args:
+        args[0]: attribute key
+    """
+    if not character:
+        return
+
+    if not args:
+        return
+
+    key = args[0]
+    character.custom_attr.remove(key)
+
