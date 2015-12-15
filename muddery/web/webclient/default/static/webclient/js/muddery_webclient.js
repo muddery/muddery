@@ -846,7 +846,7 @@ var webclient = {
             $('#tab_bar').height(tab_bar_h);
             $('#tab_content').height(total_h / 2);
         }
-        
+
         if (win_w > 960) {
             $('#middlewindow').width(960);
         }
@@ -1050,6 +1050,7 @@ var webclient = {
         $("#tab_inventory").css("display", "");
         $("#tab_skills").css("display", "");
         $("#tab_quests").css("display", "");
+        $("#tab_map").css("display", "");
         $("#tab_system").css("display", "");
         $("#tab_command").css("display", "");
 
@@ -1057,14 +1058,20 @@ var webclient = {
     },
     
     unselectAllTabs : function() {
+        $("#tab_bar li").removeClass("active")
         $("#tab_bar li").removeClass("pill_active");
         $("#tab_content form").css("display", "none");
     },
     
     showPage : function(pagename) {
         this.unselectAllTabs();
+        $("#tab_" + pagename).addClass("active");
         $("#tab_" + pagename).addClass("pill_active");
         $("#page_" + pagename).css("display", "");
+    },
+
+    showMenuSystem : function() {
+        $("#page_system").css("display", "");
     },
     
     onConnectionOpen: function() {
