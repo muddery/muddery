@@ -101,7 +101,7 @@ class MudderyObject(DefaultObject):
                 self.location.msg_contents("%s has entered the game." % self.name, exclude=[self])
 
 
-    def at_post_unpuppet(self, player, sessid=None):
+    def at_post_unpuppet(self, player, session=None):
         """
         We stove away the character when the player goes ooc/logs off,
         otherwise the character object will remain in the room also
@@ -110,17 +110,19 @@ class MudderyObject(DefaultObject):
         Args:
             player (Player): The player object that just disconnected
                 from this object.
-            sessid (int): Session id controlling the connection that
+            session (Session): Session controlling the connection that
                 just disconnected.
         """
-        if self.location: # have to check, in case of multiple connections closing
-            if not settings.SOLO_MODE:
-                # Notify other players in this location.
-                self.location.msg_contents("%s has left the game." % self.name, exclude=[self])
+        if not self.sessions.count():
+            # only remove this char from grid if no sessions control it anymore.
+            if self.location: # have to check, in case of multiple connections closing
+                if not settings.SOLO_MODE:
+                    # Notify other players in this location.
+                    self.location.msg_contents("%s has left the game." % self.name, exclude=[self])
 
-            # Save last location.
-            self.db.prelogout_location = self.location
-            self.location = None
+                # Save last location.
+                self.db.prelogout_location = self.location
+                self.location = None
 
 
     def at_object_receive(self, moved_obj, source_location):

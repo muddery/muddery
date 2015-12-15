@@ -32,8 +32,7 @@ CONNECTION_SCREEN_MODULE = settings.CONNECTION_SCREEN_MODULE
 # would also block dummyrunner, so it's not added as default.
 
 _LATEST_FAILED_LOGINS = defaultdict(list)
-def _throttle(session, maxlim=None, timeout=None,
-              storage=_LATEST_FAILED_LOGINS):
+def _throttle(session, maxlim=None, timeout=None, storage=_LATEST_FAILED_LOGINS):
     """
     This will check the session's address against the
     _LATEST_LOGINS dictionary to check they haven't
@@ -76,6 +75,114 @@ def _throttle(session, maxlim=None, timeout=None,
         return False
 
 
+def create_guest_player(session):
+    """
+    Creates a guest player/character for this session, if one is available.
+
+    Args:
+    session (Session): the session which will use the guest player/character.
+
+    Returns:
+    GUEST_ENABLED (boolean), player (Player):
+    the boolean is whether guest accounts are enabled at all.
+    the Player which was created from an available guest name.
+    """
+    # check if guests are enabled.
+    if not settings.GUEST_ENABLED:
+        return False, None
+
+    # Check IP bans.
+    bans = ServerConfig.objects.conf("server_bans")
+    if bans and any(tup[2].match(session.address) for tup in bans if tup[2]):
+        # this is a banned IP!
+        string = "{rYou have been banned and cannot continue from here." \
+            "\nIf you feel this ban is in error, please email an admin.{x"
+        session.msg(string)
+        session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
+        return True, None
+
+    try:
+        # Find an available guest name.
+        for playername in settings.GUEST_LIST:
+            if not PlayerDB.objects.filter(username__iexact=playername):
+                break
+                playername = None
+            if playername == None:
+                session.msg("All guest accounts are in use. Please try again later.")
+                return True, None
+
+        password = "%016x" % getrandbits(64)
+        home = ObjectDB.objects.get_id(settings.GUEST_HOME)
+        permissions = settings.PERMISSION_GUEST_DEFAULT
+        typeclass = settings.BASE_CHARACTER_TYPECLASS
+        ptypeclass = settings.BASE_GUEST_TYPECLASS
+        new_player = _create_player(session, playername, password,
+                                    permissions, ptypeclass)
+        if new_player:
+            _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
+                              session, new_player, typeclass,
+                              default_home, permissions, playername)
+
+    except Exception:
+        # We are in the middle between logged in and -not, so we have
+        # to handle tracebacks ourselves at this point. If we don't,
+        # we won't see any errors at all.
+        session.msg("An error occurred. Please e-mail an admin if the problem persists.")
+        logger.log_trace()
+    finally:
+        return True, new_player
+
+
+def create_normal_player(session, name, password):
+    """
+    Creates a player with the given name and password.
+
+    Args:
+    session (Session): the session which is requesting to create a player.
+    name (str): the name that the player wants to use for login.
+    password (str): the password desired by this player, for login.
+
+    Returns:
+    player (Player): the player which was created from the name and password.
+    """
+    # check for too many login errors too quick.
+    if _throttle(session, maxlim=5, timeout=5*60):
+        # timeout is 5 minutes.
+        session.msg("{RYou made too many connection attempts. Try again in a few minutes.{n")
+        return None
+
+    # Match account name and check password
+    player = PlayerDB.objects.get_player_from_name(name)
+    pswd = None
+    if player:
+        pswd = player.check_password(password)
+
+    if not (player and pswd):
+        # No playername or password match
+        session.msg(LS("Incorrect username or password."))
+        # this just updates the throttle
+        _throttle(session)
+        # calls player hook for a failed login if possible.
+        if player:
+            player.at_failed_login(session)
+        return None
+
+
+    # Check IP and/or name bans
+    bans = ServerConfig.objects.conf("server_bans")
+    if bans and (any(tup[0]==player.name.lower() for tup in bans)
+                 or
+                 any(tup[2].match(session.address) for tup in bans if tup[2])):
+        # this is a banned IP or name!
+        string = "{rYou have been banned and cannot continue from here." \
+            "\nIf you feel this ban is in error, please email an admin.{x"
+        session.msg(string)
+        session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
+        return None
+
+    return player
+
+
 class CmdUnconnectedConnect(Command):
     """
     connect to the game
@@ -115,83 +222,38 @@ class CmdUnconnectedConnect(Command):
             string += '\n        }'
 
             logger.log_errmsg(string)
-            self.caller.msg({"alert":string})
+            session.msg({"alert":string})
             return
 
         # check for too many login errors too quick.
         if _throttle(session, maxlim=5, timeout=5*60, storage=_LATEST_FAILED_LOGINS):
             # timeout is 5 minutes.
-            session.msg({"alert":"{RYou made too many connection attempts. Try again in a few minutes.{n"})
+            session.msg({"alert":LS("{RYou made too many connection attempts. Try again in a few minutes.{n")})
             return
 
         # Guest login
-        if playername.lower() == "guest" and settings.GUEST_ENABLED:
-            try:
-                # Find an available guest name.
-                for playername in settings.GUEST_LIST:
-                    if not PlayerDB.objects.filter(username__iexact=playername):
-                        break
-                    playername = None
-                if playername == None:
-                    session.msg({"alert":"All guest accounts are in use. Please try again later."})
-                    return
+        if playername.lower() == "guest":
+            enabled, new_player = create_guest_player(session)
+            if new_player:
+                session.msg({"login":{"name": playername, "dbref": new_player.dbref}})
+                session.sessionhandler.login(session, new_player)
+            if enabled:
+                return
 
-                password = "%016x" % getrandbits(64)
-                home = ObjectDB.objects.get_id(settings.GUEST_HOME)
-                permissions = settings.PERMISSION_GUEST_DEFAULT
-                typeclass = settings.BASE_CHARACTER_TYPECLASS
-                ptypeclass = settings.BASE_GUEST_TYPECLASS
-                new_player = _create_player(session, playername, password,
-                                            permissions, ptypeclass)
-                if new_player:
-                    _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
-                                      session, new_player, typeclass,
-                                      home, permissions, "GUEST")
-                    session.sessionhandler.login(session, new_player)
-
-            except Exception:
-                # We are in the middle between logged in and -not, so we have
-                # to handle tracebacks ourselves at this point. If we don't,
-                # we won't see any errors at all.
-                string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
-                session.msg({"alert":string % (traceback.format_exc())})
-                logger.log_tracemsg()
-
+        if not password:
+            session.msg({"alert":LS("{Please input password.")})
             return
 
-        # Match account name and check password
-        player = PlayerDB.objects.get_player_from_name(playername)
-        pswd = None
+        player = create_normal_player(session, playername, password)
         if player:
-            pswd = player.check_password(password)
-
-        if not (player and pswd):
-            # No playername or password match
-            session.msg({"alert": LS("Incorrect username or password.")})
-            # this just updates the throttle
-            _throttle(session, storage=_LATEST_FAILED_LOGINS)
-            return
-
-        # Check IP and/or name bans
-        bans = ServerConfig.objects.conf("server_bans")
-        if bans and (any(tup[0] == player.name.lower() for tup in bans)
-                     or
-                     any(tup[2].match(session.address) for tup in bans if tup[2])):
-            # this is a banned IP or name!
-            string = "{rYou have been banned and cannot continue from here." \
-                     "\nIf you feel this ban is in error, please email an admin.{x"
-            session.msg({"alert":string})
-            session.execute_cmd('{"cmd":"quit","args":""}')
-            return
-
-        # actually do the login. This will call all other hooks:
-        #   session.at_login()
-        #   player.at_init()  # always called when object is loaded from disk
-        #   player.at_pre_login()
-        #   player.at_first_login()  # only once
-        #   player.at_post_login(sessid=sessid)
-        session.msg({"login":{"name": playername, "dbref": player.dbref}})
-        session.sessionhandler.login(session, player)
+            # actually do the login. This will call all other hooks:
+            #   session.at_login()
+            #   player.at_init()  # always called when object is loaded from disk
+            #   player.at_first_login()  # only once, for player-centric setup
+            #   player.at_pre_login()
+            #   player.at_post_login(session=session)
+            session.msg({"login":{"name": playername, "dbref": player.dbref}})
+            session.sessionhandler.login(session, player)
 
 
 class CmdUnconnectedCreate(Command):
@@ -233,8 +295,9 @@ class CmdUnconnectedCreate(Command):
             self.caller.msg({"alert":string})
             return
 
+
         # sanity checks
-        if not re.findall(r'^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
+        if not re.findall('^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
             # this echoes the restrictions made by django's auth
             # module (except not allowing spaces, for convenience of
             # logging in).
@@ -248,11 +311,11 @@ class CmdUnconnectedCreate(Command):
             session.msg({"alert":"Sorry, there is already a player with the name '%s'." % playername})
             return
         # Reserve playernames found in GUEST_LIST
-        if settings.GUEST_LIST and playername.lower() in map(str.lower, settings.GUEST_LIST):
+        if settings.GUEST_LIST and playername.lower() in (guest.lower() for guest in settings.GUEST_LIST):
             string = "\n\r That name is reserved. Please choose another Playername."
             session.msg({"alert":string})
             return
-        
+
         # sanity checks
         if not (0 < len(nickname) <= 30):
             # Nickname's length
@@ -262,9 +325,8 @@ class CmdUnconnectedCreate(Command):
         # strip excessive spaces in playername
         nickname = re.sub(r"\s+", " ", nickname).strip()
 
-        if not re.findall(r'^[\w. @+-]+$', password) or not (3 < len(password)):
-            string = "\n\r Password should be longer than 3 characers. Letters, spaces, " \
-                     "digits and @\\.\\+\\-\\_ only." \
+        if not re.findall('^[\w. @+-]+$', password) or not (3 < len(password)):
+            string = "\n\r Password should be longer than 3 characers. Letters, spaces, digits and @\.\+\-\_ only." \
                      "\nFor best security, make it longer than 8 characters. You can also use a phrase of" \
                      "\nmany words if you enclose the password in quotes."
             session.msg({"alert":string})
@@ -272,7 +334,7 @@ class CmdUnconnectedCreate(Command):
 
         # Check IP and/or name bans
         bans = ServerConfig.objects.conf("server_bans")
-        if bans and (any(tup[0] == playername.lower() for tup in bans)
+        if bans and (any(tup[0]==playername.lower() for tup in bans)
                      or
                      any(tup[2].match(session.address) for tup in bans if tup[2])):
             # this is a banned IP or name!
@@ -345,7 +407,7 @@ class CmdUnconnectedCreateConnect(Command):
             return
 
         # sanity checks
-        if not re.findall(r'^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
+        if not re.findall('^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
             # this echoes the restrictions made by django's auth
             # module (except not allowing spaces, for convenience of
             # logging in).
@@ -359,7 +421,7 @@ class CmdUnconnectedCreateConnect(Command):
             session.msg({"alert":"Sorry, there is already a player with the name '%s'." % playername})
             return
         # Reserve playernames found in GUEST_LIST
-        if settings.GUEST_LIST and playername.lower() in map(str.lower, settings.GUEST_LIST):
+        if settings.GUEST_LIST and playername.lower() in (guest.lower() for guest in settings.GUEST_LIST):
             string = "\n\r That name is reserved. Please choose another Playername."
             session.msg({"alert":string})
             return
@@ -373,17 +435,8 @@ class CmdUnconnectedCreateConnect(Command):
         # strip excessive spaces in playername
         nickname = re.sub(r"\s+", " ", nickname).strip()
 
-        if not re.findall(r'^[\w. @+-]+$', password) or not (3 < len(password)):
-            string = "\n\r Password should be longer than 3 characers. Letters, spaces, " \
-                     "digits and @\\.\\+\\-\\_ only." \
-                     "\nFor best security, make it longer than 8 characters. You can also use a phrase of" \
-                     "\nmany words if you enclose the password in quotes."
-            session.msg({"alert":string})
-            return
-
-        if not re.findall(r'^[\w. @+-]+$', password) or not (3 < len(password)):
-            string = "\n\r Password should be longer than 3 characers. Letters, spaces, " \
-                     "digits and @\\.\\+\\-\\_ only." \
+        if not re.findall('^[\w. @+-]+$', password) or not (3 < len(password)):
+            string = "\n\r Password should be longer than 3 characers. Letters, spaces, digits and @\.\+\-\_ only." \
                      "\nFor best security, make it longer than 8 characters. You can also use a phrase of" \
                      "\nmany words if you enclose the password in quotes."
             session.msg({"alert":string})
@@ -391,7 +444,7 @@ class CmdUnconnectedCreateConnect(Command):
 
         # Check IP and/or name bans
         bans = ServerConfig.objects.conf("server_bans")
-        if bans and (any(tup[0] == playername.lower() for tup in bans)
+        if bans and (any(tup[0]==playername.lower() for tup in bans)
                      or
                      any(tup[2].match(session.address) for tup in bans if tup[2])):
             # this is a banned IP or name!
@@ -435,7 +488,7 @@ class CmdUnconnectedCreateConnect(Command):
             # we won't see any errors at all.
             string = "%s\nThis is a bug. Please e-mail an admin if the problem persists."
             session.msg({"alert":string % (traceback.format_exc())})
-            logger.log_tracemsg(traceback.format_exc())
+            logger.log_tracemsg()
 
 
 class CmdUnconnectedQuit(Command):
@@ -517,21 +570,21 @@ def _create_player(session, playername, password, permissions, typeclass=None):
         new_player = create.create_player(playername, None, password,
                                           permissions=permissions, typeclass=typeclass)
 
-    except Exception, e:
+    except Exception as e:
         session.msg("There was an error creating the Player:\n%s\n If this problem persists, contact an admin." % e)
         logger.log_trace()
         return False
 
-    # This needs to be called so the engine knows this player is
+    # This needs to be set so the engine knows this player is
     # logging in for the first time. (so it knows to call the right
     # hooks during login later)
-    utils.init_new_player(new_player)
+    new_player.db.FIRST_LOGIN = True
 
     # join the new player to the public channel
     pchannel = ChannelDB.objects.get_channel(settings.DEFAULT_CHANNELS[0]["key"])
     if not pchannel.connect(new_player):
         string = "New player '%s' could not connect to public channel!" % new_player.key
-        logger.log_errmsg(string)
+        logger.log_err(string)
     return new_player
 
 
@@ -566,7 +619,7 @@ def _create_character(character_key, level, session, new_player, typeclass, home
         
         # We need to set this to have @ic auto-connect to this character
         new_player.db._last_puppet = new_character
-    except Exception, e:
+    except Exception as e:
         session.msg("There was an error creating the Character:\n%s\n If this problem persists, contact an admin." % e)
         logger.log_trace()
         return False
