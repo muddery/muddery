@@ -815,37 +815,20 @@ var webclient = {
         var inp_w = $('#map_box').outerWidth(true);
         $('#map_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
 
-        if (win_h > 480) {
-            var head_h = $('#site-title').outerHeight(true);
-            $('#header_bar').show();
-            $('#wrapper').height(win_h - head_h - 6);
-        }
-        else {
-            $('#header_bar').hide();
-            $('#wrapper').height(win_h - 6);
-        }
-        
-        var middle_h = $('#middlewindow').outerHeight(true);
-        var bottom_bar_h = 18;
-        var total_h = middle_h - bottom_bar_h;
+        var head_h = $('#site-title').outerHeight(true);
+        var wrapper_h = win_h - head_h - 30;
+
+        $('#header_bar').show();
+        $('#wrapper').height(wrapper_h);
+
         var prompt_h = 18;
-        var tab_bar_h = $('#tab_pills').outerHeight(true) - 1;
-        if (tab_bar_h < 30) {
-            tab_bar_h = 30;
-        }
-        var tab_content_max_h = 360;
-        if (total_h + prompt_h + tab_bar_h > tab_content_max_h * 2) {
-            $('#msg_wnd').height(middle_h - tab_bar_h - tab_content_max_h - 2);
-            $('#prompt').height(prompt_h);
-            $('#tab_bar').height(tab_bar_h);
-            $('#tab_content').height(tab_content_max_h);
-        }
-        else {
-            $('#msg_wnd').height(total_h / 2 - prompt_h - tab_bar_h);
-            $('#prompt').height(prompt_h);
-            $('#tab_bar').height(tab_bar_h);
-            $('#tab_content').height(total_h / 2);
-        }
+        var tab_bar_h = 50;
+        var msg_wnd_h = wrapper_h / 3;
+        var tab_content_h = wrapper_h / 3;
+        $('#msg_wnd').height(msg_wnd_h);
+        $('#prompt').height(prompt_h);
+        $('#tab_bar').height(tab_bar_h);
+        $('#tab_content').height(tab_content_h);
 
         if (win_w > 960) {
             $('#middlewindow').width(960);
@@ -853,6 +836,8 @@ var webclient = {
         else {
             $('#middlewindow').width(win_w);
         }
+
+        console.log("$('#msg_wnd') " + $('#msg_wnd').height() + " $('#tab_content') " + $('#tab_content').height())
     },
 
     doCancel : function() {
