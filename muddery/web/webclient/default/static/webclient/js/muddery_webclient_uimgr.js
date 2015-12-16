@@ -3,7 +3,7 @@ Muddery webclient_uimgr (javascript component)
 */
 
 var uimgr = {
-    CONST_A_HREF_ONCLICK : "webclient.doCloseBox(); commands.doCommandLink(this); return false;",
+    CONST_A_HREF_ONCLICK : "popupmgr.doCloseBox(); commands.doCommandLink(this); return false;",
     divEmpty : function(element, args) {
         var divEmptyElement = $("<div>");
         var element = arguments[0]?arguments[0]:"";
