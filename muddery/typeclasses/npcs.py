@@ -19,8 +19,8 @@ class MudderyNPC(MudderyCharacter):
     """
     def at_init(self):
         """
-            Init the character.
-            """
+        Init the character.
+        """
         super(MudderyNPC, self).at_init()
 
         # set home

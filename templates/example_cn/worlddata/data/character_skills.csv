@@ -1,8 +1,5 @@
 character,skill
 player,skill_normal_hit
 player,skill_normal_hp
-mob_wu,skill_normal_hit
+npc_common,skill_normal_hit
 mob_robot_a,skill_normal_hit
-mob_zombie1,skill_normal_hit
-mob_zombie2,skill_normal_hit
-mob_zombie3,skill_normal_hit

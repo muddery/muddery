@@ -164,12 +164,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         try:
             # get data from db
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_MODELS)
-
             model_name = getattr(self, "model", None)
             if not model_name:
                 model_name = self.get_info_key()
 
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_MODELS)
             model_data = model_obj.objects.get(character=model_name, level=self.db.level)
 
             known_fields = set(["id",
@@ -241,7 +240,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         model_skills = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_SKILLS)
         if model_skills:
             # Get records.
-            skill_records = model_skills.objects.filter(character=self.get_info_key())
+            model_name = getattr(self, "model", None)
+            if not model_name:
+                model_name = self.get_info_key()
+
+            skill_records = model_skills.objects.filter(character=model_name)
 
         for skill_record in skill_records:
             self.skill.learn_skill(skill_record.skill_id)
