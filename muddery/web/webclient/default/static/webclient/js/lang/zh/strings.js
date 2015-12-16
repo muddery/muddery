@@ -24,4 +24,5 @@ var LOCAL_STRING = {
     ": ": "：",
     "NEXT": "继续",
     "The client connection was closed cleanly.": "客户端已经与服务器断开。",
+    "Scene": "场景",
 };
