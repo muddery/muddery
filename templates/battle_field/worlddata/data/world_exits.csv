@@ -1,7 +1,4 @@
 key,name,typeclass,desc,verb,location,destination,condition
-exit_start_dock,前往码头,typeclasses.exits.Exit,这扇门可以把你传送到码头,进入,room_intro,room_dock,
-exit_start_house,前往民宅,typeclasses.exits.Exit,这扇门可以把你传送到民宅,进入,room_intro,room_house,
-exit_start_graveyard,前往墓地,typeclasses.exits.Exit,这扇门可以把你传送到墓地,进入,room_intro,room_graveyard,
 exit_dock_tower,钟楼,typeclasses.exits.Exit,前往钟楼,前往,room_dock,room_tower,
 exit_dock_market,市场,typeclasses.exits.Exit,前往市场,前往,room_dock,room_market,
 exit_house_market,市场,typeclasses.exits.Exit,前往市场,前往,room_house,room_market,
