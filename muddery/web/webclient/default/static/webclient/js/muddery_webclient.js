@@ -183,7 +183,7 @@ var webclient = {
                 }
             }
 
-            this.showAlert(msg, button);
+            popupmgr.showAlert(msg, button);
         }
         catch(error) {
             this.displayErr("Data error.");
@@ -464,10 +464,11 @@ var webclient = {
             }
         }
 
-        this.doCloseBox();
-        this.createMessageBox();
-        
-        var page = $('#input_prompt');
+        popupmgr.doCloseBox();
+        popupmgr.createMessageBox();
+
+        $('#popup_header').html('displayLookObj');
+        var page = $('#popup_body');
 
         var title = $('<div>').addClass('clearfix')
                               .appendTo(page);
@@ -514,12 +515,12 @@ var webclient = {
         var html_button = '<div><br></div>\
                              <div>\
                                 <center>\
-                                    <input type="button" id="button_center" value="OK" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
+                                    <input type="button" id="button_center" value="OK" class="btn btn-primary" onClick="popupmgr.doCloseBox()"/>\
                                 </center>\
                             </div>'
         $('#input_additional').html(html_button);
         */
-        this.doSetSizes();
+        webclient.doSetSizes();
     },
     
     displayInventory : function(data) {
@@ -589,10 +590,12 @@ var webclient = {
     },
 
     displayGetObjectBox : function(data) {
-        this.doCloseBox();
-        this.createMessageBox();
-        
-        var page = $("#input_prompt");
+        popupmgr.doCloseBox();
+        popupmgr.createMessageBox();
+
+        $('#popup_header').html('displayGetObjectBox');
+
+        var page = $("#popup_body");
 
         // object's info
         var content = "";
@@ -644,17 +647,19 @@ var webclient = {
         
         // button
         var br = $("<div>").append($("<br>"));
-        $('#input_additional').append(br);
+        $('#popup_footer').append(br);
 
         var div = $("<div>");
 		var center = $("<center>").appendTo(div);
-        var html_button = $("<input>").addClass("btn btn-primary")
+        var html_button = $("<button>").addClass("btn btn-default")
         							  .attr("type", "button")
         							  .attr("id", "button_center")
-        							  .attr("onClick", "webclient.doCloseBox()")
-        							  .val(LS("OK"))
+                                      .attr('data-dismiss', 'modal')
+        							  .attr("onClick", "popupmgr.doCloseBox()")
+        							  .text(LS("OK"))
         							  .appendTo(center);
-        $('#input_additional').append(div);
+
+        $('#popup_footer').append(div);
         this.doSetSizes();
     },
 
@@ -741,7 +746,7 @@ var webclient = {
     },
 
     displayDialogue : function(data) {
-        this.showDialogue(data);
+        popupmgr.showDialogue(data);
     },
 
     onLogin : function(data) {
@@ -773,26 +778,6 @@ var webclient = {
         var win_h = $(window).innerHeight();
         var win_w = $(window).innerWidth();
 
-        //// popup box
-        //var close_h = $('#close_button').outerHeight(true);
-        //var prom_h = $('#input_prompt').outerHeight(true);
-        //var add_h = $('#input_additional').outerHeight(true);
-        //$('#popup_box').height(close_h + prom_h + add_h);
-        //
-        //var inp_h = $('#popup_box').outerHeight(true);
-        //var inp_w = $('#popup_box').outerWidth(true);
-        ////$("#wrapper").css({'height': win_h - inp_h - 1});
-        //$('#popup_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
-        //
-        //var close_h = $('#close_button').outerHeight(true);
-        //var prom_h = $('#input_prompt').outerHeight(true);
-        //var add_h = $('#input_additional').outerHeight(true);
-        //$('#dialogue_box').height(close_h + prom_h + add_h);
-        //
-        //var inp_h = $('#dialogue_box').outerHeight(true);
-        //var inp_w = $('#dialogue_box').outerWidth(true);
-        ////$("#wrapper").css({'height': win_h - inp_h - 1});
-        //$('#dialogue_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
         //
         //// combat box
         //var inp_h = $('#combat_box').outerHeight(true);
@@ -828,7 +813,7 @@ var webclient = {
     },
 
     doCancel : function() {
-        this.doCloseBox();
+        popupmgr.doCloseBox();
     },
 
     doInputCommand : function() {
@@ -839,151 +824,13 @@ var webclient = {
         HISTORY_POS = 0;
         
         sendCommand(command);
-        this.doCloseBox();
-    },
-
-    showAlert : function(msg, button) {
-        this.doCloseBox();
-        this.createMessageBox();
-
-        $('#input_prompt').html(text2html.parseHtml(msg));
-        
-        var html_button = $('<button>')
-            .attr('class', 'btn btn-default')
-            .attr('type', 'button')
-            .attr('data-dismiss', 'modal')
-            .text(button)
-            .attr('id', 'button_center')
-            .attr('onClick', 'webclient.doCloseBox()');
-        $('#input_additional').html(html_button);
-
-        console.log("button " + button);
-
-        if(button == ""){
-            $('#input_additional').hide();
-        } else {
-            $('#input_additional').show();
-        }
-
-        this.doSetSizes();
-    },
-    
-    showDialogue : function(dialogues) {
-        this.doCloseDialogue();
-        
-        try {
-            if (dialogues.length == 0) {
-                return;
-            }
-            
-            this.createDialogueBox();
-
-            if (dialogues.length == 1) {
-                var content = "";
-                if (dialogues[0].speaker.length > 0) {
-                    content += dialogues[0].speaker + ":<br>";
-                }
-                content += text2html.parseHtml(dialogues[0].content);
-                
-                $('#input_prompt').html(content);
-                
-                var html_button = '<div><br></div>\
-                <div>\
-                <center>\
-                <input type="button" id="button_center" value="';
-                html_button += LS("NEXT");
-                html_button += '" class="btn btn-primary"';
-
-                if ("npc" in dialogues[0]) {
-                    html_button += ' npc="' + dialogues[0].npc + '"';
-                }
-                html_button += ' dialogue="' + dialogues[0].dialogue + '"';
-                html_button += ' sentence="' + dialogues[0].sentence + '"';
-                html_button += ' onClick="commands.doDialogue(this); return false;"/>\
-                </center>\
-                </div>'
-
-                $('#input_additional').html(html_button);
-            }
-            else {
-                var content = "";
-                if (dialogues[0].speaker.length > 0) {
-                    content += dialogues[0].speaker + ":<br>";
-                }
-
-                for (var i in dialogues) {
-                    content += '<a href="#" onclick="commands.doDialogue(this); return false;"';
-               	 	content += ' npc="' + dialogues[i].npc + '"';
-               		content += ' dialogue="' + dialogues[i].dialogue + '"';
-                	content += ' sentence="' + dialogues[i].sentence + '"';
-                    content += '">';
-                    content += text2html.parseHtml(dialogues[i].content);
-                    content += '</a><br>';
-                }
-                
-                $('#input_prompt').html(content);
-                
-                var html_button = '<div><br></div>\
-                <div>\
-                <center>\
-                <input type="button" id="button_center" value="SELECT ONE" class="btn btn-primary" />\
-                </center>\
-                </div>'
-                $('#input_additional').html(html_button);
-            }
-        }
-        catch(error) {
-            this.doCloseDialogue();
-        }
-
-        this.doSetSizes();
-    },
-    
-    createMessageBox : function() {
-        var dlg = $('<div>').attr('id', 'popup_box');
-        dlg.attr('class', 'modal fade');
-        dlg.attr('style', 'display: block; padding-left: 15px;');
-        dlg.attr('role', 'dialog');
-
-        var dlgDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(dlg);
-        var dlgContent = $('<div>').attr('class', 'modal-content').appendTo(dlgDialog);
-
-        var dlgHeader = $('<div>')
-            .attr('class', 'modal-header').appendTo(dlgContent);
-        dlgHeader.append($('<button>')
-            .attr('type', 'button')
-            .attr('class', 'close')
-            .attr('data-dismiss', 'modal')
-            .html('&times;'));
-
-        dlgHeader.append($('<h4>')
-            .attr('id', 'input_prompt')
-            .attr('class', 'modal-title'));
-
-        var dlgFooter = $('<div>')
-            .attr('id', 'input_additional')
-            .attr('class', 'modal-footer').appendTo(dlgContent);
-
-        $("#popup_container").prepend(dlg);
-        dlg.modal();
-    },
-
-    createDialogueBox : function() {
-        var dlg = $('<div>').attr('id', 'dialogue_box');
-        dlg.append($('<div>').attr('id', 'input_prompt'));
-        dlg.append($('<div>').attr('id', 'input_additional'));
-
-        var overlayer = $('<div>').addClass('overlayer')
-        .attr('id', 'overlayer');
-
-        $("body").prepend(overlayer);
-        $("body").prepend(dlg);
+        popupmgr.doCloseBox();
     },
 
     createInputBox : function() {
         var dlg = '<div id="popup_box">\
         <div id="close_button" class="clearfix">\
-        <input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="webclient.doCloseBox()"/>\
+        <input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="popupmgr.doCloseBox()"/>\
         </div>\
         <div id="input_prompt">\
         </div>\
@@ -994,24 +841,6 @@ var webclient = {
         var overlayer = '<div class="overlayer" id="overlayer"></div>';
         
         $("body").prepend(dlg + overlayer);
-    },
-
-    doCloseBox : function() {
-        $('#popup_box').remove();
-        $('#overlayer').remove();
-        this.doSetSizes();
-    },
-
-    doCloseDialogue : function() {
-        $('#dialogue_box').remove();
-        $('#overlayer').remove();
-        this.doSetSizes();
-    },
-    
-    doCloseCombat : function() {
-        $('#combat_box').remove();
-        $('#overlayer').remove();
-        this.doSetSizes();
     },
 
     doCloseMap : function() {
