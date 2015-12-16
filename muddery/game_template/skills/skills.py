@@ -16,6 +16,9 @@ def skill_heal(caller, target, effect=0, *args, **kwargs):
     if effect <= 0:
         return
 
+    if not caller:
+        return
+
     target = caller
 
     if target:
@@ -54,3 +57,23 @@ def skill_hit(caller, target, effect=0, *args, **kwargs):
              "effect": damage,              # effect
              "hp": target.db.hp,            # current hp of the target
              "max_hp": target.max_hp}]      # max hp of the target
+
+
+def skill_increase_hp(caller, target, effect=0, *args, **kwargs):
+    """
+    Passive skill, increase the caller's max_hp.
+    """
+    if effect <= 0:
+        return
+
+    if not caller:
+        return
+
+    target = caller
+
+    if target:
+        caller.max_hp += effect
+        hp = caller.db.hp + effect
+        if hp > caller.max_hp:
+            hp = caller.max_hp
+        caller.db.hp = hp

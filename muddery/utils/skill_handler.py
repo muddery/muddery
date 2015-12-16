@@ -48,6 +48,8 @@ class SkillHandler(object):
     def learn_skill(self, skill):
         """
         Learn a new skill.
+        args:
+            skill(string): skill's key
         """
         if not self.owner:
             return
@@ -66,6 +68,15 @@ class SkillHandler(object):
         skill_obj.set_owner(self.owner)
         self.skills[skill] = skill_obj
 
+        # If it is a passive skill, player's status may change.
+        if skill_obj.passive:
+            self.owner.refresh_data()
+
+            # Notify the player
+            if self.owner.has_player:
+                self.owner.show_status()
+
+        # Notify the player
         if self.owner.has_player:
             self.owner.show_skills()
             self.owner.msg({"msg":LS("You learned skill {c%s{n.") % skill_obj.get_name()})
@@ -178,6 +189,23 @@ class SkillHandler(object):
         """
         skills = [skill for skill in self.skills if not self.skills[skill].is_cooling_down()]
         return skills
+
+
+    def get_passive_skills(self):
+        """
+        Get all passive skills.
+        """
+        skills = [skill for skill in self.skills if self.skills[skill].passive]
+        return skills
+
+
+    def cast_passive_skills(self):
+        """
+        Cast all passive skills.
+        """
+        for skill in self.skills:
+            if self.skills[skill].passive:
+                self.skills[skill].cast_skill(None)
 
 
     def choose_skill_target(self):

@@ -79,10 +79,7 @@ class MudderySkill(MudderyObject):
         """
         self.db.owner = owner
     
-        if self.passive:
-            # Cast passive skill when a character owns this skill.
-            self.cast_skill()
-        else:
+        if not self.passive:
             # Set skill cd.
             if self.cd > 0:
                 self.db.cd_end_time = time.time() + self.cd
