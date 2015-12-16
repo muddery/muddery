@@ -23,7 +23,7 @@ var combat = {
         box.attr('style', 'display: block; padding-left: 15px;');
         box.attr('role', 'dialog');
 
-        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(box);
+        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-lg').appendTo(box);
         var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
 
         var boxHeader = $('<div>')
@@ -70,7 +70,7 @@ var combat = {
         
         var box = $('#combat_box').html("");
 
-        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(box);
+        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-lg').appendTo(box);
         var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
 
         var boxHeader = $('<div>')

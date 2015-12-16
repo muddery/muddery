@@ -243,19 +243,20 @@ var webclient = {
         // set room tab
         ///////////////////////
         
-        // set tab's name to room's name
-        var tab_name = "";
-        if ("name" in data) {
-            tab_name = data["name"];
-        }
-
-        if (tab_name.length == 0) {
-            tab_name = "Room";
-        }
-        else {
-            tab_name = util.truncate_string(tab_name, 10, true);
-        }
-        tab.text(tab_name);
+        //// set tab's name to room's name
+        //var tab_name = "";
+        //if ("name" in data) {
+        //    tab_name = data["name"];
+        //}
+        //
+        //if (tab_name.length == 0) {
+        //    tab_name = "Room";
+        //}
+        //else {
+        //    tab_name = util.truncate_string(tab_name, 10, true);
+        //}
+        //tab.text(tab_name);
+        tab.text(LS('Scene'));
 
         ///////////////////////
         // set room page
