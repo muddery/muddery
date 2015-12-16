@@ -154,6 +154,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # load equips data
         self.load_equip_data()
 
+        # load passive skill
+        self.load_passive_skill_data()
+
 
     def load_model_data(self):
         """
@@ -217,6 +220,14 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     value = getattr(self, effect, 0)
                     value += getattr(content, effect, 0)
                     setattr(self, effect, value)
+
+
+    def load_passive_skill_data(self):
+        """
+        Add passive skills' effects to the character
+        """
+        # cast passive skills
+        self.skill.cast_passive_skills()
 
 
     def set_initial_data(self):
