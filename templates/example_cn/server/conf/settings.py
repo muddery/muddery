@@ -188,3 +188,6 @@ SOLO_MODE = True
 
 # Handler deals with condition scripts and action scripts
 SCRIPT_HANDLER = "utils.script_handler.ScriptHandler"
+
+# NPC's reborn time after being killed. If it is below 0, npcs will not be reborn.
+NPC_REBORN_CD = 2

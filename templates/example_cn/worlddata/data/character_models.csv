@@ -1,7 +1,7 @@
 character,level,max_exp,max_hp,max_mp,attack,defence
 player,1,50,50,100,10,10
-npc_wu,1,50,25,100,5,5
-mob_wu,1,50,25,100,5,5
+npc_common,1,50,25,100,5,5
+mob_doll,1,50,10,100,5,5
 mob_robot_a,1,20,20,100,5,5
 mob_robot_a,2,30,30,100,10,10
 mob_robot_a,3,40,40,100,15,15
