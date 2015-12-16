@@ -472,17 +472,6 @@ var webclient = {
         var title = $('<div>').addClass('clearfix')
                               .appendTo(page);
 
-        var button = $('<div>').attr('id', 'close_button')
-                               .appendTo(title)
-
-        var input = $('<input>').addClass('close')
-                                .attr('type', 'image')
-                                .attr('id', 'button_close')
-                                .attr('src', resource.close_button)
-                                .attr('alt', 'close')
-                                .attr('onclick', 'webclient.doCloseBox()')
-                                .appendTo(button)
-
         // object's info
         var element = "";
 
@@ -784,36 +773,36 @@ var webclient = {
         var win_h = $(window).innerHeight();
         var win_w = $(window).innerWidth();
 
-        // popup box
-        var close_h = $('#close_button').outerHeight(true);
-        var prom_h = $('#input_prompt').outerHeight(true);
-        var add_h = $('#input_additional').outerHeight(true);
-        $('#popup_box').height(close_h + prom_h + add_h);
-        
-        var inp_h = $('#popup_box').outerHeight(true);
-        var inp_w = $('#popup_box').outerWidth(true);
-        //$("#wrapper").css({'height': win_h - inp_h - 1});
-        $('#popup_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
-
-        var close_h = $('#close_button').outerHeight(true);
-        var prom_h = $('#input_prompt').outerHeight(true);
-        var add_h = $('#input_additional').outerHeight(true);
-        $('#dialogue_box').height(close_h + prom_h + add_h);
-
-        var inp_h = $('#dialogue_box').outerHeight(true);
-        var inp_w = $('#dialogue_box').outerWidth(true);
-        //$("#wrapper").css({'height': win_h - inp_h - 1});
-        $('#dialogue_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
-
-        // combat box
-        var inp_h = $('#combat_box').outerHeight(true);
-        var inp_w = $('#combat_box').outerWidth(true);
-        $('#combat_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
-
-        // map box
-        var inp_h = $('#map_box').outerHeight(true);
-        var inp_w = $('#map_box').outerWidth(true);
-        $('#map_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+        //// popup box
+        //var close_h = $('#close_button').outerHeight(true);
+        //var prom_h = $('#input_prompt').outerHeight(true);
+        //var add_h = $('#input_additional').outerHeight(true);
+        //$('#popup_box').height(close_h + prom_h + add_h);
+        //
+        //var inp_h = $('#popup_box').outerHeight(true);
+        //var inp_w = $('#popup_box').outerWidth(true);
+        ////$("#wrapper").css({'height': win_h - inp_h - 1});
+        //$('#popup_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+        //
+        //var close_h = $('#close_button').outerHeight(true);
+        //var prom_h = $('#input_prompt').outerHeight(true);
+        //var add_h = $('#input_additional').outerHeight(true);
+        //$('#dialogue_box').height(close_h + prom_h + add_h);
+        //
+        //var inp_h = $('#dialogue_box').outerHeight(true);
+        //var inp_w = $('#dialogue_box').outerWidth(true);
+        ////$("#wrapper").css({'height': win_h - inp_h - 1});
+        //$('#dialogue_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+        //
+        //// combat box
+        //var inp_h = $('#combat_box').outerHeight(true);
+        //var inp_w = $('#combat_box').outerWidth(true);
+        //$('#combat_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+        //
+        //// map box
+        //var inp_h = $('#map_box').outerHeight(true);
+        //var inp_w = $('#map_box').outerWidth(true);
+        //$('#map_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
 
         var head_h = $('#site-title').outerHeight(true);
         var wrapper_h = win_h - head_h - 30;
@@ -830,14 +819,12 @@ var webclient = {
         $('#tab_bar').height(tab_bar_h);
         $('#tab_content').height(tab_content_h);
 
-        if (win_w > 960) {
-            $('#middlewindow').width(960);
+        if (win_w >= 960) {
+            $('#middlewindow').width(960 - 20);
         }
         else {
-            $('#middlewindow').width(win_w);
+            $('#middlewindow').width(win_w - 20);
         }
-
-        console.log("$('#msg_wnd') " + $('#msg_wnd').height() + " $('#tab_content') " + $('#tab_content').height())
     },
 
     doCancel : function() {
@@ -861,15 +848,23 @@ var webclient = {
 
         $('#input_prompt').html(text2html.parseHtml(msg));
         
-        var html_button = '<div><br></div>\
-                             <div>\
-                                <center>\
-                                    <input type="button" id="button_center" value="';
-        html_button += button;
-        html_button += '" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
-                                </center>\
-                            </div>'
+        var html_button = $('<button>')
+            .attr('class', 'btn btn-default')
+            .attr('type', 'button')
+            .attr('data-dismiss', 'modal')
+            .text(button)
+            .attr('id', 'button_center')
+            .attr('onClick', 'webclient.doCloseBox()');
         $('#input_additional').html(html_button);
+
+        console.log("button " + button);
+
+        if(button == ""){
+            $('#input_additional').hide();
+        } else {
+            $('#input_additional').show();
+        }
+
         this.doSetSizes();
     },
     
@@ -946,14 +941,31 @@ var webclient = {
     
     createMessageBox : function() {
         var dlg = $('<div>').attr('id', 'popup_box');
-        dlg.append($('<div>').attr('id', 'input_prompt'));
-        dlg.append($('<div>').attr('id', 'input_additional'));
+        dlg.attr('class', 'modal fade');
+        dlg.attr('style', 'display: block; padding-left: 15px;');
+        dlg.attr('role', 'dialog');
 
-        var overlayer = $('<div>').addClass('overlayer')
-                                  .attr('id', 'overlayer');
-        
-        $("body").prepend(overlayer);
-        $("body").prepend(dlg);
+        var dlgDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(dlg);
+        var dlgContent = $('<div>').attr('class', 'modal-content').appendTo(dlgDialog);
+
+        var dlgHeader = $('<div>')
+            .attr('class', 'modal-header').appendTo(dlgContent);
+        dlgHeader.append($('<button>')
+            .attr('type', 'button')
+            .attr('class', 'close')
+            .attr('data-dismiss', 'modal')
+            .html('&times;'));
+
+        dlgHeader.append($('<h4>')
+            .attr('id', 'input_prompt')
+            .attr('class', 'modal-title'));
+
+        var dlgFooter = $('<div>')
+            .attr('id', 'input_additional')
+            .attr('class', 'modal-footer').appendTo(dlgContent);
+
+        $("#popup_container").prepend(dlg);
+        dlg.modal();
     },
 
     createDialogueBox : function() {
