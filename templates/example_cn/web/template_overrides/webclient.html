@@ -43,6 +43,7 @@
 
     document.write("\<script src=\"{% static "webclient/js/muddery_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
     document.write("\<script src=\"{% static "webclient/js/muddery_webclient_uimgr.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+    document.write("\<script src=\"{% static "webclient/js/muddery_webclient_popupmgr.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
     document.write("\<script src=\"{% static "webclient/js/muddery_commands.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
     document.write("\<script src=\"{% static "webclient/js/muddery_combat.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
     document.write("\<script src=\"{% static "webclient/js/muddery_map.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
@@ -58,6 +59,7 @@
     <script src="{% static "webclient/js/muddery_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/muddery_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/muddery_webclient_uimgr.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "webclient/js/muddery_webclient_popupmgr.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/muddery_commands.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/muddery_map.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/resources.js" %}" type="text/javascript" charset="utf-8"></script>
@@ -65,98 +67,99 @@
     <script src="{% static "webclient/js/utils.js" %}" type="text/javascript" charset="utf-8"></script>
     {% endif %}
 
-</head>
-<body>
-<header class="header" id="header_bar">
-    <div class="site-title" id="site-title">
-        <center><h5>Muddery 演示游戏</h5></div>
+    </head>
+    <body>
+    <div id="popup_container" class="container"></div>
+            <header class="header" id="header_bar">
+            <div class="site-title" id="site-title">
+            <center><h5>Muddery 演示游戏</h5></div>
     </div>
-</header>
-<div id="wrapper">
-    <div id="middlewindow" style="height: 100%; width: auto;margin-left: auto;margin-right: auto;">
-        <div id="prompt_bar">
-        </div>
-        <div class="panel panel-default">
+    </header>
+    <div id="wrapper">
+            <div id="middlewindow" style="height: 100%; width: auto;margin-left: auto;margin-right: auto;">
+            <div id="prompt_bar">
+            </div>
+            <div class="panel panel-default">
             <div id="msg_wnd" class="panel-body" style="overflow-x: hidden; overflow-y: auto;">
                 <!--javascript kills this when page has finished loading: -->
-                <div id="connecting"> Connecting ...</div>
+            <div id="connecting"> Connecting ...</div>
                 <!--this is supplied by django view - webclient/views.py: -->
-                <div id="noscript"><h3>Javascript Error: The Muddery webclient requires that you have Javascript activated.</h3>
-                    <p>Turn off eventual script blockers and/or switch to a web
-                        browser supporting javascript.</p><p>For admins: The error
-                        could also be due to not being able to access the online
-                        jQuery javascript library. If you are testing the client
-                        without an internet connection, you have to previously
-                        download the jQuery library from http://code.jquery.com
-                        (it's just one file) and then edit webclient.html to point
-                        to the local copy.</p>
-                </div>
-            </div>
+            <div id="noscript"><h3>Javascript Error: The Muddery webclient requires that you have Javascript activated.</h3>
+    <p>Turn off eventual script blockers and/or switch to a web
+        browser supporting javascript.</p><p>For admins: The error
+        could also be due to not being able to access the online
+        jQuery javascript library. If you are testing the client
+        without an internet connection, you have to previously
+        download the jQuery library from http://code.jquery.com
+                (it's just one file) and then edit webclient.html to point
+        to the local copy.</p>
+        </div>
+        </div>
         </div>
         <div class="panel panel-default">
-            <div id="tab_content" class="panel-body">
+                <div id="tab_content" class="panel-body">
                 <form id="page_connect" style="height:300px; display: none">
-                    <div>请连接到服务器。</div>
-                    <div>
-                        <input type="button" class="btn button_left" value="连接" onclick="doConnect()"/>
-                    </div>
+                <div>请连接到服务器。</div>
+        <div>
+        <input type="button" class="btn button_left" value="连接" onclick="doConnect()"/>
+                </div>
                 </form>
                 <form id="page_login" style="height:300px; display: none">
-                    <div>请登录。</div>
-                    <table>
-                        <tr>
-                            <td>用户名：</td>
-                            <td>
-                                <input id="login_name" type="text" placeholder="请输入用户名" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>密码：</td>
-                            <td>
-                                <input id="login_password" type="password" placeholder="请输入密码" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                记住密码: <input id="cb_save_password" type="checkbox" onclick="commands.doSetSavePassword()"/><br/>
-                                自动登录: <input id="cb_auto_login" type="checkbox"/>
-                            </td>
-                            <td><input type="button" class="btn btn-default" value="登录" onclick="commands.doLogin()"/></td>
-                        </tr>
-                    </table>
+                <div>请登录。</div>
+        <table>
+        <tr>
+        <td>用户名：</td>
+        <td>
+        <input id="login_name" type="text" placeholder="请输入用户名" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
+                </td>
+                </tr>
+                <tr>
+                <td>密码：</td>
+        <td>
+        <input id="login_password" type="password" placeholder="请输入密码" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
+                </td>
+                </tr>
+                <tr>
+                <td>
+                记住密码: <input id="cb_save_password" type="checkbox" onclick="commands.doSetSavePassword()"/><br/>
+                自动登录: <input id="cb_auto_login" type="checkbox"/>
+                </td>
+                <td><input type="button" class="btn btn-default" value="登录" onclick="commands.doLogin()"/></td>
+                </tr>
+                </table>
                 </form>
                 <form id="page_register" style="height:300px; display: none">
-                    <div>请注册。</div>
-                    <table>
-                        <tr>
-                            <td>用户名：</td>
-                            <td>
-                                <input id="reg_name" type="text" placeholder="请输入用户名" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>昵称：</td>
-                            <td>
-                                <input id="reg_nickname" type="text" placeholder="请输入密码" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>密码：</td>
-                            <td>
-                                <input id="reg_password" type="password" placeholder="请再次输入密码" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
-                            </td>
-                        </tr>
-                    </table>
-                    <div>
-                        <input type="button" class="btn btn-default" value="注册" onclick="commands.doRegister()"/>
-                    </div>
+                <div>请注册。</div>
+        <table>
+        <tr>
+        <td>用户名：</td>
+        <td>
+        <input id="reg_name" type="text" placeholder="请输入用户名" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
+                </td>
+                </tr>
+                <tr>
+                <td>昵称：</td>
+        <td>
+        <input id="reg_nickname" type="text" placeholder="请输入密码" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
+                </td>
+                </tr>
+                <tr>
+                <td>密码：</td>
+        <td>
+        <input id="reg_password" type="password" placeholder="请再次输入密码" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>
+                </td>
+                </tr>
+                </table>
+                <div>
+                <input type="button" class="btn btn-default" value="注册" onclick="commands.doRegister()"/>
+                </div>
                 </form>
                 <form id="page_room" style="display: none">
                 </form>
                 <form id="page_status" style="display: none">
-                    <div id="block_status"></div>
-                    <div><br></div>
-                    <div id="block_equipments"></div>
+                <div id="block_status"></div>
+                <div><br></div>
+                <div id="block_equipments"></div>
                 </form>
                 <form id="page_inventory" style="display: none">
                 </form>
@@ -165,63 +168,63 @@
                 <form id="page_quests" style="display: none">
                 </form>
                 <!--form id="page_test" style="display: none">
-                    <div>
-                        <div>Do test.</div>
-                        <div>
-                            <input type="button" class="btn btn-default" value="TEST" onclick="commands.doTest()"/>
-                        </div>
-                    </div>
+                <div>
+                <div>Do test.</div>
+        <div>
+        <input type="button" class="btn btn-default" value="TEST" onclick="commands.doTest()"/>
+                </div>
+                </div>
                 </form-->
-            </div>
-        </div>
-        <div id="tab_bar">
-            <ul id="tab_pills" class="nav nav-tabs">
+                </div>
+                </div>
+                <div id="tab_bar">
+                <ul id="tab_pills" class="nav nav-tabs">
                 <li id="tab_connect" role="presentation" class="active" style="display: none">
-                    <a href="#" onclick="webclient.showPage('connect')">连接</a>
+                <a href="#" onclick="webclient.showPage('connect')">连接</a>
                 </li>
                 <li id="tab_login" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('login')">登录</a>
+                <a href="#" onclick="webclient.showPage('login')">登录</a>
                 </li>
                 <li id="tab_register" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('register')">注册</a>
+                <a href="#" onclick="webclient.showPage('register')">注册</a>
                 </li>
                 <li id="tab_room" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('room')">房间</a>
+                <a href="#" onclick="webclient.showPage('room')">房间</a>
                 </li>
                 <li id="tab_status" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('status')">状态</a>
+                <a href="#" onclick="webclient.showPage('status')">状态</a>
                 </li>
                 <li id="tab_inventory" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('inventory')">背包</a>
+                <a href="#" onclick="webclient.showPage('inventory')">背包</a>
                 </li>
                 <li id="tab_skills" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('skills')">技能</a>
+                <a href="#" onclick="webclient.showPage('skills')">技能</a>
                 </li>
                 <li id="tab_quests" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('quests')">任务</a>
+                <a href="#" onclick="webclient.showPage('quests')">任务</a>
                 </li>
                 <li id="tab_map" role="presentation" style="display: none">
-                    <a id="map_button" href="#" onclick="map.showMap()">地图</a>
+                <a id="map_button" href="#" onclick="map.showMap()">地图</a>
                 </li>
                 <li id="tab_system" role="presentation" class="dropdown" style="display: none">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" onclick="webclient.showMenuSystem()">系统 <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li id="page_system"><a href="#" onclick="commands.doLogout()">退出</a></li>
-                        <!--<li role="separator" class="divider"></li>-->
-                    </ul>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" onclick="webclient.showMenuSystem()">系统 <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+                <li id="page_system"><a href="#" onclick="commands.doLogout()">退出</a></li>
+        <!--<li role="separator" class="divider"></li>-->
+                </ul>
                 </li>
-                <!--<li id="tab_command">-->
-                <!--<div class="form-group" style="float:left;">-->
-                <!--<input type="text" placeholder="" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>-->
+                    <!--<li id="tab_command">-->
+                    <!--<div class="form-group" style="float:left;">-->
+                    <!--<input type="text" placeholder="" class="form-control" aria-describedby="basic-addon2" value="" autocomplete="off"/>-->
                 <!--</div>-->
-                <!--<input type="button" class="btn btn-default" value="发送" onclick="commands.doSendCommand()"/>-->
+                    <!--<input type="button" class="btn btn-default" value="发送" onclick="commands.doSendCommand()"/>-->
                 <!--</li>-->
                 <!--li id="tab_test" role="presentation">
-                    <a href="#" onclick="webclient.showTestPage()">Test</a>
+                <a href="#" onclick="webclient.showTestPage()">Test</a>
                 </li-->
-            </ul>
-        </div>
-    </div>
-</div>
-</body>
-</html>
+                </ul>
+                </div>
+                </div>
+                </div>
+                </body>
+                </html>
