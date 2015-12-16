@@ -2,3 +2,72 @@
 #tab_pills li{
     font-size: 16px;
 }
+
+.tab_inventory {
+    border-collapse: collapse;
+    border-color: #aaa;
+    border-style: solid;
+    border-width: 1px;
+    margin: 8px;
+}
+
+.tab_inventory th {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+    font-weight: normal;
+}
+
+.tab_inventory td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+}
+
+.tab_skills {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    border-collapse: collapse;
+    margin: 8px;
+}
+
+.tab_skills th {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+    font-weight: normal;
+}
+
+.tab_skills td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+}
+
+.tab_quests {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    border-collapse: collapse;
+    margin: 8px;
+}
+
+.tab_quests th {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+    font-weight: normal;
+}
+
+.tab_quests td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+}
