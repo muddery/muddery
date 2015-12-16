@@ -1,5 +1,6 @@
 key,name,typeclass,desc,position
 room_intro,欢迎！,typeclasses.rooms.Room,进入杀戮场吧，胜者只有一个！走进这些门吧，只有活到最后的人才能出来！,
+room_center,中央广场,typeclasses.rooms.Room,这是杀戮的中心，只有最强的人才能站在这里。,"(0,0)"
 room_market,市场,typeclasses.rooms.Room,很久以前这里是繁华的市场，现在只剩一片破败，到处都积着厚厚的尘土。,"(-1.7,-1)"
 room_temple,破庙,typeclasses.rooms.Room,这里是一座破庙，大门倒在一旁，房顶连同一大片墙都坍塌了，里面的佛像也残破不全。,"(1.7,-1)"
 room_tower,钟楼,typeclasses.rooms.Room,钟楼还矗立着，但钟已经不知去向。屋瓦上长满了杂草，有两只乌鸦站在上面，不时发出凄惨的叫声。,"(0,2)"
