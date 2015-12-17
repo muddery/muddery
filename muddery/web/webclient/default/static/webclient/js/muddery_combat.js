@@ -17,14 +17,29 @@ var combat = {
     createCombat: function(data) {
         this.closeCombat();
 
-        var layer = $('<div>').addClass('overlayer').attr('id', 'overlayer');
-        layer.prependTo($("body"));
-        
         var box = $('<div>').attr('id', 'combat_box');
-        $('<div>').attr('id', 'combat_desc').appendTo(box);
-        $('<div>').attr('id', 'combat_characters').appendTo(box);
-        $('<div>').attr('id', 'combat_commands').appendTo(box);
-        box.prependTo($("body"));
+
+        box.attr('class', 'modal fade');
+        box.attr('style', 'display: block; padding-left: 15px;');
+        box.attr('role', 'dialog');
+
+        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-lg').appendTo(box);
+        var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
+
+        var boxHeader = $('<div>')
+            .attr('id', 'combat_desc')
+            .attr('class', 'modal-header').appendTo(boxContent);
+
+        var boxBody = $('<div>')
+            .attr('id', 'combat_characters')
+            .attr('class', 'modal-body').appendTo(boxContent);
+
+        var boxFooter = $('<div>')
+            .attr('id', 'combat_commands')
+            .attr('class', 'modal-footer').appendTo(boxContent);
+
+        box.prependTo($("#popup_container"));
+        box.modal({backdrop: "static"});
 
         this._current_target = null;
         this._finished = false;
@@ -53,12 +68,25 @@ var combat = {
         $('#combat_characters').remove();
         $('#combat_commands').remove();
         
-        var box = $('#combat_box');
+        var box = $('#combat_box').html("");
 
-        var messages = $('<div>').attr('id', 'combat_messages');
+        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-lg').appendTo(box);
+        var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
 
-        // get objects
-        var loot = $('<div>').attr('id', 'combat_loot');
+        var boxHeader = $('<div>')
+            .attr('id', 'combat_messages')
+            .attr('class', 'modal-header').appendTo(boxContent);
+
+        var boxBodyLoot = $('<div>')
+            .attr('id', 'combat_loot')
+            .attr('class', 'modal-body').appendTo(boxContent);
+
+        var boxBodyResult = $('<div>')
+            .attr('id', 'combat_result')
+            .attr('class', 'modal-footer').appendTo(boxContent);
+
+        var boxFooter = $('<div>')
+            .attr('class', 'modal-footer').appendTo(boxContent);
 
         // object's info
         var content = "";
@@ -131,7 +159,7 @@ var combat = {
                 }
             }
             
-            result.appendTo(messages);
+            result.appendTo(boxHeader);
         }
         else {
             // get objects
@@ -158,27 +186,30 @@ var combat = {
                 }
             }
             
-            result.appendTo(messages);
-            loot.appendTo(messages);
+            result.appendTo(boxHeader);
         }
 
-        messages.appendTo(box);
-
         var center = $('<center>');
-        var button = $('<input>').attr('type', 'button')
-                                 .attr('id', 'button_center')
-                                 .attr('onClick', 'combat.closeCombat()')
-                                 .val('OK')
-                                 .addClass('btn btn-primary');
+        var button = $('<button>')
+            .addClass('btn btn-default')
+            .attr('type', 'button')
+            .attr('id', 'button_center')
+            .attr('onClick', 'combat.closeCombat()')
+            .text('OK')
+            .addClass('btn btn-primary');
+
         button.appendTo(center);
-        center.appendTo(box);
+        center.appendTo(boxFooter);
     },
 
     closeCombat: function() {
         if ($('#popup_box').size() == 0) {
-            $('#overlayer').remove();
+            $('.modal-backdrop').remove();
         }
-        $('#combat_box').remove();
+        if($('#combat_box').size() > 0){
+            $('#combat_box').remove();
+            $('.modal-backdrop').remove();
+        }
     },
 
     displayCombatInfo: function(data) {
@@ -216,14 +247,16 @@ var combat = {
             var content = $('<div>').attr('id', 'combat_btns');
             for (var i in data) {
                 var command = data[i];
-                var button = $('<div>').addClass('btn-combat')
-                                         .attr('type', 'button')
-                                         .attr('key', command.key)
-                                         .attr('id', 'combat_btn_' + command.key)
-                                         .attr('onclick', 'combat.doCombatSkill(this); return false;')
-                                         .css({'left': 20 + i * 80})
-                                         .text(command.name);
-                
+                var button = $('<button>')
+                    .addClass('btn-combat')
+                    .addClass('btn btn-default')
+                    .attr('type', 'button')
+                    .attr('key', command.key)
+                    .attr('id', 'combat_btn_' + command.key)
+                    .attr('onclick', 'combat.doCombatSkill(this); return false;')
+                    .css({'left': 20 + i * 80})
+                    .text(command.name);
+
                 button.append($("<div>").addClass('cooldown'));
                 
                 button.appendTo(content);
