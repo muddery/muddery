@@ -56,6 +56,7 @@ class CmdImportData(default_cmds.MuxCommand):
                 count += 1
             except MudderyError, e:
                 caller.msg(e)
+                continue
             except Exception, e:
                 caller.msg("Can not import %s." % model_name)
                 continue
