@@ -200,7 +200,7 @@ def import_localized_strings(language=None):
                 # if it is a folder
                 continue
 
-            import_file(full_name, settings.LOCALIZED_STRINGS_MODEL, widecard=False, clear=True)
+            import_file(full_name, settings.LOCALIZED_STRINGS_MODEL, widecard=False, clear=False)
 
 
 def import_all():

@@ -70,7 +70,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.mp = 1
         self.db.team = 0
 
-        self.db.equipments = {}
+        equipments = {}
+        for position in settings.EQUIP_POSITIONS:
+            equipments[position] = None
+        self.db.equipments = equipments
         
         self.db.skills = {}
 
