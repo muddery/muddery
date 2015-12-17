@@ -571,6 +571,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
         position = obj.position
         career = ""
 
+        if not position in settings.EQUIP_POSITIONS:
+            raise MudderyError(LS("Can not equip it on this position."))
+
         if not EQUIP_TYPE_HANDLER.can_equip(type, career):
             raise MudderyError(LS("Can not use this equipment."))
 

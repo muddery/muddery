@@ -14,6 +14,7 @@ origin,local
 "EQUIP","装备"
 "You should equip something.","你需要指定想要装备的东西。"
 "You don't have this equipment.","你没有这件装备。"
+"Can not equip it on this position.","不能装备在这个位置。"
 "Can not find this equipment.","无法找到这件装备。"
 "Can not use this equipment.","无法使用这件装备。"
 "Can not equip %s.","无法装备%s。"
