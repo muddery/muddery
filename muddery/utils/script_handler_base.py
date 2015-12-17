@@ -155,7 +155,7 @@ class ScriptHandlerDefault(ScriptHandler):
         self.add_condition("has_attr", script_conditions.has_attr)
         self.add_condition("is_attr", script_conditions.is_attr)
 
-        # self.add_action("learn_skill", script_actions.learn_skill)
+        self.add_action("learn_skill", script_actions.learn_skill)
         self.add_action("give_objects", script_actions.give_objects)
         self.add_action("remove_objects", script_actions.remove_objects)
         self.add_action("teleport_to", script_actions.teleport_to)
