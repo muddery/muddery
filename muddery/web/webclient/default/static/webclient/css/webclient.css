@@ -821,11 +821,13 @@ combat
     line-height: 1.4em;
 }
 
-.fighter_self {
+.fighter_team {
 	padding: 0px;
 	position: absolute;
 	top: 100px;
     left: 12%;
+    text-align: left;
+    line-height: 1.2em;
 }
 
 .fighter_enemy {
@@ -833,6 +835,8 @@ combat
 	position: absolute;
 	top: 100px;
 	right: 12%;
+    text-align: right;
+    line-height: 1.2em;
 }
 
 .hp {

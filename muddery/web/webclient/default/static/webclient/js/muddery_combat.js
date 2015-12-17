@@ -191,13 +191,12 @@ var combat = {
             var div = $('<div>').attr('id', 'fighter_' + fighter.dbref.slice(1))
                                 .text(fighter.name)
                                 .data('dbref', fighter.dbref);
-            $('<div>').addClass('hp')
-                      .attr('id', 'status_' + fighter.dbref.slice(1))
+            $('<div>').attr('id', 'status_' + fighter.dbref.slice(1))
                       .text(fighter.hp + '/' + fighter.max_hp)
-                      .appendTo(div);
+                      .prependTo(div);
             
             if (fighter.dbref == this._self_dbref) {
-                div.addClass("fighter_self");
+                div.addClass("fighter_team");
             }
             else {
                 div.addClass("fighter_enemy");
@@ -249,7 +248,7 @@ var combat = {
                               .appendTo(div);
                     
                     if (fighter.dbref == this._self_dbref) {
-                        div.addClass("fighter_self");
+                        div.addClass("fighter_team");
                     }
                     else {
                         div.addClass("fighter_enemy");
