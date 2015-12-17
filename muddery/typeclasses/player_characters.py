@@ -575,12 +575,13 @@ class MudderyPlayerCharacter(MudderyCharacter):
             raise MudderyError(LS("Can not use this equipment."))
 
         # Take off old equipment
-        if self.db.equipments[position]:
-            dbref = self.db.equipments[position]
-            
-            for content in self.contents:
-                if content.dbref == dbref:
-                    content.equipped = False
+        if position in self.db.equipments:
+            if self.db.equipments[position]:
+                dbref = self.db.equipments[position]
+                
+                for content in self.contents:
+                    if content.dbref == dbref:
+                        content.equipped = False
 
         # Put on new equipment, store object's dbref.
         self.db.equipments[position] = obj.dbref
@@ -603,6 +604,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Take off an object from position.
         """
+        if not position in self.db.equipments:
+            raise MudderyError(LS("Can not find this equipment."))
+
         if not self.db.equipments[position]:
             raise MudderyError(LS("Can not find this equipment."))
 
@@ -633,7 +637,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
         if equipment.location != self:
             raise MudderyError(LS("Can not find this equipment."))
 
-        self.db.equipments[equipment.position] = None
+        if equipment.position in self.db.equipments:
+            self.db.equipments[equipment.position] = None
         
         # Set object's attribute 'equipped' to False
         equipment.equipped = False
