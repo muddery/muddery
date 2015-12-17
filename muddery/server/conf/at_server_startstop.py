@@ -30,7 +30,9 @@ def at_server_start():
     This is called every time the server starts up, regardless of
     how it was shut down.
     """
-    
+    # reload keys
+    OBJECT_KEY_HANDLER.reload()
+
     # reset default locations
     builder.reset_default_locations()
     
@@ -39,9 +41,6 @@ def at_server_start():
 
     # clear quest dependencies
     QUEST_DEP_HANDLER.clear()
-    
-    # reload keys
-    OBJECT_KEY_HANDLER.reload()
 
     # reload equipment types
     EQUIP_TYPE_HANDLER.reload()
