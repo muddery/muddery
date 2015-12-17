@@ -9,62 +9,62 @@
     <title>Muddery 演示游戏</title>
 
     <!--CSS style sheet -->
-    <link rel="stylesheet" type="text/css" media="screen" href="{% static "webclient/css/webclient.css" %}">
-    <link rel="stylesheet" href="{% static "webclient/css/bootstrap.min.css" %}">
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'webclient/css/webclient.css' %}">
+    <link rel="stylesheet" href="{% static 'webclient/css/bootstrap.min.css' %}">
     <!-- Importing the online jQuery javascript library -->
     <!--script src="http://code.jquery.com/jquery-1.6.1.js" type="text/javascript" charset="utf-8"></script-->
     <!--script src="http://code.jquery.com/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script-->
 
     <!--for offline testing, download the jquery library from jquery.com-->
-    <script src="{% static "webclient/js/jquery-1.11.1.min.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/jquery.cookie.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/bootstrap.min.js" %}"></script>
-    <script src="{% static "webclient/js/d3.v3.min.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/jquery-1.11.1.min.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/jquery.cookie.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'webclient/js/d3.v3.min.js' %}" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
         if(!window.jQuery){document.write("<div class='err'>jQuery library not found or the online version could not be reached.</div>");}
     </script>
 
     {% if websocket_enabled %}
     <script language="javascript" type="text/javascript">
-        document.write("\<script src=\"{% static "webclient/js/local_string.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-            document.write("\<script src=\"{% static "webclient/js/lang/zh/strings.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+        document.write("\<script src=\"{% static 'webclient/js/local_string.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        document.write("\<script src=\"{% static 'webclient/js/lang/zh/strings.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
 
-    if ("WebSocket" in window) {
-    <!-- Importing the Muddery websocket webclient component (requires jQuery)  -->
-    var wsurl = "ws://" + this.location.hostname + ":{{websocket_port}}";
-    document.write("\<script src=\"{% static "webclient/js/evennia_websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    document.write("\<script src=\"{% static "webclient/js/muddery_websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    }
-    else {
-    <!-- No websocket support in browser. Importing the Muddery ajax webclient component (requires jQuery)  -->
-    document.write("\<script src=\"{% static "webclient/js/evennia_ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    document.write("\<script src=\"{% static "webclient/js/muddery_ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    }
+        if ("WebSocket" in window) {
+            <!-- Importing the Muddery websocket webclient component (requires jQuery)  -->
+            var wsurl = "ws://" + this.location.hostname + ":{{websocket_port}}";
+            document.write("\<script src=\"{% static 'webclient/js/evennia_websocket_webclient.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+            document.write("\<script src=\"{% static 'webclient/js/muddery_websocket_webclient.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        }
+        else {
+            <!-- No websocket support in browser. Importing the Muddery ajax webclient component (requires jQuery)  -->
+            document.write("\<script src=\"{% static 'webclient/js/evennia_ajax_webclient.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+            document.write("\<script src=\"{% static 'webclient/js/muddery_ajax_webclient.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        }
 
-    document.write("\<script src=\"{% static "webclient/js/muddery_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    document.write("\<script src=\"{% static "webclient/js/muddery_webclient_uimgr.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    document.write("\<script src=\"{% static "webclient/js/muddery_webclient_popupmgr.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    document.write("\<script src=\"{% static "webclient/js/muddery_commands.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    document.write("\<script src=\"{% static "webclient/js/muddery_combat.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    document.write("\<script src=\"{% static "webclient/js/muddery_map.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    document.write("\<script src=\"{% static "webclient/js/resources.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    document.write("\<script src=\"{% static "webclient/js/text2html.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-    document.write("\<script src=\"{% static "webclient/js/utils.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+        document.write("\<script src=\"{% static 'webclient/js/muddery_webclient.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        document.write("\<script src=\"{% static 'webclient/js/muddery_webclient_uimgr.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        document.write("\<script src=\"{% static 'webclient/js/muddery_webclient_popupmgr.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        document.write("\<script src=\"{% static 'webclient/js/muddery_commands.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        document.write("\<script src=\"{% static 'webclient/js/muddery_combat.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        document.write("\<script src=\"{% static 'webclient/js/muddery_map.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        document.write("\<script src=\"{% static 'webclient/js/resources.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        document.write("\<script src=\"{% static 'webclient/js/text2html.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
+        document.write("\<script src=\"{% static 'webclient/js/utils.js' %}\" type=\"text/javascript\" charset=\"utf-8\"\>\<\/script\>");
     </script>
     {% else %}
     <!-- websocket not enabled; use ajax -->
-    <script src="{% static "webclient/js/local_string.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/lang/zh/strings.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/evennia_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_webclient_uimgr.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_webclient_popupmgr.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_commands.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_map.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/resources.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/text2html.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/utils.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/local_string.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/lang/zh/strings.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/evennia_ajax_webclient.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/muddery_ajax_webclient.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/muddery_webclient.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/muddery_webclient_uimgr.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/muddery_webclient_popupmgr.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/muddery_commands.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/muddery_map.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/resources.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/text2html.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'webclient/js/utils.js' %}" type="text/javascript" charset="utf-8"></script>
     {% endif %}
 
 </head>
@@ -180,28 +180,28 @@
         <div id="tab_bar">
             <ul id="tab_pills" class="nav nav-tabs">
                 <li id="tab_connect" role="presentation" class="active" style="display: none">
-                    <a href="#" onclick="webclient.showPage('connect')">连接</a>
+                    <a href="#" onclick='webclient.showPage('connect')">连接</a>
                 </li>
                 <li id="tab_login" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('login')">登录</a>
+                    <a href="#" onclick='webclient.showPage('login')">登录</a>
                 </li>
                 <li id="tab_register" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('register')">注册</a>
+                    <a href="#" onclick='webclient.showPage('register')">注册</a>
                 </li>
                 <li id="tab_room" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('room')">房间</a>
+                    <a href="#" onclick='webclient.showPage('room')">房间</a>
                 </li>
                 <li id="tab_status" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('status')">状态</a>
+                    <a href="#" onclick='webclient.showPage('status')">状态</a>
                 </li>
                 <li id="tab_inventory" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('inventory')">背包</a>
+                    <a href="#" onclick='webclient.showPage('inventory')">背包</a>
                 </li>
                 <li id="tab_skills" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('skills')">技能</a>
+                    <a href="#" onclick='webclient.showPage('skills')">技能</a>
                 </li>
                 <li id="tab_quests" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('quests')">任务</a>
+                    <a href="#" onclick='webclient.showPage('quests')">任务</a>
                 </li>
                 <li id="tab_map" role="presentation" style="display: none">
                     <a id="map_button" href="#" onclick="map.showMap()">地图</a>
@@ -220,8 +220,8 @@
                 <!--<input type="button" class="btn btn-default" value="发送" onclick="commands.doSendCommand()"/>-->
                 <!--</li>-->
                 <!--li id="tab_test" role="presentation">
-                <a href="#" onclick="webclient.showTestPage()">Test</a>
-                </li-->
+                <a href="#" onclick='webclient.showTestPage()">Test</a>
+                    </li-->
             </ul>
         </div>
     </div>
