@@ -2,3 +2,7 @@ key,condition
 dlg_tele_dock,
 dlg_tele_house,
 dlg_tele_graveyard,
+dlg_skill_dunt,"not has_attr(""skill"")"
+dlg_skill_strong_body,"not has_attr(""skill"")"
+dlg_skill_powerful_heal,"not has_attr(""skill"")"
+dlg_learned_skill,
