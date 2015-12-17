@@ -332,8 +332,8 @@ var combat = {
         this.set_button_cd(btn, cd);
                 
         var gcd = data["gcd"];
-        $('#combat_btns').each(function(){
-            combat.set_button_cd($(this), cd);
+        $('#combat_btns div').each(function(){
+            combat.set_button_cd($(this), gcd);
         });
     },
 
