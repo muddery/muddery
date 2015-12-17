@@ -70,10 +70,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.mp = 1
         self.db.team = 0
 
-        equipments = {}
-        for position in settings.EQUIP_POSITIONS:
-            equipments[position] = None
-        self.db.equipments = equipments
+        self.db.equipments = {}
         
         self.db.skills = {}
 
@@ -90,6 +87,15 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Init the character.
         """
         super(MudderyCharacter, self).at_init()
+
+        # update equipment positions
+        for position in self.db.equipments:
+            if not position in settings.EQUIP_POSITIONS:
+                del self.db.equipments[position]
+
+        for position in settings.EQUIP_POSITIONS:
+            if not position in self.db.equipments:
+                self.db.equipments[position] = None
 
         # clear target
         self.target = None

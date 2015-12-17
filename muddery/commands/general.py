@@ -848,7 +848,8 @@ class CmdEquip(Command):
             # equip
             caller.equip_object(obj)
         except MudderyError, e:
-            caller.msg({"alert":e})
+            caller.msg({"alert": str(e)})
+            return
         except Exception, e:
             caller.msg({"alert": LS("Can not use this equipment.")})
             logger.log_tracemsg("Can not use equipment %s: %s" % (obj.get_info_key(), e))
@@ -895,9 +896,10 @@ class CmdTakeOff(Command):
             # Take off the equipment.
             caller.take_off_equipment(obj)
         except MudderyError, e:
-            caller.msg({"alert":e})
+            caller.msg({"alert": str(e)})
+            return
         except Exception, e:
-            caller.msg({"alert":LS("Can not take off this equipment.")})
+            caller.msg({"alert": LS("Can not take off this equipment.")})
             logger.log_tracemsg("Can not take off %s: %s" % (obj.get_info_key(), e))
             return
 
