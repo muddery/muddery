@@ -183,7 +183,7 @@ var webclient = {
                 }
             }
 
-            this.showAlert(msg, button);
+            popupmgr.showAlert(msg, button);
         }
         catch(error) {
             this.displayErr("Data error.");
@@ -243,19 +243,20 @@ var webclient = {
         // set room tab
         ///////////////////////
         
-        // set tab's name to room's name
-        var tab_name = "";
-        if ("name" in data) {
-            tab_name = data["name"];
-        }
-
-        if (tab_name.length == 0) {
-            tab_name = "Room";
-        }
-        else {
-            tab_name = util.truncate_string(tab_name, 10, true);
-        }
-        tab.text(tab_name);
+        //// set tab's name to room's name
+        //var tab_name = "";
+        //if ("name" in data) {
+        //    tab_name = data["name"];
+        //}
+        //
+        //if (tab_name.length == 0) {
+        //    tab_name = "Room";
+        //}
+        //else {
+        //    tab_name = util.truncate_string(tab_name, 10, true);
+        //}
+        //tab.text(tab_name);
+        tab.text(LS('Scene'));
 
         ///////////////////////
         // set room page
@@ -464,24 +465,14 @@ var webclient = {
             }
         }
 
-        this.doCloseBox();
-        this.createMessageBox();
-        
-        var page = $('#input_prompt');
+        popupmgr.doCloseBox();
+        popupmgr.createMessageBox();
+
+        $('#popup_header').html('displayLookObj');
+        var page = $('#popup_body');
 
         var title = $('<div>').addClass('clearfix')
                               .appendTo(page);
-
-        var button = $('<div>').attr('id', 'close_button')
-                               .appendTo(title)
-
-        var input = $('<input>').addClass('close')
-                                .attr('type', 'image')
-                                .attr('id', 'button_close')
-                                .attr('src', resource.close_button)
-                                .attr('alt', 'close')
-                                .attr('onclick', 'webclient.doCloseBox()')
-                                .appendTo(button)
 
         // object's info
         var element = "";
@@ -525,12 +516,12 @@ var webclient = {
         var html_button = '<div><br></div>\
                              <div>\
                                 <center>\
-                                    <input type="button" id="button_center" value="OK" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
+                                    <input type="button" id="button_center" value="OK" class="btn btn-primary" onClick="popupmgr.doCloseBox()"/>\
                                 </center>\
                             </div>'
         $('#input_additional').html(html_button);
         */
-        this.doSetSizes();
+        webclient.doSetSizes();
     },
     
     displayInventory : function(data) {
@@ -600,10 +591,12 @@ var webclient = {
     },
 
     displayGetObjectBox : function(data) {
-        this.doCloseBox();
-        this.createMessageBox();
-        
-        var page = $("#input_prompt");
+        popupmgr.doCloseBox();
+        popupmgr.createMessageBox();
+
+        $('#popup_header').html('displayGetObjectBox');
+
+        var page = $("#popup_body");
 
         // object's info
         var content = "";
@@ -655,17 +648,19 @@ var webclient = {
         
         // button
         var br = $("<div>").append($("<br>"));
-        $('#input_additional').append(br);
+        $('#popup_footer').append(br);
 
         var div = $("<div>");
 		var center = $("<center>").appendTo(div);
-        var html_button = $("<input>").addClass("btn btn-primary")
+        var html_button = $("<button>").addClass("btn btn-default")
         							  .attr("type", "button")
         							  .attr("id", "button_center")
-        							  .attr("onClick", "webclient.doCloseBox()")
-        							  .val(LS("OK"))
+                                      .attr('data-dismiss', 'modal')
+        							  .attr("onClick", "popupmgr.doCloseBox()")
+        							  .text(LS("OK"))
         							  .appendTo(center);
-        $('#input_additional').append(div);
+
+        $('#popup_footer').append(div);
         this.doSetSizes();
     },
 
@@ -752,7 +747,7 @@ var webclient = {
     },
 
     displayDialogue : function(data) {
-        this.showDialogue(data);
+        popupmgr.showDialogue(data);
     },
 
     onLogin : function(data) {
@@ -784,79 +779,42 @@ var webclient = {
         var win_h = $(window).innerHeight();
         var win_w = $(window).innerWidth();
 
-        // popup box
-        var close_h = $('#close_button').outerHeight(true);
-        var prom_h = $('#input_prompt').outerHeight(true);
-        var add_h = $('#input_additional').outerHeight(true);
-        $('#popup_box').height(close_h + prom_h + add_h);
-        
-        var inp_h = $('#popup_box').outerHeight(true);
-        var inp_w = $('#popup_box').outerWidth(true);
-        //$("#wrapper").css({'height': win_h - inp_h - 1});
-        $('#popup_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+        //
+        //// combat box
+        //var inp_h = $('#combat_box').outerHeight(true);
+        //var inp_w = $('#combat_box').outerWidth(true);
+        //$('#combat_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+        //
+        //// map box
+        //var inp_h = $('#map_box').outerHeight(true);
+        //var inp_w = $('#map_box').outerWidth(true);
+        //$('#map_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
 
-        var close_h = $('#close_button').outerHeight(true);
-        var prom_h = $('#input_prompt').outerHeight(true);
-        var add_h = $('#input_additional').outerHeight(true);
-        $('#dialogue_box').height(close_h + prom_h + add_h);
+        var head_h = $('#site-title').outerHeight(true);
+        var wrapper_h = win_h - head_h - 30;
 
-        var inp_h = $('#dialogue_box').outerHeight(true);
-        var inp_w = $('#dialogue_box').outerWidth(true);
-        //$("#wrapper").css({'height': win_h - inp_h - 1});
-        $('#dialogue_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
+        $('#header_bar').show();
+        $('#wrapper').height(wrapper_h);
 
-        // combat box
-        var inp_h = $('#combat_box').outerHeight(true);
-        var inp_w = $('#combat_box').outerWidth(true);
-        $('#combat_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
-
-        // map box
-        var inp_h = $('#map_box').outerHeight(true);
-        var inp_w = $('#map_box').outerWidth(true);
-        $('#map_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
-
-        if (win_h > 480) {
-            var head_h = $('#site-title').outerHeight(true);
-            $('#header_bar').show();
-            $('#wrapper').height(win_h - head_h - 6);
-        }
-        else {
-            $('#header_bar').hide();
-            $('#wrapper').height(win_h - 6);
-        }
-        
-        var middle_h = $('#middlewindow').outerHeight(true);
-        var bottom_bar_h = 18;
-        var total_h = middle_h - bottom_bar_h;
         var prompt_h = 18;
-        var tab_bar_h = $('#tab_pills').outerHeight(true) - 1;
-        if (tab_bar_h < 30) {
-            tab_bar_h = 30;
-        }
-        var tab_content_max_h = 360;
-        if (total_h + prompt_h + tab_bar_h > tab_content_max_h * 2) {
-            $('#msg_wnd').height(middle_h - tab_bar_h - tab_content_max_h - 2);
-            $('#prompt').height(prompt_h);
-            $('#tab_bar').height(tab_bar_h);
-            $('#tab_content').height(tab_content_max_h);
-        }
-        else {
-            $('#msg_wnd').height(total_h / 2 - prompt_h - tab_bar_h);
-            $('#prompt').height(prompt_h);
-            $('#tab_bar').height(tab_bar_h);
-            $('#tab_content').height(total_h / 2);
-        }
-        
-        if (win_w > 960) {
-            $('#middlewindow').width(960);
+        var tab_bar_h = 50;
+        var msg_wnd_h = wrapper_h / 3;
+        var tab_content_h = wrapper_h / 3;
+        $('#msg_wnd').height(msg_wnd_h);
+        $('#prompt').height(prompt_h);
+        $('#tab_bar').height(tab_bar_h);
+        $('#tab_content').height(tab_content_h);
+
+        if (win_w >= 960) {
+            $('#middlewindow').width(960 - 20);
         }
         else {
-            $('#middlewindow').width(win_w);
+            $('#middlewindow').width(win_w - 20);
         }
     },
 
     doCancel : function() {
-        this.doCloseBox();
+        popupmgr.doCloseBox();
     },
 
     doInputCommand : function() {
@@ -867,126 +825,13 @@ var webclient = {
         HISTORY_POS = 0;
         
         sendCommand(command);
-        this.doCloseBox();
-    },
-
-    showAlert : function(msg, button) {
-        this.doCloseBox();
-        this.createMessageBox();
-
-        $('#input_prompt').html(text2html.parseHtml(msg));
-        
-        var html_button = '<div><br></div>\
-                             <div>\
-                                <center>\
-                                    <input type="button" id="button_center" value="';
-        html_button += button;
-        html_button += '" class="btn btn-primary" onClick="webclient.doCloseBox()"/>\
-                                </center>\
-                            </div>'
-        $('#input_additional').html(html_button);
-        this.doSetSizes();
-    },
-    
-    showDialogue : function(dialogues) {
-        this.doCloseDialogue();
-        
-        try {
-            if (dialogues.length == 0) {
-                return;
-            }
-            
-            this.createDialogueBox();
-
-            if (dialogues.length == 1) {
-                var content = "";
-                if (dialogues[0].speaker.length > 0) {
-                    content += dialogues[0].speaker + ":<br>";
-                }
-                content += text2html.parseHtml(dialogues[0].content);
-                
-                $('#input_prompt').html(content);
-                
-                var html_button = '<div><br></div>\
-                <div>\
-                <center>\
-                <input type="button" id="button_center" value="';
-                html_button += LS("NEXT");
-                html_button += '" class="btn btn-primary"';
-
-                if ("npc" in dialogues[0]) {
-                    html_button += ' npc="' + dialogues[0].npc + '"';
-                }
-                html_button += ' dialogue="' + dialogues[0].dialogue + '"';
-                html_button += ' sentence="' + dialogues[0].sentence + '"';
-                html_button += ' onClick="commands.doDialogue(this); return false;"/>\
-                </center>\
-                </div>'
-
-                $('#input_additional').html(html_button);
-            }
-            else {
-                var content = "";
-                if (dialogues[0].speaker.length > 0) {
-                    content += dialogues[0].speaker + ":<br>";
-                }
-
-                for (var i in dialogues) {
-                    content += '<a href="#" onclick="commands.doDialogue(this); return false;"';
-               	 	content += ' npc="' + dialogues[i].npc + '"';
-               		content += ' dialogue="' + dialogues[i].dialogue + '"';
-                	content += ' sentence="' + dialogues[i].sentence + '"';
-                    content += '">';
-                    content += text2html.parseHtml(dialogues[i].content);
-                    content += '</a><br>';
-                }
-                
-                $('#input_prompt').html(content);
-                
-                var html_button = '<div><br></div>\
-                <div>\
-                <center>\
-                <input type="button" id="button_center" value="SELECT ONE" class="btn btn-primary" />\
-                </center>\
-                </div>'
-                $('#input_additional').html(html_button);
-            }
-        }
-        catch(error) {
-            this.doCloseDialogue();
-        }
-
-        this.doSetSizes();
-    },
-    
-    createMessageBox : function() {
-        var dlg = $('<div>').attr('id', 'popup_box');
-        dlg.append($('<div>').attr('id', 'input_prompt'));
-        dlg.append($('<div>').attr('id', 'input_additional'));
-
-        var overlayer = $('<div>').addClass('overlayer')
-                                  .attr('id', 'overlayer');
-        
-        $("body").prepend(overlayer);
-        $("body").prepend(dlg);
-    },
-
-    createDialogueBox : function() {
-        var dlg = $('<div>').attr('id', 'dialogue_box');
-        dlg.append($('<div>').attr('id', 'input_prompt'));
-        dlg.append($('<div>').attr('id', 'input_additional'));
-
-        var overlayer = $('<div>').addClass('overlayer')
-        .attr('id', 'overlayer');
-
-        $("body").prepend(overlayer);
-        $("body").prepend(dlg);
+        popupmgr.doCloseBox();
     },
 
     createInputBox : function() {
         var dlg = '<div id="popup_box">\
         <div id="close_button" class="clearfix">\
-        <input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="webclient.doCloseBox()"/>\
+        <input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="popupmgr.doCloseBox()"/>\
         </div>\
         <div id="input_prompt">\
         </div>\
@@ -997,24 +842,6 @@ var webclient = {
         var overlayer = '<div class="overlayer" id="overlayer"></div>';
         
         $("body").prepend(dlg + overlayer);
-    },
-
-    doCloseBox : function() {
-        $('#popup_box').remove();
-        $('#overlayer').remove();
-        this.doSetSizes();
-    },
-
-    doCloseDialogue : function() {
-        $('#dialogue_box').remove();
-        $('#overlayer').remove();
-        this.doSetSizes();
-    },
-    
-    doCloseCombat : function() {
-        $('#combat_box').remove();
-        $('#overlayer').remove();
-        this.doSetSizes();
     },
 
     doCloseMap : function() {
@@ -1050,6 +877,7 @@ var webclient = {
         $("#tab_inventory").css("display", "");
         $("#tab_skills").css("display", "");
         $("#tab_quests").css("display", "");
+        $("#tab_map").css("display", "");
         $("#tab_system").css("display", "");
         $("#tab_command").css("display", "");
 
@@ -1057,14 +885,20 @@ var webclient = {
     },
     
     unselectAllTabs : function() {
+        $("#tab_bar li").removeClass("active")
         $("#tab_bar li").removeClass("pill_active");
         $("#tab_content form").css("display", "none");
     },
     
     showPage : function(pagename) {
         this.unselectAllTabs();
+        $("#tab_" + pagename).addClass("active");
         $("#tab_" + pagename).addClass("pill_active");
         $("#page_" + pagename).css("display", "");
+    },
+
+    showMenuSystem : function() {
+        $("#page_system").css("display", "");
     },
     
     onConnectionOpen: function() {
