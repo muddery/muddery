@@ -1,6 +1,5 @@
 character,skill
 player,skill_normal_hit
 player,skill_normal_hp
-player,skill_escape
 npc_common,skill_normal_hit
 mob_robot_a,skill_normal_hit
