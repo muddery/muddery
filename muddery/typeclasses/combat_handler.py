@@ -228,42 +228,47 @@ class CombatHandler(DefaultScript):
             winners = [c for c in self.db.characters.values() if c.get_team() == winner_team]
             losers = [c for c in self.db.characters.values() if c.get_team() != winner_team]
 
-            # loot
-            for winner in winners:
-                if winner.has_player:
-                    # get object list
-                    loots = None
-                    for loser in losers:
-                        obj_list = loser.loot(winner)
-                        if obj_list:
-                            if not loots:
-                                loots = obj_list
-                            else:
-                                loots.extend(obj_list)
+            if losers:
+                # defeated somebody
+                # loot
+                for winner in winners:
+                    if winner.has_player:
+                        # get object list
+                        loots = None
+                        for loser in losers:
+                            obj_list = loser.loot(winner)
+                            if obj_list:
+                                if not loots:
+                                    loots = obj_list
+                                else:
+                                    loots.extend(obj_list)
 
-                    if loots:
-                        # give objects to winner
-                        winner.receive_objects(loots)
+                        if loots:
+                            # give objects to winner
+                            winner.receive_objects(loots)
 
-            # call quest handler
-            for winner in winners:
-                if winner.has_player:
-                    for loser in losers:
-                        winner.quest.at_objective(defines.OBJECTIVE_KILL, loser.get_info_key())
+                # call quest handler
+                for winner in winners:
+                    if winner.has_player:
+                        for loser in losers:
+                            winner.quest.at_objective(defines.OBJECTIVE_KILL, loser.get_info_key())
 
-            # send result to players
-            msg = []
-            for winner in winners:
-                msg.append({"dbref": winner.dbref,
-                            "name": winner.get_name()})
+                # send result to players
+                msg = []
+                for winner in winners:
+                    msg.append({"dbref": winner.dbref,
+                                "name": winner.get_name()})
 
-            self.msg_all({"combat_finish": {"winner": msg}})
+                self.msg_all({"combat_finish": {"winner": msg}})
 
-            # remove dead character
-            for loser in losers:
-                self._cleanup_character(loser)
-                del self.db.characters[loser.dbref]
-                loser.die(winners)
+                # remove dead character
+                for loser in losers:
+                    self._cleanup_character(loser)
+                    del self.db.characters[loser.dbref]
+                    loser.die(winners)
+            else:
+                # no losers, no result
+                self.msg_all({"combat_finish": {"stopped": True}})
 
         self.db.finished = True
         self.stop()
