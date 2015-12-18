@@ -251,7 +251,7 @@ class skills(models.Model):
     name = models.CharField(max_length=KEY_LENGTH)
     typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
-    cd = models.IntegerField(blank=True, default=0)
+    cd = models.FloatField(blank=True, default=0)
     passive = models.BooleanField(blank=True, default=False)
     condition = models.TextField(blank=True)
     function = models.CharField(max_length=KEY_LENGTH)

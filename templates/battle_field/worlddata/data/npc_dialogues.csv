@@ -1,0 +1,8 @@
+npc,dialogue,default
+npc_teleporter,dlg_tele_dock
+npc_teleporter,dlg_tele_house
+npc_teleporter,dlg_tele_graveyard
+npc_master,dlg_skill_dunt,
+npc_master,dlg_skill_strong_body,
+npc_master,dlg_skill_powerful_heal,
+npc_master,dlg_learned_skill,1
