@@ -1,0 +1,2 @@
+key,name,typeclass,desc,model
+player,玩家,typeclasses.player_characters.PlayerCharacter,这是玩家。,player
