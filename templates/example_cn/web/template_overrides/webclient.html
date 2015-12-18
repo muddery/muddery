@@ -191,14 +191,13 @@
                 <li id="tab_room" role="presentation" style="display: none">
                     <a href="#" onclick="webclient.showPage('room')">房间</a>
                 </li>
-                <li id="tab_status" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('status')">状态</a>
-                </li>
-                <li id="tab_inventory" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('inventory')">背包</a>
-                </li>
-                <li id="tab_skills" role="presentation" style="display: none">
-                    <a href="#" onclick="webclient.showPage('skills')">技能</a>
+                <li id="tab_character" role="presentation" class="dropup" style="display: none">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" onclick="webclient.showMenuSystem()">人物 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li id="tab_status"><a href="#" onclick="webclient.showPage('status')">状态</a></li>
+                        <li id="tab_inventory"><a href="#" onclick="webclient.showPage('inventory')">背包</a></li>
+                        <li id="tab_skills"><a href="#" onclick="webclient.showPage('skills')">技能</a></li>
+                    </ul>
                 </li>
                 <li id="tab_quests" role="presentation" style="display: none">
                     <a href="#" onclick="webclient.showPage('quests')">任务</a>
