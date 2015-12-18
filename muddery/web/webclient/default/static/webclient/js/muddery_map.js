@@ -48,22 +48,39 @@ var map = {
     },
 
     showMap: function() {
-        var layer = $('<div>').addClass('overlayer').attr('id', 'overlayer');
-        layer.prependTo($("body"));
+
+        this._svg_width = $(window).innerWidth() * 0.8 + 50;
+        this._svg_height = $(window).innerHeight() * 0.6;
 
         var box = $('<div>').attr('id', 'map_box');
-        box.prependTo($("body"));
+        box.attr('class', 'modal');
+        box.attr('style', 'display: block; padding-left: 15px;');
+        box.attr('role', 'dialog');
+        box.prependTo($("#popup_container"));
+        box.modal({backdrop: "static"});
 
-        var button = $('<div>').attr('id', 'close_button')
-                               .appendTo(box)
+        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-lg').appendTo(box);
+        var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
 
-        var input = $('<input>').addClass('close')
-                                .attr('type', 'image')
-                                .attr('id', 'button_close')
-                                .attr('src', resource.close_button)
-                                .attr('alt', 'close')
-                                .attr('onclick', 'webclient.doCloseMap()')
-                                .appendTo(button)
+        var boxHeader = $('<div>')
+            .attr('class', 'modal-header').appendTo(boxContent);
+        boxHeader.append($('<button>')
+            .attr('id', 'button_close')
+            .attr('type', 'button')
+            .attr('class', 'close')
+            .attr('data-dismiss', 'modal')
+            .html('&times;'))
+            .attr('onclick', 'popupmgr.doCloseMap()');
+        boxHeader.append($('<h4>')
+            .attr('id', 'map_name')
+            .text('地图')
+            .attr('class', 'modal-title'));
+
+        var boxBody = $('<div>')
+            .attr('class', 'modal-body').appendTo(boxContent);
+
+        var boxFooter = $('<div>')
+            .attr('class', 'modal-footer').appendTo(boxContent);
 
         webclient.doSetSizes();
 
@@ -74,7 +91,7 @@ var map = {
         }
         var current_room = this._map_data.rooms[this._current_location];
 
-		var svg = d3.select('#map_box')
+		var svg = d3.select('#map_box').select(".modal-body")
 					.append('svg')
                     .attr('id', 'map_svg')
                     .attr('width', this._svg_width)

@@ -470,6 +470,7 @@ var webclient = {
 
         $('#popup_header').html('displayLookObj');
         var page = $('#popup_body');
+        var footer = $('#popup_footer');
 
         var title = $('<div>').addClass('clearfix')
                               .appendTo(page);
@@ -503,11 +504,20 @@ var webclient = {
         catch(error) {
         }
 
-        uimgr.divBR().appendTo(page);
+        uimgr.divBR().appendTo(footer);
 
         if ("cmds" in data) {
             if (data["cmds"].length > 0) {
-                uimgr.divObjectCmds(data["cmds"]).appendTo(page);
+                uimgr.divObjectCmds(data["cmds"]).appendTo(footer);
+            } else {
+                var html_button = $('<button>')
+                    .attr('class', 'btn btn-default')
+                    .attr('type', 'button')
+                    .attr('data-dismiss', 'modal')
+                    .text("关闭")
+                    .attr('id', 'button_center')
+                    .attr('onClick', 'popupmgr.doCloseBox()');
+                footer.html(html_button);
             }
         }
 
@@ -651,14 +661,13 @@ var webclient = {
         $('#popup_footer').append(br);
 
         var div = $("<div>");
-		var center = $("<center>").appendTo(div);
         var html_button = $("<button>").addClass("btn btn-default")
         							  .attr("type", "button")
         							  .attr("id", "button_center")
                                       .attr('data-dismiss', 'modal')
         							  .attr("onClick", "popupmgr.doCloseBox()")
         							  .text(LS("OK"))
-        							  .appendTo(center);
+        							  .appendTo(div);
 
         $('#popup_footer').append(div);
         this.doSetSizes();
@@ -779,17 +788,6 @@ var webclient = {
         var win_h = $(window).innerHeight();
         var win_w = $(window).innerWidth();
 
-        //
-        //// combat box
-        //var inp_h = $('#combat_box').outerHeight(true);
-        //var inp_w = $('#combat_box').outerWidth(true);
-        //$('#combat_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
-        //
-        //// map box
-        //var inp_h = $('#map_box').outerHeight(true);
-        //var inp_w = $('#map_box').outerWidth(true);
-        //$('#map_box').css({'left': (win_w - inp_w) / 2, 'top': (win_h - inp_h) / 2});
-
         var head_h = $('#site-title').outerHeight(true);
         var wrapper_h = win_h - head_h - 30;
 
@@ -844,12 +842,6 @@ var webclient = {
         $("body").prepend(dlg + overlayer);
     },
 
-    doCloseMap : function() {
-        $('#map_box').remove();
-        $('#overlayer').remove();
-        this.doSetSizes();
-    },
-    
     // show connect tabs
     showConnectTabs : function() {
         $("#tab_bar li").css("display", "none");
@@ -885,15 +877,17 @@ var webclient = {
     },
     
     unselectAllTabs : function() {
-        $("#tab_bar li").removeClass("active")
-        $("#tab_bar li").removeClass("pill_active");
+        $("#tab_bar li")
+            .removeClass("active")
+            .removeClass("pill_active");
         $("#tab_content form").css("display", "none");
     },
     
     showPage : function(pagename) {
         this.unselectAllTabs();
-        $("#tab_" + pagename).addClass("active");
-        $("#tab_" + pagename).addClass("pill_active");
+        $("#tab_" + pagename)
+            .addClass("active")
+            .addClass("pill_active");
         $("#page_" + pagename).css("display", "");
     },
 
