@@ -180,33 +180,33 @@
         <div id="tab_bar">
             <ul id="tab_pills" class="nav nav-tabs">
                 <li id="tab_connect" role="presentation" class="active" style="display: none">
-                    <a href="#" onclick='webclient.showPage('connect')">连接</a>
+                    <a href="#" onclick="webclient.showPage('connect')">连接</a>
                 </li>
                 <li id="tab_login" role="presentation" style="display: none">
-                    <a href="#" onclick='webclient.showPage('login')">登录</a>
+                    <a href="#" onclick="webclient.showPage('login')">登录</a>
                 </li>
                 <li id="tab_register" role="presentation" style="display: none">
-                    <a href="#" onclick='webclient.showPage('register')">注册</a>
+                    <a href="#" onclick="webclient.showPage('register')">注册</a>
                 </li>
                 <li id="tab_room" role="presentation" style="display: none">
-                    <a href="#" onclick='webclient.showPage('room')">房间</a>
+                    <a href="#" onclick="webclient.showPage('room')">房间</a>
                 </li>
                 <li id="tab_status" role="presentation" style="display: none">
-                    <a href="#" onclick='webclient.showPage('status')">状态</a>
+                    <a href="#" onclick="webclient.showPage('status')">状态</a>
                 </li>
                 <li id="tab_inventory" role="presentation" style="display: none">
-                    <a href="#" onclick='webclient.showPage('inventory')">背包</a>
+                    <a href="#" onclick="webclient.showPage('inventory')">背包</a>
                 </li>
                 <li id="tab_skills" role="presentation" style="display: none">
-                    <a href="#" onclick='webclient.showPage('skills')">技能</a>
+                    <a href="#" onclick="webclient.showPage('skills')">技能</a>
                 </li>
                 <li id="tab_quests" role="presentation" style="display: none">
-                    <a href="#" onclick='webclient.showPage('quests')">任务</a>
+                    <a href="#" onclick="webclient.showPage('quests')">任务</a>
                 </li>
                 <li id="tab_map" role="presentation" style="display: none">
                     <a id="map_button" href="#" onclick="map.showMap()">地图</a>
                 </li>
-                <li id="tab_system" role="presentation" class="dropdown" style="display: none">
+                <li id="tab_system" role="presentation" class="dropup" style="display: none">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" onclick="webclient.showMenuSystem()">系统 <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li id="page_system"><a href="#" onclick="commands.doLogout()">退出</a></li>
@@ -220,7 +220,7 @@
                 <!--<input type="button" class="btn btn-default" value="发送" onclick="commands.doSendCommand()"/>-->
                 <!--</li>-->
                 <!--li id="tab_test" role="presentation">
-                <a href="#" onclick='webclient.showTestPage()">Test</a>
+                <a href="#" onclick="webclient.showTestPage()">Test</a>
                     </li-->
             </ul>
         </div>
