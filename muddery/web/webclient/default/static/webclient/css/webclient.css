@@ -1,4 +1,8 @@
 
+.panel-body {
+    padding-top: 0;
+}
+
 .modal-footer {
     text-align: left;
 }
