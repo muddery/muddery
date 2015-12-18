@@ -1,6 +1,10 @@
 """
-Example skills.
+Default skills.
 """
+
+import random
+from muddery.utils.localized_strings_handler import LS
+
 
 def skill_example(caller, target, *args, **kwargs):
     """
@@ -9,9 +13,38 @@ def skill_example(caller, target, *args, **kwargs):
     pass
 
 
+def skill_escape(caller, target, effect=0, *args, **kwargs):
+    """
+    Escape from this combat.
+    args:
+        effect: the odds of fail.
+    """
+    if not caller:
+        return
+
+    if not caller.ndb.combat_handler:
+        # caller is not in combat.
+        return
+
+    rand = random.random()
+    if rand < effect:
+        return [{"type": "left",
+                 "caller": caller.dbref,
+                 "success": False}]
+
+    caller.ndb.combat_handler.remove_character(caller)
+    caller.msg({"combat_finish": {"escaped": True}})
+
+    return [{"type": "left",
+             "caller": caller.dbref,
+             "success": True}]
+
+
 def skill_heal(caller, target, effect=0, *args, **kwargs):
     """
-    Heal the target, if target is None, heal the caller.
+    Heal the caller.
+    args:
+        effect: the hp value to increase.
     """
     if effect <= 0:
         return
@@ -37,7 +70,12 @@ def skill_heal(caller, target, effect=0, *args, **kwargs):
 def skill_hit(caller, target, effect=0, *args, **kwargs):
     """
     Hit the target.
+    args:
+        effect: the ratio of the damage.
     """
+    if effect <= 0:
+        return
+
     if not caller:
         return
 
@@ -46,7 +84,7 @@ def skill_hit(caller, target, effect=0, *args, **kwargs):
 
     # calculate the damage
     damage = float(caller.attack) / (caller.attack + target.defence) * caller.attack
-    damage = round(damage)
+    damage = round(damage * effect)
     
     # hurt target
     target.hurt(damage)
@@ -62,6 +100,8 @@ def skill_hit(caller, target, effect=0, *args, **kwargs):
 def skill_increase_hp(caller, target, effect=0, *args, **kwargs):
     """
     Passive skill, increase the caller's max_hp.
+    args:
+        effect: the max_hp value to increase.
     """
     if effect <= 0:
         return

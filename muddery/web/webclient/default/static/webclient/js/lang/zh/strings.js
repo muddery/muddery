@@ -3,6 +3,8 @@ var LOCAL_STRING = {
     "Combat stopped !": "战斗停止了！",
     "You win !": "你赢了！",
     "You lost !": "你输了！",
+    "Combat stopped !": "战斗结束了！",
+    "Escaped !": "逃离战斗！",
     "OK": "确定",
     "Exits:": "出口：",
     "Objects:": "物体：",

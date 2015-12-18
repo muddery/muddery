@@ -112,7 +112,10 @@ var combat = {
             .css('line-height', '150px');
 
             if ("stopped" in self._result) {
-                result.text("Combat stopped !");
+                result.text(LS("Combat stopped !"));
+            }
+            else if ("escaped" in self._result) {
+                result.text(LS("Escaped !"));
             }
             else if ("winner" in self._result) {
                 var win = false;
