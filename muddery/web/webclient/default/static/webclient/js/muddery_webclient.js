@@ -809,6 +809,9 @@ var webclient = {
         else {
             $('#middlewindow').width(win_w - 20);
         }
+
+        var padding_left_right = ($('#middlewindow').width() - (32 + 10 ) * 5 ) / 10;
+        $("#tab_bar li a").css("padding", "10px " + padding_left_right + "px");
     },
 
     doCancel : function() {
@@ -865,6 +868,7 @@ var webclient = {
         $("#tab_bar").find("li").css("display", "none");
         
         $("#tab_room").css("display", "");
+        $("#tab_character").css("display", "");
         $("#tab_status").css("display", "");
         $("#tab_inventory").css("display", "");
         $("#tab_skills").css("display", "");
