@@ -1,4 +1,8 @@
 
+.modal-footer {
+    text-align: left;
+}
+
 #tab_pills li{
     font-size: 16px;
 }

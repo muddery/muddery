@@ -44,10 +44,9 @@ var popupmgr = {
 
                 var html_button = '<div><br></div>\
                 <div>\
-                <center>\
                 <input type="button" id="button_center" value="';
                 html_button += LS("NEXT");
-                html_button += '" class="btn btn-primary"';
+                html_button += '" class="btn btn-default"';
 
                 if ("npc" in dialogues[0]) {
                     html_button += ' npc="' + dialogues[0].npc + '"';
@@ -55,7 +54,6 @@ var popupmgr = {
                 html_button += ' dialogue="' + dialogues[0].dialogue + '"';
                 html_button += ' sentence="' + dialogues[0].sentence + '"';
                 html_button += ' onClick="commands.doDialogue(this); return false;"/>\
-                </center>\
                 </div>'
 
                 $('#popup_footer').html(html_button);
@@ -80,9 +78,7 @@ var popupmgr = {
 
                 var html_button = '<div><br></div>\
                 <div>\
-                <center>\
-                <input type="button" id="button_center" value="SELECT ONE" class="btn btn-primary" />\
-                </center>\
+                <center>\tton_center" value="SELECT ONE" class="btn btn-primary" />\
                 </div>'
                 $('#popup_footer').html(html_button);
             }
@@ -95,6 +91,8 @@ var popupmgr = {
     },
 
     createMessageBox : function() {
+        var win_h = $(window).innerHeight();
+
         var dlg = $('<div>').attr('id', 'popup_box');
         dlg.attr('class', 'modal');
         dlg.attr('style', 'display: block; padding-left: 15px;');
@@ -124,9 +122,12 @@ var popupmgr = {
 
         $("#popup_container").prepend(dlg);
         dlg.modal({backdrop: "static"});
+        dlg.css('top', Math.abs(win_h-dlgDialog.outerHeight())>>1);
     },
 
     createDialogueBox : function() {
+        var win_h = $(window).innerHeight();
+
         var dlg = $('<div>').attr('id', 'dialogue_box');
         dlg.attr('class', 'modal');
         dlg.attr('style', 'display: block; padding-left: 15px;');
@@ -150,6 +151,7 @@ var popupmgr = {
 
         $("#popup_container").prepend(dlg);
         dlg.modal({backdrop: "static"});
+        dlg.css('top', Math.abs(win_h-dlgDialog.outerHeight())>>1);
     },
 
     doCloseBox : function() {
@@ -175,8 +177,12 @@ var popupmgr = {
         }
         webclient.doSetSizes();
     },
-}
 
-$('body').on('hidden.bs.modal', '.modal', function () {
-    $(this).removeData('bs.modal');
-});
+    doCloseMap : function() {
+        if($('#map_box').size()>0){
+            $('#map_box').remove();
+            $('.modal-backdrop').remove();
+        }
+        webclient.doSetSizes();
+    },
+}
