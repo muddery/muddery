@@ -4,3 +4,4 @@ skill_dunt,重击,typeclasses.character_skills.Skill,攻击敌人，伤害较高
 skill_normal_heal,普通治疗,typeclasses.character_skills.Skill,治疗自己，效果一般。,5,0,,skill_heal,10
 skill_powerful_heal,强效治疗,typeclasses.character_skills.Skill,治疗自己，效果较好。,7.5,0,,skill_heal,20
 skill_strong_body,强壮体魄,typeclasses.character_skills.Skill,被动技能，提高最大生命值。,0,1,,skill_increase_hp,50
+skill_escape,逃跑,typeclasses.character_skills.Skill,逃之夭夭。,1,0,,skill_escape,0
