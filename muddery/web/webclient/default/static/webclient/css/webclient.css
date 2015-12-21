@@ -134,37 +134,10 @@
 }
 
 /* combat button */
-
 button.btn-combat {
     position: absolute;
-    bottom: 22px;
-    padding: 4px 4px;
-    margin-bottom: 0;
-    font-size: 14px;
-    line-height: 18px;
-    text-align: center;
-    vertical-align: middle;
-    border: 1px solid white;
-    width: 60px;
-    height: 18px;
-    cursor: pointer;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-button.btn-combat:hover {
-    text-decoration: underline;
-}
-
-button.btn-combat.disabled, div.button.disabled:hover {
-    cursor: default;
-    border-color: #b2b2b2;
-    color: #b2b2b2;
-    text-decoration: none;
+    width: 82px;
+    height: 34px;
 }
 
 button.btn-combat div.cooldown {
@@ -172,5 +145,6 @@ button.btn-combat div.cooldown {
     top: 0px;
     left: 0px;
     height: 100%;
-    background-color: #666666;
+    background-color: #999;
+    opacity: 0.5;
 }
