@@ -260,8 +260,9 @@ var combat = {
                     .attr('key', command.key)
                     .attr('id', 'combat_btn_' + command.key)
                     .attr('onclick', 'combat.doCombatSkill(this); return false;')
-                    .css({'left': 20 + i * 80})
-                    .text(command.name);
+                    .css({'left': 20 + i * 90});
+
+                button.append($("<div>").text(command.name));
 
                 button.append($("<div>").addClass('cooldown'));
                 
@@ -269,6 +270,8 @@ var combat = {
             }
             
             commands.html(content);
+
+            $('#combat_commands').css({'height': 60});
         }
     },
 

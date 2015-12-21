@@ -26,8 +26,6 @@ MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
 # Django web features
 ######################################################################
 
-BOOTSTRAP_APP = "bootstrap3"
-
 # The name of the currently selected webclient template. This corresponds to the
 # directory names shown in the webtemplates directory.
 WEBCLIENT_TEMPLATE = 'default'
