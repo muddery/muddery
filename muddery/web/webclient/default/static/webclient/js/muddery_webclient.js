@@ -933,7 +933,9 @@ var webclient = {
 
                 for (var i in dialogues) {
                     content += '<a href="#" onclick="commands.doDialogue(this); return false;"';
-               	 	content += ' npc="' + dialogues[i].npc + '"';
+                    if ("npc" in dialogues[i]) {
+                        content += ' npc="' + dialogues[i].npc + '"';
+                    }
                		content += ' dialogue="' + dialogues[i].dialogue + '"';
                 	content += ' sentence="' + dialogues[i].sentence + '"';
                     content += '">';
