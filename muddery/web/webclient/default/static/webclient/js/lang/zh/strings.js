@@ -1,5 +1,6 @@
 
 var LOCAL_STRING = {
+    "BATTLE RESULT": "战斗结果",
     "Combat stopped !": "战斗停止了！",
     "You win !": "你赢了！",
     "You lost !": "你输了！",
