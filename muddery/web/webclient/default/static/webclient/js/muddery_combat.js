@@ -17,13 +17,14 @@ var combat = {
     createCombat: function(data) {
         this.closeCombat();
 
-        var box = $('<div>').attr('id', 'combat_box');
+        var box = $('<div>').attr('id', 'combat_box')
+                            .attr('class', 'modal fade')
+                            .attr('style', 'display: block; padding-left: 15px;')
+                            .attr('role', 'dialog')
+                            .modal({backdrop: "static"})
+                            .prependTo($("#popup_container"));
 
-        box.attr('class', 'modal fade');
-        box.attr('style', 'display: block; padding-left: 15px;');
-        box.attr('role', 'dialog');
-
-        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-lg').appendTo(box);
+        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(box);
         var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
 
         var boxHeader = $('<div>')
@@ -32,22 +33,21 @@ var combat = {
 
         var boxBody = $('<div>')
             .attr('id', 'combat_characters')
-            .attr('class', 'modal-body').appendTo(boxContent);
+            .attr('class', 'modal-body').appendTo(boxContent)
+            .attr('style', 'min-height: 100px;');
 
         var boxFooter = $('<div>')
             .attr('id', 'combat_commands')
             .attr('class', 'modal-footer').appendTo(boxContent);
 
-        box.prependTo($("#popup_container"));
-        box.modal({backdrop: "static"});
+        boxDialog.css('top', (box.innerHeight() - boxDialog.innerHeight()) / 2);
 
+        // reset combat data
         this._current_target = null;
         this._finished = false;
         this._result = null;
         this._loot = null;
         this._skill_cd_time = {};
-    
-        webclient.doSetSizes();
     },
 
     displayGetObject: function(data) {
@@ -70,23 +70,26 @@ var combat = {
         
         var box = $('#combat_box').html("");
 
-        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-lg').appendTo(box);
+        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(box);
         var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
 
         var boxHeader = $('<div>')
             .attr('id', 'combat_messages')
-            .attr('class', 'modal-header').appendTo(boxContent);
+            .attr('class', 'modal-header')
+            .appendTo(boxContent);
+
+        var boxBodyResult = $('<div>')
+            .attr('id', 'combat_result')
+            .attr('class', 'modal-body').appendTo(boxContent);
 
         var boxBodyLoot = $('<div>')
             .attr('id', 'combat_loot')
             .attr('class', 'modal-body').appendTo(boxContent);
 
-        var boxBodyResult = $('<div>')
-            .attr('id', 'combat_result')
-            .attr('class', 'modal-footer').appendTo(boxContent);
-
         var boxFooter = $('<div>')
             .attr('class', 'modal-footer').appendTo(boxContent);
+
+        $('<center>').text(LS('BATTLE RESULT')).appendTo(boxHeader);
 
         // object's info
         var content = "";
@@ -136,11 +139,11 @@ var combat = {
 
         if (count == 0) {
             // get nothing
-            var result = $('<center>').attr('id', 'combat_result')
-            .css('line-height', '150px');
-
             if ("stopped" in self._result) {
-                result.text("Combat stopped !");
+                boxBodyResult.text(LS("Combat stopped !"));
+            }
+            else if ("escaped" in self._result) {
+                boxBodyResult.text(LS("Escaped !"));
             }
             else if ("winner" in self._result) {
                 var win = false;
@@ -152,22 +155,17 @@ var combat = {
                 }
 
                 if (win) {
-                    result.text(LS("You win !"));
+                    boxBodyResult.text(LS("You win !"));
                 }
                 else {
-                    result.text(LS("You lost !"));
+                    boxBodyResult.text(LS("You lost !"));
                 }
             }
-            
-            result.appendTo(boxHeader);
         }
         else {
             // get objects
-            var result = $('<center>').attr('id', 'combat_result')
-                                      .css('line-height', '20px');
-            
             if ("stopped" in self._result) {
-                result.text("Combat stopped !");
+                boxBodyResult.text("Combat stopped !");
             }
             else if ("winner" in self._result) {
                 var win = false;
@@ -179,14 +177,12 @@ var combat = {
                 }
                 
                 if (win) {
-                    result.text(LS("You win !"));
+                    boxBodyResult.text(LS("You win !"));
                 }
                 else {
-                    result.text(LS("You lost !"));
+                    boxBodyResult.text(LS("You lost !"));
                 }
             }
-            
-            result.appendTo(boxHeader);
         }
 
         var center = $('<center>');
@@ -200,6 +196,8 @@ var combat = {
 
         button.appendTo(center);
         center.appendTo(boxFooter);
+
+        boxDialog.css('top', (box.innerHeight() - boxDialog.innerHeight()) / 2);
     },
 
     closeCombat: function() {
@@ -215,23 +213,31 @@ var combat = {
     displayCombatInfo: function(data) {
         var desc = $('#combat_desc');
         desc.text(data.desc);
-        
+
+        var team = 0;
+        var enemy = 0;
+        var top = 10;
+        var line_height = 30;
         var characters = $('#combat_characters');
         for (var i in data.characters) {
             var fighter = data.characters[i];
             var div = $('<div>').attr('id', 'fighter_' + fighter.dbref.slice(1))
                                 .text(fighter.name)
                                 .data('dbref', fighter.dbref);
-            $('<div>').addClass('hp')
-                      .attr('id', 'status_' + fighter.dbref.slice(1))
+
+            $('<div>').attr('id', 'status_' + fighter.dbref.slice(1))
                       .text(fighter.hp + '/' + fighter.max_hp)
-                      .appendTo(div);
+                      .prependTo(div);
             
             if (fighter.dbref == this._self_dbref) {
-                div.addClass("fighter_self");
+                div.addClass('fighter_team')
+                   .css('top', top + team * line_height);
+                team++;
             }
             else {
-                div.addClass("fighter_enemy");
+                div.addClass("fighter_enemy")
+                   .css('top', top + enemy * line_height);
+                enemy++;
                 if (!this._current_target) {
                     this._current_target = fighter.dbref;
                 }
@@ -282,7 +288,7 @@ var combat = {
                               .appendTo(div);
                     
                     if (fighter.dbref == this._self_dbref) {
-                        div.addClass("fighter_self");
+                        div.addClass("fighter_team");
                     }
                     else {
                         div.addClass("fighter_enemy");

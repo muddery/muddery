@@ -1,4 +1,40 @@
 
+/* Style specific classes corresponding to formatted, narative text. */
+.red { color: red; }
+.maroon { color: maroon; }
+.lime { color: lime; }
+.green { color: green; }
+.yellow { color: yellow; }
+.olive { color: olive; }
+.blue { color: blue; }
+.navy { color: navy; }
+.magenta { color: #FF00FF; }
+.purple { color: purple; }
+.cyan { color: #00FFFF; }
+.teal { color: teal; }
+.white { color: white; }
+.gray { color: gray; }
+.dimgray {color: #696969;}
+.black {color: black;}
+.underline { text-decoration: underline; }
+
+.bgred { background-color: red;}
+.bgmaroon { background-color: maroon;}
+.bglime { background-color: lime;}
+.bggreen { background-color: green;}
+.bgyellow { background-color: yellow;}
+.bgolive { background-color: olive;}
+.bgblue { background-color: blue;}
+.bgnavy { background-color: navy;}
+.bgmagenta { background-color: #FF00FF;}
+.bgpurple { background-color: purple;}
+.bgcyan { background-color: #00FFFF;}
+.bgteal { background-color: teal;}
+.bgwhite { background-color: white;}
+.bggray { background-color: gray;}
+.bgdimgray { background-color: #696969;}
+.bgblack { background-color: black;}
+
 .modal-footer {
     text-align: left;
 }
@@ -74,4 +110,67 @@
     border-style: solid;
     border-color: #aaa;
     padding: 4px 8px 4px 8px;
+}
+
+.fighter_team {
+    padding: 0px;
+    position: absolute;
+    left: 12%;
+    text-align: left;
+    line-height: 1.2em;
+}
+
+.fighter_enemy {
+    padding: 0px;
+    position: absolute;
+    right: 12%;
+    text-align: right;
+    line-height: 1.2em;
+}
+
+.hp {
+    position: absolute;
+    top: -15px;
+}
+
+/* combat button */
+
+button.btn-combat {
+    position: absolute;
+    bottom: 22px;
+    padding: 4px 4px;
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 18px;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid white;
+    width: 60px;
+    height: 18px;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+button.btn-combat:hover {
+    text-decoration: underline;
+}
+
+button.btn-combat.disabled, div.button.disabled:hover {
+    cursor: default;
+    border-color: #b2b2b2;
+    color: #b2b2b2;
+    text-decoration: none;
+}
+
+button.btn-combat div.cooldown {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    background-color: #666666;
 }
