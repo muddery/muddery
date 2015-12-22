@@ -134,7 +134,7 @@ var combat = {
             catch(error) {
             }
 
-            loot.html(content);
+            boxBodyLoot.html(content);
         }
 
         if (count == 0) {
@@ -336,13 +336,19 @@ var combat = {
     displaySkillCD: function(data) {
         // set skill's cd
         var cd = data["cd"];
+        var gcd = data["gcd"];
         var key = data["skill"];
         var btn = $('#combat_btn_' + key);
-        this.set_button_cd(btn, cd);
                 
         var gcd = data["gcd"];
-        $('#combat_btns div').each(function(){
-            combat.set_button_cd($(this), gcd);
+        $('#combat_btns button').each(function(){
+            var time = gcd;
+            if (this == btn[0]) {
+                if (cd > gcd) {
+                    time = cd;
+                }
+            }
+            combat.set_button_cd($(this), time);
         });
     },
 
