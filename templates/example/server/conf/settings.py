@@ -120,7 +120,7 @@ TEMPLATE_DIRS = (
     os.path.join(EVENNIA_DIR, "web", "templates", ACTIVE_TEMPLATE),
     os.path.join(EVENNIA_DIR, "web", "templates"),)
 
-# The secret key is randomly seeded upon creation. It is used to sign
+# The secret key is randomly seegd upon creation. It is used to sign
 # Django's cookies. Do not share this with anyone. Changing it will
 # log out all active web browsing sessions. Game web client sessions
 # may survive.

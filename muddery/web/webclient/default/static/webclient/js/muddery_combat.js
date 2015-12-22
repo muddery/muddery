@@ -17,22 +17,37 @@ var combat = {
     createCombat: function(data) {
         this.closeCombat();
 
-        var layer = $('<div>').addClass('overlayer').attr('id', 'overlayer');
-        layer.prependTo($("body"));
-        
-        var box = $('<div>').attr('id', 'combat_box');
-        $('<div>').attr('id', 'combat_desc').appendTo(box);
-        $('<div>').attr('id', 'combat_characters').appendTo(box);
-        $('<div>').attr('id', 'combat_commands').appendTo(box);
-        box.prependTo($("body"));
+        var box = $('<div>').attr('id', 'combat_box')
+                            .attr('class', 'modal')
+                            .attr('style', 'display: block; padding-left: 15px;')
+                            .attr('role', 'dialog')
+                            .modal({backdrop: "static"})
+                            .prependTo($("#popup_container"));
 
+        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(box);
+        var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
+
+        var boxHeader = $('<div>')
+            .attr('id', 'combat_desc')
+            .attr('class', 'modal-header').appendTo(boxContent);
+
+        var boxBody = $('<div>')
+            .attr('id', 'combat_characters')
+            .attr('class', 'modal-body').appendTo(boxContent)
+            .attr('style', 'min-height: 100px;');
+
+        var boxFooter = $('<div>')
+            .attr('id', 'combat_commands')
+            .attr('class', 'modal-footer').appendTo(boxContent);
+
+        boxDialog.css('top', (box.innerHeight() - boxDialog.innerHeight()) / 2);
+
+        // reset combat data
         this._current_target = null;
         this._finished = false;
         this._result = null;
         this._loot = null;
         this._skill_cd_time = {};
-    
-        webclient.doSetSizes();
     },
 
     displayGetObject: function(data) {
@@ -53,12 +68,28 @@ var combat = {
         $('#combat_characters').remove();
         $('#combat_commands').remove();
         
-        var box = $('#combat_box');
+        var box = $('#combat_box').html("");
 
-        var messages = $('<div>').attr('id', 'combat_messages');
+        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(box);
+        var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
 
-        // get objects
-        var loot = $('<div>').attr('id', 'combat_loot');
+        var boxHeader = $('<div>')
+            .attr('id', 'combat_messages')
+            .attr('class', 'modal-header')
+            .appendTo(boxContent);
+
+        var boxBodyResult = $('<div>')
+            .attr('id', 'combat_result')
+            .attr('class', 'modal-body').appendTo(boxContent);
+
+        var boxBodyLoot = $('<div>')
+            .attr('id', 'combat_loot')
+            .attr('class', 'modal-body').appendTo(boxContent);
+
+        var boxFooter = $('<div>')
+            .attr('class', 'modal-footer').appendTo(boxContent);
+
+        $('<center>').text(LS('BATTLE RESULT')).appendTo(boxHeader);
 
         // object's info
         var content = "";
@@ -103,19 +134,16 @@ var combat = {
             catch(error) {
             }
 
-            loot.html(content);
+            boxBodyLoot.html(content);
         }
 
         if (count == 0) {
             // get nothing
-            var result = $('<center>').attr('id', 'combat_result')
-            .css('line-height', '150px');
-
             if ("stopped" in self._result) {
-                result.text(LS("Combat stopped !"));
+                boxBodyResult.text(LS("Combat stopped !"));
             }
             else if ("escaped" in self._result) {
-                result.text(LS("Escaped !"));
+                boxBodyResult.text(LS("Escaped !"));
             }
             else if ("winner" in self._result) {
                 var win = false;
@@ -127,22 +155,17 @@ var combat = {
                 }
 
                 if (win) {
-                    result.text(LS("You win !"));
+                    boxBodyResult.text(LS("You win !"));
                 }
                 else {
-                    result.text(LS("You lost !"));
+                    boxBodyResult.text(LS("You lost !"));
                 }
             }
-            
-            result.appendTo(messages);
         }
         else {
             // get objects
-            var result = $('<center>').attr('id', 'combat_result')
-                                      .css('line-height', '20px');
-            
             if ("stopped" in self._result) {
-                result.text("Combat stopped !");
+                boxBodyResult.text("Combat stopped !");
             }
             else if ("winner" in self._result) {
                 var win = false;
@@ -154,55 +177,67 @@ var combat = {
                 }
                 
                 if (win) {
-                    result.text(LS("You win !"));
+                    boxBodyResult.text(LS("You win !"));
                 }
                 else {
-                    result.text(LS("You lost !"));
+                    boxBodyResult.text(LS("You lost !"));
                 }
             }
-            
-            result.appendTo(messages);
-            loot.appendTo(messages);
         }
 
-        messages.appendTo(box);
-
         var center = $('<center>');
-        var button = $('<input>').attr('type', 'button')
-                                 .attr('id', 'button_center')
-                                 .attr('onClick', 'combat.closeCombat()')
-                                 .val('OK')
-                                 .addClass('btn btn-primary');
+        var button = $('<button>')
+            .addClass('btn btn-default')
+            .attr('type', 'button')
+            .attr('id', 'button_center')
+            .attr('onClick', 'combat.closeCombat()')
+            .text('OK')
+            .addClass('btn btn-primary');
+
         button.appendTo(center);
-        center.appendTo(box);
+        center.appendTo(boxFooter);
+
+        boxDialog.css('top', (box.innerHeight() - boxDialog.innerHeight()) / 2);
     },
 
     closeCombat: function() {
         if ($('#popup_box').size() == 0) {
-            $('#overlayer').remove();
+            $('.modal-backdrop').remove();
         }
-        $('#combat_box').remove();
+        if($('#combat_box').size() > 0){
+            $('#combat_box').remove();
+            $('.modal-backdrop').remove();
+        }
     },
 
     displayCombatInfo: function(data) {
         var desc = $('#combat_desc');
         desc.text(data.desc);
-        
+
+        var team = 0;
+        var enemy = 0;
+        var top = 10;
+        var line_height = 30;
         var characters = $('#combat_characters');
         for (var i in data.characters) {
             var fighter = data.characters[i];
             var div = $('<div>').attr('id', 'fighter_' + fighter.dbref.slice(1))
                                 .text(fighter.name)
                                 .data('dbref', fighter.dbref);
+
             $('<div>').attr('id', 'status_' + fighter.dbref.slice(1))
                       .text(fighter.hp + '/' + fighter.max_hp)
                       .prependTo(div);
             
             if (fighter.dbref == this._self_dbref) {
-                div.addClass("fighter_team");
+                div.addClass('fighter_team')
+                   .css('top', top + team * line_height);
+                team++;
             }
             else {
-                div.addClass("fighter_enemy");
+                div.addClass("fighter_enemy")
+                   .css('top', top + enemy * line_height);
+                enemy++;
                 if (!this._current_target) {
                     this._current_target = fighter.dbref;
                 }
@@ -218,20 +253,25 @@ var combat = {
             var content = $('<div>').attr('id', 'combat_btns');
             for (var i in data) {
                 var command = data[i];
-                var button = $('<div>').addClass('btn-combat')
-                                         .attr('type', 'button')
-                                         .attr('key', command.key)
-                                         .attr('id', 'combat_btn_' + command.key)
-                                         .attr('onclick', 'combat.doCombatSkill(this); return false;')
-                                         .css({'left': 20 + i * 80})
-                                         .text(command.name);
-                
+                var button = $('<button>')
+                    .addClass('btn-combat')
+                    .addClass('btn btn-default')
+                    .attr('type', 'button')
+                    .attr('key', command.key)
+                    .attr('id', 'combat_btn_' + command.key)
+                    .attr('onclick', 'combat.doCombatSkill(this); return false;')
+                    .css({'left': 20 + i * 90});
+
+                button.append($("<div>").text(command.name));
+
                 button.append($("<div>").addClass('cooldown'));
                 
                 button.appendTo(content);
             }
             
             commands.html(content);
+
+            $('#combat_commands').css({'height': 60});
         }
     },
 
@@ -296,13 +336,19 @@ var combat = {
     displaySkillCD: function(data) {
         // set skill's cd
         var cd = data["cd"];
+        var gcd = data["gcd"];
         var key = data["skill"];
         var btn = $('#combat_btn_' + key);
-        this.set_button_cd(btn, cd);
                 
         var gcd = data["gcd"];
-        $('#combat_btns div').each(function(){
-            combat.set_button_cd($(this), gcd);
+        $('#combat_btns button').each(function(){
+            var time = gcd;
+            if (this == btn[0]) {
+                if (cd > gcd) {
+                    time = cd;
+                }
+            }
+            combat.set_button_cd($(this), time);
         });
     },
 
