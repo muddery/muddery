@@ -10,9 +10,28 @@ body {
     margin-bottom: 5px;
 }
 
+.panel-body {
+    padding-top: 0;
+}
+
 .modal-content {
     background-color: #000;
     border-color: #aaa;
+}
+
+.modal-header {
+    border-bottom: 0px;
+    padding-top: 0;
+}
+
+.modal-footer {
+    text-align: left;
+    border-top: 0px;
+}
+
+.form-control {
+    padding: 3px 6px;
+    margin: 2px 2px;
 }
 
 .nav-tabs>li>a {
@@ -89,20 +108,6 @@ a:hover {
 .bggray { background-color: gray;}
 .bgdimgray { background-color: #696969;}
 .bgblack { background-color: black;}
-
-.modal-header {
-    border-bottom: 0px;
-}
-
-.modal-footer {
-    text-align: left;
-    border-top: 0px;
-}
-
-.form-control {
-    padding: 3px 6px;
-    margin: 2px 2px;
-}
 
 #tab_pills li{
     font-size: 16px;
