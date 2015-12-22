@@ -3,7 +3,7 @@ Muddery webclient_uimgr (javascript component)
 */
 
 var uimgr = {
-    CONST_A_HREF_ONCLICK : "webclient.doCloseBox(); commands.doCommandLink(this); return false;",
+    CONST_A_HREF_ONCLICK : "popupmgr.doCloseBox(); commands.doCommandLink(this); return false;",
     divEmpty : function(element, args) {
         var divEmptyElement = $("<div>");
         var element = arguments[0]?arguments[0]:"";
@@ -181,9 +181,19 @@ var uimgr = {
         for (var i in data_cmds) {
             try {
                 var cmd = data_cmds[i];
-                var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, cmd["name"],
-                    {"cmd_name": cmd["cmd"], "cmd_args": cmd["args"], "style":"margin-left:10px;"});
-                aHrefElement.appendTo(divObjectCmdsElement);
+
+                var html_button = $('<button>')
+                    .attr('class', 'btn btn-default')
+                    .attr('type', 'button')
+                    .attr('onclick', uimgr.CONST_A_HREF_ONCLICK)
+                    .text(cmd['name'])
+                    .attr("cmd_name", cmd["cmd"])
+                    .attr("cmd_args", cmd["args"]);
+                html_button.appendTo(divObjectCmdsElement);
+
+                //var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, cmd["name"],
+                //    {"cmd_name": cmd["cmd"], "cmd_args": cmd["args"], "style":"margin-left:10px;"});
+                //aHrefElement.appendTo(divObjectCmdsElement);
             }
             catch(error) {
             }
@@ -267,9 +277,6 @@ var uimgr = {
             .append($("<th>").text(LS("NAME")))
             .append($("<th>").text(LS("DESC")))
             .append($("<th>").text(LS("OBJECTIVE")));
-
-
-        console.log(JSON.stringify(data))
 
         for (var i in data) {
             try {

@@ -1,5 +1,6 @@
 
 var LOCAL_STRING = {
+    "BATTLE RESULT": "战斗结果",
     "Combat stopped !": "战斗停止了！",
     "You win !": "你赢了！",
     "You lost !": "你输了！",
@@ -26,4 +27,5 @@ var LOCAL_STRING = {
     ": ": "：",
     "NEXT": "继续",
     "The client connection was closed cleanly.": "客户端已经与服务器断开。",
+    "Scene": "场景",
 };
