@@ -1,4 +1,59 @@
 
+/* colors */
+body {
+    background-color: #000;
+    color: #ccc;
+}
+
+.panel {
+    background-color: #000;
+    margin-bottom: 5px;
+}
+
+.modal-content {
+    background-color: #000;
+    border-color: #aaa;
+}
+
+.nav-tabs>li>a {
+    border-color: #aaa;
+    padding: 5px 10px;
+}
+
+.nav-tabs>li>a:hover {
+    background-color: #666;
+}
+
+button.close {
+    color: #ccc;
+    opacity: 1.0;
+    text-shadow: 0 1px 0 #888;
+}
+
+button.close:hover {
+    color: #fff;
+    opacity: 1.0;
+    text-shadow: 0 1px 0 #bbb;
+}
+
+.btn {
+    color: #333;
+    background-color: #fff;
+}
+
+.btn:hover {
+    color: #000;
+    background-color: #ccc;
+}
+
+a {
+    color: #6bf;
+}
+
+a:hover {
+    color: #3af;
+}
+
 /* Style specific classes corresponding to formatted, narative text. */
 .red { color: red; }
 .maroon { color: maroon; }
@@ -35,8 +90,18 @@
 .bgdimgray { background-color: #696969;}
 .bgblack { background-color: black;}
 
+.modal-header {
+    border-bottom: 0px;
+}
+
 .modal-footer {
     text-align: left;
+    border-top: 0px;
+}
+
+.form-control {
+    padding: 3px 6px;
+    margin: 2px 2px;
 }
 
 #tab_pills li{
@@ -145,6 +210,6 @@ button.btn-combat div.cooldown {
     top: 0px;
     left: 0px;
     height: 100%;
-    background-color: #999;
+    background-color: #333;
     opacity: 0.5;
 }

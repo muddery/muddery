@@ -18,7 +18,7 @@ var combat = {
         this.closeCombat();
 
         var box = $('<div>').attr('id', 'combat_box')
-                            .attr('class', 'modal fade')
+                            .attr('class', 'modal')
                             .attr('style', 'display: block; padding-left: 15px;')
                             .attr('role', 'dialog')
                             .modal({backdrop: "static"})
