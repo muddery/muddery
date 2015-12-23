@@ -447,12 +447,19 @@ var webclient = {
         popupmgr.doCloseBox();
         popupmgr.createMessageBox();
 
-        $('#popup_header').html('displayLookObj');
+        // add object's name
+        var title = "";
+        try {
+            title = data["name"];
+        }
+        catch(error) {
+            title = tab_name;
+        }
+
+        $('#popup_header').text(title);
+
         var page = $('#popup_body');
         var footer = $('#popup_footer');
-
-        var title = $('<div>').addClass('clearfix')
-                              .appendTo(page);
 
         // object's info
         var element = "";
@@ -463,17 +470,6 @@ var webclient = {
             dbref = data["dbref"];
             page.data("dbref", dbref);
         }
-        
-        // add object's name
-        try {
-            element = data["name"];
-        }
-        catch(error) {
-            element = tab_name;
-        }
-
-        var name = uimgr.divRoomCenterTabName(element);
-        title.append(name);
 
         // add object's desc
         try {
@@ -493,9 +489,9 @@ var webclient = {
                     .attr('class', 'btn btn-default')
                     .attr('type', 'button')
                     .attr('data-dismiss', 'modal')
-                    .text("关闭")
-                    .attr('id', 'button_center')
-                    .attr('onClick', 'popupmgr.doCloseBox()');
+                    .attr('onClick', 'popupmgr.doCloseBox()')
+                    .addClass('button-center')
+                    .text(LS('CLOSE'))
                 footer.html(html_button);
             }
         }
@@ -583,7 +579,7 @@ var webclient = {
         popupmgr.doCloseBox();
         popupmgr.createMessageBox();
 
-        $('#popup_header').html('displayGetObjectBox');
+        $('#popup_header').text(LS('Get Object'));
 
         var page = $("#popup_body");
 

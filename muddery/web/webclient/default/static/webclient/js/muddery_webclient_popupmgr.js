@@ -7,7 +7,7 @@ var popupmgr = {
         popupmgr.doCloseBox();
         popupmgr.createMessageBox();
 
-        $('#popup_header').html("Alert");
+        $('#popup_header').text(LS("Alert"));
         $('#popup_body').html(text2html.parseHtml(msg));
 
         var html_button = $('<button>')
@@ -33,37 +33,33 @@ var popupmgr = {
             popupmgr.createDialogueBox();
 
             if (dialogues.length == 1) {
-                var content = "";
-                if (dialogues[0].speaker.length > 0) {
-                    content += dialogues[0].speaker + ":<br>";
-                }
-                content += text2html.parseHtml(dialogues[0].content);
+                var speaker = dialogues[0].speaker;
+                var content = text2html.parseHtml(dialogues[0].content);
 
-                $('#popup_header').html('Dialogue');
+                $('#popup_header').text(speaker);
                 $('#popup_body').html(content);
 
                 var html_button = '<div><br></div>\
                 <div>\
+                <center>\
                 <input type="button" id="button_center" value="';
-                html_button += LS("NEXT");
+                html_button += LS('NEXT');
                 html_button += '" class="btn btn-default"';
 
-                if ("npc" in dialogues[0]) {
+                if ('npc' in dialogues[0]) {
                     html_button += ' npc="' + dialogues[0].npc + '"';
                 }
                 html_button += ' dialogue="' + dialogues[0].dialogue + '"';
                 html_button += ' sentence="' + dialogues[0].sentence + '"';
                 html_button += ' onClick="commands.doDialogue(this); return false;"/>\
-                </div>'
+                </center>\
+                </div>';
 
                 $('#popup_footer').html(html_button);
             }
             else {
+                var speaker = dialogues[0].speaker;
                 var content = "";
-                if (dialogues[0].speaker.length > 0) {
-                    content += dialogues[0].speaker + ":<br>";
-                }
-
                 for (var i in dialogues) {
                     content += '<a href="#" onclick="commands.doDialogue(this); return false;"';
                     content += ' npc="' + dialogues[i].npc + '"';
@@ -74,12 +70,18 @@ var popupmgr = {
                     content += '</a><br>';
                 }
 
+                $('#popup_header').text(speaker);
                 $('#popup_body').html(content);
 
                 var html_button = '<div><br></div>\
                 <div>\
-                <center>\tton_center" value="SELECT ONE" class="btn btn-primary" />\
-                </div>'
+                <center>\
+                <input type="button_center" value="';
+                html_button += LS('SELECT ONE');
+                html_button += '" class="btn btn-primary" />\
+                </center>\
+                </div>';
+
                 $('#popup_footer').html(html_button);
             }
         }
@@ -106,8 +108,8 @@ var popupmgr = {
             .attr('type', 'button')
             .attr('class', 'close')
             .attr('data-dismiss', 'modal')
-            .html('&times;'))
-            .attr('onclick', 'popupmgr.doCloseBox()');
+            .html('&times;')
+            .attr('onclick', 'popupmgr.doCloseBox()'));
         dlgHeader.append($('<h4>')
             .attr('id', 'popup_header')
             .attr('class', 'modal-title'));

@@ -57,4 +57,7 @@ var LOCAL_STRING = {
     "NEXT": "继续",
     "The client connection was closed cleanly.": "客户端已经与服务器断开。",
     "Scene": "场景",
+    "Get Object": "获取物品",
+    "Alert": "警告",
+    "SELECT ONE": "选择一个",
 };
