@@ -1,0 +1,4 @@
+
+var settings = {
+    language: 'zh',
+};

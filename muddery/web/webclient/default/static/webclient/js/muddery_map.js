@@ -10,8 +10,6 @@ var map = {
 
     _svg_width: 290,
     _svg_height: 230,
-    _room_size: 40,
-    _scale: 75.0,
 
     setData: function(data) {
         this._map_data = data;
@@ -73,7 +71,7 @@ var map = {
             .attr('onclick', 'popupmgr.doCloseMap()');
         boxHeader.append($('<h4>')
             .attr('id', 'map_name')
-            .text('地图')
+            .text(LS('MAP'))
             .attr('class', 'modal-title'));
 
         var boxBody = $('<div>')
@@ -97,8 +95,8 @@ var map = {
                     .attr('width', this._svg_width)
                     .attr('height', this._svg_height);
 
-        var scale = this._scale;
-        var room_size = this._room_size;
+        var scale = settings.map_scale;
+        var room_size = settings.map_room_size;
         var origin_x = this._svg_width / 2;
         var origin_y = this._svg_height / 2;
 
