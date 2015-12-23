@@ -8,8 +8,8 @@
     <title>Muddery web MUD client</title>
 
     <!--CSS style sheet -->
-    <link rel="stylesheet" type="text/css" media="screen" href="{% static "webclient/css/webclient.css" %}">
     <link rel="stylesheet" href="{% static "webclient/css/bootstrap.min.css" %}">
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static "webclient/css/webclient.css" %}">
     <!-- Importing the online jQuery javascript library -->
     <!--script src="http://code.jquery.com/jquery-1.6.1.js" type="text/javascript" charset="utf-8"></script-->
     <!--script src="http://code.jquery.com/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script-->
@@ -42,9 +42,11 @@
 
             document.write("\<script src=\"{% static "webclient/js/muddery_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/muddery_webclient_uimgr.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+            document.write("\<script src=\"{% static "webclient/js/muddery_webclient_popupmgr.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/muddery_commands.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/muddery_combat.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/muddery_map.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+            document.write("\<script src=\"{% static "webclient/js/frame.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/resources.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/text2html.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             document.write("\<script src=\"{% static "webclient/js/utils.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
@@ -57,173 +59,26 @@
             <script src="{% static "webclient/js/muddery_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_webclient_uimgr.js" %}" type="text/javascript" charset="utf-8"></script>
+            <script src="{% static "webclient/js/muddery_webclient_popupmgr.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_commands.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/muddery_map.js" %}" type="text/javascript" charset="utf-8"></script>
+            <script src="{% static "webclient/js/frame.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/resources.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/text2html.js" %}" type="text/javascript" charset="utf-8"></script>
             <script src="{% static "webclient/js/utils.js" %}" type="text/javascript" charset="utf-8"></script>
     {% endif %}
 
   </head>
-  <body id="mainbody">
-    <header class="header" id="header_bar">
-      <div class="site-title" id="site-title">
-        <center>Muddery Webclient</center>
-      </div>
-    </header>
-    <div id="map_button">
-    	<input type="button" class="btn-map" value="MAP" onclick="map.showMap()"/>
-    </div>
-    <div id="wrapper">
-      <div id="middlewindow">
-        <div id="msg_wnd">
-	      <!--javascript kills this when page has finished loading: -->
-	      <div id="connecting"> Connecting ...</div>
-	      <!--this is supplied by django view - webclient/views.py: -->
-	      <div id="noscript"><h3>Javascript Error: The Muddery webclient requires that you have Javascript activated.</h3>
-			<p>Turn off eventual script blockers and/or switch to a web
-			  browser supporting javascript.</p><p>For admins: The error
-			  could also be due to not being able to access the online
-			  jQuery javascript library. If you are testing the client
-			  without an internet connection, you have to previously
-			  download the jQuery library from http://code.jquery.com
-			  (it's just one file) and then edit webclient.html to point
-			  to the local copy.</p>
-	      </div>
-	    </div>
-        <div id="prompt_bar">
-        </div>
-        <nav id="tab_bar">
-            <ul id="tab_pills">
-                <li id="tab_connect" style="display: none">
-                    <a href="#" onclick="webclient.showPage('connect')">Connect</a>
-                </li>
-                <li id="tab_login" style="display: none">
-                    <a href="#" onclick="webclient.showPage('login')">Login</a>
-                </li>
-                <li id="tab_register" style="display: none">
-                    <a href="#" onclick="webclient.showPage('register')">Register</a>
-                </li>
-                <li id="tab_room" style="display: none">
-                    <a href="#" onclick="webclient.showPage('room')">Room</a>
-                </li>
-                <li id="tab_status" style="display: none">
-                    <a href="#" onclick="webclient.showPage('status')">Status</a>
-                </li>
-                <li id="tab_inventory" style="display: none">
-                    <a href="#" onclick="webclient.showPage('inventory')">Inventory</a>
-                </li>
-                <li id="tab_skills" style="display: none">
-                    <a href="#" onclick="webclient.showPage('skills')">Skills</a>
-                </li>
-                <li id="tab_quests" style="display: none">
-                    <a href="#" onclick="webclient.showPage('quests')">Quests</a>
-                </li>
-                <li id="tab_system" style="display: none">
-                    <a href="#" onclick="webclient.showPage('system')">System</a>
-                </li>
-                <li id="tab_command" style="display: none">
-                    <a href="#" onclick="webclient.showPage('command')">Command</a>
-                </li>
-                <!--li id="tab_test">
-                    <a href="#" onclick="webclient.showTestPage()">Test</a>
-                </li-->
-            </ul>
-        </nav>
-        <div id="tab_content">
-            <form id="page_connect" style="display: none">
-                <div>Please connect to the server.</div>
-                <div>
-                    <input type="button" class="btn button_left" value="CONNECT" onclick="doConnect()"/>
-                </div>
-            </form>
-            <form id="page_login" style="display: none">
-                <div>Please login.</div>
-                <table>
-                    <tr>
-                        <td>USERNAME: </td>
-                        <td>
-                            <input id="login_name" type="text" class="input_text" value="" autocomplete="off"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>PASSWORD: </td>
-                        <td>
-                            <input id="login_password" type="password" class="input_text" value="" autocomplete="off"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Save Password: <input id="cb_save_password" type="checkbox" onclick="commands.doSetSavePassword()"/><br/>
-                            Auto Login:&ensp;&ensp;&ensp; <input id="cb_auto_login" type="checkbox"/>
-                        </td>
-                        <td><input type="button" class="btn button_left" value="登录" onclick="commands.doLogin()"/></td>
-                    </tr>
-                </table>
-            </form>
-            <form id="page_register" style="display: none">
-                <div>Please register.</div>
-                <table>
-                    <tr>
-                        <td>USERNAME: </td>
-                        <td>
-                            <input id="reg_name" type="text" class="input_text" value="" autocomplete="off"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>NICKNAME: </td>
-                        <td>
-                            <input id="reg_nickname" type="text" class="input_text" value="" autocomplete="off"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>PASSWORD: </td>
-                        <td>
-                            <input id="reg_password" type="password" class="input_text" value="" autocomplete="off"/>
-                        </td>
-                    </tr>
-                </table>
-                <div>
-                    <input type="button" class="btn button_left" value="REGISTER" onclick="commands.doRegister()"/>
-                </div>
-            </form>
-            <form id="page_room" style="display: none">
-            </form>
-            <form id="page_status" style="display: none">
-                <div id="block_status"></div>
-                <div><br></div>
-                <div id="block_equipments"></div>
-            </form>
-            <form id="page_inventory" style="display: none">
-            </form>
-            <form id="page_skills" style="display: none">
-            </form>
-            <form id="page_quests" style="display: none">
-            </form>
-            <form id="page_system" style="display: none">
-                <div>
-                    <input type="button" class="btn button_left" value="LOGOUT" onclick="commands.doLogout()"/>
-                </div>
-            </form>
-            <form id="page_command" style="display: none">
-                <div>Please input command.</div>
-                <div>
-                    <input type="text" class="input_text" value="" autocomplete="off"/>
-                </div>
-                <div>
-                    <input type="button" class="btn button_left" value="SEND" onclick="commands.doSendCommand()"/>
-                </div>
-            </form>
-            <!--form id="page_test" style="display: none">
-                <div>
-                    <div>Do test.</div>
-                    <div>
-                        <input type="button" class="btn button_left" value="TEST" onclick="commands.doTest()"/>
-                    </div>
-                </div>
-            </form-->
-        </div>
-      </div>
-    </div>
+  <body>
+    <div id="noscript">
+      <h3>Javascript Error: The Muddery webclient requires that you have Javascript activated.</h3>
+      <p>Turn off eventual script blockers and/or switch to a web
+      browser supporting javascript.</p><p>For admins: The error
+      could also be due to not being able to access the online
+      jQuery javascript library. If you are testing the client
+      without an internet connection, you have to previously
+      download the jQuery library from http://code.jquery.com
+      (it's just one file) and then edit webclient.html to point
+      to the local copy.</p>
   </body>
 </html>

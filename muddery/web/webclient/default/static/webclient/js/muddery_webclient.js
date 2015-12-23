@@ -236,30 +236,11 @@ var webclient = {
     },
 
     displayLookAround : function(data) {
-        var tab = $("#tab_room a");
-        var page = $("#page_room");
+        var tab = $("#tab_scene a");
+        var box = $("#box_scene");
 
         ///////////////////////
-        // set room tab
-        ///////////////////////
-        
-        //// set tab's name to room's name
-        //var tab_name = "";
-        //if ("name" in data) {
-        //    tab_name = data["name"];
-        //}
-        //
-        //if (tab_name.length == 0) {
-        //    tab_name = "Room";
-        //}
-        //else {
-        //    tab_name = util.truncate_string(tab_name, 10, true);
-        //}
-        //tab.text(tab_name);
-        tab.text(LS('Scene'));
-
-        ///////////////////////
-        // set room page
+        // set scene box
         ///////////////////////
         
         var content = "";
@@ -269,7 +250,7 @@ var webclient = {
         var dbref = "";
         if ("dbref" in data) {
             dbref = data["dbref"];
-            page.data("dbref", dbref);
+            box.data("dbref", dbref);
         }
         
         // add room's name
@@ -279,74 +260,72 @@ var webclient = {
         catch(error) {
             element = tab_name;
         }
-        page.html("");
-        uimgr.divRoomTabName(element).appendTo(page);
+        box.empty();
+        uimgr.divRoomTabName(element).appendTo(box);
 
         // add room's desc
         try {
             element = text2html.parseHtml(data["desc"]);
-            uimgr.divEmpty(element).appendTo(page);
+            uimgr.divEmpty(element).appendTo(box);
         }
         catch(error) {
         }
 
-        uimgr.divBR().appendTo(page);
+        uimgr.divBR().appendTo(box);
 
         if ("cmds" in data) {
             if (data["cmds"].length > 0) {
-                uimgr.divRoomCmds(data["cmds"]).appendTo(page);
+                uimgr.divRoomCmds(data["cmds"]).appendTo(box);
             }
         }
 
         var empty = true;
         if ("exits" in data) {
             if (data["exits"].length > 0) {
-                uimgr.divRoomExits(data["exits"]).appendTo(page);
+                uimgr.divRoomExits(data["exits"]).appendTo(box);
                 empty = false;
             }
         }
 
         if (empty) {
-            uimgr.divRoomExits("").appendTo(page);
+            uimgr.divRoomExits("").appendTo(box);
         }
 
         empty = true;
         if ("things" in data) {
             if (data["things"].length > 0) {
-                uimgr.divRoomThings(data["things"]).appendTo(page);
+                uimgr.divRoomThings(data["things"]).appendTo(box);
                 empty = false;
             }
         }
 
         if (empty) {
-            uimgr.divRoomThings("").appendTo(page);
+            uimgr.divRoomThings("").appendTo(box);
         }
 
         empty = true;
         if ("npcs" in data) {
             if (data["npcs"].length > 0) {
-                uimgr.divRoomNpcs(data["npcs"]).appendTo(page);
+                uimgr.divRoomNpcs(data["npcs"]).appendTo(box);
                 empty = false;
             }
         }
 
         if (empty) {
-            uimgr.divRoomNpcs("").appendTo(page);
+            uimgr.divRoomNpcs("").appendTo(box);
         }
 
         empty = true;
         if ("players" in data) {
             if (data["players"].length > 0) {
-                uimgr.divRoomPlayers(data["players"]).appendTo(page);
+                uimgr.divRoomPlayers(data["players"]).appendTo(box);
                 empty = false;
             }
         }
 
         if (empty) {
-            uimgr.divRoomPlayers("").appendTo(page);
+            uimgr.divRoomPlayers("").appendTo(box);
         }
-
-        this.doSetSizes();
     },
     
     displayObjMovedIn : function(data) {
@@ -536,19 +515,19 @@ var webclient = {
     
     displayInventory : function(data) {
         // display player's inventory
-        var page = $("#page_inventory").html("");
+        var page = $("#box_inventory").html("");
         uimgr.tableInventory(data).appendTo(page);
     },
 
     displaySkills : function(data) {
         // display player's skills
-        var page = $("#page_skills").html("");
+        var page = $("#box_skill").html("");
         uimgr.tableSkills(data).appendTo(page);
     },
 
     displayQuests : function(data) {
         // display player's quests
-        var page = $("#page_quests").html("");
+        var page = $("#box_quest").html("");
         uimgr.tableQuests(data).appendTo(page);
     },
 
@@ -690,7 +669,7 @@ var webclient = {
         bar.html(prompt);
         
         // display player's status
-        var block = $("#block_status");
+        var block = $("#box_status");
         var content = "";
         
         // add player's status
@@ -729,13 +708,12 @@ var webclient = {
         
     displayEquipments : function(data) {
         // display player's equipments
-        var block = $("#block_equipments");
+        var block = $("#box_equipment");
         var content = "";
 
         try {
-            element = "<div>" + LS("Equipments: ");
+            element = "<div>";
             for (position in data) {
-                element += "<br>";
                 element += "&nbsp;&nbsp;" + position + LS(": ");
                 if (data[position] != null) {
                     element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
@@ -744,6 +722,7 @@ var webclient = {
                     element += data[position].name;
                     element += "</a>"
                 }
+                element += "<br>";
             }
             element += "</div>";
             content += element;
@@ -763,7 +742,7 @@ var webclient = {
         // show login UI
         $("#msg_wnd").empty();
         this.showLoginTabs();
-        this.showPage("room");
+        this.showPage("scene");
         this.doSetSizes();
     },
     
@@ -788,10 +767,9 @@ var webclient = {
         var win_h = $(window).innerHeight();
         var win_w = $(window).innerWidth();
 
-        var head_h = $('#site-title').outerHeight(true);
+        var head_h = $('header').outerHeight(true);
         var wrapper_h = win_h - head_h - 30;
 
-        $('#header_bar').show();
         $('#wrapper').height(wrapper_h);
 
         var prompt_h = 18;
@@ -809,9 +787,6 @@ var webclient = {
         else {
             $('#middlewindow').width(win_w - 20);
         }
-
-        var padding_left_right = ($('#middlewindow').width() - (32 + 10 ) * 5 ) / 10;
-        $("#tab_bar li a").css("padding", "10px " + padding_left_right + "px");
     },
 
     doCancel : function() {
@@ -845,17 +820,22 @@ var webclient = {
         $("body").prepend(dlg + overlayer);
     },
 
+    // hide all tabs
+    hideTabs : function() {
+        $("#tab_pills").children().css("display", "none");
+    },
+
     // show connect tabs
     showConnectTabs : function() {
-        $("#tab_bar li").css("display", "none");
-        
+        this.hideTabs();
+
         $("#tab_connect").css("display", "");
     },
     
     // show unlogin tabs
     showUnloginTabs : function() {
-        $("#tab_bar li").css("display", "none");
-        
+        this.hideTabs();
+
         $("#tab_register").css("display", "");
         $("#tab_login").css("display", "");
         $("#tab_command").css("display", "");
@@ -865,14 +845,11 @@ var webclient = {
     
     // show login tabs
     showLoginTabs : function() {
-        $("#tab_bar").find("li").css("display", "none");
-        
-        $("#tab_room").css("display", "");
+        this.hideTabs();
+
+        $("#tab_scene").css("display", "");
         $("#tab_character").css("display", "");
-        $("#tab_status").css("display", "");
-        $("#tab_inventory").css("display", "");
-        $("#tab_skills").css("display", "");
-        $("#tab_quests").css("display", "");
+        $("#tab_quest").css("display", "");
         $("#tab_map").css("display", "");
         $("#tab_system").css("display", "");
         $("#tab_command").css("display", "");
@@ -884,7 +861,7 @@ var webclient = {
         $("#tab_bar li")
             .removeClass("active")
             .removeClass("pill_active");
-        $("#tab_content form").css("display", "none");
+        $("#tab_content").children().css("display", "none");
     },
     
     showPage : function(pagename) {
@@ -892,11 +869,7 @@ var webclient = {
         $("#tab_" + pagename)
             .addClass("active")
             .addClass("pill_active");
-        $("#page_" + pagename).css("display", "");
-    },
-
-    showMenuSystem : function() {
-        $("#page_system").css("display", "");
+        $("#box_" + pagename).css("display", "");
     },
     
     onConnectionOpen: function() {
@@ -942,12 +915,6 @@ var webclient = {
 
 // Input jQuery callbacks
 $(document).unbind("keydown");
-
-$(window).ready(function(){
-    webclient.showUnloginTabs();
-    webclient.showPage("login");
-    webclient.doSetSizes();
-});
 
 // Callback function - called when the browser window resizes
 $(window).unbind("resize");

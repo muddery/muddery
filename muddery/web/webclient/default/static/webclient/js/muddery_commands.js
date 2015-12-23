@@ -30,8 +30,11 @@ var commands = {
     doLogin : function() {
         var playername = $("#login_name").val();
         var password = $("#login_password").val();
+
         $("#login_password").val("");
-        
+        $("#reg_password").val("");
+        $("#reg_password_again").val("");
+
         var args = {"playername" : playername,
                     "password" : password};
         sendCommand(this.cmdString("connect", args));
@@ -48,7 +51,17 @@ var commands = {
         var playername = $("#reg_name").val();
         var nickname = $("#reg_nickname").val();
         var password = $("#reg_password").val();
+        var password_again = $("#reg_password_again").val();
+
+        $("#login_name").val(playername);
+        $("#login_password").val("");
         $("#reg_password").val("");
+        $("#reg_password_again").val("");
+
+        if (password != password_again) {
+            webclient.displayAlert(LS("Password does not match."));
+            return;
+        }
 
         var args = {"playername" : playername,
                     "nickname" : nickname,
@@ -86,8 +99,8 @@ var commands = {
     
     // common command
     doSendCommand: function() {
-        var command = $("#page_command :text").val();
-        $("#page_command :text").val("");
+        var command = $("#box_command :text").val();
+        $("#box_command :text").val("");
         
         sendCommand(command);
     },
