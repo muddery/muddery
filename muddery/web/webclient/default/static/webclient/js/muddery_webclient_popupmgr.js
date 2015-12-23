@@ -17,7 +17,9 @@ var popupmgr = {
             .text(button)
             .attr('id', 'button_center')
             .attr('onClick', 'popupmgr.doCloseBox()');
-        $('#popup_footer').html(html_button);
+        $('#popup_footer')
+            .append($('<center>')
+                .append(html_button));
 
         webclient.doSetSizes();
     },
@@ -42,7 +44,7 @@ var popupmgr = {
                 var html_button = '<div><br></div>\
                 <div>\
                 <center>\
-                <input type="button" id="button_center" value="';
+                <input type="button" value="';
                 html_button += LS('NEXT');
                 html_button += '" class="btn btn-default"';
 
@@ -76,9 +78,9 @@ var popupmgr = {
                 var html_button = '<div><br></div>\
                 <div>\
                 <center>\
-                <input type="button_center" value="';
+                <input type="button" value="';
                 html_button += LS('SELECT ONE');
-                html_button += '" class="btn btn-primary" />\
+                html_button += '" class="btn btn-default" />\
                 </center>\
                 </div>';
 

@@ -763,17 +763,20 @@ var webclient = {
         var win_h = $(window).innerHeight();
         var win_w = $(window).innerWidth();
 
-        var head_h = $('header').outerHeight(true);
-        var wrapper_h = win_h - head_h - 30;
+        //var head_h = $('header').outerHeight(true);
+        var head_h = 35;
+        $('#header').height(head_h);
 
+        var wrapper_h = win_h - head_h - 10;
         $('#wrapper').height(wrapper_h);
 
+        var margin_h = 55
         var prompt_h = 18;
-        var tab_bar_h = 50;
-        var msg_wnd_h = wrapper_h / 3;
-        var tab_content_h = wrapper_h / 3;
+        var tab_bar_h = 32;
+        var msg_wnd_h = (wrapper_h - prompt_h - tab_bar_h - margin_h) / 3;
+        var tab_content_h = wrapper_h - prompt_h - tab_bar_h - msg_wnd_h - margin_h;
         $('#msg_wnd').height(msg_wnd_h);
-        $('#prompt').height(prompt_h);
+        $('#prompt_bar').height(prompt_h);
         $('#tab_bar').height(tab_bar_h);
         $('#tab_content').height(tab_content_h);
 
