@@ -117,7 +117,7 @@ var frame = {
             .addClass('active')
             .css('display', 'none')
             .append($('<a>')
-                .attr('onclick', 'webclient.showPage("connect")')
+                .attr('onclick', 'doConnect()')
                 .text(LS('CONNECT')))
             .appendTo(ul);
 

@@ -324,15 +324,6 @@ var uimgr = {
             .text(LS('Please connect to the server.'))
             .appendTo(box);
 
-        $('<div>')
-            .append($('<input>')
-                .addClass('btn')
-                .addClass('button_left')
-                .attr('type', 'button')
-                .attr('onclick', 'doConnect()')
-                .val(LS('CONNECT')))
-            .appendTo(box);
-
         return box;
     },
 
@@ -412,7 +403,7 @@ var uimgr = {
         // input names
         $('<tr>')
             .append($('<td>')
-                .text(LS('Names')))
+                .text(LS('Name')))
             .appendTo(table);
 
         $('<tr>')
@@ -441,7 +432,7 @@ var uimgr = {
         // input passwords
         $('<tr>')
             .append($('<td>')
-                .text(LS('Passwords')))
+                .text(LS('Password')))
                 .appendTo(table);
 
         $('<tr>')
