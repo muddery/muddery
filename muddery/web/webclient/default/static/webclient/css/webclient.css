@@ -13,12 +13,13 @@ body {
 }
 
 #msg_wnd {
+    min-height: 80px;
     overflow-x: hidden;
     overflow-y: auto;
 }
 
 #tab_content {
-    min-height: 200px;
+    min-height: 185px;
     overflow-x: hidden;
     overflow-y: auto;
     padding-top: 10px;
@@ -63,6 +64,11 @@ input[type=checkbox], input[type=radio] {
     border-bottom: 0px;
 }
 
+.nav-tabs>li {
+    min-width: 60px;
+    text-align: center;
+}
+
 .nav-tabs>li>a {
     border-color: #aaa;
     padding: 5px 5px;
@@ -78,12 +84,19 @@ input[type=checkbox], input[type=radio] {
 }
 
 .dropdown-menu {
-    min-width: 10px;
+    min-width: 60px;
 }
 
 .dropdown-menu>li>a {
-    display: block;
     padding: 3px 10px;
+}
+
+.first-dropdown-item {
+    border-top: 0px;
+}
+
+.dropdown-item {
+    border-top: 1px solid rgba(0,0,0,.15);
 }
 
 .modal-header .close {

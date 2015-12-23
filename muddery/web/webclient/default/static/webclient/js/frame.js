@@ -177,18 +177,21 @@ var frame = {
         $('<li>')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("infomation")')
+                .addClass('first-dropdown-item')
                 .text(LS('STATUS')))
             .appendTo(popup_character);
 
         $('<li>')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("inventory")')
+                .addClass('dropdown-item')
                 .text(LS('INVENTORY')))
             .appendTo(popup_character);
 
         $('<li>')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("skill")')
+                .addClass('dropdown-item')
                 .text(LS('SKILL')))
             .appendTo(popup_character);
 
@@ -240,12 +243,14 @@ var frame = {
         $('<li>')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("command")')
+                .addClass('first-dropdown-item')
                 .text(LS('COMMAND')))
             .appendTo(popup_system);
 
         $('<li>')
             .append($('<a>')
                 .attr('onclick', 'commands.doLogout()')
+                .addClass('dropdown-item')
                 .text(LS('LOGOUT')))
             .appendTo(popup_system);
     },
