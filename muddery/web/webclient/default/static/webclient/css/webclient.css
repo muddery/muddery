@@ -5,13 +5,29 @@ body {
     color: #ccc;
 }
 
+#middlewindow {
+    height: 100%;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#msg_wnd {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#tab_content {
+    min-height: 200px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-top: 10px;
+    padding-bottom: 0px;
+}
+
 .panel {
     background-color: #000;
     margin-bottom: 5px;
-}
-
-.panel-body {
-    padding-top: 0;
 }
 
 .modal-content {
@@ -29,18 +45,41 @@ body {
     border-top: 0px;
 }
 
-.form-control {
-    padding: 3px 6px;
+.editbox {
+    width: 120px;
+    padding: 2px 4px;
     margin: 2px 2px;
+}
+
+input[type=checkbox], input[type=radio] {
+    margin: 4px 4px;
+}
+
+.nav-tabs {
+    border-bottom: 0px;
 }
 
 .nav-tabs>li>a {
     border-color: #aaa;
-    padding: 5px 10px;
+    padding: 5px 5px;
 }
 
 .nav-tabs>li>a:hover {
     background-color: #666;
+}
+
+.nav-tabs .dropdown-menu {
+    border-radius: 4px;
+    margin: 2px 0 0;
+}
+
+.dropdown-menu {
+    min-width: 10px;
+}
+
+.dropdown-menu>li>a {
+    display: block;
+    padding: 3px 10px;
 }
 
 button.close {
@@ -108,10 +147,6 @@ a:hover {
 .bggray { background-color: gray;}
 .bgdimgray { background-color: #696969;}
 .bgblack { background-color: black;}
-
-#tab_pills li{
-    font-size: 16px;
-}
 
 .tab_inventory {
     border-collapse: collapse;

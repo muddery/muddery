@@ -12,7 +12,7 @@ var uimgr = {
             for(key in args){
                 divEmptyElement.attr(key, args[key]);
             }
-            divEmptyElement.text(element);
+            divEmptyElement.html(element);
             return divEmptyElement;
         }
     },
@@ -314,5 +314,248 @@ var uimgr = {
             }
         }
         return tableQuestsElement;
+    },
+
+    connectBox: function() {
+        var box = $('<div>')
+            .attr('id', 'box_connect');
+
+        $('<div>')
+            .text(LS('Please connect to the server.'))
+            .appendTo(box);
+
+        $('<div>')
+            .append($('<input>')
+                .addClass('btn')
+                .addClass('button_left')
+                .attr('type', 'button')
+                .attr('onclick', 'doConnect()')
+                .val(LS('CONNECT')))
+            .appendTo(box);
+
+        return box;
+    },
+
+    loginBox: function() {
+        var box = $('<div>')
+            .attr('id', 'box_login');
+
+        $('<div>')
+            .text(LS('Please login.'))
+            .appendTo(box);
+
+        var table = $('<table>')
+            .appendTo(box);
+
+        // input username and password
+        $('<tr>')
+            .append($('<td>')
+                .append($('<input>')
+                    .attr('id', 'login_name')
+                    .attr('type', 'text')
+                    .attr('placeholder', LS('username'))
+                    .attr('aria-describedby', 'basic-addon2')
+                    .attr('autocomplete', 'off')
+                    .addClass('form-control')
+                    .addClass('editbox')
+                    .val('')))
+            .append($('<td>')
+                .append($('<input>')
+                    .attr('id', 'login_password')
+                    .attr('type', 'password')
+                    .attr('placeholder', LS('password'))
+                    .attr('aria-describedby', 'basic-addon2')
+                    .attr('autocomplete', 'off')
+                    .addClass('form-control')
+                    .addClass('editbox')
+                    .val('')))
+            .appendTo(table);
+
+        // checkboxes
+        $('<tr>')
+            .attr('colspan', 2)
+            .append($('<td>')
+                .append($('<div>')
+                    .text(LS('Save Password'))
+                    .append($('<input>')
+                        .attr('id', 'cb_save_password')
+                        .attr('type', 'checkbox')
+                        .attr('onclick', 'commands.doSetSavePassword()')))
+                .append($('<div>')
+                    .text(LS('Auto Login'))
+                    .append($('<input>')
+                        .attr('id', 'cb_auto_login')
+                        .attr('type', 'checkbox'))))
+            .appendTo(table);
+
+        // buttons
+        $('<tr>')
+            .append($('<td>')
+                .append($('<input>')
+                    .attr('type', 'button')
+                    .attr('onclick', 'commands.doLogin()')
+                    .addClass('btn')
+                    .addClass('btn-default')
+                    .val(LS('Login'))))
+            .appendTo(table);
+
+        return box;
+    },
+
+    registerBox: function() {
+        var box = $('<div>')
+        .attr('id', 'box_register');
+
+        var table = $('<table>')
+            .appendTo(box);
+
+        // input names
+        $('<tr>')
+            .append($('<td>')
+                .text(LS('Names')))
+            .appendTo(table);
+
+        $('<tr>')
+            .append($('<td>')
+                .append($('<input>')
+                    .attr('id', 'reg_name')
+                    .attr('type', 'text')
+                    .attr('placeholder', LS('username'))
+                    .attr('aria-describedby', 'basic-addon2')
+                    .attr('autocomplete', 'off')
+                    .addClass('form-control')
+                    .addClass('editbox')
+                    .val('')))
+            .append($('<td>')
+                .append($('<input>')
+                    .attr('id', 'reg_nickname')
+                    .attr('type', 'text')
+                    .attr('placeholder', LS('nickname'))
+                    .attr('aria-describedby', 'basic-addon2')
+                    .attr('autocomplete', 'off')
+                    .addClass('form-control')
+                    .addClass('editbox')
+                    .val('')))
+            .appendTo(table);
+
+        // input passwords
+        $('<tr>')
+            .append($('<td>')
+                .text(LS('Passwords')))
+                .appendTo(table);
+
+        $('<tr>')
+            .append($('<td>')
+                .append($('<input>')
+                    .attr('id', 'reg_password')
+                    .attr('type', 'password')
+                    .attr('placeholder', LS('password'))
+                    .attr('aria-describedby', 'basic-addon2')
+                    .attr('autocomplete', 'off')
+                    .addClass('form-control')
+                    .addClass('editbox')
+                    .val('')))
+            .append($('<td>')
+                .append($('<input>')
+                    .attr('id', 'reg_password_again')
+                    .attr('type', 'password')
+                    .attr('placeholder', LS('password again'))
+                    .attr('aria-describedby', 'basic-addon2')
+                    .attr('autocomplete', 'off')
+                    .addClass('form-control')
+                    .addClass('editbox')
+                    .val('')))
+            .appendTo(table);
+
+        // buttons
+        $('<tr>')
+            .append($('<td>')
+                .append($('<br>')))
+            .appendTo(table);
+
+        $('<tr>')
+            .append($('<td>')
+                .append($('<input>')
+                    .attr('type', 'button')
+                    .attr('onclick', 'commands.doRegister()')
+                    .addClass('btn')
+                    .addClass('btn-default')
+                    .val(LS('Register'))))
+            .appendTo(table);
+
+        return box;
+    },
+
+    sceneBox: function() {
+        var box = $('<div>')
+            .attr('id', 'box_scene');
+
+        return box;
+    },
+
+    statusBox: function() {
+        var box = $('<div>')
+            .attr('id', 'box_status');
+
+        return box;
+    },
+
+    equipmentBox: function() {
+        var box = $('<div>')
+            .attr('id', 'box_equipment');
+
+        return box;
+    },
+
+    inventoryBox: function() {
+        var box = $('<div>')
+            .attr('id', 'box_inventory');
+
+        return box;
+    },
+
+    skillBox: function() {
+        var box = $('<div>')
+            .attr('id', 'box_skill');
+
+        return box;
+    },
+
+    questBox: function() {
+        var box = $('<div>')
+            .attr('id', 'box_quest');
+
+        return box;
+    },
+
+    commandBox: function() {
+        var box = $('<div>')
+            .attr('id', 'box_command');
+
+        $('<div>')
+            .text(LS('Please input command.'))
+            .appendTo(box);
+
+        $('<div>')
+            .append($('<input>')
+                .attr('type', 'text')
+                .attr('aria-describedby', 'basic-addon2')
+                .attr('autocomplete', 'off')
+                .addClass('form-control')
+                .addClass('editbox')
+                .val(''))
+            .appendTo(box);
+
+        $('<div>')
+            .append($('<input>')
+                .attr('type', 'button')
+                .attr('autocomplete', 'off')
+                .attr('onclick', 'commands.doSendCommand()')
+                .addClass('btn')
+                .addClass('button_left')
+                .val(LS('SEND')))
+            .appendTo(box);
+
+        return box;
     },
 }
