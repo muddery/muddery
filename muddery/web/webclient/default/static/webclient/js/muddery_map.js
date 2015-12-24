@@ -8,9 +8,6 @@ var map = {
 
     _current_location: null,
 
-    _svg_width: 290,
-    _svg_height: 230,
-
     setData: function(data) {
         this._map_data = data;
     },
@@ -46,10 +43,6 @@ var map = {
     },
 
     showMap: function() {
-
-        this._svg_width = $(window).innerWidth() * 0.8 + 50;
-        this._svg_height = $(window).innerHeight() * 0.6;
-
         var box = $('<div>').attr('id', 'map_box');
         box.attr('class', 'modal');
         box.attr('style', 'display: block; padding-left: 15px;');
@@ -75,12 +68,8 @@ var map = {
             .attr('class', 'modal-title'));
 
         var boxBody = $('<div>')
-            .attr('class', 'modal-body').appendTo(boxContent);
-
-        var boxFooter = $('<div>')
-            .attr('class', 'modal-footer').appendTo(boxContent);
-
-        webclient.doSetSizes();
+            .attr('class', 'modal-body')
+            .appendTo(boxContent);
 
         if (!(this._current_location &&
             this._current_location in this._map_data.rooms)){
@@ -89,16 +78,22 @@ var map = {
         }
         var current_room = this._map_data.rooms[this._current_location];
 
-		var svg = d3.select('#map_box').select(".modal-body")
-					.append('svg')
-                    .attr('id', 'map_svg')
-                    .attr('width', this._svg_width)
-                    .attr('height', this._svg_height);
+        //
+        var map_width = boxBody.width();
+        var map_height = $('#middlewindow').height() * 0.8;
+
+        boxBody.height(map_height);
+
+		var svg = d3.select('#map_box .modal-body')
+            .append('svg')
+            .attr('id', 'map_svg')
+            .attr('width', map_width)
+            .attr('height', map_height);
 
         var scale = settings.map_scale;
         var room_size = settings.map_room_size;
-        var origin_x = this._svg_width / 2;
-        var origin_y = this._svg_height / 2;
+        var origin_x = map_width / 2;
+        var origin_y = map_height / 2;
 
         if (current_room[1]) {
             // set origin point
@@ -145,12 +140,18 @@ var map = {
         if (this._map_data.rooms) {
             // get room positions
             var room_data = [];
+            var current_room_index = -1;
 
             if (current_room[1]) {
+                var count = 0;
                 for (var key in this._map_data.rooms) {
                     if (this._map_data.rooms[key][1]) {
                         room_data.push([util.truncate_string(this._map_data.rooms[key][0], 10, true),   // room's name
                                         this._map_data.rooms[key][1]]);     // room's position
+                        if (key == this._current_location) {
+                            current_room_index = count;
+                        }
+                        count++;
                     }
                 }
             }
@@ -158,41 +159,44 @@ var map = {
                 // does not have current position, only show current room at center.
                 room_data.push([util.truncate_string(current_room[0], 10, true),   // room's name
                                 [0, 0]]);     // room's position
+                current_room_index = 0;
             }
 
             svg.selectAll("rect")
-                          .data(room_data)
-                          .enter()
-                          .append("rect")
-                          .attr("x", function(d, i) {
-                                return d[1][0] * scale - room_size / 2 + origin_x;
-                                })
-                          .attr("y", function(d, i) {
-                                return d[1][1] * scale - room_size / 2 + origin_y;
-                                })
-                          .attr("width", room_size)
-                          .attr("height", room_size)
-                          .attr("stroke", "grey")
-                          .attr("stroke-width", 2);
+                .data(room_data)
+                .enter()
+                .append("rect")
+                .attr("x", function(d, i) {
+                        return d[1][0] * scale - room_size / 2 + origin_x;
+                      })
+                .attr("y", function(d, i) {
+                        return d[1][1] * scale - room_size / 2 + origin_y;
+                      })
+                .attr("width", room_size)
+                .attr("height", room_size)
+                .attr("stroke", function(d, i) {
+                        return (i == current_room_index) ? "white" : "grey";
+                      })
+                .attr("stroke-width", 2);
 
             svg.selectAll("text")
-                          .data(room_data)
-                          .enter()
-                          .append("text")
-                          .attr("x", function(d, i) {
-                                return d[1][0] * scale + origin_x;
-                                })
-                          .attr("y", function(d, i) {
-                                return d[1][1] * scale + origin_y;
-                                })
-                          .attr("dy", ".3em")
-                          .attr("text-anchor", "middle")
-                          .attr("font-family", "sans-serif")
-                          .attr("font-size", "13px")
-                          .attr("fill", "white")
-                          .text(function(d) {
-                                return d[0];
-                                });
+                .data(room_data)
+                .enter()
+                .append("text")
+                .attr("x", function(d, i) {
+                        return d[1][0] * scale + origin_x;
+                      })
+                .attr("y", function(d, i) {
+                        return d[1][1] * scale + origin_y;
+                      })
+                .attr("dy", ".3em")
+                .attr("text-anchor", "middle")
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "13px")
+                .attr("fill", "white")
+                .text(function(d) {
+                        return d[0];
+                      });
         }
     },
 }

@@ -71,11 +71,16 @@ input[type=checkbox], input[type=radio] {
 
 .nav-tabs>li>a {
     border-color: #aaa;
+    color: #ddd;
     padding: 5px 5px;
 }
 
 .nav-tabs>li>a:hover {
     background-color: #666;
+}
+
+.nav-tabs>li.active>a {
+    color: #000;
 }
 
 .nav-tabs .dropdown-menu {
@@ -135,6 +140,10 @@ a {
 
 a:hover {
     color: #3af;
+}
+
+.dialogue_header {
+    text-align: left;
 }
 
 /* Style specific classes corresponding to formatted, narative text. */
