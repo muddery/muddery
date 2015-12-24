@@ -7,7 +7,7 @@ var popupmgr = {
         popupmgr.doCloseBox();
         popupmgr.createBox()
             .attr('id', 'popup_box')
-            .prependTo($('#popup_container'));
+            .appendTo($('#popup_container'));
 
         $('#popup_header').text(LS('Alert'));
         $('#popup_body').html(text2html.parseHtml(msg));

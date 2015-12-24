@@ -40,7 +40,6 @@ function onClose(evt) {
     CLIENT_HASH = 0;
     CLIENT_CONNECTED = false;
     webclient.onConnectionClose();
-    popupmgr.showAlert(LS("The client connection was closed cleanly."), "OK");
 }
 
 function doConnect() {

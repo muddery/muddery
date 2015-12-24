@@ -902,6 +902,15 @@ var webclient = {
     onConnectionClose: function() {
         this.showConnectTabs();
         this.showPage("connect");
+
+        // close all popup windows
+        combat.closeCombat();
+        popupmgr.doCloseBox();
+        popupmgr.doCloseDialogue();
+        popupmgr.doCloseMap()
+
+        // show message
+        popupmgr.showAlert(LS("The client connection was closed cleanly."), "OK");
     },
 
     doAutoLoginCheck : function() {
