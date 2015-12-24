@@ -29,7 +29,8 @@ var combat = {
 
         var boxHeader = $('<div>')
             .attr('id', 'combat_desc')
-            .attr('class', 'modal-header').appendTo(boxContent);
+            .addClass('modal-header')
+            .appendTo(boxContent);
 
         var boxBody = $('<div>')
             .attr('id', 'combat_characters')
@@ -89,7 +90,10 @@ var combat = {
         var boxFooter = $('<div>')
             .attr('class', 'modal-footer').appendTo(boxContent);
 
-        $('<center>').text(LS('BATTLE RESULT')).appendTo(boxHeader);
+        $('<center>')
+            .append($('<h4>')
+                .addClass('modal-title')
+                .text(LS('BATTLE RESULT')).appendTo(boxHeader));
 
         // object's info
         var content = "";

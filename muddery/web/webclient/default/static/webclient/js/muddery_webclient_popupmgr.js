@@ -38,7 +38,9 @@ var popupmgr = {
                 var speaker = dialogues[0].speaker;
                 var content = text2html.parseHtml(dialogues[0].content);
 
-                $('#popup_header').text(speaker);
+                $('#popup_header')
+                    .addClass('dialogue_header')
+                    .text(speaker);
                 $('#popup_body').html(content);
 
                 var html_button = '<div><br></div>\
