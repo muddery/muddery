@@ -20,6 +20,7 @@ body {
 
 #tab_content {
     min-height: 185px;
+    max-height: 240px;
     overflow-x: hidden;
     overflow-y: auto;
     padding-top: 10px;
@@ -83,6 +84,18 @@ input[type=checkbox], input[type=radio] {
     color: #000;
 }
 
+.nav-tabs>li.open>a {
+    color: #000;
+    background-color: #888;
+    border-color: #000;
+}
+
+.nav-tabs>li.open>a:hover {
+    color: #000;
+    background-color: #ccc;
+    border-color: #000;
+}
+
 .nav-tabs .dropdown-menu {
     border-radius: 4px;
     margin: 2px 0 0;
@@ -94,6 +107,10 @@ input[type=checkbox], input[type=radio] {
 
 .dropdown-menu>li>a {
     padding: 3px 10px;
+}
+
+.dropdown-menu>li>a:hover {
+    background-color: #bbb;
 }
 
 .first-dropdown-item {
@@ -140,6 +157,11 @@ a {
 
 a:hover {
     color: #3af;
+}
+
+.vertical-center {
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 .dialogue_header {

@@ -43,32 +43,42 @@ var map = {
     },
 
     showMap: function() {
-        var box = $('<div>').attr('id', 'map_box');
-        box.attr('class', 'modal');
-        box.attr('style', 'display: block; padding-left: 15px;');
-        box.attr('role', 'dialog');
-        box.prependTo($("#popup_container"));
-        box.modal({backdrop: "static"});
+        var box = $('<div>')
+            .attr('id', 'map_box')
+            .attr('role', 'dialog')
+            .css('display', 'block')
+            .addClass('modal')
+            .modal({backdrop: "static"})
+            .prependTo($("#popup_container"));
 
-        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-lg').appendTo(box);
-        var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
+        var boxDialog = $('<div>')
+            .addClass('modal-dialog modal-lg')
+            .addClass('vertical-center')
+            .appendTo(box);
+
+        var boxContent = $('<div>')
+            .addClass('modal-content')
+            .appendTo(boxDialog);
 
         var boxHeader = $('<div>')
-            .attr('class', 'modal-header').appendTo(boxContent);
+            .addClass('modal-header')
+            .appendTo(boxContent);
+
         boxHeader.append($('<button>')
             .attr('id', 'button_close')
             .attr('type', 'button')
-            .attr('class', 'close')
             .attr('data-dismiss', 'modal')
-            .html('&times;'))
-            .attr('onclick', 'popupmgr.doCloseMap()');
+            .attr('onclick', 'popupmgr.doCloseMap()')
+            .addClass('close')
+            .html('&times;'));
+
         boxHeader.append($('<h4>')
             .attr('id', 'map_name')
             .text(LS('MAP'))
-            .attr('class', 'modal-title'));
+            .addClass('modal-title'));
 
         var boxBody = $('<div>')
-            .attr('class', 'modal-body')
+            .addClass('modal-body')
             .appendTo(boxContent);
 
         if (!(this._current_location &&
@@ -198,5 +208,7 @@ var map = {
                         return d[0];
                       });
         }
+
+        webclient.doSetPopupSize();
     },
 }

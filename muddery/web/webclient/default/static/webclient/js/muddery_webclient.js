@@ -447,7 +447,9 @@ var webclient = {
         }
 
         popupmgr.doCloseBox();
-        popupmgr.createMessageBox();
+        popupmgr.createBox()
+            .attr('id', 'popup_box')
+            .prependTo($("#popup_container"));
 
         // add object's name
         var title = "";
@@ -508,7 +510,7 @@ var webclient = {
                             </div>'
         $('#input_additional').html(html_button);
         */
-        webclient.doSetSizes();
+        this.doSetPopupSize();
     },
     
     displayInventory : function(data) {
@@ -579,7 +581,9 @@ var webclient = {
 
     displayGetObjectBox : function(data) {
         popupmgr.doCloseBox();
-        popupmgr.createMessageBox();
+        popupmgr.createBox()
+            .attr('id', 'popup_box')
+            .prependTo($("#popup_container"));
 
         $('#popup_header').text(LS('Get Object'));
 
@@ -649,7 +653,7 @@ var webclient = {
             .appendTo(div);
 
         $('#popup_footer').append(div);
-        this.doSetSizes();
+        this.doSetPopupSize();
     },
 
     displayStatus : function(data) {
@@ -739,15 +743,21 @@ var webclient = {
     },
 
     displayDialogue : function(data) {
-        popupmgr.showDialogue(data);
+        if ($('#combat_box').length > 0) {
+            // has combat box
+            combat.set_dialogue(data);
+        }
+        else {
+            popupmgr.showDialogue(data);
+        }
     },
 
     onLogin : function(data) {
         // show login UI
         $("#msg_wnd").empty();
+        $("#prompt_bar").empty();
         this.showLoginTabs();
         this.showPage("scene");
-        this.doSetSizes();
     },
     
     onLogout : function(data) {
@@ -756,18 +766,22 @@ var webclient = {
         $("#prompt_bar").empty();
         this.showUnloginTabs();
         this.showPage("login");
-        this.doSetSizes();
         
         //reconnect, show the connection screen
         webclient_init();
     },
     
-    onPuppet : function(data) {
+    onPuppet: function(data) {
         this._character_name = data.name;
         combat.setSelf(data.dbref);
     },
 
-    doSetSizes : function() {
+    doSetSizes: function() {
+        webclient.doSetWindowSize();
+        webclient.doSetPopupSize();
+    },
+
+    doSetWindowSize: function() {
         // Sets the size of the message window
         var win_h = $(window).innerHeight();
         var win_w = $(window).innerWidth();
@@ -776,18 +790,20 @@ var webclient = {
         var head_h = 35;
         $('#header').height(head_h);
 
-        var wrapper_h = win_h - head_h - 10;
+        var wrapper_h = win_h - head_h - 20;
         $('#wrapper').height(wrapper_h);
 
         var margin_h = 55
         var prompt_h = 18;
         var tab_bar_h = 32;
-        var msg_wnd_h = (wrapper_h - prompt_h - tab_bar_h - margin_h) / 3;
-        var tab_content_h = wrapper_h - prompt_h - tab_bar_h - msg_wnd_h - margin_h;
-        $('#msg_wnd').height(msg_wnd_h);
+        var tab_content_h = (wrapper_h - prompt_h - tab_bar_h - margin_h) * 0.7;
         $('#prompt_bar').height(prompt_h);
         $('#tab_bar').height(tab_bar_h);
         $('#tab_content').height(tab_content_h);
+
+        tab_content_h = $('#tab_content').height();
+        var msg_wnd_h = wrapper_h - prompt_h - tab_bar_h - margin_h - tab_content_h;
+        $('#msg_wnd').height(msg_wnd_h);
 
         if (win_w >= 960) {
             $('#middlewindow').width(960 - 20);
@@ -797,7 +813,17 @@ var webclient = {
         }
     },
 
-    doCancel : function() {
+    doSetPopupSize: function() {
+        var win_h = $(window).innerHeight();
+
+        // model dialogue
+        var dlg = $('.vertical-center');
+        if (dlg.length > 0) {
+            dlg.css('top', (win_h - dlg.height()) / 2);
+        }
+    },
+
+    doCancel: function() {
         popupmgr.doCloseBox();
     },
 
@@ -810,22 +836,6 @@ var webclient = {
         
         sendCommand(command);
         popupmgr.doCloseBox();
-    },
-
-    createInputBox : function() {
-        var dlg = '<div id="popup_box">\
-        <div id="close_button" class="clearfix">\
-        <input type="image" id="button_close" class="close" src="/static/webclient/img/button_close.png" alt="close" onclick="popupmgr.doCloseBox()"/>\
-        </div>\
-        <div id="input_prompt">\
-        </div>\
-        <div id="input_additional">\
-        </div>\
-        </div>';
-        
-        var overlayer = '<div class="overlayer" id="overlayer"></div>';
-        
-        $("body").prepend(dlg + overlayer);
     },
 
     // hide all tabs
@@ -885,7 +895,6 @@ var webclient = {
         $("#prompt_bar").empty();
         this.showUnloginTabs();
         this.showPage("login");
-        this.doSetSizes();
 
         webclient.doAutoLoginCheck();
     },
@@ -893,7 +902,6 @@ var webclient = {
     onConnectionClose: function() {
         this.showConnectTabs();
         this.showPage("connect");
-        this.doSetSizes();
     },
 
     doAutoLoginCheck : function() {
