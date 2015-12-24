@@ -9,6 +9,7 @@ var combat = {
     _result: null,
     _loot: null,
     _skill_cd_time: {},
+    _dialogue: null,
     
     setSelf: function(dbref) {
         this._self_dbref = dbref;
@@ -17,15 +18,22 @@ var combat = {
     createCombat: function(data) {
         this.closeCombat();
 
-        var box = $('<div>').attr('id', 'combat_box')
-                            .attr('class', 'modal')
-                            .attr('style', 'display: block; padding-left: 15px;')
-                            .attr('role', 'dialog')
-                            .modal({backdrop: "static"})
-                            .prependTo($("#popup_container"));
+        var box = $('<div>')
+            .attr('id', 'combat_box')
+            .attr('role', 'dialog')
+            .css('display', 'block')
+            .addClass('modal')
+            .modal({backdrop: 'static'})
+            .prependTo($('#popup_container'));
 
-        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(box);
-        var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
+        var boxDialog = $('<div>')
+            .addClass('modal-dialog modal-sm')
+            .addClass('vertical-center')
+            .appendTo(box);
+
+        var boxContent = $('<div>')
+            .addClass('modal-content')
+            .appendTo(boxDialog);
 
         var boxHeader = $('<div>')
             .attr('id', 'combat_desc')
@@ -34,14 +42,13 @@ var combat = {
 
         var boxBody = $('<div>')
             .attr('id', 'combat_characters')
-            .attr('class', 'modal-body').appendTo(boxContent)
-            .attr('style', 'min-height: 100px;');
+            .addClass('modal-body')
+            .css('min-height', '100px')
+            .appendTo(boxContent);
 
         var boxFooter = $('<div>')
             .attr('id', 'combat_commands')
             .attr('class', 'modal-footer').appendTo(boxContent);
-
-        boxDialog.css('top', (box.innerHeight() - boxDialog.innerHeight()) / 2);
 
         // reset combat data
         this._current_target = null;
@@ -49,6 +56,9 @@ var combat = {
         this._result = null;
         this._loot = null;
         this._skill_cd_time = {};
+        this._dialogue = null;
+
+        webclient.doSetPopupSize();
     },
 
     displayGetObject: function(data) {
@@ -69,26 +79,35 @@ var combat = {
         $('#combat_characters').remove();
         $('#combat_commands').remove();
         
-        var box = $('#combat_box').html("");
+        var box = $('#combat_box').empty();
 
-        var boxDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(box);
-        var boxContent = $('<div>').attr('class', 'modal-content').appendTo(boxDialog);
+        var boxDialog = $('<div>')
+            .addClass('modal-dialog modal-sm')
+            .addClass('vertical-center')
+            .appendTo(box);
+
+        var boxContent = $('<div>')
+            .addClass('modal-content')
+            .appendTo(boxDialog);
 
         var boxHeader = $('<div>')
             .attr('id', 'combat_messages')
-            .attr('class', 'modal-header')
+            .addClass('modal-header')
             .appendTo(boxContent);
 
         var boxBodyResult = $('<div>')
             .attr('id', 'combat_result')
-            .attr('class', 'modal-body').appendTo(boxContent);
+            .addClass('modal-body')
+            .appendTo(boxContent);
 
         var boxBodyLoot = $('<div>')
             .attr('id', 'combat_loot')
-            .attr('class', 'modal-body').appendTo(boxContent);
+            .addClass('modal-body')
+            .appendTo(boxContent);
 
         var boxFooter = $('<div>')
-            .attr('class', 'modal-footer').appendTo(boxContent);
+            .addClass('modal-footer')
+            .appendTo(boxContent);
 
         $('<center>')
             .append($('<h4>')
@@ -195,22 +214,28 @@ var combat = {
             .attr('type', 'button')
             .attr('id', 'button_center')
             .attr('onClick', 'combat.closeCombat()')
-            .text('OK')
+            .text(LS('OK'))
             .addClass('btn btn-primary');
 
         button.appendTo(center);
         center.appendTo(boxFooter);
 
-        boxDialog.css('top', (box.innerHeight() - boxDialog.innerHeight()) / 2);
+        webclient.doSetPopupSize();
     },
 
     closeCombat: function() {
         if ($('#popup_box').size() == 0) {
             $('.modal-backdrop').remove();
         }
-        if($('#combat_box').size() > 0){
+        if ($('#combat_box').size() > 0){
             $('#combat_box').remove();
             $('.modal-backdrop').remove();
+        }
+
+        // show dialogue after combat
+        if (this._dialogue) {
+            webclient.displayDialogue(this._dialogue);
+            this._dialogue = null;
         }
     },
 
@@ -402,5 +427,9 @@ var combat = {
 
     get_current_target: function() {
         return this._current_target;
+    },
+
+    set_dialogue: function(data) {
+        this._dialogue = data;
     },
 }

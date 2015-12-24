@@ -5,9 +5,11 @@
 var popupmgr = {
     showAlert : function(msg, button) {
         popupmgr.doCloseBox();
-        popupmgr.createMessageBox();
+        popupmgr.createBox()
+            .attr('id', 'popup_box')
+            .prependTo($('#popup_container'));
 
-        $('#popup_header').text(LS("Alert"));
+        $('#popup_header').text(LS('Alert'));
         $('#popup_body').html(text2html.parseHtml(msg));
 
         var html_button = $('<button>')
@@ -17,11 +19,12 @@ var popupmgr = {
             .text(button)
             .attr('id', 'button_center')
             .attr('onClick', 'popupmgr.doCloseBox()');
+
         $('#popup_footer')
             .append($('<center>')
                 .append(html_button));
 
-        webclient.doSetSizes();
+        webclient.doSetPopupSize();
     },
 
     showDialogue : function(dialogues) {
@@ -32,15 +35,24 @@ var popupmgr = {
                 return;
             }
 
-            popupmgr.createDialogueBox();
+            popupmgr.createBox()
+                .attr('id', 'dialogue_box')
+                .prependTo($('#popup_container'));
 
             if (dialogues.length == 1) {
                 var speaker = dialogues[0].speaker;
+                if (speaker.length == 0) {
+                    // placeholder
+                    $('#popup_header')
+                        .addClass('dialogue_header')
+                        .html('&nbsp;');
+                }
+                else {
+                    $('#popup_header')
+                        .addClass('dialogue_header')
+                        .text(speaker);
+                }
                 var content = text2html.parseHtml(dialogues[0].content);
-
-                $('#popup_header')
-                    .addClass('dialogue_header')
-                    .text(speaker);
                 $('#popup_body').html(content);
 
                 var html_button = '<div><br></div>\
@@ -93,71 +105,52 @@ var popupmgr = {
             popupmgr.doCloseDialogue();
         }
 
-        webclient.doSetSizes();
+        webclient.doSetPopupSize();
     },
 
-    createMessageBox : function() {
-        var win_h = $(window).innerHeight();
+    createBox : function() {
+        var dlg = $('<div>')
+            .attr('role', 'dialog')
+            .css('display', 'block')
+            .addClass('modal')
+            .modal({backdrop: 'static'});
 
-        var dlg = $('<div>').attr('id', 'popup_box');
-        dlg.attr('class', 'modal');
-        dlg.attr('style', 'display: block; padding-left: 15px;');
-        dlg.attr('role', 'dialog');
-        var dlgDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(dlg);
-        var dlgContent = $('<div>').attr('class', 'modal-content').appendTo(dlgDialog);
+        var dlgDialog = $('<div>')
+            .addClass('modal-dialog modal-sm')
+            .addClass('vertical-center')
+            .appendTo(dlg);
+
+        var dlgContent = $('<div>')
+            .addClass('modal-content')
+            .appendTo(dlgDialog);
 
         var dlgHeader = $('<div>')
-            .attr('class', 'modal-header').appendTo(dlgContent);
+            .addClass('modal-header')
+            .appendTo(dlgContent);
+
         dlgHeader.append($('<button>')
             .attr('type', 'button')
-            .attr('class', 'close')
             .attr('data-dismiss', 'modal')
-            .html('&times;')
-            .attr('onclick', 'popupmgr.doCloseBox()'));
+            .attr('onclick', 'popupmgr.doCloseBox()')
+            .addClass('close')
+            .html('&times;'));
+
         dlgHeader.append($('<h4>')
             .attr('id', 'popup_header')
-            .attr('class', 'modal-title'));
+            .addClass('modal-title'));
 
         var dlgBody = $('<div>')
-            .attr('class', 'modal-body').appendTo(dlgContent)
-            .append($('<p>').attr('id', 'popup_body'));
+            .addClass('modal-body')
+            .append($('<p>')
+                .attr('id', 'popup_body'))
+            .appendTo(dlgContent);
 
         var dlgFooter = $('<div>')
             .attr('id', 'popup_footer')
-            .attr('class', 'modal-footer').appendTo(dlgContent);
+            .addClass('modal-footer')
+            .appendTo(dlgContent);
 
-        $("#popup_container").prepend(dlg);
-        dlg.modal({backdrop: "static"});
-        dlg.css('top', Math.abs(win_h-dlgDialog.outerHeight())>>1);
-    },
-
-    createDialogueBox : function() {
-        var win_h = $(window).innerHeight();
-
-        var dlg = $('<div>').attr('id', 'dialogue_box');
-        dlg.attr('class', 'modal');
-        dlg.attr('style', 'display: block; padding-left: 15px;');
-        dlg.attr('role', 'dialog');
-        var dlgDialog = $('<div>').attr('class', 'modal-dialog modal-sm').appendTo(dlg);
-        var dlgContent = $('<div>').attr('class', 'modal-content').appendTo(dlgDialog);
-
-        var dlgHeader = $('<div>')
-            .attr('class', 'modal-header').appendTo(dlgContent);
-        dlgHeader.append($('<h4>')
-            .attr('id', 'popup_header')
-            .attr('class', 'modal-title'));
-
-        var dlgBody = $('<div>')
-            .attr('class', 'modal-body').appendTo(dlgContent)
-            .append($('<p>').attr('id', 'popup_body'));
-
-        var dlgFooter = $('<div>')
-            .attr('id', 'popup_footer')
-            .attr('class', 'modal-footer').appendTo(dlgContent);
-
-        $("#popup_container").prepend(dlg);
-        dlg.modal({backdrop: "static"});
-        dlg.css('top', Math.abs(win_h-dlgDialog.outerHeight())>>1);
+        return dlg;
     },
 
     doCloseBox : function() {
@@ -165,7 +158,6 @@ var popupmgr = {
             $('#popup_box').remove();
             $('.modal-backdrop').remove();
         }
-        webclient.doSetSizes();
     },
 
     doCloseDialogue : function() {
@@ -173,7 +165,6 @@ var popupmgr = {
             $('#dialogue_box').remove();
             $('.modal-backdrop').remove();
         }
-        webclient.doSetSizes();
     },
 
     doCloseCombat : function() {
@@ -181,7 +172,6 @@ var popupmgr = {
             $('#combat_box').remove();
             $('.modal-backdrop').remove();
         }
-        webclient.doSetSizes();
     },
 
     doCloseMap : function() {
@@ -189,6 +179,5 @@ var popupmgr = {
             $('#map_box').remove();
             $('.modal-backdrop').remove();
         }
-        webclient.doSetSizes();
     },
 }
