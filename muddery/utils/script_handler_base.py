@@ -149,7 +149,7 @@ class ScriptHandlerDefault(ScriptHandler):
         """
         self.add_condition("is_quest_in_progress", script_conditions.is_quest_in_progress)
         self.add_condition("can_provide_quest", script_conditions.can_provide_quest)
-        self.add_condition("is_quest_finished", script_conditions.is_quest_finished)
+        self.add_condition("is_quest_completed", script_conditions.is_quest_completed)
         self.add_condition("have_object", script_conditions.have_object)
         self.add_condition("get_attr", script_actions.get_attr)
         self.add_condition("has_attr", script_conditions.has_attr)

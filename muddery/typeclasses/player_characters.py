@@ -394,15 +394,16 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 rejected_keys[key] = available - accepted
                 reject_reason[name] = reason
 
-            # call quest handler
-            self.quest.at_objective(defines.OBJECTIVE_OBJECT, key, accepted)
-
         # Send results to the player.
         message = {"get_object":
                         {"accepted": accepted_names,
                          "rejected": reject_reason}}
         self.msg(message)
         self.show_inventory()
+
+        # call quest handler
+        for key in accepted_keys:
+            self.quest.at_objective(defines.OBJECTIVE_OBJECT, key, accepted_keys[key])
 
         return rejected_keys
 

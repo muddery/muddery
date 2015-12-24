@@ -247,12 +247,6 @@ class CombatHandler(DefaultScript):
                             # give objects to winner
                             winner.receive_objects(loots)
 
-                # call quest handler
-                for winner in winners:
-                    if winner.has_player:
-                        for loser in losers:
-                            winner.quest.at_objective(defines.OBJECTIVE_KILL, loser.get_info_key())
-
                 # send result to players
                 msg = []
                 for winner in winners:
@@ -260,6 +254,12 @@ class CombatHandler(DefaultScript):
                                 "name": winner.get_name()})
 
                 self.msg_all({"combat_finish": {"winner": msg}})
+
+                # call quest handler
+                for winner in winners:
+                    if winner.has_player:
+                        for loser in losers:
+                            winner.quest.at_objective(defines.OBJECTIVE_KILL, loser.get_info_key())
 
                 # remove dead character
                 for loser in losers:

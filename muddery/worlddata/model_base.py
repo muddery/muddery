@@ -400,7 +400,7 @@ class dialogue_sentences(models.Model):
     content = models.TextField(blank=True)
     action = models.TextField(blank=True)
     provide_quest = models.ForeignKey("quests", null=True, blank=True)
-    finish_quest = models.ForeignKey("quests", null=True, blank=True)
+    complete_quest = models.ForeignKey("quests", null=True, blank=True)
 
     class Meta:
         "Define Django meta options"

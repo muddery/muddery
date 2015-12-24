@@ -128,7 +128,7 @@ var uimgr = {
                 var npc = data_npcs[i];
                 var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, npc["name"],
                     {"cmd_name": "look", "cmd_args": npc["dbref"], "dbref": npc["dbref"], "style":"margin-left:10px;"});
-                if (npc["finish_quest"]) {
+                if (npc["complete_quest"]) {
                     aHrefElement.text(aHrefElement.text() + "[?]");
                 }
                 else if (npc["provide_quest"]) {
@@ -284,12 +284,17 @@ var uimgr = {
                 var tbodyElement = $("<tbody>").appendTo(tableQuestsElement);
                 var trElement = $("<tr>").appendTo(tbodyElement);
                 var tdElement = $("<td>").appendTo(trElement);
+
+                var name = quest["name"];
+                if (quest["accomplished"]) {
+                    name += LS("(ACCOMPLISHED)");
+                }
                 var aHrefElement = $("<a>").appendTo(tdElement)
                     .attr("href", "#")
                     .attr("onclick", "commands.doCommandLink(this); return false;")
                     .attr("cmd_name", "look")
                     .attr("cmd_args", quest["dbref"])
-                    .text(quest["name"]);
+                    .text(name);
 
                 tdElement = $("<td>").appendTo(trElement)
                     .append(quest["desc"]);
@@ -306,7 +311,7 @@ var uimgr = {
                     }
                     else {
                         tdElement.append(obj.target + " " + obj.object);
-                        tdElement.append(" " + obj.achieved + "/" + obj.total);
+                        tdElement.append(" " + obj.accomplished + "/" + obj.total);
                     }
                 }
             }

@@ -93,26 +93,26 @@ class QuestDependencyHandler(object):
         elif dependency_type == defines.DEPENDENCY_QUEST_NOT_IN_PROGRESS:
             if caller.quest.is_in_progress(quest):
                 return False
-        elif dependency_type == defines.DEPENDENCY_QUEST_ACHIEVED:
-            if not caller.quest.is_achieved(quest):
+        elif dependency_type == defines.DEPENDENCY_QUEST_ACCOMPLISHED:
+            if not caller.quest.is_accomplished(quest):
                 return False
-        elif dependency_type == defines.DEPENDENCY_QUEST_NOT_ACHIEVED:
+        elif dependency_type == defines.DEPENDENCY_QUEST_NOT_ACCOMPLISHED:
             if not caller.quest.is_in_progress(quest):
                 return False
-            if caller.quest.is_achieved(quest):
+            if caller.quest.is_accomplished(quest):
                 return False
-        elif dependency_type == defines.DEPENDENCY_QUEST_FINISHED:
-            if not caller.quest.is_finished(quest):
+        elif dependency_type == defines.DEPENDENCY_QUEST_COMPLETED:
+            if not caller.quest.is_completed(quest):
                 return False
-        elif dependency_type == defines.DEPENDENCY_QUEST_NOT_FINISHED:
-            if caller.quest.is_finished(quest):
+        elif dependency_type == defines.DEPENDENCY_QUEST_NOT_COMPLETED:
+            if caller.quest.is_completed(quest):
                 return False
         elif dependency_type == defines.DEPENDENCY_QUEST_ACCEPTED:
-            if not caller.quest.is_finished(quest) and \
+            if not caller.quest.is_completed(quest) and \
                not caller.quest.is_in_progress(quest):
                 return False
         elif dependency_type == defines.DEPENDENCY_QUEST_NOT_ACCEPTED:
-            if caller.quest.is_finished(quest) or \
+            if caller.quest.is_completed(quest) or \
                caller.quest.is_in_progress(quest):
                 return False
 

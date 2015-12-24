@@ -60,4 +60,6 @@ var LOCAL_STRING = {
     "Get Object": "获取物品",
     "Alert": "警告",
     "SELECT ONE": "选择一个",
+    "(ACCOMPLISHED)": "(目标完成)",
+    "CLOSE": "关闭",
 };

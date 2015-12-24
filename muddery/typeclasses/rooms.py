@@ -133,9 +133,9 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                 if type == "npcs":
                     # add quest status
                     if hasattr(cont, "have_quest"):
-                        provide_quest, finish_quest = cont.have_quest(caller)
+                        provide_quest, complete_quest = cont.have_quest(caller)
                         appearance["provide_quest"] = provide_quest
-                        appearance["finish_quest"] = finish_quest
+                        appearance["complete_quest"] = complete_quest
                 elif type == "exits":
                     # get exits destination
                     if cont.destination:
