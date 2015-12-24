@@ -67,7 +67,6 @@ function webclient_close(){
         success: function(data){
             CLIENT_HASH = '0';
             webclient.onConnectionClose();
-            webclient.showAlert(LS("The client connection was closed cleanly."), "OK");
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){
             CLIENT_HASH = '0';
