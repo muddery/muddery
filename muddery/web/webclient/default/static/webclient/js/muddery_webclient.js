@@ -4,6 +4,8 @@ Muddery webclient (javascript component)
 
 var webclient = {
     cache_room_exits : null,
+    _character_name: "",
+
     doShow : function(type, msg) {
         var data = null;
         
@@ -653,14 +655,18 @@ var webclient = {
     displayStatus : function(data) {
         // refresh prompt bar
         var bar = $("#prompt_bar");
-        var prompt = "";
-        var element = "";
+        var prompt = $("<div>");
         
         try {
-            element = "<span class='white'> " + LS("HP: ");
-            element += data["hp"].toString();
-            element += "</span>";
-            prompt += element;
+            $("<span>")
+                .addClass("prompt_name")
+                .text(this._character_name)
+                .appendTo(prompt);
+
+            $("<span>")
+                .addClass("prompt_element")
+                .text(LS("HP: ") + data["hp"].toString())
+                .appendTo(prompt);
         }
         catch(error) {
         }
@@ -757,7 +763,8 @@ var webclient = {
     },
     
     onPuppet : function(data) {
-        combat.setSelf(data);
+        this._character_name = data.name;
+        combat.setSelf(data.dbref);
     },
 
     doSetSizes : function() {
@@ -874,6 +881,8 @@ var webclient = {
     },
     
     onConnectionOpen: function() {
+        $("#msg_wnd").empty();
+        $("#prompt_bar").empty();
         this.showUnloginTabs();
         this.showPage("login");
         this.doSetSizes();

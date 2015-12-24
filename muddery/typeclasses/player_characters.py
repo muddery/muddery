@@ -133,7 +133,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         """
         # Send puppet info to the client.
-        self.msg({"puppet": self.dbref})
+        self.msg({"puppet": {"dbref": self.dbref,
+                             "name": self.get_name()}})
 
         super(MudderyPlayerCharacter, self).at_post_puppet()
 

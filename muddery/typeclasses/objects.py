@@ -92,7 +92,7 @@ class MudderyObject(DefaultObject):
 
         """
         # Send puppet info to the player and look around.
-        self.msg("\n" + LS("You become {c%s{n.") % self.name + "\n")
+        self.msg("\n" + LS("You become {c%s{n.") % self.get_name() + "\n")
         self.execute_cmd("look")
 
         if not settings.SOLO_MODE:
