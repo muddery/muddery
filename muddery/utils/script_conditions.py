@@ -47,9 +47,9 @@ def can_provide_quest(character, obj, *args):
     return character.quest.can_provide(args[0])
 
 
-def is_quest_finished(character, obj, *args):
+def is_quest_completed(character, obj, *args):
     """
-    If specified quest is finished.
+    If specified quest is completed.
     args: quest's key
     """
     if not character:
@@ -58,7 +58,7 @@ def is_quest_finished(character, obj, *args):
     if not args:
         return False
 
-    return character.quest.is_finished(args[0])
+    return character.quest.is_completed(args[0])
 
 
 def have_object(character, obj, *args):

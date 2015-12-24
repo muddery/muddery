@@ -1,4 +1,4 @@
-dialogue,ordinal,speaker,content,action,provide_quest,finish_quest
+dialogue,ordinal,speaker,content,action,provide_quest,complete_quest
 dlg_hello,1,n,Hello!,,,
 dlg_apple,1,n,Can you find me an apple?,,,
 dlg_apple,2,p,OK!,,quest_apple,

@@ -485,13 +485,13 @@ var webclient = {
             if (data["cmds"].length > 0) {
                 uimgr.divObjectCmds(data["cmds"]).appendTo(footer);
             } else {
-                var html_button = $('<button>')
-                    .attr('class', 'btn btn-default')
-                    .attr('type', 'button')
-                    .attr('data-dismiss', 'modal')
-                    .attr('onClick', 'popupmgr.doCloseBox()')
-                    .addClass('button-center')
-                    .text(LS('CLOSE'))
+                var html_button = $('<center>')
+                    .append($('<button>')
+                        .attr('class', 'btn btn-default')
+                        .attr('type', 'button')
+                        .attr('data-dismiss', 'modal')
+                        .attr('onClick', 'popupmgr.doCloseBox()')
+                        .text(LS('CLOSE')));
                 footer.html(html_button);
             }
         }
@@ -636,13 +636,15 @@ var webclient = {
         $('#popup_footer').append(br);
 
         var div = $("<div>");
-        var html_button = $("<button>").addClass("btn btn-default")
-        							  .attr("type", "button")
-        							  .attr("id", "button_center")
-                                      .attr('data-dismiss', 'modal')
-        							  .attr("onClick", "popupmgr.doCloseBox()")
-        							  .text(LS("OK"))
-        							  .appendTo(div);
+        var html_button = $("<center>")
+            .append($("<button>")
+                .addClass("btn btn-default")
+                .attr("type", "button")
+                .attr("id", "button_center")
+                .attr('data-dismiss', 'modal')
+                .attr("onClick", "popupmgr.doCloseBox()")
+                .text(LS("OK")))
+            .appendTo(div);
 
         $('#popup_footer').append(div);
         this.doSetSizes();

@@ -58,8 +58,8 @@ class MudderyNPC(MudderyCharacter):
 
     def have_quest(self, caller):
         """
-        If the npc can finish or provide quests.
-        Returns (can_provide_quest, can_finish_quest).
+        If the npc can complete or provide quests.
+        Returns (can_provide_quest, can_complete_quest).
         """
         return DIALOGUE_HANDLER.have_quest(caller, self)
 

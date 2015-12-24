@@ -1,4 +1,4 @@
-dialogue,ordinal,speaker,content,action,provide_quest,finish_quest
+dialogue,ordinal,speaker,content,action,provide_quest,complete_quest
 dlg_hello,1,n,"你好！",,,
 dlg_alley_soliloquy,1,p,"头好晕啊，只记得我和朋友们在游乐园里玩，突然人群骚乱起来，大家都喊叫着四散奔逃，我也跟着乱跑，进了一个胡同之后不知怎么就摔晕过去了。",,,
 dlg_street_find_servivor,1,,"眼前的景象让你吓了一跳，原本游人如织的街道现在已是满目疮痍、空无一人，像是经历了一次大灾难。",,,

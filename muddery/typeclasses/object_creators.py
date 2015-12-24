@@ -87,7 +87,7 @@ class MudderyObjectCreator(MudderyObject):
                 return False
 
             if obj["quest"]:
-                if not looter.quest.is_not_achieved(obj["quest"]):
+                if not looter.quest.is_not_accomplished(obj["quest"]):
                     return False
 
             if not SCRIPT_HANDLER.match_condition(looter, self, obj["condition"]):

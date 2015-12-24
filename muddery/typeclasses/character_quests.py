@@ -22,10 +22,10 @@ class MudderyQuest(MudderyObject):
     """
     def at_object_creation(self):
         """
-        Set achieved objectives to empty.
+        Set accomplished objectives to empty.
         """
         self.db.owner = None
-        self.db.achieved = {}
+        self.db.accomplished = {}
 
 
     def set_owner(self, owner):
@@ -42,7 +42,7 @@ class MudderyQuest(MudderyObject):
         super(MudderyQuest, self).load_data()
 
         self.objectives = {}
-        self.not_achieved = {}
+        self.not_accomplished = {}
         
         key = self.get_info_key()
         if not key:
@@ -63,12 +63,12 @@ class MudderyQuest(MudderyObject):
                          "desc": obj_record.desc}
             self.objectives[obj_record.ordinal] = objective
 
-            achieved = self.db.achieved.get(key, 0)
-            if achieved < obj_record.number:
-                if not obj_record.type in self.not_achieved:
-                    self.not_achieved[obj_record.type] = [obj_record.ordinal]
+            accomplished = self.db.accomplished.get(key, 0)
+            if accomplished < obj_record.number:
+                if not obj_record.type in self.not_accomplished:
+                    self.not_accomplished[obj_record.type] = [obj_record.ordinal]
                 else:
-                    self.not_achieved[obj_record.type].append(obj_record.ordinal)
+                    self.not_accomplished[obj_record.type].append(obj_record.ordinal)
 
 
     def return_objectives(self):
@@ -85,7 +85,7 @@ class MudderyQuest(MudderyObject):
             else:
                 # Or make a desc by other data.
                 obj_num = self.objectives[ordinal]["number"]
-                achieved = self.db.achieved.get(ordinal, 0)
+                accomplished = self.db.accomplished.get(ordinal, 0)
                 
                 if self.objectives[ordinal]["type"] == defines.OBJECTIVE_TALK:
                     # talking
@@ -94,7 +94,7 @@ class MudderyQuest(MudderyObject):
         
                     objectives.append({"target": target,
                                        "object": name,
-                                       "achieved": achieved,
+                                       "accomplished": accomplished,
                                        "total": obj_num,
                                        })
                 elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_OBJECT:
@@ -116,7 +116,7 @@ class MudderyQuest(MudderyObject):
         
                     objectives.append({"target": target,
                                        "object": name,
-                                       "achieved": achieved,
+                                       "accomplished": accomplished,
                                        "total": obj_num,
                                        })
                 elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_KILL:
@@ -153,30 +153,30 @@ class MudderyQuest(MudderyObject):
 
                     objectives.append({"target": target,
                                        "object": name,
-                                       "achieved": achieved,
+                                       "accomplished": accomplished,
                                        "total": obj_num,
                                        })
 
         return objectives
 
 
-    def is_achieved(self):
+    def is_accomplished(self):
         """
-        Check all objectives are achieved or not.
+        If all objectives are accomplished or not.
         """
         for ordinal in self.objectives:
             obj_num = self.objectives[ordinal]["number"]
-            achieved = self.db.achieved.get(ordinal, 0)
+            accomplished = self.db.accomplished.get(ordinal, 0)
     
-            if achieved < obj_num:
+            if accomplished < obj_num:
                 return False
 
         return True
 
 
-    def finish(self):
+    def complete(self):
         """
-        Finish a quest, do its action.
+        Complete a quest, do its action.
         """
         owner = self.db.owner
 
@@ -196,41 +196,44 @@ class MudderyQuest(MudderyObject):
 
     def at_objective(self, type, object_key, number=1):
         """
-        Called when the owner may finish some objectives.
+        Called when the owner may complete some objectives.
         
         args:
             type: objective's type defined in defines.py
             object_key(string): the key of the relative object
             number(int): the number of the object
+        
+        return:
+            if the quest status has changed.
         """
-        if not type in self.not_achieved:
+        if not type in self.not_accomplished:
             return False
 
         status_changed = False
         index = 0
 
         # search all object objectives
-        while index < len(self.not_achieved[type]):
-            ordinal = self.not_achieved[type][index]
+        while index < len(self.not_accomplished[type]):
+            ordinal = self.not_accomplished[type][index]
             index += 1
 
             if self.objectives[ordinal]["object"] == object_key:
                 # if this object matches an objective
                 status_changed = True
 
-                # add achieved number
-                achieved = self.db.achieved.get(ordinal, 0)
-                achieved += number
-                self.db.achieved[ordinal] = achieved
+                # add accomplished number
+                accomplished = self.db.accomplished.get(ordinal, 0)
+                accomplished += number
+                self.db.accomplished[ordinal] = accomplished
 
-                if self.db.achieved[ordinal] >= self.objectives[ordinal]["number"]:
-                    # if this objective is achieved, remove it
+                if self.db.accomplished[ordinal] >= self.objectives[ordinal]["number"]:
+                    # if this objectives is accomplished, remove it
                     index -= 1
-                    del(self.not_achieved[type][index])
+                    del(self.not_accomplished[type][index])
                                                                     
-                    if not self.not_achieved[type]:
-                        # if all objectives are achieved
-                        del(self.not_achieved[type])
+                    if not self.not_accomplished[type]:
+                        # if all objectives are accomplished
+                        del(self.not_accomplished[type])
                         break
                                                                                 
         return status_changed

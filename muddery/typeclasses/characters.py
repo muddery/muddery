@@ -78,7 +78,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.skills = {}
 
         # set quests
-        self.db.finished_quests = set()
+        self.db.completed_quests = set()
         self.db.current_quests = {}
 
         # set attributes
@@ -507,7 +507,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                 return False
 
             if obj["quest"]:
-                if not looter.quest.is_not_achieved(obj["quest"]):
+                if not looter.quest.is_not_accomplished(obj["quest"]):
                     return False
 
             if not SCRIPT_HANDLER.match_condition(looter, self, obj["condition"]):

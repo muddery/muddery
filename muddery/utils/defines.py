@@ -9,10 +9,10 @@ DEPENDENCY_QUEST_ACCEPTED = 2
 DEPENDENCY_QUEST_NOT_ACCEPTED = 3
 DEPENDENCY_QUEST_IN_PROGRESS = 4
 DEPENDENCY_QUEST_NOT_IN_PROGRESS = 5
-DEPENDENCY_QUEST_ACHIEVED = 6           # quest achieved
-DEPENDENCY_QUEST_NOT_ACHIEVED = 7       # quest accepted but not achieved
-DEPENDENCY_QUEST_FINISHED = 8           # quest finished
-DEPENDENCY_QUEST_NOT_FINISHED = 9       # quest accepted but not finished
+DEPENDENCY_QUEST_ACCOMPLISHED = 6       # quest accomplished
+DEPENDENCY_QUEST_NOT_ACCOMPLISHED = 7   # quest accepted but not accomplished
+DEPENDENCY_QUEST_COMPLETED = 8          # quest complete
+DEPENDENCY_QUEST_NOT_COMPLETED = 9      # quest accepted but not complete
 
 
 # quest objective types
