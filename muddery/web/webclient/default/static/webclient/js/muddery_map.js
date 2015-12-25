@@ -81,19 +81,21 @@ var map = {
             .addClass('modal-body')
             .appendTo(boxContent);
 
-        if (!(this._current_location &&
-            this._current_location in this._map_data.rooms)){
-            // does not have current location, can not show map.
-            return;
-        }
-        var current_room = this._map_data.rooms[this._current_location];
-
-        //
+        //set size
         var map_width = boxBody.width();
         var map_height = $('#middlewindow').height() * 0.8;
 
         boxBody.height(map_height);
 
+        if (!(this._current_location &&
+            this._current_location in this._map_data.rooms)){
+            // does not have current location, can not show map.
+            webclient.doSetPopupSize();
+            return;
+        }
+        var current_room = this._map_data.rooms[this._current_location];
+
+        //
 		var svg = d3.select('#map_box .modal-body')
             .append('svg')
             .attr('id', 'map_svg')

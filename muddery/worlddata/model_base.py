@@ -2,11 +2,12 @@ from django.db import models
 
 KEY_LENGTH = 255
 
-#------------------------------------------------------------
+
+# ------------------------------------------------------------
 #
 # store all rooms
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class world_rooms(models.Model):
     "Store all unique rooms."
 
@@ -23,11 +24,11 @@ class world_rooms(models.Model):
         verbose_name_plural = "World Room List"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store all exits
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class world_exits(models.Model):
     "Store all unique exits."
 
@@ -47,11 +48,11 @@ class world_exits(models.Model):
         verbose_name_plural = "World Exit List"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store exit locks
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class exit_locks(models.Model):
     "Store all exit locks."
 
@@ -68,11 +69,11 @@ class exit_locks(models.Model):
         verbose_name_plural = "Exit Locks"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store all objects
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class world_objects(models.Model):
     "Store all unique objects."
 
@@ -90,11 +91,11 @@ class world_objects(models.Model):
         verbose_name_plural = "World Object List"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store all object creators
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class object_creators(models.Model):
     "Store all object creators."
 
@@ -109,11 +110,11 @@ class object_creators(models.Model):
         verbose_name_plural = "Object Creators"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store objects loot list
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class object_loot_list(models.Model):
     "Store all object creators."
 
@@ -127,16 +128,16 @@ class object_loot_list(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Object Creator"
-        verbose_name_plural = "Object Creators"
+        verbose_name = "Object Loot List"
+        verbose_name_plural = "Object Loot List"
         unique_together = ("provider", "object")
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store all common objects
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class common_objects(models.Model):
     "Store all common objects."
 
@@ -155,11 +156,11 @@ class common_objects(models.Model):
         verbose_name_plural = "Common Object List"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store all equip_types
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class equipment_types(models.Model):
     "Store all equip types."
 
@@ -171,15 +172,15 @@ class equipment_types(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Equipment List"
-        verbose_name_plural = "Equipment List"
+        verbose_name = "Equipment Type"
+        verbose_name_plural = "Equipment Types"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store all equipments
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class equipments(common_objects):
     "Store all equipments."
 
@@ -195,11 +196,11 @@ class equipments(common_objects):
         verbose_name_plural = "Equipment List"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store all NPCs
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class world_npcs(models.Model):
     "Store all NPCs."
 
@@ -218,11 +219,11 @@ class world_npcs(models.Model):
         verbose_name_plural = "World NPC List"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store common characters
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class common_characters(models.Model):
     "Store common characters."
 
@@ -239,11 +240,11 @@ class common_characters(models.Model):
         verbose_name_plural = "Common Character List"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store all skills
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class skills(models.Model):
     "Store all skills."
 
@@ -264,21 +265,21 @@ class skills(models.Model):
         verbose_name_plural = "Skills"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store all quests
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class quests(models.Model):
     "Store all quests."
-    
+
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
     name = models.TextField(blank=True)
     typeclass = models.CharField(max_length=KEY_LENGTH)
     desc = models.TextField(blank=True)
     condition = models.TextField(blank=True)
     action = models.TextField(blank=True)
-    
+
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -286,11 +287,11 @@ class quests(models.Model):
         verbose_name_plural = "Quests"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store quest objectives
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class quest_objectives(models.Model):
     "Store all quest objectives."
 
@@ -309,11 +310,11 @@ class quest_objectives(models.Model):
         unique_together = ("quest", "ordinal")
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store quest dependency
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class quest_dependency(models.Model):
     "Store quest dependency."
 
@@ -328,11 +329,11 @@ class quest_dependency(models.Model):
         verbose_name_plural = "Quest Dependency"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store event data
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class event_data(models.Model):
     "Store event data."
 
@@ -349,11 +350,11 @@ class event_data(models.Model):
         verbose_name_plural = "Event Data"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store all dialogues
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class dialogues(models.Model):
     "Store all dialogues."
 
@@ -368,11 +369,11 @@ class dialogues(models.Model):
         verbose_name_plural = "Dialogues"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store dialogue relations
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class dialogue_relations(models.Model):
     "Store dialogue relations."
 
@@ -386,11 +387,11 @@ class dialogue_relations(models.Model):
         verbose_name_plural = "Dialogue Relations"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store dialogue sentences
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class dialogue_sentences(models.Model):
     "Store dialogue sentences."
 
@@ -409,11 +410,11 @@ class dialogue_sentences(models.Model):
         verbose_name_plural = "Dialogue Sentences"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store npc's dialogue
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class npc_dialogues(models.Model):
     "Store npc's dialogues."
 
@@ -428,11 +429,11 @@ class npc_dialogues(models.Model):
         verbose_name_plural = "NPC Dialogues"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # store dialogue quest dependency
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class dialogue_quest_dependency(models.Model):
     "Store dialogue quest dependency."
 
@@ -447,11 +448,11 @@ class dialogue_quest_dependency(models.Model):
         verbose_name_plural = "Dialogue Quest Dependency"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # character levels
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class character_models(models.Model):
     "Store all character level informations."
 
@@ -462,6 +463,7 @@ class character_models(models.Model):
     max_mp = models.IntegerField()
     attack = models.IntegerField()
     defence = models.IntegerField()
+    give_exp = models.IntegerField()
 
     class Meta:
         "Define Django meta options"
@@ -471,11 +473,11 @@ class character_models(models.Model):
         unique_together = ("character", "level")
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # character skills
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class character_skills(models.Model):
     "Store all character skill informations."
 
@@ -490,11 +492,11 @@ class character_skills(models.Model):
         unique_together = ("character", "skill")
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # event mobs
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class event_mobs(models.Model):
     "Store all event mobs."
 
@@ -510,12 +512,12 @@ class event_mobs(models.Model):
         verbose_name = "Event Mob"
         verbose_name_plural = "Event Mobs"
 
-        
-#------------------------------------------------------------
+
+# ------------------------------------------------------------
 #
 # event dialogues
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class event_dialogues(models.Model):
     "Store all event dialogues."
 
@@ -530,11 +532,11 @@ class event_dialogues(models.Model):
         verbose_name_plural = "Event Dialogues"
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # local strings
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 class localized_strings(models.Model):
     "Store all server local strings informations."
 

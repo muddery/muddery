@@ -133,6 +133,9 @@ var webclient = {
                 else if (key == "combat_skill_cd") {
                     combat.displaySkillCD(data[key]);
                 }
+                else if (key == "get_exp") {
+                    this.displayGetExp(data[key])
+                }
                 else if (key == "current_location") {
                     map.setCurrentLocation(data[key]);
                 }
@@ -409,7 +412,7 @@ var webclient = {
 
         if(is_goto){
             var page = $("#room_exits");
-            page.html(LS("Exits:"));
+            page.html(LS("Exits") + LS(": "));
             if (webclient.cache_room_exits) {
                 if (webclient.cache_room_exits.length > 0) {
                     // add exits
@@ -656,11 +659,33 @@ var webclient = {
         this.doSetPopupSize();
     },
 
+    displayGetExp : function(data) {
+        // show exp
+        this.displayMsg(LS("You got exp: ") + data);
+
+        var combat_box = $('#combat_box');
+        if (combat_box.length > 0) {
+            // If in combat, show exp in the combat box.
+            combat.displayGetExp(data);
+        }
+    },
+
     displayStatus : function(data) {
         // refresh prompt bar
         var bar = $("#prompt_bar");
         var prompt = $("<div>");
-        
+
+        var exp = "--";
+        try {
+            if (data["max_exp"] > 0) {
+                exp = data["exp"].toString() + "/" + data["max_exp"].toString();
+            }
+        }
+        catch(error) {
+        }
+
+        var hp = data["hp"].toString() + "/" + data["max_hp"].toString();
+
         try {
             $("<span>")
                 .addClass("prompt_name")
@@ -669,7 +694,17 @@ var webclient = {
 
             $("<span>")
                 .addClass("prompt_element")
-                .text(LS("HP: ") + data["hp"].toString())
+                .text(LS("Level") + LS(": ") + data["level"].toString())
+                .appendTo(prompt);
+
+            $("<span>")
+                .addClass("prompt_element")
+                .text(LS("Exp") + LS(": ") + exp)
+                .appendTo(prompt);
+
+            $("<span>")
+                .addClass("prompt_element")
+                .text(LS("HP") + LS(": ") + hp)
                 .appendTo(prompt);
         }
         catch(error) {
@@ -678,39 +713,49 @@ var webclient = {
         
         // display player's status
         var block = $("#box_status");
-        var content = "";
+        var content = $("<div>");
         
         // add player's status
-        content += "<div>";
-
         try {
-            element = "<div><span class='white'> " + LS("HP: ");
-            element += data["hp"].toString() + "/" + data["max_hp"].toString();
-            element += "</span><br></div>";
-            content += element;
+            $("<div>")
+                .text(LS("Level") + LS(": ") + data["level"].toString())
+                .appendTo(content);
         }
         catch(error) {
         }
 
         try {
-            element = "<div><span class='white'> " + LS("ATTACK: ");
-            element += data["attack"].toString();
-            element += "</span><br></div>";
-            content += element;
+            $("<div>")
+                .text(LS("Exp") + LS(": ") + exp)
+                .appendTo(content);
+        }
+        catch(error) {
+        }
+
+        try {
+            $("<div>")
+                .text(LS("HP") + LS(": ") + hp)
+                .appendTo(content);
+        }
+        catch(error) {
+        }
+
+        try {
+            $("<div>")
+                .text(LS("Attack") + LS(": ") + data["attack"].toString())
+                .appendTo(content);
         }
         catch(error) {
         }
         
         try {
-            element = "<div><span class='white'> " + LS("DEFENCE: ");
-            element += data["defence"].toString();
-            element += "</span><br></div>";
-            content += element;
+            $("<div>")
+                .text(LS("Defence") + LS(": ") + data["defence"].toString())
+                .appendTo(content);
         }
         catch(error) {
         }
-    
-        content += "</div>";
+
         block.html(content);
     },
         
@@ -745,7 +790,7 @@ var webclient = {
     displayDialogue : function(data) {
         if ($('#combat_box').length > 0) {
             // has combat box
-            combat.set_dialogue(data);
+            combat.setDialogue(data);
         }
         else {
             popupmgr.showDialogue(data);

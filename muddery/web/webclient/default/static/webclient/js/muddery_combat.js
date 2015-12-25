@@ -8,6 +8,7 @@ var combat = {
     _finished: false,
     _result: null,
     _loot: null,
+    _exp: 0,
     _skill_cd_time: {},
     _dialogue: null,
     
@@ -55,6 +56,7 @@ var combat = {
         this._finished = false;
         this._result = null;
         this._loot = null;
+        this._exp = 0;
         this._skill_cd_time = {};
         this._dialogue = null;
 
@@ -63,6 +65,10 @@ var combat = {
 
     displayGetObject: function(data) {
         this._loot = data;
+    },
+
+    displayGetExp: function(data) {
+        this._exp = data;
     },
 
     finishCombat: function(data) {
@@ -114,100 +120,76 @@ var combat = {
                 .addClass('modal-title')
                 .text(LS('BATTLE RESULT')).appendTo(boxHeader));
 
-        // object's info
-        var content = "";
-        var element = "";
-        var count = 0;
+        var get = false;
 
+        // exp
+        if (self._exp > 0) {
+            $('<div>')
+                .text(LS('Exp') + LS(': ') + self._exp)
+                .appendTo(boxBodyLoot);
+            get = true;
+        }
+
+        // object's info
         if (self._loot) {
             // add object's name
             try {
-                var first = true;
-                var accepted = self._loot["accepted"]
+                var accepted = self._loot.accepted;
+                if (accepted.length > 0) {
+                    get = true;
+                }
                 for (var key in accepted) {
-                    element = key + ": " + accepted[key] + "<br>";
-
-                    if (first) {
-                        content += LS("You got:") + "<br>";
-                        first = false;
-                    }
-                    content += element;
-                    count += 1;
+                    $('<div>')
+                        .text(key + ": " + accepted[key])
+                        .appendTo(boxBodyLoot);
                 }
             }
             catch(error) {
             }
 
             try {
-                var first = true;
-                var rejected = self._loot["rejected"];
+                var rejected = self._loot.rejected;
                 for (var key in rejected) {
-                    element = key + ": " + rejected[key] + "<br>";
-
-                    if (first) {
-                        if (count > 0) {
-                            content += "<br>"
-                        }
-                        first = false;
-                    }
-                    content += element;
-                    count += 1;
+                    $('<div>')
+                        .text(key + ": " + rejected[key])
+                        .appendTo(boxBodyLoot);
                 }
             }
             catch(error) {
             }
-
-            boxBodyLoot.html(content);
         }
 
-        if (count == 0) {
-            // get nothing
-            if ("stopped" in self._result) {
-                boxBodyResult.text(LS("Combat stopped !"));
-            }
-            else if ("escaped" in self._result) {
-                boxBodyResult.text(LS("Escaped !"));
-            }
-            else if ("winner" in self._result) {
-                var win = false;
-                for (var i in self._result.winner) {
-                    if (self._result.winner[i].dbref == self._self_dbref) {
-                        win = true;
-                        break;
-                    }
-                }
-
-                if (win) {
-                    boxBodyResult.text(LS("You win !"));
-                }
-                else {
-                    boxBodyResult.text(LS("You lost !"));
-                }
-            }
+        if (get) {
+            $('<div>')
+                .text(LS('You got:'))
+                .prependTo(boxBodyLoot);
         }
-        else {
-            // get objects
-            if ("stopped" in self._result) {
-                boxBodyResult.text("Combat stopped !");
+
+        // result
+        if ("stopped" in self._result) {
+            boxBodyResult.text("Combat stopped !");
+        }
+        else if ("escaped" in self._result) {
+            boxBodyResult.text(LS("Escaped !"));
+        }
+        else if ("winner" in self._result) {
+            var win = false;
+            for (var i in self._result.winner) {
+                if (self._result.winner[i].dbref == self._self_dbref) {
+                    win = true;
+                    break;
+                }
             }
-            else if ("winner" in self._result) {
-                var win = false;
-                for (var i in self._result.winner) {
-                    if (self._result.winner[i].dbref == self._self_dbref) {
-                        win = true;
-                        break;
-                    }
-                }
-                
-                if (win) {
-                    boxBodyResult.text(LS("You win !"));
-                }
-                else {
-                    boxBodyResult.text(LS("You lost !"));
-                }
+
+            if (win) {
+                boxBodyResult.text(LS("You win !"));
+            }
+            else {
+                boxBodyResult.text(LS("You lost !"));
             }
         }
 
+        // button
         var center = $('<center>');
         var button = $('<button>')
             .addClass('btn btn-default')
@@ -377,11 +359,11 @@ var combat = {
                     time = cd;
                 }
             }
-            combat.set_button_cd($(this), time);
+            combat.setButtonCD($(this), time);
         });
     },
 
-    set_button_cd: function(btn, cd) {
+    setButtonCD: function(btn, cd) {
         var key = btn.attr('key');
         var current_time = (new Date()).valueOf();
         var cd_time = current_time + cd * 1000;
@@ -421,15 +403,15 @@ var combat = {
         commands.doCombatSkill(caller)
     },
 
-    is_in_combat: function() {
+    isInCombat: function() {
         return this._finished;
     },
 
-    get_current_target: function() {
+    getCurrentTarget: function() {
         return this._current_target;
     },
 
-    set_dialogue: function(data) {
+    setDialogue: function(data) {
         this._dialogue = data;
     },
 }
