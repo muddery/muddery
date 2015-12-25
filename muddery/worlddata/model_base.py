@@ -538,7 +538,7 @@ class event_dialogues(models.Model):
 class localized_strings(models.Model):
     "Store all server local strings informations."
 
-    origin = models.TextField(primary_key=True)
+    origin = models.TextField()
     local = models.TextField(blank=True)
 
     class Meta:
