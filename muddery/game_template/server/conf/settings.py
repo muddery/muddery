@@ -76,6 +76,14 @@ DATABASES = {{
         'PASSWORD': '',
         'HOST': '',
         'PORT': ''
+        }},
+    'default_edit': {{
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(GAME_DIR, "server", "muddery_edit.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': ''
         }}}}
 
 ######################################################################
