@@ -61,7 +61,7 @@ var uimgr = {
     },
 
     divRoomCmds : function(data_cmds) {
-        var divRoomCmdsElement = uimgr.divRoomCommon("room_cmds", "Commands:");
+        var divRoomCmdsElement = uimgr.divRoomCommon("room_cmds", LS("Commands") + LS(": "));
         for (var i in data_cmds) {
             try {
                 var cmd = data_cmds[i];
@@ -77,7 +77,7 @@ var uimgr = {
 
     divRoomExits : function(data_exits) {
         var empty = true;
-        var divRoomExitsElement = uimgr.divRoomCommon("room_exits", LS("Exits:"));
+        var divRoomExitsElement = uimgr.divRoomCommon("room_exits", LS("Exits") + LS(": "));
         // add exits
         webclient.cache_room_exits = new Array();
         for (var i in data_exits) {
@@ -93,14 +93,14 @@ var uimgr = {
             }
         }
         if(empty) {
-            return uimgr.divEmpty(LS("Exits:"), {"id":"room_exits", "style":"display:none"});
+            return uimgr.divEmpty(LS("Exits") + LS(": "), {"id":"room_exits", "style":"display:none"});
         }
         return divRoomExitsElement;
     },
 
     divRoomThings : function(data_things) {
         var empty = true;
-        var divRoomThingsElement = uimgr.divRoomCommon("room_things", LS("Objects:"));
+        var divRoomThingsElement = uimgr.divRoomCommon("room_things", LS("Objects") + LS(": "));
         // add things
         for (var i in data_things) {
             try {
@@ -114,14 +114,14 @@ var uimgr = {
             }
         }
         if(empty) {
-            return uimgr.divEmpty(LS("Objects:"), {"id":"room_things", "style":"display:none"});
+            return uimgr.divEmpty(LS("Objects") + LS(": "), {"id":"room_things", "style":"display:none"});
         }
         return divRoomThingsElement;
     },
 
     divRoomNpcs : function(data_npcs) {
         var empty = true;
-        var divRoomNpcsElement = uimgr.divRoomCommon("room_npcs", LS("NPCs:"));
+        var divRoomNpcsElement = uimgr.divRoomCommon("room_npcs", LS("NPCs") + LS(": "));
         // add npcs
         for (var i in data_npcs) {
             try {
@@ -142,14 +142,14 @@ var uimgr = {
         }
 
         if(empty) {
-            return uimgr.divEmpty(LS("NPCs:"), {"id":"room_npcs", "style":"display:none"});
+            return uimgr.divEmpty(LS("NPCs") + LS(": "), {"id":"room_npcs", "style":"display:none"});
         }
         return divRoomNpcsElement;
     },
 
     divRoomPlayers : function(data_players) {
         var empty = true;
-        var divRoomPlayersElement = uimgr.divRoomCommon("room_players", LS("Players:"));
+        var divRoomPlayersElement = uimgr.divRoomCommon("room_players", LS("Players") + LS(": "));
         // add players
         for (var i in data_players) {
             try {
@@ -163,7 +163,7 @@ var uimgr = {
             }
         }
         if(empty) {
-            return uimgr.divEmpty(LS("Players:"), {"id":"room_players", "style":"display:none"});
+            return uimgr.divEmpty(LS("Players") + LS(": "), {"id":"room_players", "style":"display:none"});
         }
         return divRoomPlayersElement;
     },
@@ -176,7 +176,7 @@ var uimgr = {
     },
 
     divObjectCmds : function(data_cmds) {
-        var divObjectCmdsElement = uimgr.divObjectCommon("object_cmds", LS("Actions:"));
+        var divObjectCmdsElement = uimgr.divObjectCommon("object_cmds", LS("Actions") + LS(": "));
         // add cmds
         for (var i in data_cmds) {
             try {

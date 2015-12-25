@@ -63,3 +63,4 @@ origin,local
 "%s is died.","%s已经死了。"
 "You can not attack %s.","你无法攻击%s。"
 "Kill","杀死"
+"Upgrade to level %s.","升到%s级。"

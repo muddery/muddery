@@ -247,6 +247,17 @@ class CombatHandler(DefaultScript):
                             # give objects to winner
                             winner.receive_objects(loots)
 
+                # add exp
+                for winner in winners:
+                    # get total exp
+                    exp = 0
+                    for loser in losers:
+                        exp += loser.provide_exp(winner)
+
+                    if exp:
+                        # give experience to the winner
+                        winner.add_exp(exp)
+
                 # send result to players
                 msg = []
                 for winner in winners:

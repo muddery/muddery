@@ -10,21 +10,17 @@ creation commands.
 
 from __future__ import print_function
 
-import traceback
 import random
 from django.conf import settings
 from django.db.models.loading import get_model
-from muddery.typeclasses.objects import MudderyObject
-from muddery.typeclasses.common_objects import MudderyEquipment
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property
+from muddery.typeclasses.objects import MudderyObject
+from muddery.utils.localized_strings_handler import LS
 from muddery.utils import utils
 from muddery.utils.builder import build_object
-from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
-from muddery.utils.exception import MudderyError
-from muddery.utils.localized_strings_handler import LS
 from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.script_handler import SCRIPT_HANDLER
 
@@ -53,7 +49,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     @lazy_property
     def skill(self):
         return SkillHandler(self)
-
 
     def at_object_creation(self):
         """
@@ -84,7 +79,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # set attributes
         self.db.attributes = {}
 
-
     def at_init(self):
         """
         Init the character.
@@ -93,23 +87,22 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # update equipment positions
         for position in self.db.equipments:
-            if not position in settings.EQUIP_POSITIONS:
+            if position not in settings.EQUIP_POSITIONS:
                 del self.db.equipments[position]
 
         for position in settings.EQUIP_POSITIONS:
-            if not position in self.db.equipments:
+            if position not in self.db.equipments:
                 self.db.equipments[position] = None
 
         # clear target
         self.target = None
-
 
     def load_data(self):
         """
         Set data_info to the object.
         """
         # set default values
-        self.max_exp = 1
+        self.max_exp = 0
         self.max_hp = 1
         self.max_mp = 1
         
@@ -141,17 +134,20 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # refresh data
         self.refresh_data()
 
-
     def set_level(self, level):
         """
         Set character's level.
+        Args:
+            level: character's new level
+
+        Returns:
+            None
         """
         if self.db.level == level:
             return
 
         self.db.level = level
         self.refresh_data()
-
 
     def refresh_data(self):
         """
@@ -166,17 +162,16 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # load passive skill
         self.load_passive_skill_data()
 
-
     def load_model_data(self):
         """
         Load character's level data.
         """
+        model_name = getattr(self, "model", None)
+        if not model_name:
+            model_name = self.get_info_key()
+
         try:
             # get data from db
-            model_name = getattr(self, "model", None)
-            if not model_name:
-                model_name = self.get_info_key()
-
             model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_MODELS)
             model_data = model_obj.objects.get(character=model_name, level=self.db.level)
 
@@ -193,7 +188,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         except Exception, e:
             logger.log_errmsg("Can't load character %s's level info (%s, %s): %s" %
                               (self.get_info_key(), model_name, self.db.level, e))
-
 
     def set_equips(self):
         """
@@ -213,7 +207,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # set character's attributes
         self.refresh_data()
 
-
     def load_equip_data(self):
         """
         Add equipment's attributes to the character
@@ -229,14 +222,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     value += getattr(content, effect, 0)
                     setattr(self, effect, value)
 
-
     def load_passive_skill_data(self):
         """
         Add passive skills' effects to the character
         """
         # cast passive skills
         self.skill.cast_passive_skills()
-
 
     def set_initial_data(self):
         """
@@ -261,13 +252,16 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # set initial data
         self.db.hp = self.max_hp
 
-
     def use_object(self, obj):
         """
         Use an object.
+        Args:
+            obj: (object) object to use
+
+        Returns:
+            None
         """
         pass
-
 
     def at_after_move(self, source_location):
         """
@@ -276,11 +270,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         now in.
 
         Args:
-        source_location (Object): Wwhere we came from. This may be `None`.
+            source_location : (Object) Where we came from. This may be `None`.
 
         """
         pass
-
 
     ########################################
     #
@@ -290,31 +283,46 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
     def has_skill(self, skill):
         """
-        Whether the character has the skill.
+        Check if the character has this skill.
+
+        Args:
+            skill: (string) skill's key
+
+        Returns:
+            (boolean) if the character has this skill or not
         """
         self.skill.has_skill(skill)
-
 
     def cast_skill_manually(self, skill, target):
         """
         Cast a skill.
+
+        Args:
+            skill: (string) skill's key
+            target: (object) skill's target
+
+        Returns:
+            None
         """
         self.target = target
         self.skill.cast_skill_manually(skill, target)
-
 
     ########################################
     #
     # Attack a target.
     #
     ########################################
-
     def set_target(self, target):
         """
         Set character's target.
+
+        Args:
+            target: (object) character's target
+
+        Returns:
+            None
         """
         self.target = target
-
 
     def clear_target(self):
         """
@@ -322,12 +330,16 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         self.target = None
 
-
     def attack_target(self, target, desc=""):
         """
         Attack a target.
+
         Args:
-            target (object): The target object.
+            target: (object) the target object.
+            desc: (string) string to describe this attack
+
+        Returns:
+            None
         """
         if self.is_in_combat():
             # already in battle
@@ -353,53 +365,72 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         chandler = create_script("combat_handler.CombatHandler")
                         
         # set combat team and desc
-        chandler.set_combat({1: [target], 2:[self]}, desc)
-
+        chandler.set_combat({1: [target], 2: [self]}, desc)
 
     def attack_current_target(self, desc=""):
         """
         Attack current target.
+
         Args:
-            target (string): The dbref of the target.
+            desc: (string) string to describe this attack
+
+        Returns:
+            None
         """
         self.attack_target(self.target, desc)
-
 
     def attack_target_dbref(self, target_dbref, desc=""):
         """
         Attack a target by dbref.
+
         Args:
-            target_dbref (string): The dbref of the target.
+            target_dbref: (string) the dbref of the target.
+            desc: (string) string to describe this attack
+
+        Returns:
+            None
         """
         target = self.search(target_dbref)
         self.attack_target(target, desc)
-
 
     def attack_target_key(self, target_key, desc=""):
         """
         Attack a target.
-        Args:
-            target_key (string): The info key of the target.
-        """
-        target = self.search(target_dbref)
-        self.attack_target(target, desc)
 
+        Args:
+            target_key: (string) the info key of the target.
+            desc: (string) string to describe this attack
+
+        Returns:
+            None
+        """
+        target = self.search(target_key)
+        self.attack_target(target, desc)
 
     def attack_clone_current_target(self, desc=""):
         """
         Attack current target.
-        Args:
-            target (string): The dbref of the target.
-        """
-        self.attack_clone_target(self.target.get_info_key(), self.target.db.level)
 
+        Args:
+            desc: (string) string to describe this attack
+
+        Returns:
+            None
+        """
+        self.attack_clone_target(self.target.get_info_key(), self.target.db.level, desc)
 
     def attack_clone_target(self, target_key, target_level=0, desc=""):
         """
         Attack the image of a target. This creates a new character object for attack.
         The origin target will not be affected.
+
         Args:
-            target_key (string): The info key of the target.
+            target_key: (string) the info key of the target.
+            target_level: (int) target's level
+            desc: (string) string to describe this attack
+
+        Returns:
+            None
         """
         if target_level == 0:
             # find the target and get level
@@ -418,67 +449,86 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             return
 
         target.set_level(target_level)
-
         self.attack_target(target, desc)
-
 
     ########################################
     #
     # Combat methods.
     #
     ########################################
-
     def is_in_combat(self):
         """
-        If is in combat.
+        Check if the character is in combat.
+
+        Returns:
+            (boolean) is in combat or not
         """
         return bool(self.ndb.combat_handler)
-
 
     def set_team(self, team_id):
         """
         Set character's team id in combat.
+
+        Args:
+            team_id: team's id
+
+        Returns:
+            None
         """
         self.db.team = team_id
-
 
     def get_team(self):
         """
         Get character's team id in combat.
+
+        Returns:
+            team id
         """
         return self.db.team
-
 
     def hurt(self, damage):
         """
         Be hurted.
+
+        Args:
+            damage: (number) the damage value
+
+        Returns:
+            None
         """
         self.db.hp -= damage
         if self.db.hp < 0:
             self.db.hp = 0
 
-        return
-
-
     def is_alive(self):
         """
-        If this character is alive.
+        Check if the character is alive.
+
+        Returns:
+            (boolean) the character is alive or not
         """
         return self.db.hp > 0
-
 
     def die(self, killers):
         """
         This character die.
+
+        Args:
+            killers: (list of objects) characters who kill this
+
+        Returns:
+            None
         """
         # trigger event
         self.event.at_character_die()
         self.event.at_character_kill(killers)
 
-
     def get_combat_commands(self):
         """
         This returns a list of combat commands.
+
+        Returns:
+            (list) available commands for combat
         """
         commands = []
         for key in self.db.skills:
@@ -490,17 +540,30 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             command = {"name": skill.name,
                        "key": skill.get_info_key()}
             commands.append(command)
-        return commands
 
+        return commands
 
     def loot(self, looter):
         """
-        Loot objects.
-        """
+        Loot the character for objects.
 
+        Args:
+            looter: (object) who loot this character
+
+        Returns:
+            (list) object's list
+        """
         def can_loot(self, looter, obj):
             """
             help function to decide which objects can be looted.
+
+            Args:
+                self: (object) this character
+                looter: (object) who loot this character
+                obj: (dict) information of the object which will be looted
+
+            Returns:
+                (boolean) if this object can be looted or not
             """
             rand = random.random()
             if rand > obj["odds"]:
@@ -519,3 +582,43 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         obj_list = [obj for obj in self.loot_list if can_loot(self, looter, obj)]
 
         return obj_list
+
+    def provide_exp(self, killer):
+        """
+        Calculate the exp provide to the killer.
+        Args:
+            killer: (object) the character who kills it.
+
+        Returns:
+            (int) experience give to the killer
+        """
+        if killer:
+            return self.give_exp
+
+        return 0
+
+    def add_exp(self, exp):
+        """
+        Add character's exp.
+        Args:
+            exp: the exp value to add.
+
+        Returns:
+            None
+        """
+        self.db.exp += exp
+        while self.db.exp >= self.max_exp:
+            if self.max_exp > 0:
+                # can upgrade
+                self.db.exp -= self.max_exp
+                self.set_level(self.db.level + 1)
+
+                if self.has_player:
+                    # notify the player
+                    self.msg({"msg": LS("Upgrade to level %s.") % self.db.level})
+            else:
+                # can not upgrade
+                self.db.exp = 0
+                break
+
+        self.msg({"get_exp": exp})

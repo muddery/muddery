@@ -118,7 +118,7 @@ var frame = {
             .css('display', 'none')
             .append($('<a>')
                 .attr('onclick', 'doConnect()')
-                .text(LS('CONNECT')))
+                .text(LS('Connect')))
             .appendTo(ul);
 
         $('<li>')
@@ -128,7 +128,7 @@ var frame = {
             .css('display', 'none')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("login")')
-                .text(LS('LOGIN')))
+                .text(LS('Login')))
             .appendTo(ul);
 
         $('<li>')
@@ -138,7 +138,7 @@ var frame = {
             .css('display', 'none')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("register")')
-                .text(LS('REGISTER')))
+                .text(LS('Register')))
             .appendTo(ul);
 
         $('<li>')
@@ -148,7 +148,7 @@ var frame = {
             .css('display', 'none')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("scene")')
-                .text(LS('SCENE')))
+                .text(LS('Scene')))
             .appendTo(ul);
 
         // character popup menu
@@ -165,7 +165,7 @@ var frame = {
             .attr('aria-haspopup', 'true')
             .attr('aria-expanded', 'false')
             .addClass('dropdown-toggle')
-            .text(LS('CHAR'))
+            .text(LS('Char'))
             .append($('<span>')
                 .addClass('caret'))
             .appendTo(tab_character);
@@ -178,21 +178,21 @@ var frame = {
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("infomation")')
                 .addClass('first-dropdown-item')
-                .text(LS('STATUS')))
+                .text(LS('Status')))
             .appendTo(popup_character);
 
         $('<li>')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("inventory")')
                 .addClass('dropdown-item')
-                .text(LS('INVENTORY')))
+                .text(LS('Inventory')))
             .appendTo(popup_character);
 
         $('<li>')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("skill")')
                 .addClass('dropdown-item')
-                .text(LS('SKILL')))
+                .text(LS('Skill')))
             .appendTo(popup_character);
 
         // tab quest
@@ -203,7 +203,7 @@ var frame = {
             .css('display', 'none')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("quest")')
-                .text(LS('QUEST')))
+                .text(LS('Quest')))
             .appendTo(ul);
 
         // tab map
@@ -214,7 +214,7 @@ var frame = {
             .css('display', 'none')
             .append($('<a>')
                 .attr('onclick', 'map.showMap()')
-                .text(LS('MAP')))
+                .text(LS('Map')))
             .appendTo(ul);
 
         // character system menu
@@ -231,7 +231,7 @@ var frame = {
             .attr('aria-haspopup', 'true')
             .attr('aria-expanded', 'false')
             .addClass('dropdown-toggle')
-            .text(LS('SYS'))
+            .text(LS('Sys'))
             .append($('<span>')
                 .addClass('caret'))
             .appendTo(tab_system);
@@ -247,7 +247,7 @@ var frame = {
                 .append($('<a>')
                     .attr('onclick', 'webclient.showPage("command")')
                     .addClass(item_class)
-                    .text(LS('COMMAND')))
+                    .text(LS('Command')))
                 .appendTo(popup_system);
 
             item_class = 'dropdown-item';
@@ -257,7 +257,7 @@ var frame = {
             .append($('<a>')
                 .attr('onclick', 'commands.doLogout()')
                 .addClass(item_class)
-                .text(LS('LOGOUT')))
+                .text(LS('Logout')))
             .appendTo(popup_system);
     },
 }
