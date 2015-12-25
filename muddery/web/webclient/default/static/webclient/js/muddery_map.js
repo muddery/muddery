@@ -202,7 +202,7 @@ var map = {
                 .attr("dy", ".3em")
                 .attr("text-anchor", "middle")
                 .attr("font-family", "sans-serif")
-                .attr("font-size", "13px")
+                .attr("font-size", "14px")
                 .attr("fill", "white")
                 .text(function(d) {
                         return d[0];

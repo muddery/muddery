@@ -20,7 +20,7 @@ body {
 
 #tab_content {
     min-height: 185px;
-    max-height: 240px;
+    max-height: 360px;
     overflow-x: hidden;
     overflow-y: auto;
     padding-top: 10px;
