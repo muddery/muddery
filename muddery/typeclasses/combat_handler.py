@@ -13,7 +13,7 @@ from evennia.utils import logger
 from muddery.utils import builder, defines
 
 
-class CombatHandler(DefaultScript):
+class MudderyCombatHandler(DefaultScript):
     """
     This implements the combat handler.
     """

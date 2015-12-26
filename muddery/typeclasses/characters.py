@@ -362,7 +362,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             return
 
         # create a new combat handler
-        chandler = create_script("combat_handler.CombatHandler")
+        chandler = create_script(settings.COMBAT_HANDLER)
                         
         # set combat team and desc
         chandler.set_combat({1: [target], 2: [self]}, desc)
@@ -611,14 +611,26 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             if self.max_exp > 0:
                 # can upgrade
                 self.db.exp -= self.max_exp
-                self.set_level(self.db.level + 1)
-
-                if self.has_player:
-                    # notify the player
-                    self.msg({"msg": LS("Upgrade to level %s.") % self.db.level})
+                self.level_up()
             else:
                 # can not upgrade
                 self.db.exp = 0
                 break
 
         self.msg({"get_exp": exp})
+
+    def level_up(self):
+        """
+        Upgrade level.
+
+        Returns:
+            None
+        """
+        self.set_level(self.db.level + 1)
+
+        # recover hp
+        self.db.hp = self.max_hp
+
+        if self.has_player:
+            # notify the player
+            self.msg({"msg": LS("Upgrade to level %s.") % self.db.level})

@@ -1033,7 +1033,7 @@ class CmdAttack(Command):
             return
 
         # create a new combat handler
-        chandler = create_script("combat_handler.CombatHandler")
+        chandler = create_script(settings.COMBAT_HANDLER)
         
         # set combat team and desc
         chandler.set_combat({1: [target], 2:[self.caller]}, "")

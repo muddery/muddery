@@ -102,6 +102,9 @@ BASE_QUEST_TYPECLASS = "muddery.typeclasses.quests.MudderyQuest"
 # Handler deals with condition scripts and action scripts
 SCRIPT_HANDLER = "muddery.utils.script_handler_base.ScriptHandlerDefault"
 
+# Handler of the combat
+COMBAT_HANDLER = "muddery.typeclasses.combat_handler.MudderyCombatHandler"
+
 ######################################################################
 # World data features
 ######################################################################
