@@ -12,8 +12,11 @@ from django.conf import settings
 from django.db.models.loading import get_model
 from evennia.objects.objects import DefaultObject
 from evennia.utils import logger
+from evennia.utils.utils import to_str
 from evennia.utils.utils import make_iter
 from evennia.utils.utils import lazy_property
+from evennia.typeclasses.models import DbHolder
+from muddery.utils.data_field_handler import DataFieldHandler
 from muddery.utils import utils
 from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
@@ -25,30 +28,41 @@ class MudderyObject(DefaultObject):
     """
     This object loads attributes from world data on init automatically.
     """
-
-    # these fields are reserved, can not used for other purpose.
-    reserved_fields = set(["id",
-                           "date_created",
-                           "locks",
-                           "tags",
-                           "nattributes",
-                           "dbref",
-                           "is_typeclass",
-                           "delete",
-                           "swap_typeclass",
-                           "db",
-                           "ndb",
-                           "objects",
-                           "attr",
-                           "save",
-                           "delete",
-                           ])
-
     # initialize all handlers in a lazy fashion
     @lazy_property
     def event(self):
         return EventHandler(self)
 
+    @lazy_property
+    def datafields(self):
+        return DataFieldHandler(self)
+
+    #@property dfield
+    def __dfield_get(self):
+        """
+        A non-attr_obj store (ndb: NonDataBase). Everything stored
+        to this is guaranteed to be cleared when a server is shutdown.
+        Syntax is same as for the _get_db_holder() method and
+        property, e.g. obj.ndb.attr = value etc.
+        """
+        try:
+            return self._dfield_holder
+        except AttributeError:
+            self._dfield_holder = DbHolder(self, "datafield", manager_name='datafields')
+            return self._dfield_holder
+
+    #@dfield.setter
+    def __dfield_set(self, value):
+        "Stop accidentally replacing the ndb object"
+        string = "Cannot assign directly to ndb object! "
+        string += "Use dfield.attr=value instead."
+        raise Exception(string)
+
+    #@dfield.deleter
+    def __dfield_del(self):
+        "Stop accidental deletion."
+        raise Exception("Cannot delete the dfield object!")
+    dfield = property(__dfield_get, __dfield_set, __dfield_del)
 
     def at_object_creation(self):
         """
@@ -207,54 +221,30 @@ class MudderyObject(DefaultObject):
         if not data:
             return
 
-        if hasattr(data, "typeclass"):
-            self.set_typeclass(data.typeclass)
-
-        if hasattr(data, "name"):
-            self.set_name(data.name)
-
-        if hasattr(data, "alias"):
-            self.set_alias(data.alias)
-
-        if hasattr(data, "location"):
-            self.set_location(data.location)
-
-        if hasattr(data, "desc"):
-            self.set_desc(data.desc)
-
-        if hasattr(data, "lock"):
-            self.set_lock(data.lock)
-
-        if hasattr(data, "attributes"):
-            self.set_attributes(data.attributes)
-
-        if hasattr(data, "destination"):
-            self.set_obj_destination(data.destination)
-        
-        # get other fields
-        known_fields = set(["key",
-                            "typeclass",
-                            "name",
-                            "alias",
-                            "location",
-                            "home",
-                            "desc",
-                            "lock",
-                            "attributes",
-                            "destination"])
-
+        # Set data.
         for field in data._meta.fields:
-            if field.name in known_fields:
-                # know fields have been already added.
-                continue
+            setattr(self.dfield, field.name, data.serializable_value(field.name))
 
-            if field.name in self.reserved_fields:
-                logger.log_errmsg("Can not set reserved field %s!" % field.name)
-                continue
+        if hasattr(self.dfield, "typeclass"):
+            self.set_typeclass(self.dfield.typeclass)
 
-            # Set data.
-            setattr(self, field.name, data.serializable_value(field.name))
+        if hasattr(self.dfield, "name"):
+            self.set_name(self.dfield.name)
 
+        if hasattr(self.dfield, "location"):
+            self.set_location(self.dfield.location)
+
+        if hasattr(self.dfield, "desc"):
+            self.set_desc(self.dfield.desc)
+
+        if hasattr(self.dfield, "lock"):
+            self.set_lock(self.dfield.lock)
+
+        if hasattr(self.dfield, "attributes"):
+            self.set_attributes(self.dfield.attributes)
+
+        if hasattr(self.dfield, "destination"):
+            self.set_obj_destination(self.dfield.destination)
 
     def set_typeclass(self, typeclass):
         """
@@ -280,7 +270,6 @@ class MudderyObject(DefaultObject):
             logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_info_key(), typeclass))
             return
 
-
     def set_name(self, name):
         """
         Set object's name.
@@ -302,43 +291,11 @@ class MudderyObject(DefaultObject):
         if self.destination:
             self.flush_from_cache()
 
-
     def get_name(self):
         """
         Get player character's name.
         """
         return self.name
-
-
-    def set_alias(self, aliases):
-        """
-        Set object's alias.
-        
-        Args:
-        aliases: (string) Aliases of the object.
-        """
-        # merge the old and new aliases (if any)
-        new_aliases = [alias.strip().lower() for alias in aliases.split(';')
-                       if alias.strip()]
-
-        set_new_aliases = set(new_aliases)
-        set_current_aliases = set(self.aliases.all())
-                   
-        if set_new_aliases == set_current_aliases:
-            # No change.
-            return
-
-        self.aliases.clear()
-        self.aliases.add(new_aliases)
-    
-        # we need to trigger this here, since this will force
-        # (default) Exits to rebuild their Exit commands with the new
-        # aliases
-        #self.at_cmdset_get(force_init=True)
-    
-        if self.destination:
-            self.flush_from_cache()
-
 
     def set_location(self, location):
         """
@@ -460,6 +417,12 @@ class MudderyObject(DefaultObject):
         Args:
         destination: (string) Destination's name. Must be the key of data info.
         """
+        if not destination:
+            # remove destination
+            self.destination = destination
+            return
+
+        # set new destination
         destination_obj = None
     
         if destination:
@@ -523,7 +486,7 @@ class MudderyObject(DefaultObject):
                 "name": self.name,
                 "desc": self.db.desc,
                 "cmds": self.get_available_commands(caller)}
-                
+
         return info
 
 

@@ -18,7 +18,6 @@ class MudderyCommonObject(MudderyObject):
     It has two additional properties: max_stack(int) and unique(bool). They decied the number
     of the object that a player can put in his inventory.
     """
-    
     def at_object_creation(self):
         """
         Set default values.
@@ -26,6 +25,18 @@ class MudderyCommonObject(MudderyObject):
         # set total number
         self.db.number = 0
 
+    def load_data(self):
+        """
+        Load object data.
+
+        Returns:
+            None
+        """
+        super(MudderyCommonObject, self).load_data()
+
+        # set object stack info
+        self.max_stack = getattr(self.dfield, "max_stack", 1)
+        self.unique = getattr(self.dfield, "unique", False)
 
     def get_number(self):
         """
@@ -42,20 +53,19 @@ class MudderyCommonObject(MudderyObject):
             return
         
         if number < 0:
-            raise MudderyError("%s can not increase a negative nubmer." % key)
+            raise MudderyError("%s can not increase a negative nubmer." % self.get_info_key())
             return
 
         if self.max_stack == 1 and self.db.number == 1:
-            raise MudderyError("%s can not stack." % key)
+            raise MudderyError("%s can not stack." % self.get_info_key())
             return
 
         if self.db.number + number > self.max_stack:
-            raise MudderyError("%s over stack." % key)
+            raise MudderyError("%s over stack." % self.get_info_key())
             return
         
         self.db.number += number
         return
-
 
     def decrease_num(self, number):
         """
@@ -65,16 +75,15 @@ class MudderyCommonObject(MudderyObject):
             return
 
         if number < 0:
-            raise MudderyError("%s can not decrease a negative nubmer." % key)
+            raise MudderyError("%s can not decrease a negative nubmer." % self.get_info_key())
             return
 
         if self.db.number < number:
-            raise MudderyError("%s's number will below zero." % key)
+            raise MudderyError("%s's number will below zero." % self.get_info_key())
             return
         
         self.db.number -= number
         return
-
 
     def get_available_commands(self, caller):
         """
@@ -86,16 +95,26 @@ class MudderyCommonObject(MudderyObject):
             commands.append({"name":LS("DISCARD"), "cmd":"discard", "args":self.dbref})
         return commands
 
+    def take_effect(self, user, number):
+        """
+        Use this object.
+
+        Args:
+            user: (object) the object who uses this
+            number: (int) the number of the object to use
+
+        Returns:
+            (result, number):
+                result: (string) a description of the result
+                number: (int) actually used number
+        """
+        return (LS("No effect."), 0)
 
 class MudderyFood(MudderyCommonObject):
     """
     This is a food. Players can use it to change their properties, such as hp, mp,
     strength, etc.
-    
-    Effect field is in the format of:
-    <property name>:<effect>,<property name>:<effect>...
     """
-
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -111,24 +130,22 @@ class MudderyEquipment(MudderyCommonObject):
     """
     This is a equipment. Players can equip it to change their properties, such as attack, defence,
     etc.
-    
-    Effect field is in the format of:
-    <property name>:<effect>,<property name>:<effect>...
     """
     def load_data(self):
         """
         Load equipments data.
         """
         super(MudderyEquipment, self).load_data()
-        self.equipped = False
 
+        self.type = getattr(self.dfield, "type", "")
+        self.position = getattr(self.dfield, "position", "")
 
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        if self.equipped:
+        if getattr(self, "equipped", False):
             commands = [{"name":LS("TAKE OFF"), "cmd":"takeoff", "args":self.dbref}]
         else:
             commands = [{"name":LS("EQUIP"), "cmd":"equip", "args":self.dbref}]

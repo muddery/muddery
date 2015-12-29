@@ -43,6 +43,29 @@ class MudderyExit(MudderyObject, DefaultExit):
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
     """
+
+    def at_init(self):
+        """
+        Set initial data.
+
+        Returns:
+            None
+        """
+        self.verb = LS("GOTO")
+        super(MudderyExit, self).at_init()
+
+    def load_data(self):
+        """
+        Load exit data.
+
+        Returns:
+            None
+        """
+        super(MudderyExit, self).load_data()
+
+        # set action verb
+        self.verb = getattr(self.dfield, "verb", LS("GOTO"))
+
     def at_before_traverse(self, traversing_object):
         """
         Called just before an object uses this object to traverse to
@@ -87,12 +110,7 @@ class MudderyExit(MudderyObject, DefaultExit):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        # commands = [{"name":"LOOK", "cmd":"look", "args":self.dbref}]
-        verb = getattr(self, "verb", LS("GOTO"))
-        if not verb:
-            verb = LS("GOTO")
-        commands = [{"name":verb, "cmd":"goto", "args":self.dbref}]
-
+        commands = [{"name":self.verb, "cmd":"goto", "args":self.dbref}]
         return commands
 
 

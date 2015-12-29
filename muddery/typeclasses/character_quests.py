@@ -181,8 +181,9 @@ class MudderyQuest(MudderyObject):
         owner = self.db.owner
 
         # do quest's action
-        if self.action:
-            SCRIPT_HANDLER.do_action(caller, None, self.action)
+        action = getattr(self.dfield, "action", None)
+        if action:
+            SCRIPT_HANDLER.do_action(owner, None, action)
 
         # remove objective objects
         obj_list = []

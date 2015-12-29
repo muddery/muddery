@@ -36,16 +36,13 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         """
         Set data_info to the object.
         """
+        super(MudderyRoom, self).load_data()
+
+        self.position = None
         try:
-            super(MudderyRoom, self).load_data()
-
-            # search skill function
-            self.position_org = self.position
-            self.position = None
-            if self.position_org:
-                temp = ast.literal_eval(self.position_org)
-                self.position = ast.literal_eval(self.position_org)
-
+            # set position
+            if self.dfield.position:
+                self.position = ast.literal_eval(self.dfield.position)
         except Exception, e:
             logger.log_tracemsg("load_data error: %s" % e)
 
@@ -122,8 +119,9 @@ class MudderyRoom(MudderyObject, DefaultRoom):
 
         for cont in visible:
             # only show objects that match the condition
-            if hasattr(cont, "condition"):
-                if not SCRIPT_HANDLER.match_condition(caller, self, cont.condition):
+            condition = getattr(cont.dfield, "condition", None)
+            if condition:
+                if not SCRIPT_HANDLER.match_condition(caller, self, condition):
                     continue
                         
             type = self.get_surrounding_type(cont)
