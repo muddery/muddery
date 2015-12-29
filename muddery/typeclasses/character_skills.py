@@ -49,7 +49,6 @@ class MudderySkill(MudderyObject):
         self.db.owner = None
         self.db.cd_end_time = 0
 
-
     def load_data(self):
         """
         Set data_info to the object.
@@ -58,9 +57,13 @@ class MudderySkill(MudderyObject):
 
         # search skill function
         self.function_call = None
-        if self.function in self._skill_modues:
-            self.function_call = self._skill_modues[self.function]
+        if self.dfield.function in self._skill_modues:
+            self.function_call = self._skill_modues[self.dfield.function]
 
+        # set data
+        self.effect = getattr(self.dfield, "effect", 0)
+        self.cd = getattr(self.dfield, "cd", 0)
+        self.passive = getattr(self.dfield, "passive", False)
 
     def get_available_commands(self, caller):
         """

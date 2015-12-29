@@ -77,7 +77,8 @@ var LOCAL_STRING = {
     "Scene": "场景",
     "Get Object": "获取物品",
     "Alert": "警告",
+    "Message": "消息",
     "SELECT ONE": "选择一个",
-    "(ACCOMPLISHED)": "(目标完成)",
+    "(ACCOMPLISHED)": "(完成)",
     "CLOSE": "关闭",
 };

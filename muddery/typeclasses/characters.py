@@ -101,16 +101,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         Set data_info to the object.
         """
-        # set default values
-        self.max_exp = 0
-        self.max_hp = 1
-        self.max_mp = 1
-        
-        self.attack = 0
-        self.defence = 0
-        
-        self.skill_cd = 0
-        
         super(MudderyCharacter, self).load_data()
 
         # Load loot list.
@@ -166,7 +156,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         Load character's level data.
         """
-        model_name = getattr(self, "model", None)
+        model_name = getattr(self.dfield, "model", None)
         if not model_name:
             model_name = self.get_info_key()
 
@@ -175,19 +165,21 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_MODELS)
             model_data = model_obj.objects.get(character=model_name, level=self.db.level)
 
-            known_fields = set(["id",
-                                "character",
-                                "level"])
+            reserved_fields = {"id", "character", "level"}
             for field in model_data._meta.fields:
-                if field.name in known_fields:
+                if field.name in reserved_fields:
                     continue
-                if field.name in self.reserved_fields:
-                    logger.log_errmsg("Can not set reserved field %s!" % field.name)
-                    continue
-                setattr(self, field.name, model_data.serializable_value(field.name))
+                setattr(self.dfield, field.name, model_data.serializable_value(field.name))
         except Exception, e:
             logger.log_errmsg("Can't load character %s's level info (%s, %s): %s" %
                               (self.get_info_key(), model_name, self.db.level, e))
+
+        self.max_exp = getattr(self.dfield, "max_exp", 0)
+        self.max_hp = getattr(self.dfield, "max_hp", 1)
+        self.max_mp = getattr(self.dfield, "max_mp", 1)
+        self.attack = getattr(self.dfield, "attack", 0)
+        self.defence = getattr(self.dfield, "defence", 0)
+        self.give_exp = getattr(self.dfield, "give_exp", 0)
 
     def set_equips(self):
         """
@@ -219,7 +211,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             if content.dbref in equipped:
                 for effect in settings.EQUIP_EFFECTS:
                     value = getattr(self, effect, 0)
-                    value += getattr(content, effect, 0)
+                    value += getattr(content.dfield, effect, 0)
                     setattr(self, effect, value)
 
     def load_passive_skill_data(self):
@@ -240,7 +232,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         model_skills = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_SKILLS)
         if model_skills:
             # Get records.
-            model_name = getattr(self, "model", None)
+            model_name = getattr(self.dfield, "model", None)
             if not model_name:
                 model_name = self.get_info_key()
 
@@ -252,16 +244,38 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # set initial data
         self.db.hp = self.max_hp
 
-    def use_object(self, obj):
+
+    def use_object(self, obj, number=1):
         """
         Use an object.
+
         Args:
             obj: (object) object to use
+            number: (int) number to use
 
         Returns:
-            None
+            result: (string) the description of the result
         """
-        pass
+        if not obj:
+            return LS("Can not find this object.")
+
+        if obj.db.number < number:
+            return LS("Not enough number.")
+
+        # take effect
+        try:
+            result, used = obj.take_effect(self, number)
+            if used > 0:
+                # remove used object
+                obj_list = [{"object": obj.get_info_key(),
+                             "number": used}]
+                self.remove_objects(obj_list)
+            return result
+        except Exception, e:
+            ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
+            logger.log_tracemsg(ostring)
+
+        return LS("No effect.")
 
     def at_after_move(self, source_location):
         """
@@ -633,4 +647,4 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         if self.has_player:
             # notify the player
-            self.msg({"msg": LS("Upgrade to level %s.") % self.db.level})
+            self.msg({"msg": LS("{c%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})

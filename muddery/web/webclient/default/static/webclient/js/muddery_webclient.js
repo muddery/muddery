@@ -488,19 +488,19 @@ var webclient = {
 
         uimgr.divBR().appendTo(footer);
 
-        if ("cmds" in data) {
-            if (data["cmds"].length > 0) {
-                uimgr.divObjectCmds(data["cmds"]).appendTo(footer);
-            } else {
-                var html_button = $('<center>')
-                    .append($('<button>')
-                        .attr('class', 'btn btn-default')
-                        .attr('type', 'button')
-                        .attr('data-dismiss', 'modal')
-                        .attr('onClick', 'popupmgr.doCloseBox()')
-                        .text(LS('CLOSE')));
-                footer.html(html_button);
-            }
+        if ("cmds" in data &&
+            data["cmds"] &&
+            data["cmds"].length > 0) {
+            uimgr.divObjectCmds(data["cmds"]).appendTo(footer);
+        } else {
+            var html_button = $('<center>')
+                .append($('<button>')
+                    .attr('class', 'btn btn-default')
+                    .attr('type', 'button')
+                    .attr('data-dismiss', 'modal')
+                    .attr('onClick', 'popupmgr.doCloseBox()')
+                    .text(LS('CLOSE')));
+            footer.html(html_button);
         }
 
         // button

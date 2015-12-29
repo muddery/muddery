@@ -366,7 +366,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     reason = LS("Can not get %s.") % name
                     break
 
-                name = new_obj.name
+                name = new_obj.get_name()
                 unique = new_obj.unique
 
                 # move the new object to the character
@@ -451,31 +451,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         if changed:
             self.show_inventory()
 
-
-    def use_object(self, obj):
-        """
-        Use an object.
-        """
-        if not obj:
-            return
-
-        result = ""
-
-        # take effect
-        try:
-            result = self.take_effect(obj)
-        except Exception, e:
-            ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
-            logger.log_tracemsg(ostring)
-
-        # remove used object
-        obj_list = [{"object": obj.get_info_key(),
-                     "number": 1}]
-        self.remove_objects(obj_list)
-                                                                                
-        return result
-
-
     def search_inventory(self, obj_key):
         """
         Search specified object in the inventory.
@@ -502,7 +477,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     "name": item.name,          # item's name
                     "number": item.db.number,   # item's number
                     "desc": item.db.desc}       # item's desc
-            if item.is_typeclass("muddery.typeclasses.common_objects.MudderyEquipment", False):
+            if getattr(item, "equipped", False):
                 info["equipped"] = item.equipped
             inv.append(info)
         return inv

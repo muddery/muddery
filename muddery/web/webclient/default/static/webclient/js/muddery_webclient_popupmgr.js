@@ -9,7 +9,7 @@ var popupmgr = {
             .attr('id', 'popup_box')
             .appendTo($('#popup_container'));
 
-        $('#popup_header').text(LS('Alert'));
+        $('#popup_header').text(LS('Message'));
         $('#popup_body').html(text2html.parseHtml(msg));
 
         var html_button = $('<button>')

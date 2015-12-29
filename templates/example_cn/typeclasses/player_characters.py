@@ -33,26 +33,6 @@ class PlayerCharacter(MudderyPlayerCharacter):
                     has connected" message echoed to the room
 
     """
-
-    def take_effect(self, obj):
-        """
-        take item's effect
-        """
-        status_changed = False
-        result = ""
-
-        if hasattr(obj, "hp"):
-            recover_hp = self.add_hp(obj.hp)
-            if recover_hp > 0:
-                status_changed = True
-            result += LS("HP recovered by %s.") % int(recover_hp)
-
-        if status_changed:
-            self.show_status()
-
-        return result
-
-
     def add_hp(self, hp):
         """
         Add character's hp.
@@ -69,25 +49,3 @@ class PlayerCharacter(MudderyPlayerCharacter):
             self.db.hp += recover_hp
 
         return recover_hp
-
-
-    def is_hp_full(self):
-        """
-        """
-        return self.db.hp >= self.max_hp
-
-
-    def recover_hp(self):
-        """
-        """
-        self.db.hp = self.max_hp
-        self.show_status()
-        return
-
-
-    def poison(self):
-        """
-        """
-        self.db.hp /= 2
-        self.show_status()
-        return
