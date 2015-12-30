@@ -120,9 +120,9 @@ class MudderyFood(MudderyCommonObject):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        commands = [{"name":LS("USE"), "cmd":"use", "args":self.dbref}]
+        commands = [{"name": LS("Use"), "cmd": "use", "args": self.dbref}]
         if self.location:
-            commands.append({"name":LS("DISCARD"), "cmd":"discard", "args":self.dbref})
+            commands.append({"name": LS("Discard"), "cmd": "discard", "args": self.dbref})
         return commands
 
 
@@ -146,9 +146,9 @@ class MudderyEquipment(MudderyCommonObject):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         if getattr(self, "equipped", False):
-            commands = [{"name":LS("TAKE OFF"), "cmd":"takeoff", "args":self.dbref}]
+            commands = [{"name":LS("Take Off"), "cmd":"takeoff", "args":self.dbref}]
         else:
-            commands = [{"name":LS("EQUIP"), "cmd":"equip", "args":self.dbref}]
+            commands = [{"name":LS("Equip"), "cmd":"equip", "args":self.dbref}]
 
             # Can not discard when equipped
             if self.location:

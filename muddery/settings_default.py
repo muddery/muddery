@@ -243,3 +243,6 @@ PLAYER_REBORN_CD = 10
 
 # NPC's reborn time after being killed. If it is below 0, npcs will not be reborn.
 NPC_REBORN_CD = 10
+
+# Allow players to give up quests.
+ALLOW_GIVE_UP_QUESTS = True

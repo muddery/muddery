@@ -72,7 +72,7 @@ class MudderySkill(MudderyObject):
         if self.passive:
             return
 
-        commands = [{"name":LS("CAST"), "cmd":"castskill", "args":self.get_info_key()}]
+        commands = [{"name":LS("Cast"), "cmd":"castskill", "args":self.get_info_key()}]
         return commands
 
 

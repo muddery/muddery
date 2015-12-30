@@ -499,7 +499,7 @@ var webclient = {
                     .attr('type', 'button')
                     .attr('data-dismiss', 'modal')
                     .attr('onClick', 'popupmgr.doCloseBox()')
-                    .text(LS('CLOSE')));
+                    .text(LS('Close')));
             footer.html(html_button);
         }
 

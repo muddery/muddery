@@ -1043,6 +1043,55 @@ class CmdAttack(Command):
 
 
 #------------------------------------------------------------
+# give up a quest
+#------------------------------------------------------------
+
+class CmdGiveUpQuest(Command):
+    """
+    Give up a quest.
+
+    Usage:
+        {"cmd":"giveup_quest",
+         "args":<quest's key>
+        }
+    Give up a quest.
+    """
+    key = "giveup_quest"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        """
+        Give up a quest.
+
+        Returns:
+            None
+        """
+        caller = self.caller
+
+        if not self.args:
+            caller.msg({"alert":LS("You should give up a quest.")})
+            return
+
+        quest_key = self.args
+
+        try:
+            # Take off the equipment.
+            caller.quest.give_up(quest_key)
+        except MudderyError, e:
+            caller.msg({"alert": str(e)})
+            return
+        except Exception, e:
+            caller.msg({"alert": LS("Can not give up this quest.")})
+            logger.log_tracemsg("Can not give up quest %s: %s" % (quest_key, e))
+            return
+
+        # Send lastest status to the player.
+        message = {"alert": LS("Given up!")}
+        caller.msg(message)
+
+
+#------------------------------------------------------------
 # unlock exit
 #------------------------------------------------------------
 
@@ -1127,7 +1176,6 @@ class CmdConnect(Command):
         Just ignore it.
         """
         pass
-
 
 
 #------------------------------------------------------------

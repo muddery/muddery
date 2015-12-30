@@ -52,7 +52,7 @@ class MudderyNPC(MudderyCharacter):
         commands = []
         if self.dialogues or self.default_dialogues:
             # If the character have something to talk, add talk command.
-            commands.append({"name":LS("TALK"), "cmd":"talk", "args":self.dbref})
+            commands.append({"name":LS("Talk"), "cmd":"talk", "args":self.dbref})
         return commands
 
 

@@ -287,7 +287,7 @@ var uimgr = {
 
                 var name = quest["name"];
                 if (quest["accomplished"]) {
-                    name += LS("(ACCOMPLISHED)");
+                    name += LS("(Accomplished)");
                 }
                 var aHrefElement = $("<a>").appendTo(tdElement)
                     .attr("href", "#")

@@ -204,7 +204,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         commands = []
         if self.is_alive():
-            commands.append({"name":LS("ATTACK"), "cmd":"attack", "args":self.dbref})
+            commands.append({"name": LS("Attack"), "cmd": "attack", "args": self.dbref})
         return commands
 
 

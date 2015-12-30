@@ -193,8 +193,8 @@ class MudderyLockedExit(MudderyExit):
             # show unlock command
             verb = self.exit_lock["verb"]
             if not verb:
-                verb = LS("UNLOCK")
-            cmds = [{"name":verb, "cmd":"unlock_exit", "args":self.dbref}]
+                verb = LS("Unlock")
+            cmds = [{"name": verb, "cmd": "unlock_exit", "args": self.dbref}]
         
         info = {"dbref": self.dbref,
                 "name": self.name,
@@ -219,7 +219,7 @@ class MudderyLockedExit(MudderyExit):
             # show unlock command
             verb = self.exit_lock["verb"]
             if not verb:
-                verb = LS("UNLOCK")
-            cmds = [{"name":verb, "cmd":"unlock", "args":self.dbref}]
+                verb = LS("Unlock")
+            cmds = [{"name": verb, "cmd": "unlock", "args": self.dbref}]
 
         return cmds
