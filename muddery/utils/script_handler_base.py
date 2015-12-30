@@ -154,6 +154,9 @@ class ScriptHandlerDefault(ScriptHandler):
         self.add_condition("get_attr", script_actions.get_attr)
         self.add_condition("has_attr", script_conditions.has_attr)
         self.add_condition("is_attr", script_conditions.is_attr)
+        self.add_condition("odd", script_conditions.odd)
+        self.add_condition("rand", script_conditions.rand)
+        self.add_condition("randint", script_conditions.randint)
 
         self.add_action("learn_skill", script_actions.learn_skill)
         self.add_action("give_objects", script_actions.give_objects)
@@ -162,4 +165,3 @@ class ScriptHandlerDefault(ScriptHandler):
         self.add_action("set_attr", script_actions.set_attr)
         self.add_action("get_attr", script_actions.get_attr)
         self.add_action("remove_attr", script_actions.remove_attr)
-
