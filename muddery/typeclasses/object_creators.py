@@ -12,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.utils.localized_strings_handler import LS
 
 
 class MudderyObjectCreator(MudderyObject):
@@ -26,7 +27,6 @@ class MudderyObjectCreator(MudderyObject):
         super(MudderyObjectCreator, self).load_data()
         
         # Load creator info.
-        creator_info = []
         try:
             model_obj = get_model(settings.WORLD_DATA_APP, settings.OBJECT_CREATORS)
             creator_record = model_obj.objects.get(key=self.get_info_key())
@@ -67,9 +67,9 @@ class MudderyObjectCreator(MudderyObject):
 
         verb = self.verb
         if not verb:
-            verb = LS("LOOT");
+            verb = LS("Loot")
 
-        commands = [{"name":verb, "cmd":"loot", "args":self.dbref}]
+        commands = [{"name": verb, "cmd": "loot", "args": self.dbref}]
         return commands
 
 
@@ -94,7 +94,6 @@ class MudderyObjectCreator(MudderyObject):
                 return False
 
             return True
-
 
         # Get objects that matches odds and conditions .
         obj_list = [obj for obj in self.loot_list if can_loot(self, caller, obj)]

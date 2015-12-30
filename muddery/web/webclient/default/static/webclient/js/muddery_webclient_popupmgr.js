@@ -59,7 +59,7 @@ var popupmgr = {
                 <div>\
                 <center>\
                 <input type="button" value="';
-                html_button += LS('NEXT');
+                html_button += LS('Next');
                 html_button += '" class="btn btn-default"';
 
                 if ('npc' in dialogues[0]) {
@@ -93,7 +93,7 @@ var popupmgr = {
                 <div>\
                 <center>\
                 <input type="button" value="';
-                html_button += LS('SELECT ONE');
+                html_button += LS('Select One');
                 html_button += '" class="btn btn-default" />\
                 </center>\
                 </div>';

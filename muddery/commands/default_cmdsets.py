@@ -56,6 +56,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdCastSkill())
         self.add(general.CmdAttack())
         self.add(general.CmdUnlockExit())
+        self.add(general.CmdGiveUpQuest())
         
         # Add empty login cmd and skill cmd to the normal cmdset to
         # avoid wrong cmd messages.

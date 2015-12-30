@@ -70,6 +70,14 @@ class MudderyQuest(MudderyObject):
                 else:
                     self.not_accomplished[obj_record.type].append(obj_record.ordinal)
 
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        """
+        commands = []
+        if settings.ALLOW_GIVE_UP_QUESTS:
+            commands.append({"name": LS("Give Up"), "cmd": "giveup_quest", "args": self.get_info_key()})
+        return commands
 
     def return_objectives(self):
         """
