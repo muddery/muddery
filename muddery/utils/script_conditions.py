@@ -12,6 +12,8 @@ The return value must be a boolean value.
 
 """
 
+import random
+
 def example(caller, obj, *args):
     """
     This is an example.
@@ -107,3 +109,79 @@ def is_attr(character, obj, *args):
     key = args[0]
     value = args[1]
     return character.custom_attr.is_value(key, value)
+
+
+def odd(character, obj, *args):
+    """
+    If a random number matches the odd.
+    Args:
+        character: no use
+        obj: no use
+        args[0]: (float) an odd number between 0 and 1
+
+    Returns:
+        (bool) If a random number matches the odd.
+    """
+    if not args:
+        return False
+
+    if len(args) < 1:
+        return False
+
+    return random.random() < args[0]
+
+
+def rand(character, obj, *args):
+    """
+    Get a random number.
+
+    Args:
+        character: no use
+        obj: no use
+        args[0]: (float) the bound of the random number
+        args[1]: (float) the bound of the random number
+
+    Returns:
+        (float) a random number between args[0] and args[1]
+                if only give one args, the random number will between args[0] and 0
+    """
+    if not args:
+        return 0
+
+    if len(args) < 1:
+        return 0
+
+    bound1 = args[0]
+    bound2 = 0
+    if len(args) > 1:
+        bound2 = args[1]
+
+    return random.uniform(bound1, bound2)
+
+
+def randint(character, obj, *args):
+    """
+    Get a random integer number.
+
+    Args:
+        character: no use
+        obj: no use
+        args[0]: (int) the bound of the random number
+        args[1]: (int) the bound of the random number
+
+    Returns:
+        (int) a random number between args[0] and args[1]
+             if only give one args, the random number will between args[0] and 0
+    """
+    if not args:
+        return 0
+
+    if len(args) < 1:
+        return 0
+
+    bound1 = args[0]
+    bound2 = 0
+    if len(args) > 1:
+        bound2 = args[1]
+
+    return random.randint(bound1, bound2)
