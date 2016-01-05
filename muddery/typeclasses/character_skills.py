@@ -7,12 +7,10 @@ actions of a skill.
 """
 
 import time
-import traceback
 import importlib
 from django.conf import settings
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
 
 
@@ -27,6 +25,9 @@ class MudderySkill(MudderyObject):
     def load_skill_modules(cls):
         """
         Load all available skills.
+
+        Returns:
+            None
         """
         for module_name in settings.SKILL_MODULES:
             try:
@@ -38,20 +39,25 @@ class MudderySkill(MudderyObject):
             except ImportError:
                 logger.log_errmsg("Can not import skill module %s." % module_name)
 
-
     def at_object_creation(self):
         """
         Set default values.
+
+        Returns:
+            None
         """
         super(MudderySkill, self).at_object_creation()
         
         # set status
         self.db.owner = None
-        self.db.cd_end_time = 0
+        self.db.cd_finish_time = 0
 
     def load_data(self):
         """
         Set data_info to the object.
+
+        Returns:
+            None
         """
         super(MudderySkill, self).load_data()
 
@@ -68,50 +74,80 @@ class MudderySkill(MudderyObject):
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
+
+        Args:
+            caller: (object) command's caller
+
+        Returns:
+            commands: (list) a list of available commands
         """
         if self.passive:
             return
 
-        commands = [{"name":LS("Cast"), "cmd":"castskill", "args":self.get_info_key()}]
+        commands = [{"name": LS("Cast"), "cmd": "castskill", "args": self.get_info_key()}]
         return commands
-
 
     def set_owner(self, owner):
         """
         Set the owner of the skill.
+
+        Args:
+            owner: (object) skill's owner
+
+        Returns:
+            None
         """
         self.db.owner = owner
     
         if not self.passive:
             # Set skill cd.
             if self.cd > 0:
-                self.db.cd_end_time = time.time() + self.cd
-
+                self.db.cd_finish_time = time.time() + self.cd
 
     def cast_skill_manually(self, target):
         """
         Cast this skill manually. Can not cast passive skill in this way.
+
+        Args:
+            target: (object) skill's target
+
+        Returns:
+            result: (dict) skill's result
         """
         if self.passive:
             owner = self.db.owner
             if owner:
-                owner.msg({"alert":LS("You can not cast a passive skill.")})
+                owner.msg({"alert": LS("You can not cast a passive skill.")})
             return
     
         return self.cast_skill(target)
 
-
     def cast_skill(self, target):
         """
         Cast this skill.
+
+        Args:
+            target: (object) skill's target
+
+        Returns:
+            (result, cd):
+                result: (dict) skill's result
+                cd: (dice) skill's cd
         """
         owner = self.db.owner
+        time_now = time.time()
 
-        if self.cd > 0:
-            # skill is in cd.
-            if time.time() < self.db.cd_end_time:
+        if not self.passive:
+            if owner:
+                gcd = getattr(owner, "gcd_finish_time", 0)
+                if time_now < gcd:
+                    owner.msg({"msg": LS("This skill is not ready yet!")})
+                    return
+
+            if time_now < self.db.cd_finish_time:
+                # skill in CD
                 if owner:
-                    owner.msg({"msg":LS("This skill is not ready yet!")})
+                    owner.msg({"msg": LS("This skill is not ready yet!")})
                 return
 
         if not self.function_call:
@@ -120,17 +156,20 @@ class MudderySkill(MudderyObject):
                 owner.msg({"msg": LS("Can not cast this skill!")})
             return
 
+        result = {}
+        cd = {}
         try:
             # call skill function
             result = self.function_call(owner, target, effect=self.effect)
 
-            # set cd
-            if self.cd > 0:
-                self.db.cd_end_time = time.time() + self.cd
+            if not self.passive:
+                # set cd
+                time_now = time.time()
+                if self.cd > 0:
+                    self.db.cd_finish_time = time_now + self.cd
 
-            cd_info = {"skill": self.get_info_key(),    # skill's key
-                       "cd": self.cd,                   # skill's cd
-                       "gcd": settings.GLOBAL_CD}       # global cd
+                cd = {"skill": self.get_info_key(),    # skill's key
+                      "cd": self.cd}       # global cd
         except Exception, e:
             ostring = "Can not cast skill %s: %s" % (self.get_info_key(), e)
             logger.log_tracemsg(ostring)
@@ -138,16 +177,36 @@ class MudderySkill(MudderyObject):
                 owner.msg({"msg": LS("Can not cast this skill!")})
             return
 
-        return {"result": result,
-                "cd_info": cd_info}
+        return result, cd
 
+    def check_available(self):
+        """
+        Check this skill.
+
+        Returns:
+            message: (string) If the skill is not available, returns a string of reason.
+                     If the skill is available, return "".
+        """
+        if self.passive:
+            return LS("This is a passive skill!")
+
+        if self.is_cooling_down():
+            return LS("This skill is not ready yet!")
+
+        return ""
+
+    def is_available(self):
+        """
+        If this skill is available.
+        """
+        return self.check_available() == ""
 
     def is_cooling_down(self):
         """
         If this skill is cooling down.
         """
         if self.cd > 0:
-            if self.db.cd_end_time:
-                if time.time() < self.db.cd_end_time:
+            if self.db.cd_finish_time:
+                if time.time() < self.db.cd_finish_time:
                     return True
         return False

@@ -17,7 +17,7 @@ var commands = {
     },
     
     doCombatSkill : function(caller) {
-        var cmd = "combat_skill";
+        var cmd = "castskill";
         var args = {"skill": $(caller).attr("key"),
                     "target": combat.getCurrentTarget()};
         sendCommand(this.cmdString(cmd, args));

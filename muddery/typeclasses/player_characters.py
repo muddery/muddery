@@ -693,8 +693,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
             # Set reborn timer.
             TICKER_HANDLER.add(self, settings.PLAYER_REBORN_CD, hook_key="reborn")
 
-            self.msg({"msg": LS("You will be reborn at {c%s{n in {c%s{n seconds.") %
-                        (self.home.get_name(), settings.PLAYER_REBORN_CD)})
+            self.msg({"msg": LS("You will be reborn at {c%(p)s{n in {c%(s)s{n seconds.") %
+                             {'p': self.home.get_name(), 's': settings.PLAYER_REBORN_CD}})
 
 
     def reborn(self):

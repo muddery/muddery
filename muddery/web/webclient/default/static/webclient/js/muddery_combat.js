@@ -4,6 +4,7 @@ Muddery webclient (javascript component)
 
 var combat = {
     _self_dbref: null,
+    _name_dict: {},
     _current_target: null,
     _finished: false,
     _result: null,
@@ -167,7 +168,7 @@ var combat = {
 
         // result
         if ("stopped" in self._result) {
-            boxBodyResult.text("Combat stopped !");
+            boxBodyResult.text(LS("Combat stopped !"));
         }
         else if ("escaped" in self._result) {
             boxBodyResult.text(LS("Escaped !"));
@@ -253,6 +254,8 @@ var combat = {
                     this._current_target = fighter.dbref;
                 }
             }
+
+            this._name_dict[fighter.dbref] = fighter.name;
             
             div.appendTo(characters);
         }
@@ -334,6 +337,29 @@ var combat = {
                 var target = $('#status_' + data[i].target.slice(1));
                 target.text(data[i].hp + '/' + data[i].max_hp)
             }
+            else if (data[i].type == "escape") {
+                if (data[i].success) {
+                    var target = $('#status_' + data[i].caller.slice(1));
+                    target.text(LS("Escaped"));
+                }
+
+                if (data[i].caller in this._name_dict) {
+                    var name = "";
+                    if (data[i].caller == this._self_dbref) {
+                        name = LS("You");
+                    }
+                    else {
+                        name = this._name_dict[data[i].caller];
+                    }
+
+                    if (data[i].success) {
+                        webclient.displayMsg("{c" + name + "{n" + LS(" escaped from the combat."));
+                    }
+                    else {
+                        webclient.displayMsg("{c" + name + "{n" + LS(" failed to escape."));
+                    }
+                }
+            }
         }
         
         /*
@@ -350,8 +376,7 @@ var combat = {
         var gcd = data["gcd"];
         var key = data["skill"];
         var btn = $('#combat_btn_' + key);
-                
-        var gcd = data["gcd"];
+
         $('#combat_btns button').each(function(){
             var time = gcd;
             if (this == btn[0]) {

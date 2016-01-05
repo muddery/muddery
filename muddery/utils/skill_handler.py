@@ -3,13 +3,10 @@ Skill handler handles a character's skills.
 
 """
 
-import traceback
+import time
 import random
 from django.conf import settings
-from evennia.utils import logger
-from evennia.utils.utils import lazy_property
 from evennia import TICKER_HANDLER
-from muddery.utils.exception import MudderyError
 from muddery.utils.builder import build_object
 from muddery.utils.localized_strings_handler import LS
 
@@ -24,44 +21,46 @@ class SkillHandler(object):
         Initialize handler.
         """
         self.owner = owner
-        self.skills = owner.db.skills
-        
+
         # TICKER_HANDLER needs pk.
         self.pk = "SKILL"
-        
-        # always begin with GCD
-        self.GLOBAL_COOLING_DOWN = True
-        TICKER_HANDLER.add(self, settings.GLOBAL_CD, hook_key="global_cooled_down")
 
-        self.AUTO_CAST_SKILL = False
+        self.skills = {}
+        if owner:
+            self.skills = owner.db.skills
+
+        self.can_auto_cast = False
         self.skill_target = None
-
+        self.gcd_finish_time = 0
 
     def __del__(self):
         """
         Remove tickers.
         """
-        if self.GLOBAL_COOLING_DOWN or self.AUTO_CAST_SKILL:
+        if self.can_auto_cast:
             TICKER_HANDLER.remove(self)
-
 
     def learn_skill(self, skill):
         """
         Learn a new skill.
-        args:
-            skill(string): skill's key
+
+        Args:
+            skill: (string) skill's key
+
+        Returns:
+            None
         """
         if not self.owner:
             return
 
         if skill in self.skills:
-            self.msg({"alert":LS("You have already learned this skill.")})
+            self.owner.msg({"alert": LS("You have already learned this skill.")})
             return
 
         # Create skill object.
         skill_obj = build_object(skill)
         if not skill_obj:
-            self.owner.msg({"alert":LS("Can not learn this skill.")})
+            self.owner.msg({"alert": LS("Can not learn this skill.")})
             return
 
         # Store new skill.
@@ -79,76 +78,75 @@ class SkillHandler(object):
         # Notify the player
         if self.owner.has_player:
             self.owner.show_skills()
-            self.owner.msg({"msg":LS("You learned skill {c%s{n.") % skill_obj.get_name()})
-
+            self.owner.msg({"msg": LS("You learned skill {c%s{n.") % skill_obj.get_name()})
 
     def has_skill(self, skill):
         """
         If the character has the skill or not.
+
+        Args:
+            skill: (string) skill's key
+
+        Returns:
+            None
         """
         return skill in self.skills
 
-
-    def cast_skill_manually(self, skill, target):
+    def cast_skill(self, skill, target):
         """
-        Cast a skill positively.
-        """
-        if not skill in self.skills:
-            self.msg({"alert":LS("You do not have this skill.")})
-            return
+        Cast a skill.
 
-        return self.skills[skill].cast_skill_manually(target)
+        Args:
+            skill: (string) skill's key
+            target: (object) skill's target
 
-
-    def cast_combat_skill(self, skill, target):
-        """
-        Cast a skill in combat.
+        Returns:
+            (dict) result of the skill
         """
         if not self.owner:
             return
 
-        if not self.owner.ndb.combat_handler:
-            # Onwer is not in combat.
-            return
-
-        if self.GLOBAL_COOLING_DOWN:
+        if time.time() < self.gcd_finish_time:
             # In GCD.
-            self.owner.msg({"msg":LS("This skill is not ready yet!")})
+            self.owner.msg({"msg": LS("This skill is not ready yet!")})
             return
 
-        if self.skills[skill].is_cooling_down():
-            # Skill is cooling down.
-            self.owner.msg({"msg":LS("This skill is not ready yet!")})
+        if skill not in self.skills:
+            self.owner.msg({"alert": LS("You do not have this skill.")})
             return
 
-        # Cast skill.
-        result = self.owner.ndb.combat_handler.cast_skill_manually(skill, self.owner.dbref, target)
+        message = self.skills[skill].check_available()
+        if message:
+            # Skill is not available.
+            self.owner.msg({"msg": message})
+            return
+
+        result, cd = self.skills[skill].cast_skill(target)
+
         if result:
-            # Cast successed, set GCD
-            if settings.GLOBAL_CD > 0:
-                self.GLOBAL_COOLING_DOWN = True
-                
-                # Set timer of GCD.
-                TICKER_HANDLER.add(self, settings.GLOBAL_CD, hook_key="global_cooled_down")
+            if self.owner.ndb.combat_handler:
+                # send skill's result to the combat handler
+                self.owner.ndb.combat_handler.set_skill_result(result)
+            else:
+                self.owner.msg({"skill_result": result})
 
-        return result
+        # set GCD
+        if not cd:
+            cd = {}
+        cd["gcd"] = settings.GLOBAL_CD
+        if settings.GLOBAL_CD > 0:
+            self.gcd_finish_time = time.time() + settings.GLOBAL_CD
 
+        # send CD to the player
+        self.owner.msg({"skill_cd": cd})
 
-    def global_cooled_down(self):
-        """
-        GCD finished.
-        """
-        self.GLOBAL_COOLING_DOWN = False
-        
-        # Remove the timer.
-        TICKER_HANDLER.remove(self, settings.GLOBAL_CD)
-
+        return
 
     def auto_cast_skill(self):
         """
         Cast a new skill automatically.
         """
-        if not self.AUTO_CAST_SKILL:
+        if not self.can_auto_cast:
             return
 
         if not self.owner:
@@ -180,16 +178,15 @@ class SkillHandler(object):
 
         # Random chooses a skill.
         skill = random.choice(available_skills)
-        self.cast_combat_skill(skill, self.skill_target.dbref)
-
+        if skill:
+            self.cast_skill(skill, self.skill_target)
 
     def get_available_skills(self):
         """
         Get available skills without cd.
         """
-        skills = [skill for skill in self.skills if not self.skills[skill].is_cooling_down()]
+        skills = [skill for skill in self.skills if self.skills[skill].is_available()]
         return skills
-
 
     def get_passive_skills(self):
         """
@@ -198,7 +195,6 @@ class SkillHandler(object):
         skills = [skill for skill in self.skills if self.skills[skill].passive]
         return skills
 
-
     def cast_passive_skills(self):
         """
         Cast all passive skills.
@@ -206,7 +202,6 @@ class SkillHandler(object):
         for skill in self.skills:
             if self.skills[skill].passive:
                 self.skills[skill].cast_skill(None)
-
 
     def choose_skill_target(self):
         """
@@ -227,12 +222,11 @@ class SkillHandler(object):
 
         return
 
-
     def start_auto_combat_skill(self):
         """
         Start auto cast skill.
         """
-        self.AUTO_CAST_SKILL = True
+        self.can_auto_cast = True
 
         # Cast a skill immediately
         self.auto_cast_skill()
@@ -240,10 +234,9 @@ class SkillHandler(object):
         # Set timer of auto cast.
         TICKER_HANDLER.add(self, settings.AUTO_CAST_SKILL_CD, hook_key="auto_cast_skill")
 
-
     def stop_auto_combat_skill(self):
         """
         Stop auto cast skill.
         """
-        self.AUTO_CAST_SKILL = False
+        self.can_auto_cast = False
         TICKER_HANDLER.remove(self, settings.AUTO_CAST_SKILL_CD)

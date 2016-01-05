@@ -31,7 +31,7 @@ def learn_skill(character, obj, *args):
     if not args:
         return
 
-    character.skill.learn_skill(args[0])
+    character.skill_handler.learn_skill(args[0])
 
 
 def give_objects(character, obj, *args):
