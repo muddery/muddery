@@ -47,7 +47,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
     # initialize all handlers in a lazy fashion
     @lazy_property
-    def skill(self):
+    def skill_handler(self):
         return SkillHandler(self)
 
     def at_object_creation(self):
@@ -219,7 +219,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Add passive skills' effects to the character
         """
         # cast passive skills
-        self.skill.cast_passive_skills()
+        self.skill_handler.cast_passive_skills()
 
     def set_initial_data(self):
         """
@@ -239,7 +239,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             skill_records = model_skills.objects.filter(character=model_name)
 
         for skill_record in skill_records:
-            self.skill.learn_skill(skill_record.skill_id)
+            self.skill_handler.learn_skill(skill_record.skill_id)
 
         # set initial data
         self.db.hp = self.max_hp
@@ -305,7 +305,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             (boolean) if the character has this skill or not
         """
-        self.skill.has_skill(skill)
+        self.skill_handler.has_skill(skill)
 
     def cast_skill_manually(self, skill, target):
         """
@@ -319,7 +319,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             None
         """
         self.target = target
-        self.skill.cast_skill_manually(skill, target)
+        self.skill_handler.cast_skill_manually(skill, target)
 
     ########################################
     #

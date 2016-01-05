@@ -63,7 +63,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdConnect())
         self.add(general.CmdCreate())
         self.add(general.CmdCreateConnect())
-        self.add(combat.CmdCombatSkill())
 
 
 class PlayerCmdSet(default_cmds.PlayerCmdSet):
@@ -141,5 +140,5 @@ class CombatCmdSet(CmdSet):
 
     def at_cmdset_creation(self):
         self.add(general.CmdLook())
-        self.add(combat.CmdCombatSkill())
+        self.add(general.CmdCastSkill())
         self.add(combat.CmdCombatInfo())

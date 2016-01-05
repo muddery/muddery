@@ -22,22 +22,30 @@ def skill_escape(caller, target, effect=0, *args, **kwargs):
     if not caller:
         return
 
-    if not caller.ndb.combat_handler:
+    combat_handler = caller.ndb.combat_handler
+    if not combat_handler:
         # caller is not in combat.
         return
 
     rand = random.random()
     if rand < effect:
-        return [{"type": "left",
+        return [{"type": "escape",
                  "caller": caller.dbref,
                  "success": False}]
 
-    caller.ndb.combat_handler.remove_character(caller)
+    combat_handler.remove_character(caller)
+
+    # send skill's result to the combat handler manually
+    # because the handler has been removed from the character
+    result = [{"type": "escape",
+               "caller": caller.dbref,
+               "success": True}]
+    caller.msg({"combat_process": result})
+    combat_handler.set_skill_result(result)
+
     caller.msg({"combat_finish": {"escaped": True}})
 
-    return [{"type": "left",
-             "caller": caller.dbref,
-             "success": True}]
+    return
 
 
 def skill_heal(caller, target, effect=0, *args, **kwargs):

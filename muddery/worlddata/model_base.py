@@ -457,13 +457,13 @@ class character_models(models.Model):
     "Store all character level informations."
 
     character = models.CharField(max_length=KEY_LENGTH, db_index=True)
-    level = models.IntegerField()
-    max_exp = models.IntegerField()
-    max_hp = models.IntegerField()
-    max_mp = models.IntegerField()
-    attack = models.IntegerField()
-    defence = models.IntegerField()
-    give_exp = models.IntegerField()
+    level = models.IntegerField(blank=True, default=0)
+    max_exp = models.IntegerField(blank=True, default=0)
+    max_hp = models.IntegerField(blank=True, default=1)
+    max_mp = models.IntegerField(blank=True, default=1)
+    attack = models.IntegerField(blank=True, default=1)
+    defence = models.IntegerField(blank=True, default=0)
+    give_exp = models.IntegerField(blank=True, default=0)
 
     class Meta:
         "Define Django meta options"

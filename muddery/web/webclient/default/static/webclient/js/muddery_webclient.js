@@ -130,8 +130,8 @@ var webclient = {
                 else if (key == "combat_process") {
                     combat.displayCombatProcess(data[key]);
                 }
-                else if (key == "combat_skill_cd") {
-                    combat.displaySkillCD(data[key]);
+                else if (key == "skill_cd") {
+                    this.displaySkillCD(data[key]);
                 }
                 else if (key == "get_exp") {
                     this.displayGetExp(data[key])
@@ -794,6 +794,25 @@ var webclient = {
         }
         else {
             popupmgr.showDialogue(data);
+        }
+    },
+
+    displayDialogue : function(data) {
+        if ($('#combat_box').length > 0) {
+            // has combat box
+            combat.setDialogue(data);
+        }
+        else {
+            popupmgr.showDialogue(data);
+        }
+    },
+
+    displaySkillCD: function(data) {
+        if ($('#combat_box').length > 0) {
+            // has combat box
+            combat.displaySkillCD(data);
+        }
+        else {
         }
     },
 

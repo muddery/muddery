@@ -48,7 +48,7 @@ class MudderyCombatHandler(DefaultScript):
         it of the back-reference and cmdset
         """
         del character.ndb.combat_handler
-        character.skill.stop_auto_combat_skill()
+        character.skill_handler.stop_auto_combat_skill()
         character.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
         if character.has_player:
             character.show_status()
@@ -139,43 +139,6 @@ class MudderyCombatHandler(DefaultScript):
         for character in self.db.characters.values():
             character.msg(message)
 
-
-    def cast_skill_manually(self, skill, caller, target):
-        """
-        Called by combat commands to cast a skill to the target.
-
-        args:
-            skill - (string) skill's key
-            caller - (string) caller's dbref
-            target - (string) target's dbref
-        """
-        if not skill:
-            return False
-
-        if not caller in self.db.characters:
-            return False
-        caller = self.db.characters[caller]
-
-        if target:
-            if not target in self.db.characters:
-                return False
-            target = self.db.characters[target]
-
-        try:
-            rtn = caller.skill.cast_skill_manually(skill, target)
-            if rtn:
-                self.msg_all_combat_skill(rtn["result"], rtn["cd_info"], caller)
-        except Exception, e:
-            logger.log_tracemsg("Can not cast skill %s: %s" % (skill, e))
-            return False
-
-        if self.can_finish():
-            # if this is only one team left, kill this handler
-            self.finish()
-
-        return True
-
-
     def can_finish(self):
         """
         Check if can finish this combat. The combat finishes when a team's members
@@ -198,7 +161,6 @@ class MudderyCombatHandler(DefaultScript):
 
         return True
 
-
     def start_combat(self):
         """
         Start a combat, make all NPCs to cast skills automatically.
@@ -210,8 +172,7 @@ class MudderyCombatHandler(DefaultScript):
 
         for character in self.db.characters.values():
             if not character.has_player:
-                character.skill.start_auto_combat_skill()
-
+                character.skill_handler.start_auto_combat_skill()
 
     def finish(self):
         """
@@ -311,7 +272,6 @@ class MudderyCombatHandler(DefaultScript):
 
         return self.db.characters.values()
 
-
     def msg_all_combat_process(self, process):
         """
         Send combat process to all player characters.
@@ -319,20 +279,6 @@ class MudderyCombatHandler(DefaultScript):
         for character in self.db.characters.values():
             if character.has_player:
                 character.msg({"combat_process": process})
-
-
-    def msg_all_combat_skill(self, result, cd, caller):
-        """
-        Send combat skill result to all player characters.
-        """
-        for character in self.db.characters.values():
-            if character.has_player:
-                if character == caller:
-                    character.msg({"combat_process": result,
-                                   "combat_skill_cd": cd})
-                else:
-                    character.msg({"combat_process": result})
-
 
     def msg_all_combat_info(self):
         """
@@ -342,3 +288,19 @@ class MudderyCombatHandler(DefaultScript):
         for character in self.db.characters.values():
             if character.has_player:
                 character.msg({"combat_info": appearance})
+
+    def set_skill_result(self, result):
+        """
+        Set skill's result.
+
+        Args:
+            result: (dict) skill's result
+
+        Returns:
+            None
+        """
+        self.msg_all_combat_process(result)
+
+        if self.can_finish():
+            # if this is only one team left, kill this handler
+            self.finish()

@@ -963,9 +963,10 @@ class CmdCastSkill(Command):
 
         try:
             # Cast skill.
-            caller.cast_skill_manually(skill_key, target)
+            caller.skill_handler.cast_skill(skill_key, target)
         except Exception, e:
             caller.msg({"alert":LS("Can not cast this skill.")})
+            logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
             return
 
 
@@ -1038,8 +1039,8 @@ class CmdAttack(Command):
         # set combat team and desc
         chandler.set_combat({1: [target], 2:[self.caller]}, "")
         
-        self.caller.msg("You attack %s! You are in combat." % target)
-        target.msg("%s attacks you! You are in combat." % self.caller)
+        self.caller.msg(LS("You are attacking {c%s{n! You are in combat.") % target.get_name())
+        target.msg(LS("{c%s{n is attacking you! You are in combat.") % self.caller.get_name())
 
 
 #------------------------------------------------------------
@@ -1136,26 +1137,6 @@ class CmdUnlockExit(Command):
         # Send the lastest appearance to the caller.
         appearance = obj.get_appearance(caller)
         caller.msg({"look_obj": appearance})
-
-
-#------------------------------------------------------------
-# cast a skill
-#------------------------------------------------------------
-
-class CmdCombatSkill(Command):
-    """
-    The skill command in combat, ignore it to avoid wrong command messages.
-    """
-    key = "combat_skill"
-    locks = "cmd:all()"
-    help_cateogory = "General"
-
-    def func(self):
-        """
-        If the character is not in combat, ignore this command.
-        """
-        pass
-
 
 #------------------------------------------------------------
 # connect

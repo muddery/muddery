@@ -43,7 +43,7 @@ class CmdAttack(CmdAttackDefault):
             return
 
         if caller.location:
-            peaceful = getattr(caller.location, "peaceful", False)
+            peaceful = getattr(caller.location.dfield, "peaceful", False)
             if peaceful:
                 caller.msg({"alert":LS("You can not attack in this place.")})
                 return
