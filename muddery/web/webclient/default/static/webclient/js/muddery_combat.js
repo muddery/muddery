@@ -3,19 +3,11 @@ Muddery webclient (javascript component)
 */
 
 var combat = {
-    _self_dbref: null,
-    _name_dict: {},
-    _current_target: null,
     _finished: false,
     _result: null,
     _loot: null,
     _exp: 0,
-    _skill_cd_time: {},
     _dialogue: null,
-    
-    setSelf: function(dbref) {
-        this._self_dbref = dbref;
-    },
 
     createCombat: function(data) {
         this.closeCombat();
@@ -53,12 +45,11 @@ var combat = {
             .attr('class', 'modal-footer').appendTo(boxContent);
 
         // reset combat data
-        this._current_target = null;
+        data_handler.current_target = "";
         this._finished = false;
         this._result = null;
         this._loot = null;
         this._exp = 0;
-        this._skill_cd_time = {};
         this._dialogue = null;
 
         webclient.doSetPopupSize();
@@ -176,7 +167,7 @@ var combat = {
         else if ("winner" in self._result) {
             var win = false;
             for (var i in self._result.winner) {
-                if (self._result.winner[i].dbref == self._self_dbref) {
+                if (self._result.winner[i].dbref == data_handler.character_dbref) {
                     win = true;
                     break;
                 }
@@ -241,7 +232,7 @@ var combat = {
                       .text(fighter.hp + '/' + fighter.max_hp)
                       .prependTo(div);
             
-            if (fighter.dbref == this._self_dbref) {
+            if (fighter.dbref == data_handler.character_dbref) {
                 div.addClass('fighter_team')
                    .css('top', top + team * line_height);
                 team++;
@@ -250,12 +241,12 @@ var combat = {
                 div.addClass("fighter_enemy")
                    .css('top', top + enemy * line_height);
                 enemy++;
-                if (!this._current_target) {
-                    this._current_target = fighter.dbref;
+                if (!data_handler.current_target) {
+                    data_handler.current_target = fighter.dbref;
                 }
             }
 
-            this._name_dict[fighter.dbref] = fighter.name;
+            data_handler.name_list[fighter.dbref] = fighter.name;
             
             div.appendTo(characters);
         }
@@ -274,18 +265,19 @@ var combat = {
                     .attr('key', command.key)
                     .attr('id', 'combat_btn_' + command.key)
                     .attr('onclick', 'combat.doCombatSkill(this); return false;')
+                    .data("cd", 0)
                     .css({'left': 20 + i * 90});
 
                 button.append($("<div>").text(command.name));
-
                 button.append($("<div>").addClass('cooldown'));
-                
                 button.appendTo(content);
             }
             
             commands.html(content);
 
             $('#combat_commands').css({'height': 60});
+
+            this.displaySkillCD();
         }
     },
 
@@ -304,13 +296,13 @@ var combat = {
                               .text(fighter.hp + '/' + fighter.max_hp)
                               .appendTo(div);
                     
-                    if (fighter.dbref == this._self_dbref) {
+                    if (fighter.dbref == data_handler.character_dbref) {
                         div.addClass("fighter_team");
                     }
                     else {
                         div.addClass("fighter_enemy");
-                        if (!this._current_targ) {
-                            this._current_target = fighter.dbref;
+                        if (!data_handler.current_target) {
+                            data_handler.current_target = fighter.dbref;
                         }
                     }
                     
@@ -321,7 +313,7 @@ var combat = {
             else */
             if (data[i].type == "attacked") {
                 var caller = $('#fighter_' + data[i].caller.slice(1));
-                if (data[i].caller == this._self_dbref) {
+                if (data[i].caller == data_handler.character_dbref) {
                     caller.animate({left: '50%'}, 100);
                     caller.animate({left: '12%'}, 100);
                 }
@@ -343,13 +335,13 @@ var combat = {
                     target.text(LS("Escaped"));
                 }
 
-                if (data[i].caller in this._name_dict) {
+                if (data[i].caller in data_handler.name_list) {
                     var name = "";
-                    if (data[i].caller == this._self_dbref) {
+                    if (data[i].caller == data_handler.character_dbref) {
                         name = LS("You");
                     }
                     else {
-                        name = this._name_dict[data[i].caller];
+                        name = data_handler.name_list[data[i].caller];
                     }
 
                     if (data[i].success) {
@@ -370,45 +362,34 @@ var combat = {
         */
     },
 
-    displaySkillCD: function(data) {
-        // set skill's cd
-        var cd = data["cd"];
-        var gcd = data["gcd"];
-        var key = data["skill"];
-        var btn = $('#combat_btn_' + key);
-
+    displaySkillCD: function() {
         $('#combat_btns button').each(function(){
-            var time = gcd;
-            if (this == btn[0]) {
-                if (cd > gcd) {
-                    time = cd;
-                }
-            }
-            combat.setButtonCD($(this), time);
+            combat.setButtonCD($(this));
         });
     },
 
-    setButtonCD: function(btn, cd) {
+    setButtonCD: function(btn) {
         var key = btn.attr('key');
-        var current_time = (new Date()).valueOf();
-        var cd_time = current_time + cd * 1000;
 
-        var current_cd_time = combat._skill_cd_time[key];
-        if (!current_cd_time) {
-            current_cd_time = 0;
+        var cd_time = 0;
+        if (key in data_handler.skill_cd_time) {
+            cd_time = data_handler.skill_cd_time[key];
         }
 
-        if (current_cd_time >= cd_time) {
+        var current_cd = btn.data("cd");
+        if (current_cd >= cd_time) {
             return;
         }
 
+        var current_time = (new Date()).valueOf();
+
         $('div.cooldown', btn).stop(true, true);
-        if (current_cd_time < current_time) {
+        if (current_cd < current_time) {
+            // set a new cd
             $('div.cooldown', btn).width('100%');
         }
-        $('div.cooldown', btn).animate({width: '0%'}, cd * 1000, 'linear');
-
-        combat._skill_cd_time[key] = cd_time;
+        $('div.cooldown', btn).animate({width: '0%'}, cd_time - current_time, 'linear');
+        btn.data("cd", cd_time);
     },
     
     doCombatSkill: function(caller) {
@@ -417,23 +398,11 @@ var combat = {
         }
 
         var key = $(caller).attr('key');
-        var cd_time = this._skill_cd_time[key];
-        if (cd_time) {
-            var current_time = (new Date()).valueOf();
-            if (cd_time > current_time) {
-                return;
-            }
-        }
-
-        commands.doCombatSkill(caller)
+        commands.doCastSkill(key)
     },
 
     isInCombat: function() {
         return this._finished;
-    },
-
-    getCurrentTarget: function() {
-        return this._current_target;
     },
 
     setDialogue: function(data) {

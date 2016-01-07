@@ -156,7 +156,7 @@ class DialogueHandler(object):
             for dep in npc_dlg["dependencies"]:
                 if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
                     match = False
-                    break;
+                    break
             if not match:
                 continue
 

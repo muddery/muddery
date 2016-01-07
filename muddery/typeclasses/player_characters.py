@@ -668,11 +668,15 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Get skills' data.
         """
         skills = []
-        for key in self.db.skills:
-            skill = self.db.skills[key]
-            info = {"dbref": skill.dbref,
+
+        skill_dict = self.skill_handler.get_all()
+        for key in skill_dict:
+            skill = skill_dict[key]
+            info = {"key": key,
+                    "dbref": skill.dbref,
                     "name": skill.get_name(),
-                    "desc": skill.db.desc}
+                    "desc": skill.db.desc,
+                    "cd_remain": skill.get_remain_cd()}
             skills.append(info)
 
         return skills
