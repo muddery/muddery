@@ -30,18 +30,21 @@ def skill_escape(caller, target, effect=0, *args, **kwargs):
     rand = random.random()
     if rand < effect:
         return [{"type": "escape",
+                 "message": [LS("%s tried to escape, but failed.") % caller.get_name()],
                  "caller": caller.dbref,
                  "success": False}]
-
-    combat_handler.remove_character(caller)
 
     # send skill's result to the combat handler manually
     # because the handler has been removed from the character
     result = [{"type": "escape",
+               "message": [LS("%s tried to escape. And succeeded!") % caller.get_name()],
                "caller": caller.dbref,
                "success": True}]
-    caller.msg({"combat_process": result})
-    combat_handler.set_skill_result(result)
+    combat_handler.msg_all_combat_process(result)
+
+    combat_handler.remove_character(caller)
+    if combat_handler.can_finish():
+        combat_handler.finish()
 
     caller.msg({"combat_finish": {"escaped": True}})
 
@@ -68,6 +71,7 @@ def skill_heal(caller, target, effect=0, *args, **kwargs):
             target.show_status()
 
     return [{"type": "healed",              # heal result
+             "message": [LS("%s healed %s HPs.") % (target.get_name(), int(effect))],
              "caller": caller.dbref,        # caller's dbref
              "target": target.dbref,        # target's dbref
              "effect": effect,              # effect
@@ -98,6 +102,8 @@ def skill_hit(caller, target, effect=0, *args, **kwargs):
     target.hurt(damage)
 
     return [{"type": "attacked",            # attack result
+             "message": [LS("%s hitted %s.") % (caller.get_name(), target.get_name()),
+                         LS("%s lost %s HPs.") % (target.get_name(), int(damage))],
              "caller": caller.dbref,        # caller's dbref
              "target": target.dbref,        # target's dbref
              "effect": damage,              # effect

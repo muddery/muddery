@@ -100,9 +100,9 @@ class MudderySkill(MudderyObject):
         self.db.owner = owner
     
         if not self.passive:
-            # Set skill cd.
-            if self.cd > 0:
-                self.db.cd_finish_time = time.time() + self.cd
+            # Set skill cd. Add gcd to new the skill.
+            if settings.GLOBAL_CD > 0:
+                self.db.cd_finish_time = time.time() + settings.GLOBAL_CD
 
     def cast_skill_manually(self, target):
         """

@@ -276,6 +276,9 @@ class MudderyCombatHandler(DefaultScript):
         """
         Send combat process to all player characters.
         """
+        if not process:
+            return
+
         for character in self.db.characters.values():
             if character.has_player:
                 character.msg({"combat_process": process})

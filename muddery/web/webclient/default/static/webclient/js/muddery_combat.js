@@ -283,6 +283,13 @@ var combat = {
 
     displayCombatProcess: function(data) {
         for (var i in data) {
+            // show message
+            if ("message" in data[i]) {
+                for (var m in data[i].message) {
+                    webclient.displayMsg(data[i].message[m]);
+                }
+            }
+
             /*
             if (data[i].type == "joined") {
                 var result = $('#fighter_' + data[i].dbref.slice(1));
