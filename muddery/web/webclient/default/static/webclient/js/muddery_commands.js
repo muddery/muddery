@@ -16,10 +16,18 @@ var commands = {
         sendCommand(this.cmdString(cmd, args));
     },
     
-    doCombatSkill : function(caller) {
+    doCastSkill : function(skill) {
+        if (skill in data_handler.skill_cd_time) {
+            var cd_time = data_handler.skill_cd_time[skill];
+            var current_time = (new Date()).valueOf();
+            if (cd_time > current_time) {
+                return;
+            }
+        }
+
         var cmd = "castskill";
-        var args = {"skill": $(caller).attr("key"),
-                    "target": combat.getCurrentTarget()};
+        var args = {"skill": skill,
+                    "target": data_handler.current_target};
         sendCommand(this.cmdString(cmd, args));
     },
     

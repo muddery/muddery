@@ -4,7 +4,6 @@ Muddery webclient (javascript component)
 
 var webclient = {
     cache_room_exits : null,
-    _character_name: "",
 
     doShow : function(type, msg) {
         var data = null;
@@ -523,6 +522,19 @@ var webclient = {
     },
 
     displaySkills : function(data) {
+        // set CDs
+        var current_time = (new Date()).valueOf();
+        for (var i in data) {
+            // CD in milliseconds
+            var cd_finish_time = current_time + data[i].cd_remain * 1000;
+            if (cd_finish_time > current_time) {
+                data_handler.skill_cd_time[data[i].key] = cd_finish_time;
+            }
+            else {
+                data_handler.skill_cd_time[data[i].key] = 0;
+            }
+        }
+
         // display player's skills
         var page = $("#box_skill").html("");
         uimgr.tableSkills(data).appendTo(page);
@@ -689,7 +701,7 @@ var webclient = {
         try {
             $("<span>")
                 .addClass("prompt_name")
-                .text(this._character_name)
+                .text(data_handler.character_name)
                 .appendTo(prompt);
 
             $("<span>")
@@ -808,9 +820,30 @@ var webclient = {
     },
 
     displaySkillCD: function(data) {
+        // update skill's cd
+        var cd = data["cd"];
+        var gcd = data["gcd"];
+        var skill = data["skill"];
+        var current_time = (new Date()).valueOf();
+
+        // cd_time in milliseconds
+        var cd_time = current_time + cd * 1000;
+        if (skill in data_handler.skill_cd_time) {
+            if (data_handler.skill_cd_time[skill] < cd_time) {
+                data_handler.skill_cd_time[skill] = cd_time;
+            }
+        }
+
+        var gcd_time = current_time + gcd * 1000;
+        for (key in data_handler.skill_cd_time) {
+            if (data_handler.skill_cd_time[key] < gcd_time) {
+                data_handler.skill_cd_time[key] = gcd_time;
+            }
+        }
+
         if ($('#combat_box').length > 0) {
             // has combat box
-            combat.displaySkillCD(data);
+            combat.displaySkillCD();
         }
         else {
         }
@@ -836,8 +869,8 @@ var webclient = {
     },
     
     onPuppet: function(data) {
-        this._character_name = data.name;
-        combat.setSelf(data.dbref);
+        data_handler.character_name = data.name;
+        data_handler.character_dbref = data.dbref;
     },
 
     doSetSizes: function() {

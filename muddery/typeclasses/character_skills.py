@@ -210,3 +210,15 @@ class MudderySkill(MudderyObject):
                 if time.time() < self.db.cd_finish_time:
                     return True
         return False
+
+    def get_remain_cd(self):
+        """
+        Get skill's CD.
+
+        Returns:
+            (float) Remain CD in seconds.
+        """
+        remain_cd = self.db.cd_finish_time - time.time()
+        if remain_cd < 0:
+            remain_cd = 0
+        return remain_cd

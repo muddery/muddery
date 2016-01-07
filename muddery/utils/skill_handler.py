@@ -40,6 +40,12 @@ class SkillHandler(object):
         if self.can_auto_cast:
             TICKER_HANDLER.remove(self)
 
+    def get_all(self):
+        """
+        Get all skills.
+        """
+        return self.skills
+
     def learn_skill(self, skill):
         """
         Learn a new skill.

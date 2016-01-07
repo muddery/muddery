@@ -53,6 +53,7 @@ var popupmgr = {
                         .text(speaker);
                 }
                 var content = text2html.parseHtml(dialogues[0].content);
+                content = escape.parse(content, data_handler.getEscapes());
                 $('#popup_body').html(content);
 
                 var html_button = '<div><br></div>\
@@ -82,7 +83,10 @@ var popupmgr = {
                     content += ' dialogue="' + dialogues[i].dialogue + '"';
                     content += ' sentence="' + dialogues[i].sentence + '"';
                     content += '">';
-                    content += text2html.parseHtml(dialogues[i].content);
+
+                    var string = text2html.parseHtml(dialogues[i].content);
+                    string = escape.parse(string, data_handler.getEscapes());
+                    content += string;
                     content += '</a><br>';
                 }
 
