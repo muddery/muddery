@@ -132,6 +132,9 @@ var webclient = {
                 else if (key == "skill_cd") {
                     this.displaySkillCD(data[key]);
                 }
+                else if (key == "skill_result") {
+                    this.displaySkillResult(data[key]);
+                }
                 else if (key == "get_exp") {
                     this.displayGetExp(data[key])
                 }
@@ -159,7 +162,7 @@ var webclient = {
             }
             catch(error) {
                 this.displayErr("Data error.");
-                console.error(error);
+                console.error(error.message);
             }
         }
     },
@@ -835,7 +838,7 @@ var webclient = {
         }
 
         var gcd_time = current_time + gcd * 1000;
-        for (key in data_handler.skill_cd_time) {
+        for (var key in data_handler.skill_cd_time) {
             if (data_handler.skill_cd_time[key] < gcd_time) {
                 data_handler.skill_cd_time[key] = gcd_time;
             }
@@ -845,7 +848,15 @@ var webclient = {
             // has combat box
             combat.displaySkillCD();
         }
-        else {
+    },
+
+    displaySkillResult: function(data) {
+        for (var i in data) {
+            if ("message" in data[i]) {
+                for (var m in data[i].message) {
+                    this.displayMsg(data[i].message[m]);
+                }
+            }
         }
     },
 
