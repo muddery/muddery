@@ -99,22 +99,6 @@ class MudderyObject(DefaultObject):
         pass
 
 
-    def at_post_puppet(self):
-        """
-        Called just after puppeting has been completed and all
-        Player<->Object links have been established.
-
-        """
-        # Send puppet info to the player and look around.
-        self.msg("\n" + LS("You become {c%s{n.") % self.get_name() + "\n")
-        self.execute_cmd("look")
-
-        if not settings.SOLO_MODE:
-            # Notify other players in this location.
-            if self.location:
-                self.location.msg_contents("%s has entered the game." % self.name, exclude=[self])
-
-
     def at_post_unpuppet(self, player, session=None):
         """
         We stove away the character when the player goes ooc/logs off,

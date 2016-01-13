@@ -3,8 +3,6 @@ Muddery webclient (javascript component)
 */
 
 var webclient = {
-    cache_room_exits : null,
-
     doShow : function(type, msg) {
         var data = null;
         
@@ -286,15 +284,27 @@ var webclient = {
             }
         }
 
-        var empty = true;
+        // sort exits by direction
+        var room_exits = [];
         if ("exits" in data) {
-            if (data["exits"].length > 0) {
-                uimgr.divRoomExits(data["exits"]).appendTo(box);
-                empty = false;
+            for (var i in data.exits) {
+                var direction = map.getExitDirection(data.exits[i].key);
+                // sort from north (67.5)
+                if (direction < 67.5) {
+                    direction += 360;
+                }
+                room_exits.push({"data": data.exits[i],
+                                            "direction": direction
+                                           });
             }
+
+            room_exits.sort(function(a, b) {return a.direction - b.direction;});
         }
 
-        if (empty) {
+        if (room_exits.length > 0) {
+            uimgr.divRoomExits(room_exits).appendTo(box);
+        }
+        else {
             uimgr.divRoomExits("").appendTo(box);
         }
 
@@ -398,55 +408,39 @@ var webclient = {
     },
 
     displayLookObj : function(data) {
+        var exit = $("#exit_cmd_" + data.dbref.slice(1));
+        if (exit.length > 0) {
+            // object is an exit
 
-        //if cmds contains goto, display all actions of current exit
-        var is_goto = false;
-        var is_exit = false;
+            // clear old exit commands
+            $(".exit_cmd").empty();
 
-        if ("cmds" in data) {
-            for (var i in data["cmds"]) {
-                var cmd = data["cmds"][i];
-                if(cmd["cmd"] == "goto"){
-                    is_goto = true;
-                }
-            }
-        }
-
-        if(is_goto){
-            var page = $("#room_exits");
-            page.html(LS("Exits") + LS(": "));
-            if (webclient.cache_room_exits) {
-                if (webclient.cache_room_exits.length > 0) {
-                    // add exits
-                    for (var i in webclient.cache_room_exits) {
-                        try {
-                            var exit = webclient.cache_room_exits[i];
-                            var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, exit["name"],
-                                {"cmd_name": "look", "cmd_args": exit["dbref"], "dbref": exit["dbref"], "style":"margin-left:10px;"});
-                            aHrefElement.appendTo(page);
-
-                            if(exit["dbref"] == data["dbref"]){
-                                page.append('[');
-                                is_exit = true;
-                                for (var i in data["cmds"]) {
-                                    try {
-                                        var cmd = data["cmds"][i];
-                                        var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, cmd["name"],
-                                            {"cmd_name": cmd["cmd"], "cmd_args": cmd["args"], "style":"margin-left:10px;"});
-                                        aHrefElement.appendTo(page);
-                                    }
-                                    catch(error) {
-                                    }
-                                }
-                                page.append(']');
-                            }
-                        }
-                        catch(error) {
-                        }
+            var has_goto = false;
+            if ("cmds" in data) {
+                for (var i in data["cmds"]) {
+                    if (data.cmds[i].cmd == "goto") {
+                        has_goto = true;
+                        break;
                     }
                 }
             }
-            if(is_exit && is_goto){
+
+            if (has_goto) {
+                // show a goto command
+                for (var i in data["cmds"]) {
+                    try {
+                        var cmd = data["cmds"][i];
+                        var href = uimgr.aHref("#",
+                                               uimgr.CONST_A_HREF_ONCLICK,
+                                               "[" + cmd["name"] + "]",
+                                               {"cmd_name": cmd["cmd"],
+                                                "cmd_args": cmd["args"],
+                                                "style":"margin-left:10px;"});
+                        href.appendTo(exit);
+                    }
+                    catch(error) {
+                    }
+                }
                 return;
             }
         }

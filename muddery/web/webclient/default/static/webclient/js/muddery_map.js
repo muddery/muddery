@@ -3,13 +3,37 @@ Muddery map (javascript component)
 */
 
 var map = {
-    _map_data: {"rooms": {},
-                "paths": {}},
+    _map_rooms: {},     // room's key: [room's name, potision]
+
+    _map_exits: {},     // exit's key: [location, destination]
+
+    _map_paths: {},     // room's key: [room's neighbour1,
+                        //              room's neighbour2,
+                        //              ...]
 
     _current_location: null,
 
+    clearData: function() {
+        this._map_rooms = {};
+        this._map_exits = {};
+        this._map_paths = {};
+    },
+
     setData: function(data) {
-        this._map_data = data;
+        // set map data
+        this._map_rooms = data.rooms;
+        this._map_exits = data.exits;
+
+        for (var exit in data.exits) {
+            var location = data.exits[exit][0];
+            var destination = data.exits[exit][1];
+            if (location in this._map_paths) {
+                this._map_paths[location].push(destination);
+            }
+            else {
+                this._map_paths[location] = [destination];
+            }
+        }
     },
 
     setCurrentLocation: function(location) {
@@ -18,25 +42,30 @@ var map = {
 
     revealMap: function(data) {
         // add data to map
+        if (!data) {
+            return;
+        }
 
-        if (data && "rooms" in data) {
+        if ("rooms" in data) {
             // add rooms
-            for (var key in data.rooms) {
-                if (!(key in this._map_data.rooms)) {
-                    this._map_data.rooms[key] = data.rooms[key];
-                }
+            for (var room in data.rooms) {
+                this._map_rooms[room] = data.rooms[room];
             }
         }
 
-        if (data && "paths" in data) {
-            // add paths
-            for (var begin in data.paths) {
-                if (!(begin in this._map_data.paths)) {
-                    this._map_data.paths[begin] = {};
-                }
+        if ("exits" in data) {
+            for (var exit in data.exits) {
+                // add exits
+                this._map_exits[exit] = data.exits[exit];
 
-                for (var end in data.paths[begin]) {
-                    this._map_data.paths[begin][end] = true;
+                // add paths
+                var location = data.exits[exit][0];
+                var destination = data.exits[exit][1];
+                if (location in this._map_paths) {
+                    this._map_paths[location].push(destination);
+                }
+                else {
+                    this._map_paths[location] = [destination];
                 }
             }
         }
@@ -88,12 +117,12 @@ var map = {
         boxBody.height(map_height);
 
         if (!(this._current_location &&
-            this._current_location in this._map_data.rooms)){
+            this._current_location in this._map_rooms)){
             // does not have current location, can not show map.
             webclient.doSetPopupSize();
             return;
         }
-        var current_room = this._map_data.rooms[this._current_location];
+        var current_room = this._map_rooms[this._current_location];
 
         //
 		var svg = d3.select('#map_box .modal-body')
@@ -114,17 +143,21 @@ var map = {
         }
 
         if (current_room[1] &&
-            this._map_data.paths) {
+            this._map_paths) {
             // get path positions
             var path_data = [];
-            for (var begin in this._map_data.paths) {
-                for (var end in this._map_data.paths[begin]) {
-                    if (begin in this._map_data.rooms &&
-                        this._map_data.rooms[begin][1] &&
-                        end in this._map_data.rooms &&
-                        this._map_data.rooms[end][1]) {
-                        path_data.push([this._map_data.rooms[begin][1],    // room1 posision
-                                        this._map_data.rooms[end][1]]);  // room2 posision
+            for (var begin in this._map_paths) {
+                if (begin in this._map_rooms) {
+                    var from = this._map_rooms[begin][1];
+
+                    for (var end in this._map_paths[begin]) {
+                        if (this._map_paths[begin][end] in this._map_rooms) {
+                            var to = this._map_rooms[this._map_paths[begin][end]][1];
+
+                            if (from && to) {
+                                path_data.push([from, to]);  // path posision
+                            }
+                        }
                     }
                 }
             }
@@ -149,17 +182,17 @@ var map = {
                         .attr("stroke-width", 2);
         }
 
-        if (this._map_data.rooms) {
+        if (this._map_rooms) {
             // get room positions
             var room_data = [];
             var current_room_index = -1;
 
             if (current_room[1]) {
                 var count = 0;
-                for (var key in this._map_data.rooms) {
-                    if (this._map_data.rooms[key][1]) {
-                        room_data.push([util.truncate_string(this._map_data.rooms[key][0], 10, true),   // room's name
-                                        this._map_data.rooms[key][1]]);     // room's position
+                for (var key in this._map_rooms) {
+                    if (this._map_rooms[key][1]) {
+                        room_data.push([util.truncate_string(this._map_rooms[key][0], 10, true),   // room's name
+                                        this._map_rooms[key][1]]);     // room's position
                         if (key == this._current_location) {
                             current_room_index = count;
                         }
@@ -212,5 +245,85 @@ var map = {
         }
 
         webclient.doSetPopupSize();
+    },
+
+    getExitDirection: function(exit) {
+        // get the degree of the path
+        // from 0 to 360
+        if (!(exit in this._map_exits)) {
+            return;
+        }
+
+        var location = this._map_exits[exit][0];
+        if (!location in this._map_rooms) {
+            return;
+        }
+
+        var destination = this._map_exits[exit][1];
+        if (!destination in this._map_rooms) {
+            return;
+        }
+
+        var from = this._map_rooms[location][1];
+        var to = this._map_rooms[destination][1];
+
+        if (!from || !to) {
+            return;
+        }
+
+        var dx = to[0] - from[0];
+        var dy = -(to[1] - from[1]);
+        var degree = null;
+        if (dx == 0) {
+            if (dy > 0) {
+                degree = 90;
+            }
+            else if (dy < 0) {
+                degree = 270;
+            }
+        }
+        else {
+            degree = Math.atan(dy / dx) / Math.PI * 180;
+
+            if (dx < 0) {
+                degree += 180;
+            }
+        }
+
+        return degree;
+    },
+
+    getDirectionName: function(degree) {
+        var direction = "";
+        degree = degree - Math.floor(degree / 360) * 360;
+        if (degree < 22.5) {
+            direction = LS("(E)");
+        }
+        else if (degree < 67.5) {
+            direction = LS("(NE)");
+        }
+        else if (degree < 112.5) {
+            direction = LS("(N)");
+        }
+        else if (degree < 157.5) {
+            direction = LS("(NW)");
+        }
+        else if (degree < 202.5) {
+            direction = LS("(W)");
+        }
+        else if (degree < 247.5) {
+            direction = LS("(SW)");
+        }
+        else if (degree < 292.5) {
+            direction = LS("(S)");
+        }
+        else if (degree < 337.5) {
+            direction = LS("(SE)");
+        }
+        else {
+            direction = LS("(E)");
+        }
+
+        return direction;
     },
 }

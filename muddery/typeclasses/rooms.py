@@ -91,12 +91,15 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                 self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
 
 
-    def get_neighbours(self):
+    def get_exits(self):
         """
-        Get this room's neighbour rooms.
+        Get this room's exits.
         """
-        neighbours = [cont.destination for cont in self.contents if cont.destination]
-        return neighbours
+        exits = {}
+        for cont in self.contents:
+            if cont.destination:
+                exits[cont.get_info_key()] = (self.get_info_key(), cont.destination.get_info_key(),)
+        return exits
 
 
     def get_surroundings(self, caller):
@@ -145,6 +148,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
 
                 appearance["dbref"] = cont.dbref
                 appearance["name"] = cont.get_name()
+                appearance["key"] = cont.get_info_key()
                 
                 info[type].append(appearance)
 
