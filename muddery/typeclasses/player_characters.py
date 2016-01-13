@@ -136,8 +136,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.msg({"puppet": {"dbref": self.dbref,
                              "name": self.get_name()}})
 
-        super(MudderyPlayerCharacter, self).at_post_puppet()
-
         # send character's data to player
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),
@@ -147,12 +145,14 @@ class MudderyPlayerCharacter(MudderyCharacter):
                    "revealed_map": self.get_revealed_map()}
         self.msg(message)
 
+        self.show_location()
+
         # notify its location
         if not settings.SOLO_MODE:
             if self.location:
                 change = {"dbref": self.dbref,
                           "name": self.get_name()}
-                self.location.msg_contents({"player_online":change}, exclude=self)
+                self.location.msg_contents({"player_online": change}, exclude=[self])
 
 
     def at_pre_unpuppet(self):
@@ -216,16 +216,13 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 "rooms": {room1's key: (name, position),
                           room2's key: (name, position),
                           ...},
-                "paths": {room1's key: {room2's key,
-                                        room3's key},
-                          room2's key: {room3's key,
-                                        room4's key},
+                "exits": {exit1's key: (room1's key, room2's key),
+                          exit2's key: (room3's key, room4's key},
                           ...}
             }
         """
         rooms = {}
-        neighbours = set()
-        paths = {}
+        exits = {}
 
         for room_key in self.db.revealed_map:
             # get room's information
@@ -234,31 +231,19 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 room = room[0]
                 rooms[room_key] = (room.get_name(), room.position)
 
-                for neighbour in room.get_neighbours():
-                    # get all neighbours
-                    neighbour_key = neighbour.get_info_key()
-                    neighbours.add(neighbour_key)
+                new_exits = room.get_exits()
+                if new_exits:
+                    exits.update(new_exits)
 
-                    if room_key > neighbour_key:
-                        if room_key in paths:
-                            paths[room_key][neighbour_key] = True
-                        else:
-                            paths[room_key] = {neighbour_key: True}
-                    else:
-                        if neighbour_key in paths:
-                            paths[neighbour_key][room_key] = True
-                        else:
-                            paths[neighbour_key] = {room_key: True}
-
-        for neighbour_key in neighbours:
-            # add neighbours to rooms
-            if not neighbour_key in rooms:
-                neighbour = utils.search_obj_info_key(neighbour_key)
+        for path in exits.values():
+            # add room's neighbours
+            if not path[1] in rooms:
+                neighbour = utils.search_obj_info_key(path[1])
                 if neighbour:
                     neighbour = neighbour[0]
-                    rooms[neighbour_key] = (neighbour.get_name(), neighbour.position)
+                    rooms[neighbour.get_info_key()] = (neighbour.get_name(), neighbour.position)
 
-        return {"rooms": rooms, "paths": paths}
+        return {"rooms": rooms, "exits": exits}
 
 
     def show_location(self):
@@ -270,31 +255,34 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
             msg = {"current_location": location_key}
 
+            """
+            reveal_map:
+            {
+                "rooms": {room1's key: (name, position),
+                          room2's key: (name, position),
+                          ...},
+                "exits": {exit1's key: (room1's key, room2's key),
+                          exit2's key: (room3's key, room4's key},
+                          ...}
+            }
+            """
             reveal_map = None
             if not location_key in self.db.revealed_map:
                 # reveal map
                 self.db.revealed_map.add(self.location.get_info_key())
 
                 rooms = {location_key: (self.location.get_name(), self.location.position)}
-                paths = {}
+                exits = self.location.get_exits()
 
-                for neighbour in self.location.get_neighbours():
-                    # get all neighbours
-                    neighbour_key = neighbour.get_info_key()
-                    rooms[neighbour_key] = (neighbour.get_name(), neighbour.position)
+                for path in exits.values():
+                    # add room's neighbours
+                    if not path[1] in rooms:
+                        neighbour = utils.search_obj_info_key(path[1])
+                        if neighbour:
+                            neighbour = neighbour[0]
+                            rooms[neighbour.get_info_key()] = (neighbour.get_name(), neighbour.position)
 
-                    if location_key > neighbour_key:
-                        if location_key in paths:
-                            paths[location_key][neighbour_key] = True
-                        else:
-                            paths[location_key] = {neighbour_key: True}
-                    else:
-                        if neighbour_key in paths:
-                            paths[neighbour_key][location_key] = True
-                        else:
-                            paths[neighbour_key] = {location_key: True}
-
-                msg["reveal_map"] = {"rooms": rooms, "paths": paths}
+                msg["reveal_map"] = {"rooms": rooms, "exits": exits}
 
             # get appearance
             appearance = self.location.get_appearance(self)

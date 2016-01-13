@@ -55,6 +55,7 @@ body {
     width: 120px;
     padding: 2px 4px;
     margin: 2px 2px;
+    color: #111;
 }
 
 input[type=checkbox], input[type=radio] {
@@ -156,7 +157,11 @@ a {
 }
 
 a:hover {
-    color: #3af;
+    color: #39d;
+}
+
+a:focus {
+    color: #39d;
 }
 
 .vertical-center {
@@ -318,4 +323,12 @@ button.btn-combat div.cooldown {
 .prompt_name {
     color: #0ff;
     margin: 0px 5px;
+}
+
+.room_element {
+    margin: 0px 5px;
+}
+
+.exit_cmd a {
+    color: #0ff;
 }

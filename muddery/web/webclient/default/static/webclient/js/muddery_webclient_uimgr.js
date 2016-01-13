@@ -79,14 +79,34 @@ var uimgr = {
         var empty = true;
         var divRoomExitsElement = uimgr.divRoomCommon("room_exits", LS("Exits") + LS(": "));
         // add exits
-        webclient.cache_room_exits = new Array();
         for (var i in data_exits) {
             try {
-                var exit = data_exits[i];
-                var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, exit["name"],
-                    {"cmd_name": "look", "cmd_args": exit["dbref"], "dbref": exit["dbref"], "style":"margin-left:10px;"});
-                aHrefElement.appendTo(divRoomExitsElement);
-                webclient.cache_room_exits.push(data_exits[i]);
+                var element = $("<span>").addClass("room_element");
+
+                if (data_exits[i].direction) {
+                    var direction = map.getDirectionName(data_exits[i].direction);
+                    if (direction) {
+                        $("<span>").text(direction + " ")
+                                   .appendTo(element);
+                    }
+                }
+
+                var exit = data_exits[i].data;
+                var name = exit.name;
+                var aHrefElement = uimgr.aHref("#",
+                                               uimgr.CONST_A_HREF_ONCLICK,
+                                               name,
+                                               {"cmd_name": "look",
+                                                "cmd_args": exit.dbref,
+                                                "dbref": exit.dbref
+                                               });
+                aHrefElement.appendTo(element);
+
+                $("<span>").attr("id", "exit_cmd_" + exit.dbref.slice(1))
+                           .addClass("exit_cmd")
+                           .appendTo(element);
+
+                element.appendTo(divRoomExitsElement);
                 empty = false;
             }
             catch(error) {
