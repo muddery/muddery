@@ -598,7 +598,7 @@ def _create_character(character_key, level, session, new_player, typeclass, home
                                              home=home, permissions=permissions)
 
         # set character info
-        new_character.set_data_info(character_key)
+        new_character.set_data_key(character_key)
         new_character.set_level(level)
 
         # set playable character list

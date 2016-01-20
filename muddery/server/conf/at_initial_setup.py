@@ -60,7 +60,7 @@ def at_initial_setup():
                 superuser.move_to(start_location, quiet=True)
 
             # set superuser's data
-            superuser.set_data_info(settings.DEFAULT_PLAYER_CHARACTER_KEY)
+            superuser.set_data_key(settings.DEFAULT_PLAYER_CHARACTER_KEY)
             superuser.set_level(1)
             superuser.set_nickname("superuser")
 

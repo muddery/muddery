@@ -1,6 +1,5 @@
 from django.contrib.admin.forms import forms
-from worlddata.models import *
-
+from muddery.worlddata.model_base import *
 
 #
 # Field

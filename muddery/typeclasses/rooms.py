@@ -41,8 +41,9 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         self.position = None
         try:
             # set position
-            if self.dfield.position:
-                self.position = ast.literal_eval(self.dfield.position)
+            position = getattr(self.dfield, "position", None)
+            if position:
+                self.position = ast.literal_eval(position)
         except Exception, e:
             logger.log_tracemsg("load_data error: %s" % e)
 
@@ -98,7 +99,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         exits = {}
         for cont in self.contents:
             if cont.destination:
-                exits[cont.get_info_key()] = (self.get_info_key(), cont.destination.get_info_key(),)
+                exits[cont.get_data_key()] = (self.get_data_key(), cont.destination.get_data_key(),)
         return exits
 
 
@@ -148,7 +149,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
 
                 appearance["dbref"] = cont.dbref
                 appearance["name"] = cont.get_name()
-                appearance["key"] = cont.get_info_key()
+                appearance["key"] = cont.get_data_key()
                 
                 info[type].append(appearance)
 

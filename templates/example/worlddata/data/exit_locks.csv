@@ -1,2 +1,2 @@
-key,condition,verb,message_lock,auto_unlock
+key,condition,verb,desc_locked,auto_unlock
 exit_house_to_street,have_object("obj_key"),UNLOCK,Use a key to unlock it.,0

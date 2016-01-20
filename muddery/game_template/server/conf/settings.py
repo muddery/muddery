@@ -76,14 +76,6 @@ DATABASES = {{
         'PASSWORD': '',
         'HOST': '',
         'PORT': ''
-        }},
-    'default_edit': {{
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(GAME_DIR, "server", "muddery_edit.db3"),
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': ''
         }}}}
 
 ######################################################################
@@ -106,6 +98,8 @@ STATIC_ROOT = os.path.join(GAME_DIR, "web", "static")
 
 # Directories from which static files will be gathered from.
 STATICFILES_DIRS = (
+    os.path.join(GAME_DIR, "worlddata", "editor", "static"),
+    os.path.join(MUDDERY_DIR, "worlddata", "editor", "static"),
     os.path.join(GAME_DIR, "web", "static_overrides"),
     os.path.join(MUDDERY_DIR, "web", "webclient", WEBCLIENT_TEMPLATE, "static"),
     os.path.join(MUDDERY_DIR, "web", "static"),
@@ -113,6 +107,8 @@ STATICFILES_DIRS = (
 
 # We setup the location of the website template as well as the admin site.
 TEMPLATE_DIRS = (
+    os.path.join(GAME_DIR, "worlddata", "editor", "templates"),
+    os.path.join(MUDDERY_DIR, "worlddata", "editor", "templates"),
     os.path.join(GAME_DIR, "web", "template_overrides"),
     os.path.join(MUDDERY_DIR, "web", "webclient", WEBCLIENT_TEMPLATE),
     os.path.join(MUDDERY_DIR, "web", "templates"),
@@ -140,7 +136,8 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_EXITS,
                       WORLD_OBJECTS,
                       WORLD_NPCS,
-                      COMMON_OBJECTS)
+                      COMMON_OBJECTS,
+                      ADDITIONAL_DATA,)
 
 # all other data models
 OTHER_DATA_MODELS = (OBJECT_CREATORS,
@@ -150,7 +147,6 @@ OTHER_DATA_MODELS = (OBJECT_CREATORS,
                      EVENT_DATA,
                      EVENT_MOBS,
                      EVENT_DIALOGUES,
-                     EXIT_LOCKS,
                      DIALOGUES,
                      DIALOGUE_SENTENCES,
                      DIALOGUE_RELATIONS,

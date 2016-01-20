@@ -1,6 +1,39 @@
 from django.db import models
 
 KEY_LENGTH = 255
+NAME_LENGTH = 20
+TYPECLASS_LENGTH = 80
+POSITION_LENGTH = 80
+
+
+# ------------------------------------------------------------
+#
+# store all typeclasses
+#
+# ------------------------------------------------------------
+class typeclasses(models.Model):
+    "store all typeclasses"
+
+    # typeclass's key
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # the readable name of the typeclass
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+
+    # the typeclass's path that related to a class
+    path = models.CharField(max_length=TYPECLASS_LENGTH, blank=True)
+
+    # typeclass's description (optional)
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Typeclass"
+        verbose_name_plural = "Typeclasses"
+
+    def __unicode__(self):
+        return self.name
 
 
 # ------------------------------------------------------------
@@ -11,17 +44,29 @@ KEY_LENGTH = 255
 class world_rooms(models.Model):
     "Store all unique rooms."
 
+    # room's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    name = models.CharField(max_length=KEY_LENGTH)
-    typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # room's name for display
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # room's typeclass
+    typeclass = models.ForeignKey("typeclasses")
+
+    # room's description for display
     desc = models.TextField(blank=True)
-    position = models.TextField(blank=True)
+
+    # room's position which is used in map
+    position = models.CharField(max_length=POSITION_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "World Room List"
-        verbose_name_plural = "World Room List"
+        verbose_name = "Room"
+        verbose_name_plural = "Rooms"
+
+    def __unicode__(self):
+        return self.key
 
 
 # ------------------------------------------------------------
@@ -32,20 +77,38 @@ class world_rooms(models.Model):
 class world_exits(models.Model):
     "Store all unique exits."
 
+    # exit's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    name = models.CharField(max_length=KEY_LENGTH)
-    typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # exit's name for display
+    name = models.CharField(max_length=NAME_LENGTH)
+
+    # exit's typeclass
+    typeclass = models.ForeignKey("typeclasses")
+
+    # exit's description for display
     desc = models.TextField(blank=True)
-    verb = models.TextField(blank=True)
-    location = models.CharField(max_length=KEY_LENGTH, blank=True)
-    destination = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # the action verb to enter the exit (optional)
+    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # where this exit sets
+    location = models.ForeignKey("world_rooms")
+
+    # the exits's destination
+    destination = models.ForeignKey("world_rooms")
+
+    # the condition for showing the exit
     condition = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "World Exit List"
-        verbose_name_plural = "World Exit List"
+        verbose_name = "Exit"
+        verbose_name_plural = "Exits"
+
+    def __unicode__(self):
+        return self.key
 
 
 # ------------------------------------------------------------
@@ -56,10 +119,19 @@ class world_exits(models.Model):
 class exit_locks(models.Model):
     "Store all exit locks."
 
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    condition = models.TextField(blank=True)
-    verb = models.TextField(blank=True)
-    message_lock = models.TextField(blank=True)
+    # related exit
+    key = models.OneToOneField("world_exits")
+
+    # condition of the lock
+    unlock_condition = models.TextField(blank=True)
+
+    # action to unlock the exit (optional)
+    unlock_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # description when locked
+    locked_desc = models.TextField(blank=True)
+
+    # if the exit can be unlocked automatically
     auto_unlock = models.BooleanField(blank=True, default=False)
 
     class Meta:
@@ -78,8 +150,8 @@ class world_objects(models.Model):
     "Store all unique objects."
 
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    name = models.CharField(max_length=KEY_LENGTH)
-    typeclass = models.CharField(max_length=KEY_LENGTH)
+    name = models.CharField(max_length=NAME_LENGTH)
+    typeclass = models.ForeignKey("typeclasses")
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=KEY_LENGTH, blank=True)
     condition = models.TextField(blank=True)
@@ -142,8 +214,8 @@ class common_objects(models.Model):
     "Store all common objects."
 
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    name = models.CharField(max_length=KEY_LENGTH)
-    typeclass = models.CharField(max_length=KEY_LENGTH)
+    name = models.CharField(max_length=NAME_LENGTH)
+    typeclass = models.ForeignKey("typeclasses")
     desc = models.TextField(blank=True)
     max_stack = models.IntegerField(blank=True, default=1)
     unique = models.BooleanField(blank=True, default=False)
@@ -165,7 +237,7 @@ class equipment_types(models.Model):
     "Store all equip types."
 
     type = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    name = models.CharField(max_length=KEY_LENGTH)
+    name = models.CharField(max_length=NAME_LENGTH)
     desc = models.TextField(blank=True)
     career = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -205,8 +277,8 @@ class world_npcs(models.Model):
     "Store all NPCs."
 
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    name = models.CharField(max_length=KEY_LENGTH)
-    typeclass = models.CharField(max_length=KEY_LENGTH)
+    name = models.CharField(max_length=NAME_LENGTH)
+    typeclass = models.ForeignKey("typeclasses")
     desc = models.TextField(blank=True)
     location = models.CharField(max_length=KEY_LENGTH, blank=True)
     model = models.CharField(max_length=KEY_LENGTH)
@@ -228,8 +300,8 @@ class common_characters(models.Model):
     "Store common characters."
 
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    name = models.CharField(max_length=KEY_LENGTH)
-    typeclass = models.CharField(max_length=KEY_LENGTH)
+    name = models.CharField(max_length=NAME_LENGTH)
+    typeclass = models.ForeignKey("typeclasses")
     desc = models.TextField(blank=True)
     model = models.CharField(max_length=KEY_LENGTH)
 
@@ -249,8 +321,8 @@ class skills(models.Model):
     "Store all skills."
 
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    name = models.CharField(max_length=KEY_LENGTH)
-    typeclass = models.CharField(max_length=KEY_LENGTH)
+    name = models.CharField(max_length=NAME_LENGTH)
+    typeclass = models.ForeignKey("typeclasses")
     desc = models.TextField(blank=True)
     cd = models.FloatField(blank=True, default=0)
     passive = models.BooleanField(blank=True, default=False)
@@ -274,8 +346,8 @@ class quests(models.Model):
     "Store all quests."
 
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    name = models.TextField(blank=True)
-    typeclass = models.CharField(max_length=KEY_LENGTH)
+    name = models.CharField(blank=True, max_length=NAME_LENGTH)
+    typeclass = models.ForeignKey("typeclasses")
     desc = models.TextField(blank=True)
     condition = models.TextField(blank=True)
     action = models.TextField(blank=True)

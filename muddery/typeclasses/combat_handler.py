@@ -231,7 +231,7 @@ class MudderyCombatHandler(DefaultScript):
                 for winner in winners:
                     if winner.has_player:
                         for loser in losers:
-                            winner.quest.at_objective(defines.OBJECTIVE_KILL, loser.get_info_key())
+                            winner.quest.at_objective(defines.OBJECTIVE_KILL, loser.get_data_key())
 
                 # remove dead character
                 for loser in losers:

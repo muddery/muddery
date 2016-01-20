@@ -2,6 +2,16 @@ from django.db import models
 from muddery.worlddata import model_base
 
 
+# ------------------------------------------------------------
+#
+# store all typeclasses
+#
+# ------------------------------------------------------------
+class typeclasses(model_base.typeclasses):
+    "store all typeclasses"
+    pass
+
+
 #------------------------------------------------------------
 #
 # store all rooms

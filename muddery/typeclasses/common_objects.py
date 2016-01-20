@@ -53,15 +53,15 @@ class MudderyCommonObject(MudderyObject):
             return
         
         if number < 0:
-            raise MudderyError("%s can not increase a negative nubmer." % self.get_info_key())
+            raise MudderyError("%s can not increase a negative nubmer." % self.get_data_key())
             return
 
         if self.max_stack == 1 and self.db.number == 1:
-            raise MudderyError("%s can not stack." % self.get_info_key())
+            raise MudderyError("%s can not stack." % self.get_data_key())
             return
 
         if self.db.number + number > self.max_stack:
-            raise MudderyError("%s over stack." % self.get_info_key())
+            raise MudderyError("%s over stack." % self.get_data_key())
             return
         
         self.db.number += number
@@ -75,11 +75,11 @@ class MudderyCommonObject(MudderyObject):
             return
 
         if number < 0:
-            raise MudderyError("%s can not decrease a negative nubmer." % self.get_info_key())
+            raise MudderyError("%s can not decrease a negative nubmer." % self.get_data_key())
             return
 
         if self.db.number < number:
-            raise MudderyError("%s's number will below zero." % self.get_info_key())
+            raise MudderyError("%s's number will below zero." % self.get_data_key())
             return
         
         self.db.number -= number

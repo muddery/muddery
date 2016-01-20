@@ -44,7 +44,7 @@ def build_object(obj_key, caller=None):
 
     # Create object.
     try:
-        obj = create.create_object(record.typeclass, record.name)
+        obj = create.create_object(record.typeclass.path, record.name)
     except Exception, e:
         ostring = "Can not create obj %s: %s" % (obj_key, e)
         print(ostring)
@@ -55,7 +55,7 @@ def build_object(obj_key, caller=None):
 
     try:
         # Set data info.
-        obj.set_data_info(record.key)
+        obj.set_data_key(record.key)
     except Exception, e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
         print(ostring)
@@ -67,15 +67,12 @@ def build_object(obj_key, caller=None):
     return obj
 
 
-def build_objects(model_name, unique, caller=None):
+def build_unique_objects(model_name, caller=None):
     """
     Build all objects in a model.
 
     Args:
         model_name: (string) The name of the data model.
-        unique: (boolean) If unique, every record in model should has one and only one
-                          object in the world.
-                          If not unique, a record can has zero or multiple objects.
         caller: (command caller) If provide, running messages will send to the caller.
     """
     ostring = "Building %s." % model_name
@@ -90,7 +87,7 @@ def build_objects(model_name, unique, caller=None):
     new_obj_names = set(record.key for record in model_obj.objects.all())
 
     # current objects
-    current_objs = utils.search_obj_info_model(model_name)
+    current_objs = utils.search_obj_unique_type(model_name)
 
     # remove objects
     count_remove = 0
@@ -99,30 +96,29 @@ def build_objects(model_name, unique, caller=None):
     current_obj_keys = set()
 
     for obj in current_objs:
-        obj_key = obj.get_info_key()
+        obj_key = obj.get_data_key()
 
-        if unique:
-            if obj_key in current_obj_keys:
-                # This object is duplcated.
-                ostring = "Deleting %s" % obj_key
-                print(ostring)
-                if caller:
-                    caller.msg(ostring)
+        if obj_key in current_obj_keys:
+            # This object is duplcated.
+            ostring = "Deleting %s" % obj_key
+            print(ostring)
+            if caller:
+                caller.msg(ostring)
 
-                obj.delete()
-                count_remove += 1
-                continue
+            obj.delete()
+            count_remove += 1
+            continue
 
-            if not obj_key in new_obj_names:
-                # This object should be removed
-                ostring = "Deleting %s" % obj_key
-                print(ostring)
-                if caller:
-                    caller.msg(ostring)
+        if not obj_key in new_obj_names:
+            # This object should be removed
+            ostring = "Deleting %s" % obj_key
+            print(ostring)
+            if caller:
+                caller.msg(ostring)
 
-                obj.delete()
-                count_remove += 1
-                continue
+            obj.delete()
+            count_remove += 1
+            continue
 
         try:
             obj.load_data()
@@ -135,36 +131,36 @@ def build_objects(model_name, unique, caller=None):
 
         current_obj_keys.add(obj_key)
 
-    if unique:
-        # Create objects.
-        for record in model_obj.objects.all():
-            if not record.key in current_obj_keys:
-                # Create new objects.
-                ostring = "Creating %s." % record.key
+    # Create new objects.
+    for record in model_obj.objects.all():
+        if not record.key in current_obj_keys:
+            # Create new objects.
+            ostring = "Creating %s." % record.key
+            print(ostring)
+            if caller:
+                caller.msg(ostring)
+
+            try:
+                obj = create.create_object(record.typeclass.path, record.name)
+                count_create += 1
+            except Exception, e:
+                ostring = "Can not create obj %s: %s" % (record.key, e)
                 print(ostring)
+                print(traceback.print_exc())
                 if caller:
                     caller.msg(ostring)
+                continue
 
-                try:
-                    obj = create.create_object(record.typeclass, record.name)
-                    count_create += 1
-                except Exception, e:
-                    ostring = "Can not create obj %s: %s" % (record.key, e)
-                    print(ostring)
-                    print(traceback.print_exc())
-                    if caller:
-                        caller.msg(ostring)
-                    continue
-
-                try:
-                    obj.set_data_info(record.key)
-                except Exception, e:
-                    ostring = "Can not set data info to obj %s: %s" % (record.key, e)
-                    print(ostring)
-                    print(traceback.print_exc())
-                    if caller:
-                        caller.msg(ostring)
-                    continue
+            try:
+                obj.set_data_key(record.key)
+                utils.set_obj_unique_type(obj, model_name)
+            except Exception, e:
+                ostring = "Can not set data info to obj %s: %s" % (record.key, e)
+                print(ostring)
+                print(traceback.print_exc())
+                if caller:
+                    caller.msg(ostring)
+                continue
 
     ostring = "Removed %d object(s). Created %d object(s). Updated %d object(s). Total %d objects.\n"\
               % (count_remove, count_create, count_update, len(model_obj.objects.all()))
@@ -192,7 +188,7 @@ def build_details(model_name, caller=None):
     # Set details.
     count = 0
     for record in model_detail.objects.all():
-        location_objs = utils.search_obj_info_key(record.location)
+        location_objs = utils.search_obj_data_key(record.location)
 
         # Detail's location.
         for location in location_objs:
@@ -219,19 +215,19 @@ def build_all(caller=None):
 
     # Build rooms.
     for room_info in settings.WORLD_ROOMS:
-        build_objects(room_info, True, caller)
+        build_unique_objects(room_info, caller)
 
     # Build exits.
     for exit_info in settings.WORLD_EXITS:
-        build_objects(exit_info, True, caller)
+        build_unique_objects(exit_info, caller)
 
     # Build objects.
     for object_info in settings.WORLD_OBJECTS:
-        build_objects(object_info, True, caller)
+        build_unique_objects(object_info, caller)
 
     # Build NPCs.
     for npc_info in settings.WORLD_NPCS:
-        build_objects(npc_info, True, caller)
+        build_unique_objects(npc_info, caller)
 
 
 def reset_default_locations():
@@ -256,7 +252,7 @@ def reset_default_locations():
 
     if default_home_key:
         # If get default_home_key.
-        default_home = utils.search_obj_info_key(default_home_key)
+        default_home = utils.search_obj_data_key(default_home_key)
         if default_home:
             # Set default home.
             settings.DEFAULT_HOME = default_home[0].dbref
@@ -268,7 +264,7 @@ def reset_default_locations():
         # If does not have the default_player_home_key, set to the DEFAULT_HOME
         settings.DEFAULT_PLAYER_HOME = settings.DEFAULT_HOME
     else:
-        default_player_home = utils.search_obj_info_key(default_player_home_key)
+        default_player_home = utils.search_obj_data_key(default_player_home_key)
         if default_player_home:
             # Set player's default home.
             settings.DEFAULT_PLAYER_HOME = default_player_home[0].dbref
@@ -290,7 +286,7 @@ def reset_default_locations():
 
     if start_location_key:
         # If get start_location_key.
-        start_location = utils.search_obj_info_key(start_location_key)
+        start_location = utils.search_obj_data_key(start_location_key)
         if start_location:
             settings.START_LOCATION = start_location[0].dbref
             print("settings.START_LOCATION set to: %s" % settings.START_LOCATION)

@@ -31,7 +31,7 @@ class EventHandler(object):
         model_events = get_model(settings.WORLD_DATA_APP, settings.EVENT_DATA)
         if model_events:
             # Get records.
-            event_records = model_events.objects.filter(object=owner.get_info_key())
+            event_records = model_events.objects.filter(object=owner.get_data_key())
 
         for event_record in event_records:
             if not event_record.trigger in self.events:
@@ -234,7 +234,7 @@ class EventHandler(object):
         if sentence:
             npc = None
             if data["npc"]:
-                npc = utils.search_obj_info_key(data["npc"])
+                npc = utils.search_obj_data_key(data["npc"])
                 if npc:
                     npc = npc[0]
 

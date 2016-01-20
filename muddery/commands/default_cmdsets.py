@@ -40,8 +40,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         # any commands you add below will overload the default ones.
         #
         self.add(worlddata.CmdImportData())
-        self.add(worlddata.CmdSetDataInfo())
         self.add(worlddata.CmdLoadWorld())
+        self.add(worlddata.CmdBuildWorld())
 
         self.add(general.CmdLook())
         self.add(general.CmdGoto())

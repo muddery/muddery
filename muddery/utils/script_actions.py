@@ -91,7 +91,7 @@ def teleport_to(character, obj, *args):
     if not args:
         return
 
-    destination = utils.search_obj_info_key(args[0])
+    destination = utils.search_obj_data_key(args[0])
     if not destination:
         return
     destination = destination[0]

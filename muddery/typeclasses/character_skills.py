@@ -84,7 +84,7 @@ class MudderySkill(MudderyObject):
         if self.passive:
             return
 
-        commands = [{"name": LS("Cast"), "cmd": "castskill", "args": self.get_info_key()}]
+        commands = [{"name": LS("Cast"), "cmd": "castskill", "args": self.get_data_key()}]
         return commands
 
     def set_owner(self, owner):
@@ -151,7 +151,7 @@ class MudderySkill(MudderyObject):
                 return
 
         if not self.function_call:
-            logger.log_errmsg("Can not find skill function: %s" % self.get_info_key())
+            logger.log_errmsg("Can not find skill function: %s" % self.get_data_key())
             if owner:
                 owner.msg({"msg": LS("Can not cast this skill!")})
             return
@@ -168,10 +168,10 @@ class MudderySkill(MudderyObject):
                 if self.cd > 0:
                     self.db.cd_finish_time = time_now + self.cd
 
-                cd = {"skill": self.get_info_key(),    # skill's key
-                      "cd": self.cd}       # global cd
+                cd = {"skill": self.get_data_key(), # skill's key
+                      "cd": self.cd}                # global cd
         except Exception, e:
-            ostring = "Can not cast skill %s: %s" % (self.get_info_key(), e)
+            ostring = "Can not cast skill %s: %s" % (self.get_data_key(), e)
             logger.log_tracemsg(ostring)
             if owner:
                 owner.msg({"msg": LS("Can not cast this skill!")})

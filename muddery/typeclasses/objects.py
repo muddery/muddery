@@ -9,6 +9,7 @@ MudderyObject is an object which can load it's data automatically.
 import json
 import ast
 from django.conf import settings
+from django.db import models
 from django.db.models.loading import get_model
 from evennia.objects.objects import DefaultObject
 from evennia.utils import logger
@@ -150,7 +151,7 @@ class MudderyObject(DefaultObject):
         pass
     
     
-    def set_data_info(self, key):
+    def set_data_key(self, key):
         """
         Set data_info's model and key. It puts info into attributes.
             
@@ -158,8 +159,7 @@ class MudderyObject(DefaultObject):
             key: (string) Key of the data info.
         """
         # Save data info's key and model
-        model = OBJECT_KEY_HANDLER.get_model(key)
-        utils.set_obj_data_info(self, key, model)
+        utils.set_obj_data_key(self, key)
         
         # Load data.
         self.load_data()
@@ -170,44 +170,41 @@ class MudderyObject(DefaultObject):
             del self.db.FIRST_CREATE
 
 
-    def get_data_record(self):
+    def load_data_fields(self):
         """
         Get object's data record from database.
         """
         # Get model and key names.
-        key = self.get_info_key()
+        key = self.get_data_key()
         if not key:
             return
         
-        model = OBJECT_KEY_HANDLER.get_model(key)
-        if not model:
-            return
-        
-        # Get db model
-        model_obj = get_model(settings.WORLD_DATA_APP, model)
-        if not model_obj:
-            raise MudderyError("%s can not open model %s" % (key, model))
-        
-        # Get data record.
-        try:
-            data = model_obj.objects.get(key=key)
-        except Exception, e:
-            raise MudderyError("%s can not find key %s" % (key, key))
-        
-        return data
+        models = OBJECT_KEY_HANDLER.get_models(key)
+
+        for model in models:
+            # Get db model
+            model_obj = get_model(settings.WORLD_DATA_APP, model)
+            if not model_obj:
+                logger.log_errmsg("%s can not open model %s" % (key, model))
+                continue
+
+            # Get data record.
+            try:
+                data = model_obj.objects.get(key=key)
+            except Exception, e:
+                logger.log_errmsg("%s can not find key %s" % (key, key))
+                continue
+
+            # Set data.
+            for field in data._meta.fields:
+                setattr(self.dfield, field.name, data.serializable_value(field.name))
 
 
     def load_data(self):
         """
-        Set data_info to the object."
+        Set data to the object."
         """
-        data = self.get_data_record()
-        if not data:
-            return
-
-        # Set data.
-        for field in data._meta.fields:
-            setattr(self.dfield, field.name, data.serializable_value(field.name))
+        self.load_data_fields()
 
         if hasattr(self.dfield, "typeclass"):
             self.set_typeclass(self.dfield.typeclass)
@@ -237,21 +234,32 @@ class MudderyObject(DefaultObject):
         Args:
         typeclass: (string) Typeclass's name.
         """
-        if not typeclass:
-            typeclass = settings.BASE_OBJECT_TYPECLASS
+        typeclass_path = ""
+        try:
+            model_typeclass = get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
+            data = model_typeclass.objects.get(key=typeclass)
+            typeclass_path = data.path
+        except Exception, e:
+            pass
+
+        if not typeclass_path:
+            if typeclass:
+                typeclass_path = typeclass
+            else:
+                typeclass_path = settings.BASE_OBJECT_TYPECLASS
     
-        if self.is_typeclass(typeclass, exact=True):
+        if self.is_typeclass(typeclass_path, exact=True):
             # No change.
             return
     
         if not hasattr(self, 'swap_typeclass'):
-            logger.log_errmsg("%s cannot have a type at all!" % self.get_info_key())
+            logger.log_errmsg("%s cannot have a type at all!" % self.get_data_key())
             return
 
         # Set new typeclass.
-        self.swap_typeclass(typeclass, clean_attributes=False)
-        if typeclass != self.typeclass_path:
-            logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_info_key(), typeclass))
+        self.swap_typeclass(typeclass_path, clean_attributes=False)
+        if typeclass_path != self.typeclass_path:
+            logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_data_key(), typeclass_path))
             return
 
     def set_name(self, name):
@@ -292,10 +300,10 @@ class MudderyObject(DefaultObject):
     
         if location:
             # If has location, search location object.
-            location_obj = utils.search_obj_info_key(location)
+            location_obj = utils.search_obj_data_key(location)
 
             if not location_obj:
-                logger.log_errmsg("%s can't find location %s!" % (self.get_info_key(), location))
+                logger.log_errmsg("%s can't find location %s!" % (self.get_data_key(), location))
                 return
         
             location_obj = location_obj[0]
@@ -306,7 +314,7 @@ class MudderyObject(DefaultObject):
 
         if self == location_obj:
             # Can't set location to itself.
-            logger.log_errmsg("%s can't teleport itself to itself!" % self.get_info_key())
+            logger.log_errmsg("%s can't teleport itself to itself!" % self.get_data_key())
             return
     
         # try the teleport
@@ -324,10 +332,10 @@ class MudderyObject(DefaultObject):
     
         if home:
             # If has home, search home object.
-            home_obj = utils.search_obj_info_key(home)
+            home_obj = utils.search_obj_data_key(home)
         
             if not home_obj:
-                logger.log_errmsg("%s can't find home %s!" % (self.get_info_key(), home))
+                logger.log_errmsg("%s can't find home %s!" % (self.get_data_key(), home))
                 return
             
             home_obj = home_obj[0]
@@ -338,7 +346,7 @@ class MudderyObject(DefaultObject):
 
         if self == home_obj:
             # Can't set home to itself.
-            logger.log_errmsg("%s can't set home to itself!" % self.get_info_key())
+            logger.log_errmsg("%s can't set home to itself!" % self.get_data_key())
             return
         
         self.home = home_obj
@@ -365,7 +373,7 @@ class MudderyObject(DefaultObject):
             try:
                 self.locks.add(lock)
             except Exception:
-                logger.log_errmsg("%s can't set lock %s." % (self.get_info_key(), lock))
+                logger.log_errmsg("%s can't set lock %s." % (self.get_data_key(), lock))
 
 
     def set_attributes(self, attributes):
@@ -384,14 +392,14 @@ class MudderyObject(DefaultObject):
             # Convert string to dict
             attributes = ast.literal_eval(attributes)
         except Exception, e:
-            logger.log_errmsg("%s can't load attributes %s: %s" % (self.get_info_key(), attributes, e))
+            logger.log_errmsg("%s can't load attributes %s: %s" % (self.get_data_key(), attributes, e))
     
         for key in attr:
             # Add attributes.
             try:
                 self.attributes.add(key, attr[key])
             except Exception:
-                logger.log_errmsg("%s can't set attribute %s!" % (self.get_info_key(), key))
+                logger.log_errmsg("%s can't set attribute %s!" % (self.get_data_key(), key))
 
 
     def set_obj_destination(self, destination):
@@ -411,10 +419,10 @@ class MudderyObject(DefaultObject):
     
         if destination:
             # If has destination, search destination object.
-            destination_obj = utils.search_obj_info_key(destination)
+            destination_obj = utils.search_obj_data_key(destination)
         
         if not destination_obj:
-            logger.log_errmsg("%s can't find destination %s!" % (self.get_info_key(), destination))
+            logger.log_errmsg("%s can't find destination %s!" % (self.get_data_key(), destination))
             return
         
         destination_obj = destination_obj[0]
@@ -425,7 +433,7 @@ class MudderyObject(DefaultObject):
 
         if self == destination_obj:
             # Can't set destination to itself.
-            logger.log_errmsg("%s can't set destination to itself!" % self.get_info_key())
+            logger.log_errmsg("%s can't set destination to itself!" % self.get_data_key())
             return
     
         self.destination = destination_obj
@@ -442,11 +450,11 @@ class MudderyObject(DefaultObject):
         pass
 
 
-    def get_info_key(self):
+    def get_data_key(self):
         """
-        Get data info's key.
+        Get data's key.
         """
-        key = self.attributes.get(key="key", category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
+        key = self.attributes.get(key="key", category=settings.DATA_KEY_CATEGORY, strattr=True)
         if not key:
             key = ""
         return key

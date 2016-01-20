@@ -1,1 +1,2 @@
-key,condition,verb,message_lock,auto_unlock
+key,lock_condition,verb,locked_desc,auto_unlock
+EXIT_2,1,Unlock,Locked,

@@ -125,17 +125,10 @@ class MudderyLockedExit(MudderyExit):
         """
         super(MudderyLockedExit, self).load_data()
 
-        try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.EXIT_LOCKS)
-            lock_record = model_obj.objects.get(key=self.get_info_key())
-
-            lock = {"condition": lock_record.condition,         # the condition of unlock
-                    "verb": lock_record.verb,                   # the unlock's name
-                    "message_lock": lock_record.message_lock,   # the view of the exit when locked
-                    "auto_unlock": lock_record.auto_unlock}     # if the lock can be unlocked automatically
-            self.exit_lock = lock
-        except Exception, e:
-            logger.log_errmsg("Can't load lock info %s: %s" % (self.get_info_key(), e))
+        self.unlock_condition = getattr(self.dfield, "unlock_condition", True)
+        self.unlock_verb = getattr(self.dfield, "unlock_verb", "")
+        self.locked_desc = getattr(self.dfield, "locked_desc", "")
+        self.auto_unlock = getattr(self.dfield, "auto_unlock", False)
 
 
     def at_before_traverse(self, traversing_object):
@@ -158,7 +151,7 @@ class MudderyLockedExit(MudderyExit):
             return False
 
         # Only can pass exits which have already unlockde.
-        return traversing_object.is_exit_unlocked(self.get_info_key())
+        return traversing_object.is_exit_unlocked(self.get_data_key())
 
 
     def can_unlock(self, caller):
@@ -166,7 +159,7 @@ class MudderyLockedExit(MudderyExit):
         Unlock an exit.
         """
         # Only can unlock exits which match there conditions.
-        return SCRIPT_HANDLER.match_condition(caller, self, self.exit_lock["condition"])
+        return SCRIPT_HANDLER.match_condition(caller, self, self.unlock_condition)
 
 
     def get_appearance(self, caller):
@@ -175,13 +168,13 @@ class MudderyLockedExit(MudderyExit):
         command to call.
         """
         # Get name and description.
-        if caller.is_exit_unlocked(self.get_info_key()):
+        if caller.is_exit_unlocked(self.get_data_key()):
             # If is unlocked, use common appearance.
             return super(MudderyLockedExit, self).get_appearance(caller)
 
-        can_unlock = SCRIPT_HANDLER.match_condition(caller, self, self.exit_lock["condition"])
+        can_unlock = SCRIPT_HANDLER.match_condition(caller, self, self.unlock_condition)
 
-        if can_unlock and self.exit_lock["auto_unlock"]:
+        if can_unlock and self.auto_unlock:
             # Automatically unlock the exit when a character looking at it.
             caller.unlock_exit(self)
             
@@ -191,14 +184,14 @@ class MudderyLockedExit(MudderyExit):
         cmds = []
         if can_unlock:
             # show unlock command
-            verb = self.exit_lock["verb"]
+            verb = self.unlock_verb
             if not verb:
                 verb = LS("Unlock")
             cmds = [{"name": verb, "cmd": "unlock_exit", "args": self.dbref}]
         
         info = {"dbref": self.dbref,
                 "name": self.name,
-                "desc": self.exit_lock["message_lock"],
+                "desc": self.locked_desc,
                 "cmds": cmds}
                 
         return info
@@ -209,15 +202,15 @@ class MudderyLockedExit(MudderyExit):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        if caller.is_exit_unlocked(self.get_info_key()):
+        if caller.is_exit_unlocked(self.get_data_key()):
             # If is unlocked, use common commands.
             return super(MudderyLockedExit, self).get_available_commands(caller)
 
         cmds = []
-        can_unlock = SCRIPT_HANDLER.match_condition(caller, self, self.exit_lock["condition"])
+        can_unlock = SCRIPT_HANDLER.match_condition(caller, self, self.unlock_condition)
         if can_unlock:
             # show unlock command
-            verb = self.exit_lock["verb"]
+            verb = self.unlock_verb
             if not verb:
                 verb = LS("Unlock")
             cmds = [{"name": verb, "cmd": "unlock", "args": self.dbref}]

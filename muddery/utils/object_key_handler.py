@@ -14,16 +14,14 @@ class ObjectKeyHandler(object):
         """
         Initialize handler
         """
-        self.clear()
-
+        self.key_model = {}
 
     def clear(self):
         """
         Clear data.
         """
         self.key_model = {}
-    
-    
+
     def reload(self):
         """
         Reload data.
@@ -38,31 +36,25 @@ class ObjectKeyHandler(object):
             try:
                 model_obj = get_model(settings.WORLD_DATA_APP, model_name)
                 for record in model_obj.objects.all():
-                    # Set key's model name.
-                    self.key_model[record.key] = model_name
+                    # Add key's model name.
+                    key = record.serializable_value("key")
+                    if key not in self.key_model:
+                        self.key_model[key] = []
+                    self.key_model[key].append(model_name)
             except Exception, e:
                 pass
 
-    
-    def add_key(self, key, model):
-        """
-        Add a new key.
-        """
-        self.key_model[key] = model
-
-
-    def remove_key(self, key):
-        """
-        Remove a key.
-        """
-        del self.key_model[key]
-
-
-    def get_model(self, key):
+    def get_models(self, key):
         """
         Get key's model.
+
+        Args:
+            key: the key of an object
+
+        Returns:
+            key's models
         """
-        if not key in self.key_model:
+        if key not in self.key_model:
             return
 
         return self.key_model[key]

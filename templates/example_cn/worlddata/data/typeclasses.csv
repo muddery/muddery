@@ -1,0 +1,10 @@
+key,name,path,desc
+CLASS_COMMON_ROOM,Common Room,typeclasses.rooms.Room,Common room's typeclass.
+CLASS_COMMON_EXIT,Common Exit,typeclasses.exits.Exit,Common exit's typeclass.
+CLASS_LOCKED_EXIT,Locked Exit,typeclasses.exits.LockedExit,A kind of exits that can be locked.
+CLASS_COMMON_NPC,Common NPC,typeclasses.npcs.NPC,Common NPC's typeclass.
+CLASS_COMMON_MONSTER,Common Monster,typeclasses.monsters.Monster,Common monster's typeclass.
+CLASS_PLAYER,Player,typeclasses.player_characters.PlayerCharacter,Player character's typeclass.
+CLASS_COMMON_OBJECT,Common Object,typeclasses.objects.Object,Common object's typeclass.
+CLASS_OBJECT_CREATOR,Object Creator,typeclasses.object_creators.ObjectCreator,Object creators can create new objects.
+CLASS_FOOD,Food,typeclasses.common_objects.Food,Foods can be eaten.
