@@ -110,7 +110,7 @@ COMBAT_HANDLER = "muddery.typeclasses.combat_handler.MudderyCombatHandler"
 ######################################################################
 
 # attribute's category for data info
-WORLD_DATA_INFO_CATEGORY = "data_info"
+DATA_KEY_CATEGORY = "data_key"
 
 # data app name
 WORLD_DATA_APP = "worlddata"
@@ -120,6 +120,21 @@ WORLD_DATA_FOLDER = "worlddata/data"
 
 # data file's encoding
 WORLD_DATA_FILE_ENCODING = "utf8"
+
+###################################
+# Basic data
+###################################
+
+# typeclasses
+TYPECLASSES = ("typeclasses")
+
+# basic data models
+BASIC_DATA_MODELS = (TYPECLASSES,)
+
+
+###################################
+# Object data
+###################################
 
 # unique rooms
 WORLD_ROOMS = ("world_rooms",)
@@ -136,12 +151,20 @@ WORLD_NPCS = ("world_npcs",)
 # common objects
 COMMON_OBJECTS = ("common_objects", "common_characters", "skills", "quests", "equipments")
 
+# object's additional data
+ADDITIONAL_DATA = ("exit_locks",)
+
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_EXITS,
                       WORLD_OBJECTS,
                       WORLD_NPCS,
-                      COMMON_OBJECTS)
+                      COMMON_OBJECTS,
+                      ADDITIONAL_DATA,)
+
+###################################
+# other data
+###################################
 
 # object loot list
 OBJECT_CREATORS = "object_creators"
@@ -159,9 +182,6 @@ EVENT_MOBS = "event_mobs"
 
 # event dialogues
 EVENT_DIALOGUES = "event_dialogues"
-
-# exit locks
-EXIT_LOCKS = "exit_locks"
 
 # dialogues
 DIALOGUES = "dialogues"
@@ -187,7 +207,6 @@ OTHER_DATA_MODELS = (OBJECT_CREATORS,
                      EVENT_DATA,
                      EVENT_MOBS,
                      EVENT_DIALOGUES,
-                     EXIT_LOCKS,
                      DIALOGUES,
                      DIALOGUE_SENTENCES,
                      DIALOGUE_RELATIONS,

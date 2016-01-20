@@ -107,7 +107,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         loot_list = []
         try:
             model_obj = get_model(settings.WORLD_DATA_APP, settings.OBJECT_LOOT_LIST)
-            loot_records = model_obj.objects.filter(provider=self.get_info_key())
+            loot_records = model_obj.objects.filter(provider=self.get_data_key())
 
             for loot_record in loot_records:
                 loot_object = {"object": loot_record.object,
@@ -117,7 +117,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                                "condition": loot_record.condition}
                 loot_list.append(loot_object)
         except Exception, e:
-            logger.log_errmsg("Can't load loot info %s: %s" % (self.get_info_key(), e))
+            logger.log_errmsg("Can't load loot info %s: %s" % (self.get_data_key(), e))
 
         self.loot_list = loot_list
 
@@ -158,7 +158,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         model_name = getattr(self.dfield, "model", None)
         if not model_name:
-            model_name = self.get_info_key()
+            model_name = self.get_data_key()
 
         try:
             # get data from db
@@ -172,7 +172,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                 setattr(self.dfield, field.name, model_data.serializable_value(field.name))
         except Exception, e:
             logger.log_errmsg("Can't load character %s's level info (%s, %s): %s" %
-                              (self.get_info_key(), model_name, self.db.level, e))
+                              (self.get_data_key(), model_name, self.db.level, e))
 
         self.max_exp = getattr(self.dfield, "max_exp", 0)
         self.max_hp = getattr(self.dfield, "max_hp", 1)
@@ -234,7 +234,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             # Get records.
             model_name = getattr(self.dfield, "model", None)
             if not model_name:
-                model_name = self.get_info_key()
+                model_name = self.get_data_key()
 
             skill_records = model_skills.objects.filter(character=model_name)
 
@@ -267,12 +267,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             result, used = obj.take_effect(self, number)
             if used > 0:
                 # remove used object
-                obj_list = [{"object": obj.get_info_key(),
+                obj_list = [{"object": obj.get_data_key(),
                              "number": used}]
                 self.remove_objects(obj_list)
             return result
         except Exception, e:
-            ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
+            ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
             logger.log_tracemsg(ostring)
 
         return LS("No effect.")
@@ -431,7 +431,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             None
         """
-        self.attack_clone_target(self.target.get_info_key(), self.target.db.level, desc)
+        self.attack_clone_target(self.target.get_data_key(), self.target.db.level, desc)
 
     def attack_clone_target(self, target_key, target_level=0, desc=""):
         """
@@ -448,7 +448,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         if target_level == 0:
             # find the target and get level
-            obj = utils.search_obj_info_key(target_key)
+            obj = utils.search_obj_data_key(target_key)
             if not obj:
                 logger.log_errmsg("Can not find the target %s." % target_key)
                 return
@@ -552,7 +552,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                 continue
 
             command = {"name": skill.name,
-                       "key": skill.get_info_key()}
+                       "key": skill.get_data_key()}
             commands.append(command)
 
         return commands

@@ -1,0 +1,5 @@
+key,name,path,desc
+CLASS_PLAYER,Player,typeclasses.player_characters.PlayerCharacter,Player
+CLASS_ROOM,Common Room,typeclasses.rooms.Room,Room
+CLASS_EXIT,Common Exit,typeclasses.exits.Exit,Exit
+CLASS_LOCKED_EXIT,Locked Exit,typeclasses.exits.LockedExit,Locked Exit

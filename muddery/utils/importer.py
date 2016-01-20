@@ -212,9 +212,15 @@ def import_all():
     count = 0
 
     # get model name
-    model_name_list = [model for data_models in settings.OBJECT_DATA_MODELS
-                       for model in data_models]
 
+    # basic tables
+    model_name_list = [model for model in settings.BASIC_DATA_MODELS]
+
+    # objects tables
+    model_name_list += [model for data_models in settings.OBJECT_DATA_MODELS
+                        for model in data_models]
+
+    # other tables
     model_name_list += [model for model in settings.OTHER_DATA_MODELS]
 
     # import models one by one

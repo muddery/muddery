@@ -29,20 +29,20 @@ class MudderyObjectCreator(MudderyObject):
         # Load creator info.
         try:
             model_obj = get_model(settings.WORLD_DATA_APP, settings.OBJECT_CREATORS)
-            creator_record = model_obj.objects.get(key=self.get_info_key())
+            creator_record = model_obj.objects.get(key=self.get_data_key())
 
             self.verb = creator_record.verb
             self.loot_condition = creator_record.loot_condition
         except ObjectDoesNotExist:
             pass
         except Exception, e:
-            logger.log_errmsg("Can't load creator info %s: %s" % (self.get_info_key(), e))
+            logger.log_errmsg("Can't load creator info %s: %s" % (self.get_data_key(), e))
 
         # Load loot list.
         loot_list = []
         try:
             model_obj = get_model(settings.WORLD_DATA_APP, settings.OBJECT_LOOT_LIST)
-            loot_records = model_obj.objects.filter(provider=self.get_info_key())
+            loot_records = model_obj.objects.filter(provider=self.get_data_key())
 
             for loot_record in loot_records:
                 loot_object = {"object": loot_record.object,
@@ -52,7 +52,7 @@ class MudderyObjectCreator(MudderyObject):
                                "condition": loot_record.condition}
                 loot_list.append(loot_object)
         except Exception, e:
-            logger.log_errmsg("Can't load loot info %s: %s" % (self.get_info_key(), e))
+            logger.log_errmsg("Can't load loot info %s: %s" % (self.get_data_key(), e))
 
         self.loot_list = loot_list
 

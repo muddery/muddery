@@ -20,6 +20,12 @@ from evennia.web.urls import urlpatterns
 
 patterns = [
     # url(r'/desired/url/', view, name='example'),
+
+    # Front page
+    url(r'^$', 'muddery.web.views.page_index', name="index"),
+
+    # World Editor
+    url(r'^admin/worlddata/', include('worlddata.urls', namespace='worlddata', app_name='worlddata')),
 ]
 
 urlpatterns = patterns + urlpatterns

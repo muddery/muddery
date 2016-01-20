@@ -44,7 +44,7 @@ class MudderyQuest(MudderyObject):
         self.objectives = {}
         self.not_accomplished = {}
         
-        key = self.get_info_key()
+        key = self.get_data_key()
         if not key:
             return
 
@@ -76,7 +76,7 @@ class MudderyQuest(MudderyObject):
         """
         commands = []
         if settings.ALLOW_GIVE_UP_QUESTS:
-            commands.append({"name": LS("Give Up"), "cmd": "giveup_quest", "args": self.get_info_key()})
+            commands.append({"name": LS("Give Up"), "cmd": "giveup_quest", "args": self.get_data_key()})
         return commands
 
     def return_objectives(self):

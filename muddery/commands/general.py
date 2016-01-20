@@ -708,7 +708,7 @@ class CmdLoot(Command):
             # do loot
             obj.loot(caller)
         except Exception, e:
-            ostring = "Can not loot %s: %s" % (obj.get_info_key(), e)
+            ostring = "Can not loot %s: %s" % (obj.get_data_key(), e)
             logger.log_tracemsg(ostring)
 
 
@@ -755,7 +755,7 @@ class CmdUse(Command):
             # Use the object and get the result.
             result = caller.use_object(obj)
         except Exception, e:
-            ostring = "Can not use %s: %s" % (obj.get_info_key(), e)
+            ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
             logger.log_tracemsg(ostring)
 
         # Send result to the player.
@@ -802,13 +802,13 @@ class CmdDiscard(Command):
             return
 
         # remove used object
-        obj_list = [{"object": obj.get_info_key(),
+        obj_list = [{"object": obj.get_data_key(),
                      "number": 1}]
         try:
             caller.remove_objects(obj_list)
         except Exception, e:
             caller.msg({"alert": LS("Can not discard this object.")})
-            logger.log_tracemsg("Can not discard object %s: %s" % (obj.get_info_key(), e))
+            logger.log_tracemsg("Can not discard object %s: %s" % (obj.get_data_key(), e))
             return
 
 
@@ -852,7 +852,7 @@ class CmdEquip(Command):
             return
         except Exception, e:
             caller.msg({"alert": LS("Can not use this equipment.")})
-            logger.log_tracemsg("Can not use equipment %s: %s" % (obj.get_info_key(), e))
+            logger.log_tracemsg("Can not use equipment %s: %s" % (obj.get_data_key(), e))
             return
 
         # Send lastest status to the player.
@@ -900,7 +900,7 @@ class CmdTakeOff(Command):
             return
         except Exception, e:
             caller.msg({"alert": LS("Can not take off this equipment.")})
-            logger.log_tracemsg("Can not take off %s: %s" % (obj.get_info_key(), e))
+            logger.log_tracemsg("Can not take off %s: %s" % (obj.get_data_key(), e))
             return
 
         # Send lastest status to the player.

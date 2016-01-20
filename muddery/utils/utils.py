@@ -19,63 +19,48 @@ def get_muddery_version():
     return muddery.__version__
 
 
-def copy_tree(source, destination):
+def set_obj_data_key(obj, key):
     """
-    Deep copy a folder.
-    """
-    names = os.listdir(source)
-
-    if not os.path.exists(destination):
-        # If does not exist, create one.
-        os.mkdir(destination)
-
-    # traverse files and folders
-    for name in names:
-        srcname = os.path.join(source, name)
-        dstname = os.path.join(destination, name)
-        try:
-            if os.path.isdir(srcname):
-                # If it is a folder, copy it recursively.
-                copy_tree(srcname, dstname)
-            else:
-                # Copy file.
-                shutil.copy2(srcname, dst)
-        except Exception, e:
-            logger.log_errmsg("Can not copy file:%s to %s" % (srcname, dstname))
-
-
-def set_obj_data_info(obj, key, model):
-    """
-    Set data_info's model and key. It puts info into attributes.
+    Set data key. Put it info into an object's attributes.
             
     Args:
-        model: (string) Db model's name.
-        key: (string) Key of the data info.
+        obj: (object) object to be set
+        key: (string) key of the data.
     """
-    obj.attributes.add("key", key, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
-    obj.attributes.add("model", model, category=settings.WORLD_DATA_INFO_CATEGORY, strattr=True)
+    obj.attributes.add("key", key, category=settings.DATA_KEY_CATEGORY, strattr=True)
 
 
-def search_obj_info_key(key):
+def search_obj_data_key(key):
     """
     Search objects which have the given key.
 
     Args:
-    key: (string) Data info key.
+        key: (string) Data's key.
     """
     if not key:
         return None
 
-    obj = search.search_object_attribute(key="key", strvalue=key, category=settings.WORLD_DATA_INFO_CATEGORY)
+    obj = search.search_object_attribute(key="key", strvalue=key, category=settings.DATA_KEY_CATEGORY)
     return obj
 
 
-def search_obj_info_model(model):
+def set_obj_unique_type(obj, type):
     """
-    Search objects which have the given model.
+    Set unique object's type.
 
     Args:
-    model: (string) Data model's name.
+        obj: (object) object to be set
+        type: (string) unique object's type.
     """
-    obj = search.search_object_attribute(key="model", strvalue=model, category=settings.WORLD_DATA_INFO_CATEGORY)
+    obj.attributes.add("type", type, category=settings.DATA_KEY_CATEGORY, strattr=True)
+
+
+def search_obj_unique_type(type):
+    """
+    Search objects which have the given unique type.
+
+    Args:
+        type: (string) unique object's type.
+    """
+    obj = search.search_object_attribute(key="type", strvalue=type, category=settings.DATA_KEY_CATEGORY)
     return obj

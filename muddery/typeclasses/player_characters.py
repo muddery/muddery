@@ -226,7 +226,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         for room_key in self.db.revealed_map:
             # get room's information
-            room = utils.search_obj_info_key(room_key)
+            room = utils.search_obj_data_key(room_key)
             if room:
                 room = room[0]
                 rooms[room_key] = (room.get_name(), room.position)
@@ -238,10 +238,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
         for path in exits.values():
             # add room's neighbours
             if not path[1] in rooms:
-                neighbour = utils.search_obj_info_key(path[1])
+                neighbour = utils.search_obj_data_key(path[1])
                 if neighbour:
                     neighbour = neighbour[0]
-                    rooms[neighbour.get_info_key()] = (neighbour.get_name(), neighbour.position)
+                    rooms[neighbour.get_data_key()] = (neighbour.get_name(), neighbour.position)
 
         return {"rooms": rooms, "exits": exits}
 
@@ -251,7 +251,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         show character's location
         """
         if self.location:
-            location_key = self.location.get_info_key()
+            location_key = self.location.get_data_key()
 
             msg = {"current_location": location_key}
 
@@ -269,7 +269,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
             reveal_map = None
             if not location_key in self.db.revealed_map:
                 # reveal map
-                self.db.revealed_map.add(self.location.get_info_key())
+                self.db.revealed_map.add(self.location.get_data_key())
 
                 rooms = {location_key: (self.location.get_name(), self.location.position)}
                 exits = self.location.get_exits()
@@ -277,10 +277,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 for path in exits.values():
                     # add room's neighbours
                     if not path[1] in rooms:
-                        neighbour = utils.search_obj_info_key(path[1])
+                        neighbour = utils.search_obj_data_key(path[1])
                         if neighbour:
                             neighbour = neighbour[0]
-                            rooms[neighbour.get_info_key()] = (neighbour.get_name(), neighbour.position)
+                            rooms[neighbour.get_data_key()] = (neighbour.get_name(), neighbour.position)
 
                 msg["reveal_map"] = {"rooms": rooms, "exits": exits}
 
@@ -307,7 +307,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         # check what the character has now
         inventory = {}
         for item in self.contents:
-            key = item.get_info_key()
+            key = item.get_data_key()
             if key in inventory:
                 # if the character has more than one item of the same kind,
                 # get the smallest stack.
@@ -429,7 +429,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
                     changed = True
                 except Exception, e:
-                    ostring = "Can not remove object %s: %s" % (obj.get_info_key(), e)
+                    ostring = "Can not remove object %s: %s" % (obj.get_data_key(), e)
                     logger.log_tracemsg(ostring)
                     break
 
@@ -443,7 +443,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Search specified object in the inventory.
         """
-        result = [item for item in self.contents if item.get_info_key() == obj_key]
+        result = [item for item in self.contents if item.get_data_key() == obj_key]
         return result
 
 
@@ -624,7 +624,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Unlock an exit. Add exit's key to character's unlock list.
         """
-        exit_key = exit.get_info_key()
+        exit_key = exit.get_data_key()
         if self.is_exit_unlocked(exit_key):
             return True
 

@@ -69,7 +69,7 @@ def have_object(character, obj, *args):
     args: object's key
     """
     for item in character.contents:
-        if item.get_info_key() == args[0]:
+        if item.get_data_key() == args[0]:
             return True
     return False
 

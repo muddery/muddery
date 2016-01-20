@@ -1,27 +1,42 @@
 from django.contrib import admin
 
-from form import *
-from models import *
-from muddery.worlddata import admin_base
+from muddery.worlddata.form_base import *
 
 
 # Register your models here.
 
 
-class TypeclassesAdmin(admin_base.TypeclassesAdmin):
-    pass
+class TypeclassesAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'name',
+                    'path',
+                    'desc')
 
 
-class WorldRoomsAdmin(admin_base.WorldRoomsAdmin):
-    pass
+class WorldRoomsAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'name',
+                    'typeclass',
+                    'desc',
+                    'position')
 
 
-class WorldExitsAdmin(admin_base.WorldExitsAdmin):
-    pass
+class WorldExitsAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'name',
+                    'typeclass',
+                    'desc',
+                    'location',
+                    'destination',
+                    'condition')
 
 
-class ExitLocksAdmin(admin_base.ExitLocksAdmin):
-    pass
+class ExitLocksAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'unlock_condition',
+                    'unlock_verb',
+                    'locked_desc',
+                    'auto_unlock')
 
 
 class WorldObjectsAdmin(admin.ModelAdmin):
@@ -249,33 +264,3 @@ class EventDialoguesAdmin(admin.ModelAdmin):
 class LocalizedStringsAdmin(admin.ModelAdmin):
     list_display = ('origin',
                     'local')
-
-
-admin.site.register(typeclasses, TypeclassesAdmin)
-admin.site.register(world_rooms, WorldRoomsAdmin)
-admin.site.register(world_exits, WorldExitsAdmin)
-admin.site.register(exit_locks, ExitLocksAdmin)
-admin.site.register(world_objects, WorldObjectsAdmin)
-admin.site.register(object_creators, ObjectCreatorsAdmin)
-admin.site.register(object_loot_list, ObjectLootListAdmin)
-admin.site.register(common_objects, CommonObjectsAdmin)
-admin.site.register(equipment_types, EquipmentTypesAdmin)
-admin.site.register(equipments, EquipmentsAdmin)
-admin.site.register(world_npcs, WorldNPCAdmin)
-admin.site.register(common_characters, CommonCharactersAdmin)
-admin.site.register(skills, SkillsAdmin)
-admin.site.register(quests, QuestsAdmin)
-admin.site.register(quest_objectives, QuestObjectivesAdmin)
-admin.site.register(quest_dependency, QuestDependencyAdmin)
-admin.site.register(event_data, EventDataAdmin)
-admin.site.register(dialogues, DialoguesAdmin)
-admin.site.register(dialogue_relations, DialogueRelationsAdmin)
-admin.site.register(dialogue_sentences, DialogueSentencesAdmin)
-admin.site.register(npc_dialogues, NPCDialoguesAdmin)
-admin.site.register(dialogue_quest_dependency, DialogueQuestDependencyAdmin)
-admin.site.register(character_models, CharacterModelsAdmin)
-admin.site.register(character_skills, CharacterSkillsAdmin)
-admin.site.register(event_mobs, EventMobsAdmin)
-admin.site.register(event_dialogues, EventDialoguesAdmin)
-admin.site.register(localized_strings, LocalizedStringsAdmin)
-
