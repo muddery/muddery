@@ -49,12 +49,9 @@ class WorldObjectsAdmin(admin.ModelAdmin):
 
 
 class ObjectCreatorsAdmin(admin.ModelAdmin):
-    list_display = ('get_key',
-                    'verb',
+    list_display = ('key',
+                    'loot_verb',
                     'loot_condition')
-    def get_key(self, obj):
-        return obj.key.key
-    form = ObjectCreatorsForm
 
 
 class ObjectLootListAdmin(admin.ModelAdmin):

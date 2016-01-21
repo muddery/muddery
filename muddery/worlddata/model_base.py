@@ -173,17 +173,25 @@ class world_objects(models.Model):
         verbose_name = "World Object"
         verbose_name_plural = "World Objects"
 
+    def __unicode__(self):
+        return self.key
+
 
 # ------------------------------------------------------------
 #
-# store all object creators
+# object creator's additional data
 #
 # ------------------------------------------------------------
 class object_creators(models.Model):
-    "Store all object creators."
+    "object creator's additional data"
 
-    key = models.ForeignKey("world_objects", db_index=True)
-    verb = models.TextField(blank=True)
+    # related object
+    key = models.OneToOneField("world_objects")
+
+    # loot's verb
+    loot_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # loot's condition
     loot_condition = models.TextField(blank=True)
 
     class Meta:

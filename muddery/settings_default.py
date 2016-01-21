@@ -152,7 +152,7 @@ WORLD_NPCS = "world_npcs"
 COMMON_OBJECTS = ("common_objects", "common_characters", "skills", "quests", "equipments")
 
 # object's additional data
-ADDITIONAL_DATA = ("exit_locks",)
+ADDITIONAL_DATA = ("exit_locks", "object_creators")
 
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
