@@ -28,13 +28,8 @@ class WorldObjectsAdmin(admin_base.WorldObjectsAdmin):
     pass
 
 
-class ObjectCreatorsAdmin(admin.ModelAdmin):
-    list_display = ('get_key',
-                    'verb',
-                    'loot_condition')
-    def get_key(self, obj):
-        return obj.key.key
-    form = ObjectCreatorsForm
+class ObjectCreatorsAdmin(admin_base.ObjectCreatorsAdmin):
+    pass
 
 
 class ObjectLootListAdmin(admin.ModelAdmin):

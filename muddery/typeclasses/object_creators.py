@@ -25,18 +25,10 @@ class MudderyObjectCreator(MudderyObject):
         Set data_info to the object."
         """
         super(MudderyObjectCreator, self).load_data()
-        
-        # Load creator info.
-        try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.OBJECT_CREATORS)
-            creator_record = model_obj.objects.get(key=self.get_data_key())
 
-            self.verb = creator_record.verb
-            self.loot_condition = creator_record.loot_condition
-        except ObjectDoesNotExist:
-            pass
-        except Exception, e:
-            logger.log_errmsg("Can't load creator info %s: %s" % (self.get_data_key(), e))
+        # Load creator info.
+        self.loot_verb = getattr(self.dfield, "loot_verb", LS("Loot"))
+        self.loot_condition = getattr(self.dfield, "loot_condition", None)
 
         # Load loot list.
         loot_list = []
@@ -65,11 +57,7 @@ class MudderyObjectCreator(MudderyObject):
         if not SCRIPT_HANDLER.match_condition(caller, self, self.loot_condition):
             return []
 
-        verb = self.verb
-        if not verb:
-            verb = LS("Loot")
-
-        commands = [{"name": verb, "cmd": "loot", "args": self.dbref}]
+        commands = [{"name": self.loot_verb, "cmd": "loot", "args": self.dbref}]
         return commands
 
 
