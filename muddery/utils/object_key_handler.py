@@ -29,10 +29,7 @@ class ObjectKeyHandler(object):
         self.clear()
 
         # Get model names.
-        model_names = [model for data_models in settings.OBJECT_DATA_MODELS
-                       for model in data_models]
-
-        for model_name in model_names:
+        for model_name in settings.OBJECT_DATA_MODELS:
             try:
                 model_obj = get_model(settings.WORLD_DATA_APP, model_name)
                 for record in model_obj.objects.all():

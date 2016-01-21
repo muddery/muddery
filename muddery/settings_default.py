@@ -137,16 +137,16 @@ BASIC_DATA_MODELS = (TYPECLASSES,)
 ###################################
 
 # unique rooms
-WORLD_ROOMS = ("world_rooms",)
+WORLD_ROOMS = "world_rooms"
 
 # unique exits
-WORLD_EXITS = ("world_exits",)
+WORLD_EXITS = "world_exits"
 
 # unique objects
-WORLD_OBJECTS = ("world_objects",)
+WORLD_OBJECTS = "world_objects"
 
 # unique npcs
-WORLD_NPCS = ("world_npcs",)
+WORLD_NPCS = "world_npcs"
 
 # common objects
 COMMON_OBJECTS = ("common_objects", "common_characters", "skills", "quests", "equipments")
@@ -158,9 +158,7 @@ ADDITIONAL_DATA = ("exit_locks",)
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_EXITS,
                       WORLD_OBJECTS,
-                      WORLD_NPCS,
-                      COMMON_OBJECTS,
-                      ADDITIONAL_DATA,)
+                      WORLD_NPCS) + COMMON_OBJECTS + ADDITIONAL_DATA
 
 ###################################
 # other data

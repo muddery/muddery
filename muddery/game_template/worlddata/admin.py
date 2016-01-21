@@ -24,14 +24,8 @@ class ExitLocksAdmin(admin_base.ExitLocksAdmin):
     pass
 
 
-class WorldObjectsAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'name',
-                    'typeclass',
-                    'desc',
-                    'location',
-                    'condition')
-    form = WorldObjectForm
+class WorldObjectsAdmin(admin_base.WorldObjectsAdmin):
+    pass
 
 
 class ObjectCreatorsAdmin(admin.ModelAdmin):

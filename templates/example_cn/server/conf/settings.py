@@ -147,8 +147,7 @@ COMMON_OBJECTS += ("foods",)
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_EXITS,
                       WORLD_OBJECTS,
-                      WORLD_NPCS,
-                      COMMON_OBJECTS)
+                      WORLD_NPCS) + COMMON_OBJECTS + ADDITIONAL_DATA
 
 # all other data models
 OTHER_DATA_MODELS = (OBJECT_CREATORS,
@@ -158,7 +157,6 @@ OTHER_DATA_MODELS = (OBJECT_CREATORS,
                      EVENT_DATA,
                      EVENT_MOBS,
                      EVENT_DIALOGUES,
-                     EXIT_LOCKS,
                      DIALOGUES,
                      DIALOGUE_SENTENCES,
                      DIALOGUE_RELATIONS,
