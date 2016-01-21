@@ -44,9 +44,7 @@ class CmdImportData(default_cmds.MuxCommand):
         if models:
             models = [arg.strip() for arg in models.split(',')]
         else:
-            models = [model for data_models in settings.OBJECT_DATA_MODELS
-                      for model in data_models]
-            models += [model for model in settings.OTHER_DATA_MODELS]
+            models = settings.OBJECT_DATA_MODELS + settings.OTHER_DATA_MODELS
 
         # import models one by one
         for model_name in models:

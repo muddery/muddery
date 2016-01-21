@@ -92,7 +92,7 @@ class world_exits(models.Model):
     # the action verb to enter the exit (optional)
     verb = models.CharField(max_length=NAME_LENGTH, blank=True)
 
-    # where this exit sets
+    # the exit's location, it must be a room
     location = models.ForeignKey("world_rooms")
 
     # the exits's destination
@@ -113,11 +113,11 @@ class world_exits(models.Model):
 
 # ------------------------------------------------------------
 #
-# store exit locks
+# locked exit's additional data
 #
 # ------------------------------------------------------------
 class exit_locks(models.Model):
-    "Store all exit locks."
+    "locked exit's additional data"
 
     # related exit
     key = models.OneToOneField("world_exits")
@@ -149,18 +149,29 @@ class exit_locks(models.Model):
 class world_objects(models.Model):
     "Store all unique objects."
 
+    # object's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # object's name
     name = models.CharField(max_length=NAME_LENGTH)
+
+    # object's typeclass
     typeclass = models.ForeignKey("typeclasses")
+
+    # the object's destination
     desc = models.TextField(blank=True)
-    location = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # object's location, it must be a room
+    location = models.ForeignKey("world_rooms")
+
+    # the condition for showing the object
     condition = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "World Object List"
-        verbose_name_plural = "World Object List"
+        verbose_name = "World Object"
+        verbose_name_plural = "World Objects"
 
 
 # ------------------------------------------------------------

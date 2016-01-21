@@ -135,9 +135,7 @@ INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_EXITS,
                       WORLD_OBJECTS,
-                      WORLD_NPCS,
-                      COMMON_OBJECTS,
-                      ADDITIONAL_DATA,)
+                      WORLD_NPCS) + COMMON_OBJECTS + ADDITIONAL_DATA
 
 # all other data models
 OTHER_DATA_MODELS = (OBJECT_CREATORS,

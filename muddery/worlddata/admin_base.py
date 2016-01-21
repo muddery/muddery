@@ -46,7 +46,6 @@ class WorldObjectsAdmin(admin.ModelAdmin):
                     'desc',
                     'location',
                     'condition')
-    form = WorldObjectForm
 
 
 class ObjectCreatorsAdmin(admin.ModelAdmin):

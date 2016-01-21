@@ -1,1 +1,2 @@
 key,name,typeclass,desc,location,condition
+OBJ_A,Object A,CLASS_OBJECT,This is an object.,ROOM_A,

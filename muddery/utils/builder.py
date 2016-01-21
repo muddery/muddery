@@ -214,20 +214,16 @@ def build_all(caller=None):
     OBJECT_KEY_HANDLER.reload()
 
     # Build rooms.
-    for room_info in settings.WORLD_ROOMS:
-        build_unique_objects(room_info, caller)
+    build_unique_objects(settings.WORLD_ROOMS, caller)
 
     # Build exits.
-    for exit_info in settings.WORLD_EXITS:
-        build_unique_objects(exit_info, caller)
+    build_unique_objects(settings.WORLD_EXITS, caller)
 
     # Build objects.
-    for object_info in settings.WORLD_OBJECTS:
-        build_unique_objects(object_info, caller)
+    build_unique_objects(settings.WORLD_OBJECTS, caller)
 
     # Build NPCs.
-    for npc_info in settings.WORLD_NPCS:
-        build_unique_objects(npc_info, caller)
+    build_unique_objects(settings.WORLD_NPCS, caller)
 
 
 def reset_default_locations():
@@ -241,7 +237,7 @@ def reset_default_locations():
     if not default_home_key:
         # If does not have the default_home_key, get the first room in WORLD_ROOMS.
         try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS[0])
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS)
             rooms = model_obj.objects.all()
             if rooms:
                 default_home_key = rooms[0].key
@@ -275,7 +271,7 @@ def reset_default_locations():
     if not start_location_key:
         # If does not have the start_location_key, get the first room in WORLD_ROOMS
         try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS[0])
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS)
             rooms = model_obj.objects.all()
             if rooms:
                 start_location_key = rooms[0].key
