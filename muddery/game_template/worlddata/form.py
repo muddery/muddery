@@ -165,24 +165,44 @@ class NPCDialoguesForm(forms.ModelForm):
             self.fields['dialogue'] = DialogueModelChoiceField(queryset=dialogues.objects.all())
 
 
+class ExitLocksForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ExitLocksForm, self).__init__(*args, **kwargs)
+
+        locked_exits = world_exits.objects.filter(typeclass="CLASS_LOCKED_EXIT")
+        self.fields['key'] = forms.ModelChoiceField(queryset=locked_exits)
+
+
 class ObjectCreatorsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ObjectCreatorsForm, self).__init__(*args, **kwargs)
-        if self.instance.key:
-            self.fields['key'] = WorldObjectModelChoiceField(queryset=world_objects.objects.all())
+
+        object_creators = world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
+        self.fields['key'] = forms.ModelChoiceField(queryset=object_creators)
 
 
-class ObjectLootListForm(forms.ModelForm):
-    QUEST_LIST_CHOICES = []
-
+class LootListForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(ObjectLootListForm, self).__init__(*args, **kwargs)
-        if self.instance.provider:
-            quest_list = quests.objects.all()
-            for quest_obj in quest_list:
-                self.QUEST_LIST_CHOICES.append((quest_obj.key, quest_obj.key))
-            self.fields['quest'] = forms.ChoiceField(
-                choices=self.QUEST_LIST_CHOICES)
+        super(LootListForm, self).__init__(*args, **kwargs)
+
+        choices = [("", "---------")]
+
+        object_creators = world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
+        choices.extend([(obj.key, obj.key) for obj in object_creators])
+
+        npcs = world_npcs.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in npcs])
+
+        characters = common_characters.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in characters])
+
+        self.fields['provider'] = forms.ChoiceField(choices=choices)
+
+        objects = common_objects.objects.all()
+        self.fields['object'] = forms.ModelChoiceField(queryset=objects)
+
+        quests = world_objects.objects.filter(typeclass="CLASS_QUEST")
+        self.fields['quest'] = forms.ModelChoiceField(queryset=quests)
 
 
 class QuestObjectivesForm(forms.ModelForm):

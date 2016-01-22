@@ -54,14 +54,13 @@ class ObjectCreatorsAdmin(admin.ModelAdmin):
                     'loot_condition')
 
 
-class ObjectLootListAdmin(admin.ModelAdmin):
+class LootListAdmin(admin.ModelAdmin):
     list_display = ('provider',
                     'object',
                     'number',
                     'odds',
                     'quest',
                     'condition')
-    form = ObjectLootListForm
 
 
 class CommonObjectsAdmin(admin.ModelAdmin):

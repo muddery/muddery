@@ -21,7 +21,7 @@ class WorldExitsAdmin(admin_base.WorldExitsAdmin):
 
 
 class ExitLocksAdmin(admin_base.ExitLocksAdmin):
-    pass
+    form = ExitLocksForm
 
 
 class WorldObjectsAdmin(admin_base.WorldObjectsAdmin):
@@ -29,17 +29,11 @@ class WorldObjectsAdmin(admin_base.WorldObjectsAdmin):
 
 
 class ObjectCreatorsAdmin(admin_base.ObjectCreatorsAdmin):
-    pass
+    form = ObjectCreatorsForm
 
 
-class ObjectLootListAdmin(admin.ModelAdmin):
-    list_display = ('provider',
-                    'object',
-                    'number',
-                    'odds',
-                    'quest',
-                    'condition')
-    form = ObjectLootListForm
+class LootListAdmin(admin_base.LootListAdmin):
+    form = LootListForm
 
 
 class CommonObjectsAdmin(admin.ModelAdmin):
@@ -246,7 +240,7 @@ admin.site.register(world_exits, WorldExitsAdmin)
 admin.site.register(exit_locks, ExitLocksAdmin)
 admin.site.register(world_objects, WorldObjectsAdmin)
 admin.site.register(object_creators, ObjectCreatorsAdmin)
-admin.site.register(object_loot_list, ObjectLootListAdmin)
+admin.site.register(loot_list, LootListAdmin)
 admin.site.register(common_objects, CommonObjectsAdmin)
 admin.site.register(equipment_types, EquipmentTypesAdmin)
 admin.site.register(equipments, EquipmentsAdmin)

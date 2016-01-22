@@ -206,21 +206,32 @@ class object_creators(models.Model):
 # store objects loot list
 #
 # ------------------------------------------------------------
-class object_loot_list(models.Model):
+class loot_list(models.Model):
     "Store all object creators."
 
+    # the provider of the object
     provider = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # the key of dropped object
     object = models.CharField(max_length=KEY_LENGTH)
+
+    # number of dropped object
     number = models.IntegerField(blank=True, default=0)
+
+    # odds of drop, from 0.0 to 1.0
     odds = models.FloatField(blank=True, default=0)
+
+    # the player must have this quest, or will not drop
     quest = models.CharField(max_length=KEY_LENGTH)
+
+    # condition of the drop
     condition = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Object Loot List"
-        verbose_name_plural = "Object Loot List"
+        verbose_name = "Loot List"
+        verbose_name_plural = "Loot Lists"
         unique_together = ("provider", "object")
 
 
