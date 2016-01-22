@@ -164,18 +164,11 @@ class NPCDialoguesForm(forms.ModelForm):
             self.fields['dialogue'] = DialogueModelChoiceField(queryset=dialogues.objects.all())
 
 
-class ObjectCreatorsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ObjectCreatorsForm, self).__init__(*args, **kwargs)
-        if self.instance.key:
-            self.fields['key'] = WorldObjectModelChoiceField(queryset=world_objects.objects.all())
-
-
-class ObjectLootListForm(forms.ModelForm):
+class LootListForm(forms.ModelForm):
     QUEST_LIST_CHOICES = []
 
     def __init__(self, *args, **kwargs):
-        super(ObjectLootListForm, self).__init__(*args, **kwargs)
+        super(LootListForm, self).__init__(*args, **kwargs)
         if self.instance.provider:
             quest_list = quests.objects.all()
             for quest_obj in quest_list:
