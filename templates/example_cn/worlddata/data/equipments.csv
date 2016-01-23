@@ -1,4 +1,4 @@
 key,name,typeclass,desc,max_stack,unique,position,type,attack,defence
-equip_01,Hat,typeclasses.common_objects.Equipment,This is a hat.,1,0,head,cloth,,10
-equip_02,Helm,typeclasses.common_objects.Equipment,This is a helm.,1,1,head,plate,,40
-weapon_wood_stick,木棍,typeclasses.common_objects.Equipment,这条木棍不粗，但感觉挺结实的。,1,1,hand,weapon,10,
+equip_01,Hat,CLASS_EQUIPMENT,This is a hat.,1,0,POSITION_HEAD,EQUIP_CLOTH,,10
+equip_02,Helm,CLASS_EQUIPMENT,This is a helm.,1,1,POSITION_HEAD,EQUIP_PLATE,,40
+weapon_wood_stick,木棍,CLASS_EQUIPMENT,这条木棍不粗，但感觉挺结实的。,1,1,POSITION_HAND,EQUIP_WEAPON,10,

@@ -243,19 +243,29 @@ class loot_list(models.Model):
 class common_objects(models.Model):
     "Store all common objects."
 
+    # object's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # object's name
     name = models.CharField(max_length=NAME_LENGTH)
+
+    # object's typeclass
     typeclass = models.ForeignKey("typeclasses")
+
+    # object's description
     desc = models.TextField(blank=True)
+
+    # the max number of this object in one pile, must above 1
     max_stack = models.IntegerField(blank=True, default=1)
+
+    # if can have only one pile of this object
     unique = models.BooleanField(blank=True, default=False)
-    effect = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Common Object List"
-        verbose_name_plural = "Common Object List"
+        verbose_name = "Common Object"
+        verbose_name_plural = "Common Objects"
 
 
 # ------------------------------------------------------------
@@ -266,17 +276,50 @@ class common_objects(models.Model):
 class equipment_types(models.Model):
     "Store all equip types."
 
-    type = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    # equipment type's key
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # type's name
     name = models.CharField(max_length=NAME_LENGTH)
+
+    # type's description
     desc = models.TextField(blank=True)
-    career = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Equipment Type"
-        verbose_name_plural = "Equipment Types"
+        verbose_name = "Equipment's Type"
+        verbose_name_plural = "Equipment's Types"
 
+    def __unicode__(self):
+        return self.name
+
+
+# ------------------------------------------------------------
+#
+# store all available equipment potisions
+#
+# ------------------------------------------------------------
+class equipment_positions(models.Model):
+    "Store all equip types."
+
+    # position's key
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # position's name
+    name = models.CharField(max_length=NAME_LENGTH)
+
+    # position's description
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Equipment's Position"
+        verbose_name_plural = "Equipment's Positions"
+
+    def __unicode__(self):
+        return self.name
 
 # ------------------------------------------------------------
 #
@@ -286,16 +329,68 @@ class equipment_types(models.Model):
 class equipments(common_objects):
     "Store all equipments."
 
-    position = models.CharField(max_length=KEY_LENGTH, blank=True)
-    type = models.CharField(max_length=KEY_LENGTH, blank=True)
+    # equipment's position
+    position = models.ForeignKey("equipment_positions")
+
+    # equipment's type
+    type = models.ForeignKey("equipment_types")
+
+    # attack effect
     attack = models.IntegerField(blank=True, default=0)
+
+    # defence effect
     defence = models.IntegerField(blank=True, default=0)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Equipment List"
-        verbose_name_plural = "Equipment List"
+        verbose_name = "Equipment"
+        verbose_name_plural = "Equipments"
+
+
+# ------------------------------------------------------------
+#
+# store all careers
+#
+# ------------------------------------------------------------
+class character_careers(models.Model):
+    "Store all careers."
+
+    # careers's type
+    career = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # careers's name
+    name = models.CharField(max_length=NAME_LENGTH)
+
+    # careers's description
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Career"
+        verbose_name_plural = "Careers"
+
+
+# ------------------------------------------------------------
+#
+# store career and equipment type's relationship
+#
+# ------------------------------------------------------------
+class career_equip_relation(models.Model):
+    "Store career and equipment type's relationship."
+
+    # careers's type
+    career = models.ForeignKey("character_careers")
+
+    # equipment's type
+    equip_type = models.ForeignKey("equipment_types")
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Career Equip Relation"
+        verbose_name_plural = "Career Equip Relations"
 
 
 # ------------------------------------------------------------

@@ -69,19 +69,29 @@ class CommonObjectsAdmin(admin.ModelAdmin):
                     'typeclass',
                     'desc',
                     'max_stack',
-                    'unique',
-                    'effect')
+                    'unique')
 
 
 class EquipmentTypesAdmin(admin.ModelAdmin):
-    list_display = ('type',
+    list_display = ('key',
                     'name',
-                    'desc',
-                    'career')
+                    'desc')
+
+
+class EquipmentPositionsAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'name',
+                    'desc')
 
 
 class EquipmentsAdmin(admin.ModelAdmin):
-    list_display = ('position',
+    list_display = ('key',
+                    'name',
+                    'typeclass',
+                    'desc',
+                    'max_stack',
+                    'unique',
+                    'position',
                     'type',
                     'attack',
                     'defence')

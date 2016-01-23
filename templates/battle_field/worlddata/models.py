@@ -67,7 +67,7 @@ class object_creators(model_base.object_creators):
 # store objects loot list
 #
 #------------------------------------------------------------
-class object_loot_list(model_base.object_loot_list):
+class loot_list(model_base.loot_list):
     "Store all object creators."
     pass
 

@@ -8,3 +8,6 @@ CLASS_PLAYER,Player,typeclasses.player_characters.PlayerCharacter,Player charact
 CLASS_COMMON_OBJECT,Common Object,typeclasses.objects.Object,Common object's typeclass.
 CLASS_OBJECT_CREATOR,Object Creator,typeclasses.object_creators.ObjectCreator,Object creators can create new objects.
 CLASS_FOOD,Food,typeclasses.common_objects.Food,Foods can be eaten.
+CLASS_SKILL,Skill,typeclasses.character_skills.Skill,Character's skill.
+CLASS_QUEST,Quest,typeclasses.character_quests.Quest,Quest.
+CLASS_EQUIPMENT,Equipment,typeclasses.common_objects.Equipment,Equipments.

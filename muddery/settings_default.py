@@ -126,10 +126,16 @@ WORLD_DATA_FILE_ENCODING = "utf8"
 ###################################
 
 # typeclasses
-TYPECLASSES = ("typeclasses")
+TYPECLASSES = "typeclasses"
+
+# equip types
+EQUIPMENT_TYPES = "equipment_types"
+
+# equipment positions
+EQUIPMENT_POSITIONS = "equipment_positions"
 
 # basic data models
-BASIC_DATA_MODELS = (TYPECLASSES,)
+BASIC_DATA_MODELS = (TYPECLASSES, EQUIPMENT_TYPES, EQUIPMENT_POSITIONS)
 
 
 ###################################
@@ -166,7 +172,7 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 
 # object loot list
 OBJECT_CREATORS = "object_creators"
-OBJECT_LOOT_LIST = "object_loot_list"
+LOOT_LIST = "loot_list"
 
 # quest data
 QUEST_OBJECTIVES = "quest_objectives"
@@ -188,9 +194,6 @@ DIALOGUE_RELATIONS = "dialogue_relations"
 NPC_DIALOGUES = "npc_dialogues"
 DIALOGUE_QUEST_DEPENDENCY = "dialogue_quest_dependency"
 
-# equip types
-EQUIPMENT_TYPES = "equipment_types"
-
 # character levels
 CHARACTER_MODELS = "character_models"
 
@@ -199,7 +202,7 @@ CHARACTER_SKILLS = "character_skills"
 
 # all other data models
 OTHER_DATA_MODELS = (OBJECT_CREATORS,
-                     OBJECT_LOOT_LIST,
+                     LOOT_LIST,
                      QUEST_OBJECTIVES,
                      QUEST_DEPENDENCY,
                      EVENT_DATA,
@@ -235,8 +238,6 @@ DEFAULT_PLAYER_CHARACTER_KEY = "player"
 DEFAULT_PLAYER_HOME_KEY = ""
 
 DEFAULT_PLAYER_HOME = ""
-
-EQUIP_POSITIONS = []
 
 EQUIP_EFFECTS = []
 

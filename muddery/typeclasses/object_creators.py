@@ -27,13 +27,15 @@ class MudderyObjectCreator(MudderyObject):
         super(MudderyObjectCreator, self).load_data()
 
         # Load creator info.
-        self.loot_verb = getattr(self.dfield, "loot_verb", LS("Loot"))
+        self.loot_verb = getattr(self.dfield, "loot_verb", None)
+        if not self.loot_verb:
+            self.loot_verb = LS("Loot")
         self.loot_condition = getattr(self.dfield, "loot_condition", None)
 
         # Load loot list.
         loot_list = []
         try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.OBJECT_LOOT_LIST)
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.LOOT_LIST)
             loot_records = model_obj.objects.filter(provider=self.get_data_key())
 
             for loot_record in loot_records:

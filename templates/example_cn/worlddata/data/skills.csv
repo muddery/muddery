@@ -1,4 +1,4 @@
 key,name,typeclass,desc,cd,passive,condition,function,effect
-skill_normal_hit,普通攻击,typeclasses.character_skills.Skill,攻击敌人，伤害一般。,1,0,,skill_hit,1
-skill_normal_heal,普通治疗,typeclasses.character_skills.Skill,治疗自己，效果一般。,5,0,,skill_heal,20
-skill_normal_hp,强壮体魄,typeclasses.character_skills.Skill,被动技能，提升最大生命值。,0,1,,skill_increase_hp,20
+skill_normal_hit,普通攻击,CLASS_SKILL,攻击敌人，伤害一般。,1,0,,skill_hit,1
+skill_normal_heal,普通治疗,CLASS_SKILL,治疗自己，效果一般。,5,0,,skill_heal,20
+skill_normal_hp,强壮体魄,CLASS_SKILL,被动技能，提升最大生命值。,0,1,,skill_increase_hp,20

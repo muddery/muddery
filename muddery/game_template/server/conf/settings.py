@@ -139,7 +139,7 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 
 # all other data models
 OTHER_DATA_MODELS = (OBJECT_CREATORS,
-                     OBJECT_LOOT_LIST,
+                     LOOT_LIST,
                      QUEST_OBJECTIVES,
                      QUEST_DEPENDENCY,
                      EVENT_DATA,
@@ -167,7 +167,5 @@ DEFAULT_HOME_KEY = ""
 #  MULTISESSION_MODE = 0, 1 - used by default unloggedin create command
 #  MULTISESSION_MODE = 2,3 - used by default character_create command
 START_LOCATION_KEY = ""
-
-EQUIP_POSITIONS = []
 
 EQUIP_EFFECTS = []

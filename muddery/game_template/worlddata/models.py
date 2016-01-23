@@ -93,6 +93,16 @@ class equipment_types(model_base.equipment_types):
 
 #------------------------------------------------------------
 #
+# store all equip_positions
+#
+#------------------------------------------------------------
+class equipment_positions(model_base.equipment_positions):
+    "Store all equip types."
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all equipments
 #
 #------------------------------------------------------------
