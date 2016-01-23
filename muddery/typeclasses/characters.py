@@ -65,9 +65,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.mp = 1
         self.db.team = 0
 
+        # init equipments
         equipments = {}
-        for position in settings.EQUIP_POSITIONS:
-            equipments[position] = None
+        model_position = get_model(settings.WORLD_DATA_APP, settings.EQUIPMENT_POSITIONS)
+        if model_position:
+            for position in model_position.objects.all():
+                equipments[position.key] = None
         self.db.equipments = equipments
         
         self.db.skills = {}
@@ -86,11 +89,16 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         super(MudderyCharacter, self).at_init()
 
         # update equipment positions
+        positions = []
+        model_position = get_model(settings.WORLD_DATA_APP, settings.EQUIPMENT_POSITIONS)
+        if model_position:
+            positions = [position.key for position in model_position.objects.all()]
+
         for position in self.db.equipments:
-            if position not in settings.EQUIP_POSITIONS:
+            if position not in positions:
                 del self.db.equipments[position]
 
-        for position in settings.EQUIP_POSITIONS:
+        for position in positions:
             if position not in self.db.equipments:
                 self.db.equipments[position] = None
 
@@ -106,7 +114,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # Load loot list.
         loot_list = []
         try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.OBJECT_LOOT_LIST)
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.LOOT_LIST)
             loot_records = model_obj.objects.filter(provider=self.get_data_key())
 
             for loot_record in loot_records:

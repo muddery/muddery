@@ -21,21 +21,22 @@ def build_object(obj_key, caller=None):
         caller: (command caller) If provide, running messages will send to the caller.
     """
     # Get object's model name.
-    model_name = OBJECT_KEY_HANDLER.get_model(obj_key)
-    if not model_name:
-        ostring = "Can not find the model of %s." % obj_key
-        print(ostring)
-        print(traceback.print_exc())
-        if caller:
-            caller.msg(ostring)
-        return
+    record = None
+    model_names = OBJECT_KEY_HANDLER.get_models(obj_key)
+    for model_name in model_names:
+        try:
+            # Get record.
+            model_obj = get_model(settings.WORLD_DATA_APP, model_name)
+            record_obj = model_obj.objects.get(key=obj_key)
+            if hasattr(record_obj, "typeclass"):
+                if hasattr(record_obj.typeclass, "path"):
+                    record = record_obj
+                    break
+        except Exception, e:
+            continue
 
-    try:
-        # Get record.
-        model_obj = get_model(settings.WORLD_DATA_APP, model_name)
-        record = model_obj.objects.get(key=obj_key)
-    except Exception, e:
-        ostring = "Can not load record %s:%s %s" % (model_name, obj_key, e)
+    if not record:
+        ostring = "Can not find the model of %s." % obj_key
         print(ostring)
         print(traceback.print_exc())
         if caller:

@@ -36,28 +36,20 @@ class LootListAdmin(admin_base.LootListAdmin):
     form = LootListForm
 
 
-class CommonObjectsAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'name',
-                    'typeclass',
-                    'desc',
-                    'max_stack',
-                    'unique',
-                    'effect')
+class CommonObjectsAdmin(admin_base.CommonObjectsAdmin):
+    pass
 
 
-class EquipmentTypesAdmin(admin.ModelAdmin):
-    list_display = ('type',
-                    'name',
-                    'desc',
-                    'career')
+class EquipmentTypesAdmin(admin_base.EquipmentTypesAdmin):
+    pass
 
 
-class EquipmentsAdmin(admin.ModelAdmin):
-    list_display = ('position',
-                    'type',
-                    'attack',
-                    'defence')
+class EquipmentPositionsAdmin(admin_base.EquipmentPositionsAdmin):
+    pass
+
+
+class EquipmentsAdmin(admin_base.EquipmentsAdmin):
+    pass
 
 
 class WorldNPCAdmin(admin.ModelAdmin):

@@ -66,6 +66,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         # Set default data.
         self.db.nickname = ""
+        self.db.career = ""
         self.db.unlocked_exits = set()
         self.db.revealed_map = set()
 
@@ -534,22 +535,20 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         type = obj.type
         position = obj.position
-        career = ""
 
-        if not position in settings.EQUIP_POSITIONS:
+        if position not in self.db.equipments:
             raise MudderyError(LS("Can not equip it on this position."))
 
-        if not EQUIP_TYPE_HANDLER.can_equip(type, career):
+        if not EQUIP_TYPE_HANDLER.can_equip(type, self.db.career):
             raise MudderyError(LS("Can not use this equipment."))
 
         # Take off old equipment
-        if position in self.db.equipments:
-            if self.db.equipments[position]:
-                dbref = self.db.equipments[position]
-                
-                for content in self.contents:
-                    if content.dbref == dbref:
-                        content.equipped = False
+        if self.db.equipments[position]:
+            dbref = self.db.equipments[position]
+
+            for content in self.contents:
+                if content.dbref == dbref:
+                    content.equipped = False
 
         # Put on new equipment, store object's dbref.
         self.db.equipments[position] = obj.dbref

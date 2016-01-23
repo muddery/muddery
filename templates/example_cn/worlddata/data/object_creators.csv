@@ -1,4 +1,4 @@
-key,verb,loot_condition
+key,loot_verb,loot_condition
 creator_alley_pile,检查,
 creator_street_body,搜索,
 creator_storeroom_box,检查,

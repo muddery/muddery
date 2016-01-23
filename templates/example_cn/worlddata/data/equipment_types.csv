@@ -1,4 +1,4 @@
-type,name,desc,career
-cloth,cloth,cloth,
-plate,plate,plate,
-weapon,weapon,weapon,
+key,name,desc
+EQUIP_CLOTH,Cloth,cloth,
+EQUIP_PLATE,Plate,plate,
+EQUIP_WEAPON,Weapon,weapon,
