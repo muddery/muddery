@@ -52,7 +52,7 @@ class ObjectKeyHandler(object):
             key's models
         """
         if key not in self.key_model:
-            return
+            return []
 
         return self.key_model[key]
 

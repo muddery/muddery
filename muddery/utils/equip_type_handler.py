@@ -22,7 +22,7 @@ class EquipTypeHandler(object):
         """
         Clear data.
         """
-        self.equip_career = {}
+        self.career_equip = {}
 
     
     def reload(self):
@@ -32,25 +32,27 @@ class EquipTypeHandler(object):
         self.clear()
 
         try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.EQUIPMENT_TYPES)
+            model_obj = get_model(settings.WORLD_DATA_APP, settings.CAREER_EQUIPMENTS)
             for record in model_obj.objects.all():
-                self.equip_career[record.type] = set(record.career.split(","))
+                career = record.serializable_value("career")
+                equipment = record.serializable_value("equipment")
+                if career not in self.career_equip:
+                    self.career_equip[career] = set()
+                self.career_equip[career].add(equipment)
         except Exception, e:
-            logger.log_errmsg("Can not load equipment types: %s" % e)
+            logger.log_errmsg("Can not load career equipment types: %s" % e)
             pass
 
     
-    def can_equip(self, equip, career):
+    def can_equip(self, career, equip):
         """
         Check if the equipment's type matchs career.
         """
-        if not equip in self.equip_career:
+        if career not in self.career_equip:
             return False
-
-        if not self.equip_career[equip]:
-            return True
-
-        return career in self.equip_career[equip]
+        if not self.career_equip[career]:
+            return False
+        return equip in self.career_equip[career]
 
 
 # main dialoguehandler

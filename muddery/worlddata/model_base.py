@@ -357,7 +357,7 @@ class character_careers(models.Model):
     "Store all careers."
 
     # careers's type
-    career = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
 
     # careers's name
     name = models.CharField(max_length=NAME_LENGTH)
@@ -377,20 +377,21 @@ class character_careers(models.Model):
 # store career and equipment type's relationship
 #
 # ------------------------------------------------------------
-class career_equip_relation(models.Model):
+class career_equipments(models.Model):
     "Store career and equipment type's relationship."
 
     # careers's type
     career = models.ForeignKey("character_careers")
 
     # equipment's type
-    equip_type = models.ForeignKey("equipment_types")
+    equipment = models.ForeignKey("equipment_types")
 
     class Meta:
         "Define Django meta options"
         abstract = True
         verbose_name = "Career Equip Relation"
         verbose_name_plural = "Career Equip Relations"
+        unique_together = ("career", "equipment")
 
 
 # ------------------------------------------------------------

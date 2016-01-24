@@ -134,8 +134,18 @@ EQUIPMENT_TYPES = "equipment_types"
 # equipment positions
 EQUIPMENT_POSITIONS = "equipment_positions"
 
+# character's careers
+CHARACTER_CAREERS = "character_careers"
+
+# career equipments
+CAREER_EQUIPMENTS = "career_equipments"
+
 # basic data models
-BASIC_DATA_MODELS = (TYPECLASSES, EQUIPMENT_TYPES, EQUIPMENT_POSITIONS)
+BASIC_DATA_MODELS = (TYPECLASSES,
+                     EQUIPMENT_TYPES,
+                     EQUIPMENT_POSITIONS,
+                     CHARACTER_CAREERS,
+                     CAREER_EQUIPMENTS)
 
 
 ###################################
