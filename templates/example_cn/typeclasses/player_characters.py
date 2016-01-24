@@ -8,6 +8,9 @@ creation commands.
 
 """
 
+import random
+from django.conf import settings
+from django.db.models.loading import get_model
 from evennia.utils import logger
 from muddery.typeclasses.player_characters import MudderyPlayerCharacter
 from muddery.utils.localized_strings_handler import LS
@@ -33,6 +36,25 @@ class PlayerCharacter(MudderyPlayerCharacter):
                     has connected" message echoed to the room
 
     """
+    def at_object_creation(self):
+        """
+        Called once, when this object is first created. This is the
+        normal hook to overload for most object types.
+
+        """
+        super(PlayerCharacter, self).at_object_creation()
+
+        try:
+            model_career = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_CAREERS)
+            if model_career:
+                careers = model_career.objects.all()
+                if careers:
+                    career = random.choice(careers)
+                    self.db.career = career.key
+        except Exception, e:
+            pass
+
+
     def add_hp(self, hp):
         """
         Add character's hp.

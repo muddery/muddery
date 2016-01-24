@@ -110,6 +110,26 @@ class equipments(model_base.equipments):
     "Store all equipments."
 
 
+# ------------------------------------------------------------
+#
+# store all careers
+#
+# ------------------------------------------------------------
+class character_careers(model_base.character_careers):
+    "Store all careers."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# store career and equipment type's relationship
+#
+# ------------------------------------------------------------
+class career_equipments(model_base.career_equipments):
+    "Store career and equipment type's relationship."
+    pass
+
+
 #------------------------------------------------------------
 #
 # store all npcs
