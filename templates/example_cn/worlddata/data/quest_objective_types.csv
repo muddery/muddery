@@ -1,0 +1,5 @@
+key,type_id,name,desc
+OBJECTIVE_TALK,1,Takl,finish a dialogue, object: dialogue_id
+OBJECTIVE_ARRIVE,2,Arrive,arrive a room, object: room_id
+OBJECTIVE_OBJECT,3,Object,get some objects, object: object_id
+OBJECTIVE_KILL,4,Kill,kill some characters, object: character_id

@@ -155,7 +155,7 @@ def import_file(file_name, model_name, widecard=True, clear=True):
 
             break
     except Exception, e:
-        print("Can not import file %s" % file_name)
+        print("Can not import file %s: %s" % (file_name, e))
 
     if imported:
         print("%s imported." % file_name)

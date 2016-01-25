@@ -125,6 +125,9 @@ WORLD_DATA_FILE_ENCODING = "utf8"
 # Basic data
 ###################################
 
+# class's categories
+CLASS_CATEGORIES = "class_categories"
+
 # typeclasses
 TYPECLASSES = "typeclasses"
 
@@ -140,12 +143,17 @@ CHARACTER_CAREERS = "character_careers"
 # career equipments
 CAREER_EQUIPMENTS = "career_equipments"
 
+# character levels
+CHARACTER_MODELS = "character_models"
+
 # basic data models
-BASIC_DATA_MODELS = (TYPECLASSES,
+BASIC_DATA_MODELS = (CLASS_CATEGORIES,
+                     TYPECLASSES,
                      EQUIPMENT_TYPES,
                      EQUIPMENT_POSITIONS,
                      CHARACTER_CAREERS,
-                     CAREER_EQUIPMENTS)
+                     CAREER_EQUIPMENTS,
+                     CHARACTER_MODELS)
 
 
 ###################################
@@ -204,11 +212,8 @@ DIALOGUE_RELATIONS = "dialogue_relations"
 NPC_DIALOGUES = "npc_dialogues"
 DIALOGUE_QUEST_DEPENDENCY = "dialogue_quest_dependency"
 
-# character levels
-CHARACTER_MODELS = "character_models"
-
 # character skills
-CHARACTER_SKILLS = "character_skills"
+DEFAULT_SKILLS = "default_skills"
 
 # all other data models
 OTHER_DATA_MODELS = (OBJECT_CREATORS,
@@ -224,8 +229,7 @@ OTHER_DATA_MODELS = (OBJECT_CREATORS,
                      NPC_DIALOGUES,
                      DIALOGUE_QUEST_DEPENDENCY,
                      EQUIPMENT_TYPES,
-                     CHARACTER_MODELS,
-                     CHARACTER_SKILLS)
+                     DEFAULT_SKILLS)
 
 # local strings
 LOCALIZED_STRINGS_MODEL = "localized_strings"

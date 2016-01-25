@@ -246,7 +246,7 @@ class character_models(model_base.character_models):
 # character skills
 #
 #------------------------------------------------------------
-class character_skills(model_base.character_skills):
+class default_skills(model_base.default_skills):
     "Store all character skill informations."
     pass
 

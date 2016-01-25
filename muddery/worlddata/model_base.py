@@ -11,6 +11,33 @@ POSITION_LENGTH = 80
 # store all typeclasses
 #
 # ------------------------------------------------------------
+class class_categories(models.Model):
+    "typeclass's category"
+
+    # category's key
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # the readable name of the category
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+
+    # category's description (optional)
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Class category"
+        verbose_name_plural = "Class Categories"
+
+    def __unicode__(self):
+        return self.name
+
+
+# ------------------------------------------------------------
+#
+# store all typeclasses
+#
+# ------------------------------------------------------------
 class typeclasses(models.Model):
     "store all typeclasses"
 
@@ -22,6 +49,9 @@ class typeclasses(models.Model):
 
     # the typeclass's path that related to a class
     path = models.CharField(max_length=TYPECLASS_LENGTH, blank=True)
+
+    # typeclass's category
+    category = models.ForeignKey("class_categories")
 
     # typeclass's description (optional)
     desc = models.TextField(blank=True)
@@ -209,10 +239,10 @@ class object_creators(models.Model):
 class loot_list(models.Model):
     "Store all object creators."
 
-    # the provider of the object
+    # the provider of the object. it is not a foreighkey because the provider can be in several tables.
     provider = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
-    # the key of dropped object
+    # the key of dropped object. it is not a foreighkey because the object can be from several tables.
     object = models.CharField(max_length=KEY_LENGTH)
 
     # number of dropped object
@@ -221,8 +251,8 @@ class loot_list(models.Model):
     # odds of drop, from 0.0 to 1.0
     odds = models.FloatField(blank=True, default=0)
 
-    # the player must have this quest, or will not drop
-    quest = models.CharField(max_length=KEY_LENGTH)
+    # if it is not empty, the player must have this quest, or will not drop
+    quest = models.ForeignKey("quests", null=True, blank=True)
 
     # condition of the drop
     condition = models.TextField(blank=True)
@@ -246,13 +276,13 @@ class common_objects(models.Model):
     # object's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
 
-    # object's name
+    # object's name for display
     name = models.CharField(max_length=NAME_LENGTH)
 
     # object's typeclass
     typeclass = models.ForeignKey("typeclasses")
 
-    # object's description
+    # object's description for display
     desc = models.TextField(blank=True)
 
     # the max number of this object in one pile, must above 1
@@ -266,6 +296,9 @@ class common_objects(models.Model):
         abstract = True
         verbose_name = "Common Object"
         verbose_name_plural = "Common Objects"
+
+    def __unicode__(self):
+        return self.key
 
 
 # ------------------------------------------------------------
@@ -327,7 +360,7 @@ class equipment_positions(models.Model):
 #
 # ------------------------------------------------------------
 class equipments(common_objects):
-    "Store all equipments."
+    "equipments inherit from common objects."
 
     # equipment's position
     position = models.ForeignKey("equipment_positions")
@@ -371,6 +404,8 @@ class character_careers(models.Model):
         verbose_name = "Career"
         verbose_name_plural = "Careers"
 
+    def __unicode__(self):
+        return self.name
 
 # ------------------------------------------------------------
 #
@@ -396,25 +431,88 @@ class career_equipments(models.Model):
 
 # ------------------------------------------------------------
 #
+# character models
+#
+# ------------------------------------------------------------
+class character_models(models.Model):
+    "Store all character level informations."
+
+    # model's key
+    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # model's level
+    level = models.IntegerField(blank=True, default=1)
+
+    # If a character's exp is larger than max_exp, the character can upgrade.
+    # If max_exp is 0, the character can not upgrade any more.
+    max_exp = models.IntegerField(blank=True, default=0)
+
+    # max hp of the character
+    max_hp = models.IntegerField(blank=True, default=1)
+
+    # max mp of the character
+    max_mp = models.IntegerField(blank=True, default=1)
+
+    # attack value of the character
+    attack = models.IntegerField(blank=True, default=1)
+
+    # defence value of the character
+    defence = models.IntegerField(blank=True, default=0)
+
+    # exp provided to the character who killed this character
+    give_exp = models.IntegerField(blank=True, default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Character Level"
+        verbose_name_plural = "Character Levels"
+        unique_together = ("key", "level")
+
+    def __unicode__(self):
+        return self.key
+
+
+# ------------------------------------------------------------
+#
 # store all NPCs
 #
 # ------------------------------------------------------------
 class world_npcs(models.Model):
     "Store all NPCs."
 
+    # NPC's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # NPC's name for display
     name = models.CharField(max_length=NAME_LENGTH)
+
+    # NPC's typeclass
     typeclass = models.ForeignKey("typeclasses")
+
+    # NPC's description for display
     desc = models.TextField(blank=True)
-    location = models.CharField(max_length=KEY_LENGTH, blank=True)
-    model = models.CharField(max_length=KEY_LENGTH)
+
+    # NPC's location, it must be a room.
+    location = models.ForeignKey("world_rooms")
+
+    # NPC's model. If it is empty, will use NPC's key as its model.
+    model = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # NPC's level
+    level = models.IntegerField(blank=True, default=1)
+
+    # the condition for showing the NPC
     condition = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "World NPC List"
-        verbose_name_plural = "World NPC List"
+        verbose_name = "World NPC"
+        verbose_name_plural = "World NPCs"
+
+    def __unicode__(self):
+        return self.key
 
 
 # ------------------------------------------------------------
@@ -425,11 +523,23 @@ class world_npcs(models.Model):
 class common_characters(models.Model):
     "Store common characters."
 
+    # Character's key.
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # Character's name for display.
     name = models.CharField(max_length=NAME_LENGTH)
+
+    # Character's typeclass.
     typeclass = models.ForeignKey("typeclasses")
+
+    # Character's description for display.
     desc = models.TextField(blank=True)
+
+    # Character's model. If it is empty, will use character's key as its model.
     model = models.CharField(max_length=KEY_LENGTH)
+
+    # Character's level
+    level = models.IntegerField(blank=True, default=1)
 
     class Meta:
         "Define Django meta options"
@@ -437,6 +547,8 @@ class common_characters(models.Model):
         verbose_name = "Common Character List"
         verbose_name_plural = "Common Character List"
 
+    def __unicode__(self):
+        return self.key
 
 # ------------------------------------------------------------
 #
@@ -446,14 +558,31 @@ class common_characters(models.Model):
 class skills(models.Model):
     "Store all skills."
 
+    # skill's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # skill's name for display
     name = models.CharField(max_length=NAME_LENGTH)
+
+    # skill's typeclass
     typeclass = models.ForeignKey("typeclasses")
+
+    # skill's description for display
     desc = models.TextField(blank=True)
+
+    # skill's cd
     cd = models.FloatField(blank=True, default=0)
+
+    # if it is a passive skill
     passive = models.BooleanField(blank=True, default=False)
+
+    # condition for cast this skill
     condition = models.TextField(blank=True)
+
+    # skill function's name
     function = models.CharField(max_length=KEY_LENGTH)
+
+    # skill's effect value
     effect = models.FloatField(blank=True, default=0)
 
     class Meta:
@@ -461,6 +590,30 @@ class skills(models.Model):
         abstract = True
         verbose_name = "Skill"
         verbose_name_plural = "Skills"
+
+    def __unicode__(self):
+        return self.key
+
+# ------------------------------------------------------------
+#
+# character's default skills
+#
+# ------------------------------------------------------------
+class default_skills(models.Model):
+    "character's default skills"
+
+    # character's key
+    character = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # skill's key
+    skill = models.ForeignKey("skills")
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Character's Skill"
+        verbose_name_plural = "Character's Skills"
+        unique_together = ("character", "skill")
 
 
 # ------------------------------------------------------------
@@ -471,18 +624,59 @@ class skills(models.Model):
 class quests(models.Model):
     "Store all quests."
 
+    # quest's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # quest's name for display
     name = models.CharField(blank=True, max_length=NAME_LENGTH)
+
+    # quest's typeclass
     typeclass = models.ForeignKey("typeclasses")
+
+    # quest's description for display
     desc = models.TextField(blank=True)
+
+    # the condition to accept this quest. TODO
     condition = models.TextField(blank=True)
-    action = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
         verbose_name = "Quest"
         verbose_name_plural = "Quests"
+
+    def __unicode__(self):
+        return self.key
+
+
+# ------------------------------------------------------------
+#
+# quest objective's type
+#
+# ------------------------------------------------------------
+class quest_objective_types(models.Model):
+    "quest objective's type"
+
+    # type's key
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # type's id, must be the values in utils/defines.py
+    id = models.IntegerField()
+
+    # the readable name of the type
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+
+    # type's description (optional)
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Quest Objective's Type"
+        verbose_name_plural = "Quest Objective's Types"
+
+    def __unicode__(self):
+        return self.name
 
 
 # ------------------------------------------------------------
@@ -493,11 +687,22 @@ class quests(models.Model):
 class quest_objectives(models.Model):
     "Store all quest objectives."
 
+    # quest's key
     quest = models.ForeignKey("quests", db_index=True)
-    ordinal = models.IntegerField()
-    type = models.IntegerField()
-    object = models.CharField(max_length=KEY_LENGTH)
+
+    # objective's ordinal
+    ordinal = models.IntegerField(blank=True, default=0)
+
+    # objective's type
+    type = models.ForeignKey("quest_objective_types")
+
+    # relative object's key
+    object = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # objective's number
     number = models.IntegerField(blank=True, default=0)
+
+    # objective's discription for display
     desc = models.TextField(blank=True)
 
     class Meta:
@@ -644,50 +849,6 @@ class dialogue_quest_dependency(models.Model):
         abstract = True
         verbose_name = "Dialogue Quest Dependency"
         verbose_name_plural = "Dialogue Quest Dependency"
-
-
-# ------------------------------------------------------------
-#
-# character levels
-#
-# ------------------------------------------------------------
-class character_models(models.Model):
-    "Store all character level informations."
-
-    character = models.CharField(max_length=KEY_LENGTH, db_index=True)
-    level = models.IntegerField(blank=True, default=0)
-    max_exp = models.IntegerField(blank=True, default=0)
-    max_hp = models.IntegerField(blank=True, default=1)
-    max_mp = models.IntegerField(blank=True, default=1)
-    attack = models.IntegerField(blank=True, default=1)
-    defence = models.IntegerField(blank=True, default=0)
-    give_exp = models.IntegerField(blank=True, default=0)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        verbose_name = "Character Level List"
-        verbose_name_plural = "Character Level List"
-        unique_together = ("character", "level")
-
-
-# ------------------------------------------------------------
-#
-# character skills
-#
-# ------------------------------------------------------------
-class character_skills(models.Model):
-    "Store all character skill informations."
-
-    character = models.CharField(max_length=KEY_LENGTH, db_index=True)
-    skill = models.ForeignKey("skills")
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        verbose_name = "Character Skill List"
-        verbose_name_plural = "Character Skill List"
-        unique_together = ("character", "skill")
 
 
 # ------------------------------------------------------------

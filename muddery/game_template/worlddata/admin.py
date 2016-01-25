@@ -8,16 +8,20 @@ from muddery.worlddata import admin_base
 # Register your models here.
 
 
+class ClassCategoriesAdmin(admin_base.ClassCategoriesAdmin):
+    pass
+
+
 class TypeclassesAdmin(admin_base.TypeclassesAdmin):
     pass
 
 
 class WorldRoomsAdmin(admin_base.WorldRoomsAdmin):
-    pass
+    form = WorldRoomsForm
 
 
 class WorldExitsAdmin(admin_base.WorldExitsAdmin):
-    pass
+    form = WorldExitsForm
 
 
 class ExitLocksAdmin(admin_base.ExitLocksAdmin):
@@ -25,7 +29,7 @@ class ExitLocksAdmin(admin_base.ExitLocksAdmin):
 
 
 class WorldObjectsAdmin(admin_base.WorldObjectsAdmin):
-    pass
+    form = WorldObjectsForm
 
 
 class ObjectCreatorsAdmin(admin_base.ObjectCreatorsAdmin):
@@ -37,7 +41,7 @@ class LootListAdmin(admin_base.LootListAdmin):
 
 
 class CommonObjectsAdmin(admin_base.CommonObjectsAdmin):
-    pass
+    form = CommonObjectsForm
 
 
 class EquipmentTypesAdmin(admin_base.EquipmentTypesAdmin):
@@ -52,45 +56,40 @@ class EquipmentsAdmin(admin_base.EquipmentsAdmin):
     pass
 
 
-class WorldNPCAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'name',
-                    'typeclass',
-                    'desc',
-                    'location',
-                    'model',
-                    'condition')
-    form = WorldNPCForm
+class CharacterCareersAdmin(admin_base.CharacterCareersAdmin):
+    pass
 
 
-class CommonCharactersAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'name',
-                    'typeclass',
-                    'desc',
-                    'model')
-    form = CommonCharactersForm
+class CareersEquipmentsAdmin(admin_base.CareersEquipmentsAdmin):
+    pass
 
 
-class SkillsAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'name',
-                    'typeclass',
-                    'desc',
-                    'cd',
-                    'passive',
-                    'condition',
-                    'function',
-                    'effect')
+class CharacterModelsAdmin(admin_base.CharacterModelsAdmin):
+    pass
 
 
-class QuestsAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'name',
-                    'typeclass',
-                    'desc',
-                    'condition',
-                    'action')
+class WorldNPCAdmin(admin_base.WorldNPCAdmin):
+    form = CharacterForm
+
+
+class CommonCharactersAdmin(admin_base.CommonCharactersAdmin):
+    form = CharacterForm
+
+
+class SkillsAdmin(admin_base.SkillsAdmin):
+    form = SkillsForm
+
+
+class DefaultSkillsAdmin(admin_base.DefaultSkillsAdmin):
+    form = DefaultSkillsForm
+
+
+class QuestObjectiveTypesAdmin(admin_base.QuestObjectiveTypesAdmin):
+    pass
+
+
+class QuestsAdmin(admin_base.QuestsAdmin):
+    form = QuestsForm
 
 
 class QuestObjectivesAdmin(admin.ModelAdmin):
@@ -196,16 +195,6 @@ class CharacterModelsAdmin(admin.ModelAdmin):
                     'defence')
 
 
-class CharacterSkillsAdmin(admin.ModelAdmin):
-    list_display = ('character',
-                    'get_skill')
-
-    def get_skill(self, obj):
-        return obj.skill.key
-
-    form = CharacterSkillsForm
-
-
 class EventMobsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'mob',
@@ -226,6 +215,7 @@ class LocalizedStringsAdmin(admin.ModelAdmin):
                     'local')
 
 
+admin.site.register(class_categories, ClassCategoriesAdmin)
 admin.site.register(typeclasses, TypeclassesAdmin)
 admin.site.register(world_rooms, WorldRoomsAdmin)
 admin.site.register(world_exits, WorldExitsAdmin)
@@ -235,7 +225,11 @@ admin.site.register(object_creators, ObjectCreatorsAdmin)
 admin.site.register(loot_list, LootListAdmin)
 admin.site.register(common_objects, CommonObjectsAdmin)
 admin.site.register(equipment_types, EquipmentTypesAdmin)
+admin.site.register(equipment_positions, EquipmentPositionsAdmin)
 admin.site.register(equipments, EquipmentsAdmin)
+admin.site.register(character_careers, CharacterCareersAdmin)
+admin.site.register(career_equipments, CareersEquipmentsAdmin)
+admin.site.register(character_models, CharacterModelsAdmin)
 admin.site.register(world_npcs, WorldNPCAdmin)
 admin.site.register(common_characters, CommonCharactersAdmin)
 admin.site.register(skills, SkillsAdmin)
@@ -248,8 +242,7 @@ admin.site.register(dialogue_relations, DialogueRelationsAdmin)
 admin.site.register(dialogue_sentences, DialogueSentencesAdmin)
 admin.site.register(npc_dialogues, NPCDialoguesAdmin)
 admin.site.register(dialogue_quest_dependency, DialogueQuestDependencyAdmin)
-admin.site.register(character_models, CharacterModelsAdmin)
-admin.site.register(character_skills, CharacterSkillsAdmin)
+admin.site.register(default_skills, DefaultSkillsAdmin)
 admin.site.register(event_mobs, EventMobsAdmin)
 admin.site.register(event_dialogues, EventDialoguesAdmin)
 admin.site.register(localized_strings, LocalizedStringsAdmin)

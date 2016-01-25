@@ -36,74 +36,148 @@ class WorldObjectModelChoiceField(forms.ModelChoiceField):
 # Form
 #
 
+class WorldRoomsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(WorldRoomsForm, self).__init__(*args, **kwargs)
+
+        classes = typeclasses.objects.filter(category="CATE_ROOM")
+        self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
+
 
 class WorldExitsForm(forms.ModelForm):
-    ROOMS_LIST_CHOICES = []
-
     def __init__(self, *args, **kwargs):
         super(WorldExitsForm, self).__init__(*args, **kwargs)
-        if self.instance.key:
-            rooms_list = world_rooms.objects.all()
-            for room_obj in rooms_list:
-                self.ROOMS_LIST_CHOICES.append((room_obj.key, room_obj.key))
-            self.fields['location'] = forms.ChoiceField(
-                choices=self.ROOMS_LIST_CHOICES)
-            self.fields['destination'] = forms.ChoiceField(
-                choices=self.ROOMS_LIST_CHOICES)
+
+        classes = typeclasses.objects.filter(category="CATE_EXIT")
+        self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
 
-class WorldObjectForm(forms.ModelForm):
-    ROOMS_LIST_CHOICES = []
-
+class ExitLocksForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(WorldObjectForm, self).__init__(*args, **kwargs)
-        if self.instance.key:
-            rooms_list = world_rooms.objects.all()
-            for room_obj in rooms_list:
-                self.ROOMS_LIST_CHOICES.append((room_obj.key, room_obj.key))
-            self.fields['location'] = forms.ChoiceField(
-                choices=self.ROOMS_LIST_CHOICES)
+        super(ExitLocksForm, self).__init__(*args, **kwargs)
+
+        locked_exits = world_exits.objects.filter(typeclass="CLASS_LOCKED_EXIT")
+        self.fields['key'] = forms.ModelChoiceField(queryset=locked_exits)
 
 
-class WorldNPCForm(forms.ModelForm):
-    ROOMS_LIST_CHOICES = []
-    MODELS_LIST_CHOICES = []
-
+class WorldObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(WorldNPCForm, self).__init__(*args, **kwargs)
-        if self.instance.key:
-            rooms_list = world_rooms.objects.all()
-            for room_obj in rooms_list:
-                self.ROOMS_LIST_CHOICES.append((room_obj.key, room_obj.key))
-            self.fields['location'] = forms.ChoiceField(
-                choices=self.ROOMS_LIST_CHOICES)
+        super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
-            models_list = common_characters.objects.all()
-            for model_obj in models_list:
-                self.MODELS_LIST_CHOICES.append((model_obj.key, model_obj.key))
-            self.fields['model'] = forms.ChoiceField(
-                choices=self.MODELS_LIST_CHOICES)
+        classes = typeclasses.objects.filter(category="CATE_OBJECT")
+        self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
 
-class CommonCharactersForm(forms.ModelForm):
-    ROOMS_LIST_CHOICES = []
-    MODELS_LIST_CHOICES = []
-
+class ObjectCreatorsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(CommonCharactersForm, self).__init__(*args, **kwargs)
-        if self.instance.key:
-            models_list = common_characters.objects.all()
-            for model_obj in models_list:
-                self.MODELS_LIST_CHOICES.append((model_obj.key, model_obj.key))
-            self.fields['model'] = forms.ChoiceField(
-                choices=self.MODELS_LIST_CHOICES)
+        super(ObjectCreatorsForm, self).__init__(*args, **kwargs)
+
+        object_creators = world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
+        self.fields['key'] = forms.ModelChoiceField(queryset=object_creators)
 
 
-class CharacterSkillsForm(forms.ModelForm):
+class LootListForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(CharacterSkillsForm, self).__init__(*args, **kwargs)
-        if self.instance.character:
-            self.fields['skill'] = SkillsModelChoiceField(queryset=skills.objects.all())
+        super(LootListForm, self).__init__(*args, **kwargs)
+
+        # providers
+        choices = [("", "---------")]
+
+        object_creators = world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
+        choices.extend([(obj.key, obj.key) for obj in object_creators])
+
+        npcs = world_npcs.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in npcs])
+
+        characters = common_characters.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in characters])
+
+        self.fields['provider'] = forms.ChoiceField(choices=choices)
+
+        # available objects
+        choices = [("", "---------")]
+
+        objects = common_objects.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in objects])
+
+        self.fields['object'] = forms.ModelChoiceField(queryset=objects)
+
+
+class CommonObjectsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CommonObjectsForm, self).__init__(*args, **kwargs)
+
+        classes = typeclasses.objects.filter(category="CATE_OBJECT")
+        self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
+
+
+class CharacterForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CharacterForm, self).__init__(*args, **kwargs)
+
+        classes = typeclasses.objects.filter(category="CATE_CHARACTER")
+        self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
+
+        # models
+        choices = [("", "---------")]
+
+        models = character_models.objects.all()
+        models = set([obj.key for obj in models])
+        choices.extend([(model, model) for model in models])
+
+        self.fields['model'] = forms.ChoiceField(choices=choices)
+
+    def clean(self):
+        "Validate model and level's value."
+        cleaned_data = super(CharacterForm, self).clean()
+        model = cleaned_data.get('model')
+        level = cleaned_data.get('level')
+        try:
+            character_models.objects.get(key=model, level=level)
+        except Exception, e:
+            message = "Can not get this level's data."
+            levels = character_models.objects.filter(key=model)
+            available = [str(level.level) for level in levels]
+            if len(available) == 1:
+                message += " Available level: " + available[0]
+            elif len(available) > 1:
+                message += " Available levels: " + ", ".join(available)
+            self._errors['level'] = self.error_class([message])
+            return
+
+        return cleaned_data
+
+
+class SkillsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SkillsForm, self).__init__(*args, **kwargs)
+
+        classes = typeclasses.objects.filter(category="CATE_SKILL")
+        self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
+
+
+class DefaultSkillsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(DefaultSkillsForm, self).__init__(*args, **kwargs)
+
+        # all characters
+        choices = [("", "---------")]
+
+        npcs = world_npcs.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in npcs])
+
+        characters = common_characters.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in characters])
+
+        self.fields['character'] = forms.ChoiceField(choices=choices)
+
+
+class QuestsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(QuestsForm, self).__init__(*args, **kwargs)
+
+        classes = typeclasses.objects.filter(category="CATE_QUEST")
+        self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
 
 class DialogueQuestDependencyForm(forms.ModelForm):
@@ -163,46 +237,6 @@ class NPCDialoguesForm(forms.ModelForm):
         if self.instance.npc:
             self.fields['npc'] = NPCModelChoiceField(queryset=world_npcs.objects.all())
             self.fields['dialogue'] = DialogueModelChoiceField(queryset=dialogues.objects.all())
-
-
-class ExitLocksForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ExitLocksForm, self).__init__(*args, **kwargs)
-
-        locked_exits = world_exits.objects.filter(typeclass="CLASS_LOCKED_EXIT")
-        self.fields['key'] = forms.ModelChoiceField(queryset=locked_exits)
-
-
-class ObjectCreatorsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ObjectCreatorsForm, self).__init__(*args, **kwargs)
-
-        object_creators = world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
-        self.fields['key'] = forms.ModelChoiceField(queryset=object_creators)
-
-
-class LootListForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(LootListForm, self).__init__(*args, **kwargs)
-
-        choices = [("", "---------")]
-
-        object_creators = world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
-        choices.extend([(obj.key, obj.key) for obj in object_creators])
-
-        npcs = world_npcs.objects.all()
-        choices.extend([(obj.key, obj.key) for obj in npcs])
-
-        characters = common_characters.objects.all()
-        choices.extend([(obj.key, obj.key) for obj in characters])
-
-        self.fields['provider'] = forms.ChoiceField(choices=choices)
-
-        objects = common_objects.objects.all()
-        self.fields['object'] = forms.ModelChoiceField(queryset=objects)
-
-        quests = world_objects.objects.filter(typeclass="CLASS_QUEST")
-        self.fields['quest'] = forms.ModelChoiceField(queryset=quests)
 
 
 class QuestObjectivesForm(forms.ModelForm):

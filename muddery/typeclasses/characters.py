@@ -237,7 +237,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         
         # default skills
         skill_records = []
-        model_skills = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_SKILLS)
+        model_skills = get_model(settings.WORLD_DATA_APP, settings.DEFAULT_SKILLS)
         if model_skills:
             # Get records.
             model_name = getattr(self.dfield, "model", None)

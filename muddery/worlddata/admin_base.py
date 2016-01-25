@@ -6,10 +6,17 @@ from muddery.worlddata.form_base import *
 # Register your models here.
 
 
+class ClassCategoriesAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'name',
+                    'desc')
+
+
 class TypeclassesAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
                     'path',
+                    'category',
                     'desc')
 
 
@@ -97,6 +104,28 @@ class EquipmentsAdmin(admin.ModelAdmin):
                     'defence')
 
 
+class CharacterCareersAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'name',
+                    'desc')
+
+
+class CareersEquipmentsAdmin(admin.ModelAdmin):
+    list_display = ('career',
+                    'equipment')
+
+
+class CharacterModelsAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'level',
+                    'max_exp',
+                    'max_hp',
+                    'max_mp',
+                    'attack',
+                    'defence',
+                    'give_exp')
+
+
 class WorldNPCAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
@@ -104,8 +133,8 @@ class WorldNPCAdmin(admin.ModelAdmin):
                     'desc',
                     'location',
                     'model',
+                    'level',
                     'condition')
-    form = WorldNPCForm
 
 
 class CommonCharactersAdmin(admin.ModelAdmin):
@@ -113,8 +142,8 @@ class CommonCharactersAdmin(admin.ModelAdmin):
                     'name',
                     'typeclass',
                     'desc',
-                    'model')
-    form = CommonCharactersForm
+                    'model',
+                    'level')
 
 
 class SkillsAdmin(admin.ModelAdmin):
@@ -129,13 +158,24 @@ class SkillsAdmin(admin.ModelAdmin):
                     'effect')
 
 
+class DefaultSkillsAdmin(admin.ModelAdmin):
+    list_display = ('character',
+                    'skill')
+
+
+class QuestObjectiveTypesAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'id',
+                    'name',
+                    'desc')
+
+
 class QuestsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
                     'typeclass',
                     'desc',
-                    'condition',
-                    'action')
+                    'condition')
 
 
 class QuestObjectivesAdmin(admin.ModelAdmin):
@@ -229,26 +269,6 @@ class DialogueQuestDependencyAdmin(admin.ModelAdmin):
     def get_dependency(self, obj):
         return obj.dependency.key
     form = DialogueQuestDependencyForm
-
-
-class CharacterModelsAdmin(admin.ModelAdmin):
-    list_display = ('character',
-                    'level',
-                    'max_exp',
-                    'max_hp',
-                    'max_mp',
-                    'attack',
-                    'defence')
-
-
-class CharacterSkillsAdmin(admin.ModelAdmin):
-    list_display = ('character',
-                    'get_skill')
-
-    def get_skill(self, obj):
-        return obj.skill.key
-
-    form = CharacterSkillsForm
 
 
 class EventMobsAdmin(admin.ModelAdmin):
