@@ -1,6 +1,17 @@
 from django.db import models
 from muddery.worlddata import model_base
 
+
+# ------------------------------------------------------------
+#
+# all class's categories
+#
+# ------------------------------------------------------------
+class class_categories(model_base.class_categories):
+    "all class's categories"
+    pass
+
+
 # ------------------------------------------------------------
 #
 # store all typeclasses
@@ -132,6 +143,16 @@ class career_equipments(model_base.career_equipments):
 
 #------------------------------------------------------------
 #
+# character levels
+#
+#------------------------------------------------------------
+class character_models(model_base.character_models):
+    "Store all character level informations."
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all npcs
 #
 #------------------------------------------------------------
@@ -157,6 +178,26 @@ class common_characters(model_base.common_characters):
 #------------------------------------------------------------
 class skills(model_base.skills):
     "Store all skills."
+    pass
+
+
+#------------------------------------------------------------
+#
+# character skills
+#
+#------------------------------------------------------------
+class default_skills(model_base.default_skills):
+    "Store all character skill informations."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# quest objective's type
+#
+# ------------------------------------------------------------
+class quest_objective_types(model_base.quest_objective_types):
+    "quest objective's type"
     pass
 
 
@@ -247,26 +288,6 @@ class npc_dialogues(model_base.npc_dialogues):
 #------------------------------------------------------------
 class dialogue_quest_dependency(model_base.dialogue_quest_dependency):
     "Store dialogue quest dependency."
-    pass
-
-
-#------------------------------------------------------------
-#
-# character levels
-#
-#------------------------------------------------------------
-class character_models(model_base.character_models):
-    "Store all character level informations."
-    pass
-
-
-#------------------------------------------------------------
-#
-# character skills
-#
-#------------------------------------------------------------
-class character_skills(model_base.character_skills):
-    "Store all character skill informations."
     pass
 
 

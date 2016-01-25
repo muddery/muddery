@@ -160,7 +160,7 @@ OTHER_DATA_MODELS = (OBJECT_CREATORS,
                      DIALOGUE_QUEST_DEPENDENCY,
                      EQUIPMENT_TYPES,
                      CHARACTER_MODELS,
-                     CHARACTER_SKILLS)
+                     DEFAULT_SKILLS)
 
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 
