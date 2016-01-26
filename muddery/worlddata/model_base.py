@@ -661,7 +661,7 @@ class quest_objective_types(models.Model):
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
 
     # type's id, must be the values in utils/defines.py
-    id = models.IntegerField()
+    type_id = models.IntegerField()
 
     # the readable name of the type
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -715,15 +715,45 @@ class quest_objectives(models.Model):
 
 # ------------------------------------------------------------
 #
-# store quest dependency
+# quest dependency's type
 #
 # ------------------------------------------------------------
-class quest_dependency(models.Model):
+class quest_dependency_types(models.Model):
+    "quest dependency's type"
+
+    # dependency's key
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # dependency's id, must be the values in utils/defines.py
+    type_id = models.IntegerField()
+
+    # the readable name of the dependency
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+
+    # dependency's description (optional)
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Quest dependency's Type"
+        verbose_name_plural = "Quest dependency's Types"
+
+    def __unicode__(self):
+        return self.name
+
+
+# ------------------------------------------------------------
+#
+# store quest dependencies
+#
+# ------------------------------------------------------------
+class quest_dependencies(models.Model):
     "Store quest dependency."
 
     quest = models.ForeignKey("quests", db_index=True)
     dependency = models.ForeignKey("quests")
-    type = models.IntegerField()
+    type = models.ForeignKey("quest_dependency_types")
 
     class Meta:
         "Define Django meta options"

@@ -1,0 +1,5 @@
+quest,dependency,type
+quest_find_guardhouse_key,quest_find_survivor,DPD_COMPLETED
+quest_find_binder,quest_find_guardhouse_key,DPD_COMPLETED
+quest_find_screws,quest_find_binder,DPD_COMPLETED
+quest_kill_robots,quest_find_screws,DPD_COMPLETED

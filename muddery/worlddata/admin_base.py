@@ -163,13 +163,6 @@ class DefaultSkillsAdmin(admin.ModelAdmin):
                     'skill')
 
 
-class QuestObjectiveTypesAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'id',
-                    'name',
-                    'desc')
-
-
 class QuestsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
@@ -178,28 +171,33 @@ class QuestsAdmin(admin.ModelAdmin):
                     'condition')
 
 
+class QuestObjectiveTypesAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'type_id',
+                    'name',
+                    'desc')
+
+
 class QuestObjectivesAdmin(admin.ModelAdmin):
-    list_display = ('get_quest',
+    list_display = ('quest',
                     'ordinal',
                     'type',
                     'object',
                     'number',
                     'desc')
-    def get_quest(self, obj):
-        return obj.quest.key
-    form = QuestObjectivesForm
 
 
-class QuestDependencyAdmin(admin.ModelAdmin):
-    list_display = ('get_quest',
-                    'get_dependency',
+class QuestDependencyTypesAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'type_id',
+                    'name',
+                    'desc')
+
+
+class QuestDependenciesAdmin(admin.ModelAdmin):
+    list_display = ('quest',
+                    'dependency',
                     'type')
-    def get_quest(self, obj):
-        return obj.quest.key
-    def get_dependency(self, obj):
-        if obj.dependency:
-            return obj.dependency.key
-    form = QuestDependencyForm
 
 
 class EventDataAdmin(admin.ModelAdmin):

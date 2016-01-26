@@ -193,8 +193,10 @@ OBJECT_CREATORS = "object_creators"
 LOOT_LIST = "loot_list"
 
 # quest data
+QUEST_OBJECTIVE_TYPES = "quest_objective_types"
 QUEST_OBJECTIVES = "quest_objectives"
-QUEST_DEPENDENCY = "quest_dependency"
+QUEST_DEPENDENCY_TYPES = "quest_dependency_types"
+QUEST_DEPENDENCIES = "quest_dependencies"
 
 # event data
 EVENT_DATA = "event_data"
@@ -218,8 +220,10 @@ DEFAULT_SKILLS = "default_skills"
 # all other data models
 OTHER_DATA_MODELS = (OBJECT_CREATORS,
                      LOOT_LIST,
+                     QUEST_OBJECTIVE_TYPES,
                      QUEST_OBJECTIVES,
-                     QUEST_DEPENDENCY,
+                     QUEST_DEPENDENCY_TYPES,
+                     QUEST_DEPENDENCIES,
                      EVENT_DATA,
                      EVENT_MOBS,
                      EVENT_DIALOGUES,
