@@ -191,16 +191,6 @@ class default_skills(model_base.default_skills):
     pass
 
 
-# ------------------------------------------------------------
-#
-# quest objective's type
-#
-# ------------------------------------------------------------
-class quest_objective_types(model_base.quest_objective_types):
-    "quest objective's type"
-    pass
-
-
 #------------------------------------------------------------
 #
 # store all quests
@@ -208,6 +198,16 @@ class quest_objective_types(model_base.quest_objective_types):
 #------------------------------------------------------------
 class quests(model_base.quests):
     "Store all dramas."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# quest objective's type
+#
+# ------------------------------------------------------------
+class quest_objective_types(model_base.quest_objective_types):
+    "quest objective's type"
     pass
 
 
@@ -223,10 +223,20 @@ class quest_objectives(model_base.quest_objectives):
 
 #------------------------------------------------------------
 #
-# store quest dependency
+# store quest dependency types
 #
 #------------------------------------------------------------
-class quest_dependency(model_base.quest_dependency):
+class quest_dependency_types(model_base.quest_dependency_types):
+    "Store quest dependency."
+    pass
+
+
+#------------------------------------------------------------
+#
+# store quest dependencies
+#
+#------------------------------------------------------------
+class quest_dependencies(model_base.quest_dependencies):
     "Store quest dependency."
     pass
 

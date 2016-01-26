@@ -84,36 +84,24 @@ class DefaultSkillsAdmin(admin_base.DefaultSkillsAdmin):
     form = DefaultSkillsForm
 
 
-class QuestObjectiveTypesAdmin(admin_base.QuestObjectiveTypesAdmin):
-    pass
-
-
 class QuestsAdmin(admin_base.QuestsAdmin):
     form = QuestsForm
 
 
-class QuestObjectivesAdmin(admin.ModelAdmin):
-    list_display = ('get_quest',
-                    'ordinal',
-                    'type',
-                    'object',
-                    'number',
-                    'desc')
-    def get_quest(self, obj):
-        return obj.quest.key
-    form = QuestObjectivesForm
+class QuestObjectiveTypesAdmin(admin_base.QuestObjectiveTypesAdmin):
+    pass
 
 
-class QuestDependencyAdmin(admin.ModelAdmin):
-    list_display = ('get_quest',
-                    'get_dependency',
-                    'type')
-    def get_quest(self, obj):
-        return obj.quest.key
-    def get_dependency(self, obj):
-        if obj.dependency:
-            return obj.dependency.key
-    form = QuestDependencyForm
+class QuestObjectivesAdmin(admin_base.QuestObjectivesAdmin):
+    pass
+
+
+class QuestDependencyTypesAdmin(admin_base.QuestDependencyTypesAdmin):
+    pass
+
+
+class QuestDependenciesAdmin(admin_base.QuestDependenciesAdmin):
+    pass
 
 
 class EventDataAdmin(admin.ModelAdmin):
@@ -233,16 +221,18 @@ admin.site.register(character_models, CharacterModelsAdmin)
 admin.site.register(world_npcs, WorldNPCAdmin)
 admin.site.register(common_characters, CommonCharactersAdmin)
 admin.site.register(skills, SkillsAdmin)
+admin.site.register(default_skills, DefaultSkillsAdmin)
 admin.site.register(quests, QuestsAdmin)
+admin.site.register(quest_objective_types, QuestObjectiveTypesAdmin)
 admin.site.register(quest_objectives, QuestObjectivesAdmin)
-admin.site.register(quest_dependency, QuestDependencyAdmin)
+admin.site.register(quest_dependency_types, QuestDependencyTypesAdmin)
+admin.site.register(quest_dependencies, QuestDependenciesAdmin)
 admin.site.register(event_data, EventDataAdmin)
 admin.site.register(dialogues, DialoguesAdmin)
 admin.site.register(dialogue_relations, DialogueRelationsAdmin)
 admin.site.register(dialogue_sentences, DialogueSentencesAdmin)
 admin.site.register(npc_dialogues, NPCDialoguesAdmin)
 admin.site.register(dialogue_quest_dependency, DialogueQuestDependencyAdmin)
-admin.site.register(default_skills, DefaultSkillsAdmin)
 admin.site.register(event_mobs, EventMobsAdmin)
 admin.site.register(event_dialogues, EventDialoguesAdmin)
 admin.site.register(localized_strings, LocalizedStringsAdmin)
