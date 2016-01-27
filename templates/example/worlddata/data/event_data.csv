@@ -1,3 +1,3 @@
-key,trigger,object,type,condition
-event_dialogue,1,room_cellar,2,
-event_fight,1,room_dungeon,1
+key,type,trigger_type,trigger_obj,condition
+event_dialogue,EVENT_DIALOGUE,EVENT_TRIGGER_ARRIVE,room_cellar,
+event_fight,EVENT_ATTACK,EVENT_TRIGGER_ARRIVE,room_dungeon,

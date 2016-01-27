@@ -60,11 +60,10 @@ class DialogueHandler(object):
             nexts = model_nexts.objects.filter(dialogue=dialogue)
 
         dependencies = []
-        model_dependencies = get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_QUEST_DEPENDENCY)
+        model_dependencies = get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_QUEST_DEPENDENCIES)
         if model_dependencies:
             # Get records.
             dependencies = model_dependencies.objects.filter(dialogue=dialogue)
-
 
         # Add db fields to data object.
         data = {}
@@ -74,7 +73,7 @@ class DialogueHandler(object):
         data["dependencies"] = []
         for dependency in dependencies:
             data["dependencies"].append({"quest": dependency.dependency_id,
-                                         "type": dependency.type})
+                                         "type": dependency.type.type_id})
 
         data["sentences"] = []
         count = 0

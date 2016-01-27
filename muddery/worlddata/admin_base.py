@@ -200,76 +200,61 @@ class QuestDependenciesAdmin(admin.ModelAdmin):
                     'type')
 
 
+class EventTypesAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'type_id',
+                    'name',
+                    'desc')
+
+
+class EventTriggerTypesAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'type_id',
+                    'name',
+                    'desc')
+
+
 class EventDataAdmin(admin.ModelAdmin):
     list_display = ('key',
-                    'object',
                     'type',
-                    'trigger',
+                    'trigger_type',
+                    'trigger_obj',
                     'condition')
 
 
 class DialoguesAdmin(admin.ModelAdmin):
     list_display = ('key',
-                    'condition',
-                    'get_have_quest')
-    def get_have_quest(self, obj):
-        if obj.have_quest:
-            return obj.have_quest.key
-    form = DialoguesForm
+                    'condition')
+
+
+class DialogueQuestDependenciesAdmin(admin.ModelAdmin):
+    list_display = ('dialogue',
+                    'dependency',
+                    'type')
 
 
 class DialogueRelationsAdmin(admin.ModelAdmin):
-    list_display = ('get_dialogue',
-                    'get_next')
-    def get_dialogue(self, obj):
-        return obj.dialogue.key
-    def get_next(self, obj):
-        return obj.next.key
-    form = DialogueRelationsForm
+    list_display = ('dialogue',
+                    'next')
 
 
 class DialogueSentencesAdmin(admin.ModelAdmin):
-    list_display = ('get_dialogue',
+    list_display = ('dialogue',
                     'ordinal',
                     'speaker',
                     'content',
                     'action',
-                    'get_provide_quest',
-                    'get_complete_quest')
-    def get_dialogue(self, obj):
-        return obj.dialogue.key
-    def get_provide_quest(self, obj):
-        if obj.provide_quest:
-            return obj.provide_quest.key
-    def get_complete_quest(self, obj):
-        if obj.complete_quest:
-            return obj.complete_quest.key
-    form = DialogueSentencesForm
+                    'provide_quest',
+                    'complete_quest')
 
 
 class NPCDialoguesAdmin(admin.ModelAdmin):
-    list_display = ('get_npc',
-                    'get_dialogue',
+    list_display = ('npc',
+                    'dialogue',
                     'default')
-    def get_npc(self, obj):
-        return obj.npc.key
-    def get_dialogue(self, obj):
-        return obj.dialogue.key
-    form = NPCDialoguesForm
 
 
-class DialogueQuestDependencyAdmin(admin.ModelAdmin):
-    list_display = ('get_dialogue',
-                    'get_dependency',
-                    'type')
-    def get_dialogue(self, obj):
-        return obj.dialogue.key
-    def get_dependency(self, obj):
-        return obj.dependency.key
-    form = DialogueQuestDependencyForm
-
-
-class EventMobsAdmin(admin.ModelAdmin):
+class EventAttacksAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'mob',
                     'level',
@@ -281,7 +266,6 @@ class EventDialoguesAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'dialogue',
                     'npc')
-    form = EventDialoguesForm
 
 
 class LocalizedStringsAdmin(admin.ModelAdmin):

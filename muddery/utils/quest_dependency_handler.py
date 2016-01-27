@@ -46,7 +46,7 @@ class QuestDependencyHandler(object):
         
         # Get db model
         dependencies = []
-        model_dependencies = get_model(settings.WORLD_DATA_APP, settings.QUEST_DEPENDENCY)
+        model_dependencies = get_model(settings.WORLD_DATA_APP, settings.QUEST_DEPENDENCIES)
         if model_dependencies:
             # Get records.
             dependencies = model_dependencies.objects.filter(quest=quest)
@@ -56,7 +56,7 @@ class QuestDependencyHandler(object):
         data = []
         for dependency in dependencies:
             data.append({"quest": dependency.dependency_id,
-                         "type": dependency.type})
+                         "type": dependency.type.type_id})
 
         # Add to cache.
         self.quest_depencences[quest] = data

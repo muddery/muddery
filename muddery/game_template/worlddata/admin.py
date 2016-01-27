@@ -104,103 +104,48 @@ class QuestDependenciesAdmin(admin_base.QuestDependenciesAdmin):
     pass
 
 
-class EventDataAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'object',
-                    'type',
-                    'trigger',
-                    'condition')
+class EventTypesAdmin(admin_base.EventTypesAdmin):
+    pass
 
 
-class DialoguesAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'condition',
-                    'get_have_quest')
-    def get_have_quest(self, obj):
-        if obj.have_quest:
-            return obj.have_quest.key
-    form = DialoguesForm
+class EventTriggerTypesAdmin(admin_base.EventTriggerTypesAdmin):
+    pass
 
 
-class DialogueRelationsAdmin(admin.ModelAdmin):
-    list_display = ('get_dialogue',
-                    'get_next')
-    def get_dialogue(self, obj):
-        return obj.dialogue.key
-    def get_next(self, obj):
-        return obj.next.key
-    form = DialogueRelationsForm
+class EventDataAdmin(admin_base.EventDataAdmin):
+    pass
 
 
-class DialogueSentencesAdmin(admin.ModelAdmin):
-    list_display = ('get_dialogue',
-                    'ordinal',
-                    'speaker',
-                    'content',
-                    'action',
-                    'get_provide_quest',
-                    'get_complete_quest')
-    def get_dialogue(self, obj):
-        return obj.dialogue.key
-    def get_provide_quest(self, obj):
-        if obj.provide_quest:
-            return obj.provide_quest.key
-    def get_complete_quest(self, obj):
-        if obj.complete_quest:
-            return obj.complete_quest.key
-    form = DialogueSentencesForm
+class DialoguesAdmin(admin_base.DialoguesAdmin):
+    pass
 
 
-class NPCDialoguesAdmin(admin.ModelAdmin):
-    list_display = ('get_npc',
-                    'get_dialogue',
-                    'default')
-    def get_npc(self, obj):
-        return obj.npc.key
-    def get_dialogue(self, obj):
-        return obj.dialogue.key
-    form = NPCDialoguesForm
+class DialogueQuestDependenciesAdmin(admin_base.DialogueQuestDependenciesAdmin):
+    pass
 
 
-class DialogueQuestDependencyAdmin(admin.ModelAdmin):
-    list_display = ('get_dialogue',
-                    'get_dependency',
-                    'type')
-    def get_dialogue(self, obj):
-        return obj.dialogue.key
-    def get_dependency(self, obj):
-        return obj.dependency.key
-    form = DialogueQuestDependencyForm
+class DialogueRelationsAdmin(admin_base.DialogueRelationsAdmin):
+    pass
 
 
-class CharacterModelsAdmin(admin.ModelAdmin):
-    list_display = ('character',
-                    'level',
-                    'max_exp',
-                    'max_hp',
-                    'max_mp',
-                    'attack',
-                    'defence')
+class DialogueSentencesAdmin(admin_base.DialogueSentencesAdmin):
+    pass
 
 
-class EventMobsAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'mob',
-                    'level',
-                    'odds',
-                    'desc')
+class NPCDialoguesAdmin(admin_base.NPCDialoguesAdmin):
+    pass
 
 
-class EventDialoguesAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'dialogue',
-                    'npc')
-    form = EventDialoguesForm
+class EventAttacksAdmin(admin_base.EventAttacksAdmin):
+    pass
 
 
-class LocalizedStringsAdmin(admin.ModelAdmin):
-    list_display = ('origin',
-                    'local')
+class EventDialoguesAdmin(admin_base.EventDialoguesAdmin):
+    pass
+
+
+class LocalizedStringsAdmin(admin_base.LocalizedStringsAdmin):
+    pass
 
 
 admin.site.register(class_categories, ClassCategoriesAdmin)
@@ -227,13 +172,15 @@ admin.site.register(quest_objective_types, QuestObjectiveTypesAdmin)
 admin.site.register(quest_objectives, QuestObjectivesAdmin)
 admin.site.register(quest_dependency_types, QuestDependencyTypesAdmin)
 admin.site.register(quest_dependencies, QuestDependenciesAdmin)
+admin.site.register(event_types, EventTypesAdmin)
+admin.site.register(event_trigger_types, EventTriggerTypesAdmin)
 admin.site.register(event_data, EventDataAdmin)
 admin.site.register(dialogues, DialoguesAdmin)
+admin.site.register(dialogue_quest_dependencies, DialogueQuestDependenciesAdmin)
 admin.site.register(dialogue_relations, DialogueRelationsAdmin)
 admin.site.register(dialogue_sentences, DialogueSentencesAdmin)
 admin.site.register(npc_dialogues, NPCDialoguesAdmin)
-admin.site.register(dialogue_quest_dependency, DialogueQuestDependencyAdmin)
-admin.site.register(event_mobs, EventMobsAdmin)
+admin.site.register(event_attacks, EventAttacksAdmin)
 admin.site.register(event_dialogues, EventDialoguesAdmin)
 admin.site.register(localized_strings, LocalizedStringsAdmin)
 

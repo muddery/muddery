@@ -1,7 +1,1 @@
-key,name,path,desc
-CLASS_PLAYER,Player,typeclasses.player_characters.PlayerCharacter,Player
-CLASS_ROOM,Common Room,typeclasses.rooms.Room,Room
-CLASS_EXIT,Common Exit,typeclasses.exits.Exit,Exit
-CLASS_LOCKED_EXIT,Locked Exit,typeclasses.exits.LockedExit,Locked Exit
-CLASS_OBJECT,Common Object,typeclasses.objects.Object,Common Object
-CLASS_OBJECT_CREATOR,Object Creator,typeclasses.object_creators.ObjectCreator,Object Creator
+key,name,path,category,desc

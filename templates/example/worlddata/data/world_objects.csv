@@ -1,6 +1,6 @@
 key,name,typeclass,desc,location,condition
-object_box,BOX,typeclasses.objects.Object,An empty box.,room_cellar,
-creator_box,BOX,typeclasses.object_creators.ObjectCreator,A small box.,room_house,
-creator_basket,BASKET,typeclasses.object_creators.ObjectCreator,A basket of apples.,room_house,
-creator_bag,BAG,typeclasses.object_creators.ObjectCreator,A bag of potatoes.,room_cellar,
-creator_rack,RACK,typeclasses.object_creators.ObjectCreator,This is a rack.,room_dungeon,
+object_box,BOX,CLASS_WORLD_OBJECT,An empty box.,room_cellar,
+creator_box,BOX,CLASS_OBJECT_CREATOR,A small box.,room_house,
+creator_basket,BASKET,CLASS_OBJECT_CREATOR,A basket of apples.,room_house,
+creator_bag,BAG,CLASS_OBJECT_CREATOR,A bag of potatoes.,room_cellar,
+creator_rack,RACK,CLASS_OBJECT_CREATOR,This is a rack.,room_dungeon,

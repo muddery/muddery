@@ -107,6 +107,8 @@ STATIC_ROOT = os.path.join(GAME_DIR, "web", "static")
 
 # Directories from which static files will be gathered from.
 STATICFILES_DIRS = (
+    os.path.join(GAME_DIR, "worlddata", "editor", "static"),
+    os.path.join(MUDDERY_DIR, "worlddata", "editor", "static"),
     os.path.join(GAME_DIR, "web", "static_overrides"),
     os.path.join(MUDDERY_DIR, "web", "webclient", WEBCLIENT_TEMPLATE, "static"),
     os.path.join(MUDDERY_DIR, "web", "static"),
@@ -114,6 +116,8 @@ STATICFILES_DIRS = (
 
 # We setup the location of the website template as well as the admin site.
 TEMPLATE_DIRS = (
+    os.path.join(GAME_DIR, "worlddata", "editor", "templates"),
+    os.path.join(MUDDERY_DIR, "worlddata", "editor", "templates"),
     os.path.join(GAME_DIR, "web", "template_overrides"),
     os.path.join(MUDDERY_DIR, "web", "webclient", WEBCLIENT_TEMPLATE),
     os.path.join(MUDDERY_DIR, "web", "templates"),
@@ -136,9 +140,6 @@ WORLD_DATA_FILE_ENCODING = "utf8"
 # add data app
 INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 
-# common objects
-COMMON_OBJECTS += ("foods",)
-
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_EXITS,
@@ -148,19 +149,18 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 # all other data models
 OTHER_DATA_MODELS = (OBJECT_CREATORS,
                      LOOT_LIST,
+                     QUEST_OBJECTIVE_TYPES,
                      QUEST_OBJECTIVES,
-                     QUEST_DEPENDENCY,
+                     QUEST_DEPENDENCY_TYPES,
+                     QUEST_DEPENDENCIES,
                      EVENT_DATA,
-                     EVENT_MOBS,
-                     EVENT_DIALOGUES,
                      DIALOGUES,
-                     DIALOGUE_SENTENCES,
+                     DIALOGUE_QUEST_DEPENDENCIES,
                      DIALOGUE_RELATIONS,
+                     DIALOGUE_SENTENCES,
                      NPC_DIALOGUES,
-                     DIALOGUE_QUEST_DEPENDENCY,
-                     EQUIPMENT_TYPES,
                      CHARACTER_MODELS,
-                     DEFAULT_SKILLS)
+                     DEFAULT_SKILLS) + EVENT_ADDITIONAL_DATA
 
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 

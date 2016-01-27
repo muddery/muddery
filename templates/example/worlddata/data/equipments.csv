@@ -1,3 +1,3 @@
 key,name,typeclass,desc,max_stack,unique,position,type,attack,defence
-equip_armor,ARMOR,typeclasses.common_objects.Equipment,This is an armor.,1,1,chest,plate,,10
-weapon_sword,SWORD,typeclasses.common_objects.Equipment,This is a sword.,1,1,hand,weapon,10,
+equip_armor,ARMOR,CLASS_EQUIPMENT,This is an armor.,1,1,POSITION_CHEST,EQUIP_PLATE,,10
+weapon_sword,SWORD,CLASS_EQUIPMENT,This is a sword.,1,1,POSITION_HAND,EQUIP_WEAPON,10,

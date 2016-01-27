@@ -1,2 +1,2 @@
 key,name,typeclass,desc,model
-player,玩家,typeclasses.player_characters.PlayerCharacter,这是玩家。,player
+player,玩家,CLASS_PLAYER,这是玩家。,MODEL_PLAYER

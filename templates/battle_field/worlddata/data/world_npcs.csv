@@ -1,3 +1,3 @@
-key,name,typeclass,desc,model,location,condition
-npc_teleporter,传送师,typeclasses.npcs.NPC,传送师能把你送进战场。,npc_common,room_intro,
-npc_master,技能师,typeclasses.npcs.NPC,技能师能教会你技能。,npc_common,room_intro,
+key,name,typeclass,desc,model,level,location,condition
+npc_teleporter,传送师,CLASS_COMMON_NPC,传送师能把你送进战场。,MODEL_COMMON_NPC,1,room_intro,
+npc_master,技能师,CLASS_COMMON_NPC,技能师能教会你技能。,MODEL_COMMON_NPC,1,room_intro,

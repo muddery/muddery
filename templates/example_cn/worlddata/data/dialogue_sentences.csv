@@ -28,11 +28,11 @@ dlg_colorfulworld_wu_04,2,p,"还没。",,,
 dlg_colorfulworld_wu_05,1,n,"太好了，你找到绷带了，我自己包扎一下。",,,quest_find_binder
 dlg_colorfulworld_wu_05,2,n,"谢谢你，教你一些急救技能吧！",learn_skill("skill_normal_heal"),,
 dlg_colorfulworld_wu_05,3,p,"这个技能真好！",,,
-dlg_colorfulworld_wu_06,1,n,"你再帮我找3个螺丝好吗？在机器人身上能找到螺丝。",,,
+dlg_colorfulworld_wu_06,1,n,"你再帮我找2个螺丝好吗？在机器人身上能找到螺丝。",,,
 dlg_colorfulworld_wu_06,2,p,"好的！",,quest_find_screws,
-dlg_colorfulworld_wu_07,1,n,"找到3个螺丝了吗？",,,
+dlg_colorfulworld_wu_07,1,n,"找到2个螺丝了吗？",,,
 dlg_colorfulworld_wu_07,2,p,"还没。",,,
-dlg_colorfulworld_wu_08,1,n,"太好了，你找到3个螺丝了！任务完成了！",,,quest_find_screws
+dlg_colorfulworld_wu_08,1,n,"太好了，你找到2个螺丝了！任务完成了！",,,quest_find_screws
 dlg_colorfulworld_wu_09,1,n,"外面的机器人太多了，帮我杀掉3个机器人吧。",,,
 dlg_colorfulworld_wu_09,2,p,"你的事情怎么那么多啊？",,,
 dlg_colorfulworld_wu_09,3,n,"我也不想啊，可是为了演示杀怪的任务，只能再麻烦你一次了。",,,
