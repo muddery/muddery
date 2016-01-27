@@ -56,8 +56,9 @@ class MudderyQuest(MudderyObject):
             obj_records = model_objectives.objects.filter(quest=key)
 
         for obj_record in obj_records:
+            objective_type = obj_record.type.type_id
             objective = {"ordinal": obj_record.ordinal,
-                         "type": obj_record.type,
+                         "type": objective_type,
                          "object": obj_record.object,
                          "number": obj_record.number,
                          "desc": obj_record.desc}
@@ -66,9 +67,9 @@ class MudderyQuest(MudderyObject):
             accomplished = self.db.accomplished.get(key, 0)
             if accomplished < obj_record.number:
                 if not obj_record.type in self.not_accomplished:
-                    self.not_accomplished[obj_record.type] = [obj_record.ordinal]
+                    self.not_accomplished[objective_type] = [obj_record.ordinal]
                 else:
-                    self.not_accomplished[obj_record.type].append(obj_record.ordinal)
+                    self.not_accomplished[objective_type].append(obj_record.ordinal)
 
     def get_available_commands(self, caller):
         """

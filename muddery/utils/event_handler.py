@@ -16,9 +16,29 @@ from evennia import create_script
 
 PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_EVENTS}
 
+def get_event_additional_model():
+    """
+    Set a dict of additional model names.
+    """
+    additional_model = {}
+
+    # list event's additional data's model
+    for model_name in settings.EVENT_ADDITIONAL_DATA:
+        model_data = get_model(settings.WORLD_DATA_APP, model_name)
+        if model_data:
+            # Get records.
+            for record in model_data.objects.all():
+                key = record.serializable_value("key")
+                additional_model[key] = model_name
+
+    return additional_model
+
+
 class EventHandler(object):
     """
     """
+    _additional_model = get_event_additional_model()
+
     def __init__(self, owner):
         """
         Initialize the handler.
@@ -31,23 +51,42 @@ class EventHandler(object):
         model_events = get_model(settings.WORLD_DATA_APP, settings.EVENT_DATA)
         if model_events:
             # Get records.
-            event_records = model_events.objects.filter(object=owner.get_data_key())
+            event_records = model_events.objects.filter(trigger_obj=owner.get_data_key())
 
-        for event_record in event_records:
-            if not event_record.trigger in self.events:
-                self.events[event_record.trigger] = []
+            for record in event_records:
+                event = {}
 
-            event = {"key": event_record.key,
-                     "object": event_record.object,
-                     "condition": event_record.condition}
+                # Set data.
+                event_type = record.type.type_id
+                trigger_type = record.trigger_type.type_id
 
-            if event_record.type == defines.EVENT_ATTACK:
-                self.create_event_attack(event)
-            elif event_record.type == defines.EVENT_DIALOGUE:
-                self.create_event_dialogue(event)
+                for field in record._meta.fields:
+                    event[field.name] = record.serializable_value(field.name)
+                event["type"] = event_type
 
-            self.events[event_record.trigger].append(event)
+                # Set additional data.
+                if record.key in self._additional_model:
+                    model_name = self._additional_model[record.key]
+                    model_additional = get_model(settings.WORLD_DATA_APP, model_name)
 
+                    try:
+                        add_record = model_additional.objects.get(key = record.key)
+                        # Set data.
+                        for add_field in add_record._meta.fields:
+                            event[add_field.name] = add_record.serializable_value(add_field.name)
+                    except Exception, e:
+                        pass
+
+                """
+                if event_record.type == defines.EVENT_ATTACK:
+                    self.create_event_attack(event)
+                elif event_record.type == defines.EVENT_DIALOGUE:
+                    self.create_event_dialogue(event)
+                """
+
+                if not trigger_type in self.events:
+                    self.events[trigger_type] = []
+                self.events[trigger_type].append(event)
 
     def can_bypass(self, character):
         """
@@ -72,6 +111,16 @@ class EventHandler(object):
     #
     #########################
 
+    def get_function(self, event_type):
+        """
+        Get the function of the event type.
+        """
+        if event_type == defines.EVENT_ATTACK:
+            return self.do_attack
+        elif event_type == defines.EVENT_DIALOGUE:
+            return self.do_dialogue
+
+
     def at_character_move_in(self, character):
         """
         Called when a character moves in the event handler's owner, usually a room.
@@ -87,7 +136,9 @@ class EventHandler(object):
                 # If has arrive event.
                 if SCRIPT_HANDLER.match_condition(character, self.owner, event["condition"]):
                     # If matches the condition.
-                    event["function"](event["data"], character)
+                    function = self.get_function(event["type"])
+                    if function:
+                        function(event, character)
 
 
     def at_character_move_out(self, character):
@@ -114,7 +165,9 @@ class EventHandler(object):
                 #If has die event.
                 if SCRIPT_HANDLER.match_condition(owner, None, event["condition"]):
                     # If matches the condition, run event on the owner.
-                    event["function"](event["data"], owner)
+                    function = self.get_function(event["type"])
+                    if function:
+                        function(event, self)
 
 
     def at_character_kill(self, killers):
@@ -130,7 +183,9 @@ class EventHandler(object):
                         continue
 
                     if SCRIPT_HANDLER.match_condition(killer, self.owner, event["condition"]):
-                        event["function"](event["data"], killer)
+                        function = self.get_function(event["type"])
+                        if function:
+                            function(event, killer)
 
 
     def at_character_traverse(self, character):
@@ -151,7 +206,9 @@ class EventHandler(object):
                 if SCRIPT_HANDLER.match_condition(character, self.owner, event["condition"]):
                     # If matches the condition.
                     triggered = True
-                    event["function"](event["data"], character)
+                    function = self.get_function(event["type"])
+                    if function:
+                        function(event, character)
 
         return not triggered
 
@@ -187,20 +244,17 @@ class EventHandler(object):
         return event
 
 
-    def do_attack(self, data, character):
+    def do_attack(self, event, character):
         """
         Start a combat.
         """
         rand = random.random()
-        for item in data:
-            # If matches the odds, put the character in combat.
-            # There can be several mods with different odds.
-            if rand >= item["odds"]:
-                rand -= item["odds"]
-                continue
 
+        # If matches the odds, put the character in combat.
+        # There can be several mods with different odds.
+        if rand <= event["odds"]:
             # Attack mob.
-            character.attack_clone_target(item["mob"], item["level"], item["desc"])
+            character.attack_clone_target(event["mob"], event["level"], event["desc"])
 
 
     def create_event_dialogue(self, event):
@@ -224,17 +278,17 @@ class EventHandler(object):
         return event
 
 
-    def do_dialogue(self, data, character):
+    def do_dialogue(self, event, character):
         """
         Start a dialogue.
         """
         # Get sentence.
-        sentence = DIALOGUE_HANDLER.get_sentence(data["dialogue"], 0)
+        sentence = DIALOGUE_HANDLER.get_sentence(event["dialogue"], 0)
 
         if sentence:
             npc = None
-            if data["npc"]:
-                npc = utils.search_obj_data_key(data["npc"])
+            if event["npc"]:
+                npc = utils.search_obj_data_key(event["npc"])
                 if npc:
                     npc = npc[0]
 

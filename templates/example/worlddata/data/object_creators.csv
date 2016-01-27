@@ -1,4 +1,4 @@
-key,verb,loot_condition
+key,loot_verb,loot_condition
 creator_box,SEARCH,
 creator_basket,SEARCH,is_quest_in_progress("quest_apple")
 creator_bag,SEARCH,is_quest_in_progress("quest_potato")

@@ -118,10 +118,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             loot_records = model_obj.objects.filter(provider=self.get_data_key())
 
             for loot_record in loot_records:
-                loot_object = {"object": loot_record.object,
+                loot_object = {"object": loot_record.serializable_value("object"),
                                "number": loot_record.number,
                                "odds": loot_record.odds,
-                               "quest": loot_record.quest,
+                               "quest": loot_record.serializable_value("quest"),
                                "condition": loot_record.condition}
                 loot_list.append(loot_object)
         except Exception, e:
@@ -171,9 +171,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         try:
             # get data from db
             model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_MODELS)
-            model_data = model_obj.objects.get(character=model_name, level=self.db.level)
+            model_data = model_obj.objects.get(key=model_name, level=self.db.level)
 
-            reserved_fields = {"id", "character", "level"}
+            reserved_fields = {"id", "key", "level"}
             for field in model_data._meta.fields:
                 if field.name in reserved_fields:
                     continue

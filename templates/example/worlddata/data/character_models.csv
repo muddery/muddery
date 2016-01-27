@@ -1,6 +1,6 @@
-character,level,max_exp,max_hp,max_mp,attack,defence
-player,1,100,100,100,10,10
-player,2,120,120,100,12,12
-player,3,150,150,100,15,15
-common_npc,1,1,1,1,1,1
-mob_rogue,1,20,20,100,5,5
+key,level,max_exp,max_hp,max_mp,attack,defence,give_exp
+MODEL_PLAYER,1,100,100,100,10,10,10
+MODEL_PLAYER,2,120,120,100,12,12,10
+MODEL_PLAYER,3,150,150,100,15,15,10
+MODEL_COMMON_NPC,1,1,1,1,1,1,10
+MODEL_MOB_ROGUE,1,20,20,100,5,5,10

@@ -1,5 +1,5 @@
 key,name,typeclass,desc,position
-room_house,HOUSE,typeclasses.rooms.Room,This is a house.,
-room_cellar,CELLAR,typeclasses.rooms.Room,This is a cellar.,
-room_street,STREET,typeclasses.rooms.Room,This is a street.,
-room_dungeon,DUNGEON,typeclasses.rooms.Room,This is a dungeon.,
+room_house,HOUSE,CLASS_COMMON_ROOM,This is a house.,
+room_cellar,CELLAR,CLASS_COMMON_ROOM,This is a cellar.,
+room_street,STREET,CLASS_COMMON_ROOM,This is a street.,
+room_dungeon,DUNGEON,CLASS_COMMON_ROOM,This is a dungeon.,

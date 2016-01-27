@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Defines</h1>
+    Welcome to the World Map Page. Here, you can edit the rooms, exits and other objects whose positions are fixed.
+
+    <h2><a href="../">BACK</a></h2>
+
+    <h2><a href="{% url "admin:worlddata_class_categories_changelist" %}">Class Categories</a></h2>
+    Class's categories.
+
+    <h2><a href="{% url "admin:worlddata_typeclasses_changelist" %}">Typeclasses</a></h2>
+    All available objects types.
+
+    <h2><a href="{% url "admin:worlddata_equipment_types_changelist" %}">Equipment Types</a></h2>
+    Equipment Types.
+
+    <h2><a href="{% url "admin:worlddata_equipment_positions_changelist" %}">Equipment Positions</a></h2>
+    Equipment Positions.
+
+    <h2><a href="{% url "admin:worlddata_character_careers_changelist" %}">Character Careers</a></h2>
+    Character Careers.
+
+    <h2><a href="{% url "admin:worlddata_quest_objective_types_changelist" %}">Quest Objective Types</a></h2>
+    Quest objective's type.
+
+    <h2><a href="{% url "admin:worlddata_quest_dependency_types_changelist" %}">Quest Dependency Types</a></h2>
+    Quest's dependency types.
+
+    <h2><a href="{% url "admin:worlddata_event_types_changelist" %}">Event Types</a></h2>
+    Event's types.
+
+    <h2><a href="{% url "admin:worlddata_event_trigger_types_changelist" %}">Event Trigger Types</a></h2>
+    Event trigger types.
+
+    <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
+
+{% endblock content %}

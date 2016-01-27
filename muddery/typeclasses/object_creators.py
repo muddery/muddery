@@ -39,10 +39,10 @@ class MudderyObjectCreator(MudderyObject):
             loot_records = model_obj.objects.filter(provider=self.get_data_key())
 
             for loot_record in loot_records:
-                loot_object = {"object": loot_record.object,
+                loot_object = {"object": loot_record.serializable_value("object"),
                                "number": loot_record.number,
                                "odds": loot_record.odds,
-                               "quest": loot_record.quest,
+                               "quest": loot_record.serializable_value("quest"),
                                "condition": loot_record.condition}
                 loot_list.append(loot_object)
         except Exception, e:

@@ -688,7 +688,7 @@ class quest_objectives(models.Model):
     "Store all quest objectives."
 
     # quest's key
-    quest = models.ForeignKey("quests", db_index=True)
+    quest = models.ForeignKey("quests")
 
     # objective's ordinal
     ordinal = models.IntegerField(blank=True, default=0)
@@ -751,8 +751,13 @@ class quest_dependency_types(models.Model):
 class quest_dependencies(models.Model):
     "Store quest dependency."
 
-    quest = models.ForeignKey("quests", db_index=True)
+    # quest's key
+    quest = models.ForeignKey("quests")
+
+    # quest that dependends on
     dependency = models.ForeignKey("quests")
+
+    # dependency's type
     type = models.ForeignKey("quest_dependency_types")
 
     class Meta:
@@ -764,23 +769,95 @@ class quest_dependencies(models.Model):
 
 # ------------------------------------------------------------
 #
+# event's type
+#
+# ------------------------------------------------------------
+class event_types(models.Model):
+    "event's type"
+
+    # event's key
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # event's id, must be the values in utils/defines.py
+    type_id = models.IntegerField()
+
+    # the readable name of the event type
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+
+    # event's description (optional)
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Event's Type"
+        verbose_name_plural = "Event's Types"
+
+    def __unicode__(self):
+        return self.name
+
+
+# ------------------------------------------------------------
+#
+# event trigger's types
+#
+# ------------------------------------------------------------
+class event_trigger_types(models.Model):
+    "event trigger's type"
+
+    # type's key
+    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # type's id, must be the values in utils/defines.py
+    type_id = models.IntegerField()
+
+    # the readable name of the event trigger type
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+
+    # type's description (optional)
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Event Trigger Type"
+        verbose_name_plural = "Event Trigger Types"
+
+    def __unicode__(self):
+        return self.name
+
+
+# ------------------------------------------------------------
+#
 # store event data
 #
 # ------------------------------------------------------------
 class event_data(models.Model):
     "Store event data."
 
+    # event's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    object = models.CharField(max_length=KEY_LENGTH, db_index=True)
-    type = models.IntegerField()
-    trigger = models.IntegerField()
+
+    # event's type
+    type = models.ForeignKey("event_types")
+
+    # event's trigger
+    trigger_type = models.ForeignKey("event_trigger_types")
+
+    # trigger's relative object's key
+    trigger_obj = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # the condition to enable this event
     condition = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Event Data"
-        verbose_name_plural = "Event Data"
+        verbose_name = "Event"
+        verbose_name_plural = "Events"
+
+    def __unicode__(self):
+        return self.key
 
 
 # ------------------------------------------------------------
@@ -791,15 +868,44 @@ class event_data(models.Model):
 class dialogues(models.Model):
     "Store all dialogues."
 
+    # dialogue's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+
+    # condition to show this dialogue
     condition = models.TextField(blank=True)
-    have_quest = models.ForeignKey("quests", null=True, blank=True)
 
     class Meta:
         "Define Django meta options"
         abstract = True
         verbose_name = "Dialogue"
         verbose_name_plural = "Dialogues"
+
+    def __unicode__(self):
+        return self.key
+
+
+# ------------------------------------------------------------
+#
+# store dialogue quest dependencies
+#
+# ------------------------------------------------------------
+class dialogue_quest_dependencies(models.Model):
+    "Store dialogue quest dependencies."
+
+    # dialogue's key
+    dialogue = models.ForeignKey("dialogues")
+
+    # related quest's key
+    dependency = models.ForeignKey("quests")
+
+    # dependency's type
+    type = models.ForeignKey("quest_dependency_types")
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Dialogue Quest Dependency"
+        verbose_name_plural = "Dialogue Quest Dependencies"
 
 
 # ------------------------------------------------------------
@@ -810,7 +916,10 @@ class dialogues(models.Model):
 class dialogue_relations(models.Model):
     "Store dialogue relations."
 
-    dialogue = models.ForeignKey("dialogues", db_index=True)
+    # dialogue's key
+    dialogue = models.ForeignKey("dialogues")
+
+    # next dialogue's key
     next = models.ForeignKey("dialogues")
 
     class Meta:
@@ -828,12 +937,25 @@ class dialogue_relations(models.Model):
 class dialogue_sentences(models.Model):
     "Store dialogue sentences."
 
-    dialogue = models.ForeignKey("dialogues", db_index=True)
+    # dialogue's key
+    dialogue = models.ForeignKey("dialogues")
+
+    # sentence's ordinal
     ordinal = models.IntegerField()
-    speaker = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # sentence's speaker
+    speaker = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # sentence's content
     content = models.TextField(blank=True)
+
+    # will do this action after this sentence
     action = models.TextField(blank=True)
+
+    # can provide this quest
     provide_quest = models.ForeignKey("quests", null=True, blank=True)
+
+    # can complete this quest
     complete_quest = models.ForeignKey("quests", null=True, blank=True)
 
     class Meta:
@@ -851,8 +973,13 @@ class dialogue_sentences(models.Model):
 class npc_dialogues(models.Model):
     "Store npc's dialogues."
 
-    npc = models.ForeignKey("world_npcs", db_index=True)
-    dialogue = models.ForeignKey("dialogues", db_index=True)
+    # NPC's key
+    npc = models.ForeignKey("world_npcs")
+
+    # dialogue's key
+    dialogue = models.ForeignKey("dialogues")
+
+    # if it is a default dialogue
     default = models.BooleanField(blank=True, default=False)
 
     class Meta:
@@ -864,35 +991,25 @@ class npc_dialogues(models.Model):
 
 # ------------------------------------------------------------
 #
-# store dialogue quest dependency
+# event attack's data
 #
 # ------------------------------------------------------------
-class dialogue_quest_dependency(models.Model):
-    "Store dialogue quest dependency."
+class event_attacks(models.Model):
+    "event attack's data"
 
-    dialogue = models.ForeignKey("dialogues", db_index=True)
-    dependency = models.ForeignKey("quests")
-    type = models.IntegerField()
+    # event's key
+    key = models.OneToOneField("event_data")
 
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        verbose_name = "Dialogue Quest Dependency"
-        verbose_name_plural = "Dialogue Quest Dependency"
+    # mob's key
+    mob = models.ForeignKey("common_characters")
 
-
-# ------------------------------------------------------------
-#
-# event mobs
-#
-# ------------------------------------------------------------
-class event_mobs(models.Model):
-    "Store all event mobs."
-
-    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
-    mob = models.CharField(max_length=KEY_LENGTH)
+    # mob's level
     level = models.IntegerField()
+
+    # event's odds
     odds = models.FloatField(blank=True, default=0)
+
+    # combat's description
     desc = models.TextField(blank=True)
 
     class Meta:
@@ -910,9 +1027,14 @@ class event_mobs(models.Model):
 class event_dialogues(models.Model):
     "Store all event dialogues."
 
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
-    dialogue = models.CharField(max_length=KEY_LENGTH)
-    npc = models.CharField(max_length=KEY_LENGTH)
+    # event's key
+    key = models.OneToOneField("event_data")
+
+    # dialogue's key
+    dialogue = models.ForeignKey("dialogues")
+
+    # NPC's key
+    npc = models.ForeignKey("world_npcs", null=True, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -929,7 +1051,10 @@ class event_dialogues(models.Model):
 class localized_strings(models.Model):
     "Store all server local strings informations."
 
+    # the origin words
     origin = models.TextField()
+
+    # translated worlds
     local = models.TextField(blank=True)
 
     class Meta:

@@ -1,0 +1,7 @@
+key,name,desc
+CATE_ROOM,Room,Room
+CATE_EXIT,Exit,Exit
+CATE_CHARACTER,Character,Character
+CATE_OBJECT,Object,Object
+CATE_SKILL,Skill,Skill
+CATE_QUEST,Quest,Quest

@@ -1,0 +1,8 @@
+dialogue,dependency,type
+dlg_apple,quest_apple,DPD_CAN_PROVIDE
+dlg_no_apple,quest_apple,DPD_NOT_ACCOMPLISHED
+dlg_has_apple,quest_apple,DPD_ACCOMPLISHED
+dlg_potato,quest_potato,DPD_CAN_PROVIDE
+dlg_potato,quest_apple,DPD_COMPLETED
+dlg_no_potato,quest_potato,DPD_NOT_ACCOMPLISHED
+dlg_has_potato,quest_potato,DPD_ACCOMPLISHED

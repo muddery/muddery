@@ -15,5 +15,19 @@ def worldeditor(request):
     """
     World Editor page template loading.
     """
-    return render(
-        request, 'worldeditor.html')
+    return render(request, 'worldeditor.html')
+
+
+@staff_member_required
+def editor(request):
+    """
+    World Editor page template loading.
+    """
+    try:
+        path = request.path.split('/')
+        name = path[-1]
+        if not name:
+            name = path[-2]
+        return render(request, name + '.html')
+    except:
+        return render(request, '404.html')

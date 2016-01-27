@@ -1,0 +1,10 @@
+key,type_id,name,desc
+DPD_CAN_PROVIDE,1,Can Provide,Can provide this quest.
+DPD_ACCEPTED,2,Accepted,Has accepted this quest.
+DPD_NOT_ACCEPTED,3,Not Accepted,Has not accepted this quest.
+DPD_IN_PROGRESS,4,In Progress,This quest is in progress.
+DPD_NOT_IN_PROGRESS,5,Not In Progress,This quest is not in progress.
+DPD_ACCOMPLISHED,6,Accomplished,This quest is accomplished.
+DPD_NOT_ACCOMPLISHED,7,Not Accomplished,This quest has been accepted, but not accomplished.
+DPD_COMPLETED,8,Completed,This quest is completed.
+DPD_NOT_COMPLETED,9,Not Completed,This quest has been accepted, but not completed.

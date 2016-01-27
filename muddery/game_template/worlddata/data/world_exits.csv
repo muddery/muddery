@@ -1,3 +1,1 @@
 key,name,typeclass,desc,verb,location,destination,condition
-EXIT_1,Exit 1,CLASS_EXIT,An exit.,Go,ROOM_A,ROOM_B,
-EXIT_2,Exit 2,CLASS_LOCKED_EXIT,An exit.,Back,ROOM_B,ROOM_A,

@@ -241,6 +241,26 @@ class quest_dependencies(model_base.quest_dependencies):
     pass
 
 
+# ------------------------------------------------------------
+#
+# event's type
+#
+# ------------------------------------------------------------
+class event_types(model_base.event_types):
+    "Event's type"
+    pass
+
+
+# ------------------------------------------------------------
+#
+# event triggers
+#
+# ------------------------------------------------------------
+class event_trigger_types(model_base.event_trigger_types):
+    "Event's trigger types"
+    pass
+
+
 #------------------------------------------------------------
 #
 # store event data
@@ -258,6 +278,16 @@ class event_data(model_base.event_data):
 #------------------------------------------------------------
 class dialogues(model_base.dialogues):
     "Store all dialogues."
+    pass
+
+
+#------------------------------------------------------------
+#
+# store dialogue quest dependencies
+#
+#------------------------------------------------------------
+class dialogue_quest_dependencies(model_base.dialogue_quest_dependencies):
+    "Store dialogue quest dependencies."
     pass
 
 
@@ -291,23 +321,13 @@ class npc_dialogues(model_base.npc_dialogues):
     pass
 
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
-# store dialogue quest dependency
+# event attack's data
 #
-#------------------------------------------------------------
-class dialogue_quest_dependency(model_base.dialogue_quest_dependency):
-    "Store dialogue quest dependency."
-    pass
-
-
-#------------------------------------------------------------
-#
-# event mobs
-#
-#------------------------------------------------------------
-class event_mobs(model_base.event_mobs):
-    "Store all event mobs."
+# ------------------------------------------------------------
+class event_attacks(model_base.event_attacks):
+    "event attack's data"
     pass
 
 

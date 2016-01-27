@@ -146,6 +146,12 @@ CAREER_EQUIPMENTS = "career_equipments"
 # character levels
 CHARACTER_MODELS = "character_models"
 
+# event types
+EVENT_TYPES = "event_types"
+
+# event trigger types
+EVENT_TRIGGER_TYPES = "event_trigger_types"
+
 # basic data models
 BASIC_DATA_MODELS = (CLASS_CATEGORIES,
                      TYPECLASSES,
@@ -153,7 +159,9 @@ BASIC_DATA_MODELS = (CLASS_CATEGORIES,
                      EQUIPMENT_POSITIONS,
                      CHARACTER_CAREERS,
                      CAREER_EQUIPMENTS,
-                     CHARACTER_MODELS)
+                     CHARACTER_MODELS,
+                     EVENT_TYPES,
+                     EVENT_TRIGGER_TYPES)
 
 
 ###################################
@@ -201,18 +209,15 @@ QUEST_DEPENDENCIES = "quest_dependencies"
 # event data
 EVENT_DATA = "event_data"
 
-# event mobs
-EVENT_MOBS = "event_mobs"
-
-# event dialogues
-EVENT_DIALOGUES = "event_dialogues"
+# Event additional data. One event can have one additional data model.
+EVENT_ADDITIONAL_DATA = ("event_attacks", "event_dialogues")
 
 # dialogues
 DIALOGUES = "dialogues"
 DIALOGUE_SENTENCES = "dialogue_sentences"
 DIALOGUE_RELATIONS = "dialogue_relations"
 NPC_DIALOGUES = "npc_dialogues"
-DIALOGUE_QUEST_DEPENDENCY = "dialogue_quest_dependency"
+DIALOGUE_QUEST_DEPENDENCIES = "dialogue_quest_dependencies"
 
 # character skills
 DEFAULT_SKILLS = "default_skills"
@@ -225,15 +230,13 @@ OTHER_DATA_MODELS = (OBJECT_CREATORS,
                      QUEST_DEPENDENCY_TYPES,
                      QUEST_DEPENDENCIES,
                      EVENT_DATA,
-                     EVENT_MOBS,
-                     EVENT_DIALOGUES,
                      DIALOGUES,
-                     DIALOGUE_SENTENCES,
+                     DIALOGUE_QUEST_DEPENDENCIES,
                      DIALOGUE_RELATIONS,
+                     DIALOGUE_SENTENCES,
                      NPC_DIALOGUES,
-                     DIALOGUE_QUEST_DEPENDENCY,
                      EQUIPMENT_TYPES,
-                     DEFAULT_SKILLS)
+                     DEFAULT_SKILLS) + EVENT_ADDITIONAL_DATA
 
 # local strings
 LOCALIZED_STRINGS_MODEL = "localized_strings"

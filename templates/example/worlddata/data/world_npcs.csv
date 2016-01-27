@@ -1,2 +1,2 @@
-key,name,typeclass,desc,model,location,condition
-npc_boy,BOY,typeclasses.npcs.NPC,This is a boy.,common_npc,room_street,
+key,name,typeclass,desc,model,level,location,condition
+npc_boy,BOY,CLASS_COMMON_NPC,This is a boy.,MODEL_COMMON_NPC,1,room_street,
