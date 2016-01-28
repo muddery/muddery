@@ -7,7 +7,7 @@ from __future__ import print_function
 from muddery.utils import utils
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from django.conf import settings
-from django.db.models.loading import get_model
+from django.apps import apps
 from evennia.utils import create, search, logger
 import traceback
 
@@ -26,7 +26,7 @@ def build_object(obj_key, caller=None):
     for model_name in model_names:
         try:
             # Get record.
-            model_obj = get_model(settings.WORLD_DATA_APP, model_name)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
             record_obj = model_obj.objects.get(key=obj_key)
             if hasattr(record_obj, "typeclass"):
                 if hasattr(record_obj.typeclass, "path"):
@@ -82,7 +82,7 @@ def build_unique_objects(model_name, caller=None):
         caller.msg(ostring)
 
     # get model
-    model_obj = get_model(settings.WORLD_DATA_APP, model_name)
+    model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
     # new objects
     new_obj_names = set(record.key for record in model_obj.objects.all())
@@ -179,7 +179,7 @@ def build_details(model_name, caller=None):
         caller: (command caller) If provide, running messages will send to the caller.
     """
 
-    model_detail = get_model(settings.WORLD_DATA_APP, model_name)
+    model_detail = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
     # Remove all details
     objects = search.search_object_attribute(key="details")
@@ -238,7 +238,7 @@ def reset_default_locations():
     if not default_home_key:
         # If does not have the default_home_key, get the first room in WORLD_ROOMS.
         try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS)
             rooms = model_obj.objects.all()
             if rooms:
                 default_home_key = rooms[0].key
@@ -272,7 +272,7 @@ def reset_default_locations():
     if not start_location_key:
         # If does not have the start_location_key, get the first room in WORLD_ROOMS
         try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS)
             rooms = model_obj.objects.all()
             if rooms:
                 start_location_key = rooms[0].key

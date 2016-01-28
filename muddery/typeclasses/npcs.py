@@ -6,7 +6,7 @@ MudderyNPC is NPC's base class.
 import json
 import traceback
 from django.conf import settings
-from django.db.models.loading import get_model
+from django.apps import apps
 from evennia import TICKER_HANDLER
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.utils.localized_strings_handler import LS
@@ -35,7 +35,7 @@ class MudderyNPC(MudderyCharacter):
         Load dialogues.
         """
         dialogues = []
-        model_npc_dialogues = get_model(settings.WORLD_DATA_APP, settings.NPC_DIALOGUES)
+        model_npc_dialogues = apps.get_model(settings.WORLD_DATA_APP, settings.NPC_DIALOGUES)
         if model_npc_dialogues:
             # Get records.
             npc_key = self.get_data_key()

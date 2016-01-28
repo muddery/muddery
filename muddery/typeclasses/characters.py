@@ -12,7 +12,7 @@ from __future__ import print_function
 
 import random
 from django.conf import settings
-from django.db.models.loading import get_model
+from django.apps import apps
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.utils import logger
@@ -66,12 +66,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.team = 0
 
         # init equipments
-        equipments = {}
-        model_position = get_model(settings.WORLD_DATA_APP, settings.EQUIPMENT_POSITIONS)
-        if model_position:
-            for position in model_position.objects.all():
-                equipments[position.key] = None
-        self.db.equipments = equipments
+        self.db.equipments = {}
+        self.db.position_names = {}
+        self.reset_equip_positions()
         
         self.db.skills = {}
 
@@ -89,10 +86,25 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         super(MudderyCharacter, self).at_init()
 
         # update equipment positions
+        self.reset_equip_positions()
+
+        # clear target
+        self.target = None
+
+    def reset_equip_positions(self):
+        """
+        Reset equipment's position data.
+        Returns:
+            None
+        """
         positions = []
-        model_position = get_model(settings.WORLD_DATA_APP, settings.EQUIPMENT_POSITIONS)
+        self.db.position_names = {}
+
+        model_position = apps.get_model(settings.WORLD_DATA_APP, settings.EQUIPMENT_POSITIONS)
         if model_position:
-            positions = [position.key for position in model_position.objects.all()]
+            for record in model_position.objects.all():
+                positions.append(record.key)
+                self.db.position_names[record.key] = record.name
 
         for position in self.db.equipments:
             if position not in positions:
@@ -101,9 +113,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         for position in positions:
             if position not in self.db.equipments:
                 self.db.equipments[position] = None
-
-        # clear target
-        self.target = None
 
     def load_data(self):
         """
@@ -114,7 +123,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # Load loot list.
         loot_list = []
         try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.LOOT_LIST)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.LOOT_LIST)
             loot_records = model_obj.objects.filter(provider=self.get_data_key())
 
             for loot_record in loot_records:
@@ -170,7 +179,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         try:
             # get data from db
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.CHARACTER_MODELS)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.CHARACTER_MODELS)
             model_data = model_obj.objects.get(key=model_name, level=self.db.level)
 
             reserved_fields = {"id", "key", "level"}
@@ -237,7 +246,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         
         # default skills
         skill_records = []
-        model_skills = get_model(settings.WORLD_DATA_APP, settings.DEFAULT_SKILLS)
+        model_skills = apps.get_model(settings.WORLD_DATA_APP, settings.DEFAULT_SKILLS)
         if model_skills:
             # Get records.
             model_name = getattr(self.dfield, "model", None)

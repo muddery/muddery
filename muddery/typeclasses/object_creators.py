@@ -7,7 +7,7 @@ from __future__ import print_function
 
 import random
 from django.conf import settings
-from django.db.models.loading import get_model
+from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
@@ -35,7 +35,7 @@ class MudderyObjectCreator(MudderyObject):
         # Load loot list.
         loot_list = []
         try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.LOOT_LIST)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.LOOT_LIST)
             loot_records = model_obj.objects.filter(provider=self.get_data_key())
 
             for loot_record in loot_records:

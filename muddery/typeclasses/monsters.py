@@ -6,7 +6,6 @@ MudderyMob is mob's base class.
 import json
 import traceback
 from django.conf import settings
-from django.db.models.loading import get_model
 from evennia.utils import logger
 from evennia import TICKER_HANDLER
 from muddery.typeclasses.characters import MudderyCharacter

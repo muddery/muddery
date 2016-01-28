@@ -3,7 +3,7 @@ Object key handler, stores key's model name.
 """
 
 from django.conf import settings
-from django.db.models.loading import get_model
+from django.apps import apps
 
 
 class ObjectKeyHandler(object):
@@ -31,7 +31,7 @@ class ObjectKeyHandler(object):
         # Get model names.
         for model_name in settings.OBJECT_DATA_MODELS:
             try:
-                model_obj = get_model(settings.WORLD_DATA_APP, model_name)
+                model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
                 for record in model_obj.objects.all():
                     # Add key's model name.
                     key = record.serializable_value("key")

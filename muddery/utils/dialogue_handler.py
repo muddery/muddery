@@ -11,7 +11,7 @@ from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.utils.script_handler import SCRIPT_HANDLER
 from muddery.utils import defines
 from django.conf import settings
-from django.db.models.loading import get_model
+from django.apps import apps
 from evennia.utils import logger
 
 
@@ -42,25 +42,25 @@ class DialogueHandler(object):
         
         # Get db model
         try:
-            model_dialogues = get_model(settings.WORLD_DATA_APP, settings.DIALOGUES)
+            model_dialogues = apps.get_model(settings.WORLD_DATA_APP, settings.DIALOGUES)
             dialogue_record = model_dialogues.objects.get(key=dialogue)
         except Exception, e:
             return
 
         sentences = []
-        model_sentences = get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_SENTENCES)
+        model_sentences = apps.get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_SENTENCES)
         if model_sentences:
             # Get records.
             sentences = model_sentences.objects.filter(dialogue=dialogue)
 
         nexts = []
-        model_nexts = get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_RELATIONS)
+        model_nexts = apps.get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_RELATIONS)
         if model_nexts:
             # Get records.
             nexts = model_nexts.objects.filter(dialogue=dialogue)
 
         dependencies = []
-        model_dependencies = get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_QUEST_DEPENDENCIES)
+        model_dependencies = apps.get_model(settings.WORLD_DATA_APP, settings.DIALOGUE_QUEST_DEPENDENCIES)
         if model_dependencies:
             # Get records.
             dependencies = model_dependencies.objects.filter(dialogue=dialogue)
@@ -293,7 +293,7 @@ class DialogueHandler(object):
         """
         Get who says this dialogue.
         """
-        model_npc_dialogues = get_model(settings.WORLD_DATA_APP, settings.NPC_DIALOGUES)
+        model_npc_dialogues = apps.get_model(settings.WORLD_DATA_APP, settings.NPC_DIALOGUES)
         if model_npc_dialogues:
             # Get record.
             try:

@@ -7,7 +7,6 @@ Add three commands: @importdata, @datainfo and @batchbuilder
 
 import os
 from django.conf import settings
-from django.db.models.loading import get_model
 from muddery.utils.importer import import_model, import_all
 from muddery.utils.builder import build_all
 from muddery.utils.exception import MudderyError

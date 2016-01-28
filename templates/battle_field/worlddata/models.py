@@ -29,7 +29,7 @@ class typeclasses(model_base.typeclasses):
 #------------------------------------------------------------
 class world_rooms(model_base.world_rooms):
     "Store all unique rooms."
-    pass
+    peaceful = models.BooleanField(blank=True, default=False)
 
 
 #------------------------------------------------------------

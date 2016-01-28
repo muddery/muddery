@@ -303,6 +303,27 @@ class common_objects(models.Model):
 
 # ------------------------------------------------------------
 #
+# store all foods
+#
+# ------------------------------------------------------------
+class foods(common_objects):
+    "foods inherit from common objects."
+
+    # food's hp effect
+    hp = models.IntegerField(blank=True, default=0)
+
+    # food's mp effect
+    mp = models.IntegerField(blank=True, default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Food"
+        verbose_name_plural = "Foods"
+
+
+# ------------------------------------------------------------
+#
 # store all equip_types
 #
 # ------------------------------------------------------------
@@ -339,7 +360,7 @@ class equipment_positions(models.Model):
     # position's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
 
-    # position's name
+    # position's name for display
     name = models.CharField(max_length=NAME_LENGTH)
 
     # position's description
