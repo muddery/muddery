@@ -3,7 +3,7 @@ This handles the relations of equipment types and character careers.
 """
 
 from django.conf import settings
-from django.db.models.loading import get_model
+from django.apps import apps
 from evennia.utils import logger
 
 
@@ -32,7 +32,7 @@ class EquipTypeHandler(object):
         self.clear()
 
         try:
-            model_obj = get_model(settings.WORLD_DATA_APP, settings.CAREER_EQUIPMENTS)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.CAREER_EQUIPMENTS)
             for record in model_obj.objects.all():
                 career = record.serializable_value("career")
                 equipment = record.serializable_value("equipment")

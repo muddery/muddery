@@ -10,7 +10,7 @@ from muddery.utils.script_handler import SCRIPT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils import utils
 from django.conf import settings
-from django.db.models.loading import get_model
+from django.apps import apps
 from evennia.utils import logger
 from evennia import create_script
 
@@ -24,7 +24,7 @@ def get_event_additional_model():
 
     # list event's additional data's model
     for model_name in settings.EVENT_ADDITIONAL_DATA:
-        model_data = get_model(settings.WORLD_DATA_APP, model_name)
+        model_data = apps.get_model(settings.WORLD_DATA_APP, model_name)
         if model_data:
             # Get records.
             for record in model_data.objects.all():
@@ -48,7 +48,7 @@ class EventHandler(object):
 
         # Load events.
         event_records = []
-        model_events = get_model(settings.WORLD_DATA_APP, settings.EVENT_DATA)
+        model_events = apps.get_model(settings.WORLD_DATA_APP, settings.EVENT_DATA)
         if model_events:
             # Get records.
             event_records = model_events.objects.filter(trigger_obj=owner.get_data_key())
@@ -67,7 +67,7 @@ class EventHandler(object):
                 # Set additional data.
                 if record.key in self._additional_model:
                     model_name = self._additional_model[record.key]
-                    model_additional = get_model(settings.WORLD_DATA_APP, model_name)
+                    model_additional = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
                     try:
                         add_record = model_additional.objects.get(key = record.key)
@@ -227,7 +227,7 @@ class EventHandler(object):
         event["function"] = self.do_attack
 
         mob_records = []
-        model_mobs = get_model(settings.WORLD_DATA_APP, settings.EVENT_MOBS)
+        model_mobs = apps.get_model(settings.WORLD_DATA_APP, settings.EVENT_MOBS)
         if model_mobs:
             # Get records.
             mob_records = model_mobs.objects.filter(key=event["key"])
@@ -265,7 +265,7 @@ class EventHandler(object):
         event["function"] = self.do_dialogue
 
         try:
-            model_dialogues = get_model(settings.WORLD_DATA_APP, settings.EVENT_DIALOGUES)
+            model_dialogues = apps.get_model(settings.WORLD_DATA_APP, settings.EVENT_DIALOGUES)
             if model_dialogues:
                 # Get record.
                 dialogue_record = model_dialogues.objects.get(key=event["key"])

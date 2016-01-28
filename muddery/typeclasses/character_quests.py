@@ -12,7 +12,7 @@ from muddery.utils.script_handler import SCRIPT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.localized_strings_handler import LS
 from django.conf import settings
-from django.db.models.loading import get_model
+from django.apps import apps
 from evennia.utils import logger
 
 
@@ -50,7 +50,7 @@ class MudderyQuest(MudderyObject):
 
         # Get objectives.
         obj_records = []
-        model_objectives = get_model(settings.WORLD_DATA_APP, settings.QUEST_OBJECTIVES)
+        model_objectives = apps.get_model(settings.WORLD_DATA_APP, settings.QUEST_OBJECTIVES)
         if model_objectives:
             # Get records.
             obj_records = model_objectives.objects.filter(quest=key)
@@ -113,7 +113,7 @@ class MudderyQuest(MudderyObject):
                     
                     # Get the name of the objective object.
                     for model_name in settings.COMMON_OBJECTS:
-                        model = get_model(settings.WORLD_DATA_APP, model_name)
+                        model = apps.get_model(settings.WORLD_DATA_APP, model_name)
                         if model:
                             # Get record.
                             try:
@@ -136,7 +136,7 @@ class MudderyQuest(MudderyObject):
                     # Get the name of the objective character.
                     for model_name in settings.COMMON_OBJECTS:
                         # find in common objects
-                        model = get_model(settings.WORLD_DATA_APP, model_name)
+                        model = apps.get_model(settings.WORLD_DATA_APP, model_name)
                         if model:
                             # Get record.
                             try:
@@ -150,7 +150,7 @@ class MudderyQuest(MudderyObject):
                         # find in world_npcs
                         for model_name in settings.WORLD_NPCS:
                             # find in common objects
-                            model = get_model(settings.WORLD_DATA_APP, model_name)
+                            model = apps.get_model(settings.WORLD_DATA_APP, model_name)
                             if model:
                                 # Get record.
                                 try:

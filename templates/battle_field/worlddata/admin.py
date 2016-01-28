@@ -17,6 +17,12 @@ class TypeclassesAdmin(admin_base.TypeclassesAdmin):
 
 
 class WorldRoomsAdmin(admin_base.WorldRoomsAdmin):
+    list_display = ('key',
+                    'name',
+                    'typeclass',
+                    'desc',
+                    'position',
+                    'peaceful')
     form = WorldRoomsForm
 
 

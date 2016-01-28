@@ -79,6 +79,19 @@ class CommonObjectsAdmin(admin.ModelAdmin):
                     'unique')
 
 
+class FoodsAdmin(CommonObjectsAdmin):
+    list_display = ('key',
+                    'name',
+                    'typeclass',
+                    'desc',
+                    'max_stack',
+                    'unique',
+                    'position',
+                    'type',
+                    'hp',
+                    'mp')
+
+
 class EquipmentTypesAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
@@ -91,7 +104,7 @@ class EquipmentPositionsAdmin(admin.ModelAdmin):
                     'desc')
 
 
-class EquipmentsAdmin(admin.ModelAdmin):
+class EquipmentsAdmin(CommonObjectsAdmin):
     list_display = ('key',
                     'name',
                     'typeclass',

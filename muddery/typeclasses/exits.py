@@ -17,7 +17,6 @@ from muddery.utils.localized_strings_handler import LS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultExit
 from django.conf import settings
-from django.db.models.loading import get_model
 
 
 class MudderyExit(MudderyObject, DefaultExit):

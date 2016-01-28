@@ -10,7 +10,7 @@ import json
 import ast
 from django.conf import settings
 from django.db import models
-from django.db.models.loading import get_model
+from django.apps import apps
 from evennia.objects.objects import DefaultObject
 from evennia.utils import logger
 from evennia.utils.utils import to_str
@@ -183,7 +183,7 @@ class MudderyObject(DefaultObject):
 
         for model in models:
             # Get db model
-            model_obj = get_model(settings.WORLD_DATA_APP, model)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, model)
             if not model_obj:
                 logger.log_errmsg("%s can not open model %s" % (key, model))
                 continue
@@ -236,7 +236,7 @@ class MudderyObject(DefaultObject):
         """
         typeclass_path = ""
         try:
-            model_typeclass = get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
+            model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
             data = model_typeclass.objects.get(key=typeclass)
             typeclass_path = data.path
         except Exception, e:

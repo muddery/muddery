@@ -181,7 +181,7 @@ WORLD_OBJECTS = "world_objects"
 WORLD_NPCS = "world_npcs"
 
 # common objects
-COMMON_OBJECTS = ("common_objects", "common_characters", "skills", "quests", "equipments")
+COMMON_OBJECTS = ("common_objects", "common_characters", "skills", "quests", "equipments", "foods")
 
 # object's additional data
 ADDITIONAL_DATA = ("exit_locks", "object_creators")

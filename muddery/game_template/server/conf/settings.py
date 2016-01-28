@@ -131,6 +131,17 @@ WORLD_DATA_FILE_ENCODING = "utf8"
 # add data app
 INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 
+# basic data models
+BASIC_DATA_MODELS = (CLASS_CATEGORIES,
+                     TYPECLASSES,
+                     EQUIPMENT_TYPES,
+                     EQUIPMENT_POSITIONS,
+                     CHARACTER_CAREERS,
+                     CAREER_EQUIPMENTS,
+                     CHARACTER_MODELS,
+                     EVENT_TYPES,
+                     EVENT_TRIGGER_TYPES)
+
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_EXITS,

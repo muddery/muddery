@@ -7,7 +7,7 @@ from __future__ import print_function
 import os
 import glob
 from django.db import models
-from django.db.models.loading import get_model
+from django.apps import apps
 from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
@@ -50,7 +50,7 @@ def import_file(file_name, model_name, widecard=True, clear=True):
             imported = True
 
             # get model
-            model_obj = get_model(settings.WORLD_DATA_APP, model_name)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
             if clear:
                 # clear old data
@@ -122,7 +122,12 @@ def import_file(file_name, model_name, widecard=True, clear=True):
                                 elif field_type == 1:
                                     # boolean value
                                     if value:
-                                        record[field_name] = (int(value) != 0)
+                                        if value == 'True':
+                                            record[field_name] = True
+                                        elif value == 'False':
+                                            record[field_name] = False
+                                        else:
+                                            record[field_name] = (int(value) != 0)
                                 elif field_type == 2:
                                     # interger value
                                     if value:

@@ -33,6 +33,16 @@ class PlayerCharacter(MudderyPlayerCharacter):
                     has connected" message echoed to the room
 
     """
+    def at_object_creation(self):
+        """
+        Called once, when this object is first created. This is the
+        normal hook to overload for most object types.
+
+        """
+        super(PlayerCharacter, self).at_object_creation()
+        self.db.career = "CAREER_COMMON"
+
+
     def add_hp(self, hp):
         """
         Add character's hp.

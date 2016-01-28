@@ -10,7 +10,6 @@ creation commands.
 
 import traceback
 from django.conf import settings
-from django.db.models.loading import get_model
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.typeclasses.common_objects import MudderyEquipment
 from muddery.utils import defines, utils
@@ -520,7 +519,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
                         info = {"dbref": obj.dbref,
                                 "name": obj.name,
                                 "desc": obj.db.desc}
-            equipments[LS(position)] = info
+            position_name = self.db.position_names[position]
+            equipments[position_name] = info
 
         return equipments
 
@@ -540,6 +540,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
             raise MudderyError(LS("Can not equip it on this position."))
 
         if not EQUIP_TYPE_HANDLER.can_equip(self.db.career, type):
+            print("career: %s, type: %s" % (self.db.career, type))
             raise MudderyError(LS("Can not use this equipment."))
 
         # Take off old equipment
