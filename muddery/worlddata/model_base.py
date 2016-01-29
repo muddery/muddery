@@ -96,7 +96,7 @@ class world_rooms(models.Model):
         verbose_name_plural = "Rooms"
 
     def __unicode__(self):
-        return self.key
+        return self.name + " (" + self.key + ")"
 
 
 # ------------------------------------------------------------
@@ -138,7 +138,7 @@ class world_exits(models.Model):
         verbose_name_plural = "Exits"
 
     def __unicode__(self):
-        return self.key
+        return self.name + " (" + self.key + ")"
 
 
 # ------------------------------------------------------------
@@ -204,7 +204,7 @@ class world_objects(models.Model):
         verbose_name_plural = "World Objects"
 
     def __unicode__(self):
-        return self.key
+        return self.name + " (" + self.key + ")"
 
 
 # ------------------------------------------------------------
@@ -298,7 +298,7 @@ class common_objects(models.Model):
         verbose_name_plural = "Common Objects"
 
     def __unicode__(self):
-        return self.key
+        return self.name + " (" + self.key + ")"
 
 
 # ------------------------------------------------------------
@@ -334,7 +334,7 @@ class equipment_types(models.Model):
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
 
     # type's name
-    name = models.CharField(max_length=NAME_LENGTH)
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
 
     # type's description
     desc = models.TextField(blank=True)
@@ -361,7 +361,7 @@ class equipment_positions(models.Model):
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
 
     # position's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
 
     # position's description
     desc = models.TextField(blank=True)
@@ -414,7 +414,7 @@ class character_careers(models.Model):
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
 
     # careers's name
-    name = models.CharField(max_length=NAME_LENGTH)
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
 
     # careers's description
     desc = models.TextField(blank=True)
@@ -427,6 +427,7 @@ class character_careers(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 # ------------------------------------------------------------
 #
@@ -461,6 +462,9 @@ class character_models(models.Model):
     # model's key
     key = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
+    # model's name
+    name = models.CharField(max_length=NAME_LENGTH)
+
     # model's level
     level = models.IntegerField(blank=True, default=1)
 
@@ -491,7 +495,7 @@ class character_models(models.Model):
         unique_together = ("key", "level")
 
     def __unicode__(self):
-        return self.key
+        return self.name + " (Lv" + self.level + ")"
 
 
 # ------------------------------------------------------------
@@ -533,7 +537,7 @@ class world_npcs(models.Model):
         verbose_name_plural = "World NPCs"
 
     def __unicode__(self):
-        return self.key
+        return self.name + " (" + self.key + ")"
 
 
 # ------------------------------------------------------------
@@ -569,7 +573,7 @@ class common_characters(models.Model):
         verbose_name_plural = "Common Character List"
 
     def __unicode__(self):
-        return self.key
+        return self.name + " (" + self.key + ")"
 
 # ------------------------------------------------------------
 #
@@ -613,7 +617,7 @@ class skills(models.Model):
         verbose_name_plural = "Skills"
 
     def __unicode__(self):
-        return self.key
+        return self.name + " (" + self.key + ")"
 
 # ------------------------------------------------------------
 #
@@ -649,7 +653,7 @@ class quests(models.Model):
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
 
     # quest's name for display
-    name = models.CharField(blank=True, max_length=NAME_LENGTH)
+    name = models.CharField(max_length=NAME_LENGTH)
 
     # quest's typeclass
     typeclass = models.ForeignKey("typeclasses")
@@ -667,7 +671,7 @@ class quests(models.Model):
         verbose_name_plural = "Quests"
 
     def __unicode__(self):
-        return self.key
+        return self.name + " (" + self.key + ")"
 
 
 # ------------------------------------------------------------
