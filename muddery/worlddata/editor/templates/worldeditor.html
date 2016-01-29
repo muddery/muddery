@@ -1,4 +1,11 @@
 {% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block header_ext %}
+<script src="{% static "worldeditor/js/worldeditor.js" %}" type="text/javascript" charset="utf-8"></script>
+{% endblock %}
+
 {% block content %}
     <h1>World Editor</h1>
     Welcome to the World Editor Page. Here, you can edit the whole game world.
@@ -31,12 +38,14 @@
     Localized strings.
 
     <div><br></div>
-    <div>
-      <form action="#" method="GET">
-        <input type="hidden" name="export" />
-        <input type="submit" value="Export Files" />
-      </form>
-    </div>
+    <form method="GET">
+      <input type="hidden" name="export"/>
+      <input type="submit" value="Download Files"/>
+    </form>
+    <div><br></div>
+    <form>
+      <input type="button" value="Apply Changes" onclick="worldeditor.doPost('apply=1')"/>
+    </form>
 
     <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
 
