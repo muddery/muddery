@@ -127,6 +127,65 @@ class DialogueHandler(object):
         return
 
 
+    def check_need_get_next(self, sentences):
+        if sentences.__len__() > 1:
+            return False
+
+        sentence = sentences[0]
+        if sentence['action'] or sentence['complete_quest'] or sentence['provide_quest']:
+            return False
+
+        return True
+
+
+    def get_sentences_list(self, caller, npc):
+        """
+        Get dialogues_list.
+        """
+        sentences_list = []
+        sentences = self.get_sentences(caller, npc)
+        sentences_list.append(sentences)
+
+        while self.check_need_get_next(sentences):
+            sentences = self.get_next_sentences(caller,
+                                                npc.dbref,
+                                                sentences[0]['dialogue'],
+                                                sentences[0]['sentence'])
+            if sentences:
+                sentences_list.append(sentences)
+            else:
+                break
+
+        return sentences_list
+
+
+    def get_next_sentences_list(self, caller, npc, dialogue, sentence):
+        """
+        Get dialogues_list.
+        """
+        sentences_list = []
+        sentences = self.get_next_sentences(caller,
+                                            npc,
+                                            dialogue,
+                                            sentence)
+        if sentences:
+            sentences_list.append(sentences)
+        else:
+            return sentences_list
+
+        while self.check_need_get_next(sentences):
+            sentences = self.get_next_sentences(caller,
+                                                npc,
+                                                sentences[0]['dialogue'],
+                                                sentences[0]['sentence'])
+            if sentences:
+                sentences_list.append(sentences)
+            else:
+                break
+
+        return sentences_list
+
+
     def get_sentences(self, caller, npc):
         """
         Get NPC's sentences.
