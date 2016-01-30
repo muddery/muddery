@@ -301,4 +301,7 @@ class EventHandler(object):
             if npc:
                 dlg["npc"] = npc.dbref
 
-            character.msg({"dialogue": [dlg]})
+            dialogues = [dlg]
+            dialogues_list = [dialogues]
+
+            character.msg({"dialogues_list": dialogues_list})

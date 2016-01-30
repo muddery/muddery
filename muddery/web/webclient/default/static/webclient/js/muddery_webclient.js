@@ -91,7 +91,7 @@ var webclient = {
                 else if (key == "look_obj") {
                     this.displayLookObj(data[key]);
                 }
-                else if (key == "dialogue") {
+                else if (key == "dialogues_list") {
                     this.displayDialogue(data[key]);
                 }
                 else if (key == "status") {
@@ -159,6 +159,7 @@ var webclient = {
                 }
             }
             catch(error) {
+                console.log(key, data[key])
                 this.displayErr("Data error.");
                 console.error(error.message);
             }
@@ -802,17 +803,9 @@ var webclient = {
             combat.setDialogue(data);
         }
         else {
-            popupmgr.showDialogue(data);
-        }
-    },
-
-    displayDialogue : function(data) {
-        if ($('#combat_box').length > 0) {
-            // has combat box
-            combat.setDialogue(data);
-        }
-        else {
-            popupmgr.showDialogue(data);
+            data_handler.dialogues_list = data;
+            dialogues = data_handler.dialogues_list.shift();
+            popupmgr.showDialogue(dialogues);
         }
     },
 
