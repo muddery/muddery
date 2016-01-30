@@ -565,24 +565,27 @@ class CmdTalk(Command):
         # Set caller's target.
         caller.set_target(npc)
 
-        # Get NPC's sentences.
-        sentences = DIALOGUE_HANDLER.get_sentences(caller, npc)
+        # Get NPC's sentences_list.
+        sentences_list = DIALOGUE_HANDLER.get_sentences_list(caller, npc)
 
-        # Get the spearker's name to display.
-        speaker = ""
-        if sentences:
-            speaker = DIALOGUE_HANDLER.get_dialogue_speaker(caller, npc, sentences[0]["speaker"])
+        dialogues_list = []
+        for sentences in sentences_list:
+            # Get the spearker's name to display.
+            speaker = ""
+            if sentences:
+                speaker = DIALOGUE_HANDLER.get_dialogue_speaker(caller, npc, sentences[0]["speaker"])
 
-        dialogues = []
-        for s in sentences:
-            dlg = {"speaker": speaker,          # speaker's name
-                   "npc": npc.dbref,            # NPC's dbref
-                   "dialogue": s["dialogue"],   # dialogue's key
-                   "sentence": s["sentence"],   # sentence's ordinal
-                   "content": s["content"]}     # sentence's content
-            dialogues.append(dlg)
+            dialogues = []
+            for s in sentences:
+                dlg = {"speaker": speaker,          # speaker's name
+                       "npc": npc.dbref,            # NPC's dbref
+                       "dialogue": s["dialogue"],   # dialogue's key
+                       "sentence": s["sentence"],   # sentence's ordinal
+                       "content": s["content"]}     # sentence's content
+                dialogues.append(dlg)
+            dialogues_list.append(dialogues)
 
-        caller.msg({"dialogue": dialogues})
+        caller.msg({"dialogues_list": dialogues_list})
 
 
 #------------------------------------------------------------
@@ -644,30 +647,34 @@ class CmdDialogue(Command):
                 ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
                 logger.log_tracemsg(ostring)
 
-        # Get next sentence.
-        sentences = DIALOGUE_HANDLER.get_next_sentences(caller,
-                                                        npc,
-                                                        dialogue,
-                                                        sentence)
+        # Get next sentences_list.
+        sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(caller,
+                                                                  npc,
+                                                                  dialogue,
+                                                                  sentence)
 
-        # Get speaker's name.
-        speaker = ""
-        if sentences:
-            speaker = DIALOGUE_HANDLER.get_dialogue_speaker(caller, npc, sentences[0]["speaker"])
+        dialogues_list = []
+        for sentences in sentences_list:
+            # Get the spearker's name to display.
+            speaker = ""
+            if sentences:
+                speaker = DIALOGUE_HANDLER.get_dialogue_speaker(caller, npc, sentences[0]["speaker"])
 
-        dialogues = []
-        for s in sentences:
-            dlg = {"speaker": speaker,          # speaker's name
-                   "dialogue": s["dialogue"],   # dialogue's key
-                   "sentence": s["sentence"],   # sentence's ordinal
-                   "content": s["content"]}     # sentence's content
-            if npc:
-                dlg["npc"] = npc.dbref          # NPC's dbref, if has NPC.
+            dialogues = []
+            for s in sentences:
+                dlg = {"speaker": speaker,          # speaker's name
+                       "dialogue": s["dialogue"],   # dialogue's key
+                       "sentence": s["sentence"],   # sentence's ordinal
+                       "content": s["content"]}     # sentence's content
+                if npc:
+                    dlg["npc"] = npc.dbref          # NPC's dbref, if has NPC.
 
-            dialogues.append(dlg)
+                dialogues.append(dlg)
 
-        # Send dialogues to the player.
-        caller.msg({"dialogue": dialogues})
+            dialogues_list.append(dialogues)
+
+        # Send dialogues_list to the player.
+        caller.msg({"dialogues_list": dialogues_list})
 
 
 #------------------------------------------------------------

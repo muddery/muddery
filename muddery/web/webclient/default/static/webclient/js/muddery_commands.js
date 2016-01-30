@@ -89,14 +89,18 @@ var commands = {
     
     // dialogue
     doDialogue : function(caller) {
-        var args = {"dialogue": $(caller).attr("dialogue"),
-                    "sentence": $(caller).attr("sentence")};
-                    
-        var npc = $(caller).attr("npc");
-        if (npc) {
-            args["npc"] = npc;
+        if(data_handler.dialogues_list.length > 0) {
+            popupmgr.showDialogue(data_handler.dialogues_list.shift());
+        } else {
+            var args = {"dialogue": $(caller).attr("dialogue"),
+                        "sentence": $(caller).attr("sentence")};
+
+            var npc = $(caller).attr("npc");
+            if (npc) {
+                args["npc"] = npc;
+            }
+            sendCommand(this.cmdString("dialogue", args));
         }
-        sendCommand(this.cmdString("dialogue", args));
     },
     
     // logout
