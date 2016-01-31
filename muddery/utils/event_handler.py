@@ -283,25 +283,16 @@ class EventHandler(object):
         Start a dialogue.
         """
         # Get sentence.
-        sentence = DIALOGUE_HANDLER.get_sentence(event["dialogue"], 0)
-
-        if sentence:
-            npc = None
-            if event["npc"]:
-                npc = utils.search_obj_data_key(event["npc"])
-                if npc:
-                    npc = npc[0]
-
-            speaker = DIALOGUE_HANDLER.get_dialogue_speaker(character, npc, sentence["speaker"])
-            dlg = {"speaker": speaker,
-                   "dialogue": sentence["dialogue"],
-                   "sentence": sentence["sentence"],
-                   "content": sentence["content"]}
-
+        npc = None
+        if event["npc"]:
+            npc = utils.search_obj_data_key(event["npc"])
             if npc:
-                dlg["npc"] = npc.dbref
+                npc = npc[0]
 
-            dialogues = [dlg]
-            dialogues_list = [dialogues]
+        sentence_list = DIALOGUE_HANDLER.get_next_sentences_list(character,
+                                                                 npc,
+                                                                 event["dialogue"],
+                                                                 0,
+                                                                 True)
 
-            character.msg({"dialogues_list": dialogues_list})
+        character.msg({"dialogues_list": sentence_list})

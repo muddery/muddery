@@ -568,24 +568,7 @@ class CmdTalk(Command):
         # Get NPC's sentences_list.
         sentences_list = DIALOGUE_HANDLER.get_sentences_list(caller, npc)
 
-        dialogues_list = []
-        for sentences in sentences_list:
-            # Get the spearker's name to display.
-            speaker = ""
-            if sentences:
-                speaker = DIALOGUE_HANDLER.get_dialogue_speaker(caller, npc, sentences[0]["speaker"])
-
-            dialogues = []
-            for s in sentences:
-                dlg = {"speaker": speaker,          # speaker's name
-                       "npc": npc.dbref,            # NPC's dbref
-                       "dialogue": s["dialogue"],   # dialogue's key
-                       "sentence": s["sentence"],   # sentence's ordinal
-                       "content": s["content"]}     # sentence's content
-                dialogues.append(dlg)
-            dialogues_list.append(dialogues)
-
-        caller.msg({"dialogues_list": dialogues_list})
+        caller.msg({"dialogues_list": sentences_list})
 
 
 #------------------------------------------------------------
@@ -651,30 +634,11 @@ class CmdDialogue(Command):
         sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(caller,
                                                                   npc,
                                                                   dialogue,
-                                                                  sentence)
-
-        dialogues_list = []
-        for sentences in sentences_list:
-            # Get the spearker's name to display.
-            speaker = ""
-            if sentences:
-                speaker = DIALOGUE_HANDLER.get_dialogue_speaker(caller, npc, sentences[0]["speaker"])
-
-            dialogues = []
-            for s in sentences:
-                dlg = {"speaker": speaker,          # speaker's name
-                       "dialogue": s["dialogue"],   # dialogue's key
-                       "sentence": s["sentence"],   # sentence's ordinal
-                       "content": s["content"]}     # sentence's content
-                if npc:
-                    dlg["npc"] = npc.dbref          # NPC's dbref, if has NPC.
-
-                dialogues.append(dlg)
-
-            dialogues_list.append(dialogues)
+                                                                  sentence,
+                                                                  False)
 
         # Send dialogues_list to the player.
-        caller.msg({"dialogues_list": dialogues_list})
+        caller.msg({"dialogues_list": sentences_list})
 
 
 #------------------------------------------------------------

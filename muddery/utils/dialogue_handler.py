@@ -128,7 +128,7 @@ class DialogueHandler(object):
 
 
     def check_need_get_next(self, sentences):
-        if sentences.__len__() > 1:
+        if len(sentences) != 1:
             return False
 
         sentence = sentences[0]
@@ -142,34 +142,58 @@ class DialogueHandler(object):
         """
         Get dialogues_list.
         """
+        if not caller:
+            return []
+
+        if not npc:
+            return []
+
         sentences_list = []
+
         sentences = self.get_sentences(caller, npc)
-        sentences_list.append(sentences)
+        output = self.create_output_sentences(sentences, caller, npc)
+        if output:
+            sentences_list.append(output)
+        else:
+            return sentences_list
 
         while self.check_need_get_next(sentences):
             sentences = self.get_next_sentences(caller,
                                                 npc.dbref,
                                                 sentences[0]['dialogue'],
                                                 sentences[0]['sentence'])
-            if sentences:
-                sentences_list.append(sentences)
+            output = self.create_output_sentences(sentences, caller, npc)
+            if output:
+                sentences_list.append(output)
             else:
                 break
 
         return sentences_list
 
 
-    def get_next_sentences_list(self, caller, npc, dialogue, sentence):
+    def get_next_sentences_list(self, caller, npc, dialogue, sentence, include_current):
         """
         Get dialogues_list.
         """
         sentences_list = []
+
+        # current sentence
+        if include_current:
+            data = self.get_sentence(dialogue, sentence)
+            if not data:
+                return sentences_list
+            output = self.create_output_sentences([data], caller, npc)
+            if output:
+                sentences_list.append(output)
+
+        # next sentence
         sentences = self.get_next_sentences(caller,
                                             npc,
                                             dialogue,
                                             sentence)
-        if sentences:
-            sentences_list.append(sentences)
+        output = self.create_output_sentences(sentences, caller, npc)
+        if output:
+            sentences_list.append(output)
         else:
             return sentences_list
 
@@ -178,8 +202,9 @@ class DialogueHandler(object):
                                                 npc,
                                                 sentences[0]['dialogue'],
                                                 sentences[0]['sentence'])
-            if sentences:
-                sentences_list.append(sentences)
+            output = self.create_output_sentences(sentences, caller, npc)
+            if output:
+                sentences_list.append(output)
             else:
                 break
 
@@ -283,7 +308,10 @@ class DialogueHandler(object):
         speaker = ""
         try:
             if speaker_str == "n":
-                speaker = npc.get_name()
+                if npc:
+                    speaker = npc.get_name()
+                else:
+                    speaker = ""
             elif speaker_str == "p":
                 speaker = caller.get_name()
             elif speaker_str[0] == '"' and speaker_str[-1] == '"':
@@ -292,6 +320,55 @@ class DialogueHandler(object):
             pass
 
         return speaker
+
+    def create_output_sentences(self, originals, caller, npc):
+        """
+        Create a list of sentences data to output to the client.
+
+        Args:
+            originals: (list) original sentences data
+            caller: (object) caller object
+            npc: (object, optional) NPC object
+
+        Returns:
+            (list) a list of sentence's data
+        """
+        if not originals:
+            return []
+
+        sentences_list = []
+        speaker = self.get_dialogue_speaker(caller, npc, originals[0]["speaker"])
+        for original in originals:
+            sentence = {"speaker": speaker,             # speaker's name
+                        "dialogue": original["dialogue"],   # dialogue's key
+                        "sentence": original["sentence"],   # sentence's ordinal
+                        "content": original["content"]}
+            if npc:
+                sentence["npc"] = npc.dbref             # NPC's dbref
+            sentences_list.append(sentence)
+
+        return sentences_list
+
+    def create_output_sentence(self, original, caller, npc):
+        """
+        Create a sentence's data to output to the client.
+
+        Args:
+            original: (dict) original sentence data
+            caller: (object) caller object
+            npc: (object, optional) NPC object
+
+        Returns:
+            (dict) sentence's data
+        """
+        speaker = self.get_dialogue_speaker(caller, npc, original["speaker"])
+        sentence = {"speaker": speaker,             # speaker's name
+                    "dialogue": original["dialogue"],   # dialogue's key
+                    "sentence": original["sentence"],   # sentence's ordinal
+                    "content": original["content"]}
+        if npc:
+            sentence["npc"] = npc.dbref             # NPC's dbref
+        return sentence
 
 
     def finish_sentence(self, caller, npc, dialogue, sentence):
