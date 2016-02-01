@@ -1,5 +1,5 @@
 key,type_id,name,desc
-OBJECTIVE_TALK,1,Talk,finish a dialogue, object: dialogue_id
-OBJECTIVE_ARRIVE,2,Arrive,arrive a room, object: room_id
-OBJECTIVE_OBJECT,3,Object,get some objects, object: object_id
-OBJECTIVE_KILL,4,Kill,kill some characters, object: character_id
+OBJECTIVE_TALK,1,对话,完成某个对话。object字段：对话id。
+OBJECTIVE_ARRIVE,2,到达,到达某个房间。object字段：房间id。
+OBJECTIVE_OBJECT,3,物体,获得某个物体。object字段：物体id。
+OBJECTIVE_KILL,4,杀死,杀死某个角色。object字段：角色id。
