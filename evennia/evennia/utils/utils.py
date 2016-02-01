@@ -7,7 +7,7 @@ be of use when designing your own game.
 """
 from __future__ import division, print_function
 from builtins import object, range
-from future.utils import viewkeys
+from future.utils import viewkeys, raise_
 
 import os
 import sys
@@ -720,7 +720,7 @@ def delay(delay=2, callback=None, retval=None):
     Delay the return of a value.
 
     Args:
-      delay (int): The delay in seconds
+      delay (int or float): The delay in seconds
       callback (callable, optional): Will be called without arguments
         or with `retval` after delay seconds.
       retval (any, optional): Whis will be returned by this function
@@ -1129,7 +1129,7 @@ def class_from_module(path, defaultpaths=None):
                 # this means the error happened within the called module and
                 # we must not hide it.
                 exc = sys.exc_info()
-                raise exc[1], None, exc[2]
+                raise_(exc[1], None, exc[2])
             else:
                 # otherwise, try the next suggested path
                 continue
@@ -1140,7 +1140,7 @@ def class_from_module(path, defaultpaths=None):
             if len(trace()) > 2:
                 # AttributeError within the module, don't hide it
                 exc = sys.exc_info()
-                raise exc[1], None, exc[2]
+                raise_(exc[1], None, exc[2])
     if not cls:
         err = "Could not load typeclass '%s'" % path
         if defaultpaths:
