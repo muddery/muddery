@@ -250,8 +250,6 @@ DEFAULT_HOME_KEY = ""
 
 # The start position for new characters. It is the key of the room.
 # If it is empty, the home will be set to the first room in WORLD_ROOMS.
-#  MULTISESSION_MODE = 0, 1 - used by default unloggedin create command
-#  MULTISESSION_MODE = 2,3 - used by default character_create command
 START_LOCATION_KEY = ""
 
 DEFAULT_PLAYER_CHARACTER_KEY = "player"

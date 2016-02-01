@@ -11,13 +11,13 @@
     Welcome to the World Editor Page. Here, you can edit the whole game world.
 
     <h2><a href="editor/defines">Basic Defines</a></h2>
-    Defines.
+    Basic defines of types and classes.
 
     <h2><a href="editor/worldmap">World Map</a></h2>
-    World map.
+    The whole world map can be modified here.
 
     <h2><a href="editor/characters">Characters</a></h2>
-    Characters.
+    All data about characters.
 
     <h2><a href="editor/objects">Objects</a></h2>
     Objects.
@@ -34,7 +34,7 @@
     <h2><a href="editor/dialogues">Dialogues</a></h2>
     Dialogues.
 
-    <h2><a href="editor/localized_strings">Localized Strings</a></h2>
+    <h2><a href="editor/localization">Localization</a></h2>
     Localized strings.
 
     <div><br></div>
@@ -44,7 +44,7 @@
     </form>
     <div><br></div>
     <form>
-      <input type="button" value="Apply Changes" onclick="worldeditor.doPost('apply=1')"/>
+      <input type="button" value="Apply To Game" onclick="worldeditor.doPost('apply=1')"/>
     </form>
 
     <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>

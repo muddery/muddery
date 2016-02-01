@@ -1,8 +1,8 @@
-key,condition
-dlg_tele_dock,
-dlg_tele_house,
-dlg_tele_graveyard,
-dlg_skill_dunt,"not has_attr(""skill"")"
-dlg_skill_strong_body,"not has_attr(""skill"")"
-dlg_skill_powerful_heal,"not has_attr(""skill"")"
-dlg_learned_skill,
+key,name,condition
+dlg_tele_dock,传送码头
+dlg_tele_house,传送民居
+dlg_tele_graveyard,传送墓地
+dlg_skill_dunt,技能重击,"not has_attr(""skill"")"
+dlg_skill_strong_body,技能体魄,"not has_attr(""skill"")"
+dlg_skill_powerful_heal,技能治疗,"not has_attr(""skill"")"
+dlg_learned_skill,学习技能,

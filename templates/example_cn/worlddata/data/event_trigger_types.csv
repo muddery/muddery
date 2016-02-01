@@ -1,5 +1,5 @@
 key,type_id,name,desc
-EVENT_TRIGGER_ARRIVE,1,Arrive,at attriving a room. object: room_id
-EVENT_TRIGGER_DIE,2,Die,character die. object: killer_mob_id
-EVENT_TRIGGER_KILL,3,Kill,Kill a mob. object: mob_id
-EVENT_TRIGGER_TRAVERSE,4,Traverse,Before traverse an exit. object: exit_id
+EVENT_TRIGGER_ARRIVE,1,到达,到达某个房间时触发。trigger_obj字段：房间id。
+EVENT_TRIGGER_DIE,2,死亡,角色死亡。trigger_obj字段：杀死角色的人的id。
+EVENT_TRIGGER_KILL,3,杀死,杀死某个怪。trigger_obj字段：怪的id。
+EVENT_TRIGGER_TRAVERSE,4,穿越,穿越某个出口前触发。trigger_obj字段：出口id。

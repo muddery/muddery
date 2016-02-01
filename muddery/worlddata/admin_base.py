@@ -237,6 +237,7 @@ class EventDataAdmin(admin.ModelAdmin):
 
 class DialoguesAdmin(admin.ModelAdmin):
     list_display = ('key',
+                    'name',
                     'condition')
 
 

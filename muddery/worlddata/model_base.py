@@ -896,6 +896,9 @@ class dialogues(models.Model):
     # dialogue's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
 
+    # dialogue's name
+    name = models.CharField(max_length=NAME_LENGTH, default="")
+
     # condition to show this dialogue
     condition = models.TextField(blank=True)
 
@@ -906,7 +909,7 @@ class dialogues(models.Model):
         verbose_name_plural = "Dialogues"
 
     def __unicode__(self):
-        return self.key
+        return self.name + " (" + self.key + ")"
 
 
 # ------------------------------------------------------------

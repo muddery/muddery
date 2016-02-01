@@ -1,14 +1,14 @@
 key,name,path,category,desc
-CLASS_COMMON_ROOM,Common Room,typeclasses.rooms.Room,CATE_ROOM,Common room's typeclass.
-CLASS_COMMON_EXIT,Common Exit,typeclasses.exits.Exit,CATE_EXIT,Common exit's typeclass.
-CLASS_LOCKED_EXIT,Locked Exit,typeclasses.exits.LockedExit,CATE_EXIT,A kind of exits that can be locked.
-CLASS_COMMON_NPC,Common NPC,typeclasses.npcs.NPC,CATE_CHARACTER,Common NPC's typeclass.
-CLASS_COMMON_MONSTER,Common Monster,typeclasses.monsters.Monster,CATE_CHARACTER,Common monster's typeclass.
-CLASS_PLAYER,Player,typeclasses.player_characters.PlayerCharacter,CATE_CHARACTER,Player character's typeclass.
-CLASS_WORLD_OBJECT,World Object,typeclasses.objects.Object,CATE_OBJECT,World object's typeclass.
-CLASS_COMMON_OBJECT,Common Object,typeclasses.common_objects.CommonObject,CATE_OBJECT,Common object's typeclass.
-CLASS_OBJECT_CREATOR,Object Creator,typeclasses.object_creators.ObjectCreator,CATE_OBJECT,Object creators can create new objects.
-CLASS_FOOD,Food,typeclasses.common_objects.Food,CATE_OBJECT,Foods can be eaten.
-CLASS_SKILL,Skill,typeclasses.character_skills.Skill,CATE_SKILL,Character's skill.
-CLASS_QUEST,Quest,typeclasses.character_quests.Quest,CATE_QUEST,Quest.
-CLASS_EQUIPMENT,Equipment,typeclasses.common_objects.Equipment,CATE_OBJECT,Equipments.
+CLASS_COMMON_ROOM,普通房间,typeclasses.rooms.Room,CATE_ROOM,Common room's typeclass.
+CLASS_COMMON_EXIT,普通出口,typeclasses.exits.Exit,CATE_EXIT,Common exit's typeclass.
+CLASS_LOCKED_EXIT,上锁的出口,typeclasses.exits.LockedExit,CATE_EXIT,A kind of exits that can be locked.
+CLASS_COMMON_NPC,普通NPC,typeclasses.npcs.NPC,CATE_CHARACTER,Common NPC's typeclass.
+CLASS_COMMON_MONSTER,普通怪,typeclasses.monsters.Monster,CATE_CHARACTER,Common monster's typeclass.
+CLASS_PLAYER,玩家,typeclasses.player_characters.PlayerCharacter,CATE_CHARACTER,Player character's typeclass.
+CLASS_WORLD_OBJECT,世界物体,typeclasses.objects.Object,CATE_OBJECT,World object's typeclass.
+CLASS_COMMON_OBJECT,普通物体,typeclasses.common_objects.CommonObject,CATE_OBJECT,Common object's typeclass.
+CLASS_OBJECT_CREATOR,物体生成器,typeclasses.object_creators.ObjectCreator,CATE_OBJECT,Object creators can create new objects.
+CLASS_FOOD,食物,typeclasses.common_objects.Food,CATE_OBJECT,Foods can be eaten.
+CLASS_SKILL,技能,typeclasses.character_skills.Skill,CATE_SKILL,Character's skill.
+CLASS_QUEST,任务,typeclasses.character_quests.Quest,CATE_QUEST,Quest.
+CLASS_EQUIPMENT,装备,typeclasses.common_objects.Equipment,CATE_OBJECT,Equipments.

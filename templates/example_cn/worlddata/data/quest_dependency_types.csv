@@ -1,10 +1,10 @@
 key,type_id,name,desc
-DPD_CAN_PROVIDE,1,Can Provide,Can provide this quest.
-DPD_ACCEPTED,2,Accepted,Has accepted this quest.
-DPD_NOT_ACCEPTED,3,Not Accepted,Has not accepted this quest.
-DPD_IN_PROGRESS,4,In Progress,This quest is in progress.
-DPD_NOT_IN_PROGRESS,5,Not In Progress,This quest is not in progress.
-DPD_ACCOMPLISHED,6,Accomplished,This quest is accomplished.
-DPD_NOT_ACCOMPLISHED,7,Not Accomplished,This quest has been accepted, but not accomplished.
-DPD_COMPLETED,8,Completed,This quest is completed.
-DPD_NOT_COMPLETED,9,Not Completed,This quest has been accepted, but not completed.
+DPD_CAN_PROVIDE,1,可提供,可以提供该任务。
+DPD_ACCEPTED,2,已接受,已经接受该任务。
+DPD_NOT_ACCEPTED,3,未接受,尚未接受该任务。
+DPD_IN_PROGRESS,4,进行中,任务正在进行中。
+DPD_NOT_IN_PROGRESS,5,不在进行中,任务不在进行中。
+DPD_ACCOMPLISHED,6,已达成,任务目标已达成。
+DPD_NOT_ACCOMPLISHED,7,未达成,任务已接受，但目标未达成。
+DPD_COMPLETED,8,已完成,任务已完成。
+DPD_NOT_COMPLETED,9,未完成,任务已接受，但未完成。

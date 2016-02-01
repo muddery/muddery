@@ -6,22 +6,24 @@
     <h3><a href="../">BACK</a></h3>
 
     <h2><a href="{% url "admin:worlddata_dialogues_changelist" %}">Dialogues</a></h2>
-    Dialogue's data.
+    Dialogue's name list and condtions. All dialogue names are here. Only Dialogues who match the condition
+    can be shown.
 
     <h2><a href="{% url "admin:worlddata_dialogue_quest_dependencies_changelist" %}">Dialogue Quest Dependencies</a></h2>
-    Dialogue quest dependencies.
+    Dialogue quest dependencies. Some dialogues only can be shown when certain quests have been done or
+    have not been done, these relations are all in this table.
 
     <h2><a href="{% url "admin:worlddata_dialogue_relations_changelist" %}">Dialogue Relations</a></h2>
-    Dialogue relations.
+    Dialogue relations. Defines which dialogues follow which dialogues.
 
     <h2><a href="{% url "admin:worlddata_dialogue_sentences_changelist" %}">Dialogue Sentences</a></h2>
-    Dialogue sentences.
+    Dialogue sentences. Theses are dialogues' contents.
 
     <h2><a href="{% url "admin:worlddata_npc_dialogues_changelist" %}">NPC Dialogues</a></h2>
-    NPC's dialogue.
+    NPC's dialogue. We can make NPCs talk by setting their dialogues.
 
     <h2><a href="{% url "admin:worlddata_event_dialogues_changelist" %}">Event Dialogues</a></h2>
-    Dialogue event's data.
+    Dialogue event's data. Some events can trigger dialogues.
 
     <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
 
