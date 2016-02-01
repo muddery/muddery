@@ -366,9 +366,10 @@ start
 
    view:tag(tutorial_climbed_tree, tutorial_world) ; traverse:tag(tutorial_climbed_tree, tutorial_world)
 
- This checks if Character has a Tag tutorial_climbed_tree set before it
- allows itself to be displayed. This Tag is set by the tree object when
- the 'climb' command is used.
+ This checks if Character has a Tag named "tutorial_climbed_tree" and
+of the category "tutorial_world" set before it allows itself to be
+displayed. This Tag is set by the tree object when the 'climb' command
+is used.
 #
 # Now that the exit is prepared, move to outside inn to continue building.
 #

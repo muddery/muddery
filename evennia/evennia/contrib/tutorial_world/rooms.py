@@ -15,7 +15,7 @@ from evennia import TICKER_HANDLER
 from evennia import CmdSet, Command, DefaultRoom
 from evennia import utils, create_object, search_object
 from evennia import syscmdkeys, default_cmds
-from evennia.contrib.tutorial_world.objects import LightSource, TutorialObject
+from evennia.contrib.tutorial_world.objects import LightSource
 
 # the system error-handling module is defined in the settings. We load the
 # given setting here using utils.object_from_module. This way we can use
@@ -356,7 +356,7 @@ class IntroRoom(TutorialRoom):
         Called when the room is first created.
         """
         super(IntroRoom, self).at_object_creation()
-        self.db_tutorial_info = "The first room of the tutorial. " \
+        self.db.tutorial_info = "The first room of the tutorial. " \
                                 "This assigns the health Attribute to "\
                                 "the player."
 
@@ -627,6 +627,12 @@ class BridgeRoom(WeatherRoom):
         self.db.fall_exit = "cliffledge"
         # add the cmdset on the room.
         self.cmdset.add_default(BridgeCmdSet)
+        # since the default Character's at_look() will access the room's
+        # return_description (this skips the cmdset) when
+        # first entering it, we need to explicitly turn off the room
+        # as a normal view target - once inside, our own look will
+        # handle all return messages.
+        self.locks.add("view:false()")
 
     def update_weather(self, *args, **kwargs):
         """
@@ -659,6 +665,7 @@ class BridgeRoom(WeatherRoom):
             else:
                 # if not from the east, then from the west!
                 character.db.tutorial_bridge_position = 0
+            character.execute_cmd("look")
 
     def at_object_leave(self, character, target_location):
         """
@@ -831,7 +838,7 @@ class DarkRoom(TutorialRoom):
         if there is a light-giving object in the room overall (like if
         a splinter was dropped in the room)
         """
-        return obj.is_superuser or obj.db.is_giving_light or obj.is_superuser or any(o for o in obj.contents if o.db.is_giving_light)
+        return obj.is_superuser or obj.db.is_giving_light or any(o for o in obj.contents if o.db.is_giving_light)
 
     def _heal(self, character):
         """
@@ -840,14 +847,18 @@ class DarkRoom(TutorialRoom):
         health = character.db.health_max or 20
         character.db.health = health
 
-    def check_light_state(self):
+    def check_light_state(self, exclude=None):
         """
         This method checks if there are any light sources in the room.
         If there isn't it makes sure to add the dark cmdset to all
         characters in the room. It is called whenever characters enter
         the room and also by the Light sources when they turn on.
+
+        Args:
+            exclude (Object): An object to not include in the light check.
         """
-        if any(self._carries_light(obj) for obj in self.contents):
+        if any(self._carries_light(obj) for obj in self.contents if obj != exclude):
+            self.locks.add("view:all()")
             self.cmdset.remove(DarkCmdSet)
             self.db.is_lit = True
             for char in (obj for obj in self.contents if obj.has_player):
@@ -856,6 +867,7 @@ class DarkRoom(TutorialRoom):
         else:
             # noone is carrying light - darken the room
             self.db.is_lit = False
+            self.locks.add("view:false()")
             self.cmdset.add(DarkCmdSet, permanent=True)
             for char in (obj for obj in self.contents if obj.has_player):
                 if char.is_superuser:
@@ -872,7 +884,7 @@ class DarkRoom(TutorialRoom):
             # a puppeted object, that is, a Character
             self._heal(obj)
             # in case the new guy carries light with them
-        self.check_light_state()
+            self.check_light_state()
 
     def at_object_leave(self, obj, target_location):
         """
@@ -880,7 +892,10 @@ class DarkRoom(TutorialRoom):
         DarkCmdSet if necessary.  This also works if they are
         teleported away.
         """
-        self.check_light_state()
+        # since this hook is called while the object is still in the room,
+        # we exclude it from the light check, to ignore any light sources
+        # it may be carrying.
+        self.check_light_state(exclude=obj)
 
 
 #------------------------------------------------------------
@@ -977,7 +992,7 @@ class OutroRoom(TutorialRoom):
         Called when the room is first created.
         """
         super(OutroRoom, self).at_object_creation()
-        self.db_tutorial_info = "The last room of the tutorial. " \
+        self.db.tutorial_info = "The last room of the tutorial. " \
                                 "This cleans up all temporary Attributes " \
                                 "the tutorial may have assigned to the "\
                                 "character."
