@@ -20,11 +20,12 @@ from muddery.utils import utils
 
 CONNECTION_SCREEN = \
 """{b=============================================================={n
-    Welcome to the demo game of Muddery! This version is created on Oct. 23, 2015.
-    
-    This demo game is based on Muddery, an open-source online text game server. If you are interested in it, please visit our website www.muddery.org.
-    
-    {rNotice! This game is for demo only, all players' register info and game data may be lost frequently!{n
+  Welcome to Muddery's demo game! This version is created on {yFeb. 1, 2016{n.
+
+  This is a small solo game. It's very short, only to demonstrate Muddery's abilities.
+  Because the game codes and the database structure may change frequently, user's data may lose. {rIf you can not login with your username, please register again.{n
+ 
+  Muddery is an open source online text game framework in Python. For more information, please visit our website {whttp://www.muddery.org{n.
 {b=============================================================={n"""
 
 # % (settings.SERVERNAME, utils.get_muddery_version())

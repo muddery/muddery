@@ -8,6 +8,9 @@ creation commands.
 
 """
 
+import random
+from django.conf import settings
+from django.apps import apps
 from evennia.utils import logger
 from muddery.typeclasses.player_characters import MudderyPlayerCharacter
 from muddery.utils.localized_strings_handler import LS
@@ -40,7 +43,16 @@ class PlayerCharacter(MudderyPlayerCharacter):
 
         """
         super(PlayerCharacter, self).at_object_creation()
-        self.db.career = "CAREER_COMMON"
+
+        try:
+            model_career = apps.get_model(settings.WORLD_DATA_APP, settings.CHARACTER_CAREERS)
+            if model_career:
+                careers = model_career.objects.all()
+                if careers:
+                    career = random.choice(careers)
+                    self.db.career = career.key
+        except Exception, e:
+            pass
 
 
     def add_hp(self, hp):

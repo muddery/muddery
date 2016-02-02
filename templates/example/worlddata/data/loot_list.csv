@@ -1,6 +1,6 @@
 provider,object,number,odds,quest,condition
-creator_box,obj_key,1,1,
-creator_basket,obj_apple,1,1,
-creator_bag,obj_potato,1,1,
-creator_rack,equip_armor,1,1,
-creator_rack,weapon_sword,1,1,
+creator_alley_pile,weapon_wood_stick,1,1,,
+creator_street_body,obj_guardhouse_key,1,1,quest_find_guardhouse_key,
+creator_storeroom_box,food_bread,1,1,,
+creator_photo_studio_box,obj_binder,1,1,quest_find_binder,
+mob_robot_a,obj_screw,1,0.8,quest_find_screws,

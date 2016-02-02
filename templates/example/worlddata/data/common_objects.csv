@@ -1,4 +1,4 @@
 key,name,typeclass,desc,max_stack,unique
-obj_key,KEY,CLASS_COMMON_OBJECT,A key.,1,1
-obj_apple,APPLE,CLASS_COMMON_OBJECT,An apple.,10,0
-obj_potato,POTATO,CLASS_COMMON_OBJECT,A potato.,10,0
+obj_guardhouse_key,Key,CLASS_COMMON_OBJECT,"A chain of copper keys. What locks can they open?",1,1
+obj_binder,Bandage,CLASS_COMMON_OBJECT,"A roll of bandages which are in their original pack. They can be used to stop bleeding.",1,1
+obj_screw,Screw,CLASS_COMMON_OBJECT,"A screw. What is the use for it?",5,1

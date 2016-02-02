@@ -1,37 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
     <h1>Defines</h1>
-    Welcome to the Defines Page. These are basic defines.
+    Welcome to the Defines Page. Here defines a set of basic values.
 
     <h3><a href="../">BACK</a></h3>
 
     <h2><a href="{% url "admin:worlddata_class_categories_changelist" %}">Class Categories</a></h2>
-    Class's categories. These are basic object types.
+    The basic categories of object types.
 
     <h2><a href="{% url "admin:worlddata_typeclasses_changelist" %}">Typeclasses</a></h2>
-    All available typeclasses. The typeclass's paths must match the codes.
+    All available typeclasses. Typeclass's paths must match the values in codes.
 
     <h2><a href="{% url "admin:worlddata_equipment_types_changelist" %}">Equipment Types</a></h2>
-    Equipment Types. They are used to limit character's available equipments. Characters can only put on
-    equipments that match their career.
+    Equipment Types limit character's available equipments. Characters can only put on equipments
+    that match their careers.
 
     <h2><a href="{% url "admin:worlddata_equipment_positions_changelist" %}">Equipment Positions</a></h2>
-    Equipment Positions. Equipments must be put on right positions, such as hands or head.
+    Equipments only can be put on right positions, such as hands or legs.
 
     <h2><a href="{% url "admin:worlddata_character_careers_changelist" %}">Character Careers</a></h2>
-    Character Careers.
+    Character's career decides their features, such as basic attribute values, basic skills, equipments etc.
 
     <h2><a href="{% url "admin:worlddata_quest_objective_types_changelist" %}">Quest Objective Types</a></h2>
-    Quest objective's type. They must match the types in utils.defines.
+    Quest objective's type. They must match the values in utils.defines.
 
     <h2><a href="{% url "admin:worlddata_quest_dependency_types_changelist" %}">Quest Dependency Types</a></h2>
-    Quest's dependency types. They must match the types in utils.defines.
+    Quest's dependency types. They must match the values in utils.defines.
 
     <h2><a href="{% url "admin:worlddata_event_types_changelist" %}">Event Types</a></h2>
-    Event result's types. They must match the types in utils.defines.
+    The types of actions that events lead to. They must match the values in utils.defines.
 
     <h2><a href="{% url "admin:worlddata_event_trigger_types_changelist" %}">Event Trigger Types</a></h2>
-    Event trigger's types. They must match the types in utils.defines.
+    Event trigger's types. They must match the values in utils.defines.
 
     <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
 

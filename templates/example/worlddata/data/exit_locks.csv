@@ -1,2 +1,3 @@
 key,unlock_condition,unlock_verb,locked_desc,auto_unlock
-exit_house_to_street,have_object("obj_key"),UNLOCK,This exit is locked. Use a key to unlock it.,0
+exit_colorfulworld_street_1,have_object("weapon_wood_stick"),"Try to move it.","The exit is blocked with a huge ad. board. Hope I can find something to move it.",0
+exit_colorfulworld_gate_path,is_quest_completed("quest_none"),,"There is too far. Let me search nearby places first.",1

@@ -1,9 +1,9 @@
 dialogue,ordinal,speaker,content,action,provide_quest,complete_quest
 dlg_hello,1,n,"你好！",,,
 dlg_alley_soliloquy,1,p,"头好晕啊，只记得我和朋友们在游乐园里玩，突然人群骚乱起来，大家都喊叫着四散奔逃，我也跟着乱跑，进了一个胡同之后不知怎么就摔晕过去了。",,,
-dlg_street_find_servivor,1,,"眼前的景象让你吓了一跳，原本游人如织的街道现在已是满目疮痍、空无一人，像是经历了一次大灾难。",,,
-dlg_street_find_servivor,2,,"人们都去哪里了？我该去哪里？",,,
-dlg_street_find_servivor,3,,"你环顾了一下四周，决定先在周围找找有没有其他人。",,quest_find_survivor,
+dlg_street_find_survivor,1,,"眼前的景象让你吓了一跳，原本游人如织的街道现在已是满目疮痍、空无一人，像是经历了一次大灾难。",,,
+dlg_street_find_survivor,2,,"人们都去哪里了？我该去哪里？",,,
+dlg_street_find_survivor,3,,"你环顾了一下四周，决定先在周围找找有没有其他人。",,quest_find_survivor,
 dlg_colorfulworld_find_survivor,1,"""陌生人""","该死的机器人，我要和你同归于尽！",,,
 dlg_colorfulworld_find_survivor,2,p,"我可不是什么机器人啊！你疯了吗？",,,
 dlg_colorfulworld_find_survivor,3,"""陌生人""","什么？是我认错了吗？对不起！",,,

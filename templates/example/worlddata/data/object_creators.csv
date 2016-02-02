@@ -1,5 +1,5 @@
 key,loot_verb,loot_condition
-creator_box,SEARCH,
-creator_basket,SEARCH,is_quest_in_progress("quest_apple")
-creator_bag,SEARCH,is_quest_in_progress("quest_potato")
-creator_rack,LOOT,
+creator_alley_pile,Check,
+creator_street_body,Search,
+creator_storeroom_box,Check,
+creator_photo_studio_box,Check,is_quest_in_progress("quest_find_binder")

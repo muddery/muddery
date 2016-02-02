@@ -1,2 +1,4 @@
 key,name,typeclass,desc,cd,passive,condition,function,effect
-skill_hit,HIT,CLASS_SKILL,Hit an enemy.,1,0,,skill_hit,1
+skill_normal_hit,Hit,CLASS_SKILL,"Hit an enemy. Make a little damage.",1,0,,skill_hit,1
+skill_normal_heal,Heal,CLASS_SKILL,"Heal yourself. Recover a little HP.",5,0,,skill_heal,20
+skill_normal_hp,Strong Body,CLASS_SKILL,"Passive skill. Increase max HP.",0,1,,skill_increase_hp,20
