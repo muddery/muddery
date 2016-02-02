@@ -124,7 +124,7 @@ TEMPLATE_DIRS = (
     os.path.join(EVENNIA_DIR, "web", "templates", ACTIVE_TEMPLATE),
     os.path.join(EVENNIA_DIR, "web", "templates"),)
 
-# The secret key is randomly seegd upon creation. It is used to sign
+# The secret key is randomly seeded upon creation. It is used to sign
 # Django's cookies. Do not share this with anyone. Changing it will
 # log out all active web browsing sessions. Game web client sessions
 # may survive.
@@ -179,16 +179,22 @@ AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 # fallback if an object's normal home location is deleted. It is the
 # key of the room. If it is empty, the home will be set to the first
 # room in WORLD_ROOMS.
-DEFAULT_HOME_KEY = "room_street"
+DEFAULT_HOME_KEY = "room_intro"
 
 # The start position for new characters. It is the key of the room.
 # If it is empty, the home will be set to the first room in WORLD_ROOMS.
 #  MULTISESSION_MODE = 0, 1 - used by default unloggedin create command
 #  MULTISESSION_MODE = 2,3 - used by default character_create command
-START_LOCATION_KEY = "room_street"
+START_LOCATION_KEY = "room_intro"
 
-EQUIP_POSITIONS = ["head", "chest", "hand", "leg"]
+DEFAULT_PLAYER_CHARACTER_HOME = "room_colorfulworld_hole"
 
 EQUIP_EFFECTS = ["attack", "defence"]
 
 SOLO_MODE = True
+
+# Handler deals with condition scripts and action scripts
+SCRIPT_HANDLER = "utils.script_handler.ScriptHandler"
+
+# NPC's reborn time after being killed. If it is below 0, npcs will not be reborn.
+NPC_REBORN_CD = 2

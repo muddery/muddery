@@ -1,7 +1,7 @@
 key,name,condition
 dlg_hello,欢迎,
 dlg_alley_soliloquy,小巷醒来,
-dlg_street_find_servivor,任务寻找幸存者,
+dlg_street_find_survivor,任务寻找幸存者,
 dlg_colorfulworld_find_survivor,遭遇保安,
 dlg_colorfulworld_wu_01,寻找钥匙,
 dlg_colorfulworld_wu_02,钥匙未完成,

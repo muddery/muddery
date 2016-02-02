@@ -1,31 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
     <h1>Characters</h1>
-    Welcome to the Character Page.
+    Welcome to the Character Page. Characters are activited objects what can move by themselves.
+    Some of them can be puttied by players.
 
     <h3><a href="../">BACK</a></h3>
 
     <h2><a href="{% url "admin:worlddata_character_careers_changelist" %}">Character Careers</a></h2>
-    Available careers.
+    Character's career decides their features, such as basic attribute values, basic skills, equipments etc.
 
     <h2><a href="{% url "admin:worlddata_character_models_changelist" %}">Character Models</a></h2>
-    Character's models. Character's data such as HP, MP are from this table. It is easy to create
-    a lot of characters of the same data.
+    Character's models, include HP, MP, and other attributes. With models, game designers can create
+    batchs of similar characters easily.
 
     <h2><a href="{% url "admin:worlddata_world_npcs_changelist" %}">World NPCs</a></h2>
-    Unique NPCs. These NPCs are unique in the whole game world. They initial positions are fixed.
+    These NPCs are unique in the whole game world. Their initial positions are fixed.
 
     <h2><a href="{% url "admin:worlddata_common_characters_changelist" %}">Common Characters</a></h2>
-    Common characters include player's character, mobs. They are not unique.
+    Common characters are not unique, their initial positions are not unique. It includes player's
+    character and common mobs.
 
     <h2><a href="{% url "admin:worlddata_skills_changelist" %}">Skills</a></h2>
-    Character's skills. All available skills are in this table.
+    All available skills are in this table.
 
     <h2><a href="{% url "admin:worlddata_default_skills_changelist" %}">Default Skills</a></h2>
-    Character's default skills. Characters can be born with these default skills.
+    Character's default skills. Characters are born with their default skills.
 
     <h2><a href="{% url "admin:worlddata_npc_dialogues_changelist" %}">NPC Dialogues</a></h2>
-    NPC's dialogue. We can make NPCs talk by setting their dialogues.
+    NPC's dialogue. Game designers can make NPCs talk by setting their dialogues.
+
+    <h2><a href="{% url "admin:worlddata_loot_list_changelist" %}">Loot List</a></h2>
+    Loot list sets the source and the odds of dropped objects. It can be used on objects creators and
+    characters.
 
     <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
 
