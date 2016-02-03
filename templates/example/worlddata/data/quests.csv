@@ -1,6 +1,6 @@
-key,name,typeclass,desc,condition
-quest_find_survivor,Find Survivors,CLASS_QUEST,"Search nearby places. Try to find some survivors.",
-quest_find_guardhouse_key,Find Guardhouse's Key,CLASS_QUEST,"Help the security man to find guardhouse's key.",
-quest_find_binder,Find Bandages,CLASS_QUEST,"Give the security man some bandages. Try to find them in rooms.",
-quest_find_screws,Find Screws,CLASS_QUEST,"Give the security man 2 screws. You can get them from robots.",
-quest_kill_robots,Kill Robots,CLASS_QUEST,"Kill 3 robots.",
+key,name,typeclass,desc,condition,action
+quest_find_survivor,Find Survivors,CLASS_QUEST,"Search nearby places. Try to find some survivors.",,
+quest_find_guardhouse_key,Find Guardhouse's Key,CLASS_QUEST,"Help the security man to find guardhouse's key.",,
+quest_find_binder,Find Bandages,CLASS_QUEST,"Give the security man some bandages. Try to find them in rooms.",,
+quest_find_screws,Find Screws,CLASS_QUEST,"Give the security man 2 screws. You can get them from robots.",,
+quest_kill_robots,Kill Robots,CLASS_QUEST,"Kill 3 robots.",,

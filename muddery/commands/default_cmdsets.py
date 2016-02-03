@@ -8,10 +8,6 @@ and merged onto entities at runtime.
 To create new commands to populate the cmdset, see
 `commands/command.py`.
 
-This module wraps the default command sets of Evennia; overloads them
-to add/remove commands from the default lineup. You can create your
-own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
-
 """
 
 import traceback
@@ -26,7 +22,7 @@ from muddery.commands import worlddata
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
     """
     The `CharacterCmdSet` contains general in-game commands like `look`,
-    `get`, etc available on in-game Character objects. It is merged with
+    `goto`, etc available on in-game Character objects. It is merged with
     the `PlayerCmdSet` when a Player puppets a Character.
     """
     key = "DefaultCharacter"
@@ -58,8 +54,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdUnlockExit())
         self.add(general.CmdGiveUpQuest())
         
-        # Add empty login cmd and skill cmd to the normal cmdset to
-        # avoid wrong cmd messages.
+        # Add empty login commands to the normal cmdset to
+        # avoid showing wrong cmd messages.
         self.add(general.CmdConnect())
         self.add(general.CmdCreate())
         self.add(general.CmdCreateConnect())
@@ -94,12 +90,8 @@ class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
 
     def at_cmdset_creation(self):
         """
-        Populates the cmdset
+        Populates the cmdset.
         """
-        # super(UnloggedinCmdSet, self).at_cmdset_creation()
-        #
-        # any commands you add below will overload the default ones.
-        #
         self.add(unloggedin.CmdUnconnectedLoginStart())
         self.add(unloggedin.CmdUnconnectedLook())
         self.add(unloggedin.CmdUnconnectedCreateConnect())

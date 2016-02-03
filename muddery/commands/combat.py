@@ -1,5 +1,5 @@
 """
-Battle commands.
+Battle commands. They only can be used when a character is in a combat.
 """
 
 from evennia import Command
@@ -24,7 +24,7 @@ class CmdCombatInfo(Command):
 
     def func(self):
         """
-        Handle the combat info.
+        Return the overall combat informations to the caller.
         """
         caller = self.caller
 

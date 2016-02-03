@@ -46,15 +46,27 @@ class ObjectKeyHandler(object):
         Get key's model.
 
         Args:
-            key: the key of an object
+            key: (string) the key of an object
 
         Returns:
-            key's models
+            (list) key's models' name
         """
         if key not in self.key_model:
             return []
 
         return self.key_model[key]
+
+    def has_key(self, key):
+        """
+        Check if this key exists.
+
+        Args:
+            key: (string) the key of an object
+
+        Returns:
+            (boolean) result
+        """
+        return key in self.key_model
 
 
 # main dialoguehandler

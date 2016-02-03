@@ -1049,7 +1049,7 @@ class CmdGiveUpQuest(Command):
 
         try:
             # Take off the equipment.
-            caller.quest.give_up(quest_key)
+            caller.quest_handler.give_up(quest_key)
         except MudderyError, e:
             caller.msg({"alert": str(e)})
             return

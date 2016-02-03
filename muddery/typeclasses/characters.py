@@ -22,7 +22,7 @@ from muddery.utils.localized_strings_handler import LS
 from muddery.utils import utils
 from muddery.utils.builder import build_object
 from muddery.utils.skill_handler import SkillHandler
-from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.utils.loot_handler import LootHandler
 
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
@@ -45,10 +45,15 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
     """
 
-    # initialize all handlers in a lazy fashion
+    # initialize skill handler in a lazy fashion
     @lazy_property
     def skill_handler(self):
         return SkillHandler(self)
+
+    # initialize loot handler in a lazy fashion
+    @lazy_property
+    def loot_handler(self):
+        return LootHandler(self)
 
     def at_object_creation(self):
         """
@@ -119,24 +124,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Set data_info to the object.
         """
         super(MudderyCharacter, self).load_data()
-
-        # Load loot list.
-        loot_list = []
-        try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.LOOT_LIST)
-            loot_records = model_obj.objects.filter(provider=self.get_data_key())
-
-            for loot_record in loot_records:
-                loot_object = {"object": loot_record.serializable_value("object"),
-                               "number": loot_record.number,
-                               "odds": loot_record.odds,
-                               "quest": loot_record.serializable_value("quest"),
-                               "condition": loot_record.condition}
-                loot_list.append(loot_object)
-        except Exception, e:
-            logger.log_errmsg("Can't load loot info %s: %s" % (self.get_data_key(), e))
-
-        self.loot_list = loot_list
 
         # refresh data
         self.refresh_data()
@@ -573,46 +560,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             commands.append(command)
 
         return commands
-
-    def loot(self, looter):
-        """
-        Loot the character for objects.
-
-        Args:
-            looter: (object) who loot this character
-
-        Returns:
-            (list) object's list
-        """
-        def can_loot(self, looter, obj):
-            """
-            help function to decide which objects can be looted.
-
-            Args:
-                self: (object) this character
-                looter: (object) who loot this character
-                obj: (dict) information of the object which will be looted
-
-            Returns:
-                (boolean) if this object can be looted or not
-            """
-            rand = random.random()
-            if rand > obj["odds"]:
-                return False
-
-            if obj["quest"]:
-                if not looter.quest.is_not_accomplished(obj["quest"]):
-                    return False
-
-            if not SCRIPT_HANDLER.match_condition(looter, self, obj["condition"]):
-                return False
-
-            return True
-
-        # Get objects that matches odds and conditions .
-        obj_list = [obj for obj in self.loot_list if can_loot(self, looter, obj)]
-
-        return obj_list
 
     def provide_exp(self, killer):
         """

@@ -1,40 +1,30 @@
 from django.contrib.admin.forms import forms
+from django.conf import settings
+from django.apps import apps
 from worlddata.models import *
-
-
-#
-# Field
-#
-
-
-class SkillsModelChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        return obj.key
-
-
-class DialogueModelChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        return obj.key
-
-
-class QuestModelChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        return obj.key
-
-
-class NPCModelChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        return obj.key
-
-
-class WorldObjectModelChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        return obj.key
-
 
 #
 # Form
 #
+
+
+def ExistKey(key, except_model=None):
+    """
+    Check if the key exists.
+    """
+    # Get models.
+    for model_name in settings.OBJECT_DATA_MODELS:
+        if model_name == except_model:
+            continue
+        try:
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
+            model_obj.objects.get(key=model_name)
+            return True
+        except Exception, e:
+            continue
+
+    return False
+
 
 class WorldRoomsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -43,6 +33,19 @@ class WorldRoomsForm(forms.ModelForm):
         classes = typeclasses.objects.filter(category="CATE_ROOM")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
+    def clean(self):
+        "Validate values."
+        cleaned_data = super(WorldRoomsForm, self).clean()
+
+        # object's key should be unique
+        key = cleaned_data.get('key')
+        if ExistKey.ExistKey(key, except_model=self._mega.model):
+            message = "This key has been used. Please use another one."
+            self._errors['key'] = self.error_class([message])
+            return
+
+        return cleaned_data
+
 
 class WorldExitsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -50,6 +53,19 @@ class WorldExitsForm(forms.ModelForm):
 
         classes = typeclasses.objects.filter(category="CATE_EXIT")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
+
+    def clean(self):
+        "Validate values."
+        cleaned_data = super(WorldExitsForm, self).clean()
+
+        # object's key should be unique
+        key = cleaned_data.get('key')
+        if OBJECT_KEY_HANDLER.has_key(key):
+            message = "This key has been used. Please use another one."
+            self._errors['key'] = self.error_class([message])
+            return
+
+        return cleaned_data
 
 
 class ExitLocksForm(forms.ModelForm):
@@ -66,6 +82,17 @@ class WorldObjectsForm(forms.ModelForm):
 
         classes = typeclasses.objects.filter(category="CATE_OBJECT")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
+
+    def clean(self):
+        "Validate values."
+        cleaned_data = super(WorldObjectsForm, self).clean()
+
+        # object's key should be unique
+        key = cleaned_data.get('key')
+        if OBJECT_KEY_HANDLER.has_key(key):
+            message = "This key has been used. Please use another one."
+            self._errors['key'] = self.error_class([message])
+            return
 
 
 class ObjectCreatorsForm(forms.ModelForm):
@@ -110,6 +137,17 @@ class CommonObjectsForm(forms.ModelForm):
         classes = typeclasses.objects.filter(category="CATE_OBJECT")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
+    def clean(self):
+        "Validate values."
+        cleaned_data = super(CommonObjectsForm, self).clean()
+
+        # object's key should be unique
+        key = cleaned_data.get('key')
+        if OBJECT_KEY_HANDLER.has_key(key):
+            message = "This key has been used. Please use another one."
+            self._errors['key'] = self.error_class([message])
+            return
+
 
 class CharacterForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -130,6 +168,15 @@ class CharacterForm(forms.ModelForm):
     def clean(self):
         "Validate model and level's value."
         cleaned_data = super(CharacterForm, self).clean()
+
+        # object's key should be unique
+        key = cleaned_data.get('key')
+        if OBJECT_KEY_HANDLER.has_key(key):
+            message = "This key has been used. Please use another one."
+            self._errors['key'] = self.error_class([message])
+            return
+
+        # check model and level
         model = cleaned_data.get('model')
         level = cleaned_data.get('level')
         try:

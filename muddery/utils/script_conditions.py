@@ -32,7 +32,7 @@ def is_quest_in_progress(character, obj, *args):
     if not args:
         return False
 
-    return character.quest.is_in_progress(args[0])
+    return character.quest_handler.is_in_progress(args[0])
 
 
 def can_provide_quest(character, obj, *args):
@@ -46,7 +46,7 @@ def can_provide_quest(character, obj, *args):
     if not args:
         return False
 
-    return character.quest.can_provide(args[0])
+    return character.quest_handler.can_provide(args[0])
 
 
 def is_quest_completed(character, obj, *args):
@@ -60,7 +60,7 @@ def is_quest_completed(character, obj, *args):
     if not args:
         return False
 
-    return character.quest.is_completed(args[0])
+    return character.quest_handler.is_completed(args[0])
 
 
 def have_object(character, obj, *args):

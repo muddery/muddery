@@ -51,7 +51,6 @@ class QuestDependencyHandler(object):
             # Get records.
             dependencies = model_dependencies.objects.filter(quest=quest)
 
-
         # Add db fields to data object.
         data = []
         for dependency in dependencies:
@@ -85,35 +84,35 @@ class QuestDependencyHandler(object):
         check a dependency
         """
         if dependency_type == defines.DEPENDENCY_QUEST_CAN_PROVIDE:
-            if not caller.quest.can_provide(quest):
+            if not caller.quest_handler.can_provide(quest):
                 return False
         elif dependency_type == defines.DEPENDENCY_QUEST_IN_PROGRESS:
-            if not caller.quest.is_in_progress(quest):
+            if not caller.quest_handler.is_in_progress(quest):
                 return False
         elif dependency_type == defines.DEPENDENCY_QUEST_NOT_IN_PROGRESS:
-            if caller.quest.is_in_progress(quest):
+            if caller.quest_handler.is_in_progress(quest):
                 return False
         elif dependency_type == defines.DEPENDENCY_QUEST_ACCOMPLISHED:
-            if not caller.quest.is_accomplished(quest):
+            if not caller.quest_handler.is_accomplished(quest):
                 return False
         elif dependency_type == defines.DEPENDENCY_QUEST_NOT_ACCOMPLISHED:
-            if not caller.quest.is_in_progress(quest):
+            if not caller.quest_handler.is_in_progress(quest):
                 return False
-            if caller.quest.is_accomplished(quest):
+            if caller.quest_handler.is_accomplished(quest):
                 return False
         elif dependency_type == defines.DEPENDENCY_QUEST_COMPLETED:
-            if not caller.quest.is_completed(quest):
+            if not caller.quest_handler.is_completed(quest):
                 return False
         elif dependency_type == defines.DEPENDENCY_QUEST_NOT_COMPLETED:
-            if caller.quest.is_completed(quest):
+            if caller.quest_handler.is_completed(quest):
                 return False
         elif dependency_type == defines.DEPENDENCY_QUEST_ACCEPTED:
-            if not caller.quest.is_completed(quest) and \
-               not caller.quest.is_in_progress(quest):
+            if not caller.quest_handler.is_completed(quest) and \
+               not caller.quest_handler.is_in_progress(quest):
                 return False
         elif dependency_type == defines.DEPENDENCY_QUEST_NOT_ACCEPTED:
-            if caller.quest.is_completed(quest) or \
-               caller.quest.is_in_progress(quest):
+            if caller.quest_handler.is_completed(quest) or \
+               caller.quest_handler.is_in_progress(quest):
                 return False
 
         return True
