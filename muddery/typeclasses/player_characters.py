@@ -46,7 +46,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
     # initialize all handlers in a lazy fashion
     @lazy_property
-    def quest(self):
+    def quest_handler(self):
         return QuestHandler(self)
 
 
@@ -141,7 +141,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                    "equipments": self.return_equipments(),
                    "inventory": self.return_inventory(),
                    "skills": self.return_skills(),
-                   "quests": self.quest.return_quests(),
+                   "quests": self.quest_handler.return_quests(),
                    "revealed_map": self.get_revealed_map()}
         self.msg(message)
 
@@ -392,7 +392,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         # call quest handler
         for key in accepted_keys:
-            self.quest.at_objective(defines.OBJECTIVE_OBJECT, key, accepted_keys[key])
+            self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, key, accepted_keys[key])
 
         return rejected_keys
 

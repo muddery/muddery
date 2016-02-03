@@ -181,7 +181,8 @@ class QuestsAdmin(admin.ModelAdmin):
                     'name',
                     'typeclass',
                     'desc',
-                    'condition')
+                    'condition',
+                    'action')
 
 
 class QuestObjectiveTypesAdmin(admin.ModelAdmin):

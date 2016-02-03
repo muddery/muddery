@@ -128,6 +128,11 @@ class DialogueHandler(object):
 
 
     def check_need_get_next(self, sentences):
+        """
+        Check if the next sentence can be added to the sentence list.
+        If a sentence will effect the character's status, it should not be
+        added to the sentence list.
+        """
         if len(sentences) != 1:
             return False
 
@@ -140,7 +145,14 @@ class DialogueHandler(object):
 
     def get_sentences_list(self, caller, npc):
         """
-        Get dialogues_list.
+        Get a sentences list to send to the caller at one time.
+        
+        Args:
+            caller: (object) the character who want to start a talk.
+            npc: (object) the NPC that the character want to talk to.
+        
+        Returns:
+            sentences_list: (list) a list of sentences that can be show in order.
         """
         if not caller:
             return []
@@ -150,6 +162,7 @@ class DialogueHandler(object):
 
         sentences_list = []
 
+        # Get the first sentences.
         sentences = self.get_sentences(caller, npc)
         output = self.create_output_sentences(sentences, caller, npc)
         if output:
@@ -157,6 +170,7 @@ class DialogueHandler(object):
         else:
             return sentences_list
 
+        # Get next sentences.
         while self.check_need_get_next(sentences):
             sentences = self.get_next_sentences(caller,
                                                 npc.dbref,
@@ -173,7 +187,17 @@ class DialogueHandler(object):
 
     def get_next_sentences_list(self, caller, npc, dialogue, sentence, include_current):
         """
-        Get dialogues_list.
+        Get a sentences list from the current sentence.
+        
+        Args:
+            caller: (object) the character who want to start a talk.
+            npc: (object) the NPC that the character want to talk to.
+            dialogue: (string) the key of the currrent dialogue.
+            sentence: (int) the number of current sentence.
+            include_current: (boolean) if the sentence list includes current sentence.
+
+        Returns:
+            sentences_list: (list) a list of sentences that can be show in order.
         """
         sentences_list = []
 
@@ -213,7 +237,14 @@ class DialogueHandler(object):
 
     def get_sentences(self, caller, npc):
         """
-        Get NPC's sentences.
+        Get NPC's sentences that can show to the caller.
+
+        Args:
+            caller: (object) the character who want to start a talk.
+            npc: (object) the NPC that the character want to talk to.
+
+        Returns:
+            sentences: (list) a list of available sentences.
         """
         if not caller:
             return
@@ -261,6 +292,15 @@ class DialogueHandler(object):
     def get_next_sentences(self, caller, npc, current_dialogue, current_sentence):
         """
         Get current sentence's next sentences.
+        
+        Args:
+            caller: (object) the character who want to start a talk.
+            npc: (object) the NPC that the character want to talk to.
+            dialogue: (string) the key of the currrent dialogue.
+            sentence: (int) the number of current sentence.
+
+        Returns:
+            sentences: (list) a list of available sentences.
         """
         if not caller:
             return
@@ -323,7 +363,7 @@ class DialogueHandler(object):
 
     def create_output_sentences(self, originals, caller, npc):
         """
-        Create a list of sentences data to output to the client.
+        Transform the sentences from the storing format to the output format.
 
         Args:
             originals: (list) original sentences data
@@ -348,28 +388,6 @@ class DialogueHandler(object):
             sentences_list.append(sentence)
 
         return sentences_list
-
-    def create_output_sentence(self, original, caller, npc):
-        """
-        Create a sentence's data to output to the client.
-
-        Args:
-            original: (dict) original sentence data
-            caller: (object) caller object
-            npc: (object, optional) NPC object
-
-        Returns:
-            (dict) sentence's data
-        """
-        speaker = self.get_dialogue_speaker(caller, npc, original["speaker"])
-        sentence = {"speaker": speaker,             # speaker's name
-                    "dialogue": original["dialogue"],   # dialogue's key
-                    "sentence": original["sentence"],   # sentence's ordinal
-                    "content": original["content"]}
-        if npc:
-            sentence["npc"] = npc.dbref             # NPC's dbref
-        return sentence
-
 
     def finish_sentence(self, caller, npc, dialogue, sentence):
         """
@@ -399,11 +417,10 @@ class DialogueHandler(object):
             self.finish_dialogue(caller, dialogue)
 
         if sen["complete_quest"]:
-            caller.quest.complete(sen["complete_quest"])
+            caller.quest_handler.complete(sen["complete_quest"])
 
         if sen["provide_quest"]:
-            caller.quest.accept(sen["provide_quest"])
-
+            caller.quest_handler.accept(sen["provide_quest"])
 
     def finish_dialogue(self, caller, dialogue):
         """
@@ -415,7 +432,7 @@ class DialogueHandler(object):
         if not caller:
             return
 
-        caller.quest.at_objective(defines.OBJECTIVE_TALK, dialogue)
+        caller.quest_handler.at_objective(defines.OBJECTIVE_TALK, dialogue)
 
 
     def clear(self):
@@ -455,7 +472,7 @@ class DialogueHandler(object):
         if not npc:
             return (provide_quest, complete_quest)
 
-        accomplished_quests = caller.quest.get_accomplished_quests()
+        accomplished_quests = caller.quest_handler.get_accomplished_quests()
 
         # get npc's default dialogues
         for dlg_key in npc.dialogues:
@@ -506,7 +523,7 @@ class DialogueHandler(object):
 
             if not provide_quest and sen["provide_quest"]:
                 quest_key = sen["provide_quest"]
-                if caller.quest.can_provide(quest_key):
+                if caller.quest_handler.can_provide(quest_key):
                     provide_quest = True
                     if not accomplished_quests:
                         return (provide_quest, complete_quest)

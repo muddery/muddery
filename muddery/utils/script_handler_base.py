@@ -109,7 +109,7 @@ class ScriptHandler(object):
                          "obj": obj}
             match = eval(condition, {}, env_local)
         except Exception, e:
-            logger.log_errmsg("match_condition error:%s %s" % (condition, e))
+            logger.log_tracemsg("match_condition error:%s %s" % (condition, e))
             return False
 
         return match

@@ -664,6 +664,9 @@ class quests(models.Model):
     # the condition to accept this quest. TODO
     condition = models.TextField(blank=True)
 
+    # will do this action after a quest completed
+    action = models.TextField(blank=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True

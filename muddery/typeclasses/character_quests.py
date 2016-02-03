@@ -10,16 +10,24 @@ from muddery.utils import defines
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.script_handler import SCRIPT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.loot_handler import LootHandler
 from muddery.utils.localized_strings_handler import LS
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
+from evennia.utils.utils import lazy_property
 
 
 class MudderyQuest(MudderyObject):
     """
     This class controls quest's objectives. Hooks are called when a character doing some things.
     """
+
+    # initialize loot handler in a lazy fashion
+    @lazy_property
+    def loot_handler(self):
+        return LootHandler(self)
+
     def at_object_creation(self):
         """
         Set accomplished objectives to empty.
@@ -168,7 +176,6 @@ class MudderyQuest(MudderyObject):
 
         return objectives
 
-
     def is_accomplished(self):
         """
         If all objectives are accomplished or not.
@@ -182,12 +189,17 @@ class MudderyQuest(MudderyObject):
 
         return True
 
-
     def complete(self):
         """
         Complete a quest, do its action.
         """
         owner = self.db.owner
+
+        # get rewards
+        obj_list = self.loot_handler.get_obj_list(owner)
+        if obj_list:
+            # give objects to winner
+            owner.receive_objects(obj_list)
 
         # do quest's action
         action = getattr(self.dfield, "action", None)
@@ -203,17 +215,16 @@ class MudderyQuest(MudderyObject):
         if obj_list:
             owner.remove_objects(obj_list)
 
-
     def at_objective(self, type, object_key, number=1):
         """
         Called when the owner may complete some objectives.
         
-        args:
+        Args:
             type: objective's type defined in defines.py
-            object_key(string): the key of the relative object
-            number(int): the number of the object
+            object_key: (string) the key of the relative object
+            number: (int) the number of the object
         
-        return:
+        Returns:
             if the quest status has changed.
         """
         if not type in self.not_accomplished:

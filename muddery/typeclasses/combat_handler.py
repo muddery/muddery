@@ -197,7 +197,7 @@ class MudderyCombatHandler(DefaultScript):
                         # get object list
                         loots = None
                         for loser in losers:
-                            obj_list = loser.loot(winner)
+                            obj_list = loser.loot_handler.get_obj_list(winner)
                             if obj_list:
                                 if not loots:
                                     loots = obj_list
@@ -231,7 +231,7 @@ class MudderyCombatHandler(DefaultScript):
                 for winner in winners:
                     if winner.has_player:
                         for loser in losers:
-                            winner.quest.at_objective(defines.OBJECTIVE_KILL, loser.get_data_key())
+                            winner.quest_handler.at_objective(defines.OBJECTIVE_KILL, loser.get_data_key())
 
                 # remove dead character
                 for loser in losers:
