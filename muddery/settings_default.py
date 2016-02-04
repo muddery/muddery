@@ -196,9 +196,10 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 # other data
 ###################################
 
-# object loot list
-OBJECT_CREATORS = "object_creators"
-LOOT_LIST = "loot_list"
+# loot lists
+CREATOR_LOOT_LIST = "creator_loot_list"
+CHARACTER_LOOT_LIST = "character_loot_list"
+QUEST_REWARD_LIST = "quest_reward_list"
 
 # quest data
 QUEST_OBJECTIVE_TYPES = "quest_objective_types"
@@ -223,8 +224,9 @@ DIALOGUE_QUEST_DEPENDENCIES = "dialogue_quest_dependencies"
 DEFAULT_SKILLS = "default_skills"
 
 # all other data models
-OTHER_DATA_MODELS = (OBJECT_CREATORS,
-                     LOOT_LIST,
+OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
+                     CHARACTER_LOOT_LIST,
+                     QUEST_REWARD_LIST,
                      QUEST_OBJECTIVE_TYPES,
                      QUEST_OBJECTIVES,
                      QUEST_DEPENDENCY_TYPES,

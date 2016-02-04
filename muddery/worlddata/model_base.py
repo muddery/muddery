@@ -150,7 +150,7 @@ class exit_locks(models.Model):
     "locked exit's additional data"
 
     # related exit
-    key = models.OneToOneField("world_exits")
+    key = models.OneToOneField("world_exits", primary_key=True)
 
     # condition of the lock
     unlock_condition = models.TextField(blank=True)
@@ -216,7 +216,7 @@ class object_creators(models.Model):
     "object creator's additional data"
 
     # related object
-    key = models.OneToOneField("world_objects")
+    key = models.OneToOneField("world_objects", primary_key=True)
 
     # loot's verb
     loot_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -237,7 +237,7 @@ class object_creators(models.Model):
 #
 # ------------------------------------------------------------
 class loot_list(models.Model):
-    "Store all object creators."
+    "Loot list's base class."
 
     # the provider of the object. it is not a foreighkey because the provider can be in several tables.
     provider = models.CharField(max_length=KEY_LENGTH, db_index=True)
@@ -262,6 +262,54 @@ class loot_list(models.Model):
         abstract = True
         verbose_name = "Loot List"
         verbose_name_plural = "Loot Lists"
+        unique_together = ("provider", "object")
+
+
+# ------------------------------------------------------------
+#
+# object creator's loot list
+#
+# ------------------------------------------------------------
+class creator_loot_list(loot_list):
+    "Store character's loot list."
+    
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Object Creator's Loot List"
+        verbose_name_plural = "Object Creator's Loot Lists"
+        unique_together = ("provider", "object")
+        
+
+# ------------------------------------------------------------
+#
+# character's loot list
+#
+# ------------------------------------------------------------
+class character_loot_list(loot_list):
+    "Store character's loot list."
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Character's Loot List"
+        verbose_name_plural = "Character's Loot Lists"
+        unique_together = ("provider", "object")
+
+
+# ------------------------------------------------------------
+#
+# quest's rewards
+#
+# ------------------------------------------------------------
+class quest_reward_list(loot_list):
+    "Quest reward's list."
+    
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Quest's reward List"
+        verbose_name_plural = "Quest's reward Lists"
         unique_together = ("provider", "object")
 
 
@@ -490,12 +538,12 @@ class character_models(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Character Level"
-        verbose_name_plural = "Character Levels"
+        verbose_name = "Character Model"
+        verbose_name_plural = "Character Models"
         unique_together = ("key", "level")
 
     def __unicode__(self):
-        return self.name + " (Lv" + self.level + ")"
+        return self.name + " (Lv" + str(self.level) + ")"
 
 
 # ------------------------------------------------------------
@@ -627,7 +675,7 @@ class skills(models.Model):
 class default_skills(models.Model):
     "character's default skills"
 
-    # character's key
+    # character's model
     character = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # skill's key
@@ -1029,7 +1077,7 @@ class event_attacks(models.Model):
     "event attack's data"
 
     # event's key
-    key = models.OneToOneField("event_data")
+    key = models.OneToOneField("event_data", primary_key=True)
 
     # mob's key
     mob = models.ForeignKey("common_characters")
@@ -1059,7 +1107,7 @@ class event_dialogues(models.Model):
     "Store all event dialogues."
 
     # event's key
-    key = models.OneToOneField("event_data")
+    key = models.OneToOneField("event_data", primary_key=True)
 
     # dialogue's key
     dialogue = models.ForeignKey("dialogues")
