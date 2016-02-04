@@ -70,6 +70,18 @@ class LootListAdmin(admin.ModelAdmin):
                     'condition')
 
 
+class CreatorLootListAdmin(LootListAdmin):
+    pass
+
+
+class CharacterLootListAdmin(LootListAdmin):
+    pass
+
+
+class QuestRewardListAdmin(LootListAdmin):
+    pass
+
+
 class CommonObjectsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',

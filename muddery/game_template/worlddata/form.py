@@ -1,11 +1,7 @@
 from django.contrib.admin.forms import forms
 from django.conf import settings
 from django.apps import apps
-from worlddata.models import *
-
-#
-# Form
-#
+from worlddata import models
 
 
 def ExistKey(key, except_model=None):
@@ -18,7 +14,7 @@ def ExistKey(key, except_model=None):
             continue
         try:
             model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
-            model_obj.objects.get(key=model_name)
+            model_obj.objects.get(key=key)
             return True
         except Exception, e:
             continue
@@ -30,7 +26,7 @@ class WorldRoomsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldRoomsForm, self).__init__(*args, **kwargs)
 
-        classes = typeclasses.objects.filter(category="CATE_ROOM")
+        classes = models.typeclasses.objects.filter(category="CATE_ROOM")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
     def clean(self):
@@ -39,7 +35,7 @@ class WorldRoomsForm(forms.ModelForm):
 
         # object's key should be unique
         key = cleaned_data.get('key')
-        if ExistKey.ExistKey(key, except_model=self._mega.model):
+        if ExistKey(key, except_model=self.Meta.model.__name__):
             message = "This key has been used. Please use another one."
             self._errors['key'] = self.error_class([message])
             return
@@ -51,7 +47,7 @@ class WorldExitsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldExitsForm, self).__init__(*args, **kwargs)
 
-        classes = typeclasses.objects.filter(category="CATE_EXIT")
+        classes = models.typeclasses.objects.filter(category="CATE_EXIT")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
     def clean(self):
@@ -60,7 +56,7 @@ class WorldExitsForm(forms.ModelForm):
 
         # object's key should be unique
         key = cleaned_data.get('key')
-        if OBJECT_KEY_HANDLER.has_key(key):
+        if ExistKey(key, except_model=self.Meta.model.__name__):
             message = "This key has been used. Please use another one."
             self._errors['key'] = self.error_class([message])
             return
@@ -72,7 +68,7 @@ class ExitLocksForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ExitLocksForm, self).__init__(*args, **kwargs)
 
-        locked_exits = world_exits.objects.filter(typeclass="CLASS_LOCKED_EXIT")
+        locked_exits = models.world_exits.objects.filter(typeclass="CLASS_LOCKED_EXIT")
         self.fields['key'] = forms.ModelChoiceField(queryset=locked_exits)
 
 
@@ -80,7 +76,7 @@ class WorldObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
-        classes = typeclasses.objects.filter(category="CATE_OBJECT")
+        classes = models.typeclasses.objects.filter(category="CATE_OBJECT")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
     def clean(self):
@@ -89,52 +85,103 @@ class WorldObjectsForm(forms.ModelForm):
 
         # object's key should be unique
         key = cleaned_data.get('key')
-        if OBJECT_KEY_HANDLER.has_key(key):
+        if ExistKey(key, except_model=self.Meta.model.__name__):
             message = "This key has been used. Please use another one."
             self._errors['key'] = self.error_class([message])
             return
+
+        return cleaned_data
 
 
 class ObjectCreatorsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ObjectCreatorsForm, self).__init__(*args, **kwargs)
 
-        object_creators = world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
+        object_creators = models.world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
         self.fields['key'] = forms.ModelChoiceField(queryset=object_creators)
 
 
-class LootListForm(forms.ModelForm):
+class CreatorLootListForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(LootListForm, self).__init__(*args, **kwargs)
+        super(CreatorLootListForm, self).__init__(*args, **kwargs)
 
-        # providers
+        # providers must be object_creators
+        object_creators = models.world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
+        self.fields['provider'] = forms.ModelChoiceField(queryset=object_creators)
+
+        # available objects are common objects, foods or equipments
         choices = [("", "---------")]
 
-        object_creators = world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
-        choices.extend([(obj.key, obj.key) for obj in object_creators])
+        objects = models.common_objects.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in objects])
+        
+        foods = models.foods.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in foods])
 
-        npcs = world_npcs.objects.all()
+        equipments = models.equipments.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in equipments])
+        
+        self.fields['object'] = forms.ChoiceField(choices=choices)
+
+
+class CharacterLootListForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CharacterLootListForm, self).__init__(*args, **kwargs)
+
+        # providers can be world_npc or common_character
+        choices = [("", "---------")]
+
+        npcs = models.world_npcs.objects.all()
         choices.extend([(obj.key, obj.key) for obj in npcs])
 
-        characters = common_characters.objects.all()
+        characters = models.common_characters.objects.all()
         choices.extend([(obj.key, obj.key) for obj in characters])
 
         self.fields['provider'] = forms.ChoiceField(choices=choices)
 
-        # available objects
+        # available objects are common objects, foods or equipments
         choices = [("", "---------")]
 
-        objects = common_objects.objects.all()
+        objects = models.common_objects.objects.all()
         choices.extend([(obj.key, obj.key) for obj in objects])
+        
+        foods = models.foods.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in foods])
 
-        self.fields['object'] = forms.ModelChoiceField(queryset=objects)
+        equipments = models.equipments.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in equipments])
+        
+        self.fields['object'] = forms.ChoiceField(choices=choices)
+
+
+class QuestRewardListForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(QuestRewardListForm, self).__init__(*args, **kwargs)
+
+        # providers must be object_creators
+        quests = models.quests.objects.all()
+        self.fields['provider'] = forms.ModelChoiceField(queryset=quests)
+
+        # available objects are common objects, foods or equipments
+        choices = [("", "---------")]
+
+        objects = models.common_objects.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in objects])
+        
+        foods = models.foods.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in foods])
+
+        equipments = models.equipments.objects.all()
+        choices.extend([(obj.key, obj.key) for obj in equipments])
+        
+        self.fields['object'] = forms.ChoiceField(choices=choices)
 
 
 class CommonObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CommonObjectsForm, self).__init__(*args, **kwargs)
 
-        classes = typeclasses.objects.filter(category="CATE_OBJECT")
+        classes = models.typeclasses.objects.filter(category="CATE_OBJECT")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
     def clean(self):
@@ -143,25 +190,27 @@ class CommonObjectsForm(forms.ModelForm):
 
         # object's key should be unique
         key = cleaned_data.get('key')
-        if OBJECT_KEY_HANDLER.has_key(key):
+        if ExistKey(key, except_model=self.Meta.model.__name__):
             message = "This key has been used. Please use another one."
             self._errors['key'] = self.error_class([message])
             return
+
+        return cleaned_data
 
 
 class CharacterForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CharacterForm, self).__init__(*args, **kwargs)
 
-        classes = typeclasses.objects.filter(category="CATE_CHARACTER")
+        classes = models.typeclasses.objects.filter(category="CATE_CHARACTER")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
         # models
         choices = [("", "---------")]
 
-        models = character_models.objects.all()
-        models = set([obj.key for obj in models])
-        choices.extend([(model, model) for model in models])
+        model_records = models.character_models.objects.all()
+        model_keys = set([obj.key for obj in model_records])
+        choices.extend([(model_key, model_key) for model_key in model_keys])
 
         self.fields['model'] = forms.ChoiceField(choices=choices)
 
@@ -171,7 +220,7 @@ class CharacterForm(forms.ModelForm):
 
         # object's key should be unique
         key = cleaned_data.get('key')
-        if OBJECT_KEY_HANDLER.has_key(key):
+        if ExistKey(key, except_model=self.Meta.model.__name__):
             message = "This key has been used. Please use another one."
             self._errors['key'] = self.error_class([message])
             return
@@ -180,10 +229,10 @@ class CharacterForm(forms.ModelForm):
         model = cleaned_data.get('model')
         level = cleaned_data.get('level')
         try:
-            character_models.objects.get(key=model, level=level)
+            models.character_models.objects.get(key=model, level=level)
         except Exception, e:
             message = "Can not get this level's data."
-            levels = character_models.objects.filter(key=model)
+            levels = models.character_models.objects.filter(key=model)
             available = [str(level.level) for level in levels]
             if len(available) == 1:
                 message += " Available level: " + available[0]
@@ -199,23 +248,35 @@ class SkillsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(SkillsForm, self).__init__(*args, **kwargs)
 
-        classes = typeclasses.objects.filter(category="CATE_SKILL")
+        classes = models.typeclasses.objects.filter(category="CATE_SKILL")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
+
+    def clean(self):
+        "Validate values."
+        cleaned_data = super(SkillsForm, self).clean()
+
+        # object's key should be unique
+        key = cleaned_data.get('key')
+        if ExistKey(key, except_model=self.Meta.model.__name__):
+            message = "This key has been used. Please use another one."
+            self._errors['key'] = self.error_class([message])
+            return
+
+        return cleaned_data
 
 
 class DefaultSkillsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DefaultSkillsForm, self).__init__(*args, **kwargs)
 
-        # all characters
+        # all character's models
         choices = [("", "---------")]
 
-        npcs = world_npcs.objects.all()
-        choices.extend([(obj.key, obj.key) for obj in npcs])
+        # models
+        character_models = set([record.key for record in models.character_models.objects.all()])
+        choices.extend([(key, key) for key in character_models])
 
-        characters = common_characters.objects.all()
-        choices.extend([(obj.key, obj.key) for obj in characters])
-
+        # character models
         self.fields['character'] = forms.ChoiceField(choices=choices)
 
 
@@ -223,79 +284,18 @@ class QuestsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(QuestsForm, self).__init__(*args, **kwargs)
 
-        classes = typeclasses.objects.filter(category="CATE_QUEST")
+        classes = models.typeclasses.objects.filter(category="CATE_QUEST")
         self.fields['typeclass'] = forms.ModelChoiceField(queryset=classes)
 
+    def clean(self):
+        "Validate values."
+        cleaned_data = super(QuestsForm, self).clean()
 
-class DialogueQuestDependencyForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DialogueQuestDependencyForm, self).__init__(*args, **kwargs)
-        if self.instance.dialogue:
-            self.fields['dialogue'] = DialogueModelChoiceField(queryset=dialogues.objects.all())
-            self.fields['dependency'] = QuestModelChoiceField(queryset=quests.objects.all())
+        # object's key should be unique
+        key = cleaned_data.get('key')
+        if ExistKey(key, except_model=self.Meta.model.__name__):
+            message = "This key has been used. Please use another one."
+            self._errors['key'] = self.error_class([message])
+            return
 
-
-class DialogueRelationsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DialogueRelationsForm, self).__init__(*args, **kwargs)
-        if self.instance.dialogue:
-            self.fields['dialogue'] = DialogueModelChoiceField(queryset=dialogues.objects.all())
-            self.fields['next'] = DialogueModelChoiceField(queryset=quests.objects.all())
-
-
-class DialogueSentencesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DialogueSentencesForm, self).__init__(*args, **kwargs)
-        if self.instance.dialogue:
-            self.fields['dialogue'] = DialogueModelChoiceField(queryset=dialogues.objects.all())
-            self.fields['provide_quest'] = QuestModelChoiceField(queryset=quests.objects.all())
-            self.fields['complete_quest'] = QuestModelChoiceField(queryset=quests.objects.all())
-
-
-class DialoguesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DialoguesForm, self).__init__(*args, **kwargs)
-        if self.instance.key:
-            self.fields['have_quest'] = QuestModelChoiceField(queryset=quests.objects.all())
-
-
-class EventDialoguesForm(forms.ModelForm):
-    DIALOGUE_LIST_CHOICES = []
-    NPC_LIST_CHOICES = []
-
-    def __init__(self, *args, **kwargs):
-        super(EventDialoguesForm, self).__init__(*args, **kwargs)
-        if self.instance.key:
-            dialogue_list = dialogues.objects.all()
-            for dialogue_obj in dialogue_list:
-                self.DIALOGUE_LIST_CHOICES.append((dialogue_obj.key, dialogue_obj.key))
-            self.fields['dialogue'] = forms.ChoiceField(
-                choices=self.DIALOGUE_LIST_CHOICES)
-            npc_list = world_npcs.objects.all()
-            for npc_obj in npc_list:
-                self.NPC_LIST_CHOICES.append((npc_obj.key, npc_obj.key))
-            self.fields['npc'] = forms.ChoiceField(
-                choices=self.NPC_LIST_CHOICES)
-
-
-class NPCDialoguesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(NPCDialoguesForm, self).__init__(*args, **kwargs)
-        if self.instance.npc:
-            self.fields['npc'] = NPCModelChoiceField(queryset=world_npcs.objects.all())
-            self.fields['dialogue'] = DialogueModelChoiceField(queryset=dialogues.objects.all())
-
-
-class QuestObjectivesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(QuestObjectivesForm, self).__init__(*args, **kwargs)
-        if self.instance.quest:
-            self.fields['quest'] = QuestModelChoiceField(queryset=quests.objects.all())
-
-
-class QuestDependencyForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(QuestDependencyForm, self).__init__(*args, **kwargs)
-        if self.instance.quest:
-            self.fields['quest'] = QuestModelChoiceField(queryset=quests.objects.all())
-            self.fields['dependency'] = QuestModelChoiceField(queryset=quests.objects.all())
+        return cleaned_data

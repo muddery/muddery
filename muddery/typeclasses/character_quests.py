@@ -26,7 +26,7 @@ class MudderyQuest(MudderyObject):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self)
+        return LootHandler(self, settings.QUEST_REWARD_LIST)
 
     def at_object_creation(self):
         """

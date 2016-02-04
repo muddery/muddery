@@ -53,7 +53,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self)
+        return LootHandler(self, settings.CHARACTER_LOOT_LIST)
 
     def at_object_creation(self):
         """
@@ -233,14 +233,14 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         
         # default skills
         skill_records = []
-        model_skills = apps.get_model(settings.WORLD_DATA_APP, settings.DEFAULT_SKILLS)
-        if model_skills:
+        default_skills = apps.get_model(settings.WORLD_DATA_APP, settings.DEFAULT_SKILLS)
+        if default_skills:
             # Get records.
             model_name = getattr(self.dfield, "model", None)
             if not model_name:
                 model_name = self.get_data_key()
 
-            skill_records = model_skills.objects.filter(character=model_name)
+            skill_records = default_skills.objects.filter(character=model_name)
 
         for skill_record in skill_records:
             self.skill_handler.learn_skill(skill_record.skill_id)
