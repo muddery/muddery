@@ -44,6 +44,7 @@ def export_file(request):
                     yield c
                 else:
                     # remove temp file
+                    f.close()
                     os.remove(file_name)
                     break
 
