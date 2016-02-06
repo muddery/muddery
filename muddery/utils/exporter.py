@@ -45,37 +45,42 @@ def get_lines(model_name):
 
 def export_file(file_name, model_name):
     """
+    Export a table to a csv file.
     """
-    csvfile = open(file_name, 'w')
-    writer = csv.writer(csvfile)
+    csv_file = open(file_name, 'w')
+    writer = csv.writer(csv_file)
 
     for line in get_lines(model_name):
         writer.writerow(line)
 
+    csv_file.close()
+
 
 def export_zip_all(file):
     """
+    Export all tables to a zip file which contains a group of csv files.
     """
-    archive = zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED)
     temp = tempfile.mktemp()
 
-    # get model names
-    appconfig = apps.get_app_config(settings.WORLD_DATA_APP)
-    for model in appconfig.get_models():
-        name = model._meta.object_name
-        export_file(temp, name)
-        archive.write(temp, name + ".csv")
+    try:
+        archive = zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED)
 
-    archive.close()
-    os.remove(temp)
+        # get model names
+        app_config = apps.get_app_config(settings.WORLD_DATA_APP)
+        for model in app_config.get_models():
+            name = model._meta.object_name
+            export_file(temp, name)
+            archive.write(temp, name + ".csv")
+    finally:
+        os.remove(temp)
 
 
 def export_all(path_name):
     """
-    Import all data files to models.
+    Export all data files from models.
     """
     # get model names
-    appconfig = apps.get_app_config(settings.WORLD_DATA_APP)
-    for model in appconfig.get_models():
+    app_config = apps.get_app_config(settings.WORLD_DATA_APP)
+    for model in app_config.get_models():
         name = model._meta.verbose_name
         export_file(path_name + name, name)

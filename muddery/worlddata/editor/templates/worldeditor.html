@@ -45,6 +45,13 @@
       <input type="submit" value="Download Files"/>
     </form>
     <div><br></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <input type="file" name="import"/>
+      <br>
+      <input type="submit" value="Upload File"/>
+    </form>
+    <div><br></div>
     <form>
       <input type="button" value="Apply To Game" onclick="worldeditor.doPost('apply=1')"/>
     </form>

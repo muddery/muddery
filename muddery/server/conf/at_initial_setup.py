@@ -33,7 +33,7 @@ def at_initial_setup():
 
     try:
         # load world data
-        importer.import_all()
+        importer.import_local_all()
 
         # reload skill modules
         MudderySkill.load_skill_modules()
