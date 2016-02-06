@@ -125,9 +125,6 @@ SECRET_KEY = {secret_key}
 # World data features
 ######################################################################
 
-# data file's encoding
-WORLD_DATA_FILE_ENCODING = "utf8"
-
 # add data app
 INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 

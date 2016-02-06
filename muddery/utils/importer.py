@@ -6,6 +6,9 @@ from __future__ import print_function
 
 import os
 import glob
+import tempfile
+import zipfile
+import shutil
 from django.db import models
 from django.apps import apps
 from django.conf import settings
@@ -21,7 +24,7 @@ def import_file(file_name, model_name, widecard=True, clear=True):
     Args:
         file_name: (string) file's name
         model_name: (string) db model's name.
-        widecard: (bool) add widecard or not.
+        widecard: (bool) add widecard as ext name or not.
         clear: (boolean) clear old data or not.
     """
     imported = False
@@ -107,11 +110,12 @@ def import_file(file_name, model_name, widecard=True, clear=True):
                         record = {}
                         for item in zip(title, field_types, values, related_fields):
                             field_name = item[0]
+                            # skip "id" field
+                            if field_name == "id":
+                                continue
+
                             field_type = item[1]
-                            if hasattr(item[2], "decode"):
-                                value = item[2].decode(settings.WORLD_DATA_FILE_ENCODING)
-                            else:
-                                value = item[2]
+                            value = item[2]
                             related_field = item[3]
 
                             try:
@@ -139,8 +143,7 @@ def import_file(file_name, model_name, widecard=True, clear=True):
                                 elif field_type == 4:
                                     # foreignKey
                                     if value:
-                                        arg = {}
-                                        arg[related_field.name] = value
+                                        arg = {related_field.name: value}
                                         record[field_name] = related_field.model.objects.get(**arg)
                             except Exception, e:
                                 print("value error: %s - '%s'" % (field_name, value))
@@ -168,7 +171,7 @@ def import_file(file_name, model_name, widecard=True, clear=True):
         print("Can not import file %s" % file_name)
 
 
-def import_model(model_name, clear=True):
+def import_model(model_name, path_name=None, clear=True):
     """
     Import data from a data file to the db model
 
@@ -176,7 +179,9 @@ def import_model(model_name, clear=True):
         model_name: (string) db model's name.
         clear: (boolean) clear old data or not.
     """
-    file_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER, model_name)
+    if not path_name:
+        path_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
+    file_name = os.path.join(path_name, model_name)
     import_file(file_name, model_name, widecard=True, clear=clear)
 
 
@@ -208,16 +213,33 @@ def import_localized_strings(language=None):
             import_file(full_name, settings.LOCALIZED_STRINGS_MODEL, widecard=False, clear=False)
 
 
-def import_all():
+def import_zip_all(file):
     """
-    Import all data files to models.
+    Import all data files from a zip file.
     """
+    temp = tempfile.mkdtemp()
 
-    # count the number of files loaded
-    count = 0
+    try:
+        archive = zipfile.ZipFile(file, 'r')
+        archive.extractall(temp)
 
-    # get model name
+        # import models
+        model_name_list = settings.BASIC_DATA_MODELS +\
+                          settings.OBJECT_DATA_MODELS +\
+                          settings.OTHER_DATA_MODELS +\
+                          (settings.LOCALIZED_STRINGS_MODEL,)
 
+        # import models one by one
+        for model_name in model_name_list:
+            import_model(model_name, path_name=temp)
+    finally:
+        shutil.rmtree(temp)
+
+
+def import_local_all():
+    """
+    Import all local data files to models.
+    """
     # load models in order
     model_name_list = settings.BASIC_DATA_MODELS + settings.OBJECT_DATA_MODELS + settings.OTHER_DATA_MODELS
 

@@ -118,9 +118,6 @@ WORLD_DATA_APP = "worlddata"
 # data file's folder under user's game directory.
 WORLD_DATA_FOLDER = "worlddata/data"
 
-# data file's encoding
-WORLD_DATA_FILE_ENCODING = "utf8"
-
 ###################################
 # Basic data
 ###################################

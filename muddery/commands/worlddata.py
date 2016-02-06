@@ -7,7 +7,7 @@ Add three commands: @importdata, @datainfo and @batchbuilder
 
 import os
 from django.conf import settings
-from muddery.utils.importer import import_model, import_all
+from muddery.utils.importer import import_model, import_local_all
 from muddery.utils.builder import build_all
 from muddery.utils.exception import MudderyError
 from evennia import default_cmds
@@ -81,7 +81,7 @@ class CmdLoadWorld(default_cmds.MuxCommand):
         caller = self.caller
 
         try:
-            import_all()
+            import_local_all()
             build_all(caller)
         except Exception, e:
             ostring = "Can't build world: %s" % e

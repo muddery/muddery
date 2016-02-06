@@ -10,11 +10,10 @@ import os, tempfile
 from django import http
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
-from django.core.servers.basehttp import FileWrapper
-from evennia.players.models import PlayerDB
 from evennia.server.sessionhandler import SESSIONS
 from evennia.utils import logger
 from muddery.utils import exporter
+from muddery.utils import importer
 from muddery.utils.builder import build_all
 
 
@@ -25,6 +24,8 @@ def worldeditor(request):
     """
     if "export" in request.GET:
         return export_file(request)
+    elif "import" in request.FILES:
+        return import_file(request)
     elif "apply" in request.POST:
         return apply_changes(request)
 
@@ -36,28 +37,55 @@ def export_file(request):
     """
     Export game world files.
     """
-    def file_iterator(file_name, chunk_size=512):
-        with open(file_name) as f:
-            while True:
-                c = f.read(chunk_size)
-                if c:
-                    yield c
-                else:
-                    # remove temp file
-                    f.close()
-                    os.remove(file_name)
-                    break
+    def file_iterator(file, chunk_size=512):
+        while True:
+            c = file.read(chunk_size)
+            if c:
+                yield c
+            else:
+                # remove temp file
+                file.close()
+                break
+
+    response = http.HttpResponseNotModified()
 
     # get data's zip
-    zipfile_name = tempfile.mktemp()
-    exporter.export_zip_all(zipfile_name)
+    try:
+        zipfile = tempfile.TemporaryFile()
+        exporter.export_zip_all(zipfile)
+        zipfile.seek(0)
 
-    response = http.StreamingHttpResponse(file_iterator(zipfile_name))
-    response['Content-Type'] = 'application/octet-stream'
-    response['Content-Disposition'] = 'attachment;filename="worlddata.zip"'
+        response = http.StreamingHttpResponse(file_iterator(zipfile))
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename="worlddata.zip"'
+    except Exception, e:
+        logger.log_tracemsg("Can't export world: %s" % e)
+        response = http.HttpResponseServerError()
 
     return response
 
+
+@staff_member_required
+def import_file(request):
+    """
+    Import the game world from an uploaded zip file.
+    """
+    response = http.HttpResponseNotModified()
+    file_obj = request.FILES.get("import", None)
+
+    if file_obj:
+        zipfile = tempfile.TemporaryFile()
+        try:
+            for chunk in file_obj.chunks():
+                zipfile.write(chunk)
+            importer.import_zip_all(zipfile)
+        except Exception, e:
+            logger.log_tracemsg("Can't import world: %s" % e)
+            response = http.HttpResponseServerError()
+        finally:
+            zipfile.close()
+
+    return response
 
 @staff_member_required
 def apply_changes(request):
@@ -74,7 +102,7 @@ def apply_changes(request):
     except Exception, e:
         ostring = "Can't build world: %s" % e
         logger.log_tracemsg(ostring)
-        raise http.HttpResponseServerError(ostring)
+        raise http.HttpResponseServerError
 
     return http.HttpResponse("Server is reloading...")
 
