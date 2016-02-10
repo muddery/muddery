@@ -87,3 +87,4 @@ origin,local
 "%s hitted %s.","%s打了%s。"
 "%s lost %s HPs.","%s损失了%s点生命。"
 "%s healed %s HPs.","%s治疗了%s点生命。"
+"Data applied! The server is reloading.","数据已应用，服务器正在重载。"

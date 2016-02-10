@@ -6,7 +6,7 @@ page and serve it eventual static content.
 """
 from __future__ import print_function
 
-import os, tempfile
+import os, tempfile, time
 from django import http
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
@@ -15,7 +15,7 @@ from evennia.utils import logger
 from muddery.utils import exporter
 from muddery.utils import importer
 from muddery.utils.builder import build_all
-
+from muddery.utils.localized_strings_handler import LS
 
 @staff_member_required
 def worldeditor(request):
@@ -55,9 +55,10 @@ def export_file(request):
         exporter.export_zip_all(zipfile)
         zipfile.seek(0)
 
+        filename = time.strftime("worlddata_%Y%m%d_%H%M%S.zip", time.localtime())
         response = http.StreamingHttpResponse(file_iterator(zipfile))
         response['Content-Type'] = 'application/octet-stream'
-        response['Content-Disposition'] = 'attachment;filename="worlddata.zip"'
+        response['Content-Disposition'] = 'attachment;filename="%s"' % filename
     except Exception, e:
         zipfile.close()
         message = "Can't export world: %s" % e
@@ -107,7 +108,7 @@ def apply_changes(request):
         logger.log_tracemsg(message)
         return render(request, 'fail.html', {"message": message})
 
-    return render(request, 'success.html', {"message": "Data applied! The server is reloading."})
+    return render(request, 'success.html', {"message": LS("Data applied! The server is reloading.")})
 
 
 @staff_member_required
