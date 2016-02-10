@@ -59,8 +59,10 @@ def export_file(request):
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="worlddata.zip"'
     except Exception, e:
-        logger.log_tracemsg("Can't export world: %s" % e)
-        response = http.HttpResponseServerError()
+        zipfile.close()
+        message = "Can't export world: %s" % e
+        logger.log_tracemsg(message)
+        return render(request, 'fail.html', {"message": message})
 
     return response
 
@@ -80,12 +82,13 @@ def import_file(request):
                 zipfile.write(chunk)
             importer.import_zip_all(zipfile)
         except Exception, e:
-            logger.log_tracemsg("Can't import world: %s" % e)
-            response = http.HttpResponseServerError()
-        finally:
             zipfile.close()
+            logger.log_tracemsg("Cannot import world: %s" % e)
+            return render(request, 'fail.html', {"message": str(e)})
 
-    return response
+        zipfile.close()
+
+    return render(request, 'success.html', {"message": "Data imported!"})
 
 @staff_member_required
 def apply_changes(request):
@@ -100,11 +103,11 @@ def apply_changes(request):
         SESSIONS.announce_all(" Server restarting ...")
         SESSIONS.server.shutdown(mode='reload')
     except Exception, e:
-        ostring = "Can't build world: %s" % e
-        logger.log_tracemsg(ostring)
-        raise http.HttpResponseServerError
+        message = "Can't build world: %s" % e
+        logger.log_tracemsg(message)
+        return render(request, 'fail.html', {"message": message})
 
-    return http.HttpResponse("Server is reloading...")
+    return render(request, 'success.html', {"message": "Data applied! The server is reloading."})
 
 
 @staff_member_required
@@ -120,8 +123,3 @@ def editor(request):
         return render(request, name + '.html')
     except:
         raise http.Http404
-
-
-@staff_member_required
-def export_worlddata(request):
-    pass

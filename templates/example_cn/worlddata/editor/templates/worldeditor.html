@@ -38,13 +38,29 @@
     本地化可以将原语言的游戏内容翻译为本地语言。
 
     <div><br></div>
+    <h2><u>下载游戏世界的数据</u></h2>
+    <div>下载游戏世界的数据到一组csv文件的zip压缩包。</div>
     <form method="GET">
       <input type="hidden" name="export"/>
-      <input type="submit" value="下载文件"/>
+      <input type="submit" value="Download"/>
     </form>
     <div><br></div>
-    <form>
-      <input type="button" value="应用到游戏" onclick="worldeditor.doPost('apply=1')"/>
+    <h2><u>上传游戏世界的数据</u></h2>
+    <div>将zip文件中的csv文件上传到数据库。</div>
+    <div><span style="color: red">注意：当前游戏世界的数据会被替换！</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <input type="file" name="import" accept="application/zip"/>
+      <br>
+      <input type="submit" value="Upload"/>
+    </form>
+    <div><br></div>
+    <h2><u>将变化应用到游戏</u></h2>
+    <div>将游戏世界的数据应用到游戏中。服务器会自动重启。</div>
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="apply"/>
+      <input type="submit" value="Apply"/>
     </form>
 
     <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
