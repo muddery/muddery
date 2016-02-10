@@ -3,7 +3,8 @@
 {% load staticfiles %}
 
 {% block header_ext %}
-<script src="{% static "worldeditor/js/worldeditor.js" %}" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static "worldeditor/css/worldeditor.css" %}">
+    <script src="{% static "worldeditor/js/worldeditor.js" %}" type="text/javascript" charset="utf-8"></script>
 {% endblock %}
 
 {% block content %}
@@ -40,14 +41,16 @@
     Localization can translate original game contents to local language contents.
 
     <div><br></div>
-    <h2><u>Download data of the game world.</u></h2>
+    <hr/>
+    <h2>Download data of the game world.</h2>
     <div>Download data the game world to a zip file of csv files.</div>
     <form method="GET">
       <input type="hidden" name="export"/>
       <input type="submit" value="Download"/>
     </form>
     <div><br></div>
-    <h2><u>Upload data of the game world.</u></h2>
+    <hr/>
+    <h2>Upload data of the game world.</h2>
     <div>Upload a zip file of csv files to the database.</div>
     <div><span style="color: red">NOTICE: Current world's data will be replaced!</span></div>
     <form enctype="multipart/form-data" method="POST">
@@ -57,7 +60,8 @@
       <input type="submit" value="Upload"/>
     </form>
     <div><br></div>
-    <h2><u>Apply changes to the game.</u></h2>
+    <hr/>
+    <h2>Apply changes to the game.</h2>
     <div>Apply game world's data to the server. The server will reload automatically.</div>
     <form method="POST">
       {% csrf_token %}
