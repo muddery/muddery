@@ -10,6 +10,7 @@ import traceback
 from django.conf import settings
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.utils.game_settings import GAME_SETTINGS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
 
@@ -59,7 +60,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         """
         super(MudderyRoom, self).at_object_receive(moved_obj, source_location)
 
-        if not settings.SOLO_MODE:
+        if not GAME_SETTINGS.get("solo_mode"):
             # send surrounding changes to player
             type = self.get_surrounding_type(moved_obj)
             if type:
@@ -83,7 +84,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         """
         super(MudderyRoom, self).at_object_left(moved_obj, target_location)
 
-        if not settings.SOLO_MODE:
+        if not GAME_SETTINGS.get("solo_mode"):
             # send surrounding changes to player
             type = self.get_surrounding_type(moved_obj)
             if type:
@@ -118,7 +119,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         visible = (cont for cont in self.contents if cont != caller and
                    cont.access(caller, "view"))
 
-        if settings.SOLO_MODE:
+        if GAME_SETTINGS.get("solo_mode"):
             visible = (cont for cont in visible if not cont.has_player)
 
         for cont in visible:

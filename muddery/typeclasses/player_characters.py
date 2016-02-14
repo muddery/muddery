@@ -19,6 +19,7 @@ from muddery.utils.quest_handler import QuestHandler
 from muddery.utils.attribute_handler import AttributeHandler
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
+from muddery.utils.game_settings import GAME_SETTINGS
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia import TICKER_HANDLER
@@ -68,16 +69,22 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.db.career = ""
         self.db.unlocked_exits = set()
         self.db.revealed_map = set()
-
+        
+    def load_data(self):
+        """
+        """
+        super(MudderyPlayerCharacter, self).load_data()
+        self.reborn_cd = GAME_SETTINGS.get("player_reborn_cd")
+        self.solo_mode = GAME_SETTINGS.get("solo_mode")
 
     def move_to(self, destination, quiet=False,
                 emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True):
         """
         Moves this object to a new location.
         """
-        if settings.SOLO_MODE:
-            # If in solo mode, move quietly.
-            quiet = True
+        if (not quiet) and self.solo_mode:
+			# If in solo mode, move quietly.
+			quiet = True
         
         return super(MudderyPlayerCharacter, self).move_to(destination,
                                                            quiet,
@@ -148,7 +155,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.show_location()
 
         # notify its location
-        if not settings.SOLO_MODE:
+        if not self.solo_mode:
             if self.location:
                 change = {"dbref": self.dbref,
                           "name": self.get_name()}
@@ -161,7 +168,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         this Player.
         
         """
-        if not settings.SOLO_MODE:
+        if not self.solo_mode:
             # notify its location
             if self.location:
                 change = {"dbref": self.dbref,
@@ -678,22 +685,22 @@ class MudderyPlayerCharacter(MudderyCharacter):
         
         self.msg({"msg": LS("You died.")})
 
-        if settings.PLAYER_REBORN_CD <= 0:
+        if self.reborn_cd <= 0:
             # Reborn immediately
             self.reborn()
         else:
             # Set reborn timer.
-            TICKER_HANDLER.add(self, settings.PLAYER_REBORN_CD, hook_key="reborn")
+            TICKER_HANDLER.add(self, self.reborn_cd, hook_key="reborn")
 
             self.msg({"msg": LS("You will be reborn at {c%(p)s{n in {c%(s)s{n seconds.") %
-                             {'p': self.home.get_name(), 's': settings.PLAYER_REBORN_CD}})
+                             {'p': self.home.get_name(), 's': self.reborn_cd}})
 
 
     def reborn(self):
         """
         Reborn after being killed.
         """
-        TICKER_HANDLER.remove(self, settings.PLAYER_REBORN_CD)
+        TICKER_HANDLER.remove(self, self.reborn_cd)
 
         # Recover all hp.
         self.db.hp = self.max_hp

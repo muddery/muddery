@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Defines</h1>
+<h1 xmlns="http://www.w3.org/1999/html">Defines</h1>
     Welcome to the Defines Page. Here defines a set of basic values.
 
     <h3><a href="../">BACK</a></h3>
+
+    <h2><a href="{% url "admin:worlddata_game_settings_changelist" %}">Game Settings</a></h2>
+    Game's basic settings.
 
     <h2><a href="{% url "admin:worlddata_class_categories_changelist" %}">Class Categories</a></h2>
     The basic categories of object types.

@@ -9,6 +9,7 @@ from django.conf import settings
 from evennia import TICKER_HANDLER
 from muddery.utils.builder import build_object
 from muddery.utils.localized_strings_handler import LS
+from muddery.utils.game_settings import GAME_SETTINGS
 
 
 class SkillHandler(object):
@@ -29,6 +30,8 @@ class SkillHandler(object):
         if owner:
             self.skills = owner.db.skills
 
+        self.gcd = GAME_SETTINGS.get("global_cd")
+        self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
         self.can_auto_cast = False
         self.skill_target = None
         self.gcd_finish_time = 0
@@ -139,9 +142,10 @@ class SkillHandler(object):
         # set GCD
         if not cd:
             cd = {}
-        cd["gcd"] = settings.GLOBAL_CD
-        if settings.GLOBAL_CD > 0:
-            self.gcd_finish_time = time.time() + settings.GLOBAL_CD
+
+        cd["gcd"] = self.gcd
+        if self.gcd > 0:
+            self.gcd_finish_time = time.time() + self.gcd
 
         # send CD to the player
         self.owner.msg({"skill_cd": cd})
@@ -160,7 +164,7 @@ class SkillHandler(object):
 
         if not self.owner.ndb.combat_handler:
             # combat is finished, stop ticker
-            TICKER_HANDLER.remove(self, settings.AUTO_CAST_SKILL_CD)
+            TICKER_HANDLER.remove(self, self.auto_cast_skill_cd)
             return
 
         # Get target.
@@ -238,11 +242,11 @@ class SkillHandler(object):
         self.auto_cast_skill()
 
         # Set timer of auto cast.
-        TICKER_HANDLER.add(self, settings.AUTO_CAST_SKILL_CD, hook_key="auto_cast_skill")
+        TICKER_HANDLER.add(self, self.auto_cast_skill_cd, hook_key="auto_cast_skill")
 
     def stop_auto_combat_skill(self):
         """
         Stop auto cast skill.
         """
         self.can_auto_cast = False
-        TICKER_HANDLER.remove(self, settings.AUTO_CAST_SKILL_CD)
+        TICKER_HANDLER.remove(self, self.auto_cast_skill_cd)

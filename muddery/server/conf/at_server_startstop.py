@@ -21,6 +21,7 @@ from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
+from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.typeclasses.character_skills import MudderySkill
 from muddery.utils import builder
 
@@ -30,6 +31,9 @@ def at_server_start():
     This is called every time the server starts up, regardless of
     how it was shut down.
     """
+    # reset settings
+    GAME_SETTINGS.reset()
+
     # reload keys
     OBJECT_KEY_HANDLER.reload()
 

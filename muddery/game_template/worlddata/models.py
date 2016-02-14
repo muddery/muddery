@@ -2,6 +2,10 @@ from django.db import models
 from muddery.worlddata import model_base
 
 
+class game_settings(model_base.game_settings):
+    pass
+
+
 # ------------------------------------------------------------
 #
 # all class's categories

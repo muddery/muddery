@@ -122,5 +122,5 @@ def editor(request):
         if not name:
             name = path[-2]
         return render(request, name + '.html')
-    except:
+    except Exception, e:
         raise http.Http404

@@ -19,6 +19,7 @@ from __future__ import print_function
 from django.conf import settings
 from evennia.utils import search, logger
 from muddery.utils import builder, importer, utils
+from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.typeclasses.character_skills import MudderySkill
 import traceback
 
@@ -60,7 +61,7 @@ def at_initial_setup():
                 superuser.move_to(start_location, quiet=True)
 
             # set superuser's data
-            superuser.set_data_key(settings.DEFAULT_PLAYER_CHARACTER_KEY)
+            superuser.set_data_key(GAME_SETTINGS.get("default_player_model_key"))
             superuser.set_level(1)
             superuser.set_nickname("superuser")
 

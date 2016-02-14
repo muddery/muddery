@@ -7,6 +7,9 @@ from muddery.worlddata import admin_base
 
 # Register your models here.
 
+class GameSettingsAdmin(admin_base.GameSettingsAdmin):
+    form = GameSettingsForm
+
 
 class ClassCategoriesAdmin(admin_base.ClassCategoriesAdmin):
     pass
@@ -160,6 +163,7 @@ class LocalizedStringsAdmin(admin_base.LocalizedStringsAdmin):
     pass
 
 
+admin.site.register(game_settings, GameSettingsAdmin)
 admin.site.register(class_categories, ClassCategoriesAdmin)
 admin.site.register(typeclasses, TypeclassesAdmin)
 admin.site.register(world_rooms, WorldRoomsAdmin)

@@ -12,6 +12,7 @@ from muddery.utils.script_handler import SCRIPT_HANDLER
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
+from muddery.utils.game_settings import GAME_SETTINGS
 
 
 class QuestHandler(object):
@@ -62,7 +63,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if not settings.ALLOW_GIVE_UP_QUESTS:
+        if not GAME_SETTINGS.get("allow_give_up_quests"):
             logger.log_tracemsg("Can not give up quests.")
             raise MudderyError(LS("Can not give up this quest."))
 

@@ -12,6 +12,7 @@ from django.conf import settings
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.localized_strings_handler import LS
+from muddery.utils.game_settings import GAME_SETTINGS
 
 
 class MudderySkill(MudderyObject):
@@ -101,8 +102,9 @@ class MudderySkill(MudderyObject):
     
         if not self.passive:
             # Set skill cd. Add gcd to new the skill.
-            if settings.GLOBAL_CD > 0:
-                self.db.cd_finish_time = time.time() + settings.GLOBAL_CD
+            gcd = GAME_SETTINGS.get("global_cd")
+            if gcd > 0:
+                self.db.cd_finish_time = time.time() + gcd
 
     def cast_skill_manually(self, target):
         """

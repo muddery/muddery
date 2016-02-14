@@ -6,6 +6,19 @@ from muddery.worlddata.form_base import *
 # Register your models here.
 
 
+class GameSettingsAdmin(admin.ModelAdmin):
+    list_display = ('connection_screen',
+                    'global_cd',
+                    'auto_cast_skill_cd',
+                    'player_reborn_cd',
+                    'npc_reborn_cd',
+                    'allow_give_up_quests',
+                    'default_home_key',
+                    'start_location_key',
+                    'default_player_home_key',
+                    'default_player_model_key')
+
+
 class ClassCategoriesAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',
