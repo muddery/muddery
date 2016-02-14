@@ -6,6 +6,7 @@ from __future__ import print_function
 
 from muddery.utils import utils
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
+from muddery.utils.game_settings import GAME_SETTINGS
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import create, search, logger
@@ -234,7 +235,7 @@ def reset_default_locations():
     are empty, set them to to the first room in settings.WORLD_ROOMS.
     """
     # Set default home.
-    default_home_key = settings.DEFAULT_HOME_KEY
+    default_home_key = GAME_SETTINGS.get("default_home_key")
     if not default_home_key:
         # If does not have the default_home_key, get the first room in WORLD_ROOMS.
         try:
@@ -256,7 +257,7 @@ def reset_default_locations():
             print("settings.DEFAULT_HOME set to: %s" % settings.DEFAULT_HOME)
 
     # Set player's default home.
-    default_player_home_key = settings.DEFAULT_PLAYER_HOME_KEY
+    default_player_home_key = GAME_SETTINGS.get("default_player_home_key")
     if not default_player_home_key:
         # If does not have the default_player_home_key, set to the DEFAULT_HOME
         settings.DEFAULT_PLAYER_HOME = settings.DEFAULT_HOME
@@ -268,7 +269,7 @@ def reset_default_locations():
             print("settings.DEFAULT_PLAYER_HOME set to: %s" % settings.DEFAULT_PLAYER_HOME)
     
     # Set start location.
-    start_location_key = settings.START_LOCATION_KEY
+    start_location_key = GAME_SETTINGS.get("start_location_key")
     if not start_location_key:
         # If does not have the start_location_key, get the first room in WORLD_ROOMS
         try:

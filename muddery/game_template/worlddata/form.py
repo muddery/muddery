@@ -22,6 +22,17 @@ def ExistKey(key, except_model=None):
     return False
 
 
+class GameSettingsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(GameSettingsForm, self).__init__(*args, **kwargs)
+
+        choices = [("", "---------")]
+
+        objects = models.character_models.objects.filter(level=1)
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['default_player_model_key'] = forms.ChoiceField(choices=choices)
+
+
 class WorldRoomsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldRoomsForm, self).__init__(*args, **kwargs)

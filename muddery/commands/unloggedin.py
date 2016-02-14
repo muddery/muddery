@@ -17,6 +17,7 @@ from evennia.utils import create, logger, utils
 from evennia.commands.command import Command
 from evennia.commands.cmdhandler import CMD_LOGINSTART
 from muddery.utils.localized_strings_handler import LS
+from muddery.utils.game_settings import GAME_SETTINGS
 
 
 # limit symbol import for API
@@ -119,7 +120,7 @@ def create_guest_player(session):
         new_player = _create_player(session, playername, password,
                                     permissions, ptypeclass)
         if new_player:
-            _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
+            _create_character(GAME_SETTINGS.get("default_player_model_key"), 1,
                               session, new_player, typeclass,
                               default_home, permissions, playername)
 
@@ -352,7 +353,7 @@ class CmdUnconnectedCreate(Command):
             if new_player:
                 if MULTISESSION_MODE < 2:
                     default_home = ObjectDB.objects.get_id(settings.DEFAULT_PLAYER_HOME)
-                    _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
+                    _create_character(GAME_SETTINGS.get("default_player_model_key"), 1,
                                       session, new_player, typeclass,
                                       default_home, permissions, nickname)
                 # tell the caller everything went well.
@@ -462,7 +463,7 @@ class CmdUnconnectedCreateConnect(Command):
             if new_player:
                 if MULTISESSION_MODE < 2:
                     default_home = ObjectDB.objects.get_id(settings.DEFAULT_PLAYER_HOME)
-                    _create_character(settings.DEFAULT_PLAYER_CHARACTER_KEY, 1,
+                    _create_character(GAME_SETTINGS.get("default_player_model_key"), 1,
                                       session, new_player, typeclass,
                                       default_home, permissions, nickname)
                 # tell the caller everything went well.
@@ -533,7 +534,7 @@ class CmdUnconnectedLook(Command):
 
     def func(self):
         "Show the connect screen."
-        connection_screen = utils.random_string_from_module(CONNECTION_SCREEN_MODULE)
+        connection_screen = GAME_SETTINGS.get("CONNECTION_SCREEN")
         if not connection_screen:
             connection_screen = "No connection screen found. Please contact an admin."
         self.caller.msg({"msg":connection_screen})

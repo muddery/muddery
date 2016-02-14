@@ -12,6 +12,7 @@ from muddery.utils.script_handler import SCRIPT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.loot_handler import LootHandler
 from muddery.utils.localized_strings_handler import LS
+from muddery.utils.game_settings import GAME_SETTINGS
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
@@ -84,7 +85,7 @@ class MudderyQuest(MudderyObject):
         This returns a list of available commands.
         """
         commands = []
-        if settings.ALLOW_GIVE_UP_QUESTS:
+        if GAME_SETTINGS.get("allow_give_up_quests"):
             commands.append({"name": LS("Give Up"), "cmd": "giveup_quest", "args": self.get_data_key()})
         return commands
 

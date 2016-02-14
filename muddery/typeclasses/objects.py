@@ -23,6 +23,7 @@ from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.event_handler import EventHandler
 from muddery.utils.localized_strings_handler import LS
+from muddery.utils.game_settings import GAME_SETTINGS
 
 
 class MudderyObject(DefaultObject):
@@ -115,7 +116,7 @@ class MudderyObject(DefaultObject):
         if not self.sessions.count():
             # only remove this char from grid if no sessions control it anymore.
             if self.location: # have to check, in case of multiple connections closing
-                if not settings.SOLO_MODE:
+                if not GAME_SETTINGS.get("solo_mode"):
                     # Notify other players in this location.
                     self.location.msg_contents("%s has left the game." % self.name, exclude=[self])
 

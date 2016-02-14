@@ -11,19 +11,22 @@ from evennia import TICKER_HANDLER
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.utils.builder import delete_object
 from muddery.utils.localized_strings_handler import LS
+from muddery.utils.game_settings import GAME_SETTINGS
 
 class MudderyMonster(MudderyCharacter):
     """
     Default mob. Monsters are hostile to players, they can be attacked.
     """
-    def at_init(self):
+    def load_data(self):
         """
         Init the character.
         """
-        super(MudderyMonster, self).at_init()
+        super(MudderyMonster, self).load_data()
 
         # set home
         self.home = self.location
+        
+        self.reborn_cd = GAME_SETTINGS.get("npc_reborn_cd")
 
 
     def get_available_commands(self, caller):
@@ -46,14 +49,14 @@ class MudderyMonster(MudderyCharacter):
             # delete itself and notify its location
             location = self.location
 
-            if settings.NPC_REBORN_CD <= 0:
+            if self.reborn_cd <= 0:
                 # Can not reborn.
                 delete_object(self.dbref)
             else:
                 # Remove from its location.
                 self.move_to(None, quiet=True, to_none=True)
                 # Set reborn timer.
-                TICKER_HANDLER.add(self, settings.NPC_REBORN_CD, hook_key="reborn")
+                TICKER_HANDLER.add(self, self.reborn_cd, hook_key="reborn")
 
             if location:
                 for content in location.contents:
@@ -67,7 +70,7 @@ class MudderyMonster(MudderyCharacter):
         """
         Reborn after being killed.
         """
-        TICKER_HANDLER.remove(self, settings.NPC_REBORN_CD)
+        TICKER_HANDLER.remove(self, self.reborn_cd)
 
         # Recover all hp.
         self.db.hp = self.max_hp

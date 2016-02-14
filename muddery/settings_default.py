@@ -118,6 +118,9 @@ WORLD_DATA_APP = "worlddata"
 # data file's folder under user's game directory.
 WORLD_DATA_FOLDER = "worlddata/data"
 
+# game settings
+GAME_SETTINGS = "game_settings"
+
 ###################################
 # Basic data
 ###################################
@@ -235,50 +238,17 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      DIALOGUE_SENTENCES,
                      NPC_DIALOGUES,
                      EQUIPMENT_TYPES,
-                     DEFAULT_SKILLS) + EVENT_ADDITIONAL_DATA
+                     DEFAULT_SKILLS,
+                     GAME_SETTINGS) + EVENT_ADDITIONAL_DATA
 
 # local strings
 LOCALIZED_STRINGS_MODEL = "localized_strings"
 LOCALIZED_STRINGS_FOLDER = "languages"
-
-# The default home location used for all objects. This is used as a
-# fallback if an object's normal home location is deleted. It is the
-# key of the room. If it is empty, the home will be set to the first
-# room in WORLD_ROOMS.
-DEFAULT_HOME_KEY = ""
-
-# The start position for new characters. It is the key of the room.
-# If it is empty, the home will be set to the first room in WORLD_ROOMS.
-START_LOCATION_KEY = ""
-
-DEFAULT_PLAYER_CHARACTER_KEY = "player"
-
-DEFAULT_PLAYER_HOME_KEY = ""
-
-DEFAULT_PLAYER_HOME = ""
 
 EQUIP_EFFECTS = []
 
 # all skill modules
 SKILL_MODULES = ("skills.skills",)
 
-GLOBAL_CD = 1.0
-
-# AUTO_BATTLE_SKILL_CD must be bigger than GLOBAL_CD
-# They can not be equal!
-AUTO_CAST_SKILL_CD = 1.5
-
-# In solo mode, a player can not see or affect other players.
-SOLO_MODE = False
-
 # Characters who have equal or higher permission can bypass events.
 PERMISSION_BYPASS_EVENTS = {"Builders", "Wizards", "Immortals"}
-
-# Player's reborn time after being killed. If it is below 0, players will be reborn immediately.
-PLAYER_REBORN_CD = 10
-
-# NPC's reborn time after being killed. If it is below 0, npcs will not be reborn.
-NPC_REBORN_CD = 10
-
-# Allow players to give up quests.
-ALLOW_GIVE_UP_QUESTS = True

@@ -6,6 +6,50 @@ TYPECLASS_LENGTH = 80
 POSITION_LENGTH = 80
 
 
+class game_settings(models.Model):
+    """
+    """
+    connection_screen = models.TextField(blank=True)
+
+    # In solo mode, a player can not see or affect other players.
+    solo_mode = models.BooleanField(blank=True, default=False)
+
+    global_cd = models.FloatField(blank=True, default=1.0)
+
+    # AUTO_BATTLE_SKILL_CD must be bigger than GLOBAL_CD
+    # They can not be equal!
+    auto_cast_skill_cd = models.FloatField(blank=True, default=1.5)
+
+    # Player's reborn time after being killed. If it is below 0, players will be reborn immediately.
+    player_reborn_cd = models.FloatField(blank=True, default=10.0)
+
+    # NPC's reborn time after being killed. If it is below 0, NPCs will not be reborn.
+    npc_reborn_cd = models.FloatField(blank=True, default=10.0)
+
+    # Allow players to give up quests.
+    allow_give_up_quests = models.BooleanField(blank=True, default=True)
+
+    # The default home location used for all objects. This is used as a
+    # fallback if an object's normal home location is deleted. It is the
+    # key of the room. If it is empty, the home will be set to the first
+    # room in WORLD_ROOMS.
+    default_home_key = models.ForeignKey("world_rooms", null=True, blank=True)
+
+    # The start position for new characters. It is the key of the room.
+    # If it is empty, the home will be set to the first room in WORLD_ROOMS.
+    start_location_key = models.ForeignKey("world_rooms", null=True, blank=True)
+
+    default_player_home_key = models.ForeignKey("world_rooms", null=True, blank=True)
+
+    default_player_model_key = models.CharField(max_length=KEY_LENGTH)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Game Setting"
+        verbose_name_plural = "Game Settings"
+
+
 # ------------------------------------------------------------
 #
 # store all typeclasses
