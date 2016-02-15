@@ -6,17 +6,25 @@ TYPECLASS_LENGTH = 80
 POSITION_LENGTH = 80
 
 
+# ------------------------------------------------------------
+#
+# Game's basic settings.
+#
+# ------------------------------------------------------------
 class game_settings(models.Model):
     """
+    Game's basic settings.
     """
+    # The screen shows to players who are not loggin.
     connection_screen = models.TextField(blank=True)
 
     # In solo mode, a player can not see or affect other players.
     solo_mode = models.BooleanField(blank=True, default=False)
 
+	# Time of global CD.
     global_cd = models.FloatField(blank=True, default=1.0)
 
-    # AUTO_BATTLE_SKILL_CD must be bigger than GLOBAL_CD
+    # The CD of auto casting a skill. It must be bigger than GLOBAL_CD
     # They can not be equal!
     auto_cast_skill_cd = models.FloatField(blank=True, default=1.5)
 
@@ -39,8 +47,10 @@ class game_settings(models.Model):
     # If it is empty, the home will be set to the first room in WORLD_ROOMS.
     start_location_key = models.ForeignKey("world_rooms", null=True, blank=True)
 
+	# Player's default home. When a player dies, he will be moved to his home.
     default_player_home_key = models.ForeignKey("world_rooms", null=True, blank=True)
 
+	# Default model of players.
     default_player_model_key = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:

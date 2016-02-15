@@ -35,7 +35,7 @@ class GameSettings(object):
                      "default_home_key": True,
                      "start_location_key": True,
                      "default_player_home_key": True,
-                     "default_player_model_key": True}
+                     "default_player_model_key": ""}
 
         # Get db model
         try:

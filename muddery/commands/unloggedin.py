@@ -25,7 +25,6 @@ __all__ = ("CmdUnconnectedConnect", "CmdUnconnectedCreate", "CmdUnconnectedCreat
            "CmdUnconnectedQuit", "CmdUnconnectedLook")
 
 MULTISESSION_MODE = settings.MULTISESSION_MODE
-CONNECTION_SCREEN_MODULE = settings.CONNECTION_SCREEN_MODULE
 
 # Helper function to throttle failed connection attempts.
 # This can easily be used to limit player creation too,
@@ -534,7 +533,7 @@ class CmdUnconnectedLook(Command):
 
     def func(self):
         "Show the connect screen."
-        connection_screen = GAME_SETTINGS.get("CONNECTION_SCREEN")
+        connection_screen = GAME_SETTINGS.get("connection_screen")
         if not connection_screen:
             connection_screen = "No connection screen found. Please contact an admin."
         self.caller.msg({"msg":connection_screen})
@@ -557,7 +556,7 @@ class CmdUnconnectedLoginStart(Command):
 
     def func(self):
         "Show the connect screen."
-        connection_screen = utils.random_string_from_module(CONNECTION_SCREEN_MODULE)
+        connection_screen = GAME_SETTINGS.get("connection_screen")
         if not connection_screen:
             connection_screen = "No connection screen found. Please contact an admin."
         self.caller.msg({"msg":connection_screen})

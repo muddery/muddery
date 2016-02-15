@@ -1,0 +1,9 @@
+connection_screen,solo_mode,global_cd,auto_cast_skill_cd,player_reborn_cd,npc_reborn_cd,allow_give_up_quests,default_home_key,start_location_key,default_player_home_key,default_player_model_key
+"{b=============================================================={n
+  Welcome to Muddery's demo game! This version is created on {yFeb. 1, 2016{n.
+
+  This is a small solo game. It's very short, only to demonstrate Muddery's abilities.
+  Because the game codes and the database structure may change frequently, user's data may lose. {rIf you can not login with your username, please register again.{n
+ 
+  Muddery is an open source online text game framework in Python. For more information, please visit our website {whttp://www.muddery.org{n.
+{b=============================================================={n",True,1.0,1.5,2.0,2.0,True,room_intro,room_intro,room_colorfulworld_hole,MODEL_PLAYER

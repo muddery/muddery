@@ -7,6 +7,9 @@ from muddery.worlddata import admin_base
 
 # Register your models here.
 
+class GameSettingsAdmin(admin_base.GameSettingsAdmin):
+    form = GameSettingsForm
+
 
 class ClassCategoriesAdmin(admin_base.ClassCategoriesAdmin):
     pass
@@ -42,8 +45,8 @@ class ObjectCreatorsAdmin(admin_base.ObjectCreatorsAdmin):
     form = ObjectCreatorsForm
 
 
-class LootListAdmin(admin_base.LootListAdmin):
-    form = LootListForm
+class CreatorLootListAdmin(admin_base.CreatorLootListAdmin):
+    form = CreatorLootListForm
 
 
 class CommonObjectsAdmin(admin_base.CommonObjectsAdmin):
@@ -86,6 +89,10 @@ class CommonCharactersAdmin(admin_base.CommonCharactersAdmin):
     form = CharacterForm
 
 
+class CharacterLootListAdmin(admin_base.CharacterLootListAdmin):
+    form = CharacterLootListForm
+
+
 class SkillsAdmin(admin_base.SkillsAdmin):
     form = SkillsForm
 
@@ -96,6 +103,10 @@ class DefaultSkillsAdmin(admin_base.DefaultSkillsAdmin):
 
 class QuestsAdmin(admin_base.QuestsAdmin):
     form = QuestsForm
+
+
+class QuestRewardListAdmin(admin_base.QuestRewardListAdmin):
+    form = QuestRewardListForm
 
 
 class QuestObjectiveTypesAdmin(admin_base.QuestObjectiveTypesAdmin):
@@ -158,6 +169,7 @@ class LocalizedStringsAdmin(admin_base.LocalizedStringsAdmin):
     pass
 
 
+admin.site.register(game_settings, GameSettingsAdmin)
 admin.site.register(class_categories, ClassCategoriesAdmin)
 admin.site.register(typeclasses, TypeclassesAdmin)
 admin.site.register(world_rooms, WorldRoomsAdmin)
@@ -165,7 +177,7 @@ admin.site.register(world_exits, WorldExitsAdmin)
 admin.site.register(exit_locks, ExitLocksAdmin)
 admin.site.register(world_objects, WorldObjectsAdmin)
 admin.site.register(object_creators, ObjectCreatorsAdmin)
-admin.site.register(loot_list, LootListAdmin)
+admin.site.register(creator_loot_list, CreatorLootListAdmin)
 admin.site.register(common_objects, CommonObjectsAdmin)
 admin.site.register(foods, FoodsAdmin)
 admin.site.register(equipment_types, EquipmentTypesAdmin)
@@ -176,9 +188,11 @@ admin.site.register(career_equipments, CareersEquipmentsAdmin)
 admin.site.register(character_models, CharacterModelsAdmin)
 admin.site.register(world_npcs, WorldNPCAdmin)
 admin.site.register(common_characters, CommonCharactersAdmin)
+admin.site.register(character_loot_list, CharacterLootListAdmin)
 admin.site.register(skills, SkillsAdmin)
 admin.site.register(default_skills, DefaultSkillsAdmin)
 admin.site.register(quests, QuestsAdmin)
+admin.site.register(quest_reward_list, QuestRewardListAdmin)
 admin.site.register(quest_objective_types, QuestObjectiveTypesAdmin)
 admin.site.register(quest_objectives, QuestObjectivesAdmin)
 admin.site.register(quest_dependency_types, QuestDependencyTypesAdmin)

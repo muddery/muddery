@@ -36,9 +36,12 @@ def at_initial_setup():
         # load world data
         importer.import_local_all()
 
+		# load game settings
+    	GAME_SETTINGS.reset()
+    	
         # reload skill modules
         MudderySkill.load_skill_modules()
-
+    
         # build world
         builder.build_all()
         

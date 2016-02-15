@@ -32,7 +32,7 @@ dlg_colorfulworld_wu_06,1,n,"Can you find 2 screws for me? You can get them from
 dlg_colorfulworld_wu_06,2,p,"OK.",,quest_find_screws,
 dlg_colorfulworld_wu_07,1,n,"Have you found 2 screws?",,,
 dlg_colorfulworld_wu_07,2,p,"No.",,,
-dlg_colorfulworld_wu_08,1,n,"Wonderful, you have found 2 screws! Job is doen!",,,quest_find_screws
+dlg_colorfulworld_wu_08,1,n,"Wonderful, you have found 2 screws! Job is done!",,,quest_find_screws
 dlg_colorfulworld_wu_09,1,n,"There are too many robots outside. Can you kill 3 robots for me?",,,
 dlg_colorfulworld_wu_09,2,p,"Why you have so many requests?",,,
 dlg_colorfulworld_wu_09,3,n,"I don't want it too. But it can demo the quest of killing mobs. Can you do me a favor again?",,,

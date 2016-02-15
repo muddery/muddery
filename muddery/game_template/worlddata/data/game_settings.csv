@@ -1,6 +1,4 @@
-connection_screen,global_cd,auto_cast_skill_cd,player_reborn_cd,npc_reborn_cd,allow_give_up_quests,default_home_key,start_location_key,default_player_home_key,default_player_model_key
+connection_screen,solo_mode,global_cd,auto_cast_skill_cd,player_reborn_cd,npc_reborn_cd,allow_give_up_quests,default_home_key,start_location_key,default_player_home_key,default_player_model_key
 "{b=============================================================={n
-     Welcome to this game, version 0.1.0!
-
-     Please register or login!
- {b=============================================================={n",1.0,1.5,10.0,10.0,1,,,,
+     Welcome!
+ {b=============================================================={n",False,1.0,1.5,10.0,10.0,1,,,,MODEL_PLAYER
