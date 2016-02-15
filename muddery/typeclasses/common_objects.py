@@ -92,7 +92,7 @@ class MudderyCommonObject(MudderyObject):
         """
         commands = []
         if self.location:
-            commands.append({"name":LS("DISCARD"), "cmd":"discard", "args":self.dbref})
+            commands.append({"name":LS("Discard"), "cmd":"discard", "args":self.dbref})
         return commands
 
     def take_effect(self, user, number):
@@ -152,6 +152,6 @@ class MudderyEquipment(MudderyCommonObject):
 
             # Can not discard when equipped
             if self.location:
-                commands.append({"name":LS("DISCARD"), "cmd":"discard", "args":self.dbref})
+                commands.append({"name":LS("Discard"), "cmd":"discard", "args":self.dbref})
 
         return commands

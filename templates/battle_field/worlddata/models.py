@@ -2,6 +2,10 @@ from django.db import models
 from muddery.worlddata import model_base
 
 
+class game_settings(model_base.game_settings):
+    pass
+
+
 # ------------------------------------------------------------
 #
 # all class's categories
@@ -74,11 +78,11 @@ class object_creators(model_base.object_creators):
 
 #------------------------------------------------------------
 #
-# store loot list
+# object creator's loot list
 #
 #------------------------------------------------------------
-class loot_list(model_base.loot_list):
-    "loot list"
+class creator_loot_list(model_base.creator_loot_list):
+    "Object creator's loot list"
     pass
 
 
@@ -183,6 +187,16 @@ class common_characters(model_base.common_characters):
 
 #------------------------------------------------------------
 #
+# character's loot list
+#
+#------------------------------------------------------------
+class character_loot_list(model_base.character_loot_list):
+    "Character's loot list"
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all skills
 #
 #------------------------------------------------------------
@@ -208,6 +222,16 @@ class default_skills(model_base.default_skills):
 #------------------------------------------------------------
 class quests(model_base.quests):
     "Store all dramas."
+    pass
+
+
+#------------------------------------------------------------
+#
+# quest's reward list
+#
+#------------------------------------------------------------
+class quest_reward_list(model_base.quest_reward_list):
+    "Quest's reward list"
     pass
 
 

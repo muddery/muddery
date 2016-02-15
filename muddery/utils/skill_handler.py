@@ -137,6 +137,7 @@ class SkillHandler(object):
                 # send skill's result to the combat handler
                 self.owner.ndb.combat_handler.set_skill_result(result)
             else:
+                # TODO: send result to the target too!
                 self.owner.msg({"skill_result": result})
 
         # set GCD
