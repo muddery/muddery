@@ -125,6 +125,30 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         super(MudderyCharacter, self).load_data()
 
+        # default skills
+        skill_records = []
+        default_skills = apps.get_model(settings.WORLD_DATA_APP, settings.DEFAULT_SKILLS)
+        if default_skills:
+            # Get records.
+            model_name = getattr(self.dfield, "model", None)
+            if not model_name:
+                model_name = self.get_data_key()
+
+            skill_records = default_skills.objects.filter(character=model_name)
+
+        default_skill_ids = set([record.skill_id for record in skill_records])
+
+        # remove old default skills
+        for skill in self.db.skills:
+            if self.db.skills[skill].is_default() and skill not in default_skill_ids:
+                # remove this skill
+                del self.db.skills[skill]
+
+        # add new default skills
+        for skill_record in skill_records:
+            if not self.skill_handler.has_skill(skill_record.skill_id):
+                self.skill_handler.learn_skill(skill_record.skill_id, True)
+
         # refresh data
         self.refresh_data()
 
@@ -230,20 +254,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Initialize this object after data loaded.
         """
         super(MudderyCharacter, self).set_initial_data()
-        
-        # default skills
-        skill_records = []
-        default_skills = apps.get_model(settings.WORLD_DATA_APP, settings.DEFAULT_SKILLS)
-        if default_skills:
-            # Get records.
-            model_name = getattr(self.dfield, "model", None)
-            if not model_name:
-                model_name = self.get_data_key()
-
-            skill_records = default_skills.objects.filter(character=model_name)
-
-        for skill_record in skill_records:
-            self.skill_handler.learn_skill(skill_record.skill_id)
 
         # set initial data
         self.db.hp = self.max_hp

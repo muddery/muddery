@@ -52,6 +52,27 @@ class MudderySkill(MudderyObject):
         # set status
         self.db.owner = None
         self.db.cd_finish_time = 0
+        self.db.is_default = False
+
+    def set_default(self, is_default):
+        """
+        Set this skill as default skill.
+        When skills in table default_skills changes, character's relative skills
+        will change too.
+
+        Args:
+            is_default: (boolean) if the is default or not.
+        """
+        self.db.is_default = is_default
+
+    def is_default(self):
+        """
+        Check if this skill is a default skill or not.
+
+        Returns:
+            (boolean) is default or not
+        """
+        return self.db.is_default
 
     def load_data(self):
         """
