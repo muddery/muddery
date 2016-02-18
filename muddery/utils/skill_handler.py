@@ -49,12 +49,13 @@ class SkillHandler(object):
         """
         return self.skills
 
-    def learn_skill(self, skill):
+    def learn_skill(self, skill, is_default=False):
         """
         Learn a new skill.
 
         Args:
             skill: (string) skill's key
+            is_default: (boolean) if it is a default skill
 
         Returns:
             None
@@ -71,6 +72,10 @@ class SkillHandler(object):
         if not skill_obj:
             self.owner.msg({"alert": LS("Can not learn this skill.")})
             return
+
+        # set default
+        if is_default:
+            skill_obj.set_default(is_default)
 
         # Store new skill.
         skill_obj.set_owner(self.owner)

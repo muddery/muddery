@@ -40,10 +40,11 @@ class GameSettings(object):
         # Get db model
         try:
             model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.GAME_SETTINGS)
-            record = model_obj.objects.all()[0]
-            # Add db fields to dict.
-            for field in record._meta.fields:
-                self.data[field.name] = record.serializable_value(field.name)
+            if len(model_obj.objects.all()) > 0:
+                record = model_obj.objects.all()[0]
+                # Add db fields to dict.
+                for field in record._meta.fields:
+                    self.data[field.name] = record.serializable_value(field.name)
         except Exception, e:
             print("Can not load settings: %s" % e)
             pass
