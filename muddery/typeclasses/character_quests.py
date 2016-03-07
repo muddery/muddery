@@ -75,7 +75,7 @@ class MudderyQuest(MudderyObject):
 
             accomplished = self.db.accomplished.get(key, 0)
             if accomplished < obj_record.number:
-                if not obj_record.type in self.not_accomplished:
+                if not objective_type in self.not_accomplished:
                     self.not_accomplished[objective_type] = [obj_record.ordinal]
                 else:
                     self.not_accomplished[objective_type].append(obj_record.ordinal)
