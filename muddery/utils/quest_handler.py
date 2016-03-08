@@ -71,6 +71,11 @@ class QuestHandler(object):
             raise MudderyError(LS("Can not find this quest."))
 
         del(self.current_quests[quest_key])
+
+        self.completed_quests.add(quest_key)
+        if quest_key in self.completed_quests:
+            self.completed_quests.remove(quest_key)
+
         self.show_quests()
 
     def complete(self, quest_key):
