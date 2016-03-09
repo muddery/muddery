@@ -76,19 +76,23 @@ class DialogueHandler(object):
                                          "type": dependency.type.type_id})
 
         data["sentences"] = []
-        count = 0
         for sentence in sentences:
             data["sentences"].append({"dialogue": dialogue,
-                                      "sentence": count,
                                       "ordinal": sentence.ordinal,
                                       "speaker": sentence.speaker,
                                       "content": sentence.content,
                                       "action": sentence.action,
                                       "provide_quest": sentence.provide_quest_id,
                                       "complete_quest": sentence.complete_quest_id})
-            count += 1
 
+        # sort sentences by ordinal
         data["sentences"].sort(key=lambda x:x["ordinal"])
+        count = 0
+        for sentence in data["sentences"]:
+            sentence["sentence"] = count
+            sentence["is_last"] = False
+            count += 1
+        data["sentences"][-1]["is_last"] = True
 
         data["nexts"] = [next.next.key for next in nexts]
 
@@ -137,7 +141,10 @@ class DialogueHandler(object):
             return False
 
         sentence = sentences[0]
-        if sentence['action'] or sentence['complete_quest'] or sentence['provide_quest']:
+        if sentence['is_last'] or\
+           sentence['action'] or\
+           sentence['complete_quest'] or\
+           sentence['provide_quest']:
             return False
 
         return True
@@ -389,7 +396,7 @@ class DialogueHandler(object):
 
         return sentences_list
 
-    def finish_sentence(self, caller, npc, dialogue, sentence):
+    def finish_sentence(self, caller, npc, dialogue, sentence_no):
         """
         A sentence finished, do it's action.
         """
@@ -401,26 +408,26 @@ class DialogueHandler(object):
         if not dlg:
             return
 
-        if sentence >= len(dlg["sentences"]):
+        if sentence_no >= len(dlg["sentences"]):
             return
 
-        sen = self.get_sentence(dialogue, sentence)
-        if not sen:
+        sentence = self.get_sentence(dialogue, sentence_no)
+        if not sentence:
             return
 
         # do dialogue's action
-        if sen["action"]:
-            SCRIPT_HANDLER.do_action(caller, npc, sen["action"])
+        if sentence["action"]:
+            SCRIPT_HANDLER.do_action(caller, npc, sentence["action"])
 
-        if sentence + 1 >= len(dlg["sentences"]):
+        if sentence["is_last"]:
             # last sentence
             self.finish_dialogue(caller, dialogue)
 
-        if sen["complete_quest"]:
-            caller.quest_handler.complete(sen["complete_quest"])
+        if sentence["complete_quest"]:
+            caller.quest_handler.complete(sentence["complete_quest"])
 
-        if sen["provide_quest"]:
-            caller.quest_handler.accept(sen["provide_quest"])
+        if sentence["provide_quest"]:
+            caller.quest_handler.accept(sentence["provide_quest"])
 
     def finish_dialogue(self, caller, dialogue):
         """
