@@ -162,8 +162,8 @@ def create_settings_file():
     # tweak the settings
     setting_dict = {"evennia_settings_default": os.path.join(evennia_launcher.EVENNIA_LIB, "settings_default.py"),
                     "muddery_settings_default": os.path.join(MUDDERY_LIB, "settings_default.py"),
-                    "servername":"\"%s\"" % GAMEDIR.rsplit(os.path.sep, 1)[1].capitalize(),
-                    "secret_key":"\'%s\'" % create_secret_key()}
+                    "servername":"'%s'" % GAMEDIR.rsplit(os.path.sep, 1)[1].capitalize(),
+                    "secret_key":"'%s'" % create_secret_key()}
 
     # modify the settings
     settings_string = settings_string.format(**setting_dict)
@@ -263,7 +263,7 @@ def main():
     parser.add_argument('-i', '--interactive', action='store_true',
                         dest='interactive', default=False,
                         help="Start given processes in interactive mode.")
-    parser.add_argument('--init', action='store', dest="init", metavar="game_name [template]",
+    parser.add_argument('--init', nargs='+', action='store', dest="init", metavar="game_name [template]",
                         help="Creates a new game directory 'game_name' at the current location (from optional template).")
     parser.add_argument('-l', nargs='+', action='store', dest='listsetting', metavar="key",
                         help="List values for server settings. Use 'all' to list all available keys.")
@@ -294,9 +294,12 @@ def main():
         sys.exit()
     elif args.init:
         # initialization of game directory
-        if option == "noop":
-            option = ""
-        create_game_directory(args.init, option)
+        game_name = args.init[0]
+        template = None
+        if len(args.init) > 1:
+            template = args.init[1]
+
+        create_game_directory(game_name, template)
 
         evennia_launcher.init_game_directory(GAMEDIR, check_db=False)
 
@@ -314,8 +317,8 @@ def main():
         except django.core.management.base.CommandError, exc:
             print(ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
-        print(CREATED_NEW_GAMEDIR.format(gamedir=args.init,
-                                         settings_path=os.path.join(args.init, SETTINGS_PATH)))
+        print(CREATED_NEW_GAMEDIR.format(gamedir=args.init[0],
+                                         settings_path=os.path.join(args.init[0], SETTINGS_PATH)))
         sys.exit()
 
     if args.show_version:
