@@ -123,7 +123,10 @@ def build_unique_objects(model_name, caller=None):
             continue
 
         try:
+            # set data
             obj.load_data()
+            # put obj to its default location
+            obj.reset_location()
         except Exception, e:
             ostring = "%s can not load data:%s" % (obj.dbref, e)
             print(ostring)

@@ -213,8 +213,9 @@ class MudderyObject(DefaultObject):
         if hasattr(self.dfield, "name"):
             self.set_name(self.dfield.name)
 
-        if hasattr(self.dfield, "location"):
-            self.set_location(self.dfield.location)
+        if not self.location:
+            if hasattr(self.dfield, "location"):
+                self.set_location(self.dfield.location)
 
         if hasattr(self.dfield, "desc"):
             self.set_desc(self.dfield.desc)
@@ -227,6 +228,18 @@ class MudderyObject(DefaultObject):
 
         if hasattr(self.dfield, "destination"):
             self.set_obj_destination(self.dfield.destination)
+
+
+    def reset_location(self):
+        """
+        Set object's location to its default location.
+
+        Returns:
+            None
+        """
+        if hasattr(self.dfield, "location"):
+            self.set_location(self.dfield.location)
+
 
     def set_typeclass(self, typeclass):
         """
