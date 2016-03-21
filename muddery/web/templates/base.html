@@ -40,7 +40,7 @@
       </div>
 
       <div class="midHeader">
-        <img src="{% static "evennia_general/images/evennia_logo.png" %}" align='left'/> <h1 class="headerTitle" lang="la">{{game_name}}</h1>
+        <img src="{% static "evennia_general/images/muddery_logo.png" %}" align='left'/> <h1 class="headerTitle" lang="la">{{game_name}}</h1>
         <div class="headerSubTitle" title="Slogan">
         <!-- Insert a slogan here if you want -->
         {{game_slogan}}			&nbsp;
@@ -65,10 +65,9 @@
       <div class="subHeader">
         <!--span class="doNotDisplay">Navigation:</span-->
         <a href="/">Home</a> |
-        <a href="https://github.com/muddery/muddery/">About</a> |
-        <a href="https://github.com/muddery/muddery/wiki">Documentation</a> |
-        <a href="{% url 'admin:index' %}">Admin Interface</a> |
-        <a href="{% url 'worlddata:index' %}">Edit World</a>
+        <a href="http://cn.muddery.org/">About Us</a> |
+        <a href="{% url 'admin:index' %}">Administer</a> |
+        <a href="{% url 'worlddata:index' %}">Edit Game</a>
         {% if webclient_enabled %}
          | <a href="{% url 'webclient:index' %}">Play Online</a>
         {% endif %}

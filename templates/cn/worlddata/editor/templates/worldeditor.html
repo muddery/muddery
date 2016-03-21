@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block header_ext %}
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static "worldeditor/css/worldeditor.css" %}">
+    <script src="{% static "worldeditor/js/worldeditor.js" %}" type="text/javascript" charset="utf-8"></script>
+{% endblock %}
+
+{% block content %}
+    <h1>世界编辑器</h1>
+    在世界编辑器中，你可以构建整个游戏世界。
+
+    <h2><a href="editor/defines">基本定义</a></h2>
+    这里定义了各种类型的基本值。
+
+    <h2><a href="editor/worldmap">世界地图</a></h2>
+    在这里可以编辑整个游戏世界的外观。
+
+    <h2><a href="editor/characters">角色</a></h2>
+    角色是可以自主活动或被玩家操控的物体，所有和角色有关的内容都可以在这里编辑。
+
+    <h2><a href="editor/objects">物体</a></h2>
+    基本的物体不会自己移动、不会自己思考，有些物体可以放入玩家的行囊，有些则固定在世界的某个地方。
+
+    <h2><a href="editor/equipments">装备</a></h2>
+    玩家可以把装备穿在身上，提高自己的相关属性。
+
+    <h2><a href="editor/quests">任务</a></h2>
+    游戏可以提供各种任务让玩家去完成。
+
+    <h2><a href="editor/events">事件</a></h2>
+    事件会在特定条件下触发，引发指定的操作。
+
+    <h2><a href="editor/dialogues">对话</a></h2>
+    玩家可以和NPC对话，也可以通过对话显示一段旁白或讲述一个故事。
+
+    <h2><a href="editor/localization">本地化</a></h2>
+    本地化可以将原语言的游戏内容翻译为本地语言。
+
+    <div><br></div>
+    <hr/>
+    <h2>下载游戏世界的数据</h2>
+    <div>下载游戏世界的数据到一组csv文件的zip压缩包。</div>
+    <form method="GET">
+      <input type="hidden" name="export"/>
+      <input type="submit" value="下载"/>
+    </form>
+    <div><br></div>
+    <hr/>
+    <h2>上传游戏世界的数据</h2>
+    <div>将zip文件中的csv文件上传到数据库。</div>
+    <div><span style="color: red">注意：当前游戏世界的数据会被替换！</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <input type="file" name="import" accept="application/zip"/>
+      <br>
+      <input type="submit" value="上传"/>
+    </form>
+    <div><br></div>
+    <hr/>
+    <h2>将变化应用到游戏</h2>
+    <div>将游戏世界的数据应用到游戏中。服务器会自动重启。</div>
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="apply"/>
+      <input type="submit" value="应用"/>
+    </form>
+
+{% endblock content %}
