@@ -369,8 +369,12 @@ var webclient = {
             var page = $("#room_" + key);
             for (var i in data[key]) {
                 try {
-                    var obj = data[key][i];
-                    page.find("a[dbref=" + obj["dbref"] + "]").remove();
+                    var dbref = data[key][i]["dbref"];
+                    if (data_handler.dialogue_target == dbref) {
+                        // If the player is talking to it, close the dialog window.
+                        popupmgr.doCloseDialogue();
+                    }
+                    page.find("a[dbref=" + dbref + "]").remove();
                 }
                 catch(error) {
                 }
@@ -798,14 +802,22 @@ var webclient = {
     },
 
     displayDialogue : function(data) {
-        if ($('#combat_box').length > 0) {
-            // has combat box
-            combat.setDialogue(data);
+        if (data.length == 0) {
+            popupmgr.doCloseDialogue();
         }
         else {
-            data_handler.dialogues_list = data;
-            dialogues = data_handler.dialogues_list.shift();
-            popupmgr.showDialogue(dialogues);
+            if ($('#combat_box').length > 0) {
+                // has combat box
+                combat.setDialogue(data);
+            }
+            else {
+                data_handler.dialogues_list = data;
+                dialogues = data_handler.dialogues_list.shift();
+                if (dialogues.length > 0) {
+                    data_handler.dialogue_target = dialogues[0].npc;
+                }
+                popupmgr.showDialogue(dialogues);
+            }
         }
     },
 

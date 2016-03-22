@@ -64,6 +64,7 @@ var popupmgr = {
                 html_button += '" class="btn btn-default"';
 
                 if ('npc' in dialogues[0]) {
+                    data_handler.dialogue_target = dialogues[0].npc;
                     html_button += ' npc="' + dialogues[0].npc + '"';
                 }
                 html_button += ' dialogue="' + dialogues[0].dialogue + '"';
@@ -79,7 +80,11 @@ var popupmgr = {
                 var content = "";
                 for (var i in dialogues) {
                     content += '<a href="#" onclick="commands.doDialogue(this); return false;"';
-                    content += ' npc="' + dialogues[i].npc + '"';
+                    
+                    if ('npc' in dialogues[i]) {
+                        data_handler.dialogue_target = dialogues[i].npc;
+                        content += ' npc="' + dialogues[i].npc + '"';
+                    }
                     content += ' dialogue="' + dialogues[i].dialogue + '"';
                     content += ' sentence="' + dialogues[i].sentence + '"';
                     content += '">';
@@ -165,6 +170,8 @@ var popupmgr = {
     },
 
     doCloseDialogue : function() {
+        data_handler.dialogue_target = "";
+
         if($('#dialogue_box').size()>0){
             $('#dialogue_box').remove();
             $('.modal-backdrop').remove();

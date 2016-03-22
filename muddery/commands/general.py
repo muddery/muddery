@@ -76,8 +76,9 @@ class CmdLook(Command):
 
         if args:
             # Use search to handle duplicate/nonexistant results.
-            looking_at_obj = caller.search(args)
+            looking_at_obj = caller.search(args, location=caller.location)
             if not looking_at_obj:
+                caller.msg({"alert":LS("Can not find it.")})
                 return
         else:
             # Observes the caller's location
@@ -92,7 +93,7 @@ class CmdLook(Command):
 
         if not looking_at_obj.access(caller, "view"):
             # The caller does not have the permission to look.
-            caller.msg({"msg":LS("Could not find '%s'.") % looking_at_obj.name})
+            caller.msg({"msg":LS("Can not find '%s'.") % looking_at_obj.name})
             return
 
         if looking_at_obj == caller.location:
@@ -606,6 +607,8 @@ class CmdDialogue(Command):
             if self.args["npc"]:
                 # get NPC
                 npc = caller.search(self.args["npc"], location=caller.location)
+                if not npc:
+                    caller.msg({"msg":LS("Can not find it.")})
 
         # Get the current sentence.
         dialogue = ""
