@@ -1,10 +1,11 @@
 origin,local
 "Equipped!","已装备！"
 "You have no location to look at!","你没有看任何地方！"
-"Could not find '%s'.","无法找到'%s'"
+"Can not find '%s'.","无法找到'%s'"
 "Should appoint an exit to go.","必须指定要去的出口。"
 "TALK","交谈"
 "Talk","交谈"
+"Can not find it.","无法找到它。"
 "You should talk to someone.","你需要指定想要交谈的对象。"
 "Can not find the one to talk.","无法找到交谈的对象。"
 "You should loot something.","你需要指定想要获取的东西。"
@@ -88,3 +89,4 @@ origin,local
 "%s lost %s HPs.","%s损失了%s点生命。"
 "%s healed %s HPs.","%s治疗了%s点生命。"
 "Data applied! The server is reloading.","数据已应用，服务器正在重载。"
+"%s has gone.","%s已经离开。"
