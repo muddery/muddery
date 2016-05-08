@@ -289,10 +289,4 @@ class EventHandler(object):
             if npc:
                 npc = npc[0]
 
-        sentence_list = DIALOGUE_HANDLER.get_next_sentences_list(character,
-                                                                 npc,
-                                                                 event["dialogue"],
-                                                                 0,
-                                                                 True)
-
-        character.msg({"dialogues_list": sentence_list})
+        character.show_dialogue(npc, event["dialogue"], 0)

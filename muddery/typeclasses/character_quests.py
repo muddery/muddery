@@ -85,7 +85,7 @@ class MudderyQuest(MudderyObject):
         This returns a list of available commands.
         """
         commands = []
-        if GAME_SETTINGS.get("allow_give_up_quests"):
+        if GAME_SETTINGS.get("can_give_up_quests"):
             commands.append({"name": LS("Give Up"), "cmd": "giveup_quest", "args": self.get_data_key()})
         return commands
 

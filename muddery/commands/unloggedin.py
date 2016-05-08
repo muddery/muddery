@@ -18,6 +18,7 @@ from evennia.commands.command import Command
 from evennia.commands.cmdhandler import CMD_LOGINSTART
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.utils.utils import search_obj_data_key
 
 
 # limit symbol import for API
@@ -119,9 +120,9 @@ def create_guest_player(session):
         new_player = _create_player(session, playername, password,
                                     permissions, ptypeclass)
         if new_player:
-            _create_character(GAME_SETTINGS.get("default_player_model_key"), 1,
-                              session, new_player, typeclass,
-                              default_home, permissions, playername)
+            _create_character(GAME_SETTINGS.get("default_player_model_key"), 1, session,
+                              new_player, typeclass, home,
+                              home, permissions, playername)
 
     except Exception:
         # We are in the middle between logged in and -not, so we have
@@ -352,8 +353,18 @@ class CmdUnconnectedCreate(Command):
             if new_player:
                 if MULTISESSION_MODE < 2:
                     default_home = ObjectDB.objects.get_id(settings.DEFAULT_PLAYER_HOME)
-                    _create_character(GAME_SETTINGS.get("default_player_model_key"), 1,
-                                      session, new_player, typeclass,
+
+                    start_location = None
+                    start_location_key = GAME_SETTINGS.get("start_location_key")
+                    if start_location_key:
+                        start_location = search_obj_data_key(start_location_key)
+                    if start_location:
+                        start_location = start_location[0]
+                    else:
+                        start_location = default_home
+
+                    _create_character(GAME_SETTINGS.get("default_player_model_key"), 1, session,
+                                      new_player, typeclass, start_location,
                                       default_home, permissions, nickname)
                 # tell the caller everything went well.
                 session.msg({"created":playername})
@@ -462,8 +473,18 @@ class CmdUnconnectedCreateConnect(Command):
             if new_player:
                 if MULTISESSION_MODE < 2:
                     default_home = ObjectDB.objects.get_id(settings.DEFAULT_PLAYER_HOME)
-                    _create_character(GAME_SETTINGS.get("default_player_model_key"), 1,
-                                      session, new_player, typeclass,
+
+                    start_location = None
+                    start_location_key = GAME_SETTINGS.get("start_location_key")
+                    if start_location_key:
+                        start_location = search_obj_data_key(start_location_key)
+                    if start_location:
+                        start_location = start_location[0]
+                    else:
+                        start_location = default_home
+
+                    _create_character(GAME_SETTINGS.get("default_player_model_key"), 1, session,
+                                      new_player, typeclass, start_location,
                                       default_home, permissions, nickname)
                 # tell the caller everything went well.
                 # string = "A new account '%s' was created. Welcome!"
@@ -588,13 +609,15 @@ def _create_player(session, playername, password, permissions, typeclass=None):
     return new_player
 
 
-def _create_character(character_key, level, session, new_player, typeclass, home, permissions, nickname):
+def _create_character(character_key, level, session,
+                      new_player, typeclass, location,
+                      home, permissions, nickname):
     """
     Helper function, creates a character based on a player's name.
     This is meant for Guest and MULTISESSION_MODE < 2 situations.
     """
     try:
-        new_character = create.create_object(typeclass, key=new_player.key,
+        new_character = create.create_object(typeclass, key=new_player.key, location=location,
                                              home=home, permissions=permissions)
 
         # set character info
