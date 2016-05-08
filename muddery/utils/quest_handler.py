@@ -63,7 +63,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if not GAME_SETTINGS.get("allow_give_up_quests"):
+        if not GAME_SETTINGS.get("can_give_up_quests"):
             logger.log_tracemsg("Can not give up quests.")
             raise MudderyError(LS("Can not give up this quest."))
 

@@ -172,7 +172,7 @@ def create_settings_file():
         f.write(settings_string)
 
 
-def create_game_directory(dirname, template):
+def create_game_directory(gamedir, template):
     """
     Initialize a new game directory named dirname
     at the current path. This means copying the
@@ -204,9 +204,9 @@ def create_game_directory(dirname, template):
 
 
     global GAMEDIR
-    GAMEDIR = os.path.abspath(os.path.join(CURRENT_DIR, dirname))
+    GAMEDIR = gamedir
     if os.path.exists(GAMEDIR):
-        print("Cannot create new Muddery game dir: '%s' already exists." % dirname)
+        print("Cannot create new Muddery game dir: '%s' already exists." % gamedir)
         sys.exit()
 
     template_dir = ""
@@ -299,7 +299,8 @@ def main():
         if len(args.init) > 1:
             template = args.init[1]
 
-        create_game_directory(game_name, template)
+        gamedir = os.path.abspath(os.path.join(CURRENT_DIR, game_name))
+        create_game_directory(gamedir, template)
 
         evennia_launcher.init_game_directory(GAMEDIR, check_db=False)
 

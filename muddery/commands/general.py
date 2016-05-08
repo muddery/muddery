@@ -563,13 +563,7 @@ class CmdTalk(Command):
             caller.msg({"alert":LS("Can not find the one to talk.")})
             return
 
-        # Set caller's target.
-        caller.set_target(npc)
-
-        # Get NPC's sentences_list.
-        sentences_list = DIALOGUE_HANDLER.get_sentences_list(caller, npc)
-
-        caller.msg({"dialogues_list": sentences_list})
+        caller.talk_to_npc(npc)
 
 
 #------------------------------------------------------------
@@ -609,6 +603,7 @@ class CmdDialogue(Command):
                 npc = caller.search(self.args["npc"], location=caller.location)
                 if not npc:
                     caller.msg({"msg":LS("Can not find it.")})
+                    return
 
         # Get the current sentence.
         dialogue = ""
@@ -622,26 +617,10 @@ class CmdDialogue(Command):
         except Exception, e:
             pass
 
-        if have_current_dlg:
-            try:
-                # Finish current sentence
-                DIALOGUE_HANDLER.finish_sentence(caller,
-                                                 npc,
-                                                 dialogue,
-                                                 sentence)
-            except Exception, e:
-                ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
-                logger.log_tracemsg(ostring)
+        if not have_current_dlg:
+            return
 
-        # Get next sentences_list.
-        sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(caller,
-                                                                  npc,
-                                                                  dialogue,
-                                                                  sentence,
-                                                                  False)
-
-        # Send dialogues_list to the player.
-        caller.msg({"dialogues_list": sentences_list})
+        caller.continue_dialogue(npc, dialogue, sentence)
 
 
 #------------------------------------------------------------

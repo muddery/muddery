@@ -20,6 +20,7 @@ from muddery.utils.attribute_handler import AttributeHandler
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia import TICKER_HANDLER
@@ -710,3 +711,157 @@ class MudderyPlayerCharacter(MudderyCharacter):
         if self.home:
             self.move_to(self.home, quiet=True)
             self.msg({"msg": LS("You are reborn at {c%s{n.") % self.home.get_name()})
+
+
+    def save_current_dialogue(self, sentences_list, npc):
+        """
+        Save player's current dialogues.
+
+        Args:
+            sentences_list: the list of current dialogues
+            npc: NPC whom the player is talking to.
+
+        Returns:
+            None
+        """
+        if not sentences_list:
+            self.clear_current_dialogue()
+            return
+
+        # Save dialogue's id and sentence's ordinal.
+        sentences = [(s["dialogue"], s["sentence"]) for s in sentences_list[0]]
+        self.db.current_dialogue = {"sentences": sentences,
+                                    "npc": npc,
+                                    "location": self.location}
+
+        return
+
+
+    def clear_current_dialogue(self):
+        """
+        Clear player's current dialogues.
+
+        Returns:
+            None
+        """
+        self.db.current_dialogue = None
+        return
+
+
+    def restore_current_dialogue(self):
+        """
+        Restore player's dialogues when he return to game.
+
+        Returns:
+            None
+        """
+        if not self.db.current_dialogue:
+            return
+        
+        current = self.db.current_dialogue
+        
+        if not current["sentences"]:
+            return
+
+        # Check dialogue's location
+        if self.location.get_data_key() != current["location"]:
+            # If player's location has changed, return.
+            return
+
+        # Check npc.
+        npc = None
+        if current["npc"]:
+            npc = utils.search_obj_data_key(current["npc"])
+            if npc.location != self.location:
+                # If the NPC has left it's location, return.
+                return
+
+        sentences_list = [DIALOGUE_HANDLER.get_sentence(s[0], s[1]) for s in current["sentences"]]
+        self.msg({"dialogues_list": [sentences_list]})
+        return
+
+
+    def talk_to_npc(self, npc):
+        """
+        Talk to an NPC.
+
+        Args:
+            npc: NPC's object.
+
+        Returns:
+            None
+        """
+        # Set caller's target.
+        self.set_target(npc)
+
+        # Get NPC's sentences_list.
+        sentences_list = DIALOGUE_HANDLER.get_sentences_list(self, npc)
+        
+        self.save_current_dialogue(sentences_list, npc)
+        self.msg({"dialogues_list": sentences_list})
+
+
+    def show_dialogue(self, npc, dialogue, sentence):
+        """
+        Show a dialogue.
+
+        Args:
+            npc: (optional) NPC's object.
+            dialogue: dialogue's key.
+            sentence: sentence's ordinal.
+
+        Returns:
+            None
+        """
+        # Get next sentences_list.
+        sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(self,
+                                                                  npc,
+                                                                  dialogue,
+                                                                  sentence,
+                                                                  True)
+
+        # Send dialogues_list to the player.
+        self.save_current_dialogue(sentences_list, npc)
+        self.msg({"dialogues_list": sentences_list})
+
+
+    def continue_dialogue(self, npc, dialogue, sentence):
+        """
+        Continue current dialogue.
+
+        Args:
+            npc: (optional) NPC's object.
+            dialogue: current dialogue's key.
+            sentence: current sentence's ordinal.
+
+        Returns:
+            None
+        """
+        if self.db.current_dialogue:
+            found = False
+            for s in self.db.current_dialogue["sentences"]:
+                if s[0] == dialogue:
+                    found = True
+                    break
+
+            if found:
+                try:
+                    # Finish current sentence
+                    DIALOGUE_HANDLER.finish_sentence(self,
+                                                     npc,
+                                                     dialogue,
+                                                     sentence)
+                except Exception, e:
+                    ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
+                    logger.log_tracemsg(ostring)
+
+        # Get next sentences_list.
+        sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(self,
+                                                                  npc,
+                                                                  dialogue,
+                                                                  sentence,
+                                                                  False)
+
+        # Send dialogues_list to the player.
+        self.save_current_dialogue(sentences_list, npc)
+        self.msg({"dialogues_list": sentences_list})

@@ -37,7 +37,10 @@ class game_settings(models.Model):
     npc_reborn_cd = models.FloatField(blank=True, default=10.0)
 
     # Allow players to give up quests.
-    allow_give_up_quests = models.BooleanField(blank=True, default=True)
+    can_give_up_quests = models.BooleanField(blank=True, default=True)
+
+    # Allow players to stop dialogues which are talking.
+    can_stop_dialogues = models.BooleanField(blank=True, default=True)
 
     # The default home location used for all objects. This is used as a
     # fallback if an object's normal home location is deleted. It is the
