@@ -162,6 +162,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
                           "name": self.get_name()}
                 self.location.msg_contents({"player_online": change}, exclude=[self])
 
+        self.resume_last_dialogue()
+
 
     def at_pre_unpuppet(self):
         """
@@ -724,15 +726,30 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Returns:
             None
         """
+        if not GAME_SETTINGS.get("auto_resume_dialogues"):
+            # Can not auto resume dialogues.
+        	return
+
         if not sentences_list:
             self.clear_current_dialogue()
             return
 
         # Save dialogue's id and sentence's ordinal.
-        sentences = [(s["dialogue"], s["sentence"]) for s in sentences_list[0]]
-        self.db.current_dialogue = {"sentences": sentences,
-                                    "npc": npc,
-                                    "location": self.location}
+        sentences_begin = [(s["dialogue"], s["sentence"]) for s in sentences_list[0]]
+        sentences_all = [(s["dialogue"], s["sentence"]) for s_list in sentences_list for s in s_list]
+
+        npc_key = None
+        if npc:
+            npc_key = npc.get_data_key()
+
+        location_key = None
+        if self.location:
+            location_key = self.location.get_data_key()
+
+        self.db.current_dialogue = {"sentences_begin": sentences_begin,
+                                    "sentences_all": sentences_all,
+                                    "npc": npc_key,
+                                    "location": location_key}
 
         return
 
@@ -748,19 +765,23 @@ class MudderyPlayerCharacter(MudderyCharacter):
         return
 
 
-    def restore_current_dialogue(self):
+    def resume_last_dialogue(self):
         """
         Restore player's dialogues when he return to game.
 
         Returns:
             None
         """
+        if not GAME_SETTINGS.get("auto_resume_dialogues"):
+            # Can not auto resume dialogues.
+        	return
+
         if not self.db.current_dialogue:
             return
-        
+
         current = self.db.current_dialogue
         
-        if not current["sentences"]:
+        if not current["sentences_begin"]:
             return
 
         # Check dialogue's location
@@ -769,15 +790,18 @@ class MudderyPlayerCharacter(MudderyCharacter):
             return
 
         # Check npc.
-        npc = None
+        npc_talking = None
         if current["npc"]:
-            npc = utils.search_obj_data_key(current["npc"])
-            if npc.location != self.location:
+            npc_list = utils.search_obj_data_key(current["npc"])
+            npc_in_location = [npc for npc in npc_list if npc.location == self.location]
+            if not npc_in_location:
                 # If the NPC has left it's location, return.
                 return
+            npc_talking = npc_in_location[0]
 
-        sentences_list = [DIALOGUE_HANDLER.get_sentence(s[0], s[1]) for s in current["sentences"]]
-        self.msg({"dialogues_list": [sentences_list]})
+        sentences_list = [DIALOGUE_HANDLER.get_sentence(s[0], s[1]) for s in current["sentences_begin"]]
+        output = DIALOGUE_HANDLER.create_output_sentences(sentences_list, self, npc_talking)
+        self.msg({"dialogues_list": [output]})
         return
 
 
@@ -838,22 +862,16 @@ class MudderyPlayerCharacter(MudderyCharacter):
             None
         """
         if self.db.current_dialogue:
-            found = False
-            for s in self.db.current_dialogue["sentences"]:
-                if s[0] == dialogue:
-                    found = True
-                    break
+            if (dialogue, sentence) not in self.db.current_dialogue["sentences_all"]:
+                # Can not find specified dialogue in current dialogues.
+                return
 
-            if found:
-                try:
-                    # Finish current sentence
-                    DIALOGUE_HANDLER.finish_sentence(self,
-                                                     npc,
-                                                     dialogue,
-                                                     sentence)
-                except Exception, e:
-                    ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
-                    logger.log_tracemsg(ostring)
+            try:
+                # Finish current sentence
+                DIALOGUE_HANDLER.finish_sentence(self, npc, dialogue, sentence)
+            except Exception, e:
+                ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
+                logger.log_tracemsg(ostring)
 
         # Get next sentences_list.
         sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(self,
