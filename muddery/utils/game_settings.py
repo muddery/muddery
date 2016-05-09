@@ -32,7 +32,7 @@ class GameSettings(object):
                      "player_reborn_cd": 10.0,
                      "npc_reborn_cd": 10.0,
                      "can_give_up_quests": True,
-                     "can_stop_dialogues": True,
+                     "auto_resume_dialogues": True,
                      "default_home_key": True,
                      "start_location_key": True,
                      "default_player_home_key": True,
