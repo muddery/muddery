@@ -39,8 +39,8 @@ class game_settings(models.Model):
     # Allow players to give up quests.
     can_give_up_quests = models.BooleanField(blank=True, default=True)
 
-    # Allow players to stop dialogues which are talking.
-    can_stop_dialogues = models.BooleanField(blank=True, default=True)
+    # Can resume unfinished dialogues automatically.
+    auto_resume_dialogues = models.BooleanField(blank=True, default=True)
 
     # The default home location used for all objects. This is used as a
     # fallback if an object's normal home location is deleted. It is the
@@ -63,6 +63,30 @@ class game_settings(models.Model):
         abstract = True
         verbose_name = "Game Setting"
         verbose_name_plural = "Game Settings"
+
+
+# ------------------------------------------------------------
+#
+# Webclient's basic settings.
+#
+# ------------------------------------------------------------
+class client_settings(models.Model):
+    """
+    Webclient's basic settings.
+    NOTE: The server only uses the first record!
+    """
+
+    # Room's pixel size on the map.
+    map_room_size = models.IntegerField(blank=True, default=40)
+
+    # Map's scale
+    map_scale = models.FloatField(blank=True, default=75.0)
+
+    # Show command box or not.
+    show_command_box = models.BooleanField(blank=True, default=False)
+
+    # can close dialogue box or not.
+    can_close_dialogue = models.BooleanField(blank=True, default=False)
 
 
 # ------------------------------------------------------------

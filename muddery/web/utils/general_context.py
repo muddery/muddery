@@ -49,5 +49,6 @@ def general_context(request):
         'evennia_websiteapps':WEBSITE,
         "webclient_enabled" : WEBCLIENT_ENABLED,
         "websocket_enabled" : WEBSOCKET_CLIENT_ENABLED,
-        "websocket_port" : WEBSOCKET_CLIENT_PORT
+        "websocket_port" : WEBSOCKET_CLIENT_PORT,
+        "language_code" : settings.LANGUAGE_CODE,
     }

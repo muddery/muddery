@@ -121,6 +121,9 @@ WORLD_DATA_FOLDER = "worlddata/data"
 # game settings
 GAME_SETTINGS = "game_settings"
 
+# webclient settings
+CLIENT_SETTINGS = "client_settings"
+
 ###################################
 # Basic data
 ###################################

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 {% load staticfiles %}
-<html dir="ltr" lang="en">
+<html dir="ltr" lang="{{language_code}}">
   <head>
   	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
-    <meta charset="{{encoding}}" />
+    <meta charset="utf-8" />
 
     <title>Muddery Webclient</title>
 
@@ -25,16 +25,11 @@
 
     <!-- load settings -->
     <script src="{% static "webclient/js/settings.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/settings_default.js" %}" type="text/javascript" charset="utf-8"></script>
 
     <!-- load local strings -->
     <script src="{% static "webclient/js/local_string.js" %}" type="text/javascript" charset="utf-8"></script>
     <!-- load language file-->
-    <script language="javascript" type="text/javascript">
-        if ("language" in settings && settings.language != "") {
-            document.write("\<script src=\"{% static "webclient/js/lang/" %}" + settings.language + "/strings.js\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-        }
-    </script>
+    <script src="{% static "webclient/js/lang/" %}{{language_code}}/strings.js" type="text/javascript" charset="utf-8"></script>
 
     {% if websocket_enabled %}
         <script language="javascript" type="text/javascript">
@@ -42,27 +37,27 @@
                 <!-- Importing the Muddery websocket webclient component (requires jQuery)  -->
                 var wsurl = "ws://" + this.location.hostname + ":{{websocket_port}}";
                 document.write("\<script src=\"{% static "webclient/js/evennia_websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-                document.write("\<script src=\"{% static "webclient/js/muddery_websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+                document.write("\<script src=\"{% static "webclient/js/websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             }
             else {
                 <!-- No websocket support in browser. Importing the Muddery ajax webclient component (requires jQuery)  -->
                 document.write("\<script src=\"{% static "webclient/js/evennia_ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-                document.write("\<script src=\"{% static "webclient/js/muddery_ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
+                document.write("\<script src=\"{% static "webclient/js/ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
             }
         </script>
     {% else %}
         <!-- websocket not enabled; use ajax -->
         <script src="{% static "webclient/js/evennia_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
-        <script src="{% static "webclient/js/muddery_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
+        <script src="{% static "webclient/js/ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
 
     {% endif %}
 
-    <script src="{% static "webclient/js/muddery_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_webclient_uimgr.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_webclient_popupmgr.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_commands.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_combat.js" %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static "webclient/js/muddery_map.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "webclient/js/webclient.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "webclient/js/webclient_uimgr.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "webclient/js/webclient_popupmgr.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "webclient/js/commands.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "webclient/js/combat.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "webclient/js/map.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/frame.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/text2html.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/data_handler.js" %}" type="text/javascript" charset="utf-8"></script>
