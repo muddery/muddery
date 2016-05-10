@@ -73,6 +73,9 @@ var webclient = {
                 else if (key == "prompt") {
                     this.displayPrompt(data[key]);
                 }
+                else if (key == "settings") {
+                    settings.set(data[key]);
+                }
                 else if (key == "look_around") {
                     this.displayLookAround(data[key]);
                 }

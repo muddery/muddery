@@ -17,7 +17,7 @@ from evennia.utils import create, logger, utils
 from evennia.commands.command import Command
 from evennia.commands.cmdhandler import CMD_LOGINSTART
 from muddery.utils.localized_strings_handler import LS
-from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.utils.game_settings import GAME_SETTINGS, CLIENT_SETTINGS
 from muddery.utils.utils import search_obj_data_key
 
 
@@ -577,10 +577,12 @@ class CmdUnconnectedLoginStart(Command):
 
     def func(self):
         "Show the connect screen."
+        self.caller.msg({"settings": CLIENT_SETTINGS.all_values()})
+
         connection_screen = GAME_SETTINGS.get("connection_screen")
         if not connection_screen:
             connection_screen = "No connection screen found. Please contact an admin."
-        self.caller.msg({"msg":connection_screen})
+        self.caller.msg({"msg": connection_screen})
 
 
 def _create_player(session, playername, password, permissions, typeclass=None):
