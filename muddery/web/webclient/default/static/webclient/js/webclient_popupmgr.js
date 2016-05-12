@@ -5,7 +5,7 @@
 var popupmgr = {
     showAlert : function(msg, button) {
         popupmgr.doCloseBox();
-        popupmgr.createBox()
+        popupmgr.createBox(true)
             .attr('id', 'popup_box')
             .appendTo($('#popup_container'));
 
@@ -35,7 +35,7 @@ var popupmgr = {
                 return;
             }
 
-            popupmgr.createBox()
+            popupmgr.createBox(settings.can_close_dialogue)
                 .attr('id', 'dialogue_box')
                 .prependTo($('#popup_container'));
 
@@ -117,7 +117,7 @@ var popupmgr = {
         webclient.doSetPopupSize();
     },
 
-    createBox : function() {
+    createBox : function(can_close_dialogue) {
         var dlg = $('<div>')
             .attr('role', 'dialog')
             .css('display', 'block')
@@ -137,12 +137,14 @@ var popupmgr = {
             .addClass('modal-header')
             .appendTo(dlgContent);
 
-        dlgHeader.append($('<button>')
-            .attr('type', 'button')
-            .attr('data-dismiss', 'modal')
-            .attr('onclick', 'popupmgr.doCloseBox()')
-            .addClass('close')
-            .html('&times;'));
+        if (can_close_dialogue) {
+            dlgHeader.append($('<button>')
+                .attr('type', 'button')
+                .attr('data-dismiss', 'modal')
+                .attr('onclick', 'popupmgr.doCloseBox()')
+                .addClass('close')
+                .html('&times;'));
+        }
 
         dlgHeader.append($('<h4>')
             .attr('id', 'popup_header')

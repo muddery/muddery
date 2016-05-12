@@ -240,25 +240,26 @@ var frame = {
             .addClass('dropdown-menu')
             .appendTo(tab_system);
 
-        var item_class = 'first-dropdown-item';
-
-        if (settings.show_command) {
-            $('<li>')
-                .append($('<a>')
-                    .attr('onclick', 'webclient.showPage("command")')
-                    .addClass(item_class)
-                    .text(LS('Command')))
-                .appendTo(popup_system);
-
-            item_class = 'dropdown-item';
-        }
-
         $('<li>')
             .append($('<a>')
                 .attr('onclick', 'commands.doLogout()')
-                .addClass(item_class)
+                .addClass('first-dropdown-item')
                 .text(LS('Logout')))
             .appendTo(popup_system);
+
+        $('<li>')
+            .append($('<a>')
+                .attr('id', 'item_command')
+                .attr('onclick', 'webclient.showPage("command")')
+                .addClass('dropdown-item')
+                .text(LS('Command')))
+            .appendTo(popup_system);
+
+        if (this.show_command_box) {
+            $("#item_command").css("display", "");
+        } else {
+            $("#item_command").css("display", "none");
+        }
     },
 }
 

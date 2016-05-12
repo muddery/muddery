@@ -88,6 +88,11 @@ class client_settings(models.Model):
     # can close dialogue box or not.
     can_close_dialogue = models.BooleanField(blank=True, default=False)
 
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Webclient Setting"
+        verbose_name_plural = "Webclient Settings"
 
 # ------------------------------------------------------------
 #

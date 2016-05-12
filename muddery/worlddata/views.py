@@ -6,7 +6,7 @@ page and serve it eventual static content.
 """
 from __future__ import print_function
 
-import os, tempfile, time
+import tempfile, time, json
 from django import http
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
@@ -16,6 +16,7 @@ from muddery.utils import exporter
 from muddery.utils import importer
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS
+from muddery.utils.game_settings import CLIENT_SETTINGS
 
 @staff_member_required
 def worldeditor(request):
@@ -99,6 +100,11 @@ def apply_changes(request):
     try:
         # rebuild the world
         build_all()
+
+        # send client settings
+        CLIENT_SETTINGS.reset()
+        text = json.dumps({"settings": CLIENT_SETTINGS.all_values()})
+        SESSIONS.announce_all(text)
 
         # reload
         SESSIONS.announce_all(" Server restarting ...")

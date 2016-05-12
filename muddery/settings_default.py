@@ -242,7 +242,8 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      NPC_DIALOGUES,
                      EQUIPMENT_TYPES,
                      DEFAULT_SKILLS,
-                     GAME_SETTINGS) + EVENT_ADDITIONAL_DATA
+                     GAME_SETTINGS,
+                     CLIENT_SETTINGS) + EVENT_ADDITIONAL_DATA
 
 # local strings
 LOCALIZED_STRINGS_MODEL = "localized_strings"

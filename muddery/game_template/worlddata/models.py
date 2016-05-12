@@ -2,7 +2,21 @@ from django.db import models
 from muddery.worlddata import model_base
 
 
+# ------------------------------------------------------------
+#
+# game's basic settings
+#
+# ------------------------------------------------------------
 class game_settings(model_base.game_settings):
+    pass
+
+
+# ------------------------------------------------------------
+#
+# webclient's settings
+#
+# ------------------------------------------------------------
+class client_settings(model_base.client_settings):
     pass
 
 
