@@ -454,7 +454,7 @@ var webclient = {
         }
 
         popupmgr.doCloseBox();
-        popupmgr.createBox()
+        popupmgr.createBox(true)
             .attr('id', 'popup_box')
             .prependTo($("#popup_container"));
 
@@ -601,7 +601,7 @@ var webclient = {
 
     displayGetObjectBox : function(data) {
         popupmgr.doCloseBox();
-        popupmgr.createBox()
+        popupmgr.createBox(true)
             .attr('id', 'popup_box')
             .prependTo($("#popup_container"));
 

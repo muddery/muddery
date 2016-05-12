@@ -19,5 +19,11 @@ var settings = {
         for (var key in values) {
             this[key] = values[key];
         }
+
+        if (this.show_command_box) {
+            $("#item_command").css("display", "");
+        } else {
+            $("#item_command").css("display", "none");
+        }
     },
 };

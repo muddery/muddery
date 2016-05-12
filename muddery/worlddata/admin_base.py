@@ -20,6 +20,13 @@ class GameSettingsAdmin(admin.ModelAdmin):
                     'default_player_model_key')
 
 
+class ClientSettingsAdmin(admin.ModelAdmin):
+    list_display = ('map_room_size',
+                    'map_scale',
+                    'show_command_box',
+                    'can_close_dialogue',)
+
+
 class ClassCategoriesAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',

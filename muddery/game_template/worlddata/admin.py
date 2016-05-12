@@ -11,6 +11,10 @@ class GameSettingsAdmin(admin_base.GameSettingsAdmin):
     form = GameSettingsForm
 
 
+class ClientSettingsAdmin(admin_base.ClientSettingsAdmin):
+    pass
+
+
 class ClassCategoriesAdmin(admin_base.ClassCategoriesAdmin):
     pass
 
@@ -164,6 +168,7 @@ class LocalizedStringsAdmin(admin_base.LocalizedStringsAdmin):
 
 
 admin.site.register(game_settings, GameSettingsAdmin)
+admin.site.register(client_settings, ClientSettingsAdmin)
 admin.site.register(class_categories, ClassCategoriesAdmin)
 admin.site.register(typeclasses, TypeclassesAdmin)
 admin.site.register(world_rooms, WorldRoomsAdmin)
