@@ -39,6 +39,9 @@ class game_settings(models.Model):
     # Allow players to give up quests.
     can_give_up_quests = models.BooleanField(blank=True, default=True)
 
+    # Send one sentence to client at one time.
+    single_dialogue_sentence = models.BooleanField(blank=True, default=False)
+
     # Can resume unfinished dialogues automatically.
     auto_resume_dialogues = models.BooleanField(blank=True, default=True)
 

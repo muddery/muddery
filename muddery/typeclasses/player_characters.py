@@ -819,7 +819,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.set_target(npc)
 
         # Get NPC's sentences_list.
-        sentences_list = DIALOGUE_HANDLER.get_sentences_list(self, npc)
+        sentences_list = DIALOGUE_HANDLER.get_npc_sentences_list(self, npc)
         
         self.save_current_dialogue(sentences_list, npc)
         self.msg({"dialogues_list": sentences_list})
