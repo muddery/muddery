@@ -1,4 +1,4 @@
-connection_screen,solo_mode,global_cd,auto_cast_skill_cd,player_reborn_cd,npc_reborn_cd,can_give_up_quests,can_stop_dialogues,default_home_key,start_location_key,default_player_home_key,default_player_model_key
+connection_screen,solo_mode,global_cd,auto_cast_skill_cd,player_reborn_cd,npc_reborn_cd,can_give_up_quests,single_dialogue_sentence,auto_resume_dialogues,default_home_key,start_location_key,default_player_home_key,default_player_model_key
 "{b=============================================================={n
      Welcome!
- {b=============================================================={n",False,1.0,1.5,10.0,10.0,True,True,,,,MODEL_PLAYER
+ {b=============================================================={n",False,1.0,1.5,10.0,10.0,True,False,True,,,,MODEL_PLAYER

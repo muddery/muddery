@@ -10,6 +10,7 @@ from muddery.utils import defines
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.utils.script_handler import SCRIPT_HANDLER
 from muddery.utils import defines
+from muddery.utils.game_settings import GAME_SETTINGS
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
@@ -137,6 +138,9 @@ class DialogueHandler(object):
         If a sentence will effect the character's status, it should not be
         added to the sentence list.
         """
+        if GAME_SETTINGS.get("single_dialogue_sentence"):
+            return False
+
         if len(sentences) != 1:
             return False
 
@@ -150,7 +154,7 @@ class DialogueHandler(object):
         return True
 
 
-    def get_sentences_list(self, caller, npc):
+    def get_npc_sentences_list(self, caller, npc):
         """
         Get a sentences list to send to the caller at one time.
         
@@ -170,7 +174,7 @@ class DialogueHandler(object):
         sentences_list = []
 
         # Get the first sentences.
-        sentences = self.get_sentences(caller, npc)
+        sentences = self.get_npc_sentences(caller, npc)
         output = self.create_output_sentences(sentences, caller, npc)
         if output:
             sentences_list.append(output)
@@ -209,24 +213,19 @@ class DialogueHandler(object):
         sentences_list = []
 
         # current sentence
+        sentences = []
         if include_current:
             data = self.get_sentence(dialogue, sentence)
-            if not data:
-                return sentences_list
-            output = self.create_output_sentences([data], caller, npc)
-            if output:
-                sentences_list.append(output)
-
-        # next sentence
-        sentences = self.get_next_sentences(caller,
-                                            npc,
-                                            dialogue,
-                                            sentence)
+            if data:
+                sentences = [data]
+        else:
+            sentences = self.get_next_sentences(caller,
+                                                npc,
+                                                dialogue,
+                                                sentence)
         output = self.create_output_sentences(sentences, caller, npc)
         if output:
             sentences_list.append(output)
-        else:
-            return sentences_list
 
         while self.check_need_get_next(sentences):
             sentences = self.get_next_sentences(caller,
@@ -242,7 +241,7 @@ class DialogueHandler(object):
         return sentences_list
 
 
-    def get_sentences(self, caller, npc):
+    def get_npc_sentences(self, caller, npc):
         """
         Get NPC's sentences that can show to the caller.
 
@@ -428,6 +427,7 @@ class DialogueHandler(object):
 
         if sentence["provide_quest"]:
             caller.quest_handler.accept(sentence["provide_quest"])
+
 
     def finish_dialogue(self, caller, dialogue):
         """
