@@ -1,1 +1,1 @@
-Replace templates with your own files here.
+Put static resources here.
