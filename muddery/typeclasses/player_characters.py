@@ -861,17 +861,21 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Returns:
             None
         """
-        if self.db.current_dialogue:
+        if GAME_SETTINGS.get("auto_resume_dialogues"):
+            # Check current dialogue.
+            if not self.db.current_dialogue:
+                return
+
             if (dialogue, sentence) not in self.db.current_dialogue["sentences_all"]:
                 # Can not find specified dialogue in current dialogues.
                 return
 
-            try:
-                # Finish current sentence
-                DIALOGUE_HANDLER.finish_sentence(self, npc, dialogue, sentence)
-            except Exception, e:
-                ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
-                logger.log_tracemsg(ostring)
+        try:
+            # Finish current sentence
+            DIALOGUE_HANDLER.finish_sentence(self, npc, dialogue, sentence)
+        except Exception, e:
+            ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
+            logger.log_tracemsg(ostring)
 
         # Get next sentences_list.
         sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(self,
