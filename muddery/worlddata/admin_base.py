@@ -1,8 +1,5 @@
 from django.contrib import admin
 
-from muddery.worlddata.form_base import *
-
-
 # Register your models here.
 
 

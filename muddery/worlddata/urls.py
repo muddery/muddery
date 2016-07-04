@@ -6,4 +6,6 @@ from django.conf.urls import *
 
 urlpatterns = [
     url(r'^$', 'muddery.worlddata.views.worldeditor', name="index"),
-    url(r'^editor/', 'muddery.worlddata.views.editor', name="editor")]
+    url(r'^editor/submit', 'muddery.worlddata.views.submit_form', name="submit_form"),
+    url(r'^editor/view', 'muddery.worlddata.views.view_form', name="view_form"),
+    url(r'^editor/', 'muddery.worlddata.views.editor', name="editor"),]

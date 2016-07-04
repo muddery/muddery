@@ -4,6 +4,37 @@ from django.apps import apps
 from worlddata import models
 
 
+class Manager:
+    relations = {}
+
+    @classmethod
+    def register_form(cls, form_class):
+        """
+
+        Args:
+            model_name:
+            form_class:
+
+        Returns:
+
+        """
+        model_name = form_class.Meta.model.__name__
+        cls.relations[model_name] = form_class
+
+    @classmethod
+    def get_form(cls, model_name):
+        """
+
+        Args:
+            model_name:
+
+        Returns:
+
+        """
+        return cls.relations[model_name]
+
+
+
 def ExistKey(key, except_model=None):
     """
     Check if the key exists.
@@ -27,10 +58,19 @@ class GameSettingsForm(forms.ModelForm):
         super(GameSettingsForm, self).__init__(*args, **kwargs)
 
         choices = [("", "---------")]
-
         objects = models.character_models.objects.filter(level=1)
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
         self.fields['default_player_model_key'] = forms.ChoiceField(choices=choices)
+
+    class Meta:
+        model = models.game_settings
+        fields = '__all__'
+
+
+class ClientSettingsForm(forms.ModelForm):
+    class Meta:
+        model = models.client_settings
+        fields = '__all__'
 
 
 class WorldRoomsForm(forms.ModelForm):
@@ -52,6 +92,9 @@ class WorldRoomsForm(forms.ModelForm):
             return
 
         return cleaned_data
+
+    #class Meta:
+    #    model = models.world_rooms
 
 
 class WorldExitsForm(forms.ModelForm):
@@ -310,3 +353,6 @@ class QuestsForm(forms.ModelForm):
             return
 
         return cleaned_data
+
+
+Manager.register_form(GameSettingsForm)

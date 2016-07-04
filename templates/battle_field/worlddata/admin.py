@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from form import *
+from forms import *
 from models import *
 from muddery.worlddata import admin_base
 
