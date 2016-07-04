@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from form import *
+import forms
 from models import *
 from muddery.worlddata import admin_base
 
@@ -8,7 +8,7 @@ from muddery.worlddata import admin_base
 # Register your models here.
 
 class GameSettingsAdmin(admin_base.GameSettingsAdmin):
-    form = GameSettingsForm
+    form = forms.GameSettingsForm
 
 
 class ClientSettingsAdmin(admin_base.ClientSettingsAdmin):
@@ -24,31 +24,31 @@ class TypeclassesAdmin(admin_base.TypeclassesAdmin):
 
 
 class WorldRoomsAdmin(admin_base.WorldRoomsAdmin):
-    form = WorldRoomsForm
+    form = forms.WorldRoomsForm
 
 
 class WorldExitsAdmin(admin_base.WorldExitsAdmin):
-    form = WorldExitsForm
+    form = forms.WorldExitsForm
 
 
 class ExitLocksAdmin(admin_base.ExitLocksAdmin):
-    form = ExitLocksForm
+    form = forms.ExitLocksForm
 
 
 class WorldObjectsAdmin(admin_base.WorldObjectsAdmin):
-    form = WorldObjectsForm
+    form = forms.WorldObjectsForm
 
 
 class ObjectCreatorsAdmin(admin_base.ObjectCreatorsAdmin):
-    form = ObjectCreatorsForm
+    form = forms.ObjectCreatorsForm
 
 
 class CreatorLootListAdmin(admin_base.CreatorLootListAdmin):
-    form = CreatorLootListForm
+    form = forms.CreatorLootListForm
 
 
 class CommonObjectsAdmin(admin_base.CommonObjectsAdmin):
-    form = CommonObjectsForm
+    form = forms.CommonObjectsForm
 
 
 class FoodsAdmin(admin_base.FoodsAdmin):
@@ -80,31 +80,31 @@ class CharacterModelsAdmin(admin_base.CharacterModelsAdmin):
 
 
 class WorldNPCAdmin(admin_base.WorldNPCAdmin):
-    form = CharacterForm
+    form = forms.CharacterForm
 
 
 class CommonCharactersAdmin(admin_base.CommonCharactersAdmin):
-    form = CharacterForm
+    form = forms.CharacterForm
 
 
 class CharacterLootListAdmin(admin_base.CharacterLootListAdmin):
-    form = CharacterLootListForm
+    form = forms.CharacterLootListForm
 
 
 class SkillsAdmin(admin_base.SkillsAdmin):
-    form = SkillsForm
+    form = forms.SkillsForm
 
 
 class DefaultSkillsAdmin(admin_base.DefaultSkillsAdmin):
-    form = DefaultSkillsForm
+    form = forms.DefaultSkillsForm
 
 
 class QuestsAdmin(admin_base.QuestsAdmin):
-    form = QuestsForm
+    form = forms.QuestsForm
 
 
 class QuestRewardListAdmin(admin_base.QuestRewardListAdmin):
-    form = QuestRewardListForm
+    form = forms.QuestRewardListForm
 
 
 class QuestObjectiveTypesAdmin(admin_base.QuestObjectiveTypesAdmin):

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block header_ext %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+{% endblock %}
+{% block content %}
+<h1 xmlns="http://www.w3.org/1999/html">Defines</h1>
+    Welcome to the Defines Page. Here defines a set of basic values.
+
+    <form action="submit" method="post">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-row">
+         {{ field.label_tag }}:{{ field }}
+         {{ field.errors }}
+      </div>
+      {% endfor %}
+      <input type="submit" value="Submit" />
+      <input type="hidden" name="_form" value="game_settings" />
+      <!-- input type="hidden" name="_record" value="1" /-->
+    </form>
+
+    <h3><a href="../">BACK</a></h3>
+
+{% endblock content %}

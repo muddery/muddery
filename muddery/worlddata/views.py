@@ -6,7 +6,7 @@ page and serve it eventual static content.
 """
 from __future__ import print_function
 
-import tempfile, time, json
+import tempfile, time, json, re
 from django import http
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
@@ -17,6 +17,7 @@ from muddery.utils import importer
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import CLIENT_SETTINGS
+from muddery.worlddata.editor import editworld
 
 @staff_member_required
 def worldeditor(request):
@@ -123,10 +124,36 @@ def editor(request):
     World Editor page template loading.
     """
     try:
-        path = request.path.split('/')
-        name = path[-1]
-        if not name:
-            name = path[-2]
-        return render(request, name + '.html')
+        name = re.sub(r"^/admin/worlddata/editor/", "", request.path)
+        return render(request, name)
     except Exception, e:
         raise http.Http404
+
+
+@staff_member_required
+def view_form(request):
+    try:
+        return editworld.view_form(request)
+    except Exception, e:
+        logger.log_tracemsg("Invalid view request: %s" % e)
+        
+    raise http.Http404
+
+
+@staff_member_required
+def submit_form(request):
+    """
+    Edit worlddata.
+
+    Args:
+        request:
+
+    Returns:
+        None.
+    """
+    try:
+        return editworld.submit_form(request)
+    except Exception, e:
+        logger.log_tracemsg("Invalide edit request: %s" % e)
+        
+    raise http.Http404

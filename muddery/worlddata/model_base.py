@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 KEY_LENGTH = 255
 NAME_LENGTH = 20
@@ -14,7 +15,7 @@ POSITION_LENGTH = 80
 class game_settings(models.Model):
     """
     Game's basic settings.
-    NOTE: The server only uses the first record!
+    NOTE: Only uses the first record!
     """
 
     # The screen shows to players who are not loggin.
@@ -24,23 +25,28 @@ class game_settings(models.Model):
     solo_mode = models.BooleanField(blank=True, default=False)
 
     # Time of global CD.
-    global_cd = models.FloatField(blank=True, default=1.0)
+    global_cd = models.FloatField(blank=True,
+                                  default=1.0,
+                                  validators=[MinValueValidator(0.0)])
 
     # The CD of auto casting a skill. It must be bigger than GLOBAL_CD
     # They can not be equal!
-    auto_cast_skill_cd = models.FloatField(blank=True, default=1.5)
+    auto_cast_skill_cd = models.FloatField(blank=True,
+                                           default=1.5,
+                                           validators=[MinValueValidator(0.0)])
 
     # Player's reborn time after being killed. If it is below 0, players will be reborn immediately.
-    player_reborn_cd = models.FloatField(blank=True, default=10.0)
+    player_reborn_cd = models.FloatField(blank=True,
+                                         default=10.0,
+                                         validators=[MinValueValidator(0.0)])
 
     # NPC's reborn time after being killed. If it is below 0, NPCs will not be reborn.
-    npc_reborn_cd = models.FloatField(blank=True, default=10.0)
+    npc_reborn_cd = models.FloatField(blank=True,
+                                      default=10.0,
+                                      validators=[MinValueValidator(0.0)])
 
     # Allow players to give up quests.
     can_give_up_quests = models.BooleanField(blank=True, default=True)
-
-    # Send one sentence to client at one time.
-    single_dialogue_sentence = models.BooleanField(blank=True, default=False)
 
     # Can resume unfinished dialogues automatically.
     auto_resume_dialogues = models.BooleanField(blank=True, default=True)
@@ -59,7 +65,7 @@ class game_settings(models.Model):
     default_player_home_key = models.ForeignKey("world_rooms", null=True, blank=True)
 
     # Default model of players.
-    default_player_model_key = models.CharField(max_length=KEY_LENGTH)
+    default_player_model_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -75,15 +81,19 @@ class game_settings(models.Model):
 # ------------------------------------------------------------
 class client_settings(models.Model):
     """
-    Webclient's basic settings.
+    Html webclient's basic settings.
     NOTE: The server only uses the first record!
     """
 
     # Room's pixel size on the map.
-    map_room_size = models.IntegerField(blank=True, default=40)
+    map_room_size = models.FloatField(blank=True,
+                                      default=40.0,
+                                      validators=[MinValueValidator(0.0)])
 
     # Map's scale
-    map_scale = models.FloatField(blank=True, default=75.0)
+    map_scale = models.FloatField(blank=True,
+                                  default=75.0,
+                                  validators=[MinValueValidator(0.0)])
 
     # Show command box or not.
     show_command_box = models.BooleanField(blank=True, default=False)
@@ -103,7 +113,7 @@ class client_settings(models.Model):
 #
 # ------------------------------------------------------------
 class class_categories(models.Model):
-    "typeclass's category"
+    "Typeclass's category defines base types."
 
     # category's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
@@ -130,7 +140,7 @@ class class_categories(models.Model):
 #
 # ------------------------------------------------------------
 class typeclasses(models.Model):
-    "store all typeclasses"
+    "Defines all available typeclasses."
 
     # typeclass's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
@@ -146,6 +156,9 @@ class typeclasses(models.Model):
 
     # typeclass's description (optional)
     desc = models.TextField(blank=True)
+    
+    # Can loot from objects of this type.
+    can_loot = models.BooleanField(blank=True, default=False)
 
     class Meta:
         "Define Django meta options"
@@ -163,7 +176,7 @@ class typeclasses(models.Model):
 #
 # ------------------------------------------------------------
 class world_rooms(models.Model):
-    "Store all unique rooms."
+    "Defines all unique rooms."
 
     # room's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
@@ -177,7 +190,7 @@ class world_rooms(models.Model):
     # room's description for display
     desc = models.TextField(blank=True)
 
-    # room's position which is used in map
+    # room's position which is used in maps
     position = models.CharField(max_length=POSITION_LENGTH, blank=True)
 
     class Meta:
@@ -196,7 +209,7 @@ class world_rooms(models.Model):
 #
 # ------------------------------------------------------------
 class world_exits(models.Model):
-    "Store all unique exits."
+    "Defines all unique exits."
 
     # exit's key
     key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
@@ -213,13 +226,14 @@ class world_exits(models.Model):
     # the action verb to enter the exit (optional)
     verb = models.CharField(max_length=NAME_LENGTH, blank=True)
 
-    # the exit's location, it must be a room
+    # The exit's location, it must be a room.
+    # Players can see and enter an exit from this room.
     location = models.ForeignKey("world_rooms")
 
-    # the exits's destination
+    # The exits's destination.
     destination = models.ForeignKey("world_rooms")
 
-    # the condition for showing the exit
+    # the condition to show the exit
     condition = models.TextField(blank=True)
 
     class Meta:
@@ -238,7 +252,7 @@ class world_exits(models.Model):
 #
 # ------------------------------------------------------------
 class exit_locks(models.Model):
-    "locked exit's additional data"
+    "Locked exit's additional data"
 
     # related exit
     key = models.OneToOneField("world_exits", primary_key=True)
@@ -304,7 +318,7 @@ class world_objects(models.Model):
 #
 # ------------------------------------------------------------
 class object_creators(models.Model):
-    "object creator's additional data"
+    "Players can get new objects from an object_creator."
 
     # related object
     key = models.OneToOneField("world_objects", primary_key=True)
@@ -328,7 +342,7 @@ class object_creators(models.Model):
 #
 # ------------------------------------------------------------
 class loot_list(models.Model):
-    "Loot list's base class."
+    "Loot list. It is used in object_creators and mods."
 
     # the provider of the object. it is not a foreighkey because the provider can be in several tables.
     provider = models.CharField(max_length=KEY_LENGTH, db_index=True)
