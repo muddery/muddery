@@ -3,7 +3,9 @@
 This file checks user's edit actions and put changes into db.
 """
 
+import re
 from django.shortcuts import render, render_to_response
+from django.http import HttpResponseRedirect  
 from muddery.utils.exception import MudderyError
 from worlddata import forms
 
@@ -42,7 +44,8 @@ def view_form(request):
     else:
         form_data = form_class()
 
-    page_name = "forms/" + form_name + ".html"
+    page_name = re.sub(r"^/admin/worlddata/editor/", "", request.path)
+    page_name = re.sub(r"form.html$", "", page_name) + form_name + ".html"
     return render(request, page_name, {'form': form_data})
 
 
@@ -54,7 +57,12 @@ def submit_form(request):
     Returns:
         None.
     """
-    print "request.POST: %s" % request.POST
+    if "_quit" in request.POST:
+        if "_referrer" in request.POST:
+            referrer = request.POST.get("_referrer")
+            return HttpResponseRedirect(referrer)
+        else:
+            return HttpResponseRedirect("./index.html")
 
     form_name = None
     if "_form" in request.POST:
@@ -82,6 +90,14 @@ def submit_form(request):
 
     if form_data.is_valid():
         form_data.save()
-    
-    page_name = "forms/" + form_name + ".html"
+
+        if "_save" in request.POST:
+            if "_referrer" in request.POST:
+                referrer = request.POST.get("_referrer")
+                return HttpResponseRedirect(referrer)
+            else:
+                return HttpResponseRedirect("./index.html")
+       
+    page_name = re.sub(r"^/admin/worlddata/editor/", "", request.path)
+    page_name = re.sub(r"submit.html$", "", page_name) + form_name + ".html"
     return render(request, page_name, {'form': form_data})
