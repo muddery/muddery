@@ -17,7 +17,8 @@ from muddery.utils import importer
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import CLIENT_SETTINGS
-from muddery.worlddata.editor import editworld
+from muddery.worlddata.editor import edit_world
+
 
 @staff_member_required
 def worldeditor(request):
@@ -133,7 +134,7 @@ def editor(request):
 @staff_member_required
 def view_form(request):
     try:
-        return editworld.view_form(request)
+        return edit_world.view_form(request)
     except Exception, e:
         logger.log_tracemsg("Invalid view request: %s" % e)
         
@@ -152,7 +153,7 @@ def submit_form(request):
         None.
     """
     try:
-        return editworld.submit_form(request)
+        return edit_world.submit_form(request)
     except Exception, e:
         logger.log_tracemsg("Invalide edit request: %s" % e)
         

@@ -71,6 +71,12 @@ class ClientSettingsForm(forms.ModelForm):
     class Meta:
         model = models.client_settings
         fields = '__all__'
+        
+
+class ClassCategoriesForm(forms.ModelForm):
+    class Meta:
+        model = models.class_categories
+        fields = '__all__'
 
 
 class WorldRoomsForm(forms.ModelForm):
@@ -356,3 +362,5 @@ class QuestsForm(forms.ModelForm):
 
 
 Manager.register_form(GameSettingsForm)
+Manager.register_form(ClientSettingsForm)
+Manager.register_form(ClassCategoriesForm)
