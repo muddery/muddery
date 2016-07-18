@@ -11,10 +11,10 @@
     <h2><a href="./form.html?_form=client_settings&_record=1">Webclient Settings</a></h2>
     Webclient's settings.
 
-    <h2><a href="{% url "admin:worlddata_class_categories_changelist" %}">Class Categories</a></h2>
+    <h2><a href="./list.html?_form=class_categories" %}">Class Categories</a></h2>
     The basic categories of object types.
 
-    <h2><a href="{% url "admin:worlddata_typeclasses_changelist" %}">Typeclasses</a></h2>
+    <h2><a href="./list.html?_form=typeclasses" %}">Typeclasses</a></h2>
     All available typeclasses. Typeclass's paths must match the values in codes.
 
     <h2><a href="{% url "admin:worlddata_equipment_types_changelist" %}">Equipment Types</a></h2>
@@ -38,7 +38,5 @@
 
     <h2><a href="{% url "admin:worlddata_event_trigger_types_changelist" %}">Event Trigger Types</a></h2>
     Event trigger's types. They must match the values in utils.defines.
-
-    <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
 
 {% endblock content %}

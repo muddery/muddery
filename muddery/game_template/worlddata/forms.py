@@ -66,17 +66,38 @@ class GameSettingsForm(forms.ModelForm):
         model = models.game_settings
         fields = '__all__'
 
+    class Template:
+        "Define template options"
+        list_template = "common_list.html"
+        form_template = "common_form.html"
+
 
 class ClientSettingsForm(forms.ModelForm):
     class Meta:
         model = models.client_settings
         fields = '__all__'
-        
+
+    class Template:
+        "Define template options"
+        list_template = "common_list.html"
+        form_template = "common_form.html"
+
+
+class TypeclassesForm(forms.ModelForm):
+    class Meta:
+        model = models.typeclasses
+        fields = '__all__'
+
 
 class ClassCategoriesForm(forms.ModelForm):
     class Meta:
         model = models.class_categories
         fields = '__all__'
+
+    class Template:
+        "Define template options"
+        list_template = "common_list.html"
+        form_template = "common_form.html"
 
 
 class WorldRoomsForm(forms.ModelForm):
@@ -364,3 +385,4 @@ class QuestsForm(forms.ModelForm):
 Manager.register_form(GameSettingsForm)
 Manager.register_form(ClientSettingsForm)
 Manager.register_form(ClassCategoriesForm)
+Manager.register_form(TypeclassesForm)

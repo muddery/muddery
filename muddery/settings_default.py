@@ -256,3 +256,10 @@ SKILL_MODULES = ("skills.skills",)
 
 # Characters who have equal or higher permission can bypass events.
 PERMISSION_BYPASS_EVENTS = {"Builders", "Wizards", "Immortals"}
+
+###################################
+# world editor
+###################################
+DEFUALT_LIST_TEMPLATE = "common_list.html"
+
+DEFUALT_FORM_TEMPLATE = "common_form.html"

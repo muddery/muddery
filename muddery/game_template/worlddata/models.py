@@ -8,6 +8,9 @@ from muddery.worlddata import model_base
 #
 # ------------------------------------------------------------
 class game_settings(model_base.game_settings):
+    """
+    Game's basic settings.
+    """
     pass
 
 
@@ -17,6 +20,9 @@ class game_settings(model_base.game_settings):
 #
 # ------------------------------------------------------------
 class client_settings(model_base.client_settings):
+    """
+    Html webclient's basic settings.
+    """
     pass
 
 
