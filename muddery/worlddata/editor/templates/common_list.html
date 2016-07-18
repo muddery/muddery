@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block header_ext %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/changelists.css" />
+{% endblock %}
+{% block content %}
+<h1 xmlns="http://www.w3.org/1999/html">{{ title }}</h1>
+<div>{{ desc }}</div>
+<div id="content-main">
+    <ul class="object-tools">
+        <li>
+            <a href="./form.html?_form={{ form }}" class="addlink">
+                Add {{ title }}
+            </a>
+        </li>
+    </ul>
+    <div class="module" id="changelist">
+        <div class="results">
+            <table id="result_list">
+                <thead>
+                    <tr>
+                        {% for field in fields %}
+                        <th scope="col" class="sortable">
+                            <div class="text">{{ field.verbose_name|upper }}</div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                        <tr class="{% cycle 'row1' 'row2' %}">
+                            {% for item in record.items %}
+                            <td class="field">
+                                {% if forloop.first %}
+                                    <script type="text/javascript">
+                                    var url = "./form.html?_form={{ form }}&_record={{ record.pk }}&_referrer=" + window.location.href;
+                                    document.write("<a href=" + url + ">");
+                                    </script>
+                                {% endif %}
+                                {{ item }}
+                                {% if forloop.first %}
+                                    </a>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div>
+        <span>Pages:&nbsp;</span>
+        <span>&gt;&gt;</span>
+        {% for i in page_range %}
+            {% ifequal i page.number %}
+                <span>&nbsp;{{ i }}&nbsp;</span>
+            {% else %}
+                <a href="?_form={{ form }}&_page={{ i }}" class="page_link">&nbsp;{{ i }}&nbsp;</a>
+            {% endifequal %}
+        {% endfor %}
+        <span>&lt;&lt;</span>
+    </div>
+</div>
+{% endblock content %}

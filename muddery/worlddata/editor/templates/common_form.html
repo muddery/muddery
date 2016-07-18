@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block header_ext %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+{% endblock %}
+{% block content %}
+<div id="content" class="colM"></div>
+    <h1>{{ title }}</h1>
+    <div>{{ desc }}</div>
+    <div id="content-main">
+        <form action="submit.html" method="post">
+            {% csrf_token %}
+            <div>
+                <fieldset class="module aligned">
+                    {% for item in data %}
+                    <div class="form-row">
+                        {{ item.label_tag }}{{ item }}{{ item.errors }}
+                    </div>
+                    {% endfor %}
+                </fieldset>
+                <input type="hidden" name="_form" value="{{ form }}" />
+                <input type="hidden" name="_record" value="{{ record }}" />
+                <input type="hidden" name="_referrer" value="{{ referrer }}" />
+                <div class="submit-row">
+                    {% if can_delete %}
+                    <input type="submit" name="_delete" value="Delete" class="delete-box" />
+                    {% endif %}
+                    <input type="submit" name="_quit" value="Back without save" />
+                    <input type="submit" name="_continue" value="Save and continue editing" />
+                    <input type="submit" name="_save" value="Save" class="default" />
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
