@@ -394,8 +394,13 @@ body.popup .submit-row {
     background-image: url(../img/selector-search.gif);
 }
 
-.delete-box {
+input.delete-box {
     float: left;
+}
+
+span.page_list {
+    float: left;
+    padding: 4px 2px;
 }
 
 a.page_link {

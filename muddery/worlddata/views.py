@@ -17,7 +17,7 @@ from muddery.utils import importer
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import CLIENT_SETTINGS
-from muddery.worlddata.editor import edit_world, page_view
+from muddery.worlddata.editor import form_view, page_view
 
 
 @staff_member_required
@@ -125,16 +125,20 @@ def editor(request):
     World Editor page template loading.
     """
     try:
-        name = re.sub(r"^/admin/worlddata/editor/", "", request.path)
-        return render(request, name)
+        name = re.sub(r"^/worlddata/editor/", "", request.path)
+        return render(request, name, {"self": request.get_full_path()})
     except Exception, e:
+        logger.log_tracemsg(e)
         raise http.Http404
 
 
 @staff_member_required
 def list_view(request):
     try:
-        return page_view.view(request)
+        if "_back" in request.POST:
+            return page_view.quit_list(request)
+        else:
+            return page_view.view_list(request)
     except Exception, e:
         logger.log_tracemsg("Invalid view request: %s" % e)
 
@@ -144,7 +148,7 @@ def list_view(request):
 @staff_member_required
 def view_form(request):
     try:
-        return edit_world.view_form(request)
+        return form_view.view_form(request)
     except Exception, e:
         logger.log_tracemsg("Invalid view request: %s" % e)
         
@@ -163,12 +167,12 @@ def submit_form(request):
         None.
     """
     try:
-        if "_quit" in request.POST:
-            return edit_world.quit_form(request)
+        if "_back" in request.POST:
+            return form_view.quit_form(request)
         elif "_delete" in request.POST:
-            return edit_world.delete_form(request)
+            return form_view.delete_form(request)
         else:
-            return edit_world.submit_form(request)
+            return form_view.submit_form(request)
     except Exception, e:
         logger.log_tracemsg("Invalide edit request: %s" % e)
         
