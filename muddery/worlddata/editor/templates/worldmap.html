@@ -5,22 +5,20 @@
 
     <h3><a href="../">BACK</a></h3>
 
-    <h2><a href="{% url "admin:worlddata_world_rooms_changelist" %}">Rooms</a></h2>
+    <h2><a href="./worldmap/world_rooms/list.html">Rooms</a></h2>
     Rooms compose basic map areas.
 
-    <h2><a href="{% url "admin:worlddata_world_exits_changelist" %}">Exits</a></h2>
+    <h2><a href="./worldmap/world_exits/list.html">Exits</a></h2>
     Exits link rooms together.
 
-    <h2><a href="{% url "admin:worlddata_exit_locks_changelist" %}">Exit Locks</a></h2>
+    <h2><a href="./worldmap/exit_locks/list.html">Exit Locks</a></h2>
     Locked exit's additional data. Exits can be locked, they can be opened only when their conditions
     are matched.
 
-    <h2><a href="{% url "admin:worlddata_world_objects_changelist" %}">World Objects</a></h2>
+    <h2><a href="./worldmap/world_objects/list.html">World Objects</a></h2>
     World objects are unique. Their initial positions are fixed.
 
-    <h2><a href="{% url "admin:worlddata_world_npcs_changelist" %}">World NPCs</a></h2>
+    <h2><a href="./worldmap/world_npcs/list.html">World NPCs</a></h2>
     These NPCs are unique in the whole game world. Their initial positions are fixed.
-
-    <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
 
 {% endblock content %}

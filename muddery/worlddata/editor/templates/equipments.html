@@ -5,19 +5,17 @@
 
     <h3><a href="../">BACK</a></h3>
 
-    <h2><a href="{% url "admin:worlddata_equipment_types_changelist" %}">Equipment Types</a></h2>
+    <h2><a href="./equipments/equipment_types/list.html">Equipment Types</a></h2>
     Equipment Types limit character's available equipments. Characters can only put on equipments
     that match their careers.
 
-    <h2><a href="{% url "admin:worlddata_equipment_positions_changelist" %}">Equipment Positions</a></h2>
+    <h2><a href="./equipments/equipment_positions/list.html">Equipment Positions</a></h2>
     Equipments only can be put on right positions, such as hands or legs.
 
-    <h2><a href="{% url "admin:worlddata_equipments_changelist" %}">Equipments</a></h2>
+    <h2><a href="./equipments/equipments/list.html">Equipments</a></h2>
     All equipments' data are in this table.
 
-    <h2><a href="{% url "admin:worlddata_career_equipments_changelist" %}">Career Equipments</a></h2>
+    <h2><a href="./equipments/career_equipments/list.html">Career Equipments</a></h2>
     Defines certain careers can put on what kinds of equipments.
-
-    <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
 
 {% endblock content %}

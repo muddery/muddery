@@ -8,7 +8,7 @@ from muddery.worlddata import admin_base
 # Register your models here.
 
 class GameSettingsAdmin(admin_base.GameSettingsAdmin):
-    form = forms.GameSettingsForm
+    pass
 
 
 class ClientSettingsAdmin(admin_base.ClientSettingsAdmin):
@@ -24,31 +24,31 @@ class TypeclassesAdmin(admin_base.TypeclassesAdmin):
 
 
 class WorldRoomsAdmin(admin_base.WorldRoomsAdmin):
-    form = forms.WorldRoomsForm
+    pass
 
 
 class WorldExitsAdmin(admin_base.WorldExitsAdmin):
-    form = forms.WorldExitsForm
+    pass
 
 
 class ExitLocksAdmin(admin_base.ExitLocksAdmin):
-    form = forms.ExitLocksForm
+    pass
 
 
 class WorldObjectsAdmin(admin_base.WorldObjectsAdmin):
-    form = forms.WorldObjectsForm
+    pass
 
 
 class ObjectCreatorsAdmin(admin_base.ObjectCreatorsAdmin):
-    form = forms.ObjectCreatorsForm
+    pass
 
 
 class CreatorLootListAdmin(admin_base.CreatorLootListAdmin):
-    form = forms.CreatorLootListForm
+    pass
 
 
 class CommonObjectsAdmin(admin_base.CommonObjectsAdmin):
-    form = forms.CommonObjectsForm
+    pass
 
 
 class FoodsAdmin(admin_base.FoodsAdmin):
@@ -80,31 +80,31 @@ class CharacterModelsAdmin(admin_base.CharacterModelsAdmin):
 
 
 class WorldNPCAdmin(admin_base.WorldNPCAdmin):
-    form = forms.CharacterForm
+    pass
 
 
 class CommonCharactersAdmin(admin_base.CommonCharactersAdmin):
-    form = forms.CharacterForm
+    pass
 
 
 class CharacterLootListAdmin(admin_base.CharacterLootListAdmin):
-    form = forms.CharacterLootListForm
+    pass
 
 
 class SkillsAdmin(admin_base.SkillsAdmin):
-    form = forms.SkillsForm
+    pass
 
 
 class DefaultSkillsAdmin(admin_base.DefaultSkillsAdmin):
-    form = forms.DefaultSkillsForm
+    pass
 
 
 class QuestsAdmin(admin_base.QuestsAdmin):
-    form = forms.QuestsForm
+    pass
 
 
 class QuestRewardListAdmin(admin_base.QuestRewardListAdmin):
-    form = forms.QuestRewardListForm
+    pass
 
 
 class QuestObjectiveTypesAdmin(admin_base.QuestObjectiveTypesAdmin):

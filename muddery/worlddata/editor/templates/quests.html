@@ -5,29 +5,27 @@
 
     <h3><a href="../">BACK</a></h3>
 
-    <h2><a href="{% url "admin:worlddata_quests_changelist" %}">Quests</a></h2>
+    <h2><a href="./quests/quests/list.html">Quests</a></h2>
     Quest's basic data, include quest's name, description, condition, etc.
 
-    <h2><a href="{% url "admin:worlddata_quest_reward_list_changelist" %}">Quest Reward List</a></h2>
+    <h2><a href="./quests/quest_reward_list/list.html">Quest Reward List</a></h2>
     Reward list sets the source and the odds of reward objects.
     
-    <h2><a href="{% url "admin:worlddata_quest_objective_types_changelist" %}">Quest Objective Types</a></h2>
+    <h2><a href="./quests/quest_objective_types/list.html">Quest Objective Types</a></h2>
     Quest objective's type. They must match the values in utils.defines.
 
-    <h2><a href="{% url "admin:worlddata_quest_objectives_changelist" %}">Quest Objectives</a></h2>
+    <h2><a href="./quests/quest_objectives/list.html">Quest Objectives</a></h2>
     A quest can be completed only when all its objectives are accomplished.
 
-    <h2><a href="{% url "admin:worlddata_quest_dependency_types_changelist" %}">Quest Dependency Types</a></h2>
+    <h2><a href="./quests/quest_dependency_types/list.html">Quest Dependency Types</a></h2>
     Quest's dependency types. They must match the values in utils.defines.
 
-    <h2><a href="{% url "admin:worlddata_quest_dependencies_changelist" %}">Quest Dependencies</a></h2>
+    <h2><a href="./quests/quest_dependencies/list.html">Quest Dependencies</a></h2>
     Some quests can be accepted only when relative quests have been done or have not been done. Here are
     the relations.
 
-    <h2><a href="{% url "admin:worlddata_dialogue_quest_dependencies_changelist" %}">Dialogue Quest Dependencies</a></h2>
+    <h2><a href="./quests/dialogue_quest_dependencies/list.html">Dialogue Quest Dependencies</a></h2>
     Some dialogues can be shown only when relative quests have been done or have not been done. These
     relations are set in this table.
-
-    <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
 
 {% endblock content %}

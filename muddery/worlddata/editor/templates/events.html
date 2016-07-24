@@ -5,21 +5,19 @@
 
     <h3><a href="../">BACK</a></h3>
 
-    <h2><a href="{% url "admin:worlddata_event_types_changelist" %}">Event Types</a></h2>
+    <h2><a href="./events/event_types/list.html">Event Types</a></h2>
     The types of actions that events lead to. They must match the values in utils.defines.
 
-    <h2><a href="{% url "admin:worlddata_event_trigger_types_changelist" %}">Event Trigger Types</a></h2>
+    <h2><a href="./events/event_trigger_types/list.html">Event Trigger Types</a></h2>
     Event trigger's types. They must match the values in utils.defines.
 
-    <h2><a href="{% url "admin:worlddata_event_data_changelist" %}">Events</a></h2>
+    <h2><a href="./events/event_data/list.html">Events</a></h2>
     Event's basic data.
 
-    <h2><a href="{% url "admin:worlddata_event_attacks_changelist" %}">Event Attacks</a></h2>
+    <h2><a href="./events/event_attacks/list.html">Event Attacks</a></h2>
     Attacking event's additional data. These events lead to a combat.
 
-    <h2><a href="{% url "admin:worlddata_event_dialogues_changelist" %}">Event Dialogues</a></h2>
+    <h2><a href="./events/event_dialogues/list.html">Event Dialogues</a></h2>
     Dialogue event's additional data. These events lead to a dialogue.
-
-    <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
 
 {% endblock content %}

@@ -23,19 +23,19 @@ def view_form(request):
     Returns:
         HttpResponse
     """
-
     # Get form's name form the request.
     request_data = request.GET
-    form_name = None
-    if "_form" in request_data:
-        form_name = request_data.get("_form")
-    else:
+
+    try:
+        path_list = request.path.split("/")
+        form_name = path_list[-2]
+    except Exception, e:
         logger.log_errmsg("Invalid form.")
         raise http.Http404
 
-    form_class = None
     try:
         form_class = forms.Manager.get_form(form_name)
+        model = form_class.Meta.model
     except Exception, e:
         raise MudderyError("Invalid form: %s." % form_name)
 
@@ -50,25 +50,23 @@ def view_form(request):
     else:
         data = form_class()
 
-    referrer = request_data.get("_referrer", "")
-
     # Get template file's name form the request.
-    template_file = settings.DEFUALT_FORM_TEMPLATE
     if "_template" in request_data:
         template_file = request_data.get("_template")
     else:
-        try:
-            template_file = form_class.Template.form_template
-        except:
-            pass
+        template_file = getattr(form_class.Meta, "form_template", settings.DEFUALT_FORM_TEMPLATE)
 
-    return render(request, template_file, {"form": form_name,
-                                           "record": record,
-                                           "data": data,
-                                           "referrer": referrer,
-                                           "title": model._meta.verbose_name_plural,
-                                           "desc": model.__doc__,
-                                           "can_delete": (record is not None)})
+    context = {"form": form_name,
+               "record": record,
+               "data": data,
+               "title": model._meta.verbose_name_plural,
+               "desc": getattr(form_class.Meta, "desc", model._meta.verbose_name_plural),
+               "can_delete": (record is not None)}
+
+    if "_page" in request_data:
+        context["page"] = request_data.get("_page")
+
+    return render(request, template_file, context)
 
 
 def submit_form(request):
@@ -84,23 +82,22 @@ def submit_form(request):
     request_data = request.POST
 
     # Get form's name form the request.
-    form_name = None
-    if "_form" in request_data:
-        form_name = request_data.get("_form")
-    else:
+    try:
+        path_list = request.path.split("/")
+        form_name = path_list[-2]
+    except Exception, e:
         logger.log_errmsg("Invalid form.")
         raise http.Http404
 
-    form_class = None
     try:
         form_class = forms.Manager.get_form(form_name)
+        model = form_class.Meta.model
     except Exception, e:
         raise MudderyError("Invalid form: %s." % form_name)
 
     record = request_data.get("_record", None)
 
     # Save data.
-    model = form_class.Meta.model
     data = None
     if record:
         item = form_class.Meta.model.objects.get(pk=record) 
@@ -113,29 +110,25 @@ def submit_form(request):
 
         if "_save" in request_data:
             # save and back
-            if "_referrer" in request_data:
-                referrer = request_data.get("_referrer")
-                if referrer:
-                    return HttpResponseRedirect(referrer)
-
-            return HttpResponseRedirect("./index.html")
+            return quit_form(request)
 
     # Get template file's name form the request.
-    template_file = settings.DEFUALT_FORM_TEMPLATE
     if "_template" in request_data:
         template_file = request_data.get("_template")
     else:
-        try:
-            template_file = form_class.Template.form_template
-        except:
-            pass
+        template_file = getattr(form_class.Meta, "form_template", settings.DEFUALT_FORM_TEMPLATE)
 
-    return render(request, template_file, {"form": form_name,
-                                           "record": record,
-                                           "data": data,
-                                           "title": model._meta.verbose_name_plural,
-                                           "desc": model.__doc__,
-                                           "can_delete": (record is not None)})
+    context = {"form": form_name,
+               "record": record,
+               "data": data,
+               "title": model._meta.verbose_name_plural,
+               "desc": getattr(form_class.Meta, "desc", ""),
+               "can_delete": (record is not None)}
+
+    if "_page" in request_data:
+        context["page"] = request_data.get("_page")
+
+    return render(request, template_file, context)
 
 
 def quit_form(request):
@@ -154,7 +147,18 @@ def quit_form(request):
         if referrer:
           return HttpResponseRedirect(referrer)
 
-    return HttpResponseRedirect("./index.html")
+    try:
+        pos = request.path.rfind("/")
+        if pos > 0:
+            url = request.path[:pos] + "/list.html"
+            if "_page" in request_data:
+                page = request_data.get("_page")
+                url += "?_page=" + str(page)
+            return HttpResponseRedirect(url)
+    except Exception, e:
+        logger.log_tracemsg("quit form error: %s" % e)
+
+    raise http.Http404
 
 
 def delete_form(request):
@@ -171,31 +175,25 @@ def delete_form(request):
     # Get form's name form the request.
     request_data = request.POST
 
-    form_name = None
-    if "_form" in request_data:
-        form_name = request_data.get("_form")
-    else:
+    try:
+        path_list = request.path.split("/")
+        form_name = path_list[-2]
+    except Exception, e:
         logger.log_errmsg("Invalid form.")
         raise http.Http404
 
-    form_class = None
     try:
         form_class = forms.Manager.get_form(form_name)
+        model = form_class.Meta.model
     except Exception, e:
         raise MudderyError("Invalid form: %s." % form_name)
 
-    record = request_data.get("_record", None)
-
     # Delete data.
-    if record:
-        item = form_class.Meta.model.objects.get(pk=record)
+    try:
+        record = request_data.get("_record")
+        item = model.objects.get(pk=record)
         item.delete()
-    else:
-        raise MudderyError("Invalid record: %s." % record)
+    except Exception, e:
+        raise MudderyError("Invalid record.")
 
-    if "_referrer" in request_data:
-        referrer = request_data.get("_referrer")
-        if referrer:
-            return HttpResponseRedirect(referrer)
-
-    return HttpResponseRedirect("./index.html")
+    return quit_form(request)

@@ -15,7 +15,7 @@ from muddery.utils.exception import MudderyError
 from worlddata import forms, models
 
 
-def view(request):
+def view_list(request):
     """
     Show a list of records.
 
@@ -25,24 +25,23 @@ def view(request):
     Returns:
         HttpResponse
     """
-
     # Get form's name form the request.
     request_data = request.GET
 
-    form_name = None
-    if "_form" in request_data:
-        form_name = request_data.get("_form")
-    else:
+    try:
+        path_list = request.path.split("/")
+        form_name = path_list[-2]
+    except Exception, e:
         logger.log_errmsg("Invalid form.")
         raise http.Http404
 
+    # Get models and recoreds.
     try:
         form_class = forms.Manager.get_form(form_name)
+        model = form_class.Meta.model
     except Exception, e:
         raise MudderyError("Invalid form: %s." % form_name)
 
-    # Get models and recoreds.
-    model = form_class.Meta.model
     fields = model._meta.get_fields()
     fields = [field for field in fields if not isinstance(field, ManyToOneRel)]
     records = model.objects.all()
@@ -53,14 +52,12 @@ def view(request):
         template_file = request_data.get("_template")
     else:
         try:
-            template_file = form_class.Template.list_template
+            template_file = form_class.Meta.list_template
         except:
             pass
 
-    referrer = request_data.get("_referrer", "")
-
     # Get page size and page number.
-    page_size = request_data.get("_page_size", 20)
+    page_size = 20
     page_number = request_data.get("_page", 1)
 
     # Divide pages.
@@ -88,7 +85,37 @@ def view(request):
                                            "records": page_records,
                                            "page": page,
                                            "page_range": xrange(range_begin, range_end + 1),
-                                           "referrer": referrer,
+                                           "self": request.get_full_path(),
                                            "title": model._meta.verbose_name_plural,
-                                           "desc": model.__doc__})
-        
+                                           "desc": getattr(form_class.Meta, "desc", model._meta.verbose_name_plural),})
+
+
+def quit_list(request):
+    """
+    Quit a list.
+
+    "editor/category/form/list.html" => "editor/category.html"
+
+    Args:
+        request: http request
+
+    Returns:
+        HttpResponse
+    """
+    request_data = request.POST
+
+    if "_referrer" in request_data:
+        referrer = request_data.get("_referrer")
+        if referrer:
+          return HttpResponseRedirect(referrer)
+
+    try:
+        pos = request.path.rfind("/")
+        pos = request.path.rfind("/", 0, pos)
+        if pos > 0:
+            url = request.path[:pos] + ".html"
+            return HttpResponseRedirect(url)
+    except Exception, e:
+        logger.log_tracemsg("quit list error: %s" % e)
+
+    raise http.Http404

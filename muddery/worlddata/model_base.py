@@ -814,7 +814,7 @@ class quests(models.Model):
     # quest's description for display
     desc = models.TextField(blank=True)
 
-    # the condition to accept this quest. TODO
+    # the condition to accept this quest.
     condition = models.TextField(blank=True)
 
     # will do this action after a quest completed
