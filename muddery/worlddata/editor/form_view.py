@@ -66,6 +66,9 @@ def view_form(request):
     if "_page" in request_data:
         context["page"] = request_data.get("_page")
 
+    if "_referrer" in request_data:
+        context["referrer"] = request_data.get("_referrer")
+
     return render(request, template_file, context)
 
 
@@ -127,6 +130,9 @@ def submit_form(request):
 
     if "_page" in request_data:
         context["page"] = request_data.get("_page")
+
+    if "_referrer" in request_data:
+        context["referrer"] = request_data.get("_referrer")
 
     return render(request, template_file, context)
 
