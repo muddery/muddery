@@ -79,15 +79,20 @@ def view_list(request):
         range_end = paginator.num_pages
 
     page_records = [{"pk": record.pk, "items": [getattr(record, field.name, "") for field in fields]} for record in page]
+    
+    context = {"form": form_name,
+               "fields": fields,
+               "records": page_records,
+               "page": page,
+               "page_range": xrange(range_begin, range_end + 1),
+               "self": request.get_full_path(),
+               "title": model._meta.verbose_name_plural,
+               "desc": getattr(form_class.Meta, "desc", model._meta.verbose_name_plural),}
 
-    return render(request, template_file, {"form": form_name,
-                                           "fields": fields,
-                                           "records": page_records,
-                                           "page": page,
-                                           "page_range": xrange(range_begin, range_end + 1),
-                                           "self": request.get_full_path(),
-                                           "title": model._meta.verbose_name_plural,
-                                           "desc": getattr(form_class.Meta, "desc", model._meta.verbose_name_plural),})
+    if "_referrer" in request_data:
+        context["referrer"] = request_data.get("_referrer")
+
+    return render(request, template_file, context)
 
 
 def quit_list(request):
