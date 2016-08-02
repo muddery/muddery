@@ -13,7 +13,7 @@ from muddery.utils.exception import MudderyError
 from worlddata import forms
 
 
-def view_form(request):
+def view_form(form_name, request):
     """
     Show a form of a record.
 
@@ -27,13 +27,6 @@ def view_form(request):
     request_data = request.GET
 
     try:
-        path_list = request.path.split("/")
-        form_name = path_list[-2]
-    except Exception, e:
-        logger.log_errmsg("Invalid form.")
-        raise http.Http404
-
-    try:
         form_class = forms.Manager.get_form(form_name)
         model = form_class.Meta.model
     except Exception, e:
@@ -42,8 +35,6 @@ def view_form(request):
     record = request_data.get("_record", None)
 
     # Query data.
-    model = form_class.Meta.model
-    data = None
     if record:
         item = model.objects.get(pk=record)
         data = form_class(instance=item)
@@ -72,7 +63,7 @@ def view_form(request):
     return render(request, template_file, context)
 
 
-def submit_form(request):
+def submit_form(form_name, request):
     """
     Edit or add a form of a record.
 
@@ -84,14 +75,6 @@ def submit_form(request):
     """
     request_data = request.POST
 
-    # Get form's name form the request.
-    try:
-        path_list = request.path.split("/")
-        form_name = path_list[-2]
-    except Exception, e:
-        logger.log_errmsg("Invalid form.")
-        raise http.Http404
-
     try:
         form_class = forms.Manager.get_form(form_name)
         model = form_class.Meta.model
@@ -101,9 +84,8 @@ def submit_form(request):
     record = request_data.get("_record", None)
 
     # Save data.
-    data = None
     if record:
-        item = form_class.Meta.model.objects.get(pk=record) 
+        item = model.objects.get(pk=record) 
         data = form_class(request_data, instance=item)
     else:
         data = form_class(request_data)
@@ -125,7 +107,7 @@ def submit_form(request):
                "record": record,
                "data": data,
                "title": model._meta.verbose_name_plural,
-               "desc": getattr(form_class.Meta, "desc", ""),
+               "desc": getattr(form_class.Meta, "desc", model._meta.verbose_name_plural),
                "can_delete": (record is not None)}
 
     if "_page" in request_data:
@@ -137,7 +119,7 @@ def submit_form(request):
     return render(request, template_file, context)
 
 
-def quit_form(request):
+def quit_form(form_name, request):
     """
     Quit a form without saving.
     Args:
@@ -167,7 +149,7 @@ def quit_form(request):
     raise http.Http404
 
 
-def delete_form(request):
+def delete_form(form_name, request):
     """
     Delete a record.
 
@@ -180,13 +162,6 @@ def delete_form(request):
 
     # Get form's name form the request.
     request_data = request.POST
-
-    try:
-        path_list = request.path.split("/")
-        form_name = path_list[-2]
-    except Exception, e:
-        logger.log_errmsg("Invalid form.")
-        raise http.Http404
 
     try:
         form_class = forms.Manager.get_form(form_name)

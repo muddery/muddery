@@ -13,7 +13,11 @@
             <fieldset class="module aligned">
                 {% for item in data %}
                 <div class="form-row">
-                    {{ item.label_tag }}{{ item }}{{ item.errors }}
+                    {{ item.label_tag }}{{ item }}
+                    {% if item.help_text %}
+                    <ul class="helplist"><li>{{ item.help_text }}</li></ul>
+                    {% endif %}
+                    {{ item.errors }}
                 </div>
                 {% endfor %}
             </fieldset>

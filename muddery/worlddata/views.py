@@ -17,7 +17,7 @@ from muddery.utils import importer
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import CLIENT_SETTINGS
-from muddery.worlddata.editor import form_view, page_view
+from muddery.worlddata.editor import form_view, page_view, exits_view
 
 
 @staff_member_required
@@ -148,7 +148,17 @@ def list_view(request):
 @staff_member_required
 def view_form(request):
     try:
-        return form_view.view_form(request)
+        path_list = request.path.split("/")
+        form_name = path_list[-2]
+    except Exception, e:
+        logger.log_errmsg("Invalid form.")
+        raise http.Http404
+
+    try:
+        if form_name == "world_exits":
+            return form_view.view_form(form_name, request)
+        else:
+            return form_view.view_form(form_name, request)
     except Exception, e:
         logger.log_tracemsg("Invalid view request: %s" % e)
         
@@ -167,12 +177,22 @@ def submit_form(request):
         None.
     """
     try:
+        path_list = request.path.split("/")
+        form_name = path_list[-2]
+    except Exception, e:
+        logger.log_errmsg("Invalid form.")
+        raise http.Http404
+
+    try:
         if "_back" in request.POST:
-            return form_view.quit_form(request)
+            return form_view.quit_form(form_name, request)
         elif "_delete" in request.POST:
-            return form_view.delete_form(request)
+            return form_view.delete_form(form_name, request)
         else:
-            return form_view.submit_form(request)
+            if form_name == "world_exits":
+                return form_view.submit_form(form_name, request)
+            else:
+                return form_view.submit_form(form_name, request)
     except Exception, e:
         logger.log_tracemsg("Invalide edit request: %s" % e)
         

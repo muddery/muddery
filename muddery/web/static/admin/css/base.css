@@ -596,6 +596,28 @@ td ul.errorlist li {
     background: #ffefef;
 }
 
+ul.helplist {
+    margin: 0 0 !important;
+    padding: 0 !important;
+    color: #000;
+}
+
+ul.helplist li {
+    font-size: 12px !important;
+    display: block;
+    padding: 5px 5px 4px 0px;
+    margin: 3px 0 0 0;
+}
+
+ul.helplist li:first-child {
+    margin-top: 0;
+}
+
+ul.helplist li a {
+    color: #000;
+    text-decoration: underline;
+}
+
 .form-row.errors {
     border: 1px solid #c22;
     margin: -1px;
