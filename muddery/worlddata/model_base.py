@@ -51,18 +51,21 @@ class game_settings(models.Model):
     # Can resume unfinished dialogues automatically.
     auto_resume_dialogues = models.BooleanField(blank=True, default=True)
 
-    # The default home location used for all objects. This is used as a
+    # The key of a world room.
+    # It is the default home location used for all objects. This is used as a
     # fallback if an object's normal home location is deleted. It is the
     # key of the room. If it is empty, the home will be set to the first
     # room in WORLD_ROOMS.
-    default_home_key = models.ForeignKey("world_rooms", null=True, blank=True)
+    default_home_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
 
+    # The key of a world room.
     # The start position for new characters. It is the key of the room.
     # If it is empty, the home will be set to the first room in WORLD_ROOMS.
-    start_location_key = models.ForeignKey("world_rooms", null=True, blank=True)
+    start_location_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
 
+    # The key of a world room.
     # Player's default home. When a player dies, he will be moved to his home.
-    default_player_home_key = models.ForeignKey("world_rooms", null=True, blank=True)
+    default_player_home_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
 
     # Default model of players.
     default_player_model_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
@@ -116,7 +119,7 @@ class class_categories(models.Model):
     "Typeclass's category defines base types."
 
     # category's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # the readable name of the category
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -143,7 +146,7 @@ class typeclasses(models.Model):
     "Defines all available typeclasses."
 
     # typeclass's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # the readable name of the typeclass
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -151,8 +154,9 @@ class typeclasses(models.Model):
     # the typeclass's path that related to a class
     path = models.CharField(max_length=TYPECLASS_LENGTH, blank=True)
 
+    # The key of a typeclass category.
     # typeclass's category
-    category = models.ForeignKey("class_categories")
+    category = models.CharField(max_length=KEY_LENGTH)
 
     # typeclass's description (optional)
     desc = models.TextField(blank=True)
@@ -179,13 +183,14 @@ class world_rooms(models.Model):
     "Defines all unique rooms."
 
     # room's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # room's name for display
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
 
+    # The key of a room typeclass.
     # room's typeclass
-    typeclass = models.ForeignKey("typeclasses")
+    typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # room's description for display
     desc = models.TextField(blank=True)
@@ -212,13 +217,14 @@ class world_exits(models.Model):
     "Defines all unique exits."
 
     # exit's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # exit's name for display
     name = models.CharField(max_length=NAME_LENGTH)
 
+    # The key of an exit typeclass.
     # exit's typeclass
-    typeclass = models.ForeignKey("typeclasses")
+    typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # exit's description for display
     desc = models.TextField(blank=True)
@@ -226,12 +232,14 @@ class world_exits(models.Model):
     # the action verb to enter the exit (optional)
     verb = models.CharField(max_length=NAME_LENGTH, blank=True)
 
+    # The key of a world room.
     # The exit's location, it must be a room.
     # Players can see and enter an exit from this room.
-    location = models.ForeignKey("world_rooms")
+    location = models.CharField(max_length=KEY_LENGTH)
 
+    # The key of a world room.
     # The exits's destination.
-    destination = models.ForeignKey("world_rooms")
+    destination = models.CharField(max_length=KEY_LENGTH)
 
     # the condition to show the exit
     condition = models.TextField(blank=True)
@@ -254,8 +262,9 @@ class world_exits(models.Model):
 class exit_locks(models.Model):
     "Locked exit's additional data"
 
+    # The key of a world exit.
     # related exit
-    key = models.OneToOneField("world_exits", primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # condition of the lock
     unlock_condition = models.TextField(blank=True)
@@ -285,19 +294,21 @@ class world_objects(models.Model):
     "Store all unique objects."
 
     # object's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # object's name
     name = models.CharField(max_length=NAME_LENGTH)
 
+    # The key of an object typeclass.
     # object's typeclass
-    typeclass = models.ForeignKey("typeclasses")
+    typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # the object's destination
     desc = models.TextField(blank=True)
 
+    # The key of a world room.
     # object's location, it must be a room
-    location = models.ForeignKey("world_rooms")
+    location = models.CharField(max_length=KEY_LENGTH)
 
     # the condition for showing the object
     condition = models.TextField(blank=True)
@@ -320,8 +331,9 @@ class world_objects(models.Model):
 class object_creators(models.Model):
     "Players can get new objects from an object_creator."
 
+    # The key of a world object.
     # related object
-    key = models.OneToOneField("world_objects", primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # loot's verb
     loot_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -356,8 +368,9 @@ class loot_list(models.Model):
     # odds of drop, from 0.0 to 1.0
     odds = models.FloatField(blank=True, default=0)
 
+    # The key of a quest.
     # if it is not empty, the player must have this quest, or will not drop
-    quest = models.ForeignKey("quests", null=True, blank=True)
+    quest = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
 
     # condition of the drop
     condition = models.TextField(blank=True)
@@ -427,13 +440,14 @@ class common_objects(models.Model):
     "Store all common objects."
 
     # object's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # object's name for display
     name = models.CharField(max_length=NAME_LENGTH)
 
+    # The key of an object typeclass.
     # object's typeclass
-    typeclass = models.ForeignKey("typeclasses")
+    typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # object's description for display
     desc = models.TextField(blank=True)
@@ -484,7 +498,7 @@ class equipment_types(models.Model):
     "Store all equip types."
 
     # equipment type's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # type's name
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -511,7 +525,7 @@ class equipment_positions(models.Model):
     "Store all equip types."
 
     # position's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # position's name for display
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -536,11 +550,13 @@ class equipment_positions(models.Model):
 class equipments(common_objects):
     "equipments inherit from common objects."
 
+    # The key of an equipment position.
     # equipment's position
-    position = models.ForeignKey("equipment_positions")
+    position = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
+    # The key of an equipment type.
     # equipment's type
-    type = models.ForeignKey("equipment_types")
+    type = models.CharField(max_length=KEY_LENGTH)
 
     # attack effect
     attack = models.IntegerField(blank=True, default=0)
@@ -564,7 +580,7 @@ class character_careers(models.Model):
     "Store all careers."
 
     # careers's type
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # careers's name
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -590,11 +606,13 @@ class character_careers(models.Model):
 class career_equipments(models.Model):
     "Store career and equipment type's relationship."
 
+    # The key of a character career.
     # careers's type
-    career = models.ForeignKey("character_careers")
+    career = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
+    # The key of an equipment type.
     # equipment's type
-    equipment = models.ForeignKey("equipment_types")
+    equipment = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -660,19 +678,21 @@ class world_npcs(models.Model):
     "Store all NPCs."
 
     # NPC's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # NPC's name for display
     name = models.CharField(max_length=NAME_LENGTH)
 
+    # The key of a character typeclass.
     # NPC's typeclass
-    typeclass = models.ForeignKey("typeclasses")
+    typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # NPC's description for display
     desc = models.TextField(blank=True)
 
+    # The key of a world room.
     # NPC's location, it must be a room.
-    location = models.ForeignKey("world_rooms")
+    location = models.CharField(max_length=KEY_LENGTH)
 
     # NPC's model. If it is empty, will use NPC's key as its model.
     model = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -702,13 +722,14 @@ class common_characters(models.Model):
     "Store common characters."
 
     # Character's key.
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # Character's name for display.
     name = models.CharField(max_length=NAME_LENGTH)
 
+    # The key of a character typeclass.
     # Character's typeclass.
-    typeclass = models.ForeignKey("typeclasses")
+    typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # Character's description for display.
     desc = models.TextField(blank=True)
@@ -737,13 +758,14 @@ class skills(models.Model):
     "Store all skills."
 
     # skill's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # skill's name for display
     name = models.CharField(max_length=NAME_LENGTH)
 
+    # The key of a skill typeclass.
     # skill's typeclass
-    typeclass = models.ForeignKey("typeclasses")
+    typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # skill's description for display
     desc = models.TextField(blank=True)
@@ -783,8 +805,9 @@ class default_skills(models.Model):
     # character's model
     character = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
+    # The key of a skill.
     # skill's key
-    skill = models.ForeignKey("skills")
+    skill = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -803,13 +826,14 @@ class quests(models.Model):
     "Store all quests."
 
     # quest's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # quest's name for display
     name = models.CharField(max_length=NAME_LENGTH)
 
+    # The key of a quest typeclass.
     # quest's typeclass
-    typeclass = models.ForeignKey("typeclasses")
+    typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # quest's description for display
     desc = models.TextField(blank=True)
@@ -839,7 +863,7 @@ class quest_objective_types(models.Model):
     "quest objective's type"
 
     # type's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # type's id, must be the values in utils/defines.py
     type_id = models.IntegerField()
@@ -868,14 +892,16 @@ class quest_objective_types(models.Model):
 class quest_objectives(models.Model):
     "Store all quest objectives."
 
+    # The key of a quest.
     # quest's key
-    quest = models.ForeignKey("quests")
+    quest = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # objective's ordinal
     ordinal = models.IntegerField(blank=True, default=0)
 
+    # The key of an objetive type.
     # objective's type
-    type = models.ForeignKey("quest_objective_types")
+    type = models.CharField(max_length=KEY_LENGTH)
 
     # relative object's key
     object = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -903,7 +929,7 @@ class quest_dependency_types(models.Model):
     "quest dependency's type"
 
     # dependency's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # dependency's id, must be the values in utils/defines.py
     type_id = models.IntegerField()
@@ -932,14 +958,17 @@ class quest_dependency_types(models.Model):
 class quest_dependencies(models.Model):
     "Store quest dependency."
 
+    # The key of a quest.
     # quest's key
-    quest = models.ForeignKey("quests")
+    quest = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
+    # The key of a quest.
     # quest that dependends on
-    dependency = models.ForeignKey("quests")
+    dependency = models.CharField(max_length=KEY_LENGTH)
 
+    # The key of a quest dependency type.
     # dependency's type
-    type = models.ForeignKey("quest_dependency_types")
+    type = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -957,7 +986,7 @@ class event_types(models.Model):
     "event's type"
 
     # event's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # event's id, must be the values in utils/defines.py
     type_id = models.IntegerField()
@@ -987,7 +1016,7 @@ class event_trigger_types(models.Model):
     "event trigger's type"
 
     # type's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # type's id, must be the values in utils/defines.py
     type_id = models.IntegerField()
@@ -1017,13 +1046,15 @@ class event_data(models.Model):
     "Store event data."
 
     # event's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
+    # The key of an event type.
     # event's type
-    type = models.ForeignKey("event_types")
+    type = models.CharField(max_length=KEY_LENGTH)
 
+    # The key of an event trigger type.
     # event's trigger
-    trigger_type = models.ForeignKey("event_trigger_types")
+    trigger_type = models.CharField(max_length=KEY_LENGTH)
 
     # trigger's relative object's key
     trigger_obj = models.CharField(max_length=KEY_LENGTH, db_index=True)
@@ -1050,7 +1081,7 @@ class dialogues(models.Model):
     "Store all dialogues."
 
     # dialogue's key
-    key = models.CharField(max_length=KEY_LENGTH, primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # dialogue's name
     name = models.CharField(max_length=NAME_LENGTH, default="")
@@ -1076,14 +1107,17 @@ class dialogues(models.Model):
 class dialogue_quest_dependencies(models.Model):
     "Store dialogue quest dependencies."
 
+    # The key of a dialogue.
     # dialogue's key
-    dialogue = models.ForeignKey("dialogues")
+    dialogue = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
+    # The key of a quest.
     # related quest's key
-    dependency = models.ForeignKey("quests")
+    dependency = models.CharField(max_length=KEY_LENGTH)
 
+    # The key of a quest dependency type.
     # dependency's type
-    type = models.ForeignKey("quest_dependency_types")
+    type = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -1100,11 +1134,13 @@ class dialogue_quest_dependencies(models.Model):
 class dialogue_relations(models.Model):
     "Store dialogue relations."
 
+    # The key of a dialogue.
     # dialogue's key
-    dialogue = models.ForeignKey("dialogues")
+    dialogue = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
+    # The key of a dialogue.
     # next dialogue's key
-    next = models.ForeignKey("dialogues")
+    next = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -1121,8 +1157,9 @@ class dialogue_relations(models.Model):
 class dialogue_sentences(models.Model):
     "Store dialogue sentences."
 
+    # The key of a dialogue.
     # dialogue's key
-    dialogue = models.ForeignKey("dialogues")
+    dialogue = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # sentence's ordinal
     ordinal = models.IntegerField()
@@ -1136,11 +1173,13 @@ class dialogue_sentences(models.Model):
     # will do this action after this sentence
     action = models.TextField(blank=True)
 
+    # The key of a quest.
     # can provide this quest
-    provide_quest = models.ForeignKey("quests", null=True, blank=True)
+    provide_quest = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
 
+    # The key of a quest.
     # can complete this quest
-    complete_quest = models.ForeignKey("quests", null=True, blank=True)
+    complete_quest = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1157,11 +1196,13 @@ class dialogue_sentences(models.Model):
 class npc_dialogues(models.Model):
     "Store npc's dialogues."
 
+    # The key of an NPC.
     # NPC's key
-    npc = models.ForeignKey("world_npcs")
+    npc = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
+    # The key of a dialogue.
     # dialogue's key
-    dialogue = models.ForeignKey("dialogues")
+    dialogue = models.CharField(max_length=KEY_LENGTH)
 
     # if it is a default dialogue
     default = models.BooleanField(blank=True, default=False)
@@ -1181,11 +1222,13 @@ class npc_dialogues(models.Model):
 class event_attacks(models.Model):
     "event attack's data"
 
+    # The key of an event.
     # event's key
-    key = models.OneToOneField("event_data", primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
+    # The key of a character.
     # mob's key
-    mob = models.ForeignKey("common_characters")
+    mob = models.CharField(max_length=KEY_LENGTH)
 
     # mob's level
     level = models.IntegerField()
@@ -1211,14 +1254,17 @@ class event_attacks(models.Model):
 class event_dialogues(models.Model):
     "Store all event dialogues."
 
+    # The key of an event.
     # event's key
-    key = models.OneToOneField("event_data", primary_key=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
+    # The key of a dialogue.
     # dialogue's key
-    dialogue = models.ForeignKey("dialogues")
+    dialogue = models.CharField(max_length=KEY_LENGTH)
 
+    # The key of an NPC.
     # NPC's key
-    npc = models.ForeignKey("world_npcs", null=True, blank=True)
+    npc = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
 
     class Meta:
         "Define Django meta options"
