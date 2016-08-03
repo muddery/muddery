@@ -65,7 +65,7 @@ class MudderyQuest(MudderyObject):
             obj_records = model_objectives.objects.filter(quest=key)
 
         for obj_record in obj_records:
-            objective_type = obj_record.type.type_id
+            objective_type = obj_record.type
             objective = {"ordinal": obj_record.ordinal,
                          "type": objective_type,
                          "object": obj_record.object,

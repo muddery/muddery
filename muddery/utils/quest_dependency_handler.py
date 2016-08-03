@@ -54,8 +54,8 @@ class QuestDependencyHandler(object):
         # Add db fields to data object.
         data = []
         for dependency in dependencies:
-            data.append({"quest": dependency.dependency_id,
-                         "type": dependency.type.type_id})
+            data.append({"quest": dependency.dependency,
+                         "type": dependency.type})
 
         # Add to cache.
         self.quest_depencences[quest] = data

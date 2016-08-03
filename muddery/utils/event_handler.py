@@ -57,8 +57,8 @@ class EventHandler(object):
                 event = {}
 
                 # Set data.
-                event_type = record.type.type_id
-                trigger_type = record.trigger_type.type_id
+                event_type = record.type
+                trigger_type = record.trigger_type
 
                 for field in record._meta.fields:
                     event[field.name] = record.serializable_value(field.name)
