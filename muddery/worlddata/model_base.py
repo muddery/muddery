@@ -862,11 +862,8 @@ class quests(models.Model):
 class quest_objective_types(models.Model):
     "quest objective's type"
 
-    # type's key
+    # Type's key. It must be the values in utils/defines.py.
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
-
-    # type's id, must be the values in utils/defines.py
-    type_id = models.IntegerField()
 
     # the readable name of the type
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -928,11 +925,8 @@ class quest_objectives(models.Model):
 class quest_dependency_types(models.Model):
     "quest dependency's type"
 
-    # dependency's key
+    # Dependency's key. It must be the values in utils/defines.pyl
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
-
-    # dependency's id, must be the values in utils/defines.py
-    type_id = models.IntegerField()
 
     # the readable name of the dependency
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -985,11 +979,8 @@ class quest_dependencies(models.Model):
 class event_types(models.Model):
     "event's type"
 
-    # event's key
+    # Event's key. It must be the values in utils/defines.py
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
-
-    # event's id, must be the values in utils/defines.py
-    type_id = models.IntegerField()
 
     # the readable name of the event type
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -1015,11 +1006,8 @@ class event_types(models.Model):
 class event_trigger_types(models.Model):
     "event trigger's type"
 
-    # type's key
+    # Type's key. It must be the values in utils/defines.py
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
-
-    # type's id, must be the values in utils/defines.py
-    type_id = models.IntegerField()
 
     # the readable name of the event trigger type
     name = models.CharField(max_length=NAME_LENGTH, unique=True)

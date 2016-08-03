@@ -1,5 +1,5 @@
-key,type_id,name,desc
-OBJECTIVE_TALK,1,Talk,"Finishes a dialogue. object field: dialogue's id."
-OBJECTIVE_ARRIVE,2,Arrive,"Arrives a room. object: room's id."
-OBJECTIVE_OBJECT,3,Object,"Get some objects. object: object's id."
-OBJECTIVE_KILL,4,Kill,"Kill some characters. object: character's id."
+key,name,desc
+OBJECTIVE_TALK,Talk,"Finishes a dialogue. object field: dialogue's id."
+OBJECTIVE_ARRIVE,Arrive,"Arrives a room. object: room's id."
+OBJECTIVE_OBJECT,Object,"Get some objects. object: object's id."
+OBJECTIVE_KILL,Kill,"Kill some characters. object: character's id."

@@ -73,8 +73,8 @@ class DialogueHandler(object):
 
         data["dependencies"] = []
         for dependency in dependencies:
-            data["dependencies"].append({"quest": dependency.dependency_id,
-                                         "type": dependency.type.type_id})
+            data["dependencies"].append({"quest": dependency.dependency,
+                                         "type": dependency.type})
 
         data["sentences"] = []
         for sentence in sentences:
@@ -83,8 +83,8 @@ class DialogueHandler(object):
                                       "speaker": sentence.speaker,
                                       "content": sentence.content,
                                       "action": sentence.action,
-                                      "provide_quest": sentence.provide_quest_id,
-                                      "complete_quest": sentence.complete_quest_id})
+                                      "provide_quest": sentence.provide_quest,
+                                      "complete_quest": sentence.complete_quest})
 
         # sort sentences by ordinal
         data["sentences"].sort(key=lambda x:x["ordinal"])
@@ -95,7 +95,7 @@ class DialogueHandler(object):
             count += 1
         data["sentences"][-1]["is_last"] = True
 
-        data["nexts"] = [next.next.key for next in nexts]
+        data["nexts"] = [next.next for next in nexts]
 
         # Add to cache.
         self.dialogue_storage[dialogue] = data

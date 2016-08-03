@@ -136,7 +136,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
             skill_records = default_skills.objects.filter(character=model_name)
 
-        default_skill_ids = set([record.skill_id for record in skill_records])
+        default_skill_ids = set([record.skill for record in skill_records])
 
         # remove old default skills
         for skill in self.db.skills:
@@ -146,8 +146,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # add new default skills
         for skill_record in skill_records:
-            if not self.skill_handler.has_skill(skill_record.skill_id):
-                self.skill_handler.learn_skill(skill_record.skill_id, True)
+            if not self.skill_handler.has_skill(skill_record.skill):
+                self.skill_handler.learn_skill(skill_record.skill, True)
 
         # refresh data
         self.refresh_data()

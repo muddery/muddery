@@ -3,34 +3,32 @@ This module defines constent constant values.
 """
 
 # quest dependencies
-DEPENDENCY_NONE = 0
-DEPENDENCY_QUEST_CAN_PROVIDE = 1
-DEPENDENCY_QUEST_ACCEPTED = 2
-DEPENDENCY_QUEST_NOT_ACCEPTED = 3
-DEPENDENCY_QUEST_IN_PROGRESS = 4
-DEPENDENCY_QUEST_NOT_IN_PROGRESS = 5
-DEPENDENCY_QUEST_ACCOMPLISHED = 6       # quest accomplished
-DEPENDENCY_QUEST_NOT_ACCOMPLISHED = 7   # quest accepted but not accomplished
-DEPENDENCY_QUEST_COMPLETED = 8          # quest complete
-DEPENDENCY_QUEST_NOT_COMPLETED = 9      # quest accepted but not complete
-
+DEPENDENCY_NONE = ""
+DEPENDENCY_QUEST_CAN_PROVIDE = "DPD_CAN_PROVIDE"
+DEPENDENCY_QUEST_ACCEPTED = "DPD_ACCEPTED"
+DEPENDENCY_QUEST_NOT_ACCEPTED = "DPD_NOT_ACCEPTED"
+DEPENDENCY_QUEST_IN_PROGRESS = "DPD_IN_PROGRESS"
+DEPENDENCY_QUEST_NOT_IN_PROGRESS = "DPD_NOT_IN_PROGRESS"
+DEPENDENCY_QUEST_ACCOMPLISHED = "DPD_ACCOMPLISHED"          # quest accomplished
+DEPENDENCY_QUEST_NOT_ACCOMPLISHED = "DPD_NOT_ACCOMPLISHED"  # quest accepted but not accomplished
+DEPENDENCY_QUEST_COMPLETED = "DPD_COMPLETED"                # quest complete
+DEPENDENCY_QUEST_NOT_COMPLETED = "DPD_NOT_COMPLETED"        # quest accepted but not complete
 
 # quest objective types
-OBJECTIVE_NONE = 0
-OBJECTIVE_TALK = 1      # finish a dialogue, object: dialogue_id
-OBJECTIVE_ARRIVE = 2    # arrive a room, object: room_id
-OBJECTIVE_OBJECT = 3    # get some objects, object: object_id
-OBJECTIVE_KILL = 4      # kill some characters, object: character_id
+OBJECTIVE_NONE = ""
+OBJECTIVE_TALK = "OBJECTIVE_TALK"           # finish a dialogue, object: dialogue_id
+OBJECTIVE_ARRIVE = "OBJECTIVE_ARRIVE"       # arrive a room, object: room_id
+OBJECTIVE_OBJECT = "OBJECTIVE_OBJECT"       # get some objects, object: object_id
+OBJECTIVE_KILL = "OBJECTIVE_KILL"           # kill some characters, object: character_id
 
 # event trigger types
 EVENT_TRIGGER_NONE = 0
-EVENT_TRIGGER_ARRIVE = 1    # at attriving a room. object: room_id
-EVENT_TRIGGER_DIE = 2       # character die. object: killer_mob_id
-EVENT_TRIGGER_KILL = 3      # kill a mob. object: mob_id
-EVENT_TRIGGER_TRAVERSE = 4  # before traverse an exit. object: exit_id
-
+EVENT_TRIGGER_ARRIVE = "EVENT_TRIGGER_ARRIVE"       # at attriving a room. object: room_id
+EVENT_TRIGGER_DIE = "EVENT_TRIGGER_DIE"             # character die. object: killer_mob_id
+EVENT_TRIGGER_KILL = "EVENT_TRIGGER_KILL"           # kill a mob. object: mob_id
+EVENT_TRIGGER_TRAVERSE = "EVENT_TRIGGER_TRAVERSE"   # before traverse an exit. object: exit_id
 
 # event types
-EVENT_NONE = 0
-EVENT_ATTACK = 1        # event to begin a combat
-EVENT_DIALOGUE = 2      # event to begin a dialogue
+EVENT_NONE = ""
+EVENT_ATTACK = "EVENT_ATTACK"               # event to begin a combat
+EVENT_DIALOGUE = "EVENT_DIALOGUE"           # event to begin a dialogue

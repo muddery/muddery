@@ -44,8 +44,8 @@ class MudderyNPC(MudderyCharacter):
             npc_key = self.get_data_key()
             dialogues = model_npc_dialogues.objects.filter(npc=npc_key)
 
-        self.default_dialogues = [dialogue.dialogue_id for dialogue in dialogues if dialogue.default]
-        self.dialogues = [dialogue.dialogue_id for dialogue in dialogues if not dialogue.default]
+        self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.default]
+        self.dialogues = [dialogue.dialogue for dialogue in dialogues if not dialogue.default]
 
 
     def get_available_commands(self, caller):

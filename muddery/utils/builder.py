@@ -21,18 +21,21 @@ def build_object(obj_key, caller=None):
         obj_key: (string) The key of the object.
         caller: (command caller) If provide, running messages will send to the caller.
     """
+    # get typeclass model
+    model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
+
     # Get object's model name.
     record = None
+    typeclass = None
     model_names = OBJECT_KEY_HANDLER.get_models(obj_key)
     for model_name in model_names:
         try:
             # Get record.
             model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
             record_obj = model_obj.objects.get(key=obj_key)
-            if hasattr(record_obj, "typeclass"):
-                if hasattr(record_obj.typeclass, "path"):
-                    record = record_obj
-                    break
+            typeclass = model_typeclass.objects.get(key=record_obj.typeclass)
+            record = record_obj
+            break
         except Exception, e:
             continue
 
@@ -46,7 +49,7 @@ def build_object(obj_key, caller=None):
 
     # Create object.
     try:
-        obj = create.create_object(record.typeclass.path, record.name)
+        obj = create.create_object(typeclass.path, record.name)
     except Exception, e:
         ostring = "Can not create obj %s: %s" % (obj_key, e)
         print(ostring)
@@ -81,6 +84,9 @@ def build_unique_objects(model_name, caller=None):
     print(ostring)
     if caller:
         caller.msg(ostring)
+
+    # get typeclass model
+    model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
 
     # get model
     model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
@@ -146,7 +152,8 @@ def build_unique_objects(model_name, caller=None):
                 caller.msg(ostring)
 
             try:
-                obj = create.create_object(record.typeclass.path, record.name)
+                typeclass = model_typeclass.objects.get(key=record.typeclass)
+                obj = create.create_object(typeclass.path, record.name)
                 count_create += 1
             except Exception, e:
                 ostring = "Can not create obj %s: %s" % (record.key, e)
