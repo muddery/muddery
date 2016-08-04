@@ -89,7 +89,6 @@ class QuestObjectiveTypesForm(forms_base.QuestObjectiveTypesForm):
         super(QuestObjectiveTypesForm, self).__init__(*args, **kwargs)
 
         self.fields['key'].label = u"标识"
-        self.fields['type_id'].label = u"类型"
         self.fields['name'].label = u"名称"
         self.fields['desc'].label = u"描述"
 
@@ -99,7 +98,6 @@ class EventTypesForm(forms_base.EventTypesForm):
         super(EventTypesForm, self).__init__(*args, **kwargs)
 
         self.fields['key'].label = u"标识"
-        self.fields['type_id'].label = u"类型"
         self.fields['name'].label = u"名称"
         self.fields['desc'].label = u"描述"
 
@@ -109,7 +107,6 @@ class EventTriggerTypes(forms_base.EventTriggerTypes):
         super(EventTriggerTypes, self).__init__(*args, **kwargs)
 
         self.fields['key'].label = u"标识"
-        self.fields['type_id'].label = u"类型"
         self.fields['name'].label = u"名称"
         self.fields['desc'].label = u"描述"
 
@@ -119,7 +116,6 @@ class QuestDependencyTypesForm(forms_base.QuestDependencyTypesForm):
         super(QuestDependencyTypesForm, self).__init__(*args, **kwargs)
 
         self.fields['key'].label = u"标识"
-        self.fields['type_id'].label = u"类型"
         self.fields['name'].label = u"名称"
         self.fields['desc'].label = u"描述"
 
@@ -400,6 +396,27 @@ class DialoguesForm(forms_base.DialoguesForm):
         self.fields['key'].label = u"标识"
         self.fields['name'].label = u"名称"
         self.fields['condition'].label = u"条件"
+
+
+class DialogueRelationsForm(forms_base.DialogueRelationsForm):
+    def __init__(self, *args, **kwargs):
+        super(DialogueRelationsForm, self).__init__(*args, **kwargs)
+
+        self.fields['dialogue'].label = u"对话"
+        self.fields['next'].label = u"后续"
+
+
+class DialogueSentencesForm(forms_base.DialogueSentencesForm):
+    def __init__(self, *args, **kwargs):
+        super(DialogueSentencesForm, self).__init__(*args, **kwargs)
+
+        self.fields['dialogue'].label = u"对话"
+        self.fields['ordinal'].label = u"序号"
+        self.fields['speaker'].label = u"说话者"
+        self.fields['content'].label = u"内容"
+        self.fields['action'].label = u"动作"
+        self.fields['provide_quest'].label = u"提供任务"
+        self.fields['complete_quest'].label = u"完成任务"
 
 
 class LocalizedStringsForm(forms_base.LocalizedStringsForm):
