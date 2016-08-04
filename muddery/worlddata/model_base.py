@@ -67,6 +67,7 @@ class game_settings(models.Model):
     # Player's default home. When a player dies, he will be moved to his home.
     default_player_home_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
 
+    # The key of a character model.
     # Default model of players.
     default_player_model_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
 
@@ -356,10 +357,10 @@ class object_creators(models.Model):
 class loot_list(models.Model):
     "Loot list. It is used in object_creators and mods."
 
-    # the provider of the object. it is not a foreighkey because the provider can be in several tables.
+    # the provider of the object
     provider = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
-    # the key of dropped object. it is not a foreighkey because the object can be from several tables.
+    # the key of dropped object
     object = models.CharField(max_length=KEY_LENGTH)
 
     # number of dropped object
@@ -734,7 +735,7 @@ class common_characters(models.Model):
     # Character's description for display.
     desc = models.TextField(blank=True)
 
-    # Character's model. If it is empty, will use character's key as its model.
+    # Character's model. If it is empty, character's key will be used as its model.
     model = models.CharField(max_length=KEY_LENGTH)
 
     # Character's level
@@ -1035,6 +1036,9 @@ class event_data(models.Model):
 
     # event's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # the readable name of the event
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
 
     # The key of an event type.
     # event's type
