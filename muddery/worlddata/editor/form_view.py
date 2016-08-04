@@ -48,12 +48,14 @@ def view_form(form_name, request):
         template_file = getattr(form_class.Meta, "form_template", settings.DEFUALT_FORM_TEMPLATE)
 
     context = {"form": form_name,
-               "record": record,
                "data": data,
                "title": model._meta.verbose_name_plural,
                "desc": getattr(form_class.Meta, "desc", model._meta.verbose_name_plural),
                "can_delete": (record is not None)}
 
+    if record:
+        context["record"] = record
+        
     if "_page" in request_data:
         context["page"] = request_data.get("_page")
 
@@ -91,11 +93,12 @@ def submit_form(form_name, request):
         data = form_class(request_data)
 
     if data.is_valid():
-        data.save()
+        item = data.save()
+        record = item.pk
 
         if "_save" in request_data:
             # save and back
-            return quit_form(request)
+            return quit_form(form_name, request)
 
     # Get template file's name form the request.
     if "_template" in request_data:
@@ -104,11 +107,13 @@ def submit_form(form_name, request):
         template_file = getattr(form_class.Meta, "form_template", settings.DEFUALT_FORM_TEMPLATE)
 
     context = {"form": form_name,
-               "record": record,
                "data": data,
                "title": model._meta.verbose_name_plural,
                "desc": getattr(form_class.Meta, "desc", model._meta.verbose_name_plural),
                "can_delete": (record is not None)}
+
+    if record:
+        context["record"] = record
 
     if "_page" in request_data:
         context["page"] = request_data.get("_page")
@@ -177,4 +182,4 @@ def delete_form(form_name, request):
     except Exception, e:
         raise MudderyError("Invalid record.")
 
-    return quit_form(request)
+    return quit_form(form_name, request)
