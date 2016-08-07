@@ -5,13 +5,13 @@ from django.apps import apps
 from worlddata import models
 
 
-def ExistKey(key, except_model=None):
+def ExistKey(key, except_models=None):
     """
     Check if the key exists.
     """
     # Get models.
     for model_name in settings.OBJECT_DATA_MODELS:
-        if model_name == except_model:
+        if model_name in except_models:
             continue
         try:
             model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
@@ -132,7 +132,7 @@ class WorldRoomsForm(forms.ModelForm):
 
         # object's key should be unique
         key = cleaned_data.get('key')
-        if ExistKey(key, except_model=self.Meta.model.__name__):
+        if ExistKey(key, except_models=[self.Meta.model.__name__]):
             message = "This key has been used. Please use another one."
             self._errors['key'] = self.error_class([message])
             return
@@ -163,7 +163,7 @@ class WorldExitsForm(forms.ModelForm):
 
         # object's key should be unique
         key = cleaned_data.get('key')
-        if ExistKey(key, except_model=self.Meta.model.__name__):
+        if ExistKey(key, except_models=[self.Meta.model.__name__]):
             message = "This key has been used. Please use another one."
             self._errors['key'] = self.error_class([message])
             return
@@ -179,9 +179,9 @@ class ExitLocksForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ExitLocksForm, self).__init__(*args, **kwargs)
 
-        objects = models.world_exits.objects.filter(typeclass="CLASS_LOCKED_EXIT")
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-        self.fields['key'] = forms.ChoiceField(choices=choices)
+        #objects = models.world_exits.objects.filter(typeclass="CLASS_LOCKED_EXIT")
+        #choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        #self.fields['key'] = forms.ChoiceField(choices=choices)
 
     class Meta:
         model = models.exit_locks
@@ -206,7 +206,7 @@ class WorldObjectsForm(forms.ModelForm):
 
         # object's key should be unique
         key = cleaned_data.get('key')
-        if ExistKey(key, except_model=self.Meta.model.__name__):
+        if ExistKey(key, except_models=[self.Meta.model.__name__]):
             message = "This key has been used. Please use another one."
             self._errors['key'] = self.error_class([message])
             return
@@ -365,7 +365,7 @@ class CommonObjectsForm(forms.ModelForm):
 
         # object's key should be unique
         key = cleaned_data.get('key')
-        if ExistKey(key, except_model=self.Meta.model.__name__):
+        if ExistKey(key, except_models=[self.Meta.model.__name__]):
             message = "This key has been used. Please use another one."
             self._errors['key'] = self.error_class([message])
             return
@@ -404,7 +404,7 @@ class CommonCharacterForm(forms.ModelForm):
 
         # object's key should be unique
         key = cleaned_data.get('key')
-        if ExistKey(key, except_model=self.Meta.model.__name__):
+        if ExistKey(key, except_models=[self.Meta.model.__name__]):
             message = "This key has been used. Please use another one."
             self._errors['key'] = self.error_class([message])
             return

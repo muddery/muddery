@@ -156,7 +156,7 @@ def view_form(request):
 
     try:
         if form_name == "world_exits":
-            return form_view.view_form(form_name, request)
+            return exits_view.view_form(form_name, request)
         else:
             return form_view.view_form(form_name, request)
     except Exception, e:
@@ -190,7 +190,7 @@ def submit_form(request):
             return form_view.delete_form(form_name, request)
         else:
             if form_name == "world_exits":
-                return form_view.submit_form(form_name, request)
+                return exits_view.submit_form(form_name, request)
             else:
                 return form_view.submit_form(form_name, request)
     except Exception, e:

@@ -154,7 +154,7 @@ BASIC_DATA_MODELS = (CLASS_CATEGORIES,
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_EXITS,
                       WORLD_OBJECTS,
-                      WORLD_NPCS) + COMMON_OBJECTS + ADDITIONAL_DATA
+                      WORLD_NPCS) + COMMON_OBJECTS
 
 # all other data models
 OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
@@ -173,7 +173,7 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      CHARACTER_MODELS,
                      DEFAULT_SKILLS,
                      GAME_SETTINGS,
-                     CLIENT_SETTINGS) + EVENT_ADDITIONAL_DATA
+                     CLIENT_SETTINGS) + ADDITIONAL_DATA + EVENT_ADDITIONAL_DATA
 
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 
