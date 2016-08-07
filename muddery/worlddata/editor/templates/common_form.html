@@ -15,6 +15,7 @@
                 <div class="form-row">
                     {{ item.label_tag }}{{ item }}
                     {% if item.help_text %}
+                    <br><br>
                     <ul class="helplist"><li>{{ item.help_text }}</li></ul>
                     {% endif %}
                     {{ item.errors }}

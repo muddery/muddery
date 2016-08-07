@@ -10,7 +10,7 @@ class GameSettingsForm(forms_base.GameSettingsForm):
     def __init__(self, *args, **kwargs):
         super(GameSettingsForm, self).__init__(*args, **kwargs)
 
-        self.fields['connection_screen'].help_text = u"connection screen"
+        self.fields['connection_screen'].label = u"connection screen"
         self.fields['connection_screen'].help_text = u"Set the connection screen."
 
 class ClientSettingsForm(forms_base.ClientSettingsForm):

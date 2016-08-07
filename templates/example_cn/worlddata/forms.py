@@ -13,17 +13,40 @@ class GameSettingsForm(forms_base.GameSettingsForm):
         super(GameSettingsForm, self).__init__(*args, **kwargs)
 
         self.fields['connection_screen'].label = u"欢迎文字"
+        self.fields['connection_screen'].help_text = u"欢迎文字会在用户连接到游戏的时候显示。"
+
         self.fields['solo_mode'].label = u"单人模式"
+        self.fields['solo_mode'].help_text = u"在单人模式下，一个玩家不会看到其他的玩家。"
+
         self.fields['global_cd'].label = u"公共CD"
+        self.fields['global_cd'].help_text = u"施放技能的公共CD。"
+
         self.fields['auto_cast_skill_cd'].label = u"自动施放技能CD"
+        self.fields['auto_cast_skill_cd'].help_text = u"系统自动施放技能的时间间隔，必须大于公共CD。"
+
         self.fields['player_reborn_cd'].label = u"玩家重生CD"
+        self.fields['player_reborn_cd'].help_text = u"玩家死后重生的时间间隔，如果小于等于0，则玩家会立即重生。"
+
         self.fields['npc_reborn_cd'].label = u"NPC重生CD"
+        self.fields['npc_reborn_cd'].help_text = u"NPC死后重生的时间间隔，如果小于等于0，则NPC不会重生。"
+
         self.fields['can_give_up_quests'].label = u"允许放弃任务"
+        self.fields['can_give_up_quests'].help_text = u"如果允许放弃任务，则玩家可以主动放弃任务。"
+
         self.fields['auto_resume_dialogues'].label = u"自动继续对话"
+        self.fields['auto_resume_dialogues'].help_text = u"如果允许自动继续对话，玩家在登入系统时会自动继续上次未完成的对话。"
+
         self.fields['default_home_key'].label = u"默认位置"
+        self.fields['default_home_key'].help_text = u"所有物体的默认位置，如果物体的所在的房间被移除，则物体会自动移动到默认位置。如果为空，则设为数据表中的第一个房间。"
+
         self.fields['start_location_key'].label = u"初始位置"
+        self.fields['start_location_key'].help_text = u"玩家初次进入系统时的位置。如果为空，则设为数据表中的第一个房间。"
+
         self.fields['default_player_home_key'].label = u"玩家默认位置"
+        self.fields['default_player_home_key'].help_text = u"玩家的默认位置，如果玩家死亡，则会自动移动到玩家默认位置。如果为空，则设为数据表中的第一个房间。"
+
         self.fields['default_player_model_key'].label = u"默认玩家模型"
+        self.fields['default_player_model_key'].help_text = u"默认选用的玩家模型。"
 
 
 class ClientSettingsForm(forms_base.ClientSettingsForm):

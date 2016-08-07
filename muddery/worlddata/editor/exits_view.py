@@ -8,6 +8,7 @@ from django import http
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponseRedirect
 from django.conf import settings
+from django.db import transaction
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
 from worlddata import forms
@@ -39,8 +40,8 @@ def view_form(exit_form_name, request):
 
     # Query data.
     if record:
-        item = exit_model.objects.get(pk=record)
-        exit = exit_class(instance=item)
+        exit_instance = exit_model.objects.get(pk=record)
+        exit = exit_class(instance=exit_instance)
     else:
         exit = exit_class()
         
@@ -48,8 +49,8 @@ def view_form(exit_form_name, request):
     lock = lock_class()
     if record:
         try:
-            item = lock_model.objects.get(pk=record)
-            lock = lock_class(instance=item)
+            lock_instance = lock_model.objects.get(key=exit_instance.key)
+            lock = lock_class(instance=lock_instance)
         except Exception, e:
             pass
 
@@ -100,44 +101,46 @@ def submit_form(exit_form_name, request):
     record = request_data.get("_record", None)
 
     # Save data.
-    if record:
-        item = exit_model.objects.get(pk=record) 
-        exit = exit_class(request_data, instance=item)
-    else:
-        exit = exit_class(request_data)
-
+    exit = exit_class(request_data)
     lock = lock_class(request_data)
+    
+    exit_instance = None
+    lock_instance = None
+    
+    if record:
+        exit_instance = exit_model.objects.get(pk=record) 
+        exit = exit_class(request_data, instance=exit_instance)
 
-    if exit.is_valid():
-        if request_data["typeclass"] != "CLASS_LOCKED_EXIT":
-            exit.save()
+        try:
+            lock_instance = lock_model.objects.get(key=exit_instance.key)
+            lock = lock_class(request_data, instance=lock_instance)
+        except Exception, e:
+            pass
 
-            # If it is not a locked exit, remove its lock records.
-            try:
-                lock = lock_model.objects.get(pk=record)
-                lock.delete()
-            except Exception, e:
-                pass
-        
-            if "_save" in request_data:
-                # save and back
-                return quit_form(exit_form_name, request)
-        else:
-            # Check lock's data.
-            if record:
-                try:
-                    item = lock_model.objects.get(pk=record)
-                    lock = lock_class(request_data, instance=item)
-                except Exception, e:
-                    pass
+    # Validate
+    saved = False
+    if request_data["typeclass"] != "CLASS_LOCKED_EXIT":
+        if exit.is_valid():
+            with transaction.atomic():
+                exit.save()
+                # Keep old lock data, comment following codes.
+                # if lock_instance:
+                #     lock_instance.delete()
+                saved = True
+    else:
+        # Prevent short cut.
+        exit_valid = exit.is_valid()
+        lock_valid = lock.is_valid()
 
-            if lock.is_valid():
+        if exit_valid and lock_valid:
+            with transaction.atomic():
                 exit.save()
                 lock.save()
+                saved = True
 
-                if "_save" in request_data:
-                    # save and back
-                    return quit_form(exit_form_name, request)
+    if saved and "_save" in request_data:
+        # save and back
+        return quit_form(exit_form_name, request)
 
     # Get template file's name form the request.
     if "_template" in request_data:

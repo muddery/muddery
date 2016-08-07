@@ -186,18 +186,18 @@ WORLD_NPCS = "world_npcs"
 # common objects
 COMMON_OBJECTS = ("common_objects", "common_characters", "skills", "quests", "equipments", "foods")
 
-# object's additional data
-ADDITIONAL_DATA = ("exit_locks", "object_creators")
-
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_EXITS,
                       WORLD_OBJECTS,
-                      WORLD_NPCS) + COMMON_OBJECTS + ADDITIONAL_DATA
+                      WORLD_NPCS) + COMMON_OBJECTS
 
 ###################################
 # other data
 ###################################
+
+# object's additional data
+ADDITIONAL_DATA = ("exit_locks", "object_creators")
 
 # loot lists
 CREATOR_LOOT_LIST = "creator_loot_list"
@@ -243,7 +243,7 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      EQUIPMENT_TYPES,
                      DEFAULT_SKILLS,
                      GAME_SETTINGS,
-                     CLIENT_SETTINGS) + EVENT_ADDITIONAL_DATA
+                     CLIENT_SETTINGS) + ADDITIONAL_DATA + EVENT_ADDITIONAL_DATA
 
 # local strings
 LOCALIZED_STRINGS_MODEL = "localized_strings"
