@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block header_ext %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+<script type="text/javascript">
+    function typeclassChanged(value) {
+        if (value == "{{ addition_typeclass }}") {
+            $(".addition").show();
+        }
+        else {
+        	$(".addition").hide();
+        }
+    }
+
+    $(document).ready(function(){
+        $("#id_typeclass").attr("onchange", "typeclassChanged(this.value);");
+
+        if ($("#id_typeclass").val() == "{{ addition_typeclass }}") {
+            $(".addition").show();
+        }
+        else {
+        	$(".addition").hide();
+        }
+    });
+</script>
+{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<div>{{ desc }}</div>
+<div id="content-main">
+    <form action="submit.html" method="post">
+        {% csrf_token %}
+        <div>
+            <fieldset class="module aligned">
+                {% for item in base %}
+                <div class="form-row">
+                    {{ item.label_tag }}{{ item }}
+                    {% if item.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ item.help_text }}</li></ul>
+                    {% endif %}
+                    {{ item.errors }}
+                </div>
+                {% endfor %}
+                {% for item in addition %}
+                <div class="form-row addition">
+                    {{ item.label_tag }}{{ item }}
+                    {% if item.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ item.help_text }}</li></ul>
+                    {% endif %}
+                    {{ item.errors }}
+                </div>
+                {% endfor %}
+            </fieldset>
+            <input type="hidden" name="_form" value="{{ form }}" />
+            <input type="hidden" name="_record" value="{{ record }}" />
+            <input type="hidden" name="_page" value="{{ page }}" />
+            {% if referrer %}
+                <input type="hidden" name="_referrer" value="{{ referrer }}" />
+            {% endif %}
+            <div class="submit-row">
+                {% if can_delete %}
+                <input type="submit" name="_delete" value="Delete" class="delete-box" />
+                {% endif %}
+                <input type="submit" name="_back" value="Back without save" />
+                <input type="submit" name="_continue" value="Save and continue editing" />
+                <input type="submit" name="_save" value="Save" class="default" />
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock content %}

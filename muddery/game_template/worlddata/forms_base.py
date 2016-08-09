@@ -185,6 +185,7 @@ class ExitLocksForm(forms.ModelForm):
 
     class Meta:
         model = models.exit_locks
+        exclude = ['key']
         fields = '__all__'
 
 
@@ -192,8 +193,10 @@ class WorldObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
-        objects = models.typeclasses.objects.filter(category="CATE_OBJECT")
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        object = models.typeclasses.objects.get(key="CLASS_WORLD_OBJECT")
+        choices = [(object.key, object.name + " (" + object.key + ")")]
+        object = models.typeclasses.objects.get(key="CLASS_OBJECT_CREATOR")
+        choices.append((object.key, object.name + " (" + object.key + ")"))
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         objects = models.world_rooms.objects.all()
@@ -239,12 +242,13 @@ class ObjectCreatorsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ObjectCreatorsForm, self).__init__(*args, **kwargs)
 
-        objects = models.world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-        self.fields['key'] = forms.ChoiceField(choices=choices)
+        #objects = models.world_objects.objects.filter(typeclass="CLASS_OBJECT_CREATOR")
+        #choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        #self.fields['key'] = forms.ChoiceField(choices=choices)
 
     class Meta:
         model = models.object_creators
+        exclude = ['key']
         fields = '__all__'
 
 

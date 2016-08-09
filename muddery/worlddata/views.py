@@ -17,7 +17,7 @@ from muddery.utils import importer
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import CLIENT_SETTINGS
-from muddery.worlddata.editor import form_view, page_view, exits_view
+from muddery.worlddata.editor import form_view, page_view, addition_view
 
 
 @staff_member_required
@@ -156,7 +156,11 @@ def view_form(request):
 
     try:
         if form_name == "world_exits":
-            return exits_view.view_form(form_name, request)
+            return addition_view.view_form(form_name, "exit_locks", "addition_form.html",
+                                           "CLASS_LOCKED_EXIT", request)
+        elif form_name == "world_objects":
+            return addition_view.view_form(form_name, "object_creators", "addition_form.html",
+                                           "CLASS_OBJECT_CREATOR", request)
         else:
             return form_view.view_form(form_name, request)
     except Exception, e:
@@ -190,7 +194,11 @@ def submit_form(request):
             return form_view.delete_form(form_name, request)
         else:
             if form_name == "world_exits":
-                return exits_view.submit_form(form_name, request)
+                return addition_view.submit_form(form_name, "exit_locks", "addition_form.html",
+                                                 "CLASS_LOCKED_EXIT", request)
+            elif form_name == "world_objects":
+                return addition_view.submit_form(form_name, "object_creators", "addition_form.html",
+                                                 "CLASS_OBJECT_CREATOR", request)
             else:
                 return form_view.submit_form(form_name, request)
     except Exception, e:
