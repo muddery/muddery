@@ -185,7 +185,6 @@ class ExitLocksForm(forms.ModelForm):
 
     class Meta:
         model = models.exit_locks
-        exclude = ['key']
         fields = '__all__'
 
 
@@ -248,7 +247,6 @@ class ObjectCreatorsForm(forms.ModelForm):
 
     class Meta:
         model = models.object_creators
-        exclude = ['key']
         fields = '__all__'
 
 

@@ -156,11 +156,11 @@ def view_form(request):
 
     try:
         if form_name == "world_exits":
-            return addition_view.view_form(form_name, "exit_locks", "addition_form.html",
-                                           "CLASS_LOCKED_EXIT", request)
+            return addition_view.view_form(request, form_name, "addition_form.html",
+                                           {"CLASS_LOCKED_EXIT": "exit_locks"})
         elif form_name == "world_objects":
-            return addition_view.view_form(form_name, "object_creators", "addition_form.html",
-                                           "CLASS_OBJECT_CREATOR", request)
+            return addition_view.view_form(request, form_name, "addition_form.html",
+                                           {"CLASS_OBJECT_CREATOR": "object_creators"})
         else:
             return form_view.view_form(form_name, request)
     except Exception, e:
@@ -194,11 +194,11 @@ def submit_form(request):
             return form_view.delete_form(form_name, request)
         else:
             if form_name == "world_exits":
-                return addition_view.submit_form(form_name, "exit_locks", "addition_form.html",
-                                                 "CLASS_LOCKED_EXIT", request)
+                return addition_view.submit_form(request, form_name, "addition_form.html",
+                                                 {"CLASS_LOCKED_EXIT": "exit_locks"})
             elif form_name == "world_objects":
-                return addition_view.submit_form(form_name, "object_creators", "addition_form.html",
-                                                 "CLASS_OBJECT_CREATOR", request)
+                return addition_view.submit_form(request, form_name, "addition_form.html",
+                                                 {"CLASS_OBJECT_CREATOR": "object_creators"})
             else:
                 return form_view.submit_form(form_name, request)
     except Exception, e:

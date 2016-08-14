@@ -3,23 +3,37 @@
 <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
 <link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
 <script type="text/javascript">
-    function typeclassChanged(value) {
-        if (value == "{{ addition_typeclass }}") {
-            $(".addition").show();
+    var addition_data = {{ addition_typeclasses | safe }};
+
+    function in_list(value, list) {
+        for (var i in list) {
+            if (value == list[i]) {
+                return true;
+            }
         }
-        else {
-        	$(".addition").hide();
+        return false;
+    }
+
+    function hide_classes(list) {
+        for (var i in list) {
+            $("." + list[i]).hide();
+        }
+    }
+
+    function typeclassChanged(value) {
+        hide_classes(addition_data);
+        if (in_list(value, addition_data)) {
+            $("." + value).show();
         }
     }
 
     $(document).ready(function(){
         $("#id_typeclass").attr("onchange", "typeclassChanged(this.value);");
 
-        if ($("#id_typeclass").val() == "{{ addition_typeclass }}") {
-            $(".addition").show();
-        }
-        else {
-        	$(".addition").hide();
+        var value = $("#id_typeclass").val();
+        hide_classes(addition_data);
+        if (in_list(value, addition_data)) {
+            $("." + value).show();
         }
     });
 </script>
@@ -32,7 +46,7 @@
         {% csrf_token %}
         <div>
             <fieldset class="module aligned">
-                {% for item in base %}
+                {% for item in base_data %}
                 <div class="form-row">
                     {{ item.label_tag }}{{ item }}
                     {% if item.help_text %}
@@ -42,15 +56,19 @@
                     {{ item.errors }}
                 </div>
                 {% endfor %}
-                {% for item in addition %}
-                <div class="form-row addition">
-                    {{ item.label_tag }}{{ item }}
-                    {% if item.help_text %}
-                    <br><br>
-                    <ul class="helplist"><li>{{ item.help_text }}</li></ul>
-                    {% endif %}
-                    {{ item.errors }}
-                </div>
+                {% for data in addition_data %}
+                    {% for item in data.data %}
+                        {% ifnotequal item.name "key" %}
+                        <div class="form-row {{ data.typeclass }}">
+                            {{ item.label_tag }}{{ item }}
+                            {% if item.help_text %}
+                            <br><br>
+                            <ul class="helplist"><li>{{ item.help_text }}</li></ul>
+                            {% endif %}
+                            {{ item.errors }}
+                        </div>
+                        {% endifnotequal %}
+                    {% endfor %}
                 {% endfor %}
             </fieldset>
             <input type="hidden" name="_form" value="{{ form }}" />
