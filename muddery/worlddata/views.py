@@ -17,8 +17,13 @@ from muddery.utils import importer
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import CLIENT_SETTINGS
-from muddery.worlddata.editor import form_view, page_view, addition_view
+from muddery.worlddata.editor import form_view, page_view, relative_view
 
+
+relative_forms = {
+    "world_exits": {"CLASS_LOCKED_EXIT": "exit_locks"},
+    "world_objects": {"CLASS_OBJECT_CREATOR": "object_creators"}
+}
 
 @staff_member_required
 def worldeditor(request):
@@ -155,12 +160,9 @@ def view_form(request):
         raise http.Http404
 
     try:
-        if form_name == "world_exits":
-            return addition_view.view_form(request, form_name, "addition_form.html",
-                                           {"CLASS_LOCKED_EXIT": "exit_locks"})
-        elif form_name == "world_objects":
-            return addition_view.view_form(request, form_name, "addition_form.html",
-                                           {"CLASS_OBJECT_CREATOR": "object_creators"})
+        if form_name in relative_forms:
+            return relative_view.view_form(request, form_name, "relative_form.html",
+                                           relative_forms[form_name])
         else:
             return form_view.view_form(form_name, request)
     except Exception, e:
@@ -191,14 +193,14 @@ def submit_form(request):
         if "_back" in request.POST:
             return form_view.quit_form(form_name, request)
         elif "_delete" in request.POST:
-            return form_view.delete_form(form_name, request)
+            if form_name in relative_forms:
+                return relative_view.delete_form(request, form_name, relative_forms[form_name])
+            else:
+                return form_view.delete_form(form_name, request)
         else:
-            if form_name == "world_exits":
-                return addition_view.submit_form(request, form_name, "addition_form.html",
-                                                 {"CLASS_LOCKED_EXIT": "exit_locks"})
-            elif form_name == "world_objects":
-                return addition_view.submit_form(request, form_name, "addition_form.html",
-                                                 {"CLASS_OBJECT_CREATOR": "object_creators"})
+            if form_name in relative_forms:
+                return relative_view.submit_form(request, form_name, "relative_form.html",
+                                                 relative_forms[form_name])
             else:
                 return form_view.submit_form(form_name, request)
     except Exception, e:
