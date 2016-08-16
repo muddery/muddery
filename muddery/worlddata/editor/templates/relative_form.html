@@ -3,7 +3,7 @@
 <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
 <link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
 <script type="text/javascript">
-    var addition_data = {{ addition_typeclasses | safe }};
+    var relative_data = {{ relative_typeclasses | safe }};
 
     function in_list(value, list) {
         for (var i in list) {
@@ -21,8 +21,8 @@
     }
 
     function typeclassChanged(value) {
-        hide_classes(addition_data);
-        if (in_list(value, addition_data)) {
+        hide_classes(relative_data);
+        if (in_list(value, relative_data)) {
             $("." + value).show();
         }
     }
@@ -31,8 +31,8 @@
         $("#id_typeclass").attr("onchange", "typeclassChanged(this.value);");
 
         var value = $("#id_typeclass").val();
-        hide_classes(addition_data);
-        if (in_list(value, addition_data)) {
+        hide_classes(relative_data);
+        if (in_list(value, relative_data)) {
             $("." + value).show();
         }
     });
@@ -56,7 +56,7 @@
                     {{ item.errors }}
                 </div>
                 {% endfor %}
-                {% for data in addition_data %}
+                {% for data in relative_data %}
                     {% for item in data.data %}
                         {% ifnotequal item.name "key" %}
                         <div class="form-row {{ data.typeclass }}">

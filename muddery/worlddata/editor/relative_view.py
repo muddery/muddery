@@ -14,13 +14,13 @@ from muddery.utils.exception import MudderyError
 from worlddata import forms
 
 
-def view_form(request, base_form_name, default_template, addition_forms):
+def view_form(request, base_form_name, default_template, relative_forms):
     """
     Show a form of a record.
 
     Args:
         request: http request
-        addition_forms: dict {addition_typeclass: addition_form_name}
+        relative_forms: dict {relative_typeclass: relative_form_name}
 
     Returns:
         HttpResponse
@@ -43,24 +43,24 @@ def view_form(request, base_form_name, default_template, addition_forms):
     else:
         base_data = base_class()
 
-    addition_data = []
-    addition_typeclasses = list(addition_forms)
-    for typeclass, form_name in addition_forms.iteritems():
+    relative_data = []
+    relative_typeclasses = list(relative_forms)
+    for typeclass, form_name in relative_forms.iteritems():
         try:
-            addition_class = forms.Manager.get_form(form_name)
-            addition_model = addition_class.Meta.model
+            relative_class = forms.Manager.get_form(form_name)
+            relative_model = relative_class.Meta.model
         except Exception, e:
             raise MudderyError("Invalid form: %s." % form_name)
 
-        # additional data
-        data = addition_class()
+        # relativeal data
+        data = relative_class()
         if record:
             try:
-                addition_instance = addition_model.objects.get(key=base_instance.key)
-                data = addition_class(instance=addition_instance)
+                relative_instance = relative_model.objects.get(key=base_instance.key)
+                data = relative_class(instance=relative_instance)
             except Exception, e:
                 pass
-        addition_data.append({"typeclass": typeclass, "data": data})
+        relative_data.append({"typeclass": typeclass, "data": data})
 
     # Get template file's name form the request.
     if "_template" in request_data:
@@ -71,8 +71,8 @@ def view_form(request, base_form_name, default_template, addition_forms):
     context = {"form": base_form_name,
                "record": record,
                "base_data": base_data,
-               "addition_data": addition_data,
-               "addition_typeclasses": addition_typeclasses,
+               "relative_data": relative_data,
+               "relative_typeclasses": relative_typeclasses,
                "title": base_model._meta.verbose_name_plural,
                "desc": getattr(base_class.Meta, "desc", base_model._meta.verbose_name_plural),
                "can_delete": (record is not None)}
@@ -86,7 +86,7 @@ def view_form(request, base_form_name, default_template, addition_forms):
     return render(request, template_file, context)
 
 
-def submit_form(request, base_form_name, default_template, addition_forms):
+def submit_form(request, base_form_name, default_template, relative_forms):
     """
     Edit or add a form of a record.
 
@@ -114,31 +114,31 @@ def submit_form(request, base_form_name, default_template, addition_forms):
         base_instance = base_model.objects.get(pk=record)
         base_data = base_class(request_data, instance=base_instance)
 
-    # make addition data
-    addition_data = {}
-    addition_typeclasses = list(addition_forms)
-    for typeclass, form_name in addition_forms.iteritems():
+    # make relative data
+    relative_data = {}
+    relative_typeclasses = list(relative_forms)
+    for typeclass, form_name in relative_forms.iteritems():
         try:
-            addition_class = forms.Manager.get_form(form_name)
-            addition_model = addition_class.Meta.model
+            relative_class = forms.Manager.get_form(form_name)
+            relative_model = relative_class.Meta.model
         except Exception, e:
             raise MudderyError("Invalid form: %s." % form_name)
 
-        # additional data
-        data = addition_class(request_data)
+        # relativeal data
+        data = relative_class(request_data)
         if record:
             try:
-                addition_instance = addition_model.objects.get(key=base_instance.key)
-                data = addition_class(request_data, instance=addition_instance)
+                relative_instance = relative_model.objects.get(key=base_instance.key)
+                data = relative_class(request_data, instance=relative_instance)
             except Exception, e:
                 pass
 
-        addition_data[typeclass] = data
+        relative_data[typeclass] = data
 
     # Validate
     saved = False
     typeclass = request_data["typeclass"]
-    if typeclass not in addition_data:
+    if typeclass not in relative_data:
         if base_data.is_valid():
             with transaction.atomic():
                 base_data.save()
@@ -149,12 +149,12 @@ def submit_form(request, base_form_name, default_template, addition_forms):
     else:
         # Prevent short cut.
         base_valid = base_data.is_valid()
-        addition_valid = addition_data[typeclass].is_valid()
+        relative_valid = relative_data[typeclass].is_valid()
 
-        if base_valid and addition_valid:
+        if base_valid and relative_valid:
             with transaction.atomic():
                 base_data.save()
-                addition_data[typeclass].save()
+                relative_data[typeclass].save()
                 saved = True
 
     if saved and "_save" in request_data:
@@ -170,8 +170,8 @@ def submit_form(request, base_form_name, default_template, addition_forms):
     context = {"form": base_form_name,
                "record": record,
                "base_data": base_data,
-               "addition_data": [({"typeclass": key, "data": addition_data[key]}) for key in addition_data],
-               "addition_typeclasses": addition_typeclasses,
+               "relative_data": [({"typeclass": key, "data": relative_data[key]}) for key in relative_data],
+               "relative_typeclasses": relative_typeclasses,
                "title": base_model._meta.verbose_name_plural,
                "desc": getattr(base_class.Meta, "desc", base_model._meta.verbose_name_plural),
                "can_delete": (record is not None)}
@@ -215,7 +215,7 @@ def quit_form(request):
     raise http.Http404
 
 
-def delete_form(base_form_name, addition_form_name, request):
+def delete_form(request, base_form_name, relative_forms):
     """
     Delete a record.
 
@@ -235,26 +235,27 @@ def delete_form(base_form_name, addition_form_name, request):
     except Exception, e:
         raise MudderyError("Invalid form: %s." % base_form_name)
 
-    try:
-        addition_class = forms.Manager.get_form(addition_form_name)
-        addition_model = addition_class.Meta.model
-    except Exception, e:
-        raise MudderyError("Invalid form: %s." % addition_form_name)
-
     # Delete data.
     try:
         record = request_data.get("_record")
-
         item = base_model.objects.get(pk=record)
+        key = item.key
         item.delete()
+    except Exception, e:
+        raise MudderyError("Invalid record.")
 
+    for typeclass, form_name in relative_forms.iteritems():
         try:
-            item = addition_model.objects.get(pk=record)
+            relative_class = forms.Manager.get_form(form_name)
+            relative_model = relative_class.Meta.model
+        except Exception, e:
+            raise MudderyError("Invalid form: %s." % form_name)
+
+        # Delete data.
+        try:
+            item = relative_model.objects.get(key=key)
             item.delete()
         except Exception, e:
             pass
-
-    except Exception, e:
-        raise MudderyError("Invalid record.")
 
     return quit_form(request)
