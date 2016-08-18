@@ -406,3 +406,7 @@ span.page_list {
 a.page_link {
     text-decoration: underline;
 }
+
+#result_list {
+    width: 100%;
+}

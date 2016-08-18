@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block header_ext %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<div>{{ desc }}</div>
+<div id="content-main">
+    <form action="submit.html" method="post">
+        {% csrf_token %}
+        <div>
+            <fieldset class="module aligned">
+                {% for field in data %}
+                <div class="form-row">
+                    {{ field.label_tag }}{{ field }}
+                    {% if field.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ field.help_text }}</li></ul>
+                    {% endif %}
+                    {{ field.errors }}
+                </div>
+                {% endfor %}
+            </fieldset>
+            <br>
+            <br>
+            <ul class="object-tools">
+                <li>
+                    <a href="/worlddata/editor/dialogues/dialogue_sentences/form.html?_disabled_field=dialogue&_disabled_value={{ key }}" class="addlink">
+                        Add {{ title }}
+                    </a>
+                </li>
+            </ul>
+            <div class="module" id="changelist">
+                <div class="results">
+                    <table id="result_list">
+                        <thead>
+                            <tr>
+                                {% for field in fields %}
+                                <th scope="col" class="sortable">
+                                    <div class="text">{{ field.verbose_name|upper }}</div>
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records %}
+                                <tr class="{% cycle 'row1' 'row2' %}">
+                                    {% for item in record.items %}
+                                    <td class="field">
+                                        {% if forloop.first %}
+                                            <a href="./form.html?_page={{ page.number }}&_record={{ record.pk }}">
+                                        {% endif %}
+                                        {{ item }}
+                                        {% if forloop.first %}
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <input type="hidden" name="_form" value="{{ form }}" />
+            <input type="hidden" name="_record" value="{{ record }}" />
+            <input type="hidden" name="_page" value="{{ page }}" />
+            {% if referrer %}
+                <input type="hidden" name="_referrer" value="{{ referrer }}" />
+            {% endif %}
+            <div class="submit-row">
+                {% if can_delete %}
+                <input type="submit" name="_delete" value="Delete" class="delete-box" />
+                {% endif %}
+                <input type="submit" name="_back" value="Back without save" />
+                <input type="submit" name="_continue" value="Save and continue editing" />
+                <input type="submit" name="_save" value="Save" class="default" />
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock content %}
