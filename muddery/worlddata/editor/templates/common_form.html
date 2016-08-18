@@ -11,14 +11,14 @@
         {% csrf_token %}
         <div>
             <fieldset class="module aligned">
-                {% for item in data %}
+                {% for field in data %}
                 <div class="form-row">
-                    {{ item.label_tag }}{{ item }}
-                    {% if item.help_text %}
+                    {{ field.label_tag }}{{ field }}
+                    {% if field.help_text %}
                     <br><br>
-                    <ul class="helplist"><li>{{ item.help_text }}</li></ul>
+                    <ul class="helplist"><li>{{ field.help_text }}</li></ul>
                     {% endif %}
-                    {{ item.errors }}
+                    {{ field.errors }}
                 </div>
                 {% endfor %}
             </fieldset>

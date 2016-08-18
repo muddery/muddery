@@ -4,10 +4,11 @@ This file checks user's edit actions and put changes into db.
 """
 
 import re
-import json
 from django import http
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, InvalidPage
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponseRedirect
+from django.db.models.fields.related import ManyToOneRel
 from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
@@ -36,32 +37,67 @@ def view_form(form_name, request):
     record = request_data.get("_record", None)
 
     # Query data.
+    key = ""
     if record:
-        item = model.objects.get(pk=record)
-        data = form_class(instance=item)
+        instance = model.objects.get(pk=record)
+        key = instance.key
+        data = form_class(instance=instance)
     else:
         data = form_class()
-
-    # Fixed key.
-    if "_disabled_field" in request_data:
-        disabled_field = request_data["_disabled_field"]
-        for field in data:
-            if field.name == disabled_field:
-                field.disabled = True
-                if "_disabled_value" in request_data:
-                    field.initial = request_data["_disabled_value"]
 
     # Get template file's name form the request.
     if "_template" in request_data:
         template_file = request_data.get("_template")
     else:
-        template_file = getattr(form_class.Meta, "form_template", settings.DEFUALT_FORM_TEMPLATE)
+        template_file = "dialogue_form.html"
+
+    # Dialogue sentences
+    # Get models and recoreds.
+    try:
+        form_class = forms.Manager.get_form("dialogue_sentences")
+        model = form_class.Meta.model
+    except Exception, e:
+        raise MudderyError("Invalid form: %s." % "dialogue_sentences")
+
+    fields = model._meta.get_fields()
+    fields = [field for field in fields if not isinstance(field, ManyToOneRel)]
+    records = model.objects.filter(dialogue=key)
+
+    # Get page size and page number.
+    page_size = 20
+    page_number = request_data.get("_page", 1)
+
+    # Divide pages.
+    paginator = Paginator(records, page_size)
+    try:
+        page = paginator.page(page_number)
+    except (PageNotAnInteger, EmptyPage, InvalidPage):
+        page = paginator.page(1)
+
+    # Set range.
+    page_range = 3
+
+    range_begin = page.number - page_range
+    if range_begin < 1:
+        range_begin = 1
+
+    range_end = page.number + page_range
+    if range_end > paginator.num_pages:
+        range_end = paginator.num_pages
+
+    page_records = [{"pk": record.pk, "items": [getattr(record, field.name, "") for field in fields]} for record in page]
 
     context = {"form": form_name,
                "data": data,
+               "key": key,
                "title": model._meta.verbose_name_plural,
                "desc": getattr(form_class.Meta, "desc", model._meta.verbose_name_plural),
-               "can_delete": (record is not None)}
+               "can_delete": (record is not None),
+               "fields": fields,
+               "records": page_records,
+               "page": page,
+               "page_range": xrange(range_begin, range_end + 1),
+               "self": request.get_full_path()}
 
     if record:
         context["record"] = record
