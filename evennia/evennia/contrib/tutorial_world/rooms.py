@@ -154,7 +154,10 @@ class CmdTutorialLook(default_cmds.CmdLook):
             # ourself. This also means the search function will always
             # return a list (with 0, 1 or more elements) rather than
             # result/None.
-            looking_at_obj = caller.search(args, use_nicks=True, quiet=True)
+            looking_at_obj = caller.search(args,
+                                           # note: excludes room/room aliases
+                                           candidates=caller.location.contents + caller.contents,
+                                           use_nicks=True, quiet=True)
             if len(looking_at_obj) != 1:
                 # no target found or more than one target found (multimatch)
                 # look for a detail that may match
@@ -310,7 +313,7 @@ class WeatherRoom(TutorialRoom):
         # "update_weather" on this object. The interval is randomized
         # so as to not have all weather rooms update at the same time.
         interval = random.randint(50, 70)
-        TICKER_HANDLER.add(self, interval, idstring="tutorial", hook_key="update_weather")
+        TICKER_HANDLER.add(interval=interval, callback=self.update_weather, idstring="tutorial")
         # this is parsed by the 'tutorial' command on TutorialRooms.
         self.db.tutorial_info = \
             "This room has a Script running that has it echo a weather-related message at irregular intervals."
@@ -968,6 +971,10 @@ class TeleportRoom(TutorialRoom):
             character.msg(self.db.failure_teleport_msg)
         # teleport quietly to the new place
         character.move_to(results[0], quiet=True, move_hooks=False)
+        # we have to call this manually since we turn off move_hooks
+        # - this is necessary to make the target dark room aware of an
+        # already carried light.
+        results[0].at_object_receive(character, self)
 
 
 #------------------------------------------------------------

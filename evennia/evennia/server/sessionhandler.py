@@ -18,13 +18,19 @@ from future.utils import listvalues
 from time import time
 from django.conf import settings
 from evennia.commands.cmdhandler import CMD_LOGINSTART
-from evennia.utils.utils import variable_from_module, is_iter, \
-                            to_str, to_unicode, strip_control_sequences, make_iter
+from evennia.utils.logger import log_trace
+from evennia.utils.utils import (variable_from_module, is_iter,
+                                 to_str, to_unicode,
+                                 make_iter,
+                                 callables_from_module)
+from evennia.utils.inlinefuncs import parse_inlinefunc
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
+
+_INLINEFUNC_ENABLED = settings.INLINEFUNC_ENABLED
 
 # delayed imports
 _PlayerDB = None
@@ -57,7 +63,13 @@ _MULTISESSION_MODE = settings.MULTISESSION_MODE
 _IDLE_TIMEOUT = settings.IDLE_TIMEOUT
 _MAX_SERVER_COMMANDS_PER_SECOND = 100.0
 _MAX_SESSION_COMMANDS_PER_SECOND = 5.0
+_MODEL_MAP = None
 
+# input handlers
+
+_INPUT_FUNCS = {}
+for modname in make_iter(settings.INPUT_FUNC_MODULES):
+    _INPUT_FUNCS.update(callables_from_module(modname))
 
 def delayed_import():
     """
@@ -116,6 +128,84 @@ class SessionHandler(dict):
         """
         return dict((sessid, sess.get_sync_data()) for sessid, sess in self.items())
 
+    def clean_senddata(self, session, kwargs):
+        """
+        Clean up data for sending across the AMP wire. Also apply INLINEFUNCS.
+
+        Args:
+            session (Session): The relevant session instance.
+            kwargs (dict) Each keyword represents a
+                send-instruction, with the keyword itself being the name
+                of the instruction (like "text"). Suitable values for each
+                keyword are:
+                    - arg                ->  [[arg], {}]
+                    - [args]             ->  [[args], {}]
+                    - {kwargs}           ->  [[], {kwargs}]
+                    - [args, {kwargs}]   ->  [[arg], {kwargs}]
+                    - [[args], {kwargs}] ->  [[args], {kwargs}]
+
+        Returns:
+            kwargs (dict): A cleaned dictionary of cmdname:[[args],{kwargs}] pairs,
+                where the keys, args and kwargs have all been converted to
+                send-safe entities (strings or numbers), and inlinefuncs have been
+                applied.
+
+        """
+        options = kwargs.pop("options", None) or {}
+        raw = options.get("raw", False)
+        strip_inlinefunc = options.get("strip_inlinefunc", False)
+
+        def _validate(data):
+            "Helper function to convert data to AMP-safe (picketable) values"
+            if isinstance(data, dict):
+                newdict = {}
+                for key, part in data.items():
+                    newdict[key] = _validate(part)
+                return newdict
+            elif hasattr(data, "__iter__"):
+                return [_validate(part) for part in data]
+            elif isinstance(data, basestring):
+                # make sure strings are in a valid encoding
+                try:
+                    data = data and to_str(to_unicode(data), encoding=session.protocol_flags["ENCODING"])
+                except LookupError:
+                    # wrong encoding set on the session. Set it to a safe one
+                    session.protocol_flags["ENCODING"] = "utf-8"
+                    data = to_str(to_unicode(data), encoding=session.protocol_flags["ENCODING"])
+                if _INLINEFUNC_ENABLED and not raw and isinstance(self, ServerSessionHandler):
+                    # only parse inlinefuncs on the outgoing path (sessionhandler->)
+                    data = parse_inlinefunc(data, strip=strip_inlinefunc, session=session)
+                return data
+            elif hasattr(data, "id") and hasattr(data, "db_date_created") \
+                    and hasattr(data, '__dbclass__'):
+                # convert database-object to their string representation.
+                return _validate(unicode(data))
+            else:
+                return data
+
+        rkwargs = {}
+        for key, data in kwargs.iteritems():
+            key = _validate(key)
+            if not data:
+                rkwargs[key] = [ [], {} ]
+            elif isinstance(data, dict):
+                rkwargs[key] = [ [], _validate(data) ]
+            elif hasattr(data, "__iter__"):
+                if isinstance(data[-1], dict):
+                    if len(data) == 2:
+                        if hasattr(data[0], "__iter__"):
+                            rkwargs[key] = [_validate(data[0]), _validate(data[1])]
+                        else:
+                            rkwargs[key] = [[_validate(data[0])], _validate(data[1])]
+                    else:
+                        rkwargs[key] = [ _validate(data[:-1]), _validate(data[-1]) ]
+                else:
+                    rkwargs[key] = [ _validate(data), {} ]
+            else:
+                rkwargs[key] = [ [_validate(data)], {} ]
+            rkwargs[key][1]["options"] = options
+        return rkwargs
+
 
 #------------------------------------------------------------
 # Server-SessionHandler class
@@ -162,15 +252,25 @@ class ServerSessionHandler(SessionHandler):
         sess = _ServerSession()
         sess.sessionhandler = self
         sess.load_sync_data(portalsessiondata)
-        if sess.logged_in and sess.uid:
-            # this can happen in the case of auto-authenticating
-            # protocols like SSH
-            sess.player = _PlayerDB.objects.get_player_from_uid(sess.uid)
         sess.at_sync()
         # validate all scripts
         _ScriptDB.objects.validate()
         self[sess.sessid] = sess
-        sess.data_in(CMD_LOGINSTART)
+
+        if sess.logged_in and sess.uid:
+            # Session is already logged in. This can happen in the
+            # case of auto-authenticating protocols like SSH or
+            # webclient's session sharing
+            player = _PlayerDB.objects.get_player_from_uid(sess.uid)
+            if player:
+                self.login(sess, player, force=True)
+                return
+            else:
+                sess.logged_in = False
+                sess.uid = None
+
+        # show the first login command
+        self.data_in(sess, text=[[CMD_LOGINSTART],{}])
 
     def portal_session_sync(self, portalsessiondata):
         """
@@ -265,7 +365,7 @@ class ServerSessionHandler(SessionHandler):
         self.server.amp_protocol.send_AdminServer2Portal(DUMMYSESSION,
                                                          operation=SSHUTD)
 
-    def login(self, session, player, testmode=False):
+    def login(self, session, player, force=False, testmode=False):
         """
         Log in the previously unloggedin session and the player we by
         now should know is connected to it. After this point we assume
@@ -274,10 +374,16 @@ class ServerSessionHandler(SessionHandler):
         Args:
             session (Session): The Session to authenticate.
             player (Player): The Player identified as associated with this Session.
+            force (bool): Login also if the session thinks it's already logged in
+                (this can happen for auto-authenticating protocols)
             testmode (bool, optional): This is used by unittesting for
                 faking login without any AMP being actually active.
 
         """
+
+        if session.logged_in and not force:
+            # don't log in a session that is already logged in.
+            return
 
         # we have to check this first before uid has been assigned
         # this session.
@@ -353,6 +459,18 @@ class ServerSessionHandler(SessionHandler):
         return self.server.amp_protocol.send_AdminServer2Portal(DUMMYSESSION,
                                                          operation=SSYNC,
                                                          sessiondata=sessdata)
+
+    def session_portal_sync(self, session):
+        """
+        This is called by the server when it wants to sync a single session
+        with the Portal for whatever reason. Returns a deferred!
+
+        """
+        sessdata = {session.sessid: session.get_sync_data()}
+        return self.server.amp_protocol.send_AdminServer2Portal(DUMMYSESSION,
+                                                                operation=SSYNC,
+                                                                sessiondata=sessdata,
+                                                                clean=False)
 
     def disconnect_all_sessions(self, reason="You have been disconnected."):
         """
@@ -487,6 +605,18 @@ class ServerSessionHandler(SessionHandler):
         return sessions[0] if len(sessions) == 1 else sessions
     sessions_from_character = sessions_from_puppet
 
+    def sessions_from_csessid(self, csessid):
+        """
+        Given a cliend identification hash (for session types that offer them) return all sessions with
+        a matching hash.
+
+        Args
+            csessid (str): The session hash
+
+        """
+        return [session for session in self.values()
+                if session.csessid and session.csessid == csessid]
+
     def announce_all(self, message):
         """
         Send message to all connected sessions
@@ -496,9 +626,9 @@ class ServerSessionHandler(SessionHandler):
 
         """
         for sess in self.values():
-            self.data_out(sess, message)
+            self.data_out(sess, text=message)
 
-    def data_out(self, session, text="", **kwargs):
+    def data_out(self, session, **kwargs):
         """
         Sending data Server -> Portal
 
@@ -506,24 +636,27 @@ class ServerSessionHandler(SessionHandler):
             session (Session): Session to relay to.
             text (str, optional): text data to return
 
+        Notes:
+            The outdata will be scrubbed for sending across
+            the wire here.
         """
-        #from evennia.server.profiling.timetrace import timetrace
-        #text = timetrace(text, "ServerSessionHandler.data_out")
-
-        try:
-            text = text and to_str(to_unicode(text), encoding=session.encoding)
-        except LookupError:
-            # wrong encoding set on the session. Set it to a safe one
-            session.encoding = "utf-8"
-            text = to_str(to_unicode(text), encoding=session.encoding)
-
+        # clean output for sending
+        kwargs = self.clean_senddata(session, kwargs)
 
         # send across AMP
         self.server.amp_protocol.send_MsgServer2Portal(session,
-                                                       text=text,
                                                        **kwargs)
 
-    def data_in(self, session, text="", **kwargs):
+    def get_inputfuncs(self):
+        """
+        Get all registered inputfuncs (access function)
+
+        Returns:
+            inputfuncs (dict): A dict of {key:inputfunc,...}
+        """
+        return _INPUT_FUNCS
+
+    def data_in(self, session, **kwargs):
         """
         Data Portal -> Server.
         We also intercept OOB communication here.
@@ -532,25 +665,25 @@ class ServerSessionHandler(SessionHandler):
             sessions (Session): Session.
 
         Kwargs:
-            text (str): Text from protocol.
             kwargs (any): Other data from protocol.
 
         """
-        #from evennia.server.profiling.timetrace import timetrace
-        #text = timetrace(text, "ServerSessionHandler.data_in")
-        if session:
-            text = text and to_unicode(strip_control_sequences(text), encoding=session.encoding)
-            if "oob" in kwargs:
-                # incoming data is always on the form (cmdname, args, kwargs)
-                global _OOB_HANDLER
-                if not _OOB_HANDLER:
-                    from evennia.server.oobhandler import OOB_HANDLER as _OOB_HANDLER
-                funcname, args, kwargs = kwargs.pop("oob")
-                if funcname:
-                    _OOB_HANDLER.execute_cmd(session, funcname, *args, **kwargs)
 
-            # pass the rest off to the session
-            session.data_in(text=text, **kwargs)
+        # distribute incoming data to the correct receiving methods.
+        if session:
+            input_debug = session.protocol_flags.get("INPUTDEBUG", False)
+            for cmdname, (cmdargs, cmdkwargs) in kwargs.iteritems():
+                cname = cmdname.strip().lower()
+                try:
+                    cmdkwargs.pop("options", None)
+                    if cname in _INPUT_FUNCS:
+                        _INPUT_FUNCS[cname](session, *cmdargs, **cmdkwargs)
+                    else:
+                        _INPUT_FUNCS["default"](session, cname, *cmdargs, **cmdkwargs)
+                except Exception, err:
+                    if input_debug:
+                        session.msg(err)
+                    log_trace()
 
 SESSION_HANDLER = ServerSessionHandler()
 SESSIONS = SESSION_HANDLER # legacy

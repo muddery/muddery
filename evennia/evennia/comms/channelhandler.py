@@ -25,22 +25,38 @@ does this for you.
 """
 from builtins import object
 
+from django.conf import settings
 from evennia.comms.models import ChannelDB
 from evennia.commands import cmdset, command
+from evennia.utils.logger import tail_log_file
+from evennia.utils.utils import class_from_module
+from django.utils.translation import ugettext as _
 
+_CHANNEL_COMMAND_CLASS = None
 
 class ChannelCommand(command.Command):
     """
-    Channel
+    {channelkey} channel
+
+    {channeldesc}
 
     Usage:
-       <channel name or alias>  <message>
+       {lower_channelkey}  <message>
+       {lower_channelkey}/history [start]
 
-    This is a channel. If you have subscribed to it, you can send to
-    it by entering its name or alias, followed by the text you want to
-    send.
+    Switch:
+        history: View 20 previous messages, either from the end or
+            from <start> number of messages from the end.
+
+    Example:
+        {lower_channelkey} Hello World!
+        {lower_channelkey}/history
+        {lower_channelkey}/history 30
 
     """
+    # ^note that channeldesc and lower_channelkey will be filled
+    # automatically by ChannelHandler
+
     # this flag is what identifies this cmd as a channel cmd
     # and branches off to the system send-to-channel command
     # (which is customizable by admin)
@@ -55,6 +71,13 @@ class ChannelCommand(command.Command):
         """
         # cmdhandler sends channame:msg here.
         channelname, msg = self.args.split(":", 1)
+        self.history_start = None
+        if msg.startswith("/history"):
+            arg = msg[8:]
+            try:
+                self.history_start = int(arg) if arg else 0
+            except ValueError:
+                pass
         self.args = (channelname.strip(), msg.strip())
 
     def func(self):
@@ -65,22 +88,29 @@ class ChannelCommand(command.Command):
         channelkey, msg = self.args
         caller = self.caller
         if not msg:
-            self.msg("Say what?")
+            self.msg(_("Say what?"))
             return
         channel = ChannelDB.objects.get_channel(channelkey)
 
         if not channel:
-            self.msg("Channel '%s' not found." % channelkey)
+            self.msg(_("Channel '%s' not found.") % channelkey)
             return
         if not channel.has_connection(caller):
-            string = "You are not connected to channel '%s'."
+            string = _("You are not connected to channel '%s'.")
             self.msg(string % channelkey)
             return
         if not channel.access(caller, 'send'):
-            string = "You are not permitted to send to channel '%s'."
+            string = _("You are not permitted to send to channel '%s'.")
             self.msg(string % channelkey)
             return
-        channel.msg(msg, senders=self.caller, online=True)
+        if self.history_start is not None:
+            # Try to view history
+            log_file = channel.attributes.get("log_file", default="channel_%s.log" % channel.key)
+            send_msg = lambda lines: self.msg("".join(line.split("[-]", 1)[1]
+                                                    if "[-]" in line else line for line in lines))
+            tail_log_file(log_file, self.history_start, 20, callback=send_msg)
+        else:
+            channel.msg(msg, senders=self.caller, online=True)
 
     def get_extra_info(self, caller, **kwargs):
         """
@@ -128,33 +158,6 @@ class ChannelHandler(object):
         """
         self.cached_channel_cmds = []
 
-    def _format_help(self, channel):
-        """
-        Builds an automatic doc string for the channel.
-
-        Args:
-            channel (Channel): Source of help info.
-
-        Returns:
-            doc (str): The docstring for the channel.
-
-        """
-
-        key = channel.key
-        aliases = channel.aliases.all()
-        ustring = "%s <message>" % key.lower() + "".join(["\n           %s <message>" % alias.lower() for alias in aliases])
-        desc = channel.db.desc
-        string = \
-        """
-        Channel '%s'
-
-        Usage (not including your personal aliases):
-           %s
-
-        %s
-        """ % (key, ustring, desc)
-        return string
-
     def add_channel(self, channel):
         """
         Add an individual channel to the handler. This should be
@@ -170,14 +173,24 @@ class ChannelHandler(object):
             the Channel itself.
 
         """
+        global _CHANNEL_COMMAND_CLASS
+        if not _CHANNEL_COMMAND_CLASS:
+            _CHANNEL_COMMAND_CLASS = class_from_module(settings.CHANNEL_COMMAND_CLASS)
+
         # map the channel to a searchable command
-        cmd = ChannelCommand(key=channel.key.strip().lower(),
+        cmd = _CHANNEL_COMMAND_CLASS(
+                             key=channel.key.strip().lower(),
                              aliases=channel.aliases.all(),
                              locks="cmd:all();%s" % channel.locks,
                              help_category="Channel names",
                              obj=channel,
-                             arg_regex=r"\s.*?",
+                             arg_regex=r"\s.*?|/history.*?",
                              is_channel=True)
+        # format the help entry
+        key = channel.key
+        cmd.__doc__ = cmd.__doc__.format(channelkey=key,
+                                         lower_channelkey=key.strip().lower(),
+                                         channeldesc=channel.attributes.get("desc", default="").strip())
         self.cached_channel_cmds.append(cmd)
         self.cached_cmdsets = {}
 

@@ -17,9 +17,9 @@ import sys
 import signal
 import shutil
 import importlib
+from distutils.version import LooseVersion
 from argparse import ArgumentParser
 from subprocess import Popen, check_output, call, CalledProcessError, STDOUT
-import twisted
 import django
 
 # Signal processing
@@ -60,9 +60,9 @@ PORTAL_PY_FILE = None
 
 
 PYTHON_MIN = '2.7'
-TWISTED_MIN = '15.2.1'
+TWISTED_MIN = '16.0.0'
 DJANGO_MIN = '1.8'
-DJANGO_REC = '1.8'
+DJANGO_REC = '1.9'
 
 sys.path[1] = EVENNIA_ROOT
 
@@ -106,18 +106,36 @@ ERROR_INPUT = \
 
 ERROR_NO_GAMEDIR = \
     """
-    No Evennia settings file was found. You must run this command from
-    inside a valid game directory first created with --init.
+    ERROR: No Evennia settings file was found. Evennia looks for the
+    file in your game directory as server/conf/settings.py.
+
+    You must run this command from somewhere inside a valid game
+    directory first created with
+
+        evennia --init mygamename
+
+    If you are in a game directory but is missing a settings.py file,
+    it may be because you have git-cloned an existing game directory.
+    The settings.py file is not cloned by git (it's in .gitignore)
+    since it can contain sensitive and/or server-specific information.
+    You can create a new, empty settings file with
+
+        evennia --initsettings
+
+    If cloning the settings file is not a problem you could manually
+    copy over the old settings file or remove its entry in .gitignore
+
     """
 
 WARNING_MOVING_SUPERUSER = \
     """
-    Evennia expects a Player superuser with id=1. No such Player was
-    found. However, another superuser ('{other_key}', id={other_id})
-    was found in the database. If you just created this superuser and
-    still see this text it is probably due to the database being
-    flushed recently - in this case the database's internal
-    auto-counter might just start from some value higher than one.
+    WARNING: Evennia expects a Player superuser with id=1. No such
+    Player was found. However, another superuser ('{other_key}',
+    id={other_id}) was found in the database. If you just created this
+    superuser and still see this text it is probably due to the
+    database being flushed recently - in this case the database's
+    internal auto-counter might just start from some value higher than
+    one.
 
     We will fix this by assigning the id 1 to Player '{other_key}'.
     Please confirm this is acceptable before continuing.
@@ -134,7 +152,8 @@ WARNING_RUNSERVER = \
 
 ERROR_SETTINGS = \
     """
-    There was an error importing Evennia's config file {settingspath}.
+    ERROR: There was an error importing Evennia's config file
+    {settingspath}.
     There is usually one of three reasons for this:
         1) You are not running this command from your game directory.
            Change directory to your game directory and try again (or
@@ -147,9 +166,26 @@ ERROR_SETTINGS = \
            this resolves the issue.
     """.format(settingsfile=SETTINGFILE, settingspath=SETTINGS_PATH)
 
+ERROR_INITSETTINGS = \
+    """
+    ERROR: 'evennia --initsettings' must be called from the root of
+    your game directory, since it tries to (re)create the new
+    settings.py file in a subfolder server/conf/.
+    """
+
+RECREATED_SETTINGS = \
+    """
+    (Re)created an empty settings file in server/conf/settings.py.
+
+    Note that if you were using an existing database, the password
+    salt of this new settings file will be different from the old one.
+    This means that any existing players may not be able to log in to
+    their accounts with their old passwords.
+    """
+
 ERROR_DATABASE = \
     """
-    Your database does not seem to be set up correctly.
+    ERROR: Your database does not seem to be set up correctly.
     (error was '{traceback}')
 
     Standing in your game directory, run
@@ -192,10 +228,10 @@ INFO_WINDOWS_BATFILE = \
 
 CMDLINE_HELP = \
     """
-    Starts or operates the Evennia MU* server. Also allows for
+    Starts or operates the Evennia MU* server.  Allows for
     initializing a new game directory and manages the game's database.
-    You can also pass most standard django-admin arguments and
-    options.
+    Most standard django-admin arguments and options can also be
+    passed.
     """
 
 
@@ -377,14 +413,14 @@ def check_main_evennia_dependencies():
 
     # Python
     pversion = ".".join(str(num) for num in sys.version_info if type(num) == int)
-    if pversion < PYTHON_MIN:
+    if LooseVersion(pversion) < LooseVersion(PYTHON_MIN):
         print(ERROR_PYTHON_VERSION.format(pversion=pversion, python_min=PYTHON_MIN))
         error = True
     # Twisted
     try:
         import twisted
         tversion = twisted.version.short()
-        if tversion < TWISTED_MIN:
+        if LooseVersion(tversion) < LooseVersion(TWISTED_MIN):
             print(ERROR_TWISTED_VERSION.format(
                 tversion=tversion, twisted_min=TWISTED_MIN))
             error = True
@@ -396,14 +432,14 @@ def check_main_evennia_dependencies():
         dversion = ".".join(str(num) for num in django.VERSION if type(num) == int)
         # only the main version (1.5, not 1.5.4.0)
         dversion_main = ".".join(dversion.split(".")[:2])
-        if dversion < DJANGO_MIN:
+        if LooseVersion(dversion) < LooseVersion(DJANGO_MIN):
             print(ERROR_DJANGO_MIN.format(
                 dversion=dversion_main, django_min=DJANGO_MIN))
             error = True
-        elif DJANGO_MIN <= dversion < DJANGO_REC:
+        elif LooseVersion(DJANGO_MIN) <= LooseVersion(dversion) < LooseVersion(DJANGO_REC):
             print(NOTE_DJANGO_MIN.format(
                 dversion=dversion_main, django_rec=DJANGO_REC))
-        elif DJANGO_REC < dversion_main:
+        elif LooseVersion(DJANGO_REC) < LooseVersion(dversion_main):
             print(NOTE_DJANGO_NEW.format(
                 dversion=dversion_main, django_rec=DJANGO_REC))
     except ImportError:
@@ -421,24 +457,19 @@ def set_gamedir(path):
     is inside the directory tree.
 
     """
-
     global GAMEDIR
-    if os.path.exists(os.path.join(path, SETTINGS_PATH)):
-        # path at root of game dir
-        GAMEDIR = os.path.abspath(path)
-    elif os.path.exists(os.path.join(path, os.path.pardir, SETTINGS_PATH)):
-        # path given to somewhere one level down
-        GAMEDIR = os.path.dirname(path)
-    elif os.path.exists(os.path.join(path, os.path.pardir, os.path.pardir, SETTINGS_PATH)):
-        # path given to somwhere two levels down
-        GAMEDIR = os.path.dirname(os.path.dirname(path))
-    elif os.path.exists(os.path.join(path, os.path.pardir, os.path. pardir, os.path.pardir, SETTINGS_PATH)):
-        # path given to somewhere three levels down (custom directories)
-        GAMEDIR = os.path.dirname(os.path.dirname(os.path.dirname(path)))
-    else:
-        # we don't look further down than this ...
-        print(ERROR_NO_GAMEDIR)
-        sys.exit()
+
+    Ndepth = 10
+    settings_path = os.path.join("server", "conf", "settings.py")
+    for i in range(Ndepth):
+        gpath = os.getcwd()
+        if "server" in os.listdir(gpath):
+            if os.path.isfile(settings_path):
+                GAMEDIR = gpath
+                return
+        os.chdir(os.pardir)
+    print(ERROR_NO_GAMEDIR)
+    sys.exit()
 
 
 def create_secret_key():
@@ -449,19 +480,39 @@ def create_secret_key():
     import random
     import string
     secret_key = list((string.letters +
-        string.digits + string.punctuation).replace("\\", "").replace("'", '"'))
+        string.digits + string.punctuation).replace("\\", "")\
+                .replace("'", '"').replace("{","_").replace("}","-"))
     random.shuffle(secret_key)
     secret_key = "".join(secret_key[:40])
     return secret_key
 
 
-def create_settings_file():
+def create_settings_file(init=True):
     """
-    Uses the template settings file to build a working
-    settings file.
+    Uses the template settings file to build a working settings file.
+
+    Args:
+        init (bool): This is part of the normal evennia --init
+            operation.  If false, this function will copy a fresh
+            template file in (asking if it already exists).
 
     """
     settings_path = os.path.join(GAMEDIR, "server", "conf", "settings.py")
+
+    if not init:
+        # if not --init mode, settings file may already exist from before
+        if os.path.exists(settings_path):
+            inp = raw_input("server/conf/settings.py already exists. "
+                            "Do you want to reset it? y/[N]> ")
+            if not inp.lower() == 'y':
+                print ("Aborted.")
+                sys.exit()
+            else:
+                print ("Reset the settings file.")
+
+        default_settings_path = os.path.join(EVENNIA_TEMPLATE, "server", "conf", "settings.py")
+        shutil.copy(default_settings_path, settings_path)
+
     with open(settings_path, 'r') as f:
         settings_string = f.read()
 
@@ -471,7 +522,6 @@ def create_settings_file():
         "servername": "\"%s\"" % GAMEDIR.rsplit(os.path.sep, 1)[1].capitalize(),
         "secret_key": "\'%s\'" % create_secret_key()}
 
-    # modify the settings
     settings_string = settings_string.format(**setting_dict)
 
     with open(settings_path, 'w') as f:
@@ -775,11 +825,10 @@ def init_game_directory(path, check_db=True):
     # Add gamedir to python path
     sys.path.insert(0, GAMEDIR)
 
-    #if sys.argv[1] == 'test':
-    #    os.environ['DJANGO_SETTINGS_MODULE'] = 'evennia.settings_default'
-    #else:
-    #    os.environ['DJANGO_SETTINGS_MODULE'] = SETTINGS_DOTPATH
-    os.environ['DJANGO_SETTINGS_MODULE'] = SETTINGS_DOTPATH
+    if sys.argv[1] == 'test':
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'evennia.settings_default'
+    else:
+        os.environ['DJANGO_SETTINGS_MODULE'] = SETTINGS_DOTPATH
 
     # required since django1.7
     django.setup()
@@ -1134,28 +1183,31 @@ def main():
     parser.add_argument(
         '--dummyrunner', nargs=1, action='store', dest='dummyrunner',
         metavar="N",
-        help="Tests a running server by connecting N dummy players to it.")
+        help="Test a running server by connecting N dummy players to it.")
     parser.add_argument(
         '--settings', nargs=1, action='store', dest='altsettings',
         default=None, metavar="filename.py",
-        help=("Start evennia with alternative settings file in "
-              "gamedir/server/conf/."))
+        help=("Start evennia with alternative settings file from "
+              "gamedir/server/conf/. (default is settings.py)"))
     parser.add_argument(
-        "option", nargs='?', default="noop",
-        help="Operational mode: 'start', 'stop', 'restart' or 'menu'.")
+        '--initsettings', action='store_true', dest="initsettings",
+        default=False,
+        help="Create a new, empty settings file as gamedir/server/conf/settings.py.")
+    parser.add_argument(
+        "operation", nargs='?', default="noop",
+        help="Operation to perform: 'start', 'stop', 'reload' or 'menu'.")
     parser.add_argument(
         "service", metavar="component", nargs='?', default="all",
-        help=("Server component to operate on: "
-              "'server', 'portal' or 'all' (default)."))
+        help=("Which component to operate on: "
+              "'server', 'portal' or 'all' (default if not set)."))
     parser.epilog = (
-        "Example django-admin commands: "
-        "'migrate', 'flush', 'shell' and 'dbshell'. "
-        "See the django documentation for more django-admin commands.")
+            "Common usage: evennia start|stop|reload. Django-admin database commands:"
+        "evennia migration|flush|shell|dbshell (see the django documentation for more django-admin commands.)")
 
     args, unknown_args = parser.parse_known_args()
 
     # handle arguments
-    option, service = args.option, args.service
+    option, service = args.operation, args.service
 
     # make sure we have everything
     check_main_evennia_dependencies()
@@ -1185,6 +1237,17 @@ def main():
         SETTINGS_DOTPATH = "server.conf.%s" % sfile.rstrip(".py")
         print("Using settings file '%s' (%s)." % (
             SETTINGSFILE, SETTINGS_DOTPATH))
+
+    if args.initsettings:
+        # create new settings file
+        global GAMEDIR
+        GAMEDIR = os.getcwd()
+        try:
+            create_settings_file(init=False)
+            print(RECREATED_SETTINGS)
+        except IOError:
+            print(ERROR_INITSETTINGS)
+        sys.exit()
 
     if args.dummyrunner:
         # launch the dummy runner

@@ -9,7 +9,6 @@ from evennia.commands.default import general, help, admin, system
 from evennia.commands.default import building
 from evennia.commands.default import batchprocess
 
-
 class CharacterCmdSet(CmdSet):
     """
     Implements the default command set.
@@ -47,6 +46,7 @@ class CharacterCmdSet(CmdSet):
         self.add(system.CmdTime())
         self.add(system.CmdServerLoad())
         #self.add(system.CmdPs())
+        self.add(system.CmdTickers())
 
         # Admin commands
         self.add(admin.CmdBoot())
