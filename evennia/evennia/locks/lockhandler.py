@@ -140,12 +140,7 @@ def _cache_lockfuncs():
     global _LOCKFUNCS
     _LOCKFUNCS = {}
     for modulepath in settings.LOCK_FUNC_MODULES:
-        mod = utils.mod_import(modulepath)
-        if mod:
-            for tup in (tup for tup in inspect.getmembers(mod) if callable(tup[1])):
-                _LOCKFUNCS[tup[0]] = tup[1]
-        else:
-            logger.log_err("Couldn't load %s from PERMISSION_FUNC_MODULES." % modulepath)
+        _LOCKFUNCS.update(utils.callables_from_module(modulepath))
 
 #
 # pre-compiled regular expressions
@@ -365,6 +360,16 @@ class LockHandler(object):
         if access_type:
             return self.locks.get(access_type, ["", "", ""])[2]
         return str(self)
+
+    def all(self):
+        """
+        Return all lockstrings.
+
+        Returns:
+            lockstring (str): The full lockstring
+
+        """
+        return self.get()
 
     def remove(self, access_type):
         """

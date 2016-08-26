@@ -6,14 +6,16 @@ import time
 from collections import defaultdict
 from random import getrandbits
 from django.conf import settings
+from django.contrib.auth import authenticate
 from evennia.players.models import PlayerDB
 from evennia.objects.models import ObjectDB
 from evennia.server.models import ServerConfig
 from evennia.comms.models import ChannelDB
 
 from evennia.utils import create, logger, utils, ansi
-from evennia.commands.default.muxcommand import MuxCommand
 from evennia.commands.cmdhandler import CMD_LOGINSTART
+
+COMMAND_DEFAULT_CLASS = utils.class_from_module(settings.COMMAND_DEFAULT_CLASS)
 
 # limit symbol import for API
 __all__ = ("CmdUnconnectedConnect", "CmdUnconnectedCreate",
@@ -147,17 +149,15 @@ def create_normal_player(session, name, password):
         return None
 
     # Match account name and check password
-    player = PlayerDB.objects.get_player_from_name(name)
-    pswd = None
-    if player:
-        pswd = player.check_password(password)
+    player = authenticate(username=name, password=password)
 
-    if not (player and pswd):
+    if not player:
         # No playername or password match
         session.msg("Incorrect login information given.")
         # this just updates the throttle
         _throttle(session)
         # calls player hook for a failed login if possible.
+        player = PlayerDB.objects.get_player_from_name(name)
         if player:
             player.at_failed_login(session)
         return None
@@ -178,7 +178,7 @@ def create_normal_player(session, name, password):
     return player
 
 
-class CmdUnconnectedConnect(MuxCommand):
+class CmdUnconnectedConnect(COMMAND_DEFAULT_CLASS):
     """
     connect to the game
 
@@ -241,7 +241,7 @@ class CmdUnconnectedConnect(MuxCommand):
             session.sessionhandler.login(session, player)
 
 
-class CmdUnconnectedCreate(MuxCommand):
+class CmdUnconnectedCreate(COMMAND_DEFAULT_CLASS):
     """
     create a new player account
 
@@ -340,7 +340,7 @@ class CmdUnconnectedCreate(MuxCommand):
             logger.log_trace()
 
 
-class CmdUnconnectedQuit(MuxCommand):
+class CmdUnconnectedQuit(COMMAND_DEFAULT_CLASS):
     """
     quit when in unlogged-in state
 
@@ -361,7 +361,7 @@ class CmdUnconnectedQuit(MuxCommand):
         session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
 
 
-class CmdUnconnectedLook(MuxCommand):
+class CmdUnconnectedLook(COMMAND_DEFAULT_CLASS):
     """
     look when in unlogged-in state
 
@@ -379,13 +379,13 @@ class CmdUnconnectedLook(MuxCommand):
 
     def func(self):
         "Show the connect screen."
-        connection_screen = ansi.parse_ansi(utils.random_string_from_module(CONNECTION_SCREEN_MODULE))
+        connection_screen = utils.random_string_from_module(CONNECTION_SCREEN_MODULE)
         if not connection_screen:
             connection_screen = "No connection screen found. Please contact an admin."
         self.caller.msg(connection_screen)
 
 
-class CmdUnconnectedHelp(MuxCommand):
+class CmdUnconnectedHelp(COMMAND_DEFAULT_CLASS):
     """
     get help when in unconnected-in state
 
@@ -424,7 +424,7 @@ You can use the {wlook{n command if you want to see the connect screen again.
         self.caller.msg(string)
 
 
-class CmdUnconnectedEncoding(MuxCommand):
+class CmdUnconnectedEncoding(COMMAND_DEFAULT_CLASS):
     """
     set which text encoding to use in unconnected-in state
 
@@ -459,17 +459,19 @@ class CmdUnconnectedEncoding(MuxCommand):
         if self.session is None:
             return
 
+        sync = False
         if 'clear' in self.switches:
             # remove customization
-            old_encoding = self.session.encoding
+            old_encoding = self.session.protocol_flags.get("ENCODING", None)
             if old_encoding:
                 string = "Your custom text encoding ('%s') was cleared." % old_encoding
             else:
                 string = "No custom encoding was set."
-            self.session.encoding = "utf-8"
+            self.session.protocol_flags["ENCODING"] = "utf-8"
+            sync = True
         elif not self.args:
             # just list the encodings supported
-            pencoding = self.session.encoding
+            pencoding = self.session.protocol_flags.get("ENCODING", None)
             string = ""
             if pencoding:
                 string += "Default encoding: {g%s{n (change with {w@encoding <encoding>{n)" % pencoding
@@ -480,18 +482,21 @@ class CmdUnconnectedEncoding(MuxCommand):
                 string = "No encodings found."
         else:
             # change encoding
-            old_encoding = self.session.encoding
+            old_encoding = self.session.protocol_flags.get("ENCODING", None)
             encoding = self.args
             try:
                 utils.to_str(utils.to_unicode("test-string"), encoding=encoding)
             except LookupError:
                 string = "|rThe encoding '|w%s|r' is invalid. Keeping the previous encoding '|w%s|r'.|n" % (encoding, old_encoding)
             else:
-                self.session.encoding = encoding
+                self.session.protocol_flags["ENCODING"] = encoding
                 string = "Your custom text encoding was changed from '|w%s|n' to '|w%s|n'." % (old_encoding, encoding)
+                sync = True
+        if sync:
+            self.session.sessionhandler.session_portal_sync(self.session)
         self.caller.msg(string.strip())
 
-class CmdUnconnectedScreenreader(MuxCommand):
+class CmdUnconnectedScreenreader(COMMAND_DEFAULT_CLASS):
     """
     Activate screenreader mode.
 
@@ -506,9 +511,11 @@ class CmdUnconnectedScreenreader(MuxCommand):
 
     def func(self):
         "Flips screenreader setting."
-        self.session.screenreader = not self.session.screenreader
-        string = "Screenreader mode turned {w%s{n." % ("on" if self.session.screenreader else "off")
+        new_setting = not self.session.protocol_flags.get("SCREENREADER", False)
+        self.session.protocol_flags["SCREENREADER"] =  new_setting
+        string = "Screenreader mode turned {w%s{n." % ("on" if new_setting else "off")
         self.caller.msg(string)
+        self.session.sessionhandler.session_portal_sync(self.session)
 
 
 def _create_player(session, playername, password, permissions, typeclass=None):

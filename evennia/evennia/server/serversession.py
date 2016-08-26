@@ -10,29 +10,25 @@ from builtins import object
 
 import re
 import weakref
+import importlib
 from time import time
 from django.utils import timezone
 from django.conf import settings
 from evennia.comms.models import ChannelDB
 from evennia.utils import logger
-from evennia.utils.inlinefunc import parse_inlinefunc
-from evennia.utils.nested_inlinefuncs import parse_inlinefunc as parse_nested_inlinefunc
 from evennia.utils.utils import make_iter, lazy_property
-from evennia.commands.cmdhandler import cmdhandler
 from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.server.session import Session
 
-_IDLE_COMMAND = settings.IDLE_COMMAND
+ClientSessionStore = importlib.import_module(settings.SESSION_ENGINE).SessionStore
+
 _GA = object.__getattribute__
 _SA = object.__setattr__
 _ObjectDB = None
 _ANSI = None
-_INLINEFUNC_ENABLED = settings.INLINEFUNC_ENABLED
-_RE_SCREENREADER_REGEX = re.compile(r"%s" % settings.SCREENREADER_REGEX_STRIP, re.DOTALL + re.MULTILINE)
 
 # i18n
 from django.utils.translation import ugettext as _
-
 
 # Handlers for Session.db/ndb operation
 
@@ -88,7 +84,7 @@ class NAttributeHandler(object):
         """
         return key in self._store
 
-    def get(self, key):
+    def get(self, key, default=None):
         """
         Get the named key value.
 
@@ -99,7 +95,7 @@ class NAttributeHandler(object):
             the value of the Nattribute.
 
         """
-        return self._store.get(key, None)
+        return self._store.get(key, default)
 
     def add(self, key, value):
         """
@@ -227,6 +223,15 @@ class ServerSession(Session):
         self.puppet = None
         self.cmdset_storage = settings.CMDSET_SESSION
 
+        if self.csessid:
+            # An existing client sessid is registered, thus a matching
+            # Client Session must also exist. Update it so the website
+            # can also see we are logged in.
+            csession = ClientSessionStore(session_key=self.csessid)
+            if not csession.get("logged_in"):
+                csession["logged_in"] = player.id
+                csession.save()
+
         # Update account's last login time.
         self.player.last_login = timezone.now()
         self.player.save()
@@ -336,70 +341,81 @@ class ServerSession(Session):
             # Player-visible idle time, not used in idle timeout calcs.
             self.cmd_last_visible = self.cmd_last
 
-    def data_in(self, text=None, **kwargs):
+    def update_flags(self, **kwargs):
         """
-        Send data User->Evennia. This will in effect execute a command
-        string on the server.
-
-        Note that oob data is already sent separately to the
-        oobhandler at this point.
+        Update the protocol_flags and sync them with Portal.
 
         Kwargs:
-            text (str): A text to relay
-            kwargs (any): Other parameters from the protocol.
+            key, value - A key:value pair to set in the
+                protocol_flags dictionary.
+
+        Notes:
+            Since protocols can vary, no checking is done
+            as to the existene of the flag or not. The input
+            data should have been validated before this call.
 
         """
-        #from evennia.server.profiling.timetrace import timetrace
-        #text = timetrace(text, "ServerSession.data_in")
+        if kwargs:
+            self.protocol_flags.update(kwargs)
+            self.sessionhandler.session_portal_sync(self)
 
-        #explicitly check for None since text can be an empty string, which is
-        #also valid
+
+    def data_out(self, **kwargs):
+        """
+        Sending data from Evennia->Client
+
+        Kwargs:
+            text (str or tuple)
+            any (str or tuple): Send-commands identified
+                by their keys. Or "options", carrying options
+                for the protocol(s).
+
+        """
+        self.sessionhandler.data_out(self, **kwargs)
+
+    def msg(self, text=None, **kwargs):
+        """
+        Wrapper to mimic msg() functionality of Objects and Players
+        (server sessions don't use data_in since incoming data is
+        handled by inputfuncs).
+
+        Args:
+            text (str): String input.
+
+        Kwargs:
+            any (str or tuple): Send-commands identified
+                by their keys. Or "options", carrying options
+                for the protocol(s).
+
+        """
+        # this can happen if this is triggered e.g. a command.msg
+        # that auto-adds the session, we'd get a kwarg collision.
+        kwargs.pop("session", None)
         if text is not None:
-            # this is treated as a command input
-            #text = to_unicode(escape_control_sequences(text), encoding=self.encoding)
-            # handle the 'idle' command
-            if text.strip() == _IDLE_COMMAND:
-                self.update_session_counters(idle=True)
-                return
-            if self.player:
-                # nick replacement
-                puppet = self.puppet
-                if puppet:
-                    text = puppet.nicks.nickreplace(text,
-                                  categories=("inputline", "channel"), include_player=True)
-                else:
-                    text = self.player.nicks.nickreplace(text,
-                                categories=("inputline", "channels"), include_player=False)
-            cmdhandler(self, text, callertype="session", session=self)
-            self.update_session_counters()
+            self.data_out(text=text, **kwargs)
+        else:
+            self.data_out(**kwargs)
 
-    execute_cmd = data_in  # alias
-
-    def data_out(self, text=None, **kwargs):
+    def execute_cmd(self, raw_string, **kwargs):
         """
-        Send Evennia -> User
+        Do something as this object. This method is normally never
+        called directly, instead incoming command instructions are
+        sent to the appropriate inputfunc already at the sessionhandler
+        level. This method allows Python code to inject commands into
+        this stream, and will lead to the text inputfunc be called.
 
+        Args:
+            raw_string (string): Raw command input
         Kwargs:
-            text (str): A text to relay
-            kwargs (any): Other parameters to the protocol.
+            Other keyword arguments will be added to the found command
+            object instace as variables before it executes.  This is
+            unused by default Evennia but may be used to set flags and
+            change operating paramaters for commands at run-time.
 
         """
-        #from evennia.server.profiling.timetrace import timetrace
-        #text = timetrace(text, "ServerSession.data_out")
-
-        text = text if text else ""
-        if _INLINEFUNC_ENABLED and not "raw" in kwargs:
-            text = parse_inlinefunc(text, strip="strip_inlinefunc" in kwargs, session=self)
-            text = parse_nested_inlinefunc(text, strip="strip_inlinefunc" in kwargs, session=self)
-        if self.screenreader:
-            global _ANSI
-            if not _ANSI:
-                from evennia.utils import ansi as _ANSI
-            text = _ANSI.parse_ansi(text, strip_ansi=True, xterm256=False, mxp=False)
-            text = _RE_SCREENREADER_REGEX.sub("", text)
-        self.sessionhandler.data_out(self, text=text, **kwargs)
-    # alias
-    msg = data_out
+        # inject instruction into input stream
+        kwargs["text"] = ((raw_string,), {})
+        self.sessionhandler.data_in(self, **kwargs)
 
     def __eq__(self, other):
         "Handle session comparisons"
@@ -426,6 +442,8 @@ class ServerSession(Session):
     def __unicode__(self):
         "Unicode representation"
         return u"%s" % str(self)
+
+
 
     # Dummy API hooks for use during non-loggedin operation
 

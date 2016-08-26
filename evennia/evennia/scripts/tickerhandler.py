@@ -14,26 +14,30 @@ Example:
 ```python
     from evennia.scripts.tickerhandler import TICKER_HANDLER
 
-    # tick myobj every 15 seconds
-    TICKER_HANDLER.add(myobj, 15)
+    # call tick myobj.at_tick(*args, **kwargs) every 15 seconds
+    TICKER_HANDLER.add(15, myobj.at_tick, *args, **kwargs)
 ```
 
-The handler will by default try to call a hook `at_tick()`
-on the subscribing object. The hook's name can be changed
-if the `hook_key` keyword is given to the `add()` method (only
-one such alternate name per interval though). The
-handler will transparently set up and add new timers behind
-the scenes to tick at given intervals, using a TickerPool.
+You supply the interval to tick and a callable to call regularly
+with any extra args/kwargs. The handler will transparently set
+up and add new timers behind the scenes to tick at given intervals,
+using a TickerPool - all callables with the same interval will share
+the interval ticker.
 
 To remove:
 
 ```python
-    TICKER_HANDLER.remove(myobj, 15)
+    TICKER_HANDLER.remove(15, myobj.at_tick)
 ```
 
-The interval must be given since a single object can be subscribed
-to many different tickers at the same time.
-
+Both interval and callable must be given since a single object can be subscribed
+to many different tickers at the same time. You can also supply `idstring`
+as an identifying string if you ever want to tick the callable at the same interval
+but with different arguments (args/kwargs are not used for identifying the ticker). There
+is also `persistent=False` if you don't want to make a ticker that don't survive a reload.
+If either or both `idstring` or `persistent` has been changed from their defaults, they
+must be supplied to the `TICKER_HANDLER.remove` call to properly identify the ticker
+to remove.
 
 The TickerHandler's functionality can be overloaded by modifying the
 Ticker class and then changing TickerPool and TickerHandler to use the
@@ -54,8 +58,8 @@ a  custom handler one can make a custom `AT_STARTSTOP_MODULE` entry to
 call the handler's `save()` and `restore()` methods when the server reboots.
 
 """
+import inspect
 from builtins import object
-from future.utils import listvalues
 
 from twisted.internet.defer import inlineCallbacks
 from django.core.exceptions import ObjectDoesNotExist
@@ -63,15 +67,15 @@ from evennia.scripts.scripts import ExtendedLoopingCall
 from evennia.server.models import ServerConfig
 from evennia.utils.logger import log_trace, log_err
 from evennia.utils.dbserialize import dbserialize, dbunserialize, pack_dbobj, unpack_dbobj
+from evennia.utils import variable_from_module
 
 _GA = object.__getattribute__
 _SA = object.__setattr__
 
 
-_ERROR_ADD_INTERVAL = \
-"""TickerHandler: Tried to add a ticker with invalid interval:
-obj={obj}, interval={interval}, args={args}, kwargs={kwargs}
-store_key={store_key}
+_ERROR_ADD_TICKER = \
+"""TickerHandler: Tried to add an invalid ticker:
+{storekey}
 Ticker was not added."""
 
 class Ticker(object):
@@ -98,22 +102,42 @@ class Ticker(object):
         kwargs is used here to identify which hook method to call.
 
         """
-        for store_key, (obj, args, kwargs) in self.subscriptions.items():
-            hook_key = yield kwargs.pop("_hook_key", "at_tick")
-            if not obj or not obj.pk:
-                # object was deleted between calls
-                self.remove(store_key)
-                continue
+        self._to_add = []
+        self._to_remove = []
+        self._is_ticking = True
+        for store_key, (args, kwargs) in self.subscriptions.iteritems():
+            callback = yield kwargs.pop("_callback", "at_tick")
+            obj = yield kwargs.pop("_obj", None)
             try:
-                yield _GA(obj, hook_key)(*args, **kwargs)
+                if callable(callback):
+                    # call directly
+                    yield callback(*args, **kwargs)
+                    continue
+                # try object method
+                if not obj or not obj.pk:
+                    # object was deleted between calls
+                    self._to_remove.append(store_key)
+                    continue
+                else:
+                    yield _GA(obj, callback)(*args, **kwargs)
             except ObjectDoesNotExist:
-                log_trace()
-                self.remove(store_key)
+                log_trace("Removing ticker.")
+                self._to_remove.append(store_key)
             except Exception:
                 log_trace()
             finally:
                 # make sure to re-store
-                kwargs["_hook_key"] = hook_key
+                kwargs["_callback"] = callback
+                kwargs["_obj"] = obj
+        # cleanup - we do this here to avoid changing the subscription dict while it loops
+        self._is_ticking = False
+        for store_key in self._to_remove:
+            self.remove(store_key)
+        for store_key, (args, kwargs) in self._to_add:
+            self.add(store_key, *args, **kwargs)
+        self._to_remove = []
+        self._to_add = []
+
 
     def __init__(self, interval):
         """
@@ -125,6 +149,9 @@ class Ticker(object):
         """
         self.interval = interval
         self.subscriptions = {}
+        self._is_ticking = False
+        self._to_remove = []
+        self._to_add = []
         # set up a twisted asynchronous repeat call
         self.task = ExtendedLoopingCall(self._callback)
 
@@ -138,35 +165,33 @@ class Ticker(object):
 
         """
         subs = self.subscriptions
-        if None in subs.values():
-            # clean out objects that may have been deleted
-            subs = dict((store_key, obj) for store_key, obj in subs if obj)
-            self.subscriptions = subs
         if self.task.running:
             if not subs:
                 self.task.stop()
         elif subs:
             self.task.start(self.interval, now=False, start_delay=start_delay)
 
-    def add(self, store_key, obj, *args, **kwargs):
+    def add(self, store_key, *args, **kwargs):
         """
         Sign up a subscriber to this ticker.
         Args:
             store_key (str): Unique storage hash for this ticker subscription.
-            obj (Object): Object subscribing to this ticker.
             args (any, optional): Arguments to call the hook method with.
 
         Kwargs:
             _start_delay (int): If set, this will be
                 used to delay the start of the trigger instead of
                 `interval`.
-            _hooK_key (str): This carries the name of the hook method
-                to call. It is passed on as-is from this method.
 
         """
-        start_delay = kwargs.pop("_start_delay", None)
-        self.subscriptions[store_key] = (obj, args, kwargs)
-        self.validate(start_delay=start_delay)
+        if self._is_ticking:
+            # protects the subscription dict from
+            # updating while it is looping
+            self._to_start.append((store_key, (args, kwargs)))
+        else:
+            start_delay = kwargs.pop("_start_delay", None)
+            self.subscriptions[store_key] = (args, kwargs)
+            self.validate(start_delay=start_delay)
 
     def remove(self, store_key):
         """
@@ -176,8 +201,13 @@ class Ticker(object):
             store_key (str): Unique store key.
 
         """
-        self.subscriptions.pop(store_key, False)
-        self.validate()
+        if self._is_ticking:
+            # this protects the subscription dict from
+            # updating while it is looping
+            self._to_remove.append(store_key)
+        else:
+            self.subscriptions.pop(store_key, False)
+            self.validate()
 
     def stop(self):
         """
@@ -204,48 +234,37 @@ class TickerPool(object):
         """
         self.tickers = {}
 
-    def add(self, store_key, obj, interval, *args, **kwargs):
+    def add(self, store_key, *args, **kwargs):
         """
         Add new ticker subscriber.
 
         Args:
             store_key (str): Unique storage hash.
-            obj (Object): Object subscribing.
-            interval (int): How often to call the ticker.
             args (any, optional): Arguments to send to the hook method.
 
-        Kwargs:
-            _start_delay (int): If set, this will be
-                used to delay the start of the trigger instead of
-                `interval`. It is passed on as-is from this method.
-            _hooK_key (str): This carries the name of the hook method
-                to call. It is passed on as-is from this method.
-
         """
+        _, _, _, interval, _, _ = store_key
         if not interval:
-            log_err(_ERROR_ADD_INTERVAL.format(store_key=store_key, obj=obj,
-                                       interval=interval, args=args, kwargs=kwargs))
+            log_err(_ERROR_ADD_TICKER.format(store_key=store_key))
             return
 
         if interval not in self.tickers:
             self.tickers[interval] = self.ticker_class(interval)
-        self.tickers[interval].add(store_key, obj, *args, **kwargs)
+        self.tickers[interval].add(store_key, *args, **kwargs)
 
-    def remove(self, store_key, interval):
+    def remove(self, store_key):
         """
         Remove subscription from pool.
 
         Args:
-            store_key (str): Unique storage hash.
-            interval (int): Ticker interval.
-
-        Notes:
-            A given subscription is uniquely identified both
-            via its `store_key` and its `interval`.
+            store_key (str): Unique storage hash to remove
 
         """
+        _, _, _, interval, _, _ = store_key
         if interval in self.tickers:
             self.tickers[interval].remove(store_key)
+            if not self.tickers[interval]:
+                del self.tickers[interval]
 
     def stop(self, interval=None):
         """
@@ -285,33 +304,69 @@ class TickerHandler(object):
         self.save_name = save_name
         self.ticker_pool = self.ticker_pool_class()
 
-    def _store_key(self, obj, interval, idstring=""):
+    def _get_callback(self, callback):
         """
-        Tries to create a store_key for the object.  Returns a tuple
-        (isdb, store_key) where isdb is a boolean True if obj was a
-        database object, False otherwise.
+        Analyze callback and determine its consituents
 
         Args:
-            obj (Object): Subscribing object.
-            interval (int): Ticker interval
-            idstring (str, optional): Additional separator between
-                different subscription types.
+            callback (function or method): This is either a stand-alone
+                function or class method on a typeclassed entitye (that is,
+                an entity that can be saved to the database).
+
+        Returns:
+            ret (tuple): This is a tuple of the form `(obj, path, callfunc)`,
+                where `obj` is the database object the callback is defined on
+                if it's a method (otherwise `None`) and vice-versa, `path` is
+                the python-path to the stand-alone function (`None` if a method).
+                The `callfunc` is either the name of the method to call or the
+                callable function object itself.
 
         """
-        if hasattr(obj, "db_key"):
-            # create a store_key using the database representation
-            objkey = pack_dbobj(obj)
-            isdb = True
+        outobj, outpath, outcallfunc = None, None, None
+        if callable(callback):
+            if inspect.ismethod(callback):
+                outobj = callback.im_self
+                outcallfunc = callback.im_func.func_name
+            elif inspect.isfunction(callback):
+                outpath = "%s.%s" % (callback.__module__, callback.func_name)
+                outcallfunc = callback
         else:
-            # non-db object, look for a property "key" on it, otherwise
-            # use its memory location.
-            try:
-                objkey = _GA(obj, "key")
-            except AttributeError:
-                objkey = id(obj)
-            isdb = False
-        # return sidb and store_key
-        return isdb, (objkey, interval, idstring)
+            raise TypeError("%s is not a callable function or method." %  callback)
+        return outobj, outpath, outcallfunc
+
+    def _store_key(self, obj, path, interval, callfunc, idstring="", persistent=True):
+        """
+        Tries to create a store_key for the object.
+
+        Args:
+            obj (Object, tuple or None): Subscribing object if any. If a tuple, this is
+                a packed_obj tuple from dbserialize.
+            path (str or None): Python-path to callable, if any.
+            interval (int): Ticker interval.
+            callfunc (callable or str): This is either the callable function or
+                the name of the method to call. Note that the callable is never
+                stored in the key; that is uniquely identified with the python-path.
+            idstring (str, optional): Additional separator between
+                different subscription types.
+            persistent (bool, optional): If this ticker should survive a system
+                shutdown or not.
+
+        Returns:
+            store_key (tuple): A tuple `(packed_obj, methodname, outpath, interval,
+                idstring, persistent)` that uniquely identifies the
+                ticker. Here, `packed_obj` is the unique string representation of the
+                object or `None`. The `methodname` is the string name of the method on
+                `packed_obj` to call, or `None` if `packed_obj` is unset. `path` is
+                the Python-path to a non-method callable, or `None`. Finally, `interval`
+                `idstring` and `persistent` are integers, strings and bools respectively.
+
+        """
+        interval = int(interval)
+        persistent = bool(persistent)
+        packed_obj = pack_dbobj(obj)
+        methodname = callfunc if callfunc and isinstance(callfunc, basestring) else None
+        outpath = path if path and isinstance(path, basestring) else None
+        return (packed_obj, methodname, outpath, interval, idstring, persistent)
 
     def save(self):
         """
@@ -322,107 +377,148 @@ class TickerHandler(object):
 
         """
         if self.ticker_storage:
+            # get the current times so the tickers can be restarted with a delay later
             start_delays = dict((interval, ticker.task.next_call_time())
                                  for interval, ticker in self.ticker_pool.tickers.items())
+
+            # remove any subscriptions that lost its object in the interim
+            to_save = {store_key: (args, kwargs) for store_key, (args, kwargs) in self.ticker_storage.items()
+                        if ((store_key[1] and ("_obj" in kwargs and kwargs["_obj"].pk) and
+                             hasattr(kwargs["_obj"], store_key[1])) or    # a valid method with existing obj
+                           store_key[2])}  # a path given
+
             # update the timers for the tickers
-            #for (obj, interval, idstring), (args, kwargs) in self.ticker_storage.items():
-            for store_key, (args, kwargs) in self.ticker_storage.items():
+            for store_key, (args, kwargs) in to_save.items():
                 interval = store_key[1]
                 # this is a mutable, so it's updated in-place in ticker_storage
                 kwargs["_start_delay"] = start_delays.get(interval, None)
-            ServerConfig.objects.conf(key=self.save_name,
-                                    value=dbserialize(self.ticker_storage))
+            ServerConfig.objects.conf(key=self.save_name, value=dbserialize(to_save))
         else:
             # make sure we have nothing lingering in the database
             ServerConfig.objects.conf(key=self.save_name, delete=True)
 
-    def restore(self):
+    def restore(self, server_reload=True):
         """
         Restore ticker_storage from database and re-initialize the
         handler from storage. This is triggered by the server at
         restart.
 
+        Args:
+            server_reload (bool, optional): If this is False, it means
+                the server went through a cold reboot and all
+                non-persistent tickers must be killed.
+
         """
         # load stored command instructions and use them to re-initialize handler
-        ticker_storage = ServerConfig.objects.conf(key=self.save_name)
-        if ticker_storage:
-            self.ticker_storage = dbunserialize(ticker_storage)
-            for store_key, (args, kwargs) in self.ticker_storage.items():
-                obj, interval, idstring = store_key
-                obj = unpack_dbobj(obj)
-                _, store_key = self._store_key(obj, interval, idstring)
-                self.ticker_pool.add(store_key, obj, interval, *args, **kwargs)
+        restored_tickers = ServerConfig.objects.conf(key=self.save_name)
+        if restored_tickers:
+            # the dbunserialize will convert all serialized dbobjs to real objects
 
-    def add(self, obj, interval, idstring="", hook_key="at_tick", *args, **kwargs):
+            restored_tickers = dbunserialize(restored_tickers)
+            self.ticker_storage = {}
+            for store_key, (args, kwargs) in restored_tickers.iteritems():
+                try:
+                    # at this point obj is the actual object (or None) due to how
+                    # the dbunserialize works
+                    obj, callfunc, path, interval, idstring, persistent = store_key
+                    if not persistent and not server_reload:
+                        # this ticker will not be restarted
+                        continue
+                    if isinstance(callfunc, basestring) and not obj:
+                        # methods must have an existing object
+                        continue
+                    # we must rebuild the store_key here since obj must not be
+                    # stored as the object itself for the store_key to be hashable.
+                    store_key = self._store_key(obj, path, interval, callfunc, idstring, persistent)
+
+                    if obj and callfunc:
+                        kwargs["_callback"] = callfunc
+                        kwargs["_obj"] = obj
+                    elif path:
+                        modname, varname = path.rsplit(".", 1)
+                        callback = variable_from_module(modname, varname)
+                        kwargs["_callback"] = callback
+                        kwargs["_obj"] = None
+                    else:
+                        # Neither object nor path - discard this ticker
+                        log_err("Tickerhandler: Removing malformed ticker: %s" % str(store_key))
+                        continue
+                except Exception:
+                    # this suggests a malformed save or missing objects
+                    log_trace("Tickerhandler: Removing malformed ticker: %s" % str(store_key))
+                    continue
+                # if we get here we should create a new ticker
+                self.ticker_storage[store_key] = (args, kwargs)
+                self.ticker_pool.add(store_key, *args, **kwargs)
+
+    def add(self, interval=60, callback=None, idstring="", persistent=True, *args, **kwargs):
         """
-        Add object to tickerhandler
+        Add subscription to tickerhandler
 
         Args:
-            obj (Object): The object to subscribe to the ticker.
-            interval (int): Interval in seconds between calling
-                `hook_key` below.
+            interval (int, optional): Interval in seconds between calling
+                `callable(*args, **kwargs)`
+            callable (callable function or method, optional): This
+                should either be a stand-alone function or a method on a
+                typeclassed entity (that is, one that can be saved to the
+                database).
             idstring (str, optional): Identifier for separating
                 this ticker-subscription from others with the same
                 interval. Allows for managing multiple calls with
-                the same time interval
-            hook_key (str, optional): The name of the hook method
-                on `obj` to call every `interval` seconds. Defaults to
-                `at_tick(*args, **kwargs`. All hook methods must
-                always accept *args, **kwargs.
+                the same time interval and callback.
+            persistent (bool, optional): A ticker will always survive
+                a server reload. If this is unset, the ticker will be
+                deleted by a server shutdown.
             args, kwargs (optional): These will be passed into the
-                method given by `hook_key` every time it is called.
+                callback every time it is called.
 
         Notes:
-            The combination of `obj`, `interval` and `idstring`
-            together uniquely defines the ticker subscription. They
-            must all be supplied in order to unsubscribe from it
-            later.
+            The callback will be identified by type and stored either as
+            as combination of serialized database object + methodname or
+            as a python-path to the module + funcname. These strings will
+            be combined iwth `interval` and `idstring` to define a
+            unique storage key for saving. These must thus all be supplied
+            when wanting to modify/remove the ticker later.
 
         """
-        isdb, store_key = self._store_key(obj, interval, idstring)
-        if isdb:
-            self.ticker_storage[store_key] = (args, kwargs)
-            self.save()
-        kwargs["_hook_key"] = hook_key
-        self.ticker_pool.add(store_key, obj, interval, *args, **kwargs)
+        if isinstance(callback, int):
+            raise RuntimeError("TICKER_HANDLER.add has changed: "
+            "the interval is now the first argument, callback the second.")
 
-    def remove(self, obj, interval=None, idstring=""):
+        obj, path, callfunc = self._get_callback(callback)
+        store_key = self._store_key(obj, path, interval, callfunc, idstring, persistent)
+        kwargs["_obj"] = obj
+        kwargs["_callback"] = callfunc # either method-name or callable
+        self.ticker_storage[store_key] = (args, kwargs)
+        self.ticker_pool.add(store_key, *args, **kwargs)
+        self.save()
+
+    def remove(self, interval=60, callback=None, idstring="", persistent=True):
         """
         Remove object from ticker or only remove it from tickers with
         a given interval.
 
         Args:
-            obj (Object): The object subscribing to the ticker.
-            interval (int, optional): Interval of ticker to remove. If
-                `None`, all tickers on this object matching `idstring`
-                will be removed, regardless of their `interval` setting.
+            interval (int, optional): Interval of ticker to remove.
+            callback (callable function or method): Either a function or
+                the method of a typeclassed object.
             idstring (str, optional): Identifier id of ticker to remove.
 
         """
-        if interval:
-            isdb, store_key = self._store_key(obj, interval, idstring)
-            if isdb:
-                self.ticker_storage.pop(store_key, None)
-                self.save()
-            self.ticker_pool.remove(store_key, interval)
-        else:
-            # remove all objects with any intervals
-            intervals = list(self.ticker_pool.tickers)
-            should_save = False
-            for interval in intervals:
-                isdb, store_key = self._store_key(obj, interval, idstring)
-                if isdb:
-                    self.ticker_storage.pop(store_key, None)
-                    should_save = True
-                self.ticker_pool.remove(store_key, interval)
-            if should_save:
-                self.save()
+        if isinstance(callback, int):
+            raise RuntimeError("TICKER_HANDLER.remove has changed: "
+            "the interval is now the first argument, callback the second.")
 
-
+        obj, path, callfunc = self._get_callback(callback)
+        store_key = self._store_key(obj, path, interval, callfunc, idstring, persistent)
+        to_remove = self.ticker_storage.pop(store_key, None)
+        if to_remove:
+            self.ticker_pool.remove(store_key)
+            self.save()
 
     def clear(self, interval=None):
         """
-        Stop/remove all tickers from handler.
+        Stop/remove tickers from handler.
 
         Args:
             interval (int): Only stop tickers with this interval.
@@ -457,14 +553,27 @@ class TickerHandler(object):
         """
         if interval is None:
             # return dict of all, ordered by interval
-            return dict((interval, listvalues(ticker.subscriptions))
-                         for interval, ticker in self.ticker_pool.tickers.items())
+            return dict((interval, ticker.subscriptions)
+                         for interval, ticker in self.ticker_pool.tickers.iteritems())
         else:
             # get individual interval
             ticker = self.ticker_pool.tickers.get(interval, None)
             if ticker:
-                return listvalues(ticker.subscriptions)
+                return {interval: ticker.subscriptions}
 
+    def all_display(self):
+        """
+        Get all tickers on an easily displayable form.
+
+        Returns:
+            tickers (dict): A list of all storekeys
+
+        """
+        store_keys = []
+        for ticker in self.ticker_pool.tickers.itervalues():
+            for (objtup, callfunc, path, interval, idstring, persistent), (args, kwargs) in ticker.subscriptions.iteritems():
+                store_keys.append((kwargs.get("_obj", None), callfunc, path, interval, idstring, persistent))
+        return store_keys
 
 # main tickerhandler
 TICKER_HANDLER = TickerHandler()

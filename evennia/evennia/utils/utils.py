@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 """
 General helper functions that don't fit neatly under any given category.
 
@@ -18,7 +19,7 @@ import re
 import textwrap
 import random
 from importlib import import_module
-from inspect import ismodule, trace
+from inspect import ismodule, trace, getmembers, getmodule
 from collections import defaultdict, OrderedDict
 from twisted.internet import threads, defer, reactor
 from django.conf import settings
@@ -299,7 +300,9 @@ def time_format(seconds, style=0):
         """
         Full-detailed, long-winded format. We ignore seconds.
         """
-        days_str = hours_str = minutes_str = seconds_str = ''
+        days_str = hours_str = ''
+        minutes_str = '0 minutes'
+
         if days > 0:
             if days == 1:
                 days_str = '%i day, ' % days
@@ -460,12 +463,12 @@ def dbref(dbref, reqhash=True):
         return dbref if isinstance(dbref, int) else None
 
 
-def dbid_to_obj(inp, objclass, raise_errors=True):
+def dbref_to_obj(inp, objclass, raise_errors=True):
     """
-    Convert a #dbid to a valid object.
+    Convert a #dbref to a valid object.
 
     Args:
-        inp (str or int): A valid dbref.
+        inp (str or int): A valid #dbref.
         objclass (class): A valid django model to filter against.
         raise_errors (bool, optional): Whether to raise errors
             or return `None` on errors.
@@ -484,18 +487,71 @@ def dbid_to_obj(inp, objclass, raise_errors=True):
         # we only convert #dbrefs
         return inp
     try:
-        if int(inp) < 0:
+        if dbid < 0:
             return None
     except ValueError:
         return None
 
     # if we get to this point, inp is an integer dbref; get the matching object
     try:
-        return objclass.objects.get(id=inp)
+        return objclass.objects.get(id=dbid)
     except Exception:
         if raise_errors:
             raise
         return inp
+
+# legacy alias
+dbid_to_obj = dbref_to_obj
+
+
+# some direct translations for the latinify
+_UNICODE_MAP = {"EM DASH": "-", "FIGURE DASH": "-", "EN DASH": "-", "HORIZONTAL BAR": "-",
+                "HORIZONTAL ELLIPSIS": "...", "RIGHT SINGLE QUOTATION MARK": "'"}
+
+def latinify(unicode_string, default='?', pure_ascii=False):
+    """
+    Convert a unicode string to "safe" ascii/latin-1 characters.
+    This is used as a last resort when normal decoding does not work.
+
+    Arguments:
+        unicode_string (unicode): A string to convert to an ascii
+            or latin-1 string.
+        default (str, optional): Characters resisting mapping will be replaced
+            with this character or string.
+    Notes:
+        This is inspired by the gist by Ricardo Murri:
+            https://gist.github.com/riccardomurri/3c3ccec30f037be174d3
+
+    """
+
+    from unicodedata import name
+
+    converted = []
+    for unich in iter(unicode_string):
+        try:
+            ch = unich.decode('ascii')
+        except UnicodeDecodeError:
+            # deduce a latin letter equivalent from the Unicode data
+            # point name; e.g., since `name(u'á') == 'LATIN SMALL
+            # LETTER A WITH ACUTE'` translate `á` to `a`.  However, in
+            # some cases the unicode name is still "LATIN LETTER"
+            # although no direct equivalent in the Latin alphabeth
+            # exists (e.g., Þ, "LATIN CAPITAL LETTER THORN") -- we can
+            # avoid these cases by checking that the letter name is
+            # composed of one letter only.
+            # We also supply some direct-translations for some particular
+            # common cases.
+            what = name(unich)
+            if what in _UNICODE_MAP:
+                ch = _UNICODE_MAP[what]
+            else:
+                what = what.split()
+                if what[0] == 'LATIN' and what[2] == 'LETTER' and len(what[3]) == 1:
+                    ch = what[3].lower() if what[1] == 'SMALL' else what[3].upper()
+                else:
+                    ch = default
+        converted.append(chr(ord(ch)))
+    return ''.join(converted)
 
 
 def to_unicode(obj, encoding='utf-8', force_string=False):
@@ -565,7 +621,6 @@ def to_str(obj, encoding='utf-8', force_string=False):
         conversion of objects to strings.
 
     """
-
     if force_string and not isinstance(obj, basestring):
         # some sort of other object. Try to
         # convert it to a string representation.
@@ -581,11 +636,16 @@ def to_str(obj, encoding='utf-8', force_string=False):
         except UnicodeEncodeError:
             for alt_encoding in ENCODINGS:
                 try:
-                    obj = obj.encode(encoding)
+                    obj = obj.encode(alt_encoding)
                     return obj
                 except UnicodeEncodeError:
                     pass
-        raise Exception("Error: Unicode could not encode unicode string '%s'(%s) to a bytestring. " % (obj, encoding))
+
+        # if we get to this point we have not found any way to convert this string. Try to parse it manually,
+        try:
+            return latinify(obj, '?')
+        except Exception, err:
+            raise Exception("%s, Error: Unicode could not encode unicode string '%s'(%s) to a bytestring. " % (err, obj, encoding))
     return obj
 
 
@@ -954,7 +1014,7 @@ def mod_import(module):
 
 def all_from_module(module):
     """
-    Return all global-level variables from a module.
+    Return all global-level variables defined in a module.
 
     Args:
         module (str, module): This can be either a Python path
@@ -973,8 +1033,35 @@ def all_from_module(module):
     mod = mod_import(module)
     if not mod:
         return {}
-    return dict((key, val) for key, val in mod.__dict__.items()
-                            if not (key.startswith("_") or ismodule(val)))
+    # make sure to only return variables actually defined in this
+    # module if available (try to avoid not imports)
+    members = getmembers(mod, predicate=lambda obj: getmodule(obj) in (mod, None))
+    return dict((key, val) for key, val in members if not key.startswith("_"))
+    #return dict((key, val) for key, val in mod.__dict__.items()
+    #                        if not (key.startswith("_") or ismodule(val)))
+
+
+def callables_from_module(module):
+    """
+    Return all global-level callables defined in a module.
+
+    Args:
+        module (str, module): A python-path to a module or an actual
+            module object.
+
+    Returns:
+        callables (dict): A dict of {name: callable, ...} from the module.
+
+    Notes:
+        Will ignore callables whose names start with underscore "_".
+
+    """
+    mod = mod_import(module)
+    if not mod:
+        return {}
+    # make sure to only return callables actually defined in this module (not imports)
+    members = getmembers(mod, predicate=lambda obj: callable(obj) and getmodule(obj) == mod)
+    return dict((key, val) for key, val in members if not key.startswith("_"))
 
 
 def variable_from_module(module, variable=None, default=None):
@@ -1202,9 +1289,9 @@ def string_suggestions(string, vocabulary, cutoff=0.6, maxnum=3):
         maxnum (int): Maximum number of suggestions to return.
 
     Returns:
-        suggestions (list): Suggestions from `vocabulary` that fall
-            under the `cutoff` setting. Could be empty if there are no
-            matches.
+        suggestions (list): Suggestions from `vocabulary` with a
+            similarity-rating that higher than or equal to `cutoff`.
+            Could be empty if there are no matches.
 
     """
     return [tup[1] for tup in sorted([(string_similarity(string, sugg), sugg)
@@ -1491,13 +1578,15 @@ def m_len(target):
 def at_search_result(matches, caller, query="", quiet=False, **kwargs):
     """
     This is a generic hook for handling all processing of a search
-    result, including error reporting.
+    result, including error reporting. This is also called by the cmdhandler
+    to manage errors in command lookup.
 
     Args:
-        matches (list): This is a list of 0, 1 or more typeclass instances,
-            the matched result of the search. If 0, a nomatch error should
-            be echoed, and if >1, multimatch errors should be given. Only
-            if a single match should the result pass through.
+        matches (list): This is a list of 0, 1 or more typeclass
+            instances or Command instances, the matched result of the
+            search. If 0, a nomatch error should be echoed, and if >1,
+            multimatch errors should be given. Only if a single match
+            should the result pass through.
         caller (Object): The object performing the search and/or which should
         receive error messages.
     query (str, optional): The search query used to produce `matches`.
@@ -1520,15 +1609,16 @@ def at_search_result(matches, caller, query="", quiet=False, **kwargs):
         error = kwargs.get("nofound_string") or _("Could not find '%s'." % query)
         matches = None
     elif len(matches) > 1:
-        error = kwargs.get("multimatch_string", None)
-        if not error:
-            error = _("More than one match for '%s'" \
-                     " (please narrow target):" % query)
-            for num, result in enumerate(matches):
-                error += "\n %i%s%s%s" % (
-                    num + 1, _MULTIMATCH_SEPARATOR,
-                    result.get_display_name(caller) if hasattr(result, "get_display_name") else result.key,
-                    result.get_extra_info(caller))
+        error = kwargs.get("multimatch_string") or \
+                _("More than one match for '%s' (please narrow target):" % query)
+        for num, result in enumerate(matches):
+            # we need to consider Commands, where .aliases is a list
+            aliases = result.aliases.all() if hasattr(result.aliases, "all") else result.aliases
+            error += "\n %i%s%s%s%s" % (
+                num + 1, _MULTIMATCH_SEPARATOR,
+                result.get_display_name(caller) if hasattr(result, "get_display_name") else query,
+                " [%s]" % ";".join(aliases) if aliases else "",
+                result.get_extra_info(caller))
         matches = None
     else:
         # exactly one match
@@ -1576,3 +1666,22 @@ class LimitedSizeOrderedDict(OrderedDict):
     def update(self, *args, **kwargs):
         super(LimitedSizeOrderedDict, self).update(*args, **kwargs)
         self._check_size()
+
+def get_game_dir_path():
+    """
+    This is called by settings_default in order to determine the path
+    of the game directory.
+
+    Returns:
+        path (str): Full OS path to the game dir
+
+    """
+    # current working directory, assumed to be somewhere inside gamedir.
+    for i in range(10):
+        gpath = os.getcwd()
+        if "server" in os.listdir(gpath):
+            if os.path.isfile(os.path.join("server", "conf", "settings.py")):
+                return gpath
+        else:
+            os.chdir(os.pardir)
+    raise RuntimeError("server/conf/settings.py not found: Must start from inside game dir.")
