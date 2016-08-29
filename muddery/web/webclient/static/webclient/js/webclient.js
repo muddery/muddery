@@ -3,6 +3,12 @@ Muddery webclient (javascript component)
 */
 
 var webclient = {
+ 	onText: function(args, kwargs) {
+ 	    for (index in args) {
+ 		    webclient.doShow("out", args[index]);
+ 		}
+ 	},
+ 	
     doShow : function(type, msg) {
         var data = null;
         
@@ -878,7 +884,7 @@ var webclient = {
         this.showPage("login");
         
         //reconnect, show the connection screen
-        webclient_init();
+        Evennia.connect();
     },
     
     onPuppet: function(data) {
@@ -1003,15 +1009,15 @@ var webclient = {
     onConnectionOpen: function() {
         $("#msg_wnd").empty();
         $("#prompt_bar").empty();
-        this.showUnloginTabs();
-        this.showPage("login");
+        webclient.showUnloginTabs();
+        webclient.showPage("login");
 
         webclient.doAutoLoginCheck();
     },
     
     onConnectionClose: function() {
-        this.showConnectTabs();
-        this.showPage("connect");
+        webclient.showConnectTabs();
+        webclient.showPage("connect");
 
         // close all popup windows
         combat.closeCombat();
@@ -1051,8 +1057,38 @@ var webclient = {
 }
 
 // Input jQuery callbacks
-$(document).unbind("keydown");
+//$(document).unbind("keydown");
 
 // Callback function - called when the browser window resizes
-$(window).unbind("resize");
-$(window).resize(webclient.doSetSizes);
+//$(window).unbind("resize");
+//$(window).resize(webclient.doSetSizes);
+
+// Event when client finishes loading
+$(document).ready(function() {
+    // Event when client window changes
+    $(window).bind("resize", webclient.doSetSizes);
+
+    // This is safe to call, it will always only
+    // initialize once.
+    Evennia.init();
+    // register listeners
+    Evennia.emitter.on("text", webclient.onText);
+    //Evennia.emitter.on("prompt", onPrompt);
+    //Evennia.emitter.on("default", onDefault);
+    Evennia.emitter.on("connection_close", webclient.onConnectionClose);
+    // silence currently unused events
+    Evennia.emitter.on("connection_open", webclient.onConnectionOpen);
+    //Evennia.emitter.on("connection_error", onSilence);
+
+    webclient.doSetSizes();
+    // set an idle timer to send idle every 3 minutes,
+    // to avoid proxy servers timing out on us
+    setInterval(function() {
+        // Connect to server
+        if (Evennia.isConnected()) {
+            Evennia.msg("text", ["idle"], {});
+        }
+    },
+    60000*3
+    );
+});

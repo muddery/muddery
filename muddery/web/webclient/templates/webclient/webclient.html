@@ -29,29 +29,31 @@
     <!-- load local strings -->
     <script src="{% static "webclient/js/local_string.js" %}" type="text/javascript" charset="utf-8"></script>
     <!-- load language file-->
+    {% if language_code %}
     <script src="{% static "webclient/js/lang/" %}{{language_code}}/strings.js" type="text/javascript" charset="utf-8"></script>
-
-    {% if websocket_enabled %}
-        <script language="javascript" type="text/javascript">
-            if ("WebSocket" in window) {
-                <!-- Importing the Muddery websocket webclient component (requires jQuery)  -->
-                var wsurl = "ws://" + this.location.hostname + ":{{websocket_port}}";
-                document.write("\<script src=\"{% static "webclient/js/evennia_websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-                document.write("\<script src=\"{% static "webclient/js/websocket_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-            }
-            else {
-                <!-- No websocket support in browser. Importing the Muddery ajax webclient component (requires jQuery)  -->
-                document.write("\<script src=\"{% static "webclient/js/evennia_ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-                document.write("\<script src=\"{% static "webclient/js/ajax_webclient.js" %}\" type=\"text/javascript\" charset=\"utf-8\"\>\</script\>");
-            }
-        </script>
-    {% else %}
-        <!-- websocket not enabled; use ajax -->
-        <script src="{% static "webclient/js/evennia_ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
-        <script src="{% static "webclient/js/ajax_webclient.js" %}" type="text/javascript" charset="utf-8"></script>
-
     {% endif %}
 
+    <!-- Set up Websocket url and load the evennia.js library-->
+    <script language="javascript" type="text/javascript">
+        {% if websocket_enabled %}
+            var wsactive = true;
+        {% else %}
+            var wsactive = false;
+        {% endif %}
+
+        {% if browser_sessid %}
+           var csessid = "{{browser_sessid}}";
+        {% else %}
+           var csessid = false;
+        {% endif %}
+
+        {% if websocket_url %}
+            var wsurl = "{{websocket_url}}:{{websocket_port}}";
+        {% else %}
+            var wsurl = "ws://" + this.location.hostname + ":{{websocket_port}}";
+        {% endif %}
+    </script>
+    <script src="{% static "webclient/js/evennia.js" %}" type="text/javascript" charset="utf-8"/></script>
     <script src="{% static "webclient/js/webclient.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/webclient_uimgr.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "webclient/js/webclient_popupmgr.js" %}" type="text/javascript" charset="utf-8"></script>
@@ -66,15 +68,17 @@
 
   </head>
   <body>
-    <div id="noscript">
-      <h3>Javascript Error: The Muddery webclient requires that you have Javascript activated.</h3>
-      <p>Turn off eventual script blockers and/or switch to a web
-      browser supporting javascript.</p><p>For admins: The error
-      could also be due to not being able to access the online
-      jQuery javascript library. If you are testing the client
-      without an internet connection, you have to previously
-      download the jQuery library from http://code.jquery.com
-      (it's just one file) and then edit webclient.html to point
-      to the local copy.</p>
+    <div id="noscript" class="err">
+        <h3>Javascript Error: The Evennia MUD client requires that you
+            have Javascript activated.</h3>
+            <p>Turn off eventual script blockers and/or switch to a
+            web browser supporting javascript. <p>
+            This error could also be due to not being able to access
+            the online jQuery javascript library.</p>
+        <!-- This is will only fire if javascript is actually active -->
+        <script language="javascript" type="text/javascript">
+            $('#noscript').remove();
+        </script>
+    </div>
   </body>
 </html>

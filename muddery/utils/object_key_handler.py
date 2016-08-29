@@ -29,7 +29,7 @@ class ObjectKeyHandler(object):
         self.clear()
 
         # Get model names.
-        for model_name in settings.OBJECT_DATA_MODELS:
+        for model_name in settings.OBJECT_DATA_MODELS + settings.OBJECT_ADDITIONAL_DATA:
             try:
                 model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
                 for record in model_obj.objects.all():

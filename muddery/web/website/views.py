@@ -13,14 +13,38 @@ from django.shortcuts import render
 from evennia import SESSION_HANDLER
 from evennia.objects.models import ObjectDB
 from evennia.players.models import PlayerDB
+from evennia.utils import logger
+
+from django.contrib.auth import login
 
 _BASE_CHAR_TYPECLASS = settings.BASE_CHARACTER_TYPECLASS
 
 
-def page_index(request):
+def _shared_login(request):
     """
-    Main root page.
+    Handle the shared login between website and webclient.
+
     """
+    csession = request.session
+    player = request.user
+    sesslogin = csession.get("logged_in", None)
+
+    if csession.session_key is None:
+        # this is necessary to build the sessid key
+        csession.save()
+    elif player.is_authenticated():
+        if not sesslogin:
+            csession["logged_in"] = player.id
+    elif sesslogin:
+        # The webclient has previously registered a login to this csession
+        player = PlayerDB.objects.get(id=sesslogin)
+        try:
+            login(request, player)
+        except AttributeError:
+            logger.log_trace()
+
+
+def _gamestats():
     # Some misc. configurable stuff.
     # TODO: Move this to either SQL or settings.py based configuration.
     fpage_player_limit = 4
@@ -42,16 +66,29 @@ def page_index(request):
     pagevars = {
         "page_title": "Front Page",
         "players_connected_recent": recent_users,
-        "num_players_connected": nsess or "no one",
-        "num_players_registered": nplyrs or "no",
-        "num_players_connected_recent": nplyrs_conn_recent or "no",
-        "num_players_registered_recent": nplyrs_reg_recent or "no one",
-        "num_rooms": nrooms or "none",
-        "num_exits": nexits or "no",
-        "num_objects": nobjs or "none",
-        "num_characters": nchars or "no",
-        "num_others": nothers or "no"
+        "num_players_connected": nsess,
+        "num_players_registered": nplyrs,
+        "num_players_connected_recent": nplyrs_conn_recent,
+        "num_players_registered_recent": nplyrs_reg_recent,
+        "num_rooms": nrooms,
+        "num_exits": nexits,
+        "num_objects": nobjs,
+        "num_characters": nchars,
+        "num_others": nothers
     }
+    return pagevars
+
+
+def page_index(request):
+    """
+    Main root page.
+    """
+
+    # handle webclient-website shared login
+    _shared_login(request)
+
+    # get game db stats
+    pagevars = _gamestats()
 
     return render(request, 'index.html', pagevars)
 
@@ -66,7 +103,7 @@ def to_be_implemented(request):
         "page_title": "To Be Implemented...",
     }
 
-    return render(request, 'evennia_general/tbi.html', pagevars)
+    return render(request, 'tbi.html', pagevars)
 
 
 @staff_member_required
@@ -75,7 +112,7 @@ def evennia_admin(request):
     Helpful Evennia-specific admin page.
     """
     return render(
-        request, 'evennia_general/evennia_admin.html', {
+        request, 'evennia_admin.html', {
             'playerdb': PlayerDB})
 
 

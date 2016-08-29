@@ -2,11 +2,12 @@
 This structures the (simple) structure of the
 webpage 'application'.
 """
-from django.conf.urls import *
+from django.conf.urls import url
+from muddery.worlddata import views
 
 urlpatterns = [
-    url(r'^$', 'muddery.worlddata.views.worldeditor', name="index"),
-    url(r'^editor/.*submit.html$', 'muddery.worlddata.views.submit_form', name="submit_form"),
-    url(r'^editor/.*form.html$', 'muddery.worlddata.views.view_form', name="view_form"),
-    url(r'^editor/.*list.html$', 'muddery.worlddata.views.list_view', name="list_view"),
-    url(r'^editor/', 'muddery.worlddata.views.editor', name="editor"),]
+    url(r'^$', views.worldeditor, name="index"),
+    url(r'^editor/.*submit.html$', views.submit_form, name="submit_form"),
+    url(r'^editor/.*form.html$', views.view_form, name="view_form"),
+    url(r'^editor/.*list.html$', views.list_view, name="list_view"),
+    url(r'^editor/', views.editor, name="editor"),]
