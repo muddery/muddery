@@ -13,7 +13,7 @@ var commands = {
     doCommandLink : function(caller) {
         var cmd = $(caller).attr("cmd_name");
         var args = $(caller).attr("cmd_args");
-        sendCommand(this.cmdString(cmd, args));
+        Evennia.msg("text", this.cmdString(cmd, args));
     },
     
     doCastSkill : function(skill) {
@@ -28,7 +28,7 @@ var commands = {
         var cmd = "castskill";
         var args = {"skill": skill,
                     "target": data_handler.current_target};
-        sendCommand(this.cmdString(cmd, args));
+        Evennia.msg("text", this.cmdString(cmd, args));
     },
     
     
@@ -45,15 +45,15 @@ var commands = {
 
         var args = {"playername" : playername,
                     "password" : password};
-        sendCommand(this.cmdString("connect", args));
+        Evennia.msg("text", this.cmdString("connect", args));
 
         commands.doAutoLoginConfig(playername, password);
     },
 
     // register
     doRegister : function() {
-        if (!CLIENT_CONNECTED) {
-            doConnect();
+        if (!Evennia.isConnected()) {
+            Evennia.connect();
         }
         
         var playername = $("#reg_name").val();
@@ -74,17 +74,17 @@ var commands = {
         var args = {"playername" : playername,
                     "nickname" : nickname,
                     "password" : password};
-        sendCommand(this.cmdString("create_connect", args));
+        Evennia.msg("text", this.cmdString("create_connect", args));
     },
     
     // look
     doLook : function(object) {
-        sendCommand(this.cmdString("look", object));
+        Evennia.msg("text", this.cmdString("look", object));
     },
     
     // talk
     doTalk : function(object) {
-        sendCommand(this.cmdString("talk", object));
+        Evennia.msg("text", this.cmdString("talk", object));
     },
     
     // dialogue
@@ -99,14 +99,14 @@ var commands = {
             if (npc) {
                 args["npc"] = npc;
             }
-            sendCommand(this.cmdString("dialogue", args));
+            Evennia.msg("text", this.cmdString("dialogue", args));
         }
     },
     
     // logout
     doLogout : function() {
         $.cookie("is_auto_login", '', {expires: -1});
-        sendCommand(this.cmdString("quit", ""));
+        Evennia.msg("text", this.cmdString("quit", ""));
     },
     
     // common command

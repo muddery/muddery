@@ -117,7 +117,7 @@ var frame = {
             .addClass('active')
             .css('display', 'none')
             .append($('<a>')
-                .attr('onclick', 'doConnect()')
+                .attr('onclick', 'Evennia.connect()')
                 .text(LS('Connect')))
             .appendTo(ul);
 

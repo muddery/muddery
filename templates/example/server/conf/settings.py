@@ -171,7 +171,7 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      CHARACTER_MODELS,
                      DEFAULT_SKILLS,
                      GAME_SETTINGS,
-                     CLIENT_SETTINGS) + ADDITIONAL_DATA + EVENT_ADDITIONAL_DATA
+                     CLIENT_SETTINGS) + OBJECT_ADDITIONAL_DATA + EVENT_ADDITIONAL_DATA
 
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 

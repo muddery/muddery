@@ -524,6 +524,7 @@ class MudderyObject(DefaultObject):
 
         """
         # Send messages to the client. Messages are in format of JSON.
+        """
         raw = kwargs.get("raw", False)
         if not raw:
             try:
@@ -539,6 +540,7 @@ class MudderyObject(DefaultObject):
             kwargs["raw"] = True
         else:
             kwargs = {"raw": True}
+        """
 
         # try send hooks
         if from_obj:
