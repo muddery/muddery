@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.conf.urls import url, include
 from django import views as django_views
-from evennia.web.website import views as website_views
+from muddery.web.website import views as website_views
 
 # loop over all settings.INSTALLED_APPS and execute code in
 # files named admin.py in each such app (this will add those

@@ -112,19 +112,37 @@ STATICFILES_DIRS = (
     os.path.join(GAME_DIR, "worlddata", "editor", "static"),
     os.path.join(MUDDERY_DIR, "worlddata", "editor", "static"),
     os.path.join(GAME_DIR, "web", "static_overrides"),
-    os.path.join(MUDDERY_DIR, "web", "webclient", WEBCLIENT_TEMPLATE, "static"),
-    os.path.join(MUDDERY_DIR, "web", "static"),
-    os.path.join(EVENNIA_DIR, "web", "static"),)
+    os.path.join(MUDDERY_DIR, "web", "website", "static"),
+    os.path.join(MUDDERY_DIR, "web", "webclient", "static"),)
 
 # We setup the location of the website template as well as the admin site.
-TEMPLATE_DIRS = (
-    os.path.join(GAME_DIR, "worlddata", "editor", "templates"),
-    os.path.join(MUDDERY_DIR, "worlddata", "editor", "templates"),
-    os.path.join(GAME_DIR, "web", "template_overrides"),
-    os.path.join(MUDDERY_DIR, "web", "webclient", WEBCLIENT_TEMPLATE),
-    os.path.join(MUDDERY_DIR, "web", "templates"),
-    os.path.join(EVENNIA_DIR, "web", "templates", ACTIVE_TEMPLATE),
-    os.path.join(EVENNIA_DIR, "web", "templates"),)
+TEMPLATES = [{{
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(GAME_DIR, "worlddata", "editor", "templates"),
+            os.path.join(MUDDERY_DIR, "worlddata", "editor", "templates"),
+            os.path.join(GAME_DIR, "web", "template_overrides", WEBSITE_TEMPLATE),
+            os.path.join(GAME_DIR, "web", "template_overrides", WEBCLIENT_TEMPLATE),
+            os.path.join(GAME_DIR, "web", "template_overrides"),
+            os.path.join(MUDDERY_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
+            os.path.join(MUDDERY_DIR, "web", "website", "templates"),
+            os.path.join(MUDDERY_DIR, "web", "webclient", "templates", WEBCLIENT_TEMPLATE),
+            os.path.join(MUDDERY_DIR, "web", "webclient", "templates"),
+            os.path.join(EVENNIA_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
+            os.path.join(EVENNIA_DIR, "web", "website", "templates"),
+            os.path.join(EVENNIA_DIR, "web", "webclient", "templates", WEBCLIENT_TEMPLATE),
+            os.path.join(EVENNIA_DIR, "web", "webclient", "templates")],
+        'APP_DIRS': True,
+        'OPTIONS': {{
+            "context_processors": [
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.media',
+                'django.template.context_processors.debug',
+                'muddery.web.utils.general_context.general_context']
+            }}
+        }}]
 
 # The secret key is randomly seeded upon creation. It is used to sign
 # Django's cookies. Do not share this with anyone. Changing it will
