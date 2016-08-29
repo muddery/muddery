@@ -9,12 +9,12 @@
     <meta name="generator" content="haran" />
 
     {% if sidebar %}
-    <link rel="stylesheet" type="text/css" href="{% static "evennia_general/css/prosimii-screen-alt.css" %}" media="screen" title="Prosimii (Sidebar)" />
+    <link rel="stylesheet" type="text/css" href="{% static "website/css/prosimii-screen-alt.css" %}" media="screen" title="Prosimii (Sidebar)" />
     {% else %}
-    <link rel="stylesheet" type="text/css" href="{% static "evennia_general/css/prosimii-screen.css" %}" media="screen" title="Prosimii" />
+    <link rel="stylesheet" type="text/css" href="{% static "website/css/prosimii-screen.css" %}" media="screen" title="Prosimii" />
     {% endif %}
-    <link rel="stylesheet alternative" type="text/css" href="{% static "evennia_general/css/prosimii-print.css" %}" media="screen" title="Print Preview" />
-    <link rel="stylesheet" type="text/css" href="{% static "evennia_general/css/prosimii-print.css" %}" media="print" />
+    <link rel="stylesheet alternative" type="text/css" href="{% static "website/css/prosimii-print.css" %}" media="screen" title="Print Preview" />
+    <link rel="stylesheet" type="text/css" href="{% static "website/css/prosimii-print.css" %}" media="print" />
     <link rel="stylesheet" type="text/css" href="{% static "public/css/bootstrap.min.css" %}" media="screen" />
     <script src="{% static "public/js/jquery-1.11.1.min.js" %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static "public/js/jquery.cookie.js" %}" type="text/javascript" charset="utf-8"></script>
@@ -40,7 +40,7 @@
       </div>
 
       <div class="midHeader">
-        <img src="{% static "evennia_general/images/muddery_logo.png" %}" align='left'/> <h1 class="headerTitle" lang="la">{{game_name}}</h1>
+        <img src="{% static "website/images/muddery_logo.png" %}" align='left'/> <h1 class="headerTitle" lang="la">{{game_name}}</h1>
         <div class="headerSubTitle" title="Slogan">
         <!-- Insert a slogan here if you want -->
         {{game_slogan}}			&nbsp;

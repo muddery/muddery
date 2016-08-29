@@ -147,6 +147,7 @@ class equipment_positions(model_base.equipment_positions):
 #------------------------------------------------------------
 class equipments(model_base.equipments):
     "Store all equipments."
+    pass
 
 
 # ------------------------------------------------------------

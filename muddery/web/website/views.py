@@ -51,9 +51,9 @@ def _gamestats():
 
     # A QuerySet of the most recently connected players.
     recent_users = PlayerDB.objects.get_recently_connected_players()[:fpage_player_limit]
-    nplyrs_conn_recent = len(recent_users) or "none"
-    nplyrs = PlayerDB.objects.num_total_players() or "none"
-    nplyrs_reg_recent = len(PlayerDB.objects.get_recently_created_players()) or "none"
+    nplyrs_conn_recent = len(recent_users)
+    nplyrs = PlayerDB.objects.num_total_players()
+    nplyrs_reg_recent = len(PlayerDB.objects.get_recently_created_players())
     nsess = SESSION_HANDLER.player_count()
     # nsess = len(PlayerDB.objects.get_connected_players()) or "no one"
 
