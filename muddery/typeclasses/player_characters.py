@@ -693,7 +693,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
             self.reborn()
         else:
             # Set reborn timer.
-            TICKER_HANDLER.add(self, self.reborn_cd, hook_key="reborn")
+            TICKER_HANDLER.add(self.reborn_cd, self.reborn)
 
             self.msg({"msg": LS("You will be reborn at {c%(p)s{n in {c%(s)s{n seconds.") %
                              {'p': self.home.get_name(), 's': self.reborn_cd}})
@@ -703,7 +703,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Reborn after being killed.
         """
-        TICKER_HANDLER.remove(self, self.reborn_cd)
+        TICKER_HANDLER.remove(self.reborn_cd, self.reborn)
 
         # Recover all hp.
         self.db.hp = self.max_hp

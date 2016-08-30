@@ -302,6 +302,7 @@ def main():
         gamedir = os.path.abspath(os.path.join(CURRENT_DIR, game_name))
         create_game_directory(gamedir, template)
 
+        os.chdir(gamedir)
         evennia_launcher.init_game_directory(GAMEDIR, check_db=False)
 
         try:

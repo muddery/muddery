@@ -16,7 +16,7 @@ from twisted.internet.reactor import callFromThread
 from django.core.exceptions import ObjectDoesNotExist, FieldError
 from django.db.models.signals import post_save
 from django.db.models.base import Model, ModelBase
-from django.db.models.signals import pre_delete, post_syncdb
+from django.db.models.signals import pre_delete, post_migrate
 from evennia.utils import logger
 from evennia.utils.utils import dbref, get_evennia_pids, to_str
 
@@ -27,7 +27,7 @@ AUTO_FLUSH_MIN_INTERVAL = 60.0 * 5 # at least 5 mins between cache flushes
 _GA = object.__getattribute__
 _SA = object.__setattr__
 _DA = object.__delattr__
-
+_MONITOR_HANDLER = None
 
 # References to db-updated objects are stored here so the
 # main process can be informed to re-cache itself.
@@ -361,6 +361,9 @@ class SharedMemoryModel(with_metaclass(SharedMemoryModelBase, Model)):
             self._oob_at_<fieldname>_postsave())
 
         """
+        global _MONITOR_HANDLER
+        if not _MONITOR_HANDLER:
+            from evennia.scripts.monitorhandler import MONITOR_HANDLER as _MONITORHANDLER
 
         if _IS_SUBPROCESS:
             # we keep a store of objects modified in subprocesses so
@@ -382,23 +385,26 @@ class SharedMemoryModel(with_metaclass(SharedMemoryModelBase, Model)):
         new = False
         if "update_fields" in kwargs and kwargs["update_fields"]:
             # get field objects from their names
-            update_fields = (self._meta.get_field_by_name(field)[0]
-                             for field in kwargs.get("update_fields"))
+            update_fields = (self._meta.get_field(fieldname)
+                             for fieldname in kwargs.get("update_fields"))
         else:
             # meta.fields are already field objects; get them all
             new =True
             update_fields = self._meta.fields
         for field in update_fields:
             fieldname = field.name
+            # trigger eventual monitors
+            _MONITORHANDLER.at_update(self, fieldname)
             # if a hook is defined it must be named exactly on this form
             hookname = "at_%s_postsave" % fieldname
             if hasattr(self, hookname) and callable(_GA(self, hookname)):
                 _GA(self, hookname)(new)
-            # if a trackerhandler is set on this object, update it with the
-            # fieldname and the new value
-            fieldtracker = "_oob_at_%s_postsave" % fieldname
-            if hasattr(self, fieldtracker):
-                _GA(self, fieldtracker)(fieldname)
+
+#            # if a trackerhandler is set on this object, update it with the
+#            # fieldname and the new value
+#            fieldtracker = "_oob_at_%s_postsave" % fieldname
+#            if hasattr(self, fieldtracker):
+#                _GA(self, fieldtracker)(fieldname)
 
 
 class WeakSharedMemoryModelBase(SharedMemoryModelBase):
@@ -446,7 +452,7 @@ def flush_cache(**kwargs):
     # run the python garbage collector
     return gc.collect()
 #request_finished.connect(flush_cache)
-post_syncdb.connect(flush_cache)
+post_migrate.connect(flush_cache)
 
 
 def flush_cached_instance(sender, instance, **kwargs):

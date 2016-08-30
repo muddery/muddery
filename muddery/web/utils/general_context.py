@@ -31,7 +31,8 @@ WEBSITE = ['Flatpages', 'News', 'Sites']
 # The main context processor function
 WEBCLIENT_ENABLED = settings.WEBCLIENT_ENABLED
 WEBSOCKET_CLIENT_ENABLED = settings.WEBSOCKET_CLIENT_ENABLED
-WEBSOCKET_CLIENT_PORT = settings.WEBSOCKET_CLIENT_PORT
+WEBSOCKET_PORT = settings.WEBSOCKET_CLIENT_PORT
+WEBSOCKET_URL = settings.WEBSOCKET_CLIENT_URL
 
 
 def general_context(request):
@@ -49,6 +50,7 @@ def general_context(request):
         'evennia_websiteapps':WEBSITE,
         "webclient_enabled" : WEBCLIENT_ENABLED,
         "websocket_enabled" : WEBSOCKET_CLIENT_ENABLED,
-        "websocket_port" : WEBSOCKET_CLIENT_PORT,
+        "websocket_port" : WEBSOCKET_PORT,
+        "websocket_url" : WEBSOCKET_URL,
         "language_code" : settings.LANGUAGE_CODE,
     }

@@ -9,9 +9,9 @@ from future.utils import viewkeys
 import re
 from twisted.application import internet
 from twisted.words.protocols import irc
-from twisted.internet import protocol
+from twisted.internet import protocol, reactor
 from evennia.server.session import Session
-from evennia.utils import logger, utils
+from evennia.utils import logger, utils, ansi
 
 
 # IRC colors
@@ -177,6 +177,7 @@ class IRCBot(irc.IRCClient, Session):
         """
         if not msg.startswith('***'):
             user = user.split('!', 1)[0]
+            user = ansi.raw(user)
             self.data_in("bot_data_in %s@%s: %s" % (user, channel, msg))
 
     def action(self, user, channel, msg):
@@ -202,21 +203,31 @@ class IRCBot(irc.IRCClient, Session):
             kwargs (any): Other data from protocol.
 
         """
+
         self.sessionhandler.data_in(self, text=text, **kwargs)
 
-    def data_out(self, text=None, **kwargs):
+    def send_text(self, *args, **kwargs):
         """
-        Data from server-> IRC.
+        Send channel text to IRC
+
+        Args:
+            text (str): Outgoing text
 
         Kwargs:
-            text (str): Outgoing text.
-            kwargs (any): Other data to protocol.
+            bot_data_out (bool): If True, echo to channel.
 
         """
-        if text.startswith("bot_data_out"):
-            text = text.split(" ", 1)[1]
+        text = args[0] if args else ""
+        if text and kwargs['options'].get("bot_data_out", False):
             text = parse_irc_colors(text)
             self.say(self.channel, text)
+
+    def send_default(self, *args, **kwargs):
+        """
+        Ignore other types of sends.
+
+        """
+        pass
 
 
 class IRCBotFactory(protocol.ReconnectingClientFactory):
@@ -230,7 +241,7 @@ class IRCBotFactory(protocol.ReconnectingClientFactory):
     factor = 1.5
     maxDelay = 60
 
-    def __init__(self, sessionhandler, uid=None, botname=None, channel=None, network=None, port=None):
+    def __init__(self, sessionhandler, uid=None, botname=None, channel=None, network=None, port=None, ssl=None):
         """
         Storing some important protocol properties.
 
@@ -243,6 +254,7 @@ class IRCBotFactory(protocol.ReconnectingClientFactory):
             channel (str): IRC channel to connect to.
             network (str): Network address to connect to.
             port (str): Port of the network.
+            ssl (bool): Indicates SSL connection.
 
         """
         self.sessionhandler = sessionhandler
@@ -251,6 +263,7 @@ class IRCBotFactory(protocol.ReconnectingClientFactory):
         self.channel = str(channel)
         self.network = str(network)
         self.port = port
+        self.ssl = ssl
         self.bot = None
 
     def buildProtocol(self, addr):
@@ -267,6 +280,7 @@ class IRCBotFactory(protocol.ReconnectingClientFactory):
         protocol.channel = self.channel
         protocol.network = self.network
         protocol.port = self.port
+        protocol.ssl = self.ssl
         return protocol
 
     def startedConnecting(self, connector):
@@ -308,5 +322,12 @@ class IRCBotFactory(protocol.ReconnectingClientFactory):
 
         """
         if self.port:
-            service = internet.TCPClient(self.network, int(self.port), self)
+            if self.ssl:
+                try:
+                    from twisted.internet import ssl
+                    service = reactor.connectSSL(self.network, int(self.port), self, ssl.ClientContextFactory())
+                except ImportError:
+                    self.caller.msg("To use SSL, the PyOpenSSL module must be installed.")
+            else:
+                service = internet.TCPClient(self.network, int(self.port), self)
             self.sessionhandler.portal.services.addService(service)

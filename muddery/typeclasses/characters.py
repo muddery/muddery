@@ -321,6 +321,15 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         self.skill_handler.has_skill(skill)
 
+    def auto_cast_skill(self):
+        """
+        Auto cast an available skill.
+
+        Returns:
+            None
+        """
+        self.skill_handler.auto_cast_skill()
+
     def cast_skill_manually(self, skill, target):
         """
         Cast a skill.
