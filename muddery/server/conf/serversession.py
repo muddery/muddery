@@ -40,7 +40,8 @@ class ServerSession(BaseServerSession):
         Send Evennia -> User
         Convert to JSON.
         """
-        raw = kwargs.get("raw", False)
+        options = kwargs.get("options", {})
+        raw = options.get("raw", False)
         if not raw:
             try:
                 text = json.dumps(text)
@@ -50,10 +51,9 @@ class ServerSession(BaseServerSession):
 
         # set raw=True
         if kwargs:
-            kwargs["raw"] = True
+            kwargs["options"] = {"raw", True}
         else:
-            kwargs = {"raw": True}
+            kwargs = {"options": {"raw": True}}
 
         return super(ServerSession, self).data_out(text=text, **kwargs)
-    # alias
-    msg = data_out
+

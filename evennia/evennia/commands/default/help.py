@@ -12,8 +12,9 @@ from evennia.utils.utils import fill, dedent
 from evennia.commands.command import Command
 from evennia.help.models import HelpEntry
 from evennia.utils import create
-from evennia.utils.utils import string_suggestions
-from evennia.commands.default.muxcommand import MuxCommand
+from evennia.utils.utils import string_suggestions, class_from_module
+
+COMMAND_DEFAULT_CLASS = class_from_module(settings.COMMAND_DEFAULT_CLASS)
 
 # limit symbol import for API
 __all__ = ("CmdHelp", "CmdSetHelp")
@@ -157,7 +158,7 @@ class CmdHelp(Command):
         self.msg(format_help_entry("", "No help entry found for '%s'" % query, None, suggested=suggestions))
 
 
-class CmdSetHelp(MuxCommand):
+class CmdSetHelp(COMMAND_DEFAULT_CLASS):
     """
     edit the help database
 
@@ -196,27 +197,25 @@ class CmdSetHelp(MuxCommand):
         lhslist = self.lhslist
 
         if not self.args:
-            self.msg("Usage: @sethelp/[add|del|append|merge] <topic>[,category[,locks,..] = <text>")
+            self.msg("Usage: @sethelp[/switches] <topic>[,category[,locks,..] = <text>")
             return
 
-        topicstr = ""
-        category = "General"
-        lockstring = "view:all()"
-        try:
-            topicstr = lhslist[0]
-            category = lhslist[1]
-            lockstring = ",".join(lhslist[2:])
-        except Exception:
-            pass
-
+        nlist = len(lhslist)
+        topicstr = lhslist[0] if nlist > 0 else ""
         if not topicstr:
             self.msg("You have to define a topic!")
             return
+
         # check if we have an old entry with the same name
         try:
             old_entry = HelpEntry.objects.get(db_key__iexact=topicstr)
+            category = lhslist[1] if nlist > 1 else old_entry.help_category
+            lockstring = ",".join(lhslist[2:]) if nlist > 2 else old_entry.locks.get()
         except Exception:
             old_entry = None
+            category = lhslist[1] if nlist > 1 else "General"
+            lockstring = ",".join(lhslist[2:]) if nlist > 2 else "view:all()"
+        category = category.lower()
 
         if 'append' in switches or "merge" in switches:
             # merge/append operations
@@ -254,7 +253,7 @@ class CmdSetHelp(MuxCommand):
                 old_entry.locks.clear()
                 old_entry.locks.add(lockstring)
                 old_entry.save()
-                self.msg("Overwrote the old topic '%s' with a new one." % topicstr)
+                self.msg("Overwrote the old topic '%s'." % topicstr)
             else:
                 self.msg("Topic '%s' already exists. Use /force to overwrite or /append or /merge to add text to it." % topicstr)
         else:

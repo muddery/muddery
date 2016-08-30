@@ -36,12 +36,12 @@ def at_initial_setup():
         # load world data
         importer.import_local_all()
 
-		# load game settings
-    	GAME_SETTINGS.reset()
+        # load game settings
+        GAME_SETTINGS.reset()
     	
         # reload skill modules
         MudderySkill.load_skill_modules()
-    
+
         # build world
         builder.build_all()
         
@@ -49,6 +49,7 @@ def at_initial_setup():
         limbo_obj = search.search_object("#2", exact=True)
         if limbo_obj:
             limbo_obj[0].db.desc = LIMBO_DESC
+            limbo_obj[0].position = None
 
         # set default locations
         builder.reset_default_locations()

@@ -60,6 +60,7 @@ class MudderyPlayer(DefaultPlayer):
             All other keywords are passed on to the protocol.
 
         """
+        """
         raw = kwargs.get("raw", False)
         if not raw:
             try:
@@ -75,6 +76,7 @@ class MudderyPlayer(DefaultPlayer):
             kwargs["raw"] = True
         else:
             kwargs = {"raw": True}
+        """
 
         if from_obj:
             # call hook

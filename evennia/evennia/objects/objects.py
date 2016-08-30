@@ -5,6 +5,7 @@ These are the (default) starting points for all in-game visible
 entities.
 
 """
+import time
 from builtins import object
 from future.utils import listvalues, with_metaclass
 
@@ -20,7 +21,7 @@ from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.commands import cmdhandler
 from evennia.utils import logger
 from evennia.utils.utils import (variable_from_module, lazy_property,
-                                 make_iter, to_str, to_unicode)
+                                 make_iter, to_unicode)
 
 _MULTISESSION_MODE = settings.MULTISESSION_MODE
 
@@ -47,7 +48,7 @@ class ObjectSessionHandler(object):
 
         """
         self.obj = obj
-        self._sessid_cache = set()
+        self._sessid_cache = []
         self._recache()
 
     def _recache(self):
@@ -239,7 +240,31 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
 
     # main methods
 
-    ## methods inherited from the database object (overload them here)
+    def get_display_name(self, looker, **kwargs):
+        """
+        Displays the name of the object in a viewer-aware manner.
+
+        Args:
+            looker (TypedObject): The object or player that is looking
+                at/getting inforamtion for this object.
+
+        Returns:
+            name (str): A string containing the name of the object,
+                including the DBREF if this user is privileged to control
+                said object.
+
+        Notes:
+            This function could be extended to change how object names
+            appear to users in character, but be wary. This function
+            does not change an object's keys or aliases when
+            searching, and is expected to produce something useful for
+            builders.
+
+        """
+        if self.locks.check_lockstring(looker, "perm(Builders)"):
+            return "{}(#{})".format(self.name, self.id)
+        return self.name
+
 
     def search(self, searchdata,
                global_search=False,
@@ -276,9 +301,11 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
             typeclass (str or Typeclass, or list of either): Limit search only
                 to `Objects` with this typeclass. May be a list of typeclasses
                 for a broader search.
-            location (Object): Specify a location to search, if different from the
-                self's given `location` plus its contents. This can also
-                be a list of locations.
+            location (Object or list): Specify a location or multiple locations
+                to search. Note that this is used to query the *contents* of a
+                location and will not match for the location itself -
+                if you want that, don't set this or use `candidates` to specify
+                exactly which objects should be searched.
             attribute_name (str): Define which property to search. If set, no
                 key+alias search will be performed. This can be used
                 to search database fields (db_ will be automatically
@@ -389,7 +416,7 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
         if isinstance(searchdata, basestring):
             # searchdata is a string; wrap some common self-references
             if searchdata.lower() in ("me", "self",):
-                return self.player
+                return [self.player] if quiet else self.player
 
         results = self.player.__class__.objects.player_search(searchdata)
 
@@ -399,11 +426,10 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
 
     def execute_cmd(self, raw_string, session=None, **kwargs):
         """
-        Do something as this object. This method is a copy of the
-        `execute_cmd` method on the session. This is never called
-        normally, it's only used when wanting specifically to let an
-        object be the caller of a command. It makes use of nicks of
-        eventual connected players as well.
+        Do something as this object. This is never called normally,
+        it's only used when wanting specifically to let an object be
+        the caller of a command. It makes use of nicks of eventual
+        connected players as well.
 
         Args:
             raw_string (string): Raw command input
@@ -436,25 +462,34 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
         return cmdhandler.cmdhandler(self, raw_string, callertype="object", session=session, **kwargs)
 
 
-    def msg(self, text=None, from_obj=None, session=None, **kwargs):
+    def msg(self, text=None, from_obj=None, session=None, options=None, **kwargs):
         """
         Emits something to a session attached to the object.
 
         Args:
-            text (str, optional): The message to send
+            text (str or tuple, optional): The message to send. This
+                is treated internally like any send-command, so its
+                value can be a tuple if sending multiple arguments to
+                the `text` oob command.
             from_obj (obj, optional): object that is sending. If
-                given, at_msg_send will be called
+                given, at_msg_send will be called. This value will be
+                passed on to the protocol.
             session (Session or list, optional): Session or list of
-                Sessions to relay data to, if any. If set, will
-                force send to these sessions. If unset, who receives the
-                message depends on the MULTISESSION_MODE.
+                Sessions to relay data to, if any. If set, will force send
+                to these sessions. If unset, who receives the message
+                depends on the MULTISESSION_MODE.
+            options (dict, optional): Message-specific option-value
+                pairs. These will be applied at the protocol level.
+        Kwargs:
+            any (string or tuples): All kwarg keys not listed above
+                will be treated as send-command names and their arguments
+                (which can be a string or a tuple).
 
         Notes:
             `at_msg_receive` will be called on this Object.
             All extra kwargs will be passed on to the protocol.
 
         """
-        text = to_str(text, force_string=True) if text != None else ""
         # try send hooks
         if from_obj:
             try:
@@ -468,10 +503,12 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
         except Exception:
             logger.log_trace()
 
+        kwargs["options"] = options
+
         # relay to session(s)
         sessions = make_iter(session) if session else self.sessions.all()
         for session in sessions:
-            session.msg(text=text, **kwargs)
+            session.data_out(text=text, **kwargs)
 
     def for_contents(self, func, exclude=None, **kwargs):
         """
@@ -557,10 +594,10 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
              7. `self.at_after_move(source_location)`
 
         """
-        def logerr(string=""):
+        def logerr(string="", err=None):
             "Simple log helper method"
             logger.log_trace()
-            self.msg(string)
+            self.msg("%s%s" % (string, "" if err is None else " (%s)" % err))
 
         errtxt = _("Couldn't perform move ('%s'). Contact an admin.")
         if not emit_to_obj:
@@ -583,51 +620,42 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
             try:
                 if not self.at_before_move(destination):
                     return
-            except Exception:
-                logerr(errtxt % "at_before_move()")
+            except Exception as err:
+                logerr(errtxt % "at_before_move()", err)
                 return False
 
         # Save the old location
         source_location = self.location
-        if not source_location:
-            # there was some error in placing this room.
-            # we have to set one or we won't be able to continue
-            if self.home:
-                source_location = self.home
-            else:
-                default_home = ObjectDB.objects.get_id(settings.DEFAULT_HOME)
-                source_location = default_home
 
         # Call hook on source location
-        if move_hooks:
+        if move_hooks and source_location:
             try:
                 source_location.at_object_leave(self, destination)
-            except Exception:
-                logerr(errtxt % "at_object_leave()")
+            except Exception as err:
+                logerr(errtxt % "at_object_leave()", err)
                 return False
 
         if not quiet:
             #tell the old room we are leaving
             try:
                 self.announce_move_from(destination)
-            except Exception:
-                logerr(errtxt % "at_announce_move()")
+            except Exception as err:
+                logerr(errtxt % "at_announce_move()", err)
                 return False
 
         # Perform move
         try:
             self.location = destination
-        except Exception:
-            emit_to_obj.msg(errtxt % "location change")
-            logger.log_trace()
+        except Exception as err:
+            logerr(errtxt % "location change", err)
             return False
 
         if not quiet:
             # Tell the new room we are there.
             try:
                 self.announce_move_to(source_location)
-            except Exception:
-                logerr(errtxt % "announce_move_to()")
+            except Exception as err:
+                logerr(errtxt % "announce_move_to()", err)
                 return  False
 
         if move_hooks:
@@ -635,8 +663,8 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
             # (the object has already arrived at this point)
             try:
                 destination.at_object_receive(self, source_location)
-            except Exception:
-                logerr(errtxt % "at_object_receive()")
+            except Exception as err:
+                logerr(errtxt % "at_object_receive()", err)
                 return False
 
         # Execute eventual extra commands on this object after moving it
@@ -644,8 +672,8 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
         if move_hooks:
             try:
                 self.at_after_move(source_location)
-            except Exception:
-                logerr(errtxt % "at_after_move")
+            except Exception as err:
+                logerr(errtxt % "at_after_move", err)
                 return False
         return True
 
@@ -996,6 +1024,12 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
         Called just after puppeting has been completed and all
         Player<->Object links have been established.
 
+        Note:
+            You can use `self.player` and `self.sessions.get()` to get
+            player and sessions at this point; the last entry in the
+            list from `self.sessions.get()` is the latest Session
+            puppeting this Object.
+
         """
         self.player.db._last_puppet = self
 
@@ -1003,6 +1037,12 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
         """
         Called just before beginning to un-connect a puppeting from
         this Player.
+
+        Note:
+            You can use `self.player` and `self.sessions.get()` to get
+            player and sessions at this point; the last entry in the
+            list from `self.sessions.get()` is the latest Session
+            puppeting this Object.
 
         """
         pass
@@ -1308,7 +1348,10 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
 
         """
         if not target.access(self, "view"):
-            return "Could not find '%s'." % target
+            try:
+                return "Could not view '%s'." % target.get_display_name(self)
+            except AttributeError:
+                return "Could not view '%s'." % target.key
         # the target's at_desc() method.
         target.at_desc(looker=self)
         return target.return_appearance(self)
@@ -1434,6 +1477,12 @@ class DefaultCharacter(DefaultObject):
         Called just after puppeting has been completed and all
         Player<->Object links have been established.
 
+        Note:
+            You can use `self.player` and `self.sessions.get()` to get
+            player and sessions at this point; the last entry in the
+            list from `self.sessions.get()` is the latest Session
+            puppeting this Object.
+
         """
         self.msg("\nYou become {c%s{n.\n" % self.name)
         self.msg(self.at_look(self.location))
@@ -1462,6 +1511,26 @@ class DefaultCharacter(DefaultObject):
                 self.location.for_contents(message, exclude=[self], from_obj=self)
                 self.db.prelogout_location = self.location
                 self.location = None
+
+    @property
+    def idle_time(self):
+        """
+        Returns the idle time of the least idle session in seconds. If
+        no sessions are connected it returns nothing.
+        """
+        idle = [session.cmd_last_visible for session in self.sessions.all()]
+        if idle:
+            return time.time() - float(max(idle))
+
+    @property
+    def connection_time(self):
+        """
+        Returns the maximum connection time of all connected sessions
+        in seconds. Returns nothing if there are no sessions.
+        """
+        conn = [session.conn_time for session in self.sessions.all()]
+        if conn:
+            return time.time() - float(min(conn))
 
 #
 # Base Room object

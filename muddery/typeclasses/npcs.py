@@ -82,7 +82,7 @@ class MudderyNPC(MudderyCharacter):
             # Remove from its location.
             self.move_to(None, quiet=True, to_none=True)
             # Set reborn timer.
-            TICKER_HANDLER.add(self, self.reborn_cd, hook_key="reborn")
+            TICKER_HANDLER.add(self.reborn_cd, self.reborn)
 
         if location:
             for content in location.contents:
@@ -94,7 +94,7 @@ class MudderyNPC(MudderyCharacter):
         """
         Reborn after being killed.
         """
-        TICKER_HANDLER.remove(self, self.reborn_cd)
+        TICKER_HANDLER.remove(self.reborn_cd, self.reborn)
 
         # Recover all hp.
         self.db.hp = self.max_hp

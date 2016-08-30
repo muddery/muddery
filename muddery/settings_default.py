@@ -26,10 +26,6 @@ MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
 # Django web features
 ######################################################################
 
-# The name of the currently selected webclient template. This corresponds to the
-# directory names shown in the webtemplates directory.
-WEBCLIENT_TEMPLATE = 'default'
-
 # Context processors define context variables, generally for the template
 # system to use.
 TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.i18n',
@@ -192,12 +188,12 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_OBJECTS,
                       WORLD_NPCS) + COMMON_OBJECTS
 
+# object's additional data
+OBJECT_ADDITIONAL_DATA = ("exit_locks", "object_creators")
+
 ###################################
 # other data
 ###################################
-
-# object's additional data
-ADDITIONAL_DATA = ("exit_locks", "object_creators")
 
 # loot lists
 CREATOR_LOOT_LIST = "creator_loot_list"
@@ -243,7 +239,7 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      EQUIPMENT_TYPES,
                      DEFAULT_SKILLS,
                      GAME_SETTINGS,
-                     CLIENT_SETTINGS) + ADDITIONAL_DATA + EVENT_ADDITIONAL_DATA
+                     CLIENT_SETTINGS) + OBJECT_ADDITIONAL_DATA + EVENT_ADDITIONAL_DATA
 
 # local strings
 LOCALIZED_STRINGS_MODEL = "localized_strings"

@@ -18,10 +18,11 @@ from evennia.server.sessionhandler import SESSIONS
 from evennia.scripts.models import ScriptDB
 from evennia.objects.models import ObjectDB
 from evennia.players.models import PlayerDB
-from evennia.utils import logger, utils, gametime, create, is_pypy, prettytable
+from evennia.utils import logger, utils, gametime, create, prettytable
 from evennia.utils.evtable import EvTable
-from evennia.utils.utils import crop
-from evennia.commands.default.muxcommand import MuxCommand
+from evennia.utils.utils import crop, class_from_module
+
+COMMAND_DEFAULT_CLASS = class_from_module(settings.COMMAND_DEFAULT_CLASS)
 
 # delayed imports
 _RESOURCE = None
@@ -33,7 +34,7 @@ __all__ = ("CmdReload", "CmdReset", "CmdShutdown", "CmdPy",
            "CmdTime", "CmdServerLoad")
 
 
-class CmdReload(MuxCommand):
+class CmdReload(COMMAND_DEFAULT_CLASS):
     """
     reload the server
 
@@ -59,7 +60,7 @@ class CmdReload(MuxCommand):
         SESSIONS.server.shutdown(mode='reload')
 
 
-class CmdReset(MuxCommand):
+class CmdReset(COMMAND_DEFAULT_CLASS):
     """
     reset and reboot the server
 
@@ -92,7 +93,7 @@ class CmdReset(MuxCommand):
         SESSIONS.server.shutdown(mode='reset')
 
 
-class CmdShutdown(MuxCommand):
+class CmdShutdown(COMMAND_DEFAULT_CLASS):
 
     """
     stop the server completely
@@ -121,7 +122,7 @@ class CmdShutdown(MuxCommand):
         SESSIONS.portal_shutdown()
 
 
-class CmdPy(MuxCommand):
+class CmdPy(COMMAND_DEFAULT_CLASS):
     """
     execute a snippet of python code
 
@@ -176,9 +177,9 @@ class CmdPy(MuxCommand):
                           'inherits_from': utils.inherits_from}
 
         try:
-            self.msg(">>> %s" % pycode, raw=True, session=self.session)
+            self.msg(">>> %s" % pycode, session=self.session, options={"raw":True})
         except TypeError:
-            self.msg(">>> %s" % pycode, raw=True)
+            self.msg(">>> %s" % pycode, options={"raw":True})
 
         mode = "eval"
         try:
@@ -197,19 +198,19 @@ class CmdPy(MuxCommand):
             else:
                 ret = eval(pycode_compiled, {}, available_vars)
             if mode == "eval":
-                ret = "<<< %s%s" % (str(ret), duration)
+                ret = "%s%s" % (str(ret), duration)
             else:
-                ret = "<<< Done (use self.msg() if you want to catch output)%s" % duration
+                ret = " Done (use self.msg() if you want to catch output)%s" % duration
         except Exception:
             errlist = traceback.format_exc().split('\n')
             if len(errlist) > 4:
                 errlist = errlist[4:]
-            ret = "\n".join("<<< %s" % line for line in errlist if line)
+            ret = "\n".join("%s" % line for line in errlist if line)
 
         try:
-            self.msg(ret, session=self.session, raw=True)
+            self.msg(ret, session=self.session, options={"raw":True})
         except TypeError:
-            self.msg(ret, raw=True)
+            self.msg(ret, options={"raw":True})
 
 
 # helper function. Kept outside so it can be imported and run
@@ -248,7 +249,7 @@ def format_script_list(scripts):
     return "%s" % table
 
 
-class CmdScripts(MuxCommand):
+class CmdScripts(COMMAND_DEFAULT_CLASS):
     """
     list and manage all running scripts
 
@@ -344,7 +345,7 @@ class CmdScripts(MuxCommand):
         caller.msg(string)
 
 
-class CmdObjects(MuxCommand):
+class CmdObjects(COMMAND_DEFAULT_CLASS):
     """
     statistics on objects in the database
 
@@ -408,7 +409,7 @@ class CmdObjects(MuxCommand):
         caller.msg(string)
 
 
-class CmdPlayers(MuxCommand):
+class CmdPlayers(COMMAND_DEFAULT_CLASS):
     """
     list all registered players
 
@@ -451,7 +452,7 @@ class CmdPlayers(MuxCommand):
         caller.msg(string)
 
 
-class CmdService(MuxCommand):
+class CmdService(COMMAND_DEFAULT_CLASS):
     """
     manage system services
 
@@ -545,7 +546,7 @@ class CmdService(MuxCommand):
             service.startService()
 
 
-class CmdAbout(MuxCommand):
+class CmdAbout(COMMAND_DEFAULT_CLASS):
     """
     show Evennia info
 
@@ -586,7 +587,7 @@ class CmdAbout(MuxCommand):
         self.caller.msg(string)
 
 
-class CmdTime(MuxCommand):
+class CmdTime(COMMAND_DEFAULT_CLASS):
     """
     show server time statistics
 
@@ -612,7 +613,7 @@ class CmdTime(MuxCommand):
         self.caller.msg(str(table))
 
 
-class CmdServerLoad(MuxCommand):
+class CmdServerLoad(COMMAND_DEFAULT_CLASS):
     """
     show server load and memory statistics
 
@@ -662,10 +663,12 @@ class CmdServerLoad(MuxCommand):
 
         if "flushmem" in self.switches:
             # flush the cache
+            prev, _ = _IDMAPPER.cache_size()
             nflushed = _IDMAPPER.flush_cache()
-            string = "Flushed object idmapper cache. Python garbage " \
-                     "collector recovered memory from %i objects."
-            self.caller(string % nflushed)
+            now, _ = _IDMAPPER.cache_size()
+            string = "The Idmapper cache freed |w{idmapper}|n database objects.\n" \
+                     "The Python garbage collector freed |w{gc}|n Python instances total."
+            self.caller.msg(string.format(idmapper=(prev-now), gc=nflushed))
             return
 
         # display active processes
@@ -739,19 +742,51 @@ class CmdServerLoad(MuxCommand):
 
         string = "{wServer CPU and Memory load:{n\n%s" % loadtable
 
-        if not is_pypy:
-            # Cache size measurements are not available on PyPy
-            # because it lacks sys.getsizeof
+        # object cache count (note that sys.getsiseof is not called so this works for pypy too.
+        total_num, cachedict = _IDMAPPER.cache_size()
+        sorted_cache = sorted([(key, num) for key, num in cachedict.items() if num > 0],
+                                key=lambda tup: tup[1], reverse=True)
+        memtable = EvTable("entity name", "number", "idmapper %", align="l")
+        for tup in sorted_cache:
+            memtable.add_row(tup[0], "%i" % tup[1], "%.2f" % (float(tup[1]) / total_num * 100))
 
-            # object cache size
-            total_num, cachedict = _IDMAPPER.cache_size()
-            sorted_cache = sorted([(key, num) for key, num in cachedict.items() if num > 0],
-                                    key=lambda tup: tup[1], reverse=True)
-            memtable = EvTable("entity name", "number", "idmapper %", align="l")
-            for tup in sorted_cache:
-                memtable.add_row(tup[0], "%i" % tup[1], "%.2f" % (float(tup[1]) / total_num * 100))
-
-            string += "\n{w Entity idmapper cache:{n %i items\n%s" % (total_num, memtable)
+        string += "\n{w Entity idmapper cache:{n %i items\n%s" % (total_num, memtable)
 
         # return to caller
         self.caller.msg(string)
+
+class CmdTickers(COMMAND_DEFAULT_CLASS):
+    """
+    View running tickers
+
+    Usage:
+      @tickers
+
+    Note: Tickers are created, stopped and manipulated in Python code
+    using the TickerHandler. This is merely a convenience function for
+    inspecting the current status.
+
+    """
+    key = "@tickers"
+    help_category = "System"
+    locks = "cmd:perm(tickers) or perm(Builders)"
+
+    def func(self):
+        from evennia import TICKER_HANDLER
+        all_subs = TICKER_HANDLER.all_display()
+        if not all_subs:
+            self.caller.msg("No tickers are currently active.")
+            return
+        table = EvTable("interval (s)", "object", "path/methodname", "idstring", "db")
+        for sub in all_subs:
+            table.add_row(sub[3],
+                          "%s%s" % (sub[0] or "[None]", sub[0] and " (#%s)" % (sub[0].id if hasattr(sub[0], "id") else "") or ""),
+                          sub[1] if sub[1] else sub[2],
+                          sub[4] or "[Unset]",
+                          "*" if sub[5] else "-")
+        self.caller.msg("|wActive tickers|n:\n" + unicode(table))
+
+
+
+
+

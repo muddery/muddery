@@ -23,9 +23,6 @@ class SkillHandler(object):
         """
         self.owner = owner
 
-        # TICKER_HANDLER needs pk.
-        self.pk = "SKILL"
-
         self.skills = {}
         if owner:
             self.skills = owner.db.skills
@@ -41,7 +38,7 @@ class SkillHandler(object):
         Remove tickers.
         """
         if self.can_auto_cast:
-            TICKER_HANDLER.remove(self)
+            TICKER_HANDLER.remove(callback=self.owner.auto_cast_skill)
 
     def get_all(self):
         """
@@ -170,7 +167,7 @@ class SkillHandler(object):
 
         if not self.owner.ndb.combat_handler:
             # combat is finished, stop ticker
-            TICKER_HANDLER.remove(self, self.auto_cast_skill_cd)
+            TICKER_HANDLER.remove(self.auto_cast_skill_cd, self.owner.auto_cast_skill)
             return
 
         # Get target.
@@ -248,11 +245,11 @@ class SkillHandler(object):
         self.auto_cast_skill()
 
         # Set timer of auto cast.
-        TICKER_HANDLER.add(self, self.auto_cast_skill_cd, hook_key="auto_cast_skill")
+        TICKER_HANDLER.add(self.auto_cast_skill_cd, self.owner.auto_cast_skill)
 
     def stop_auto_combat_skill(self):
         """
         Stop auto cast skill.
         """
         self.can_auto_cast = False
-        TICKER_HANDLER.remove(self, self.auto_cast_skill_cd)
+        TICKER_HANDLER.remove(self.auto_cast_skill_cd, self.owner.auto_cast_skill)

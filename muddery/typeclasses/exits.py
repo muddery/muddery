@@ -124,7 +124,7 @@ class MudderyLockedExit(MudderyExit):
         """
         super(MudderyLockedExit, self).load_data()
 
-        self.unlock_condition = getattr(self.dfield, "unlock_condition", True)
+        self.unlock_condition = getattr(self.dfield, "unlock_condition", "")
         self.unlock_verb = getattr(self.dfield, "unlock_verb", "")
         self.locked_desc = getattr(self.dfield, "locked_desc", "")
         self.auto_unlock = getattr(self.dfield, "auto_unlock", False)

@@ -13,7 +13,7 @@ import time
 import sys
 import os
 
-from twisted.web import server, static
+from twisted.web import static
 from twisted.application import internet, service
 from twisted.internet import reactor, defer
 from twisted.internet.task import LoopingCall
@@ -48,8 +48,14 @@ SERVER_RESTART = os.path.join(settings.GAME_DIR, "server", 'server.restart')
 # module containing hook methods called during start_stop
 SERVER_STARTSTOP_MODULE = mod_import(settings.AT_SERVER_STARTSTOP_MODULE)
 
-# module containing plugin services
+# modules containing plugin services
 SERVER_SERVICES_PLUGIN_MODULES = [mod_import(module) for module in make_iter(settings.SERVER_SERVICES_PLUGIN_MODULES)]
+try:
+    WEB_PLUGINS_MODULE = mod_import(settings.WEB_PLUGINS_MODULE)
+except ImportError:
+    WEB_PLUGINS_MODULE = None
+    print ("WARNING: settings.WEB_PLUGINS_MODULE not found - "
+           "copy 'evennia/game_template/server/conf/web_plugins.py to mygame/server/conf.")
 
 #------------------------------------------------------------
 # Evennia Server settings
@@ -276,11 +282,11 @@ class Evennia(object):
         with open(SERVER_RESTART, 'r') as f:
             mode = f.read()
         if mode in ('True', 'reload'):
-            from evennia.server.oobhandler import OOB_HANDLER
-            OOB_HANDLER.restore()
+            from evennia.scripts.monitorhandler import MONITOR_HANDLER
+            MONITOR_HANDLER.restore()
 
         from evennia.scripts.tickerhandler import TICKER_HANDLER
-        TICKER_HANDLER.restore()
+        TICKER_HANDLER.restore(mode in ('True', 'reload'))
 
         # call correct server hook based on start file value
         if mode in ('True', 'reload'):
@@ -352,9 +358,9 @@ class Evennia(object):
             yield [(s.pause(manual_pause=False), s.at_server_reload()) for s in ScriptDB.get_all_cached_instances() if s.is_active]
             yield self.sessions.all_sessions_portal_sync()
             self.at_server_reload_stop()
-            # only save OOB state on reload, not on shutdown/reset
-            from evennia.server.oobhandler import OOB_HANDLER
-            OOB_HANDLER.save()
+            # only save monitor state on reload, not on shutdown/reset
+            from evennia.scripts.monitorhandler import MONITOR_HANDLER
+            MONITOR_HANDLER.save()
         else:
             if mode == 'reset':
                 # like shutdown but don't unset the is_connected flag and don't disconnect sessions
@@ -437,6 +443,11 @@ class Evennia(object):
         from evennia.objects.models import ObjectDB
         ObjectDB.objects.clear_all_sessids()
 
+        # Remove non-persistent scripts
+        from evennia.scripts.models import ScriptDB
+        for script in ScriptDB.objects.filter(db_persistent=False):
+            script.stop()
+
         if GUEST_ENABLED:
             for guest in PlayerDB.objects.all().filter(db_typeclass_path=settings.BASE_GUEST_TYPECLASS):
                 for character in guest.db._playable_characters:
@@ -495,7 +506,7 @@ if WEBSERVER_ENABLED:
     # Start a django-compatible webserver.
 
     from twisted.python import threadpool
-    from evennia.server.webserver import DjangoWebRoot, WSGIWebServer
+    from evennia.server.webserver import DjangoWebRoot, WSGIWebServer, NonLoggingSite
 
     # start a thread pool and define the root url (/) as a wsgi resource
     # recognized by Django
@@ -506,7 +517,12 @@ if WEBSERVER_ENABLED:
     web_root.putChild("media", static.File(settings.MEDIA_ROOT))
     # point our static resources to url /static
     web_root.putChild("static", static.File(settings.STATIC_ROOT))
-    web_site = server.Site(web_root, logPath=settings.HTTP_LOG_FILE)
+
+    if WEB_PLUGINS_MODULE:
+        # custom overloads
+        web_root = WEB_PLUGINS_MODULE.at_webserver_root_creation(web_root)
+
+    web_site = NonLoggingSite(web_root, logPath=settings.HTTP_LOG_FILE)
 
     for proxyport, serverport in WEBSERVER_PORTS:
         # create the webserver (we only need the port for this)

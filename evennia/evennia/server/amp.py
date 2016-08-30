@@ -170,7 +170,7 @@ class AmpClientFactory(protocol.ReconnectingClientFactory):
 
         """
         if hasattr(self, "server_restart_mode"):
-            self.maxDelay = 1
+            self.maxDelay = 2
         else:
             # Don't translate this; avoid loading django on portal side.
             self.maxDelay = 10
@@ -187,8 +187,9 @@ class AmpClientFactory(protocol.ReconnectingClientFactory):
             reason (str): Eventual text describing why connection failed.
 
         """
+        print ("portal retrying connection"), self.maxDelay
         if hasattr(self, "server_restart_mode"):
-            self.maxDelay = 1
+            self.maxDelay = 2
         else:
             self.maxDelay = 10
         self.portal.sessions.announce_all(" ...")
@@ -424,20 +425,19 @@ class AMPProtocol(amp.AMP):
         self.factory.server.sessions.data_in(self.factory.server.sessions[sessid], **kwargs)
         return {}
 
-    def send_MsgPortal2Server(self, session, text="", **kwargs):
+    def send_MsgPortal2Server(self, session, **kwargs):
         """
         Access method called by the Portal and executed on the Portal.
 
         Args:
             sessid (int): Unique Session id.
-            text (str): Message to send over the wire.
             kwargs (any, optional): Optional data.
 
         Returns:
             deferred (Deferred): Asynchronous return.
 
         """
-        return self.send_data(MsgPortal2Server, session.sessid, text=text, **kwargs)
+        return self.send_data(MsgPortal2Server, session.sessid, **kwargs)
 
     # Server -> Portal message
 
@@ -455,18 +455,17 @@ class AMPProtocol(amp.AMP):
         return {}
 
 
-    def send_MsgServer2Portal(self, session, text="", **kwargs):
+    def send_MsgServer2Portal(self, session, **kwargs):
         """
         Access method - executed on the Server for sending data
             to Portal.
 
         Args:
             session (Session): Unique Session.
-            msg (str, optional): Message to send over the wire.
             kwargs (any, optiona): Extra data.
 
         """
-        return self.send_data(MsgServer2Portal, session.sessid, text=text, **kwargs)
+        return self.send_data(MsgServer2Portal, session.sessid, **kwargs)
 
     # Server administration from the Portal side
     @AdminPortal2Server.responder
@@ -561,7 +560,8 @@ class AMPProtocol(amp.AMP):
         elif operation == SSYNC:  # server_session_sync
             # server wants to save session data to the portal,
             # maybe because it's about to shut down.
-            portal_sessionhandler.server_session_sync(kwargs.get("sessiondata"))
+            portal_sessionhandler.server_session_sync(kwargs.get("sessiondata"),
+                                                      kwargs.get("clean", True))
             # set a flag in case we are about to shut down soon
             self.factory.server_restart_mode = True
 
