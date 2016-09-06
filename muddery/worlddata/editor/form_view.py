@@ -42,15 +42,6 @@ def view_form(form_name, request):
     else:
         data = form_class()
 
-    # Fixed key.
-    if "_disabled_field" in request_data:
-        disabled_field = request_data["_disabled_field"]
-        for field in data:
-            if field.name == disabled_field:
-                field.disabled = True
-                if "_disabled_value" in request_data:
-                    field.initial = request_data["_disabled_value"]
-
     # Get template file's name form the request.
     if "_template" in request_data:
         template_file = request_data.get("_template")

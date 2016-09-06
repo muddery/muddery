@@ -17,7 +17,7 @@ from muddery.utils import importer
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import CLIENT_SETTINGS
-from muddery.worlddata.editor import form_view, page_view, relative_view, dialogue_view
+from muddery.worlddata.editor import form_view, page_view, relative_view, dialogue_view, dialogue_sentence_view
 
 
 relative_forms = {
@@ -165,6 +165,8 @@ def view_form(request):
                                            relative_forms[form_name])
         elif form_name == "dialogues":
             return dialogue_view.view_form(form_name, request)
+        elif form_name == "dialogue_sentences":
+            return dialogue_sentence_view.view_form(form_name, request)
         else:
             return form_view.view_form(form_name, request)
     except Exception, e:
@@ -193,16 +195,25 @@ def submit_form(request):
 
     try:
         if "_back" in request.POST:
-            return form_view.quit_form(form_name, request)
+            if form_name == "dialogue_sentences":
+                return dialogue_sentence_view.quit_form(form_name, request)
+            else:
+                return form_view.quit_form(form_name, request)
         elif "_delete" in request.POST:
             if form_name in relative_forms:
                 return relative_view.delete_form(request, form_name, relative_forms[form_name])
+            elif form_name == "dialogue_sentences":
+                return dialogue_sentence_view.delete_form(form_name, request)
             else:
                 return form_view.delete_form(form_name, request)
         else:
             if form_name in relative_forms:
                 return relative_view.submit_form(request, form_name, "relative_form.html",
                                                  relative_forms[form_name])
+            elif form_name == "dialogues":
+                return dialogue_view.submit_form(form_name, request)
+            elif form_name == "dialogue_sentences":
+                return dialogue_sentence_view.submit_form(form_name, request)
             else:
                 return form_view.submit_form(form_name, request)
     except Exception, e:
