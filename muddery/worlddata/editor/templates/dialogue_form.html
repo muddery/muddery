@@ -26,7 +26,7 @@
             <br>
             <ul class="object-tools">
                 <li>
-                    <a href="/worlddata/editor/dialogues/dialogue_sentences/form.html?_disabled_field=dialogue&_disabled_value={{ key }}" class="addlink">
+                    <a href="/worlddata/editor/dialogues/dialogue_sentences/form.html?_dialogue={{ key }}&_back_page={{ back_page }}&_back_record={{ back_record }}" class="addlink">
                         Add {{ title }}
                     </a>
                 </li>
@@ -44,12 +44,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for record in records %}
+                            {% for sentence in sentences %}
                                 <tr class="{% cycle 'row1' 'row2' %}">
-                                    {% for item in record.items %}
+                                    {% for item in sentence.items %}
                                     <td class="field">
                                         {% if forloop.first %}
-                                            <a href="./form.html?_page={{ page.number }}&_record={{ record.pk }}">
+                                            <a href="/worlddata/editor/dialogues/dialogue_sentences/form.html?_dialogue={{ key }}&_record={{ sentence.pk }}&_back_page={{ back_page }}&_back_record={{ back_record }}">
                                         {% endif %}
                                         {{ item }}
                                         {% if forloop.first %}
