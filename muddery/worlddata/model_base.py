@@ -59,20 +59,20 @@ class game_settings(models.Model):
     # fallback if an object's normal home location is deleted. It is the
     # key of the room. If it is empty, the home will be set to the first
     # room in WORLD_ROOMS.
-    default_home_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
+    default_home_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # The key of a world room.
     # The start position for new characters. It is the key of the room.
     # If it is empty, the home will be set to the first room in WORLD_ROOMS.
-    start_location_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
+    start_location_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # The key of a world room.
     # Player's default home. When a player dies, he will be moved to his home.
-    default_player_home_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
+    default_player_home_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # The key of a character model.
     # Default model of players.
-    default_player_model_key = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
+    default_player_model_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -374,7 +374,7 @@ class loot_list(models.Model):
 
     # The key of a quest.
     # if it is not empty, the player must have this quest, or will not drop
-    quest = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
+    quest = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # condition of the drop
     condition = models.TextField(blank=True)
@@ -1170,11 +1170,11 @@ class dialogue_sentences(models.Model):
 
     # The key of a quest.
     # can provide this quest
-    provide_quest = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
+    provide_quest = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # The key of a quest.
     # can complete this quest
-    complete_quest = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
+    complete_quest = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1259,7 +1259,7 @@ class event_dialogues(models.Model):
 
     # The key of an NPC.
     # NPC's key
-    npc = models.CharField(max_length=KEY_LENGTH, null=True, blank=True)
+    npc = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"

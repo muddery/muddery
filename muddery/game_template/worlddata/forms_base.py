@@ -30,14 +30,14 @@ class GameSettingsForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.world_rooms.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['default_home_key'] = forms.ChoiceField(choices=choices)
-        self.fields['start_location_key'] = forms.ChoiceField(choices=choices)
-        self.fields['default_player_home_key'] = forms.ChoiceField(choices=choices)
+        self.fields['default_home_key'] = forms.ChoiceField(choices=choices, required=False)
+        self.fields['start_location_key'] = forms.ChoiceField(choices=choices, required=False)
+        self.fields['default_player_home_key'] = forms.ChoiceField(choices=choices, required=False)
 
         choices = [("", "---------")]
         objects = models.character_models.objects.filter(level=1)
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['default_player_model_key'] = forms.ChoiceField(choices=choices)
+        self.fields['default_player_model_key'] = forms.ChoiceField(choices=choices, required=False)
 
     class Meta:
         model = models.game_settings
@@ -275,7 +275,7 @@ class CreatorLootListForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.quests.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['quest'] = forms.ChoiceField(choices=choices)
+        self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
         self.fields['quest'].label = u"Depends on quest"
 
     class Meta:
@@ -312,7 +312,7 @@ class CharacterLootListForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.quests.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['quest'] = forms.ChoiceField(choices=choices)
+        self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
         self.fields['quest'].label = u"Depends on quest"
         
     class Meta:
@@ -345,7 +345,7 @@ class QuestRewardListForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.quests.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['quest'] = forms.ChoiceField(choices=choices)
+        self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
         self.fields['quest'].label = u"Depends on quest"
 
     class Meta:
@@ -398,7 +398,7 @@ class CommonCharacterForm(forms.ModelForm):
         objects = models.character_models.objects.all()
         model_keys = set([obj.key for obj in objects])
         choices.extend([(model_key, model_key) for model_key in model_keys])
-        self.fields['model'] = forms.ChoiceField(choices=choices)
+        self.fields['model'] = forms.ChoiceField(choices=choices, required=False)
 
     def clean(self):
         "Validate model and level's value."
@@ -675,8 +675,8 @@ class DialogueSentencesForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.quests.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['provide_quest'] = forms.ChoiceField(choices=choices)
-        self.fields['complete_quest'] = forms.ChoiceField(choices=choices)
+        self.fields['provide_quest'] = forms.ChoiceField(choices=choices, required=False)
+        self.fields['complete_quest'] = forms.ChoiceField(choices=choices, required=False)
 
     class Meta:
         model = models.dialogue_sentences

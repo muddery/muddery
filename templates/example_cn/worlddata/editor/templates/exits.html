@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block header_ext %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+<script type="text/javascript">
+    function typeclassChanged(value) {
+        if (value == "CLASS_LOCKED_EXIT") {
+            $(".locked_exit").show();
+        }
+        else {
+        	$(".locked_exit").hide();
+        }
+    }
+    
+    $(document).ready(function(){
+        $("#id_typeclass").attr("onchange", "typeclassChanged(this.value);");
+
+        if ($("#id_typeclass").val() == "CLASS_LOCKED_EXIT") {
+            $(".locked_exit").show();
+        }
+        else {
+        	$(".locked_exit").hide();
+        }
+    });
+</script>
+{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<div>{{ desc }}</div>
+<div id="content-main">
+    <form id="form_exits" action="submit.html" method="post">
+        {% csrf_token %}
+        <div>
+            <fieldset class="module aligned">
+                <div class="form-row">
+                    {{ exit.key.label_tag }}{{ exit.key }}
+                    {% if exit.key.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ exit.key.help_text }}</li></ul>
+                    {% endif %}
+                    {{ exit.key.errors }}
+                </div>
+                <div class="form-row">
+                    {{ exit.name.label_tag }}{{ exit.name }}
+                    {% if exit.name.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ exit.name.help_text }}</li></ul>
+                    {% endif %}
+                    {{ exit.name.errors }}
+                </div>
+                <div class="form-row">
+                    {{ exit.typeclass.label_tag }}{{ exit.typeclass }}
+                    {% if exit.typeclass.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ exit.typeclass.help_text }}</li></ul>
+                    {% endif %}
+                    {{ exit.typeclass.errors }}
+                </div>
+                <div class="form-row">
+                    {{ exit.desc.label_tag }}{{ exit.desc }}
+                    {% if exit.desc.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ exit.desc.help_text }}</li></ul>
+                    {% endif %}
+                    {{ exit.desc.errors }}
+                </div>
+                <div class="form-row">
+                    {{ exit.verb.label_tag }}{{ exit.verb }}
+                    {% if exit.verb.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ exit.verb.help_text }}</li></ul>
+                    {% endif %}
+                    {{ exit.verb.errors }}
+                </div>
+                <div class="form-row">
+                    {{ exit.location.label_tag }}{{ exit.location }}
+                    {% if exit.location.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ exit.location.help_text }}</li></ul>
+                    {% endif %}
+                    {{ exit.location.errors }}
+                </div>
+                <div class="form-row">
+                    {{ exit.destination.label_tag }}{{ exit.destination }}
+                    {% if exit.destination.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ exit.destination.help_text }}</li></ul>
+                    {% endif %}
+                    {{ exit.destination.errors }}
+                </div>
+                <div class="form-row">
+                    {{ exit.condition.label_tag }}{{ exit.condition }}
+                    {% if exit.condition.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ exit.condition.help_text }}</li></ul>
+                    {% endif %}
+                    {{ exit.condition.errors }}
+                </div>
+                <div class="form-row locked_exit">
+                    {{ lock.unlock_condition.label_tag }}{{ lock.unlock_condition }}
+                    {% if lock.unlock_condition.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ lock.unlock_condition.help_text }}</li></ul>
+                    {% endif %}
+                    {{ lock.unlock_condition.errors }}
+                </div>
+                <div class="form-row locked_exit">
+                    {{ lock.unlock_verb.label_tag }}{{ lock.unlock_verb }}
+                    {% if lock.unlock_verb.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ lock.unlock_verb.help_text }}</li></ul>
+                    {% endif %}
+                    {{ lock.unlock_verb.errors }}
+                </div>
+                <div class="form-row locked_exit">
+                    {{ lock.locked_desc.label_tag }}{{ lock.locked_desc }}
+                    {% if lock.locked_desc.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ lock.locked_desc.help_text }}</li></ul>
+                    {% endif %}
+                    {{ lock.locked_desc.errors }}
+                </div>
+                <div class="form-row locked_exit">
+                    {{ lock.auto_unlock.label_tag }}{{ lock.auto_unlock }}
+                    {% if lock.auto_unlock.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ lock.auto_unlock.help_text }}</li></ul>
+                    {% endif %}
+                    {{ lock.auto_unlock.errors }}
+                </div>
+            </fieldset>
+            <input type="hidden" name="_form" value="{{ form }}" />
+            <input type="hidden" name="_record" value="{{ record }}" />
+            <input type="hidden" name="_page" value="{{ page }}" />
+            {% if referrer %}
+                <input type="hidden" name="_referrer" value="{{ referrer }}" />
+            {% endif %}
+            <div class="submit-row">
+                {% if can_delete %}
+                <input type="submit" name="_delete" value="删除" class="delete-box" />
+                {% endif %}
+                <input type="submit" name="_back" value="返回" />
+                <input type="submit" name="_continue" value="保存并继续编辑" />
+                <input type="submit" name="_save" value="保存" class="default" />
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock content %}
