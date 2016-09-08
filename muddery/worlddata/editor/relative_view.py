@@ -69,13 +69,15 @@ def view_form(request, base_form_name, default_template, relative_forms):
         template_file = default_template
 
     context = {"form": base_form_name,
-               "record": record,
                "base_data": base_data,
                "relative_data": relative_data,
                "relative_typeclasses": relative_typeclasses,
                "title": base_model._meta.verbose_name_plural,
                "desc": getattr(base_class.Meta, "desc", base_model._meta.verbose_name_plural),
                "can_delete": (record is not None)}
+
+    if record:
+        context["record"] = record
 
     if "_page" in request_data:
         context["page"] = request_data.get("_page")
@@ -109,7 +111,7 @@ def submit_form(request, base_form_name, default_template, relative_forms):
     # make base data.
     base_data = base_class(request_data)
     base_instance = None
-    
+
     if record:
         base_instance = base_model.objects.get(pk=record)
         base_data = base_class(request_data, instance=base_instance)
@@ -168,13 +170,15 @@ def submit_form(request, base_form_name, default_template, relative_forms):
         template_file = default_template
 
     context = {"form": base_form_name,
-               "record": record,
                "base_data": base_data,
                "relative_data": [({"typeclass": key, "data": relative_data[key]}) for key in relative_data],
                "relative_typeclasses": relative_typeclasses,
                "title": base_model._meta.verbose_name_plural,
                "desc": getattr(base_class.Meta, "desc", base_model._meta.verbose_name_plural),
                "can_delete": (record is not None)}
+
+    if record:
+        context["record"] = record
 
     if "_page" in request_data:
         context["page"] = request_data.get("_page")
