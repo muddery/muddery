@@ -76,10 +76,13 @@ def view_form(form_name, request):
                "self": request.get_full_path()}
 
     if record:
-        context["back_record"] = record
-        
+        context["record"] = record
+
     if "_page" in request_data:
-        context["back_page"] = request_data.get("_page")
+        context["page"] = request_data.get("_page")
+
+    if "_referrer" in request_data:
+        context["referrer"] = request_data.get("_referrer")
 
     return render(request, template_file, context)
 
@@ -105,15 +108,18 @@ def submit_form(form_name, request):
     record = request_data.get("_record", None)
 
     # Save data.
+    key = ""
     if record:
-        item = model.objects.get(pk=record) 
-        data = form_class(request_data, instance=item)
+        instance = model.objects.get(pk=record)
+        key = instance.key
+        data = form_class(request_data, instance=instance)
     else:
         data = form_class(request_data)
 
     if data.is_valid():
-        item = data.save()
-        record = item.pk
+        instance = data.save()
+        record = instance.pk
+        key = instance.key
 
         if "_save" in request_data:
             # save and back
@@ -123,13 +129,31 @@ def submit_form(form_name, request):
     if "_template" in request_data:
         template_file = request_data.get("_template")
     else:
-        template_file = getattr(form_class.Meta, "form_template", settings.DEFUALT_FORM_TEMPLATE)
+        template_file = "dialogue_form.html"
+
+    # Dialogue sentences
+    # Get models and recoreds.
+    try:
+        form_class = forms.Manager.get_form("dialogue_sentences")
+        model = form_class.Meta.model
+    except Exception, e:
+        raise MudderyError("Invalid form: %s." % "dialogue_sentences")
+
+    fields = model._meta.get_fields()
+    fields = [field for field in fields if not isinstance(field, ManyToOneRel)]
+    sentences = model.objects.filter(dialogue=key)
+
+    sentences = [{"pk": sentence.pk, "items": [getattr(sentence, field.name, "") for field in fields]} for sentence in sentences]
 
     context = {"form": form_name,
                "data": data,
+               "key": key,
                "title": model._meta.verbose_name_plural,
                "desc": getattr(form_class.Meta, "desc", model._meta.verbose_name_plural),
-               "can_delete": (record is not None)}
+               "can_delete": (record is not None),
+               "fields": fields,
+               "sentences": sentences,
+               "self": request.get_full_path()}
 
     if record:
         context["record"] = record
