@@ -23,6 +23,7 @@ from muddery.worlddata.editor.single_form_view import SingleFormView
 from muddery.worlddata.editor.relative_view import RelativeView
 from muddery.worlddata.editor.dialogue_view import DialogueView
 from muddery.worlddata.editor.dialogue_sentence_view import DialogueSentenceView
+from muddery.worlddata.editor.dialogue_chain_view import DialogueChainView
 from muddery.worlddata.editor import dialogue_chain_view
 
 
@@ -247,7 +248,7 @@ def get_view(request):
     elif form_name == "dialogue_sentences":
         view = DialogueSentenceView(form_name, request)
     elif form_name == "dialogue_relations":
-        return dialogue_chain_view.view_form(form_name, request)
+        view = DialogueChainView(form_name, request)
     else:
         view = FormView(form_name, request)
 
