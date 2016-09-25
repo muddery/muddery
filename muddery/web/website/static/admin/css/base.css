@@ -261,7 +261,7 @@ tfoot td {
     color: #666;
     padding: 2px 5px;
     font-size: 11px;
-    background: #e1e1e1 url(../img/nav-bg.gif) top left repeat-x;
+    background: #e1e1e1;
     border-left: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
 }
@@ -338,7 +338,7 @@ table thead th .text a {
 }
 
 table thead th.sortable:hover {
-    background: #fff url(../img/nav-bg-reverse.gif) 0 -5px repeat-x;
+    background: #fff;
 }
 
 thead th.sorted a.sortremove {
@@ -432,7 +432,7 @@ textarea, select, .vTextField {
 /* FORM BUTTONS */
 
 .button, input[type=submit], input[type=button], .submit-row input, a.button {
-    background: #fff url(../img/nav-bg.gif) bottom repeat-x;
+    background: #fff;
     padding: 3px 5px;
     color: black;
     border: 1px solid #bbb;
@@ -444,19 +444,17 @@ a.button {
 }
 
 .button:active, input[type=submit]:active, input[type=button]:active {
-    background-image: url(../img/nav-bg-reverse.gif);
     background-position: top;
 }
 
 .button[disabled], input[type=submit][disabled], input[type=button][disabled] {
-    background-image: url(../img/nav-bg.gif);
     background-position: bottom;
     opacity: 0.4;
 }
 
 .button.default, input[type=submit].default, .submit-row input.default {
     border: 2px solid #5b80b2;
-    background: #7CA0C7 url(../img/default-bg.gif) bottom repeat-x;
+    background: #7CA0C7;
     font-weight: bold;
     color: #fff;
     float: right;
@@ -468,7 +466,6 @@ a.button {
 }
 
 .button[disabled].default, input[type=submit][disabled].default, input[type=button][disabled].default {
-    background-image: url(../img/default-bg.gif);
     background-position: bottom;
     opacity: 0.4;
 }
@@ -511,7 +508,7 @@ a.button {
     font-size: 11px;
     text-align: left;
     font-weight: bold;
-    background: #7CA0C7 url(../img/default-bg.gif) top left repeat-x;
+    background: #7CA0C7;
     color: #fff;
 }
 
@@ -649,7 +646,7 @@ div.system-message p.system-message-title {
 /* BREADCRUMBS */
 
 div.breadcrumbs {
-    background: #fff url(../img/nav-bg-reverse.gif) 0 -10px repeat-x;
+    background: #fff;
     padding: 2px 8px 3px 8px;
     font-size: 11px;
     color: #999;
@@ -662,17 +659,14 @@ div.breadcrumbs {
 
 .addlink {
     padding-left: 12px;
-    background: url(../img/icon_addlink.gif) 0 .2em no-repeat;
 }
 
 .changelink, .inlinechangelink {
     padding-left: 12px;
-    background: url(../img/icon_changelink.gif) 0 .2em no-repeat;
 }
 
 .deletelink {
     padding-left: 12px;
-    background: url(../img/icon_deletelink.gif) 0 .25em no-repeat;
 }
 
 a.deletelink:link, a.deletelink:visited {
@@ -690,10 +684,8 @@ a.deletelink:hover {
     font-weight: bold;
     font-family: Arial,Helvetica,sans-serif;
     padding-left: 0;
-    float: right;
     position: relative;
-    margin-top: -3.4em;
-    margin-bottom: -3em;
+    overflow: hidden;
 }
 
 .form-row .object-tools {
@@ -733,7 +725,7 @@ a.deletelink:hover {
 }
 
 .object-tools a.addlink {
-    background: #999 url(../img/tooltag-add.png) 95% center no-repeat;
+    background: #999;
     padding-right: 26px;
 }
 
@@ -874,6 +866,6 @@ table#change-history tbody th {
 }
 
 #content-related .module h2 {
-    background: #eee url(../img/nav-bg.gif) bottom left repeat-x;
+    background: #eee;
     color: #666;
 }
