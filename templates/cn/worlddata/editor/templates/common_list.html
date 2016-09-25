@@ -8,13 +8,14 @@
 <h1 xmlns="http://www.w3.org/1999/html">{{ title }}</h1>
 <div>{{ desc }}</div>
 <div id="content-main">
-    <ul class="object-tools">
-        <li>
-            <a href="./form.html" class="addlink">
-                添加 {{ title }}
-            </a>
-        </li>
-    </ul>
+    <div class="object-tools">
+        <form action="add.html" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="_form" value="{{ form }}" />
+            <input type="hidden" name="_page" value="{{ page.number }}" />
+            <input type="submit" name="_add" value="添加 {{ title }}" class="add-box" />
+        </form>
+    </div>
     <div class="module" id="changelist">
         <div class="results">
             <table id="result_list">

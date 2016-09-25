@@ -3,263 +3,189 @@
 This file checks user's edit actions and put changes into db.
 """
 
-import re
-from django import http
-from django.shortcuts import render, render_to_response
-from django.http import HttpResponseRedirect
-from django.conf import settings
 from django.db import transaction
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
+from muddery.worlddata.editor.form_view import FormView
 from worlddata import forms
 
 
-def view_form(request, base_form_name, default_template, relative_forms):
+class RelativeView(FormView):
     """
-    Show a form of a record.
-
-    Args:
-        request: http request
-        relative_forms: dict {relative_typeclass: relative_form_name}
-
-    Returns:
-        HttpResponse
+    This object deal with forms and views with two db models.
     """
-    # Get form's name form the request.
-    request_data = request.GET
 
-    try:
-        base_class = forms.Manager.get_form(base_form_name)
-        base_model = base_class.Meta.model
-    except Exception, e:
-        raise MudderyError("Invalid form: %s." % base_form_name)
+    def __init__(self, form_name, request, relative_forms):
+        """
+        Set form name and request.
 
-    record = request_data.get("_record", None)
+        Args:
+            form_name: model form's name
+            request: http request
 
-    # Query data.
-    if record:
-        base_instance = base_model.objects.get(pk=record)
-        base_data = base_class(instance=base_instance)
-    else:
-        base_data = base_class()
+        Returns:
+            None
+        """
+        super(RelativeView, self).__init__(form_name, request)
 
-    relative_data = []
-    relative_typeclasses = list(relative_forms)
-    for typeclass, form_name in relative_forms.iteritems():
-        try:
-            relative_class = forms.Manager.get_form(form_name)
-            relative_model = relative_class.Meta.model
-        except Exception, e:
-            raise MudderyError("Invalid form: %s." % form_name)
+        # set relative forms's names
+        self.relative_forms = relative_forms
+        self.relative_data = {}
 
-        # relativeal data
-        data = relative_class()
-        if record:
+    def parse_request(self):
+        """
+        Parse request data.
+
+        Returns:
+            boolean: Parse success.
+        """
+        if not super(RelativeView, self).parse_request():
+            return False
+
+        self.template_file = getattr(self.form_class.Meta, "form_template", "relative_form.html")
+
+        # Check relative form's name.
+        for typeclass, form_name in self.relative_forms.iteritems():
             try:
-                relative_instance = relative_model.objects.get(key=base_instance.key)
-                data = relative_class(instance=relative_instance)
+                forms.Manager.get_form(form_name)
             except Exception, e:
-                pass
-        relative_data.append({"typeclass": typeclass, "data": data})
+                logger.log_tracemsg("Invalid form %s: %s." % (form_name, e))
+                self.error = "Invalid form: %s." % form_name
+                return False
 
-    # Get template file's name form the request.
-    if "_template" in request_data:
-        template_file = request_data.get("_template")
-    else:
-        template_file = default_template
+        return True
 
-    context = {"form": base_form_name,
-               "base_data": base_data,
-               "relative_data": relative_data,
-               "relative_typeclasses": relative_typeclasses,
-               "title": base_model._meta.verbose_name_plural,
-               "desc": getattr(base_class.Meta, "desc", base_model._meta.verbose_name_plural),
-               "can_delete": (record is not None)}
+    def query_view_data(self):
+        """
+        Get db instance for view.
 
-    if record:
-        context["record"] = record
+        Returns:
+            None
+        """
+        super(RelativeView, self).query_view_data()
 
-    if "_page" in request_data:
-        context["page"] = request_data.get("_page")
-
-    if "_referrer" in request_data:
-        context["referrer"] = request_data.get("_referrer")
-
-    return render(request, template_file, context)
-
-
-def submit_form(request, base_form_name, default_template, relative_forms):
-    """
-    Edit or add a form of a record.
-
-    Args:
-        request: http request
-
-    Returns:
-        HttpResponse
-    """
-    request_data = request.POST
-
-    try:
-        base_class = forms.Manager.get_form(base_form_name)
-        base_model = base_class.Meta.model
-    except Exception, e:
-        raise MudderyError("Invalid form: %s." % base_form_name)
-
-    record = request_data.get("_record", None)
-
-    # make base data.
-    base_data = base_class(request_data)
-    base_instance = None
-
-    if record:
-        base_instance = base_model.objects.get(pk=record)
-        base_data = base_class(request_data, instance=base_instance)
-
-    # make relative data
-    relative_data = {}
-    relative_typeclasses = list(relative_forms)
-    for typeclass, form_name in relative_forms.iteritems():
-        try:
+        # Get relative form's data.
+        self.relative_data = {}
+        for typeclass, form_name in self.relative_forms.iteritems():
             relative_class = forms.Manager.get_form(form_name)
-            relative_model = relative_class.Meta.model
-        except Exception, e:
-            raise MudderyError("Invalid form: %s." % form_name)
+            data = None
+            if self.key:
+                try:
+                    relative_instance = relative_class.Meta.model.objects.get(key=self.key)
+                    data = relative_class(instance=relative_instance)
+                except Exception, e:
+                    data = None
 
-        # relativeal data
-        data = relative_class(request_data)
-        if record:
-            try:
-                relative_instance = relative_model.objects.get(key=base_instance.key)
-                data = relative_class(request_data, instance=relative_instance)
-            except Exception, e:
-                pass
+            if not data:
+                data = relative_class()
 
-        relative_data[typeclass] = data
+            self.relative_data[typeclass] = data
 
-    # Validate
-    saved = False
-    typeclass = request_data["typeclass"]
-    if typeclass not in relative_data:
-        if base_data.is_valid():
-            with transaction.atomic():
-                base_data.save()
-                # Keep old lock data, comment following codes.
-                # if lock_instance:
-                #     lock_instance.delete()
-                saved = True
-    else:
-        # Prevent short cut.
-        base_valid = base_data.is_valid()
-        relative_valid = relative_data[typeclass].is_valid()
+    def get_context(self):
+        """
+        Get render context.
 
-        if base_valid and relative_valid:
-            with transaction.atomic():
-                base_data.save()
-                relative_data[typeclass].save()
-                saved = True
+        Returns:
+            context
+        """
+        context = super(RelativeView, self).get_context()
 
-    if saved and "_save" in request_data:
-        # save and back
-        return quit_form(request)
+        # Set relative form's context.
+        relative_data = [({"typeclass": key, "data": self.relative_data[key]}) for key in self.relative_data]
+        relative_typeclasses = list(self.relative_forms)
 
-    # Get template file's name form the request.
-    if "_template" in request_data:
-        template_file = request_data.get("_template")
-    else:
-        template_file = default_template
+        context["relative_data"] = relative_data,
+        context["relative_typeclasses"] = relative_typeclasses,
 
-    context = {"form": base_form_name,
-               "base_data": base_data,
-               "relative_data": [({"typeclass": key, "data": relative_data[key]}) for key in relative_data],
-               "relative_typeclasses": relative_typeclasses,
-               "title": base_model._meta.verbose_name_plural,
-               "desc": getattr(base_class.Meta, "desc", base_model._meta.verbose_name_plural),
-               "can_delete": (record is not None)}
+        return context
 
-    if record:
-        context["record"] = record
+    def query_submit_data(self):
+        """
+        Get db instance to submit a record.
 
-    if "_page" in request_data:
-        context["page"] = request_data.get("_page")
+        Returns:
+            None
+        """
+        super(RelativeView, self).query_submit_data()
 
-    if "_referrer" in request_data:
-        context["referrer"] = request_data.get("_referrer")
-
-    return render(request, template_file, context)
-
-
-def quit_form(request):
-    """
-    Quit a form without saving.
-    Args:
-        request: http request
-
-    Returns:
-        HttpResponse
-    """
-    request_data = request.POST
-
-    if "_referrer" in request_data:
-        referrer = request_data.get("_referrer")
-        if referrer:
-          return HttpResponseRedirect(referrer)
-
-    try:
-        pos = request.path.rfind("/")
-        if pos > 0:
-            url = request.path[:pos] + "/list.html"
-            if "_page" in request_data:
-                page = request_data.get("_page")
-                url += "?_page=" + str(page)
-            return HttpResponseRedirect(url)
-    except Exception, e:
-        logger.log_tracemsg("quit form error: %s" % e)
-
-    raise http.Http404
-
-
-def delete_form(request, base_form_name, relative_forms):
-    """
-    Delete a record.
-
-    Args:
-        request: http request
-
-    Returns:
-        HttpResponse
-    """
-
-    # Get form's name form the request.
-    request_data = request.POST
-
-    try:
-        base_class = forms.Manager.get_form(base_form_name)
-        base_model = base_class.Meta.model
-    except Exception, e:
-        raise MudderyError("Invalid form: %s." % base_form_name)
-
-    # Delete data.
-    try:
-        record = request_data.get("_record")
-        item = base_model.objects.get(pk=record)
-        key = item.key
-        item.delete()
-    except Exception, e:
-        raise MudderyError("Invalid record.")
-
-    for typeclass, form_name in relative_forms.iteritems():
-        try:
+        # Get relative form's data.
+        self.relative_data = {}
+        for typeclass, form_name in self.relative_forms.iteritems():
             relative_class = forms.Manager.get_form(form_name)
-            relative_model = relative_class.Meta.model
-        except Exception, e:
-            raise MudderyError("Invalid form: %s." % form_name)
+            data = None
+            if self.key:
+                try:
+                    relative_instance = relative_class.Meta.model.objects.get(key=self.key)
+                    data = relative_class(self.request_data, instance=relative_instance)
+                except Exception, e:
+                    data = None
 
-        # Delete data.
-        try:
-            item = relative_model.objects.get(key=key)
-            item.delete()
-        except Exception, e:
-            pass
+            if not data:
+                data = relative_class(self.request_data)
 
-    return quit_form(request)
+            self.relative_data[typeclass] = data
+
+
+    def submit_form(self):
+        """
+        Edit a record.
+
+        Returns:
+            HttpResponse
+        """
+        if not self.valid:
+            raise MudderyError("Invalid form: %s." % self.form_name)
+
+        # Query data.
+        if not self.data:
+            self.query_submit_data()
+
+        # Validate
+        saved = False
+        typeclass = self.request_data["typeclass"]
+        if typeclass not in self.relative_data:
+            if self.data.is_valid():
+                with transaction.atomic():
+                    self.data.save()
+                    # Keep old lock data, comment following codes.
+                    # if lock_instance:
+                    #     lock_instance.delete()
+                    saved = True
+        else:
+            # Prevent short cut.
+            base_valid = self.data.is_valid()
+            relative_valid = self.relative_data[typeclass].is_valid()
+
+            if base_valid and relative_valid:
+                with transaction.atomic():
+                    self.data.save()
+                    self.relative_data[typeclass].save()
+                    saved = True
+
+        if saved and "_save" in self.request_data:
+            # save and back
+            return self.quit_form()
+
+        return self.view_form()
+
+
+    def delete_form(self):
+        """
+        Delete a record.
+
+        Returns:
+            HttpResponse
+        """
+        super(RelativeView, self).delete_form()
+
+        # Delete relative data.
+        if self.key:
+            for typeclass, form_name in self.relative_forms.iteritems():
+                relative_class = forms.Manager.get_form(form_name)
+                try:
+                    instance = relative_class.Meta.model.objects.get(key=self.key)
+                    instance.delete()
+                except Exception, e:
+                    pass
+
+        return self.quit_form()

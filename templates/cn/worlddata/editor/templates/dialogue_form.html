@@ -22,53 +22,8 @@
                 </div>
                 {% endfor %}
             </fieldset>
-            <br>
-            <br>
-            <ul class="object-tools">
-                <li>
-                    <a href="/worlddata/editor/dialogues/dialogue_sentences/form.html?_dialogue={{ key }}&_back_page={{ back_page }}&_back_record={{ back_record }}" class="addlink">
-                        添加 {{ title }}
-                    </a>
-                </li>
-            </ul>
-            <div class="module" id="changelist">
-                <div class="results">
-                    <table id="result_list">
-                        <thead>
-                            <tr>
-                                {% for field in fields %}
-                                <th scope="col" class="sortable">
-                                    <div class="text">{{ field.verbose_name|upper }}</div>
-                                </th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for sentence in sentences %}
-                                <tr class="{% cycle 'row1' 'row2' %}">
-                                    {% for item in sentence.items %}
-                                    <td class="field">
-                                        {% if forloop.first %}
-                                            <a href="/worlddata/editor/dialogues/dialogue_sentences/form.html?_dialogue={{ key }}&_record={{ sentence.pk }}&_back_page={{ back_page }}&_back_record={{ back_record }}">
-                                        {% endif %}
-                                        {{ item }}
-                                        {% if forloop.first %}
-                                            </a>
-                                        {% endif %}
-                                    </td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <input type="hidden" name="_form" value="{{ form }}" />
             <input type="hidden" name="_record" value="{{ record }}" />
             <input type="hidden" name="_page" value="{{ page }}" />
-            {% if referrer %}
-                <input type="hidden" name="_referrer" value="{{ referrer }}" />
-            {% endif %}
             <div class="submit-row">
                 {% if can_delete %}
                 <input type="submit" name="_delete" value="删除" class="delete-box" />
@@ -79,5 +34,48 @@
             </div>
         </div>
     </form>
+    {% if dialogue_key %}
+    <form action="../dialogue_sentences/add.html" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="_dialogue_key" value="{{ dialogue_key }}" />
+        <input type="hidden" name="_back_record" value="{{ record }}" />
+        <input type="hidden" name="_back_page" value="{{ page }}" />
+        <div class="object-tools">
+            <input type="submit" name="_add_sentence" value="添加 {{ sentence_title }}" class="add-box" />
+        </div>
+    </form>
+    <div class="module" id="changelist">
+        <div class="results">
+            <table id="result_list">
+                <thead>
+                    <tr>
+                        {% for field in fields %}
+                        <th scope="col" class="sortable">
+                            <div class="text">{{ field.verbose_name|upper }}</div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sentence in sentences %}
+                        <tr class="{% cycle 'row1' 'row2' %}">
+                            {% for item in sentence.items %}
+                            <td class="field">
+                                {% if forloop.first %}
+                                    <a href="/worlddata/editor/dialogues/dialogue_sentences/form.html?_dialogue_key={{ dialogue_key }}&_record={{ sentence.pk }}&_back_page={{ page }}&_back_record={{ record }}">
+                                {% endif %}
+                                {{ item }}
+                                {% if forloop.first %}
+                                    </a>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock content %}

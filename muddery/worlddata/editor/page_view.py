@@ -89,9 +89,6 @@ def view_list(request):
                "title": model._meta.verbose_name_plural,
                "desc": getattr(form_class.Meta, "desc", model._meta.verbose_name_plural),}
 
-    if "_referrer" in request_data:
-        context["referrer"] = request_data.get("_referrer")
-
     return render(request, template_file, context)
 
 
@@ -107,13 +104,6 @@ def quit_list(request):
     Returns:
         HttpResponse
     """
-    request_data = request.POST
-
-    if "_referrer" in request_data:
-        referrer = request_data.get("_referrer")
-        if referrer:
-          return HttpResponseRedirect(referrer)
-
     try:
         pos = request.path.rfind("/")
         pos = request.path.rfind("/", 0, pos)

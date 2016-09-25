@@ -22,12 +22,8 @@
                 </div>
                 {% endfor %}
             </fieldset>
-            <input type="hidden" name="_form" value="{{ form }}" />
             <input type="hidden" name="_record" value="{{ record }}" />
             <input type="hidden" name="_page" value="{{ page }}" />
-            {% if referrer %}
-                <input type="hidden" name="_referrer" value="{{ referrer }}" />
-            {% endif %}
             <div class="submit-row">
                 {% if can_delete %}
                 <input type="submit" name="_delete" value="删除" class="delete-box" />

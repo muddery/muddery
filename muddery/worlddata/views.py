@@ -17,13 +17,14 @@ from muddery.utils import importer
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import CLIENT_SETTINGS
-from muddery.worlddata.editor import form_view, page_view, relative_view, dialogue_view, dialogue_sentence_view
+from muddery.worlddata.editor import page_view
+from muddery.worlddata.editor.form_view import FormView
+from muddery.worlddata.editor.single_form_view import SingleFormView
+from muddery.worlddata.editor.relative_view import RelativeView
+from muddery.worlddata.editor.dialogue_view import DialogueView
+from muddery.worlddata.editor.dialogue_sentence_view import DialogueSentenceView
+from muddery.worlddata.editor import dialogue_chain_view
 
-
-relative_forms = {
-    "world_exits": {"CLASS_LOCKED_EXIT": "exit_locks"},
-    "world_objects": {"CLASS_OBJECT_CREATOR": "object_creators"}
-}
 
 @staff_member_required
 def worldeditor(request):
@@ -58,6 +59,7 @@ def export_file(request):
     response = http.HttpResponseNotModified()
 
     # get data's zip
+    zipfile = None
     try:
         zipfile = tempfile.TemporaryFile()
         exporter.export_zip_all(zipfile)
@@ -68,7 +70,8 @@ def export_file(request):
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
     except Exception, e:
-        zipfile.close()
+        if zipfile:
+            zipfile.close()
         message = "Can't export world: %s" % e
         logger.log_tracemsg(message)
         return render(request, 'fail.html', {"message": message})
@@ -98,6 +101,7 @@ def import_file(request):
         zipfile.close()
 
     return render(request, 'success.html', {"message": "Data imported!"})
+
 
 @staff_member_required
 def apply_changes(request):
@@ -153,22 +157,9 @@ def list_view(request):
 @staff_member_required
 def view_form(request):
     try:
-        path_list = request.path.split("/")
-        form_name = path_list[-2]
-    except Exception, e:
-        logger.log_errmsg("Invalid form.")
-        raise http.Http404
-
-    try:
-        if form_name in relative_forms:
-            return relative_view.view_form(request, form_name, "relative_form.html",
-                                           relative_forms[form_name])
-        elif form_name == "dialogues":
-            return dialogue_view.view_form(form_name, request)
-        elif form_name == "dialogue_sentences":
-            return dialogue_sentence_view.view_form(form_name, request)
-        else:
-            return form_view.view_form(form_name, request)
+        view = get_view(request)
+        if view.is_valid():
+            return view.view_form()
     except Exception, e:
         logger.log_tracemsg("Invalid view request: %s" % e)
         
@@ -187,36 +178,77 @@ def submit_form(request):
         None.
     """
     try:
+        view = get_view(request)
+
+        if "_back" in request.POST:
+            return view.quit_form()
+        elif "_delete" in request.POST:
+            if view.is_valid():
+                return view.delete_form()
+        else:
+            if view.is_valid():
+                return view.submit_form()
+    except Exception, e:
+        logger.log_tracemsg("Invalide edit request: %s" % e)
+        
+    raise http.Http404
+
+
+@staff_member_required
+def add_form(request):
+    """
+    Edit worlddata.
+
+    Args:
+        request:
+
+    Returns:
+        None.
+    """
+    try:
+        view = get_view(request)
+        if view.is_valid():
+            return view.add_form()
+    except Exception, e:
+        logger.log_tracemsg("Invalide edit request: %s" % e)
+
+    raise http.Http404
+
+
+@staff_member_required
+def get_view(request):
+    """
+    Get form view's object.
+
+    Args:
+        form_name: The name of the form.
+        request: Http request.
+    Returns:
+        view
+    """
+    try:
         path_list = request.path.split("/")
         form_name = path_list[-2]
     except Exception, e:
         logger.log_errmsg("Invalid form.")
         raise http.Http404
 
-    try:
-        if "_back" in request.POST:
-            if form_name == "dialogue_sentences":
-                return dialogue_sentence_view.quit_form(form_name, request)
-            else:
-                return form_view.quit_form(form_name, request)
-        elif "_delete" in request.POST:
-            if form_name in relative_forms:
-                return relative_view.delete_form(request, form_name, relative_forms[form_name])
-            elif form_name == "dialogue_sentences":
-                return dialogue_sentence_view.delete_form(form_name, request)
-            else:
-                return form_view.delete_form(form_name, request)
-        else:
-            if form_name in relative_forms:
-                return relative_view.submit_form(request, form_name, "relative_form.html",
-                                                 relative_forms[form_name])
-            elif form_name == "dialogues":
-                return dialogue_view.submit_form(form_name, request)
-            elif form_name == "dialogue_sentences":
-                return dialogue_sentence_view.submit_form(form_name, request)
-            else:
-                return form_view.submit_form(form_name, request)
-    except Exception, e:
-        logger.log_tracemsg("Invalide edit request: %s" % e)
-        
-    raise http.Http404
+    relative_forms = {
+        "world_exits": {"CLASS_LOCKED_EXIT": "exit_locks"},
+        "world_objects": {"CLASS_OBJECT_CREATOR": "object_creators"}
+    }
+
+    if form_name in relative_forms:
+        view = RelativeView(form_name, request, relative_forms[form_name])
+    elif form_name == "game_settings" or form_name == "client_settings":
+        view = SingleFormView(form_name, request)
+    elif form_name == "dialogues":
+        view = DialogueView(form_name, request)
+    elif form_name == "dialogue_sentences":
+        view = DialogueSentenceView(form_name, request)
+    elif form_name == "dialogue_relations":
+        return dialogue_chain_view.view_form(form_name, request)
+    else:
+        view = FormView(form_name, request)
+
+    return view

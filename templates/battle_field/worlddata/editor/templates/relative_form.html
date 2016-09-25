@@ -46,7 +46,7 @@
         {% csrf_token %}
         <div>
             <fieldset class="module aligned">
-                {% for item in base_data %}
+                {% for item in data %}
                 <div class="form-row">
                     {{ item.label_tag }}{{ item }}
                     {% if item.help_text %}
@@ -71,12 +71,8 @@
                     {% endfor %}
                 {% endfor %}
             </fieldset>
-            <input type="hidden" name="_form" value="{{ form }}" />
             <input type="hidden" name="_record" value="{{ record }}" />
             <input type="hidden" name="_page" value="{{ page }}" />
-            {% if referrer %}
-                <input type="hidden" name="_referrer" value="{{ referrer }}" />
-            {% endif %}
             <div class="submit-row">
                 {% if can_delete %}
                 <input type="submit" name="_delete" value="删除" class="delete-box" />
