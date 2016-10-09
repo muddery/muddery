@@ -911,12 +911,11 @@ def init_game_directory(path, check_db=True):
             # try to get to the executable by relative path.
             twistd_path = os.path.abspath(
                 os.path.join(twistd_dir, os.pardir, os.pardir, os.pardir,
-                             os.pardir, 'scripts', 'twistd.py'))
+                             os.pardir, 'scripts', 'twistd.exe'))
 
             with open(batpath, 'w') as bat_file:
                 # build a custom bat file for windows
-                bat_file.write("@\"%s\" \"%s\" %%*" % (
-                    sys.executable, twistd_path))
+                bat_file.write("@\"%s\" %%*" % twistd_path)
 
             print(INFO_WINDOWS_BATFILE.format(twistd_path=twistd_path))
 
