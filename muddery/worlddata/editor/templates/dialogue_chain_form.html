@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block header_ext %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+<link rel="stylesheet" type="text/css" href="/static/worldeditor/css/worldeditor.css" />
+<script src="/static/worldeditor/js/dialogue_chain.js" type="text/javascript" charset="utf-8"></script>
+{% endblock %}
+{% block content %}
+<div id="title">
+    <h1>{{ title }}</h1>
+    <div>{{ desc }}</div>
+</div>
+<div style="height:100%;">
+    <div class="leftside" id="content-main">
+        <form action="submit.html" method="post" id="form-content">
+            {% csrf_token %}
+            <div>
+                <fieldset class="module aligned">
+                    {% for field in data %}
+                    <div class="form-row">
+                        {{ field.label_tag }}{{ field }}
+                        {% if field.help_text %}
+                        <br><br>
+                        <ul class="helplist"><li>{{ field.help_text }}</li></ul>
+                        {% endif %}
+                        {{ field.errors }}
+                    </div>
+                    {% endfor %}
+                </fieldset>
+                <input type="hidden" name="_form" value="{{ form }}" />
+                <input type="hidden" name="_record" value="{{ record }}" />
+                <input type="hidden" name="_page" value="{{ page }}" />
+                <div class="submit-row">
+                    {% if can_delete %}
+                    <input type="submit" name="_delete" value="Delete" class="delete-box" />
+                    {% endif %}
+                    <input type="submit" name="_back" value="Back without save" />
+                    <input type="submit" name="_continue" value="Save and continue editing" />
+                    <input type="submit" name="_save" value="Save" class="default" />
+                </div>
+            </div>
+        </form>
+    </div>
+    <div id="dialogue-chains">
+        <div id="chain-box">
+            <img src="./image.png?_record={{ record }}"/>
+        </div>
+    </div>
+</div>
+{% endblock content %}

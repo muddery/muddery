@@ -1135,7 +1135,7 @@ class dialogue_relations(models.Model):
 
     # The key of a dialogue.
     # next dialogue's key
-    next = models.CharField(max_length=KEY_LENGTH)
+    next_dlg = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     class Meta:
         "Define Django meta options"
@@ -1197,7 +1197,7 @@ class npc_dialogues(models.Model):
 
     # The key of a dialogue.
     # dialogue's key
-    dialogue = models.CharField(max_length=KEY_LENGTH)
+    dialogue = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # if it is a default dialogue
     default = models.BooleanField(blank=True, default=False)
