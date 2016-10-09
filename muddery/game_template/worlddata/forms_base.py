@@ -657,7 +657,7 @@ class DialogueRelationsForm(forms.ModelForm):
         objects = models.dialogues.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['dialogue'] = forms.ChoiceField(choices=choices)
-        self.fields['next'] = forms.ChoiceField(choices=choices)
+        self.fields['next_dlg'] = forms.ChoiceField(choices=choices)
 
     class Meta:
         model = models.dialogue_relations

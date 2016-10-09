@@ -95,7 +95,7 @@ class DialogueHandler(object):
             count += 1
         data["sentences"][-1]["is_last"] = True
 
-        data["nexts"] = [next.next for next in nexts]
+        data["nexts"] = [next_one.next_dlg for next_one in nexts]
 
         # Add to cache.
         self.dialogue_storage[dialogue] = data
