@@ -248,7 +248,7 @@ def get_view(request):
     elif form_name == "dialogue_sentences":
         view = DialogueSentenceView(form_name, request)
     elif form_name == "dialogue_relations":
-        return dialogue_chain_view.view_form(form_name, request)
+        return DialogueChainView(form_name, request)
     else:
         view = FormView(form_name, request)
 

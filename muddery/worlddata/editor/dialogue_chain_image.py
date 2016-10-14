@@ -62,8 +62,9 @@ class DialogueChainImage(object):
         self.error = None
         self.data = None
 
-        self.dlg_map = [[] for _ in xrange(-self.search_range, self.search_range + 1)]
         self.dialogues = {}
+        self.max_x = 0
+        self.max_y = 0
 
     def is_valid(self):
         """
@@ -124,18 +125,16 @@ class DialogueChainImage(object):
         Returns:
             boolean
         """
-        try:
-            models.npc_dialogues.objects.get(dialogue=dlg_key)
-            # This dialogue is a root.
-            return True
-        except Exception, e:
-            pass
 
-        try:
-            models.dialogue_relations.objects.get(next_dlg=dlg_key)
+        # Count the NPCs who use this dialogue.
+        npc_num = models.npc_dialogues.objects.filter(dialogue=dlg_key).count()
+        if npc_num > 0:
             return True
-        except Exception, e:
-            pass
+
+        # Find its parents number.
+        parent_num = models.dialogue_relations.objects.filter(next_dlg=dlg_key).count()
+        if parent_num == 0:
+            return True
 
         return False
 
@@ -223,36 +222,39 @@ class DialogueChainImage(object):
             dlg_info.root_key = root_key
             dlg_info.root_distance = root_distance
 
-        # build a map according to roots
-        max_y = 0
-        for dlg_info in self.dialogues.values():
-            root_pos = roots_distance[dlg_info.root_key]
-            dlg_info.pos_y = dlg_info.root_distance - root_pos
-            if dlg_info.pos_y > max_y:
-                max_y = dlg_info.pos_y
-
         # group dialogues by root
         root_trees = {}
         for dlg_info in self.dialogues.values():
             if dlg_info.root_key not in root_trees:
-                root_trees[dlg_info.root_key] = [[] for _ in xrange(max_y + 1)]
-            root_trees[dlg_info.root_key][dlg_info.pos_y].append(dlg_info.dlg_key)
+                root_trees[dlg_info.root_key] = []
+            root_trees[dlg_info.root_key].append(dlg_info.dlg_key)
 
+        # calculate y pos
+        for root_tree in root_trees:
+            pass
+
+        # build a map according to roots
+        self.max_y = 0
+        for dlg_info in self.dialogues.values():
+            root_pos = roots_distance[dlg_info.root_key]
+            dlg_info.pos_y = dlg_info.root_distance - root_pos
+            if dlg_info.pos_y > self.max_y:
+                self.max_y = dlg_info.pos_y
+
+
+
+        print "root_trees: %s" % root_trees
         # calculate x pos
-        pos_x = 0
+        self.max_x = -1
         for root_tree in root_trees.values():
-            for dlg_key in root_tree:
-                pass
-
-        # sort every line by parent number
-        for line in self.dlg_map:
-            line.sort(key=lambda x:len(self.dialogues[x].parents))
-
-        # store positions
-        for line in xrange(len(self.dlg_map)):
-            for block in xrange(len(self.dlg_map[line])):
-                dlg = self.dlg_map[line][block]
-                self.dialogues[dlg].position = (block, line,)
+            from_x = self.max_x + 1
+            for pos_y in xrange(len(root_tree)):
+                pos_x = from_x
+                for i in xrange(len(root_tree[pos_y])):
+                    self.dialogues[root_tree[pos_y][i]].pos_x = i + pos_x
+                    self.dialogues[root_tree[pos_y][i]].pos_y = pos_y
+                    if i + pos_x > self.max_x:
+                        self.max_x = i + pos_x
 
     def render(self):
         """
@@ -267,21 +269,6 @@ class DialogueChainImage(object):
         # Query data.
         if not self.data:
             self.query_data()
-        print(self.dlg_map)
-
-        # get validate levels
-        begin_level = self.search_range
-        end_level = self.search_range
-        max_length = 0
-        for i in xrange(0, len(self.dlg_map)):
-            length = len(self.dlg_map[i])
-            if length > 0:
-                if i < begin_level:
-                    begin_level = i
-                if i > end_level:
-                    end_level = i
-                if length > max_length:
-                    max_length = length
 
         # set sizes
         border = 20
@@ -290,8 +277,8 @@ class DialogueChainImage(object):
         space_width = 20
         space_height = 20
         margin = 5
-        total_width = (block_width + space_width) * max_length + border * 2
-        total_height = (block_height + space_height) * (end_level - begin_level + 1) + border * 2
+        total_width = (block_width + space_width) * (self.max_x + 1) + border * 2
+        total_height = (block_height + space_height) * (self.max_y + 1) + border * 2
 
         image = Image.new("RGB", (total_width, total_height), (127, 255, 255))
         font_file = os.path.join(settings.GAME_DIR, "static", "worldeditor", "font", "Arial Unicode.ttf")
@@ -299,47 +286,42 @@ class DialogueChainImage(object):
 
         # draw image
         draw = ImageDraw.Draw(image)
-        for line in xrange(begin_level, end_level + 1):
-            for block in xrange(0, len(self.dlg_map[line])):
-                dlg_key = self.dlg_map[line][block]
+        for dlg in self.dialogues.values():
+            # set position
+            x = dlg.pos_x * (block_width + space_width) + border
+            y = dlg.pos_y * (block_height + space_height) + border
 
-                # set position
-                x = block * (block_width + space_width) + border
-                y = (line - begin_level) * (block_height + space_height) + border
+            # get name
+            name = None
+            try:
+                dialogue = models.dialogues.objects.get(key=dlg.dlg_key)
+                name = dialogue.name[:8]
+            except Exception, e:
+                pass
 
-                # get name
-                name = None
-                try:
-                    dialogue = models.dialogues.objects.get(key=dlg_key)
-                    name = dialogue.name[:8]
-                except Exception, e:
-                    pass
+            # draw block
+            draw.rectangle([x, y, x + block_width, y + block_height], outline=(63, 63, 63))
 
-                # draw block
-                draw.rectangle([x, y, x + block_width, y + block_height], outline=(63, 63, 63))
+            # draw text
+            if name:
+                width = draw.textsize(name, font=font)[0]
+                max = block_width - margin * 2
+                if width > max:
+                    length = int(float(max) / width / 2 * len(name))
+                    while length < len(name) and draw.textsize(name[:length], font=font)[0] < max:
+                        length += 1
+                    name = name[:length - 1]
 
-                # draw text
-                if name:
-                    width = draw.textsize(name, font=font)[0]
-                    max = block_width - margin * 2
-                    if width > max:
-                        length = int(float(max) / width / 2 * len(name))
-                        while length < len(name) and draw.textsize(name[:length], font=font)[0] < max:
-                            length += 1
-                        name = name[:length - 1]
+                draw.text((x + margin, y), name, fill=(63, 63, 63), font=font)
 
-                    draw.text((x + margin, y), name, fill=(63, 63, 63), font=font)
+            # draw lines to its children
+            line_begin_x = x + block_width / 2
+            line_begin_y = y + block_height
 
-                # draw lines to its children
-                line_begin_x = x + block_width / 2
-                line_begin_y = y + block_height
-                print "begin: %s %s" % (block, line)
-                for child in self.dialogues[dlg_key].children:
-                    end_block, end_line = self.dialogues[child].position
-                    print "end: %s %s" % (end_block, end_line)
-                    line_end_x = end_block * (block_width + space_width) + border + block_width / 2
-                    line_end_y = (end_line - begin_level) * (block_height + space_height) + border
-                    draw.line([line_begin_x, line_begin_y, line_end_x, line_end_y], fill=(63, 63, 63))
+            for child in self.dialogues[dlg.dlg_key].children:
+                line_end_x = self.dialogues[child].pos_x * (block_width + space_width) + border + block_width / 2
+                line_end_y = self.dialogues[child].pos_y * (block_height + space_height) + border
+                draw.line([line_begin_x, line_begin_y, line_end_x, line_end_y], fill=(63, 63, 63))
 
         del draw
 
