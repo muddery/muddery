@@ -9,6 +9,7 @@ from __future__ import print_function
 import tempfile, time, json, re
 from django import http
 from django.shortcuts import render
+from django.http import HttpResponse
 from django.contrib.admin.views.decorators import staff_member_required
 from evennia.server.sessionhandler import SESSIONS
 from evennia.utils import logger
@@ -24,7 +25,7 @@ from muddery.worlddata.editor.relative_view import RelativeView
 from muddery.worlddata.editor.dialogue_view import DialogueView
 from muddery.worlddata.editor.dialogue_sentence_view import DialogueSentenceView
 from muddery.worlddata.editor.dialogue_chain_view import DialogueChainView
-from muddery.worlddata.editor import dialogue_chain_view
+from muddery.worlddata.editor.dialogue_chain_image import DialogueChainImage
 
 
 @staff_member_required
@@ -190,7 +191,7 @@ def submit_form(request):
             if view.is_valid():
                 return view.submit_form()
     except Exception, e:
-        logger.log_tracemsg("Invalide edit request: %s" % e)
+        logger.log_tracemsg("Invalid edit request: %s" % e)
         
     raise http.Http404
 
@@ -211,7 +212,7 @@ def add_form(request):
         if view.is_valid():
             return view.add_form()
     except Exception, e:
-        logger.log_tracemsg("Invalide edit request: %s" % e)
+        logger.log_tracemsg("Invalid edit request: %s" % e)
 
     raise http.Http404
 
@@ -222,7 +223,6 @@ def get_view(request):
     Get form view's object.
 
     Args:
-        form_name: The name of the form.
         request: Http request.
     Returns:
         view
@@ -253,3 +253,47 @@ def get_view(request):
         view = FormView(form_name, request)
 
     return view
+
+
+@staff_member_required
+def get_image(request):
+    """
+    Create an image.
+
+    Args:
+        request:
+
+    Returns:
+
+    """
+    try:
+        image_view = get_image_view(request)
+        if image_view.is_valid():
+            return image_view.render()
+    except Exception, e:
+        logger.log_tracemsg("Invalid image request: %s" % e)
+
+    raise http.Http404
+
+
+@staff_member_required
+def get_image_view(request):
+    """
+    Get image's render.
+
+    Args:
+        request: Http request.
+    Returns:
+        view
+    """
+    try:
+        path_list = request.path.split("/")
+        form_name = path_list[-2]
+    except Exception, e:
+        logger.log_errmsg("Invalid form.")
+        raise http.Http404
+
+    if form_name == "dialogue_relations":
+        return DialogueChainImage(form_name, request)
+
+    raise http.Http404

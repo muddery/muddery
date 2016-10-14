@@ -415,13 +415,6 @@ a.page_link {
     overflow-y:auto;
 }
 
-#dialogue-map.rightside {
-    height: 100%;
-    width: 49%;
-    float: right;
-    display: block;
-}
-
 input.add-box {
     color: #fff;
     background: #999;

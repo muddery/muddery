@@ -426,7 +426,7 @@ class DialogueRelationsForm(forms_base.DialogueRelationsForm):
         super(DialogueRelationsForm, self).__init__(*args, **kwargs)
 
         self.fields['dialogue'].label = u"对话"
-        self.fields['next'].label = u"后续"
+        self.fields['next_dlg'].label = u"后续"
 
 
 class DialogueSentencesForm(forms_base.DialogueSentencesForm):
