@@ -152,6 +152,7 @@ class WorldRoomsForm(forms_base.WorldRoomsForm):
         self.fields['typeclass'].label = u"类型"
         self.fields['desc'].label = u"描述"
         self.fields['position'].label = u"位置"
+        self.fields['peaceful'].label = u"中立"
 
 
 class WorldExitsForm(forms_base.WorldExitsForm):
