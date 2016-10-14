@@ -62,7 +62,7 @@
                             {% for item in sentence.items %}
                             <td class="field">
                                 {% if forloop.first %}
-                                    <a href="/worlddata/editor/dialogues/dialogue_sentences/form.html?_dialogue_key={{ dialogue_key }}&_record={{ sentence.pk }}&_back_page={{ page }}&_back_record={{ record }}">
+                                    <a class="table_head" href="/worlddata/editor/dialogues/dialogue_sentences/form.html?_dialogue_key={{ dialogue_key }}&_record={{ sentence.pk }}&_back_page={{ page }}&_back_record={{ record }}">
                                 {% endif %}
                                 {{ item }}
                                 {% if forloop.first %}
