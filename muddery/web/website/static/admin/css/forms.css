@@ -423,3 +423,7 @@ input.add-box {
     float: right;
     border-radius: 15px;
 }
+
+a.table_head:link, a.table_head:visited {
+    text-decoration: underline;
+}

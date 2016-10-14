@@ -31,9 +31,5 @@ class DialogueChainView(FormView):
         if not super(DialogueChainView, self).parse_request():
             return False
 
-<<<<<<< HEAD
-        self.template_file = getattr(self.form_class.Meta, "form_template", "dialogue_chain_form.html")
-=======
         # self.template_file = getattr(self.form_class.Meta, "form_template", "dialogue_chain_form.html")
->>>>>>> dev
         return True
