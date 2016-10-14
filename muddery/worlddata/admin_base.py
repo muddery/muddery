@@ -281,7 +281,7 @@ class DialogueQuestDependenciesAdmin(admin.ModelAdmin):
 
 class DialogueRelationsAdmin(admin.ModelAdmin):
     list_display = ('dialogue',
-                    'next')
+                    'next_dlg')
 
 
 class DialogueSentencesAdmin(admin.ModelAdmin):
