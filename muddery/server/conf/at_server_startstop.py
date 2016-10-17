@@ -24,7 +24,7 @@ from muddery.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS, CLIENT_SETTINGS
 from muddery.typeclasses.character_skills import MudderySkill
 from muddery.utils import builder
-
+from muddery.utils.localiztion_handler import localize_model_fields
 
 def at_server_start():
     """
@@ -52,6 +52,9 @@ def at_server_start():
 
     # reload local strings
     LOCALIZED_STRINGS_HANDLER.reload()
+
+    # localize model fields
+    localize_model_fields()
 
     # reload skill modules
     MudderySkill.load_skill_modules()

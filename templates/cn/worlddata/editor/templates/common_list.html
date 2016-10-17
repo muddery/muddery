@@ -3,6 +3,7 @@
 <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
 <link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
 <link rel="stylesheet" type="text/css" href="/static/admin/css/changelists.css" />
+<link rel="stylesheet" type="text/css" href="/static/worldeditor/css/worldeditor.css" />
 {% endblock %}
 {% block content %}
 <h1 xmlns="http://www.w3.org/1999/html">{{ title }}</h1>
@@ -21,9 +22,9 @@
             <table id="result_list">
                 <thead>
                     <tr>
-                        {% for field in fields %}
+                        {% for title in titles %}
                         <th scope="col" class="sortable">
-                            <div class="text">{{ field.verbose_name|upper }}</div>
+                            <div class="text">{{ title|upper }}</div>
                         </th>
                         {% endfor %}
                     </tr>

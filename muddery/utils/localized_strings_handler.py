@@ -38,31 +38,34 @@ class LocalizedStringsHandler(object):
             model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.LOCALIZED_STRINGS_MODEL)
             for record in model_obj.objects.all():
                 # Add db fields to dict.
-                if record.origin in self.dict:
+                if (record.category, record.origin) in self.dict:
                     # origin words duplicated
                     print("************ WARNING ************")
-                    print("Local string duplicated: \"%s\"" % record.origin)
+                    print("Local string duplicated: \"%s:%s\"" % (record.category, record.origin))
                     continue
-                self.dict[record.origin] = record.local
+                self.dict[(record.category, record.origin)] = record.local
         except Exception, e:
             print("Can not load server local string: %s" % e)
             pass
 
 
-    def translate(self, origin):
+    def translate(self, origin, category="", default=None):
         """
         Translate origin string to local string.
         """
         try:
             # Get local string.
-            local = self.dict[origin]
+            local = self.dict[(category, origin)]
             if local:
                 return local
         except:
             pass
 
-        # Else return origin string.
-        return origin
+        if default is None:
+            # Else return origin string.
+            return origin
+        else:
+            return default
 
 
 # main dialoguehandler
@@ -70,8 +73,10 @@ LOCALIZED_STRINGS_HANDLER = LocalizedStringsHandler()
 
 
 # translater
-def LS(origin):
+def LS(origin, category="", default=None):
     """
     This function returns the localized string.
     """
-    return LOCALIZED_STRINGS_HANDLER.translate(origin)
+    return LOCALIZED_STRINGS_HANDLER.translate(origin, category, default)
+
+

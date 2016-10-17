@@ -78,10 +78,11 @@ def view_list(request):
     if range_end > paginator.num_pages:
         range_end = paginator.num_pages
 
-    page_records = [{"pk": record.pk, "items": [getattr(record, field.name, "") for field in fields]} for record in page]
+    titles = [field.verbose_name for field in fields]
+    page_records = [{"pk": record.pk, "items": [getattr(record, field.name) for field in fields]} for record in page]
     
     context = {"form": form_name,
-               "fields": fields,
+               "titles": titles,
                "records": page_records,
                "page": page,
                "page_range": xrange(range_begin, range_end + 1),
