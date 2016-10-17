@@ -1276,6 +1276,9 @@ class event_dialogues(models.Model):
 class localized_strings(models.Model):
     "Store all server local strings informations."
 
+    # word's category
+    category = models.TextField(blank=True)
+
     # the origin words
     origin = models.TextField()
 
