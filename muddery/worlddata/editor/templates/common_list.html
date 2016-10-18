@@ -35,7 +35,7 @@
                             {% for item in record.items %}
                             <td class="field">
                                 {% if forloop.first %}
-                                    <a class="table_head" href="./t/form.html?_page={{ page.number }}&_record={{ record.pk }}">
+                                    <a class="table_head" href="./form.html?_page={{ page.number }}&_record={{ record.pk }}">
                                 {% endif %}
                                 {{ item }}
                                 {% if forloop.first %}
