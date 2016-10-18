@@ -94,8 +94,8 @@ class RelativeView(FormView):
         relative_data = [({"typeclass": key, "data": self.relative_data[key]}) for key in self.relative_data]
         relative_typeclasses = list(self.relative_forms)
 
-        context["relative_data"] = relative_data,
-        context["relative_typeclasses"] = relative_typeclasses,
+        context["relative_data"] = relative_data
+        context["relative_typeclasses"] = relative_typeclasses
 
         return context
 
