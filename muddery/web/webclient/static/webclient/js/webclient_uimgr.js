@@ -28,7 +28,7 @@ var uimgr = {
         var aHrefElement = $("<a>")
             .attr("href", href)
             .attr("onclick", onclick)
-            .text(name);
+            .html(name);
         for(key in args){
             aHrefElement.attr(key, args[key]);
         }
@@ -37,7 +37,7 @@ var uimgr = {
 
     divRoomTabName : function(element) {
         var divRoomTabNameElement = uimgr.divEmpty();
-        var roomTabNameElement = $("<span>").text("\>\>\>\>\> " + element +  " \<\<\<\<\<")
+        var roomTabNameElement = $("<span>").html("&gt;&gt;&gt;&gt;&gt; " + element +  " &lt;&lt;&lt;&lt;&lt;")
             .attr("class", "cyan")
             .appendTo(divRoomTabNameElement);
         return divRoomTabNameElement;
@@ -46,7 +46,7 @@ var uimgr = {
     divRoomCenterTabName : function(element) {
         var divRoomTabNameElement = uimgr.divEmpty();
         var centerElement = $("<center>");
-        var roomTabNameElement = $("<span>").text("\>\>\>\>\> " + element +  " \<\<\<\<\<")
+        var roomTabNameElement = $("<span>").html("&gt;&gt;&gt;&gt;&gt; " + element +  " &lt;&lt;&lt;&lt;&lt;")
             .attr("class", "cyan")
             .appendTo(centerElement);
         centerElement.appendTo(divRoomTabNameElement);
@@ -65,8 +65,14 @@ var uimgr = {
         for (var i in data_cmds) {
             try {
                 var cmd = data_cmds[i];
-                var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, cmd["name"],
-                    {"cmd_name": cmd["cmd"], "cmd_args": cmd["args"], "style":"margin-left:10px;"});
+                var name = text2html.parseHtml(cmd["name"]);
+                var aHrefElement = uimgr.aHref("#",
+                                               uimgr.CONST_A_HREF_ONCLICK,
+                                               name,
+                                               {"cmd_name": cmd["cmd"],
+                                                "cmd_args": cmd["args"],
+                                                 "style":"margin-left:10px;"
+                                               });
                 aHrefElement.appendTo(divRoomCmdsElement);
             }
             catch(error) {
@@ -92,7 +98,7 @@ var uimgr = {
                 }
 
                 var exit = data_exits[i].data;
-                var name = exit.name;
+                var name = text2html.parseHtml(exit.name);
                 var aHrefElement = uimgr.aHref("#",
                                                uimgr.CONST_A_HREF_ONCLICK,
                                                name,
@@ -125,8 +131,15 @@ var uimgr = {
         for (var i in data_things) {
             try {
                 var thing = data_things[i];
-                var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, thing["name"],
-                    {"cmd_name": "look", "cmd_args": thing["dbref"], "dbref": thing["dbref"], "style":"margin-left:10px;"});
+                var name = text2html.parseHtml(thing["name"]);
+                var aHrefElement = uimgr.aHref("#",
+                                               uimgr.CONST_A_HREF_ONCLICK,
+                                               name,
+                                               {"cmd_name": "look",
+                                                "cmd_args": thing["dbref"],
+                                                "dbref": thing["dbref"],
+                                                "style":"margin-left:10px;"
+                                               });
                 aHrefElement.appendTo(divRoomThingsElement);
                 empty = false;
             }
@@ -146,8 +159,15 @@ var uimgr = {
         for (var i in data_npcs) {
             try {
                 var npc = data_npcs[i];
-                var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, npc["name"],
-                    {"cmd_name": "look", "cmd_args": npc["dbref"], "dbref": npc["dbref"], "style":"margin-left:10px;"});
+                var name = text2html.parseHtml(npc["name"]);
+                var aHrefElement = uimgr.aHref("#",
+                                               uimgr.CONST_A_HREF_ONCLICK,
+                                               name,
+                                               {"cmd_name": "look",
+                                                "cmd_args": npc["dbref"],
+                                                "dbref": npc["dbref"],
+                                                "style":"margin-left:10px;"
+                                               });
                 if (npc["complete_quest"]) {
                     aHrefElement.text(aHrefElement.text() + "[?]");
                 }
@@ -174,8 +194,15 @@ var uimgr = {
         for (var i in data_players) {
             try {
                 var player = data_players[i];
-                var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, player["name"],
-                    {"cmd_name": "look", "cmd_args": player["dbref"], "dbref": player["dbref"], "style":"margin-left:10px;"});
+                var name = text2html.parseHtml(player["name"]);
+                var aHrefElement = uimgr.aHref("#",
+                                               uimgr.CONST_A_HREF_ONCLICK,
+                                               name,
+                                               {"cmd_name": "look",
+                                                "cmd_args": player["dbref"],
+                                                "dbref": player["dbref"],
+                                                "style":"margin-left:10px;"
+                                               });
                 aHrefElement.appendTo(divRoomPlayersElement);
                 empty = false;
             }

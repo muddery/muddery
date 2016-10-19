@@ -240,7 +240,7 @@ var map = {
                 .attr("font-size", "14px")
                 .attr("fill", "white")
                 .text(function(d) {
-                        return d[0];
+                        return text2html.clearTags(d[0]);
                       });
         }
 
