@@ -241,9 +241,6 @@ class DialogueChainImage(object):
             if dlg_info.pos_y > self.max_y:
                 self.max_y = dlg_info.pos_y
 
-
-
-        print "root_trees: %s" % root_trees
         # calculate x pos
         self.max_x = -1
         for root_tree in root_trees.values():

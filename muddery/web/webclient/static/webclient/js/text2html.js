@@ -108,9 +108,57 @@ var text2html = {
 
         // Convert marks
         string = string.replace(text2html.regexp_mark, text2html.convertMark);
+
+        if (text2html.last_convert.substring(0, 5) == "<span") {
+            // close span
+            string += "</span>";
+        }
+        else if (text2html.last_convert.substring(0, 8) == "<strong>") {
+            // close strong
+            string += "</strong>";
+        }
+
+        // Clear last convert.
+        text2html.last_convert = "";
         
         return string;
     },
+
+    clearTag: function(match) {
+        var replacement = "";
+
+        if (match in text2html.mark_map) {
+            if (match == "{{") {
+                // "{"
+                replacement = "{";
+            }
+            else if (match == "{/") {
+                // line break
+                replacement = " ";
+            }
+            else if (match == "{-") {
+                // tab
+                replacement = "    ";
+            }
+            else if (match == "{_") {
+                // space
+                replacement = " ";
+            }
+            else {
+                replacement = "";
+            }
+        }
+        else {
+            replacement = match;
+        }
+
+        return replacement;
+    },
+
+    clearTags: function(string) {
+        string = string.replace(text2html.regexp_mark, text2html.clearTag);
+        return string;
+    }
 };
 
 // Compile RegExps.

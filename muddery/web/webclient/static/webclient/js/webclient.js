@@ -270,10 +270,10 @@ var webclient = {
         
         // add room's name
         try {
-            element = data["name"];
+            element = text2html.parseHtml(data["name"]);
         }
         catch(error) {
-            element = tab_name;
+            element = LS('Scene');
         }
         box.empty();
         uimgr.divRoomTabName(element).appendTo(box);
@@ -467,13 +467,13 @@ var webclient = {
         // add object's name
         var title = "";
         try {
-            title = data["name"];
+            title = text2html.parseHtml(data["name"]);
         }
         catch(error) {
-            title = tab_name;
+            title = LS('Scene');
         }
 
-        $('#popup_header').text(title);
+        $('#popup_header').html(title);
 
         var page = $('#popup_body');
         var footer = $('#popup_footer');
