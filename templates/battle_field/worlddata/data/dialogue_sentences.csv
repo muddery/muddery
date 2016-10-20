@@ -6,3 +6,6 @@ dlg_skill_dunt,1,n,"学习重击","learn_skill(""skill_dunt"");set_attr(""skill"
 dlg_skill_strong_body,1,n,"学习强壮体魄","learn_skill(""skill_strong_body"");set_attr(""skill"")",,
 dlg_skill_powerful_heal,1,n,"学习强效治疗","learn_skill(""skill_powerful_heal"");set_attr(""skill"")",,
 dlg_learned_skill,1,n,"你已经学习过技能了。",,,
+dlg_trainer_begin,1,n,"你想要和我切磋一下吗？",,,
+dlg_trainer_fight,1,p,"好啊，我们来比试比试！","fight_mob(""mob_trainer"")",,
+dlg_trainer_cancel,1,p,"算了，我打不过你。",,,

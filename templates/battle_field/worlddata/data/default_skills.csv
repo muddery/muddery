@@ -1,3 +1,4 @@
 character,skill
 MODEL_PLAYER,skill_normal_hit
 MODEL_PLAYER,skill_escape
+MODEL_TRAINER,skill_normal_hit

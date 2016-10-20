@@ -470,13 +470,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             None
         """
         if target_level == 0:
-            # find the target and get level
+            # Find the target and get its level.
             obj = utils.search_obj_data_key(target_key)
             if not obj:
                 logger.log_errmsg("Can not find the target %s." % target_key)
                 return
             obj = obj[0]
-
             target_level = obj.db.level
 
         # Create a target.

@@ -6,3 +6,6 @@ dlg_skill_dunt,技能重击,"not has_attr(""skill"")"
 dlg_skill_strong_body,技能体魄,"not has_attr(""skill"")"
 dlg_skill_powerful_heal,技能治疗,"not has_attr(""skill"")"
 dlg_learned_skill,学习技能,
+dlg_trainer_begin,教练对话,
+dlg_trainer_fight,教练战斗,
+dlg_trainer_cancel,放弃战斗,
