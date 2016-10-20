@@ -165,3 +165,5 @@ class ScriptHandlerDefault(ScriptHandler):
         self.add_action("set_attr", script_actions.set_attr)
         self.add_action("get_attr", script_actions.get_attr)
         self.add_action("remove_attr", script_actions.remove_attr)
+        self.add_action("fight_mob", script_actions.fight_mob)
+        self.add_action("fight_target", script_actions.fight_target)

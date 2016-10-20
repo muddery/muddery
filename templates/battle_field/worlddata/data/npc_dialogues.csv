@@ -6,3 +6,4 @@ npc_master,dlg_skill_dunt,
 npc_master,dlg_skill_strong_body,
 npc_master,dlg_skill_powerful_heal,
 npc_master,dlg_learned_skill,1
+npc_trainer,dlg_trainer_begin,

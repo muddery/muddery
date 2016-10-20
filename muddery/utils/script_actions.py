@@ -156,3 +156,47 @@ def remove_attr(character, obj, *args):
     key = args[0]
     character.custom_attr.remove(key)
 
+
+def fight_mob(character, obj, *args):
+    """
+    Fight with specified target.
+
+    Args:
+        args[0]: mob's key
+        args[1]: mob's level
+        args[2]: optional fight's desc
+    """
+    if not character:
+        return
+
+    if not args:
+        return
+
+    key = args[0]
+
+    level = 1
+    if len(args) > 1:
+        level = args[1]
+
+    desc = ""
+    if len(args) > 2:
+        desc = args[2]
+
+    character.attack_clone_target(key, level, desc)
+
+
+def fight_target(character, obj, *args):
+    """
+    Fight with current target.
+
+    Args:
+        args[0]: optional fight's desc
+    """
+    if not character:
+        return
+
+    desc = ""
+    if args:
+        desc = args[0]
+
+    character.attack_clone_target(obj.get_data_key(), obj.db.level, desc)
