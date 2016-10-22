@@ -122,6 +122,11 @@ var webclient = {
                     this.displayGetObject(data[key]);
                 }
                 else if (key == "joined_combat") {
+                    if (data_handler.dialogue_target != "") {
+                        // If the player is talking, close the dialog window.
+                        popupmgr.doCloseDialogue();
+                    }
+
                     combat.createCombat(data[key]);
                 }
                 else if (key == "combat_finish") {

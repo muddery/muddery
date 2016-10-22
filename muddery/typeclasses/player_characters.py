@@ -84,9 +84,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Moves this object to a new location.
         """
         if (not quiet) and self.solo_mode:
-			# If in solo mode, move quietly.
-			quiet = True
-        
+            # If in solo mode, move quietly.
+            quiet = True
+
         return super(MudderyPlayerCharacter, self).move_to(destination,
                                                            quiet,
                                                            emit_to_obj,
