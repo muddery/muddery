@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
-from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
@@ -228,7 +228,7 @@ class QuestHandler(object):
 
             try:
                 record = model_quest.objects.get(key=quest_key)
-                return SCRIPT_HANDLER.match_condition(self.owner, None, record.condition)
+                return STATEMENT_HANDLER.match_condition(self.owner, None, record.condition)
             except ObjectDoesNotExist:
                 continue
             except AttributeError:

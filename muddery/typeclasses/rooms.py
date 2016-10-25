@@ -9,7 +9,7 @@ import ast
 import traceback
 from django.conf import settings
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
@@ -126,7 +126,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
             # only show objects that match the condition
             condition = getattr(cont.dfield, "condition", None)
             if condition:
-                if not SCRIPT_HANDLER.match_condition(caller, self, condition):
+                if not STATEMENT_HANDLER.match_condition(caller, self, condition):
                     continue
                         
             type = self.get_surrounding_type(cont)

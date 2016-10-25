@@ -55,20 +55,20 @@ class SkillHandler(object):
             is_default: (boolean) if it is a default skill
 
         Returns:
-            None
+            (boolean) learned skill
         """
         if not self.owner:
-            return
+            return False
 
         if skill in self.skills:
             self.owner.msg({"alert": LS("You have already learned this skill.")})
-            return
+            return False
 
         # Create skill object.
         skill_obj = build_object(skill)
         if not skill_obj:
             self.owner.msg({"alert": LS("Can not learn this skill.")})
-            return
+            return False
 
         # set default
         if is_default:
@@ -90,6 +90,8 @@ class SkillHandler(object):
         if self.owner.has_player:
             self.owner.show_skills()
             self.owner.msg({"msg": LS("You learned skill {c%s{n.") % skill_obj.get_name()})
+
+        return True
 
     def has_skill(self, skill):
         """

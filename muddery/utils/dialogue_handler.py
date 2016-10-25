@@ -8,7 +8,7 @@ The DialogueHandler maintains a pool of dialogues.
 
 from muddery.utils import defines
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
-from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils import defines
 from muddery.utils.game_settings import GAME_SETTINGS
 from django.conf import settings
@@ -268,7 +268,7 @@ class DialogueHandler(object):
                 continue
 
             # Match conditions.
-            if not SCRIPT_HANDLER.match_condition(caller, npc, npc_dlg["condition"]):
+            if not STATEMENT_HANDLER.match_condition(caller, npc, npc_dlg["condition"]):
                 continue
 
             # Match dependeces.
@@ -332,7 +332,7 @@ class DialogueHandler(object):
                 if not next_dlg["sentences"]:
                     continue
 
-                if not SCRIPT_HANDLER.match_condition(caller, npc, next_dlg["condition"]):
+                if not STATEMENT_HANDLER.match_condition(caller, npc, next_dlg["condition"]):
                     continue
 
                 for dep in next_dlg["dependencies"]:
@@ -416,7 +416,7 @@ class DialogueHandler(object):
 
         # do dialogue's action
         if sentence["action"]:
-            SCRIPT_HANDLER.do_action(caller, npc, sentence["action"])
+            STATEMENT_HANDLER.do_statement(caller, npc, sentence["action"])
 
         if sentence["is_last"]:
             # last sentence
@@ -511,7 +511,7 @@ class DialogueHandler(object):
         if not npc_dlg:
             return (provide_quest, complete_quest)
 
-        if not SCRIPT_HANDLER.match_condition(caller, npc, npc_dlg["condition"]):
+        if not STATEMENT_HANDLER.match_condition(caller, npc, npc_dlg["condition"]):
             return (provide_quest, complete_quest)
 
         match = True

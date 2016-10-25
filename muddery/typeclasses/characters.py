@@ -376,33 +376,35 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             desc: (string) string to describe this attack
 
         Returns:
-            None
+            (boolean) attack begins
         """
         if self.is_in_combat():
             # already in battle
             logger.log_errmsg("%s is already in battle." % self.dbref)
-            return
+            return False
 
         # search target
         if not target:
             logger.log_errmsg("Can not find the target.")
-            return
+            return False
 
         if not target.is_typeclass(settings.BASE_GENERAL_CHARACTER_TYPECLASS, exact=False):
             # Target is not a character.
             logger.log_errmsg("Can not attack the target %s." % target.dbref)
-            return
+            return False
 
         if target.is_in_combat():
             # obj is already in battle
             logger.log_errmsg("%s is already in battle." % target.dbref)
-            return
+            return False
 
         # create a new combat handler
         chandler = create_script(settings.COMBAT_HANDLER)
                         
         # set combat team and desc
         chandler.set_combat({1: [target], 2: [self]}, desc)
+
+        return True
 
     def attack_current_target(self, desc=""):
         """
@@ -467,14 +469,14 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             desc: (string) string to describe this attack
 
         Returns:
-            None
+            (boolean) fight begins
         """
         if target_level == 0:
             # Find the target and get its level.
             obj = utils.search_obj_data_key(target_key)
             if not obj:
                 logger.log_errmsg("Can not find the target %s." % target_key)
-                return
+                return False
             obj = obj[0]
             target_level = obj.db.level
 
@@ -482,10 +484,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         target = build_object(target_key)
         if not target:
             logger.log_errmsg("Can not create the target %s." % target_key)
-            return
+            return False
 
         target.set_level(target_level)
-        self.attack_target(target, desc)
+        return self.attack_target(target, desc)
 
     ########################################
     #

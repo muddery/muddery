@@ -150,6 +150,15 @@ TEMPLATES = [{{
 # may survive.
 SECRET_KEY = {secret_key}
 
+
+######################################################################
+# Typeclasses and other paths
+######################################################################
+
+# Statement functions set
+STATEMENT_FUNC_SET = "statements.statement_func_set.StatementFuncSet"
+
+
 ######################################################################
 # World data features
 ######################################################################

@@ -7,7 +7,7 @@ from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
 from muddery.utils.localized_strings_handler import LS
-from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.exception import MudderyError
 
 
@@ -64,7 +64,7 @@ class LootHandler(object):
                 if not looter.quest_handler.is_not_accomplished(obj["quest"]):
                     return False
 
-            if not SCRIPT_HANDLER.match_condition(looter, self.owner, obj["condition"]):
+            if not STATEMENT_HANDLER.match_condition(looter, self.owner, obj["condition"]):
                 return False
 
             return True

@@ -6,7 +6,7 @@ import re
 import random
 from muddery.utils import defines
 from muddery.utils.builder import build_object
-from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils import utils
 from django.conf import settings
@@ -134,7 +134,7 @@ class EventHandler(object):
         if defines.EVENT_TRIGGER_ARRIVE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_ARRIVE]:
                 # If has arrive event.
-                if SCRIPT_HANDLER.match_condition(character, self.owner, event["condition"]):
+                if STATEMENT_HANDLER.match_condition(character, self.owner, event["condition"]):
                     # If matches the condition.
                     function = self.get_function(event["type"])
                     if function:
@@ -163,7 +163,7 @@ class EventHandler(object):
         if defines.EVENT_TRIGGER_DIE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_DIE]:
                 #If has die event.
-                if SCRIPT_HANDLER.match_condition(owner, None, event["condition"]):
+                if STATEMENT_HANDLER.match_condition(owner, None, event["condition"]):
                     # If matches the condition, run event on the owner.
                     function = self.get_function(event["type"])
                     if function:
@@ -182,7 +182,7 @@ class EventHandler(object):
                     if self.can_bypass(killer):
                         continue
 
-                    if SCRIPT_HANDLER.match_condition(killer, self.owner, event["condition"]):
+                    if STATEMENT_HANDLER.match_condition(killer, self.owner, event["condition"]):
                         function = self.get_function(event["type"])
                         if function:
                             function(event, killer)
@@ -203,7 +203,7 @@ class EventHandler(object):
         if defines.EVENT_TRIGGER_TRAVERSE in self.events:
             for event in self.events[defines.EVENT_TRIGGER_TRAVERSE]:
                 # If has traverse event.
-                if SCRIPT_HANDLER.match_condition(character, self.owner, event["condition"]):
+                if STATEMENT_HANDLER.match_condition(character, self.owner, event["condition"]):
                     # If matches the condition.
                     triggered = True
                     function = self.get_function(event["type"])

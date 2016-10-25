@@ -150,6 +150,15 @@ TEMPLATES = [{{
 # may survive.
 SECRET_KEY = {secret_key}
 
+
+######################################################################
+# Typeclasses and other paths
+######################################################################
+
+# Statement functions set
+STATEMENT_FUNC_SET = "statements.statement_func_set.StatementFuncSet"
+
+
 ######################################################################
 # World data features
 ######################################################################
@@ -196,6 +205,3 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
 AT_INITIAL_SETUP_HOOK_MODULE = "server.conf.at_initial_setup"
 
 EQUIP_EFFECTS = ["attack", "defence"]
-
-# Handler deals with condition scripts and action scripts
-SCRIPT_HANDLER = "utils.script_handler.ScriptHandler"
