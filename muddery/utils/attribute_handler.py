@@ -39,11 +39,15 @@ class AttributeHandler(object):
     def remove(self, key):
         """
         Remove an attribute
+
+        Returns:
+            Can remove.
         """
         if not key in self.attributes:
-            return
+            return False
 
         del self.attributes[key]
+        return True
 
 
     def has(self, key):
@@ -53,7 +57,7 @@ class AttributeHandler(object):
         return key in self.attributes
 
 
-    def is_value(self, key, value):
+    def check_value(self, key, value):
         """
         Does this attribute match the value.
         """

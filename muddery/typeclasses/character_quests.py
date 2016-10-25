@@ -8,7 +8,7 @@ in the character. It controls quest's objectives.
 
 from muddery.utils import defines
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.loot_handler import LootHandler
 from muddery.utils.localized_strings_handler import LS
@@ -205,7 +205,7 @@ class MudderyQuest(MudderyObject):
         # do quest's action
         action = getattr(self.dfield, "action", None)
         if action:
-            SCRIPT_HANDLER.do_action(owner, None, action)
+            STATEMENT_HANDLER.do_statement(owner, None, action)
 
         # remove objective objects
         obj_list = []

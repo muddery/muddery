@@ -95,8 +95,8 @@ BASE_SKILL_TYPECLASS = "muddery.typeclasses.skills.MudderySkill"
 # Typeclass for quests
 BASE_QUEST_TYPECLASS = "muddery.typeclasses.quests.MudderyQuest"
 
-# Handler deals with condition scripts and action scripts
-SCRIPT_HANDLER = "muddery.utils.script_handler_base.ScriptHandlerDefault"
+# Statement functions set
+STATEMENT_FUNC_SET = "muddery.statements.default_statement_func_set.DefaultStatementFuncSet"
 
 # Handler of the combat
 COMBAT_HANDLER = "muddery.typeclasses.combat_handler.MudderyCombatHandler"

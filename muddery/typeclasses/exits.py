@@ -12,7 +12,7 @@ from __future__ import print_function
 import traceback
 from muddery.utils import utils
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.localized_strings_handler import LS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultExit
@@ -158,7 +158,7 @@ class MudderyLockedExit(MudderyExit):
         Unlock an exit.
         """
         # Only can unlock exits which match there conditions.
-        return SCRIPT_HANDLER.match_condition(caller, self, self.unlock_condition)
+        return STATEMENT_HANDLER.match_condition(caller, self, self.unlock_condition)
 
 
     def get_appearance(self, caller):
@@ -171,7 +171,7 @@ class MudderyLockedExit(MudderyExit):
             # If is unlocked, use common appearance.
             return super(MudderyLockedExit, self).get_appearance(caller)
 
-        can_unlock = SCRIPT_HANDLER.match_condition(caller, self, self.unlock_condition)
+        can_unlock = STATEMENT_HANDLER.match_condition(caller, self, self.unlock_condition)
 
         if can_unlock and self.auto_unlock:
             # Automatically unlock the exit when a character looking at it.
@@ -206,7 +206,7 @@ class MudderyLockedExit(MudderyExit):
             return super(MudderyLockedExit, self).get_available_commands(caller)
 
         cmds = []
-        can_unlock = SCRIPT_HANDLER.match_condition(caller, self, self.unlock_condition)
+        can_unlock = STATEMENT_HANDLER.match_condition(caller, self, self.unlock_condition)
         if can_unlock:
             # show unlock command
             verb = self.unlock_verb

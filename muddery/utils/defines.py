@@ -24,8 +24,8 @@ OBJECTIVE_KILL = "OBJECTIVE_KILL"           # kill some characters, object: char
 # event trigger types
 EVENT_TRIGGER_NONE = 0
 EVENT_TRIGGER_ARRIVE = "EVENT_TRIGGER_ARRIVE"       # at attriving a room. object: room_id
-EVENT_TRIGGER_DIE = "EVENT_TRIGGER_DIE"             # character die. object: killer_mob_id
-EVENT_TRIGGER_KILL = "EVENT_TRIGGER_KILL"           # kill a mob. object: mob_id
+EVENT_TRIGGER_KILL = "EVENT_TRIGGER_KILL"           # caller kills one. object: dead_one_id
+EVENT_TRIGGER_DIE = "EVENT_TRIGGER_DIE"             # caller die. object: killer_id
 EVENT_TRIGGER_TRAVERSE = "EVENT_TRIGGER_TRAVERSE"   # before traverse an exit. object: exit_id
 
 # event types

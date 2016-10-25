@@ -14,7 +14,7 @@ from evennia.utils.utils import lazy_property
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.loot_handler import LootHandler
 from muddery.utils.localized_strings_handler import LS
-from muddery.utils.script_handler import SCRIPT_HANDLER
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 
 
 class MudderyObjectCreator(MudderyObject):
@@ -44,7 +44,7 @@ class MudderyObjectCreator(MudderyObject):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        if not SCRIPT_HANDLER.match_condition(caller, self, self.loot_condition):
+        if not STATEMENT_HANDLER.match_condition(caller, self, self.loot_condition):
             return []
 
         commands = [{"name": self.loot_verb, "cmd": "loot", "args": self.dbref}]

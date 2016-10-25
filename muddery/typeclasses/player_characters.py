@@ -305,9 +305,14 @@ class MudderyPlayerCharacter(MudderyCharacter):
     def receive_objects(self, obj_list):
         """
         Add objects to the inventory.
-        obj_list: (list) a list of object keys and there numbers.
-                         list item: {"object": object's key
-                                     "number": object's number}
+
+        Args:
+            obj_list: (list) a list of object keys and there numbers.
+                             list item: {"object": object's key
+                                         "number": object's number}
+
+        Returns:
+            (dict) a list of objects that not have been received and their reasons.
         """
         accepted_keys = {}      # the keys of objects that have been accepted
         accepted_names = {}     # the names of objects that have been accepted
@@ -410,25 +415,31 @@ class MudderyPlayerCharacter(MudderyCharacter):
     def remove_objects(self, obj_list):
         """
         Remove objects from the inventory.
-        obj_list: (list) a list of object keys and there numbers.
-                         list item: {"object": object's key
-                                     "number": object's number}
+
+        Args:
+            obj_list: (list) a list of object keys and there numbers.
+                             list item: {"object": object's key
+                                         "number": object's number}
+
+        Returns:
+            (dict) a list of objects that have not been removed and their numbers.
         """
+        not_removed = {}
         changed = False
         for item in obj_list:
             # decrease object's number
-            decrease = item["number"]
+            to_remove = item["number"]
             objects = self.search_inventory(item["object"])
 
             for obj in objects:
                 try:
                     obj_num = obj.get_number()
-                    if obj_num >= decrease:
-                        obj.decrease_num(decrease)
-                        decrease = 0
+                    if obj_num >= to_remove:
+                        obj.decrease_num(to_remove)
+                        to_remove = 0
                     else:
                         obj.decrease_num(obj_num)
-                        decrease -= obj_num
+                        to_remove -= obj_num
 
                     if obj.get_number() <= 0:
                         # if it is an equipment, take off it first
@@ -443,11 +454,16 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     logger.log_tracemsg(ostring)
                     break
 
-                if decrease <= 0:
+                if to_remove <= 0:
                     break
+
+            if to_remove > 0:
+                not_removed[item["object"]] = to_remove
 
         if changed:
             self.show_inventory()
+
+        return not_removed
 
     def search_inventory(self, obj_key):
         """
