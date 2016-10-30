@@ -126,7 +126,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
             # only show objects that match the condition
             condition = getattr(cont.dfield, "condition", None)
             if condition:
-                if not STATEMENT_HANDLER.match_condition(caller, self, condition):
+                if not STATEMENT_HANDLER.match_condition(condition, caller, self):
                     continue
                         
             type = self.get_surrounding_type(cont)

@@ -158,7 +158,7 @@ class MudderyLockedExit(MudderyExit):
         Unlock an exit.
         """
         # Only can unlock exits which match there conditions.
-        return STATEMENT_HANDLER.match_condition(caller, self, self.unlock_condition)
+        return STATEMENT_HANDLER.match_condition(self.unlock_condition, caller, self)
 
 
     def get_appearance(self, caller):
@@ -171,7 +171,7 @@ class MudderyLockedExit(MudderyExit):
             # If is unlocked, use common appearance.
             return super(MudderyLockedExit, self).get_appearance(caller)
 
-        can_unlock = STATEMENT_HANDLER.match_condition(caller, self, self.unlock_condition)
+        can_unlock = STATEMENT_HANDLER.match_condition(self.unlock_condition, caller, self)
 
         if can_unlock and self.auto_unlock:
             # Automatically unlock the exit when a character looking at it.
@@ -206,7 +206,7 @@ class MudderyLockedExit(MudderyExit):
             return super(MudderyLockedExit, self).get_available_commands(caller)
 
         cmds = []
-        can_unlock = STATEMENT_HANDLER.match_condition(caller, self, self.unlock_condition)
+        can_unlock = STATEMENT_HANDLER.match_condition(self.unlock_condition, caller, self)
         if can_unlock:
             # show unlock command
             verb = self.unlock_verb

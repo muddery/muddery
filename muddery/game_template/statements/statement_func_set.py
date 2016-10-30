@@ -2,10 +2,10 @@
 Custom statement functions.
 """
 
-from muddery.statements.default_statement_func_set import DefaultStatementFuncSet
+from muddery.statements import default_statement_func_set as default_set
 
 
-class StatementFuncSet(DefaultStatementFuncSet):
+class ActionFuncSet(default_set.ActionFuncSet):
     """
     Custom statement functions.
     """
@@ -13,6 +13,6 @@ class StatementFuncSet(DefaultStatementFuncSet):
         """
         Load statement functions here.
         """
-        super(StatementFuncSet, self).at_creation()
+        super(ActionFuncSet, self).at_creation()
 
         # self.add(statement_function_class)

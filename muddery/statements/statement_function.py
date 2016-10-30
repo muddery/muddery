@@ -5,13 +5,13 @@ Base statement function.
 
 class StatementFunction(object):
     """
-    If the caller is doing specified quest.
+    This is the base statement function class.
 
     Args:
-        args[0]: (string) quest's key
+        args[0]: statement function's args
 
     Returns:
-        boolean result
+        return value
     """
 
     # the function's key

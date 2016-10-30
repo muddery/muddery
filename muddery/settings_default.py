@@ -95,8 +95,14 @@ BASE_SKILL_TYPECLASS = "muddery.typeclasses.skills.MudderySkill"
 # Typeclass for quests
 BASE_QUEST_TYPECLASS = "muddery.typeclasses.quests.MudderyQuest"
 
-# Statement functions set
-STATEMENT_FUNC_SET = "muddery.statements.default_statement_func_set.DefaultStatementFuncSet"
+# Action functions set
+ACTION_FUNC_SET = "muddery.statements.default_statement_func_set.ActionFuncSet"
+
+# Condition functions set
+CONDITION_FUNC_SET = "muddery.statements.default_statement_func_set.ConditionFuncSet"
+
+# Skill functions set
+SKILL_FUNC_SET = "muddery.statements.default_statement_func_set.SkillFuncSet"
 
 # Handler of the combat
 COMBAT_HANDLER = "muddery.typeclasses.combat_handler.MudderyCombatHandler"

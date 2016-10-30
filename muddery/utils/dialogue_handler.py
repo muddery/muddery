@@ -268,13 +268,13 @@ class DialogueHandler(object):
                 continue
 
             # Match conditions.
-            if not STATEMENT_HANDLER.match_condition(caller, npc, npc_dlg["condition"]):
+            if not STATEMENT_HANDLER.match_condition(npc_dlg["condition"], caller, npc):
                 continue
 
             # Match dependeces.
             match = True
             for dep in npc_dlg["dependencies"]:
-                if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
+                if not QUEST_DEP_HANDLER.match_dependency(dep["type"], caller, dep["quest"]):
                     match = False
                     break
             if not match:
@@ -332,11 +332,11 @@ class DialogueHandler(object):
                 if not next_dlg["sentences"]:
                     continue
 
-                if not STATEMENT_HANDLER.match_condition(caller, npc, next_dlg["condition"]):
+                if not STATEMENT_HANDLER.match_condition(next_dlg["condition"], caller, npc):
                     continue
 
                 for dep in next_dlg["dependencies"]:
-                    if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
+                    if not QUEST_DEP_HANDLER.match_dependency(dep["type"], caller, dep["quest"]):
                         continue
 
                 sentences.append(next_dlg["sentences"][0])
@@ -416,7 +416,7 @@ class DialogueHandler(object):
 
         # do dialogue's action
         if sentence["action"]:
-            STATEMENT_HANDLER.do_statement(caller, npc, sentence["action"])
+            STATEMENT_HANDLER.do_action(sentence["action"], caller, npc)
 
         if sentence["is_last"]:
             # last sentence
@@ -511,7 +511,7 @@ class DialogueHandler(object):
         if not npc_dlg:
             return (provide_quest, complete_quest)
 
-        if not STATEMENT_HANDLER.match_condition(caller, npc, npc_dlg["condition"]):
+        if not STATEMENT_HANDLER.match_condition(npc_dlg["condition"], caller, npc):
             return (provide_quest, complete_quest)
 
         match = True

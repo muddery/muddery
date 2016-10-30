@@ -228,7 +228,7 @@ class QuestHandler(object):
 
             try:
                 record = model_quest.objects.get(key=quest_key)
-                return STATEMENT_HANDLER.match_condition(self.owner, None, record.condition)
+                return STATEMENT_HANDLER.match_condition(record.condition, self.owner, None)
             except ObjectDoesNotExist:
                 continue
             except AttributeError:
