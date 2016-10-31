@@ -55,14 +55,13 @@ def get_condition_func(func_set, caller, obj):
 
         try:
             result = exec_function(func_set, func_word, caller, obj)
+            if result:
+                return "True"
+            else:
+                return "False"
         except Exception, e:
             logger.log_errmsg("Exec function error: %s %s" % (function, e))
-            result = False
-
-        if result:
-            return "True"
-        else:
-            return "False"
+            return "None"
 
     return function
 
@@ -86,6 +85,8 @@ def exec_function(func_set, func_word, caller, obj):
         pos = func_word.index("(")
         func_key = func_word[:pos]
         func_args = ast.literal_eval(func_word[pos:])
+        if type(func_args) != tuple:
+            func_args = (func_args,)
     except ValueError:
         func_key = func_word
         func_args = ()

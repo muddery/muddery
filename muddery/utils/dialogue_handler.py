@@ -271,10 +271,10 @@ class DialogueHandler(object):
             if not STATEMENT_HANDLER.match_condition(npc_dlg["condition"], caller, npc):
                 continue
 
-            # Match dependeces.
+            # Match dependencies.
             match = True
             for dep in npc_dlg["dependencies"]:
-                if not QUEST_DEP_HANDLER.match_dependency(dep["type"], caller, dep["quest"]):
+                if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
                     match = False
                     break
             if not match:
@@ -336,7 +336,7 @@ class DialogueHandler(object):
                     continue
 
                 for dep in next_dlg["dependencies"]:
-                    if not QUEST_DEP_HANDLER.match_dependency(dep["type"], caller, dep["quest"]):
+                    if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
                         continue
 
                 sentences.append(next_dlg["sentences"][0])
