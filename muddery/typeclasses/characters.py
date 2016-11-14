@@ -344,6 +344,25 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.target = target
         self.skill_handler.cast_skill_manually(skill, target)
 
+    def skill_results(self, results):
+        """
+        Set the result of the skill. The character can send these messages to its surroundings.
+
+        Args:
+            result: (dict)the result of the skill
+
+        Returns:
+            None
+        """
+
+        if results:
+            if self.ndb.combat_handler:
+                # send skill's result to the combat handler
+                self.ndb.combat_handler.set_skill_result(results)
+            else:
+                # TODO: send result to the target too!
+                self.msg({"skill_results": results})
+
     ########################################
     #
     # Attack a target.

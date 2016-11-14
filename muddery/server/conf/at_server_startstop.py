@@ -56,9 +56,6 @@ def at_server_start():
     # localize model fields
     localize_model_fields()
 
-    # reload skill modules
-    MudderySkill.load_skill_modules()
-
 
 def at_server_stop():
     """

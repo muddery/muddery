@@ -38,9 +38,6 @@ def at_initial_setup():
 
         # load game settings
         GAME_SETTINGS.reset()
-    	
-        # reload skill modules
-        MudderySkill.load_skill_modules()
 
         # build world
         builder.build_all()

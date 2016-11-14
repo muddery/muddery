@@ -136,14 +136,6 @@ class SkillHandler(object):
 
         result, cd = self.skills[skill].cast_skill(target)
 
-        if result:
-            if self.owner.ndb.combat_handler:
-                # send skill's result to the combat handler
-                self.owner.ndb.combat_handler.set_skill_result(result)
-            else:
-                # TODO: send result to the target too!
-                self.owner.msg({"skill_result": result})
-
         # set GCD
         if not cd:
             cd = {}
