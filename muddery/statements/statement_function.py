@@ -17,8 +17,8 @@ class StatementFunction(object):
     # the function's key
     key = "statement_function"
 
-    # if this function may change the caller's status, const is False
-    # only const functions can be used in conditions
+    # If this function may change the caller's status, const is False
+    # only const functions can be used in conditions.
     const = False
 
     def __init__(self):

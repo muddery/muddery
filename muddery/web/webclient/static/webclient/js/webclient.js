@@ -144,8 +144,8 @@ var webclient = {
                 else if (key == "skill_cd") {
                     this.displaySkillCD(data[key]);
                 }
-                else if (key == "skill_result") {
-                    this.displaySkillResult(data[key]);
+                else if (key == "skill_results") {
+                    this.displaySkillResults(data[key]);
                 }
                 else if (key == "get_exp") {
                     this.displayGetExp(data[key])
@@ -863,7 +863,7 @@ var webclient = {
         }
     },
 
-    displaySkillResult: function(data) {
+    displaySkillResults: function(data) {
         for (var i in data) {
             if ("message" in data[i]) {
                 for (var m in data[i].message) {

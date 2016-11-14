@@ -7,7 +7,7 @@ actions of a skill.
 """
 
 import time
-import importlib
+import ast
 from django.conf import settings
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
@@ -19,26 +19,6 @@ class MudderySkill(MudderyObject):
     """
     A skill of the character.
     """
-
-    _skill_modues = {}
-
-    @classmethod
-    def load_skill_modules(cls):
-        """
-        Load all available skills.
-
-        Returns:
-            None
-        """
-        for module_name in settings.SKILL_MODULES:
-            try:
-                module = importlib.import_module(module_name)
-                skills = [skill for skill in dir(module) if skill[0] != '_']
-
-                for skill in skills:
-                    cls._skill_modues[skill] = getattr(module, skill, None)
-            except ImportError:
-                logger.log_errmsg("Can not import skill module %s." % module_name)
 
     def at_object_creation(self):
         """
@@ -83,13 +63,8 @@ class MudderySkill(MudderyObject):
         """
         super(MudderySkill, self).load_data()
 
-        # search skill function
-        self.function_call = None
-        if self.dfield.function in self._skill_modues:
-            self.function_call = self._skill_modues[self.dfield.function]
-
         # set data
-        self.effect = getattr(self.dfield, "effect", 0)
+        self.function = getattr(self.dfield, "function", "")
         self.cd = getattr(self.dfield, "cd", 0)
         self.passive = getattr(self.dfield, "passive", False)
 
