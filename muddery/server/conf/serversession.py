@@ -51,7 +51,7 @@ class ServerSession(BaseServerSession):
 
         # set raw=True
         if kwargs:
-            kwargs["options"] = {"raw", True}
+            kwargs["options"] = {"raw": True}
         else:
             kwargs = {"options": {"raw": True}}
 
