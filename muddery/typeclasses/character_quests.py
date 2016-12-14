@@ -228,7 +228,7 @@ class MudderyQuest(MudderyObject):
         Returns:
             if the quest status has changed.
         """
-        if not type in self.not_accomplished:
+        if type not in self.not_accomplished:
             return False
 
         status_changed = False

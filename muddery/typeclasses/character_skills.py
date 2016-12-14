@@ -13,6 +13,7 @@ from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 
 
 class MudderySkill(MudderyObject):
@@ -118,7 +119,7 @@ class MudderySkill(MudderyObject):
                 owner.msg({"alert": LS("You can not cast a passive skill.")})
             return
     
-        return self.cast_skill(target)
+        self.cast_skill(target)
 
     def cast_skill(self, target):
         """
@@ -136,46 +137,22 @@ class MudderySkill(MudderyObject):
         time_now = time.time()
 
         if not self.passive:
-            if owner:
-                gcd = getattr(owner, "gcd_finish_time", 0)
-                if time_now < gcd:
-                    owner.msg({"msg": LS("This skill is not ready yet!")})
-                    return
-
             if time_now < self.db.cd_finish_time:
                 # skill in CD
                 if owner:
                     owner.msg({"msg": LS("This skill is not ready yet!")})
                 return
 
-        if not self.function_call:
-            logger.log_errmsg("Can not find skill function: %s" % self.get_data_key())
-            if owner:
-                owner.msg({"msg": LS("Can not cast this skill!")})
-            return
+        # call skill function
+        STATEMENT_HANDLER.do_action(self.function, owner, target)
 
-        result = {}
-        cd = {}
-        try:
-            # call skill function
-            result = self.function_call(owner, target, effect=self.effect)
+        if not self.passive:
+            # set cd
+            time_now = time.time()
+            if self.cd > 0:
+                self.db.cd_finish_time = time_now + self.cd
 
-            if not self.passive:
-                # set cd
-                time_now = time.time()
-                if self.cd > 0:
-                    self.db.cd_finish_time = time_now + self.cd
-
-                cd = {"skill": self.get_data_key(), # skill's key
-                      "cd": self.cd}                # global cd
-        except Exception, e:
-            ostring = "Can not cast skill %s: %s" % (self.get_data_key(), e)
-            logger.log_tracemsg(ostring)
-            if owner:
-                owner.msg({"msg": LS("Can not cast this skill!")})
-            return
-
-        return result, cd
+        return
 
     def check_available(self):
         """
@@ -197,7 +174,13 @@ class MudderySkill(MudderyObject):
         """
         If this skill is available.
         """
-        return self.check_available() == ""
+        if self.passive:
+            return False
+
+        if self.is_cooling_down():
+            return False
+
+        return True
 
     def is_cooling_down(self):
         """
