@@ -105,12 +105,12 @@ class SkillHandler(object):
         """
         return skill in self.skills
 
-    def cast_skill(self, skill, target):
+    def cast_skill(self, skill_key, target):
         """
         Cast a skill.
 
         Args:
-            skill: (string) skill's key
+            skill_key: (string) skill's key
             target: (object) skill's target
 
         Returns:
@@ -124,27 +124,29 @@ class SkillHandler(object):
             self.owner.msg({"msg": LS("This skill is not ready yet!")})
             return
 
-        if skill not in self.skills:
+        if skill_key not in self.skills:
             self.owner.msg({"alert": LS("You do not have this skill.")})
             return
 
-        message = self.skills[skill].check_available()
+        skill = self.skills[skill_key]
+
+        message = skill.check_available()
         if message:
             # Skill is not available.
             self.owner.msg({"msg": message})
             return
 
-        result, cd = self.skills[skill].cast_skill(target)
+        skill.cast_skill(target)
 
-        # set GCD
-        if not cd:
-            cd = {}
-
-        cd["gcd"] = self.gcd
         if self.gcd > 0:
+            # set GCD
             self.gcd_finish_time = time.time() + self.gcd
 
         # send CD to the player
+        cd = {"skill": skill.get_data_key(),    # skill's key
+              "cd": skill.cd,                   # skill's cd
+              "gcd": self.gcd}
+
         self.owner.msg({"skill_cd": cd})
 
         return
