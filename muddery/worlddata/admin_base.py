@@ -198,8 +198,7 @@ class SkillsAdmin(admin.ModelAdmin):
                     'cd',
                     'passive',
                     'condition',
-                    'function',
-                    'effect')
+                    'function')
 
 
 class DefaultSkillsAdmin(admin.ModelAdmin):

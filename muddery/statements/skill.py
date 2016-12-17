@@ -84,17 +84,17 @@ class FuncHeal(StatementFunction):
 
         effect = self.args[0]
 
-        recover_hp = self.obj.add_hp(effect)
+        recover_hp = self.caller.add_hp(effect)
         if recover_hp > 0:
-            self.obj.show_status()
+            self.caller.show_status()
 
         result = {"type": "healed",                 # heal result
-                  "message": [LS("%s healed %s HPs.") % (self.obj.get_name(), int(effect))],
+                  "message": [LS("%s healed %s HPs.") % (self.caller.get_name(), int(effect))],
                   "caller": self.caller.dbref,      # caller's dbref
-                  "target": self.obj.dbref,         # target's dbref
+                  "target": self.caller.dbref,      # target's dbref
                   "effect": effect,                 # effect
-                  "hp": self.obj.db.hp,             # current hp of the target
-                  "max_hp": self.obj.max_hp}        # max hp of the target
+                  "hp": self.caller.db.hp,          # current hp of the target
+                  "max_hp": self.caller.max_hp}     # max hp of the target
 
         self.caller.skill_results([result])
 

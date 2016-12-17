@@ -144,7 +144,7 @@ class MudderySkill(MudderyObject):
                 return
 
         # call skill function
-        STATEMENT_HANDLER.do_action(self.function, owner, target)
+        STATEMENT_HANDLER.do_skill(self.function, owner, target)
 
         if not self.passive:
             # set cd
