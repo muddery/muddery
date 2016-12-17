@@ -9,7 +9,9 @@ creation commands.
 """
 
 import traceback
+import random
 from django.conf import settings
+from django.apps import apps
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.typeclasses.common_objects import MudderyEquipment
 from muddery.utils import defines, utils
@@ -70,6 +72,17 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.db.career = ""
         self.db.unlocked_exits = set()
         self.db.revealed_map = set()
+
+        # Choose a random career.
+        try:
+            model_career = apps.get_model(settings.WORLD_DATA_APP, settings.CHARACTER_CAREERS)
+            if model_career:
+                careers = model_career.objects.all()
+                if careers:
+                    career = random.choice(careers)
+                    self.db.career = career.key
+        except Exception, e:
+            pass
         
     def load_data(self):
         """
@@ -565,6 +578,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         if position not in self.db.equipments:
             raise MudderyError(LS("Can not equip it on this position."))
 
+        print("career: %s, type: %s" % (self.db.career, type))
         if not EQUIP_TYPE_HANDLER.can_equip(self.db.career, type):
             print("career: %s, type: %s" % (self.db.career, type))
             raise MudderyError(LS("Can not use this equipment."))
