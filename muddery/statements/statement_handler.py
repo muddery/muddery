@@ -144,6 +144,31 @@ class StatementHandler(object):
 
         return
 
+    def do_skill(self, action, caller, obj):
+        """
+        Do a function.
+
+        Args:
+            action: (string) statements separated by ";"
+            caller: (object) statement's caller
+            obj: (object) caller's current target
+
+        Returns:
+            None
+        """
+        if not action:
+            return
+
+        # execute the statement
+        functions = action.split(";")
+        for function in functions:
+            try:
+                exec_function(self.skill_func_set, function, caller, obj)
+            except Exception, e:
+                logger.log_errmsg("Exec function error: %s %s" % (function, e))
+
+        return
+
     def match_condition(self, condition, caller, obj):
         """
         Check a condition.

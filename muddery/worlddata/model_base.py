@@ -786,9 +786,6 @@ class skills(models.Model):
     # skill function's name
     function = models.CharField(max_length=KEY_LENGTH)
 
-    # skill's effect value
-    effect = models.FloatField(blank=True, default=0)
-
     class Meta:
         "Define Django meta options"
         abstract = True
