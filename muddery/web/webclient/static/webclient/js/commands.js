@@ -114,7 +114,7 @@ var commands = {
         var command = $("#box_command :text").val();
         $("#box_command :text").val("");
         
-        sendCommand(command);
+        Evennia.msg("text", command);
     },
     
     // do test
