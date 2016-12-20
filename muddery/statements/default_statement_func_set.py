@@ -52,7 +52,7 @@ class ConditionFuncSet(BaseStatementFuncSet):
 
 
 class SkillFuncSet(BaseStatementFuncSet):
-    """l
+    """
     Statement functions used in actions.
     """
     def at_creation(self):

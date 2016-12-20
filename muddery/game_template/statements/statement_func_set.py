@@ -16,3 +16,29 @@ class ActionFuncSet(default_set.ActionFuncSet):
         super(ActionFuncSet, self).at_creation()
 
         # self.add(statement_function_class)
+
+
+class ConditionFuncSet(default_set.ConditionFuncSet):
+    """
+    Statement functions used in conditions.
+    """
+    def at_creation(self):
+        """
+        Load statement functions here.
+        """
+        super(ConditionFuncSet, self).at_creation()
+
+        # self.add(statement_function_class)
+
+
+class SkillFuncSet(default_set.SkillFuncSet):
+    """
+    Statement functions used in actions.
+    """
+    def at_creation(self):
+        """
+        Load statement functions here.
+        """
+        super(SkillFuncSet, self).at_creation()
+
+        # self.add(statement_function_class)
