@@ -40,6 +40,13 @@ ALLOWED_HOSTS = ["*"]
 # webserver (these should not be publicly open)
 WEBSERVER_PORTS = [(8000, 5001)]
 
+# Server-side websocket port to open for the webclient.
+WEBSOCKET_CLIENT_PORT = 8001
+
+# The game server opens an AMP port so that the portal can
+# communicate with it.
+AMP_PORT = 5000
+
 # This setting is no use any more, so set it to blank.
 WEBSOCKET_CLIENT_URL = ""
 
