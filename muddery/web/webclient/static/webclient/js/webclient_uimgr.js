@@ -102,7 +102,7 @@ var uimgr = {
                 var aHrefElement = uimgr.aHref("#",
                                                uimgr.CONST_A_HREF_ONCLICK,
                                                name,
-                                               {"cmd_name": "look",
+                                               {"cmd_name": "goto",
                                                 "cmd_args": exit.dbref,
                                                 "dbref": exit.dbref
                                                });

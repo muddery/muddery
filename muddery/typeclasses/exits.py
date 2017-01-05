@@ -87,7 +87,6 @@ class MudderyExit(MudderyObject, DefaultExit):
         
         return True
 
-
     def at_failed_traverse(self, traversing_object):
         """
         Overloads the default hook to implement a simple default error message.
@@ -102,7 +101,6 @@ class MudderyExit(MudderyObject, DefaultExit):
 
         """
         traversing_object.msg({"alert": "You cannot go there."})
-
 
     def get_available_commands(self, caller):
         """
@@ -129,7 +127,6 @@ class MudderyLockedExit(MudderyExit):
         self.locked_desc = getattr(self.dfield, "locked_desc", "")
         self.auto_unlock = getattr(self.dfield, "auto_unlock", False)
 
-
     def at_before_traverse(self, traversing_object):
         """
         Called just before an object uses this object to traverse to
@@ -150,8 +147,13 @@ class MudderyLockedExit(MudderyExit):
             return False
 
         # Only can pass exits which have already unlockde.
-        return traversing_object.is_exit_unlocked(self.get_data_key())
+        if traversing_object.is_exit_unlocked(self.get_data_key()):
+            return True
 
+        # Show the object's appearance.
+        appearance = self.get_appearance(traversing_object)
+        traversing_object.msg({"look_obj": appearance})
+        return False
 
     def can_unlock(self, caller):
         """
@@ -159,7 +161,6 @@ class MudderyLockedExit(MudderyExit):
         """
         # Only can unlock exits which match there conditions.
         return STATEMENT_HANDLER.match_condition(self.unlock_condition, caller, self)
-
 
     def get_appearance(self, caller):
         """
@@ -194,7 +195,6 @@ class MudderyLockedExit(MudderyExit):
                 "cmds": cmds}
                 
         return info
-
 
     def get_available_commands(self, caller):
         """
