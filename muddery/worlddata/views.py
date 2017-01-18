@@ -39,6 +39,8 @@ def worldeditor(request):
         return import_file(request)
     elif "apply" in request.POST:
         return apply_changes(request)
+    elif "restart" in request.POST:
+        return restart_server(request)
 
     return render(request, 'worldeditor.html')
 
@@ -113,7 +115,20 @@ def apply_changes(request):
     try:
         # rebuild the world
         build_all()
+    except Exception, e:
+        message = "Can't build world: %s" % e
+        logger.log_tracemsg(message)
+        return render(request, 'fail.html', {"message": message})
 
+    return render(request, 'success.html', {"message": LS("Data applied.")})
+
+
+@staff_member_required
+def restart_server(request):
+    """
+    Apply the game world's data.
+    """
+    try:
         # send client settings
         CLIENT_SETTINGS.reset()
         text = json.dumps({"settings": CLIENT_SETTINGS.all_values()})
@@ -123,11 +138,11 @@ def apply_changes(request):
         SESSIONS.announce_all(" Server restarting ...")
         SESSIONS.server.shutdown(mode='reload')
     except Exception, e:
-        message = "Can't build world: %s" % e
+        message = "Can't restart the server"
         logger.log_tracemsg(message)
         return render(request, 'fail.html', {"message": message})
 
-    return render(request, 'success.html', {"message": LS("Data applied! The server is reloading.")})
+    return render(request, 'success.html', {"message": LS("The server is reloading.")})
 
 
 @staff_member_required
