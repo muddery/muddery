@@ -21,6 +21,11 @@ import os
 
 MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
 
+######################################################################
+# Evennia base server config
+######################################################################
+# Activate telnet service
+TELNET_ENABLED = False
 
 ######################################################################
 # Django web features

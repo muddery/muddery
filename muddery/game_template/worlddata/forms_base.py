@@ -723,10 +723,12 @@ class EventDialoguesForm(forms.ModelForm):
         objects = models.dialogues.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['dialogue'] = forms.ChoiceField(choices=choices)
-        
+
+        # NPCs
+        choices = [("", "---------")]
         objects = models.world_npcs.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-        self.fields['npc'] = forms.ChoiceField(choices=choices)
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['npc'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
         
