@@ -60,11 +60,20 @@
     <div><br></div>
     <hr/>
     <h2>将变化应用到游戏</h2>
-    <div>将游戏世界的数据应用到游戏中。服务器会自动重启。</div>
+    <div>将游戏世界的数据应用到游戏中。然后需要重启服务器。</div>
     <form method="POST">
       {% csrf_token %}
       <input type="hidden" name="apply"/>
       <input type="submit" value="应用"/>
+    </form>
+    <div><br></div>
+    <hr/>
+    <h2>重启服务器</h2>
+    <div>重启服务器。</div>
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="restart"/>
+      <input type="submit" value="重启"/>
     </form>
 
 {% endblock content %}
