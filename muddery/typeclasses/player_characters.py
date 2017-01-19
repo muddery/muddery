@@ -578,9 +578,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         if position not in self.db.equipments:
             raise MudderyError(LS("Can not equip it on this position."))
 
-        print("career: %s, type: %s" % (self.db.career, type))
         if not EQUIP_TYPE_HANDLER.can_equip(self.db.career, type):
-            print("career: %s, type: %s" % (self.db.career, type))
             raise MudderyError(LS("Can not use this equipment."))
 
         # Take off old equipment

@@ -76,7 +76,6 @@ GUEST_ENABLED = settings.GUEST_ENABLED
 
 # server-channel mappings
 WEBSERVER_ENABLED = settings.WEBSERVER_ENABLED and WEBSERVER_PORTS and WEBSERVER_INTERFACES
-IMC2_ENABLED = settings.IMC2_ENABLED
 IRC_ENABLED = settings.IRC_ENABLED
 RSS_ENABLED = settings.RSS_ENABLED
 WEBCLIENT_ENABLED = settings.WEBCLIENT_ENABLED
@@ -279,17 +278,10 @@ class Evennia(object):
         [o.at_init() for o in ObjectDB.get_all_cached_instances()]
         [p.at_init() for p in PlayerDB.get_all_cached_instances()]
 
-        with open(SERVER_RESTART, 'r') as f:
-            mode = f.read()
-        if mode in ('True', 'reload'):
-            from evennia.scripts.monitorhandler import MONITOR_HANDLER
-            MONITOR_HANDLER.restore()
-
-        from evennia.scripts.tickerhandler import TICKER_HANDLER
-        TICKER_HANDLER.restore(mode in ('True', 'reload'))
+        mode = self.getset_restart_mode()
 
         # call correct server hook based on start file value
-        if mode in ('True', 'reload'):
+        if mode == 'reload':
             # True was the old reload flag, kept for compatibilty
             self.at_server_reload_start()
         elif mode == 'reset':
@@ -302,15 +294,19 @@ class Evennia(object):
         # always call this regardless of start type
         self.at_server_start()
 
-    def set_restart_mode(self, mode=None):
+    def getset_restart_mode(self, mode=None):
         """
         This manages the flag file that tells the runner if the server is
-        reloading, resetting or shutting down. Valid modes are
-          'reload', 'reset', 'shutdown' and None.
-        If mode is None, no change will be done to the flag file.
+        reloading, resetting or shutting down.
 
-        Either way, the active restart setting (Restart=True/False) is
-        returned so the server knows which more it's in.
+        Args:
+            mode (string or None, optional): Valid values are
+                'reload', 'reset', 'shutdown' and `None`. If mode is `None`,
+                no change will be done to the flag file.
+        Returns:
+            mode (str): The currently active restart mode, either just
+                set or previously set.
+
         """
         if mode is None:
             with open(SERVER_RESTART, 'r') as f:
@@ -344,7 +340,7 @@ class Evennia(object):
             # once; we don't need to run the shutdown procedure again.
             defer.returnValue(None)
 
-        mode = self.set_restart_mode(mode)
+        mode = self.getset_restart_mode(mode)
 
         from evennia.objects.models import ObjectDB
         #from evennia.players.models import PlayerDB
@@ -395,7 +391,7 @@ class Evennia(object):
             # flag to avoid loops.
             self.shutdown_complete = True
             # kill the server
-            reactor.callLater(0, reactor.stop)
+            reactor.callLater(1, reactor.stop)
 
     # server start/stop hooks
 
@@ -424,6 +420,26 @@ class Evennia(object):
         if SERVER_STARTSTOP_MODULE:
             SERVER_STARTSTOP_MODULE.at_server_reload_start()
 
+    def at_post_portal_sync(self):
+        """
+        This is called just after the portal has finished syncing back data to the server
+        after reconnecting.
+        """
+        # one of reload, reset or shutdown
+        mode = self.getset_restart_mode()
+
+        from evennia.scripts.monitorhandler import MONITOR_HANDLER
+        MONITOR_HANDLER.restore(mode == 'reload')
+
+        from evennia.scripts.tickerhandler import TICKER_HANDLER
+        TICKER_HANDLER.restore(mode == 'reload')
+
+        # after sync is complete we force-validate all scripts
+        # (this also starts any that didn't yet start)
+        ScriptDB.objects.validate(init_mode=mode)
+
+        # delete the temporary setting
+        ServerConfig.objects.conf("server_restart_mode", delete=True)
 
     def at_server_reload_stop(self):
         """
@@ -506,7 +522,7 @@ if WEBSERVER_ENABLED:
     # Start a django-compatible webserver.
 
     from twisted.python import threadpool
-    from evennia.server.webserver import DjangoWebRoot, WSGIWebServer, NonLoggingSite
+    from evennia.server.webserver import DjangoWebRoot, WSGIWebServer, Website
 
     # start a thread pool and define the root url (/) as a wsgi resource
     # recognized by Django
@@ -522,7 +538,7 @@ if WEBSERVER_ENABLED:
         # custom overloads
         web_root = WEB_PLUGINS_MODULE.at_webserver_root_creation(web_root)
 
-    web_site = NonLoggingSite(web_root, logPath=settings.HTTP_LOG_FILE)
+    web_site = Website(web_root, logPath=settings.HTTP_LOG_FILE)
 
     for proxyport, serverport in WEBSERVER_PORTS:
         # create the webserver (we only need the port for this)
@@ -536,10 +552,6 @@ ENABLED = []
 if IRC_ENABLED:
     # IRC channel connections
     ENABLED.append('irc')
-
-if IMC2_ENABLED:
-    # IMC2 channel connections
-    ENABLED.append('imc2')
 
 if RSS_ENABLED:
     # RSS feed channel connections

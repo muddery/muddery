@@ -17,8 +17,7 @@ _GA = object.__getattribute__
 # delayed import
 _ATTR = None
 
-_MULTIMATCH_REGEX = re.compile(r"([0-9]+)%s(.*)" %
-        settings.SEARCH_MULTIMATCH_SEPARATOR, re.I + re.U)
+_MULTIMATCH_REGEX = re.compile(settings.SEARCH_MULTIMATCH_REGEX, re.I + re.U)
 
 # Try to use a custom way to parse id-tagged multimatches.
 
@@ -254,7 +253,7 @@ class ObjectDBManager(TypedObjectManager):
 
         # build query objects
         candidates_id = [_GA(obj, "id") for obj in make_iter(candidates) if obj]
-        cand_restriction = candidates != None and Q(pk__in=make_iter(candidates_id)) or Q()
+        cand_restriction = candidates != None and Q(pk__in=candidates_id) or Q()
         type_restriction = typeclasses and Q(db_typeclass_path__in=make_iter(typeclasses)) or Q()
         if exact:
             # exact match - do direct search
@@ -262,33 +261,42 @@ class ObjectDBManager(TypedObjectManager):
                                Q(db_tags__db_key__iexact=ostring) & Q(db_tags__db_tagtype__iexact="alias"))).distinct()
         elif candidates:
             # fuzzy with candidates
-            key_candidates = self.filter(cand_restriction & type_restriction)
+            search_candidates = self.filter(cand_restriction & type_restriction)
         else:
             # fuzzy without supplied candidates - we select our own candidates
-            key_candidates = self.filter(type_restriction & (Q(db_key__istartswith=ostring) | Q(db_tags__db_key__istartswith=ostring))).distinct()
-            candidates_id = [_GA(obj, "id") for obj in key_candidates]
+            search_candidates = self.filter(type_restriction & (Q(db_key__istartswith=ostring) | Q(db_tags__db_key__istartswith=ostring))).distinct()
         # fuzzy matching
-        key_strings = key_candidates.values_list("db_key", flat=True).order_by("id")
+        key_strings = search_candidates.values_list("db_key", flat=True).order_by("id")
 
         index_matches = string_partial_matching(key_strings, ostring, ret_index=True)
         if index_matches:
-            return [obj for ind, obj in enumerate(key_candidates) if ind in index_matches]
+            # a match by key
+            return [obj for ind, obj in enumerate(search_candidates) if ind in index_matches]
         else:
-            alias_candidates = self.filter(id__in=candidates_id, db_tags__db_tagtype__iexact="alias")
-            alias_strings = alias_candidates.values_list("db_key", flat=True)
+            # match by alias rather than by key
+            search_candidates = search_candidates.filter(db_tags__db_tagtype__iexact="alias",
+                                                        db_tags__db_key__icontains=ostring)
+            alias_strings = []
+            alias_candidates = []
+            #TODO create the alias_strings and alias_candidates lists more effiently?
+            for candidate in search_candidates:
+                for alias in candidate.aliases.all():
+                    alias_strings.append(alias)
+                    alias_candidates.append(candidate)
             index_matches = string_partial_matching(alias_strings, ostring, ret_index=True)
             if index_matches:
-                return [alias.db_obj for ind, alias in enumerate(alias_candidates) if ind in index_matches]
+                return [alias_candidates[ind] for ind in index_matches]
             return []
 
     # main search methods and helper functions
 
     @returns_typeclass_list
-    def object_search(self, searchdata,
+    def search_object(self, searchdata,
                       attribute_name=None,
                       typeclass=None,
                       candidates=None,
-                      exact=True):
+                      exact=True,
+                      use_dbref=True):
         """
         Search as an object globally or in a list of candidates and
         return results. The result is always an Object. Always returns
@@ -321,6 +329,8 @@ class ObjectDBManager(TypedObjectManager):
                 used together with the `candidates` keyword to limit the
                 number of possibilities. This value has no meaning if
                 searching for attributes/properties.
+            use_dbref (bool): If False, bypass direct lookup of a string
+                on the form #dbref and treat it like any string.
 
         Returns:
             matches (list): Matching objects
@@ -354,15 +364,18 @@ class ObjectDBManager(TypedObjectManager):
                     typeclasses[i] = u"%s" % typeclass
             typeclass = typeclasses
 
-        if candidates:
+        if candidates is not None:
+            if not candidates:
+                # candidates is the empty list. This should mean no matches can ever be acquired.
+                return []
             # Convenience check to make sure candidates are really dbobjs
             candidates = [cand for cand in make_iter(candidates) if cand]
             if typeclass:
                 candidates = [cand for cand in candidates
                                 if _GA(cand, "db_typeclass_path") in typeclass]
 
-        dbref = not attribute_name and exact and self.dbref(searchdata)
-        if dbref is not None:
+        dbref = not attribute_name and exact and use_dbref and self.dbref(searchdata)
+        if dbref:
             # Easiest case - dbref matching (always exact)
             dbref_match = self.dbref_search(dbref)
             if dbref_match:
@@ -383,7 +396,7 @@ class ObjectDBManager(TypedObjectManager):
             match_number = None
             if match:
                 # strips the number
-                match_number, searchdata = match.groups()
+                match_number, searchdata = match.group("number"), match.group("name")
                 match_number = int(match_number) - 1
                 match_number = match_number if match_number >= 0 else None
             if match_number is not None or not exact:
@@ -399,6 +412,8 @@ class ObjectDBManager(TypedObjectManager):
                 pass
         # return a list (possibly empty)
         return matches
+    # alias for backwards compatibility
+    object_search = search_object
 
     #
     # ObjectManager Copy method

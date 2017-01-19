@@ -21,7 +21,7 @@ from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.commands import cmdhandler
 from evennia.utils import logger
 from evennia.utils.utils import (variable_from_module, lazy_property,
-                                 make_iter, to_unicode)
+                                 make_iter, to_unicode, calledby)
 
 _MULTISESSION_MODE = settings.MULTISESSION_MODE
 
@@ -52,7 +52,15 @@ class ObjectSessionHandler(object):
         self._recache()
 
     def _recache(self):
+        global _SESSIONS
+        if not _SESSIONS:
+            from evennia.server.sessionhandler import SESSIONS as _SESSIONS
         self._sessid_cache = list(set(int(val) for val in (self.obj.db_sessid or "").split(",") if val))
+        if any(sessid for sessid in self._sessid_cache if sessid not in _SESSIONS):
+            # cache is out of sync with sessionhandler! Only retain the ones in the handler.
+            self.sessid_cache = [sessid for sessid in self._sessid_cache if sessid in _SESSIONS]
+            self.obj.db_sessid = ",".join(str(val) for val in self._sessid_cache)
+            self.obj.save(update_fields=["db_sessid"])
 
     def get(self, sessid=None):
         """
@@ -73,9 +81,14 @@ class ObjectSessionHandler(object):
         if not _SESSIONS:
             from evennia.server.sessionhandler import SESSIONS as _SESSIONS
         if sessid:
-            return [_SESSIONS[sessid]] if sessid in self._sessid_cache and sessid in _SESSIONS else []
+            sessions = [_SESSIONS[sessid] if sessid in _SESSIONS else None] if sessid in self._sessid_cache else []
         else:
-            return [_SESSIONS[sessid] for sessid in self._sessid_cache if sessid in _SESSIONS]
+            sessions = [_SESSIONS[sessid] if sessid in _SESSIONS else None for sessid in self._sessid_cache]
+        if None in sessions:
+            # this happens only if our cache has gone out of sync with the SessionHandler.
+            self._recache()
+            return self.get(sessid=sessid)
+        return sessions
 
     def all(self):
         """
@@ -227,7 +240,9 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
             Also available as the `contents` property.
 
         """
-        return self.contents_cache.get(exclude=exclude)
+        con = self.contents_cache.get(exclude=exclude)
+        #print "contents_get:", self, con, id(self), calledby()
+        return con
     contents = property(contents_get)
 
     @property
@@ -265,7 +280,6 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
             return "{}(#{})".format(self.name, self.id)
         return self.name
 
-
     def search(self, searchdata,
                global_search=False,
                use_nicks=True,  # should this default to off?
@@ -276,10 +290,10 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
                exact=False,
                candidates=None,
                nofound_string=None,
-               multimatch_string=None):
+               multimatch_string=None,
+               use_dbref=True):
         """
-        Returns the typeclass of an `Object` matching a search
-        string/condition
+        Returns an Object matching a search string/condition
 
         Perform a standard object search in the database, handling
         multiple results and lack thereof gracefully. By default, only
@@ -309,7 +323,7 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
             attribute_name (str): Define which property to search. If set, no
                 key+alias search will be performed. This can be used
                 to search database fields (db_ will be automatically
-                appended), and if that fails, it will try to return
+                prepended), and if that fails, it will try to return
                 objects having Attributes with this name and value
                 equal to searchdata. A special use is to search for
                 "key" here if you want to do a key-search without
@@ -328,6 +342,8 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
                 caller's contents (inventory).
             nofound_string (str):  optional custom string for not-found error message.
             multimatch_string (str): optional custom string for multimatch error header.
+            use_dbref (bool, optional): if False, treat a given #dbref strings as a
+                normal string rather than database ids.
 
         Returns:
             match (Object, None or list): will return an Object/None if `quiet=False`,
@@ -359,7 +375,7 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
             # only allow exact matching if searching the entire database
             # or unique #dbrefs
             exact = True
-        elif not candidates:
+        elif candidates is None:
             # no custom candidates given - get them automatically
             if location:
                 # location(s) were given
@@ -383,7 +399,8 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
                                                  attribute_name=attribute_name,
                                                  typeclass=typeclass,
                                                  candidates=candidates,
-                                                 exact=exact)
+                                                 exact=exact,
+                                                 use_dbref=use_dbref)
         if quiet:
             return results
         return  _AT_SEARCH_RESULT(results, self, query=searchdata,
@@ -532,7 +549,7 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
         for obj in contents:
             func(obj, **kwargs)
 
-    def msg_contents(self, message, exclude=None, from_obj=None, **kwargs):
+    def msg_contents(self, message, exclude=None, from_obj=None, mapping=None, **kwargs):
         """
         Emits a message to all objects inside this object.
 
@@ -542,15 +559,45 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
             from_obj (Object, optional): An object designated as the
                 "sender" of the message. See `DefaultObject.msg()` for
                 more info.
-
+            mapping (dict, optional): A mapping of formatting keys
+                `{"key":<object>, "key2":<object2>,...}. The keys
+                must match `{key}` markers in `message` and will be
+                replaced by the return of `<object>.get_display_name(looker)`
+                for every looker that is messaged.
         Kwargs:
             Keyword arguments will be passed on to `obj.msg()` for all
             messaged objects.
 
+        Notes:
+            The `mapping` argument is required if `message` contains
+            {}-style format syntax. The keys of `mapping` should match
+            named format tokens, and its values will have their
+            `get_display_name()` function called for  each object in
+            the room before substitution. If an item in the mapping does
+            not have `get_display_name()`, its string value will be used.
+
+        Example:
+            Say char is a Character object and npc is an NPC object:
+
+            action = 'kicks'
+            char.location.msg_contents(
+                "{attacker} {action} {defender}",
+                mapping=dict(attacker=char, defender=npc, action=action),
+                exclude=(char, npc))
         """
-        def msg(obj, message, from_obj, **kwargs):
-            obj.msg(message, from_obj=from_obj, **kwargs)
-        self.for_contents(msg, exclude=exclude, from_obj=from_obj, message=message, **kwargs)
+        contents = self.contents
+        if exclude:
+            exclude = make_iter(exclude)
+            contents = [obj for obj in contents if obj not in exclude]
+        for obj in contents:
+            if mapping:
+                substitutions = {t: sub.get_display_name(obj)
+                                    if hasattr(sub, 'get_display_name')
+                                    else str(sub)
+                                 for t, sub in mapping.items()}
+                obj.msg(message.format(**substitutions), from_obj=from_obj, **kwargs)
+            else:
+                obj.msg(message, from_obj=from_obj, **kwargs)
 
     def move_to(self, destination, quiet=False,
                 emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True):
@@ -841,24 +888,6 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
         self.at_access(result, accessing_obj, access_type, **kwargs)
         return result
 
-    def __eq__(self, other):
-        """
-        Checks for equality against an id string or another object or
-        user.
-
-        Args:
-            other (Object): object to compare to.
-
-        """
-        try:
-            return self.dbid == other.dbid
-        except AttributeError:
-           # compare players instead
-            try:
-                return self.player.uid == other.player.uid
-            except AttributeError:
-                return False
-
     #
     # Hook methods
     #
@@ -1099,7 +1128,6 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
         """
         pass
 
-
     # hooks called when moving the object
 
     def at_before_move(self, destination):
@@ -1133,12 +1161,13 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
         """
         if not self.location:
             return
-        name = self.name
-        loc_name = ""
-        loc_name = self.location.name
-        dest_name = destination.name
         string = "%s is leaving %s, heading for %s."
-        self.location.msg_contents(string % (name, loc_name, dest_name), exclude=self)
+        location = self.location
+        for obj in self.location.contents:
+            if obj != self:
+                obj.msg(string % (self.get_display_name(obj),
+                                  location.get_display_name(obj) if location else "nowhere",
+                                  destination.get_display_name(obj)))
 
     def announce_move_to(self, source_location):
         """
@@ -1150,20 +1179,20 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
 
         """
 
-        name = self.name
         if not source_location and self.location.has_player:
             # This was created from nowhere and added to a player's
             # inventory; it's probably the result of a create command.
-            string = "You now have %s in your possession." % name
+            string = "You now have %s in your possession." % self.get_display_name(self.location)
             self.location.msg(string)
             return
 
-        src_name = "nowhere"
-        loc_name = self.location.name
-        if source_location:
-            src_name = source_location.name
-        string = "%s arrives to %s from %s."
-        self.location.msg_contents(string % (name, loc_name, src_name), exclude=self)
+        string = "%s arrives to %s%s."
+        location = self.location
+        for obj in self.location.contents:
+            if obj != self:
+                obj.msg(string % (self.get_display_name(obj),
+                                  location.get_display_name(obj) if location else "nowhere",
+                                  " from %s" % source_location.get_display_name(obj) if source_location else ""))
 
     def at_after_move(self, source_location):
         """
@@ -1352,9 +1381,14 @@ class DefaultObject(with_metaclass(TypeclassBase, ObjectDB)):
                 return "Could not view '%s'." % target.get_display_name(self)
             except AttributeError:
                 return "Could not view '%s'." % target.key
+
+        description = target.return_appearance(self)
+
         # the target's at_desc() method.
+        # this must be the last reference to target so it may delete itself when acted on.
         target.at_desc(looker=self)
-        return target.return_appearance(self)
+
+        return description
 
     def at_desc(self, looker=None):
         """
@@ -1645,7 +1679,7 @@ class DefaultExit(DefaultObject):
                                 obj=exidbobj)
         # create a cmdset
         exit_cmdset = cmdset.CmdSet(None)
-        exit_cmdset.key = '_exitset'
+        exit_cmdset.key = 'ExitCmdSet'
         exit_cmdset.priority = self.priority
         exit_cmdset.duplicates = True
         # add command to cmdset
@@ -1687,14 +1721,14 @@ class DefaultExit(DefaultObject):
 
         """
 
-        if "force_init" in kwargs or not self.cmdset.has_cmdset("_exitset", must_be_default=True):
+        if "force_init" in kwargs or not self.cmdset.has_cmdset("ExitCmdSet", must_be_default=True):
             # we are resetting, or no exit-cmdset was set. Create one dynamically.
             self.cmdset.add_default(self.create_exit_cmdset(self), permanent=False)
 
     def at_init(self):
         """
         This is called when this objects is re-loaded from cache. When
-        that happens, we make sure to remove any old _exitset cmdset
+        that happens, we make sure to remove any old ExitCmdSet cmdset
         (this most commonly occurs when renaming an existing exit)
         """
         self.cmdset.remove_default()

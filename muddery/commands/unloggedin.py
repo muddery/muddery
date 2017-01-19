@@ -214,14 +214,7 @@ class CmdUnconnectedConnect(Command):
             playername = self.args["playername"]
             password = self.args["password"]
         except Exception:
-            string = 'Syntax error!'
-            string += '\nUsage:'
-            string += '\n    {"cmd":"create_account",'
-            string += '\n    "args":{'
-            string += '\n        "playername":<playername>,'
-            string += '\n        "password":<password>'
-            string += '\n        }'
-
+            string = 'Can not log in.'
             logger.log_errmsg(string)
             session.msg({"alert":string})
             return

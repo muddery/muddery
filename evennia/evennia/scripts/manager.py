@@ -85,7 +85,8 @@ class ScriptDBManager(TypedObjectManager):
             script = []
             dbref = self.dbref(key)
             if dbref or dbref == 0:
-                script = [self.dbref_search(dbref)]
+                # return either [] or a valid list (never [None])
+                script = [res for res in [self.dbref_search(dbref)] if res]
             if not script:
                 script = self.filter(db_key=key)
             return script
@@ -132,7 +133,7 @@ class ScriptDBManager(TypedObjectManager):
         return nr_deleted
 
     def validate(self, scripts=None, obj=None, key=None, dbref=None,
-                 init_mode=False):
+                 init_mode=None):
         """
         This will step through the script database and make sure
         all objects run scripts that are still valid in the context
@@ -152,7 +153,7 @@ class ScriptDBManager(TypedObjectManager):
                 particular id.
             init_mode (str, optional): This is used during server
                 upstart and can have three values:
-                - `False` (no init mode). Called during run.
+                - `None` (no init mode). Called during run.
                 - `"reset"` - server reboot. Kill non-persistent scripts
                 - `"reload"` - server reload. Keep non-persistent scripts.
         Returns:
@@ -216,7 +217,7 @@ class ScriptDBManager(TypedObjectManager):
         return nr_started, nr_stopped
 
     @returns_typeclass_list
-    def script_search(self, ostring, obj=None, only_timed=False):
+    def search_script(self, ostring, obj=None, only_timed=False):
         """
         Search for a particular script.
 
@@ -244,6 +245,8 @@ class ScriptDBManager(TypedObjectManager):
         timed_restriction = only_timed and Q(interval__gt=0) or Q()
         scripts = self.filter(timed_restriction & obj_restriction & Q(db_key__iexact=ostring))
         return scripts
+    # back-compatibility alias
+    script_search = search_script
 
     def copy_script(self, original_script, new_key=None, new_obj=None, new_locks=None):
         """
