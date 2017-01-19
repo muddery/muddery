@@ -2,12 +2,18 @@
 Evennia MUD/MUX/MU* creation system
 
 This is the main top-level API for Evennia. You can also explore the
-evennia library by accessing evennia.<subpackage> directly.
+evennia library by accessing evennia.<subpackage> directly. From
+inside the game you can read docs of all object by viewing its
+`__doc__` string, such as through
 
-For full functionality you need to explore this module via a django-
-aware shell. Go to your game directory and use the command 'evennia.py shell'
+    @py evennia.ObjectDB.__doc__
+
+For full functionality you should explore this module via a django-
+aware shell. Go to your game directory and use the command
+
+   evennia shell
+
 to launch such a shell (using python or ipython depending on your install).
-
 See www.evennia.com for full documentation.
 
 """
@@ -46,6 +52,7 @@ search_object = None
 search_script = None
 search_player = None
 search_channel = None
+search_message = None
 search_help = None
 search_tag = None
 
@@ -67,6 +74,10 @@ ansi = None
 spawn = None
 managers = None
 contrib = None
+EvMenu = None
+EvTable = None
+EvForm = None
+EvEditor = None
 
 # Handlers
 SESSION_HANDLER = None
@@ -144,6 +155,7 @@ def _init():
     from .utils.search import search_object
     from .utils.search import search_script
     from .utils.search import search_player
+    from .utils.search import search_message
     from .utils.search import search_channel
     from .utils.search import search_help
     from .utils.search import search_tag
@@ -164,6 +176,10 @@ def _init():
     from .utils import ansi
     from .utils.spawner import spawn
     from . import contrib
+    from .utils.evmenu import EvMenu
+    from .utils.evtable import EvTable
+    from .utils.evform import EvForm
+    from .utils.eveditor import EvEditor
 
     # handlers
     from .scripts.tickerhandler import TICKER_HANDLER

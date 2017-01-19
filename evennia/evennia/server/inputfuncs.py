@@ -48,6 +48,7 @@ def text(session, *args, **kwargs):
     string on the server.
 
     Args:
+        session (Session): The active Session to receive the input.
         text (str): First arg is used as text-command input. Other
             arguments are ignored.
 
@@ -74,9 +75,37 @@ def text(session, *args, **kwargs):
                           categories=("inputline", "channel"), include_player=True)
         else:
             text = session.player.nicks.nickreplace(text,
-                        categories=("inputline", "channels"), include_player=False)
+                        categories=("inputline", "channel"), include_player=False)
     kwargs.pop("options", None)
     cmdhandler(session, text, callertype="session", session=session, **kwargs)
+    session.update_session_counters()
+
+
+def bot_data_in(session, *args, **kwargs):
+    """
+    Text input from the IRC and RSS bots.
+    This will trigger the execute_cmd method on the bots in-game counterpart.
+
+    Args:
+        session (Session): The active Session to receive the input.
+        text (str): First arg is text input. Other arguments are ignored.
+
+    """
+
+    text = args[0] if args else None
+
+    # Explicitly check for None since text can be an empty string, which is
+    # also valid
+    if text is None:
+        return
+    # this is treated as a command input
+    # handle the 'idle' command
+    if text.strip() in _IDLE_COMMAND:
+        session.update_session_counters(idle=True)
+        return
+    kwargs.pop("options", None)
+    # Trigger the execute_cmd method of the corresponding bot.
+    session.player.execute_cmd(text=text, session=session)
     session.update_session_counters()
 
 
@@ -287,7 +316,7 @@ def get_value(session, *args, **kwargs):
     name = kwargs.get("name", "")
     obj = session.puppet or session.player
     if name in _gettable:
-        session.msg(get_value=_gettable[name](obj))
+        session.msg(get_value={"name": name, "value": _gettable[name](obj)})
 
 
 def _testrepeat(**kwargs):
@@ -355,7 +384,10 @@ def _on_monitor_change(**kwargs):
     obj = kwargs["obj"]
     name = kwargs["name"]
     session = kwargs["session"]
-    session.msg(monitor={"name": name, "value": _GA(obj, fieldname)})
+    # the session may be None if the char quits and someone
+    # else then edits the object
+    if session:
+        session.msg(monitor={"name": name, "value": _GA(obj, fieldname)})
 
 
 def monitor(session, *args, **kwargs):

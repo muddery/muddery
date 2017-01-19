@@ -54,6 +54,7 @@ SSHUTD = chr(7)       # server shutdown
 SSYNC = chr(8)        # server session sync
 SCONN = chr(11)        # server portal connection (for bots)
 PCONNSYNC = chr(12)   # portal post-syncing session
+PDISCONNALL = chr(13) # portal session discnnect all
 
 # i18n
 from django.utils.translation import ugettext as _
@@ -187,6 +188,10 @@ class SessionHandler(dict):
         for key, data in kwargs.iteritems():
             key = _validate(key)
             if not data:
+                if key == "text":
+                    # we don't allow sending text = None, this must mean
+                    # that the text command is not to be used.
+                    continue
                 rkwargs[key] = [ [], {} ]
             elif isinstance(data, dict):
                 rkwargs[key] = [ [], _validate(data) ]
@@ -263,6 +268,7 @@ class ServerSessionHandler(SessionHandler):
             # webclient's session sharing
             player = _PlayerDB.objects.get_player_from_uid(sess.uid)
             if player:
+                # this will set player.is_connected too
                 self.login(sess, player, force=True)
                 return
             else:
@@ -321,13 +327,37 @@ class ServerSessionHandler(SessionHandler):
             self[sessid] = sess
             sess.at_sync()
 
-        # after sync is complete we force-validate all scripts
-        # (this also starts them)
-        init_mode = _ServerConfig.objects.conf("server_restart_mode", default=None)
-        _ScriptDB.objects.validate(init_mode=init_mode)
-        _ServerConfig.objects.conf("server_restart_mode", delete=True)
+        # tell the server hook we synced
+        self.server.at_post_portal_sync()
         # announce the reconnection
         self.announce_all(_(" ... Server restarted."))
+
+
+    def portal_disconnect(self, session):
+        """
+        Called from Portal when Portal session closed from the portal
+        side. There is no message to report in this case.
+
+        Args:
+            session (Session): The Session to disconnect
+
+        """
+        # disconnect us without calling Portal since
+        # Portal already knows.
+        self.disconnect(session, reason="", sync_portal=False)
+
+    def portal_disconnect_all(self):
+        """
+        Called from Portal when Portal is closing down. All
+        Sessions should die. The Portal should not be informed.
+
+        """
+        # set a watchdog to avoid self.disconnect from deleting
+        # the session while we are looping over them
+        self._disconnect_all = True
+        for session in self.values:
+            session.disconnect()
+        del self._disconnect_all
 
     # server-side access methods
 
@@ -385,11 +415,7 @@ class ServerSessionHandler(SessionHandler):
             # don't log in a session that is already logged in.
             return
 
-        # we have to check this first before uid has been assigned
-        # this session.
-
-        if not self.sessions_from_player(player):
-            player.is_connected = True
+        player.is_connected = True
 
         # sets up and assigns all properties on the session
         session.at_login(player)
@@ -420,7 +446,7 @@ class ServerSessionHandler(SessionHandler):
                                                          sessiondata={"logged_in": True})
         player.at_post_login(session=session)
 
-    def disconnect(self, session, reason=""):
+    def disconnect(self, session, reason="", sync_portal=True):
         """
         Called from server side to remove session and inform portal
         of this fact.
@@ -428,6 +454,9 @@ class ServerSessionHandler(SessionHandler):
         Args:
             session (Session): The Session to disconnect.
             reason (str, optional): A motivation for the disconnect.
+            sync_portal (bool, optional): Sync the disconnect to
+                Portal side. This should be done unless this was
+                called by self.portal_disconnect().
 
         """
         session = self.get(session.sessid)
@@ -443,11 +472,13 @@ class ServerSessionHandler(SessionHandler):
 
         session.at_disconnect()
         sessid = session.sessid
-        del self[sessid]
-        # inform portal that session should be closed.
-        self.server.amp_protocol.send_AdminServer2Portal(session,
-                                                         operation=SDISCONN,
-                                                         reason=reason)
+        if sessid in self and not hasattr(self, "_disconnect_all"):
+            del self[sessid]
+        if sync_portal:
+            # inform portal that session should be closed.
+            self.server.amp_protocol.send_AdminServer2Portal(session,
+                                                             operation=SDISCONN,
+                                                             reason=reason)
 
     def all_sessions_portal_sync(self):
         """
@@ -625,8 +656,8 @@ class ServerSessionHandler(SessionHandler):
             message (str): Message to send.
 
         """
-        for sess in self.values():
-            self.data_out(sess, text=message)
+        for session in self.values():
+            self.data_out(session, text=message)
 
     def data_out(self, session, **kwargs):
         """
@@ -658,7 +689,22 @@ class ServerSessionHandler(SessionHandler):
 
     def data_in(self, session, **kwargs):
         """
-        Data Portal -> Server.
+        We let the data take a "detour" to session.data_in
+        so the user can override and see it all in one place.
+        That method is responsible to in turn always call
+        this class' `sessionhandler.call_inputfunc` with the
+        (possibly processed) data.
+
+        """
+        if session:
+            session.data_in(**kwargs)
+
+    def call_inputfuncs(self, session, **kwargs):
+        """
+        Split incoming data into its inputfunc counterparts.
+        This should be called by the serversession.data_in
+        as sessionhandler.call_inputfunc(self, **kwargs).
+
         We also intercept OOB communication here.
 
         Args:

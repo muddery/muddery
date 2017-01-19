@@ -114,7 +114,7 @@ from django.utils.translation import ugettext as _
 
 __all__ = ("LockHandler", "LockException")
 
-WARNING_LOG = "lockwarnings.log"
+WARNING_LOG = settings.LOCKWARNING_LOG_FILE
 
 #
 # Exception class. This will be raised
@@ -177,7 +177,10 @@ class LockHandler(object):
             _cache_lockfuncs()
         self.obj = obj
         self.locks = {}
-        self.reset()
+        try:
+            self.reset()
+        except LockException as err:
+            logger.log_trace(err)
 
     def __str__(self):
         return ";".join(self.locks[key][2] for key in sorted(self.locks))
@@ -244,7 +247,7 @@ class LockHandler(object):
                 wlist.append(_("LockHandler on %(obj)s: access type '%(access_type)s' changed from '%(source)s' to '%(goal)s' " % \
                         {"obj":self.obj, "access_type":access_type, "source":locks[access_type][2], "goal":raw_lockstring}))
             locks[access_type] = (evalstring, tuple(lock_funcs), raw_lockstring)
-        if wlist:
+        if wlist and WARNING_LOG:
             # a warning text was set, it's not an error, so only report
             logger.log_file("\n".join(wlist), WARNING_LOG)
         if elist:

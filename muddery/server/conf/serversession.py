@@ -44,7 +44,8 @@ class ServerSession(BaseServerSession):
         raw = options.get("raw", False)
         if not raw:
             try:
-                text = json.dumps(text)
+                if text:
+                    text = json.dumps(text)
             except Exception, e:
                 text = json.dumps({"err": "There is an error occurred while outputing messages."})
                 logger.log_tracemsg("json.dumps failed: %s" % e)
