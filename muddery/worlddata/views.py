@@ -120,29 +120,16 @@ def apply_changes(request):
         CLIENT_SETTINGS.reset()
         text = json.dumps({"settings": CLIENT_SETTINGS.all_values()})
         SESSIONS.announce_all(text)
+
+        # restart the server
+        SESSIONS.announce_all(" Server restarting ...")
+        SESSIONS.server.shutdown(mode='reload')
     except Exception, e:
         message = "Can't build world: %s" % e
         logger.log_tracemsg(message)
         return render(request, 'fail.html', {"message": message})
 
     return render(request, 'success.html', {"message": LS("Data applied.")})
-
-
-@staff_member_required
-def restart_server(request):
-    """
-    Apply the game world's data.
-    """
-    try:
-        # reload
-        SESSIONS.announce_all(" Server restarting ...")
-        SESSIONS.server.shutdown(mode='reload')
-    except Exception, e:
-        message = "Can't restart the server: %s" % e
-        logger.log_tracemsg(message)
-        return render(request, 'fail.html', {"message": message})
-
-    return render(request, 'success.html', {"message": LS("The server is restarting.")})
 
 
 @staff_member_required

@@ -59,7 +59,7 @@ CREATED_NEW_GAMEDIR = \
     will work out of the box. When ready to continue, 'cd' to your
     game directory and run:
 
-       muddery -i start
+       muddery start
 
     This starts the server for the first time. Make sure to create
     a superuser when asked for it. You should now be able to (by
@@ -260,9 +260,9 @@ def main():
     parser.add_argument('-v', '--version', action='store_true',
                         dest='show_version', default=False,
                         help="Show version info.")
-    parser.add_argument('-i', '--interactive', action='store_true',
-                        dest='interactive', default=False,
-                        help="Start given processes in interactive mode.")
+    # parser.add_argument('-i', '--interactive', action='store_true',
+    #                     dest='interactive', default=False,
+    #                     help="Start given processes in interactive mode.")
     parser.add_argument('--init', nargs='+', action='store', dest="init", metavar="game_name [template]",
                         help="Creates a new game directory 'game_name' at the current location (from optional template).")
     parser.add_argument('-l', nargs='+', action='store', dest='listsetting', metavar="key",
