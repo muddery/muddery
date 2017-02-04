@@ -69,6 +69,9 @@ class QuestRewardListForm(forms_base.QuestRewardListForm):
 class CommonObjectsForm(forms_base.CommonObjectsForm):
     pass
 
+class FoodsForm(forms_base.FoodsForm):
+    pass
+    
 class CharacterModelsForm(forms_base.CharacterModelsForm):
     pass
 
