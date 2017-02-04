@@ -293,12 +293,47 @@ var webclient = {
 
         uimgr.divBR().appendTo(box);
 
-        if ("cmds" in data) {
-            if (data["cmds"].length > 0) {
-                uimgr.divRoomCmds(data["cmds"]).appendTo(box);
-            }
+        var empty = true;
+        if ("cmds" in data && data["cmds"].length > 0) {
+            uimgr.divRoomCmds(data["cmds"]).appendTo(box);
+            empty = false;
+        }
+        else {
+            uimgr.divRoomCmds("").appendTo(box);
         }
 
+        // add things
+        if ("things" in data && data["things"].length > 0) {
+            uimgr.divRoomThings(data["things"]).appendTo(box);
+            empty = false;
+        }
+        else {
+            uimgr.divRoomThings("").appendTo(box);
+        }
+
+        // add NPCs
+        if ("npcs" in data && data["npcs"].length > 0) {
+            uimgr.divRoomNpcs(data["npcs"]).appendTo(box);
+            empty = false;
+        }
+        else {
+            uimgr.divRoomNpcs("").appendTo(box);
+        }
+
+        // add players
+        if ("players" in data && data["players"].length > 0) {
+            uimgr.divRoomPlayers(data["players"]).appendTo(box);
+            empty = false;
+        }
+        else {
+            uimgr.divRoomPlayers("").appendTo(box);
+        }
+
+        if (!empty) {
+            uimgr.divBR().appendTo(box);
+        }
+
+        // add exits
         // sort exits by direction
         var room_exits = [];
         if ("exits" in data) {
@@ -321,42 +356,6 @@ var webclient = {
         }
         else {
             uimgr.divRoomExits("").appendTo(box);
-        }
-
-        empty = true;
-        if ("things" in data) {
-            if (data["things"].length > 0) {
-                uimgr.divRoomThings(data["things"]).appendTo(box);
-                empty = false;
-            }
-        }
-
-        if (empty) {
-            uimgr.divRoomThings("").appendTo(box);
-        }
-
-        empty = true;
-        if ("npcs" in data) {
-            if (data["npcs"].length > 0) {
-                uimgr.divRoomNpcs(data["npcs"]).appendTo(box);
-                empty = false;
-            }
-        }
-
-        if (empty) {
-            uimgr.divRoomNpcs("").appendTo(box);
-        }
-
-        empty = true;
-        if ("players" in data) {
-            if (data["players"].length > 0) {
-                uimgr.divRoomPlayers(data["players"]).appendTo(box);
-                empty = false;
-            }
-        }
-
-        if (empty) {
-            uimgr.divRoomPlayers("").appendTo(box);
         }
     },
     
@@ -871,7 +870,7 @@ var webclient = {
         var win_w = $(window).innerWidth();
 
         //var head_h = $('header').outerHeight(true);
-        var head_h = 35;
+        var head_h = 20;
         $('#header').height(head_h);
 
         var wrapper_h = win_h - head_h - 20;

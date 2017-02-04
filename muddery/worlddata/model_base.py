@@ -92,6 +92,9 @@ class client_settings(models.Model):
     NOTE: The server only uses the first record!
     """
 
+    # Game's title on the webclient.
+    game_title = models.TextField(blank=True)
+
     # Room's pixel size on the map.
     map_room_size = models.FloatField(blank=True,
                                       default=40.0,
