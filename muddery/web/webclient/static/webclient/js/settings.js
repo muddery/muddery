@@ -25,5 +25,9 @@ var settings = {
         } else {
             $("#item_command").css("display", "none");
         }
+
+        if (this.game_title) {
+            $("#game_title").text(this.game_title);
+        }
     },
 };

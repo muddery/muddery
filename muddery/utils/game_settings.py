@@ -88,7 +88,8 @@ GAME_SETTINGS = GameSettings(settings.GAME_SETTINGS,
 
 
 CLIENT_SETTINGS = GameSettings(settings.CLIENT_SETTINGS,
-                               {"map_room_size": 40,
+                               {"game_title": "",
+                                "map_room_size": 40,
                                 "map_scale": 75,
                                 "show_command_box": False,
                                 "can_close_dialogue": False,

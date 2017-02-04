@@ -326,4 +326,44 @@ var map = {
 
         return direction;
     },
+
+    getDirectionIndex: function(degree) {
+        // index of direction:
+        // 0  1  2
+        // 6  7  8
+        // 12 13 14
+        // default direction index is 2
+
+        var direction = 1;
+        degree = degree - Math.floor(degree / 360) * 360;
+        if (degree < 22.5) {
+            direction = 8;
+        }
+        else if (degree < 67.5) {
+            direction = 2;
+        }
+        else if (degree < 112.5) {
+            direction = 1;
+        }
+        else if (degree < 157.5) {
+            direction = 0;
+        }
+        else if (degree < 202.5) {
+            direction = 6;
+        }
+        else if (degree < 247.5) {
+            direction = 12;
+        }
+        else if (degree < 292.5) {
+            direction = 13;
+        }
+        else if (degree < 337.5) {
+            direction = 14;
+        }
+        else {
+            direction = 8;
+        }
+
+        return direction;
+    },
 }

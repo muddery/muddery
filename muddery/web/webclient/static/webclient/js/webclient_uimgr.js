@@ -61,6 +61,7 @@ var uimgr = {
     },
 
     divRoomCmds : function(data_cmds) {
+        var empty = true;
         var divRoomCmdsElement = uimgr.divRoomCommon("room_cmds", LS("Commands") + LS(": "));
         for (var i in data_cmds) {
             try {
@@ -71,57 +72,181 @@ var uimgr = {
                                                name,
                                                {"cmd_name": cmd["cmd"],
                                                 "cmd_args": cmd["args"],
-                                                 "style":"margin-left:10px;"
+                                                "style":"margin-left:10px;"
                                                });
                 aHrefElement.appendTo(divRoomCmdsElement);
-            }
-            catch(error) {
-            }
-        }
-        return divRoomCmdsElement;
-    },
-
-    divRoomExits : function(data_exits) {
-        var empty = true;
-        var divRoomExitsElement = uimgr.divRoomCommon("room_exits", LS("Exits") + LS(": "));
-        // add exits
-        for (var i in data_exits) {
-            try {
-                var element = $("<span>").addClass("room_element");
-
-                if (data_exits[i].direction) {
-                    var direction = map.getDirectionName(data_exits[i].direction);
-                    if (direction) {
-                        $("<span>").text(direction + " ")
-                                   .appendTo(element);
-                    }
-                }
-
-                var exit = data_exits[i].data;
-                var name = text2html.parseHtml(exit.name);
-                var aHrefElement = uimgr.aHref("#",
-                                               uimgr.CONST_A_HREF_ONCLICK,
-                                               name,
-                                               {"cmd_name": "goto",
-                                                "cmd_args": exit.dbref,
-                                                "dbref": exit.dbref
-                                               });
-                aHrefElement.appendTo(element);
-
-                $("<span>").attr("id", "exit_cmd_" + exit.dbref.slice(1))
-                           .addClass("exit_cmd")
-                           .appendTo(element);
-
-                element.appendTo(divRoomExitsElement);
                 empty = false;
             }
             catch(error) {
             }
         }
         if(empty) {
+            return uimgr.divEmpty(LS("Commands") + LS(": "), {"id":"room_cmds", "style":"display:none"});
+        }
+        return divRoomCmdsElement;
+    },
+
+    divRoomExits : function(data_exits) {
+        // add exits to grids
+        if (data_exits) {
+            var divRoomExitsElement = uimgr.divRoomCommon("room_exits", "");
+
+            var exitCell = new Array(15);
+            for (var i = 0; i < exitCell.length; ++i) {
+                exitCell[i] = "";
+            }
+            for (var i in data_exits) {
+                try {
+                    // get cell's index
+                    var index = 7;
+                    if (data_exits[i].direction) {
+                        index = map.getDirectionIndex(data_exits[i].direction);
+                    }
+
+                    // create exit link
+                    var exit = data_exits[i].data;
+                    var name = text2html.parseHtml(exit.name);
+                    var aHrefElement = uimgr.aHref("#",
+                                                   uimgr.CONST_A_HREF_ONCLICK,
+                                                   name,
+                                                   {"cmd_name": "goto",
+                                                    "cmd_args": exit.dbref,
+                                                    "dbref": exit.dbref
+                                                   }).addClass("exit_element");
+
+                    if (exitCell[index].length == 0) {
+                        exitCell[index] = $("<span>").append(aHrefElement);
+                    }
+                    else if (index >= 3) {
+                        aHrefElement.appendTo(exitCell[index]);
+                    }
+                    else {
+                        aHrefElement.prependTo(exitCell[index]);
+                    }
+                }
+                catch(error) {
+                }
+            }
+
+            // create cells
+            var center = $("<center>").appendTo(divRoomExitsElement);
+
+            var table = $("<table>").addClass("exit_table")
+                                    .appendTo(center);
+
+            {
+                var row = $("<tr>").appendTo(table);
+
+                $("<td>").html(exitCell[0])
+                         .attr("align", "right")
+                         .appendTo(row);
+
+                $("<td>").html(exitCell[1])
+                         .attr("align", "center")
+                         .appendTo(row);
+
+                $("<td>").html(exitCell[2])
+                         .attr("align", "left")
+                         .appendTo(row);
+            }
+
+            {
+                var row = $("<tr>").appendTo(table);
+
+                if (exitCell[0].length > 0) {
+                    exitCell[3] = "\\";
+                }
+                $("<td>").html(exitCell[3])
+                         .attr("align", "right")
+                         .appendTo(row);
+
+                if (exitCell[1].length > 0) {
+                    exitCell[4] = "|";
+                }
+                $("<td>").html(exitCell[4])
+                         .attr("align", "center")
+                        .appendTo(row);
+
+                if (exitCell[2].length > 0) {
+                    exitCell[5] = "/";
+                }
+                $("<td>").html(exitCell[5])
+                         .attr("align", "left")
+                         .appendTo(row);
+            }
+
+            {
+                var row = $("<tr>").appendTo(table);
+
+                if (exitCell[6].length > 0) {
+                    exitCell[6].append("--");
+                }
+                $("<td>").html(exitCell[6])
+                         .attr("align", "right")
+                         .appendTo(row);
+
+                if (exitCell[7].length == 0) {
+                    exitCell[7] = $("<span>").append($("<span>").text(LS("You"))
+                                                                .addClass("exit_element"));
+                }
+                $("<td>").html(exitCell[7])
+                         .attr("align", "center")
+                         .appendTo(row);
+
+                if (exitCell[8].length > 0) {
+                    exitCell[8].prepend("--");
+                }
+                $("<td>").html(exitCell[8])
+                         .attr("align", "left")
+                         .appendTo(row);
+            }
+
+            {
+                var row = $("<tr>").appendTo(table);
+
+                if (exitCell[12].length > 0) {
+                    exitCell[9] = "/";
+                }
+                $("<td>").html(exitCell[9])
+                         .attr("align", "right")
+                         .appendTo(row);
+
+                if (exitCell[13].length > 0) {
+                    exitCell[10] = "|";
+                }
+                $("<td>").html(exitCell[10])
+                         .attr("align", "center")
+                        .appendTo(row);
+
+                if (exitCell[14].length > 0) {
+                    exitCell[11] = "\\";
+                }
+                $("<td>").html(exitCell[11])
+                         .attr("align", "left")
+                         .appendTo(row);
+            }
+
+            {
+                var row = $("<tr>").appendTo(table);
+
+                $("<td>").html(exitCell[12])
+                         .attr("align", "right")
+                         .appendTo(row);
+
+                $("<td>").html(exitCell[13])
+                         .attr("align", "center")
+                        .appendTo(row);
+
+                $("<td>").html(exitCell[14])
+                         .attr("align", "left")
+                         .appendTo(row);
+            }
+
+            return divRoomExitsElement;
+        }
+        else {
             return uimgr.divEmpty(LS("Exits") + LS(": "), {"id":"room_exits", "style":"display:none"});
         }
-        return divRoomExitsElement;
     },
 
     divRoomThings : function(data_things) {

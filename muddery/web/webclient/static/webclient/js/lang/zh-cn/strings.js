@@ -51,6 +51,7 @@ var LOCAL_STRING = {
     "You got exp: ": "你获得经验：",
     "OK": "确定",
     "Exits": "出口",
+    "Commands": "命令",
     "Objects": "物体",
     "NPCs": "人物",
     "Players": "玩家",

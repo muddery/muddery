@@ -27,6 +27,10 @@ body {
     padding-bottom: 0px;
 }
 
+#game_title {
+    margin: 2px 0px;
+}
+
 .panel {
     background-color: #000;
     margin-bottom: 5px;
@@ -326,6 +330,23 @@ button.btn-combat div.cooldown {
 }
 
 .room_element {
+    margin: 0px 5px;
+}
+
+.exit_table {
+    line-height: 1;
+    background: #333;
+    border-width: 1px;
+    border-color: #666;
+    border-style: solid;
+}
+
+.exit_table td {
+    min-width: 52px;
+    height: 16px;
+}
+
+.exit_element {
     margin: 0px 5px;
 }
 

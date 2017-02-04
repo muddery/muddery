@@ -13,10 +13,16 @@ var frame = {
             .appendTo(body);
 
         // create header
-        $('<header>')
+        var header = $('<header>')
             .attr('id', 'header')
-            .append($('<center>').append($('<h5>').text(LS('Muddery Webclient'))))
             .appendTo(body);
+
+        var center = $('<center>')
+            .appendTo(header);
+
+        $('<h5>').text(LS('Muddery Webclient'))
+            .attr('id', 'game_title')
+            .appendTo(center);
 
         // create wrapper
         var wrapper = $('<div>')
