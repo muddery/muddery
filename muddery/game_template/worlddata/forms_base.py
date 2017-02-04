@@ -440,6 +440,21 @@ class CommonObjectsForm(forms.ModelForm):
         fields = '__all__'
 
 
+class FoodsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(FoodsForm, self).__init__(*args, **kwargs)
+        
+        objects = models.typeclasses.objects.filter(key="CLASS_FOOD")
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+
+    class Meta:
+        model = models.foods
+        fields = '__all__'
+        
+
 class CharacterModelsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CharacterModelsForm, self).__init__(*args, **kwargs)
@@ -636,7 +651,7 @@ class EquipmentsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentsForm, self).__init__(*args, **kwargs)
         
-        objects = models.typeclasses.objects.filter(category="CATE_OBJECT")
+        objects = models.typeclasses.objects.filter(key="CLASS_EQUIPMENT")
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
