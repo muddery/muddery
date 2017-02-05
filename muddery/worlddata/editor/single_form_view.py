@@ -8,6 +8,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from evennia.utils import logger
 from muddery.worlddata.editor.form_view import FormView
+from muddery.utils.exception import MudderyError
 from worlddata import forms
 
 
@@ -26,6 +27,56 @@ class SingleFormView(FormView):
         context["can_delete"] = False
 
         return context
+
+    def query_view_data(self):
+        """
+        Get db instance for view.
+
+        Returns:
+            None
+        """
+        if not self.valid:
+            raise MudderyError("Invalid form: %s." % self.form_name)
+
+        self.data = None
+        self.key = None
+
+        try:
+            # Query the only data.
+            instance = self.form_class.Meta.model.objects.get()
+            self.data = self.form_class(instance=instance)
+            self.key = getattr(instance, "key", None)
+        except Exception, e:
+            self.data = None
+
+        if not self.data:
+            # Get empty data.
+            self.data = self.form_class()
+
+    def query_submit_data(self):
+        """
+        Get db instance to submit a record.
+
+        Returns:
+            None
+        """
+        if not self.valid:
+            raise MudderyError("Invalid form: %s." % self.form_name)
+
+        self.data = None
+        self.key = None
+
+        try:
+            # Query the only data.
+            instance = self.form_class.Meta.model.objects.get()
+            self.data = self.form_class(self.request_data, instance=instance)
+            self.key = getattr(instance, "key", None)
+        except Exception, e:
+            self.data = None
+
+        if not self.data:
+            # Create new data.
+            self.data = self.form_class(self.request_data)
 
     def add_form(self):
         """
