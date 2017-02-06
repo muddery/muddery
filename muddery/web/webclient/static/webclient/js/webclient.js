@@ -274,12 +274,15 @@ var webclient = {
         }
         
         // add room's name
+        var room_name = "";
         try {
-            element = text2html.parseHtml(data["name"]);
+            room_name = text2html.parseHtml(data["name"]);
+            element = room_name;
         }
         catch(error) {
             element = LS('Scene');
         }
+
         box.empty();
         uimgr.divRoomTabName(element).appendTo(box);
 
@@ -351,12 +354,7 @@ var webclient = {
             room_exits.sort(function(a, b) {return a.direction - b.direction;});
         }
 
-        if (room_exits.length > 0) {
-            uimgr.divRoomExits(room_exits).appendTo(box);
-        }
-        else {
-            uimgr.divRoomExits("").appendTo(box);
-        }
+        uimgr.divRoomExits(room_exits, room_name).appendTo(box);
     },
     
     displayObjMovedIn : function(data) {

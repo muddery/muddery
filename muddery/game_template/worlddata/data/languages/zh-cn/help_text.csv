@@ -12,6 +12,7 @@ help_game_settings,"default_home_key","所有物体的默认位置，如果物�
 help_game_settings,"start_location_key","玩家初次进入系统时的位置。如果为空，则设为数据表中的第一个房间。"
 help_game_settings,"default_player_home_key","玩家的默认位置，如果玩家死亡，则会自动移动到玩家默认位置。如果为空，则设为数据表中的第一个房间。"
 help_game_settings,"default_player_model_key","默认选用的玩家模型。"
+help_client_settings,"game_title","在游戏网页客户端上显示的游戏标题。"
 help_client_settings,"map_room_size","在网页地图中房间方块的大小。"
 help_client_settings,"map_scale","地图比例尺寸。"
 help_client_settings,"show_command_box","是否在网页客户端中显示命令输入窗口。"
