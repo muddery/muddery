@@ -807,3 +807,13 @@ class LocalizedStringsForm(forms.ModelForm):
     class Meta:
         model = models.localized_strings
         fields = '__all__'
+        
+
+class ImageResourcesForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ImageResourcesForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    class Meta:
+        model = models.image_resources
+        fields = ('key', 'name', 'resource',)

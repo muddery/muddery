@@ -37,6 +37,8 @@ class FormView(object):
         else:
             self.request_data = self.request.GET
 
+        self.files = self.request.FILES
+
         # initialize values
         self.valid = None
         self.form_class = None
@@ -167,14 +169,14 @@ class FormView(object):
             try:
                 # Query existing record's data.
                 instance = self.form_class.Meta.model.objects.get(pk=self.record)
-                self.data = self.form_class(self.request_data, instance=instance)
+                self.data = self.form_class(self.request_data, self.files, instance=instance)
                 self.key = getattr(instance, "key", None)
             except Exception, e:
                 self.data = None
 
         if not self.data:
             # Create new data.
-            self.data = self.form_class(self.request_data)
+            self.data = self.form_class(self.request_data, self.files)
 
     def submit_form(self):
         """
