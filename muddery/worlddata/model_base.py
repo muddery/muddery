@@ -1290,3 +1290,33 @@ class localized_strings(models.Model):
         abstract = True
         verbose_name = "Server Local String"
         verbose_name_plural = "Server Local Strings"
+
+
+# ------------------------------------------------------------
+#
+# image resources
+#
+# ------------------------------------------------------------
+class image_resources(models.Model):
+    "Store image resource's information."
+
+    # The key of image.
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # image's name
+    name = models.CharField(max_length=NAME_LENGTH, default="")
+
+    # resource    
+    resource = models.ImageField(upload_to="resource", null=True, blank=True, width_field='image_width', height_field='image_height')
+
+    # resource'e width
+    image_width = models.PositiveIntegerField(null=True, blank=True)
+    
+    # resource'e height
+    image_height = models.PositiveIntegerField(null=True, blank=True)
+    
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Image Resource"
+        verbose_name_plural = "Image Resources"

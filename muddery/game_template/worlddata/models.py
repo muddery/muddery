@@ -403,3 +403,13 @@ class event_dialogues(model_base.event_dialogues):
 class localized_strings(model_base.localized_strings):
     "Store all server local strings informations."
     pass
+
+
+#------------------------------------------------------------
+#
+# image resources
+#
+#------------------------------------------------------------
+class image_resources(model_base.image_resources):
+    "Store all server local strings informations."
+    pass

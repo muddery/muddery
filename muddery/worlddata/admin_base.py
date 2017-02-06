@@ -316,3 +316,9 @@ class EventDialoguesAdmin(admin.ModelAdmin):
 class LocalizedStringsAdmin(admin.ModelAdmin):
     list_display = ('origin',
                     'local')
+
+
+class ImageResourcesAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'name',
+                    'resource')

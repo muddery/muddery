@@ -125,6 +125,9 @@ class DialogueSentencesForm(forms_base.DialogueSentencesForm):
 
 class LocalizedStringsForm(forms_base.LocalizedStringsForm):
     pass
+    
+class ImageResourcesForm(forms_base.ImageResourcesForm):
+    pass
 
 class Manager:
     relations = {}
