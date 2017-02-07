@@ -86,20 +86,19 @@ def export_all(path_name):
         export_file(path_name + name, name)
 
 
-def zip_resource_all(file):
+def export_resources(file):
     """
     Export all resource files to a zip file.
     """
-    temp = tempfile.mktemp()
+    dir_name = settings.MEDIA_ROOT
+    dir_length = len(dir_name)
 
-    try:
-        archive = zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED)
+    archive = zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED)   
+    for root, dirs, files in os.walk(dir_name):
+        for file in files:
+            if file[:1] == '.':
+                continue
 
-        # get model names
-        app_config = apps.get_app_config(settings.WORLD_DATA_APP)
-        for model in app_config.get_models():
-            name = model._meta.object_name
-            export_file(temp, name)
-            archive.write(temp, name + ".csv")
-    finally:
-        os.remove(temp)
+            full_path = os.path.join(root, file)
+            file_name = full_path[dir_length:]
+            archive.write(full_path, file_name)

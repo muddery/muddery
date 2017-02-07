@@ -33,20 +33,22 @@ def worldeditor(request):
     """
     World Editor page template loading.
     """
-    if "export" in request.GET:
-        return export_file(request)
-    elif "import" in request.FILES:
-        return import_file(request)
+    if "export_game_data" in request.GET:
+        return export_game_data(request)
+    elif "export_resources" in request.GET:
+        return export_resources(request)
+    elif "import_game_data" in request.FILES:
+        return import_game_data(request)
+    elif "import_resources" in request.FILES:
+        return import_resources(request)
     elif "apply" in request.POST:
         return apply_changes(request)
-    elif "restart" in request.POST:
-        return restart_server(request)
 
     return render(request, 'worldeditor.html')
 
 
 @staff_member_required
-def export_file(request):
+def export_game_data(request):
     """
     Export game world files.
     """
@@ -76,7 +78,7 @@ def export_file(request):
     except Exception, e:
         if zipfile:
             zipfile.close()
-        message = "Can't export world: %s" % e
+        message = "Can't export game data: %s" % e
         logger.log_tracemsg(message)
         return render(request, 'fail.html', {"message": message})
 
@@ -84,12 +86,50 @@ def export_file(request):
 
 
 @staff_member_required
-def import_file(request):
+def export_resources(request):
+    """
+    Export resource files.
+    """
+    def file_iterator(file, chunk_size=512):
+        while True:
+            c = file.read(chunk_size)
+            if c:
+                yield c
+            else:
+                # remove temp file
+                file.close()
+                break
+
+    response = http.HttpResponseNotModified()
+
+    # get data's zip
+    zipfile = None
+    try:
+        zipfile = tempfile.TemporaryFile()
+        exporter.export_resources(zipfile)
+        zipfile.seek(0)
+
+        filename = time.strftime("resources_%Y%m%d_%H%M%S.zip", time.localtime())
+        response = http.StreamingHttpResponse(file_iterator(zipfile))
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename="%s"' % filename
+    except Exception, e:
+        if zipfile:
+            zipfile.close()
+        message = "Can't export resources: %s" % e
+        logger.log_tracemsg(message)
+        return render(request, 'fail.html', {"message": message})
+
+    return response
+
+
+@staff_member_required
+def import_game_data(request):
     """
     Import the game world from an uploaded zip file.
     """
     response = http.HttpResponseNotModified()
-    file_obj = request.FILES.get("import", None)
+    file_obj = request.FILES.get("import_game_data", None)
 
     if file_obj:
         zipfile = tempfile.TemporaryFile()
@@ -99,12 +139,36 @@ def import_file(request):
             importer.import_zip_all(zipfile)
         except Exception, e:
             zipfile.close()
-            logger.log_tracemsg("Cannot import world: %s" % e)
+            logger.log_tracemsg("Cannot import game data: %s" % e)
             return render(request, 'fail.html', {"message": str(e)})
 
         zipfile.close()
 
-    return render(request, 'success.html', {"message": "Data imported!"})
+    return render(request, 'success.html', {"message": "World data imported!"})
+
+
+@staff_member_required
+def import_resources(request):
+    """
+    Import resources from an uploaded zip file.
+    """
+    response = http.HttpResponseNotModified()
+    file_obj = request.FILES.get("import_resources", None)
+
+    if file_obj:
+        zipfile = tempfile.TemporaryFile()
+        try:
+            for chunk in file_obj.chunks():
+                zipfile.write(chunk)
+            importer.import_resources(zipfile)
+        except Exception, e:
+            zipfile.close()
+            logger.log_tracemsg("Cannot import resources: %s" % e)
+            return render(request, 'fail.html', {"message": str(e)})
+
+        zipfile.close()
+
+    return render(request, 'success.html', {"message": "Resources imported!"})
 
 
 @staff_member_required

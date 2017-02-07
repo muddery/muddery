@@ -862,8 +862,8 @@ class ResourcesForm(forms.ModelForm):
         key = cleaned_data.get('key')
 
         if not key:
-            resource = cleaned_data.get('resource')
-            cleaned_data['key'] = resource
+            key = cleaned_data.get('resource')
+            cleaned_data['key'] = key
 
         if not key:
             message = "This field is needed."
