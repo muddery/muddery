@@ -128,6 +128,9 @@ class LocalizedStringsForm(forms_base.LocalizedStringsForm):
     
 class ImageResourcesForm(forms_base.ImageResourcesForm):
     pass
+    
+class IconResourcesForm(forms_base.IconResourcesForm):
+    pass
 
 class Manager:
     relations = {}

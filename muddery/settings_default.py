@@ -233,6 +233,10 @@ DIALOGUE_QUEST_DEPENDENCIES = "dialogue_quest_dependencies"
 # character skills
 DEFAULT_SKILLS = "default_skills"
 
+# resources
+IMAGE_RESOURCES = "image_resources"
+ICON_RESOURCES = "icon_resources"
+
 # all other data models
 OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      CHARACTER_LOOT_LIST,
@@ -249,6 +253,8 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      NPC_DIALOGUES,
                      EQUIPMENT_TYPES,
                      DEFAULT_SKILLS,
+                     IMAGE_RESOURCES,
+                     ICON_RESOURCES,
                      GAME_SETTINGS,
                      CLIENT_SETTINGS) + OBJECT_ADDITIONAL_DATA + EVENT_ADDITIONAL_DATA
 

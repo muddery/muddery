@@ -14,6 +14,12 @@ var settings = {
 
     // can close dialogue box
     can_close_dialogue: false,
+    
+    // game title
+    game_title: '',
+    
+    // resource location
+    resource_location: window.location.protocol + "//" + window.location.host,
 
     set: function(values) {
         for (var key in values) {

@@ -167,6 +167,11 @@ class WorldRoomsForm(forms.ModelForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
+        choices = [("", "---------")]
+        objects = models.image_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['background'] = forms.ChoiceField(choices=choices)
+
         localize_form_fields(self)
 
     def clean(self):
@@ -248,6 +253,11 @@ class WorldObjectsForm(forms.ModelForm):
         objects = models.world_rooms.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['location'] = forms.ChoiceField(choices=choices)
+        
+        choices = [("", "---------")]
+        objects = models.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
 
@@ -280,6 +290,11 @@ class WorldNPCsForm(forms.ModelForm):
         objects = models.world_rooms.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['location'] = forms.ChoiceField(choices=choices)
+        
+        choices = [("", "---------")]
+        objects = models.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
         
@@ -419,6 +434,11 @@ class CommonObjectsForm(forms.ModelForm):
         objects = models.typeclasses.objects.filter(category="CATE_OBJECT")
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
+        
+        choices = [("", "---------")]
+        objects = models.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
 
@@ -447,6 +467,11 @@ class FoodsForm(forms.ModelForm):
         objects = models.typeclasses.objects.filter(key="CLASS_FOOD")
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
+        
+        choices = [("", "---------")]
+        objects = models.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
 
@@ -479,6 +504,11 @@ class CommonCharacterForm(forms.ModelForm):
         model_keys = set([obj.key for obj in objects])
         choices.extend([(model_key, model_key) for model_key in model_keys])
         self.fields['model'] = forms.ChoiceField(choices=choices, required=False)
+        
+        choices = [("", "---------")]
+        objects = models.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
 
@@ -523,6 +553,11 @@ class SkillsForm(forms.ModelForm):
         objects = models.typeclasses.objects.filter(category="CATE_SKILL")
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
+        
+        choices = [("", "---------")]
+        objects = models.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
 
@@ -663,6 +698,11 @@ class EquipmentsForm(forms.ModelForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
+        choices = [("", "---------")]
+        objects = models.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices)
+        
         localize_form_fields(self)
 
     class Meta:
@@ -809,11 +849,37 @@ class LocalizedStringsForm(forms.ModelForm):
         fields = '__all__'
         
 
-class ImageResourcesForm(forms.ModelForm):
+class ResourcesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(ImageResourcesForm, self).__init__(*args, **kwargs)
+        super(ResourcesForm, self).__init__(*args, **kwargs)
         localize_form_fields(self)
 
+    def clean(self):
+        "Validate values."
+        cleaned_data = super(ResourcesForm, self).clean()
+
+        # set object key's default value to the resource name
+        key = cleaned_data.get('key')
+
+        if not key:
+            resource = cleaned_data.get('resource')
+            cleaned_data['key'] = resource
+
+        if not key:
+            message = "This field is needed."
+            self._errors['key'] = self.error_class([message])
+            return
+
+        return cleaned_data
+
+
+class ImageResourcesForm(ResourcesForm):
     class Meta:
         model = models.image_resources
+        fields = ('key', 'name', 'resource',)
+
+
+class IconResourcesForm(ResourcesForm):
+    class Meta:
+        model = models.icon_resources
         fields = ('key', 'name', 'resource',)

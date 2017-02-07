@@ -8,7 +8,7 @@
 <h1>{{ title }}</h1>
 <div>{{ desc }}</div>
 <div id="content-main">
-    <form action="submit.html" method="post">
+    <form enctype="multipart/form-data" action="submit.html" method="post">
         {% csrf_token %}
         <div>
             <fieldset class="module aligned">

@@ -84,3 +84,22 @@ def export_all(path_name):
     for model in app_config.get_models():
         name = model._meta.verbose_name
         export_file(path_name + name, name)
+
+
+def zip_resource_all(file):
+    """
+    Export all resource files to a zip file.
+    """
+    temp = tempfile.mktemp()
+
+    try:
+        archive = zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED)
+
+        # get model names
+        app_config = apps.get_app_config(settings.WORLD_DATA_APP)
+        for model in app_config.get_models():
+            name = model._meta.object_name
+            export_file(temp, name)
+            archive.write(temp, name + ".csv")
+    finally:
+        os.remove(temp)

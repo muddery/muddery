@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.conf import settings
 
 KEY_LENGTH = 255
 NAME_LENGTH = 20
@@ -204,6 +205,9 @@ class world_rooms(models.Model):
 
     # room's position which is used in maps
     position = models.CharField(max_length=POSITION_LENGTH, blank=True)
+    
+    # room's background image resource
+    background = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -319,6 +323,9 @@ class world_objects(models.Model):
 
     # the condition for showing the object
     condition = models.TextField(blank=True)
+    
+    # object's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -464,6 +471,9 @@ class common_objects(models.Model):
 
     # if can have only one pile of this object
     unique = models.BooleanField(blank=True, default=False)
+    
+    # object's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -709,6 +719,9 @@ class world_npcs(models.Model):
 
     # the condition for showing the NPC
     condition = models.TextField(blank=True)
+    
+    # NPC's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -744,8 +757,11 @@ class common_characters(models.Model):
     # Character's model. If it is empty, character's key will be used as its model.
     model = models.CharField(max_length=KEY_LENGTH)
 
-    # Character's level
+    # Character's level.
     level = models.IntegerField(blank=True, default=1)
+    
+    # Character's icon resource.
+    icon = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -789,6 +805,9 @@ class skills(models.Model):
     # skill function's name
     function = models.CharField(max_length=KEY_LENGTH)
 
+    # Skill's icon resource.
+    icon = models.CharField(max_length=KEY_LENGTH)
+    
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -1301,13 +1320,13 @@ class image_resources(models.Model):
     "Store image resource's information."
 
     # The key of image.
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # image's name
-    name = models.CharField(max_length=NAME_LENGTH, default="")
+    name = models.CharField(max_length=NAME_LENGTH, blank=True, default="")
 
     # resource    
-    resource = models.ImageField(upload_to="resource", null=True, blank=True, width_field='image_width', height_field='image_height')
+    resource = models.ImageField(upload_to=settings.IMAGE_RESOURCE_DIR, null=True, blank=True, width_field='image_width', height_field='image_height')
 
     # resource'e width
     image_width = models.PositiveIntegerField(null=True, blank=True)
@@ -1320,3 +1339,33 @@ class image_resources(models.Model):
         abstract = True
         verbose_name = "Image Resource"
         verbose_name_plural = "Image Resources"
+
+
+# ------------------------------------------------------------
+#
+# icon resources
+#
+# ------------------------------------------------------------
+class icon_resources(models.Model):
+    "Store icon resource's information."
+
+    # The key of icon.
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+
+    # icon's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True, default="")
+
+    # resource    
+    resource = models.ImageField(upload_to=settings.ICON_RESOURCE_DIR, null=True, blank=True, width_field='image_width', height_field='image_height')
+
+    # resource'e width
+    image_width = models.PositiveIntegerField(null=True, blank=True)
+    
+    # resource'e height
+    image_height = models.PositiveIntegerField(null=True, blank=True)
+    
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Icon Resource"
+        verbose_name_plural = "Icon Resources"
