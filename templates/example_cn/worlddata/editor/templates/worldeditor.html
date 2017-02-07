@@ -46,7 +46,7 @@
     <h2>下载游戏世界的数据</h2>
     <div>下载游戏世界的数据到一组csv文件的zip压缩包。</div>
     <form method="GET">
-      <input type="hidden" name="export"/>
+      <input type="hidden" name="export_game_data"/>
       <input type="submit" value="下载"/>
     </form>
     <div><br></div>
@@ -62,7 +62,7 @@
     <div><span style="color: red">注意：当前游戏世界的数据会被替换！</span></div>
     <form enctype="multipart/form-data" method="POST">
       {% csrf_token %}
-      <input type="file" name="import" accept="application/zip"/>
+      <input type="file" name="import_game_data" accept="application/zip"/>
       <br>
       <input type="submit" value="上传"/>
     </form>

@@ -1,4 +1,4 @@
-key,name,typeclass,desc,max_stack,unique
-obj_guardhouse_key,钥匙,CLASS_COMMON_OBJECT,钥匙圈上扣着一串铜质的钥匙，它们是用来开什么门的呢？,1,1
-obj_binder,绷带,CLASS_COMMON_OBJECT,一卷绷带，还没拆封过，可以帮助止血。,1,1
-obj_screw,螺丝,CLASS_COMMON_OBJECT,一颗螺丝，能派什么用处呢？,5,1
+key,name,typeclass,desc,max_stack,unique,icon
+obj_guardhouse_key,钥匙,CLASS_COMMON_OBJECT,钥匙圈上扣着一串铜质的钥匙，它们是用来开什么门的呢？,1,1,
+obj_binder,绷带,CLASS_COMMON_OBJECT,一卷绷带，还没拆封过，可以帮助止血。,1,1,
+obj_screw,螺丝,CLASS_COMMON_OBJECT,一颗螺丝，能派什么用处呢？,5,1,
