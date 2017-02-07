@@ -48,7 +48,13 @@
     <h2>Download data of the game world.</h2>
     <div>Download data the game world to a zip file of csv files.</div>
     <form method="GET">
-      <input type="hidden" name="export"/>
+      <input type="hidden" name="export_game_data"/>
+      <input type="submit" value="Download"/>
+    </form>
+    <div><br></div>
+    <div>Download game resources files to a zip file.</div>
+    <form method="GET">
+      <input type="hidden" name="export_resources"/>
       <input type="submit" value="Download"/>
     </form>
     <div><br></div>
@@ -58,7 +64,16 @@
     <div><span style="color: red">NOTICE: Current world's data will be replaced!</span></div>
     <form enctype="multipart/form-data" method="POST">
       {% csrf_token %}
-      <input type="file" name="import" accept="application/zip"/>
+      <input type="file" name="import_game_data" accept="application/zip"/>
+      <br>
+      <input type="submit" value="Upload"/>
+    </form>
+    <div><br></div>
+    <div>Upload a zip file of resources.</div>
+    <div><span style="color: red">NOTICE: Current resources will be replaced!</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <input type="file" name="import_resources" accept="application/zip"/>
       <br>
       <input type="submit" value="Upload"/>
     </form>

@@ -50,6 +50,12 @@
       <input type="submit" value="下载"/>
     </form>
     <div><br></div>
+    <div>下载游戏资源文件到zip压缩包中。</div>
+    <form method="GET">
+      <input type="hidden" name="export_resources"/>
+      <input type="submit" value="下载"/>
+    </form>
+    <div><br></div>
     <hr/>
     <h2>上传游戏世界的数据</h2>
     <div>将zip文件中的csv文件上传到数据库。</div>
@@ -57,6 +63,15 @@
     <form enctype="multipart/form-data" method="POST">
       {% csrf_token %}
       <input type="file" name="import" accept="application/zip"/>
+      <br>
+      <input type="submit" value="上传"/>
+    </form>
+    <div><br></div>
+    <div>将zip文件中的资源文件上传。</div>
+    <div><span style="color: red">注意：当前的资源文件会被替换！</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <input type="file" name="import_resources" accept="application/zip"/>
       <br>
       <input type="submit" value="上传"/>
     </form>
@@ -71,12 +86,5 @@
     </form>
     <div><br></div>
     <hr/>
-    <h2>重启服务器</h2>
-    <div>重启服务器。</div>
-    <form method="POST">
-      {% csrf_token %}
-      <input type="hidden" name="restart"/>
-      <input type="submit" value="重启"/>
-    </form>
 
 {% endblock content %}

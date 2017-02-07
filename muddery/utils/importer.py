@@ -249,3 +249,26 @@ def import_local_all():
 
     # import localized strings
     import_localized_strings(settings.LANGUAGE_CODE)
+
+
+def import_resources(file):
+    """
+    Import all resource files from a zip file.
+    """
+    dir_name = settings.MEDIA_ROOT
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+
+    archive = zipfile.ZipFile(file)
+    for name in archive.namelist():
+        if name.endswith('/'):
+            os.makedirs(os.path.join(dir_name, name))
+        else:            
+            filename = os.path.join(dir_name, name)
+            dir = os.path.dirname(filename)
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+
+            outfile = open(filename, 'wb')
+            outfile.write(archive.read(name))
+            outfile.close()

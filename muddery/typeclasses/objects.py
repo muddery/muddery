@@ -76,7 +76,7 @@ class MudderyObject(DefaultObject):
         
         # Call set_initial_data() when this object is first created.
         self.db.FIRST_CREATE = True
-
+        self.icon = None
 
     def at_init(self):
         """
@@ -228,7 +228,7 @@ class MudderyObject(DefaultObject):
 
         if hasattr(self.dfield, "destination"):
             self.set_obj_destination(self.dfield.destination)
-            
+
         self.icon = None
         try:
             # get icon

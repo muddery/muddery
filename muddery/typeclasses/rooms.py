@@ -26,13 +26,23 @@ class MudderyRoom(MudderyObject, DefaultRoom):
     See examples/object.py for a list of
     properties and methods available on all Objects.
     """
+    def at_object_creation(self):
+        """
+        Called once, when this object is first created. This is the
+        normal hook to overload for most object types.
+        """
+        super(MudderyRoom, self).at_object_creation()
+
+        self.position = None
+        self.background = None
+
     def at_init(self):
         """
         Load world data.
         """
         self.position = None
+        self.background = None
         super(MudderyRoom, self).at_init()
-
 
     def load_data(self):
         """
@@ -61,7 +71,6 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         except Exception, e:
             logger.log_tracemsg("load background error: %s" % e)
 
-
     def at_object_receive(self, moved_obj, source_location):
         """
         Called after an object has been moved into this object.
@@ -85,7 +94,6 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         if moved_obj.has_player:
             self.event.at_character_move_in(moved_obj)
 
-
     def at_object_left(self, moved_obj, target_location):
         """
         Called after an object has been removed from this object.
@@ -104,7 +112,6 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                 change = {type: [{"dbref": moved_obj.dbref,
                                   "name": moved_obj.get_name()}]}
                 self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
-
 
     def get_appearance(self, caller):
         """
@@ -127,7 +134,6 @@ class MudderyRoom(MudderyObject, DefaultRoom):
             if cont.destination:
                 exits[cont.get_data_key()] = (self.get_data_key(), cont.destination.get_data_key(),)
         return exits
-
 
     def get_surroundings(self, caller):
         """
@@ -180,7 +186,6 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                 info[type].append(appearance)
 
         return info
-
 
     def get_surrounding_type(self, obj):
         """
