@@ -8,6 +8,7 @@ Rooms are simple containers that has no location of their own.
 import ast
 import traceback
 from django.conf import settings
+from django.apps import apps
 from muddery.typeclasses.objects import MudderyObject
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
@@ -46,7 +47,19 @@ class MudderyRoom(MudderyObject, DefaultRoom):
             if position:
                 self.position = ast.literal_eval(position)
         except Exception, e:
-            logger.log_tracemsg("load_data error: %s" % e)
+            logger.log_tracemsg("load position error: %s" % e)
+
+        self.background = None
+        try:
+            # get background
+            resource_key = getattr(self.dfield, "background", None)
+            if resource_key:
+                model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.IMAGE_RESOURCES)
+                if model_resource:
+                    resource_info = model_resource.objects.get(key=resource_key)
+                    self.background = resource_info.resource.url
+        except Exception, e:
+            logger.log_tracemsg("load background error: %s" % e)
 
 
     def at_object_receive(self, moved_obj, source_location):
@@ -93,6 +106,18 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                 self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
 
 
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        info = super(MudderyRoom, self).get_appearance(caller)
+        
+        # add background
+        info["background"] = self.background
+
+        return info
+        
     def get_exits(self):
         """
         Get this room's exits.

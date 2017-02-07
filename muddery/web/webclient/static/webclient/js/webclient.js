@@ -355,6 +355,16 @@ var webclient = {
         }
 
         uimgr.divRoomExits(room_exits, room_name).appendTo(box);
+        
+        // set background
+        var backview = $("#box_scene");
+        if (data["background"]) {
+            var url = settings.resource_location + data["background"];
+            backview.css("background", "url(" + url + ") no-repeat center center");
+        }
+        else {
+            backview.css("background", "");
+        }
     },
     
     displayObjMovedIn : function(data) {
@@ -451,6 +461,18 @@ var webclient = {
         if ("dbref" in data) {
             dbref = data["dbref"];
             page.data("dbref", dbref);
+        }
+        
+        // add object's icon
+        try {
+			if (data["icon"]) {
+				var url = settings.resource_location + data["icon"];
+				element = $("<center>")
+							.append($("<img>").attr("src", url));
+				element.appendTo(page);
+			}
+        }
+        catch(error) {
         }
 
         // add object's desc

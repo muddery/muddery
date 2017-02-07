@@ -228,7 +228,18 @@ class MudderyObject(DefaultObject):
 
         if hasattr(self.dfield, "destination"):
             self.set_obj_destination(self.dfield.destination)
-
+            
+        self.icon = None
+        try:
+            # get icon
+            resource_key = getattr(self.dfield, "icon", None)
+            if resource_key:
+                model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.ICON_RESOURCES)
+                if model_resource:
+                    resource_info = model_resource.objects.get(key=resource_key)
+                    self.icon = resource_info.resource.url
+        except Exception, e:
+            logger.log_tracemsg("load icon error: %s" % e)
 
     def reset_location(self):
         """
@@ -239,7 +250,6 @@ class MudderyObject(DefaultObject):
         """
         if hasattr(self.dfield, "location"):
             self.set_location(self.dfield.location)
-
 
     def set_typeclass(self, typeclass):
         """
@@ -334,7 +344,6 @@ class MudderyObject(DefaultObject):
         # try the teleport
         self.move_to(location_obj, quiet=True, to_none=True)
 
-
     def set_home(self, home):
         """
         Set object's home.
@@ -364,7 +373,6 @@ class MudderyObject(DefaultObject):
             return
         
         self.home = home_obj
-
 
     def set_desc(self, desc):
         """
@@ -491,7 +499,8 @@ class MudderyObject(DefaultObject):
         info = {"dbref": self.dbref,
                 "name": self.name,
                 "desc": self.db.desc,
-                "cmds": self.get_available_commands(caller)}
+                "cmds": self.get_available_commands(caller),
+                "icon": self.icon}
 
         return info
 

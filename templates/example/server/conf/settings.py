@@ -102,6 +102,16 @@ BASE_CHARACTER_TYPECLASS = "typeclasses.player_characters.PlayerCharacter"
 # Example: "/home/media/media.lawrence.com"
 MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
 
+# URL that handles the media served from MEDIA_ROOT.
+# Example: "http://media.lawrence.com"
+MEDIA_URL = '/media/'
+
+# image resource's dir
+IMAGE_RESOURCE_DIR = 'resource/image'
+
+# icon resource's dir
+ICON_RESOURCE_DIR = 'resource/icon'
+
 # The master urlconf file that contains all of the sub-branches to the
 # applications. Change this to add your own URLs to the website.
 ROOT_URLCONF = 'web.urls'
@@ -204,6 +214,8 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      NPC_DIALOGUES,
                      CHARACTER_MODELS,
                      DEFAULT_SKILLS,
+                     IMAGE_RESOURCES,
+                     ICON_RESOURCES,
                      GAME_SETTINGS,
                      CLIENT_SETTINGS) + OBJECT_ADDITIONAL_DATA + EVENT_ADDITIONAL_DATA
 

@@ -139,7 +139,7 @@ var map = {
         if (current_room[1]) {
             // set origin point
             origin_x -= current_room[1][0] * scale;
-            origin_y -= current_room[1][1] * scale;
+            origin_y -= -current_room[1][1] * scale;
         }
 
         if (current_room[1] &&
@@ -170,13 +170,13 @@ var map = {
                               return d[0][0] * scale + origin_x;
                               })
                         .attr("y1",  function(d, i) {
-                              return d[0][1] * scale + origin_y;
+                              return -d[0][1] * scale + origin_y;
                               })
                         .attr("x2",  function(d, i) {
                               return d[1][0] * scale + origin_x;
                               })
                         .attr("y2",  function(d, i) {
-                              return d[1][1] * scale + origin_y;
+                              return -d[1][1] * scale + origin_y;
                               })
                         .attr("stroke", "grey")
                         .attr("stroke-width", 2);
@@ -215,7 +215,7 @@ var map = {
                         return d[1][0] * scale - room_size / 2 + origin_x;
                       })
                 .attr("y", function(d, i) {
-                        return d[1][1] * scale - room_size / 2 + origin_y;
+                        return -d[1][1] * scale - room_size / 2 + origin_y;
                       })
                 .attr("width", room_size)
                 .attr("height", room_size)
@@ -232,7 +232,7 @@ var map = {
                         return d[1][0] * scale + origin_x;
                       })
                 .attr("y", function(d, i) {
-                        return d[1][1] * scale + origin_y;
+                        return -d[1][1] * scale + origin_y;
                       })
                 .attr("dy", ".3em")
                 .attr("text-anchor", "middle")
@@ -272,7 +272,7 @@ var map = {
         }
 
         var dx = to[0] - from[0];
-        var dy = -(to[1] - from[1]);
+        var dy = to[1] - from[1];
         var degree = null;
         if (dx == 0) {
             if (dy > 0) {
