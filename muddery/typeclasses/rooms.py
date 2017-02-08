@@ -119,9 +119,11 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         command to call.
         """
         info = super(MudderyRoom, self).get_appearance(caller)
-        
+
         # add background
-        info["background"] = self.background
+        background = getattr(self, "background", None)
+        if background:
+            info["background"] = background
 
         return info
         

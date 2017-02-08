@@ -200,7 +200,6 @@ class MudderyObject(DefaultObject):
             for field in data._meta.fields:
                 setattr(self.dfield, field.name, data.serializable_value(field.name))
 
-
     def load_data(self):
         """
         Set data to the object."
@@ -499,8 +498,11 @@ class MudderyObject(DefaultObject):
         info = {"dbref": self.dbref,
                 "name": self.name,
                 "desc": self.db.desc,
-                "cmds": self.get_available_commands(caller),
-                "icon": self.icon}
+                "cmds": self.get_available_commands(caller)}
+
+        icon = getattr(self, "icon", None)
+        if icon:
+            info["icon"] = icon
 
         return info
 

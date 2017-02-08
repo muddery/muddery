@@ -382,7 +382,19 @@ var uimgr = {
                 var obj = data[i];
                 var tbodyElement = $("<tbody>").appendTo(tableInventoryElement);
                 var trElement = $("<tr>").appendTo(tbodyElement);
+                
+                // object's icon and name
                 var tdElement = $("<td>").appendTo(trElement);
+                
+                if ("icon" in obj && obj["icon"]) {
+                	var url = settings.resource_location + obj["icon"];
+					var icon = $("<center>")
+						.append($("<img>")
+							.attr("src", url)
+							.addClass("inventory_icon"))
+						.appendTo(tdElement);
+				}
+
                 var aHrefElement = $("<a>").appendTo(tdElement)
                     .attr("href", "#")
                     .attr("onclick", "commands.doCommandLink(this); return false;")
@@ -390,6 +402,7 @@ var uimgr = {
                     .attr("cmd_args", obj["dbref"])
                     .text(obj["name"]);
 
+				// object's number
                 tdElement = $("<td>").appendTo(trElement);
                 tdElement.append(obj["number"]);
                 if("equipped" in obj) {
@@ -397,6 +410,8 @@ var uimgr = {
                         tdElement.append(LS(" (equipped)"));
                     }
                 }
+                
+                // object's desc
                 tdElement = $("<td>").appendTo(trElement)
                     .append(obj["desc"]);
             }

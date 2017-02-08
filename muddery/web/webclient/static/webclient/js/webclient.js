@@ -358,7 +358,7 @@ var webclient = {
         
         // set background
         var backview = $("#box_scene");
-        if (data["background"]) {
+        if ("background" in data && data["background"]) {
             var url = settings.resource_location + data["background"];
             backview.css("background", "url(" + url + ") no-repeat center center");
         }
@@ -465,11 +465,13 @@ var webclient = {
         
         // add object's icon
         try {
-			if (data["icon"]) {
+			if ("icon" in data && data["icon"]) {
 				var url = settings.resource_location + data["icon"];
 				element = $("<center>")
-							.append($("<img>").attr("src", url));
-				element.appendTo(page);
+							.append($("<img>")
+								.attr("src", url)
+								.addClass("obj_icon"))
+							.appendTo(page);
 			}
         }
         catch(error) {

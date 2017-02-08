@@ -44,6 +44,7 @@ body {
 .modal-header {
     border-bottom: 0px;
     padding: 8px 15px 3px 15px;
+    position: relative;
 }
 
 .modal-body {
@@ -133,6 +134,9 @@ input[type=checkbox], input[type=radio] {
     padding: 10px 10px;
     margin-top: -10px;
     margin-right: -10px;
+    position: absolute;
+    right: 10px;
+    top: 5px;
 }
 
 .modal-header .close:hover {
@@ -352,4 +356,14 @@ button.btn-combat div.cooldown {
 
 .exit_cmd a {
     color: #0ff;
+}
+
+.obj_icon {
+	width: 40px;
+	height: 40px;
+}
+
+.inventory_icon {
+	width: 20px;
+	height: 20px;
 }
