@@ -170,7 +170,7 @@ class WorldRoomsForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.image_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['background'] = forms.ChoiceField(choices=choices)
+        self.fields['background'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 
@@ -257,7 +257,7 @@ class WorldObjectsForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.icon_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['icon'] = forms.ChoiceField(choices=choices)
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 
@@ -294,7 +294,7 @@ class WorldNPCsForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.icon_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['icon'] = forms.ChoiceField(choices=choices)
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
         
@@ -344,7 +344,6 @@ class CreatorLootListForm(forms.ModelForm):
         objects = models.quests.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
         self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
-        self.fields['quest'].label = u"Depends on quest"
 
         localize_form_fields(self)
 
@@ -383,7 +382,6 @@ class CharacterLootListForm(forms.ModelForm):
         objects = models.quests.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
         self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
-        self.fields['quest'].label = u"Depends on quest"
 
         localize_form_fields(self)
         
@@ -418,7 +416,6 @@ class QuestRewardListForm(forms.ModelForm):
         objects = models.quests.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
         self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
-        self.fields['quest'].label = u"Depends on quest"
 
         localize_form_fields(self)
 
@@ -438,7 +435,7 @@ class CommonObjectsForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.icon_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['icon'] = forms.ChoiceField(choices=choices)
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 
@@ -471,9 +468,22 @@ class FoodsForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.icon_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['icon'] = forms.ChoiceField(choices=choices)
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
+
+    def clean(self):
+        "Validate values."
+        cleaned_data = super(FoodsForm, self).clean()
+
+        # object's key should be unique
+        key = cleaned_data.get('key')
+        if ExistKey(key, except_models=[self.Meta.model.__name__]):
+            message = "This key has been used. Please use another one."
+            self._errors['key'] = self.error_class([message])
+            return
+
+        return cleaned_data
 
     class Meta:
         model = models.foods
@@ -508,7 +518,7 @@ class CommonCharacterForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.icon_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['icon'] = forms.ChoiceField(choices=choices)
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 
@@ -557,7 +567,7 @@ class SkillsForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.icon_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['icon'] = forms.ChoiceField(choices=choices)
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 
@@ -701,9 +711,22 @@ class EquipmentsForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = models.icon_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['icon'] = forms.ChoiceField(choices=choices)
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
         
         localize_form_fields(self)
+
+    def clean(self):
+        "Validate values."
+        cleaned_data = super(EquipmentsForm, self).clean()
+
+        # object's key should be unique
+        key = cleaned_data.get('key')
+        if ExistKey(key, except_models=[self.Meta.model.__name__]):
+            message = "This key has been used. Please use another one."
+            self._errors['key'] = self.error_class([message])
+            return
+
+        return cleaned_data
 
     class Meta:
         model = models.equipments

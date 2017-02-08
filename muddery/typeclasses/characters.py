@@ -105,6 +105,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         positions = []
         self.db.position_names = {}
 
+        # reset equipment's position
         model_position = apps.get_model(settings.WORLD_DATA_APP, settings.EQUIPMENT_POSITIONS)
         if model_position:
             for record in model_position.objects.all():
@@ -118,6 +119,17 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         for position in positions:
             if position not in self.db.equipments:
                 self.db.equipments[position] = None
+
+        # reset equipments status
+        equipped = set()
+        equipments = self.db.equipments
+        for position in equipments:
+            if equipments[position]:
+                equipped.add(equipments[position])
+
+        for content in self.contents:
+            if content.dbref in equipped:
+                content.equipped = True
 
     def load_data(self):
         """

@@ -110,6 +110,7 @@ class MudderyCommonObject(MudderyObject):
         """
         return (LS("No effect."), 0)
 
+
 class MudderyFood(MudderyCommonObject):
     """
     This is a food. Players can use it to change their properties, such as hp, mp,
