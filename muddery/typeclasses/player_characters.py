@@ -504,6 +504,11 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     "name": item.name,          # item's name
                     "number": item.db.number,   # item's number
                     "desc": item.db.desc}       # item's desc
+            
+            icon = getattr(item, "icon", None)
+            if icon:
+                info["icon"] = icon
+            
             if getattr(item, "equipped", False):
                 info["equipped"] = item.equipped
             inv.append(info)
