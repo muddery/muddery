@@ -207,7 +207,7 @@ class world_rooms(models.Model):
     position = models.CharField(max_length=POSITION_LENGTH, blank=True)
     
     # room's background image resource
-    background = models.CharField(max_length=KEY_LENGTH)
+    background = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -325,7 +325,7 @@ class world_objects(models.Model):
     condition = models.TextField(blank=True)
     
     # object's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH)
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -473,7 +473,7 @@ class common_objects(models.Model):
     unique = models.BooleanField(blank=True, default=False)
     
     # object's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH)
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -721,7 +721,7 @@ class world_npcs(models.Model):
     condition = models.TextField(blank=True)
     
     # NPC's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH)
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -761,7 +761,7 @@ class common_characters(models.Model):
     level = models.IntegerField(blank=True, default=1)
     
     # Character's icon resource.
-    icon = models.CharField(max_length=KEY_LENGTH)
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -806,7 +806,7 @@ class skills(models.Model):
     function = models.CharField(max_length=KEY_LENGTH)
 
     # Skill's icon resource.
-    icon = models.CharField(max_length=KEY_LENGTH)
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
     
     class Meta:
         "Define Django meta options"
