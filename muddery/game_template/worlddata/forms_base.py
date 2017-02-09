@@ -556,6 +556,34 @@ class CommonCharacterForm(forms.ModelForm):
         fields = '__all__'
 
 
+class DefaultObjectsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(DefaultObjectsForm, self).__init__(*args, **kwargs)
+
+        # all character's models
+        character_models = set([record.key for record in models.character_models.objects.all()])
+        choices = [(key, key) for key in character_models]
+        self.fields['character'] = forms.ChoiceField(choices=choices)
+
+        # available objects are common objects, foods or equipments
+        objects = models.common_objects.objects.all()
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+
+        foods = models.foods.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
+
+        equipments = models.equipments.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
+
+        self.fields['object'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+        
+    class Meta:
+        model = models.default_objects
+        fields = '__all__'
+        
+
 class SkillsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(SkillsForm, self).__init__(*args, **kwargs)

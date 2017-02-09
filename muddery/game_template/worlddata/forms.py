@@ -78,6 +78,9 @@ class CharacterModelsForm(forms_base.CharacterModelsForm):
 class CommonCharacterForm(forms_base.CommonCharacterForm):
     pass
 
+class DefaultObjectsForm(forms_base.DefaultObjectsForm):
+    pass
+    
 class SkillsForm(forms_base.SkillsForm):
     pass
 

@@ -217,6 +217,16 @@ class character_loot_list(model_base.character_loot_list):
 
 #------------------------------------------------------------
 #
+# character's default objects
+#
+#------------------------------------------------------------
+class default_objects(model_base.default_objects):
+    "Store character's default objects information."
+    pass
+    
+    
+#------------------------------------------------------------
+#
 # store all skills
 #
 #------------------------------------------------------------

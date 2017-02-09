@@ -136,30 +136,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Set data_info to the object.
         """
         super(MudderyCharacter, self).load_data()
+        
+        # load default skills
+        self.load_default_skills()
 
-        # default skills
-        skill_records = []
-        default_skills = apps.get_model(settings.WORLD_DATA_APP, settings.DEFAULT_SKILLS)
-        if default_skills:
-            # Get records.
-            model_name = getattr(self.dfield, "model", None)
-            if not model_name:
-                model_name = self.get_data_key()
-
-            skill_records = default_skills.objects.filter(character=model_name)
-
-        default_skill_ids = set([record.skill for record in skill_records])
-
-        # remove old default skills
-        for skill in self.db.skills:
-            if self.db.skills[skill].is_default() and skill not in default_skill_ids:
-                # remove this skill
-                del self.db.skills[skill]
-
-        # add new default skills
-        for skill_record in skill_records:
-            if not self.skill_handler.has_skill(skill_record.skill):
-                self.skill_handler.learn_skill(skill_record.skill, True)
+        # load default objects
+        self.load_default_objects()
 
         # refresh data
         self.refresh_data()
@@ -221,6 +203,13 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.defence = getattr(self.dfield, "defence", 0)
         self.give_exp = getattr(self.dfield, "give_exp", 0)
 
+    def search_inventory(self, obj_key):
+        """
+        Search specified object in the inventory.
+        """
+        result = [item for item in self.contents if item.get_data_key() == obj_key]
+        return result
+
     def set_equips(self):
         """
         Load equipments data.
@@ -254,6 +243,35 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     value += getattr(content.dfield, effect, 0)
                     setattr(self, effect, value)
 
+    def load_default_skills(self):
+        """
+        Load character's default skills.
+        """
+        # get character's model name
+        model_name = getattr(self.dfield, "model", None)
+        if not model_name:
+            model_name = self.get_data_key()
+
+        # default skills
+        skill_records = []
+        default_skills = apps.get_model(settings.WORLD_DATA_APP, settings.DEFAULT_SKILLS)
+        if default_skills:
+            # Get records.
+            skill_records = default_skills.objects.filter(character=model_name)
+
+        default_skill_ids = set([record.skill for record in skill_records])
+
+        # remove old default skills
+        for skill in self.db.skills:
+            if self.db.skills[skill].is_default() and skill not in default_skill_ids:
+                # remove this skill
+                del self.db.skills[skill]
+
+        # add new default skills
+        for skill_record in skill_records:
+            if not self.skill_handler.has_skill(skill_record.skill):
+                self.skill_handler.learn_skill(skill_record.skill, True)
+                
     def load_passive_skill_data(self):
         """
         Add passive skills' effects to the character
@@ -270,6 +288,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # set initial data
         self.db.hp = self.max_hp
 
+    def load_default_objects(self):
+        """
+        Load character's default objects.
+        """
+        pass
 
     def use_object(self, obj, number=1):
         """

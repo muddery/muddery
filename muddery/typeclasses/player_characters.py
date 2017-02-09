@@ -15,7 +15,7 @@ from django.apps import apps
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.typeclasses.common_objects import MudderyEquipment
 from muddery.utils import defines, utils
-from muddery.utils.builder import build_object
+from muddery.utils.builder import build_object, get_object_record
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.quest_handler import QuestHandler
 from muddery.utils.attribute_handler import AttributeHandler
@@ -53,11 +53,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
     def quest_handler(self):
         return QuestHandler(self)
 
-
     @lazy_property
     def custom_attr(self):
         return AttributeHandler(self)
-
 
     def at_object_creation(self):
         """
@@ -88,8 +86,12 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         """
         super(MudderyPlayerCharacter, self).load_data()
+
         self.reborn_cd = GAME_SETTINGS.get("player_reborn_cd")
         self.solo_mode = GAME_SETTINGS.get("solo_mode")
+
+        # refresh data
+        self.refresh_data()
 
     def move_to(self, destination, quiet=False,
                 emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True):
@@ -107,7 +109,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
                                                            to_none,
                                                            move_hooks)
 
-
     def at_object_receive(self, moved_obj, source_location):
         """
         Called after an object has been moved into this object.
@@ -122,7 +123,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         # send latest inventory data to player
         self.msg({"inventory": self.return_inventory()})
     
-        
     def at_object_left(self, moved_obj, target_location):
         """
         Called after an object has been removed from this object.
@@ -137,7 +137,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         # send latest inventory data to player
         self.msg({"inventory": self.return_inventory()})
 
-
     def at_after_move(self, source_location):
         """
         We make sure to look around after a move.
@@ -145,7 +144,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         self.msg({"msg": LS("Moving to %s ...") % self.location.name})
         self.show_location()
-
 
     def at_post_puppet(self):
         """
@@ -177,7 +175,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         self.resume_last_dialogue()
 
-
     def at_pre_unpuppet(self):
         """
         Called just before beginning to un-connect a puppeting from
@@ -191,13 +188,11 @@ class MudderyPlayerCharacter(MudderyCharacter):
                           "name": self.get_name()}
                 self.location.msg_contents({"player_offline":change}, exclude=self)
 
-
     def set_nickname(self, nickname):
         """
         Set player character's nickname.
         """
         self.db.nick_name = nickname
-
 
     def get_name(self):
         """
@@ -205,7 +200,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         # Use nick name instead of normal name.
         return self.db.nick_name
-
 
     def get_appearance(self, caller):
         """
@@ -220,7 +214,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         return info
 
-
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -229,7 +222,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         if self.is_alive():
             commands.append({"name": LS("Attack"), "cmd": "attack", "args": self.dbref})
         return commands
-
 
     def get_revealed_map(self):
         """
@@ -267,7 +259,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     rooms[neighbour.get_data_key()] = (neighbour.get_name(), neighbour.position)
 
         return {"rooms": rooms, "exits": exits}
-
 
     def show_location(self):
         """
@@ -314,8 +305,31 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
             self.msg(msg)
 
+    def load_default_objects(self):
+        """
+        Load character's default objects.
+        """
+        # get character's model name
+        model_name = getattr(self.dfield, "model", None)
+        if not model_name:
+            model_name = self.get_data_key()
+        
+        # default objects
+        object_records = []
+        default_objects = apps.get_model(settings.WORLD_DATA_APP, settings.DEFAULT_OBJECTS)
+        if default_objects:
+            # Get records.
+            object_records = default_objects.objects.filter(character=model_name)
 
-    def receive_objects(self, obj_list):
+        default_object_ids = set([record.object for record in object_records])
+
+        # add new default objects
+        for object_record in object_records:
+            if not self.search_inventory(object_record.object):
+                obj_list = [{"object": object_record.object, "number": object_record.number}]
+                self.receive_objects(obj_list, mute=True)
+
+    def receive_objects(self, obj_list, mute=False):
         """
         Add objects to the inventory.
 
@@ -323,6 +337,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
             obj_list: (list) a list of object keys and there numbers.
                              list item: {"object": object's key
                                          "number": object's number}
+            mute: (boolean) do not send messages to the owner
 
         Returns:
             (dict) a list of objects that not have been received and their reasons.
@@ -352,78 +367,124 @@ class MudderyPlayerCharacter(MudderyCharacter):
             name = ""
             unique = False
 
-            # if already has this kind of object
-            if key in inventory:
-                # add to current object
-                name = inventory[key].name
-                unique = inventory[key].unique
+            if number == 0:
+                # it is an empty object
+                if key in inventory:
+                    # already has this object
+                    accepted_keys[key] = 0
+                    accepted_names[name] = 0
+                    continue
 
-                add = number
-                if add > inventory[key].max_stack - inventory[key].db.number:
-                    add = inventory[key].max_stack - inventory[key].db.number
+                object_record = get_object_record(key)
+                if not object_record:
+                    # can not find object's data record
+                    reason = LS("Can not get %s.") % name
+                    rejected_keys[key] = 0
+                    reject_reason[name] = reason
+                    continue
 
-                if add > 0:
-                    # increase stack number
-                    inventory[key].increase_num(add)
-                    number -= add
-                    accepted += add
+                if object_record.can_remove:
+                    # remove this empty object
+                    accepted_keys[key] = 0
+                    accepted_names[name] = 0
+                    continue
 
-            # if does not have this kind of object, or stack is full
-            reason = ""
-            while number > 0:
-                if unique:
-                    # can not have more than one unique objects
-                    reason = LS("Can not get more %s.") % name
-                    break
-                        
                 # create a new content
                 new_obj = build_object(key)
                 if not new_obj:
                     reason = LS("Can not get %s.") % name
-                    break
+                    rejected_keys[key] = 0
+                    reject_reason[name] = reason
+                    continue
 
                 name = new_obj.get_name()
-                unique = new_obj.unique
 
                 # move the new object to the character
                 if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
                     new_obj.delete()
                     reason = LS("Can not get %s.") % name
+                    rejected_keys[key] = 0
+                    reject_reason[name] = reason
                     break
 
-                # Get the number that actually added.
-                add = number
-                if add > new_obj.max_stack:
-                    add = new_obj.max_stack
-                    
-                if add <= 0:
-                    break
+                # accept this object
+                accepted_keys[key] = 0
+                accepted_names[name] = 0
 
-                new_obj.increase_num(add)
-                number -= add
-                accepted += add
+            else:
+                # common number
+                # if already has this kind of object
+                if key in inventory:
+                    # add to current object
+                    name = inventory[key].name
+                    unique = inventory[key].unique
 
-            if accepted > 0:
-                accepted_keys[key] = accepted
-                accepted_names[name] = accepted
+                    add = number
+                    if add > inventory[key].max_stack - inventory[key].db.number:
+                        add = inventory[key].max_stack - inventory[key].db.number
 
-            if accepted < available:
-                rejected_keys[key] = available - accepted
-                reject_reason[name] = reason
+                    if add > 0:
+                        # increase stack number
+                        inventory[key].increase_num(add)
+                        number -= add
+                        accepted += add
 
-        # Send results to the player.
-        message = {"get_object":
-                        {"accepted": accepted_names,
-                         "rejected": reject_reason}}
-        self.msg(message)
-        self.show_inventory()
+                # if does not have this kind of object, or stack is full
+                reason = ""
+                while number > 0:
+                    if unique:
+                        # can not have more than one unique objects
+                        reason = LS("Can not get more %s.") % name
+                        break
 
-        # call quest handler
-        for key in accepted_keys:
-            self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, key, accepted_keys[key])
+                    # create a new content
+                    new_obj = build_object(key)
+                    if not new_obj:
+                        reason = LS("Can not get %s.") % name
+                        break
+
+                    name = new_obj.get_name()
+                    unique = new_obj.unique
+
+                    # move the new object to the character
+                    if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
+                        new_obj.delete()
+                        reason = LS("Can not get %s.") % name
+                        break
+
+                    # Get the number that actually added.
+                    add = number
+                    if add > new_obj.max_stack:
+                        add = new_obj.max_stack
+
+                    if add <= 0:
+                        break
+
+                    new_obj.increase_num(add)
+                    number -= add
+                    accepted += add
+
+                if accepted > 0:
+                    accepted_keys[key] = accepted
+                    accepted_names[name] = accepted
+
+                if accepted < available:
+                    rejected_keys[key] = available - accepted
+                    reject_reason[name] = reason
+
+        if not mute:
+            # Send results to the player.
+            message = {"get_object":
+                            {"accepted": accepted_names,
+                             "rejected": reject_reason}}
+            self.msg(message)
+            self.show_inventory()
+
+            # call quest handler
+            for key in accepted_keys:
+                self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, key, accepted_keys[key])
 
         return rejected_keys
-
 
     def remove_objects(self, obj_list):
         """
@@ -447,21 +508,23 @@ class MudderyPlayerCharacter(MudderyCharacter):
             for obj in objects:
                 try:
                     obj_num = obj.get_number()
-                    if obj_num >= to_remove:
-                        obj.decrease_num(to_remove)
-                        to_remove = 0
-                    else:
-                        obj.decrease_num(obj_num)
-                        to_remove -= obj_num
+                    if obj_num > 0:
+                        if obj_num >= to_remove:
+                            obj.decrease_num(to_remove)
+                            to_remove = 0
+                        else:
+                            obj.decrease_num(obj_num)
+                            to_remove -= obj_num
 
-                    if obj.get_number() <= 0:
-                        # if it is an equipment, take off it first
-                        if getattr(obj, "equipped", False):
-                            self.take_off_equipment(obj)
+                        if obj.get_number() <= 0:
+                            # If this object can be removed from the inventor.
+                            if obj.can_remove:
+                                # if it is an equipment, take off it first
+                                if getattr(obj, "equipped", False):
+                                    self.take_off_equipment(obj)
+                                obj.delete()
 
-                        obj.delete()
-
-                    changed = True
+                        changed = True
                 except Exception, e:
                     ostring = "Can not remove object %s: %s" % (obj.get_data_key(), e)
                     logger.log_tracemsg(ostring)
@@ -485,14 +548,12 @@ class MudderyPlayerCharacter(MudderyCharacter):
         result = [item for item in self.contents if item.get_data_key() == obj_key]
         return result
 
-
     def show_inventory(self):
         """
         Send inventory data to player.
         """
         inv = self.return_inventory()
         self.msg({"inventory": inv})
-
 
     def return_inventory(self):
         """
@@ -512,8 +573,11 @@ class MudderyPlayerCharacter(MudderyCharacter):
             if getattr(item, "equipped", False):
                 info["equipped"] = item.equipped
             inv.append(info)
-        return inv
 
+        # sort by created time
+        inv.sort(key=lambda x:x["dbref"])
+
+        return inv
 
     def show_status(self):
         """
@@ -521,7 +585,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         status = self.return_status()
         self.msg({"status": status})
-
 
     def return_status(self):
         """
@@ -539,14 +602,12 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         return status
 
-
     def show_equipments(self):
         """
         Send equipments to player.
         """
         equipments = self.return_equipments()
         self.msg({"equipments": equipments})
-
 
     def return_equipments(self):
         """
@@ -567,7 +628,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
             equipments[position_name] = info
 
         return equipments
-
 
     def equip_object(self, obj):
         """
@@ -610,7 +670,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         return
 
-
     def take_off_position(self, position):
         """
         Take off an object from position.
@@ -639,7 +698,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
                    "inventory": self.return_inventory()}
         self.msg(message)
 
-
     def take_off_equipment(self, equipment):
         """
         Take off an equipment.
@@ -662,7 +720,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
                    "inventory": self.return_inventory()}
         self.msg(message)
 
-
     def unlock_exit(self, exit):
         """
         Unlock an exit. Add exit's key to character's unlock list.
@@ -678,13 +735,11 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.db.unlocked_exits.add(exit_key)
         return True
 
-
     def is_exit_unlocked(self, exit_key):
         """
         Whether the exit is unlocked.
         """
         return exit_key in self.db.unlocked_exits
-
 
     def show_skills(self):
         """
@@ -692,7 +747,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         skills = self.return_skills()
         self.msg({"skills": skills})
-
 
     def return_skills(self):
         """
@@ -712,7 +766,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         return skills
 
-
     def die(self, killers):
         """
         This character is killed. Move it to it's home.
@@ -731,7 +784,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
             self.msg({"msg": LS("You will be reborn at {c%(p)s{n in {c%(s)s{n seconds.") %
                              {'p': self.home.get_name(), 's': self.reborn_cd}})
 
-
     def reborn(self):
         """
         Reborn after being killed.
@@ -746,7 +798,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         if self.home:
             self.move_to(self.home, quiet=True)
             self.msg({"msg": LS("You are reborn at {c%s{n.") % self.home.get_name()})
-
 
     def save_current_dialogue(self, sentences_list, npc):
         """
@@ -786,7 +837,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         return
 
-
     def clear_current_dialogue(self):
         """
         Clear player's current dialogues.
@@ -796,7 +846,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         self.db.current_dialogue = None
         return
-
 
     def resume_last_dialogue(self):
         """
@@ -837,7 +886,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.msg({"dialogues_list": [output]})
         return
 
-
     def talk_to_npc(self, npc):
         """
         Talk to an NPC.
@@ -856,7 +904,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         
         self.save_current_dialogue(sentences_list, npc)
         self.msg({"dialogues_list": sentences_list})
-
 
     def show_dialogue(self, npc, dialogue, sentence):
         """
@@ -880,7 +927,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         # Send dialogues_list to the player.
         self.save_current_dialogue(sentences_list, npc)
         self.msg({"dialogues_list": sentences_list})
-
 
     def continue_dialogue(self, npc, dialogue, sentence):
         """
