@@ -83,7 +83,7 @@ GAME_SETTINGS = GameSettings(settings.GAME_SETTINGS,
                               "default_home_key": True,
                               "start_location_key": True,
                               "default_player_home_key": True,
-                              "default_player_model_key": "",
+                              "default_player_character_key": "",
                               })
 
 

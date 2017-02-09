@@ -600,6 +600,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
                   "attack": self.attack,
                   "defence": self.defence}
 
+        icon = getattr(self, "icon", None)
+        if icon:
+            status["icon"] = icon
+
         return status
 
     def show_equipments(self):
@@ -762,6 +766,11 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     "name": skill.get_name(),
                     "desc": skill.db.desc,
                     "cd_remain": skill.get_remain_cd()}
+
+            icon = getattr(skill, "icon", None)
+            if icon:
+                info["icon"] = icon
+
             skills.append(info)
 
         return skills

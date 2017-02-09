@@ -177,8 +177,9 @@ a:focus {
     margin-bottom: 0px;
 }
 
-.dialogue_header {
-    text-align: left;
+.dialogue-header {
+    color: #0ff;
+    text-align: center;
 }
 
 /* Style specific classes corresponding to formatted, narative text. */
@@ -366,4 +367,14 @@ button.btn-combat div.cooldown {
 .inventory_icon {
 	width: 20px;
 	height: 20px;
+}
+
+.skill_list_icon {
+	width: 20px;
+	height: 20px;
+}
+
+.dialogue_icon {
+	width: 40px;
+	height: 40px;
 }

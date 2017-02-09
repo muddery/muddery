@@ -212,6 +212,16 @@ class character_loot_list(model_base.character_loot_list):
 
 #------------------------------------------------------------
 #
+# character's default objects
+#
+#------------------------------------------------------------
+class default_objects(model_base.default_objects):
+    "Store character's default objects information."
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all skills
 #
 #------------------------------------------------------------
@@ -397,4 +407,24 @@ class event_dialogues(model_base.event_dialogues):
 #------------------------------------------------------------
 class localized_strings(model_base.localized_strings):
     "Store all server local strings informations."
+    pass
+
+
+#------------------------------------------------------------
+#
+# image resources
+#
+#------------------------------------------------------------
+class image_resources(model_base.image_resources):
+    "Store all image resource's information."
+    pass
+
+
+#------------------------------------------------------------
+#
+# icon resources
+#
+#------------------------------------------------------------
+class icon_resources(model_base.icon_resources):
+    "Store all icon resource's information."
     pass

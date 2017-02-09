@@ -15,7 +15,7 @@ class GameSettingsAdmin(admin.ModelAdmin):
                     'default_home_key',
                     'start_location_key',
                     'default_player_home_key',
-                    'default_player_model_key')
+                    'default_player_character_key')
 
 
 class ClientSettingsAdmin(admin.ModelAdmin):

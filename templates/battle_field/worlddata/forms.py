@@ -78,6 +78,9 @@ class CharacterModelsForm(forms_base.CharacterModelsForm):
 class CommonCharacterForm(forms_base.CommonCharacterForm):
     pass
 
+class DefaultObjectsForm(forms_base.DefaultObjectsForm):
+    pass
+
 class SkillsForm(forms_base.SkillsForm):
     pass
 
@@ -124,6 +127,12 @@ class DialogueSentencesForm(forms_base.DialogueSentencesForm):
     pass
 
 class LocalizedStringsForm(forms_base.LocalizedStringsForm):
+    pass
+
+class ImageResourcesForm(forms_base.ImageResourcesForm):
+    pass
+
+class IconResourcesForm(forms_base.IconResourcesForm):
     pass
 
 class Manager:

@@ -36,9 +36,9 @@ class GameSettingsForm(forms.ModelForm):
         self.fields['default_player_home_key'] = forms.ChoiceField(choices=choices, required=False)
 
         choices = [("", "---------")]
-        objects = models.character_models.objects.filter(level=1)
+        objects = models.common_characters.objects.filter(typeclass="CLASS_PLAYER")
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['default_player_model_key'] = forms.ChoiceField(choices=choices, required=False)
+        self.fields['default_player_character_key'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 
