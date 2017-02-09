@@ -230,6 +230,9 @@ DIALOGUE_RELATIONS = "dialogue_relations"
 NPC_DIALOGUES = "npc_dialogues"
 DIALOGUE_QUEST_DEPENDENCIES = "dialogue_quest_dependencies"
 
+# character's default objects
+DEFAULT_OBJECTS = "default_objects"
+
 # character skills
 DEFAULT_SKILLS = "default_skills"
 
@@ -252,6 +255,7 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      DIALOGUE_SENTENCES,
                      NPC_DIALOGUES,
                      EQUIPMENT_TYPES,
+                     DEFAULT_OBJECTS,
                      DEFAULT_SKILLS,
                      IMAGE_RESOURCES,
                      ICON_RESOURCES,

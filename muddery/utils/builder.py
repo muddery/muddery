@@ -13,6 +13,30 @@ from evennia.utils import create, search, logger
 import traceback
 
 
+def get_object_record(obj_key):
+    """
+    Query the object's record.
+
+    Args:
+        obj_key: (string) The key of the object.
+
+    Returns:
+        The object's data record.
+    """
+    record = None
+    model_names = OBJECT_KEY_HANDLER.get_models(obj_key)
+    for model_name in model_names:
+        try:
+            # Get record.
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
+            record = model_obj.objects.get(key=obj_key)
+            break
+        except Exception, e:
+            continue
+
+    return record
+
+
 def build_object(obj_key, caller=None):
     """
     Build objects of a model.
@@ -24,23 +48,17 @@ def build_object(obj_key, caller=None):
     # get typeclass model
     model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
 
-    # Get object's model name.
+    # Get object's information
     record = None
     typeclass = None
-    model_names = OBJECT_KEY_HANDLER.get_models(obj_key)
-    for model_name in model_names:
-        try:
-            # Get record.
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
-            record_obj = model_obj.objects.get(key=obj_key)
-            typeclass = model_typeclass.objects.get(key=record_obj.typeclass)
-            record = record_obj
-            break
-        except Exception, e:
-            continue
+    try:
+        record = get_object_record(obj_key)
+        typeclass = model_typeclass.objects.get(key=record.typeclass)
+    except Exception, e:
+        pass
 
-    if not record:
-        ostring = "Can not find the model of %s." % obj_key
+    if not record or not typeclass:
+        ostring = "Can not find the data of %s." % obj_key
         print(ostring)
         print(traceback.print_exc())
         if caller:

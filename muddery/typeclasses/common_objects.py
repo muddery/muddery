@@ -37,13 +37,14 @@ class MudderyCommonObject(MudderyObject):
         # set object stack info
         self.max_stack = getattr(self.dfield, "max_stack", 1)
         self.unique = getattr(self.dfield, "unique", False)
+        self.can_remove = getattr(self.dfield, "can_remove", True)
+        self.can_discard = getattr(self.dfield, "can_discard", True)
 
     def get_number(self):
         """
         Get object's number.
         """
         return self.db.number
-
 
     def increase_num(self, number):
         """
@@ -91,8 +92,9 @@ class MudderyCommonObject(MudderyObject):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         commands = []
-        if self.location:
-            commands.append({"name":LS("Discard"), "cmd":"discard", "args":self.dbref})
+        if self.db.number > 0:
+            if self.location and self.can_discard:
+                commands.append({"name":LS("Discard"), "cmd":"discard", "args":self.dbref})
         return commands
 
     def take_effect(self, user, number):
@@ -121,9 +123,11 @@ class MudderyFood(MudderyCommonObject):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        commands = [{"name": LS("Use"), "cmd": "use", "args": self.dbref}]
-        if self.location:
-            commands.append({"name": LS("Discard"), "cmd": "discard", "args": self.dbref})
+        commands = []
+        if self.db.number > 0:
+            commands.append({"name": LS("Use"), "cmd": "use", "args": self.dbref})
+            if self.location and self.can_discard:
+                commands.append({"name": LS("Discard"), "cmd": "discard", "args": self.dbref})
         return commands
 
 
@@ -146,13 +150,15 @@ class MudderyEquipment(MudderyCommonObject):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        if getattr(self, "equipped", False):
-            commands = [{"name":LS("Take Off"), "cmd":"takeoff", "args":self.dbref}]
-        else:
-            commands = [{"name":LS("Equip"), "cmd":"equip", "args":self.dbref}]
+        commands = []
+        if self.db.number > 0:
+            if getattr(self, "equipped", False):
+                commands.append({"name":LS("Take Off"), "cmd":"takeoff", "args":self.dbref})
+            else:
+                commands.append({"name":LS("Equip"), "cmd":"equip", "args":self.dbref})
 
-            # Can not discard when equipped
-            if self.location:
-                commands.append({"name":LS("Discard"), "cmd":"discard", "args":self.dbref})
+                # Can not discard when equipped
+                if self.location and self.can_discard:
+                    commands.append({"name":LS("Discard"), "cmd":"discard", "args":self.dbref})
 
         return commands

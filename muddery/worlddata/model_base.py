@@ -377,7 +377,7 @@ class loot_list(models.Model):
     object = models.CharField(max_length=KEY_LENGTH)
 
     # number of dropped object
-    number = models.IntegerField(blank=True, default=0)
+    number = models.PositiveIntegerField(blank=True, default=0)
 
     # odds of drop, from 0.0 to 1.0
     odds = models.FloatField(blank=True, default=0)
@@ -467,11 +467,17 @@ class common_objects(models.Model):
     desc = models.TextField(blank=True)
 
     # the max number of this object in one pile, must above 1
-    max_stack = models.IntegerField(blank=True, default=1)
+    max_stack = models.PositiveIntegerField(blank=True, default=1)
 
     # if can have only one pile of this object
     unique = models.BooleanField(blank=True, default=False)
     
+    # if this object can be removed from the inventory when its number is decreased to zero.
+    can_remove = models.BooleanField(blank=True, default=True)
+
+    # if this object can discard
+    can_discard = models.BooleanField(blank=True, default=True)
+
     # object's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -654,17 +660,17 @@ class character_models(models.Model):
     name = models.CharField(max_length=NAME_LENGTH)
 
     # model's level
-    level = models.IntegerField(blank=True, default=1)
+    level = models.PositiveIntegerField(blank=True, default=1)
 
     # If a character's exp is larger than max_exp, the character can upgrade.
     # If max_exp is 0, the character can not upgrade any more.
-    max_exp = models.IntegerField(blank=True, default=0)
+    max_exp = models.PositiveIntegerField(blank=True, default=0)
 
     # max hp of the character
-    max_hp = models.IntegerField(blank=True, default=1)
+    max_hp = models.PositiveIntegerField(blank=True, default=1)
 
     # max mp of the character
-    max_mp = models.IntegerField(blank=True, default=1)
+    max_mp = models.PositiveIntegerField(blank=True, default=1)
 
     # attack value of the character
     attack = models.IntegerField(blank=True, default=1)
@@ -715,7 +721,7 @@ class world_npcs(models.Model):
     model = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # NPC's level
-    level = models.IntegerField(blank=True, default=1)
+    level = models.PositiveIntegerField(blank=True, default=1)
 
     # the condition for showing the NPC
     condition = models.TextField(blank=True)
@@ -758,7 +764,7 @@ class common_characters(models.Model):
     model = models.CharField(max_length=KEY_LENGTH)
 
     # Character's level.
-    level = models.IntegerField(blank=True, default=1)
+    level = models.PositiveIntegerField(blank=True, default=1)
     
     # Character's icon resource.
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -771,6 +777,33 @@ class common_characters(models.Model):
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
+
+
+# ------------------------------------------------------------
+#
+# character's default objects
+#
+# ------------------------------------------------------------
+class default_objects(models.Model):
+    "character's default objects"
+
+    # Character's model.
+    character = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # The key of an object.
+    # Object's key.
+    object = models.CharField(max_length=KEY_LENGTH)
+    
+    # Object's number
+    number = models.PositiveIntegerField(blank=True, default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Character's Default Object"
+        verbose_name_plural = "Character's Default Objects"
+        unique_together = ("character", "object")
+
 
 # ------------------------------------------------------------
 #
@@ -1245,7 +1278,7 @@ class event_attacks(models.Model):
     mob = models.CharField(max_length=KEY_LENGTH)
 
     # mob's level
-    level = models.IntegerField()
+    level = models.PositiveIntegerField()
 
     # event's odds
     odds = models.FloatField(blank=True, default=0)
