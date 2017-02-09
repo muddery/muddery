@@ -179,7 +179,7 @@ class MudderyObject(DefaultObject):
         key = self.get_data_key()
         if not key:
             return
-        
+
         models = OBJECT_KEY_HANDLER.get_models(key)
 
         for model in models:

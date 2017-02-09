@@ -39,22 +39,36 @@ var popupmgr = {
                 .attr('id', 'dialogue_box')
                 .prependTo($('#popup_container'));
 
+            var header = $('#popup_header')
+                .addClass('dialogue-header');
+
+            // speaker's name
+            var speaker = dialogues[0].speaker;
+            if (speaker.length == 0) {
+                // placeholder
+                header.append($("<span>").html("&nbsp;"));
+            }
+            else {
+                header.append($("<span>").text(speaker));
+            }
+
+            var body = $('#popup_body');
+
+            // speaker's icon
+            if ("icon" in dialogues[0] && dialogues[0]["icon"]) {
+                var url = settings.resource_location + dialogues[0]["icon"];
+                var icon = $("<center>")
+                    .append($("<img>")
+                        .attr("src", url)
+                        .addClass("dialogue_icon"))
+                    .appendTo(body);
+            }
+
             if (dialogues.length == 1) {
-                var speaker = dialogues[0].speaker;
-                if (speaker.length == 0) {
-                    // placeholder
-                    $('#popup_header')
-                        .addClass('dialogue_header')
-                        .html('&nbsp;');
-                }
-                else {
-                    $('#popup_header')
-                        .addClass('dialogue_header')
-                        .text(speaker);
-                }
+                // dialogue's content
                 var content = text2html.parseHtml(dialogues[0].content);
                 content = escape.parse(content, data_handler.getEscapes());
-                $('#popup_body').html(content);
+                body.append($("<div>").html(content));
 
                 var html_button = '<div><br></div>\
                 <div>\
@@ -76,7 +90,6 @@ var popupmgr = {
                 $('#popup_footer').html(html_button);
             }
             else {
-                var speaker = dialogues[0].speaker;
                 var content = "";
                 for (var i in dialogues) {
                     content += '<a href="#" onclick="commands.doDialogue(this); return false;"';
@@ -95,8 +108,7 @@ var popupmgr = {
                     content += '</a><br>';
                 }
 
-                $('#popup_header').text(speaker);
-                $('#popup_body').html(content);
+                body.append($("<div>").html(content));
 
                 var html_button = '<div><br></div>\
                 <div>\
@@ -112,6 +124,7 @@ var popupmgr = {
         }
         catch(error) {
             popupmgr.doCloseDialogue();
+            console.error(error.message);
         }
 
         webclient.doSetPopupSize();

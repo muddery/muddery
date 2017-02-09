@@ -120,7 +120,7 @@ def create_guest_player(session):
         new_player = _create_player(session, playername, password,
                                     permissions, ptypeclass)
         if new_player:
-            _create_character(GAME_SETTINGS.get("default_player_model_key"), 1, session,
+            _create_character(GAME_SETTINGS.get("default_player_character_key"), 1, session,
                               new_player, typeclass, home,
                               home, permissions, playername)
 
@@ -356,7 +356,7 @@ class CmdUnconnectedCreate(Command):
                     else:
                         start_location = default_home
 
-                    _create_character(GAME_SETTINGS.get("default_player_model_key"), 1, session,
+                    _create_character(GAME_SETTINGS.get("default_player_character_key"), 1, session,
                                       new_player, typeclass, start_location,
                                       default_home, permissions, nickname)
                 # tell the caller everything went well.
@@ -476,7 +476,7 @@ class CmdUnconnectedCreateConnect(Command):
                     else:
                         start_location = default_home
 
-                    _create_character(GAME_SETTINGS.get("default_player_model_key"), 1, session,
+                    _create_character(GAME_SETTINGS.get("default_player_character_key"), 1, session,
                                       new_player, typeclass, start_location,
                                       default_home, permissions, nickname)
                 # tell the caller everything went well.

@@ -726,8 +726,21 @@ var webclient = {
         // display player's status
         var block = $("#box_status");
         var content = $("<div>");
-        
+
         // add player's status
+        try {
+			if ("icon" in data && data["icon"]) {
+				var url = settings.resource_location + data["icon"];
+				$("<div>")
+				    .append($("<img>")
+								.attr("src", url)
+								.addClass("obj_icon"))
+                    .appendTo(content);
+			}
+        }
+        catch(error) {
+        }
+
         try {
             $("<div>")
                 .text(LS("Level") + LS(": ") + data["level"].toString())

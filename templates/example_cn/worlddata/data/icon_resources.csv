@@ -1,2 +1,5 @@
 key,name,resource,image_width,image_height
+ICON_PLAYER,玩家,resource/icon/player.jpg,60,60
+ICON_GUARD,保安,resource/icon/guard.jpg,60,60
 ICON_CLUB,木棍,resource/icon/club.jpg,60,60
+ICON_HIT,攻击,resource/icon/hit.jpg,60,60

@@ -343,8 +343,7 @@ class DialogueHandler(object):
 
         return sentences
 
-        
-    def get_dialogue_speaker(self, caller, npc, speaker_str):
+    def get_dialogue_speaker_name(self, caller, npc, speaker_str):
         """
         Get the speaker's text.
         'p' means player.
@@ -356,8 +355,6 @@ class DialogueHandler(object):
             if speaker_str == "n":
                 if npc:
                     speaker = npc.get_name()
-                else:
-                    speaker = ""
             elif speaker_str == "p":
                 speaker = caller.get_name()
             elif speaker_str[0] == '"' and speaker_str[-1] == '"':
@@ -366,6 +363,25 @@ class DialogueHandler(object):
             pass
 
         return speaker
+
+    def get_dialogue_speaker_icon(self, caller, npc, speaker_str):
+        """
+        Get the speaker's text.
+        'p' means player.
+        'n' means NPC.
+        Use string in quotes directly.
+        """
+        icon = None
+        try:
+            if speaker_str == "n":
+                if npc:
+                    icon = getattr(npc, "icon", None)
+            elif speaker_str == "p":
+                icon = getattr(caller, "icon", None)
+        except:
+            pass
+
+        return icon
 
     def create_output_sentences(self, originals, caller, npc):
         """
@@ -383,7 +399,8 @@ class DialogueHandler(object):
             return []
 
         sentences_list = []
-        speaker = self.get_dialogue_speaker(caller, npc, originals[0]["speaker"])
+        speaker = self.get_dialogue_speaker_name(caller, npc, originals[0]["speaker"])
+        icon = self.get_dialogue_speaker_icon(caller, npc, originals[0]["speaker"])
         for original in originals:
             sentence = {"speaker": speaker,             # speaker's name
                         "dialogue": original["dialogue"],   # dialogue's key
@@ -391,6 +408,10 @@ class DialogueHandler(object):
                         "content": original["content"]}
             if npc:
                 sentence["npc"] = npc.dbref             # NPC's dbref
+
+            if icon:
+                sentence["icon"] = icon
+
             sentences_list.append(sentence)
 
         return sentences_list

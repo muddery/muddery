@@ -71,9 +71,9 @@ class game_settings(models.Model):
     # Player's default home. When a player dies, he will be moved to his home.
     default_player_home_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
-    # The key of a character model.
-    # Default model of players.
-    default_player_model_key = models.CharField(max_length=KEY_LENGTH, blank=True)
+    # The key of a character.
+    # Default character of players.
+    default_player_character_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"

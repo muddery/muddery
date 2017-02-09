@@ -377,10 +377,10 @@ var uimgr = {
             .append($("<th>").text(LS("NUM")))
             .append($("<th>").text(LS("DESC")));
 
+        var tbodyElement = $("<tbody>").appendTo(tableInventoryElement);
         for (var i in data) {
             try {
                 var obj = data[i];
-                var tbodyElement = $("<tbody>").appendTo(tableInventoryElement);
                 var trElement = $("<tr>").appendTo(tbodyElement);
                 
                 // object's icon and name
@@ -429,12 +429,24 @@ var uimgr = {
             .append($("<th>").text(LS("NAME")))
             .append($("<th>").text(LS("DESC")));
 
+        var tbodyElement = $("<tbody>").appendTo(tableSkillsElement);
         for (var i in data) {
             try {
                 var obj = data[i];
-                var tbodyElement = $("<tbody>").appendTo(tableSkillsElement);
                 var trElement = $("<tr>").appendTo(tbodyElement);
+
+                // skill's icon and name
                 var tdElement = $("<td>").appendTo(trElement);
+
+                if ("icon" in obj && obj["icon"]) {
+                	var url = settings.resource_location + obj["icon"];
+					var icon = $("<center>")
+						.append($("<img>")
+							.attr("src", url)
+							.addClass("skill_list_icon"))
+						.appendTo(tdElement);
+				}
+
                 var aHrefElement = $("<a>").appendTo(tdElement)
                     .attr("href", "#")
                     .attr("onclick", "commands.doCommandLink(this); return false;")
@@ -460,10 +472,10 @@ var uimgr = {
             .append($("<th>").text(LS("DESC")))
             .append($("<th>").text(LS("OBJECTIVE")));
 
+        var tbodyElement = $("<tbody>").appendTo(tableQuestsElement);
         for (var i in data) {
             try {
                 var quest = data[i];
-                var tbodyElement = $("<tbody>").appendTo(tableQuestsElement);
                 var trElement = $("<tr>").appendTo(tbodyElement);
                 var tdElement = $("<td>").appendTo(trElement);
 
