@@ -60,6 +60,7 @@ var LOCAL_STRING = {
     "NUM": "数量",
     "DESC": "描述",
     "OBJECTIVE": "目标",
+    "PRICE": "价格",
     " (equipped)": " (已装备)",
     "You got:": "你获得了：",
     "You can not get:": "你无法获得：",
@@ -97,4 +98,5 @@ var LOCAL_STRING = {
     "(NW)": "(西北)",
     "(SE)": "(东南)",
     "(SW)": "(西南)",
+    "Buy": "购买",
 };

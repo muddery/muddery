@@ -93,13 +93,11 @@ class MudderyObject(DefaultObject):
         except Exception, e:
             logger.log_tracemsg("%s can not load data:%s" % (self.dbref, e))
 
-
     def set_initial_data(self):
         """
         Initialize this object after data loaded.
         """
         pass
-
 
     def at_post_unpuppet(self, player, session=None):
         """
@@ -124,7 +122,6 @@ class MudderyObject(DefaultObject):
                 self.db.prelogout_location = self.location
                 self.location = None
 
-
     def at_object_receive(self, moved_obj, source_location):
         """
         Called after an object has been moved into this object.
@@ -139,7 +136,6 @@ class MudderyObject(DefaultObject):
             if source_location != self:
                 source_location.at_object_left(moved_obj, moved_obj.location)
 
-
     def at_object_left(self, moved_obj, target_location):
         """
         Called after an object has been removed from this object.
@@ -150,8 +146,7 @@ class MudderyObject(DefaultObject):
         
         """
         pass
-    
-    
+
     def set_data_key(self, key):
         """
         Set data_info's model and key. It puts info into attributes.
@@ -169,7 +164,6 @@ class MudderyObject(DefaultObject):
         if self.db.FIRST_CREATE:
             self.set_initial_data()
             del self.db.FIRST_CREATE
-
 
     def load_data_fields(self):
         """
@@ -395,7 +389,6 @@ class MudderyObject(DefaultObject):
                 self.locks.add(lock)
             except Exception:
                 logger.log_errmsg("%s can't set lock %s." % (self.get_data_key(), lock))
-
 
     def set_attributes(self, attributes):
         """

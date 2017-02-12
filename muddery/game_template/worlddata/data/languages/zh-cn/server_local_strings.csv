@@ -90,3 +90,5 @@ category,origin,local
 ,"%s healed %s HPs.","%s治疗了%s点生命。"
 ,"Data applied! The server is reloading.","数据已应用，服务器正在重载。"
 ,"%s has gone.","%s已经离开。"
+,"Sorry, %s is not enough.","对不起，%s不足。"
+,"Sorry, you can not take more %s.","对不起，您无法获得更多的%s。"

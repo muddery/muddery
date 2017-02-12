@@ -755,10 +755,8 @@ class CmdDiscard(Command):
             return
 
         # remove used object
-        obj_list = [{"object": obj.get_data_key(),
-                     "number": 1}]
         try:
-            caller.remove_objects(obj_list)
+            caller.remove_object(obj.get_data_key(), 1)
         except Exception, e:
             caller.msg({"alert": LS("Can not discard this object.")})
             logger.log_tracemsg("Can not discard object %s: %s" % (obj.get_data_key(), e))
@@ -1048,7 +1046,6 @@ class CmdGiveUpQuest(Command):
 #------------------------------------------------------------
 # unlock exit
 #------------------------------------------------------------
-
 class CmdUnlockExit(Command):
     """
     Unlock an exit.
@@ -1064,7 +1061,7 @@ class CmdUnlockExit(Command):
     help_cateogory = "General"
 
     def func(self):
-        "Take off an equipment."
+        "Open a locked exit."
         caller = self.caller
 
         if not self.args:
@@ -1090,6 +1087,77 @@ class CmdUnlockExit(Command):
         # Send the lastest appearance to the caller.
         appearance = obj.get_appearance(caller)
         caller.msg({"look_obj": appearance})
+
+
+#------------------------------------------------------------
+# open a shop
+#------------------------------------------------------------
+class CmdShopping(Command):
+    """
+    Open a shop.
+
+    Usage:
+        {"cmd":"shopping",
+         "args":<shop's dbref>
+        }
+    """
+    key = "shopping"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Do shopping."
+        caller = self.caller
+
+        if not self.args:
+            caller.msg({"alert":LS("You should shopping in someplace.")})
+            return
+
+        shop = caller.search(self.args)
+        if not shop:
+            caller.msg({"alert":LS("Can not find this shop.")})
+            return
+
+        shop.show_shop(caller)
+
+
+#------------------------------------------------------------
+# buy a goods
+#------------------------------------------------------------
+class CmdBuy(Command):
+    """
+    Buy a goods.
+
+    Usage:
+        {"cmd":"buy",
+         "args":<goods' dbref>}
+        }
+    """
+    key = "buy"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Buy a goods."
+        caller = self.caller
+
+        if not self.args:
+            caller.msg({"alert":LS("You should buy something.")})
+            return
+
+        goods = caller.search(self.args)
+        if not goods:
+            caller.msg({"alert":LS("Can not find this goods.")})
+            return
+
+        # buy goods
+        try:
+            goods.sell_to(caller)
+        except Exception, e:
+            caller.msg({"alert":LS("Can not buy this goods.")})
+            logger.log_err("Can not buy %s: %s" % (goods.get_goods_key(), e))
+            return
+
 
 #------------------------------------------------------------
 # connect

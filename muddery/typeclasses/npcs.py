@@ -8,9 +8,11 @@ import traceback
 from django.conf import settings
 from django.apps import apps
 from evennia import TICKER_HANDLER
+from evennia.utils import logger
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.builder import build_object, delete_object
 from muddery.utils.game_settings import GAME_SETTINGS
 
 
@@ -18,6 +20,17 @@ class MudderyNPC(MudderyCharacter):
     """
     Default NPC. NPCs are friendly to players, they can not be attacked.
     """
+    def at_object_creation(self):
+        """
+        Called once, when this object is first created. This is the
+        normal hook to overload for most object types.
+            
+        """
+        super(MudderyNPC, self).at_object_creation()
+        
+        # NPC's shop
+        self.db.shops = {}
+
     def load_data(self):
         """
         Init the character.
@@ -30,8 +43,10 @@ class MudderyNPC(MudderyCharacter):
         # load dialogues.
         self.load_dialogues()
         
+        # load shops
+        self.load_shops()
+        
         self.reborn_cd = GAME_SETTINGS.get("npc_reborn_cd")
-
 
     def load_dialogues(self):
         """
@@ -47,7 +62,38 @@ class MudderyNPC(MudderyCharacter):
         self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.default]
         self.dialogues = [dialogue.dialogue for dialogue in dialogues if not dialogue.default]
 
+    def load_shops(self):
+        """
+        Load character's shop.
+        """
+        # shops records
+        shop_records = []
+        nps_shops_model = apps.get_model(settings.WORLD_DATA_APP, settings.NPC_SHOPS)
+        if nps_shops_model:
+            # Get records.
+            shop_records = nps_shops_model.objects.filter(npc=self.get_data_key())
 
+        shop_keys = set([record.shop for record in shop_records])
+
+        # remove old shops
+        for shop_key in self.db.shops:
+            if shop_key not in shop_keys:
+                # remove this shop
+                self.db.shops[shop_key].delete()
+                del self.db.shops[shop_key]
+
+        # add new shop
+        for shop_record in shop_records:
+            shop_key = shop_record.shop
+            if shop_key not in self.db.shops:
+                # Create shop object.
+                shop_obj = build_object(shop_key)
+                if not shop_obj:
+                    logger.log_errmsg("Can't create shop: %s" % shop_key)
+                    continue
+
+                self.db.shops[shop_key] = shop_obj
+                
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -56,8 +102,15 @@ class MudderyNPC(MudderyCharacter):
         if self.dialogues or self.default_dialogues:
             # If the character have something to talk, add talk command.
             commands.append({"name":LS("Talk"), "cmd":"talk", "args":self.dbref})
+        
+        # Add shops.
+        for shop_obj in self.db.shops.values():
+            verb = shop_obj.verb
+            if not verb:
+                verb = shop_obj.get_name()
+            commands.append({"name":verb, "cmd":"shopping", "args":shop_obj.dbref})
+        
         return commands
-
 
     def have_quest(self, caller):
         """
@@ -65,7 +118,6 @@ class MudderyNPC(MudderyCharacter):
         Returns (can_provide_quest, can_complete_quest).
         """
         return DIALOGUE_HANDLER.have_quest(caller, self)
-
 
     def die(self, killers):
         """
@@ -88,7 +140,6 @@ class MudderyNPC(MudderyCharacter):
             for content in location.contents:
                 if content.has_player:
                     content.show_location()
-
 
     def reborn(self):
         """

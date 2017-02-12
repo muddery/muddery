@@ -807,6 +807,100 @@ class default_objects(models.Model):
 
 # ------------------------------------------------------------
 #
+# shops
+#
+# ------------------------------------------------------------
+class shops(models.Model):
+    "Store all shops."
+    
+    # shop's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    
+    # shop's name for display
+    name = models.CharField(max_length=NAME_LENGTH)
+    
+    # The key of a shop typeclass.
+    # Shop's typeclass.
+    typeclass = models.CharField(max_length=KEY_LENGTH)
+    
+    # shop's description for display
+    desc = models.TextField(blank=True)
+    
+    # the verb to open the shop
+    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+    
+    # shop's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Shop"
+        verbose_name_plural = "Shops"
+        
+        
+# ------------------------------------------------------------
+#
+# shop goods
+#
+# ------------------------------------------------------------
+class shop_goods(models.Model):
+    "All goods that sold in shops."
+    
+    # shop's key
+    shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    
+    # the key of objects to sell
+    goods = models.CharField(max_length=KEY_LENGTH)
+
+    # the typeclass of this goods
+    typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # number of shop goods
+    stack = models.PositiveIntegerField(blank=True, default=1)
+
+    # the price of the goods
+    price = models.PositiveIntegerField(blank=True, default=1)
+
+    # the unit of the goods price
+    unit = models.CharField(max_length=KEY_LENGTH)
+
+    # condition of the object
+    condition = models.TextField(blank=True)
+    
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Shop Object"
+        verbose_name_plural = "Shop Objects"
+        unique_together = ("shop", "goods")
+        
+
+# ------------------------------------------------------------
+#
+# store npc's shop
+#
+# ------------------------------------------------------------
+class npc_shops(models.Model):
+    "Store npc's shops."
+
+    # The key of an NPC.
+    # NPC's key
+    npc = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # The key of a shop.
+    # shop's key
+    shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "NPC Shop"
+        verbose_name_plural = "NPC Shops"
+
+
+# ------------------------------------------------------------
+#
 # store all skills
 #
 # ------------------------------------------------------------
@@ -849,6 +943,7 @@ class skills(models.Model):
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
+
 
 # ------------------------------------------------------------
 #

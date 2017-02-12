@@ -91,7 +91,8 @@ var commands = {
     doDialogue : function(caller) {
         if(data_handler.dialogues_list.length > 0) {
             popupmgr.showDialogue(data_handler.dialogues_list.shift());
-        } else {
+        }
+        else {
             var args = {"dialogue": $(caller).attr("dialogue"),
                         "sentence": $(caller).attr("sentence")};
 
@@ -100,6 +101,17 @@ var commands = {
                 args["npc"] = npc;
             }
             Evennia.msg("text", this.cmdString("dialogue", args));
+        }
+    },
+
+    // shop goods detail
+    doShopGoodsLink: function(obj_dbref) {
+        var goods_list = data_handler.shop_data["goods"];
+        for (var i in goods_list) {
+            if (obj_dbref == goods_list[i]["dbref"]) {
+                popupmgr.showGoods(goods_list[i]);
+                break;
+            }
         }
     },
     

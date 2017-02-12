@@ -582,7 +582,86 @@ class DefaultObjectsForm(forms.ModelForm):
     class Meta:
         model = models.default_objects
         fields = '__all__'
+
+
+class ShopsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ShopsForm, self).__init__(*args, **kwargs)
         
+        objects = models.typeclasses.objects.filter(category="CATE_SHOP")
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
+        
+        choices = [("", "---------")]
+        objects = models.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
+        
+        localize_form_fields(self)
+        
+    class Meta:
+        model = models.shops
+        fields = '__all__'
+
+
+class ShopGoodsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ShopGoodsForm, self).__init__(*args, **kwargs)
+
+        # all shops
+        objects = models.shops.objects.all()
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['shop'] = forms.ChoiceField(choices=choices)
+
+        # available objects are common objects, foods or equipments
+        objects = models.common_objects.objects.all()
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+
+        foods = models.foods.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
+
+        equipments = models.equipments.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
+
+        self.fields['goods'] = forms.ChoiceField(choices=choices)
+
+        # Goods typeclasses
+        objects = models.typeclasses.objects.filter(category="CATE_SHOP_GOODS")
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
+
+        # available units are common objects
+        objects = models.common_objects.objects.all()
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['unit'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+        
+    class Meta:
+        model = models.shop_goods
+        fields = '__all__'
+
+
+class NPCShopsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(NPCShopsForm, self).__init__(*args, **kwargs)
+
+        # All NPCs.
+        objects = models.world_npcs.objects.all()
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['npc'] = forms.ChoiceField(choices=choices)
+        
+        # All shops.
+        objects = models.shops.objects.all()
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['shop'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+        
+    class Meta:
+        model = models.npc_shops
+        fields = '__all__'
+
 
 class SkillsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -628,6 +707,7 @@ class NPCDialoguesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(NPCDialoguesForm, self).__init__(*args, **kwargs)
 
+        # All NPCs.
         objects = models.world_npcs.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['npc'] = forms.ChoiceField(choices=choices)

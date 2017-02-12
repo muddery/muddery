@@ -12,3 +12,5 @@ CLASS_FOOD,Food,typeclasses.common_objects.Food,CATE_OBJECT,Foods can be eaten.
 CLASS_SKILL,Skill,typeclasses.character_skills.Skill,CATE_SKILL,Character's skill.
 CLASS_QUEST,Quest,typeclasses.character_quests.Quest,CATE_QUEST,Quest.
 CLASS_EQUIPMENT,Equipment,typeclasses.common_objects.Equipment,CATE_OBJECT,Equipments.
+CLASS_SHOP,Shop,typeclasses.shops.Shop,CATE_SHOP,Shops.
+CLASS_SHOP_GOODS,Goods,typeclasses.shop_goods.ShopGoods,CATE_SHOP_GOODS,Goods

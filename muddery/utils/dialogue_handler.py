@@ -9,7 +9,6 @@ The DialogueHandler maintains a pool of dialogues.
 from muddery.utils import defines
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.statements.statement_handler import STATEMENT_HANDLER
-from muddery.utils import defines
 from muddery.utils.game_settings import GAME_SETTINGS
 from django.conf import settings
 from django.apps import apps

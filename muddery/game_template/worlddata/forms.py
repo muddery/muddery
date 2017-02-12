@@ -80,7 +80,16 @@ class CommonCharacterForm(forms_base.CommonCharacterForm):
 
 class DefaultObjectsForm(forms_base.DefaultObjectsForm):
     pass
-    
+
+class ShopsForm(forms_base.ShopsForm):
+    pass
+
+class ShopGoodsForm(forms_base.ShopGoodsForm):
+    pass
+
+class NPCShopsForm(forms_base.NPCShopsForm):
+    pass
+
 class SkillsForm(forms_base.SkillsForm):
     pass
 
