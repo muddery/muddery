@@ -191,7 +191,7 @@ WORLD_OBJECTS = "world_objects"
 WORLD_NPCS = "world_npcs"
 
 # common objects
-COMMON_OBJECTS = ("common_objects", "common_characters", "skills", "quests", "equipments", "foods")
+COMMON_OBJECTS = ("common_objects", "common_characters", "skills", "quests", "equipments", "foods", "shops")
 
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,
@@ -236,6 +236,10 @@ DEFAULT_OBJECTS = "default_objects"
 # character skills
 DEFAULT_SKILLS = "default_skills"
 
+# shops
+SHOP_GOODS = "shop_goods"
+NPC_SHOPS = "npc_shops"
+
 # resources
 IMAGE_RESOURCES = "image_resources"
 ICON_RESOURCES = "icon_resources"
@@ -257,6 +261,8 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      EQUIPMENT_TYPES,
                      DEFAULT_OBJECTS,
                      DEFAULT_SKILLS,
+                     SHOP_GOODS,
+                     NPC_SHOPS,
                      IMAGE_RESOURCES,
                      ICON_RESOURCES,
                      GAME_SETTINGS,

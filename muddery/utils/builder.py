@@ -32,6 +32,9 @@ def get_object_record(obj_key):
             record = model_obj.objects.get(key=obj_key)
             break
         except Exception, e:
+            ostring = "Can not get record %s: %s." % (obj_key, e)
+            print(ostring)
+            print(traceback.print_exc())
             continue
 
     return record
@@ -45,16 +48,20 @@ def build_object(obj_key, caller=None):
         obj_key: (string) The key of the object.
         caller: (command caller) If provide, running messages will send to the caller.
     """
-    # get typeclass model
-    model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
 
     # Get object's information
     record = None
     typeclass = None
     try:
         record = get_object_record(obj_key)
+
+        # get typeclass model
+        model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
         typeclass = model_typeclass.objects.get(key=record.typeclass)
     except Exception, e:
+        ostring = "Can not get typeclass of %s: %s." % (obj_key, e)
+        print(ostring)
+        print(traceback.print_exc())
         pass
 
     if not record or not typeclass:

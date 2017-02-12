@@ -182,6 +182,11 @@ a:focus {
     text-align: center;
 }
 
+.shop-header {
+    color: #0ff;
+    text-align: center;
+}
+
 /* Style specific classes corresponding to formatted, narative text. */
 .red { color: red; }
 .maroon { color: maroon; }
@@ -287,6 +292,29 @@ a:focus {
     padding: 4px 8px 4px 8px;
 }
 
+.tab_shop {
+    border-collapse: collapse;
+    border-color: #aaa;
+    border-style: solid;
+    border-width: 1px;
+    margin: 8px;
+}
+
+.tab_shop th {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+    font-weight: normal;
+}
+
+.tab_shop td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+}
+
 .fighter_team {
     padding: 0px;
     position: absolute;
@@ -377,4 +405,17 @@ button.btn-combat div.cooldown {
 .dialogue_icon {
 	width: 40px;
 	height: 40px;
+}
+
+.shop_icon {
+	width: 40px;
+	height: 40px;
+}
+
+.shop_goods_name {
+    min-width: 60px;
+}
+
+.shop_goods_price {
+    min-width: 60px;
 }

@@ -10,6 +10,7 @@ var data_handler = {
     skill_cd_time: {},
     dialogue_target: "",
     dialogues_list: [],
+    shop_data: {},
 
     getEscapes: function() {
         return {"$PLAYER_NAME": this.character_name};

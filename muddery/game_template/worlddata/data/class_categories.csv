@@ -5,3 +5,5 @@ CATE_CHARACTER,Character,Character
 CATE_OBJECT,Object,Object
 CATE_SKILL,Skill,Skill
 CATE_QUEST,Quest,Quest
+CATE_SHOP,Shop,Shop
+CATE_SHOP_GOODS,Goods,Goods

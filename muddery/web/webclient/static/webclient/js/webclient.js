@@ -168,6 +168,9 @@ var webclient = {
                 else if (key == "puppet") {
                     this.onPuppet(data[key]);
                 }
+                else if (key == "shop") {
+                    this.displayShop(data[key])
+                }
                 else {
                     this.displayMsg(data[key]);
                 }
@@ -445,7 +448,6 @@ var webclient = {
             title = text2html.parseHtml(data["name"]);
         }
         catch(error) {
-            title = LS('Scene');
         }
 
         $('#popup_header').html(title);
@@ -832,6 +834,11 @@ var webclient = {
         }
     },
 
+    displayShop: function(data) {
+        data_handler.shop_data = data;
+        popupmgr.showShop();
+    },
+
     displaySkillCD: function(data) {
         // update skill's cd
         var cd = data["cd"];
@@ -1025,7 +1032,8 @@ var webclient = {
         combat.closeCombat();
         popupmgr.doCloseBox();
         popupmgr.doCloseDialogue();
-        popupmgr.doCloseMap()
+        popupmgr.doCloseMap();
+        popupmgr.doCloseShop();
 
         // show message
         popupmgr.showAlert(LS("The client connection was closed cleanly."), LS("OK"));

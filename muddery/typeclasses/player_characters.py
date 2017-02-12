@@ -486,6 +486,84 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         return rejected_keys
 
+    def get_object_number(self, obj_key):
+        """
+        Get the number of this object.
+        Args:
+            obj_key: (String) object's key
+
+        Returns:
+            int: object number
+        """
+        objects = self.search_inventory(obj_key)
+
+        # get total number
+        sum = 0
+        for obj in objects:
+            obj_num = obj.get_number()
+            sum += obj_num
+
+        return sum
+
+    def can_get_object(self, obj_key, number):
+        """
+        Check if the character can get these objects.
+
+        Args:
+            obj_key: (String) object's key
+            number: (int) object's number
+
+        Returns:
+            boolean: can get
+
+        Notice:
+            If the character does not have this object, the return will be always true,
+            despite of the number!
+        """
+        objects = self.search_inventory(obj_key)
+
+        if not objects:
+            return True
+
+        obj = objects[0]
+        if not obj.unique:
+            return True
+
+        if obj.get_number() + number <= obj.max_stack:
+            return True
+
+        return False
+
+    def use_object(self, obj, number=1):
+        """
+        Use an object.
+
+        Args:
+            obj: (object) object to use
+            number: (int) number to use
+
+        Returns:
+            result: (string) the description of the result
+        """
+        if not obj:
+            return LS("Can not find this object.")
+
+        if obj.db.number < number:
+            return LS("Not enough number.")
+
+        # take effect
+        try:
+            result, used = obj.take_effect(self, number)
+            if used > 0:
+                # remove used object
+                self.remove_object(obj.get_data_key(), used)
+            return result
+        except Exception, e:
+            ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
+            logger.log_tracemsg(ostring)
+
+        return LS("No effect.")
+
     def remove_objects(self, obj_list):
         """
         Remove objects from the inventory.
@@ -496,50 +574,74 @@ class MudderyPlayerCharacter(MudderyCharacter):
                                          "number": object's number}
 
         Returns:
-            (dict) a list of objects that have not been removed and their numbers.
+            boolean: success
         """
-        not_removed = {}
-        changed = False
+        success = True
         for item in obj_list:
-            # decrease object's number
-            to_remove = item["number"]
-            objects = self.search_inventory(item["object"])
+            if not self.remove_object(item["object"], item["number"], True):
+                success = False
 
+        self.show_inventory()
+        return success
+
+    def remove_object(self, obj_key, number, mute=False):
+        """
+        Remove objects from the inventory.
+
+        Args:
+            obj_key: object's key
+            number: object's number
+            mute: send inventory information
+
+        Returns:
+            boolean: success
+        """
+        objects = self.search_inventory(obj_key)
+
+        # get total number
+        sum = 0
+        for obj in objects:
+            obj_num = obj.get_number()
+            sum += obj_num
+
+        if sum < number:
+            return False
+
+        # remove objects
+        to_remove = number
+        try:
             for obj in objects:
-                try:
-                    obj_num = obj.get_number()
-                    if obj_num > 0:
-                        if obj_num >= to_remove:
-                            obj.decrease_num(to_remove)
-                            to_remove = 0
-                        else:
-                            obj.decrease_num(obj_num)
-                            to_remove -= obj_num
+                obj_num = obj.get_number()
+                if obj_num > 0:
+                    if obj_num >= to_remove:
+                        obj.decrease_num(to_remove)
+                        to_remove = 0
+                    else:
+                        obj.decrease_num(obj_num)
+                        to_remove -= obj_num
 
-                        if obj.get_number() <= 0:
-                            # If this object can be removed from the inventor.
-                            if obj.can_remove:
-                                # if it is an equipment, take off it first
-                                if getattr(obj, "equipped", False):
-                                    self.take_off_equipment(obj)
-                                obj.delete()
-
-                        changed = True
-                except Exception, e:
-                    ostring = "Can not remove object %s: %s" % (obj.get_data_key(), e)
-                    logger.log_tracemsg(ostring)
-                    break
+                    if obj.get_number() <= 0:
+                        # If this object can be removed from the inventor.
+                        if obj.can_remove:
+                            # if it is an equipment, take off it first
+                            if getattr(obj, "equipped", False):
+                                self.take_off_equipment(obj)
+                            obj.delete()
 
                 if to_remove <= 0:
                     break
+        except Exception, e:
+            logger.log_tracemsg("Can not remove object %s: %s" % (obj_key, e))
+            return False
 
-            if to_remove > 0:
-                not_removed[item["object"]] = to_remove
+        if to_remove > 0:
+            logger.log_err("Remove object error: %s" % obj_key)
+            return False
 
-        if changed:
+        if not mute:
             self.show_inventory()
 
-        return not_removed
+        return True
 
     def search_inventory(self, obj_key):
         """

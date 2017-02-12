@@ -92,11 +92,7 @@ class FuncRemoveObjects(StatementFunction):
         if len(self.args) > 1:
             number = self.args[1]
 
-        obj_list = [{"object": obj_key,
-                     "number": number}]
-
-        not_removed = self.caller.remove_objects(obj_list)
-        return not_removed is None
+        return self.caller.remove_object(obj_key, number)
 
 
 class FuncTeleportTo(StatementFunction):

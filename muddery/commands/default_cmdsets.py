@@ -53,7 +53,9 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdAttack())
         self.add(general.CmdUnlockExit())
         self.add(general.CmdGiveUpQuest())
-        
+        self.add(general.CmdShopping())
+        self.add(general.CmdBuy())
+
         # Add empty login commands to the normal cmdset to
         # avoid showing wrong cmd messages.
         self.add(general.CmdConnect())

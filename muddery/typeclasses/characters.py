@@ -263,8 +263,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # remove old default skills
         for skill in self.db.skills:
-            if self.db.skills[skill].is_default() and skill not in default_skill_ids:
+            skill_obj = self.db.skills[skill]
+            if skill_obj.is_default() and skill not in default_skill_ids:
                 # remove this skill
+                skill_obj.delete()
                 del self.db.skills[skill]
 
         # add new default skills
@@ -293,38 +295,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Load character's default objects.
         """
         pass
-
-    def use_object(self, obj, number=1):
-        """
-        Use an object.
-
-        Args:
-            obj: (object) object to use
-            number: (int) number to use
-
-        Returns:
-            result: (string) the description of the result
-        """
-        if not obj:
-            return LS("Can not find this object.")
-
-        if obj.db.number < number:
-            return LS("Not enough number.")
-
-        # take effect
-        try:
-            result, used = obj.take_effect(self, number)
-            if used > 0:
-                # remove used object
-                obj_list = [{"object": obj.get_data_key(),
-                             "number": used}]
-                self.remove_objects(obj_list)
-            return result
-        except Exception, e:
-            ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
-            logger.log_tracemsg(ostring)
-
-        return LS("No effect.")
 
     def at_after_move(self, source_location):
         """
