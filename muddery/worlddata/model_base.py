@@ -828,6 +828,9 @@ class shops(models.Model):
     
     # the verb to open the shop
     verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # condition of the shop
+    condition = models.TextField(blank=True)
     
     # shop's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -857,7 +860,7 @@ class shop_goods(models.Model):
     typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # number of shop goods
-    stack = models.PositiveIntegerField(blank=True, default=1)
+    number = models.PositiveIntegerField(blank=True, default=1)
 
     # the price of the goods
     price = models.PositiveIntegerField(blank=True, default=1)
@@ -865,7 +868,7 @@ class shop_goods(models.Model):
     # the unit of the goods price
     unit = models.CharField(max_length=KEY_LENGTH)
 
-    # condition of the object
+    # visible condition of the goods
     condition = models.TextField(blank=True)
     
     class Meta:
@@ -897,6 +900,7 @@ class npc_shops(models.Model):
         abstract = True
         verbose_name = "NPC Shop"
         verbose_name_plural = "NPC Shops"
+        unique_together = ("npc", "shop")
 
 
 # ------------------------------------------------------------
@@ -925,9 +929,6 @@ class skills(models.Model):
 
     # if it is a passive skill
     passive = models.BooleanField(blank=True, default=False)
-
-    # condition for cast this skill
-    condition = models.TextField(blank=True)
 
     # skill function's name
     function = models.CharField(max_length=KEY_LENGTH)

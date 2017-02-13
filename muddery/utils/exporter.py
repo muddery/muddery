@@ -68,9 +68,10 @@ def export_zip_all(file):
         # get model names
         app_config = apps.get_app_config(settings.WORLD_DATA_APP)
         for model in app_config.get_models():
-            name = model._meta.object_name
-            export_file(temp, name)
-            archive.write(temp, name + ".csv")
+            model_name = model._meta.object_name
+            export_file(temp, model_name)
+            filename = model_name + ".csv"
+            archive.write(temp, filename)
     finally:
         os.remove(temp)
 

@@ -208,8 +208,8 @@ var popupmgr = {
 				}
 
                 var name = obj["name"];
-                if (obj["stack"] > 1) {
-                    name += "×" + obj["stack"];
+                if (obj["number"] > 1) {
+                    name += "×" + obj["number"];
                 }
 
                 var command = "commands.doShopGoodsLink('" + obj["dbref"] + "'); return false;";

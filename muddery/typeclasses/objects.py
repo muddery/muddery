@@ -17,6 +17,7 @@ from evennia.utils.utils import to_str
 from evennia.utils.utils import make_iter
 from evennia.utils.utils import lazy_property
 from evennia.typeclasses.models import DbHolder
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.data_field_handler import DataFieldHandler
 from muddery.utils import utils
 from muddery.utils.exception import MudderyError
@@ -76,6 +77,7 @@ class MudderyObject(DefaultObject):
         
         # Call set_initial_data() when this object is first created.
         self.db.FIRST_CREATE = True
+        self.condition = None
         self.icon = None
 
     def at_init(self):
@@ -221,7 +223,9 @@ class MudderyObject(DefaultObject):
 
         if hasattr(self.dfield, "destination"):
             self.set_obj_destination(self.dfield.destination)
-
+            
+        self.condition = getattr(self.dfield, "condition", None)
+        
         self.icon = None
         try:
             # get icon
@@ -376,7 +380,6 @@ class MudderyObject(DefaultObject):
         """
         self.db.desc = desc
 
-
     def set_lock(self, lock):
         """
         Set object's lock.
@@ -415,7 +418,6 @@ class MudderyObject(DefaultObject):
             except Exception:
                 logger.log_errmsg("%s can't set attribute %s!" % (self.get_data_key(), key))
 
-
     def set_obj_destination(self, destination):
         """
         Set object's destination
@@ -452,7 +454,6 @@ class MudderyObject(DefaultObject):
     
         self.destination = destination_obj
 
-
     def set_detail(self, key, detail):
         """
         Set object's detail.
@@ -463,7 +464,6 @@ class MudderyObject(DefaultObject):
         """
         pass
 
-
     def get_data_key(self):
         """
         Get data's key.
@@ -473,6 +473,17 @@ class MudderyObject(DefaultObject):
             key = ""
         return key
 
+    def is_visible(self, caller):
+        """
+        If this object is visible to the caller.
+        
+        Return:
+            boolean: visible
+        """
+        if not self.condition:
+            return True
+
+        return STATEMENT_HANDLER.match_condition(self.condition, caller, self)
 
     def get_surroundings(self, caller):
         """

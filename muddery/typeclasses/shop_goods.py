@@ -105,7 +105,7 @@ class MudderyShopGoods(DefaultObject):
         self.price = goods_record.price
         self.unit_key = goods_record.unit
         self.unit_name = unit_name
-        self.stack = goods_record.stack
+        self.number = goods_record.number
         self.condition = goods_record.condition
 
         self.name = goods.get_name()
@@ -159,7 +159,7 @@ class MudderyShopGoods(DefaultObject):
             return
 
         # check if can get these objects
-        if not caller.can_get_object(self.db.goods.get_data_key(), self.stack):
+        if not caller.can_get_object(self.db.goods.get_data_key(), self.number):
             caller.msg({"alert": LS("Sorry, you can not take more %s.") % self.db.goods.get_name()})
             return
 
@@ -170,5 +170,5 @@ class MudderyShopGoods(DefaultObject):
 
         # Give goods.
         obj_list = [{"object": self.db.goods.get_data_key(),
-                     "number": self.stack}]
+                     "number": self.number}]
         caller.receive_objects(obj_list)

@@ -120,7 +120,7 @@ class MudderyShop(MudderyObject):
             goods = {"dbref": item.dbref,
                      "name": item.name,
                      "desc": item.desc,
-                     "stack": item.stack,
+                     "number": item.number,
                      "price": item.price,
                      "unit": item.unit_name}
 

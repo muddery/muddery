@@ -68,15 +68,13 @@ def import_file(file_name, model_name, widecard=True, clear=True):
                 # type = 1    means Boolean field
                 # type = 2    means Integer field
                 # type = 3    means Float field
-                # type = 4    means ForeignKey field
+                # type = 4    means ForeignKey field, not support
                 # type = 5    means ManyToManyField field, not support
                 # type = -1   means field does not exist
 
                 field_types = []
-                related_fields = []
                 for field_name in title:
-                    field_type = -1
-                    related_field = 0
+                    field_type = 0
 
                     try:
                         # get field info
@@ -90,7 +88,6 @@ def import_file(file_name, model_name, widecard=True, clear=True):
                             field_type = 3
                         elif isinstance(field, models.ForeignKey):
                             field_type = 4
-                            related_field = field.related_field
                         elif isinstance(field, models.ManyToManyField):
                             field_type = 5
                         else:
@@ -99,7 +96,6 @@ def import_file(file_name, model_name, widecard=True, clear=True):
                         logger.log_errmsg("Field error: %s" % e)
 
                     field_types.append(field_type)
-                    related_fields.append(related_field)
 
                 # import values
                 # read next line
@@ -108,7 +104,7 @@ def import_file(file_name, model_name, widecard=True, clear=True):
                 while values:
                     try:
                         record = {}
-                        for item in zip(title, field_types, values, related_fields):
+                        for item in zip(title, field_types, values):
                             field_name = item[0]
                             # skip "id" field
                             if field_name == "id":
@@ -116,7 +112,6 @@ def import_file(file_name, model_name, widecard=True, clear=True):
 
                             field_type = item[1]
                             value = item[2]
-                            related_field = item[3]
 
                             try:
                                 # set field values
@@ -140,11 +135,6 @@ def import_file(file_name, model_name, widecard=True, clear=True):
                                     # float value
                                     if value:
                                         record[field_name] = float(value)
-                                elif field_type == 4:
-                                    # foreignKey
-                                    if value:
-                                        arg = {related_field.name: value}
-                                        record[field_name] = related_field.model.objects.get(**arg)
                             except Exception, e:
                                 print("value error: %s - '%s'" % (field_name, value))
 

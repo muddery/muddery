@@ -10,7 +10,6 @@ import traceback
 from django.conf import settings
 from django.apps import apps
 from muddery.typeclasses.objects import MudderyObject
-from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
@@ -157,11 +156,9 @@ class MudderyRoom(MudderyObject, DefaultRoom):
 
         for cont in visible:
             # only show objects that match the condition
-            condition = getattr(cont.dfield, "condition", None)
-            if condition:
-                if not STATEMENT_HANDLER.match_condition(condition, caller, self):
-                    continue
-                        
+            if not cont.is_visible(caller):
+                continue
+
             type = self.get_surrounding_type(cont)
             if type:
                 appearance = {}

@@ -105,6 +105,9 @@ class MudderyNPC(MudderyCharacter):
         
         # Add shops.
         for shop_obj in self.db.shops.values():
+            if not shop_obj.is_visible(caller):
+                continue
+
             verb = shop_obj.verb
             if not verb:
                 verb = shop_obj.get_name()
