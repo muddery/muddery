@@ -175,21 +175,26 @@ def import_model(model_name, path_name=None, clear=True):
     import_file(file_name, model_name, widecard=True, clear=clear)
 
 
-def import_localized_strings(language=None):
+def import_system_localized_strings(language=None):
     """
     Import localized strings.
 
     language: All choices can be found here: 
               # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
     """
+    # clear old data
+    model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.SYSTEM_LOCALIZED_STRINGS)
+    if model_obj:
+        model_obj.objects.all().delete()
+
     # if language is empty, load settings.LANGUAGE_CODE
     if not language:
         language = settings.LANGUAGE_CODE
 
-    # import all files in LANGUAGE_FOLDER
+    # import all files in SYSTEM_LANGUAGE_FOLDER
     dir_name = os.path.join(settings.GAME_DIR,
                             settings.WORLD_DATA_FOLDER,
-                            settings.LOCALIZED_STRINGS_FOLDER,
+                            settings.SYSTEM_LOCALIZED_STRINGS_FOLDER,
                             language)
 
     if os.path.isdir(dir_name):
@@ -200,7 +205,7 @@ def import_localized_strings(language=None):
                 # if it is a folder
                 continue
 
-            import_file(full_name, settings.LOCALIZED_STRINGS_MODEL, widecard=False, clear=False)
+            import_file(full_name, settings.SYSTEM_LOCALIZED_STRINGS, widecard=False, clear=False)
 
 
 def import_zip_all(file):
@@ -216,8 +221,7 @@ def import_zip_all(file):
         # import models
         model_name_list = settings.BASIC_DATA_MODELS +\
                           settings.OBJECT_DATA_MODELS +\
-                          settings.OTHER_DATA_MODELS +\
-                          (settings.LOCALIZED_STRINGS_MODEL,)
+                          settings.OTHER_DATA_MODELS
 
         # import models one by one
         for model_name in model_name_list:
@@ -238,7 +242,7 @@ def import_local_all():
         import_model(model_name)
 
     # import localized strings
-    import_localized_strings(settings.LANGUAGE_CODE)
+    import_system_localized_strings(settings.LANGUAGE_CODE)
 
 
 def import_resources(file):

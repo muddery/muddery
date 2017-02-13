@@ -244,6 +244,9 @@ NPC_SHOPS = "npc_shops"
 IMAGE_RESOURCES = "image_resources"
 ICON_RESOURCES = "icon_resources"
 
+# custom localized string
+CUSTOM_LOCALIZED_STRINGS = "custom_localized_strings"
+
 # all other data models
 OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      CHARACTER_LOOT_LIST,
@@ -265,12 +268,13 @@ OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
                      NPC_SHOPS,
                      IMAGE_RESOURCES,
                      ICON_RESOURCES,
+                     CUSTOM_LOCALIZED_STRINGS,
                      GAME_SETTINGS,
                      CLIENT_SETTINGS) + OBJECT_ADDITIONAL_DATA + EVENT_ADDITIONAL_DATA
 
-# local strings
-LOCALIZED_STRINGS_MODEL = "localized_strings"
-LOCALIZED_STRINGS_FOLDER = "languages"
+# system local strings
+SYSTEM_LOCALIZED_STRINGS = "system_localized_strings"
+SYSTEM_LOCALIZED_STRINGS_FOLDER = "languages"
 
 EQUIP_EFFECTS = []
 

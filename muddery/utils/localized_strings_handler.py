@@ -33,9 +33,9 @@ class LocalizedStringsHandler(object):
         """
         self.clear()
 
-        # Get db model
+        # Load system localized string model.
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.LOCALIZED_STRINGS_MODEL)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.SYSTEM_LOCALIZED_STRINGS)
             for record in model_obj.objects.all():
                 # Add db fields to dict.
                 if (record.category, record.origin) in self.dict:
@@ -45,8 +45,16 @@ class LocalizedStringsHandler(object):
                     continue
                 self.dict[(record.category, record.origin)] = record.local
         except Exception, e:
-            print("Can not load server local string: %s" % e)
-            pass
+            print("Can not load system localized string: %s" % e)
+
+        # Load custom localized string model.
+        try:
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.CUSTOM_LOCALIZED_STRINGS)
+            for record in model_obj.objects.all():
+                # Add db fields to dict. Overwrite system localized strings.
+                self.dict[(record.category, record.origin)] = record.local
+        except Exception, e:
+            print("Can not load custom localized string: %s" % e)
 
 
     def translate(self, origin, category="", default=None):
