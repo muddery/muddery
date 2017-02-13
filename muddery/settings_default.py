@@ -123,7 +123,7 @@ DATA_KEY_CATEGORY = "data_key"
 WORLD_DATA_APP = "worlddata"
 
 # data file's folder under user's game directory.
-WORLD_DATA_FOLDER = "worlddata/data"
+WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
 
 # game settings
 GAME_SETTINGS = "game_settings"

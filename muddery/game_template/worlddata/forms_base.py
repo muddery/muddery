@@ -283,14 +283,24 @@ class WorldNPCsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldNPCsForm, self).__init__(*args, **kwargs)
 
+        # NPC's typeclass
         objects = models.typeclasses.objects.filter(category="CATE_CHARACTER")
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
+        # NPC's location
         objects = models.world_rooms.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['location'] = forms.ChoiceField(choices=choices)
         
+        # NPC's model
+        choices = [("", "---------")]
+        objects = models.character_models.objects.all()
+        model_keys = set([obj.key for obj in objects])
+        choices.extend([(model_key, model_key) for model_key in model_keys])
+        self.fields['model'] = forms.ChoiceField(choices=choices, required=False)
+        
+        # NPC's icon
         choices = [("", "---------")]
         objects = models.icon_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
