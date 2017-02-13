@@ -11,12 +11,13 @@ from django import http
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.admin.views.decorators import staff_member_required
+from django.conf import settings
 from evennia.server.sessionhandler import SESSIONS
 from evennia.utils import logger
 from muddery.utils import exporter
 from muddery.utils import importer
 from muddery.utils.builder import build_all
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import LS, LOCALIZED_STRINGS_HANDLER
 from muddery.utils.game_settings import CLIENT_SETTINGS
 from muddery.worlddata.editor import page_view
 from muddery.worlddata.editor.form_view import FormView
@@ -177,6 +178,12 @@ def apply_changes(request):
     Apply the game world's data.
     """
     try:
+        # load system localized strings
+        importer.import_system_localized_strings(settings.LANGUAGE_CODE)
+
+        # reload localized strings
+        LOCALIZED_STRINGS_HANDLER.reload()
+
         # rebuild the world
         build_all()
 

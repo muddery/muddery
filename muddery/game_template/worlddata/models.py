@@ -437,11 +437,21 @@ class event_dialogues(model_base.event_dialogues):
 
 #------------------------------------------------------------
 #
-# local strings
+# system localized strings
 #
 #------------------------------------------------------------
-class localized_strings(model_base.localized_strings):
-    "Store all server local strings informations."
+class system_localized_strings(model_base.system_localized_strings):
+    "Store all system localized strings."
+    pass
+
+
+#------------------------------------------------------------
+#
+# custom local strings
+#
+#------------------------------------------------------------
+class custom_localized_strings(model_base.custom_localized_strings):
+    "Store all custom localized strings."
     pass
 
 

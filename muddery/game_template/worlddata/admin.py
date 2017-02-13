@@ -163,11 +163,17 @@ class EventDialoguesAdmin(admin_base.EventDialoguesAdmin):
     pass
 
 
-class LocalizedStringsAdmin(admin_base.LocalizedStringsAdmin):
+class SystemLocalizedStringsAdmin(admin_base.SystemLocalizedStringsAdmin):
     pass
+
+
+class CustomLocalizedStringsAdmin(admin_base.CustomLocalizedStringsAdmin):
+    pass
+
 
 class ImageResourcesAdmin(admin_base.ImageResourcesAdmin):
     pass
+
 
 admin.site.register(game_settings, GameSettingsAdmin)
 admin.site.register(client_settings, ClientSettingsAdmin)
@@ -208,5 +214,6 @@ admin.site.register(dialogue_sentences, DialogueSentencesAdmin)
 admin.site.register(npc_dialogues, NPCDialoguesAdmin)
 admin.site.register(event_attacks, EventAttacksAdmin)
 admin.site.register(event_dialogues, EventDialoguesAdmin)
-admin.site.register(localized_strings, LocalizedStringsAdmin)
+admin.site.register(system_localized_strings, SystemLocalizedStringsAdmin)
+admin.site.register(custom_localized_strings, CustomLocalizedStringsAdmin)
 admin.site.register(image_resources, ImageResourcesAdmin)
