@@ -61,13 +61,26 @@
       <input type="submit" value="Download"/>
     </form>
     <div><br></div>
+    <div>Download a data table.</div>
+    <form method="GET">
+      {% csrf_token %}
+      <select name="model_name">
+        {% for model in models %}
+        <option value="{{ model.key }}">{{ model.name }}</option>
+        {% endfor %}
+      </select>
+      <div><br></div>
+      <input type="hidden" name="export_data_single"/>
+      <input type="submit" value="Download"/>
+    </form>
+    <div><br></div>
     <hr/>
     <h2>Upload data of the game world.</h2>
     <div>Upload a zip file of csv files to the database.</div>
     <div><span style="color: red">NOTICE: Current world's data will be replaced!</span></div>
     <form enctype="multipart/form-data" method="POST">
       {% csrf_token %}
-      <input type="file" name="import_game_data" accept="application/zip"/>
+      <input type="file" name="import_data_all" accept="application/zip"/>
       <br>
       <input type="submit" value="Upload"/>
     </form>
@@ -76,8 +89,24 @@
     <div><span style="color: red">NOTICE: Current resources will be replaced!</span></div>
     <form enctype="multipart/form-data" method="POST">
       {% csrf_token %}
-      <input type="file" name="import_resources" accept="application/zip"/>
+      <input type="file" name="import_resources_all" accept="application/zip"/>
       <br>
+      <input type="submit" value="Upload"/>
+    </form>
+    <div><br></div>
+    <div>Upload a csv/xls/xlsx file to the database.</div>
+    <div><span style="color: red">NOTICE: Current world's data will be replaced!</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <select name="model_name">
+        <option value="">---------</option>
+        {% for model in models %}
+        <option value="{{ model.key }}">{{ model.name }}</option>
+        {% endfor %}
+      </select>
+      <div><br></div>
+      <input type="file" name="import_data_single" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
+      <div><br></div>
       <input type="submit" value="Upload"/>
     </form>
     <div><br></div>

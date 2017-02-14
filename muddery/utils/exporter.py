@@ -43,17 +43,24 @@ def get_lines(model_name):
         yield line
 
 
-def export_file(file_name, model_name):
+def export_file_with_name(file_name, model_name):
     """
     Export a table to a csv file.
     """
     csv_file = open(file_name, 'w')
-    writer = csv.writer(csv_file)
+    export_file(csv_file, model_name)
+
+    csv_file.close()
+
+
+def export_file(file, model_name):
+    """
+    Export a table to a csv file.
+    """
+    writer = csv.writer(file)
 
     for line in get_lines(model_name):
         writer.writerow(line)
-
-    csv_file.close()
 
 
 def export_zip_all(file):
@@ -69,7 +76,7 @@ def export_zip_all(file):
         app_config = apps.get_app_config(settings.WORLD_DATA_APP)
         for model in app_config.get_models():
             model_name = model._meta.object_name
-            export_file(temp, model_name)
+            export_file_with_name(temp, model_name)
             filename = model_name + ".csv"
             archive.write(temp, filename)
     finally:
@@ -84,7 +91,7 @@ def export_all(path_name):
     app_config = apps.get_app_config(settings.WORLD_DATA_APP)
     for model in app_config.get_models():
         name = model._meta.verbose_name
-        export_file(path_name + name, name)
+        export_file_with_name(path_name + name, name)
 
 
 def export_resources(file):

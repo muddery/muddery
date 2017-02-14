@@ -59,6 +59,19 @@
       <input type="submit" value="下载"/>
     </form>
     <div><br></div>
+    <div>下载一张数据表。</div>
+    <form method="GET">
+      {% csrf_token %}
+      <select name="model_name">
+        {% for model in models %}
+        <option value="{{ model.key }}">{{ model.name }}</option>
+        {% endfor %}
+      </select>
+      <div><br></div>
+      <input type="hidden" name="export_data_single"/>
+      <input type="submit" value="下载"/>
+    </form>
+    <div><br></div>
     <hr/>
     <h2>上传游戏世界的数据</h2>
     <div>将zip文件中的csv文件上传到数据库。</div>
@@ -77,6 +90,22 @@
       <input type="file" name="import_resources" accept="application/zip"/>
       <br>
       <input type="submit" value="上传"/>
+    </form>
+    <div><br></div>
+    <div>上传单个 csv/xls/xlsx 文件到数据库。</div>
+    <div><span style="color: red">NOTICE: Current world's data will be replaced!</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <select name="model_name">
+        <option value="">---------</option>
+        {% for model in models %}
+        <option value="{{ model.key }}">{{ model.name }}</option>
+        {% endfor %}
+      </select>
+      <div><br></div>
+      <input type="file" name="import_data_single" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
+      <div><br></div>
+      <input type="submit" value="Upload"/>
     </form>
     <div><br></div>
     <hr/>
