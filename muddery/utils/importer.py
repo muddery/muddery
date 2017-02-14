@@ -17,13 +17,15 @@ from muddery.utils.exception import MudderyError
 from muddery.utils import readers
 
 
-def import_file(file_name, model_name, widecard=True, clear=True):
+def import_file(file_name, model_name, file_type=None, widecard=True, clear=True):
     """
     Import data from a data file to the db model
 
     Args:
         file_name: (string) file's name
         model_name: (string) db model's name.
+        file_type: (string) the type of the file. If it's None, the function will get
+                   the file type from the extension name of the file.
         widecard: (bool) add widecard as ext name or not.
         clear: (boolean) clear old data or not.
     """
@@ -37,20 +39,19 @@ def import_file(file_name, model_name, widecard=True, clear=True):
             file_names = [file_name]
 
         for file_name in file_names:
-            # get file's extension name
-            ext_name = os.path.splitext(file_name)[1].lower()
+            if not file_type:
+                # get file's extension name
+                file_type = os.path.splitext(file_name)[1].lower()
 
             reader = None
-            if ext_name == ".csv":
+            if file_type == ".csv":
                 reader = readers.csv_reader(file_name)
-            elif ext_name == ".xls" or ext_name == ".xlsx":
+            elif file_type == ".xls" or file_type == ".xlsx":
                 reader = readers.xls_reader(file_name)
 
             if not reader:
                 # does support this file type, read next one.
                 continue
-
-            imported = True
 
             # get model
             model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
@@ -151,6 +152,7 @@ def import_file(file_name, model_name, widecard=True, clear=True):
                 # reach the end of file, pass this exception
                 pass
 
+            imported = True
             break
     except Exception, e:
         print("Can not import file %s: %s" % (file_name, e))
@@ -159,6 +161,8 @@ def import_file(file_name, model_name, widecard=True, clear=True):
         print("%s imported." % file_name)
     else:
         print("Can not import file %s" % file_name)
+
+    return imported
 
 
 def import_model(model_name, path_name=None, clear=True):
@@ -208,7 +212,24 @@ def import_system_localized_strings(language=None):
             import_file(full_name, settings.SYSTEM_LOCALIZED_STRINGS, widecard=False, clear=False)
 
 
-def import_zip_all(file):
+def import_local_all():
+    """
+    Import all local data files to models.
+    """
+    # load models in order
+    model_name_list = settings.BASIC_DATA_MODELS +\
+                      settings.OBJECT_DATA_MODELS +\
+                      settings.OTHER_DATA_MODELS
+
+    # import models one by one
+    for model_name in model_name_list:
+        import_model(model_name)
+
+    # import localized strings
+    import_system_localized_strings(settings.LANGUAGE_CODE)
+
+
+def unzip_data_all(file):
     """
     Import all data files from a zip file.
     """
@@ -230,38 +251,23 @@ def import_zip_all(file):
         shutil.rmtree(temp)
 
 
-def import_local_all():
-    """
-    Import all local data files to models.
-    """
-    # load models in order
-    model_name_list = settings.BASIC_DATA_MODELS + settings.OBJECT_DATA_MODELS + settings.OTHER_DATA_MODELS
-
-    # import models one by one
-    for model_name in model_name_list:
-        import_model(model_name)
-
-    # import localized strings
-    import_system_localized_strings(settings.LANGUAGE_CODE)
-
-
-def import_resources(file):
+def unzip_resources_all(file):
     """
     Import all resource files from a zip file.
     """
-    dir_name = settings.MEDIA_ROOT
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+    media_dir = settings.MEDIA_ROOT
+    if not os.path.exists(media_dir):
+        os.makedirs(media_dir)
 
     archive = zipfile.ZipFile(file)
     for name in archive.namelist():
-        if name.endswith('/'):
-            os.makedirs(os.path.join(dir_name, name))
+        if os.path.isdir(name):
+            os.makedirs(os.path.join(media_dir, name))
         else:            
-            filename = os.path.join(dir_name, name)
-            dir = os.path.dirname(filename)
-            if not os.path.exists(dir):
-                os.makedirs(dir)
+            filename = os.path.join(media_dir, name)
+            dir_name = os.path.dirname(filename)
+            if not os.path.exists(dir_name):
+                os.makedirs(dir_name)
 
             outfile = open(filename, 'wb')
             outfile.write(archive.read(name))

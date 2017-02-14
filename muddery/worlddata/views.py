@@ -6,7 +6,7 @@ page and serve it eventual static content.
 """
 from __future__ import print_function
 
-import tempfile, time, json, re
+import tempfile, time, json, re, os
 from django import http
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -38,14 +38,43 @@ def worldeditor(request):
         return export_game_data(request)
     elif "export_resources" in request.GET:
         return export_resources(request)
-    elif "import_game_data" in request.FILES:
-        return import_game_data(request)
-    elif "import_resources" in request.FILES:
-        return import_resources(request)
+    elif "export_data_single" in request.GET:
+        return export_data_single(request)
+    elif "import_data_all" in request.FILES:
+        return import_data_all(request)
+    elif "import_resources_all" in request.FILES:
+        return import_resources_all(request)
+    elif "import_data_single" in request.FILES:
+        return import_data_single(request)
     elif "apply" in request.POST:
         return apply_changes(request)
 
-    return render(request, 'worldeditor.html')
+    return world_editor(request)
+
+
+@staff_member_required
+def world_editor(request):
+    """
+    Render the world editor.
+    """
+    model_list = settings.BASIC_DATA_MODELS +\
+                      settings.OBJECT_DATA_MODELS +\
+                      settings.OTHER_DATA_MODELS
+    models = [{"key": model, "name": LS(model, category="models") + "(" + model + ")"} for model in model_list]
+
+    context = {"models": models}
+    return render(request, 'worldeditor.html', context)
+
+
+def file_iterator(file, chunk_size=512):
+    while True:
+        c = file.read(chunk_size)
+        if c:
+            yield c
+        else:
+            # remove temp file
+            file.close()
+            break
 
 
 @staff_member_required
@@ -53,16 +82,6 @@ def export_game_data(request):
     """
     Export game world files.
     """
-    def file_iterator(file, chunk_size=512):
-        while True:
-            c = file.read(chunk_size)
-            if c:
-                yield c
-            else:
-                # remove temp file
-                file.close()
-                break
-
     response = http.HttpResponseNotModified()
 
     # get data's zip
@@ -77,10 +96,10 @@ def export_game_data(request):
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
     except Exception, e:
-        if zipfile:
-            zipfile.close()
         message = "Can't export game data: %s" % e
         logger.log_tracemsg(message)
+
+        zipfile.close()
         return render(request, 'fail.html', {"message": message})
 
     return response
@@ -91,16 +110,6 @@ def export_resources(request):
     """
     Export resource files.
     """
-    def file_iterator(file, chunk_size=512):
-        while True:
-            c = file.read(chunk_size)
-            if c:
-                yield c
-            else:
-                # remove temp file
-                file.close()
-                break
-
     response = http.HttpResponseNotModified()
 
     # get data's zip
@@ -115,61 +124,123 @@ def export_resources(request):
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
     except Exception, e:
-        if zipfile:
-            zipfile.close()
         message = "Can't export resources: %s" % e
         logger.log_tracemsg(message)
+
+        zipfile.close()
         return render(request, 'fail.html', {"message": message})
 
     return response
 
 
 @staff_member_required
-def import_game_data(request):
+def export_data_single(request):
+    """
+    Export a data table.
+    """
+    response = http.HttpResponseNotModified()
+    model_name = request.GET.get("model_name", None)
+
+    # get data's zip
+    temp_file = None
+    try:
+        temp_file = tempfile.TemporaryFile()
+        exporter.export_file(temp_file, model_name)
+        temp_file.seek(0)
+
+        filename = model_name + ".csv"
+        response = http.StreamingHttpResponse(file_iterator(temp_file))
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename="%s"' % filename
+    except Exception, e:
+        message = "Can't export game data: %s" % e
+        logger.log_tracemsg(message)
+
+        temp_file.close()
+        return render(request, 'fail.html', {"message": message})
+
+    return response
+
+
+@staff_member_required
+def import_data_all(request):
     """
     Import the game world from an uploaded zip file.
     """
     response = http.HttpResponseNotModified()
-    file_obj = request.FILES.get("import_game_data", None)
+    file_obj = request.FILES.get("import_data_all", None)
 
     if file_obj:
         zipfile = tempfile.TemporaryFile()
         try:
             for chunk in file_obj.chunks():
                 zipfile.write(chunk)
-            importer.import_zip_all(zipfile)
-        except Exception, e:
+            importer.unzip_data_all(zipfile)
             zipfile.close()
+        except Exception, e:
             logger.log_tracemsg("Cannot import game data: %s" % e)
-            return render(request, 'fail.html', {"message": str(e)})
 
-        zipfile.close()
+            zipfile.close()
+            return render(request, 'fail.html', {"message": str(e)})
 
     return render(request, 'success.html', {"message": "World data imported!"})
 
 
 @staff_member_required
-def import_resources(request):
+def import_resources_all(request):
     """
     Import resources from an uploaded zip file.
     """
     response = http.HttpResponseNotModified()
-    file_obj = request.FILES.get("import_resources", None)
+    file_obj = request.FILES.get("import_resources_all", None)
 
     if file_obj:
         zipfile = tempfile.TemporaryFile()
         try:
             for chunk in file_obj.chunks():
                 zipfile.write(chunk)
-            importer.import_resources(zipfile)
-        except Exception, e:
+            importer.unzip_resources_all(zipfile)
             zipfile.close()
+        except Exception, e:
             logger.log_tracemsg("Cannot import resources: %s" % e)
+
+            zipfile.close()
             return render(request, 'fail.html', {"message": str(e)})
 
-        zipfile.close()
-
     return render(request, 'success.html', {"message": "Resources imported!"})
+
+
+@staff_member_required
+def import_data_single(request):
+    """
+    Import the game world from an uploaded zip file.
+    """
+    response = http.HttpResponseNotModified()
+    model_name = request.POST.get("model_name", None)
+    upload_file = request.FILES.get("import_data_single", None)
+
+    if upload_file:
+        temp_file = tempfile.NamedTemporaryFile()
+        try:
+            # Write to a template file.
+            for chunk in upload_file.chunks():
+                temp_file.write(chunk)
+            temp_file.flush()
+
+            (filename, ext_name) = os.path.splitext(upload_file.name)
+
+            # If model name is empty, get model name from filename.
+            if not model_name:
+                model_name = filename
+
+            if importer.import_file(temp_file.name, model_name, file_type=ext_name, widecard=False):
+                temp_file.close()
+                return render(request, 'success.html', {"message": "World data imported!"})
+        except Exception, e:
+            logger.log_tracemsg("Cannot import game data: %s" % e)
+
+        temp_file.close()
+    return render(request, 'fail.html', {"message": "Cannot import game data."})
 
 
 @staff_member_required
