@@ -80,6 +80,7 @@ class DialogueHandler(object):
             data["sentences"].append({"dialogue": dialogue,
                                       "ordinal": sentence.ordinal,
                                       "speaker": sentence.speaker,
+                                      "icon": sentence.icon,
                                       "content": sentence.content,
                                       "action": sentence.action,
                                       "provide_quest": sentence.provide_quest,
@@ -363,7 +364,7 @@ class DialogueHandler(object):
 
         return speaker
 
-    def get_dialogue_speaker_icon(self, caller, npc, speaker_str):
+    def get_dialogue_speaker_icon(self, icon_str, caller, npc, speaker_str):
         """
         Get the speaker's text.
         'p' means player.
@@ -371,14 +372,19 @@ class DialogueHandler(object):
         Use string in quotes directly.
         """
         icon = None
-        try:
+
+        if icon_str:
+            # use icon resource in dialogue sentence
+            model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.ICON_RESOURCES)
+            if model_resource:
+                resource_info = model_resource.objects.get(key=icon_str)
+                icon = resource_info.resource.url
+        else:
             if speaker_str == "n":
                 if npc:
                     icon = getattr(npc, "icon", None)
             elif speaker_str == "p":
                 icon = getattr(caller, "icon", None)
-        except:
-            pass
 
         return icon
 
@@ -399,7 +405,7 @@ class DialogueHandler(object):
 
         sentences_list = []
         speaker = self.get_dialogue_speaker_name(caller, npc, originals[0]["speaker"])
-        icon = self.get_dialogue_speaker_icon(caller, npc, originals[0]["speaker"])
+        icon = self.get_dialogue_speaker_icon(originals[0]["icon"], caller, npc, originals[0]["speaker"])
         for original in originals:
             sentence = {"speaker": speaker,             # speaker's name
                         "dialogue": original["dialogue"],   # dialogue's key

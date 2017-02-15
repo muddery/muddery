@@ -966,6 +966,12 @@ class DialogueSentencesForm(forms.ModelForm):
         objects = models.dialogues.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['dialogue'] = forms.ChoiceField(choices=choices)
+
+        # dialogue's icon
+        choices = [("", "---------")]
+        objects = models.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
         
         choices = [("", "---------")]
         objects = models.quests.objects.all()
