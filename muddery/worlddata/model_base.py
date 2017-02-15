@@ -1310,6 +1310,9 @@ class dialogue_sentences(models.Model):
     # sentence's speaker
     speaker = models.CharField(max_length=NAME_LENGTH, blank=True)
 
+    # speaker's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
     # sentence's content
     content = models.TextField(blank=True)
 
