@@ -18,8 +18,7 @@ class MudderyCombatHandler(DefaultScript):
     This implements the combat handler.
     """
 
-    # standard Script hooks 
-
+    # standard Script hooks
     def at_script_creation(self):
         "Called when script is first created"
         self.desc = "handles combat"
@@ -32,27 +31,21 @@ class MudderyCombatHandler(DefaultScript):
         # if battle is finished
         self.db.finished = False
 
-
     def _init_character(self, character):
         """
         This initializes handler back-reference 
         and combat cmdset on a character
         """
-        character.ndb.combat_handler = self
-        character.cmdset.add("muddery.commands.default_cmdsets.CombatCmdSet")
-
+        if character:
+            character.at_enter_combat(self)
 
     def _cleanup_character(self, character):
         """
         Remove character from handler and clean 
         it of the back-reference and cmdset
         """
-        del character.ndb.combat_handler
-        character.skill_handler.stop_auto_combat_skill()
-        character.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
-        if character.has_player:
-            character.show_status()
-
+        if character:
+            character.at_leave_combat()
 
     def at_start(self):
         """
@@ -64,12 +57,8 @@ class MudderyCombatHandler(DefaultScript):
             self._init_character(character)
         self.start_combat()
 
-
     def at_stop(self):
         "Called just before the script is stopped/destroyed."
-        if not self.db.finished:
-            self.msg_all({"combat_finish": {"stopped": True}})
-
         for character in self.db.characters.values():
             # note: the list() call above disconnects list from database
             self._cleanup_character(character)
@@ -112,14 +101,6 @@ class MudderyCombatHandler(DefaultScript):
                 character.set_team(team)
                 self.db.characters[character.dbref] = character
                 self._init_character(character)
-        
-        for character in self.db.characters.values():
-            if character.has_player:
-                # notify character
-                character.msg({"joined_combat": True})
-                message = {"combat_info": self.get_appearance(),
-                           "combat_commands": character.get_combat_commands()}
-                character.msg(message)
 
         self.start_combat()
 
@@ -132,7 +113,6 @@ class MudderyCombatHandler(DefaultScript):
         if not self.db.characters:
             # if we have no more characters in battle, kill this handler
             self.stop()
-
 
     def msg_all(self, message):
         "Send message to all combatants"
@@ -171,8 +151,7 @@ class MudderyCombatHandler(DefaultScript):
             return
 
         for character in self.db.characters.values():
-            if not character.has_player:
-                character.skill_handler.start_auto_combat_skill()
+            character.at_combat_start()
 
     def finish(self):
         """

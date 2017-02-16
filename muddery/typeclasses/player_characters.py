@@ -175,6 +175,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         self.resume_last_dialogue()
 
+        self.resume_combat()
+
     def at_pre_unpuppet(self):
         """
         Called just before beginning to un-connect a puppeting from
@@ -876,6 +878,61 @@ class MudderyPlayerCharacter(MudderyCharacter):
             skills.append(info)
 
         return skills
+
+    def at_enter_combat(self, combat_handler):
+        """
+        Called when the character enters a combat.
+
+        Returns:
+            None
+        """
+        super(MudderyPlayerCharacter, self).at_enter_combat(combat_handler)
+
+        self.show_enter_combat(combat_handler)
+
+    def at_leave_combat(self):
+        """
+        Called when the character leaves a combat.
+
+        Returns:
+            None
+        """
+        super(MudderyPlayerCharacter, self).at_leave_combat()
+
+        if self.has_player:
+            # notify combat finished
+            self.msg({"combat_finish": {"stopped": True}})
+
+            # show status
+            self.show_status()
+
+    def show_enter_combat(self, combat_handler):
+        """
+        Show combat information to the player.
+
+        Returns:
+            None
+        """
+        if not combat_handler:
+            return
+        # notify character
+        self.msg({"joined_combat": True})
+
+        # send messages in order
+        self.msg({"combat_info": combat_handler.get_appearance(),
+                  "combat_commands": self.get_combat_commands()})
+
+    def resume_combat(self):
+        """
+        Resume unfinished combat.
+
+        Returns:
+            None
+        """
+        combat_handler = getattr(self.ndb, "combat_handler", None)
+        if combat_handler:
+            # show combat infomation
+            self.show_enter_combat(combat_handler)
 
     def die(self, killers):
         """
