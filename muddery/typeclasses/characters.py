@@ -518,6 +518,53 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     # Combat methods.
     #
     ########################################
+    def at_enter_combat(self, combat_handler):
+        """
+        Called when the character enters a combat.
+
+        Returns:
+            None
+        """
+        if not combat_handler:
+            return
+
+        # add the combat handler
+        self.ndb.combat_handler = combat_handler
+
+        # Change the command set.
+        self.cmdset.add("muddery.commands.default_cmdsets.CombatCmdSet")
+
+    def at_combat_start(self):
+        """
+        Called when the combat begins.
+
+        Returns:
+            None
+        """
+        pass
+
+    def at_combat_finish(self):
+        """
+        Called when the combat finishes.
+
+        Returns:
+            None
+        """
+        pass
+
+    def at_leave_combat(self):
+        """
+        Called when the character leaves a combat.
+
+        Returns:
+            None
+        """
+        # remove the combat handler
+        del self.ndb.combat_handler
+
+        # remove combat commands
+        self.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
+
     def is_in_combat(self):
         """
         Check if the character is in combat.
