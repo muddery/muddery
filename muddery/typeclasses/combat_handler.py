@@ -86,7 +86,6 @@ class MudderyCombatHandler(DefaultScript):
 #                "hp": character.db.hp}
 #        self.msg_all_combat_process([info])
 
-
     def set_combat(self, teams, desc):
         """
         Add combatant to handler
@@ -103,7 +102,6 @@ class MudderyCombatHandler(DefaultScript):
                 self._init_character(character)
 
         self.start_combat()
-
 
     def remove_character(self, character):
         "Remove combatant from handler"
@@ -224,7 +222,6 @@ class MudderyCombatHandler(DefaultScript):
         self.db.finished = True
         self.stop()
 
-
     def get_appearance(self):
         """
         Get the combat appearance.
@@ -237,6 +234,10 @@ class MudderyCombatHandler(DefaultScript):
                     "name": character.get_name(),
                     "max_hp": character.max_hp,
                     "hp": character.db.hp}
+
+            icon = getattr(character, "icon", None)
+            if icon:
+                info["icon"] = icon
             appearance["characters"].append(info)
 
         return appearance
@@ -284,5 +285,5 @@ class MudderyCombatHandler(DefaultScript):
         self.msg_all_combat_process(result)
 
         if self.can_finish():
-            # if this is only one team left, kill this handler
+            # if there is only one team left, kill this handler
             self.finish()
