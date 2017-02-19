@@ -5,14 +5,13 @@ This module imports data from files to db.
 from __future__ import print_function
 
 import os
-import csv
 import tempfile
 import zipfile
 from django.apps import apps
 from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
-from muddery.utils import readers
+from muddery.utils import writers
 
 
 def get_header(model_name):
@@ -39,34 +38,46 @@ def get_lines(model_name):
 
     # get records
     for record in model_obj.objects.all():
-        line = [record.serializable_value(field.name) for field in fields]
+        line = [str(record.serializable_value(field.name)) for field in fields]
         yield line
 
 
-def export_file_with_name(file_name, model_name):
+def export_file(filename, model_name, file_type=None):
     """
     Export a table to a csv file.
     """
-    csv_file = open(file_name, 'w')
-    export_file(csv_file, model_name)
+    if not file_type:
+        # Get file's extension name.
+        file_type = os.path.splitext(filename)[1].lower()
+        if len(file_type) > 0:
+            file_type = file_type[1:]
 
-    csv_file.close()
+    writer = None
+    all_writers = writers.get_writers()
+    for w in all_writers:
+        if file_type in w.available_types:
+            writer = w(filename)
+            break
 
-
-def export_file(file, model_name):
-    """
-    Export a table to a csv file.
-    """
-    writer = csv.writer(file)
+    if not writer:
+        print("Can not export file %s" % filename)
+        return
 
     for line in get_lines(model_name):
-        writer.writerow(line)
+        writer.writeln(line)
+
+    writer.save()
 
 
-def export_zip_all(file):
+def export_zip_all(file, file_type=None):
     """
     Export all tables to a zip file which contains a group of csv files.
     """
+    if not file_type:
+        # Set default file type.
+        file_type = "csv"
+
+    # Get tempfile's name.
     temp = tempfile.mktemp()
 
     try:
@@ -76,22 +87,11 @@ def export_zip_all(file):
         app_config = apps.get_app_config(settings.WORLD_DATA_APP)
         for model in app_config.get_models():
             model_name = model._meta.object_name
-            export_file_with_name(temp, model_name)
-            filename = model_name + ".csv"
+            export_file(temp, model_name, file_type)
+            filename = model_name + "." + file_type
             archive.write(temp, filename)
     finally:
         os.remove(temp)
-
-
-def export_all(path_name):
-    """
-    Export all data files from models.
-    """
-    # get model names
-    app_config = apps.get_app_config(settings.WORLD_DATA_APP)
-    for model in app_config.get_models():
-        name = model._meta.verbose_name
-        export_file_with_name(path_name + name, name)
 
 
 def export_resources(file):

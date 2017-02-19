@@ -16,6 +16,8 @@ from evennia.server.sessionhandler import SESSIONS
 from evennia.utils import logger
 from muddery.utils import exporter
 from muddery.utils import importer
+from muddery.utils import readers
+from muddery.utils import writers
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS, LOCALIZED_STRINGS_HANDLER
 from muddery.utils.game_settings import CLIENT_SETTINGS
@@ -62,7 +64,12 @@ def world_editor(request):
                       settings.OTHER_DATA_MODELS
     models = [{"key": model, "name": LS(model, category="models") + "(" + model + ")"} for model in model_list]
 
-    context = {"models": models}
+    export_types = []
+    for w in writers.get_writers():
+        export_types.extend(w.available_types)
+
+    context = {"models": models,
+               "export_types": export_types}
     return render(request, 'worldeditor.html', context)
 
 
@@ -83,12 +90,13 @@ def export_game_data(request):
     Export game world files.
     """
     response = http.HttpResponseNotModified()
+    file_type = request.GET.get("file_type", None)
 
     # get data's zip
     zipfile = None
     try:
         zipfile = tempfile.TemporaryFile()
-        exporter.export_zip_all(zipfile)
+        exporter.export_zip_all(zipfile, file_type)
         zipfile.seek(0)
 
         filename = time.strftime("worlddata_%Y%m%d_%H%M%S.zip", time.localtime())
@@ -100,6 +108,41 @@ def export_game_data(request):
         logger.log_tracemsg(message)
 
         zipfile.close()
+        return render(request, 'fail.html', {"message": message})
+
+    return response
+
+
+@staff_member_required
+def export_data_single(request):
+    """
+    Export a data table.
+    """
+    response = http.HttpResponseNotModified()
+    model_name = request.GET.get("model_name", None)
+    file_type = request.GET.get("file_type", None)
+
+    if not file_type:
+        # Default file type.
+        file_type = "csv"
+
+    # Get tempfile's name.
+    temp =  tempfile.mktemp()
+    temp_file = None
+    try:
+        exporter.export_file(temp, model_name, file_type)
+        temp_file = open(temp, "r")
+
+        filename = model_name + "." + file_type
+        response = http.StreamingHttpResponse(file_iterator(temp_file))
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename="%s"' % filename
+    except Exception, e:
+        message = "Can't export game data: %s" % e
+        logger.log_tracemsg(message)
+
+        if temp_file:
+            temp_file.close()
         return render(request, 'fail.html', {"message": message})
 
     return response
@@ -128,35 +171,6 @@ def export_resources(request):
         logger.log_tracemsg(message)
 
         zipfile.close()
-        return render(request, 'fail.html', {"message": message})
-
-    return response
-
-
-@staff_member_required
-def export_data_single(request):
-    """
-    Export a data table.
-    """
-    response = http.HttpResponseNotModified()
-    model_name = request.GET.get("model_name", None)
-
-    # get data's zip
-    temp_file = None
-    try:
-        temp_file = tempfile.TemporaryFile()
-        exporter.export_file(temp_file, model_name)
-        temp_file.seek(0)
-
-        filename = model_name + ".csv"
-        response = http.StreamingHttpResponse(file_iterator(temp_file))
-        response['Content-Type'] = 'application/octet-stream'
-        response['Content-Disposition'] = 'attachment;filename="%s"' % filename
-    except Exception, e:
-        message = "Can't export game data: %s" % e
-        logger.log_tracemsg(message)
-
-        temp_file.close()
         return render(request, 'fail.html', {"message": message})
 
     return response
@@ -228,12 +242,15 @@ def import_data_single(request):
             temp_file.flush()
 
             (filename, ext_name) = os.path.splitext(upload_file.name)
+            file_type = None
+            if ext_name:
+                file_type = ext_name[1:]
 
             # If model name is empty, get model name from filename.
             if not model_name:
                 model_name = filename
 
-            if importer.import_file(temp_file.name, model_name, file_type=ext_name, widecard=False):
+            if importer.import_file(temp_file.name, model_name, file_type=file_type, widecard=False):
                 temp_file.close()
                 return render(request, 'success.html', {"message": "World data imported!"})
         except Exception, e:

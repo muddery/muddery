@@ -38,16 +38,21 @@ def import_file(file_name, model_name, file_type=None, widecard=True, clear=True
         else:
             file_names = [file_name]
 
+        readers_dict = {}
+        for r in readers.get_readers():
+            for type in r.available_types:
+                readers_dict[type] = r
+
         for file_name in file_names:
             if not file_type:
                 # get file's extension name
                 file_type = os.path.splitext(file_name)[1].lower()
+                if len(file_type) > 0:
+                    file_type = file_type[1:]
 
             reader = None
-            if file_type == ".csv":
-                reader = readers.csv_reader(file_name)
-            elif file_type == ".xls" or file_type == ".xlsx":
-                reader = readers.xls_reader(file_name)
+            if file_type in readers_dict:
+                reader = readers_dict[file_type](file_name)
 
             if not reader:
                 # does support this file type, read next one.
@@ -62,7 +67,7 @@ def import_file(file_name, model_name, file_type=None, widecard=True, clear=True
 
             try:
                 # read title
-                title = reader.next()
+                title = reader.readln()
 
                 # get field types
                 # type = 0    means common field
@@ -100,7 +105,7 @@ def import_file(file_name, model_name, file_type=None, widecard=True, clear=True
 
                 # import values
                 # read next line
-                values = reader.next()
+                values = reader.readln()
 
                 while values:
                     try:
@@ -146,7 +151,7 @@ def import_file(file_name, model_name, file_type=None, widecard=True, clear=True
                         print("Can not load %s %s: %s" % (file_name, values, e))
 
                     # read next line
-                    values = reader.next()
+                    values = reader.readln()
 
             except StopIteration:
                 # reach the end of file, pass this exception

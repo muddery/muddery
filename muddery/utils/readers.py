@@ -16,6 +16,8 @@ class DataReader(object):
     """
     Game data file reader.
     """
+    available_types = None
+
     def __init__(self, filename = None):
         """
         Args:
@@ -41,6 +43,8 @@ class CSVReader(DataReader):
     """
     CSV file's reader.
     """
+    available_types = ("csv",)
+
     def __init__(self, filename=None):
         """
         Args:
@@ -55,7 +59,6 @@ class CSVReader(DataReader):
         if filename:
             csvfile = open(filename, 'r')
             self.reader = csv.reader(csvfile)
-            print("self.reader: %s" % self.reader)
 
     def readln(self):
         """
@@ -67,15 +70,17 @@ class CSVReader(DataReader):
         if not self.reader:
             raise StopIteration
 
-        # read line
+        # Read line.
         return self.reader.next()
 
 
 class XLSReader(DataReader):
     """
-    CSV file's reader.
+    XLS/XLSX file's reader.
     """
-    def __init__(self, filename = None):
+    available_types = ("xls", "xlsx")
+
+    def __init__(self, filename=None):
         """
         Args:
             filename: (String) data file's name.
@@ -93,11 +98,11 @@ class XLSReader(DataReader):
             return
 
         # load file
-        self.table = None
+        self.sheet = None
         self.row_pos = 0
         if filename:
-            data = xlrd.open_workbook(filename)
-            self.table = data.sheet_by_index(0)
+            book = xlrd.open_workbook(filename)
+            self.sheet = book.sheet_by_index(0)
 
     def readln(self):
         """
@@ -106,13 +111,27 @@ class XLSReader(DataReader):
         Returns:
             list: data line
         """
-        if not self.table:
+        if not self.sheet:
             raise StopIteration
 
-        if self.row_pos >= self.table.nrows:
+        if self.row_pos >= self.sheet.nrows:
             raise StopIteration
 
-        # read line
+        # Read line.
         pos = self.row_pos
         self.row_pos += 1
-        return self.table.row_values(pos)
+        return self.sheet.row_values(pos)
+
+
+def get_readers():
+    """
+    Get all available writers.
+
+    Returns:
+        list: available writers
+    """
+    readers = [CSVReader]
+    if xlrd:
+        readers.append(XLSReader)
+
+    return readers
