@@ -49,52 +49,57 @@
     <div><br></div>
     <hr/>
     <h2>Download data of the game world.</h2>
+    <div>(Install xlwt/xlsxwriter to support download xls/xlsx files.)</div>
     <div>Download data the game world to a zip file of csv files.</div>
     <form method="GET">
-      <input type="hidden" name="export_game_data"/>
       <input type="submit" value="Download"/>
+      <select name="file_type">
+        {% for type in export_types %}
+        <option value={{ type }}>{{ type }}</option>
+        {% endfor %}
+      </select>
+      <input type="hidden" name="export_game_data"/>
     </form>
     <div><br></div>
+
+    <div>Download a data table.</div>
+    <form method="GET">
+      <input type="submit" value="Download"/>
+      <select name="model_name">
+        {% for model in models %}
+        <option value="{{ model.key }}">{{ model.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="file_type">
+        {% for type in export_types %}
+        <option value={{ type }}>{{ type }}</option>
+        {% endfor %}
+      </select>
+      <div><br></div>
+      <input type="hidden" name="export_data_single"/>
+    </form>
+    <div><br></div>
+
     <div>Download game resources files to a zip file.</div>
     <form method="GET">
       <input type="hidden" name="export_resources"/>
       <input type="submit" value="Download"/>
     </form>
     <div><br></div>
-    <div>Download a data table.</div>
-    <form method="GET">
-      {% csrf_token %}
-      <select name="model_name">
-        {% for model in models %}
-        <option value="{{ model.key }}">{{ model.name }}</option>
-        {% endfor %}
-      </select>
-      <div><br></div>
-      <input type="hidden" name="export_data_single"/>
-      <input type="submit" value="Download"/>
-    </form>
-    <div><br></div>
+
     <hr/>
     <h2>Upload data of the game world.</h2>
+    <div>(Install xlrd to support upload xls/xlsx files.)</div>
     <div>Upload a zip file of csv files to the database.</div>
     <div><span style="color: red">NOTICE: Current world's data will be replaced!</span></div>
     <form enctype="multipart/form-data" method="POST">
       {% csrf_token %}
       <input type="file" name="import_data_all" accept="application/zip"/>
-      <br>
       <input type="submit" value="Upload"/>
     </form>
     <div><br></div>
-    <div>Upload a zip file of resources.</div>
-    <div><span style="color: red">NOTICE: Current resources will be replaced!</span></div>
-    <form enctype="multipart/form-data" method="POST">
-      {% csrf_token %}
-      <input type="file" name="import_resources_all" accept="application/zip"/>
-      <br>
-      <input type="submit" value="Upload"/>
-    </form>
-    <div><br></div>
-    <div>Upload a csv/xls/xlsx file to the database.</div>
+
+    <div>Upload a data file to the database.</div>
     <div><span style="color: red">NOTICE: Current world's data will be replaced!</span></div>
     <form enctype="multipart/form-data" method="POST">
       {% csrf_token %}
@@ -104,13 +109,21 @@
         <option value="{{ model.key }}">{{ model.name }}</option>
         {% endfor %}
       </select>
-      <div><br></div>
       <input type="file" name="import_data_single" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
-      <div><br></div>
+      <input type="submit" value="Upload"/>
+    </form>
+    <div><br></div>
+
+    <div>Upload a zip file of resources.</div>
+    <div><span style="color: red">NOTICE: Current resources will be replaced!</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <input type="file" name="import_resources_all" accept="application/zip"/>
       <input type="submit" value="Upload"/>
     </form>
     <div><br></div>
     <hr/>
+
     <h2>Apply changes to the game.</h2>
     <div>Apply game world's data to the server. You need to restart the server then.</div>
     <form method="POST">

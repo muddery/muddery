@@ -46,54 +46,62 @@
     
     <div><br></div>
     <hr/>
+
     <h2>下载游戏世界的数据</h2>
-    <div>下载游戏世界的数据到一组csv文件的zip压缩包。</div>
+    <div>(安装 xlwt/xlsxwriter 以支持下载 xls/xlsx 文件。)</div>
+    <div><br></div>
+    <div>下载游戏世界的数据到zip压缩包中。</div>
     <form method="GET">
-      <input type="hidden" name="export_game_data"/>
       <input type="submit" value="下载"/>
+      <select name="file_type">
+        {% for type in export_types %}
+        <option value={{ type }}>{{ type }}</option>
+        {% endfor %}
+      </select>
+      <input type="hidden" name="export_game_data"/>
     </form>
     <div><br></div>
+
+    <div>下载一张数据表。</div>
+    <form method="GET">
+      <input type="submit" value="下载"/>
+      <select name="model_name">
+        {% for model in models %}
+        <option value="{{ model.key }}">{{ model.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="file_type">
+        {% for type in export_types %}
+        <option value={{ type }}>{{ type }}</option>
+        {% endfor %}
+      </select>
+      <div><br></div>
+      <input type="hidden" name="export_data_single"/>
+    </form>
+    <div><br></div>
+
     <div>下载游戏资源文件到zip压缩包中。</div>
     <form method="GET">
       <input type="hidden" name="export_resources"/>
       <input type="submit" value="下载"/>
     </form>
     <div><br></div>
-    <div>下载一张数据表。</div>
-    <form method="GET">
-      {% csrf_token %}
-      <select name="model_name">
-        {% for model in models %}
-        <option value="{{ model.key }}">{{ model.name }}</option>
-        {% endfor %}
-      </select>
-      <div><br></div>
-      <input type="hidden" name="export_data_single"/>
-      <input type="submit" value="下载"/>
-    </form>
-    <div><br></div>
+
     <hr/>
     <h2>上传游戏世界的数据</h2>
-    <div>将zip文件中的csv文件上传到数据库。</div>
+    <div>(安装 xlrd 以支持上传 xls/xlsx 文件。)</div>
+    <div><br></div>
+    <div>上传zip压缩包中的数据文件。</div>
     <div><span style="color: red">注意：当前游戏世界的数据会被替换！</span></div>
     <form enctype="multipart/form-data" method="POST">
       {% csrf_token %}
-      <input type="file" name="import_game_data" accept="application/zip"/>
-      <br>
+      <input type="file" name="import_data_all" accept="application/zip"/>
       <input type="submit" value="上传"/>
     </form>
     <div><br></div>
-    <div>将zip文件中的资源文件上传。</div>
-    <div><span style="color: red">注意：当前的资源文件会被替换！</span></div>
-    <form enctype="multipart/form-data" method="POST">
-      {% csrf_token %}
-      <input type="file" name="import_resources" accept="application/zip"/>
-      <br>
-      <input type="submit" value="上传"/>
-    </form>
-    <div><br></div>
-    <div>上传单个 csv/xls/xlsx 文件到数据库。</div>
-    <div><span style="color: red">NOTICE: Current world's data will be replaced!</span></div>
+
+    <div>上传单个数据文件到数据库。</div>
+    <div><span style="color: red">注意：当前游戏世界的数据会被替换！</span></div>
     <form enctype="multipart/form-data" method="POST">
       {% csrf_token %}
       <select name="model_name">
@@ -102,13 +110,21 @@
         <option value="{{ model.key }}">{{ model.name }}</option>
         {% endfor %}
       </select>
-      <div><br></div>
       <input type="file" name="import_data_single" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
-      <div><br></div>
-      <input type="submit" value="Upload"/>
+      <input type="submit" value="上传"/>
+    </form>
+    <div><br></div>
+
+    <div>上传zip压缩包中的资源文件。</div>
+    <div><span style="color: red">注意：当前的资源文件会被替换！</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <input type="file" name="import_resources_all" accept="application/zip"/>
+      <input type="submit" value="上传"/>
     </form>
     <div><br></div>
     <hr/>
+
     <h2>将变化应用到游戏</h2>
     <div>将游戏世界的数据应用到游戏中。然后需要重启服务器。</div>
     <form method="POST">
