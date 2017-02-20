@@ -5,8 +5,8 @@ Muddery webclient (javascript component)
 var combat = {
     _finished: false,
     _result: null,
-    _loot: null,
-    _exp: 0,
+    _exp: null,
+    _loots: null,
     _dialogue: null,
 
     createCombat: function(data) {
@@ -48,26 +48,75 @@ var combat = {
         data_handler.current_target = "";
         this._finished = false;
         this._result = null;
-        this._loot = null;
-        this._exp = 0;
+        this._exp = null;
+        this._loots = null;
         this._dialogue = null;
 
         webclient.doSetPopupSize();
     },
 
+    setGetObject: function(data) {
+        this._loots = data;
+    },
+
     displayGetObject: function(data) {
-        this._loot = data;
+        // object's info
+        var boxBodyLoot = $('#combat_loot');
+        if (boxBodyLoot.length > 0) {
+            // add object's name
+            try {
+                var accepted = data.accepted;
+                var get = false;
+                for (var key in accepted) {
+                    get = true;
+                    $('<div>')
+                        .text(key + ": " + accepted[key])
+                        .appendTo(boxBodyLoot);
+                }
+
+                if (get) {
+                    $('<div>')
+                        .text(LS('You got:'))
+                        .prependTo(boxBodyLoot);
+                }
+            }
+            catch(error) {
+            }
+
+            try {
+                var rejected = data.rejected;
+                for (var key in rejected) {
+                    $('<div>')
+                        .text(key + ": " + rejected[key])
+                        .appendTo(boxBodyLoot);
+                }
+            }
+            catch(error) {
+            }
+        }
+    },
+
+    setGetExp: function(data) {
+        this._exp = data;
     },
 
     displayGetExp: function(data) {
-        this._exp = data;
+        var boxBodyExp = $('#combat_exp');
+        if (boxBodyExp.length > 0) {
+            $('<div>')
+                .text(LS('You got exp: ') + data)
+                .appendTo(boxBodyExp);
+        }
     },
 
     finishCombat: function(data) {
         this._finished = true;
         this._result = data;
-        
-        setTimeout(combat.showCombatResult, 1000);
+    },
+
+    leftCombat: function(data) {
+        this._finished = true;
+        setTimeout(combat.showCombatResult, 500);
     },
 
     showCombatResult: function() {
@@ -98,6 +147,11 @@ var combat = {
             .addClass('modal-body')
             .appendTo(boxContent);
 
+        var boxBodyExp = $('<div>')
+            .attr('id', 'combat_exp')
+            .addClass('modal-body')
+            .appendTo(boxContent);
+            
         var boxBodyLoot = $('<div>')
             .attr('id', 'combat_loot')
             .addClass('modal-body')
@@ -112,73 +166,23 @@ var combat = {
                 .addClass('modal-title')
                 .text(LS('BATTLE RESULT')).appendTo(boxHeader));
 
-        var get = false;
-
-        // exp
-        if (self._exp > 0) {
-            $('<div>')
-                .text(LS('Exp') + LS(': ') + self._exp)
-                .appendTo(boxBodyLoot);
-            get = true;
-        }
-
-        // object's info
-        if (self._loot) {
-            // add object's name
-            try {
-                var accepted = self._loot.accepted;
-                if (accepted.length > 0) {
-                    get = true;
-                }
-                for (var key in accepted) {
-                    $('<div>')
-                        .text(key + ": " + accepted[key])
-                        .appendTo(boxBodyLoot);
-                }
-            }
-            catch(error) {
-            }
-
-            try {
-                var rejected = self._loot.rejected;
-                for (var key in rejected) {
-                    $('<div>')
-                        .text(key + ": " + rejected[key])
-                        .appendTo(boxBodyLoot);
-                }
-            }
-            catch(error) {
-            }
-        }
-
-        if (get) {
-            $('<div>')
-                .text(LS('You got:'))
-                .prependTo(boxBodyLoot);
-        }
-
         // result
-        if ("stopped" in self._result) {
-            boxBodyResult.text(LS("Combat stopped !"));
-        }
-        else if ("escaped" in self._result) {
+        if ("escaped" in self._result) {
             boxBodyResult.text(LS("Escaped !"));
         }
-        else if ("winner" in self._result) {
-            var win = false;
-            for (var i in self._result.winner) {
-                if (self._result.winner[i].dbref == data_handler.character_dbref) {
-                    win = true;
-                    break;
-                }
-            }
+        else if ("win" in self._result) {
+            boxBodyResult.text(LS("You win !"));
+        }
+        else if ("lose" in self._result) {
+            boxBodyResult.text(LS("You lost !"));
+        }
 
-            if (win) {
-                boxBodyResult.text(LS("You win !"));
-            }
-            else {
-                boxBodyResult.text(LS("You lost !"));
-            }
+        if (self._exp) {
+            self.displayGetExp(self._exp);
+        }
+
+        if (self._loots) {
+            self.displayGetObject(self._loots);
         }
 
         // button

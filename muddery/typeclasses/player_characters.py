@@ -890,6 +890,55 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         self.show_enter_combat(combat_handler)
 
+    def at_combat_win(self, winners, losers):
+        """
+        Called when the character wins the combat.
+        
+        Args:
+            winners: (List) all combat winners.
+            losers: (List) all combat losers.
+
+        Returns:
+            None
+        """
+        super(MudderyPlayerCharacter, self).at_combat_win( winners, losers)
+
+        self.msg({"combat_finish": {"win": True}})
+
+        # loot
+        # get object list
+        loots = None
+        for loser in losers:
+            obj_list = loser.loot_handler.get_obj_list(self)
+            if obj_list:
+                if not loots:
+                    loots = obj_list
+                else:
+                    loots.extend(obj_list)
+
+        if loots:
+            # give objects to winner
+            self.receive_objects(loots)
+
+        # call quest handler
+        for loser in losers:
+            self.quest_handler.at_objective(defines.OBJECTIVE_KILL, loser.get_data_key())
+
+    def at_combat_lose(self, winners, losers):
+        """
+        Called when the character loses the combat.
+
+        Args:
+            winners: (List) all combat winners.
+            losers: (List) all combat losers.
+
+        Returns:
+            None
+        """
+        super(MudderyPlayerCharacter, self).at_combat_lose(winners, losers)
+
+        self.msg({"combat_finish": {"lose": True}})
+
     def at_leave_combat(self):
         """
         Called when the character leaves a combat.
@@ -901,7 +950,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         if self.has_player:
             # notify combat finished
-            self.msg({"combat_finish": {"stopped": True}})
+            self.msg({"left_combat": True})
 
             # show status
             self.show_status()
@@ -980,7 +1029,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         if not GAME_SETTINGS.get("auto_resume_dialogues"):
             # Can not auto resume dialogues.
-        	return
+            return
 
         if not sentences_list:
             self.clear_current_dialogue()
@@ -1024,7 +1073,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         if not GAME_SETTINGS.get("auto_resume_dialogues"):
             # Can not auto resume dialogues.
-        	return
+            return
 
         if not self.db.current_dialogue:
             return
@@ -1134,3 +1183,28 @@ class MudderyPlayerCharacter(MudderyCharacter):
         # Send dialogues_list to the player.
         self.save_current_dialogue(sentences_list, npc)
         self.msg({"dialogues_list": sentences_list})
+
+    def add_exp(self, exp):
+        """
+        Add character's exp.
+        Args:
+            exp: the exp value to add.
+
+        Returns:
+            None
+        """
+        super(MudderyPlayerCharacter, self).add_exp(exp)
+
+        self.msg({"get_exp": exp})
+
+    def level_up(self):
+        """
+        Upgrade level.
+
+        Returns:
+            None
+        """
+        super(MudderyPlayerCharacter, self).level_up()
+
+        # notify the player
+        self.msg({"msg": LS("{c%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})

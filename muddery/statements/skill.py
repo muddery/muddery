@@ -54,11 +54,9 @@ class FuncEscape(StatementFunction):
                   "success": True}
         self.caller.skill_results([result])
 
-        combat_handler.remove_character(self.caller)
-        if combat_handler.can_finish():
-            combat_handler.finish()
-
         self.caller.msg({"combat_finish": {"escaped": True}})
+
+        combat_handler.remove_character(self.caller)
 
 
 class FuncHeal(StatementFunction):

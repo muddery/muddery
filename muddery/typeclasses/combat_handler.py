@@ -66,7 +66,6 @@ class MudderyCombatHandler(DefaultScript):
 
     # Combat-handler methods
 
-
 #    def add_character(self, character):
 #        "Add combatant to handler"
 #        self.db.characters[character.dbref] = character
@@ -99,7 +98,9 @@ class MudderyCombatHandler(DefaultScript):
             for character in teams[team]:
                 character.set_team(team)
                 self.db.characters[character.dbref] = character
-                self._init_character(character)
+
+        for character in self.db.characters.values():
+            self._init_character(character)
 
         self.start_combat()
 
@@ -108,9 +109,10 @@ class MudderyCombatHandler(DefaultScript):
         if character.dbref in self.db.characters:
             self._cleanup_character(character)
             del self.db.characters[character.dbref]
-        if not self.db.characters:
-            # if we have no more characters in battle, kill this handler
-            self.stop()
+
+            if self.can_finish():
+                # if we have no more characters in battle, kill this handler
+                self.finish()
 
     def msg_all(self, message):
         "Send message to all combatants"
@@ -165,59 +167,12 @@ class MudderyCombatHandler(DefaultScript):
 
             winners = [c for c in self.db.characters.values() if c.get_team() == winner_team]
             losers = [c for c in self.db.characters.values() if c.get_team() != winner_team]
-
-            if losers:
-                # defeated somebody
-                # loot
-                for winner in winners:
-                    if winner.has_player:
-                        # get object list
-                        loots = None
-                        for loser in losers:
-                            obj_list = loser.loot_handler.get_obj_list(winner)
-                            if obj_list:
-                                if not loots:
-                                    loots = obj_list
-                                else:
-                                    loots.extend(obj_list)
-
-                        if loots:
-                            # give objects to winner
-                            winner.receive_objects(loots)
-
-                # add exp
-                for winner in winners:
-                    # get total exp
-                    exp = 0
-                    for loser in losers:
-                        exp += loser.provide_exp(winner)
-
-                    if exp:
-                        # give experience to the winner
-                        winner.add_exp(exp)
-
-                # send result to players
-                msg = []
-                for winner in winners:
-                    msg.append({"dbref": winner.dbref,
-                                "name": winner.get_name()})
-
-                self.msg_all({"combat_finish": {"winner": msg}})
-
-                # call quest handler
-                for winner in winners:
-                    if winner.has_player:
-                        for loser in losers:
-                            winner.quest_handler.at_objective(defines.OBJECTIVE_KILL, loser.get_data_key())
-
-                # remove dead character
-                for loser in losers:
-                    self._cleanup_character(loser)
-                    del self.db.characters[loser.dbref]
-                    loser.die(winners)
-            else:
-                # no losers, no result
-                self.msg_all({"combat_finish": {"stopped": True}})
+            
+            for character in winners:
+                character.at_combat_win(winners, losers)
+                
+            for character in losers:
+                character.at_combat_lose(winners, losers)
 
         self.db.finished = True
         self.stop()
@@ -241,7 +196,6 @@ class MudderyCombatHandler(DefaultScript):
             appearance["characters"].append(info)
 
         return appearance
-
 
     def get_all_characters(self):
         """

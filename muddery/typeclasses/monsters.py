@@ -28,7 +28,6 @@ class MudderyMonster(MudderyCharacter):
         
         self.reborn_cd = GAME_SETTINGS.get("npc_reborn_cd")
 
-
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -53,14 +52,26 @@ class MudderyMonster(MudderyCharacter):
         # begin auto cast
         self.skill_handler.start_auto_combat_skill()
 
-    def at_combat_finish(self):
+    def at_combat_win(self, winners, losers):
         """
-        Called when a character leaves a combat.
+        Called when the character wins a combat.
 
         Returns:
             None
         """
-        super(MudderyMonster, self).at_combat_finish()
+        super(MudderyMonster, self).at_combat_win(winners, losers)
+
+        # stop auto cast
+        self.skill_handler.stop_auto_combat_skill()
+
+    def at_combat_lose(self, winners, losers):
+        """
+        Called when the character loses a combat.
+
+        Returns:
+            None
+        """
+        super(MudderyMonster, self).at_combat_lose(winners, losers)
 
         # stop auto cast
         self.skill_handler.stop_auto_combat_skill()
@@ -90,7 +101,6 @@ class MudderyMonster(MudderyCharacter):
                         content.show_location()
         except Exception, e:
             logger.log_tracemsg("die error: %s" % e)
-
 
     def reborn(self):
         """
