@@ -621,20 +621,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         return self.db.team
 
-    def hurt(self, damage):
-        """
-        Be hurted.
-
-        Args:
-            damage: (number) the damage value
-
-        Returns:
-            None
-        """
-        self.db.hp -= damage
-        if self.db.hp < 0:
-            self.db.hp = 0
-
     def is_alive(self):
         """
         Check if the character is alive.
@@ -723,3 +709,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # recover hp
         self.db.hp = self.max_hp
+
+    def show_status(self):
+        """
+        Show character's status.
+        """
+        pass
