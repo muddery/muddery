@@ -80,17 +80,27 @@ class FuncHeal(StatementFunction):
         if not self.args:
             return
 
-        effect = self.args[0]
+        hp = self.args[0]
 
-        recover_hp = self.caller.add_hp(effect)
+        # recover caller's hp
+        recover_hp = int(hp)
+
+        if self.caller.db.hp < 0:
+            self.caller.db.hp = 0
+
+        if self.caller.db.hp + recover_hp > self.caller.max_hp:
+            recover_hp = self.caller.max_hp - self.caller.db.hp
+
+        # add actual hp value
         if recover_hp > 0:
+            self.caller.db.hp += recover_hp
             self.caller.show_status()
 
         result = {"type": "healed",                 # heal result
-                  "message": [LS("%s healed %s HPs.") % (self.caller.get_name(), int(effect))],
+                  "message": [LS("%s healed %s HPs.") % (self.caller.get_name(), int(hp))],
                   "caller": self.caller.dbref,      # caller's dbref
                   "target": self.caller.dbref,      # target's dbref
-                  "effect": effect,                 # effect
+                  "effect": hp,                     # effect
                   "hp": self.caller.db.hp,          # current hp of the target
                   "max_hp": self.caller.max_hp}     # max hp of the target
 
@@ -129,7 +139,11 @@ class FuncHit(StatementFunction):
         damage = round(damage * effect)
 
         # hurt target
-        self.obj.hurt(damage)
+        self.obj.db.hp -= damage
+        if self.obj.db.hp < 0:
+            self.obj.db.hp = 0
+
+        self.obj.show_status()
 
         result = {"type": "attacked",               # attack result
                   "message": [LS("%s hitted %s.") % (self.caller.get_name(), self.obj.get_name()),

@@ -45,20 +45,28 @@ class Food(MudderyFood):
         if number <= 0:
             raise ValueError("Number should be above zero.")
 
-        status_changed = False
-
         result = ""
         used = number
         if used > self.db.number:
             used = self.db.number
 
         if hasattr(self.dfield, "hp"):
-            recover_hp = user.add_hp(self.dfield.hp * used)
-            if recover_hp > 0:
-                status_changed = True
-            result += LS("HP recovered by %s.") % int(recover_hp)
+            hp = self.dfield.hp * used
 
-        if status_changed:
-            user.show_status()
+            # recover caller's hp
+            recover_hp = int(hp)
+
+            if user.db.hp < 0:
+                user.db.hp = 0
+
+            if user.db.hp + recover_hp > user.max_hp:
+                recover_hp = user.max_hp - user.db.hp
+
+            # add actual hp value
+            if recover_hp > 0:
+                user.db.hp += recover_hp
+                user.show_status()
+
+            result += LS("HP recovered by %s.") % int(recover_hp)
 
         return result, used
