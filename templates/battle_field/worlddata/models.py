@@ -220,6 +220,36 @@ class default_objects(model_base.default_objects):
     pass
 
 
+# ------------------------------------------------------------
+#
+# shops
+#
+# ------------------------------------------------------------
+class shops(model_base.shops):
+    "Store all shops."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# shop goods
+#
+# ------------------------------------------------------------
+class shop_goods(model_base.shop_goods):
+    "All goods that sold in shops."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# npc shops
+#
+# ------------------------------------------------------------
+class npc_shops(model_base.npc_shops):
+    "Store npc's shops."
+    pass
+
+
 #------------------------------------------------------------
 #
 # store all skills

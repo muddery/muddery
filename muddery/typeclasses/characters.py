@@ -543,15 +543,41 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         pass
 
-    def at_combat_finish(self):
+    def at_combat_win(self, winners, losers):
         """
-        Called when the combat finishes.
+        Called when the character wins the combat.
+        
+        Args:
+            winners: (List) all combat winners.
+            losers: (List) all combat losers.
 
         Returns:
             None
         """
-        pass
+        # add exp
+        # get total exp
+        exp = 0
+        for loser in losers:
+            exp += loser.provide_exp(self)
 
+        if exp:
+            # give experience to the winner
+            self.add_exp(exp)
+
+    def at_combat_lose(self, winners, losers):
+        """
+        Called when the character loses the combat.
+        
+        Args:
+            winners: (List) all combat winners.
+            losers: (List) all combat losers.
+
+        Returns:
+            None
+        """
+        # The character is killed.
+        self.die(winners)
+            
     def at_leave_combat(self):
         """
         Called when the character leaves a combat.
@@ -686,8 +712,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                 self.db.exp = 0
                 break
 
-        self.msg({"get_exp": exp})
-
     def level_up(self):
         """
         Upgrade level.
@@ -699,7 +723,3 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # recover hp
         self.db.hp = self.max_hp
-
-        if self.has_player:
-            # notify the player
-            self.msg({"msg": LS("{c%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})

@@ -126,9 +126,6 @@ class DialogueRelationsForm(forms_base.DialogueRelationsForm):
 class DialogueSentencesForm(forms_base.DialogueSentencesForm):
     pass
 
-class SystemLocalizedStringsForm(forms_base.SystemLocalizedStringsForm):
-    pass
-
 class CustomLocalizedStringsForm(forms_base.CustomLocalizedStringsForm):
     pass
 

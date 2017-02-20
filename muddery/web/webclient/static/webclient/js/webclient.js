@@ -129,6 +129,9 @@ var webclient = {
 
                     combat.createCombat(data[key]);
                 }
+                else if (key == "left_combat") {
+                    combat.leftCombat(data[key]);
+                }
                 else if (key == "combat_finish") {
                     combat.finishCombat(data[key]);
                 }
@@ -592,7 +595,7 @@ var webclient = {
         }
         else {
             // If in combat, show objects in the combat box.
-            combat.displayGetObject(data);
+            combat.setGetObject(data);
         }
     },
 
@@ -680,7 +683,7 @@ var webclient = {
         var combat_box = $('#combat_box');
         if (combat_box.length > 0) {
             // If in combat, show exp in the combat box.
-            combat.displayGetExp(data);
+            combat.setGetExp(data);
         }
     },
 
