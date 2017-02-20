@@ -76,6 +76,19 @@ class MudderyMonster(MudderyCharacter):
         # stop auto cast
         self.skill_handler.stop_auto_combat_skill()
 
+    def at_leave_combat(self):
+        """
+        Called when the character leaves a combat.
+
+        Returns:
+            None
+        """
+        super(MudderyMonster, self).at_leave_combat()
+
+        if self.is_alive():
+            # Recover all hp.
+            self.db.hp = self.max_hp
+
     def die(self, killers):
         """
         The monster is killed. Reborn in settings.NPC_REBORN_CD seconds.
