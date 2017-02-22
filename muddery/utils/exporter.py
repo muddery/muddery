@@ -52,13 +52,12 @@ def export_file(filename, model_name, file_type=None):
         if len(file_type) > 0:
             file_type = file_type[1:]
 
-    writer = None
-    all_writers = writers.get_writers()
-    for w in all_writers:
-        if file_type == w.file_type:
-            writer = w(filename)
-            break
+    writer_class = writers.get_writer(file_type)
+    if not writer_class:
+        print("Can not export file %s" % filename)
+        return
 
+    writer = writer_class(filename)
     if not writer:
         print("Can not export file %s" % filename)
         return
@@ -77,21 +76,24 @@ def export_zip_all(file, file_type=None):
         # Set default file type.
         file_type = "csv"
 
-    # Get tempfile's name.
-    temp = tempfile.mktemp()
+    writer_class = writers.get_writer(file_type)
+    if writer_class:
+        # Get tempfile's name.
+        temp = tempfile.mktemp()
+        file_ext = writer_class.file_ext
 
-    try:
-        archive = zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED)
+        try:
+            archive = zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED)
 
-        # get model names
-        app_config = apps.get_app_config(settings.WORLD_DATA_APP)
-        for model in app_config.get_models():
-            model_name = model._meta.object_name
-            export_file(temp, model_name, file_type)
-            filename = model_name + "." + file_type
-            archive.write(temp, filename)
-    finally:
-        os.remove(temp)
+            # get model names
+            app_config = apps.get_app_config(settings.WORLD_DATA_APP)
+            for model in app_config.get_models():
+                model_name = model._meta.object_name
+                export_file(temp, model_name, file_type)
+                filename = model_name + "." + file_ext
+                archive.write(temp, filename)
+        finally:
+            os.remove(temp)
 
 
 def export_resources(file):

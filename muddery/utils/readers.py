@@ -17,7 +17,7 @@ class DataReader(object):
     """
     Game data file reader.
     """
-    available_types = None
+    types = None
 
     def __init__(self, filename = None):
         """
@@ -44,7 +44,7 @@ class CSVReader(DataReader):
     """
     CSV file's reader.
     """
-    available_types = ("csv",)
+    types = ("csv",)
 
     def __init__(self, filename=None):
         """
@@ -85,7 +85,7 @@ class XLSReader(DataReader):
     """
     XLS/XLSX file's reader.
     """
-    available_types = ("xls", "xlsx")
+    types = ("xls", "xlsx")
 
     def __init__(self, filename=None):
         """
@@ -130,6 +130,7 @@ class XLSReader(DataReader):
         return self.sheet.row_values(pos)
 
 
+all_readers = [CSVReader, XLSReader]
 def get_readers():
     """
     Get all available writers.
@@ -142,3 +143,17 @@ def get_readers():
         readers.append(XLSReader)
 
     return readers
+
+
+reader_dict = {type: reader for reader in all_readers for type in reader.types}
+def get_reader(reader_type):
+    """
+    Get a reader by reader's type.
+
+    Args:
+        type: (String) reader's type.
+
+    Returns:
+        reader
+    """
+    return reader_dict.get(reader_type, None)
