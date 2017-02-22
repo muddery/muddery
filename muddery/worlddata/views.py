@@ -64,12 +64,8 @@ def world_editor(request):
                       settings.OTHER_DATA_MODELS
     models = [{"key": model, "name": LS(model, category="models") + "(" + model + ")"} for model in model_list]
 
-    export_types = []
-    for w in writers.get_writers():
-        export_types.append(w.file_type)
-
     context = {"models": models,
-               "export_types": export_types}
+               "writers": writers.get_writers()}
     return render(request, 'worldeditor.html', context)
 
 
@@ -126,6 +122,10 @@ def export_data_single(request):
         # Default file type.
         file_type = "csv"
 
+    writer_class = writers.get_writer(file_type)
+    if not writer_class:
+        return render(request, 'fail.html', {"message": "Can not export this type of file."})
+
     # Get tempfile's name.
     temp =  tempfile.mktemp()
     temp_file = None
@@ -133,7 +133,7 @@ def export_data_single(request):
         exporter.export_file(temp, model_name, file_type)
         temp_file = open(temp, "r")
 
-        filename = model_name + "." + file_type
+        filename = model_name + "." + writer_class.file_ext
         response = http.StreamingHttpResponse(file_iterator(temp_file))
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename

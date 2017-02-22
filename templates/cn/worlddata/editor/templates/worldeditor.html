@@ -48,14 +48,13 @@
     <hr/>
 
     <h2>下载游戏世界的数据</h2>
-    <div>(安装 xlwt/xlsxwriter 以支持下载 xls/xlsx 文件。)</div>
     <div><br></div>
     <div>下载游戏世界的数据到zip压缩包中。</div>
     <form method="GET">
       <input type="submit" value="下载"/>
       <select name="file_type">
-        {% for type in export_types %}
-        <option value={{ type }}>{{ type }}</option>
+        {% for writer in writers %}
+        <option value={{ writer.type }}>{{ writer.name }}</option>
         {% endfor %}
       </select>
       <input type="hidden" name="export_game_data"/>
@@ -71,8 +70,8 @@
         {% endfor %}
       </select>
       <select name="file_type">
-        {% for type in export_types %}
-        <option value={{ type }}>{{ type }}</option>
+        {% for writer in writers %}
+        <option value={{ writer.type }}>{{ writer.name }}</option>
         {% endfor %}
       </select>
       <div><br></div>
@@ -89,7 +88,6 @@
 
     <hr/>
     <h2>上传游戏世界的数据</h2>
-    <div>(安装 xlrd 以支持上传 xls/xlsx 文件。)</div>
     <div><br></div>
     <div>上传zip压缩包中的数据文件。</div>
     <div><span style="color: red">注意：当前游戏世界的数据会被替换！</span></div>

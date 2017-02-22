@@ -22,7 +22,9 @@ class DataWriter(object):
     """
     Game data file writer.
     """
-    file_type = None
+    type = None
+    name = None
+    file_ext = None
 
     def __init__(self, filename = None):
         """
@@ -61,7 +63,9 @@ class CSVWriter(DataWriter):
     """
     CSV file's writer.
     """
-    file_type = "csv"
+    type = "csv"
+    name = "csv"
+    file_ext = "csv"
 
     def __init__(self, filename=None):
         """
@@ -113,7 +117,9 @@ class CSVWindowsWriter(DataWriter):
     """
     CSV file's writer.
     """
-    file_type = "csv (For Windows)"
+    type = "csv_win"
+    name = "csv (For Windows)"
+    file_ext = "csv"
 
     def __init__(self, filename=None):
         """
@@ -168,7 +174,9 @@ class XLSWriter(DataWriter):
     
     IT HAS PROBLEMS ON WINDOWS!
     """
-    file_type = "xls"
+    type = "xls"
+    name = "xls"
+    file_ext = "xls"
 
     def __init__(self, filename=None):
         """
@@ -234,7 +242,9 @@ class XLSXWriter(DataWriter):
     
     IT HAS PROBLEMS ON WINDOWS!
     """
-    file_type = "xlsx"
+    type = "xlsx"
+    name = "xlsx"
+    file_ext = "xlsx"
 
     def __init__(self, filename=None):
         """
@@ -294,6 +304,7 @@ class XLSXWriter(DataWriter):
         self.book.close()
 
 
+all_writers = [CSVWindowsWriter, CSVWriter]
 def get_writers():
     """
     Get all available writers.
@@ -301,13 +312,18 @@ def get_writers():
     Returns:
         list: available writers
     """
-    writers = [CSVWindowsWriter, CSVWriter]
-    
-    # THEY HAVE PROBLEMS ON WINDOWS!
-    # if xlwt:
-    #     writers.append(XLSWriter)
-    #
-    # if xlsxwriter:
-    #     writers.append(XLSXWriter)
+    return all_writers
 
-    return writers
+
+writer_dict = {writer.type: writer for writer in all_writers}
+def get_writer(writer_type):
+    """
+    Get a writer by writer's type.
+
+    Args:
+        type: (String) writer's type.
+
+    Returns:
+        writer
+    """
+    return writer_dict.get(writer_type, None)
