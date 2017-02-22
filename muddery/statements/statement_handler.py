@@ -12,7 +12,7 @@ from django.conf import settings
 
 #re_words = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)|("(.*)")')
 re_function = re.compile(r'[a-zA-Z_][a-zA-Z0-9_\.]*\(.*\)')
-def exec_condition(func_set, condition, caller, obj):
+def exec_condition(func_set, condition, caller, obj, **kwargs):
     """
     Execute the statements.
 
@@ -25,11 +25,11 @@ def exec_condition(func_set, condition, caller, obj):
     Returns:
         result
     """
-    func = get_condition_func(func_set, caller, obj)
+    func = get_condition_func(func_set, caller, obj, **kwargs)
     return re_function.sub(func, condition)
 
 
-def get_condition_func(func_set, caller, obj):
+def get_condition_func(func_set, caller, obj, **kwargs):
     """
     Get a function used in re's sub.
 
@@ -54,7 +54,7 @@ def get_condition_func(func_set, caller, obj):
         func_word = word.group()
 
         try:
-            result = exec_function(func_set, func_word, caller, obj)
+            result = exec_function(func_set, func_word, caller, obj, **kwargs)
             if result:
                 return "True"
             else:
@@ -66,7 +66,7 @@ def get_condition_func(func_set, caller, obj):
     return function
 
 
-def exec_function(func_set, func_word, caller, obj):
+def exec_function(func_set, func_word, caller, obj, **kwargs):
     """
     Do function.
 
@@ -97,7 +97,7 @@ def exec_function(func_set, func_word, caller, obj):
         return
 
     func_obj = func_class()
-    func_obj.set(caller, obj, func_args)
+    func_obj.set(caller, obj, func_args, **kwargs)
     return func_obj.func()
 
 
@@ -119,7 +119,7 @@ class StatementHandler(object):
         skill_func_set_class = class_from_module(settings.SKILL_FUNC_SET)
         self.skill_func_set = skill_func_set_class()
 
-    def do_action(self, action, caller, obj):
+    def do_action(self, action, caller, obj, **kwargs):
         """
         Do a function.
 
@@ -138,13 +138,13 @@ class StatementHandler(object):
         functions = action.split(";")
         for function in functions:
             try:
-                exec_function(self.action_func_set, function, caller, obj)
+                exec_function(self.action_func_set, function, caller, obj, **kwargs)
             except Exception, e:
                 logger.log_errmsg("Exec function error: %s %s" % (function, e))
 
         return
 
-    def do_skill(self, action, caller, obj):
+    def do_skill(self, action, caller, obj, **kwargs):
         """
         Do a function.
 
@@ -163,13 +163,13 @@ class StatementHandler(object):
         functions = action.split(";")
         for function in functions:
             try:
-                exec_function(self.skill_func_set, function, caller, obj)
+                exec_function(self.skill_func_set, function, caller, obj, **kwargs)
             except Exception, e:
                 logger.log_errmsg("Exec function error: %s %s" % (function, e))
 
         return
 
-    def match_condition(self, condition, caller, obj):
+    def match_condition(self, condition, caller, obj, **kwargs):
         """
         Check a condition.
 
@@ -185,7 +185,7 @@ class StatementHandler(object):
             return True
 
         # calculate functions first
-        exec_string = exec_condition(self.condition_func_set, condition, caller, obj)
+        exec_string = exec_condition(self.condition_func_set, condition, caller, obj, **kwargs)
 
         try:
             # do condition
