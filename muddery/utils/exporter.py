@@ -55,7 +55,7 @@ def export_file(filename, model_name, file_type=None):
     writer = None
     all_writers = writers.get_writers()
     for w in all_writers:
-        if file_type in w.available_types:
+        if file_type == w.file_type:
             writer = w(filename)
             break
 

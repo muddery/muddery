@@ -5,6 +5,7 @@ This module parse data files to lines.
 from __future__ import print_function
 
 import csv
+import codecs
 
 try:
     import xlwt
@@ -21,7 +22,7 @@ class DataWriter(object):
     """
     Game data file writer.
     """
-    available_types = None
+    file_type = None
 
     def __init__(self, filename = None):
         """
@@ -60,7 +61,7 @@ class CSVWriter(DataWriter):
     """
     CSV file's writer.
     """
-    available_types = ("csv",)
+    file_type = "csv"
 
     def __init__(self, filename=None):
         """
@@ -76,7 +77,60 @@ class CSVWriter(DataWriter):
         self.writer = None
         if filename:
             self.data_file = open(filename, 'w')
-            self.writer = csv.writer(self.data_file)
+            self.writer = csv.writer(self.data_file, dialect='excel')
+
+    def writeln(self, line):
+        """
+        Write data line.
+
+        Args:
+            line: (List) Line data.
+
+        Returns:
+            boolean: Write success.
+        """
+        if not self.writer:
+            return False
+
+        # Write line.
+        self.writer.writerow(line)
+        return True
+
+    def save(self):
+        """
+        Save the file
+
+        Returns:
+            None
+        """
+        if not self.data_file:
+            return
+
+        self.data_file.close()
+
+
+class CSVWindowsWriter(DataWriter):
+    """
+    CSV file's writer.
+    """
+    file_type = "csv (For Windows)"
+
+    def __init__(self, filename=None):
+        """
+        Args:
+            filename: (String) data file's name.
+
+        Returns:
+            None
+        """
+        super(CSVWindowsWriter, self).__init__(filename)
+
+        self.data_file = None
+        self.writer = None
+        if filename:
+            self.data_file = open(filename, 'w')
+            self.data_file.write(codecs.BOM_UTF8)
+            self.writer = csv.writer(self.data_file, dialect='excel')
 
     def writeln(self, line):
         """
@@ -111,8 +165,10 @@ class CSVWriter(DataWriter):
 class XLSWriter(DataWriter):
     """
     XLS/XLSX file's writer.
+    
+    IT HAS PROBLEMS ON WINDOWS!
     """
-    available_types = ("xls",)
+    file_type = "xls"
 
     def __init__(self, filename=None):
         """
@@ -175,8 +231,10 @@ class XLSWriter(DataWriter):
 class XLSXWriter(DataWriter):
     """
     XLSX file's writer.
+    
+    IT HAS PROBLEMS ON WINDOWS!
     """
-    available_types = ("xlsx",)
+    file_type = "xlsx"
 
     def __init__(self, filename=None):
         """
@@ -243,11 +301,13 @@ def get_writers():
     Returns:
         list: available writers
     """
-    writers = [CSVWriter]
-    if xlwt:
-        writers.append(XLSWriter)
-
-    if xlsxwriter:
-        writers.append(XLSXWriter)
+    writers = [CSVWindowsWriter, CSVWriter]
+    
+    # THEY HAVE PROBLEMS ON WINDOWS!
+    # if xlwt:
+    #     writers.append(XLSWriter)
+    #
+    # if xlsxwriter:
+    #     writers.append(XLSXWriter)
 
     return writers

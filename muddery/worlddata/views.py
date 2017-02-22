@@ -66,7 +66,7 @@ def world_editor(request):
 
     export_types = []
     for w in writers.get_writers():
-        export_types.extend(w.available_types)
+        export_types.append(w.file_type)
 
     context = {"models": models,
                "export_types": export_types}
