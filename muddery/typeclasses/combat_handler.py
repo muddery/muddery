@@ -76,14 +76,7 @@ class MudderyCombatHandler(DefaultScript):
 #        message = {"combat_info": self.get_appearance(),
 #                   "combat_commands": character.get_combat_commands()}
 #        character.msg(message)
-#
-#        # notify other characters
-#        info = {"type": "joined",
-#                "dbref": character.dbref,
-#                "name": character.name,
-#                "max_hp": character.max_hp,
-#                "hp": character.db.hp}
-#        self.msg_all_combat_process([info])
+
 
     def set_combat(self, teams, desc):
         """
@@ -206,17 +199,6 @@ class MudderyCombatHandler(DefaultScript):
 
         return self.db.characters.values()
 
-    def msg_all_combat_process(self, process):
-        """
-        Send combat process to all player characters.
-        """
-        if not process:
-            return
-
-        for character in self.db.characters.values():
-            if character.has_player:
-                character.msg({"combat_process": process})
-
     def msg_all_combat_info(self):
         """
         Send combat info to all player characters.
@@ -226,9 +208,20 @@ class MudderyCombatHandler(DefaultScript):
             if character.has_player:
                 character.msg({"combat_info": appearance})
 
-    def set_skill_result(self, result):
+    def prepare_skill(self, skill_key, caller, target):
         """
-        Set skill's result.
+        Cast a skill.
+        """
+        if caller:
+            caller.cast_skill(skill_key, target)
+        
+            if self.can_finish():
+                # if there is only one team left, kill this handler
+                self.finish()
+            
+    def send_skill_result(self, result):
+        """
+        Send skill's result to players
 
         Args:
             result: (dict) skill's result
@@ -236,8 +229,6 @@ class MudderyCombatHandler(DefaultScript):
         Returns:
             None
         """
-        self.msg_all_combat_process(result)
-
-        if self.can_finish():
-            # if there is only one team left, kill this handler
-            self.finish()
+        for character in self.db.characters.values():
+            if character.has_player:
+                character.msg({"skill_result": result})

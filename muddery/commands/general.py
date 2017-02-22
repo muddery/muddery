@@ -913,8 +913,8 @@ class CmdCastSkill(Command):
             target = caller.search(self.args["target"])
 
         try:
-            # Cast skill.
-            caller.skill_handler.cast_skill(skill_key, target)
+            # Prepare to cast this skill.
+            caller.prepare_skill(skill_key, target)
         except Exception, e:
             caller.msg({"alert":LS("Can not cast this skill.")})
             logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))

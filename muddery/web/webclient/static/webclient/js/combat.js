@@ -4,6 +4,7 @@ Muddery webclient (javascript component)
 
 var combat = {
     _finished: false,
+    _left: false,
     _result: null,
     _exp: null,
     _loots: null,
@@ -47,6 +48,7 @@ var combat = {
         // reset combat data
         data_handler.current_target = "";
         this._finished = false;
+        this._left = false;
         this._result = null;
         this._exp = null;
         this._loots = null;
@@ -115,7 +117,7 @@ var combat = {
     },
 
     leftCombat: function(data) {
-        this._finished = true;
+        this._left = true;
         setTimeout(combat.showCombatResult, 500);
     },
 
@@ -285,86 +287,90 @@ var combat = {
         }
     },
 
-    displayCombatProcess: function(data) {
+    displayStatus: function(data) {
         for (var i in data) {
-            // show message
-            if ("message" in data[i]) {
-                for (var m in data[i].message) {
-                    webclient.displayMsg(data[i].message[m]);
-                }
-            }
-
-            /*
-            if (data[i].type == "joined") {
-                var result = $('#fighter_' + data[i].dbref.slice(1));
-                if (result.length == 0) {
-                    var fighter = data[i];
-                    var div = $('<div>').attr('id', 'fighter_' + fighter.dbref.slice(1))
-                                        .text(fighter.name)
-                                        .data('dbref', fighter.dbref);
-                    $('<div>').addClass('hp')
-                              .attr('id', 'status_' + fighter.dbref.slice(1))
-                              .text(fighter.hp + '/' + fighter.max_hp)
-                              .appendTo(div);
-                    
-                    if (fighter.dbref == data_handler.character_dbref) {
-                        div.addClass("fighter_team");
-                    }
-                    else {
-                        div.addClass("fighter_enemy");
-                        if (!data_handler.current_target) {
-                            data_handler.current_target = fighter.dbref;
-                        }
-                    }
-                    
-                    var characters = $('#combat_characters');
-                    div.appendTo(characters);
-                }
-            }
-            else */
-            if (data[i].type == "attacked") {
-                var caller = $('#fighter_' + data[i].caller.slice(1));
-                if (data[i].caller == data_handler.character_dbref) {
-                    caller.animate({left: '50%'}, 100);
-                    caller.animate({left: '12%'}, 100);
-                }
-                else {
-                    caller.animate({right: '50%'}, 100);
-                    caller.animate({right: '12%'}, 100);
-                }
-                
-                var target = $('#status_' + data[i].target.slice(1));
-                target.text(data[i].hp + '/' + data[i].max_hp)
-            }
-            else if (data[i].type == "healed") {
-                var target = $('#status_' + data[i].target.slice(1));
-                target.text(data[i].hp + '/' + data[i].max_hp)
-            }
-            else if (data[i].type == "escape") {
-                if (data[i].success) {
-                    var target = $('#status_' + data[i].caller.slice(1));
-                    target.text(LS("Escaped"));
-                }
-
-                if (data[i].caller in data_handler.name_list) {
-                    var name = "";
-                    if (data[i].caller == data_handler.character_dbref) {
-                        name = LS("You");
-                    }
-                    else {
-                        name = data_handler.name_list[data[i].caller];
-                    }
-
-                    if (data[i].success) {
-                        webclient.displayMsg("{c" + name + "{n" + LS(" escaped from the combat."));
-                    }
-                    else {
-                        webclient.displayMsg("{c" + name + "{n" + LS(" failed to escape."));
-                    }
-                }
+            var character = $('#status_' + data[i]["dbref"].slice(1));
+            if (character.length > 0) {
+                character.text(data[i]["hp"] + '/' + data[i]["max_hp"])
             }
         }
-        
+    },
+
+    displaySkillResult: function(skill) {
+
+		/*
+		if (data[i].type == "joined") {
+			var result = $('#fighter_' + data[i].dbref.slice(1));
+			if (result.length == 0) {
+				var fighter = data[i];
+				var div = $('<div>').attr('id', 'fighter_' + fighter.dbref.slice(1))
+									.text(fighter.name)
+									.data('dbref', fighter.dbref);
+				$('<div>').addClass('hp')
+						  .attr('id', 'status_' + fighter.dbref.slice(1))
+						  .text(fighter.hp + '/' + fighter.max_hp)
+						  .appendTo(div);
+				
+				if (fighter.dbref == data_handler.character_dbref) {
+					div.addClass("fighter_team");
+				}
+				else {
+					div.addClass("fighter_enemy");
+					if (!data_handler.current_target) {
+						data_handler.current_target = fighter.dbref;
+					}
+				}
+				
+				var characters = $('#combat_characters');
+				div.appendTo(characters);
+			}
+		}
+		else */
+
+		if (skill.key == "skill_normal_hit" ||
+		    skill.key == "skill_dunt") {
+			var caller = $('#fighter_' + skill.caller.slice(1));
+			if (skill.caller == data_handler.character_dbref) {
+				caller.animate({left: '50%'}, 100);
+				caller.animate({left: '12%'}, 100);
+			}
+			else {
+				caller.animate({right: '50%'}, 100);
+				caller.animate({right: '12%'}, 100);
+			}
+			
+			// var target = $('#status_' + data[i].target.slice(1));
+			// target.text(data[i].hp + '/' + data[i].max_hp)
+		}
+		else if (skill.key == "skill_normal_heal" ||
+		         skill.key == "skill_powerful_heal") {
+			// var target = $('#status_' + data[i].target.slice(1));
+			// target.text(data[i].hp + '/' + data[i].max_hp)
+		}
+		else if (skill.key == "skill_escape") {
+			if (data[i].success) {
+				var target = $('#status_' + data[i].caller.slice(1));
+				target.text(LS("Escaped"));
+			}
+
+			if (data[i].caller in data_handler.name_list) {
+				var name = "";
+				if (data[i].caller == data_handler.character_dbref) {
+					name = LS("You");
+				}
+				else {
+					name = data_handler.name_list[data[i].caller];
+				}
+
+				if (data[i].success) {
+					webclient.displayMsg("{c" + name + "{n" + LS(" escaped from the combat."));
+				}
+				else {
+					webclient.displayMsg("{c" + name + "{n" + LS(" failed to escape."));
+				}
+			}
+		}
+	
         /*
         var fighter = $('status_' + data["character"]);
         if (fighter) {
@@ -412,8 +418,12 @@ var combat = {
         commands.doCastSkill(key)
     },
 
-    isInCombat: function() {
+    isCombatFinished: function() {
         return this._finished;
+    },
+    
+    isLeftCombat: function() {
+    	return this._left;
     },
 
     setDialogue: function(data) {

@@ -6,10 +6,10 @@ import random
 from muddery.utils.localized_strings_handler import LS
 
 
-from muddery.statements.statement_function import StatementFunction
+from muddery.statements.statement_function import SkillFunction
 
 
-class FuncEscape(StatementFunction):
+class FuncEscape(SkillFunction):
     """
     Set the caller's attribute.
 
@@ -39,27 +39,21 @@ class FuncEscape(StatementFunction):
         rand = random.random()
         if rand >= odd:
             # escape failed
-            result = {"type": "escape",
-                      "message": [LS("%s tried to escape, but failed.") % self.caller.get_name()],
-                      "caller": self.caller.dbref,
-                      "success": False}
-            self.caller.skill_results([result])
+            result = self.result_message(message_model=LS("%(c) tried to escape, but failed."))
+            self.caller.send_skill_result(result)
             return
 
         # send skill's result to the combat handler manually
         # before the handler is removed from the character
-        result = {"type": "escape",
-                  "message": [LS("%s tried to escape. And succeeded!") % self.caller.get_name()],
-                  "caller": self.caller.dbref,
-                  "success": True}
-        self.caller.skill_results([result])
+        result = self.result_message(message_model=LS("%(c) tried to escape. Succeeded!"))
+        self.caller.send_skill_result(result)
 
         self.caller.msg({"combat_finish": {"escaped": True}})
 
         combat_handler.remove_character(self.caller)
 
 
-class FuncHeal(StatementFunction):
+class FuncHeal(SkillFunction):
     """
     Heal the caller.
 
@@ -81,6 +75,7 @@ class FuncHeal(StatementFunction):
             return
 
         hp = self.args[0]
+        message = getattr(self.kwargs, "message", "")
 
         # recover caller's hp
         recover_hp = int(hp)
@@ -96,18 +91,12 @@ class FuncHeal(StatementFunction):
             self.caller.db.hp += recover_hp
             self.caller.show_status()
 
-        result = {"type": "healed",                 # heal result
-                  "message": [LS("%s healed %s HPs.") % (self.caller.get_name(), int(hp))],
-                  "caller": self.caller.dbref,      # caller's dbref
-                  "target": self.caller.dbref,      # target's dbref
-                  "effect": hp,                     # effect
-                  "hp": self.caller.db.hp,          # current hp of the target
-                  "max_hp": self.caller.max_hp}     # max hp of the target
-
-        self.caller.skill_results([result])
+        # send skill result
+        result = self.result_message(int(hp))
+        self.caller.send_skill_result(result)
 
 
-class FuncHit(StatementFunction):
+class FuncHit(SkillFunction):
     """
     Hit the target.
 
@@ -145,19 +134,12 @@ class FuncHit(StatementFunction):
 
         self.obj.show_status()
 
-        result = {"type": "attacked",               # attack result
-                  "message": [LS("%s hitted %s.") % (self.caller.get_name(), self.obj.get_name()),
-                              LS("%s lost %s HPs.") % (self.obj.get_name(), int(damage))],
-                  "caller": self.caller.dbref,      # caller's dbref
-                  "target": self.obj.dbref,         # target's dbref
-                  "effect": damage,                 # effect
-                  "hp": self.obj.db.hp,             # current hp of the target
-                  "max_hp": self.obj.max_hp}        # max hp of the target
-
-        self.caller.skill_results([result])
+        # send skill result
+        result = self.result_message(int(damage))
+        self.caller.send_skill_result(result)
 
 
-class FuncIncreaseMaxHP(StatementFunction):
+class FuncIncreaseMaxHP(SkillFunction):
     """
     Passive skill, increase the caller's max_hp.
 
@@ -189,3 +171,7 @@ class FuncIncreaseMaxHP(StatementFunction):
         if hp > self.caller.max_hp:
             hp = self.caller.max_hp
         self.caller.db.hp = hp
+
+        # send skill result
+        result = self.result_message(effect)
+        self.caller.send_skill_result(result)
