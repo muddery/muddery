@@ -5,6 +5,7 @@ This module parse data files to lines.
 from __future__ import print_function
 
 import csv
+import codecs
 
 try:
     import xlrd
@@ -58,6 +59,12 @@ class CSVReader(DataReader):
         self.reader = None
         if filename:
             csvfile = open(filename, 'r')
+
+            # test BOM
+            head = csvfile.read(len(codecs.BOM_UTF8))
+            if head != codecs.BOM_UTF8:
+                # read from beginning
+                csvfile.seek(0)
             self.reader = csv.reader(csvfile)
 
     def readln(self):
