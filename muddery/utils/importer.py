@@ -38,11 +38,6 @@ def import_file(file_name, model_name, file_type=None, widecard=True, clear=True
         else:
             file_names = [file_name]
 
-        readers_dict = {}
-        for r in readers.get_readers():
-            for type in r.available_types:
-                readers_dict[type] = r
-
         for file_name in file_names:
             if not file_type:
                 # get file's extension name
@@ -50,12 +45,14 @@ def import_file(file_name, model_name, file_type=None, widecard=True, clear=True
                 if len(file_type) > 0:
                     file_type = file_type[1:]
 
-            reader = None
-            if file_type in readers_dict:
-                reader = readers_dict[file_type](file_name)
+            reader_class = readers.get_reader(file_type)
+            if not reader_class:
+                # Does support this file type, read next one.
+                continue
 
+            reader = reader_class(file_name)
             if not reader:
-                # does support this file type, read next one.
+                # Does support this file type, read next one.
                 continue
 
             # get model
