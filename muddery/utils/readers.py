@@ -18,6 +18,7 @@ class DataReader(object):
     Game data file reader.
     """
     types = None
+    binary = True
 
     def __init__(self, filename = None):
         """
@@ -45,6 +46,7 @@ class CSVReader(DataReader):
     CSV file's reader.
     """
     types = ("csv",)
+    binary = False
 
     def __init__(self, filename=None):
         """
@@ -86,6 +88,7 @@ class XLSReader(DataReader):
     XLS/XLSX file's reader.
     """
     types = ("xls", "xlsx")
+    binary = True
 
     def __init__(self, filename=None):
         """
