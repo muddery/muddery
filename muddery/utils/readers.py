@@ -138,11 +138,7 @@ def get_readers():
     Returns:
         list: available writers
     """
-    readers = [CSVReader]
-    if xlrd:
-        readers.append(XLSReader)
-
-    return readers
+    return all_readers
 
 
 reader_dict = {type: reader for reader in all_readers for type in reader.types}

@@ -69,7 +69,7 @@ def world_editor(request):
     return render(request, 'worldeditor.html', context)
 
 
-def file_iterator(file, chunk_size=512):
+def file_iterator(file, erase=False, chunk_size=512):
     while True:
         c = file.read(chunk_size)
         if c:
@@ -77,6 +77,8 @@ def file_iterator(file, chunk_size=512):
         else:
             # remove temp file
             file.close()
+            if erase:
+                os.remove(file.name)
             break
 
 
@@ -127,14 +129,14 @@ def export_data_single(request):
         return render(request, 'fail.html', {"message": "Can not export this type of file."})
 
     # Get tempfile's name.
-    temp =  tempfile.mktemp()
+    temp_name = tempfile.mktemp()
     temp_file = None
     try:
-        exporter.export_file(temp, model_name, file_type)
-        temp_file = open(temp, "r")
+        exporter.export_file(temp_name, model_name, file_type)
+        temp_file = open(temp_name, "rb")
 
         filename = model_name + "." + writer_class.file_ext
-        response = http.StreamingHttpResponse(file_iterator(temp_file))
+        response = http.StreamingHttpResponse(file_iterator(temp_file, erase=True))
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
     except Exception, e:
@@ -143,6 +145,12 @@ def export_data_single(request):
 
         if temp_file:
             temp_file.close()
+            
+        try:
+            os.remove(temp_name)
+        except Exception, e:
+            pass
+
         return render(request, 'fail.html', {"message": message})
 
     return response
@@ -233,8 +241,12 @@ def import_data_single(request):
     model_name = request.POST.get("model_name", None)
     upload_file = request.FILES.get("import_data_single", None)
 
+    success = False
     if upload_file:
-        temp_file = tempfile.NamedTemporaryFile()
+        # Get tempfile's name.
+        temp_name = tempfile.mktemp()
+        temp_file = open(temp_name, "wb")
+
         try:
             # Write to a template file.
             for chunk in upload_file.chunks():
@@ -250,14 +262,23 @@ def import_data_single(request):
             if not model_name:
                 model_name = filename
 
-            if importer.import_file(temp_file.name, model_name, file_type=file_type, widecard=False):
-                temp_file.close()
-                return render(request, 'success.html', {"message": "World data imported!"})
+            if importer.import_file(temp_name, model_name, file_type=file_type, widecard=False):
+                success = True
         except Exception, e:
             logger.log_tracemsg("Cannot import game data: %s" % e)
 
-        temp_file.close()
-    return render(request, 'fail.html', {"message": "Cannot import game data."})
+        if temp_file:
+            temp_file.close()
+
+        try:
+            os.remove(temp_name)
+        except:
+            pass
+        
+    if success:
+        return render(request, 'success.html', {"message": "World data imported!"})
+    else:
+        return render(request, 'fail.html', {"message": "Cannot import game data."})
 
 
 @staff_member_required
