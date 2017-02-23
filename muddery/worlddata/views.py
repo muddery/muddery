@@ -133,7 +133,12 @@ def export_data_single(request):
     temp_file = None
     try:
         exporter.export_file(temp_name, model_name, file_type)
-        temp_file = open(temp_name, "rb")
+
+        if writer_class.binary:
+            open_mode = "rb"
+        else:
+            open_mode = "r"
+        temp_file = open(temp_name, open_mode)
 
         filename = model_name + "." + writer_class.file_ext
         response = http.StreamingHttpResponse(file_iterator(temp_file, erase=True))
@@ -243,20 +248,30 @@ def import_data_single(request):
 
     success = False
     if upload_file:
+        # Get file type.
+        (filename, ext_name) = os.path.splitext(upload_file.name)
+        file_type = None
+        if ext_name:
+            file_type = ext_name[1:]
+
+        reader_class = readers.get_reader(file_type)
+        if not reader_class:
+            return render(request, 'fail.html', {"message": "Can not import this type of file."})
+
         # Get tempfile's name.
         temp_name = tempfile.mktemp()
-        temp_file = open(temp_name, "wb")
+
+        if reader_class.binary:
+            open_mode = "wb"
+        else:
+            open_mode = "w"
+        temp_file = open(temp_name, open_mode)
 
         try:
             # Write to a template file.
             for chunk in upload_file.chunks():
                 temp_file.write(chunk)
             temp_file.flush()
-
-            (filename, ext_name) = os.path.splitext(upload_file.name)
-            file_type = None
-            if ext_name:
-                file_type = ext_name[1:]
 
             # If model name is empty, get model name from filename.
             if not model_name:
