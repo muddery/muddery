@@ -68,6 +68,7 @@ class MudderySkill(MudderyObject):
         self.function = getattr(self.dfield, "function", "")
         self.cd = getattr(self.dfield, "cd", 0)
         self.passive = getattr(self.dfield, "passive", False)
+        self.message = getattr(self.dfield, "message", "")
 
     def get_available_commands(self, caller):
         """
@@ -103,24 +104,6 @@ class MudderySkill(MudderyObject):
             if gcd > 0:
                 self.db.cd_finish_time = time.time() + gcd
 
-    def cast_skill_manually(self, target):
-        """
-        Cast this skill manually. Can not cast passive skill in this way.
-
-        Args:
-            target: (object) skill's target
-
-        Returns:
-            result: (dict) skill's result
-        """
-        if self.passive:
-            owner = self.db.owner
-            if owner:
-                owner.msg({"alert": LS("You can not cast a passive skill.")})
-            return
-    
-        self.cast_skill(target)
-
     def cast_skill(self, target):
         """
         Cast this skill.
@@ -144,7 +127,10 @@ class MudderySkill(MudderyObject):
                 return
 
         # call skill function
-        STATEMENT_HANDLER.do_skill(self.function, owner, target)
+        print("skill_key: %s" % self.get_data_key())
+        STATEMENT_HANDLER.do_skill(self.function, owner, target,
+                                   key=self.get_data_key(), name=self.get_name(),
+                                   message=self.message)
 
         if not self.passive:
             # set cd
