@@ -2,6 +2,8 @@
 Base statement function.
 """
 
+import re
+
 
 class StatementFunction(object):
     """
@@ -50,6 +52,20 @@ class SkillFunction(StatementFunction):
     """
     This is the base skill function class.
     """
+    msg_escape = re.compile(r'%[%|n|c|t|e]')
+
+    @staticmethod
+    def escape_fun(word):
+        """
+        Change escapes to target words.
+        """
+        escape_word = word.group()
+        char = escape_word[1]
+        if char == "%":
+            return char
+        else:
+            return "%(" + char + ")s"
+
     def __init__(self):
         """
         Init default attributes.
@@ -70,8 +86,9 @@ class SkillFunction(StatementFunction):
         
         self.key = kwargs.get("key", "")
         self.name = kwargs.get("name", "")
-        self.message_model = kwargs.get("message", "")
-        
+        message_model = kwargs.get("message", "")
+        self.message_model = self.msg_escape.sub(self.escape_fun, message_model)
+
     def result_message(self, effect=None, message_model=None):
         """
         Create skill's result message.
@@ -97,7 +114,7 @@ class SkillFunction(StatementFunction):
         if self.message_model:
             values = {"n": self.name,
                       "c": caller_name,
-                      "o": obj_name,
+                      "t": obj_name,
                       "e": effect_str}
             message = self.message_model % values
 
