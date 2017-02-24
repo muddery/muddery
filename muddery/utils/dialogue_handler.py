@@ -5,7 +5,7 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
-
+import re
 from muddery.utils import defines
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.statements.statement_handler import STATEMENT_HANDLER
@@ -19,6 +19,20 @@ class DialogueHandler(object):
     """
     The DialogueHandler maintains a pool of dialogues.
     """
+    speaker_escape = re.compile(r'%[%|p|n]')
+
+    @staticmethod
+    def escape_fun(word):
+        """
+        Change escapes to target words.
+        """
+        escape_word = word.group()
+        char = escape_word[1]
+        if char == "%":
+            return char
+        else:
+            return "%(" + char + ")s"
+
     def __init__(self):
         """
         Initialize the handler.
@@ -77,9 +91,11 @@ class DialogueHandler(object):
 
         data["sentences"] = []
         for sentence in sentences:
+            speaker_model = self.speaker_escape.sub(self.escape_fun, sentence.speaker)
+
             data["sentences"].append({"dialogue": dialogue,
                                       "ordinal": sentence.ordinal,
-                                      "speaker": sentence.speaker,
+                                      "speaker_model": speaker_model,
                                       "icon": sentence.icon,
                                       "content": sentence.content,
                                       "action": sentence.action,
@@ -100,7 +116,6 @@ class DialogueHandler(object):
         # Add to cache.
         self.dialogue_storage[dialogue] = data
 
-
     def get_dialogue(self, dialogue):
         """
         Get specified dialogue.
@@ -117,7 +132,6 @@ class DialogueHandler(object):
 
         return self.dialogue_storage[dialogue]
 
-
     def get_sentence(self, dialogue, sentence):
         """
         Get specified sentence.
@@ -130,7 +144,6 @@ class DialogueHandler(object):
             pass
 
         return
-
 
     def check_need_get_next(self, sentences):
         """
@@ -152,7 +165,6 @@ class DialogueHandler(object):
             return False
 
         return True
-
 
     def get_npc_sentences_list(self, caller, npc):
         """
@@ -194,7 +206,6 @@ class DialogueHandler(object):
                 break
 
         return sentences_list
-
 
     def get_next_sentences_list(self, caller, npc, dialogue, sentence, include_current):
         """
@@ -239,7 +250,6 @@ class DialogueHandler(object):
                 break
 
         return sentences_list
-
 
     def get_npc_sentences(self, caller, npc):
         """
@@ -294,7 +304,6 @@ class DialogueHandler(object):
             
         return sentences
 
-
     def get_next_sentences(self, caller, npc, current_dialogue, current_sentence):
         """
         Get current sentence's next sentences.
@@ -343,28 +352,28 @@ class DialogueHandler(object):
 
         return sentences
 
-    def get_dialogue_speaker_name(self, caller, npc, speaker_str):
+    def get_dialogue_speaker_name(self, caller, npc, speaker_model):
         """
         Get the speaker's text.
         'p' means player.
         'n' means NPC.
         Use string in quotes directly.
         """
-        speaker = ""
-        try:
-            if speaker_str == "n":
-                if npc:
-                    speaker = npc.get_name()
-            elif speaker_str == "p":
-                speaker = caller.get_name()
-            elif speaker_str[0] == '"' and speaker_str[-1] == '"':
-                speaker = speaker_str[1:-1]
-        except:
-            pass
+        caller_name = ""
+        npc_name = ""
+
+        if caller:
+            caller_name = caller.get_name()
+        if npc:
+            npc_name = npc.get_name()
+
+        values = {"p": caller_name,
+                  "n": npc_name}
+        speaker = speaker_model % values
 
         return speaker
 
-    def get_dialogue_speaker_icon(self, icon_str, caller, npc, speaker_str):
+    def get_dialogue_speaker_icon(self, icon_str, caller, npc, speaker_model):
         """
         Get the speaker's text.
         'p' means player.
@@ -380,10 +389,10 @@ class DialogueHandler(object):
                 resource_info = model_resource.objects.get(key=icon_str)
                 icon = resource_info.resource.url
         else:
-            if speaker_str == "n":
+            if "%(n)" in speaker_model:
                 if npc:
                     icon = getattr(npc, "icon", None)
-            elif speaker_str == "p":
+            elif "%(p)" in speaker_model:
                 icon = getattr(caller, "icon", None)
 
         return icon
@@ -404,8 +413,8 @@ class DialogueHandler(object):
             return []
 
         sentences_list = []
-        speaker = self.get_dialogue_speaker_name(caller, npc, originals[0]["speaker"])
-        icon = self.get_dialogue_speaker_icon(originals[0]["icon"], caller, npc, originals[0]["speaker"])
+        speaker = self.get_dialogue_speaker_name(caller, npc, originals[0]["speaker_model"])
+        icon = self.get_dialogue_speaker_icon(originals[0]["icon"], caller, npc, originals[0]["speaker_model"])
         for original in originals:
             sentence = {"speaker": speaker,             # speaker's name
                         "dialogue": original["dialogue"],   # dialogue's key
@@ -454,7 +463,6 @@ class DialogueHandler(object):
         if sentence["provide_quest"]:
             caller.quest_handler.accept(sentence["provide_quest"])
 
-
     def finish_dialogue(self, caller, dialogue):
         """
         A dialogue finished, do it's action.
@@ -467,13 +475,11 @@ class DialogueHandler(object):
 
         caller.quest_handler.at_objective(defines.OBJECTIVE_TALK, dialogue)
 
-
     def clear(self):
         """
         clear cache
         """
         self.dialogue_storage = {}
-
 
     def get_npc_name(self, dialogue):
         """
@@ -489,7 +495,6 @@ class DialogueHandler(object):
                 pass
 
         return ""
-
 
     def have_quest(self, caller, npc):
         """
@@ -523,7 +528,6 @@ class DialogueHandler(object):
                     break
         
         return (provide_quest, complete_quest)
-
 
     def dialogue_have_quest(self, caller, npc, dialogue, accomplished_quests):
         """
