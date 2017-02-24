@@ -325,31 +325,33 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             (boolean) if the character has this skill or not
         """
         self.skill_handler.has_skill(skill)
+        
+    def prepare_skill(self, skill_key, target):
+        """
+        Prepare to cast a skill.
+        """
+        if self.is_in_combat():
+            self.ndb.combat_handler.prepare_skill(skill_key, self, target)
+        else:
+            self.cast_skill(skill_key, target)
+
+    def cast_skill(self, skill_key, target):
+        """
+        Cast a skill.
+        """
+        self.skill_handler.cast_skill(skill_key, target)
 
     def auto_cast_skill(self):
         """
         Auto cast an available skill.
+        Put this method on the character because TICKER_HANDLER needs a typeclass.
 
         Returns:
             None
         """
         self.skill_handler.auto_cast_skill()
 
-    def cast_skill_manually(self, skill, target):
-        """
-        Cast a skill.
-
-        Args:
-            skill: (string) skill's key
-            target: (object) skill's target
-
-        Returns:
-            None
-        """
-        self.target = target
-        self.skill_handler.cast_skill_manually(skill, target)
-
-    def skill_results(self, results):
+    def send_skill_result(self, result):
         """
         Set the result of the skill. The character can send these messages to its surroundings.
 
@@ -359,14 +361,13 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             None
         """
-
-        if results:
+        if result:
             if self.ndb.combat_handler:
                 # send skill's result to the combat handler
-                self.ndb.combat_handler.set_skill_result(results)
+                self.ndb.combat_handler.send_skill_result(result)
             else:
-                # TODO: send result to the target too!
-                self.msg({"skill_results": results})
+                # send skill's result to caller's location
+                self.location.msg_contents({"skill_result": result})
 
     ########################################
     #

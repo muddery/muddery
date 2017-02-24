@@ -924,6 +924,9 @@ class skills(models.Model):
     # skill's description for display
     desc = models.TextField(blank=True)
 
+    # skill's message when casting
+    message = models.TextField(blank=True)
+
     # skill's cd
     cd = models.FloatField(blank=True, default=0)
 

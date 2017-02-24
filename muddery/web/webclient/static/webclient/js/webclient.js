@@ -141,14 +141,14 @@ var webclient = {
                 else if (key == "combat_commands") {
                     combat.displayCombatCommands(data[key]);
                 }
-                else if (key == "combat_process") {
-                    combat.displayCombatProcess(data[key]);
+                else if (key == "combat_status") {
+                    combat.displayStatus(data[key])
                 }
                 else if (key == "skill_cd") {
                     this.displaySkillCD(data[key]);
                 }
-                else if (key == "skill_results") {
-                    this.displaySkillResults(data[key]);
+                else if (key == "skill_result") {
+                    this.displaySkillResult(data[key]);
                 }
                 else if (key == "get_exp") {
                     this.displayGetExp(data[key])
@@ -870,14 +870,16 @@ var webclient = {
         }
     },
 
-    displaySkillResults: function(data) {
-        for (var i in data) {
-            if ("message" in data[i]) {
-                for (var m in data[i].message) {
-                    this.displayMsg(data[i].message[m]);
-                }
-            }
-        }
+    displaySkillResult: function(data) {
+		if ("message" in data) {
+		    if (data.message) {
+			    this.displayMsg(data.message);
+			}
+		}
+		
+		if (!combat.isLeftCombat()) {
+			combat.displaySkillResult(data);
+		}
     },
 
     onLogin : function(data) {
