@@ -32,6 +32,8 @@ class FuncEscape(SkillFunction):
             # caller is not in combat.
             return
 
+        self.obj = self.caller
+
         odd = 0.0
         if self.args:
             odd = self.args[0]
@@ -39,18 +41,16 @@ class FuncEscape(SkillFunction):
         rand = random.random()
         if rand >= odd:
             # escape failed
-            result = self.result_message(message_model=LS("%(c) tried to escape, but failed."))
+            result = self.result_message(effect=0, message_model=LS("%(c)s tried to escape, but failed."))
             self.caller.send_skill_result(result)
             return
 
         # send skill's result to the combat handler manually
         # before the handler is removed from the character
-        result = self.result_message(message_model=LS("%(c) tried to escape. Succeeded!"))
+        result = self.result_message(effect=1, message_model=LS("%(c)s tried to escape. Succeeded!"))
         self.caller.send_skill_result(result)
 
-        self.caller.msg({"combat_finish": {"escaped": True}})
-
-        combat_handler.remove_character(self.caller)
+        combat_handler.skill_escape(self.caller)
 
 
 class FuncHeal(SkillFunction):
@@ -74,6 +74,8 @@ class FuncHeal(SkillFunction):
         if not self.args:
             return
 
+        self.obj = self.caller
+
         hp = self.args[0]
         message = getattr(self.kwargs, "message", "")
 
@@ -91,8 +93,13 @@ class FuncHeal(SkillFunction):
             self.caller.db.hp += recover_hp
             self.caller.show_status()
 
+        # character's status after skill casted
+        status = [{"dbref": self.caller.dbref,
+                   "max_hp": self.caller.max_hp,
+                   "hp": self.caller.db.hp}]
+
         # send skill result
-        result = self.result_message(int(hp))
+        result = self.result_message(effect=int(hp), status=status)
         self.caller.send_skill_result(result)
 
 
@@ -134,8 +141,13 @@ class FuncHit(SkillFunction):
 
         self.obj.show_status()
 
+        # character's status after skill casted
+        status = [{"dbref": self.obj.dbref,
+                   "max_hp": self.obj.max_hp,
+                   "hp": self.obj.db.hp}]
+
         # send skill result
-        result = self.result_message(int(damage))
+        result = self.result_message(effect=int(damage), status=status)
         self.caller.send_skill_result(result)
 
 
@@ -172,6 +184,9 @@ class FuncIncreaseMaxHP(SkillFunction):
             hp = self.caller.max_hp
         self.caller.db.hp = hp
 
+        # character's status after skill casted
+        status = [{"dbref": self.caller.dbref}]
+
         # send skill result
-        result = self.result_message(effect)
+        result = self.result_message(effect=effect, status=status)
         self.caller.send_skill_result(result)

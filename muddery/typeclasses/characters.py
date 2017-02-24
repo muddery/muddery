@@ -365,7 +365,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             if self.ndb.combat_handler:
                 # send skill's result to the combat handler
                 self.ndb.combat_handler.send_skill_result(result)
-            else:
+            elif self.location:
                 # send skill's result to caller's location
                 self.location.msg_contents({"skill_result": result})
 
@@ -578,7 +578,16 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         # The character is killed.
         self.die(winners)
-            
+
+    def at_combat_escape(self):
+        """
+        Called when the character escaped from the combat.
+
+        Returns:
+            None
+        """
+        pass
+
     def at_leave_combat(self):
         """
         Called when the character leaves a combat.

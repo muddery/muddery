@@ -89,7 +89,7 @@ class SkillFunction(StatementFunction):
         message_model = kwargs.get("message", "")
         self.message_model = self.msg_escape.sub(self.escape_fun, message_model)
 
-    def result_message(self, effect=None, message_model=None):
+    def result_message(self, effect=None, status=None, message_model=None):
         """
         Create skill's result message.
         """
@@ -111,16 +111,20 @@ class SkillFunction(StatementFunction):
         if effect:
             effect_str = str(effect)
 
-        if self.message_model:
+        if message_model is None:
+            message_model = self.message_model
+
+        if message_model:
             values = {"n": self.name,
                       "c": caller_name,
                       "t": obj_name,
                       "e": effect_str}
-            message = self.message_model % values
+            message = message_model % values
 
-        return {"key": self.key,             # skill's key
-                "name": self.name,           # skill's name
-                "effect": effect,            # skill's effect
-                "message": message,          # skill's message
-                "caller": caller_dbref,      # caller's dbref
-                "target": obj_dbref}         # target's dbref
+        return {"key": self.key,            # skill's key
+                "name": self.name,          # skill's name
+                "effect": effect,           # skill's effect
+                "status": status,           # character's status
+                "message": message,         # skill's message
+                "caller": caller_dbref,     # caller's dbref
+                "target": obj_dbref}        # target's dbref

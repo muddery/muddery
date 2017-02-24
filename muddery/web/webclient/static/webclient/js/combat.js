@@ -348,35 +348,18 @@ var combat = {
 			// target.text(data[i].hp + '/' + data[i].max_hp)
 		}
 		else if (skill.key == "skill_escape") {
-			if (data[i].success) {
-				var target = $('#status_' + data[i].caller.slice(1));
-				target.text(LS("Escaped"));
-			}
-
-			if (data[i].caller in data_handler.name_list) {
-				var name = "";
-				if (data[i].caller == data_handler.character_dbref) {
-					name = LS("You");
-				}
-				else {
-					name = data_handler.name_list[data[i].caller];
-				}
-
-				if (data[i].success) {
-					webclient.displayMsg("{c" + name + "{n" + LS(" escaped from the combat."));
-				}
-				else {
-					webclient.displayMsg("{c" + name + "{n" + LS(" failed to escape."));
+			if (skill.effect == 1) {
+				var character = $('#status_' + skill.target.slice(1));
+				if (character.length > 0) {
+				    character.text(LS("Escaped"));
 				}
 			}
 		}
 	
-        /*
-        var fighter = $('status_' + data["character"]);
-        if (fighter) {
-            fighter.text(data["hp"] + '/' + data["max_hp"]).appendTo(div);
+        // Update status.
+        if ("status" in skill) {
+            this.displayStatus(skill["status"]);
         }
-        */
     },
 
     displaySkillCD: function() {
