@@ -939,6 +939,17 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         self.msg({"combat_finish": {"lose": True}})
 
+    def at_combat_escape(self):
+        """
+        Called when the character escaped from the combat.
+
+        Returns:
+            None
+        """
+        super(MudderyPlayerCharacter, self).at_combat_escape()
+
+        self.msg({"combat_finish": {"escaped": True}})
+
     def at_leave_combat(self):
         """
         Called when the character leaves a combat.

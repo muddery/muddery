@@ -218,6 +218,24 @@ class MudderyCombatHandler(DefaultScript):
             if self.can_finish():
                 # if there is only one team left, kill this handler
                 self.finish()
+
+    def skill_escape(self, caller):
+        """
+        Character escaped by a skill.
+
+        Args:
+            caller: (object) the caller of the escape skill.
+
+        Returns:
+            None
+        """
+        if caller:
+            caller.at_combat_escape()
+
+            # Skill function will call finish func later, so should not check finish here.
+            if caller.dbref in self.db.characters:
+                self._cleanup_character(caller)
+                del self.db.characters[caller.dbref]
             
     def send_skill_result(self, result):
         """
