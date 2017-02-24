@@ -127,7 +127,6 @@ class MudderySkill(MudderyObject):
                 return
 
         # call skill function
-        print("skill_key: %s" % self.get_data_key())
         STATEMENT_HANDLER.do_skill(self.function, owner, target,
                                    key=self.get_data_key(), name=self.get_name(),
                                    message=self.message)
