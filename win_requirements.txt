@@ -10,3 +10,4 @@ pillow == 2.9.0
 pytz
 future >= 0.15.2
 xlrd >= 1.0.0
+xlwt >= 1.2.0
