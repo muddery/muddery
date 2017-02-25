@@ -31,6 +31,10 @@ body {
     margin: 2px 0px;
 }
 
+#combat_commands {
+    height: 80px;
+}
+
 .panel {
     background-color: #000;
     margin-bottom: 5px;
@@ -339,8 +343,14 @@ a:focus {
 /* combat button */
 button.btn-combat {
     position: absolute;
-    width: 82px;
-    height: 34px;
+    width: 80px;
+    height: 52px;
+    font-size: 14px;
+    padding: 3px 12px 0px 12px;
+}
+
+button.button-icon {
+    font-size: 12px;
 }
 
 button.btn-combat div.cooldown {
@@ -418,4 +428,14 @@ button.btn-combat div.cooldown {
 
 .shop_goods_price {
     min-width: 60px;
+}
+
+.fighter_icon {
+	width: 30px;
+	height: 30px;
+}
+
+.command_icon {
+	width: 30px;
+	height: 30px;
 }

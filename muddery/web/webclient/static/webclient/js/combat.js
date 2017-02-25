@@ -231,12 +231,22 @@ var combat = {
         for (var i in data.characters) {
             var fighter = data.characters[i];
             var div = $('<div>').attr('id', 'fighter_' + fighter.dbref.slice(1))
-                                .text(fighter.name)
                                 .data('dbref', fighter.dbref);
 
             $('<div>').attr('id', 'status_' + fighter.dbref.slice(1))
                       .text(fighter.hp + '/' + fighter.max_hp)
-                      .prependTo(div);
+                      .appendTo(div);
+
+            if ("icon" in fighter && fighter["icon"]) {
+                var url = settings.resource_location + fighter["icon"];
+                var icon = $("<div>")
+                    .append($("<img>")
+                        .attr("src", url)
+                        .addClass("fighter_icon"))
+                    .appendTo(div);
+            }
+
+            div.append(fighter.name);
             
             if (fighter.dbref == data_handler.character_dbref) {
                 div.addClass('fighter_team')
@@ -274,14 +284,23 @@ var combat = {
                     .data("cd", 0)
                     .css({'left': 20 + i * 90});
 
+                if ("icon" in command && command["icon"]) {
+                    var url = settings.resource_location + command["icon"];
+                    var icon = $("<center>")
+                        .append($("<img>")
+                            .attr("src", url)
+                            .addClass("command_icon"))
+                        .appendTo(button);
+
+                    button.addClass('button-icon');
+                }
+
                 button.append($("<div>").text(command.name));
                 button.append($("<div>").addClass('cooldown'));
                 button.appendTo(content);
             }
             
             commands.html(content);
-
-            $('#combat_commands').css({'height': 60});
 
             this.displaySkillCD();
         }
