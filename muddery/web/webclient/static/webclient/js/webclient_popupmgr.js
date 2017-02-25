@@ -156,7 +156,7 @@ var popupmgr = {
 
             // shop's icon
             if ("icon" in shop && shop["icon"]) {
-                var url = settings.resource_location + dialogues[0]["icon"];
+                var url = settings.resource_location + shop["icon"];
                 var icon = $("<center>")
                     .append($("<img>")
                         .attr("src", url)
