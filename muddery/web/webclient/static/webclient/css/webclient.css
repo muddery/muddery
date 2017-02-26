@@ -32,7 +32,7 @@ body {
 }
 
 #combat_commands {
-    height: 80px;
+    height: 90px;
 }
 
 .panel {
@@ -341,24 +341,36 @@ a:focus {
 }
 
 /* combat button */
-button.btn-combat {
+button.btn-combat,
+button.btn-combat:focus,
+button.btn-combat:hover,
+button.btn-combat:active {
     position: absolute;
-    width: 80px;
-    height: 52px;
-    font-size: 14px;
-    padding: 3px 12px 0px 12px;
+    width: 72px;
+    height: 72px;
+    font-size: 12px;
+    padding: 3px 3px 0px 3px;
+    margin: 0px;
+    background-color: #000;
+    border-style: none;
+    outline: none;
+    color: #333;
 }
 
-button.button-icon {
-    font-size: 12px;
+div.combat-skill-name {
+    border: 1px solid;
+    border-color: #ccc;
+    border-radius: 4px;
+    background-color: #ddd;
+    margin: 3px 0px 0px 0px;
 }
 
 button.btn-combat div.cooldown {
     position: absolute;
     top: 0px;
     left: 0px;
-    height: 100%;
-    background-color: #333;
+    width: 100%;
+    background-color: #600;
     opacity: 0.5;
 }
 
@@ -436,6 +448,6 @@ button.btn-combat div.cooldown {
 }
 
 .command_icon {
-	width: 30px;
-	height: 30px;
+	width: 40px;
+	height: 40px;
 }

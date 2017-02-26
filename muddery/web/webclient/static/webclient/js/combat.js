@@ -276,26 +276,28 @@ var combat = {
                 var command = data[i];
                 var button = $('<button>')
                     .addClass('btn-combat')
-                    .addClass('btn btn-default')
                     .attr('type', 'button')
                     .attr('key', command.key)
                     .attr('id', 'combat_btn_' + command.key)
                     .attr('onclick', 'combat.doCombatSkill(this); return false;')
                     .data("cd", 0)
-                    .css({'left': 20 + i * 90});
+                    .css({'left': 20 + i * 80});
+
+                var img = $("<img>").addClass("command_icon");
 
                 if ("icon" in command && command["icon"]) {
                     var url = settings.resource_location + command["icon"];
-                    var icon = $("<center>")
-                        .append($("<img>")
-                            .attr("src", url)
-                            .addClass("command_icon"))
-                        .appendTo(button);
-
-                    button.addClass('button-icon');
+                    img.attr("src", url);
                 }
 
-                button.append($("<div>").text(command.name));
+                var icon = $("<center>")
+                        .append(img)
+                        .appendTo(button);
+
+                button.append($("<div>")
+                    .addClass('combat-skill-name')
+                    .text(command.name));
+
                 button.append($("<div>").addClass('cooldown'));
                 button.appendTo(content);
             }
@@ -405,9 +407,10 @@ var combat = {
         $('div.cooldown', btn).stop(true, true);
         if (current_cd < current_time) {
             // set a new cd
-            $('div.cooldown', btn).width('100%');
+            $('div.cooldown', btn).css('height', '100%')
+                                  .css('top', 0);
         }
-        $('div.cooldown', btn).animate({width: '0%'}, cd_time - current_time, 'linear');
+        $('div.cooldown', btn).animate({height: '0%', top: '100%'}, cd_time - current_time, 'linear');
         btn.data("cd", cd_time);
     },
     
