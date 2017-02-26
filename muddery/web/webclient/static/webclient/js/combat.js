@@ -118,7 +118,7 @@ var combat = {
 
     leftCombat: function(data) {
         this._left = true;
-        setTimeout(combat.showCombatResult, 500);
+        setTimeout(combat.showCombatResult, 750);
     },
 
     showCombatResult: function() {
