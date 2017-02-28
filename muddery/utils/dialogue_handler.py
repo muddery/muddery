@@ -382,12 +382,15 @@ class DialogueHandler(object):
         """
         icon = None
 
+        # use icon resource in dialogue sentence
         if icon_str:
-            # use icon resource in dialogue sentence
-            model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.ICON_RESOURCES)
-            if model_resource:
-                resource_info = model_resource.objects.get(key=icon_str)
-                icon = resource_info.resource.url
+            try:
+                model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.ICON_RESOURCES)
+                if model_resource:
+                    resource_info = model_resource.objects.get(key=icon_str)
+                    icon = resource_info.resource.url
+            except Exception, e:
+                logger.log_errmsg("Load icon %s error: %s" % (icon_str, e))
         else:
             if "%(n)" in speaker_model:
                 if npc:
