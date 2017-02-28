@@ -225,18 +225,18 @@ class MudderyObject(DefaultObject):
             self.set_obj_destination(self.dfield.destination)
             
         self.condition = getattr(self.dfield, "condition", None)
-        
+
+        # get icon
         self.icon = None
-        try:
-            # get icon
-            resource_key = getattr(self.dfield, "icon", None)
-            if resource_key:
+        resource_key = getattr(self.dfield, "icon", None)
+        if resource_key:
+            try:
                 model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.ICON_RESOURCES)
                 if model_resource:
                     resource_info = model_resource.objects.get(key=resource_key)
                     self.icon = resource_info.resource.url
-        except Exception, e:
-            logger.log_tracemsg("load icon error: %s" % e)
+            except Exception, e:
+                logger.log_errmsg("Load icon %s error: %s" % (resource_key, e))
 
     def reset_location(self):
         """

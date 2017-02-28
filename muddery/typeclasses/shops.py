@@ -124,21 +124,8 @@ class MudderyShop(MudderyObject):
                      "price": item.price,
                      "unit": item.unit_name}
 
-            icon = None
-            try:
-                # get icon
-                resource_key = item.icon
-                if resource_key:
-                    model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.ICON_RESOURCES)
-                    if model_resource:
-                        resource_info = model_resource.objects.get(key=resource_key)
-                        icon = resource_info.resource.url
-            except Exception, e:
-                logger.log_errmsg("Can't get icon %s: %s" % (item.icon, e))
-                pass
-            
-            if icon:
-                goods["icon"] = icon
+            if item.icon:
+                goods["icon"] = item.icon
             
             goods_list.append(goods)
 

@@ -58,17 +58,17 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         except Exception, e:
             logger.log_tracemsg("load position error: %s" % e)
 
+        # get background
         self.background = None
-        try:
-            # get background
-            resource_key = getattr(self.dfield, "background", None)
-            if resource_key:
+        resource_key = getattr(self.dfield, "background", None)
+        if resource_key:
+            try:
                 model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.IMAGE_RESOURCES)
                 if model_resource:
                     resource_info = model_resource.objects.get(key=resource_key)
                     self.background = resource_info.resource.url
-        except Exception, e:
-            logger.log_tracemsg("load background error: %s" % e)
+            except Exception, e:
+                logger.log_tracemsg("Load background %s error: %s" % (resource_key, e))
 
     def at_object_receive(self, moved_obj, source_location):
         """
