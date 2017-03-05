@@ -94,6 +94,31 @@ def build_object(obj_key, caller=None):
             caller.msg(ostring)
         return
 
+    if typeclass.key == settings.TWO_WAY_EXIT_TYPECLASS_KEY:
+        # If it's a two way exit, create the reverse exit.
+
+        # Create object.
+        try:
+            obj = create.create_object(settings.REVERSE_EXIT_TYPECLASS_PATH, record.name)
+        except Exception, e:
+            ostring = "Can not create obj %s: %s" % (obj_key, e)
+            print(ostring)
+            print(traceback.print_exc())
+            if caller:
+                caller.msg(ostring)
+            return
+
+        try:
+            # Set data info.
+            obj.set_data_key(settings.REVERSE_EXIT_PREFIX + record.key)
+        except Exception, e:
+            ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
+            print(ostring)
+            print(traceback.print_exc())
+            if caller:
+                caller.msg(ostring)
+            return
+
     return obj
 
 
@@ -117,7 +142,14 @@ def build_unique_objects(model_name, caller=None):
     model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
     # new objects
-    new_obj_names = set(record.key for record in model_obj.objects.all())
+    new_obj_keys = set(record.key for record in model_obj.objects.all())
+
+    # reverse exits
+    reverse_exits = set(settings.REVERSE_EXIT_PREFIX + record.key
+                        for record in model_obj.objects.all()
+                            if record.typeclass==settings.TWO_WAY_EXIT_TYPECLASS_KEY)
+
+    new_obj_keys.update(reverse_exits)
 
     # current objects
     current_objs = utils.search_obj_unique_type(model_name)
@@ -142,7 +174,7 @@ def build_unique_objects(model_name, caller=None):
             count_remove += 1
             continue
 
-        if not obj_key in new_obj_names:
+        if not obj_key in new_obj_keys:
             # This object should be removed
             ostring = "Deleting %s" % obj_key
             print(ostring)
@@ -199,8 +231,41 @@ def build_unique_objects(model_name, caller=None):
                     caller.msg(ostring)
                 continue
 
+        if record.typeclass == settings.TWO_WAY_EXIT_TYPECLASS_KEY:
+            # If it's a two way exit, create the reverse exit.
+            reverse_exit_key = settings.REVERSE_EXIT_PREFIX + record.key
+            if not reverse_exit_key in current_obj_keys:
+                ostring = "Creating %s." % reverse_exit_key
+                print(ostring)
+                if caller:
+                    caller.msg(ostring)
+
+                # Create object.
+                try:
+                    obj = create.create_object(settings.REVERSE_EXIT_TYPECLASS_PATH, record.name)
+                    count_create += 1
+                except Exception, e:
+                    ostring = "Can not create obj %s: %s" % (reverse_exit_key, e)
+                    print(ostring)
+                    print(traceback.print_exc())
+                    if caller:
+                        caller.msg(ostring)
+                    return
+
+                try:
+                    # Set data info.
+                    obj.set_data_key(reverse_exit_key)
+                    utils.set_obj_unique_type(obj, model_name)
+                except Exception, e:
+                    ostring = "Can not set data info to obj %s: %s" % (reverse_exit_key, e)
+                    print(ostring)
+                    print(traceback.print_exc())
+                    if caller:
+                        caller.msg(ostring)
+                    return
+
     ostring = "Removed %d object(s). Created %d object(s). Updated %d object(s). Total %d objects.\n"\
-              % (count_remove, count_create, count_update, len(model_obj.objects.all()))
+              % (count_remove, count_create, count_update, len(model_obj.objects.all()) + len(reverse_exits))
     print(ostring)
     if caller:
         caller.msg(ostring)

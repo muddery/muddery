@@ -169,12 +169,6 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                         provide_quest, complete_quest = cont.have_quest(caller)
                         appearance["provide_quest"] = provide_quest
                         appearance["complete_quest"] = complete_quest
-                elif type == "exits":
-                    # get exits destination
-                    if cont.destination:
-                        dest = {"name": cont.destination.get_name(),
-                                "position": cont.destination.position}
-                        appearance["destination"] = dest
                 elif type == "offlines":
                     continue
 

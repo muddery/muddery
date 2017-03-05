@@ -1,5 +1,4 @@
 category,origin,local
-field_game_settings,"key","标识"
 field_game_settings,"connection_screen","欢迎文字"
 field_game_settings,"solo_mode","单人模式"
 field_game_settings,"global_cd","公共CD"

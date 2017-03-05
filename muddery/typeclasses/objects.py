@@ -77,6 +77,7 @@ class MudderyObject(DefaultObject):
         
         # Call set_initial_data() when this object is first created.
         self.db.FIRST_CREATE = True
+        self.typeclass_key = None
         self.condition = None
         self.icon = None
 
@@ -167,14 +168,21 @@ class MudderyObject(DefaultObject):
             self.set_initial_data()
             del self.db.FIRST_CREATE
 
-    def load_data_fields(self):
+    def load_data_fields(self, key=None):
         """
         Get object's data record from database.
+
+        Args:
+            key: (String) object's data key.
+
+        Returns:
+            None
         """
         # Get model and key names.
-        key = self.get_data_key()
         if not key:
-            return
+            key = self.get_data_key()
+            if not key:
+                return
 
         models = OBJECT_KEY_HANDLER.get_models(key)
 
@@ -248,24 +256,24 @@ class MudderyObject(DefaultObject):
         if hasattr(self.dfield, "location"):
             self.set_location(self.dfield.location)
 
-    def set_typeclass(self, typeclass):
+    def set_typeclass(self, typeclass_key):
         """
         Set object's typeclass.
         
         Args:
-        typeclass: (string) Typeclass's name.
+            typeclass_key: (string) Typeclass's key.
         """
         typeclass_path = ""
         try:
             model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
-            data = model_typeclass.objects.get(key=typeclass)
+            data = model_typeclass.objects.get(key=typeclass_key)
             typeclass_path = data.path
         except Exception, e:
             pass
 
         if not typeclass_path:
-            if typeclass:
-                typeclass_path = typeclass
+            if typeclass_key:
+                typeclass_path = typeclass_key
             else:
                 typeclass_path = settings.BASE_OBJECT_TYPECLASS
     
@@ -282,6 +290,8 @@ class MudderyObject(DefaultObject):
         if typeclass_path != self.typeclass_path:
             logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_data_key(), typeclass_path))
             return
+
+        self.typeclass_key = typeclass_key
 
     def set_name(self, name):
         """

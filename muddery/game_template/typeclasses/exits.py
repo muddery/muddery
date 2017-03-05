@@ -6,8 +6,8 @@ set and has a single command defined on itself with the same name as its key,
 for allowing Characters to traverse the exit to its destination.
 
 """
-from muddery.typeclasses.exits import MudderyExit
-from muddery.typeclasses.exits import MudderyLockedExit
+from muddery.typeclasses.exits import MudderyExit, MudderyReverseExit, MudderyLockedExit
+
 
 class Exit(MudderyExit):
     """
@@ -31,6 +31,13 @@ class Exit(MudderyExit):
         at_failed_traverse(traveller) - called if traversal failed for some reason. Will
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
+    """
+    pass
+
+
+class ReverseExit(MudderyReverseExit):
+    """
+    This is the reverse side of the two way exit.
     """
     pass
 
