@@ -193,12 +193,12 @@ class world_rooms(models.Model):
     # room's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
-    # room's name for display
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
     # The key of a room typeclass.
     # room's typeclass
     typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # room's name for display
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
 
     # room's description for display
     desc = models.TextField(blank=True)
@@ -230,12 +230,13 @@ class world_exits(models.Model):
     # exit's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
-    # exit's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-
     # The key of an exit typeclass.
     # exit's typeclass
     typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # exit's name for display
+    # If it's empty, use the destination room's name.
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
 
     # exit's description for display
     desc = models.TextField(blank=True)
@@ -307,12 +308,12 @@ class world_objects(models.Model):
     # object's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
-    # object's name
-    name = models.CharField(max_length=NAME_LENGTH)
-
     # The key of an object typeclass.
     # object's typeclass
     typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # object's name
+    name = models.CharField(max_length=NAME_LENGTH)
 
     # the object's destination
     desc = models.TextField(blank=True)
@@ -456,12 +457,12 @@ class common_objects(models.Model):
     # object's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
-    # object's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-
     # The key of an object typeclass.
     # object's typeclass
     typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # object's name for display
+    name = models.CharField(max_length=NAME_LENGTH)
 
     # object's description for display
     desc = models.TextField(blank=True)
@@ -703,12 +704,12 @@ class world_npcs(models.Model):
     # NPC's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
-    # NPC's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-
     # The key of a character typeclass.
     # NPC's typeclass
     typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # NPC's name for display
+    name = models.CharField(max_length=NAME_LENGTH)
 
     # NPC's description for display
     desc = models.TextField(blank=True)
@@ -750,12 +751,12 @@ class common_characters(models.Model):
     # Character's key.
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
-    # Character's name for display.
-    name = models.CharField(max_length=NAME_LENGTH)
-
     # The key of a character typeclass.
     # Character's typeclass.
     typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # Character's name for display.
+    name = models.CharField(max_length=NAME_LENGTH)
 
     # Character's description for display.
     desc = models.TextField(blank=True)
@@ -815,13 +816,13 @@ class shops(models.Model):
     
     # shop's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
-    
-    # shop's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-    
+
     # The key of a shop typeclass.
     # Shop's typeclass.
     typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # shop's name for display
+    name = models.CharField(max_length=NAME_LENGTH)
     
     # shop's description for display
     desc = models.TextField(blank=True)
@@ -914,12 +915,12 @@ class skills(models.Model):
     # skill's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
-    # skill's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-
     # The key of a skill typeclass.
     # skill's typeclass
     typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # skill's name for display
+    name = models.CharField(max_length=NAME_LENGTH)
 
     # skill's description for display
     desc = models.TextField(blank=True)
@@ -983,12 +984,12 @@ class quests(models.Model):
     # quest's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
-    # quest's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-
     # The key of a quest typeclass.
     # quest's typeclass
     typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # quest's name for display
+    name = models.CharField(max_length=NAME_LENGTH)
 
     # quest's description for display
     desc = models.TextField(blank=True)

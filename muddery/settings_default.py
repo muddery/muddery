@@ -131,6 +131,15 @@ GAME_SETTINGS = "game_settings"
 # webclient settings
 CLIENT_SETTINGS = "client_settings"
 
+# Two way exit's typeclass key.
+TWO_WAY_EXIT_TYPECLASS_KEY = "CLASS_TWO_WAY_EXIT"
+
+# Reverse exit's typeclass path.
+REVERSE_EXIT_TYPECLASS_PATH = "typeclasses.exits.ReverseExit"
+
+# Reverse exit's key's prefix.
+REVERSE_EXIT_PREFIX = "__reverse__"
+
 ###################################
 # Basic data
 ###################################

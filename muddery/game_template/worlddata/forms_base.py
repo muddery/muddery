@@ -10,6 +10,10 @@ def ExistKey(key, except_models=None):
     """
     Check if the key exists.
     """
+    if key[:2] == "__":
+        # Keys begin with __ are reserved by system.
+        return True
+
     # Get models.
     for model_name in settings.OBJECT_DATA_MODELS:
         if model_name in except_models:

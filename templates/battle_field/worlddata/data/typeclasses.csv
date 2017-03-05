@@ -1,6 +1,7 @@
 key,name,path,category,desc
 CLASS_COMMON_ROOM,Common Room,typeclasses.rooms.Room,CATE_ROOM,Common room's typeclass.
 CLASS_COMMON_EXIT,Common Exit,typeclasses.exits.Exit,CATE_EXIT,Common exit's typeclass.
+CLASS_TWO_WAY_EXIT,双向出口,typeclasses.exits.Exit,CATE_EXIT,Two way exit's typeclass. It builds two exits on both sides.
 CLASS_LOCKED_EXIT,Locked Exit,typeclasses.exits.LockedExit,CATE_EXIT,A kind of exits that can be locked.
 CLASS_COMMON_NPC,Common NPC,typeclasses.npcs.NPC,CATE_CHARACTER,Common NPC's typeclass.
 CLASS_COMMON_MONSTER,Common Monster,typeclasses.monsters.Monster,CATE_CHARACTER,Common monster's typeclass.
