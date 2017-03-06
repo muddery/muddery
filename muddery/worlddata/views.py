@@ -432,7 +432,8 @@ def get_view(request):
         raise http.Http404
 
     relative_forms = {
-        "world_exits": {"CLASS_LOCKED_EXIT": "exit_locks"},
+        "world_exits": {"CLASS_LOCKED_EXIT": "exit_locks",
+                        "CLASS_TWO_WAY_EXIT": "two_way_exits"},
         "world_objects": {"CLASS_OBJECT_CREATOR": "object_creators"}
     }
 

@@ -209,7 +209,7 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
                       WORLD_NPCS) + COMMON_OBJECTS
 
 # object's additional data
-OBJECT_ADDITIONAL_DATA = ("exit_locks", "object_creators")
+OBJECT_ADDITIONAL_DATA = ("exit_locks", "two_way_exits", "object_creators")
 
 ###################################
 # other data

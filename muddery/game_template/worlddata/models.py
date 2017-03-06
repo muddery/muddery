@@ -78,6 +78,16 @@ class exit_locks(model_base.exit_locks):
 
 #------------------------------------------------------------
 #
+# two way exit's additional data
+#
+#------------------------------------------------------------
+class two_way_exits(model_base.two_way_exits):
+    "Store all exit locks."
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all objects
 #
 #------------------------------------------------------------

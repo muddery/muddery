@@ -65,6 +65,11 @@ class ExitLocksAdmin(admin.ModelAdmin):
                     'auto_unlock')
 
 
+class TwoWayExitsAdmin(admin.ModelAdmin):
+    list_display = ('key',
+                    'reverse_name')
+
+
 class WorldObjectsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',

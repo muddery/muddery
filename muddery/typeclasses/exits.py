@@ -62,6 +62,9 @@ class MudderyExit(MudderyObject, DefaultExit):
         """
         super(MudderyExit, self).load_data()
 
+        # set exit's destination
+        self.set_obj_destination(getattr(self.dfield, "destination", None))
+
         # set action verb
         self.verb = getattr(self.dfield, "verb", LS("GOTO"))
 
@@ -147,15 +150,28 @@ class MudderyReverseExit(MudderyExit):
 
         super(MudderyReverseExit, self).load_data_fields(key=key)
 
-    def set_typeclass(self, typeclass_key):
+    def load_data(self):
         """
-        Set object's typeclass.
+        Set data to the object."
+        """
+        self.load_data_fields()
 
-        Args:
-            typeclass_key: (string) Typeclass's key.
-        """
         # Reverse exit's typeclass can only be set to settings.REVERSE_EXIT_TYPECLASS_PATH.
-        super(MudderyReverseExit, self).set_typeclass(settings.REVERSE_EXIT_TYPECLASS_PATH)
+        self.set_typeclass(settings.REVERSE_EXIT_TYPECLASS_PATH)
+
+        self.set_name(getattr(self.dfield, "reverse_name", ""))
+
+        # reverse location and destination
+        if not self.location:
+            self.set_location(getattr(self.dfield, "destination", ""))
+
+        # set exit's destination
+        self.set_obj_destination(getattr(self.dfield, "location", ""))
+
+        self.condition = getattr(self.dfield, "condition", "")
+
+        # set icon
+        self.set_icon(getattr(self.dfield, "icon", ""))
 
     def reset_location(self):
         """
@@ -166,24 +182,6 @@ class MudderyReverseExit(MudderyExit):
         """
         if hasattr(self.dfield, "destination"):
             self.set_obj_destination(self.dfield.destination)
-
-    def set_location(self, location):
-        """
-        Set object's destination.
-
-        Args:
-            location: (string) Location's name. Must be the key of data info.
-        """
-        super(MudderyReverseExit, self).set_obj_destination(location)
-
-    def set_obj_destination(self, destination):
-        """
-        Set object's location
-
-        Args:
-            destination: (string) Destination's name. Must be the key of data info.
-        """
-        super(MudderyReverseExit, self).set_location(destination)
 
 
 class MudderyLockedExit(MudderyExit):

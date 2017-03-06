@@ -299,6 +299,27 @@ class exit_locks(models.Model):
 
 # ------------------------------------------------------------
 #
+# two way exit's additional data
+#
+# ------------------------------------------------------------
+class two_way_exits(models.Model):
+    "Two way exit's additional data"
+
+    # The key of a world exit.
+    # related exit
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # reverse exit's name
+    reverse_name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Two Way Exit"
+        verbose_name_plural = "Two Way Exits"
+
+# ------------------------------------------------------------
+#
 # store all objects
 #
 # ------------------------------------------------------------

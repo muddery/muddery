@@ -271,40 +271,6 @@ def build_unique_objects(model_name, caller=None):
         caller.msg(ostring)
 
 
-def build_details(model_name, caller=None):
-    """
-    Build details of a model.
-
-    Args:
-        model_name: (string) The name of the data model.
-        caller: (command caller) If provide, running messages will send to the caller.
-    """
-
-    model_detail = apps.get_model(settings.WORLD_DATA_APP, model_name)
-
-    # Remove all details
-    objects = search.search_object_attribute(key="details")
-    for obj in objects:
-        obj.attributes.remove("details")
-
-    # Set details.
-    count = 0
-    for record in model_detail.objects.all():
-        location_objs = utils.search_obj_data_key(record.location)
-
-        # Detail's location.
-        for location in location_objs:
-            for name in record.name.split(";"):
-                location.set_detail(name, record.desc)
-
-            count += 1
-
-    ostring = "Set %d detail(s)." % count
-    print(ostring)
-    if caller:
-        caller.msg(ostring)
-
-
 def build_all(caller=None):
     """
     Build all objects in the world.

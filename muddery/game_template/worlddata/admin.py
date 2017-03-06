@@ -35,6 +35,10 @@ class ExitLocksAdmin(admin_base.ExitLocksAdmin):
     pass
 
 
+class TwoWayExitsAdmin(admin_base.TwoWayExitsAdmin):
+    pass
+
+
 class WorldObjectsAdmin(admin_base.WorldObjectsAdmin):
     pass
 
@@ -182,6 +186,7 @@ admin.site.register(typeclasses, TypeclassesAdmin)
 admin.site.register(world_rooms, WorldRoomsAdmin)
 admin.site.register(world_exits, WorldExitsAdmin)
 admin.site.register(exit_locks, ExitLocksAdmin)
+admin.site.register(two_way_exits, TwoWayExitsAdmin)
 admin.site.register(world_objects, WorldObjectsAdmin)
 admin.site.register(object_creators, ObjectCreatorsAdmin)
 admin.site.register(creator_loot_list, CreatorLootListAdmin)
