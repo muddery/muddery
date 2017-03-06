@@ -210,38 +210,19 @@ class MudderyObject(DefaultObject):
         """
         self.load_data_fields()
 
-        if hasattr(self.dfield, "typeclass"):
-            self.set_typeclass(self.dfield.typeclass)
+        self.set_typeclass(getattr(self.dfield, "typeclass", ""))
 
-        if hasattr(self.dfield, "name"):
-            self.set_name(self.dfield.name)
+        self.set_name(getattr(self.dfield, "name", ""))
 
         if not self.location:
-            if hasattr(self.dfield, "location"):
-                self.set_location(self.dfield.location)
+            self.set_location(getattr(self.dfield, "location", ""))
 
-        if hasattr(self.dfield, "desc"):
-            self.set_desc(self.dfield.desc)
+        self.set_desc(getattr(self.dfield, "desc", ""))
 
-        if hasattr(self.dfield, "lock"):
-            self.set_lock(self.dfield.lock)
+        self.condition = getattr(self.dfield, "condition", "")
 
-        if hasattr(self.dfield, "destination"):
-            self.set_obj_destination(self.dfield.destination)
-            
-        self.condition = getattr(self.dfield, "condition", None)
-
-        # get icon
-        self.icon = None
-        resource_key = getattr(self.dfield, "icon", None)
-        if resource_key:
-            try:
-                model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.ICON_RESOURCES)
-                if model_resource:
-                    resource_info = model_resource.objects.get(key=resource_key)
-                    self.icon = resource_info.resource.url
-            except Exception, e:
-                logger.log_errmsg("Load icon %s error: %s" % (resource_key, e))
+        # set icon
+        self.set_icon(getattr(self.dfield, "icon", ""))
 
     def reset_location(self):
         """
@@ -387,19 +368,6 @@ class MudderyObject(DefaultObject):
         """
         self.db.desc = desc
 
-    def set_lock(self, lock):
-        """
-        Set object's lock.
-        
-        Args:
-        lock: (string) Object's lock string.
-        """
-        if lock:
-            try:
-                self.locks.add(lock)
-            except Exception:
-                logger.log_errmsg("%s can't set lock %s." % (self.get_data_key(), lock))
-
     def set_obj_destination(self, destination):
         """
         Set object's destination
@@ -436,15 +404,25 @@ class MudderyObject(DefaultObject):
     
         self.destination = destination_obj
 
-    def set_detail(self, key, detail):
+    def set_icon(self, icon_key):
         """
-        Set object's detail.
-        
+        Set object's icon.
         Args:
-        key: (string) Detail's key.
-        detail: (string) Detail's info.
+            icon_key: (String)icon's resource key.
+
+        Returns:
+            None
         """
-        pass
+        self.icon = None
+        icon_key = getattr(self.dfield, "icon", None)
+        if icon_key:
+            try:
+                model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.ICON_RESOURCES)
+                if model_resource:
+                    resource_info = model_resource.objects.get(key=icon_key)
+                    self.icon = resource_info.resource.url
+            except Exception, e:
+                logger.log_errmsg("Load icon %s error: %s" % (icon_key, e))
 
     def get_data_key(self):
         """

@@ -244,6 +244,21 @@ class ExitLocksForm(forms.ModelForm):
         fields = '__all__'
 
 
+class TwoWayExitsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(TwoWayExitsForm, self).__init__(*args, **kwargs)
+
+        #objects = models.world_exits.objects.filter(typeclass="CLASS_LOCKED_EXIT")
+        #choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        #self.fields['key'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+
+    class Meta:
+        model = models.two_way_exits
+        fields = '__all__'
+
+
 class WorldObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldObjectsForm, self).__init__(*args, **kwargs)
