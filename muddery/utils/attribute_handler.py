@@ -18,13 +18,11 @@ class AttributeHandler(object):
         self.owner = owner
         self.attributes = owner.db.attributes
 
-
     def set(self, key, value=None):
         """
         Set an attribute.
         """
         self.attributes[key] = value
-
 
     def get(self, key, default=None):
         """
@@ -34,7 +32,6 @@ class AttributeHandler(object):
             return default
 
         return self.attributes[key]
-
 
     def remove(self, key):
         """
@@ -49,13 +46,11 @@ class AttributeHandler(object):
         del self.attributes[key]
         return True
 
-
     def has(self, key):
         """
         Does this attribute exist.
         """
         return key in self.attributes
-
 
     def check_value(self, key, value):
         """

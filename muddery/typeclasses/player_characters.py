@@ -71,6 +71,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.db.unlocked_exits = set()
         self.db.revealed_map = set()
 
+        # set custom attributes
+        self.db.attributes = {}
+
         # Choose a random career.
         try:
             model_career = apps.get_model(settings.WORLD_DATA_APP, settings.CHARACTER_CAREERS)

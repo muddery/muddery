@@ -1,5 +1,5 @@
 """
-AttributeHandler handles a character's custom attributes.
+Set the game's configuration.
 """
 
 
