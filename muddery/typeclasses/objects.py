@@ -226,9 +226,6 @@ class MudderyObject(DefaultObject):
         if hasattr(self.dfield, "lock"):
             self.set_lock(self.dfield.lock)
 
-        if hasattr(self.dfield, "attributes"):
-            self.set_attributes(self.dfield.attributes)
-
         if hasattr(self.dfield, "destination"):
             self.set_obj_destination(self.dfield.destination)
             
@@ -402,31 +399,6 @@ class MudderyObject(DefaultObject):
                 self.locks.add(lock)
             except Exception:
                 logger.log_errmsg("%s can't set lock %s." % (self.get_data_key(), lock))
-
-    def set_attributes(self, attributes):
-        """
-        Set object's attribute.
-        
-        Args:
-        attributes: (string) Attribues in form of python dict. Such as: "{'age':'22', 'career':'warrior'}"
-        """
-        if not attributes:
-            return
-        
-        # Set attributes.
-        attr = {}
-        try:
-            # Convert string to dict
-            attributes = ast.literal_eval(attributes)
-        except Exception, e:
-            logger.log_errmsg("%s can't load attributes %s: %s" % (self.get_data_key(), attributes, e))
-    
-        for key in attr:
-            # Add attributes.
-            try:
-                self.attributes.add(key, attr[key])
-            except Exception:
-                logger.log_errmsg("%s can't set attribute %s!" % (self.get_data_key(), key))
 
     def set_obj_destination(self, destination):
         """

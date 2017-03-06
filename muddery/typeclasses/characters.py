@@ -81,9 +81,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.completed_quests = set()
         self.db.current_quests = {}
 
-        # set attributes
-        self.db.attributes = {}
-
     def at_init(self):
         """
         Init the character.
