@@ -74,7 +74,10 @@ class CommonObjectsForm(forms_base.CommonObjectsForm):
 
 class FoodsForm(forms_base.FoodsForm):
     pass
-    
+
+class SkillBooksForm(forms_base.SkillBooksForm):
+    pass
+
 class CharacterModelsForm(forms_base.CharacterModelsForm):
     pass
 

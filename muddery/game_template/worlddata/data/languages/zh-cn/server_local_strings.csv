@@ -38,6 +38,7 @@ category,origin,local
 ,"You can not cast a passive skill.","不能施放被动技能。"
 ,"You have already learned this skill.","你已经学习过这项技能了。"
 ,"You learned skill {c%s{n.","你学会了技能{c%s{n。"
+,"You learned skill.","你学会了技能。"
 ,"Talk to","对话"
 ,"Get","获取"
 ,"You should select a target.","你需要指定一个目标。"

@@ -200,7 +200,14 @@ WORLD_OBJECTS = "world_objects"
 WORLD_NPCS = "world_npcs"
 
 # common objects
-COMMON_OBJECTS = ("common_objects", "common_characters", "skills", "quests", "equipments", "foods", "shops")
+COMMON_OBJECTS = ("common_objects",
+                  "common_characters",
+                  "skills",
+                  "quests",
+                  "equipments",
+                  "foods",
+                  "skill_books",
+                  "shops")
 
 # all object data models
 OBJECT_DATA_MODELS = (WORLD_ROOMS,

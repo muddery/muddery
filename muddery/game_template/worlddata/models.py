@@ -132,9 +132,19 @@ class common_objects(model_base.common_objects):
 #
 # ------------------------------------------------------------
 class foods(model_base.foods):
-    "foods inherit from common objects."
+    "Foods inherit from common objects."
     pass
 
+
+# ------------------------------------------------------------
+#
+# store all skill books
+#
+# ------------------------------------------------------------
+class skill_books(model_base.skill_books):
+    "Skill books inherit from common objects."
+    pass
+    
 
 #------------------------------------------------------------
 #

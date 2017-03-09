@@ -46,12 +46,12 @@ class SkillHandler(object):
         """
         return self.skills
 
-    def learn_skill(self, skill, is_default=False):
+    def learn_skill(self, skill_key, is_default=False):
         """
         Learn a new skill.
 
         Args:
-            skill: (string) skill's key
+            skill_key: (string) skill's key
             is_default: (boolean) if it is a default skill
 
         Returns:
@@ -60,14 +60,14 @@ class SkillHandler(object):
         if not self.owner:
             return False
 
-        if skill in self.skills:
-            self.owner.msg({"alert": LS("You have already learned this skill.")})
+        if skill_key in self.skills:
+            self.owner.msg({"msg": LS("You have already learned this skill.")})
             return False
 
         # Create skill object.
-        skill_obj = build_object(skill)
+        skill_obj = build_object(skill_key)
         if not skill_obj:
-            self.owner.msg({"alert": LS("Can not learn this skill.")})
+            self.owner.msg({"msg": LS("Can not learn this skill.")})
             return False
 
         # set default
@@ -76,7 +76,7 @@ class SkillHandler(object):
 
         # Store new skill.
         skill_obj.set_owner(self.owner)
-        self.skills[skill] = skill_obj
+        self.skills[skill_key] = skill_obj
 
         # If it is a passive skill, player's status may change.
         if skill_obj.passive:

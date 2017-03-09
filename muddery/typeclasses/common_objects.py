@@ -55,15 +55,12 @@ class MudderyCommonObject(MudderyObject):
         
         if number < 0:
             raise MudderyError("%s can not increase a negative nubmer." % self.get_data_key())
-            return
 
         if self.max_stack == 1 and self.db.number == 1:
             raise MudderyError("%s can not stack." % self.get_data_key())
-            return
 
         if self.db.number + number > self.max_stack:
             raise MudderyError("%s over stack." % self.get_data_key())
-            return
         
         self.db.number += number
         return
@@ -162,3 +159,45 @@ class MudderyEquipment(MudderyCommonObject):
                     commands.append({"name":LS("Discard"), "cmd":"discard", "args":self.dbref})
 
         return commands
+
+
+class MudderySkillBook(MudderyCommonObject):
+    """
+    This is a skill book. Players can use it to learn a new skill.
+    """
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        "args" must be a string without ' and ", usually it is self.dbref.
+        """
+        commands = []
+        if self.db.number > 0:
+            commands.append({"name": LS("Use"), "cmd": "use", "args": self.dbref})
+            if self.location and self.can_discard:
+                commands.append({"name": LS("Discard"), "cmd": "discard", "args": self.dbref})
+        return commands
+
+    def take_effect(self, user, number):
+        """
+        Use this object.
+
+        Args:
+            user: (object) the object who uses this
+            number: (int) the number of the object to use
+
+        Returns:
+            (result, number):
+                result: (string) a description of the result
+                number: (int) actually used number
+        """
+        if not user:
+            raise ValueError("User should not be None.")
+
+        skill_key = getattr(self.dfield, "skill", None)
+        if not skill_key:
+            return LS("No effect."), 0
+
+        if user.learn_skill(skill_key):
+            return LS("You learned skill."), 1
+        else:
+            return LS("No effect."), 0

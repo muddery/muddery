@@ -310,18 +310,31 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     # Skill methods.
     #
     ########################################
-
-    def has_skill(self, skill):
+    
+    def learn_skill(self, skill_key):
         """
         Check if the character has this skill.
 
         Args:
-            skill: (string) skill's key
+            skill_key: (string) skill's key
+
+        Returns:
+            (boolean) If the character learned this skill.
+        """
+        return self.skill_handler.learn_skill(skill_key)
+        
+
+    def has_skill(self, skill_key):
+        """
+        Check if the character has this skill.
+
+        Args:
+            skill_key: (string) skill's key
 
         Returns:
             (boolean) if the character has this skill or not
         """
-        self.skill_handler.has_skill(skill)
+        self.skill_handler.has_skill(skill_key)
         
     def prepare_skill(self, skill_key, target):
         """
