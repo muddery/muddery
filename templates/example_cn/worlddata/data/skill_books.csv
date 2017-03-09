@@ -1,0 +1,2 @@
+key,name,typeclass,desc,max_stack,unique,can_remove,can_discard,icon,skill
+book_dunt,重击之术,CLASS_SKILL_BOOK,"记录了重击之术的奥秘。使用之后可以学会重击技能。",1,0,1,1,icon_dunt,skill_dunt

@@ -10,6 +10,7 @@ CLASS_WORLD_OBJECT,World Object,typeclasses.objects.Object,CATE_OBJECT,World obj
 CLASS_COMMON_OBJECT,Common Object,typeclasses.common_objects.CommonObject,CATE_OBJECT,Common object's typeclass.
 CLASS_OBJECT_CREATOR,Object Creator,typeclasses.object_creators.ObjectCreator,CATE_OBJECT,Object creators can create new objects.
 CLASS_FOOD,Food,typeclasses.common_objects.Food,CATE_OBJECT,Foods can be eaten.
+CLASS_SKILL_BOOK,Skill Book,typeclasses.common_objects.SkillBook,CATE_OBJECT,Players can learn skills from skill books.
 CLASS_SKILL,Skill,typeclasses.character_skills.Skill,CATE_SKILL,Character's skill.
 CLASS_QUEST,Quest,typeclasses.character_quests.Quest,CATE_QUEST,Quest.
 CLASS_EQUIPMENT,Equipment,typeclasses.common_objects.Equipment,CATE_OBJECT,Equipments.

@@ -28,6 +28,26 @@ def ExistKey(key, except_models=None):
     return False
 
 
+def GetAllPocketableObjects():
+	"""
+	Get all objects that can be put in player's pockets.
+	"""
+	# available objects are common objects, foods skill books or equipments
+	objects = models.common_objects.objects.all()
+	choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+
+	foods = models.foods.objects.all()
+	choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
+	
+	skill_books = models.skill_books.objects.all()
+	choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in skill_books])
+
+	equipments = models.equipments.objects.all()
+	choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
+	
+	return choices
+    
+
 class GameSettingsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(GameSettingsForm, self).__init__(*args, **kwargs)
@@ -356,16 +376,8 @@ class CreatorLootListForm(forms.ModelForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['provider'] = forms.ChoiceField(choices=choices)
 
-        # available objects are common objects, foods or equipments
-        objects = models.common_objects.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-
-        foods = models.foods.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
-
-        equipments = models.equipments.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
-
+        # available objects
+        choices = GetAllPocketableObjects()
         self.fields['object'] = forms.ChoiceField(choices=choices)
         
         # depends on quest
@@ -394,16 +406,8 @@ class CharacterLootListForm(forms.ModelForm):
 
         self.fields['provider'] = forms.ChoiceField(choices=choices)
 
-        # available objects are common objects, foods or equipments
-        objects = models.common_objects.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-
-        foods = models.foods.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
-
-        equipments = models.equipments.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
-
+        # available objects
+        choices = GetAllPocketableObjects()
         self.fields['object'] = forms.ChoiceField(choices=choices)
 
         # depends on quest
@@ -428,16 +432,8 @@ class QuestRewardListForm(forms.ModelForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['provider'] = forms.ChoiceField(choices=choices)
 
-        # available objects are common objects, foods or equipments
-        objects = models.common_objects.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-
-        foods = models.foods.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
-
-        equipments = models.equipments.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
-
+        # available objects
+        choices = GetAllPocketableObjects()
         self.fields['object'] = forms.ChoiceField(choices=choices)
         
         # depends on quest
@@ -519,6 +515,45 @@ class FoodsForm(forms.ModelForm):
         fields = '__all__'
         
 
+class SkillBooksForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SkillBooksForm, self).__init__(*args, **kwargs)
+        
+        objects = models.typeclasses.objects.filter(key="CLASS_SKILL_BOOK")
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
+        
+        # skills
+        objects = models.skills.objects.all()
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['skill'] = forms.ChoiceField(choices=choices)
+        
+        # icons
+        choices = [("", "---------")]
+        objects = models.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
+
+        localize_form_fields(self)
+
+    def clean(self):
+        "Validate values."
+        cleaned_data = super(SkillBooksForm, self).clean()
+
+        # object's key should be unique
+        key = cleaned_data.get('key')
+        if ExistKey(key, except_models=[self.Meta.model.__name__]):
+            message = "This key has been used. Please use another one."
+            self._errors['key'] = self.error_class([message])
+            return
+
+        return cleaned_data
+
+    class Meta:
+        model = models.skill_books
+        fields = '__all__'
+        
+
 class CharacterModelsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CharacterModelsForm, self).__init__(*args, **kwargs)
@@ -594,16 +629,8 @@ class DefaultObjectsForm(forms.ModelForm):
         choices = [(key, key) for key in character_models]
         self.fields['character'] = forms.ChoiceField(choices=choices)
 
-        # available objects are common objects, foods or equipments
-        objects = models.common_objects.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-
-        foods = models.foods.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
-
-        equipments = models.equipments.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
-
+        # available objects
+        choices = GetAllPocketableObjects()
         self.fields['object'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
@@ -642,17 +669,9 @@ class ShopGoodsForm(forms.ModelForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['shop'] = forms.ChoiceField(choices=choices)
 
-        # available objects are common objects, foods or equipments
-        objects = models.common_objects.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-
-        foods = models.foods.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
-
-        equipments = models.equipments.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
-
-        self.fields['goods'] = forms.ChoiceField(choices=choices)
+        # available objects
+        choices = GetAllPocketableObjects()
+        self.fields['object'] = forms.ChoiceField(choices=choices)
 
         # Goods typeclasses
         objects = models.typeclasses.objects.filter(category="CATE_SHOP_GOODS")

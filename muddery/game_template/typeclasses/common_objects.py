@@ -2,23 +2,28 @@
 Object creators.
 
 """
-from muddery.typeclasses.common_objects import MudderyCommonObject
-from muddery.typeclasses.common_objects import MudderyFood
-from muddery.typeclasses.common_objects import MudderyEquipment
+from muddery.typeclasses import common_objects as base
 
-class CommonObject(MudderyCommonObject):
+
+class CommonObject(base.MudderyCommonObject):
     """
     """
     pass
 
 
-class Food(MudderyFood):
+class Food(base.MudderyFood):
     """
     """
     pass
 
 
-class Equipment(MudderyEquipment):
+class SkillBook(base.MudderySkillBook):
+    """
+    """
+    pass
+
+
+class Equipment(base.MudderyEquipment):
     """
     """
     pass

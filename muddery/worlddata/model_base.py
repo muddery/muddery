@@ -519,7 +519,7 @@ class common_objects(models.Model):
 #
 # ------------------------------------------------------------
 class foods(common_objects):
-    "foods inherit from common objects."
+    "Foods inherit from common objects."
 
     # food's hp effect
     hp = models.IntegerField(blank=True, default=0)
@@ -533,6 +533,23 @@ class foods(common_objects):
         verbose_name = "Food"
         verbose_name_plural = "Foods"
 
+
+# ------------------------------------------------------------
+#
+# store all skill books
+#
+# ------------------------------------------------------------
+class skill_books(common_objects):
+    "Skill books inherit from common objects."
+
+    # skill's key
+    skill = models.CharField(max_length=KEY_LENGTH)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Skill Book"
+        verbose_name_plural = "Skill Books"
 
 # ------------------------------------------------------------
 #
