@@ -135,7 +135,7 @@ CLIENT_SETTINGS = "client_settings"
 TWO_WAY_EXIT_TYPECLASS_KEY = "CLASS_TWO_WAY_EXIT"
 
 # Reverse exit's typeclass path.
-REVERSE_EXIT_TYPECLASS_PATH = "typeclasses.exits.ReverseExit"
+REVERSE_EXIT_TYPECLASS_PATH = "muddery.typeclasses.exits.MudderyReverseExit"
 
 # Reverse exit's key's prefix.
 REVERSE_EXIT_PREFIX = "__reverse__"

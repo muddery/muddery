@@ -4,28 +4,10 @@ CommonObject is the object that players can put into their inventory.
 """
 
 from muddery.utils.localized_strings_handler import LS
-from muddery.typeclasses import common_objects as base
+from muddery.typeclasses.common_objects import MudderyFood
 
 
-class CommonObject(base.MudderyCommonObject):
-    """
-    """
-    pass
-
-
-class SkillBook(base.MudderySkillBook):
-    """
-    """
-    pass
-
-
-class Equipment(base.MudderyEquipment):
-    """
-    """
-    pass
-
-
-class Food(base.MudderyFood):
+class Food(MudderyFood):
     """
     This is a food. Players can use it to change their properties, such as hp, mp,
     strength, etc.

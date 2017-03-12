@@ -89,14 +89,6 @@ DATABASES = {{
 
 
 ######################################################################
-# Typeclasses and other paths
-######################################################################
-
-# Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "typeclasses.player_characters.PlayerCharacter"
-
-
-######################################################################
 # Django web features
 ######################################################################
 
