@@ -9,18 +9,6 @@ from muddery.typeclasses.common_objects import MudderyFood
 from muddery.typeclasses.common_objects import MudderyEquipment
 
 
-class CommonObject(MudderyCommonObject):
-    """
-    """
-    pass
-
-
-class Equipment(MudderyEquipment):
-    """
-    """
-    pass
-
-
 class Food(MudderyFood):
     """
     This is a food. Players can use it to change their properties, such as hp, mp,

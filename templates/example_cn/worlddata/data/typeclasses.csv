@@ -1,18 +1,18 @@
 key,name,path,category,desc
-CLASS_COMMON_ROOM,普通房间,typeclasses.rooms.Room,CATE_ROOM,Common room's typeclass.
-CLASS_COMMON_EXIT,普通出口,typeclasses.exits.Exit,CATE_EXIT,Common exit's typeclass.
-CLASS_TWO_WAY_EXIT,双向出口,typeclasses.exits.Exit,CATE_EXIT,Two way exit's typeclass. It builds two exits on both sides.
-CLASS_LOCKED_EXIT,上锁的出口,typeclasses.exits.LockedExit,CATE_EXIT,A kind of exits that can be locked.
-CLASS_COMMON_NPC,普通NPC,typeclasses.npcs.NPC,CATE_CHARACTER,Common NPC's typeclass.
-CLASS_COMMON_MONSTER,普通怪,typeclasses.monsters.Monster,CATE_CHARACTER,Common monster's typeclass.
-CLASS_PLAYER,玩家,typeclasses.player_characters.PlayerCharacter,CATE_CHARACTER,Player character's typeclass.
-CLASS_WORLD_OBJECT,世界物体,typeclasses.objects.Object,CATE_OBJECT,World object's typeclass.
-CLASS_COMMON_OBJECT,普通物体,typeclasses.common_objects.CommonObject,CATE_OBJECT,Common object's typeclass.
-CLASS_OBJECT_CREATOR,物体生成器,typeclasses.object_creators.ObjectCreator,CATE_OBJECT,Object creators can create new objects.
+CLASS_COMMON_ROOM,普通房间,muddery.typeclasses.rooms.MudderyRoom,CATE_ROOM,Common room's typeclass.
+CLASS_COMMON_EXIT,普通出口,muddery.typeclasses.exits.MudderyExit,CATE_EXIT,Common exit's typeclass.
+CLASS_TWO_WAY_EXIT,双向出口,muddery.typeclasses.exits.MudderyExit,CATE_EXIT,Two way exit's typeclass. It builds two exits on both sides.
+CLASS_LOCKED_EXIT,上锁的出口,muddery.typeclasses.exits.MudderyLockedExit,CATE_EXIT,A kind of exits that can be locked.
+CLASS_COMMON_NPC,普通NPC,muddery.typeclasses.npcs.MudderyNPC,CATE_CHARACTER,Common NPC's typeclass.
+CLASS_COMMON_MONSTER,普通怪,muddery.typeclasses.monsters.MudderyMonster,CATE_CHARACTER,Common monster's typeclass.
+CLASS_PLAYER,玩家,muddery.typeclasses.player_characters.MudderyPlayerCharacter,CATE_CHARACTER,Player character's typeclass.
+CLASS_WORLD_OBJECT,世界物体,muddery.typeclasses.objects.MudderyObject,CATE_OBJECT,World object's typeclass.
+CLASS_COMMON_OBJECT,普通物体,muddery.typeclasses.common_objects.MudderyCommonObject,CATE_OBJECT,Common object's typeclass.
+CLASS_OBJECT_CREATOR,物体生成器,muddery.typeclasses.object_creators.MudderyObjectCreator,CATE_OBJECT,Object creators can create new objects.
 CLASS_FOOD,食物,typeclasses.common_objects.Food,CATE_OBJECT,Foods can be eaten.
-CLASS_SKILL_BOOK,技能书,typeclasses.common_objects.SkillBook,CATE_OBJECT,玩家可以通过技能书学习新技能。
-CLASS_SKILL,技能,typeclasses.character_skills.Skill,CATE_SKILL,Character's skill.
-CLASS_QUEST,任务,typeclasses.character_quests.Quest,CATE_QUEST,Quest.
-CLASS_EQUIPMENT,装备,typeclasses.common_objects.Equipment,CATE_OBJECT,Equipments.
-CLASS_SHOP,商店,typeclasses.shops.Shop,CATE_SHOP,Shops.
-CLASS_SHOP_GOODS,商品,typeclasses.shop_goods.ShopGoods,CATE_SHOP_GOODS,Goods.
+CLASS_SKILL_BOOK,技能书,muddery.typeclasses.common_objects.MudderySkillBook,CATE_OBJECT,玩家可以通过技能书学习新技能。
+CLASS_SKILL,技能,muddery.typeclasses.character_skills.MudderySkill,CATE_SKILL,Character's skill.
+CLASS_QUEST,任务,muddery.typeclasses.character_quests.MudderyQuest,CATE_QUEST,Quest.
+CLASS_EQUIPMENT,装备,muddery.typeclasses.common_objects.MudderyEquipment,CATE_OBJECT,Equipments.
+CLASS_SHOP,商店,muddery.typeclasses.shops.MudderyShop,CATE_SHOP,Shops.
+CLASS_SHOP_GOODS,商品,muddery.typeclasses.shop_goods.MudderyShopGoods,CATE_SHOP_GOODS,Goods.
