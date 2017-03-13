@@ -188,7 +188,7 @@ class SkillHandler(object):
         # Random chooses a skill.
         skill = random.choice(available_skills)
         if skill:
-            self.cast_skill(skill, self.skill_target)
+            self.owner.ndb.combat_handler.prepare_skill(skill, self.owner, self.skill_target)
 
     def get_available_skills(self):
         """
