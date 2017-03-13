@@ -648,7 +648,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             (boolean) the character is alive or not
         """
-        return self.db.hp > 0
+        return round(self.db.hp) > 0
 
     def die(self, killers):
         """
