@@ -100,6 +100,11 @@ BASE_SKILL_TYPECLASS = "muddery.typeclasses.skills.MudderySkill"
 # Typeclass for quests
 BASE_QUEST_TYPECLASS = "muddery.typeclasses.quests.MudderyQuest"
 
+
+######################################################################
+# Default statement sets
+######################################################################
+
 # Action functions set
 ACTION_FUNC_SET = "muddery.statements.default_statement_func_set.ActionFuncSet"
 
@@ -111,6 +116,27 @@ SKILL_FUNC_SET = "muddery.statements.default_statement_func_set.SkillFuncSet"
 
 # Handler of the combat
 COMBAT_HANDLER = "muddery.typeclasses.combat_handler.MudderyCombatHandler"
+
+
+######################################################################
+# Default command sets
+######################################################################
+
+# Command set used on session before player has logged in
+CMDSET_UNLOGGEDIN = "muddery.commands.default_cmdsets.UnloggedinCmdSet"
+
+# Command set used on the logged-in session
+CMDSET_SESSION = "muddery.commands.default_cmdsets.SessionCmdSet"
+
+# Default set for logged in player with characters (fallback)
+CMDSET_CHARACTER = "muddery.commands.default_cmdsets.CharacterCmdSet"
+
+# Command set for players without a character (ooc)
+CMDSET_PLAYER = "muddery.commands.default_cmdsets.PlayerCmdSet"
+
+# Command set for players in combat
+CMDSET_COMBAT = "muddery.commands.default_cmdsets.CombatCmdSet"
+
 
 ######################################################################
 # World data features

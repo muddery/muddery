@@ -543,7 +543,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.ndb.combat_handler = combat_handler
 
         # Change the command set.
-        self.cmdset.add("muddery.commands.default_cmdsets.CombatCmdSet")
+        self.cmdset.add(settings.CMDSET_COMBAT)
 
     def at_combat_start(self):
         """
@@ -609,7 +609,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         del self.ndb.combat_handler
 
         # remove combat commands
-        self.cmdset.delete("muddery.commands.default_cmdsets.CombatCmdSet")
+        self.cmdset.delete(settings.CMDSET_COMBAT)
 
     def is_in_combat(self):
         """
