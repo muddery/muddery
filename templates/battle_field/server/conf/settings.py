@@ -161,11 +161,11 @@ SECRET_KEY = {secret_key}
 
 
 ######################################################################
-# Typeclasses and other paths
+# Default command sets
 ######################################################################
 
-# Statement functions set
-STATEMENT_FUNC_SET = "statements.statement_func_set.StatementFuncSet"
+# Default set for logged in player with characters (fallback)
+CMDSET_CHARACTER = "commands.default_cmdsets.CharacterCmdSet"
 
 
 ######################################################################

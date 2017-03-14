@@ -51,6 +51,9 @@ class WorldExitsForm(forms_base.WorldExitsForm):
 class ExitLocksForm(forms_base.ExitLocksForm):
     pass
 
+class TwoWayExitsForm(forms_base.TwoWayExitsForm):
+    pass
+
 class WorldObjectsForm(forms_base.WorldObjectsForm):
     pass
 
@@ -70,6 +73,12 @@ class QuestRewardListForm(forms_base.QuestRewardListForm):
     pass
 
 class CommonObjectsForm(forms_base.CommonObjectsForm):
+    pass
+
+class FoodsForm(forms_base.FoodsForm):
+    pass
+
+class SkillBooksForm(forms_base.SkillBooksForm):
     pass
 
 class CharacterModelsForm(forms_base.CharacterModelsForm):
