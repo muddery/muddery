@@ -72,6 +72,16 @@ class exit_locks(model_base.exit_locks):
 
 #------------------------------------------------------------
 #
+# two way exit's additional data
+#
+#------------------------------------------------------------
+class two_way_exits(model_base.two_way_exits):
+    "Store all exit locks."
+    pass
+
+
+#------------------------------------------------------------
+#
 # store all objects
 #
 #------------------------------------------------------------
@@ -117,6 +127,16 @@ class common_objects(model_base.common_objects):
 # ------------------------------------------------------------
 class foods(model_base.foods):
     "foods inherit from common objects."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# store all skill books
+#
+# ------------------------------------------------------------
+class skill_books(model_base.skill_books):
+    "Skill books inherit from common objects."
     pass
 
 
