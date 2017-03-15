@@ -35,12 +35,12 @@ from evennia.server import evennia_launcher
 
 # Game directory structure
 SETTINGFILE = "settings.py"
-SERVERDIR = "server"
-CONFDIR = os.path.join(SERVERDIR, "conf")
-SETTINGS_PATH = os.path.join(CONFDIR, SETTINGFILE)
+SERVER_DIR = "server"
+CONF_DIR = os.path.join(SERVER_DIR, "conf")
+SETTINGS_PATH = os.path.join(CONF_DIR, SETTINGFILE)
 SETTINGS_DOTPATH = "server.conf.settings"
 CURRENT_DIR = os.getcwd()
-GAMEDIR = CURRENT_DIR
+GAME_DIR = CURRENT_DIR
 
 
 #------------------------------------------------------------
@@ -155,14 +155,14 @@ def create_settings_file():
     Uses the template settings file to build a working
     settings file.
     """
-    settings_path = os.path.join(GAMEDIR, "server", "conf", "settings.py")
+    settings_path = os.path.join(GAME_DIR, "server", "conf", "settings.py")
     with open(settings_path, 'r') as f:
         settings_string = f.read()
 
     # tweak the settings
     setting_dict = {"evennia_settings_default": os.path.join(evennia_launcher.EVENNIA_LIB, "settings_default.py"),
                     "muddery_settings_default": os.path.join(MUDDERY_LIB, "settings_default.py"),
-                    "servername":"'%s'" % GAMEDIR.rsplit(os.path.sep, 1)[1].capitalize(),
+                    "servername":"'%s'" % GAME_DIR.rsplit(os.path.sep, 1)[1].capitalize(),
                     "secret_key":"'%s'" % create_secret_key()}
 
     # modify the settings
@@ -203,9 +203,9 @@ def create_game_directory(gamedir, template):
                 print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
 
 
-    global GAMEDIR
-    GAMEDIR = gamedir
-    if os.path.exists(GAMEDIR):
+    global GAME_DIR
+    GAME_DIR = gamedir
+    if os.path.exists(GAME_DIR):
         print("Cannot create new Muddery game dir: '%s' already exists." % gamedir)
         sys.exit()
 
@@ -224,12 +224,12 @@ def create_game_directory(gamedir, template):
 
     # copy default template directory
     default_template = os.path.join(MUDDERY_LIB, "game_template")
-    shutil.copytree(default_template, GAMEDIR)
+    shutil.copytree(default_template, GAME_DIR)
 
     if template_dir:
-        copy_tree(template_dir, GAMEDIR)
+        copy_tree(template_dir, GAME_DIR)
 
-    # pre-build settings file in the new GAMEDIR
+    # pre-build settings file in the new GAME_DIR
     create_settings_file()
 
 
@@ -303,7 +303,7 @@ def main():
         create_game_directory(gamedir, template)
 
         os.chdir(gamedir)
-        evennia_launcher.init_game_directory(GAMEDIR, check_db=False)
+        evennia_launcher.init_game_directory(GAME_DIR, check_db=False)
 
         try:
             django_args = ["makemigrations"]

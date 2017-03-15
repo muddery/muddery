@@ -14,6 +14,10 @@ always be sure of what you have changed and what is default behaviour.
 """
 
 import os
+from evennia.settings_default import EVENNIA_DIR, GAME_DIR
+from evennia.settings_default import WEBSITE_TEMPLATE, WEBCLIENT_TEMPLATE
+from evennia.settings_default import INSTALLED_APPS
+
 
 ######################################################################
 # Muddery base server config
@@ -21,11 +25,48 @@ import os
 
 MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Place to put log files
+LOG_DIR = os.path.join(GAME_DIR, "server", "logs")
+SERVER_LOG_FILE = os.path.join(LOG_DIR, 'server.log')
+PORTAL_LOG_FILE = os.path.join(LOG_DIR, 'portal.log')
+HTTP_LOG_FILE = os.path.join(LOG_DIR, 'http_requests.log')
+
+# This setting is no use any more, so set it to blank.
+WEBSOCKET_CLIENT_URL = ""
+
+
+######################################################################
+# Evennia Database config
+######################################################################
+
+# Database config syntax:
+# ENGINE - path to the the database backend. Possible choices are:
+#            'django.db.backends.sqlite3', (default)
+#            'django.db.backends.mysql',
+#            'django.db.backends.postgresql_psycopg2' (see Issue 241),
+#            'django.db.backends.oracle' (untested).
+# NAME - database name, or path to the db file for sqlite3
+# USER - db admin (unused in sqlite3)
+# PASSWORD - db admin password (unused in sqlite3)
+# HOST - empty string is localhost (unused in sqlite3)
+# PORT - empty string defaults to localhost (unused in sqlite3)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(GAME_DIR, "server", "muddery.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': ''
+        }}
+
+
 ######################################################################
 # Evennia base server config
 ######################################################################
 # Activate telnet service
 TELNET_ENABLED = False
+
 
 ######################################################################
 # Django web features
@@ -39,6 +80,65 @@ TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.i18n',
                                'django.core.context_processors.media',
                                'django.core.context_processors.debug',
                                'muddery.web.utils.general_context.general_context',)
+
+# Absolute path to the directory that holds file uploads from web apps.
+# Example: "/home/media/media.lawrence.com"
+MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
+
+# URL that handles the media served from MEDIA_ROOT.
+# Example: "http://media.lawrence.com"
+MEDIA_URL = '/media/'
+
+# image resource's dir
+IMAGE_RESOURCE_DIR = 'resource/image'
+
+# icon resource's dir
+ICON_RESOURCE_DIR = 'resource/icon'
+
+# The master urlconf file that contains all of the sub-branches to the
+# applications. Change this to add your own URLs to the website.
+ROOT_URLCONF = 'web.urls'
+
+# URL prefix for admin media -- CSS, JavaScript and images. Make sure
+# to use a trailing slash. Django1.4+ will look for admin files under
+# STATIC_URL/admin.
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(GAME_DIR, "web", "static")
+
+# Directories from which static files will be gathered from.
+STATICFILES_DIRS = (
+    os.path.join(GAME_DIR, "worlddata", "editor", "static"),
+    os.path.join(MUDDERY_DIR, "worlddata", "editor", "static"),
+    os.path.join(GAME_DIR, "web", "static_overrides"),
+    os.path.join(MUDDERY_DIR, "web", "website", "static"),
+    os.path.join(MUDDERY_DIR, "web", "webclient", "static"),)
+
+# We setup the location of the website template as well as the admin site.
+TEMPLATES = [{
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(GAME_DIR, "worlddata", "editor", "templates"),
+            os.path.join(MUDDERY_DIR, "worlddata", "editor", "templates"),
+            os.path.join(GAME_DIR, "web", "template_overrides", WEBSITE_TEMPLATE),
+            os.path.join(GAME_DIR, "web", "template_overrides", WEBCLIENT_TEMPLATE),
+            os.path.join(GAME_DIR, "web", "template_overrides"),
+            os.path.join(MUDDERY_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
+            os.path.join(MUDDERY_DIR, "web", "website", "templates"),
+            os.path.join(MUDDERY_DIR, "web", "webclient", "templates", WEBCLIENT_TEMPLATE),
+            os.path.join(MUDDERY_DIR, "web", "webclient", "templates"),
+            os.path.join(EVENNIA_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
+            os.path.join(EVENNIA_DIR, "web", "website", "templates")],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            "context_processors": [
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.media',
+                'django.template.context_processors.debug',
+                'muddery.web.utils.general_context.general_context']
+            }
+        }]
 
 
 ######################################################################
@@ -88,18 +188,6 @@ BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
 # Typeclass for general characters, include NPCs, mobs and player characters.
 BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.characters.MudderyCharacter"
 
-# Typeclass for NPCs
-BASE_NPC_TYPECLASS = "muddery.typeclasses.npcs.MudderyNPC"
-
-# Typeclass for monsters
-BASE_MONSTER_TYPECLASS = "muddery.typeclasses.monsters.MudderyMonster"
-
-# Typeclass for skills
-BASE_SKILL_TYPECLASS = "muddery.typeclasses.skills.MudderySkill"
-
-# Typeclass for quests
-BASE_QUEST_TYPECLASS = "muddery.typeclasses.quests.MudderyQuest"
-
 
 ######################################################################
 # Default statement sets
@@ -148,6 +236,9 @@ DATA_KEY_CATEGORY = "data_key"
 # data app name
 WORLD_DATA_APP = "worlddata"
 
+# add data app
+INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
+
 # data file's folder under user's game directory.
 WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
 
@@ -165,6 +256,7 @@ REVERSE_EXIT_TYPECLASS_PATH = "muddery.typeclasses.exits.MudderyReverseExit"
 
 # Reverse exit's key's prefix.
 REVERSE_EXIT_PREFIX = "__reverse__"
+
 
 ###################################
 # Basic data
@@ -243,6 +335,7 @@ OBJECT_DATA_MODELS = (WORLD_ROOMS,
 
 # object's additional data
 OBJECT_ADDITIONAL_DATA = ("exit_locks", "two_way_exits", "object_creators")
+
 
 ###################################
 # other data
@@ -325,6 +418,7 @@ SKILL_MODULES = ("skills.skills",)
 
 # Characters who have equal or higher permission can bypass events.
 PERMISSION_BYPASS_EVENTS = {"Builders", "Wizards", "Immortals"}
+
 
 ###################################
 # world editor
