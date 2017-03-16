@@ -13,6 +13,7 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.loot_handler import LootHandler
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
@@ -121,16 +122,17 @@ class MudderyQuest(MudderyObject):
                     name = ""
                     
                     # Get the name of the objective object.
-                    for model_name in settings.COMMON_OBJECTS:
+                    object_key = self.objectives[ordinal]["object"]
+                    model_names = OBJECT_KEY_HANDLER.get_models(object_key)
+                    for model_name in model_names:
                         model = apps.get_model(settings.WORLD_DATA_APP, model_name)
-                        if model:
-                            # Get record.
-                            try:
-                                record = model.objects.get(key=self.objectives[ordinal]["object"])
-                                name = record.name
-                                break
-                            except Exception, e:
-                                pass
+                        # Get record.
+                        try:
+                            record = model.objects.get(key=object_key)
+                            name = record.name
+                            break
+                        except Exception, e:
+                            pass
         
                     objectives.append({"target": target,
                                        "object": name,
@@ -143,31 +145,17 @@ class MudderyQuest(MudderyObject):
                     name = ""
 
                     # Get the name of the objective character.
-                    for model_name in settings.COMMON_OBJECTS:
-                        # find in common objects
+                    object_key = self.objectives[ordinal]["object"]
+                    model_names = OBJECT_KEY_HANDLER.get_models(object_key)
+                    for model_name in model_names:
                         model = apps.get_model(settings.WORLD_DATA_APP, model_name)
-                        if model:
-                            # Get record.
-                            try:
-                                record = model.objects.get(key=self.objectives[ordinal]["object"])
-                                name = record.name
-                                break
-                            except Exception, e:
-                                pass
-
-                    if not name:
-                        # find in world_npcs
-                        for model_name in settings.WORLD_NPCS:
-                            # find in common objects
-                            model = apps.get_model(settings.WORLD_DATA_APP, model_name)
-                            if model:
-                                # Get record.
-                                try:
-                                    record = model.objects.get(key=self.objectives[ordinal]["object"])
-                                    name = record.name
-                                    break
-                                except Exception, e:
-                                    pass
+                        # Get record.
+                        try:
+                            record = model.objects.get(key=object_key)
+                            name = record.name
+                            break
+                        except Exception, e:
+                            pass
 
                     objectives.append({"target": target,
                                        "object": name,
