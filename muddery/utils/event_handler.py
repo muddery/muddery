@@ -13,6 +13,7 @@ from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
 from evennia import create_script
+from muddery.worlddata.data_settings import EventAdditionalData
 
 PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_EVENTS}
 
@@ -23,13 +24,14 @@ def get_event_additional_model():
     additional_model = {}
 
     # list event's additional data's model
-    for model_name in settings.EVENT_ADDITIONAL_DATA:
-        model_data = apps.get_model(settings.WORLD_DATA_APP, model_name)
-        if model_data:
-            # Get records.
-            for record in model_data.objects.all():
-                key = record.serializable_value("key")
-                additional_model[key] = model_name
+    for model_type, model_name in vars(EventAdditionalData).items():
+        if model_type[1] != "_":
+            model_data = apps.get_model(settings.WORLD_DATA_APP, model_name)
+            if model_data:
+                # Get records.
+                for record in model_data.objects.all():
+                    key = record.serializable_value("key")
+                    additional_model[key] = model_name
 
     return additional_model
 

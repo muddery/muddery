@@ -10,6 +10,25 @@ POSITION_LENGTH = 80
 
 # ------------------------------------------------------------
 #
+# System data flag.
+#
+# ------------------------------------------------------------
+class system_data(models.Model):
+    """
+    All system data should have this flag. This flag is used to 
+    differentiate between system data and custom data. 
+    """
+    system_data = models.BooleanField(blank=True, default=False)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "System Data"
+        verbose_name_plural = "System Data"
+        
+
+# ------------------------------------------------------------
+#
 # Game's basic settings.
 #
 # ------------------------------------------------------------
@@ -123,7 +142,7 @@ class client_settings(models.Model):
 # store all typeclasses
 #
 # ------------------------------------------------------------
-class class_categories(models.Model):
+class class_categories(system_data):
     "Typeclass's category defines base types."
 
     # category's key
@@ -138,7 +157,7 @@ class class_categories(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Class category"
+        verbose_name = "Class Category"
         verbose_name_plural = "Class Categories"
 
     def __unicode__(self):
@@ -150,7 +169,7 @@ class class_categories(models.Model):
 # store all typeclasses
 #
 # ------------------------------------------------------------
-class typeclasses(models.Model):
+class typeclasses(system_data):
     "Defines all available typeclasses."
 
     # typeclass's key
@@ -556,7 +575,7 @@ class skill_books(common_objects):
 # store all equip_types
 #
 # ------------------------------------------------------------
-class equipment_types(models.Model):
+class equipment_types(system_data):
     "Store all equip types."
 
     # equipment type's key
@@ -1053,7 +1072,7 @@ class quests(models.Model):
 # quest objective's type
 #
 # ------------------------------------------------------------
-class quest_objective_types(models.Model):
+class quest_objective_types(system_data):
     "quest objective's type"
 
     # Type's key. It must be the values in utils/defines.py.
@@ -1116,7 +1135,7 @@ class quest_objectives(models.Model):
 # quest dependency's type
 #
 # ------------------------------------------------------------
-class quest_dependency_types(models.Model):
+class quest_dependency_types(system_data):
     "quest dependency's type"
 
     # Dependency's key. It must be the values in utils/defines.pyl
@@ -1170,7 +1189,7 @@ class quest_dependencies(models.Model):
 # event's type
 #
 # ------------------------------------------------------------
-class event_types(models.Model):
+class event_types(system_data):
     "event's type"
 
     # Event's key. It must be the values in utils/defines.py
@@ -1197,7 +1216,7 @@ class event_types(models.Model):
 # event trigger's types
 #
 # ------------------------------------------------------------
-class event_trigger_types(models.Model):
+class event_trigger_types(system_data):
     "event trigger's type"
 
     # Type's key. It must be the values in utils/defines.py

@@ -5,6 +5,7 @@ Set the game's configuration.
 
 from django.conf import settings
 from django.apps import apps
+from worlddata.data_settings import OtherSettings
 from evennia.utils import logger
 
 
@@ -70,7 +71,7 @@ class GameSettings(object):
         return self.values
 
 
-GAME_SETTINGS = GameSettings(settings.GAME_SETTINGS,
+GAME_SETTINGS = GameSettings(OtherSettings.GAME_SETTINGS,
                              {"connection_screen": "",
                               "solo_mode": False,
                               "global_cd": 1.0,
@@ -87,7 +88,7 @@ GAME_SETTINGS = GameSettings(settings.GAME_SETTINGS,
                               })
 
 
-CLIENT_SETTINGS = GameSettings(settings.CLIENT_SETTINGS,
+CLIENT_SETTINGS = GameSettings(OtherSettings.CLIENT_SETTINGS,
                                {"game_title": "",
                                 "map_room_size": 40,
                                 "map_scale": 75,
