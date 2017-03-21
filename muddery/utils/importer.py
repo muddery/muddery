@@ -17,7 +17,128 @@ from muddery.utils.exception import MudderyError
 from muddery.utils import readers
 
 
-def import_file(file_name, model_name, file_type=None, widecard=True, clear=True):
+def get_field_types(model_obj, field_names):
+    """
+    Get field types by field names.
+
+    type = 0    means common field
+    type = 1    means Boolean field
+    type = 2    means Integer field
+    type = 3    means Float field
+    type = 4    means ForeignKey field, not support
+    type = 5    means ManyToManyField field, not support
+    type = -1   means field does not exist
+    """
+    field_types = []
+    for field_name in field_names:
+        field_type = 0
+
+        try:
+            # get field info
+            field = model_obj._meta.get_field(field_name)
+
+            if isinstance(field, models.BooleanField):
+                field_type = 1
+            elif isinstance(field, models.IntegerField):
+                field_type = 2
+            elif isinstance(field, models.FloatField):
+                field_type = 3
+            elif isinstance(field, models.ForeignKey):
+                field_type = 4
+            elif isinstance(field, models.ManyToManyField):
+                field_type = 5
+            else:
+                field_type = 0
+        except Exception, e:
+            logger.log_errmsg("Field error: %s" % e)
+
+        field_types.append(field_type)
+
+    return field_types
+    
+
+def parse_record(field_names, field_types, values):
+    """
+    Parse text values to field values.
+    """
+    record = {}
+    for item in zip(field_names, field_types, values):
+        field_name = item[0]
+        # skip "id" field
+        if field_name == "id":
+            continue
+
+        field_type = item[1]
+        value = item[2]
+
+        try:
+            # set field values
+            if field_type == 0:
+                # default
+                record[field_name] = value
+            elif field_type == 1:
+                # boolean value
+                if value:
+                    if value == 'True':
+                        record[field_name] = True
+                    elif value == 'False':
+                        record[field_name] = False
+                    else:
+                        record[field_name] = (int(value) != 0)
+            elif field_type == 2:
+                # interger value
+                if value:
+                    record[field_name] = int(value)
+            elif field_type == 3:
+                # float value
+                if value:
+                    record[field_name] = float(value)
+        except Exception, e:
+            print("value error: %s - '%s'" % (field_name, value))
+            
+    return record
+
+
+def import_data(model_obj, reader):
+    """
+    Import data to the model.
+
+    Args:
+        model_obj:
+        reader:
+
+    Returns:
+        None
+    """
+    try:
+        # read title
+        titles = reader.readln()
+
+        field_types = get_field_types(model_obj, titles)
+
+        # import values
+        # read next line
+        values = reader.readln()
+
+        while values:
+            try:
+                record = parse_record(titles, field_types, values)
+
+                # create new record
+                data = model_obj.objects.create(**record)
+                data.save()
+            except Exception, e:
+                print("Can not load %s: %s" % (values, e))
+
+            # read next line
+            values = reader.readln()
+
+    except StopIteration:
+        # reach the end of file, pass this exception
+        pass
+
+
+def import_file(file_name, model_name, file_type=None, wildcard=True, clear=True):
     """
     Import data from a data file to the db model
 
@@ -26,14 +147,14 @@ def import_file(file_name, model_name, file_type=None, widecard=True, clear=True
         model_name: (string) db model's name.
         file_type: (string) the type of the file. If it's None, the function will get
                    the file type from the extension name of the file.
-        widecard: (bool) add widecard as ext name or not.
+        wildcard: (bool) add wildcard as ext name or not.
         clear: (boolean) clear old data or not.
     """
     imported = False
 
     try:
         # get file list
-        if widecard:
+        if wildcard:
             file_names = glob.glob(file_name + ".*")
         else:
             file_names = [file_name]
@@ -58,102 +179,15 @@ def import_file(file_name, model_name, file_type=None, widecard=True, clear=True
             # get model
             model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
+            print("%s is instance: %s" % (file_name, model_obj))
+
             if clear:
                 # clear old data
                 model_obj.objects.all().delete()
 
-            try:
-                # read title
-                title = reader.readln()
+            print("Importing %s" % file_name)
 
-                # get field types
-                # type = 0    means common field
-                # type = 1    means Boolean field
-                # type = 2    means Integer field
-                # type = 3    means Float field
-                # type = 4    means ForeignKey field, not support
-                # type = 5    means ManyToManyField field, not support
-                # type = -1   means field does not exist
-
-                field_types = []
-                for field_name in title:
-                    field_type = 0
-
-                    try:
-                        # get field info
-                        field = model_obj._meta.get_field(field_name)
-
-                        if isinstance(field, models.BooleanField):
-                            field_type = 1
-                        elif isinstance(field, models.IntegerField):
-                            field_type = 2
-                        elif isinstance(field, models.FloatField):
-                            field_type = 3
-                        elif isinstance(field, models.ForeignKey):
-                            field_type = 4
-                        elif isinstance(field, models.ManyToManyField):
-                            field_type = 5
-                        else:
-                            field_type = 0
-                    except Exception, e:
-                        logger.log_errmsg("Field error: %s" % e)
-
-                    field_types.append(field_type)
-
-                # import values
-                # read next line
-                values = reader.readln()
-
-                while values:
-                    try:
-                        record = {}
-                        for item in zip(title, field_types, values):
-                            field_name = item[0]
-                            # skip "id" field
-                            if field_name == "id":
-                                continue
-
-                            field_type = item[1]
-                            value = item[2]
-
-                            try:
-                                # set field values
-                                if field_type == 0:
-                                    # default
-                                    record[field_name] = value
-                                elif field_type == 1:
-                                    # boolean value
-                                    if value:
-                                        if value == 'True':
-                                            record[field_name] = True
-                                        elif value == 'False':
-                                            record[field_name] = False
-                                        else:
-                                            record[field_name] = (int(value) != 0)
-                                elif field_type == 2:
-                                    # interger value
-                                    if value:
-                                        record[field_name] = int(value)
-                                elif field_type == 3:
-                                    # float value
-                                    if value:
-                                        record[field_name] = float(value)
-                            except Exception, e:
-                                print("value error: %s - '%s'" % (field_name, value))
-
-                        # create new record
-                        data = model_obj.objects.create(**record)
-                        data.save()
-                    except Exception, e:
-                        print("Can not load %s %s: %s" % (file_name, values, e))
-
-                    # read next line
-                    values = reader.readln()
-
-            except StopIteration:
-                # reach the end of file, pass this exception
-                pass
-
+            import_data(model_obj, reader)
             imported = True
             break
     except Exception, e:
@@ -178,7 +212,7 @@ def import_model(model_name, path_name=None, clear=True):
     if not path_name:
         path_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
     file_name = os.path.join(path_name, model_name)
-    import_file(file_name, model_name, widecard=True, clear=clear)
+    import_file(file_name, model_name, wildcard=True, clear=clear)
 
 
 def import_system_localized_strings(language=None):
@@ -211,7 +245,7 @@ def import_system_localized_strings(language=None):
                 # if it is a folder
                 continue
 
-            import_file(full_name, settings.SYSTEM_LOCALIZED_STRINGS, widecard=False, clear=False)
+            import_file(full_name, settings.SYSTEM_LOCALIZED_STRINGS, wildcard=False, clear=False)
 
 
 def import_local_all():

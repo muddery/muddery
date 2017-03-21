@@ -64,46 +64,4 @@ SECRET_KEY = {secret_key}
 # World data features
 ######################################################################
 
-# basic data models
-BASIC_DATA_MODELS = (CLASS_CATEGORIES,
-                     TYPECLASSES,
-                     EQUIPMENT_TYPES,
-                     EQUIPMENT_POSITIONS,
-                     CHARACTER_CAREERS,
-                     CAREER_EQUIPMENTS,
-                     CHARACTER_MODELS,
-                     EVENT_TYPES,
-                     EVENT_TRIGGER_TYPES)
-
-# all object data models
-OBJECT_DATA_MODELS = (WORLD_ROOMS,
-                      WORLD_EXITS,
-                      WORLD_OBJECTS,
-                      WORLD_NPCS) + COMMON_OBJECTS
-
-# all other data models
-OTHER_DATA_MODELS = (CREATOR_LOOT_LIST,
-                     CHARACTER_LOOT_LIST,
-                     QUEST_REWARD_LIST,
-                     QUEST_OBJECTIVE_TYPES,
-                     QUEST_OBJECTIVES,
-                     QUEST_DEPENDENCY_TYPES,
-                     QUEST_DEPENDENCIES,
-                     EVENT_DATA,
-                     DIALOGUES,
-                     DIALOGUE_QUEST_DEPENDENCIES,
-                     DIALOGUE_RELATIONS,
-                     DIALOGUE_SENTENCES,
-                     NPC_DIALOGUES,
-                     CHARACTER_MODELS,
-                     DEFAULT_OBJECTS,
-                     DEFAULT_SKILLS,
-                     SHOP_GOODS,
-                     NPC_SHOPS,
-                     CUSTOM_LOCALIZED_STRINGS,
-                     IMAGE_RESOURCES,
-                     ICON_RESOURCES,
-                     GAME_SETTINGS,
-                     CLIENT_SETTINGS) + OBJECT_ADDITIONAL_DATA + EVENT_ADDITIONAL_DATA
-
 EQUIP_EFFECTS = []
