@@ -9,6 +9,7 @@ from muddery.utils.builder import build_object
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils import utils
+from muddery.worlddata.data_settings import OtherData
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
@@ -17,6 +18,7 @@ from muddery.worlddata.data_settings import EventAdditionalData
 
 PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_EVENTS}
 
+
 def get_event_additional_model():
     """
     Set a dict of additional model names.
@@ -24,8 +26,8 @@ def get_event_additional_model():
     additional_model = {}
 
     # list event's additional data's model
-    for model_type, model_name in vars(EventAdditionalData).items():
-        if model_type[1] != "_":
+    for model_key, model_name in vars(EventAdditionalData).items():
+        if model_key[1] != "_":
             model_data = apps.get_model(settings.WORLD_DATA_APP, model_name)
             if model_data:
                 # Get records.
@@ -50,7 +52,7 @@ class EventHandler(object):
 
         # Load events.
         event_records = []
-        model_events = apps.get_model(settings.WORLD_DATA_APP, settings.EVENT_DATA)
+        model_events = apps.get_model(settings.WORLD_DATA_APP, OtherData.EVENT_DATA)
         if model_events:
             # Get records.
             event_records = model_events.objects.filter(trigger_obj=owner.get_data_key())
@@ -78,13 +80,6 @@ class EventHandler(object):
                             event[add_field.name] = add_record.serializable_value(add_field.name)
                     except Exception, e:
                         pass
-
-                """
-                if event_record.type == defines.EVENT_ATTACK:
-                    self.create_event_attack(event)
-                elif event_record.type == defines.EVENT_DIALOGUE:
-                    self.create_event_dialogue(event)
-                """
 
                 if not trigger_type in self.events:
                     self.events[trigger_type] = []
@@ -214,38 +209,6 @@ class EventHandler(object):
 
         return not triggered
 
-
-    #########################
-    #
-    # Event attack
-    #
-    #########################
-
-    def create_event_attack(self, event):
-        """
-        Create a combat event, load combat infos.
-        """
-        event["type"] = defines.EVENT_ATTACK
-        event["function"] = self.do_attack
-
-        mob_records = []
-        model_mobs = apps.get_model(settings.WORLD_DATA_APP, settings.EVENT_MOBS)
-        if model_mobs:
-            # Get records.
-            mob_records = model_mobs.objects.filter(key=event["key"])
-
-        data = []
-        for mob_record in mob_records:
-            mob = {"mob": mob_record.mob,
-                   "level": mob_record.level,
-                   "odds": mob_record.odds,
-                   "desc": mob_record.desc}
-            data.append(mob)
-        event["data"] = data
-
-        return event
-
-
     def do_attack(self, event, character):
         """
         Start a combat.
@@ -257,28 +220,6 @@ class EventHandler(object):
         if rand <= event["odds"]:
             # Attack mob.
             character.attack_clone_target(event["mob"], event["level"], event["desc"])
-
-
-    def create_event_dialogue(self, event):
-        """
-        Create a dialogue event, load dialog info.
-        """
-        event["type"] = defines.EVENT_DIALOGUE
-        event["function"] = self.do_dialogue
-
-        try:
-            model_dialogues = apps.get_model(settings.WORLD_DATA_APP, settings.EVENT_DIALOGUES)
-            if model_dialogues:
-                # Get record.
-                dialogue_record = model_dialogues.objects.get(key=event["key"])
-                data = {"dialogue": dialogue_record.dialogue,
-                        "npc": dialogue_record.npc}
-                event["data"] = data
-        except Exception, e:
-            logger.log_errmsg("Can't load event dialogue %s: %s" % (event["key"], e))
-
-        return event
-
 
     def do_dialogue(self, event, character):
         """

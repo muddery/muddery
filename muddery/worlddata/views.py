@@ -29,6 +29,7 @@ from muddery.worlddata.editor.dialogue_view import DialogueView
 from muddery.worlddata.editor.dialogue_sentence_view import DialogueSentenceView
 from muddery.worlddata.editor.dialogue_chain_view import DialogueChainView
 from muddery.worlddata.editor.dialogue_chain_image import DialogueChainImage
+from muddery.worlddata import data_settings
 
 
 @staff_member_required
@@ -59,9 +60,12 @@ def world_editor(request):
     """
     Render the world editor.
     """
-    model_list = settings.BASIC_DATA_MODELS +\
-                      settings.OBJECT_DATA_MODELS +\
-                      settings.OTHER_DATA_MODELS
+    model_list = [name for key, name in vars(data_settings.BasicData).items() if key[1] != "_"]
+    model_list.extend([name for key, name in vars(data_settings.ObjectsData).items() if key[1] != "_"])
+    model_list.extend([name for key, name in vars(data_settings.ObjectsAdditionalData).items() if key[1] != "_"])
+    model_list.extend([name for key, name in vars(data_settings.OtherData).items() if key[1] != "_"])
+    model_list.extend([name for key, name in vars(data_settings.EventAdditionalData).items() if key[1] != "_"])
+
     models = [{"key": model, "name": LS(model, category="models") + "(" + model + ")"} for model in model_list]
 
     context = {"models": models,

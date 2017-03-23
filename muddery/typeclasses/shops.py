@@ -11,6 +11,7 @@ from django.apps import apps
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.builder import build_object, get_object_record
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.worlddata.data_settings import BasicData, OtherData
 
 
 class MudderyShop(MudderyObject):
@@ -37,7 +38,7 @@ class MudderyShop(MudderyObject):
         """
         # shops records
         goods_records = []
-        goods_model = apps.get_model(settings.WORLD_DATA_APP, settings.SHOP_GOODS)
+        goods_model = apps.get_model(settings.WORLD_DATA_APP, OtherData.SHOP_GOODS)
         if goods_model:
             # Get records.
             goods_records = goods_model.objects.filter(shop=self.get_data_key())
@@ -57,7 +58,7 @@ class MudderyShop(MudderyObject):
         # add new goods
 
         # get typeclass model
-        model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
+        model_typeclass = apps.get_model(settings.WORLD_DATA_APP, BasicData.TYPECLASSES)
 
         for goods_record in goods_records:
             goods_key = goods_record.goods

@@ -23,6 +23,7 @@ from muddery.utils import utils
 from muddery.utils.builder import build_object
 from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.loot_handler import LootHandler
+from muddery.worlddata.data_settings import BasicData, OtherData
 
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
@@ -53,7 +54,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, settings.CHARACTER_LOOT_LIST)
+        return LootHandler(self, OtherData.CHARACTER_LOOT_LIST)
 
     def at_object_creation(self):
         """
@@ -103,7 +104,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.position_names = {}
 
         # reset equipment's position
-        model_position = apps.get_model(settings.WORLD_DATA_APP, settings.EQUIPMENT_POSITIONS)
+        model_position = apps.get_model(settings.WORLD_DATA_APP, BasicData.EQUIPMENT_POSITIONS)
         if model_position:
             for record in model_position.objects.all():
                 positions.append(record.key)
@@ -181,7 +182,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         try:
             # get data from db
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.CHARACTER_MODELS)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, BasicData.CHARACTER_MODELS)
             model_data = model_obj.objects.get(key=model_name, level=self.db.level)
 
             reserved_fields = {"id", "key", "level"}
@@ -251,7 +252,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # default skills
         skill_records = []
-        default_skills = apps.get_model(settings.WORLD_DATA_APP, settings.DEFAULT_SKILLS)
+        default_skills = apps.get_model(settings.WORLD_DATA_APP, OtherData.DEFAULT_SKILLS)
         if default_skills:
             # Get records.
             skill_records = default_skills.objects.filter(character=model_name)
