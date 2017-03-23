@@ -15,6 +15,7 @@ from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
 from muddery.utils import readers
+from muddery.worlddata import data_settings
 
 
 def get_field_types(model_obj, field_names):
@@ -215,54 +216,20 @@ def import_model(model_name, path_name=None, clear=True):
     import_file(file_name, model_name, wildcard=True, clear=clear)
 
 
-def import_system_localized_strings(language=None):
-    """
-    Import localized strings.
-
-    language: All choices can be found here: 
-              # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
-    """
-    # clear old data
-    model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.SYSTEM_LOCALIZED_STRINGS)
-    if model_obj:
-        model_obj.objects.all().delete()
-
-    # if language is empty, load settings.LANGUAGE_CODE
-    if not language:
-        language = settings.LANGUAGE_CODE
-
-    # import all files in SYSTEM_LANGUAGE_FOLDER
-    dir_name = os.path.join(settings.GAME_DIR,
-                            settings.WORLD_DATA_FOLDER,
-                            settings.SYSTEM_LOCALIZED_STRINGS_FOLDER,
-                            language)
-
-    if os.path.isdir(dir_name):
-        for file_name in os.listdir(dir_name):
-            full_name = os.path.join(dir_name, file_name)
-
-            if os.path.isdir(full_name):
-                # if it is a folder
-                continue
-
-            import_file(full_name, settings.SYSTEM_LOCALIZED_STRINGS, wildcard=False, clear=False)
-
-
 def import_local_all():
     """
     Import all local data files to models.
     """
     # load models in order
-    model_name_list = settings.BASIC_DATA_MODELS +\
-                      settings.OBJECT_DATA_MODELS +\
-                      settings.OTHER_DATA_MODELS
+    model_list = [name for key, name in vars(data_settings.BasicData).items() if key[1] != "_"]
+    model_list.extend([name for key, name in vars(data_settings.ObjectsData).items() if key[1] != "_"])
+    model_list.extend([name for key, name in vars(data_settings.ObjectsAdditionalData).items() if key[1] != "_"])
+    model_list.extend([name for key, name in vars(data_settings.OtherData).items() if key[1] != "_"])
+    model_list.extend([name for key, name in vars(data_settings.EventAdditionalData).items() if key[1] != "_"])
 
     # import models one by one
-    for model_name in model_name_list:
+    for model_name in model_list:
         import_model(model_name)
-
-    # import localized strings
-    import_system_localized_strings(settings.LANGUAGE_CODE)
 
 
 def unzip_data_all(file):
@@ -276,12 +243,14 @@ def unzip_data_all(file):
         archive.extractall(temp)
 
         # import models
-        model_name_list = settings.BASIC_DATA_MODELS +\
-                          settings.OBJECT_DATA_MODELS +\
-                          settings.OTHER_DATA_MODELS
+        model_list = [name for key, name in vars(data_settings.BasicData).items() if key[1] != "_"]
+        model_list.extend([name for key, name in vars(data_settings.ObjectsData).items() if key[1] != "_"])
+        model_list.extend([name for key, name in vars(data_settings.ObjectsAdditionalData).items() if key[1] != "_"])
+        model_list.extend([name for key, name in vars(data_settings.OtherData).items() if key[1] != "_"])
+        model_list.extend([name for key, name in vars(data_settings.EventAdditionalData).items() if key[1] != "_"])
 
         # import models one by one
-        for model_name in model_name_list:
+        for model_name in model_list:
             import_model(model_name, path_name=temp)
     finally:
         shutil.rmtree(temp)

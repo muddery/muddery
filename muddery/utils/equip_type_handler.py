@@ -5,6 +5,7 @@ This handles the relations of equipment types and character careers.
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
+from muddery.worlddata.data_settings import OtherData
 
 
 class EquipTypeHandler(object):
@@ -32,7 +33,7 @@ class EquipTypeHandler(object):
         self.clear()
 
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.CAREER_EQUIPMENTS)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, OtherData.CAREER_EQUIPMENTS)
             for record in model_obj.objects.all():
                 career = record.serializable_value("career")
                 equipment = record.serializable_value("equipment")

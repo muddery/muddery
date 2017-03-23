@@ -3,6 +3,7 @@ from django.contrib.admin.forms import forms
 from django.conf import settings
 from django.apps import apps
 from muddery.utils.localiztion_handler import localize_form_fields
+from muddery.worlddata import data_settings
 from worlddata import models
 
 
@@ -15,7 +16,8 @@ def ExistKey(key, except_models=None):
         return True
 
     # Get models.
-    for model_name in settings.OBJECT_DATA_MODELS:
+    model_list = [name for key, name in vars(data_settings.ObjectsData).items() if key[1] != "_"]
+    for model_name in model_list:
         if model_name in except_models:
             continue
         try:
@@ -29,7 +31,7 @@ def ExistKey(key, except_models=None):
 
 
 def GetAllPocketableObjects():
-	"""
+    """
 	Get all objects that can be put in player's pockets.
 	"""
 	# available objects are common objects, foods skill books or equipments

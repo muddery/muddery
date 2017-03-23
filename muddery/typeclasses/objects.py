@@ -25,6 +25,7 @@ from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.event_handler import EventHandler
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.worlddata.data_settings import BasicData, OtherData
 
 
 class MudderyObject(DefaultObject):
@@ -243,7 +244,7 @@ class MudderyObject(DefaultObject):
         """
         typeclass_path = ""
         try:
-            model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
+            model_typeclass = apps.get_model(settings.WORLD_DATA_APP, BasicData.TYPECLASSES)
             data = model_typeclass.objects.get(key=typeclass_key)
             typeclass_path = data.path
         except Exception, e:
@@ -417,7 +418,7 @@ class MudderyObject(DefaultObject):
         icon_key = getattr(self.dfield, "icon", None)
         if icon_key:
             try:
-                model_resource = apps.get_model(settings.WORLD_DATA_APP, settings.ICON_RESOURCES)
+                model_resource = apps.get_model(settings.WORLD_DATA_APP, OtherData.ICON_RESOURCES)
                 if model_resource:
                     resource_info = model_resource.objects.get(key=icon_key)
                     self.icon = resource_info.resource.url

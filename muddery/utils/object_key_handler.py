@@ -4,6 +4,7 @@ Object key handler, stores key's model name.
 
 from django.conf import settings
 from django.apps import apps
+from muddery.worlddata import data_settings
 
 
 class ObjectKeyHandler(object):
@@ -29,7 +30,8 @@ class ObjectKeyHandler(object):
         self.clear()
 
         # Get model names.
-        for model_name in settings.OBJECT_DATA_MODELS + settings.OBJECT_ADDITIONAL_DATA:
+        model_list = [name for key, name in vars(data_settings.ObjectsData).items() if key[1] != "_"]
+        for model_name in model_list:
             try:
                 model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
                 for record in model_obj.objects.all():

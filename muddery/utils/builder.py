@@ -7,6 +7,7 @@ from __future__ import print_function
 from muddery.utils import utils
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.worlddata.data_settings import BasicData, ObjectsData
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import create, search, logger
@@ -56,7 +57,7 @@ def build_object(obj_key, caller=None):
         record = get_object_record(obj_key)
 
         # get typeclass model
-        model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
+        model_typeclass = apps.get_model(settings.WORLD_DATA_APP, BasicData.TYPECLASSES)
         typeclass = model_typeclass.objects.get(key=record.typeclass)
     except Exception, e:
         ostring = "Can not get typeclass of %s: %s." % (obj_key, e)
@@ -136,7 +137,7 @@ def build_unique_objects(model_name, caller=None):
         caller.msg(ostring)
 
     # get typeclass model
-    model_typeclass = apps.get_model(settings.WORLD_DATA_APP, settings.TYPECLASSES)
+    model_typeclass = apps.get_model(settings.WORLD_DATA_APP, BasicData.TYPECLASSES)
 
     # get model
     model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
@@ -282,16 +283,16 @@ def build_all(caller=None):
     OBJECT_KEY_HANDLER.reload()
 
     # Build rooms.
-    build_unique_objects(settings.WORLD_ROOMS, caller)
+    build_unique_objects(ObjectsData.WORLD_ROOMS, caller)
 
     # Build exits.
-    build_unique_objects(settings.WORLD_EXITS, caller)
+    build_unique_objects(ObjectsData.WORLD_EXITS, caller)
 
     # Build objects.
-    build_unique_objects(settings.WORLD_OBJECTS, caller)
+    build_unique_objects(ObjectsData.WORLD_OBJECTS, caller)
 
     # Build NPCs.
-    build_unique_objects(settings.WORLD_NPCS, caller)
+    build_unique_objects(ObjectsData.WORLD_NPCS, caller)
 
 
 def reset_default_locations():
@@ -305,7 +306,7 @@ def reset_default_locations():
     if not default_home_key:
         # If does not have the default_home_key, get the first room in WORLD_ROOMS.
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, ObjectsData.WORLD_ROOMS)
             rooms = model_obj.objects.all()
             if rooms:
                 default_home_key = rooms[0].key
@@ -339,7 +340,7 @@ def reset_default_locations():
     if not start_location_key:
         # If does not have the start_location_key, get the first room in WORLD_ROOMS
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, settings.WORLD_ROOMS)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, ObjectsData.WORLD_ROOMS)
             rooms = model_obj.objects.all()
             if rooms:
                 start_location_key = rooms[0].key
