@@ -7,7 +7,7 @@ from __future__ import print_function
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
-from muddery.worlddata.data_settings import OtherData
+from muddery.worlddata.data_handler import DATA_HANDLER
 
 
 class LocalizedStringsHandler(object):
@@ -34,7 +34,7 @@ class LocalizedStringsHandler(object):
 
         # Load localized string model.
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, OtherData.LOCALIZED_STRINGS)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.LOCALIZED_STRINGS)
             for record in model_obj.objects.all():
                 # Add db fields to dict. Overwrite system localized strings.
                 self.dict[(record.category, record.origin)] = record.local
@@ -59,11 +59,11 @@ class LocalizedStringsHandler(object):
         else:
             return default
 
-# main dialoguehandler
+# main dialogue handler
 LOCALIZED_STRINGS_HANDLER = LocalizedStringsHandler()
 
 
-# translater
+# translator
 def LS(origin, category="", default=None):
     """
     This function returns the localized string.

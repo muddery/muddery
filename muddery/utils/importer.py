@@ -15,7 +15,7 @@ from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
 from muddery.utils import readers
-from muddery.worlddata import data_settings
+from muddery.worlddata.data_handler import DATA_HANDLER
 
 
 def get_field_types(model_obj, field_names):
@@ -221,11 +221,12 @@ def import_local_all():
     Import all local data files to models.
     """
     # load models in order
-    model_list = [name for key, name in vars(data_settings.BasicData).items() if key[1] != "_"]
-    model_list.extend([name for key, name in vars(data_settings.ObjectsData).items() if key[1] != "_"])
-    model_list.extend([name for key, name in vars(data_settings.ObjectsAdditionalData).items() if key[1] != "_"])
-    model_list.extend([name for key, name in vars(data_settings.OtherData).items() if key[1] != "_"])
-    model_list.extend([name for key, name in vars(data_settings.EventAdditionalData).items() if key[1] != "_"])
+    model_list = []
+    model_list.extend(DATA_HANDLER.BasicData.all())
+    model_list.extend(DATA_HANDLER.ObjectsData.all())
+    model_list.extend(DATA_HANDLER.ObjectsAdditionalData.all())
+    model_list.extend(DATA_HANDLER.OtherData.all())
+    model_list.extend(DATA_HANDLER.EventAdditionalData.all())
 
     # import models one by one
     for model_name in model_list:
@@ -243,11 +244,12 @@ def unzip_data_all(file):
         archive.extractall(temp)
 
         # import models
-        model_list = [name for key, name in vars(data_settings.BasicData).items() if key[1] != "_"]
-        model_list.extend([name for key, name in vars(data_settings.ObjectsData).items() if key[1] != "_"])
-        model_list.extend([name for key, name in vars(data_settings.ObjectsAdditionalData).items() if key[1] != "_"])
-        model_list.extend([name for key, name in vars(data_settings.OtherData).items() if key[1] != "_"])
-        model_list.extend([name for key, name in vars(data_settings.EventAdditionalData).items() if key[1] != "_"])
+        model_list = []
+        model_list.extend(DATA_HANDLER.BasicData.all())
+        model_list.extend(DATA_HANDLER.ObjectsData.all())
+        model_list.extend(DATA_HANDLER.ObjectsAdditionalData.all())
+        model_list.extend(DATA_HANDLER.OtherData.all())
+        model_list.extend(DATA_HANDLER.EventAdditionalData.all())
 
         # import models one by one
         for model_name in model_list:
