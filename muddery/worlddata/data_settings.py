@@ -3,7 +3,30 @@ This module defines available model types.
 """
 
 
-class BasicData(object):
+class DataSettingsBase(object):
+    """
+    Base methods of data setting classes.
+    """
+    def __init__(self):
+        """
+        Set data.
+
+        Returns:
+            None.
+        """
+        self.__all_data = [name for key, name in vars(self).items() if key[1] != "_"]
+
+    def all(self):
+        """
+        Get all models.
+
+        Returns:
+            list: all data model's name.
+        """
+        return self.__all_data
+
+
+class BasicData(DataSettingsBase):
 
     # class's categories
     CLASS_CATEGORIES = "class_categories"
@@ -33,7 +56,7 @@ class BasicData(object):
     EVENT_TRIGGER_TYPES = "event_trigger_types"
 
 
-class ObjectsData(object):
+class ObjectsData(DataSettingsBase):
 
     # unique rooms
     WORLD_ROOMS = "world_rooms"
@@ -72,7 +95,7 @@ class ObjectsData(object):
     SHOPS = "shops"
 
 
-class ObjectsAdditionalData(object):
+class ObjectsAdditionalData(DataSettingsBase):
 
     # exit locks
     EXIT_LOCKS = "exit_locks"
@@ -84,7 +107,13 @@ class ObjectsAdditionalData(object):
     OBJECT_CREATORS = "object_creators"
 
 
-class OtherData(object):
+class OtherData(DataSettingsBase):
+
+    # game settings
+    GAME_SETTINGS = "game_settings"
+
+    # webclient settings
+    CLIENT_SETTINGS = "client_settings"
 
     # loot lists
     CREATOR_LOOT_LIST = "creator_loot_list"
@@ -125,15 +154,10 @@ class OtherData(object):
     LOCALIZED_STRINGS = "localized_strings"
 
 
-class EventAdditionalData(object):
+class EventAdditionalData(DataSettingsBase):
     """
     Event additional data. One event can have one additional data model.
     """
 
     EVENT_ATTACKS = "event_attacks"
     EVENT_DIALOGUES = "event_dialogues"
-
-
-class OtherSettings(object):
-
-    SYSTEM_LOCALIZED_STRINGS_FOLDER = "languages"

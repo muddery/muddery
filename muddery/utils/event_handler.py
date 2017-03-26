@@ -9,12 +9,12 @@ from muddery.utils.builder import build_object
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils import utils
-from muddery.worlddata.data_settings import OtherData
+from muddery.worlddata.data_handler import DATA_HANDLER
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
 from evennia import create_script
-from muddery.worlddata.data_settings import EventAdditionalData
+
 
 PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_EVENTS}
 
@@ -26,14 +26,13 @@ def get_event_additional_model():
     additional_model = {}
 
     # list event's additional data's model
-    for model_key, model_name in vars(EventAdditionalData).items():
-        if model_key[1] != "_":
-            model_data = apps.get_model(settings.WORLD_DATA_APP, model_name)
-            if model_data:
-                # Get records.
-                for record in model_data.objects.all():
-                    key = record.serializable_value("key")
-                    additional_model[key] = model_name
+    for model_name in DATA_HANDLER.EventAdditionalData.all():
+        model_data = apps.get_model(settings.WORLD_DATA_APP, model_name)
+        if model_data:
+            # Get records.
+            for record in model_data.objects.all():
+                key = record.serializable_value("key")
+                additional_model[key] = model_name
 
     return additional_model
 
@@ -52,7 +51,7 @@ class EventHandler(object):
 
         # Load events.
         event_records = []
-        model_events = apps.get_model(settings.WORLD_DATA_APP, OtherData.EVENT_DATA)
+        model_events = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.EVENT_DATA)
         if model_events:
             # Get records.
             event_records = model_events.objects.filter(trigger_obj=owner.get_data_key())

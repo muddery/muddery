@@ -23,7 +23,7 @@ from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
-from muddery.worlddata.data_settings import BasicData, OtherData
+from muddery.worlddata.data_handler import DATA_HANDLER
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia import TICKER_HANDLER
@@ -77,7 +77,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         # Choose a random career.
         try:
-            model_career = apps.get_model(settings.WORLD_DATA_APP, BasicData.CHARACTER_CAREERS)
+            model_career = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.BasicData.CHARACTER_CAREERS)
             if model_career:
                 careers = model_career.objects.all()
                 if careers:
@@ -322,7 +322,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         
         # default objects
         object_records = []
-        default_objects = apps.get_model(settings.WORLD_DATA_APP, OtherData.DEFAULT_OBJECTS)
+        default_objects = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.DEFAULT_OBJECTS)
         if default_objects:
             # Get records.
             object_records = default_objects.objects.filter(character=model_name)

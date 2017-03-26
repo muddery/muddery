@@ -3,7 +3,7 @@ from django.contrib.admin.forms import forms
 from django.conf import settings
 from django.apps import apps
 from muddery.utils.localiztion_handler import localize_form_fields
-from muddery.worlddata import data_settings
+from muddery.worlddata.data_handler import DATA_HANDLER
 from worlddata import models
 
 
@@ -16,8 +16,7 @@ def ExistKey(key, except_models=None):
         return True
 
     # Get models.
-    model_list = [name for key, name in vars(data_settings.ObjectsData).items() if key[1] != "_"]
-    for model_name in model_list:
+    for model_name in DATA_HANDLER.objectData.all():
         if model_name in except_models:
             continue
         try:
@@ -32,22 +31,22 @@ def ExistKey(key, except_models=None):
 
 def GetAllPocketableObjects():
     """
-	Get all objects that can be put in player's pockets.
-	"""
-	# available objects are common objects, foods skill books or equipments
-	objects = models.common_objects.objects.all()
-	choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+    Get all objects that can be put in player's pockets.
+    """
+    # available objects are common objects, foods skill books or equipments
+    objects = models.common_objects.objects.all()
+    choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
 
-	foods = models.foods.objects.all()
-	choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
-	
-	skill_books = models.skill_books.objects.all()
-	choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in skill_books])
+    foods = models.foods.objects.all()
+    choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
 
-	equipments = models.equipments.objects.all()
-	choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
-	
-	return choices
+    skill_books = models.skill_books.objects.all()
+    choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in skill_books])
+
+    equipments = models.equipments.objects.all()
+    choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
+
+    return choices
     
 
 class GameSettingsForm(forms.ModelForm):

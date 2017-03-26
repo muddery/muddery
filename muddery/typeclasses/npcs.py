@@ -14,7 +14,7 @@ from muddery.utils.localized_strings_handler import LS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.builder import build_object, delete_object
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_settings import OtherData
+from muddery.worlddata.data_handler import DATA_HANDLER
 
 
 class MudderyNPC(MudderyCharacter):
@@ -54,7 +54,7 @@ class MudderyNPC(MudderyCharacter):
         Load dialogues.
         """
         dialogues = []
-        model_npc_dialogues = apps.get_model(settings.WORLD_DATA_APP, OtherData.NPC_DIALOGUES)
+        model_npc_dialogues = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.NPC_DIALOGUES)
         if model_npc_dialogues:
             # Get records.
             npc_key = self.get_data_key()
@@ -69,7 +69,7 @@ class MudderyNPC(MudderyCharacter):
         """
         # shops records
         shop_records = []
-        nps_shops_model = apps.get_model(settings.WORLD_DATA_APP, OtherData.NPC_SHOPS)
+        nps_shops_model = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.NPC_SHOPS)
         if nps_shops_model:
             # Get records.
             shop_records = nps_shops_model.objects.filter(npc=self.get_data_key())

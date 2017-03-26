@@ -65,3 +65,6 @@ SECRET_KEY = {secret_key}
 ######################################################################
 
 EQUIP_EFFECTS = []
+
+# Date settings
+DATA_SETTINGS = "worlddata.data_settings"
