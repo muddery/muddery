@@ -1,0 +1,5 @@
+key,name,desc
+EVENT_TRIGGER_ARRIVE,Arrive,"Triggers when players attrive a room. trigger_obj field: room's id."
+EVENT_TRIGGER_DIE,Die,"Triggers when characters die. trigger_obj field: killer's id."
+EVENT_TRIGGER_KILL,Kill,"Triggers when players kill mobs. trigger_obj field: mob's id."
+EVENT_TRIGGER_TRAVERSE,Traverse,"Triggers just before players traverse an exit. trigger_obj field: exit's id."

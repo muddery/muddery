@@ -14,7 +14,7 @@ class DataSettingsBase(object):
         Returns:
             None.
         """
-        self.__all_data = [name for key, name in vars(self).items() if key[1] != "_"]
+        self._all_data = []
 
     def all(self):
         """
@@ -23,7 +23,10 @@ class DataSettingsBase(object):
         Returns:
             list: all data model's name.
         """
-        return self.__all_data
+        if not self._all_data:
+            names = [name for name in dir(self.__class__) if name[0] != "_" and name.isupper()]
+            self._all_data = [getattr(self, name) for name in names]
+        return self._all_data
 
 
 class BasicData(DataSettingsBase):

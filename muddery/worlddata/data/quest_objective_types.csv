@@ -1,0 +1,5 @@
+key,name,desc
+OBJECTIVE_TALK,Talk,"Finishes a dialogue. object field: dialogue's id."
+OBJECTIVE_ARRIVE,Arrive,"Arrives a room. object: room's id."
+OBJECTIVE_OBJECT,Object,"Get some objects. object: object's id."
+OBJECTIVE_KILL,Kill,"Kill some characters. object: character's id."

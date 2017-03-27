@@ -1,0 +1,18 @@
+key,name,path,category,desc
+CLASS_COMMON_ROOM,Common Room,muddery.typeclasses.rooms.MudderyRoom,CATE_ROOM,Common room's typeclass.
+CLASS_COMMON_EXIT,Common Exit,muddery.typeclasses.exits.MudderyExit,CATE_EXIT,Common exit's typeclass.
+CLASS_TWO_WAY_EXIT,Two Way Exit,muddery.typeclasses.exits.MudderyExit,CATE_EXIT,Two way exit's typeclass. It builds two exits on both sides.
+CLASS_LOCKED_EXIT,Locked Exit,muddery.typeclasses.exits.MudderyLockedExit,CATE_EXIT,A kind of exits that can be locked.
+CLASS_COMMON_NPC,Common NPC,muddery.typeclasses.npcs.MudderyNPC,CATE_CHARACTER,Common NPC's typeclass.
+CLASS_COMMON_MONSTER,Common Monster,muddery.typeclasses.monsters.MudderyMonster,CATE_CHARACTER,Common monster's typeclass.
+CLASS_PLAYER,Player,muddery.typeclasses.player_characters.MudderyPlayerCharacter,CATE_CHARACTER,Player character's typeclass.
+CLASS_WORLD_OBJECT,World Object,muddery.typeclasses.objects.MudderyObject,CATE_OBJECT,World object's typeclass.
+CLASS_COMMON_OBJECT,Common Object,muddery.typeclasses.common_objects.MudderyCommonObject,CATE_OBJECT,Common object's typeclass.
+CLASS_OBJECT_CREATOR,Object Creator,muddery.typeclasses.object_creators.MudderyObjectCreator,CATE_OBJECT,Object creators can create new objects.
+CLASS_FOOD,Food,muddery.typeclasses.common_objects.MudderyFood,CATE_OBJECT,Foods can be eaten.
+CLASS_SKILL_BOOK,Skill Book,muddery.typeclasses.common_objects.MudderySkillBook,CATE_OBJECT,Players can learn skills from skill books.
+CLASS_SKILL,Skill,muddery.typeclasses.character_skills.MudderySkill,CATE_SKILL,Character's skill.
+CLASS_QUEST,Quest,muddery.typeclasses.character_quests.MudderyQuest,CATE_QUEST,Quest.
+CLASS_EQUIPMENT,Equipment,muddery.typeclasses.common_objects.MudderyEquipment,CATE_OBJECT,Equipments.
+CLASS_SHOP,Shop,muddery.typeclasses.shops.MudderyShop,CATE_SHOP,Shops.
+CLASS_SHOP_GOODS,Goods,muddery.typeclasses.shop_goods.MudderyShopGoods,CATE_SHOP_GOODS,Goods

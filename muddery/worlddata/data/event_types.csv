@@ -1,0 +1,3 @@
+key,name,desc
+EVENT_ATTACK,Attack,"Event leads to a combat."
+EVENT_DIALOGUE,Dialogue,"Event leads to a dialogue."

@@ -21,7 +21,7 @@ class DataHandler(object):
         settings_module = import_module(settings_path)
 
         self.BasicData = settings_module.BasicData()
-        self.ObjectData = settings_module.ObjectsData()
+        self.ObjectsData = settings_module.ObjectsData()
         self.ObjectsAdditionalData = settings_module.ObjectsAdditionalData()
         self.OtherData = settings_module.OtherData()
         self.EventAdditionalData = settings_module.EventAdditionalData()
