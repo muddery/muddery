@@ -18,6 +18,10 @@ class system_data(models.Model):
     All system data should have this flag. This flag is used to 
     differentiate between system data and custom data. 
     """
+    # data's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # is system data or not
     system_data = models.BooleanField(blank=True, default=False)
 
     class Meta:
@@ -137,16 +141,18 @@ class client_settings(models.Model):
         verbose_name = "Webclient Setting"
         verbose_name_plural = "Webclient Settings"
 
+
 # ------------------------------------------------------------
 #
 # store all typeclasses
 #
 # ------------------------------------------------------------
 class class_categories(system_data):
-    "Typeclass's category defines base types."
+    """
+    Typeclass's category defines base types.
 
-    # category's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    The key is category's key.
+    """
 
     # the readable name of the category
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -170,10 +176,11 @@ class class_categories(system_data):
 #
 # ------------------------------------------------------------
 class typeclasses(system_data):
-    "Defines all available typeclasses."
+    """
+    Defines all available typeclasses.
 
-    # typeclass's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    The key is typeclass's key.
+    """
 
     # the readable name of the typeclass
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -570,12 +577,13 @@ class skill_books(common_objects):
         verbose_name = "Skill Book"
         verbose_name_plural = "Skill Books"
 
+
 # ------------------------------------------------------------
 #
 # store all equip_types
 #
 # ------------------------------------------------------------
-class equipment_types(system_data):
+class equipment_types(models.Model):
     "Store all equip types."
 
     # equipment type's key
@@ -1073,10 +1081,11 @@ class quests(models.Model):
 #
 # ------------------------------------------------------------
 class quest_objective_types(system_data):
-    "quest objective's type"
+    """
+    quest objective's type
 
-    # Type's key. It must be the values in utils/defines.py.
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    The key is type's key. It must be the values in utils.defines.
+    """
 
     # the readable name of the type
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -1136,10 +1145,11 @@ class quest_objectives(models.Model):
 #
 # ------------------------------------------------------------
 class quest_dependency_types(system_data):
-    "quest dependency's type"
+    """
+    quest dependency's type"
 
-    # Dependency's key. It must be the values in utils/defines.pyl
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    The key is dependency's key. It must be the values in utils.defines.
+    """
 
     # the readable name of the dependency
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -1190,10 +1200,11 @@ class quest_dependencies(models.Model):
 #
 # ------------------------------------------------------------
 class event_types(system_data):
-    "event's type"
+    """
+    event's type
 
-    # Event's key. It must be the values in utils/defines.py
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    The key is event's key. It must be the values in utils.defines.
+    """
 
     # the readable name of the event type
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -1217,10 +1228,11 @@ class event_types(system_data):
 #
 # ------------------------------------------------------------
 class event_trigger_types(system_data):
-    "event trigger's type"
+    """
+    event trigger's type
 
-    # Type's key. It must be the values in utils/defines.py
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    The key is type's key. It must be the values in utils.defines.
+    """
 
     # the readable name of the event trigger type
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
