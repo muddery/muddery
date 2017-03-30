@@ -16,6 +16,7 @@ from evennia.utils import logger
 from muddery.utils.exception import MudderyError
 from muddery.utils import readers
 from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.model_base import system_data
 
 
 def get_field_types(model_obj, field_names):
@@ -56,7 +57,7 @@ def get_field_types(model_obj, field_names):
         field_types.append(field_type)
 
     return field_types
-    
+
 
 def parse_record(field_names, field_types, values):
     """
@@ -100,7 +101,7 @@ def parse_record(field_names, field_types, values):
     return record
 
 
-def import_data(model_obj, reader):
+def import_data(model_obj, reader, is_system_model, system_data):
     """
     Import data to the model.
 
@@ -117,6 +118,14 @@ def import_data(model_obj, reader):
 
         field_types = get_field_types(model_obj, titles)
 
+        key_index = 0
+        if is_system_model:
+            # get pk's position
+            for index, title in enumerate(titles):
+                if title == "key":
+                    key_index = index
+                    break
+
         # import values
         # read next line
         values = reader.readln()
@@ -125,8 +134,14 @@ def import_data(model_obj, reader):
             try:
                 record = parse_record(titles, field_types, values)
 
-                # create new record
-                data = model_obj.objects.create(**record)
+                # Merge system and custom data.
+                if is_system_model:
+                    if system_data:
+                        # System data can not overwrite custom data.
+                        if model_obj.objects.filter(key=values[key_index], system_data=False).count() > 0:
+                            continue
+
+                data = model_obj(**record)
                 data.save()
             except Exception, e:
                 print("Can not load %s: %s" % (values, e))
@@ -139,7 +154,7 @@ def import_data(model_obj, reader):
         pass
 
 
-def import_file(file_name, model_name, file_type=None, wildcard=True, clear=True):
+def import_file(file_name, model_name, file_type=None, wildcard=True, clear=True, system_data=False):
     """
     Import data from a data file to the db model
 
@@ -180,15 +195,23 @@ def import_file(file_name, model_name, file_type=None, wildcard=True, clear=True
             # get model
             model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
-            print("%s is instance: %s" % (file_name, model_obj))
+            is_system_model = False
+            try:
+                model_obj._meta.get_field("system_data")
+                is_system_model = True
+            except Exception, e:
+                pass
 
             if clear:
                 # clear old data
-                model_obj.objects.all().delete()
+                if is_system_model:
+                    model_obj.objects.filter(system_data=system_data).delete()
+                else:
+                    model_obj.objects.all().delete()
 
             print("Importing %s" % file_name)
 
-            import_data(model_obj, reader)
+            import_data(model_obj, reader, is_system_model, system_data)
             imported = True
             break
     except Exception, e:
