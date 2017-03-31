@@ -15,8 +15,7 @@ from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
 from muddery.utils import readers
-from muddery.worlddata.data_handler import DATA_HANDLER
-from muddery.worlddata.model_base import system_data
+from muddery.worlddata.data_handler import SYSTEM_DATA_HANDLER, DATA_HANDLER
 
 
 def get_field_types(model_obj, field_names):
@@ -101,7 +100,7 @@ def parse_record(field_names, field_types, values):
     return record
 
 
-def import_data(model_obj, reader, is_system_model, system_data):
+def import_data(model_obj, reader, system_data):
     """
     Import data to the model.
 
@@ -118,13 +117,18 @@ def import_data(model_obj, reader, is_system_model, system_data):
 
         field_types = get_field_types(model_obj, titles)
 
+        found_key = False
         key_index = 0
-        if is_system_model:
+        if system_data:
             # get pk's position
             for index, title in enumerate(titles):
                 if title == "key":
+                    found_key = True
                     key_index = index
                     break
+            if not found_key:
+                print("Can not found system data's key.")
+                return
 
         # import values
         # read next line
@@ -135,11 +139,13 @@ def import_data(model_obj, reader, is_system_model, system_data):
                 record = parse_record(titles, field_types, values)
 
                 # Merge system and custom data.
-                if is_system_model:
-                    if system_data:
-                        # System data can not overwrite custom data.
-                        if model_obj.objects.filter(key=values[key_index], system_data=False).count() > 0:
-                            continue
+                if system_data:
+                    # System data can not overwrite custom data.
+                    if model_obj.objects.filter(key=values[key_index], system_data=False).count() > 0:
+                        continue
+
+                    # Add system data flag.
+                    record["system_data"] = True
 
                 data = model_obj(**record)
                 data.save()
@@ -154,7 +160,7 @@ def import_data(model_obj, reader, is_system_model, system_data):
         pass
 
 
-def import_file(file_name, model_name, file_type=None, wildcard=True, clear=True, system_data=False):
+def import_file(file_name, model_name, file_type=None, wildcard=True, system_data=False):
     """
     Import data from a data file to the db model
 
@@ -164,7 +170,7 @@ def import_file(file_name, model_name, file_type=None, wildcard=True, clear=True
         file_type: (string) the type of the file. If it's None, the function will get
                    the file type from the extension name of the file.
         wildcard: (bool) add wildcard as ext name or not.
-        clear: (boolean) clear old data or not.
+        system_data: (bool) is system data or not.
     """
     imported = False
 
@@ -195,23 +201,9 @@ def import_file(file_name, model_name, file_type=None, wildcard=True, clear=True
             # get model
             model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
-            is_system_model = False
-            try:
-                model_obj._meta.get_field("system_data")
-                is_system_model = True
-            except Exception, e:
-                pass
-
-            if clear:
-                # clear old data
-                if is_system_model:
-                    model_obj.objects.filter(system_data=system_data).delete()
-                else:
-                    model_obj.objects.all().delete()
-
+            print()
             print("Importing %s" % file_name)
-
-            import_data(model_obj, reader, is_system_model, system_data)
+            import_data(model_obj, reader, system_data)
             imported = True
             break
     except Exception, e:
@@ -225,24 +217,40 @@ def import_file(file_name, model_name, file_type=None, wildcard=True, clear=True
     return imported
 
 
-def import_model(model_name, path_name=None, clear=True):
-    """
-    Import data from a data file to the db model
-
-    Args:
-        model_name: (string) db model's name.
-        clear: (boolean) clear old data or not.
-    """
-    if not path_name:
-        path_name = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
-    file_name = os.path.join(path_name, model_name)
-    import_file(file_name, model_name, wildcard=True, clear=clear)
-
-
 def import_local_all():
     """
     Import all local data files to models.
     """
+    ##########################
+    # load system data
+    ##########################
+    # system data file's path
+    system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
+
+    # load models in order
+    model_list = SYSTEM_DATA_HANDLER.SystemData.all()
+
+    # import models one by one
+    for model_name in model_list:
+        clear_model_data(model_name, is_system_model=True, system_data=True)
+        file_name = os.path.join(system_data_path, model_name)
+        import_file(file_name, model_name, system_data=True)
+
+    ##########################
+    # load custom data
+    ##########################
+    # custom data file's path
+    custom_data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
+
+    # load system models
+    model_list = DATA_HANDLER.SystemData.all()
+
+    # import models one by one
+    for model_name in model_list:
+        clear_model_data(model_name, is_system_model=True, system_data=False)
+        file_name = os.path.join(custom_data_path, model_name)
+        import_file(file_name, model_name, system_data=False)
+
     # load models in order
     model_list = []
     model_list.extend(DATA_HANDLER.BasicData.all())
@@ -253,18 +261,51 @@ def import_local_all():
 
     # import models one by one
     for model_name in model_list:
-        import_model(model_name)
+        clear_model_data(model_name, is_system_model=False, system_data=False)
+        file_name = os.path.join(custom_data_path, model_name)
+        import_file(file_name, model_name, system_data=False)
+
+
+def clear_model_data(model_name, is_system_model, system_data):
+    """
+    Remove all data from db.
+
+    Args:
+        model_name: (string) db model's name.
+        is_system_model: (bool) is systm data model or not.
+        system_data: (bool) remove system data or custom data.
+
+    Returns:
+        None
+    """
+    # get model
+    model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
+
+    # clear old data
+    if is_system_model:
+        model_obj.objects.filter(system_data=system_data).delete()
+    else:
+        model_obj.objects.all().delete()
 
 
 def unzip_data_all(file):
     """
     Import all data files from a zip file.
     """
-    temp = tempfile.mkdtemp()
+    temp_path = tempfile.mkdtemp()
 
     try:
         archive = zipfile.ZipFile(file, 'r')
-        archive.extractall(temp)
+        archive.extractall(temp_path)
+
+        # import models one by one
+        # load system models
+        model_list = DATA_HANDLER.SystemData.all()
+
+        for model_name in model_list:
+            clear_model_data(model_name, is_system_model=True, system_data=False)
+            file_name = os.path.join(temp_path, model_name)
+            import_file(file_name, model_name, system_data=False)
 
         # import models
         model_list = []
@@ -276,9 +317,11 @@ def unzip_data_all(file):
 
         # import models one by one
         for model_name in model_list:
-            import_model(model_name, path_name=temp)
+            clear_model_data(model_name, is_system_model=False, system_data=False)
+            file_name = os.path.join(temp_path, model_name)
+            import_file(file_name, model_name, system_data=False)
     finally:
-        shutil.rmtree(temp)
+        shutil.rmtree(temp_path)
 
 
 def unzip_resources_all(file):

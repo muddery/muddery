@@ -29,6 +29,27 @@ class DataSettingsBase(object):
         return self._all_data
 
 
+class SystemData(DataSettingsBase):
+
+    # class's categories
+    CLASS_CATEGORIES = "class_categories"
+
+    # typeclasses
+    TYPECLASSES = "typeclasses"
+
+    # event types
+    EVENT_TYPES = "event_types"
+
+    # event trigger types
+    EVENT_TRIGGER_TYPES = "event_trigger_types"
+
+    # quest objective types
+    QUEST_OBJECTIVE_TYPES = "quest_objective_types"
+
+    # quest dependency types
+    QUEST_DEPENDENCY_TYPES = "quest_dependency_types"
+
+
 class BasicData(DataSettingsBase):
 
     # class's categories
@@ -57,6 +78,12 @@ class BasicData(DataSettingsBase):
 
     # event trigger types
     EVENT_TRIGGER_TYPES = "event_trigger_types"
+
+    # quest objective types
+    QUEST_OBJECTIVE_TYPES = "quest_objective_types"
+
+    # quest dependency types
+    QUEST_DEPENDENCY_TYPES = "quest_dependency_types"
 
 
 class ObjectsData(DataSettingsBase):
@@ -124,9 +151,7 @@ class OtherData(DataSettingsBase):
     QUEST_REWARD_LIST = "quest_reward_list"
 
     # quest data
-    QUEST_OBJECTIVE_TYPES = "quest_objective_types"
     QUEST_OBJECTIVES = "quest_objectives"
-    QUEST_DEPENDENCY_TYPES = "quest_dependency_types"
     QUEST_DEPENDENCIES = "quest_dependencies"
 
     # event data
