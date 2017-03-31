@@ -17,7 +17,7 @@ from muddery.commands import combat
 from muddery.commands import general
 from muddery.commands import player
 from muddery.commands import unloggedin
-from muddery.commands import worlddata
+
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
     """
@@ -35,8 +35,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
-        self.add(worlddata.CmdLoadWorld())
-        self.add(worlddata.CmdBuildWorld())
 
         self.add(general.CmdLook())
         self.add(general.CmdGoto())

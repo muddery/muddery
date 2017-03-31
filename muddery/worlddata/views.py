@@ -282,6 +282,9 @@ def import_data_single(request):
             if not model_name:
                 model_name = filename
 
+            # clear old data first
+            importer.clear_model_data(model_name)
+
             if importer.import_file(temp_name, model_name, file_type=file_type, wildcard=False):
                 success = True
         except Exception, e:
