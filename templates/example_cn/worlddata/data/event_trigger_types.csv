@@ -1,5 +1,1 @@
 key,name,desc
-EVENT_TRIGGER_ARRIVE,到达,到达某个房间时触发。trigger_obj字段：房间id。
-EVENT_TRIGGER_DIE,死亡,角色死亡。trigger_obj字段：杀死角色的人的id。
-EVENT_TRIGGER_KILL,杀死,杀死某个怪。trigger_obj字段：怪的id。
-EVENT_TRIGGER_TRAVERSE,穿越,穿越某个出口前触发。trigger_obj字段：出口id。

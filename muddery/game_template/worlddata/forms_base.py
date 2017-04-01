@@ -1025,13 +1025,13 @@ class DialogueSentencesForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CustomLocalizedStringsForm(forms.ModelForm):
+class LocalizedStringsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(CustomLocalizedStringsForm, self).__init__(*args, **kwargs)
+        super(LocalizedStringsForm, self).__init__(*args, **kwargs)
         localize_form_fields(self)
 
     class Meta:
-        model = models.custom_localized_strings
+        model = models.localized_strings
         fields = '__all__'
 
 

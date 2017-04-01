@@ -57,7 +57,7 @@ def build_object(obj_key, caller=None):
         record = get_object_record(obj_key)
 
         # get typeclass model
-        model_typeclass = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.BasicData.TYPECLASSES)
+        model_typeclass = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.SystemData.TYPECLASSES)
         typeclass = model_typeclass.objects.get(key=record.typeclass)
     except Exception, e:
         ostring = "Can not get typeclass of %s: %s." % (obj_key, e)
@@ -137,7 +137,7 @@ def build_unique_objects(model_name, caller=None):
         caller.msg(ostring)
 
     # get typeclass model
-    model_typeclass = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.BasicData.TYPECLASSES)
+    model_typeclass = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.SystemData.TYPECLASSES)
 
     # get model
     model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)

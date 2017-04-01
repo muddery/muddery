@@ -1518,36 +1518,6 @@ class localized_strings(models.Model):
 
 # ------------------------------------------------------------
 #
-# system localized strings
-#
-# ------------------------------------------------------------
-class system_localized_strings(localized_strings):
-    "Store all system localized strings."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        verbose_name = "System Localized String"
-        verbose_name_plural = "System Localized Strings"
-
-
-# ------------------------------------------------------------
-#
-# custom local strings
-#
-# ------------------------------------------------------------
-class custom_localized_strings(localized_strings):
-    "Store all custom localized strings."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        verbose_name = "Custom Localized String"
-        verbose_name_plural = "Custom Localized Strings"
-
-
-# ------------------------------------------------------------
-#
 # image resources
 #
 # ------------------------------------------------------------

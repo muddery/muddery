@@ -1,5 +1,1 @@
 key,name,desc
-OBJECTIVE_TALK,对话,完成某个对话。object字段：对话id。
-OBJECTIVE_ARRIVE,到达,到达某个房间。object字段：房间id。
-OBJECTIVE_OBJECT,物体,获得某个物体。object字段：物体id。
-OBJECTIVE_KILL,杀死,杀死某个角色。object字段：角色id。

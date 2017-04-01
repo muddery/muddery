@@ -244,7 +244,7 @@ class MudderyObject(DefaultObject):
         """
         typeclass_path = ""
         try:
-            model_typeclass = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.BasicData.TYPECLASSES)
+            model_typeclass = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.SystemData.TYPECLASSES)
             data = model_typeclass.objects.get(key=typeclass_key)
             typeclass_path = data.path
         except Exception, e:

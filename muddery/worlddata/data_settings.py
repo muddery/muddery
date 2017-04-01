@@ -52,12 +52,6 @@ class SystemData(DataSettingsBase):
 
 class BasicData(DataSettingsBase):
 
-    # class's categories
-    CLASS_CATEGORIES = "class_categories"
-
-    # typeclasses
-    TYPECLASSES = "typeclasses"
-
     # equip types
     EQUIPMENT_TYPES = "equipment_types"
 
@@ -72,18 +66,6 @@ class BasicData(DataSettingsBase):
 
     # character levels
     CHARACTER_MODELS = "character_models"
-
-    # event types
-    EVENT_TYPES = "event_types"
-
-    # event trigger types
-    EVENT_TRIGGER_TYPES = "event_trigger_types"
-
-    # quest objective types
-    QUEST_OBJECTIVE_TYPES = "quest_objective_types"
-
-    # quest dependency types
-    QUEST_DEPENDENCY_TYPES = "quest_dependency_types"
 
 
 class ObjectsData(DataSettingsBase):

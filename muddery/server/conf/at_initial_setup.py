@@ -35,21 +35,26 @@ def at_initial_setup():
     try:
         # load world data
         importer.import_local_all()
+        print("Import local all.")
 
         # load game settings
         GAME_SETTINGS.reset()
+        print("Reset game settings.")
 
         # build world
         builder.build_all()
-        
+        print("Builder build all.")
+
         # set limbo's desc
         limbo_obj = search.search_object("#2", exact=True)
         if limbo_obj:
             limbo_obj[0].db.desc = LIMBO_DESC
             limbo_obj[0].position = None
+        print("Set limbo object.")
 
         # set default locations
         builder.reset_default_locations()
+        print("Set default locations.")
 
         superuser = search.search_object("#1", exact=True)
         if superuser:
@@ -65,8 +70,9 @@ def at_initial_setup():
             superuser.set_data_key(GAME_SETTINGS.get("default_player_character_key"))
             superuser.set_level(1)
             superuser.set_nickname("superuser")
+            print("Set supervisor.")
 
     except Exception, e:
-        ostring = "Can't build world: %s" % e
+        ostring = "Can't set initial data: %s" % e
         print(ostring)
         print(traceback.format_exc())
