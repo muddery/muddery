@@ -58,7 +58,7 @@ class MudderyShop(MudderyObject):
         # add new goods
 
         # get typeclass model
-        model_typeclass = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.BasicData.TYPECLASSES)
+        model_typeclass = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.SystemData.TYPECLASSES)
 
         for goods_record in goods_records:
             goods_key = goods_record.goods

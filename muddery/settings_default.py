@@ -62,6 +62,81 @@ DATABASES = {
 
 
 ######################################################################
+# Evennia pluggable modules
+######################################################################
+# Plugin modules extend Evennia in various ways. In the cases with no
+# existing default, there are examples of many of these modules
+# in contrib/examples.
+
+# The command parser module to use. See the default module for which
+# functions it must implement
+COMMAND_PARSER = "muddery.server.conf.cmdparser.cmdparser"
+
+# The handler that outputs errors when using any API-level search
+# (not manager methods). This function should correctly report errors
+# both for command- and object-searches. This allows full control
+# over the error output (it uses SEARCH_MULTIMATCH_TEMPLATE by default).
+# SEARCH_AT_RESULT = "muddery.server.conf.at_search_result"
+
+# An optional module that, if existing, must hold a function
+# named at_initial_setup(). This hook method can be used to customize
+# the server's initial setup sequence (the very first startup of the system).
+# The check will fail quietly if module doesn't exist or fails to load.
+AT_INITIAL_SETUP_HOOK_MODULE = "muddery.server.conf.at_initial_setup"
+
+# Module containing your custom at_server_start(), at_server_reload() and
+# at_server_stop() methods. These methods will be called every time
+# the server starts, reloads and resets/stops respectively.
+AT_SERVER_STARTSTOP_MODULE = "muddery.server.conf.at_server_startstop"
+
+# List of one or more module paths to modules containing a function start_
+# plugin_services(application). This module will be called with the main
+# Evennia Server application when the Server is initiated.
+# It will be called last in the startup sequence.
+SERVER_SERVICES_PLUGIN_MODULES = ["muddery.server.conf.server_services_plugins"]
+
+# List of one or more module paths to modules containing a function
+# start_plugin_services(application). This module will be called with the
+# main Evennia Portal application when the Portal is initiated.
+# It will be called last in the startup sequence.
+PORTAL_SERVICES_PLUGIN_MODULES = ["muddery.server.conf.portal_services_plugins"]
+
+# Module holding MSSP meta data. This is used by MUD-crawlers to determine
+# what type of game you are running, how many players you have etc.
+MSSP_META_MODULE = "muddery.server.conf.mssp"
+
+# Module for web plugins.
+WEB_PLUGINS_MODULE = "muddery.server.conf.web_plugins"
+
+# Tuple of modules implementing lock functions. All callable functions
+# inside these modules will be available as lock functions.
+LOCK_FUNC_MODULES = ("evennia.locks.lockfuncs", "muddery.server.conf.lockfuncs",)
+
+# Module holding handlers for managing incoming data from the client. These
+# will be loaded in order, meaning functions in later modules may overload
+# previous ones if having the same name.
+INPUT_FUNC_MODULES = ["evennia.server.inputfuncs", "muddery.server.conf.inputfuncs"]
+
+# Modules that contain prototypes for use with the spawner mechanism.
+PROTOTYPE_MODULES = ["muddery.world.prototypes"]
+
+
+######################################################################
+# Inlinefunc
+######################################################################
+# Evennia supports inline function preprocessing. This allows users
+# to supply inline calls on the form $func(arg, arg, ...) to do
+# session-aware text formatting and manipulation on the fly. If
+# disabled, such inline functions will not be parsed.
+INLINEFUNC_ENABLED = False
+# Only functions defined globally (and not starting with '_') in
+# these modules will be considered valid inlinefuncs. The list
+# is loaded from left-to-right, same-named functions will overload
+INLINEFUNC_MODULES = ["evennia.utils.inlinefuncs",
+                      "muddery.server.conf.inlinefuncs"]
+
+
+######################################################################
 # Evennia base server config
 ######################################################################
 # Activate telnet service
@@ -139,15 +214,6 @@ TEMPLATES = [{
                 'muddery.web.utils.general_context.general_context']
             }
         }]
-
-
-######################################################################
-# Evennia pluggable modules
-######################################################################
-
-# The command parser module to use. See the default module for which
-# functions it must implement
-COMMAND_PARSER = "muddery.server.conf.cmdparser.cmdparser"
 
 
 ######################################################################

@@ -318,12 +318,7 @@ class EventDialoguesAdmin(admin.ModelAdmin):
                     'npc')
 
 
-class SystemLocalizedStringsAdmin(admin.ModelAdmin):
-    list_display = ('origin',
-                    'local')
-
-
-class CustomLocalizedStringsAdmin(admin.ModelAdmin):
+class LocalizedStringsAdmin(admin.ModelAdmin):
     list_display = ('origin',
                     'local')
 

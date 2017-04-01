@@ -141,7 +141,7 @@ class DialogueRelationsForm(forms_base.DialogueRelationsForm):
 class DialogueSentencesForm(forms_base.DialogueSentencesForm):
     pass
 
-class CustomLocalizedStringsForm(forms_base.CustomLocalizedStringsForm):
+class LocalizedStringsForm(forms_base.LocalizedStringsForm):
     pass
     
 class ImageResourcesForm(forms_base.ImageResourcesForm):
