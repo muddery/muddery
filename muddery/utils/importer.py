@@ -264,6 +264,16 @@ def import_model_list(model_list, data_path, system_model, system_data):
         import_file(file_name, model_name, system_model=system_model, system_data=system_data)
 
 
+def import_system_localized_strings():
+    """
+    Import system local strings.
+
+    Returns:
+
+    """
+    pass
+
+
 def clear_model_data(model_name, system_model, system_data):
     """
     Remove all data from db.
@@ -298,7 +308,7 @@ def unzip_data_all(file):
 
         # import models one by one
         # load system models
-        import_model_list(DATA_HANDLER.SystemData.all(), custom_data_path, system_model=True, system_data=False)
+        import_model_list(DATA_HANDLER.SystemData.all(), temp_path, system_model=True, system_data=False)
 
         # import models
         model_list = []
@@ -307,7 +317,7 @@ def unzip_data_all(file):
         model_list.extend(DATA_HANDLER.ObjectsAdditionalData.all())
         model_list.extend(DATA_HANDLER.OtherData.all())
         model_list.extend(DATA_HANDLER.EventAdditionalData.all())
-        import_model_list(model_list, custom_data_path, system_model=False, system_data=False)
+        import_model_list(model_list, temp_path, system_model=False, system_data=False)
 
     finally:
         shutil.rmtree(temp_path)

@@ -58,13 +58,3 @@ LANGUAGE_CODE = 'en-us'
 # log out all active web browsing sessions. Game web client sessions
 # may survive.
 SECRET_KEY = {secret_key}
-
-
-######################################################################
-# World data features
-######################################################################
-
-EQUIP_EFFECTS = []
-
-# Date settings
-DATA_SETTINGS = "worlddata.data_settings"

@@ -71,16 +71,15 @@ class MudderyShopGoods(DefaultObject):
         # Get goods record.
         goods_record = None
         try:
-            goods_model = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherSettings.SHOP_GOODS)
+            goods_model = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.SHOP_GOODS)
             if goods_model:
                 # Get records.
                 goods_record = goods_model.objects.get(shop=shop_key, goods=goods_key)
         except Exception, e:
-            logger.log_errmsg("Can not find goods %s in shop %s." % (shop_key, goods_key))
+            logger.log_errmsg("Can not find goods %s in shop %s: %s" % (goods_key, shop_key, e))
             return
 
         # get price unit information
-        unit_name = None
         unit_record = get_object_record(goods_record.unit)
         if not unit_record:
             logger.log_errmsg("Can not find %s price unit %s." % (goods_key, goods_record.unit))
