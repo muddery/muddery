@@ -74,11 +74,9 @@ class MudderyCommonObject(MudderyObject):
 
         if number < 0:
             raise MudderyError("%s can not decrease a negative nubmer." % self.get_data_key())
-            return
 
         if self.db.number < number:
             raise MudderyError("%s's number will below zero." % self.get_data_key())
-            return
         
         self.db.number -= number
         return
@@ -107,7 +105,7 @@ class MudderyCommonObject(MudderyObject):
                 result: (string) a description of the result
                 number: (int) actually used number
         """
-        return (LS("No effect."), 0)
+        return LS("No effect."), 0
 
 
 class MudderyFood(MudderyCommonObject):
@@ -141,6 +139,39 @@ class MudderyEquipment(MudderyCommonObject):
 
         self.type = getattr(self.dfield, "type", "")
         self.position = getattr(self.dfield, "position", "")
+
+    def get_effect_fields(self):
+        """
+        Get data field names which can add to the user.
+
+        Returns:
+            (list) a list of field names.
+        """
+        return []
+
+    def equip_to(self, user):
+        """
+        Equip this equipment to the user. It is called when a character equip
+        this equipment.
+
+        This implementation uses the simplest way to add equipment effects to
+        the user. It simply add equipment's effect fields to the user. The user
+        must has attributes that has the same name as the equipment's effects.
+        You can implementation this method in another way.
+
+        Args:
+            user: (object) the user of the equipment.
+
+        Returns:
+            None
+        """
+        if not user:
+            return
+
+        for field_name in self.get_effect_fields():
+            value = getattr(user, field_name, 0)
+            value += getattr(self.dfield, field_name, 0)
+            setattr(user, field_name, value)
 
     def get_available_commands(self, caller):
         """

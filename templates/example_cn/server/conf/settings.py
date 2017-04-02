@@ -62,10 +62,3 @@ LANGUAGE_CODE = 'zh-cn'
 # log out all active web browsing sessions. Game web client sessions
 # may survive.
 SECRET_KEY = {secret_key}
-
-
-######################################################################
-# World data features
-######################################################################
-
-EQUIP_EFFECTS = ["attack", "defence"]

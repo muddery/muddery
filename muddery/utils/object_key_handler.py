@@ -30,7 +30,10 @@ class ObjectKeyHandler(object):
         self.clear()
 
         # Get model names.
-        for model_name in DATA_HANDLER.ObjectsData.all():
+        model_names = []
+        model_names.extend(DATA_HANDLER.ObjectsData.all())
+        model_names.extend(DATA_HANDLER.ObjectsAdditionalData.all())
+        for model_name in model_names:
             try:
                 model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
                 for record in model_obj.objects.all():

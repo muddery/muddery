@@ -185,13 +185,13 @@ class MudderyObject(DefaultObject):
             if not key:
                 return
 
-        models = OBJECT_KEY_HANDLER.get_models(key)
+        data_models = OBJECT_KEY_HANDLER.get_models(key)
 
-        for model in models:
+        for data_model in data_models:
             # Get db model
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, model)
+            model_obj = apps.get_model(settings.WORLD_DATA_APP, data_model)
             if not model_obj:
-                logger.log_errmsg("%s can not open model %s" % (key, model))
+                logger.log_errmsg("%s can not open model %s" % (key, data_model))
                 continue
 
             # Get data record.

@@ -166,11 +166,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # load level data
         self.load_model_data()
         
-        # load equips data
-        self.load_equip_data()
+        # load equips
+        self.ues_equipments()
 
-        # load passive skill
-        self.load_passive_skill_data()
+        # load passive skills
+        self.cast_passive_skills()
 
     def load_model_data(self):
         """
@@ -226,7 +226,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # set character's attributes
         self.refresh_data()
 
-    def load_equip_data(self):
+    def ues_equipments(self):
         """
         Add equipment's attributes to the character
         """
@@ -236,10 +236,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # add equipment's attributes
         for content in self.contents:
             if content.dbref in equipped:
-                for effect in settings.EQUIP_EFFECTS:
-                    value = getattr(self, effect, 0)
-                    value += getattr(content.dfield, effect, 0)
-                    setattr(self, effect, value)
+                content.equip_to(self)
 
     def load_default_skills(self):
         """
@@ -272,7 +269,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             if not self.skill_handler.has_skill(skill_record.skill):
                 self.skill_handler.learn_skill(skill_record.skill, True)
                 
-    def load_passive_skill_data(self):
+    def cast_passive_skills(self):
         """
         Add passive skills' effects to the character
         """

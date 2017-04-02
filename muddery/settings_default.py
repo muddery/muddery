@@ -317,8 +317,6 @@ REVERSE_EXIT_TYPECLASS_PATH = "muddery.typeclasses.exits.MudderyReverseExit"
 # Reverse exit's key's prefix.
 REVERSE_EXIT_PREFIX = "__reverse__"
 
-EQUIP_EFFECTS = []
-
 # Characters who have equal or higher permission can bypass events.
 PERMISSION_BYPASS_EVENTS = {"Builders", "Wizards", "Immortals"}
 
