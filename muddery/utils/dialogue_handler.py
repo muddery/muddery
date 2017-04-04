@@ -10,9 +10,7 @@ from muddery.utils import defines
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_handler import DATA_HANDLER
-from django.conf import settings
-from django.apps import apps
+from muddery.worlddata.data_sets import DATA_SETS
 from evennia.utils import logger
 
 
@@ -57,28 +55,24 @@ class DialogueHandler(object):
         
         # Get db model
         try:
-            model_dialogues = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.DIALOGUES)
-            dialogue_record = model_dialogues.objects.get(key=dialogue)
+            dialogue_record = DATA_SETS.dialogues.model.objects.get(key=dialogue)
         except Exception, e:
             return
 
         sentences = []
-        model_sentences = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.DIALOGUE_SENTENCES)
-        if model_sentences:
+        if DATA_SETS.dialogue_sentences.model:
             # Get records.
-            sentences = model_sentences.objects.filter(dialogue=dialogue)
+            sentences = DATA_SETS.dialogue_sentences.model.objects.filter(dialogue=dialogue)
 
         nexts = []
-        model_nexts = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.DIALOGUE_RELATIONS)
-        if model_nexts:
+        if DATA_SETS.dialogue_relations.model:
             # Get records.
-            nexts = model_nexts.objects.filter(dialogue=dialogue)
+            nexts = DATA_SETS.dialogue_relations.model.objects.filter(dialogue=dialogue)
 
         dependencies = []
-        model_dependencies = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.DIALOGUE_QUEST_DEPENDENCIES)
-        if model_dependencies:
+        if DATA_SETS.dialogue_quest_dependencies.model:
             # Get records.
-            dependencies = model_dependencies.objects.filter(dialogue=dialogue)
+            dependencies = DATA_SETS.dialogue_quest_dependencies.model.objects.filter(dialogue=dialogue)
 
         # Add db fields to data object.
         data = {}
@@ -386,10 +380,8 @@ class DialogueHandler(object):
         # use icon resource in dialogue sentence
         if icon_str:
             try:
-                model_resource = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.ICON_RESOURCES)
-                if model_resource:
-                    resource_info = model_resource.objects.get(key=icon_str)
-                    icon = resource_info.resource.url
+                resource_info = DATA_SETS.icon_resources.model.objects.get(key=icon_str)
+                icon = resource_info.resource.url
             except Exception, e:
                 logger.log_errmsg("Load icon %s error: %s" % (icon_str, e))
         else:
@@ -489,14 +481,12 @@ class DialogueHandler(object):
         """
         Get who says this dialogue.
         """
-        model_npc_dialogues = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.NPC_DIALOGUES)
-        if model_npc_dialogues:
-            # Get record.
-            try:
-                record = model_npc_dialogues.objects.get(dialogue=dialogue)
-                return record.npc.name
-            except Exception, e:
-                pass
+        # Get record.
+        try:
+            record = DATA_SETS.npc_dialogues.model.objects.get(dialogue=dialogue)
+            return record.npc.name
+        except Exception, e:
+            pass
 
         return ""
 

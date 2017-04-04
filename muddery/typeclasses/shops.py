@@ -11,7 +11,7 @@ from django.apps import apps
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.builder import build_object, get_object_record
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 
 
 class MudderyShop(MudderyObject):
@@ -38,10 +38,9 @@ class MudderyShop(MudderyObject):
         """
         # shops records
         goods_records = []
-        goods_model = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.SHOP_GOODS)
-        if goods_model:
+        if DATA_SETS.shop_goods.model:
             # Get records.
-            goods_records = goods_model.objects.filter(shop=self.get_data_key())
+            goods_records = DATA_SETS.shop_goods.model.objects.filter(shop=self.get_data_key())
 
         goods_keys = set([record.goods for record in goods_records])
 
@@ -58,8 +57,6 @@ class MudderyShop(MudderyObject):
         # add new goods
 
         # get typeclass model
-        model_typeclass = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.SystemData.TYPECLASSES)
-
         for goods_record in goods_records:
             goods_key = goods_record.goods
             if goods_key not in current_goods:
@@ -67,7 +64,7 @@ class MudderyShop(MudderyObject):
 
                 typeclass = None
                 try:
-                    typeclass = model_typeclass.objects.get(key=goods_record.typeclass)
+                    typeclass = DATA_SETS.typeclasses.model.objects.get(key=goods_record.typeclass)
                 except Exception, e:
                     logger.log_errmsg("Can't create goods: %s" % goods_key)
                     continue

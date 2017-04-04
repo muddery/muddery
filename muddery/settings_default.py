@@ -327,7 +327,7 @@ SYSTEM_DATA_SETTINGS = "muddery.worlddata.data_settings"
 DATA_SETTINGS = "worlddata.data_settings"
 
 # Localized string data's folder
-SYSTEM_LOCALIZED_STRINGS_FOLDER = "languages"
+LOCALIZED_STRINGS_FOLDER = "languages"
 
 
 ###################################

@@ -15,7 +15,7 @@ from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.loot_handler import LootHandler
 from muddery.utils.localized_strings_handler import LS
 from muddery.statements.statement_handler import STATEMENT_HANDLER
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 
 
 class MudderyObjectCreator(MudderyObject):
@@ -26,7 +26,7 @@ class MudderyObjectCreator(MudderyObject):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, DATA_HANDLER.OtherData.CREATOR_LOOT_LIST)
+        return LootHandler(self, DATA_SETS.creator_loot_list.model)
 
     def load_data(self):
         """

@@ -4,10 +4,8 @@ This model translates default strings into localized strings.
 
 from __future__ import print_function
 
-from django.conf import settings
-from django.apps import apps
 from evennia.utils import logger
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 
 
 class LocalizedStringsHandler(object):
@@ -34,8 +32,7 @@ class LocalizedStringsHandler(object):
 
         # Load localized string model.
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.LOCALIZED_STRINGS)
-            for record in model_obj.objects.all():
+            for record in DATA_SETS.localized_strings.model.objects.all():
                 # Add db fields to dict. Overwrite system localized strings.
                 self.dict[(record.category, record.origin)] = record.local
         except Exception, e:

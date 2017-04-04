@@ -14,7 +14,7 @@ from muddery.utils.loot_handler import LootHandler
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
@@ -29,7 +29,7 @@ class MudderyQuest(MudderyObject):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, DATA_HANDLER.OtherData.QUEST_REWARD_LIST)
+        return LootHandler(self, DATA_SETS.quest_reward_list.model)
 
     def at_object_creation(self):
         """
@@ -61,10 +61,9 @@ class MudderyQuest(MudderyObject):
 
         # Get objectives.
         obj_records = []
-        model_objectives = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.QUEST_OBJECTIVES)
-        if model_objectives:
+        if DATA_SETS.quest_objectives.model:
             # Get records.
-            obj_records = model_objectives.objects.filter(quest=key)
+            obj_records = DATA_SETS.quest_objectives.model.objects.filter(quest=key)
 
         for obj_record in obj_records:
             objective_type = obj_record.type
