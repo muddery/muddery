@@ -12,7 +12,6 @@ from __future__ import print_function
 
 import random
 from django.conf import settings
-from django.apps import apps
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.utils import logger
@@ -23,7 +22,7 @@ from muddery.utils import utils
 from muddery.utils.builder import build_object
 from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.loot_handler import LootHandler
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
@@ -54,7 +53,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, DATA_HANDLER.OtherData.CHARACTER_LOOT_LIST)
+        return LootHandler(self, DATA_SETS.character_loot_list.model)
 
     def at_object_creation(self):
         """
@@ -104,9 +103,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.position_names = {}
 
         # reset equipment's position
-        model_position = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.BasicData.EQUIPMENT_POSITIONS)
-        if model_position:
-            for record in model_position.objects.all():
+        if DATA_SETS.equipment_positions.model:
+            for record in DATA_SETS.equipment_positions.model.objects.all():
                 positions.append(record.key)
                 self.db.position_names[record.key] = record.name
 
@@ -182,8 +180,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         try:
             # get data from db
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.BasicData.CHARACTER_MODELS)
-            model_data = model_obj.objects.get(key=model_name, level=self.db.level)
+            model_data = DATA_SETS.character_models.model.objects.get(key=model_name, level=self.db.level)
 
             reserved_fields = {"id", "key", "level"}
             for field in model_data._meta.fields:
@@ -249,10 +246,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # default skills
         skill_records = []
-        default_skills = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.DEFAULT_SKILLS)
-        if default_skills:
+        if DATA_SETS.default_skills.model:
             # Get records.
-            skill_records = default_skills.objects.filter(character=model_name)
+            skill_records = DATA_SETS.default_skills.model.objects.filter(character=model_name)
 
         default_skill_ids = set([record.skill for record in skill_records])
 

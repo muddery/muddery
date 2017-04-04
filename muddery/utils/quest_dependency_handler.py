@@ -3,9 +3,7 @@ QuestDependencyHandler deals quest's dependencies.
 """
 
 from muddery.utils import defines
-from muddery.worlddata.data_handler import DATA_HANDLER
-from django.conf import settings
-from django.apps import apps
+from muddery.worlddata.data_sets import DATA_SETS
 from evennia.utils import logger
 
 
@@ -47,10 +45,9 @@ class QuestDependencyHandler(object):
         
         # Get db model
         dependencies = []
-        model_dependencies = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.QUEST_DEPENDENCIES)
-        if model_dependencies:
+        if DATA_SETS.quest_dependencies.model:
             # Get records.
-            dependencies = model_dependencies.objects.filter(quest=quest)
+            dependencies = DATA_SETS.quest_dependencies.model.objects.filter(quest=quest)
 
         # Add db fields to data object.
         data = []

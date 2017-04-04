@@ -2,9 +2,7 @@
 Object key handler, stores key's model name.
 """
 
-from django.conf import settings
-from django.apps import apps
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 
 
 class ObjectKeyHandler(object):
@@ -30,18 +28,17 @@ class ObjectKeyHandler(object):
         self.clear()
 
         # Get model names.
-        model_names = []
-        model_names.extend(DATA_HANDLER.ObjectsData.all())
-        model_names.extend(DATA_HANDLER.ObjectsAdditionalData.all())
-        for model_name in model_names:
+        data_settings_list = []
+        data_settings_list.extend(DATA_SETS.objectData)
+        data_settings_list.extend(DATA_SETS.objectAdditionalData)
+        for data_settings in data_settings_list:
             try:
-                model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
-                for record in model_obj.objects.all():
+                for record in data_settings.model.objects.all():
                     # Add key's model name.
                     key = record.serializable_value("key")
                     if key not in self.key_model:
                         self.key_model[key] = []
-                    self.key_model[key].append(model_name)
+                    self.key_model[key].append(data_settings.model_name)
             except Exception, e:
                 pass
 

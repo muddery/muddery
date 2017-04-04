@@ -2,18 +2,14 @@
 EventHandler handles all events. The handler sets on every object.
 """
 
-import re
 import random
 from muddery.utils import defines
-from muddery.utils.builder import build_object
 from muddery.statements.statement_handler import STATEMENT_HANDLER
-from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils import utils
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
-from evennia import create_script
 
 
 PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_EVENTS}
@@ -26,13 +22,12 @@ def get_event_additional_model():
     additional_model = {}
 
     # list event's additional data's model
-    for model_name in DATA_HANDLER.EventAdditionalData.all():
-        model_data = apps.get_model(settings.WORLD_DATA_APP, model_name)
-        if model_data:
+    for data_settings in DATA_SETS.eventAdditionalData:
+        if data_settings.model:
             # Get records.
-            for record in model_data.objects.all():
+            for record in data_settings.model.objects.all():
                 key = record.serializable_value("key")
-                additional_model[key] = model_name
+                additional_model[key] = data_settings.model_name
 
     return additional_model
 
@@ -51,10 +46,9 @@ class EventHandler(object):
 
         # Load events.
         event_records = []
-        model_events = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.EVENT_DATA)
-        if model_events:
+        if DATA_SETS.event_data.model:
             # Get records.
-            event_records = model_events.objects.filter(trigger_obj=owner.get_data_key())
+            event_records = DATA_SETS.event_data.model.objects.filter(trigger_obj=owner.get_data_key())
 
             for record in event_records:
                 event = {}

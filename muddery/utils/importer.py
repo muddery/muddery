@@ -15,7 +15,6 @@ from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
 from muddery.utils import readers
-from muddery.worlddata.data_handler import SYSTEM_DATA_HANDLER, DATA_HANDLER
 
 
 def get_field_types(model_obj, field_names):
@@ -164,7 +163,7 @@ def import_data(model_obj, reader, system_model, system_data):
         pass
 
 
-def import_file(file_name, model_name, file_type=None, wildcard=True, system_model=False, system_data=False):
+def import_file(file_name, model_name, file_type=None, system_model=False, system_data=False):
     """
     Import data from a data file to the db model
 
@@ -173,21 +172,24 @@ def import_file(file_name, model_name, file_type=None, wildcard=True, system_mod
         model_name: (string) db model's name.
         file_type: (string) the type of the file. If it's None, the function will get
                    the file type from the extension name of the file.
-        wildcard: (bool) add wildcard as ext name or not.
         system_data: (bool) is system data or not.
     """
     imported = False
 
     try:
         # get file list
-        if wildcard:
+        if not file_type:
+            # find extensions
             file_names = glob.glob(file_name + ".*")
+
+            # add original filename
+            file_names.append(file_name)
         else:
             file_names = [file_name]
 
         for file_name in file_names:
             if not file_type:
-                # get file's extension name
+                # get file's extension name as file type
                 file_type = os.path.splitext(file_name)[1].lower()
                 if len(file_type) > 0:
                     file_type = file_type[1:]
@@ -220,39 +222,6 @@ def import_file(file_name, model_name, file_type=None, wildcard=True, system_mod
     return imported
 
 
-def import_local_all():
-    """
-    Import all local data files to models.
-    """
-    ##########################
-    # load system data
-    ##########################
-    # system data file's path
-    system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
-
-    # load models in order
-    import_model_list(SYSTEM_DATA_HANDLER.SystemData.all(), system_data_path, system_model=True, system_data=True)
-
-
-    ##########################
-    # load custom data
-    ##########################
-    # custom data file's path
-    custom_data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
-
-    # load system models
-    import_model_list(DATA_HANDLER.SystemData.all(), custom_data_path, system_model=True, system_data=False)
-
-    # load models in order
-    model_list = []
-    model_list.extend(DATA_HANDLER.BasicData.all())
-    model_list.extend(DATA_HANDLER.ObjectsData.all())
-    model_list.extend(DATA_HANDLER.ObjectsAdditionalData.all())
-    model_list.extend(DATA_HANDLER.OtherData.all())
-    model_list.extend(DATA_HANDLER.EventAdditionalData.all())
-    import_model_list(model_list, custom_data_path, system_model=False, system_data=False)
-        
-
 def import_model_list(model_list, data_path, system_model, system_data):
     """
     Load a list of models.
@@ -262,16 +231,6 @@ def import_model_list(model_list, data_path, system_model, system_data):
         clear_model_data(model_name, system_model=system_model, system_data=system_data)
         file_name = os.path.join(data_path, model_name)
         import_file(file_name, model_name, system_model=system_model, system_data=system_data)
-
-
-def import_system_localized_strings():
-    """
-    Import system local strings.
-
-    Returns:
-
-    """
-    pass
 
 
 def clear_model_data(model_name, system_model, system_data):
@@ -308,15 +267,15 @@ def unzip_data_all(file):
 
         # import models one by one
         # load system models
-        import_model_list(DATA_HANDLER.SystemData.all(), temp_path, system_model=True, system_data=False)
+        import_model_list(DATA_SETS.SystemData.all(), temp_path, system_model=True, system_data=False)
 
         # import models
         model_list = []
-        model_list.extend(DATA_HANDLER.BasicData.all())
-        model_list.extend(DATA_HANDLER.ObjectsData.all())
-        model_list.extend(DATA_HANDLER.ObjectsAdditionalData.all())
-        model_list.extend(DATA_HANDLER.OtherData.all())
-        model_list.extend(DATA_HANDLER.EventAdditionalData.all())
+        model_list.extend(DATA_SETS.BasicData.all())
+        model_list.extend(DATA_SETS.ObjectsData.all())
+        model_list.extend(DATA_SETS.ObjectsAdditionalData.all())
+        model_list.extend(DATA_SETS.OtherData.all())
+        model_list.extend(DATA_SETS.EventAdditionalData.all())
         import_model_list(model_list, temp_path, system_model=False, system_data=False)
 
     finally:

@@ -16,7 +16,7 @@ class LootHandler(object):
     Handles matters of loots.
     """
 
-    def __init__(self, owner, model_name):
+    def __init__(self, owner, model):
         """
         Initialize handler
         """
@@ -29,8 +29,7 @@ class LootHandler(object):
         # load loot data
         loot_list = []
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
-            loot_records = model_obj.objects.filter(provider=self.owner.get_data_key())
+            loot_records = model.objects.filter(provider=self.owner.get_data_key())
 
             for loot_record in loot_records:
                 loot_object = {"object": loot_record.serializable_value("object"),

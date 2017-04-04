@@ -1497,7 +1497,7 @@ class event_dialogues(models.Model):
 # localized strings
 #
 # ------------------------------------------------------------
-class localized_strings(models.Model):
+class localized_strings(system_data):
     "Store all localized strings."
 
     # word's category

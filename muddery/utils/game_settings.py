@@ -3,9 +3,7 @@ Set the game's configuration.
 """
 
 
-from django.conf import settings
-from django.apps import apps
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 from evennia.utils import logger
 
 
@@ -13,15 +11,14 @@ class GameSettings(object):
     """
     Handles a character's custom attributes.
     """
-    def __init__(self, model_name, default_values):
+    def __init__(self, model, default_values):
         """
         Initialize handler.
         """
         self.values = {}
         self.default_values = default_values
-        self.model_name = model_name
+        self.model = model
         self.reset()
-
 
     def reset(self):
         """
@@ -33,16 +30,15 @@ class GameSettings(object):
 
         # Get db model
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
-            if len(model_obj.objects.all()) > 0:
-                record = model_obj.objects.all()[0]
+            query = self.model.objects.all()
+            if len(query) > 0:
+                record = query[0]
                 # Add db fields to dict.
                 for field in record._meta.fields:
                     self.values[field.name] = record.serializable_value(field.name)
         except Exception, e:
             print("Can not load settings: %s" % e)
             pass
-
 
     def get(self, key):
         """
@@ -53,13 +49,11 @@ class GameSettings(object):
 
         return self.values[key]
 
-
     def set(self, key, value):
         """
         Set an attribute.
         """
         self.values[key] = value
-
 
     def all_values(self):
         """
@@ -71,7 +65,7 @@ class GameSettings(object):
         return self.values
 
 
-GAME_SETTINGS = GameSettings(DATA_HANDLER.OtherData.GAME_SETTINGS,
+GAME_SETTINGS = GameSettings(DATA_SETS.game_settings.model,
                              {"connection_screen": "",
                               "solo_mode": False,
                               "global_cd": 1.0,
@@ -88,7 +82,7 @@ GAME_SETTINGS = GameSettings(DATA_HANDLER.OtherData.GAME_SETTINGS,
                               })
 
 
-CLIENT_SETTINGS = GameSettings(DATA_HANDLER.OtherData.CLIENT_SETTINGS,
+CLIENT_SETTINGS = GameSettings(DATA_SETS.client_settings.model,
                                {"game_title": "",
                                 "map_room_size": 40,
                                 "map_scale": 75,

@@ -5,8 +5,6 @@ MudderyNPC is NPC's base class.
 
 import json
 import traceback
-from django.conf import settings
-from django.apps import apps
 from evennia import TICKER_HANDLER
 from evennia.utils import logger
 from muddery.typeclasses.characters import MudderyCharacter
@@ -14,7 +12,7 @@ from muddery.utils.localized_strings_handler import LS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.builder import build_object, delete_object
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 
 
 class MudderyNPC(MudderyCharacter):
@@ -54,11 +52,10 @@ class MudderyNPC(MudderyCharacter):
         Load dialogues.
         """
         dialogues = []
-        model_npc_dialogues = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.NPC_DIALOGUES)
-        if model_npc_dialogues:
+        if DATA_SETS.npc_dialogues.model:
             # Get records.
             npc_key = self.get_data_key()
-            dialogues = model_npc_dialogues.objects.filter(npc=npc_key)
+            dialogues = DATA_SETS.npc_dialogues.model.objects.filter(npc=npc_key)
 
         self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.default]
         self.dialogues = [dialogue.dialogue for dialogue in dialogues if not dialogue.default]
@@ -69,10 +66,9 @@ class MudderyNPC(MudderyCharacter):
         """
         # shops records
         shop_records = []
-        nps_shops_model = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.NPC_SHOPS)
-        if nps_shops_model:
+        if DATA_SETS.npc_shops.model:
             # Get records.
-            shop_records = nps_shops_model.objects.filter(npc=self.get_data_key())
+            shop_records = DATA_SETS.npc_shops.model.objects.filter(npc=self.get_data_key())
 
         shop_keys = set([record.shop for record in shop_records])
 

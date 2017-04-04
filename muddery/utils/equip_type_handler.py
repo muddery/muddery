@@ -2,10 +2,8 @@
 This handles the relations of equipment types and character careers.
 """
 
-from django.conf import settings
-from django.apps import apps
 from evennia.utils import logger
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 
 
 class EquipTypeHandler(object):
@@ -33,8 +31,7 @@ class EquipTypeHandler(object):
         self.clear()
 
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.BasicData.CAREER_EQUIPMENTS)
-            for record in model_obj.objects.all():
+            for record in DATA_SETS.career_equipments.model.objects.all():
                 career = record.serializable_value("career")
                 equipment = record.serializable_value("equipment")
                 if career not in self.career_equip:

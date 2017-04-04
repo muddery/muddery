@@ -11,7 +11,7 @@ from django.conf import settings
 from django.apps import apps
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
 
@@ -64,10 +64,8 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         resource_key = getattr(self.dfield, "background", None)
         if resource_key:
             try:
-                model_resource = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.IMAGE_RESOURCES)
-                if model_resource:
-                    resource_info = model_resource.objects.get(key=resource_key)
-                    self.background = resource_info.resource.url
+                resource_info = DATA_SETS.image_resources.model.objects.get(key=resource_key)
+                self.background = resource_info.resource.url
             except Exception, e:
                 logger.log_tracemsg("Load background %s error: %s" % (resource_key, e))
 

@@ -9,11 +9,9 @@ MudderyObject is an object which can load it's data automatically.
 import json
 import ast
 from django.conf import settings
-from django.db import models
 from django.apps import apps
 from evennia.objects.objects import DefaultObject
 from evennia.utils import logger
-from evennia.utils.utils import to_str
 from evennia.utils.utils import make_iter
 from evennia.utils.utils import lazy_property
 from evennia.typeclasses.models import DbHolder
@@ -25,7 +23,7 @@ from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.event_handler import EventHandler
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 
 
 class MudderyObject(DefaultObject):
@@ -244,8 +242,7 @@ class MudderyObject(DefaultObject):
         """
         typeclass_path = ""
         try:
-            model_typeclass = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.SystemData.TYPECLASSES)
-            data = model_typeclass.objects.get(key=typeclass_key)
+            data = DATA_SETS.typeclasses.model.objects.get(key=typeclass_key)
             typeclass_path = data.path
         except Exception, e:
             pass
@@ -418,9 +415,8 @@ class MudderyObject(DefaultObject):
         icon_key = getattr(self.dfield, "icon", None)
         if icon_key:
             try:
-                model_resource = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.ICON_RESOURCES)
-                if model_resource:
-                    resource_info = model_resource.objects.get(key=icon_key)
+                if DATA_SETS.icon_resources.model:
+                    resource_info = DATA_SETS.icon_resources.model.objects.get(key=icon_key)
                     self.icon = resource_info.resource.url
             except Exception, e:
                 logger.log_errmsg("Load icon %s error: %s" % (icon_key, e))

@@ -1,9 +1,7 @@
-import sys
+
 from django.contrib.admin.forms import forms
-from django.conf import settings
-from django.apps import apps
 from muddery.utils.localiztion_handler import localize_form_fields
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 from worlddata import models
 
 
@@ -16,12 +14,11 @@ def ExistKey(key, except_models=None):
         return True
 
     # Get models.
-    for model_name in DATA_HANDLER.objectData.all():
-        if model_name in except_models:
+    for data_settings in DATA_SETS.objectData:
+        if data_settings.model_name in except_models:
             continue
         try:
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
-            model_obj.objects.get(key=key)
+            data_settings.model.objects.get(key=key)
             return True
         except Exception, e:
             continue

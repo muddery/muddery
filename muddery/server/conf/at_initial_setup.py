@@ -16,10 +16,12 @@ does what you expect it to.
 
 from __future__ import print_function
 
+import os
 from django.conf import settings
 from evennia.utils import search, logger
 from muddery.utils import builder, importer, utils
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.worlddata.data_sets import DATA_SETS
 from muddery.typeclasses.character_skills import MudderySkill
 import traceback
 
@@ -34,8 +36,8 @@ def at_initial_setup():
 
     try:
         # load world data
-        importer.import_local_all()
-        print("Import local all.")
+        import_local_data()
+        print("Import local data.")
 
         # load game settings
         GAME_SETTINGS.reset()
@@ -76,3 +78,29 @@ def at_initial_setup():
         ostring = "Can't set initial data: %s" % e
         print(ostring)
         print(traceback.format_exc())
+
+
+def import_local_data():
+    """
+    Import all local data files to models.
+    """
+    ##########################
+    # load system data
+    ##########################
+    # system data file's path
+    system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
+
+    # load system data
+    for data_settings in DATA_SETS.systemData:
+        data_settings.import_from_path(system_data_path, system_data=True)
+
+
+    ##########################
+    # load custom data
+    ##########################
+    # custom data file's path
+    custom_data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
+
+    # load all custom data
+    for data_settings in DATA_SETS.allData:
+        data_settings.import_from_path(custom_data_path, system_data=False)

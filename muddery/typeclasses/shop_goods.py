@@ -11,7 +11,7 @@ from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
 from muddery.utils.builder import build_object, get_object_record
 from muddery.utils.localized_strings_handler import LS
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 
 
 class MudderyShopGoods(DefaultObject):
@@ -71,10 +71,8 @@ class MudderyShopGoods(DefaultObject):
         # Get goods record.
         goods_record = None
         try:
-            goods_model = apps.get_model(settings.WORLD_DATA_APP, DATA_HANDLER.OtherData.SHOP_GOODS)
-            if goods_model:
-                # Get records.
-                goods_record = goods_model.objects.get(shop=shop_key, goods=goods_key)
+            # Get records.
+            goods_record = DATA_SETS.shop_goods.model.objects.get(shop=shop_key, goods=goods_key)
         except Exception, e:
             logger.log_errmsg("Can not find goods %s in shop %s: %s" % (goods_key, shop_key, e))
             return

@@ -29,7 +29,7 @@ from muddery.worlddata.editor.dialogue_view import DialogueView
 from muddery.worlddata.editor.dialogue_sentence_view import DialogueSentenceView
 from muddery.worlddata.editor.dialogue_chain_view import DialogueChainView
 from muddery.worlddata.editor.dialogue_chain_image import DialogueChainImage
-from muddery.worlddata.data_handler import DATA_HANDLER
+from muddery.worlddata.data_sets import DATA_SETS
 
 
 @staff_member_required
@@ -60,14 +60,8 @@ def world_editor(request):
     """
     Render the world editor.
     """
-    model_list = []
-    model_list.extend(DATA_HANDLER.BasicData.all())
-    model_list.extend(DATA_HANDLER.ObjectsData.all())
-    model_list.extend(DATA_HANDLER.ObjectsAdditionalData.all())
-    model_list.extend(DATA_HANDLER.OtherData.all())
-    model_list.extend(DATA_HANDLER.EventAdditionalData.all())
-
-    models = [{"key": model, "name": LS(model, category="models") + "(" + model + ")"} for model in model_list]
+    data_handlers = DATA_SETS.all_data()
+    models = [{"key": data_handler.model_name, "name": LS(data_handler.model_name, category="models") + "(" + data_handler.model_name + ")"} for data_handler in data_handlers]
 
     context = {"models": models,
                "writers": writers.get_writers()}
@@ -285,7 +279,7 @@ def import_data_single(request):
             # clear old data first
             importer.clear_model_data(model_name)
 
-            if importer.import_file(temp_name, model_name, file_type=file_type, wildcard=False):
+            if importer.import_file(temp_name, model_name, file_type=file_type):
                 success = True
         except Exception, e:
             logger.log_tracemsg("Cannot import game data: %s" % e)
@@ -310,9 +304,6 @@ def apply_changes(request):
     Apply the game world's data.
     """
     try:
-        # load system localized strings
-        importer.import_system_localized_strings(settings.LANGUAGE_CODE)
-
         # reload localized strings
         LOCALIZED_STRINGS_HANDLER.reload()
 
