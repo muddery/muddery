@@ -103,10 +103,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.db.position_names = {}
 
         # reset equipment's position
-        if DATA_SETS.equipment_positions.model:
-            for record in DATA_SETS.equipment_positions.model.objects.all():
-                positions.append(record.key)
-                self.db.position_names[record.key] = record.name
+        for record in DATA_SETS.equipment_positions.objects.all():
+            positions.append(record.key)
+            self.db.position_names[record.key] = record.name
 
         for position in self.db.equipments:
             if position not in positions:
@@ -180,7 +179,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         try:
             # get data from db
-            model_data = DATA_SETS.character_models.model.objects.get(key=model_name, level=self.db.level)
+            model_data = DATA_SETS.character_models.objects.get(key=model_name, level=self.db.level)
 
             reserved_fields = {"id", "key", "level"}
             for field in model_data._meta.fields:
@@ -245,10 +244,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             model_name = self.get_data_key()
 
         # default skills
-        skill_records = []
-        if DATA_SETS.default_skills.model:
-            # Get records.
-            skill_records = DATA_SETS.default_skills.model.objects.filter(character=model_name)
+        skill_records = DATA_SETS.default_skills.objects.filter(character=model_name)
 
         default_skill_ids = set([record.skill for record in skill_records])
 

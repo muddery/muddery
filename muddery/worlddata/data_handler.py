@@ -3,6 +3,7 @@ This module defines available model types.
 """
 import os
 import glob
+import traceback
 from django.apps import apps
 from django.conf import settings
 from django.db import models
@@ -24,7 +25,14 @@ class DataHandler(object):
 
         """
         self.model_name = model_name
-        self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
+        self.model = None
+        self.objects = None
+        
+        try:
+            self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
+            self.objects = self.model.objects
+        except Exception, e:
+            logger.log_errmsg("Can not load model %s: %s" % (self.model_name, e))
 
     def get_field_types(self, model_obj, field_names):
         """
@@ -141,7 +149,7 @@ class DataHandler(object):
             # reach the end of file, pass this exception
             pass
 
-    def import_file(self, file_name, file_type=None, **kwargs):
+    def import_file(self, file_name, file_type=None, clear=True, **kwargs):
         """
         Import data from a data file to the db model
 
@@ -151,6 +159,9 @@ class DataHandler(object):
                        the file type from the extension name of the file.
         """
         imported = False
+        
+        if clear:
+            self.clear_model_data(**kwargs)
 
         try:
             # get file list
@@ -186,6 +197,7 @@ class DataHandler(object):
                 break
         except Exception, e:
             print("Can not import file %s: %s" % (file_name, e))
+            traceback.print_exc()
 
         if imported:
             print("%s imported." % file_name)
@@ -205,7 +217,20 @@ class DataHandler(object):
 
         """
         file_name = os.path.join(path_name, self.model_name)
-        self.import_file(file_name, **kwargs)
+        return self.import_file(file_name, **kwargs)
+
+    def clear_model_data(self, **kwargs):
+        """
+        Remove all data from db.
+
+        Args:
+            model_name: (string) db model's name.
+
+        Returns:
+            None
+        """
+        # clear old data
+        self.objects.all().delete()
 
 
 class SystemDataHandler(DataHandler):
@@ -274,8 +299,23 @@ class SystemDataHandler(DataHandler):
             # reach the end of file, pass this exception
             pass
 
+    def clear_model_data(self, **kwargs):
+        """
+        Remove all data from db.
 
-class LocalizedStringsSettings(DataHandler):
+        Args:
+            model_name: (string) db model's name.
+
+        Returns:
+            None
+        """
+        system_data = kwargs.get('system_data', False)
+        
+        # clear old data
+        self.objects.filter(system_data=system_data).delete()
+
+
+class LocalizedStringsHandler(DataHandler):
     """
 
     """
@@ -347,21 +387,35 @@ class LocalizedStringsSettings(DataHandler):
 
     def import_from_path(self, path_name, **kwargs):
         # import data from default position
-        super(LocalizedStringsSettings, self).import_from_path(path_name, **kwargs)
+        super(LocalizedStringsHandler, self).import_from_path(path_name, **kwargs)
 
         # import all files in LOCALIZED_STRINGS_FOLDER
         dir_name = os.path.join(path_name,
                                 settings.LOCALIZED_STRINGS_FOLDER,
                                 settings.LANGUAGE_CODE)
 
-        print("dir_name: %s" % dir_name)
         if os.path.isdir(dir_name):
-            print(1)
+            # Does not clear previous data.
+            kwargs["clear"] = False
             for file_name in os.listdir(dir_name):
                 file_name = os.path.join(dir_name, file_name)
-                print("file name: %s" % file_name)
                 if os.path.isdir(file_name):
                     # if it is a folder
                     continue
 
-                self.import_file(file_name, kwargs)
+                self.import_file(file_name, **kwargs)
+
+    def clear_model_data(self, **kwargs):
+        """
+        Remove all data from db.
+
+        Args:
+            model_name: (string) db model's name.
+
+        Returns:
+            None
+        """
+        system_data = kwargs.get('system_data', False)
+        
+        # clear old data
+        self.objects.filter(system_data=system_data).delete()

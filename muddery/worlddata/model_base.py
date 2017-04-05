@@ -1497,9 +1497,12 @@ class event_dialogues(models.Model):
 # localized strings
 #
 # ------------------------------------------------------------
-class localized_strings(system_data):
+class localized_strings(models.Model):
     "Store all localized strings."
 
+    # is system data or not
+    system_data = models.BooleanField(blank=True, default=False)
+    
     # word's category
     category = models.CharField(max_length=KEY_LENGTH, blank=True)
 

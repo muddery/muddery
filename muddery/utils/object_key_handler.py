@@ -29,11 +29,11 @@ class ObjectKeyHandler(object):
 
         # Get model names.
         data_settings_list = []
-        data_settings_list.extend(DATA_SETS.objectData)
-        data_settings_list.extend(DATA_SETS.objectAdditionalData)
+        data_settings_list.extend(DATA_SETS.object_data)
+        data_settings_list.extend(DATA_SETS.object_additional_data)
         for data_settings in data_settings_list:
             try:
-                for record in data_settings.model.objects.all():
+                for record in data_settings.objects.all():
                     # Add key's model name.
                     key = record.serializable_value("key")
                     if key not in self.key_model:

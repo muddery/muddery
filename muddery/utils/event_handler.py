@@ -22,12 +22,10 @@ def get_event_additional_model():
     additional_model = {}
 
     # list event's additional data's model
-    for data_settings in DATA_SETS.eventAdditionalData:
-        if data_settings.model:
-            # Get records.
-            for record in data_settings.model.objects.all():
-                key = record.serializable_value("key")
-                additional_model[key] = data_settings.model_name
+    for data_settings in DATA_SETS.event_additional_data:
+        for record in data_settings.objects.all():
+            key = record.serializable_value("key")
+            additional_model[key] = data_settings.model_name
 
     return additional_model
 
@@ -45,38 +43,35 @@ class EventHandler(object):
         self.events = {}
 
         # Load events.
-        event_records = []
-        if DATA_SETS.event_data.model:
-            # Get records.
-            event_records = DATA_SETS.event_data.model.objects.filter(trigger_obj=owner.get_data_key())
+        event_records = DATA_SETS.event_data.objects.filter(trigger_obj=owner.get_data_key())
 
-            for record in event_records:
-                event = {}
+        for record in event_records:
+            event = {}
 
-                # Set data.
-                event_type = record.type
-                trigger_type = record.trigger_type
+            # Set data.
+            event_type = record.type
+            trigger_type = record.trigger_type
 
-                for field in record._meta.fields:
-                    event[field.name] = record.serializable_value(field.name)
-                event["type"] = event_type
+            for field in record._meta.fields:
+                event[field.name] = record.serializable_value(field.name)
+            event["type"] = event_type
 
-                # Set additional data.
-                if record.key in self._additional_model:
-                    model_name = self._additional_model[record.key]
-                    model_additional = apps.get_model(settings.WORLD_DATA_APP, model_name)
+            # Set additional data.
+            if record.key in self._additional_model:
+                model_name = self._additional_model[record.key]
+                model_additional = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
-                    try:
-                        add_record = model_additional.objects.get(key = record.key)
-                        # Set data.
-                        for add_field in add_record._meta.fields:
-                            event[add_field.name] = add_record.serializable_value(add_field.name)
-                    except Exception, e:
-                        pass
+                try:
+                    add_record = model_additional.objects.get(key = record.key)
+                    # Set data.
+                    for add_field in add_record._meta.fields:
+                        event[add_field.name] = add_record.serializable_value(add_field.name)
+                except Exception, e:
+                    pass
 
-                if not trigger_type in self.events:
-                    self.events[trigger_type] = []
-                self.events[trigger_type].append(event)
+            if not trigger_type in self.events:
+                self.events[trigger_type] = []
+            self.events[trigger_type].append(event)
 
     def can_bypass(self, character):
         """

@@ -320,15 +320,11 @@ REVERSE_EXIT_PREFIX = "__reverse__"
 # Characters who have equal or higher permission can bypass events.
 PERMISSION_BYPASS_EVENTS = {"Builders", "Wizards", "Immortals"}
 
-# System date settings
-SYSTEM_DATA_SETTINGS = "muddery.worlddata.data_settings"
-
-# Custom date settings
-DATA_SETTINGS = "worlddata.data_settings"
-
 # Localized string data's folder
 LOCALIZED_STRINGS_FOLDER = "languages"
 
+# World data sets
+DATA_SETS = "muddery.worlddata.data_sets.DataSets"
 
 ###################################
 # world editor

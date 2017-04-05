@@ -242,7 +242,7 @@ class MudderyObject(DefaultObject):
         """
         typeclass_path = ""
         try:
-            data = DATA_SETS.typeclasses.model.objects.get(key=typeclass_key)
+            data = DATA_SETS.typeclasses.objects.get(key=typeclass_key)
             typeclass_path = data.path
         except Exception, e:
             pass
@@ -415,9 +415,8 @@ class MudderyObject(DefaultObject):
         icon_key = getattr(self.dfield, "icon", None)
         if icon_key:
             try:
-                if DATA_SETS.icon_resources.model:
-                    resource_info = DATA_SETS.icon_resources.model.objects.get(key=icon_key)
-                    self.icon = resource_info.resource.url
+                resource_info = DATA_SETS.icon_resources.objects.get(key=icon_key)
+                self.icon = resource_info.resource.url
             except Exception, e:
                 logger.log_errmsg("Load icon %s error: %s" % (icon_key, e))
 

@@ -2,7 +2,9 @@
 This module defines available model types.
 """
 
-from muddery.worlddata.data_handler import DataHandler, SystemDataHandler
+from django.conf import settings
+from evennia.utils.utils import class_from_module
+from muddery.worlddata.data_handler import DataHandler, SystemDataHandler, LocalizedStringsHandler
 
 
 class DataSets(object):
@@ -21,15 +23,15 @@ class DataSets(object):
         self.event_trigger_types = SystemDataHandler("event_trigger_types")
         self.quest_objective_types = SystemDataHandler("quest_objective_types")
         self.quest_dependency_types = SystemDataHandler("quest_dependency_types")
-        self.localized_strings = SystemDataHandler("localized_strings")
+        self.localized_strings = LocalizedStringsHandler("localized_strings")
 
-        self.systemData = [self.class_categories,
-                           self.typeclasses,
-                           self.event_types,
-                           self.event_trigger_types,
-                           self.quest_objective_types,
-                           self.quest_dependency_types,
-                           self.localized_strings]
+        self.system_data = [self.class_categories,
+                            self.typeclasses,
+                            self.event_types,
+                            self.event_trigger_types,
+                            self.quest_objective_types,
+                            self.quest_dependency_types,
+                            self.localized_strings]
 
         # Basic settings
         self.equipment_types = DataHandler("equipment_types")
@@ -38,11 +40,11 @@ class DataSets(object):
         self.career_equipments = DataHandler("career_equipments")
         self.character_models = DataHandler("character_models")
 
-        self.basicData = [self.equipment_types,
-                          self.equipment_positions,
-                          self.character_careers,
-                          self.career_equipments,
-                          self.character_models]
+        self.basic_data = [self.equipment_types,
+                           self.equipment_positions,
+                           self.character_careers,
+                           self.career_equipments,
+                           self.character_models]
 
         # Objects data
         self.world_rooms = DataHandler("world_rooms")
@@ -58,23 +60,27 @@ class DataSets(object):
         self.skill_books = DataHandler("skill_books")
         self.shops = DataHandler("shops")
 
-        self.objectData = [self.world_rooms,
-                           self.world_exits,
-                           self.world_objects,
-                           self.world_npcs,
-                           self.common_objects,
-                           self.common_characters,
-                           self.skills,
-                           self.quests,
-                           self.equipments,
-                           self.foods,
-                           self.skill_books,
-                           self.shops]
+        self.object_data = [self.world_rooms,
+                            self.world_exits,
+                            self.world_objects,
+                            self.world_npcs,
+                            self.common_objects,
+                            self.common_characters,
+                            self.skills,
+                            self.quests,
+                            self.equipments,
+                            self.foods,
+                            self.skill_books,
+                            self.shops]
 
         # Object additional data
-        self.objectAdditionalData = [DataHandler("exit_locks"),
-                                     DataHandler("two_way_exits"),
-                                     DataHandler("object_creators")]
+        self.exit_locks = DataHandler("exit_locks")
+        self.two_way_exits = DataHandler("two_way_exits")
+        self.object_creators = DataHandler("object_creators")
+        
+        self.object_additional_data = [self.exit_locks,
+                                       self.two_way_exits,
+                                       self.object_creators]
 
         # Other data
         self.game_settings = DataHandler("game_settings")
@@ -97,45 +103,76 @@ class DataSets(object):
         self.image_resources = DataHandler("image_resources")
         self.icon_resources = DataHandler("icon_resources")
 
-        self.otherData = [self.game_settings,
-                          self.client_settings,
-                          self.creator_loot_list,
-                          self.character_loot_list,
-                          self.quest_reward_list,
-                          self.quest_objectives,
-                          self.quest_dependencies,
-                          self.event_data,
-                          self.dialogues,
-                          self.dialogue_sentences,
-                          self.dialogue_relations,
-                          self.npc_dialogues,
-                          self.dialogue_quest_dependencies,
-                          self.default_objects,
-                          self.default_skills,
-                          self.shop_goods,
-                          self.npc_shops,
-                          self.image_resources,
-                          self.icon_resources]
+        self.other_data = [self.game_settings,
+                           self.client_settings,
+                           self.creator_loot_list,
+                           self.character_loot_list,
+                           self.quest_reward_list,
+                           self.quest_objectives,
+                           self.quest_dependencies,
+                           self.event_data,
+                           self.dialogues,
+                           self.dialogue_sentences,
+                           self.dialogue_relations,
+                           self.npc_dialogues,
+                           self.dialogue_quest_dependencies,
+                           self.default_objects,
+                           self.default_skills,
+                           self.shop_goods,
+                           self.npc_shops,
+                           self.image_resources,
+                           self.icon_resources]
 
         # Event additional data
-        self.eventAdditionalData = [DataHandler("event_attacks"),
-                                    DataHandler("event_dialogues")]
+        self.event_attacks = DataHandler("event_attacks")
+        self.event_dialogues = DataHandler("event_dialogues")
 
-        # all data
-        self.allData = []
-        self.allData.extend(self.systemData)
-        self.allData.extend(self.basicData)
-        self.allData.extend(self.objectData)
-        self.allData.extend(self.objectAdditionalData)
-        self.allData.extend(self.otherData)
-        self.allData.extend(self.eventAdditionalData)
+        self.event_additional_data = [self.event_attacks,
+                                      self.event_dialogues]
 
+        # all data handlers
+        self.all_handlers = []
+        
+        # data handler dict
+        self.handler_dict = {}
+
+        # update data dict after hook
+        self.update_data_sets()
+        
         # call creation hook
         self.at_creation()
+
+    def update_data_sets(self):
+        # all data handlers
+        self.all_handlers = []
+        self.all_handlers.extend(self.system_data)
+        self.all_handlers.extend(self.basic_data)
+        self.all_handlers.extend(self.object_data)
+        self.all_handlers.extend(self.object_additional_data)
+        self.all_handlers.extend(self.other_data)
+        self.all_handlers.extend(self.event_additional_data)
+        
+        # data handler dict
+        self.handler_dict = {}
+        for data_handler in self.all_handlers:
+            self.handler_dict[data_handler.model_name] = data_handler
+
+    def add_data_handler(self, group, data_handler):
+        if group:
+            group.append(data_handler)
+        
+        self.all_handlers.append(data_handler)
+        self.handler_dict[data_handler.model_name] = data_handler
+
+    def get_handler(self, model_name):
+        """
+        Get a data handler by model name.
+        """
+        return self.handler_dict.get(model_name, None)
 
     def at_creation(self):
         pass
 
 
 # Data sets
-DATA_SETS = DataSets()
+DATA_SETS = class_from_module(settings.DATA_SETS)()

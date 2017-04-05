@@ -60,10 +60,7 @@ class MudderyQuest(MudderyObject):
             return
 
         # Get objectives.
-        obj_records = []
-        if DATA_SETS.quest_objectives.model:
-            # Get records.
-            obj_records = DATA_SETS.quest_objectives.model.objects.filter(quest=key)
+        obj_records = DATA_SETS.quest_objectives.objects.filter(quest=key)
 
         for obj_record in obj_records:
             objective_type = obj_record.type

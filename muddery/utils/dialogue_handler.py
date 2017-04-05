@@ -55,24 +55,15 @@ class DialogueHandler(object):
         
         # Get db model
         try:
-            dialogue_record = DATA_SETS.dialogues.model.objects.get(key=dialogue)
+            dialogue_record = DATA_SETS.dialogues.objects.get(key=dialogue)
         except Exception, e:
             return
 
-        sentences = []
-        if DATA_SETS.dialogue_sentences.model:
-            # Get records.
-            sentences = DATA_SETS.dialogue_sentences.model.objects.filter(dialogue=dialogue)
+        sentences = DATA_SETS.dialogue_sentences.objects.filter(dialogue=dialogue)
 
-        nexts = []
-        if DATA_SETS.dialogue_relations.model:
-            # Get records.
-            nexts = DATA_SETS.dialogue_relations.model.objects.filter(dialogue=dialogue)
+        nexts = DATA_SETS.dialogue_relations.objects.filter(dialogue=dialogue)
 
-        dependencies = []
-        if DATA_SETS.dialogue_quest_dependencies.model:
-            # Get records.
-            dependencies = DATA_SETS.dialogue_quest_dependencies.model.objects.filter(dialogue=dialogue)
+        dependencies = DATA_SETS.dialogue_quest_dependencies.objects.filter(dialogue=dialogue)
 
         # Add db fields to data object.
         data = {}
@@ -380,7 +371,7 @@ class DialogueHandler(object):
         # use icon resource in dialogue sentence
         if icon_str:
             try:
-                resource_info = DATA_SETS.icon_resources.model.objects.get(key=icon_str)
+                resource_info = DATA_SETS.icon_resources.objects.get(key=icon_str)
                 icon = resource_info.resource.url
             except Exception, e:
                 logger.log_errmsg("Load icon %s error: %s" % (icon_str, e))
@@ -483,7 +474,7 @@ class DialogueHandler(object):
         """
         # Get record.
         try:
-            record = DATA_SETS.npc_dialogues.model.objects.get(dialogue=dialogue)
+            record = DATA_SETS.npc_dialogues.objects.get(dialogue=dialogue)
             return record.npc.name
         except Exception, e:
             pass

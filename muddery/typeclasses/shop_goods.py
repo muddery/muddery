@@ -72,7 +72,7 @@ class MudderyShopGoods(DefaultObject):
         goods_record = None
         try:
             # Get records.
-            goods_record = DATA_SETS.shop_goods.model.objects.get(shop=shop_key, goods=goods_key)
+            goods_record = DATA_SETS.shop_goods.objects.get(shop=shop_key, goods=goods_key)
         except Exception, e:
             logger.log_errmsg("Can not find goods %s in shop %s: %s" % (goods_key, shop_key, e))
             return

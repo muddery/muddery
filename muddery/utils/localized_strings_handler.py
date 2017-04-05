@@ -32,7 +32,7 @@ class LocalizedStringsHandler(object):
 
         # Load localized string model.
         try:
-            for record in DATA_SETS.localized_strings.model.objects.all():
+            for record in DATA_SETS.localized_strings.objects.all():
                 # Add db fields to dict. Overwrite system localized strings.
                 self.dict[(record.category, record.origin)] = record.local
         except Exception, e:
