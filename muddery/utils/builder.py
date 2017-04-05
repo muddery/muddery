@@ -57,7 +57,7 @@ def build_object(obj_key, caller=None):
         record = get_object_record(obj_key)
 
         # get typeclass model
-        typeclass = DATA_SETS.typeclasses.model.objects.get(key=record.typeclass)
+        typeclass = DATA_SETS.typeclasses.objects.get(key=record.typeclass)
     except Exception, e:
         ostring = "Can not get typeclass of %s: %s." % (obj_key, e)
         print(ostring)
@@ -122,7 +122,7 @@ def build_object(obj_key, caller=None):
     return obj
 
 
-def build_unique_objects(model_obj, type_name, caller=None):
+def build_unique_objects(objects_data, type_name, caller=None):
     """
     Build all objects in a model.
 
@@ -131,14 +131,16 @@ def build_unique_objects(model_obj, type_name, caller=None):
         caller: (command caller) If provide, running messages will send to the caller.
     """
     # get typeclass model
-    model_typeclass = DATA_SETS.typeclasses.model
+    typeclass_objects = DATA_SETS.typeclasses.objects
+    
+    all_objects = objects_data.all()
 
     # new objects
-    new_obj_keys = set(record.key for record in model_obj.objects.all())
+    new_obj_keys = set(record.key for record in all_objects)
 
     # reverse exits
     reverse_exits = set(settings.REVERSE_EXIT_PREFIX + record.key
-                        for record in model_obj.objects.all()
+                        for record in all_objects
                             if record.typeclass==settings.TWO_WAY_EXIT_TYPECLASS_KEY)
 
     new_obj_keys.update(reverse_exits)
@@ -192,7 +194,7 @@ def build_unique_objects(model_obj, type_name, caller=None):
         current_obj_keys.add(obj_key)
 
     # Create new objects.
-    for record in model_obj.objects.all():
+    for record in all_objects:
         if not record.key in current_obj_keys:
             # Create new objects.
             ostring = "Creating %s." % record.key
@@ -201,7 +203,7 @@ def build_unique_objects(model_obj, type_name, caller=None):
                 caller.msg(ostring)
 
             try:
-                typeclass = model_typeclass.objects.get(key=record.typeclass)
+                typeclass = typeclass_objects.get(key=record.typeclass)
                 obj = create.create_object(typeclass.path, record.name)
                 count_create += 1
             except Exception, e:
@@ -257,7 +259,7 @@ def build_unique_objects(model_obj, type_name, caller=None):
                     return
 
     ostring = "Removed %d object(s). Created %d object(s). Updated %d object(s). Total %d objects.\n"\
-              % (count_remove, count_create, count_update, len(model_obj.objects.all()) + len(reverse_exits))
+              % (count_remove, count_create, count_update, len(all_objects) + len(reverse_exits))
     print(ostring)
     if caller:
         caller.msg(ostring)
@@ -274,16 +276,16 @@ def build_all(caller=None):
     OBJECT_KEY_HANDLER.reload()
 
     # Build rooms.
-    build_unique_objects(DATA_SETS.world_rooms.model, DATA_SETS.world_rooms.model_name, caller)
+    build_unique_objects(DATA_SETS.world_rooms.objects, DATA_SETS.world_rooms.model_name, caller)
 
     # Build exits.
-    build_unique_objects(DATA_SETS.world_exits.model, DATA_SETS.world_exits.model_name, caller)
+    build_unique_objects(DATA_SETS.world_exits.objects, DATA_SETS.world_exits.model_name, caller)
 
     # Build objects.
-    build_unique_objects(DATA_SETS.world_objects.model, DATA_SETS.world_objects.model_name, caller)
+    build_unique_objects(DATA_SETS.world_objects.objects, DATA_SETS.world_objects.model_name, caller)
 
     # Build NPCs.
-    build_unique_objects(DATA_SETS.world_npcs.model, DATA_SETS.world_npcs.model_name, caller)
+    build_unique_objects(DATA_SETS.world_npcs.objects, DATA_SETS.world_npcs.model_name, caller)
 
 
 def reset_default_locations():
@@ -297,7 +299,7 @@ def reset_default_locations():
     if not default_home_key:
         # If does not have the default_home_key, get the first room in WORLD_ROOMS.
         try:
-            rooms = DATA_SETS.world_rooms.model.objects.all()
+            rooms = DATA_SETS.world_rooms.objects.all()
             if rooms:
                 default_home_key = rooms[0].key
         except Exception, e:
@@ -330,7 +332,7 @@ def reset_default_locations():
     if not start_location_key:
         # If does not have the start_location_key, get the first room in WORLD_ROOMS
         try:
-            rooms = DATA_SETS.world_rooms.model.objects.all()
+            rooms = DATA_SETS.world_rooms.objects.all()
             if rooms:
                 start_location_key = rooms[0].key
         except Exception, e:

@@ -2,8 +2,7 @@ import sys
 from django.contrib.admin.forms import forms
 from django.conf import settings
 from django.apps import apps
-from worlddata import models
-from worlddata import forms_base
+from muddery.worlddata import forms_base
 
 
 class GameSettingsForm(forms_base.GameSettingsForm):

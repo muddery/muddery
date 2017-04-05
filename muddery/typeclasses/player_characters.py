@@ -77,7 +77,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         # Choose a random career.
         try:
-            careers = DATA_SETS.character_models.model.objects.all()
+            careers = DATA_SETS.character_careers.objects.all()
             if careers:
                 career = random.choice(careers)
                 self.db.career = career.key
@@ -319,10 +319,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
             model_name = self.get_data_key()
         
         # default objects
-        object_records = []
-        if DATA_SETS.default_objects.model:
-            # Get records.
-            object_records = DATA_SETS.default_objects.model.objects.filter(character=model_name)
+        object_records = DATA_SETS.default_objects.objects.filter(character=model_name)
 
         default_object_ids = set([record.object for record in object_records])
 

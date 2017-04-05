@@ -60,7 +60,7 @@ def world_editor(request):
     """
     Render the world editor.
     """
-    data_handlers = DATA_SETS.all_data()
+    data_handlers = DATA_SETS.all_handlers
     models = [{"key": data_handler.model_name, "name": LS(data_handler.model_name, category="models") + "(" + data_handler.model_name + ")"} for data_handler in data_handlers]
 
     context = {"models": models,
@@ -249,6 +249,17 @@ def import_data_single(request):
     if upload_file:
         # Get file type.
         (filename, ext_name) = os.path.splitext(upload_file.name)
+        
+        # If model name is empty, get model name from filename.
+        if not model_name:
+            model_name = filename
+
+        # get data handler
+        data_handler = DATA_SETS.get_handler(model_name)
+        if not data_handler:
+            logger.log_tracemsg("Cannot get data handler: %s" % model_name)
+            return render(request, 'fail.html', {"message": "Can not import this file."})
+            
         file_type = None
         if ext_name:
             file_type = ext_name[1:]
@@ -272,14 +283,7 @@ def import_data_single(request):
                 temp_file.write(chunk)
             temp_file.flush()
 
-            # If model name is empty, get model name from filename.
-            if not model_name:
-                model_name = filename
-
-            # clear old data first
-            importer.clear_model_data(model_name)
-
-            if importer.import_file(temp_name, model_name, file_type=file_type):
+            if data_handler.import_file(temp_name, file_type=file_type):
                 success = True
         except Exception, e:
             logger.log_tracemsg("Cannot import game data: %s" % e)

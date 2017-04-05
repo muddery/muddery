@@ -11,13 +11,13 @@ class GameSettings(object):
     """
     Handles a character's custom attributes.
     """
-    def __init__(self, model, default_values):
+    def __init__(self, objects, default_values):
         """
         Initialize handler.
         """
         self.values = {}
         self.default_values = default_values
-        self.model = model
+        self.objects = objects
         self.reset()
 
     def reset(self):
@@ -30,7 +30,7 @@ class GameSettings(object):
 
         # Get db model
         try:
-            query = self.model.objects.all()
+            query = self.objects.all()
             if len(query) > 0:
                 record = query[0]
                 # Add db fields to dict.
@@ -65,7 +65,7 @@ class GameSettings(object):
         return self.values
 
 
-GAME_SETTINGS = GameSettings(DATA_SETS.game_settings.model,
+GAME_SETTINGS = GameSettings(DATA_SETS.game_settings.objects,
                              {"connection_screen": "",
                               "solo_mode": False,
                               "global_cd": 1.0,
@@ -82,7 +82,7 @@ GAME_SETTINGS = GameSettings(DATA_SETS.game_settings.model,
                               })
 
 
-CLIENT_SETTINGS = GameSettings(DATA_SETS.client_settings.model,
+CLIENT_SETTINGS = GameSettings(DATA_SETS.client_settings.objects,
                                {"game_title": "",
                                 "map_room_size": 40,
                                 "map_scale": 75,

@@ -37,10 +37,7 @@ class MudderyShop(MudderyObject):
         Load shop goods.
         """
         # shops records
-        goods_records = []
-        if DATA_SETS.shop_goods.model:
-            # Get records.
-            goods_records = DATA_SETS.shop_goods.model.objects.filter(shop=self.get_data_key())
+        goods_records = DATA_SETS.shop_goods.objects.filter(shop=self.get_data_key())
 
         goods_keys = set([record.goods for record in goods_records])
 
@@ -64,7 +61,7 @@ class MudderyShop(MudderyObject):
 
                 typeclass = None
                 try:
-                    typeclass = DATA_SETS.typeclasses.model.objects.get(key=goods_record.typeclass)
+                    typeclass = DATA_SETS.typeclasses.objects.get(key=goods_record.typeclass)
                 except Exception, e:
                     logger.log_errmsg("Can't create goods: %s" % goods_key)
                     continue

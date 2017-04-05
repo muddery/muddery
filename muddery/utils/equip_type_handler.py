@@ -31,7 +31,7 @@ class EquipTypeHandler(object):
         self.clear()
 
         try:
-            for record in DATA_SETS.career_equipments.model.objects.all():
+            for record in DATA_SETS.career_equipments.objects.all():
                 career = record.serializable_value("career")
                 equipment = record.serializable_value("equipment")
                 if career not in self.career_equip:

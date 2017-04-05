@@ -91,8 +91,8 @@ def import_local_data():
     system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
 
     # load system data
-    for data_settings in DATA_SETS.systemData:
-        data_settings.import_from_path(system_data_path, system_data=True)
+    for data_handlers in DATA_SETS.system_data:
+        data_handlers.import_from_path(system_data_path, system_data=True)
 
 
     ##########################
@@ -102,5 +102,5 @@ def import_local_data():
     custom_data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
 
     # load all custom data
-    for data_settings in DATA_SETS.allData:
-        data_settings.import_from_path(custom_data_path, system_data=False)
+    for data_handlers in DATA_SETS.all_handlers:
+        data_handlers.import_from_path(custom_data_path, system_data=False)
