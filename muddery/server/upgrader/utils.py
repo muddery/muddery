@@ -64,7 +64,7 @@ def to_temp_dir(game_dir):
     return temp_dir
 
 
-def create_game(game_dir):
+def create_game(game_dir, game_template):
     """
     Create a new game dir.
 
@@ -74,7 +74,7 @@ def create_game(game_dir):
     Returns:
         None
     """
-    muddery_launcher.create_game_directory(game_dir, None)
+    muddery_launcher.create_game_directory(game_dir, game_template)
 
     os.chdir(game_dir)
     evennia_launcher.init_game_directory(game_dir, check_db=False)

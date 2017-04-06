@@ -20,7 +20,7 @@ class UpgradeHandler(object):
         self.upgrader_list = []
         self.upgrader_list.append(upgrader_0_0.Upgrader())
 
-    def upgrade(self, game_dir):
+    def upgrade(self, game_dir, game_template):
         # Get first two version numbers.
         if not os.path.exists(game_dir):
             print("Can not find dir '%s'" % game_dir)
@@ -46,7 +46,7 @@ class UpgradeHandler(object):
                 utils.make_backup(game_dir)
                 
                 # do upgrade
-                upgrader.upgrade(game_dir)
+                upgrader.upgrade(game_dir, game_template)
                 break
 
         print("Upgraded.")

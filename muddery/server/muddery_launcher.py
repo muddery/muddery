@@ -340,9 +340,13 @@ def main():
             from muddery.server.upgrader.upgrade_handler import UPGRADE_HANDLER
 
             game_name = args.upgrade[0]
+            template = None
+            if len(args.upgrade) > 1:
+                template = args.upgrade[1]
+
             gamedir = os.path.abspath(os.path.join(CURRENT_DIR, game_name))
 
-            UPGRADE_HANDLER.upgrade(gamedir)
+            UPGRADE_HANDLER.upgrade(gamedir, template)
             print(UPGRADED_GAMEDIR.format(gamedir=args.upgrade[0],
                                           version=MUDDERY_VERSION))
         except Exception, e:
