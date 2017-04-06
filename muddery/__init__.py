@@ -28,11 +28,6 @@ def _create_version():
             version = f.read().strip()
     except IOError as err:
         print(err)
-    try:
-        rev = check_output("git rev-parse --short HEAD", shell=True, cwd=root, stderr=STDOUT).strip()
-        version = "%s (rev %s)" % (version, rev)
-    except (IOError, CalledProcessError):
-        pass
     return version
 
 __version__ = _create_version()
