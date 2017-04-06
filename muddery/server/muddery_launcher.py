@@ -69,7 +69,12 @@ CREATED_NEW_GAMEDIR = \
 
     """
 
-
+UPGRADED_GAMEDIR = \
+    """
+    Your game directory '{gamedir}' has been upgraded to
+    muddery version {version}.
+    """
+    
 CMDLINE_HELP = \
     """
     Starts or operates the Muddery game server. Also allows for
@@ -226,6 +231,11 @@ def create_game_directory(gamedir, template):
     default_template = os.path.join(MUDDERY_LIB, "game_template")
     shutil.copytree(default_template, GAME_DIR)
 
+    # copy version file
+    version_src = os.path.join(MUDDERY_LIB, "VERSION.txt")
+    version_dest = os.path.join(GAME_DIR, "muddery_version.txt")
+    shutil.copy2(version_src, version_dest)
+
     if template_dir:
         copy_tree(template_dir, GAME_DIR)
 
@@ -240,13 +250,14 @@ def show_version_info(about=False):
     import os, sys
     import twisted
     import django
+    import evennia
 
     return VERSION_INFO.format(version=MUDDERY_VERSION,
                                about=ABOUT_INFO if about else "",
                                os=os.name, python=sys.version.split()[0],
                                twisted=twisted.version.short(),
                                django=django.get_version(),
-                               evennia=evennia_launcher.evennia_version(),)
+                               evennia=evennia.__version__,)
 
 
 def main():
@@ -273,6 +284,8 @@ def main():
                         help="Tests a running server by connecting N dummy players to it.")
     parser.add_argument('--settings', nargs=1, action='store', dest='altsettings', default=None, metavar="filename.py",
                         help="Start evennia with alternative settings file in gamedir/server/conf/.")
+    parser.add_argument('--upgrade', nargs='+', action='store', dest="upgrade", metavar="game_name [template]",
+                        help="Upgrade a game directory 'game_name' to the latest version.")
     parser.add_argument("option", nargs='?', default="noop",
                         help="Operational mode: 'start', 'stop' or 'restart'.")
     parser.add_argument("service", metavar="component", nargs='?', default="all",
@@ -321,6 +334,20 @@ def main():
 
         print(CREATED_NEW_GAMEDIR.format(gamedir=args.init[0],
                                          settings_path=os.path.join(args.init[0], SETTINGS_PATH)))
+        sys.exit()
+    elif args.upgrade:
+        try:
+            from muddery.server.upgrader.upgrade_handler import UPGRADE_HANDLER
+
+            game_name = args.upgrade[0]
+            gamedir = os.path.abspath(os.path.join(CURRENT_DIR, game_name))
+
+            UPGRADE_HANDLER.upgrade(gamedir)
+            print(UPGRADED_GAMEDIR.format(gamedir=args.upgrade[0],
+                                          version=MUDDERY_VERSION))
+        except Exception, e:
+            print("Upgrade failed: %s" % e)
+
         sys.exit()
 
     if args.show_version:
