@@ -17,7 +17,7 @@ class BaseUpgrader(object):
     # Upgrade to the target version. None means the latest version.
     target_version = None
     
-    def upgrade(self, game_dir):
+    def upgrade(self, game_dir, game_template):
         """
         Do upgrade.
         """

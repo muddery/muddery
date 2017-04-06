@@ -19,7 +19,7 @@ class Upgrader(BaseUpgrader):
     to_version = (0, 2)
     target_version = None
     
-    def upgrade(self, game_dir):
+    def upgrade(self, game_dir, game_template):
         """
         Do upgrade.
         """
@@ -31,7 +31,7 @@ class Upgrader(BaseUpgrader):
             temp_dir = utils.to_temp_dir(game_dir)
 
             # create new game
-            utils.create_game(game_dir)
+            utils.create_game(game_dir, game_template)
 
             # copy old files
             # settings
