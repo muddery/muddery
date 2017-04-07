@@ -6,13 +6,16 @@
 # tuple.
 #
 
+from __future__ import print_function
+
 from django.conf import settings
 from muddery.utils import utils
+from muddery.utils.game_settings import GAME_SETTINGS
 
 # Determine the site name and server version
 
 try:
-    GAME_NAME = settings.SERVERNAME.strip()
+    GAME_NAME = GAME_SETTINGS.get("game_name")
 except AttributeError:
     GAME_NAME = "Muddery"
 SERVER_VERSION = utils.get_muddery_version()

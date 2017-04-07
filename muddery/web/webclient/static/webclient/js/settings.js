@@ -32,8 +32,8 @@ var settings = {
             $("#item_command").css("display", "none");
         }
 
-        if (this.game_title) {
-            $("#game_title").text(this.game_title);
+        if (this.game_name) {
+            $("#game_title").text(this.game_name);
         }
     },
 };

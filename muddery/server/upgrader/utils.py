@@ -64,7 +64,7 @@ def to_temp_dir(game_dir):
     return temp_dir
 
 
-def create_game(game_dir, game_template):
+def create_game(game_dir, game_template, setting_dict):
     """
     Create a new game dir.
 
@@ -74,7 +74,7 @@ def create_game(game_dir, game_template):
     Returns:
         None
     """
-    muddery_launcher.create_game_directory(game_dir, game_template)
+    muddery_launcher.create_game_directory(game_dir, game_template, setting_dict)
 
     os.chdir(game_dir)
     evennia_launcher.init_game_directory(game_dir, check_db=False)
@@ -124,3 +124,21 @@ def copy_tree(source, destination):
         except Exception, e:
             print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
             raise(Exception)
+
+
+def get_settings(game_dir, setting_list):
+    """
+    Get values in setting dict from settings file.
+    """
+    setting_dict = {}
+    settings_path = os.path.join(game_dir, "server", "conf", "settings.py")
+    with open(settings_path, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            contents = line.split("=")
+            if len(contents) == 2:
+                key = contents[0].strip()
+                value = contents[1].strip()
+                if key in setting_list:
+                    setting_dict[key] = value
+    return setting_dict

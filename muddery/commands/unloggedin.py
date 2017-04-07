@@ -569,9 +569,12 @@ class CmdUnconnectedLoginStart(Command):
     locks = "cmd:all()"
 
     def func(self):
-        "Show the connect screen."
-        self.caller.msg({"settings": CLIENT_SETTINGS.all_values()})
+        "Send settings to the client."
+        client_settings = CLIENT_SETTINGS.all_values()
+        client_settings["game_name"] = GAME_SETTINGS.get("game_name")
+        self.caller.msg({"settings": client_settings})
 
+        "Show the connect screen."
         connection_screen = GAME_SETTINGS.get("connection_screen")
         if not connection_screen:
             connection_screen = "No connection screen found. Please contact an admin."

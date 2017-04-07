@@ -155,29 +155,41 @@ def create_secret_key():
     return secret_key
 
 
-def create_settings_file():
+def create_settings_file(setting_dict=None):
     """
     Uses the template settings file to build a working
     settings file.
+
+    Args:
+        setting_dict: (dict)preset settings.
     """
     settings_path = os.path.join(GAME_DIR, "server", "conf", "settings.py")
     with open(settings_path, 'r') as f:
         settings_string = f.read()
 
     # tweak the settings
-    setting_dict = {"evennia_settings_default": os.path.join(evennia_launcher.EVENNIA_LIB, "settings_default.py"),
-                    "muddery_settings_default": os.path.join(MUDDERY_LIB, "settings_default.py"),
-                    "servername":"'%s'" % GAME_DIR.rsplit(os.path.sep, 1)[1].capitalize(),
-                    "secret_key":"'%s'" % create_secret_key()}
+    default_setting_dict = {"EVENNIA_SETTINGS_DEFAULT": os.path.join(evennia_launcher.EVENNIA_LIB, "settings_default.py"),
+                            "MUDDERY_SETTINGS_DEFAULT": os.path.join(MUDDERY_LIB, "settings_default.py"),
+                            "ALLOWED_HOSTS": "['*']",
+                            "WEBSERVER_PORTS": "[(8000, 5001)]",
+                            "WEBSOCKET_CLIENT_PORT": "8001",
+                            "AMP_PORT": "5000",
+                            "LANGUAGE_CODE": "'en-us'",
+                            "SECRET_KEY":"'%s'" % create_secret_key()}
+
+    if setting_dict:
+        merged_setting_dict = dict(default_setting_dict, **setting_dict)
+    else:
+        merged_setting_dict = default_setting_dict
 
     # modify the settings
-    settings_string = settings_string.format(**setting_dict)
+    settings_string = settings_string.format(**merged_setting_dict)
 
     with open(settings_path, 'w') as f:
         f.write(settings_string)
 
 
-def create_game_directory(gamedir, template):
+def create_game_directory(gamedir, template, setting_dict=None):
     """
     Initialize a new game directory named dirname
     at the current path. This means copying the
@@ -240,7 +252,7 @@ def create_game_directory(gamedir, template):
         copy_tree(template_dir, GAME_DIR)
 
     # pre-build settings file in the new GAME_DIR
-    create_settings_file()
+    create_settings_file(setting_dict)
 
 
 def show_version_info(about=False):

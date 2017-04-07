@@ -316,7 +316,9 @@ def apply_changes(request):
 
         # send client settings
         CLIENT_SETTINGS.reset()
-        text = json.dumps({"settings": CLIENT_SETTINGS.all_values()})
+        client_settings = CLIENT_SETTINGS.all_values()
+        client_settings["game_name"] = GAME_SETTINGS.get("game_name")
+        text = json.dumps({"settings": client_settings})
         SESSIONS.announce_all(text)
 
         # restart the server

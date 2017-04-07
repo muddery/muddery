@@ -41,6 +41,9 @@ class game_settings(models.Model):
     Game's basic settings.
     NOTE: Only uses the first record!
     """
+    
+    # The name of your game.
+    game_name = models.CharField(max_length=80, blank=True)
 
     # The screen shows to players who are not loggin.
     connection_screen = models.TextField(blank=True)
@@ -115,9 +118,6 @@ class client_settings(models.Model):
     Html webclient's basic settings.
     NOTE: The server only uses the first record!
     """
-
-    # Game's title on the webclient.
-    game_title = models.CharField(max_length=80)
 
     # Room's pixel size on the map.
     map_room_size = models.FloatField(blank=True,
