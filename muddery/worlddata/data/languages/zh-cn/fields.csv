@@ -1,4 +1,5 @@
 category,origin,local
+field_game_settings,"game_name","游戏名称"
 field_game_settings,"connection_screen","欢迎文字"
 field_game_settings,"solo_mode","单人模式"
 field_game_settings,"global_cd","公共CD"
@@ -12,7 +13,6 @@ field_game_settings,"default_home_key","默认位置"
 field_game_settings,"start_location_key","初始位置"
 field_game_settings,"default_player_home_key","玩家默认位置"
 field_game_settings,"default_player_character_key","默认玩家角色"
-field_client_settings,"game_title","游戏标题"
 field_client_settings,"map_room_size","地图房间尺寸"
 field_client_settings,"map_scale","地图比例"
 field_client_settings,"show_command_box","是否可以输入命令"

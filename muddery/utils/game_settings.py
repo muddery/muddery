@@ -66,7 +66,8 @@ class GameSettings(object):
 
 
 GAME_SETTINGS = GameSettings(DATA_SETS.game_settings.objects,
-                             {"connection_screen": "",
+                             {"game_name": "Muddery",
+                              "connection_screen": "",
                               "solo_mode": False,
                               "global_cd": 1.0,
                               "auto_cast_skill_cd": 1.5,
@@ -83,8 +84,7 @@ GAME_SETTINGS = GameSettings(DATA_SETS.game_settings.objects,
 
 
 CLIENT_SETTINGS = GameSettings(DATA_SETS.client_settings.objects,
-                               {"game_title": "",
-                                "map_room_size": 40,
+                               {"map_room_size": 40,
                                 "map_scale": 75,
                                 "show_command_box": False,
                                 "can_close_dialogue": False,
