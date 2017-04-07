@@ -126,24 +126,18 @@ class DataHandler(object):
         """
         try:
             # read title
-            titles = reader.readln()
+            titles = reader.iterator.next()
 
             field_types = self.get_field_types(self.model, titles)
 
             # import values
-            # read next line
-            values = reader.readln()
-
-            while values:
+            for values in reader.iterator:
                 try:
                     record = self.parse_record(titles, field_types, values)
                     data = self.model(**record)
                     data.save()
                 except Exception, e:
                     print("Can not load %s: %s" % (values, e))
-
-                # read next line
-                values = reader.readln()
 
         except StopIteration:
             # reach the end of file, pass this exception
@@ -252,7 +246,7 @@ class SystemDataHandler(DataHandler):
 
         try:
             # read title
-            titles = reader.readln()
+            titles = reader.iterator.next()
 
             field_types = self.get_field_types(self.model, titles)
 
@@ -267,10 +261,7 @@ class SystemDataHandler(DataHandler):
                 return
 
             # import values
-            # read next line
-            values = reader.readln()
-
-            while values:
+            for values in reader.iterator:
                 try:
                     record = self.parse_record(titles, field_types, values)
                     key = values[key_index]
@@ -291,9 +282,6 @@ class SystemDataHandler(DataHandler):
                     data.save()
                 except Exception, e:
                     print("Can not load %s: %s" % (values, e))
-
-                # read next line
-                values = reader.readln()
 
         except StopIteration:
             # reach the end of file, pass this exception
@@ -334,7 +322,7 @@ class LocalizedStringsHandler(DataHandler):
 
         try:
             # read title
-            titles = reader.readln()
+            titles = reader.iterator.next()
 
             field_types = self.get_field_types(self.model, titles)
 
@@ -352,10 +340,7 @@ class LocalizedStringsHandler(DataHandler):
                     return
 
             # import values
-            # read next line
-            values = reader.readln()
-
-            while values:
+            for values in reader.iterator:
                 try:
                     record = self.parse_record(titles, field_types, values)
                     category = values[category_index]
@@ -377,9 +362,6 @@ class LocalizedStringsHandler(DataHandler):
                     data.save()
                 except Exception, e:
                     print("Can not load %s: %s" % (values, e))
-
-                # read next line
-                values = reader.readln()
 
         except StopIteration:
             # reach the end of file, pass this exception

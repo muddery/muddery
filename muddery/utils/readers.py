@@ -20,6 +20,19 @@ class DataReader(object):
     types = None
     binary = True
 
+    class Iterator(object):
+        """
+        Reader data's iterator.
+        """
+        def __init__(self, reader):
+            self.reader = reader
+
+        def __iter__(self):
+            return self
+
+        def next(self):
+            return self.reader.readln()
+
     def __init__(self, filename = None):
         """
         Args:
@@ -29,6 +42,7 @@ class DataReader(object):
             None
         """
         self.filename = filename
+        self.iterator = self.Iterator(self)
 
     def readln(self):
         """

@@ -138,7 +138,6 @@ def get_settings(game_dir, setting_list):
             contents = line.split("=")
             if len(contents) == 2:
                 key = contents[0].strip()
-                value = contents[1].strip()
                 if key in setting_list:
-                    setting_dict[key] = value
+                    setting_dict[key] = contents[1].strip()
     return setting_dict
