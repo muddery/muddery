@@ -28,11 +28,11 @@ class MudderyObjectCreator(MudderyObject):
     def loot_handler(self):
         return LootHandler(self, DATA_SETS.creator_loot_list.model)
 
-    def load_data(self):
+    def after_data_loaded(self):
         """
         Set data_info to the object."
         """
-        super(MudderyObjectCreator, self).load_data()
+        super(MudderyObjectCreator, self).after_data_loaded()
 
         # Load creator info.
         self.loot_verb = getattr(self.dfield, "loot_verb", None)

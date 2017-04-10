@@ -67,27 +67,33 @@ class MudderyPlayerCharacter(MudderyCharacter):
         super(MudderyPlayerCharacter, self).at_object_creation()
 
         # Set default data.
-        self.db.nickname = ""
-        self.db.career = ""
-        self.db.unlocked_exits = set()
-        self.db.revealed_map = set()
+        if not self.attributes.has("nickname"):
+            self.db.nickname = ""
+        if not self.attributes.has("career"):
+            self.db.career = ""
+        if not self.attributes.has("unlocked_exits"):
+            self.db.unlocked_exits = set()
+        if not self.attributes.has("revealed_map"):
+            self.db.revealed_map = set()
 
         # set custom attributes
-        self.db.attributes = {}
+        if not self.attributes.has("attributes"):
+            self.db.attributes = {}
 
         # Choose a random career.
-        try:
-            careers = DATA_SETS.character_careers.objects.all()
-            if careers:
-                career = random.choice(careers)
-                self.db.career = career.key
-        except Exception, e:
-            pass
+        if not self.attributes.has("career"):
+            try:
+                careers = DATA_SETS.character_careers.objects.all()
+                if careers:
+                    career = random.choice(careers)
+                    self.db.career = career.key
+            except Exception, e:
+                pass
         
-    def load_data(self):
+    def after_data_loaded(self):
         """
         """
-        super(MudderyPlayerCharacter, self).load_data()
+        super(MudderyPlayerCharacter, self).after_data_loaded()
 
         self.reborn_cd = GAME_SETTINGS.get("player_reborn_cd")
         self.solo_mode = GAME_SETTINGS.get("solo_mode")

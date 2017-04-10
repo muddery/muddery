@@ -35,9 +35,12 @@ class MudderyQuest(MudderyObject):
         """
         Set accomplished objectives to empty.
         """
-        self.db.owner = None
-        self.db.accomplished = {}
+        super(MudderyQuest, self).at_object_creation()
 
+        if not self.attributes.has("owner"):
+            self.db.owner = None
+        if not self.attributes.has("accomplished"):
+            self.db.accomplished = {}
 
     def set_owner(self, owner):
         """
@@ -45,12 +48,11 @@ class MudderyQuest(MudderyObject):
         """
         self.db.owner = owner
 
-
-    def load_data(self):
+    def after_data_loaded(self):
         """
         Load quest's data from db.
         """
-        super(MudderyQuest, self).load_data()
+        super(MudderyQuest, self).after_data_loaded()
 
         self.objectives = {}
         self.not_accomplished = {}

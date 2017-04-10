@@ -22,17 +22,17 @@ class MudderyCommonObject(MudderyObject):
         """
         Set default values.
         """
-        # set total number
-        self.db.number = 0
+        super(MudderyCommonObject, self).at_object_creation()
 
-    def load_data(self):
-        """
-        Load object data.
+        # set default number
+        if not self.attributes.has("number"):
+            self.db.number = 0
 
-        Returns:
-            None
+    def after_data_loaded(self):
         """
-        super(MudderyCommonObject, self).load_data()
+        Initial this object.
+        """
+        super(MudderyCommonObject, self).after_data_loaded()
 
         # set object stack info
         self.max_stack = getattr(self.dfield, "max_stack", 1)
@@ -131,11 +131,11 @@ class MudderyEquipment(MudderyCommonObject):
     This is a equipment. Players can equip it to change their properties, such as attack, defence,
     etc.
     """
-    def load_data(self):
+    def after_data_loaded(self):
         """
         Load equipments data.
         """
-        super(MudderyEquipment, self).load_data()
+        super(MudderyEquipment, self).after_data_loaded()
 
         self.type = getattr(self.dfield, "type", "")
         self.position = getattr(self.dfield, "position", "")

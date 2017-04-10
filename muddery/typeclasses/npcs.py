@@ -28,13 +28,14 @@ class MudderyNPC(MudderyCharacter):
         super(MudderyNPC, self).at_object_creation()
         
         # NPC's shop
-        self.db.shops = {}
+        if not self.attributes.has("shops"):
+            self.db.shops = {}
 
-    def load_data(self):
+    def after_data_loaded(self):
         """
         Init the character.
         """
-        super(MudderyNPC, self).load_data()
+        super(MudderyNPC, self).after_data_loaded()
 
         # set home
         self.home = self.location

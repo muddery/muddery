@@ -18,14 +18,14 @@ class MudderyShop(MudderyObject):
     """
     A shop.
     """
-    def load_data(self):
+    def after_data_loaded(self):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderyShop, self).load_data()
+        super(MudderyShop, self).after_data_loaded()
         
         # load shop goods
         self.load_goods()

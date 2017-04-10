@@ -71,16 +71,16 @@ class Upgrader(BaseUpgrader):
                 kwargs = {"game_name": ast.literal_eval(server_name["SERVERNAME"])}
                 DATA_SETS.game_settings.objects.all().update(**kwargs)
 
-            # update typeclasses settings
+            # upgrade system data
             from django.conf import settings
-
-            DATA_SETS.typeclasses.clear_model_data(system_data=False)
             custom_data_path = os.path.join(game_dir, settings.WORLD_DATA_FOLDER)
-            DATA_SETS.typeclasses.import_from_path(custom_data_path, system_data=False)
-
-            DATA_SETS.typeclasses.clear_model_data(system_data=True)
             system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
-            DATA_SETS.typeclasses.import_from_path(system_data_path, system_data=True)
+
+            for data_handler in DATA_SETS.system_data:
+                data_handler.clear_model_data(system_data=False)
+                data_handler.import_from_path(custom_data_path, system_data=False)
+                data_handler.clear_model_data(system_data=True)
+                data_handler.import_from_path(system_data_path, system_data=True)
 
         finally:
             if temp_dir:

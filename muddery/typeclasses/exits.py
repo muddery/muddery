@@ -42,25 +42,14 @@ class MudderyExit(MudderyObject, DefaultExit):
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
     """
-
-    def at_init(self):
-        """
-        Set initial data.
-
-        Returns:
-            None
-        """
-        self.verb = LS("GOTO")
-        super(MudderyExit, self).at_init()
-
-    def load_data(self):
+    def after_data_loaded(self):
         """
         Load exit data.
 
         Returns:
             None
         """
-        super(MudderyExit, self).load_data()
+        super(MudderyExit, self).after_data_loaded()
 
         # set exit's destination
         self.set_obj_destination(getattr(self.dfield, "destination", None))
@@ -159,6 +148,12 @@ class MudderyReverseExit(MudderyExit):
         # Reverse exit's typeclass can only be set to settings.REVERSE_EXIT_TYPECLASS_PATH.
         self.set_typeclass(settings.REVERSE_EXIT_TYPECLASS_PATH)
 
+        self.after_data_loaded()
+
+    def after_data_loaded(self):
+        """
+        Called after self.data_loaded().
+        """
         self.set_name(getattr(self.dfield, "reverse_name", ""))
 
         # reverse location and destination
@@ -189,11 +184,11 @@ class MudderyLockedExit(MudderyExit):
     Characters must unlock these exits to pass it.
     The view and commands of locked exits are different from unlocked exits.
     """
-    def load_data(self):
+    def after_data_loaded(self):
         """
         Set data_info to the object."
         """
-        super(MudderyLockedExit, self).load_data()
+        super(MudderyLockedExit, self).after_data_loaded()
 
         self.unlock_condition = getattr(self.dfield, "unlock_condition", "")
         self.unlock_verb = getattr(self.dfield, "unlock_verb", "")
