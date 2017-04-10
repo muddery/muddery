@@ -33,22 +33,16 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         """
         super(MudderyRoom, self).at_object_creation()
 
-        self.position = None
-        self.background = None
+        if not self.attributes.has("position"):
+            self.position = None
+        if not self.attributes.has("background"):
+            self.background = None
 
-    def at_init(self):
-        """
-        Load world data.
-        """
-        self.position = None
-        self.background = None
-        super(MudderyRoom, self).at_init()
-
-    def load_data(self):
+    def after_data_loaded(self):
         """
         Set data_info to the object.
         """
-        super(MudderyRoom, self).load_data()
+        super(MudderyRoom, self).after_data_loaded()
 
         self.position = None
         try:

@@ -64,22 +64,32 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         super(MudderyCharacter, self).at_object_creation()
 
         # set default values
-        self.db.level = 1
-        self.db.exp = 0
-        self.db.hp = 1
-        self.db.mp = 1
-        self.db.team = 0
+        if not self.attributes.has("level"):
+            self.db.level = 1
+        if not self.attributes.has("exp"):
+            self.db.exp = 0
+        if not self.attributes.has("hp"):
+            self.db.hp = 1
+        if not self.attributes.has("mp"):
+            self.db.mp = 1
+        if not self.attributes.has("team"):
+            self.db.team = 0
 
         # init equipments
-        self.db.equipments = {}
-        self.db.position_names = {}
+        if not self.attributes.has("equipments"):
+            self.db.equipments = {}
+        if not self.attributes.has("position_names"):
+            self.db.position_names = {}
         self.reset_equip_positions()
-        
-        self.db.skills = {}
+
+        if not self.attributes.has("skills"):
+            self.db.skills = {}
 
         # set quests
-        self.db.completed_quests = set()
-        self.db.current_quests = {}
+        if not self.attributes.has("completed_quests"):
+            self.db.completed_quests = set()
+        if not self.attributes.has("current_quests"):
+            self.db.current_quests = {}
 
     def at_init(self):
         """
@@ -87,11 +97,35 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         super(MudderyCharacter, self).at_init()
 
+        # clear target
+        self.target = None
+
+    def after_data_loaded(self):
+        """
+        Init the character.
+        """
+        super(MudderyCharacter, self).after_data_loaded()
+
         # update equipment positions
         self.reset_equip_positions()
 
-        # clear target
-        self.target = None
+        # load default skills
+        self.load_default_skills()
+
+        # load default objects
+        self.load_default_objects()
+
+        # refresh data
+        self.refresh_data()
+        
+    def after_data_key_changed(self):
+        """
+        Called at data_key changed.
+        """
+        super(MudderyCharacter, self).after_data_key_changed()
+
+        # reset hp
+        self.db.hp = self.max_hp
 
     def reset_equip_positions(self):
         """
@@ -125,21 +159,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         for content in self.contents:
             if content.dbref in equipped:
                 content.equipped = True
-
-    def load_data(self):
-        """
-        Set data_info to the object.
-        """
-        super(MudderyCharacter, self).load_data()
-        
-        # load default skills
-        self.load_default_skills()
-
-        # load default objects
-        self.load_default_objects()
-
-        # refresh data
-        self.refresh_data()
 
     def set_level(self, level):
         """
@@ -267,15 +286,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         # cast passive skills
         self.skill_handler.cast_passive_skills()
-
-    def set_initial_data(self):
-        """
-        Initialize this object after data loaded.
-        """
-        super(MudderyCharacter, self).set_initial_data()
-
-        # set initial data
-        self.db.hp = self.max_hp
 
     def load_default_objects(self):
         """

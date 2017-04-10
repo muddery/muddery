@@ -17,11 +17,11 @@ class MudderyMonster(MudderyCharacter):
     """
     Default mob. Monsters are hostile to players, they can be attacked.
     """
-    def load_data(self):
+    def after_data_loaded(self):
         """
         Init the character.
         """
-        super(MudderyMonster, self).load_data()
+        super(MudderyMonster, self).after_data_loaded()
 
         # set home
         self.home = self.location

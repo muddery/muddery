@@ -28,9 +28,12 @@ class MudderyShopGoods(DefaultObject):
         super(MudderyShopGoods, self).at_object_creation()
 
         # Set default values.
-        self.db.shop_key = None
-        self.db.goods_key = None
-        self.db.goods = None
+        if not self.attributes.has("shop_key"):
+            self.db.shop_key = None
+        if not self.attributes.has("goods_key"):
+            self.db.goods_key = None
+        if not self.attributes.has("goods"):
+            self.db.goods = None
 
         self.available = False
 
@@ -128,8 +131,6 @@ class MudderyShopGoods(DefaultObject):
 
         self.db.shop_key = shop_key
         self.db.goods_key = goods_key
-
-        self.load_data()
 
     def get_goods_key(self):
         """

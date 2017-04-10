@@ -6,6 +6,8 @@ MudderyObject is an object which can load it's data automatically.
 
 """
 
+from __future__ import print_function
+
 import json
 import ast
 from django.conf import settings
@@ -73,12 +75,13 @@ class MudderyObject(DefaultObject):
             
         """
         super(MudderyObject, self).at_object_creation()
-        
-        # Call set_initial_data() when this object is first created.
-        self.db.FIRST_CREATE = True
-        self.typeclass_key = None
-        self.condition = None
-        self.icon = None
+
+        if not self.attributes.has("typeclass_key"):
+            self.typeclass_key = None
+        if not self.attributes.has("condition"):
+            self.condition = None
+        if not self.attributes.has("icon"):
+            self.icon = None
 
     def at_init(self):
         """
@@ -94,13 +97,7 @@ class MudderyObject(DefaultObject):
             self.load_data()
         except Exception, e:
             logger.log_tracemsg("%s can not load data:%s" % (self.dbref, e))
-
-    def set_initial_data(self):
-        """
-        Initialize this object after data loaded.
-        """
-        pass
-
+    
     def at_post_unpuppet(self, player, session=None):
         """
         We stove away the character when the player goes ooc/logs off,
@@ -156,16 +153,18 @@ class MudderyObject(DefaultObject):
         Args:
             key: (string) Key of the data info.
         """
+        if key == self.get_data_key():
+            "Key has not changed."
+            return
+        
         # Save data info's key and model
         utils.set_obj_data_key(self, key)
         
         # Load data.
         self.load_data()
 
-        # initialize with data
-        if self.db.FIRST_CREATE:
-            self.set_initial_data()
-            del self.db.FIRST_CREATE
+        # call data_key hook
+        self.after_data_key_changed()
 
     def load_data_fields(self, key=None):
         """
@@ -211,6 +210,18 @@ class MudderyObject(DefaultObject):
 
         self.set_typeclass(getattr(self.dfield, "typeclass", ""))
 
+        self.after_data_loaded()
+
+    def after_data_key_changed(self):
+        """
+        Called at data_key changed.
+        """
+        pass
+
+    def after_data_loaded(self):
+        """
+        Called after self.data_loaded().
+        """
         self.set_name(getattr(self.dfield, "name", ""))
 
         if not self.location:
@@ -252,21 +263,23 @@ class MudderyObject(DefaultObject):
                 typeclass_path = typeclass_key
             else:
                 typeclass_path = settings.BASE_OBJECT_TYPECLASS
-    
+        
         if self.is_typeclass(typeclass_path, exact=True):
             # No change.
             return
-    
+
         if not hasattr(self, 'swap_typeclass'):
             logger.log_errmsg("%s cannot have a type at all!" % self.get_data_key())
             return
 
         # Set new typeclass.
+        # It will call target typeclass's at_object_creation hook.
+        # You should prevent at_object_creation rewrite current attributes.
         self.swap_typeclass(typeclass_path, clean_attributes=False)
         if typeclass_path != self.typeclass_path:
             logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_data_key(), typeclass_path))
             return
-
+        
         self.typeclass_key = typeclass_key
 
     def set_name(self, name):
@@ -448,7 +461,6 @@ class MudderyObject(DefaultObject):
         """
         pass
 
-
     def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
@@ -466,7 +478,6 @@ class MudderyObject(DefaultObject):
 
         return info
 
-
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -474,7 +485,6 @@ class MudderyObject(DefaultObject):
         """
         commands = []
         return commands
-
 
     def msg(self, text=None, from_obj=None, session=None, **kwargs):
         """

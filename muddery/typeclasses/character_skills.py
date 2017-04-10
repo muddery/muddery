@@ -31,9 +31,12 @@ class MudderySkill(MudderyObject):
         super(MudderySkill, self).at_object_creation()
         
         # set status
-        self.db.owner = None
-        self.db.cd_finish_time = 0
-        self.db.is_default = False
+        if not self.attributes.has("owner"):
+            self.db.owner = None
+        if not self.attributes.has("cd_finish_time"):
+            self.db.cd_finish_time = 0
+        if not self.attributes.has("is_default"):
+            self.db.is_default = False
 
     def set_default(self, is_default):
         """
@@ -55,14 +58,14 @@ class MudderySkill(MudderyObject):
         """
         return self.db.is_default
 
-    def load_data(self):
+    def after_data_loaded(self):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderySkill, self).load_data()
+        super(MudderySkill, self).after_data_loaded()
 
         # set data
         self.function = getattr(self.dfield, "function", "")
