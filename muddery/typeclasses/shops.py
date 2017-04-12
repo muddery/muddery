@@ -5,6 +5,8 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
+from __future__ import print_function
+
 from evennia.utils import logger, create
 from django.conf import settings
 from django.apps import apps
@@ -26,7 +28,7 @@ class MudderyShop(MudderyObject):
             None
         """
         super(MudderyShop, self).after_data_loaded()
-        
+
         # load shop goods
         self.load_goods()
         
@@ -39,39 +41,28 @@ class MudderyShop(MudderyObject):
         # shops records
         goods_records = DATA_SETS.shop_goods.objects.filter(shop=self.get_data_key())
 
-        goods_keys = set([record.goods for record in goods_records])
+        goods_keys = set([record.key for record in goods_records])
 
         # search current goods
         current_goods = set()
         for item in self.contents:
-            key = item.get_goods_key()
+            key = item.get_data_key()
             if key in goods_keys:
                 current_goods.add(key)
             else:
-                # remove this goods
+                # remove goods that is not in goods_keys
                 item.delete()
 
         # add new goods
-
-        # get typeclass model
         for goods_record in goods_records:
-            goods_key = goods_record.goods
+            goods_key = goods_record.key
             if goods_key not in current_goods:
-                # Create goods object.
-
-                typeclass = None
-                try:
-                    typeclass = DATA_SETS.typeclasses.objects.get(key=goods_record.typeclass)
-                except Exception, e:
-                    logger.log_errmsg("Can't create goods: %s" % goods_key)
-                    continue
-
-                goods_obj = create.create_object(typeclass.path, goods_record.goods)
+                # Create shop_goods object.
+                goods_obj = build_object(goods_key)
                 if not goods_obj:
                     logger.log_errmsg("Can't create goods: %s" % goods_key)
                     continue
 
-                goods_obj.set_goods_key(self.get_data_key(), goods_key)
                 goods_obj.move_to(self, quiet=True)
 
     def show_shop(self, caller):

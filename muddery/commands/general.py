@@ -1155,7 +1155,7 @@ class CmdBuy(Command):
             goods.sell_to(caller)
         except Exception, e:
             caller.msg({"alert":LS("Can not buy this goods.")})
-            logger.log_err("Can not buy %s: %s" % (goods.get_goods_key(), e))
+            logger.log_err("Can not buy %s: %s" % (goods.get_data_key(), e))
             return
 
 

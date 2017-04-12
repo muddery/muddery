@@ -74,7 +74,8 @@ def build_object(obj_key, caller=None):
 
     # Create object.
     try:
-        obj = create.create_object(typeclass.path, record.name)
+        name = getattr(record, "name", "")
+        obj = create.create_object(typeclass.path, name)
     except Exception, e:
         ostring = "Can not create obj %s: %s" % (obj_key, e)
         print(ostring)

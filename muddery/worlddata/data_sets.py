@@ -59,6 +59,7 @@ class DataSets(object):
         self.foods = DataHandler("foods")
         self.skill_books = DataHandler("skill_books")
         self.shops = DataHandler("shops")
+        self.shop_goods = DataHandler("shop_goods")
 
         self.object_data = [self.world_rooms,
                             self.world_exits,
@@ -71,7 +72,8 @@ class DataSets(object):
                             self.equipments,
                             self.foods,
                             self.skill_books,
-                            self.shops]
+                            self.shops,
+                            self.shop_goods]
 
         # Object additional data
         self.exit_locks = DataHandler("exit_locks")
@@ -98,7 +100,6 @@ class DataSets(object):
         self.dialogue_quest_dependencies = DataHandler("dialogue_quest_dependencies")
         self.default_objects = DataHandler("default_objects")
         self.default_skills = DataHandler("default_skills")
-        self.shop_goods = DataHandler("shop_goods")
         self.npc_shops = DataHandler("npc_shops")
         self.image_resources = DataHandler("image_resources")
         self.icon_resources = DataHandler("icon_resources")

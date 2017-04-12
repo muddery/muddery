@@ -118,38 +118,6 @@ class MudderyReverseExit(MudderyExit):
     """
     This is the reverse side of the two way exit.
     """
-    def load_data_fields(self, key=None):
-        """
-        Get object's data record from database.
-
-        Args:
-            key: (String) object's data key.
-
-        Returns:
-            None
-        """
-        # Get model and key names.
-        if not key:
-            key = self.get_data_key()
-            if not key:
-                return
-
-        # Load data without key's prefix.
-        key = key[len(settings.REVERSE_EXIT_PREFIX):]
-
-        super(MudderyReverseExit, self).load_data_fields(key=key)
-
-    def load_data(self):
-        """
-        Set data to the object."
-        """
-        self.load_data_fields()
-
-        # Reverse exit's typeclass can only be set to settings.REVERSE_EXIT_TYPECLASS_PATH.
-        self.set_typeclass(settings.REVERSE_EXIT_TYPECLASS_PATH)
-
-        self.after_data_loaded()
-
     def after_data_loaded(self):
         """
         Called after self.data_loaded().

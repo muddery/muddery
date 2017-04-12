@@ -69,8 +69,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         # Set default data.
         if not self.attributes.has("nickname"):
             self.db.nickname = ""
-        if not self.attributes.has("career"):
-            self.db.career = ""
         if not self.attributes.has("unlocked_exits"):
             self.db.unlocked_exits = set()
         if not self.attributes.has("revealed_map"):
@@ -82,6 +80,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         # Choose a random career.
         if not self.attributes.has("career"):
+            self.db.career = ""
             try:
                 careers = DATA_SETS.character_careers.objects.all()
                 if careers:
