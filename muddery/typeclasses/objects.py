@@ -72,7 +72,9 @@ class MudderyObject(DefaultObject):
         """
         Called once, when this object is first created. This is the
         normal hook to overload for most object types.
-            
+        
+        It will be called when swap its typeclass, so it must keep
+        old values.
         """
         super(MudderyObject, self).at_object_creation()
 
@@ -89,14 +91,15 @@ class MudderyObject(DefaultObject):
         """
         super(MudderyObject, self).at_init()
 
-        # need save before modify m2m fields
-        self.save()
-
         try:
             # Load db data.
             self.load_data()
         except Exception, e:
             logger.log_tracemsg("%s can not load data:%s" % (self.dbref, e))
+            
+        # This object's class may be changed after load_data(), so do not add
+        # codes here. You can add codes in after_data_loaded() which is called
+        # after load_data().
     
     def at_post_unpuppet(self, player, session=None):
         """
@@ -166,7 +169,7 @@ class MudderyObject(DefaultObject):
         # call data_key hook
         self.after_data_key_changed()
 
-    def load_data_fields(self, key=None):
+    def load_data_fields(self, key):
         """
         Get object's data record from database.
 
@@ -181,6 +184,10 @@ class MudderyObject(DefaultObject):
             key = self.get_data_key()
             if not key:
                 return
+
+        if key[:len(settings.REVERSE_EXIT_PREFIX)] == settings.REVERSE_EXIT_PREFIX:
+            # Reverse exit loads data without key's prefix.
+            key = key[len(settings.REVERSE_EXIT_PREFIX):]
 
         data_models = OBJECT_KEY_HANDLER.get_models(key)
 
@@ -206,11 +213,23 @@ class MudderyObject(DefaultObject):
         """
         Set data to the object."
         """
-        self.load_data_fields()
+        key = self.get_data_key()
+        if not key:
+            return
 
-        self.set_typeclass(getattr(self.dfield, "typeclass", ""))
+        self.load_data_fields(key)
+
+        if key[:len(settings.REVERSE_EXIT_PREFIX)] == settings.REVERSE_EXIT_PREFIX:
+            # Reverse exit's typeclass can only be set to settings.REVERSE_EXIT_TYPECLASS_PATH.
+            typeclass = settings.REVERSE_EXIT_TYPECLASS_PATH
+        else:
+            typeclass = getattr(self.dfield, "typeclass", "")
+        self.set_typeclass(typeclass)
 
         self.after_data_loaded()
+        
+        # This object's class may be changed after load_data(), so do not add
+        # codes here. You can add codes in after_data_loaded().
 
     def after_data_key_changed(self):
         """
@@ -221,7 +240,7 @@ class MudderyObject(DefaultObject):
     def after_data_loaded(self):
         """
         Called after self.data_loaded().
-        """
+        """        
         self.set_name(getattr(self.dfield, "name", ""))
 
         if not self.location:

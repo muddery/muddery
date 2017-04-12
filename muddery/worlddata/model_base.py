@@ -916,14 +916,17 @@ class shops(models.Model):
 class shop_goods(models.Model):
     "All goods that sold in shops."
     
+    # goods's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # the typeclass of this goods
+    typeclass = models.CharField(max_length=KEY_LENGTH)
+
     # shop's key
     shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
     
     # the key of objects to sell
     goods = models.CharField(max_length=KEY_LENGTH)
-
-    # the typeclass of this goods
-    typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # number of shop goods
     number = models.PositiveIntegerField(blank=True, default=1)
@@ -942,8 +945,7 @@ class shop_goods(models.Model):
         abstract = True
         verbose_name = "Shop Object"
         verbose_name_plural = "Shop Objects"
-        unique_together = ("shop", "goods")
-        
+
 
 # ------------------------------------------------------------
 #

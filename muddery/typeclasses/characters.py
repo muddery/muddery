@@ -200,7 +200,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             # get data from db
             model_data = DATA_SETS.character_models.objects.get(key=model_name, level=self.db.level)
 
-            reserved_fields = {"id", "key", "level"}
+            reserved_fields = {"id", "key", "name", "level"}
             for field in model_data._meta.fields:
                 if field.name in reserved_fields:
                     continue
