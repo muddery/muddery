@@ -1,3 +1,6 @@
+
+from __future__ import print_function
+
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
@@ -8,15 +11,55 @@ TYPECLASS_LENGTH = 80
 POSITION_LENGTH = 80
 
 
+def generate_key(model):
+    index = 0
+    try:
+        query = model.__class__.objects.last()
+        index = int(query.id)
+        index += 1
+    except Exception, e:
+        pass
+
+    return model.__class__.__name__ + "_" + str(index)
+
+
+# ------------------------------------------------------------
+#
+# Generate a auto key if key is empty.
+#
+# ------------------------------------------------------------
+class AutoKeyModel(models.Model):
+    """
+    Generate a auto key if key is empty.
+    """
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Auto Key Data"
+        verbose_name_plural = "Auto Key Data"
+
+    def clean(self):
+        if not self.key:
+            # generate a key
+            index = 0
+            try:
+                query = self.__class__.objects.last()
+                index = int(query.id)
+                index += 1
+            except Exception, e:
+                pass
+            self.key = self.__class__.__name__ + "_" + str(index)
+        return
+
 # ------------------------------------------------------------
 #
 # System data flag.
 #
 # ------------------------------------------------------------
-class system_data(models.Model):
+class SystemData(models.Model):
     """
-    All system data should have this flag. This flag is used to 
-    differentiate between system data and custom data. 
+    All system data should have this flag. This flag is used to
+    differentiate between system data and custom data.
     """
     # data's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
@@ -29,7 +72,7 @@ class system_data(models.Model):
         abstract = True
         verbose_name = "System Data"
         verbose_name_plural = "System Data"
-        
+
 
 # ------------------------------------------------------------
 #
@@ -41,7 +84,7 @@ class game_settings(models.Model):
     Game's basic settings.
     NOTE: Only uses the first record!
     """
-    
+
     # The name of your game.
     game_name = models.CharField(max_length=80, blank=True)
 
@@ -147,7 +190,7 @@ class client_settings(models.Model):
 # store all typeclasses
 #
 # ------------------------------------------------------------
-class class_categories(system_data):
+class class_categories(SystemData):
     """
     Typeclass's category defines base types.
 
@@ -175,7 +218,7 @@ class class_categories(system_data):
 # store all typeclasses
 #
 # ------------------------------------------------------------
-class typeclasses(system_data):
+class typeclasses(SystemData):
     """
     Defines all available typeclasses.
 
@@ -194,7 +237,7 @@ class typeclasses(system_data):
 
     # typeclass's description (optional)
     desc = models.TextField(blank=True)
-    
+
     # Can loot from objects of this type.
     can_loot = models.BooleanField(blank=True, default=False)
 
@@ -213,11 +256,11 @@ class typeclasses(system_data):
 # store all rooms
 #
 # ------------------------------------------------------------
-class world_rooms(models.Model):
+class world_rooms(AutoKeyModel):
     "Defines all unique rooms."
 
     # room's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # The key of a room typeclass.
     # room's typeclass
@@ -231,7 +274,7 @@ class world_rooms(models.Model):
 
     # room's position which is used in maps
     position = models.CharField(max_length=POSITION_LENGTH, blank=True)
-    
+
     # room's background image resource
     background = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -250,11 +293,11 @@ class world_rooms(models.Model):
 # store all exits
 #
 # ------------------------------------------------------------
-class world_exits(models.Model):
+class world_exits(AutoKeyModel):
     "Defines all unique exits."
 
     # exit's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # The key of an exit typeclass.
     # exit's typeclass
@@ -349,11 +392,11 @@ class two_way_exits(models.Model):
 # store all objects
 #
 # ------------------------------------------------------------
-class world_objects(models.Model):
+class world_objects(AutoKeyModel):
     "Store all unique objects."
 
     # object's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # The key of an object typeclass.
     # object's typeclass
@@ -371,7 +414,7 @@ class world_objects(models.Model):
 
     # the condition for showing the object
     condition = models.TextField(blank=True)
-    
+
     # object's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -452,14 +495,14 @@ class loot_list(models.Model):
 # ------------------------------------------------------------
 class creator_loot_list(loot_list):
     "Store character's loot list."
-    
+
     class Meta:
         "Define Django meta options"
         abstract = True
         verbose_name = "Object Creator's Loot List"
         verbose_name_plural = "Object Creator's Loot Lists"
         unique_together = ("provider", "object")
-        
+
 
 # ------------------------------------------------------------
 #
@@ -484,7 +527,7 @@ class character_loot_list(loot_list):
 # ------------------------------------------------------------
 class quest_reward_list(loot_list):
     "Quest reward's list."
-    
+
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -498,11 +541,11 @@ class quest_reward_list(loot_list):
 # store all common objects
 #
 # ------------------------------------------------------------
-class common_objects(models.Model):
+class common_objects(AutoKeyModel):
     "Store all common objects."
 
     # object's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # The key of an object typeclass.
     # object's typeclass
@@ -519,7 +562,7 @@ class common_objects(models.Model):
 
     # if can have only one pile of this object
     unique = models.BooleanField(blank=True, default=False)
-    
+
     # if this object can be removed from the inventory when its number is decreased to zero.
     can_remove = models.BooleanField(blank=True, default=True)
 
@@ -763,11 +806,11 @@ class character_models(models.Model):
 # store all NPCs
 #
 # ------------------------------------------------------------
-class world_npcs(models.Model):
+class world_npcs(AutoKeyModel):
     "Store all NPCs."
 
     # NPC's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # The key of a character typeclass.
     # NPC's typeclass
@@ -791,7 +834,7 @@ class world_npcs(models.Model):
 
     # the condition for showing the NPC
     condition = models.TextField(blank=True)
-    
+
     # NPC's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -810,11 +853,11 @@ class world_npcs(models.Model):
 # store common characters
 #
 # ------------------------------------------------------------
-class common_characters(models.Model):
+class common_characters(AutoKeyModel):
     "Store common characters."
 
     # Character's key.
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # The key of a character typeclass.
     # Character's typeclass.
@@ -831,7 +874,7 @@ class common_characters(models.Model):
 
     # Character's level.
     level = models.PositiveIntegerField(blank=True, default=1)
-    
+
     # Character's icon resource.
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -859,7 +902,7 @@ class default_objects(models.Model):
     # The key of an object.
     # Object's key.
     object = models.CharField(max_length=KEY_LENGTH)
-    
+
     # Object's number
     number = models.PositiveIntegerField(blank=True, default=0)
 
@@ -876,11 +919,11 @@ class default_objects(models.Model):
 # shops
 #
 # ------------------------------------------------------------
-class shops(models.Model):
+class shops(AutoKeyModel):
     "Store all shops."
-    
+
     # shop's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # The key of a shop typeclass.
     # Shop's typeclass.
@@ -888,16 +931,16 @@ class shops(models.Model):
 
     # shop's name for display
     name = models.CharField(max_length=NAME_LENGTH)
-    
+
     # shop's description for display
     desc = models.TextField(blank=True)
-    
+
     # the verb to open the shop
     verb = models.CharField(max_length=NAME_LENGTH, blank=True)
 
     # condition of the shop
     condition = models.TextField(blank=True)
-    
+
     # shop's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -906,25 +949,25 @@ class shops(models.Model):
         abstract = True
         verbose_name = "Shop"
         verbose_name_plural = "Shops"
-        
-        
+
+
 # ------------------------------------------------------------
 #
 # shop goods
 #
 # ------------------------------------------------------------
-class shop_goods(models.Model):
+class shop_goods(AutoKeyModel):
     "All goods that sold in shops."
-    
+
     # goods's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # the typeclass of this goods
     typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # shop's key
     shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
-    
+
     # the key of objects to sell
     goods = models.CharField(max_length=KEY_LENGTH)
 
@@ -939,7 +982,7 @@ class shop_goods(models.Model):
 
     # visible condition of the goods
     condition = models.TextField(blank=True)
-    
+
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -976,11 +1019,11 @@ class npc_shops(models.Model):
 # store all skills
 #
 # ------------------------------------------------------------
-class skills(models.Model):
+class skills(AutoKeyModel):
     "Store all skills."
 
     # skill's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # The key of a skill typeclass.
     # skill's typeclass
@@ -1002,11 +1045,11 @@ class skills(models.Model):
     passive = models.BooleanField(blank=True, default=False)
 
     # skill function's name
-    function = models.CharField(max_length=KEY_LENGTH)
+    function = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # Skill's icon resource.
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-    
+
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -1045,11 +1088,11 @@ class default_skills(models.Model):
 # store all quests
 #
 # ------------------------------------------------------------
-class quests(models.Model):
+class quests(AutoKeyModel):
     "Store all quests."
 
     # quest's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # The key of a quest typeclass.
     # quest's typeclass
@@ -1082,7 +1125,7 @@ class quests(models.Model):
 # quest objective's type
 #
 # ------------------------------------------------------------
-class quest_objective_types(system_data):
+class quest_objective_types(SystemData):
     """
     quest objective's type
 
@@ -1146,7 +1189,7 @@ class quest_objectives(models.Model):
 # quest dependency's type
 #
 # ------------------------------------------------------------
-class quest_dependency_types(system_data):
+class quest_dependency_types(SystemData):
     """
     quest dependency's type"
 
@@ -1201,7 +1244,7 @@ class quest_dependencies(models.Model):
 # event's type
 #
 # ------------------------------------------------------------
-class event_types(system_data):
+class event_types(SystemData):
     """
     event's type
 
@@ -1229,7 +1272,7 @@ class event_types(system_data):
 # event trigger's types
 #
 # ------------------------------------------------------------
-class event_trigger_types(system_data):
+class event_trigger_types(SystemData):
     """
     event trigger's type
 
@@ -1257,11 +1300,11 @@ class event_trigger_types(system_data):
 # store event data
 #
 # ------------------------------------------------------------
-class event_data(models.Model):
+class event_data(AutoKeyModel):
     "Store event data."
 
     # event's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # the readable name of the event
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
@@ -1295,11 +1338,11 @@ class event_data(models.Model):
 # store all dialogues
 #
 # ------------------------------------------------------------
-class dialogues(models.Model):
+class dialogues(AutoKeyModel):
     "Store all dialogues."
 
     # dialogue's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # dialogue's name
     name = models.CharField(max_length=NAME_LENGTH, default="")
@@ -1526,7 +1569,7 @@ class localized_strings(models.Model):
 # image resources
 #
 # ------------------------------------------------------------
-class image_resources(models.Model):
+class image_resources(AutoKeyModel):
     "Store image resource's information."
 
     # The key of image.
@@ -1556,7 +1599,7 @@ class image_resources(models.Model):
 # icon resources
 #
 # ------------------------------------------------------------
-class icon_resources(models.Model):
+class icon_resources(AutoKeyModel):
     "Store icon resource's information."
 
     # The key of icon.

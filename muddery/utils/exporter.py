@@ -68,6 +68,27 @@ def export_file(filename, model_name, file_type=None):
     writer.save()
 
 
+def export_path_all(path, file_type=None):
+    """
+    Export all tables to a path which contains a group of csv files.
+    """
+    if not file_type:
+        # Set default file type.
+        file_type = "csv"
+
+    writer_class = writers.get_writer(file_type)
+    if writer_class:
+        # Get tempfile's name.
+        file_ext = writer_class.file_ext
+
+        # get model names
+        app_config = apps.get_app_config(settings.WORLD_DATA_APP)
+        for model in app_config.get_models():
+            model_name = model._meta.object_name
+            filename = os.path.join(path, model_name + "." + file_ext)
+            export_file(filename, model_name, file_type)
+
+
 def export_zip_all(file, file_type=None):
     """
     Export all tables to a zip file which contains a group of csv files.
