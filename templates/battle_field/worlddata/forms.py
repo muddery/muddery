@@ -1,10 +1,6 @@
 import sys
-from django.contrib.admin.forms import forms
-from django.conf import settings
-from django.apps import apps
 from muddery.utils.localiztion_handler import localize_form_field
-from worlddata import models
-from worlddata import forms_base
+from muddery.worlddata import forms_base
 
 
 class GameSettingsForm(forms_base.GameSettingsForm):
@@ -42,7 +38,7 @@ class QuestDependencyTypesForm(forms_base.QuestDependencyTypesForm):
 
 class WorldRoomsForm(forms_base.WorldRoomsForm):
     def __init__(self, *args, **kwargs):
-        super(forms_base.WorldRoomsForm, self).__init__(*args, **kwargs)
+        super(WorldRoomsForm, self).__init__(*args, **kwargs)
         localize_form_field(self, "peaceful")
 
 class WorldExitsForm(forms_base.WorldExitsForm):
@@ -135,7 +131,7 @@ class DialogueRelationsForm(forms_base.DialogueRelationsForm):
 class DialogueSentencesForm(forms_base.DialogueSentencesForm):
     pass
 
-class CustomLocalizedStringsForm(forms_base.CustomLocalizedStringsForm):
+class LocalizedStringsForm(forms_base.LocalizedStringsForm):
     pass
 
 class ImageResourcesForm(forms_base.ImageResourcesForm):
