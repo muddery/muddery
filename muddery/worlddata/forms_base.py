@@ -4,27 +4,6 @@ from muddery.utils.localiztion_handler import localize_form_fields
 from muddery.worlddata.data_sets import DATA_SETS
 
 
-def exist_key(key, except_models=None):
-    """
-    Check if the key exists.
-    """
-    if key[:2] == "__":
-        # Keys begin with __ are reserved by system.
-        return True
-
-    # Get models.
-    for data_settings in DATA_SETS.object_data:
-        if data_settings.model_name in except_models:
-            continue
-        try:
-            data_settings.model.objects.get(key=key)
-            return True
-        except Exception, e:
-            continue
-
-    return False
-
-
 def get_all_pocketable_objects():
     """
     Get all objects that can be put in player's pockets.
@@ -44,23 +23,6 @@ def get_all_pocketable_objects():
 
     return choices
 
-
-class UniqueKeyForm(forms.ModelForm):
-    """
-    Unique key form can create a default key and checks the key.
-    """
-    def clean(self):
-        "Validate values."
-        cleaned_data = super(UniqueKeyForm, self).clean()
-
-        # object's key should be unique
-        key = cleaned_data.get('key')
-        if exist_key(key, except_models=[self.Meta.model.__name__]):
-            message = "This key has been used. Please use another one."
-            self._errors['key'] = self.error_class([message])
-
-        return cleaned_data
-        
         
 class GameSettingsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -197,7 +159,7 @@ class QuestDependencyTypesForm(forms.ModelForm):
         fields = '__all__'
 
 
-class WorldRoomsForm(UniqueKeyForm):
+class WorldRoomsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldRoomsForm, self).__init__(*args, **kwargs)
 
@@ -217,7 +179,7 @@ class WorldRoomsForm(UniqueKeyForm):
         fields = '__all__'
 
 
-class WorldExitsForm(UniqueKeyForm):
+class WorldExitsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldExitsForm, self).__init__(*args, **kwargs)
 
@@ -267,7 +229,7 @@ class TwoWayExitsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class WorldObjectsForm(UniqueKeyForm):
+class WorldObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
@@ -293,7 +255,7 @@ class WorldObjectsForm(UniqueKeyForm):
         fields = '__all__'
 
 
-class WorldNPCsForm(UniqueKeyForm):
+class WorldNPCsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldNPCsForm, self).__init__(*args, **kwargs)
 
@@ -424,7 +386,7 @@ class QuestRewardListForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CommonObjectsForm(UniqueKeyForm):
+class CommonObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CommonObjectsForm, self).__init__(*args, **kwargs)
 
@@ -444,7 +406,7 @@ class CommonObjectsForm(UniqueKeyForm):
         fields = '__all__'
 
 
-class FoodsForm(UniqueKeyForm):
+class FoodsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FoodsForm, self).__init__(*args, **kwargs)
         
@@ -464,7 +426,7 @@ class FoodsForm(UniqueKeyForm):
         fields = '__all__'
         
 
-class SkillBooksForm(UniqueKeyForm):
+class SkillBooksForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(SkillBooksForm, self).__init__(*args, **kwargs)
         
@@ -500,7 +462,7 @@ class CharacterModelsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CommonCharacterForm(UniqueKeyForm):
+class CommonCharacterForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CommonCharacterForm, self).__init__(*args, **kwargs)
 
@@ -521,30 +483,6 @@ class CommonCharacterForm(UniqueKeyForm):
         self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
-
-    def clean(self):
-        "Validate model and level's value."
-        cleaned_data = super(CommonCharacterForm, self).clean()
-        if not cleaned_data:
-            return
-
-        # check model and level
-        model = cleaned_data.get('model')
-        level = cleaned_data.get('level')
-        try:
-            DATA_SETS.character_models.objects.get(key=model, level=level)
-        except Exception, e:
-            message = "Can not get this level's data."
-            levels = DATA_SETS.character_models.objects.filter(key=model)
-            available = [str(level.level) for level in levels]
-            if len(available) == 1:
-                message += " Available level: " + available[0]
-            elif len(available) > 1:
-                message += " Available levels: " + ", ".join(available)
-            self._errors['level'] = self.error_class([message])
-            return
-
-        return cleaned_data
 
     class Meta:
         model = DATA_SETS.common_characters.model
@@ -571,7 +509,7 @@ class DefaultObjectsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class ShopsForm(UniqueKeyForm):
+class ShopsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ShopsForm, self).__init__(*args, **kwargs)
         
@@ -591,7 +529,7 @@ class ShopsForm(UniqueKeyForm):
         fields = '__all__'
 
 
-class ShopGoodsForm(UniqueKeyForm):
+class ShopGoodsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ShopGoodsForm, self).__init__(*args, **kwargs)
 
@@ -642,7 +580,7 @@ class NPCShopsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class SkillsForm(UniqueKeyForm):
+class SkillsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(SkillsForm, self).__init__(*args, **kwargs)
 
@@ -702,7 +640,7 @@ class NPCDialoguesForm(forms.ModelForm):
         fields = '__all__'
 
 
-class QuestsForm(UniqueKeyForm):
+class QuestsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(QuestsForm, self).__init__(*args, **kwargs)
 
@@ -779,7 +717,7 @@ class DialogueQuestDependenciesForm(forms.ModelForm):
         fields = '__all__'
 
 
-class EquipmentsForm(UniqueKeyForm):
+class EquipmentsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentsForm, self).__init__(*args, **kwargs)
         
@@ -952,37 +890,21 @@ class LocalizedStringsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class ResourcesForm(forms.ModelForm):
+class ImageResourcesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ResourcesForm, self).__init__(*args, **kwargs)
         localize_form_fields(self)
 
-    def clean(self):
-        "Validate values."
-        cleaned_data = super(ResourcesForm, self).clean()
-
-        # set object key's default value to the resource name
-        key = cleaned_data.get('key')
-
-        if not key:
-            key = cleaned_data.get('resource')
-            cleaned_data['key'] = key
-
-        if not key:
-            message = "This field is needed."
-            self._errors['key'] = self.error_class([message])
-            return
-
-        return cleaned_data
-
-
-class ImageResourcesForm(ResourcesForm):
     class Meta:
         model = DATA_SETS.image_resources.model
         fields = ('key', 'name', 'resource',)
 
 
-class IconResourcesForm(ResourcesForm):
+class IconResourcesForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ResourcesForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
     class Meta:
         model = DATA_SETS.icon_resources.model
         fields = ('key', 'name', 'resource',)

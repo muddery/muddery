@@ -4,9 +4,7 @@ CommonObject is the object that players can put into their inventory.
 """
 
 from muddery.utils.localized_strings_handler import LS
-from muddery.typeclasses.common_objects import MudderyCommonObject
-from muddery.typeclasses.common_objects import MudderyFood
-from muddery.typeclasses.common_objects import MudderyEquipment
+from muddery.typeclasses.common_objects import MudderyFood, MudderyEquipment
 
 
 class Food(MudderyFood):
@@ -33,6 +31,8 @@ class Food(MudderyFood):
         if number <= 0:
             raise ValueError("Number should be above zero.")
 
+        status_changed = False
+
         result = ""
         used = number
         if used > self.db.number:
@@ -58,3 +58,18 @@ class Food(MudderyFood):
             result += LS("HP recovered by %s.") % int(recover_hp)
 
         return result, used
+
+
+class Equipment(MudderyEquipment):
+    """
+    This is a equipment. Players can equip it to change their properties, such as attack, defence,
+    etc.
+    """
+    def get_effect_fields(self):
+        """
+        Get data field names which can add to the user.
+
+        Returns:
+            (list) a list of field names.
+        """
+        return ["attack", "defence"]

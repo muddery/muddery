@@ -3,53 +3,54 @@ from __future__ import print_function
 
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ValidationError
 from django.conf import settings
 
+
 KEY_LENGTH = 255
-NAME_LENGTH = 20
+NAME_LENGTH = 80
 TYPECLASS_LENGTH = 80
 POSITION_LENGTH = 80
 
 
-def generate_key(model):
-    index = 0
-    try:
-        query = model.__class__.objects.last()
-        index = int(query.id)
-        index += 1
-    except Exception, e:
-        pass
-
-    return model.__class__.__name__ + "_" + str(index)
-
-
-# ------------------------------------------------------------
-#
-# Generate a auto key if key is empty.
-#
-# ------------------------------------------------------------
-class AutoKeyModel(models.Model):
-    """
-    Generate a auto key if key is empty.
-    """
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        verbose_name = "Auto Key Data"
-        verbose_name_plural = "Auto Key Data"
-
-    def clean(self):
-        if not self.key:
-            # generate a key
-            index = 0
+def auto_generate_key(model):
+    if not model.key:
+        index = 0
+        if model.id is not None:
+            # Get this record's id.
+            index = model.id
+        else:
             try:
-                query = self.__class__.objects.last()
+                # Get last id.
+                query = model.__class__.objects.last()
                 index = int(query.id)
                 index += 1
             except Exception, e:
                 pass
-            self.key = self.__class__.__name__ + "_" + str(index)
-        return
+
+        model.key = model.__class__.__name__ + "_" + str(index)
+
+
+def validate_object_key(model):
+    """
+    Check if the key exists. Object's key should be unique in all objects.
+    """
+    # Get models.
+    from muddery.worlddata.data_sets import DATA_SETS
+    for data_settings in DATA_SETS.object_data:
+        if data_settings.model_name == model.__class__.__name__:
+            continue
+
+        exist = False
+        try:
+            data_settings.model.objects.get(key=model.key)
+            exist = True
+        except Exception, e:
+            continue
+
+        if exist:
+            raise ValidationError({"key": "The key '%s' has been used. Please use another one." % model.key})
+
 
 # ------------------------------------------------------------
 #
@@ -86,7 +87,7 @@ class game_settings(models.Model):
     """
 
     # The name of your game.
-    game_name = models.CharField(max_length=80, blank=True)
+    game_name = models.CharField(max_length=NAME_LENGTH, blank=True)
 
     # The screen shows to players who are not loggin.
     connection_screen = models.TextField(blank=True)
@@ -256,7 +257,7 @@ class typeclasses(SystemData):
 # store all rooms
 #
 # ------------------------------------------------------------
-class world_rooms(AutoKeyModel):
+class world_rooms(models.Model):
     "Defines all unique rooms."
 
     # room's key
@@ -286,6 +287,10 @@ class world_rooms(AutoKeyModel):
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
+        
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
 
 
 # ------------------------------------------------------------
@@ -293,7 +298,7 @@ class world_rooms(AutoKeyModel):
 # store all exits
 #
 # ------------------------------------------------------------
-class world_exits(AutoKeyModel):
+class world_exits(models.Model):
     "Defines all unique exits."
 
     # exit's key
@@ -333,6 +338,10 @@ class world_exits(AutoKeyModel):
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
+
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
 
 
 # ------------------------------------------------------------
@@ -392,7 +401,7 @@ class two_way_exits(models.Model):
 # store all objects
 #
 # ------------------------------------------------------------
-class world_objects(AutoKeyModel):
+class world_objects(models.Model):
     "Store all unique objects."
 
     # object's key
@@ -427,6 +436,10 @@ class world_objects(AutoKeyModel):
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
 
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
+        
 
 # ------------------------------------------------------------
 #
@@ -541,7 +554,7 @@ class quest_reward_list(loot_list):
 # store all common objects
 #
 # ------------------------------------------------------------
-class common_objects(AutoKeyModel):
+class common_objects(models.Model):
     "Store all common objects."
 
     # object's key
@@ -580,6 +593,10 @@ class common_objects(AutoKeyModel):
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
+
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
 
 
 # ------------------------------------------------------------
@@ -806,7 +823,7 @@ class character_models(models.Model):
 # store all NPCs
 #
 # ------------------------------------------------------------
-class world_npcs(AutoKeyModel):
+class world_npcs(models.Model):
     "Store all NPCs."
 
     # NPC's key
@@ -847,13 +864,17 @@ class world_npcs(AutoKeyModel):
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
 
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
+
 
 # ------------------------------------------------------------
 #
 # store common characters
 #
 # ------------------------------------------------------------
-class common_characters(AutoKeyModel):
+class common_characters(models.Model):
     "Store common characters."
 
     # Character's key.
@@ -887,6 +908,25 @@ class common_characters(AutoKeyModel):
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
 
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
+
+        # check model and level
+        from muddery.worlddata.data_sets import DATA_SETS
+
+        try:
+            DATA_SETS.character_models.objects.get(key=self.model, level=self.level)
+        except Exception, e:
+            message = "Can not get this level's data."
+            levels = DATA_SETS.character_models.objects.filter(key=self.model)
+            available = [str(level.level) for level in levels]
+            if len(available) == 1:
+                message += " Available level: " + available[0]
+            elif len(available) > 1:
+                message += " Available levels: " + ", ".join(available)
+            raise ValidationError({"level": message})
+
 
 # ------------------------------------------------------------
 #
@@ -919,7 +959,7 @@ class default_objects(models.Model):
 # shops
 #
 # ------------------------------------------------------------
-class shops(AutoKeyModel):
+class shops(models.Model):
     "Store all shops."
 
     # shop's key
@@ -950,13 +990,17 @@ class shops(AutoKeyModel):
         verbose_name = "Shop"
         verbose_name_plural = "Shops"
 
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
+
 
 # ------------------------------------------------------------
 #
 # shop goods
 #
 # ------------------------------------------------------------
-class shop_goods(AutoKeyModel):
+class shop_goods(models.Model):
     "All goods that sold in shops."
 
     # goods's key
@@ -989,6 +1033,10 @@ class shop_goods(AutoKeyModel):
         verbose_name = "Shop Object"
         verbose_name_plural = "Shop Objects"
 
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
+
 
 # ------------------------------------------------------------
 #
@@ -1019,7 +1067,7 @@ class npc_shops(models.Model):
 # store all skills
 #
 # ------------------------------------------------------------
-class skills(AutoKeyModel):
+class skills(models.Model):
     "Store all skills."
 
     # skill's key
@@ -1059,6 +1107,10 @@ class skills(AutoKeyModel):
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
 
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
+
 
 # ------------------------------------------------------------
 #
@@ -1088,7 +1140,7 @@ class default_skills(models.Model):
 # store all quests
 #
 # ------------------------------------------------------------
-class quests(AutoKeyModel):
+class quests(models.Model):
     "Store all quests."
 
     # quest's key
@@ -1118,6 +1170,10 @@ class quests(AutoKeyModel):
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
+
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
 
 
 # ------------------------------------------------------------
@@ -1300,7 +1356,7 @@ class event_trigger_types(SystemData):
 # store event data
 #
 # ------------------------------------------------------------
-class event_data(AutoKeyModel):
+class event_data(models.Model):
     "Store event data."
 
     # event's key
@@ -1332,13 +1388,16 @@ class event_data(AutoKeyModel):
     def __unicode__(self):
         return self.key
 
+    def clean(self):
+        auto_generate_key(self)
+
 
 # ------------------------------------------------------------
 #
 # store all dialogues
 #
 # ------------------------------------------------------------
-class dialogues(AutoKeyModel):
+class dialogues(models.Model):
     "Store all dialogues."
 
     # dialogue's key
@@ -1359,6 +1418,9 @@ class dialogues(AutoKeyModel):
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
 
+    def clean(self):
+        auto_generate_key(self)
+        
 
 # ------------------------------------------------------------
 #
@@ -1566,20 +1628,17 @@ class localized_strings(models.Model):
 
 # ------------------------------------------------------------
 #
-# image resources
+# set image resources
 #
 # ------------------------------------------------------------
-class image_resources(AutoKeyModel):
-    "Store image resource's information."
+class ImageResources(models.Model):
+    "Store resource's information."
 
     # The key of image.
     key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # image's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True, default="")
-
-    # resource    
-    resource = models.ImageField(upload_to=settings.IMAGE_RESOURCE_DIR, null=True, blank=True, width_field='image_width', height_field='image_height')
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
 
     # resource'e width
     image_width = models.PositiveIntegerField(null=True, blank=True)
@@ -1587,38 +1646,52 @@ class image_resources(AutoKeyModel):
     # resource'e height
     image_height = models.PositiveIntegerField(null=True, blank=True)
     
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Resource"
+        verbose_name_plural = "Resources"
+
+    def clean(self):
+        auto_generate_key(self)
+
+
+# ------------------------------------------------------------
+#
+# image resources
+#
+# ------------------------------------------------------------
+class image_resources(ImageResources):
+    "Store image resource's information."
+
+    # resource    
+    resource = models.ImageField(upload_to=settings.IMAGE_RESOURCE_DIR, null=True, blank=True, width_field='image_width', height_field='image_height')
+
     class Meta:
         "Define Django meta options"
         abstract = True
         verbose_name = "Image Resource"
         verbose_name_plural = "Image Resources"
 
+    def __unicode__(self):
+        return self.key + " (" + self.resource + ")"
 
 # ------------------------------------------------------------
 #
 # icon resources
 #
 # ------------------------------------------------------------
-class icon_resources(AutoKeyModel):
+class icon_resources(ImageResources):
     "Store icon resource's information."
-
-    # The key of icon.
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # icon's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True, default="")
 
     # resource    
     resource = models.ImageField(upload_to=settings.ICON_RESOURCE_DIR, null=True, blank=True, width_field='image_width', height_field='image_height')
 
-    # resource'e width
-    image_width = models.PositiveIntegerField(null=True, blank=True)
-    
-    # resource'e height
-    image_height = models.PositiveIntegerField(null=True, blank=True)
-    
     class Meta:
         "Define Django meta options"
         abstract = True
         verbose_name = "Icon Resource"
         verbose_name_plural = "Icon Resources"
+
+    def __unicode__(self):
+        return self.key + " (" + self.resource + ")"

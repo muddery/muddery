@@ -7,6 +7,7 @@ import traceback
 from django.apps import apps
 from django.conf import settings
 from django.db import models
+from django.core.exceptions import ValidationError
 from evennia.utils import logger
 from muddery.utils import readers
 
@@ -32,7 +33,9 @@ class DataHandler(object):
             self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
             self.objects = self.model.objects
         except Exception, e:
-            logger.log_errmsg("Can not load model %s: %s" % (self.model_name, e))
+            ostring = "Can not load model %s: %s" % (self.model_name, e)
+            print(ostring)
+            logger.log_errmsg(ostring)
 
     def get_field_types(self, model_obj, field_names):
         """
@@ -110,7 +113,7 @@ class DataHandler(object):
                     if value:
                         record[field_name] = float(value)
             except Exception, e:
-                print("value error: %s - '%s'" % (field_name, value))
+                raise ValidationError({field_name: "value error: '%s'" % value})
 
         return record
 
@@ -132,12 +135,10 @@ class DataHandler(object):
 
             # import values
             for values in reader.iterator:
-                try:
-                    record = self.parse_record(titles, field_types, values)
-                    data = self.model(**record)
-                    data.save()
-                except Exception, e:
-                    print("Can not load %s: %s" % (values, e))
+                record = self.parse_record(titles, field_types, values)
+                data = self.model(**record)
+                data.full_clean()
+                data.save()
 
         except StopIteration:
             # reach the end of file, pass this exception
@@ -152,53 +153,39 @@ class DataHandler(object):
             file_type: (string) the type of the file. If it's None, the function will get
                        the file type from the extension name of the file.
         """
-        imported = False
-        
         if clear:
             self.clear_model_data(**kwargs)
 
-        try:
-            # get file list
-            if not file_type:
-                # find extensions
-                file_names = glob.glob(file_name + ".*")
+        # get file list
+        if not file_type:
+            # find extensions
+            file_names = glob.glob(file_name + ".*")
 
-                # add original filename
-                file_names.append(file_name)
-            else:
-                file_names = [file_name]
-
-            for file_name in file_names:
-                if not file_type:
-                    # get file's extension name as file type
-                    file_type = os.path.splitext(file_name)[1].lower()
-                    if len(file_type) > 0:
-                        file_type = file_type[1:]
-
-                reader_class = readers.get_reader(file_type)
-                if not reader_class:
-                    # Does support this file type, read next one.
-                    continue
-
-                reader = reader_class(file_name)
-                if not reader:
-                    # Does support this file type, read next one.
-                    continue
-
-                print("Importing %s" % file_name)
-                self.import_data(reader, **kwargs)
-                imported = True
-                break
-        except Exception, e:
-            print("Can not import file %s: %s" % (file_name, e))
-            traceback.print_exc()
-
-        if imported:
-            print("%s imported." % file_name)
+            # add original filename
+            file_names.append(file_name)
         else:
-            print("Can not import file %s" % file_name)
+            file_names = [file_name]
 
-        return imported
+        for file_name in file_names:
+            if not file_type:
+                # get file's extension name as file type
+                file_type = os.path.splitext(file_name)[1].lower()
+                if len(file_type) > 0:
+                    file_type = file_type[1:]
+
+            reader_class = readers.get_reader(file_type)
+            if not reader_class:
+                # Does support this file type, read next one.
+                continue
+
+            reader = reader_class(file_name)
+            if not reader:
+                # Does support this file type, read next one.
+                continue
+
+            print("Importing %s" % file_name)
+            self.import_data(reader, **kwargs)
+            break
 
     def import_from_path(self, path_name, **kwargs):
         """
@@ -279,6 +266,7 @@ class SystemDataHandler(DataHandler):
                         self.model.objects.filter(key=key, system_data=True).delete()
 
                     data = self.model(**record)
+                    data.full_clean()
                     data.save()
                 except Exception, e:
                     print("Can not load %s: %s" % (values, e))
@@ -359,6 +347,7 @@ class LocalizedStringsHandler(DataHandler):
                         self.model.objects.filter(category=category, origin=origin, system_data=True).delete()
 
                     data = self.model(**record)
+                    data.full_clean()
                     data.save()
                 except Exception, e:
                     print("Can not load %s: %s" % (values, e))

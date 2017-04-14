@@ -12,6 +12,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from evennia.server.sessionhandler import SESSIONS
 from evennia.utils import logger
 from muddery.utils import exporter
@@ -197,17 +198,26 @@ def import_data_all(request):
     file_obj = request.FILES.get("import_data_all", None)
 
     if file_obj:
-        zipfile = tempfile.TemporaryFile()
-        try:
-            for chunk in file_obj.chunks():
-                zipfile.write(chunk)
-            importer.unzip_data_all(zipfile)
-            zipfile.close()
-        except Exception, e:
-            logger.log_tracemsg("Cannot import game data: %s" % e)
+        with tempfile.TemporaryFile() as zipfile:
+            try:
+                for chunk in file_obj.chunks():
+                    zipfile.write(chunk)
+                importer.unzip_data_all(zipfile)
+            except ValidationError, e:
+                err_message = ""
+                if not hasattr(e, "error_dict"):
+                    e.error_dict = {"": e.error_list}
+                for key, values in e.error_dict.items():
+                    if key:
+                        err_message += key + ": "
+                    for value in values:
+                        err_message += value.message + "  "
 
-            zipfile.close()
-            return render(request, 'fail.html', {"message": str(e)})
+                logger.log_tracemsg(err_message)
+                return render(request, 'fail.html', {"message": str(e)})
+            except Exception, e:
+                logger.log_tracemsg("Cannot import game data: %s" % e)
+                return render(request, 'fail.html', {"message": str(e)})
 
     return render(request, 'success.html', {"message": "World data imported!"})
 
@@ -221,17 +231,14 @@ def import_resources_all(request):
     file_obj = request.FILES.get("import_resources_all", None)
 
     if file_obj:
-        zipfile = tempfile.TemporaryFile()
-        try:
-            for chunk in file_obj.chunks():
-                zipfile.write(chunk)
-            importer.unzip_resources_all(zipfile)
-            zipfile.close()
-        except Exception, e:
-            logger.log_tracemsg("Cannot import resources: %s" % e)
-
-            zipfile.close()
-            return render(request, 'fail.html', {"message": str(e)})
+        with tempfile.TemporaryFile() as zipfile:
+            try:
+                for chunk in file_obj.chunks():
+                    zipfile.write(chunk)
+                importer.unzip_resources_all(zipfile)
+            except Exception, e:
+                logger.log_tracemsg("Cannot import resources: %s" % e)
+                return render(request, 'fail.html', {"message": str(e)})
 
     return render(request, 'success.html', {"message": "Resources imported!"})
 
@@ -245,7 +252,7 @@ def import_data_single(request):
     model_name = request.POST.get("model_name", None)
     upload_file = request.FILES.get("import_data_single", None)
 
-    success = False
+    err_message = None
     if upload_file:
         # Get file type.
         (filename, ext_name) = os.path.splitext(upload_file.name)
@@ -275,31 +282,38 @@ def import_data_single(request):
             open_mode = "wb"
         else:
             open_mode = "w"
-        temp_file = open(temp_name, open_mode)
+            
+        with open(temp_name, open_mode) as temp_file:
+            try:
+                # Write to a template file.
+                for chunk in upload_file.chunks():
+                    temp_file.write(chunk)
+                temp_file.flush()
+                data_handler.import_file(temp_name, file_type=file_type)
+            except ValidationError, e:
+                err_message = ""
+                if not hasattr(e, "error_dict"):
+                    e.error_dict = {"": e.error_list}
+                for key, values in e.error_dict.items():
+                    if key:
+                        err_message += key + ": "
+                    for value in values:
+                        err_message += value.message + "  "
 
-        try:
-            # Write to a template file.
-            for chunk in upload_file.chunks():
-                temp_file.write(chunk)
-            temp_file.flush()
-
-            if data_handler.import_file(temp_name, file_type=file_type):
-                success = True
-        except Exception, e:
-            logger.log_tracemsg("Cannot import game data: %s" % e)
-
-        if temp_file:
-            temp_file.close()
+                logger.log_tracemsg(err_message)
+            except Exception, e:
+                err_message = "Cannot import game data: %s" % e
+                logger.log_tracemsg(err_message)
 
         try:
             os.remove(temp_name)
         except:
             pass
         
-    if success:
+    if not err_message:
         return render(request, 'success.html', {"message": "World data imported!"})
     else:
-        return render(request, 'fail.html', {"message": "Cannot import game data."})
+        return render(request, 'fail.html', {"message": err_message})
 
 
 @staff_member_required
