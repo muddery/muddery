@@ -51,7 +51,7 @@ class DataHandler(object):
         """
         field_types = []
         for field_name in field_names:
-            field_type = 0
+            field_type = -1
 
             try:
                 # get field info
@@ -70,7 +70,8 @@ class DataHandler(object):
                 else:
                     field_type = 0
             except Exception, e:
-                logger.log_errmsg("Field error: %s" % e)
+                field_type = -1
+                logger.log_errmsg("Field %s error: %s" % (field_name, e))
 
             field_types.append(field_type)
 
@@ -92,7 +93,10 @@ class DataHandler(object):
 
             try:
                 # set field values
-                if field_type == 0:
+                if field_type == -1:
+                    # not support this field
+                    continue
+                elif field_type == 0:
                     # default
                     record[field_name] = value
                 elif field_type == 1:
