@@ -58,6 +58,9 @@ class Upgrader(BaseUpgrader):
             # migrations
             utils.copy_path(temp_dir, game_dir, os.path.join("worlddata", "migrations"))
 
+            # web
+            utils.copy_path(temp_dir, game_dir, "web")
+
             # make new migrations
             os.chdir(game_dir)
             django_args = ["makemigrations"]
