@@ -8,10 +8,12 @@ class BaseUpgrader(object):
     Upgrade a game dir from the version in [<from_version>, <to_version>) to version
     <target_version>.
     """
-    # include from_version
+    # upgrade from version from_version to to_version
+    # from version 0.0
     from_version = (0, 0)
     
-    # NOT include to_version
+    # NOT include this version
+    # to version 0.0
     to_version = (0, 0)
 
     # Upgrade to the target version. None means the latest version.
@@ -33,7 +35,7 @@ class BaseUpgrader(object):
             return False
         elif game_ver[0] > self.to_version[0]:
             return False
-        elif game_ver[0] == self.to_version[0] and game_ver[1] > self.to_version[1]:
+        elif game_ver[0] == self.to_version[0] and game_ver[1] >= self.to_version[1]:
             return False
         else:
             return True
