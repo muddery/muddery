@@ -34,22 +34,29 @@ class UpgradeHandler(object):
         game_ver = utils.version_to_num(game_ver)
             
         print("Game version: %s" % (game_ver,))
-        
-        if not self.upgrader_list:
-            print("Does not need upgrade.")
-            return
+
+        upgraded = False
 
         # Get proper upgrader.
-        for upgrader in self.upgrader_list:
-            if upgrader.can_upgrade(game_ver):
-                # backup current game dir
-                utils.make_backup(game_dir)
-                
-                # do upgrade
-                upgrader.upgrade(game_dir, game_template)
-                break
+        try:
+            for upgrader in self.upgrader_list:
+                if upgrader.can_upgrade(game_ver):
+                    # backup current game dir
+                    utils.make_backup(game_dir)
 
-        print("Upgraded.")
+                    # do upgrade
+                    upgrader.upgrade(game_dir, game_template)
+                    upgraded = True
+                    break
+
+            if upgraded:
+                print("Upgraded.")
+            else:
+                print("Does not need upgrade.")
+
+        except Exception, e:
+            print("Upgrade failed!")
+
         return
 
 UPGRADE_HANDLER = UpgradeHandler()

@@ -16,8 +16,12 @@ class Upgrader(BaseUpgrader):
     """
     Upgrade a game dir to a specified version.
     """
+    # from version 0.0
     from_version = (0, 0)
+
+    # to version 0.2
     to_version = (0, 2)
+
     target_version = None
     
     def upgrade(self, game_dir, game_template):
