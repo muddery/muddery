@@ -12,7 +12,6 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from evennia.server.sessionhandler import SESSIONS
 from evennia.utils import logger
 from muddery.utils import exporter
@@ -203,20 +202,8 @@ def import_data_all(request):
                 for chunk in file_obj.chunks():
                     zipfile.write(chunk)
                 importer.unzip_data_all(zipfile)
-            except ValidationError, e:
-                err_message = ""
-                if not hasattr(e, "error_dict"):
-                    e.error_dict = {"": e.error_list}
-                for key, values in e.error_dict.items():
-                    if key:
-                        err_message += key + ": "
-                    for value in values:
-                        err_message += value.message + "  "
-
-                logger.log_tracemsg(err_message)
-                return render(request, 'fail.html', {"message": str(e)})
             except Exception, e:
-                logger.log_tracemsg("Cannot import game data: %s" % e)
+                logger.log_errmsg("Cannot import game data. %s" % e)
                 return render(request, 'fail.html', {"message": str(e)})
 
     return render(request, 'success.html', {"message": "World data imported!"})
@@ -290,20 +277,9 @@ def import_data_single(request):
                     temp_file.write(chunk)
                 temp_file.flush()
                 data_handler.import_file(temp_name, file_type=file_type)
-            except ValidationError, e:
-                err_message = ""
-                if not hasattr(e, "error_dict"):
-                    e.error_dict = {"": e.error_list}
-                for key, values in e.error_dict.items():
-                    if key:
-                        err_message += key + ": "
-                    for value in values:
-                        err_message += value.message + "  "
-
-                logger.log_tracemsg(err_message)
             except Exception, e:
-                err_message = "Cannot import game data: %s" % e
-                logger.log_tracemsg(err_message)
+                err_message = "Cannot import game data. %s" % e
+                logger.log_errmsg(err_message)
 
         try:
             os.remove(temp_name)
