@@ -68,12 +68,6 @@ CREATED_NEW_GAMEDIR = \
     browser. If things don't work, check so those ports are open.
 
     """
-
-UPGRADED_GAMEDIR = \
-    """
-    Your game directory '{gamedir}' has been upgraded to
-    muddery version {version}.
-    """
     
 CMDLINE_HELP = \
     """
@@ -357,10 +351,7 @@ def main():
                 template = args.upgrade[1]
 
             gamedir = os.path.abspath(os.path.join(CURRENT_DIR, game_name))
-
             UPGRADE_HANDLER.upgrade(gamedir, template)
-            print(UPGRADED_GAMEDIR.format(gamedir=args.upgrade[0],
-                                          version=MUDDERY_VERSION))
         except Exception, e:
             print("Upgrade failed: %s" % e)
 

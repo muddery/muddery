@@ -95,7 +95,7 @@ def import_local_data():
         try:
             data_handlers.import_from_path(system_data_path, system_data=True)
         except Exception, e:
-            err_message = "Cannot import game data: %s" % e
+            err_message = "Cannot import game data. %s" % e
             logger.log_tracemsg(err_message)
 
     ##########################
@@ -109,5 +109,5 @@ def import_local_data():
         try:
             data_handlers.import_from_path(custom_data_path, system_data=False)
         except Exception, e:
-            err_message = "Cannot import game data: %s" % e
+            err_message = "Cannot import game data. %s" % e
             logger.log_tracemsg(err_message)

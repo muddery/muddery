@@ -88,13 +88,13 @@ class Upgrader(BaseUpgrader):
                 try:
                     data_handler.import_from_path(custom_data_path, system_data=False)
                 except Exception, e:
-                    print("Cannot import game data: %s" % e)
+                    print("Cannot import game data. %s" % e)
 
                 data_handler.clear_model_data(system_data=True)
                 try:
                     data_handler.import_from_path(system_data_path, system_data=True)
                 except Exception, e:
-                    print("Cannot import game data: %s" % e)
+                    print("Cannot import game data. %s" % e)
 
             # set shop goods' key
             for data in DATA_SETS.shop_goods.objects.all():

@@ -10,6 +10,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from evennia.utils import logger
 from muddery.utils import readers
+from muddery.utils.exception import MudderyError
 
 
 class DataHandler(object):
@@ -131,22 +132,38 @@ class DataHandler(object):
         Returns:
             None
         """
+        line = 1
         try:
             # read title
             titles = reader.iterator.next()
-
-            field_types = self.get_field_types(self.model, titles)
+            field_types = self.get_field_types(self.model, titles)            
+            line += 1
 
             # import values
             for values in reader.iterator:
+                # skip blank lines
+                blank_line = True
+                for value in values:
+                    if value:
+                        blank_line = False
+                        break
+                if blank_line:
+                    line += 1
+                    continue
+
                 record = self.parse_record(titles, field_types, values)
                 data = self.model(**record)
                 data.full_clean()
                 data.save()
+                line += 1
 
         except StopIteration:
             # reach the end of file, pass this exception
             pass
+        except ValidationError, e:
+            raise MudderyError(self.parse_error(e, line))
+        except Exception, e:
+            raise MudderyError("%s (model: %s, line: %s)" % (e, self.model_name, line))
 
     def import_file(self, file_name, file_type=None, clear=True, **kwargs):
         """
@@ -217,6 +234,35 @@ class DataHandler(object):
         # clear old data
         self.objects.all().delete()
 
+    def parse_error(self, error, line):
+        """
+        Parse validation error to string message.
+
+        Args:
+            error: (ValidationError) a ValidationError.
+            line: (number) the line number where the error occurs.
+        Returns:
+            (string) output string.
+        """
+        err_message = ""
+
+        if hasattr(error, "error_dict"):
+            error_dict = error.error_dict
+        else:
+            error_dict = {"": error.error_list}
+
+        count = 1
+        for field, error_list in error_dict.items():
+            err_message += str(count) + ". "
+            if field:
+                err_message += "[" + field + "] "
+            for item in error_list:
+                print("item.message: %s" % item.message)
+                print("item.params: %s" % item.params)
+                err_message += item.message % item.params + "  "
+            count += 1
+        return "%s (model: %s, line: %s)" % (err_message, self.model_name, line)
+
 
 class SystemDataHandler(DataHandler):
     """
@@ -234,7 +280,8 @@ class SystemDataHandler(DataHandler):
             None
         """
         system_data = kwargs.get('system_data', False)
-
+        
+        line = 1
         try:
             # read title
             titles = reader.iterator.next()
@@ -250,34 +297,48 @@ class SystemDataHandler(DataHandler):
             if key_index == -1:
                 print("Can not found system data's key.")
                 return
+                
+            line += 1
 
             # import values
             for values in reader.iterator:
-                try:
-                    record = self.parse_record(titles, field_types, values)
-                    key = values[key_index]
+                # skip blank lines
+                blank_line = True
+                for value in values:
+                    if value:
+                        blank_line = False
+                        break
+                if blank_line:
+                    line += 1
+                    continue
 
-                    # Merge system and custom data.
-                    if system_data:
-                        # System data can not overwrite custom data.
-                        if self.model.objects.filter(key=key, system_data=False).count() > 0:
-                            continue
+                record = self.parse_record(titles, field_types, values)
+                key = values[key_index]
 
-                        # Add system data flag.
-                        record["system_data"] = True
-                    else:
-                        # Custom data can not overwrite system data.
-                        self.model.objects.filter(key=key, system_data=True).delete()
+                # Merge system and custom data.
+                if system_data:
+                    # System data can not overwrite custom data.
+                    if self.model.objects.filter(key=key, system_data=False).count() > 0:
+                        continue
 
-                    data = self.model(**record)
-                    data.full_clean()
-                    data.save()
-                except Exception, e:
-                    print("Can not load %s: %s" % (values, e))
+                    # Add system data flag.
+                    record["system_data"] = True
+                else:
+                    # Custom data can not overwrite system data.
+                    self.model.objects.filter(key=key, system_data=True).delete()
+
+                data = self.model(**record)
+                data.full_clean()
+                data.save()
+                line += 1
 
         except StopIteration:
             # reach the end of file, pass this exception
             pass
+        except ValidationError, e:
+            raise MudderyError(self.parse_error(e, line))
+        except Exception, e:
+            raise MudderyError("%s (model: %s, line: %s)" % (e, self.model_name, line))
 
     def clear_model_data(self, **kwargs):
         """
@@ -312,6 +373,7 @@ class LocalizedStringsHandler(DataHandler):
         """
         system_data = kwargs.get('system_data', False)
 
+        line = 1
         try:
             # read title
             titles = reader.iterator.next()
@@ -330,35 +392,49 @@ class LocalizedStringsHandler(DataHandler):
                 if category_index == -1 and origin_index == -1:
                     print("Can not found data's key.")
                     return
+                    
+            line += 1
 
             # import values
             for values in reader.iterator:
-                try:
-                    record = self.parse_record(titles, field_types, values)
-                    category = values[category_index]
-                    origin = values[origin_index]
+                # skip blank lines
+                blank_line = True
+                for value in values:
+                    if value:
+                        blank_line = False
+                        break
+                if blank_line:
+                    line += 1
+                    continue
 
-                    # Merge system and custom data.
-                    if system_data:
-                        # System data can not overwrite custom data.
-                        if self.model.objects.filter(category=category, origin=origin, system_data=False).count() > 0:
-                            continue
+                record = self.parse_record(titles, field_types, values)
+                category = values[category_index]
+                origin = values[origin_index]
 
-                        # Add system data flag.
-                        record["system_data"] = True
-                    else:
-                        # Custom data can not overwrite system data.
-                        self.model.objects.filter(category=category, origin=origin, system_data=True).delete()
+                # Merge system and custom data.
+                if system_data:
+                    # System data can not overwrite custom data.
+                    if self.model.objects.filter(category=category, origin=origin, system_data=False).count() > 0:
+                        continue
 
-                    data = self.model(**record)
-                    data.full_clean()
-                    data.save()
-                except Exception, e:
-                    print("Can not load %s: %s" % (values, e))
+                    # Add system data flag.
+                    record["system_data"] = True
+                else:
+                    # Custom data can not overwrite system data.
+                    self.model.objects.filter(category=category, origin=origin, system_data=True).delete()
+
+                data = self.model(**record)
+                data.full_clean()
+                data.save()
+                line += 1
 
         except StopIteration:
             # reach the end of file, pass this exception
             pass
+        except ValidationError, e:
+            raise MudderyError(self.parse_error(e, line))
+        except Exception, e:
+            raise MudderyError("%s (model: %s, line: %s)" % (e, self.model_name, line))
 
     def import_from_path(self, path_name, **kwargs):
         # import data from default position

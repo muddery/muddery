@@ -39,18 +39,19 @@ def validate_object_key(model):
     from muddery.worlddata.data_sets import DATA_SETS
     for data_settings in DATA_SETS.object_data:
         if data_settings.model_name == model.__class__.__name__:
+            # Models will validate unique values of its own,
+            # so we do not validate them here.
             continue
 
-        exist = False
         try:
             data_settings.model.objects.get(key=model.key)
-            exist = True
         except Exception, e:
             continue
 
-        if exist:
-            raise ValidationError({"key": "The key '%s' has been used. Please use another one." % model.key})
-
+        error = ValidationError("The key '%(value)s' already exists in model %(model)s.",
+                                code="unique",
+                                params={"value": model.key, "model": data_settings.model_name})
+        raise ValidationError({"key": error})
 
 # ------------------------------------------------------------
 #
