@@ -25,7 +25,6 @@ class DataWriter(object):
     type = None
     name = None
     file_ext = None
-    binary = True
 
     def __init__(self, filename = None):
         """
@@ -67,7 +66,6 @@ class CSVWriter(DataWriter):
     type = "csv"
     name = "csv"
     file_ext = "csv"
-    binary = False
 
     def __init__(self, filename=None):
         """
@@ -122,7 +120,6 @@ class CSVWindowsWriter(DataWriter):
     type = "csv_win"
     name = "csv (For Windows)"
     file_ext = "csv"
-    binary = False
 
     def __init__(self, filename=None):
         """
@@ -180,7 +177,6 @@ class XLSWriter(DataWriter):
     type = "xls"
     name = "xls"
     file_ext = "xls"
-    binary = True
 
     def __init__(self, filename=None):
         """
@@ -249,7 +245,6 @@ class XLSXWriter(DataWriter):
     type = "xlsx"
     name = "xlsx"
     file_ext = "xlsx"
-    binary = True
 
     def __init__(self, filename=None):
         """
