@@ -132,12 +132,7 @@ def export_data_single(request):
     temp_file = None
     try:
         exporter.export_file(temp_name, model_name, file_type)
-
-        if writer_class.binary:
-            open_mode = "rb"
-        else:
-            open_mode = "r"
-        temp_file = open(temp_name, open_mode)
+        temp_file = open(temp_name, "rb")
 
         filename = model_name + "." + writer_class.file_ext
         response = http.StreamingHttpResponse(file_iterator(temp_file, erase=True))
@@ -263,14 +258,8 @@ def import_data_single(request):
             return render(request, 'fail.html', {"message": "Can not import this type of file."})
 
         # Get tempfile's name.
-        temp_name = tempfile.mktemp()
-
-        if reader_class.binary:
-            open_mode = "wb"
-        else:
-            open_mode = "w"
-            
-        with open(temp_name, open_mode) as temp_file:
+        temp_name = tempfile.mktemp()            
+        with open(temp_name, "wb") as temp_file:
             try:
                 # Write to a template file.
                 for chunk in upload_file.chunks():

@@ -135,12 +135,12 @@ class DataHandler(object):
         line = 1
         try:
             # read title
-            titles = reader.iterator.next()
+            titles = reader.next()
             field_types = self.get_field_types(self.model, titles)            
             line += 1
 
             # import values
-            for values in reader.iterator:
+            for values in reader:
                 # skip blank lines
                 blank_line = True
                 for value in values:
@@ -284,7 +284,7 @@ class SystemDataHandler(DataHandler):
         line = 1
         try:
             # read title
-            titles = reader.iterator.next()
+            titles = reader.next()
 
             field_types = self.get_field_types(self.model, titles)
 
@@ -301,7 +301,7 @@ class SystemDataHandler(DataHandler):
             line += 1
 
             # import values
-            for values in reader.iterator:
+            for values in reader:
                 # skip blank lines
                 blank_line = True
                 for value in values:
@@ -376,7 +376,7 @@ class LocalizedStringsHandler(DataHandler):
         line = 1
         try:
             # read title
-            titles = reader.iterator.next()
+            titles = reader.next()
 
             field_types = self.get_field_types(self.model, titles)
 
@@ -396,7 +396,7 @@ class LocalizedStringsHandler(DataHandler):
             line += 1
 
             # import values
-            for values in reader.iterator:
+            for values in reader:
                 # skip blank lines
                 blank_line = True
                 for value in values:
