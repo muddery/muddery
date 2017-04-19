@@ -33,10 +33,8 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         """
         super(MudderyRoom, self).at_object_creation()
 
-        if not self.attributes.has("position"):
-            self.position = None
-        if not self.attributes.has("background"):
-            self.background = None
+        self.position = None
+        self.background = None
 
     def after_data_loaded(self):
         """
