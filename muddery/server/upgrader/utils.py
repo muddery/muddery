@@ -13,11 +13,24 @@ from evennia.server import evennia_launcher
 from muddery.server import muddery_launcher
 
 
-def version_to_num(version):
+def get_data_version(path):
     """
     Transform a vesion string to version and sub version numbers.
+
+    Args:
+        path: (string) the path of the game or data.
+
+    Returns:
+        (tuple): data's version number list.
     """
-    ver_list = version.split('.')
+    game_ver = ""
+    try:
+        with open(os.path.join(path, "muddery_version.txt"), 'r') as f:
+            game_ver = f.read().strip()
+    except Exception, e:
+        pass
+
+    ver_list = game_ver.split('.')
     num_list = [0, 0]
     for i, ver in enumerate(ver_list):
         if i >= len(num_list):

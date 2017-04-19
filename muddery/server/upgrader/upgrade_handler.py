@@ -30,41 +30,55 @@ class UpgradeHandler(object):
         if self.is_running(game_dir):
             print("\nThe game is still running, stop it first.\n")
             return
-        
-        game_ver = ""
-        try:
-            with open(os.path.join(game_dir, "muddery_version.txt"), 'r') as f:
-                game_ver = f.read().strip()
-        except Exception, e:
-            pass
-        game_ver = utils.version_to_num(game_ver)
-            
+
+        # Get game version
+        game_ver = utils.get_data_version(game_dir)
         print("Game version: %s" % (game_ver,))
 
-        upgraded = False
-
         # Get proper upgrader.
+        upgrader = self.get_upgrader(game_ver)
+        if not upgrader:
+            print("\nYour game does not need upgrade.\n")
+            return
+
         try:
-            for upgrader in self.upgrader_list:
-                if upgrader.can_upgrade(game_ver):
-                    # backup current game dir
-                    utils.make_backup(game_dir)
+            # backup current game dir
+            utils.make_backup(game_dir)
 
-                    # do upgrade
-                    upgrader.upgrade(game_dir, game_template)
-                    upgraded = True
-                    break
-
-            if upgraded:
-                print("\nYour game has been upgraded to muddery version %s.\n" % muddery.__version__)
-            else:
-                print("\nYour game does not need upgrade.\n")
+            # do upgrade
+            upgrader.upgrade_game(game_dir, game_template)
+            print("\nYour game has been upgraded to muddery version %s.\n" % muddery.__version__)
 
         except Exception, e:
             print("\nUpgrade failed: %s\n" % e)
 
         return
-        
+
+    def upgrade_data(self, data_path):
+        """
+        Upgrade game data.
+
+        Args:
+            data_path: (string) the path of game data.
+
+        Returns:
+            None
+        """
+        # Get game version
+        game_ver = utils.get_data_version(data_path)
+        print("Data version: %s" % (game_ver,))
+
+        # Get proper upgrader.
+        upgrader = self.get_upgrader(game_ver)
+        if not upgrader:
+            # Does not need upgrade.
+            return
+
+        try:
+            upgrader.upgrade_data(data_path, None)
+        except Exception, e:
+            print("\nUpgrade failed: %s\n" % e)
+
     def is_running(self, game_dir):
         """
         Check whether the game server is running.
@@ -73,5 +87,21 @@ class UpgradeHandler(object):
         portal_pidfile = os.path.join(game_dir, "server", "portal.pid")
         
         return os.path.exists(server_pidfile) or os.path.exists(portal_pidfile)
+
+    def get_upgrader(self, game_ver):
+        """
+        Get a proper upgrader according the data version.
+
+        Args:
+            game_ver: (tuple) version number's list.
+
+        Returns:
+            Game upgrader.
+        """
+        for upgrader in self.upgrader_list:
+            if upgrader.can_upgrade(game_ver):
+                return upgrader
+        return None
+
 
 UPGRADE_HANDLER = UpgradeHandler()

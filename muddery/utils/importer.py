@@ -5,16 +5,12 @@ This module imports data from files to db.
 from __future__ import print_function
 
 import os
-import glob
 import tempfile
 import zipfile
 import shutil
-from django.db import models
-from django.apps import apps
 from django.conf import settings
-from evennia.utils import logger
-from muddery.utils.exception import MudderyError
-from muddery.utils import readers
+from muddery.server.upgrader.upgrade_handler import UPGRADE_HANDLER
+from muddery.server.upgrader.utils import get_data_version
 from muddery.worlddata.data_sets import DATA_SETS
 
 
@@ -27,6 +23,15 @@ def unzip_data_all(file):
     try:
         archive = zipfile.ZipFile(file, 'r')
         archive.extractall(temp_path)
+
+        # get data version
+        data_ver = get_data_version(temp_path)
+        print("Import game data version: %s" % (data_ver,))
+
+        # Get proper upgrader.
+        upgrader = UPGRADE_HANDLER.get_upgrader(data_ver)
+        if upgrader:
+            upgrader.upgrade_data(temp_path, None)
 
         # import models one by one
         data_handlers = DATA_SETS.all_handlers
