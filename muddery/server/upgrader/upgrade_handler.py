@@ -66,7 +66,7 @@ class UpgradeHandler(object):
         """
         # Get game version
         game_ver = utils.get_data_version(data_path)
-        print("Data version: %s" % (game_ver,))
+        print("Game data version: %s" % (game_ver,))
 
         # Get proper upgrader.
         upgrader = self.get_upgrader(game_ver)
@@ -76,6 +76,8 @@ class UpgradeHandler(object):
 
         try:
             upgrader.upgrade_data(data_path, None)
+            print("\nYour game data have been upgraded to muddery version %s.\n" % muddery.__version__)
+
         except Exception, e:
             print("\nUpgrade failed: %s\n" % e)
 

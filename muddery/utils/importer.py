@@ -24,14 +24,8 @@ def unzip_data_all(file):
         archive = zipfile.ZipFile(file, 'r')
         archive.extractall(temp_path)
 
-        # get data version
-        data_ver = get_data_version(temp_path)
-        print("Import game data version: %s" % (data_ver,))
-
-        # Get proper upgrader.
-        upgrader = UPGRADE_HANDLER.get_upgrader(data_ver)
-        if upgrader:
-            upgrader.upgrade_data(temp_path, None)
+        # Upgrade game data.
+        UPGRADE_HANDLER.upgrade_data(temp_path)
 
         # import models one by one
         data_handlers = DATA_SETS.all_handlers
