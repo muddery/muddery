@@ -20,7 +20,7 @@ from muddery.utils import readers
 from muddery.utils import writers
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import LS, LOCALIZED_STRINGS_HANDLER
-from muddery.utils.game_settings import CLIENT_SETTINGS
+from muddery.utils.game_settings import CLIENT_SETTINGS, GAME_SETTINGS
 from muddery.worlddata.editor import page_view
 from muddery.worlddata.editor.form_view import FormView
 from muddery.worlddata.editor.single_form_view import SingleFormView

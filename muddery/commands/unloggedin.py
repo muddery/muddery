@@ -345,16 +345,23 @@ class CmdUnconnectedCreate(Command):
             new_player = _create_player(session, playername, password, permissions)
             if new_player:
                 if MULTISESSION_MODE < 2:
-                    default_home = ObjectDB.objects.get_id(settings.DEFAULT_PLAYER_HOME)
+                    default_home = settings.DEFAULT_HOME
+                    try:
+                        default_home_key = GAME_SETTINGS.get("default_player_home_key")
+                        if default_home_key:
+                            rooms = utils.search_obj_data_key(default_home_key)
+                            default_home = rooms[0]
+                    except:
+                        pass
 
-                    start_location = None
-                    start_location_key = GAME_SETTINGS.get("start_location_key")
-                    if start_location_key:
-                        start_location = search_obj_data_key(start_location_key)
-                    if start_location:
-                        start_location = start_location[0]
-                    else:
-                        start_location = default_home
+                    start_location = default_home
+                    try:
+                        start_location_key = GAME_SETTINGS.get("start_location_key")
+                        if start_location_key:
+                            rooms = search_obj_data_key(start_location_key)
+                            start_location = rooms[0]
+                    except:
+                        pass
 
                     _create_character(GAME_SETTINGS.get("default_player_character_key"), 1, session,
                                       new_player, typeclass, start_location,
@@ -465,16 +472,23 @@ class CmdUnconnectedCreateConnect(Command):
             new_player = _create_player(session, playername, password, permissions)
             if new_player:
                 if MULTISESSION_MODE < 2:
-                    default_home = ObjectDB.objects.get_id(settings.DEFAULT_PLAYER_HOME)
+                    default_home = settings.DEFAULT_HOME
+                    try:
+                        default_home_key = GAME_SETTINGS.get("default_player_home_key")
+                        if default_home_key:
+                            rooms = utils.search_obj_data_key(default_home_key)
+                            default_home = rooms[0]
+                    except:
+                        pass
 
-                    start_location = None
-                    start_location_key = GAME_SETTINGS.get("start_location_key")
-                    if start_location_key:
-                        start_location = search_obj_data_key(start_location_key)
-                    if start_location:
-                        start_location = start_location[0]
-                    else:
-                        start_location = default_home
+                    start_location = default_home
+                    try:
+                        start_location_key = GAME_SETTINGS.get("start_location_key")
+                        if start_location_key:
+                            rooms = search_obj_data_key(start_location_key)
+                            start_location = rooms[0]
+                    except:
+                        pass
 
                     _create_character(GAME_SETTINGS.get("default_player_character_key"), 1, session,
                                       new_player, typeclass, start_location,

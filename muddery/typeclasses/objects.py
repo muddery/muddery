@@ -78,12 +78,9 @@ class MudderyObject(DefaultObject):
         """
         super(MudderyObject, self).at_object_creation()
 
-        if not self.attributes.has("typeclass_key"):
-            self.typeclass_key = None
-        if not self.attributes.has("condition"):
-            self.condition = None
-        if not self.attributes.has("icon"):
-            self.icon = None
+        self.typeclass_key = None
+        self.condition = None
+        self.icon = None
 
     def at_init(self):
         """
@@ -91,6 +88,10 @@ class MudderyObject(DefaultObject):
         """
         super(MudderyObject, self).at_init()
 
+        self.typeclass_key = None
+        self.condition = None
+        self.icon = None
+        
         try:
             # Load db data.
             self.load_data()
@@ -214,17 +215,16 @@ class MudderyObject(DefaultObject):
         Set data to the object."
         """
         key = self.get_data_key()
-        if not key:
-            return
+        if key:
+            self.load_data_fields(key)
 
-        self.load_data_fields(key)
-
-        if key[:len(settings.REVERSE_EXIT_PREFIX)] == settings.REVERSE_EXIT_PREFIX:
-            # Reverse exit's typeclass can only be set to settings.REVERSE_EXIT_TYPECLASS_PATH.
-            typeclass = settings.REVERSE_EXIT_TYPECLASS_PATH
-        else:
-            typeclass = getattr(self.dfield, "typeclass", "")
-        self.set_typeclass(typeclass)
+            # reset typeclass
+            if key[:len(settings.REVERSE_EXIT_PREFIX)] == settings.REVERSE_EXIT_PREFIX:
+                # Reverse exit's typeclass can only be set to settings.REVERSE_EXIT_TYPECLASS_PATH.
+                typeclass = settings.REVERSE_EXIT_TYPECLASS_PATH
+            else:
+                typeclass = getattr(self.dfield, "typeclass", "")
+            self.set_typeclass(typeclass)
 
         self.after_data_loaded()
         
