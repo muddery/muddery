@@ -7,6 +7,7 @@ from __future__ import print_function
 import os
 import shutil
 import ast
+import glob
 import django.core.management
 from muddery.server.upgrader import utils
 from muddery.server.upgrader.base_upgrader import BaseUpgrader
@@ -24,15 +25,15 @@ class Upgrader(BaseUpgrader):
 
     target_version = None
     
-    def upgrade(self, game_dir, game_template):
+    def upgrade_game(self, game_dir, game_template):
         """
-        Do upgrade.
+        Upgrade a game.
 
         Args:
             game_dir: (string) the game dir to be upgraded.
             game_template: (string) the game template used to upgrade the game dir.
         """
-        print("Doing upgrade.")
+        print("Upgrading game %s." % game_dir)
 
         temp_dir = None
         try:
@@ -105,3 +106,19 @@ class Upgrader(BaseUpgrader):
             if temp_dir:
                 # remove temp dir
                 shutil.rmtree(temp_dir)
+
+    def upgrade_data(self, data_path, game_template):
+        """
+        Upgrade game data.
+
+        Args:
+            data_path: (string) the data path to be upgraded.
+            game_template: (string) the game template used to upgrade the game dir.
+        """
+        print("Upgrading game data %s." % data_path)
+
+        from muddery.worlddata.data_sets import DATA_SETS
+        file_names = glob.glob(os.path.join(data_path, DATA_SETS.typeclasses.model_name + ".*"))
+        for file_name in file_names:
+            print("Remove file %s." % file_name)
+            os.remove(file_name)

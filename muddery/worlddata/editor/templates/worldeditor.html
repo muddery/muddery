@@ -54,8 +54,8 @@
     <form method="GET">
       <input type="submit" value="Download"/>
       <select name="file_type">
-        {% for type in export_types %}
-        <option value={{ type }}>{{ type }}</option>
+        {% for writer in writers %}
+        <option value={{ writer.type }}>{{ writer.name }}</option>
         {% endfor %}
       </select>
       <input type="hidden" name="export_game_data"/>
@@ -71,8 +71,8 @@
         {% endfor %}
       </select>
       <select name="file_type">
-        {% for type in export_types %}
-        <option value={{ type }}>{{ type }}</option>
+        {% for writer in writers %}
+        <option value={{ writer.type }}>{{ writer.name }}</option>
         {% endfor %}
       </select>
       <div><br></div>
