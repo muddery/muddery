@@ -168,6 +168,16 @@ class WorldRoomsForm(forms.ModelForm):
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         choices = [("", "---------")]
+        objects = DATA_SETS.world_areas.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['area'] = forms.ChoiceField(choices=choices)
+
+        choices = [("", "---------")]
+        objects = DATA_SETS.icon_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
+
+        choices = [("", "---------")]
         objects = DATA_SETS.image_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
         self.fields['background'] = forms.ChoiceField(choices=choices, required=False)
@@ -233,10 +243,10 @@ class WorldObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
-        object = DATA_SETS.typeclasses.objects.get(key="CLASS_WORLD_OBJECT")
-        choices = [(object.key, object.name + " (" + object.key + ")")]
-        object = DATA_SETS.typeclasses.objects.get(key="CLASS_OBJECT_CREATOR")
-        choices.append((object.key, object.name + " (" + object.key + ")"))
+        objects = DATA_SETS.typeclasses.objects.get(key="CLASS_WORLD_OBJECT")
+        choices = [(objects.key, objects.name + " (" + objects.key + ")")]
+        objects = DATA_SETS.typeclasses.objects.get(key="CLASS_OBJECT_CREATOR")
+        choices.append((objects.key, objects.name + " (" + objects.key + ")"))
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         objects = DATA_SETS.world_rooms.objects.all()
@@ -880,6 +890,21 @@ class DialogueSentencesForm(forms.ModelForm):
         fields = '__all__'
 
 
+class WorldAreasForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(WorldAreasForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+        choices = [("", "---------")]
+        objects = DATA_SETS.image_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['background'] = forms.ChoiceField(choices=choices, required=False)
+
+    class Meta:
+        model = DATA_SETS.world_areas.model
+        fields = '__all__'
+
+
 class LocalizedStringsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(LocalizedStringsForm, self).__init__(*args, **kwargs)
@@ -892,7 +917,7 @@ class LocalizedStringsForm(forms.ModelForm):
 
 class ImageResourcesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(ResourcesForm, self).__init__(*args, **kwargs)
+        super(ImageResourcesForm, self).__init__(*args, **kwargs)
         localize_form_fields(self)
 
     class Meta:
@@ -902,7 +927,7 @@ class ImageResourcesForm(forms.ModelForm):
 
 class IconResourcesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(ResourcesForm, self).__init__(*args, **kwargs)
+        super(IconResourcesForm, self).__init__(*args, **kwargs)
         localize_form_fields(self)
 
     class Meta:

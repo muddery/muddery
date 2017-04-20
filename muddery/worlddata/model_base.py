@@ -274,9 +274,15 @@ class world_rooms(models.Model):
     # room's description for display
     desc = models.TextField(blank=True)
 
+    # the area that the room belongs to
+    area = models.CharField(max_length=KEY_LENGTH, blank=True)
+
     # room's position which is used in maps
     position = models.CharField(max_length=POSITION_LENGTH, blank=True)
 
+    # room's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+    
     # room's background image resource
     background = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -1598,6 +1604,36 @@ class event_dialogues(models.Model):
         abstract = True
         verbose_name = "Event Dialogues"
         verbose_name_plural = "Event Dialogues"
+
+
+# ------------------------------------------------------------
+#
+# world areas
+#
+# ------------------------------------------------------------
+class world_areas(models.Model):
+    "World areas that rooms belongs to."
+
+    # area's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # area's name
+    name = models.CharField(max_length=NAME_LENGTH, default="")
+
+    # area's map background image resource
+    background = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "World Area"
+        verbose_name_plural = "World Areas"
+
+    def __unicode__(self):
+        return self.name + " (" + self.key + ")"
+
+    def clean(self):
+        auto_generate_key(self)
 
 
 # ------------------------------------------------------------
