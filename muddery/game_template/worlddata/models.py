@@ -455,6 +455,16 @@ class event_dialogues(model_base.event_dialogues):
     pass
 
 
+# ------------------------------------------------------------
+#
+# world areas
+#
+# ------------------------------------------------------------
+class world_areas(model_base.world_areas):
+    "World areas that rooms belongs to."
+    pass
+
+
 #------------------------------------------------------------
 #
 # localized strings

@@ -101,6 +101,7 @@ class DataSets(object):
         self.default_objects = DataHandler("default_objects")
         self.default_skills = DataHandler("default_skills")
         self.npc_shops = DataHandler("npc_shops")
+        self.world_areas = DataHandler("world_areas")
         self.image_resources = DataHandler("image_resources")
         self.icon_resources = DataHandler("icon_resources")
 
@@ -121,6 +122,7 @@ class DataSets(object):
                            self.default_skills,
                            self.shop_goods,
                            self.npc_shops,
+                           self.world_areas,
                            self.image_resources,
                            self.icon_resources]
 

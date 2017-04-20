@@ -237,11 +237,19 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Get the map that the character has revealed.
         Return value:
             {
-                "rooms": {room1's key: (name, position),
-                          room2's key: (name, position),
+                "rooms": {room1's key: {"name": name,
+                                        "icon": icon,
+                                        "area": area,
+                                        "pos": position},
+                          room2's key: {"name": name,
+                                        "icon": icon,
+                                        "area": area,
+                                        "pos": position},
                           ...},
-                "exits": {exit1's key: (room1's key, room2's key),
-                          exit2's key: (room3's key, room4's key},
+                "exits": {exit1's key: {"from": room1's key,
+                                        "to": room2's key},
+                          exit2's key: {"from": room3's key,
+                                        "to": room4's key},
                           ...}
             }
         """
@@ -253,7 +261,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
             room = utils.search_obj_data_key(room_key)
             if room:
                 room = room[0]
-                rooms[room_key] = (room.get_name(), room.position)
+                rooms[room_key] = {"name": room.get_name(),
+                                   "icon": room.icon,
+                                   "area": room.area,
+                                   "pos": room.position}
 
                 new_exits = room.get_exits()
                 if new_exits:
@@ -261,12 +272,15 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         for path in exits.values():
             # add room's neighbours
-            if not path[1] in rooms:
-                neighbour = utils.search_obj_data_key(path[1])
+            if not path["to"] in rooms:
+                neighbour = utils.search_obj_data_key(path["to"])
                 if neighbour:
-                    neighbour = neighbour[0]
-                    rooms[neighbour.get_data_key()] = (neighbour.get_name(), neighbour.position)
-
+                    neighbour = neighbour[0]                    
+                    rooms[neighbour.get_data_key()] = {"name": neighbour.get_name(),
+                                                       "icon": neighbour.icon,
+                                                       "area": neighbour.area,
+                                                       "pos": neighbour.position}
+                    
         return {"rooms": rooms, "exits": exits}
 
     def show_location(self):
@@ -281,11 +295,19 @@ class MudderyPlayerCharacter(MudderyCharacter):
             """
             reveal_map:
             {
-                "rooms": {room1's key: (name, position),
-                          room2's key: (name, position),
+                "rooms": {room1's key: {"name": name,
+                                        "icon": icon,
+                                        "area": area,
+                                        "pos": position},
+                          room2's key: {"name": name,
+                                        "icon": icon,
+                                        "area": area,
+                                        "pos": position},
                           ...},
-                "exits": {exit1's key: (room1's key, room2's key),
-                          exit2's key: (room3's key, room4's key},
+                "exits": {exit1's key: {"from": room1's key,
+                                        "to": room2's key},
+                          exit2's key: {"from": room3's key,
+                                        "to": room4's key},
                           ...}
             }
             """
@@ -294,17 +316,25 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 # reveal map
                 self.db.revealed_map.add(self.location.get_data_key())
 
-                rooms = {location_key: (self.location.get_name(), self.location.position)}
+                rooms = {location_key: {"name": self.location.get_name(),
+                                        "icon": self.location.icon,
+                                        "area": self.location.area,
+                                        "pos": self.location.position}}
+
                 exits = self.location.get_exits()
 
                 for path in exits.values():
                     # add room's neighbours
-                    if not path[1] in rooms:
-                        neighbour = utils.search_obj_data_key(path[1])
+                    if not path["to"] in rooms:
+                        neighbour = utils.search_obj_data_key(path["to"])
                         if neighbour:
                             neighbour = neighbour[0]
-                            rooms[neighbour.get_data_key()] = (neighbour.get_name(), neighbour.position)
 
+                            rooms[neighbour.get_data_key()] = {"name": neighbour.get_name(),
+                                                               "icon": neighbour.icon,
+                                                               "area": neighbour.area,
+                                                               "pos": neighbour.position}
+                    
                 msg["reveal_map"] = {"rooms": rooms, "exits": exits}
 
             # get appearance

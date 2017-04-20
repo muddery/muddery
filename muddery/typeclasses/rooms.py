@@ -33,6 +33,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         """
         super(MudderyRoom, self).at_object_creation()
 
+        self.area = None
         self.position = None
         self.background = None
 
@@ -41,6 +42,8 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         Set data_info to the object.
         """
         super(MudderyRoom, self).after_data_loaded()
+
+        self.area = getattr(self.dfield, "area", None)
 
         self.position = None
         try:
@@ -124,7 +127,8 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         exits = {}
         for cont in self.contents:
             if cont.destination:
-                exits[cont.get_data_key()] = (self.get_data_key(), cont.destination.get_data_key(),)
+                exits[cont.get_data_key()] = {"from": self.get_data_key(),
+                                              "to": cont.destination.get_data_key()}
         return exits
 
     def get_surroundings(self, caller):
