@@ -276,6 +276,9 @@ def build_all(caller=None):
     # Reset object key's info.
     OBJECT_KEY_HANDLER.reload()
 
+    # Build areas.
+    build_unique_objects(DATA_SETS.world_areas.objects, DATA_SETS.world_areas.model_name, caller)
+    
     # Build rooms.
     build_unique_objects(DATA_SETS.world_rooms.objects, DATA_SETS.world_rooms.model_name, caller)
 

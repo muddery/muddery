@@ -1,4 +1,5 @@
 key,name,path,category,desc
+CLASS_COMMON_AREA,Common Area,muddery.typeclasses.areas.MudderyArea,CATE_AREA,Common area's typeclass.
 CLASS_COMMON_ROOM,Common Room,muddery.typeclasses.rooms.MudderyRoom,CATE_ROOM,Common room's typeclass.
 CLASS_COMMON_EXIT,Common Exit,muddery.typeclasses.exits.MudderyExit,CATE_EXIT,Common exit's typeclass.
 CLASS_TWO_WAY_EXIT,Two Way Exit,muddery.typeclasses.exits.MudderyExit,CATE_EXIT,Two way exit's typeclass. It builds two exits on both sides.

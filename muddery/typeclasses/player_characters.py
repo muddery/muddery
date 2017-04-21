@@ -263,7 +263,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 room = room[0]
                 rooms[room_key] = {"name": room.get_name(),
                                    "icon": room.icon,
-                                   "area": room.area,
+                                   "area": room.location and room.location.get_data_key(),
                                    "pos": room.position}
 
                 new_exits = room.get_exits()
@@ -278,7 +278,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     neighbour = neighbour[0]                    
                     rooms[neighbour.get_data_key()] = {"name": neighbour.get_name(),
                                                        "icon": neighbour.icon,
-                                                       "area": neighbour.area,
+                                                       "area": neighbour.location and neighbour.location.get_data_key(),
                                                        "pos": neighbour.position}
                     
         return {"rooms": rooms, "exits": exits}
@@ -289,8 +289,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         if self.location:
             location_key = self.location.get_data_key()
+            area = self.location.location and self.location.location.get_appearance(self)
 
-            msg = {"current_location": location_key}
+            msg = {"current_location": {"key": location_key,
+                                        "area": area}}
 
             """
             reveal_map:
@@ -318,7 +320,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
                 rooms = {location_key: {"name": self.location.get_name(),
                                         "icon": self.location.icon,
-                                        "area": self.location.area,
+                                        "area": self.location.location and self.location.location.get_data_key(),
                                         "pos": self.location.position}}
 
                 exits = self.location.get_exits()
@@ -332,7 +334,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
                             rooms[neighbour.get_data_key()] = {"name": neighbour.get_name(),
                                                                "icon": neighbour.icon,
-                                                               "area": neighbour.area,
+                                                               "area": neighbour.location and neighbour.location.get_data_key(),
                                                                "pos": neighbour.position}
                     
                 msg["reveal_map"] = {"rooms": rooms, "exits": exits}

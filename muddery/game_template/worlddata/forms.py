@@ -38,6 +38,9 @@ class EventTriggerTypes(forms_base.EventTriggerTypes):
 class QuestDependencyTypesForm(forms_base.QuestDependencyTypesForm):
     pass
 
+class WorldAreasForm(forms_base.WorldAreasForm):
+    pass
+
 class WorldRoomsForm(forms_base.WorldRoomsForm):
     pass
 
@@ -138,9 +141,6 @@ class DialogueRelationsForm(forms_base.DialogueRelationsForm):
     pass
 
 class DialogueSentencesForm(forms_base.DialogueSentencesForm):
-    pass
-
-class WorldAreasForm(forms_base.WorldAreasForm):
     pass
 
 class LocalizedStringsForm(forms_base.LocalizedStringsForm):

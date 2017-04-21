@@ -46,6 +46,16 @@ class typeclasses(model_base.typeclasses):
     pass
 
 
+# ------------------------------------------------------------
+#
+# world areas
+#
+# ------------------------------------------------------------
+class world_areas(model_base.world_areas):
+    "Rooms belongs to areas."
+    pass
+    
+
 #------------------------------------------------------------
 #
 # store all rooms
@@ -452,16 +462,6 @@ class event_attacks(model_base.event_attacks):
 #------------------------------------------------------------
 class event_dialogues(model_base.event_dialogues):
     "Store all event dialogues."
-    pass
-
-
-# ------------------------------------------------------------
-#
-# world areas
-#
-# ------------------------------------------------------------
-class world_areas(model_base.world_areas):
-    "World areas that rooms belongs to."
     pass
 
 

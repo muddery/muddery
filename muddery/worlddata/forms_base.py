@@ -159,6 +159,25 @@ class QuestDependencyTypesForm(forms.ModelForm):
         fields = '__all__'
 
 
+class WorldAreasForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(WorldAreasForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+        objects = DATA_SETS.typeclasses.objects.filter(category="CATE_AREA")
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
+
+        choices = [("", "---------")]
+        objects = DATA_SETS.image_resources.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['background'] = forms.ChoiceField(choices=choices, required=False)
+
+    class Meta:
+        model = DATA_SETS.world_areas.model
+        fields = '__all__'
+        
+    
 class WorldRoomsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldRoomsForm, self).__init__(*args, **kwargs)
@@ -170,7 +189,7 @@ class WorldRoomsForm(forms.ModelForm):
         choices = [("", "---------")]
         objects = DATA_SETS.world_areas.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['area'] = forms.ChoiceField(choices=choices)
+        self.fields['location'] = forms.ChoiceField(choices=choices)
 
         choices = [("", "---------")]
         objects = DATA_SETS.icon_resources.objects.all()
@@ -887,21 +906,6 @@ class DialogueSentencesForm(forms.ModelForm):
 
     class Meta:
         model = DATA_SETS.dialogue_sentences.model
-        fields = '__all__'
-
-
-class WorldAreasForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(WorldAreasForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-        choices = [("", "---------")]
-        objects = DATA_SETS.image_resources.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['background'] = forms.ChoiceField(choices=choices, required=False)
-
-    class Meta:
-        model = DATA_SETS.world_areas.model
         fields = '__all__'
 
 

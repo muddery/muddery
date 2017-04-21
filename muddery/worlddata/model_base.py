@@ -255,6 +255,51 @@ class typeclasses(SystemData):
 
 # ------------------------------------------------------------
 #
+# world areas
+#
+# ------------------------------------------------------------
+class world_areas(models.Model):
+    "The game map is composed by areas."
+
+    # area's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    
+    # The key of a area typeclass.
+    # area's typeclass
+    typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # area's name
+    name = models.CharField(max_length=NAME_LENGTH, default="")
+    
+    # area's description for display
+    desc = models.TextField(blank=True)
+
+    # area's map background image resource
+    background = models.CharField(max_length=KEY_LENGTH, blank=True)
+    
+    # Corresponding data are used to define the background image's position.
+    # The corresponding map position will be shown on this point.
+    background_point = models.CharField(max_length=POSITION_LENGTH, blank=True)
+    
+    # corresponding map position which matches the area background position
+    corresp_map_pos = models.CharField(max_length=POSITION_LENGTH, blank=True)
+    
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "World Area"
+        verbose_name_plural = "World Areas"
+
+    def __unicode__(self):
+        return self.name + " (" + self.key + ")"
+
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
+
+
+# ------------------------------------------------------------
+#
 # store all rooms
 #
 # ------------------------------------------------------------
@@ -274,8 +319,9 @@ class world_rooms(models.Model):
     # room's description for display
     desc = models.TextField(blank=True)
 
-    # the area that the room belongs to
-    area = models.CharField(max_length=KEY_LENGTH, blank=True)
+    # The key of a world area.
+    # The room's location, it must be a area.
+    location = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # room's position which is used in maps
     position = models.CharField(max_length=POSITION_LENGTH, blank=True)
@@ -1604,36 +1650,6 @@ class event_dialogues(models.Model):
         abstract = True
         verbose_name = "Event Dialogues"
         verbose_name_plural = "Event Dialogues"
-
-
-# ------------------------------------------------------------
-#
-# world areas
-#
-# ------------------------------------------------------------
-class world_areas(models.Model):
-    "World areas that rooms belongs to."
-
-    # area's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
-
-    # area's name
-    name = models.CharField(max_length=NAME_LENGTH, default="")
-
-    # area's map background image resource
-    background = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        verbose_name = "World Area"
-        verbose_name_plural = "World Areas"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
 
 
 # ------------------------------------------------------------

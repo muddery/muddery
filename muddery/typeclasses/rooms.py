@@ -33,7 +33,6 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         """
         super(MudderyRoom, self).at_object_creation()
 
-        self.area = None
         self.position = None
         self.background = None
 
@@ -42,8 +41,6 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         Set data_info to the object.
         """
         super(MudderyRoom, self).after_data_loaded()
-
-        self.area = getattr(self.dfield, "area", None)
 
         self.position = None
         try:
@@ -114,9 +111,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         info = super(MudderyRoom, self).get_appearance(caller)
 
         # add background
-        background = getattr(self, "background", None)
-        if background:
-            info["background"] = background
+        info["background"] = getattr(self, "background", None)
 
         return info
         
