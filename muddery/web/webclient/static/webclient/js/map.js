@@ -16,6 +16,7 @@ var map = {
                         //              ...]
 
     _current_location: null,
+    _current_area: null,
 
     clearData: function() {
         this._map_rooms = {};
@@ -41,7 +42,8 @@ var map = {
     },
 
     setCurrentLocation: function(location) {
-        this._current_location = location;
+        this._current_location = location["key"];
+        this._current_area = location["area"];
     },
 
     revealMap: function(data) {
@@ -140,13 +142,34 @@ var map = {
         var origin_x = map_width / 2;
         var origin_y = map_height / 2;
         var current_map_key = "";		// Only show rooms and exits on the same map.
-
+        
         if (current_room["pos"]) {
             // set origin point
             origin_x -= current_room["pos"][0] * scale;
             origin_y -= -current_room["pos"][1] * scale;
 
-            current_map_key = current_room["area"];
+            current_area_key = current_room["area"];
+        }
+        
+        // background
+        if (this._current_area && this._current_area["background"]) {
+             var x = 0;
+             var y = 0;
+             
+             if (this._current_area["background_point"]) {
+             	x -= this._current_area["background_point"][0];
+             	y -= this._current_area["background_point"][1];
+             }
+             
+             if (this._current_area["corresp_map_pos"]) {
+             	x += this._current_area["corresp_map_pos"][0] * scale + origin_x;
+             	y += -this._current_area["corresp_map_pos"][1] * scale + origin_y;
+             }
+
+             svg.append("image")
+                .attr("x", x)
+                .attr("y", y)
+                .attr("xlink:href", this._current_area["background"]);
         }
 
         if (current_room["pos"] &&
@@ -157,8 +180,8 @@ var map = {
                 if (begin in this._map_rooms) {
                     var from_room = this._map_rooms[begin];
 
-                    var from_map_key = from_room["area"];
-            		if (from_map_key != current_map_key) {
+                    var from_area_key = from_room["area"];
+            		if (from_area_key != current_area_key) {
             		    continue;
             		}
 
@@ -167,8 +190,8 @@ var map = {
                         if (this._map_paths[begin][end] in this._map_rooms) {
                             var to_room = this._map_rooms[this._map_paths[begin][end]];
 
-							var to_map_key = to_room["area"];
-							if (to_map_key != current_map_key) {
+							var to_area_key = to_room["area"];
+							if (to_area_key != current_area_key) {
 								continue;
 							}
 
@@ -181,24 +204,24 @@ var map = {
                 }
             }
 
-            svg.selectAll("line")
-                        .data(path_data)
-                        .enter()
-                        .append("line")
-                        .attr("x1",  function(d, i) {
-                              return d["from"][0] * scale + origin_x;
-                              })
-                        .attr("y1",  function(d, i) {
-                              return -d["from"][1] * scale + origin_y;
-                              })
-                        .attr("x2",  function(d, i) {
-                              return d["to"][0] * scale + origin_x;
-                              })
-                        .attr("y2",  function(d, i) {
-                              return -d["to"][1] * scale + origin_y;
-                              })
-                        .attr("stroke", "grey")
-                        .attr("stroke-width", 2);
+            svg.selectAll()
+                .data(path_data)
+                .enter()
+                .append("line")
+                .attr("x1",  function(d, i) {
+                        return d["from"][0] * scale + origin_x;
+                        })
+                .attr("y1",  function(d, i) {
+                        return -d["from"][1] * scale + origin_y;
+                        })
+                .attr("x2",  function(d, i) {
+                        return d["to"][0] * scale + origin_x;
+                        })
+                .attr("y2",  function(d, i) {
+                        return -d["to"][1] * scale + origin_y;
+                        })
+                .attr("stroke", "grey")
+                .attr("stroke-width", 2);
         }
 
         if (this._map_rooms) {
@@ -212,8 +235,8 @@ var map = {
                     var room = this._map_rooms[key];
                     if (room["pos"]) {
                     
-                    	var map_key = room["area"];
-						if (map_key != current_map_key) {
+                    	var area_key = room["area"];
+						if (area_key != current_area_key) {
 							continue;
 						}
 							
@@ -237,7 +260,7 @@ var map = {
                 current_room_index = 0;
             }
             
-            svg.selectAll("image")
+            svg.selectAll()
                 .data(room_data.filter(function(d) {
                         // Draw icons.
                 		return d["icon"];
@@ -256,7 +279,8 @@ var map = {
                         return d["icon"];
                       });
 
-            svg.selectAll("rect")
+            /*
+            svg.selectAll()
                 .data(room_data.filter(function(d) {
                         // Draw rect to rooms without icon.
                 		return !d["icon"];
@@ -273,8 +297,9 @@ var map = {
                 .attr("height", room_size)
                 .attr("stroke", "grey")
                 .attr("stroke-width", 1);
+            */
 
-            svg.selectAll("text")
+            svg.selectAll()
                 .data(room_data)
                 .enter()
                 .append("text")
@@ -285,7 +310,9 @@ var map = {
  		                // Under the room's icon.
                         return -d["pos"][1] * scale + origin_y;
                       })
-                .attr("dy", room_size / 2 + 16)
+                .attr("dy", function(d) {
+                        return d["icon"] ? room_size / 2 + 16 : 8;
+                      })
                 .attr("text-anchor", "middle")
                 .attr("font-family", "sans-serif")
                 .attr("font-size", function(d, i) {

@@ -1,4 +1,4 @@
-key,name,typeclass,desc,area,position,icon,background
+key,name,typeclass,desc,location,position,icon,background
 room_intro,欢迎！,CLASS_COMMON_ROOM,点击“开始游戏”，展开一段特别的旅程吧！,area_intro,"(0,0)",icon_muddery,
 room_colorfulworld_hole,电缆井,CLASS_COMMON_ROOM,四周一片漆黑，只有头顶的天空透着一点灰暗的光。周围的空间的很小，一伸手就能触碰到坚硬的四壁，在脚下能感觉到有几捆塑料线，这应该是个电缆井吧。我怎么会在这里呢？,area_hole,"(0,0)",icon_room,
 room_colorfulworld_alley,小巷,CLASS_COMMON_ROOM,这是一条狭长的小巷，没有路灯，显得很昏暗。它一端是死路，另一端一直向前延伸出去，应该可以通向大路吧。,area_park,"(0,7)",icon_room,

@@ -47,6 +47,7 @@ class DataSets(object):
                            self.character_models]
 
         # Objects data
+        self.world_areas = DataHandler("world_areas")
         self.world_rooms = DataHandler("world_rooms")
         self.world_exits = DataHandler("world_exits")
         self.world_objects = DataHandler("world_objects")
@@ -61,7 +62,8 @@ class DataSets(object):
         self.shops = DataHandler("shops")
         self.shop_goods = DataHandler("shop_goods")
 
-        self.object_data = [self.world_rooms,
+        self.object_data = [self.world_areas,
+                            self.world_rooms,
                             self.world_exits,
                             self.world_objects,
                             self.world_npcs,
@@ -101,7 +103,6 @@ class DataSets(object):
         self.default_objects = DataHandler("default_objects")
         self.default_skills = DataHandler("default_skills")
         self.npc_shops = DataHandler("npc_shops")
-        self.world_areas = DataHandler("world_areas")
         self.image_resources = DataHandler("image_resources")
         self.icon_resources = DataHandler("icon_resources")
 
@@ -122,7 +123,6 @@ class DataSets(object):
                            self.default_skills,
                            self.shop_goods,
                            self.npc_shops,
-                           self.world_areas,
                            self.image_resources,
                            self.icon_resources]
 
