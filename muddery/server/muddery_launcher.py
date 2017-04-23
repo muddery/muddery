@@ -322,7 +322,7 @@ def main():
         create_game_directory(gamedir, template)
 
         os.chdir(gamedir)
-        evennia_launcher.init_game_directory(GAME_DIR, check_db=False)
+        evennia_launcher.init_game_directory(gamedir, check_db=False)
 
         try:
             django_args = ["makemigrations"]
@@ -351,7 +351,7 @@ def main():
                 template = args.upgrade[1]
 
             gamedir = os.path.abspath(os.path.join(CURRENT_DIR, game_name))
-            UPGRADE_HANDLER.upgrade(gamedir, template)
+            UPGRADE_HANDLER.upgrade_game(gamedir, template, MUDDERY_LIB)
         except Exception, e:
             print("Upgrade failed: %s" % e)
 

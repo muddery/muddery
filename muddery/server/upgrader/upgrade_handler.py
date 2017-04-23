@@ -5,9 +5,11 @@ Upgrade custom's game dir to the latest version.
 from __future__ import print_function
 
 import os
+import shutil
 import muddery
 from muddery.server.upgrader import utils
-from muddery.server.upgrader import upgrader_0_0
+from muddery.server.upgrader import upgrader_0_0_0
+from muddery.server.upgrader import upgrader_0_2_0
 
 
 class UpgradeHandler(object):
@@ -19,9 +21,10 @@ class UpgradeHandler(object):
         Add upgraders.
         """
         self.upgrader_list = []
-        self.upgrader_list.append(upgrader_0_0.Upgrader())
+        self.upgrader_list.append(upgrader_0_0_0.Upgrader())
+        self.upgrader_list.append(upgrader_0_2_0.Upgrader())
 
-    def upgrade(self, game_dir, game_template):
+    def upgrade_game(self, game_dir, game_template, muddery_lib):
         # Get first two version numbers.
         if not os.path.exists(game_dir):
             print("\nCan not find dir '%s'.\n" % game_dir)
@@ -48,6 +51,11 @@ class UpgradeHandler(object):
             # do upgrade
             upgrader.upgrade_game(game_dir, game_template)
             print("\nYour game has been upgraded to muddery version %s.\n" % muddery.__version__)
+
+            # copy version file
+            version_src = os.path.join(muddery_lib, "VERSION.txt")
+            version_dest = os.path.join(game_dir, "muddery_version.txt")
+            shutil.copy2(version_src, version_dest)
 
         except Exception, e:
             print("\nUpgrade failed: %s\n" % e)

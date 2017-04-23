@@ -40,6 +40,16 @@ class typeclasses(model_base.typeclasses):
     pass
 
 
+# ------------------------------------------------------------
+#
+# world areas
+#
+# ------------------------------------------------------------
+class world_areas(model_base.world_areas):
+    "The game map is composed by areas."
+    pass
+
+
 #------------------------------------------------------------
 #
 # store all rooms
