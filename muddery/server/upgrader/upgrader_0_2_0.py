@@ -34,7 +34,7 @@ class Upgrader(BaseUpgrader):
         print("Upgrading game %s." % game_dir)
 
         os.chdir(game_dir)
-        init_game_directory(game_dir, check_db=True)
+        init_game_directory(game_dir, check_db=False)
 
         # make new migrations
         django_args = ["makemigrations"]
