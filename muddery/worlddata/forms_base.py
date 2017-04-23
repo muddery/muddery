@@ -162,7 +162,6 @@ class QuestDependencyTypesForm(forms.ModelForm):
 class WorldAreasForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WorldAreasForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
 
         objects = DATA_SETS.typeclasses.objects.filter(category="CATE_AREA")
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
@@ -172,6 +171,8 @@ class WorldAreasForm(forms.ModelForm):
         objects = DATA_SETS.image_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
         self.fields['background'] = forms.ChoiceField(choices=choices, required=False)
+
+        localize_form_fields(self)
 
     class Meta:
         model = DATA_SETS.world_areas.model

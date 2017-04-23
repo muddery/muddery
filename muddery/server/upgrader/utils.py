@@ -31,7 +31,7 @@ def get_data_version(path):
         pass
 
     ver_list = game_ver.split('.')
-    num_list = [0, 0]
+    num_list = [0, 0, 0]
     for i, ver in enumerate(ver_list):
         if i >= len(num_list):
             break
@@ -39,6 +39,28 @@ def get_data_version(path):
             num_list[i] = int(ver)
 
     return tuple(num_list)
+
+
+def compare_version(ver1, ver2):
+    """
+    Compare two version.
+
+    Args:
+        ver1: (tuple) version number's list 1.
+        ver2: (tuple) version number's list 2.
+
+    Returns:
+        -1: ver1 < ver2
+        0: ver1 == ver2
+        1: ver1 > ver2
+    """
+    if not ver1 or not ver2:
+        return 0
+    if ver1[0] < ver2[0]:
+        return -1
+    if ver1[0] > ver2[0]:
+        return 1
+    return compare_version(ver1[1:], ver2[1:])
 
 
 def make_backup(game_dir):
