@@ -360,19 +360,24 @@ class CmdGive(MuxCommand):
         target.msg("%s gives you %s." % (caller.key, to_give.key))
 
 
-class CmdSay(MuxCommand):
+#------------------------------------------------------------
+# Say something in the room.
+#------------------------------------------------------------
+class CmdSay(Command):
     """
     speak as your character
 
     Usage:
-      say <message>
+        {"cmd":"say",
+         "args":<message>
+        }
 
     Talk to those in your current location.
     """
 
     key = "say"
-    aliases = ['"', "'"]
     locks = "cmd:all()"
+    help_cateogory = "General"
 
     def func(self):
         "Run the say command"
@@ -380,7 +385,6 @@ class CmdSay(MuxCommand):
         caller = self.caller
 
         if not self.args:
-            caller.msg("Say what?")
             return
 
         speech = self.args
@@ -389,11 +393,10 @@ class CmdSay(MuxCommand):
         speech = caller.location.at_say(caller, speech)
 
         # Feedback for the object doing the talking.
-        caller.msg('You say, "%s{n"' % speech)
+        caller.msg(LS("You say, '%s'") % speech)
 
         # Build the string to emit to neighbors.
-        emit_string = '%s says, "%s{n"' % (caller.name,
-                                               speech)
+        emit_string = LS("%s says, '%s'") % (caller.get_name(), speech)
         caller.location.msg_contents(emit_string,
                                      exclude=caller)
 

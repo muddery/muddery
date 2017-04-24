@@ -102,6 +102,10 @@ var frame = {
             .css('display', 'none')
             .appendTo(tab_content);
 
+        uimgr.speechBox()
+            .css('display', 'none')
+            .appendTo(tab_content);
+
         uimgr.commandBox()
             .css('display', 'none')
             .appendTo(tab_content);
@@ -200,17 +204,43 @@ var frame = {
                 .addClass('dropdown-item')
                 .text(LS('Skill')))
             .appendTo(popup_character);
-
-        // tab quest
+            
         $('<li>')
-            .attr('id', 'tab_quest')
-            .attr('role', 'presentation')
-            .addClass('active')
-            .css('display', 'none')
             .append($('<a>')
                 .attr('onclick', 'webclient.showPage("quest")')
+                .addClass('dropdown-item')
                 .text(LS('Quest')))
+            .appendTo(popup_character);
+
+        // tab social
+        var tab_social = $('<li>')
+            .attr('id', 'tab_social')
+            .attr('role', 'presentation')
+            .addClass('dropup')
+            .css('display', 'none')
             .appendTo(ul);
+
+        $('<a>')
+            .attr('data-toggle', 'dropdown')
+            .attr('role', 'button')
+            .attr('aria-haspopup', 'true')
+            .attr('aria-expanded', 'false')
+            .addClass('dropdown-toggle')
+            .text(LS('Social'))
+            .append($('<span>')
+                .addClass('caret'))
+            .appendTo(tab_social);
+
+        var popup_social = $('<ul>')
+            .addClass('dropdown-menu')
+            .appendTo(tab_social);
+
+        $('<li>')
+            .append($('<a>')
+                .attr('onclick', 'webclient.showPage("speech")')
+                .addClass('first-dropdown-item')
+                .text(LS('Say')))
+            .appendTo(popup_social);
 
         // tab map
         $('<li>')

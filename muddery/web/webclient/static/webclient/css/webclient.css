@@ -67,6 +67,13 @@ body {
     color: #111;
 }
 
+.inputbox {
+    width: 240px;
+    padding: 2px 4px;
+    margin: 2px 2px;
+    color: #111;
+}
+
 input[type=checkbox], input[type=radio] {
     margin: 4px 4px;
 }

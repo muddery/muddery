@@ -160,7 +160,7 @@ def create_normal_player(session, name, password):
 
     if not (player and pswd):
         # No playername or password match
-        session.msg(LS("Incorrect username or password."))
+        session.msg({"alert":LS("Incorrect username or password.")})
         # this just updates the throttle
         _throttle(session)
         # calls player hook for a failed login if possible.
@@ -302,7 +302,7 @@ class CmdUnconnectedCreate(Command):
         playername = re.sub(r"\s+", " ", playername).strip()
         if PlayerDB.objects.filter(username__iexact=playername):
             # player already exists (we also ignore capitalization here)
-            session.msg({"alert":"Sorry, there is already a player with the name '%s'." % playername})
+            session.msg({"alert":LS("Sorry, there is already a player with the name '%s'.") % playername})
             return
         # Reserve playernames found in GUEST_LIST
         if settings.GUEST_LIST and playername.lower() in (guest.lower() for guest in settings.GUEST_LIST):
@@ -429,7 +429,7 @@ class CmdUnconnectedCreateConnect(Command):
         playername = re.sub(r"\s+", " ", playername).strip()
         if PlayerDB.objects.filter(username__iexact=playername):
             # player already exists (we also ignore capitalization here)
-            session.msg({"alert":"Sorry, there is already a player with the name '%s'." % playername})
+            session.msg({"alert":LS("Sorry, there is already a player with the name '%s'.") % playername})
             return
         # Reserve playernames found in GUEST_LIST
         if settings.GUEST_LIST and playername.lower() in (guest.lower() for guest in settings.GUEST_LIST):
@@ -586,6 +586,7 @@ class CmdUnconnectedLoginStart(Command):
         "Send settings to the client."
         client_settings = CLIENT_SETTINGS.all_values()
         client_settings["game_name"] = GAME_SETTINGS.get("game_name")
+        client_settings["show_social_box"] = not GAME_SETTINGS.get("solo_mode")
         self.caller.msg({"settings": client_settings})
 
         "Show the connect screen."

@@ -93,3 +93,6 @@ category,origin,local
 ,"%s has gone.","%s已经离开。"
 ,"Sorry, %s is not enough.","对不起，%s不足。"
 ,"Sorry, you can not take more %s.","对不起，您无法获得更多的%s。"
+,"Sorry, there is already a player with the name '%s'.","对不起，已经有名为“%s”的用户了。"
+,"You say, '%s'","你说：%s"
+,"%s says, '%s'","%s说：%s"

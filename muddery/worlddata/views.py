@@ -297,6 +297,7 @@ def apply_changes(request):
         CLIENT_SETTINGS.reset()
         client_settings = CLIENT_SETTINGS.all_values()
         client_settings["game_name"] = GAME_SETTINGS.get("game_name")
+        client_settings["show_social_box"] = not GAME_SETTINGS.get("solo_mode")
         text = json.dumps({"settings": client_settings})
         SESSIONS.announce_all(text)
 
