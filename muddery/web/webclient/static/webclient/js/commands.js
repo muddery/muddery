@@ -121,12 +121,29 @@ var commands = {
         Evennia.msg("text", this.cmdString("quit", ""));
     },
     
-    // common command
+    // send command from command box
     doSendCommand: function() {
         var command = $("#box_command :text").val();
         $("#box_command :text").val("");
         
         Evennia.msg("text", command);
+    },
+    
+    // send command text
+    doSendText: function(test) {
+        Evennia.msg("text", test);
+    },
+    
+    // send out a speech
+    doSay: function() {
+        var speech = $("#box_speech :text").val();
+        $("#box_speech :text").val("");
+
+        if (!speech) {
+            return;
+        }
+
+        Evennia.msg("text", this.cmdString("say", speech));
     },
     
     // do test

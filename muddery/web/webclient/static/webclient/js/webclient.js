@@ -957,17 +957,6 @@ var webclient = {
         popupmgr.doCloseBox();
     },
 
-    doInputCommand : function() {
-        var command = $("#popup_box :text").val();
-        $("#popup_box :text").val("");
-        
-        history_add(command);
-        HISTORY_POS = 0;
-        
-        sendCommand(command);
-        popupmgr.doCloseBox();
-    },
-
     // hide all tabs
     hideTabs : function() {
         $("#tab_pills").children().css("display", "none");
@@ -986,9 +975,6 @@ var webclient = {
 
         $("#tab_register").css("display", "");
         $("#tab_login").css("display", "");
-        $("#tab_command").css("display", "");
-
-        $("#map_button").css("display", "none");
     },
     
     // show login tabs
@@ -997,12 +983,11 @@ var webclient = {
 
         $("#tab_scene").css("display", "");
         $("#tab_character").css("display", "");
-        $("#tab_quest").css("display", "");
+        if (settings.show_social_box) {
+        	$("#tab_social").css("display", "");
+        }
         $("#tab_map").css("display", "");
         $("#tab_system").css("display", "");
-        $("#tab_command").css("display", "");
-
-        $("#map_button").css("display", "");
     },
     
     unselectAllTabs : function() {
@@ -1053,10 +1038,7 @@ var webclient = {
 
                 if($.cookie("is_auto_login")) {
                     $("#cb_auto_login").attr("checked", "true");
-
-                    var args = {"playername" : $.cookie("login_name"),
-                                "password" : $.cookie("login_password")};
-                    sendCommand(JSON.stringify({"cmd" : "connect", "args" : args}));
+                    commands.doLogin();
                 }
             } else {
                 $("#cb_save_password").removeAttr("checked");

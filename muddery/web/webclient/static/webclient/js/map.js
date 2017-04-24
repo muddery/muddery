@@ -319,8 +319,9 @@ var map = {
                         return (i == current_room_index) ? "16px" : "14px";
                       })
                 .attr("fill", function(d, i) {
-                        return (i == current_room_index) ? "white" : "#ccc";
+                        return (i == current_room_index) ? "white" : "#eee";
                       })
+                .style("text-shadow", ".1em .1em .5em #000000")
                 .text(function(d) {
                         return text2html.clearTags(d["name"]);
                       });

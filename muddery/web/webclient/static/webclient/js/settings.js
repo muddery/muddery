@@ -15,6 +15,9 @@ var settings = {
     // can close dialogue box
     can_close_dialogue: false,
     
+    // social box
+    show_social_box: false,
+    
     // game title
     game_title: '',
     
@@ -30,6 +33,14 @@ var settings = {
             $("#item_command").css("display", "");
         } else {
             $("#item_command").css("display", "none");
+        }
+        
+        var login = $("#tab_scene").css("display");
+        if (self.show_social_box && login) {
+        	$("#tab_social").css("display", "");
+        }
+        else {
+        	$("#tab_social").css("display", "none");
         }
 
         if (this.game_name) {

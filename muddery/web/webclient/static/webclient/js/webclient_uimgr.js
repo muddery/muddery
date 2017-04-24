@@ -718,6 +718,38 @@ var uimgr = {
         return box;
     },
 
+    speechBox: function() {
+        var box = $('<div>')
+            .attr('id', 'box_speech');
+
+        $('<div>')
+            .text(LS('Please input your words.'))
+            .appendTo(box);
+
+        $('<div>')
+            .append($('<input>')
+                .attr('type', 'text')
+                .attr('aria-describedby', 'basic-addon2')
+                .attr('autocomplete', 'off')
+                .attr('onkeydown', 'if (event.keyCode==13) {commands.doSay();}')
+                .addClass('form-control')
+                .addClass('inputbox')
+                .val(''))
+            .appendTo(box);
+
+        $('<div>')
+            .append($('<input>')
+                .attr('type', 'button')
+                .attr('autocomplete', 'off')
+                .attr('onclick', 'commands.doSay()')
+                .addClass('btn')
+                .addClass('button_left')
+                .val(LS('SEND')))
+            .appendTo(box);
+
+        return box;
+    },
+    
     commandBox: function() {
         var box = $('<div>')
             .attr('id', 'box_command');
@@ -732,7 +764,7 @@ var uimgr = {
                 .attr('aria-describedby', 'basic-addon2')
                 .attr('autocomplete', 'off')
                 .addClass('form-control')
-                .addClass('editbox')
+                .addClass('inputbox')
                 .val(''))
             .appendTo(box);
 
