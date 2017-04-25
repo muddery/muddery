@@ -5,9 +5,12 @@ page and serve it eventual static content.
 
 """
 from __future__ import print_function
+
+import re
+from django.conf import settings
 from django.shortcuts import render
 from django.contrib.auth import login
-
+from django.template.exceptions import TemplateDoesNotExist
 from evennia.players.models import PlayerDB
 from evennia.utils import logger
 
@@ -50,4 +53,21 @@ def webclient(request):
     # pagevars = {'browser_sessid': request.session.session_key}
     pagevars = {}
 
-    return render(request, 'webclient.html', pagevars)
+    try:
+        return render(request, settings.LANGUAGE_CODE + "/webclient.html", pagevars)
+    except TemplateDoesNotExist, e:
+        return render(request, "webclient.html", pagevars)
+
+
+def view(request):
+    """
+    World Editor page template loading.
+    """
+    path = re.sub(r"^/webclient/", "", request.path)
+    if not path:
+        path = "webclient.html"
+
+    try:
+        return render(request, settings.LANGUAGE_CODE + "/" + path)
+    except TemplateDoesNotExist, e:
+        return render(request, path)

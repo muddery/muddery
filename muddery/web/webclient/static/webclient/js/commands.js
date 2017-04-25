@@ -35,41 +35,23 @@ var commands = {
     // functions when user click a button
 
     // login
-    doLogin : function() {
-        var playername = $("#login_name").val();
-        var password = $("#login_password").val();
-
-        $("#login_password").val("");
-        $("#reg_password").val("");
-        $("#reg_password_again").val("");
-
+    doLogin: function(playername, password) {
         var args = {"playername" : playername,
                     "password" : password};
         Evennia.msg("text", this.cmdString("connect", args));
-
-        commands.doAutoLoginConfig(playername, password);
     },
 
     // register
-    doRegister : function() {
+    doRegister: function(playername, nickname, password) {
         if (!Evennia.isConnected()) {
             Evennia.connect();
         }
-        
-        var playername = $("#reg_name").val();
-        var nickname = $("#reg_nickname").val();
-        var password = $("#reg_password").val();
-        var password_again = $("#reg_password_again").val();
 
-        $("#login_name").val(playername);
-        $("#login_password").val("");
-        $("#reg_password").val("");
-        $("#reg_password_again").val("");
-
-        if (password != password_again) {
-            webclient.displayAlert(LS("Password does not match."));
-            return;
-        }
+        // $("#login_name").val(playername);
+        //if (password != password_again) {
+        //    webclient.displayAlert(LS("Password does not match."));
+        //    return;
+        //}
 
         var args = {"playername" : playername,
                     "nickname" : nickname,
@@ -151,12 +133,12 @@ var commands = {
         // test codes
     },
 
-    doAutoLoginConfig : function(playername, password) {
-        if($("#cb_save_password").is(":checked")) {
+    doAutoLoginConfig: function(playername, password, save_password, auto_login) {
+        if (save_password) {
             $.cookie("login_name", playername);
             $.cookie("login_password", password);
 
-            if($("#cb_auto_login").is(":checked")) {
+            if (auto_login) {
                 $.cookie("is_auto_login", 'true');
             } else {
                 $.cookie("is_auto_login", '', {expires: -1});
@@ -164,19 +146,14 @@ var commands = {
         }
     },
 
-    doSetSavePassword : function() {
-        if($("#cb_save_password").is(":checked")) {
+    doSetSavePassword: function(save_password) {
+        if (save_password) {
             $.cookie("is_save_password", 'true');
         } else {
             $.cookie("login_name", '', {expires: -1});
             $.cookie("login_password", '', {expires: -1});
             $.cookie("is_save_password", '', {expires: -1});
             $.cookie("is_auto_login", '', {expires: -1});
-            $("#cb_auto_login").removeAttr("checked");
         }
     },
 }
-
-
-// Callback function - called when the browser window resizes
-$(window).resize(webclient.doSetSizes);
