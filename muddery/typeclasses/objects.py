@@ -157,9 +157,12 @@ class MudderyObject(DefaultObject):
         Args:
             key: (string) Key of the data info.
         """
-        if key == self.get_data_key():
-            "Key has not changed."
-            return
+        current_key = self.get_data_key(default=None)
+        if current_key is not None:
+            # Has data key
+            if key == current_key:
+                # Key has not changed.
+                return
         
         # Save data info's key and model
         utils.set_obj_data_key(self, key)
@@ -452,13 +455,16 @@ class MudderyObject(DefaultObject):
             except Exception, e:
                 logger.log_errmsg("Load icon %s error: %s" % (icon_key, e))
 
-    def get_data_key(self):
+    def get_data_key(self, default=""):
         """
         Get data's key.
+
+        Args:
+            default: (string) default value if can not find the data key.
         """
         key = self.attributes.get(key="key", category=settings.DATA_KEY_CATEGORY, strattr=True)
         if not key:
-            key = ""
+            key = default
         return key
 
     def is_visible(self, caller):
