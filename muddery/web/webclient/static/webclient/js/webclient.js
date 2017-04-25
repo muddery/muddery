@@ -941,6 +941,8 @@ var webclient = {
         else {
             $('#middlewindow').width(win_w - 20);
         }
+        
+        webclient.doChangeFrameSize();
     },
 
     doSetPopupSize: function() {
@@ -951,6 +953,14 @@ var webclient = {
         if (dlg.length > 0) {
             dlg.css('top', (win_h - dlg.height()) / 2);
         }
+    },
+
+	doChangeFrameSize: function() {
+		var tab_content = $("#tab_content");
+    	var tab_frame = $("#tab_frame");
+    	
+    	tab_frame.width(tab_content.width());
+    	tab_frame.height(tab_content.height() - 5);
     },
 
     doCancel: function() {
@@ -1004,19 +1014,27 @@ var webclient = {
             .addClass("pill_active");
         $("#box_" + pagename).css("display", "");
     },
+        
+    showContent : function(pagename) {
+        $("#tab_" + pagename)
+            .addClass("active")
+            .addClass("pill_active");
+
+        $("#tab_frame").attr("src", pagename + ".html");
+    },
     
     onConnectionOpen: function() {
         $("#msg_wnd").empty();
         $("#prompt_bar").empty();
         webclient.showUnloginTabs();
-        webclient.showPage("login");
+        webclient.showContent("login");
 
         webclient.doAutoLoginCheck();
     },
     
     onConnectionClose: function() {
         webclient.showConnectTabs();
-        webclient.showPage("connect");
+        webclient.showContent("connect");
 
         // close all popup windows
         combat.closeCombat();
@@ -1059,6 +1077,12 @@ var webclient = {
 // Callback function - called when the browser window resizes
 //$(window).unbind("resize");
 //$(window).resize(webclient.doSetSizes);
+
+$(window).ready(function(){
+    webclient.showUnloginTabs();
+    webclient.showContent("login");
+    webclient.doSetSizes();
+});
 
 // Event when client finishes loading
 $(document).ready(function() {

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="{{language_code}}">
+    <head>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" href="{% static "public/css/bootstrap.min.css" %}">
+        <link rel="stylesheet" type="text/css" media="screen" href="{% static "webclient/css/webclient.css" %}">
+
+        <script src="{% static "webclient/js/scene_controller.js" %}" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="box_scene">
+            <div id="scene_name">
+                <span class="cyan"></span>
+            </div>
+            <div id="scene_desc">
+            </div>
+            <div><br></div>
+            <div id="room_things">物体：<br>
+                <div id="room_things_content">
+                </div>
+            </div>
+            <div id="room_npcs">人物：<br>
+                <div id="room_npcs_content">
+                </div>
+            </div>
+            <div id="room_players">玩家：<br>
+                <div id="room_players_content">
+                </div>
+            </div>
+            <div id="room_exits">
+                <center>
+                    <table class="exit_table">
+                    </table>
+                </center>
+            </div>
+        </div>
+    </body>
+</html>
