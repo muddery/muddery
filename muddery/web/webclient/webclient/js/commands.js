@@ -38,25 +38,29 @@ var commands = {
     doLogin: function(playername, password) {
         var args = {"playername" : playername,
                     "password" : password};
+        
         Evennia.msg("text", this.cmdString("connect", args));
     },
 
     // register
-    doRegister: function(playername, nickname, password) {
+    doRegister: function(playername, nickname, password, password_again) {
+        
         if (!Evennia.isConnected()) {
             Evennia.connect();
         }
 
-        // $("#login_name").val(playername);
-        //if (password != password_again) {
-        //    webclient.displayAlert(LS("Password does not match."));
-        //    return;
-        //}
+        if (password != password_again) {
+            webclient.displayAlert(LS("Password does not match."));
+            return;
+        }
 
         var args = {"playername" : playername,
                     "nickname" : nickname,
                     "password" : password};
         Evennia.msg("text", this.cmdString("create_connect", args));
+        
+        var login = $("#frame_login")[0].contentWindow.controller;
+        login.setPlayerName(playername);
     },
     
     // look
@@ -146,10 +150,11 @@ var commands = {
         }
     },
 
-    doSetSavePassword: function(save_password) {
+    doSavePassword: function(save_password) {
         if (save_password) {
             $.cookie("is_save_password", 'true');
-        } else {
+        }
+        else {
             $.cookie("login_name", '', {expires: -1});
             $.cookie("login_password", '', {expires: -1});
             $.cookie("is_save_password", '', {expires: -1});

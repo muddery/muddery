@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" href="/static/public/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css">
+
+        <script src="/static/public/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+    	<script src="/webclient/js/text2html.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/webclient/controllers/scene.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="box_scene">
+            <div id="name">
+                <span id="name_content" class="cyan"></span>
+            </div>
+            <div id="desc">
+            	<div id="desc_content"></div>
+            </div>
+            <div id="commands">
+                <div id="commands_content">
+                	<input type="button" class="btn btn-default scene_object" value="" cmd_name="" cmd_args="" />
+                </div>
+            </div>
+            <div><br></div>
+            <div id="things">物体：<br>
+                <div id="things_content">
+					<a class="scene_object" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                </div>
+            </div>
+            <div id="npcs">人物：<br>
+                <div id="npcs_content">
+					<a class="scene_object" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                </div>
+            </div>
+            <div id="players">玩家：<br>
+                <div id="players_content">
+					<a class="scene_object" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                </div>
+            </div>
+            <div><br></div>
+            <div id="exits">
+                <center id="exits_content">
+                    <table class="exit_table">
+                        <tbody>
+                            <tr>
+                                <td id="exits_1" align="right">
+                                    <a class="exit_element" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                                </td>
+                                <td id="exits_2" align="center">
+                                    <a class="exit_element" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                                </td>
+                                <td id="exits_3" align="left">
+                                    <a class="exit_element" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td id="link_1" align="right">\</td>
+                                <td id="link_2" align="center">|</td>
+                                <td id="link_3" align="left">/</td>
+                            </tr>
+                            <tr>
+                                <td id="exits_4" align="right">
+                                    <a class="exit_element" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                                    <span id="link_4">--</span>
+                                </td>
+                                <td id="exits_5" align="center">
+                                    <a class="exit_element" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                                </td>
+                                <td id="exits_6" align="left">
+                                    <span id="link_6">--</span>
+                                    <a class="exit_element" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td id="link_7" align="right">/</td>
+                                <td id="link_8" align="center">|</td>
+                                <td id="link_9" align="left">\</td>
+                            </tr>
+                            <tr>
+                                <td id="exits_7" align="right">
+                                    <a class="exit_element" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                                </td>
+                                <td id="exits_8" align="center">
+                                    <a class="exit_element" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                                </td>
+                                <td id="exits_9" align="left">
+                                    <a class="exit_element" href="#" onclick="controller.doCommandLink(this); return false;" cmd_name="" cmd_args="" dbref="" ></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </center>
+            </div>
+        </div>
+    </body>
+</html>
