@@ -262,115 +262,9 @@ var webclient = {
     },
 
     displayLookAround : function(data) {
-        var tab = $("#tab_scene a");
-        var box = $("#box_scene");
-
-        ///////////////////////
-        // set scene box
-        ///////////////////////
-        
-        var content = "";
-        var element = "";
-        
-        // add room's dbref
-        var dbref = "";
-        if ("dbref" in data) {
-            dbref = data["dbref"];
-            box.data("dbref", dbref);
-        }
-        
-        // add room's name
-        var room_name = "";
-        try {
-            room_name = text2html.parseHtml(data["name"]);
-            element = room_name;
-        }
-        catch(error) {
-            element = LS('Scene');
-        }
-
-        box.empty();
-        uimgr.divRoomTabName(element).appendTo(box);
-
-        // add room's desc
-        try {
-            element = text2html.parseHtml(data["desc"]);
-            uimgr.divEmpty(element).appendTo(box);
-        }
-        catch(error) {
-        }
-
-        uimgr.divBR().appendTo(box);
-
-        var empty = true;
-        if ("cmds" in data && data["cmds"].length > 0) {
-            uimgr.divRoomCmds(data["cmds"]).appendTo(box);
-            empty = false;
-        }
-        else {
-            uimgr.divRoomCmds("").appendTo(box);
-        }
-
-        // add things
-        if ("things" in data && data["things"].length > 0) {
-            uimgr.divRoomThings(data["things"]).appendTo(box);
-            empty = false;
-        }
-        else {
-            uimgr.divRoomThings("").appendTo(box);
-        }
-
-        // add NPCs
-        if ("npcs" in data && data["npcs"].length > 0) {
-            uimgr.divRoomNpcs(data["npcs"]).appendTo(box);
-            empty = false;
-        }
-        else {
-            uimgr.divRoomNpcs("").appendTo(box);
-        }
-
-        // add players
-        if ("players" in data && data["players"].length > 0) {
-            uimgr.divRoomPlayers(data["players"]).appendTo(box);
-            empty = false;
-        }
-        else {
-            uimgr.divRoomPlayers("").appendTo(box);
-        }
-
-        if (!empty) {
-            uimgr.divBR().appendTo(box);
-        }
-
-        // add exits
-        // sort exits by direction
-        var room_exits = [];
-        if ("exits" in data) {
-            for (var i in data.exits) {
-                var direction = map.getExitDirection(data.exits[i].key);
-                // sort from north (67.5)
-                if (direction < 67.5) {
-                    direction += 360;
-                }
-                room_exits.push({"data": data.exits[i],
-                                 "direction": direction
-                                 });
-            }
-
-            room_exits.sort(function(a, b) {return a.direction - b.direction;});
-        }
-
-        uimgr.divRoomExits(room_exits, room_name).appendTo(box);
-        
-        // set background
-        var backview = $("#box_scene");
-        if ("background" in data && data["background"]) {
-            var url = settings.resource_location + data["background"];
-            backview.css("background", "url(" + url + ") no-repeat center center");
-        }
-        else {
-            backview.css("background", "");
-        }
+        var win = $("#frame_scene")[0].contentWindow;
+        var scene = $("#frame_scene")[0].contentWindow.controller;
+        scene.set_scene(data);
     },
     
     displayObjMovedIn : function(data) {
@@ -887,7 +781,7 @@ var webclient = {
         $("#msg_wnd").empty();
         $("#prompt_bar").empty();
         this.showLoginTabs();
-        this.showPage("scene");
+        this.showContent("scene");
     },
     
     onLogout : function(data) {
@@ -942,7 +836,7 @@ var webclient = {
             $('#middlewindow').width(win_w - 20);
         }
         
-        webclient.doChangeFrameSize();
+        webclient.doChangeVisibleFrameSize();
     },
 
     doSetPopupSize: function() {
@@ -954,13 +848,17 @@ var webclient = {
             dlg.css('top', (win_h - dlg.height()) / 2);
         }
     },
+    
+    doChangeVisibleFrameSize: function() {
+		var frame = $("#tab_content iframe:visible");
+		this.doChangeFrameSize(frame);
+    },
 
-	doChangeFrameSize: function() {
+	doChangeFrameSize: function(frame) {
 		var tab_content = $("#tab_content");
-    	var tab_frame = $("#tab_frame");
-    	
-    	tab_frame.width(tab_content.width());
-    	tab_frame.height(tab_content.height() - 5);
+
+    	frame.width(tab_content.width());
+    	frame.height(tab_content.height() - 5);
     },
 
     doCancel: function() {
@@ -1014,13 +912,25 @@ var webclient = {
             .addClass("pill_active");
         $("#box_" + pagename).css("display", "");
     },
+    
+    hideAllContents: function() {
+        $("#tab_bar li")
+            .removeClass("active")
+            .removeClass("pill_active");
+
+    	$("#tab_content").children().hide();
+    },
+    
+    showContent: function(frame_name) {
+        this.hideAllContents();
         
-    showContent : function(pagename) {
-        $("#tab_" + pagename)
+        $("#tab_" + frame_name)
             .addClass("active")
             .addClass("pill_active");
 
-        $("#tab_frame").attr("src", pagename + ".html");
+		var frame = $("#frame_" + frame_name);
+		this.doChangeFrameSize(frame);
+        frame.show();
     },
     
     onConnectionOpen: function() {

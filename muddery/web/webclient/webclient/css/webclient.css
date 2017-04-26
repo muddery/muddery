@@ -27,6 +27,11 @@ body {
     padding-bottom: 0px;
 }
 
+.content_frame {
+	border-style: none;
+	overflow: auto;
+}
+
 #game_title {
     margin: 2px 0px;
 }
@@ -457,4 +462,8 @@ button.btn-combat div.cooldown {
 .command_icon {
 	width: 40px;
 	height: 40px;
+}
+
+.scene_object {
+	margin-left: 10px;
 }

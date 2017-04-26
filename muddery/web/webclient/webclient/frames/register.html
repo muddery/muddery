@@ -1,16 +1,15 @@
 <!DOCTYPE html>
-{% load staticfiles %}
-<html lang="{{language_code}}">
+<html lang="en-us">
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
         <meta charset="utf-8" />
 
         <!--CSS style sheet -->
-        <link rel="stylesheet" href="{% static "public/css/bootstrap.min.css" %}">
-        <link rel="stylesheet" type="text/css" media="screen" href="{% static "webclient/css/webclient.css" %}">
+        <link rel="stylesheet" href="/static/public/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css">
 
-        <script src="{% static "public/js/jquery-1.11.1.min.js" %}" type="text/javascript" charset="utf-8"></script>
-        <script src="{% static "webclient/js/controllers/register.js" %}" type="text/javascript" charset="utf-8"></script>
+        <script src="/static/public/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/webclient/controllers/register.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
 	    <div id="box_register">
@@ -43,7 +42,7 @@
 	            </tr>
 	            <tr>
 	                <td>
-	                    <input type="button" onclick="register.doRegister()" class="btn btn-default" value="注册">
+	                    <input type="button" onclick="controller.doRegister()" class="btn btn-default" value="注册">
 	                </td>
 	            </tr>
 	        </tbody>
