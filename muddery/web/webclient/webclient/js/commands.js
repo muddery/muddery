@@ -10,9 +10,7 @@ var commands = {
     
     // functions when user click a command link
     //
-    doCommandLink : function(caller) {
-        var cmd = $(caller).attr("cmd_name");
-        var args = $(caller).attr("cmd_args");
+    doCommandLink: function(cmd, args) {
         Evennia.msg("text", this.cmdString(cmd, args));
     },
     

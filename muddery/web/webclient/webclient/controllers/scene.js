@@ -13,7 +13,11 @@ var controller = {
         this.clear_items("#things_content");
         this.clear_items("#npcs_content");
         this.clear_items("#players_content");
-        this.clear_items("#exits_content");
+
+        for (var i = 0; i < 9; ++i) {
+            this.clear_items("#exits_" + i);
+            $("#link_" + i).hide();
+        }
     },
 
     set_scene: function(data) {
@@ -52,26 +56,26 @@ var controller = {
 
         // add commands
         var contents = "cmds" in data ? data["cmds"]: null;
-        this.add_commands("#commands", "#commands_content", contents);
+        this.add_buttons("#commands", "#commands_content", contents);
 
         // add things
         contents = "things" in data ? data["things"]: null;
-        this.add_objects("#things", "#things_content", contents);
+        this.add_links("#things", "#things_content", contents, "look");
 
         // add NPCs
         contents = "npcs" in data ? data["npcs"]: null;
-        this.add_objects("#npcs", "#npcs_content", contents);
+        this.add_links("#npcs", "#npcs_content", contents, "look");
 
         // add players
         contents = "players" in data ? data["players"]: null;
-        this.add_objects("#players", "#players_content", contents);
+        this.add_links("#players", "#players_content", contents, "look");
 
         // add exits
         // sort exits by direction
         var map = parent.map;
         var room_exits = [];
         if ("exits" in data) {
-            for (var i in data.exits) {
+            for (var i in data["exits"]) {
                 var direction = map.getExitDirection(data.exits[i].key);
                 // sort from north (67.5)
                 if (direction < 67.5) {
@@ -84,162 +88,30 @@ var controller = {
 
             room_exits.sort(function(a, b) {return a.direction - b.direction;});
         }
-
-        // add exits to grids
-        for (var i in data_exits) {
-            try {
-                // get cell's index
-                var index = 5;
-                if (data_exits[i].direction) {
-                    index = map.getDirectionIndex(data_exits[i].direction);
-                }
-
-                // create exit link
-                var exit = data_exits[i].data;
-                var name = text2html.parseHtml(exit.name);
-                var grid = $("#exit_" + index);
-
-                if (index >= 3) {
-		            var item_template = grid.children().first();
-		            var new_item = item_template.clone()
-                        .attr("cmd_name", "goto")
-                        .attr("cmd_args", exit["dbref"])
-                        .attr("dbref", exit["dbref"])
-                        .html(name)
-                        .show()
-                        .insertAfter(item_template);
-
-                if (exitCell[index].length == 0) {
-                    exitCell[index] = $("<span>").append(aHrefElement);
-                }
-                else if (index >= 3) {
-                    aHrefElement.appendTo(exitCell[index]);
-                }
-                else {
-                    aHrefElement.prependTo(exitCell[index]);
-                }
-            }
-            catch(error) {
-            }
+        
+        var exit_grids = [[], [], [] ,[] ,[], [], [], [], []];
+        for (var i in room_exits) {
+        	var index = map.getDirectionIndex(room_exits[i]["direction"]);
+        	exit_grids[index].push(room_exits[i]["data"]);
+        }
+        
+        // reverse the upper circle elements
+        for (var i = 0; i < 4; ++i) {
+        	exit_grids[i].reverse();
         }
 
-        // create cells
-        var center = $("<center>").appendTo(divRoomExitsElement);
-
-        var table = $("<table>").addClass("exit_table")
-                                .appendTo(center);
-
-        {
-            var row = $("<tr>").appendTo(table);
-
-            $("<td>").html(exitCell[0])
-                     .attr("align", "right")
-                     .appendTo(row);
-
-            $("<td>").html(exitCell[1])
-                     .attr("align", "center")
-                     .appendTo(row);
-
-            $("<td>").html(exitCell[2])
-                     .attr("align", "left")
-                     .appendTo(row);
+        // add exits to table
+        for (var i in exit_grids) {
+            var grid_id = "#exits_" + i;
+            var link_id = "#link_" + i;
+            this.add_links(link_id, grid_id, exit_grids[i], "goto");
         }
 
-        {
-            var row = $("<tr>").appendTo(table);
-
-            if (exitCell[0].length > 0) {
-                exitCell[3] = "\\";
-            }
-            $("<td>").html(exitCell[3])
-                     .attr("align", "right")
-                     .appendTo(row);
-
-            if (exitCell[1].length > 0) {
-                exitCell[4] = "|";
-            }
-            $("<td>").html(exitCell[4])
-                     .attr("align", "center")
-                    .appendTo(row);
-
-            if (exitCell[2].length > 0) {
-                exitCell[5] = "/";
-            }
-            $("<td>").html(exitCell[5])
-                     .attr("align", "left")
-                     .appendTo(row);
+        // If the center grid is empty, show room's name in the center grid.
+        if (exit_grids[4].length == 0) {
+            this.add_text("", "#exits_4", room_name);
         }
 
-        {
-            var row = $("<tr>").appendTo(table);
-
-            if (exitCell[6].length > 0) {
-                exitCell[6].append("--");
-            }
-            $("<td>").html(exitCell[6])
-                     .attr("align", "right")
-                     .appendTo(row);
-
-            if (exitCell[7].length == 0) {
-                exitCell[7] = $("<span>").append($("<span>").html(rooom_name)
-                                                            .addClass("exit_element"));
-            }
-            $("<td>").html(exitCell[7])
-                     .attr("align", "center")
-                     .appendTo(row);
-
-            if (exitCell[8].length > 0) {
-                exitCell[8].prepend("--");
-            }
-            $("<td>").html(exitCell[8])
-                     .attr("align", "left")
-                     .appendTo(row);
-        }
-
-        {
-            var row = $("<tr>").appendTo(table);
-
-            if (exitCell[12].length > 0) {
-                exitCell[9] = "/";
-            }
-            $("<td>").html(exitCell[9])
-                     .attr("align", "right")
-                     .appendTo(row);
-
-            if (exitCell[13].length > 0) {
-                exitCell[10] = "|";
-            }
-            $("<td>").html(exitCell[10])
-                     .attr("align", "center")
-                    .appendTo(row);
-
-            if (exitCell[14].length > 0) {
-                exitCell[11] = "\\";
-            }
-            $("<td>").html(exitCell[11])
-                     .attr("align", "left")
-                     .appendTo(row);
-        }
-
-        {
-            var row = $("<tr>").appendTo(table);
-
-            $("<td>").html(exitCell[12])
-                     .attr("align", "right")
-                     .appendTo(row);
-
-            $("<td>").html(exitCell[13])
-                     .attr("align", "center")
-                    .appendTo(row);
-
-            $("<td>").html(exitCell[14])
-                     .attr("align", "left")
-                     .appendTo(row);
-        }
-
-        return divRoomExitsElement;
-
-        /*
         // set background
         var backview = $("#box_scene");
         if ("background" in data && data["background"]) {
@@ -249,19 +121,16 @@ var controller = {
         else {
             backview.css("background", "");
         }
-        */
     },
         
     clear_items: function(item_id) {
-    	// Hide the first item and remove others.
-    	var first = $(item_id + ":first");
-    	first.hide();
-    	first.nextAll().remove();
+    	// remove items that are not template..
+    	$(item_id).children().not(".template").remove();
     },
     
-    add_commands: function(block_id, content_id, data) {
+    add_buttons: function(block_id, content_id, data) {
     	var content = $(content_id);
-		var item_template = content.children().first();
+		var item_template = content.find("input.template");
 
 		var has_button = false;
 		if (data) {
@@ -271,10 +140,10 @@ var controller = {
                 try {
                     var name = text2html.parseHtml(cmd["name"]);
                     item_template.clone()
+                        .removeClass("template")
                         .attr("value", name)
                         .attr("cmd_name", cmd["cmd"])
                         .attr("cmd_args", cmd["args"])
-                        .show()
                         .appendTo(content);
 
                     has_button = true;
@@ -285,17 +154,19 @@ var controller = {
             }
         }
 
-		if (has_button) {
-			$(block_id).show();
-		}
-		else {
-			$(block_id).hide();
+		if (block_id) {
+			if (has_button) {
+				$(block_id).show();
+			}
+			else {
+				$(block_id).hide();
+			}
 		}
     },
     
-    add_objects: function(block_id, content_id, data) {
+    add_links: function(block_id, content_id, data, command) {
     	var content = $(content_id);
-		var item_template = content.children().first();
+		var item_template = content.find("a.template");
 
 		var has_link = false;
 		if (data) {
@@ -312,11 +183,11 @@ var controller = {
                     }
 
                     item_template.clone()
-                        .attr("cmd_name", "look")
+                        .removeClass("template")
+                        .attr("cmd_name", command)
                         .attr("cmd_args", obj["dbref"])
                         .attr("dbref", obj["dbref"])
                         .html(name)
-                        .show()
                         .appendTo(content);
 
                     has_link = true;
@@ -327,11 +198,48 @@ var controller = {
             }
         }
 
-		if (has_link) {
-			$(block_id).show();
+		if (block_id) {
+			if (has_link) {
+				$(block_id).show();
+			}
+			else {
+				$(block_id).hide();
+			}
 		}
-		else {
-			$(block_id).hide();
+    },
+
+    add_text: function(block_id, content_id, text) {
+    	var content = $(content_id);
+		var item_template = content.find("span.template");
+
+		var has_text = false;
+		if (text) {
+            try {
+                item_template.clone()
+                    .removeClass("template")
+                    .html(text)
+                    .appendTo(content);
+
+                has_text = true;
+            }
+            catch(error) {
+                console.error(error.message);
+            }
+        }
+
+		if (block_id) {
+			if (has_text) {
+				$(block_id).show();
+			}
+			else {
+				$(block_id).hide();
+			}
 		}
+    },
+
+    doCommandLink: function(caller) {
+        var cmd = $(caller).attr("cmd_name");
+        var args = $(caller).attr("cmd_args");
+        parent.commands.doCommandLink(cmd, args);
     },
 };
