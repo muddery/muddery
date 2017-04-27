@@ -467,3 +467,7 @@ button.btn-combat div.cooldown {
 .scene_object {
 	margin-left: 10px;
 }
+
+.template {
+    display: none;
+}
