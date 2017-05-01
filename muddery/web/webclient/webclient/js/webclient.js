@@ -192,24 +192,27 @@ var webclient = {
         
     displayAlert : function(data) {
         try {
-            var msg = "";
-            var button = LS("OK");
+            var header = _("Message");
+            var content = "";
+            var commands = null;
             
             var type = Object.prototype.toString.call(data);
             if (type == "[object String]") {
-                msg = data;
+                content = data;
             }
             else {
                 if ("msg" in data) {
-                    msg = data["msg"];
+                    content = data["msg"];
                 }
                 
                 if ("button" in data) {
-                    button = data["button"];
+                    commands = [{"name": data["button"],
+                                 "cmd": "",
+                                 "args": ""}];
                 }
             }
 
-            popupmgr.showAlert(msg, button);
+            controller.showMessage(header, content, commands);
         }
         catch(error) {
             this.displayErr("Data error.");
@@ -262,9 +265,8 @@ var webclient = {
     },
 
     displayLookAround : function(data) {
-        var win = $("#frame_scene")[0].contentWindow;
         var scene = $("#frame_scene")[0].contentWindow.controller;
-        scene.set_scene(data);
+        scene.setScene(data);
     },
     
     displayObjMovedIn : function(data) {
@@ -334,84 +336,11 @@ var webclient = {
     },
 
     displayLookObj : function(data) {
-        popupmgr.doCloseBox();
-        popupmgr.createBox(true)
-            .attr('id', 'popup_box')
-            .prependTo($("#popup_container"));
-
-        // add object's name
-        var title = "";
-        try {
-            title = text2html.parseHtml(data["name"]);
-        }
-        catch(error) {
-        }
-
-        $('#popup_header').html(title);
-
-        var page = $('#popup_body');
-        var footer = $('#popup_footer');
-
-        // object's info
-        var element = "";
-
-        // add object's dbref
-        var dbref = "";
-        if ("dbref" in data) {
-            dbref = data["dbref"];
-            page.data("dbref", dbref);
-        }
-        
-        // add object's icon
-        try {
-			if ("icon" in data && data["icon"]) {
-				var url = settings.resource_location + data["icon"];
-				element = $("<center>")
-							.append($("<img>")
-								.attr("src", url)
-								.addClass("obj_icon"))
-							.appendTo(page);
-			}
-        }
-        catch(error) {
-        }
-
-        // add object's desc
-        try {
-            element = text2html.parseHtml(data["desc"]);
-            uimgr.divEmpty(element).appendTo(page);
-        }
-        catch(error) {
-        }
-
-        uimgr.divBR().appendTo(footer);
-
-        if ("cmds" in data &&
-            data["cmds"] &&
-            data["cmds"].length > 0) {
-            uimgr.divObjectCmds(data["cmds"]).appendTo(footer);
-        } else {
-            var html_button = $('<center>')
-                .append($('<button>')
-                    .attr('class', 'btn btn-default')
-                    .attr('type', 'button')
-                    .attr('data-dismiss', 'modal')
-                    .attr('onClick', 'popupmgr.doCloseBox()')
-                    .text(LS('Close')));
-            footer.html(html_button);
-        }
-
-        // button
-        /*
-        var html_button = '<div><br></div>\
-                             <div>\
-                                <center>\
-                                    <input type="button" id="button_center" value="OK" class="btn btn-primary" onClick="popupmgr.doCloseBox()"/>\
-                                </center>\
-                            </div>'
-        $('#input_additional').html(html_button);
-        */
-        this.doSetPopupSize();
+        var header = data["name"];
+        var icon = data["icon"];
+        var content = data["desc"];
+        var commands = data["cmds"];
+        controller.showObject(header, icon, content, commands);
     },
     
     displayInventory : function(data) {
@@ -623,92 +552,18 @@ var webclient = {
         bar.html(prompt);
         
         // display player's status
-        var block = $("#box_status");
-        var content = $("<div>");
-
-        // add player's status
-        try {
-			if ("icon" in data && data["icon"]) {
-				var url = settings.resource_location + data["icon"];
-				$("<div>")
-				    .append($("<img>")
-								.attr("src", url)
-								.addClass("obj_icon"))
-                    .appendTo(content);
-			}
-        }
-        catch(error) {
-        }
-
-        try {
-            $("<div>")
-                .text(LS("Level") + LS(": ") + data["level"].toString())
-                .appendTo(content);
-        }
-        catch(error) {
-        }
-
-        try {
-            $("<div>")
-                .text(LS("Exp") + LS(": ") + exp)
-                .appendTo(content);
-        }
-        catch(error) {
-        }
-
-        try {
-            $("<div>")
-                .text(LS("HP") + LS(": ") + hp)
-                .appendTo(content);
-        }
-        catch(error) {
-        }
-
-        try {
-            $("<div>")
-                .text(LS("Attack") + LS(": ") + data["attack"].toString())
-                .appendTo(content);
-        }
-        catch(error) {
-        }
-        
-        try {
-            $("<div>")
-                .text(LS("Defence") + LS(": ") + data["defence"].toString())
-                .appendTo(content);
-        }
-        catch(error) {
-        }
-
-        block.html(content);
+        var level = data["level"];
+        var exp = data["exp"];
+        var max_exp = data["max_exp"];
+        var hp = data["hp"];
+        var max_hp = data["max_hp"];
+        var attack = data["attack"];
+        var defence = data["defence"];
+        controller.setStatus(level, exp, max_exp, hp, max_hp, attack, defence);
     },
         
     displayEquipments : function(data) {
-        // display player's equipments
-        var block = $("#box_equipment");
-        var content = "";
-
-        try {
-            element = "<div>";
-            for (position in data) {
-                element += "&nbsp;&nbsp;" + position + LS(": ");
-                if (data[position] != null) {
-                    element += " <a href='#' onclick='commands.doCommandLink(this); return false;'"
-                    element += " cmd_name='look'";
-                    element += " cmd_args='" + data[position].dbref + "'>";
-                    element += data[position].name;
-                    element += "</a>"
-                }
-                element += "<br>";
-            }
-            element += "</div>";
-            content += element;
-        }
-        catch(error) {
-        }
-        
-        content += "</div>";
-        block.html(content);
+        controller.setEquipments(data);
     },
 
     displayDialogue : function(data) {
@@ -726,7 +581,8 @@ var webclient = {
                 if (dialogues.length > 0) {
                     data_handler.dialogue_target = dialogues[0].npc;
                 }
-                popupmgr.showDialogue(dialogues);
+
+                controller.showDialogue(dialogues);
             }
         }
     },
@@ -796,13 +652,15 @@ var webclient = {
     },
     
     onPuppet: function(data) {
-        data_handler.character_name = data.name;
-        data_handler.character_dbref = data.dbref;
+        data_handler.character_dbref = data["dbref"];
+        data_handler.character_name = data["name"];
+
+        controller.setInfo(data["name"], data["icon"]);
     },
 
     doSetSizes: function() {
         webclient.doSetWindowSize();
-        webclient.doSetPopupSize();
+        webclient.doSetVisiblePopupSize();
     },
 
     doSetWindowSize: function() {
@@ -839,11 +697,23 @@ var webclient = {
         webclient.doChangeVisibleFrameSize();
     },
 
-    doSetPopupSize: function() {
-        var win_h = $(window).innerHeight();
+    doSetVisiblePopupSize: function() {
+        var popup_content = $("#popup_content");
+        var frame = popup_content.find("iframe:visible:first");
+        if (frame.length == 0) {
+            return;
+        }
+
+        var width = popup_content.width();
+        frame.innerWidth(popup_content.width());
+        frame.height(0);
+        
+        var frame_body = frame[0].contentWindow.document.body;
+		frame.height(frame_body.scrollHeight);
 
         // model dialogue
-        var dlg = $('.vertical-center');
+        var win_h = $(window).innerHeight();
+        var dlg = $('#box_pop');
         if (dlg.length > 0) {
             dlg.css('top', (win_h - dlg.height()) / 2);
         }
@@ -954,7 +824,7 @@ var webclient = {
         popupmgr.doCloseShop();
 
         // show message
-        popupmgr.showAlert(LS("The client connection was closed cleanly."), LS("OK"));
+        controller.showMessage(_("Message"), _("The client connection was closed cleanly."));
     },
 
     doAutoLoginCheck : function() {

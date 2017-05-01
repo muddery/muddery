@@ -406,12 +406,12 @@ class DialogueHandler(object):
             sentence = {"speaker": speaker,             # speaker's name
                         "dialogue": original["dialogue"],   # dialogue's key
                         "sentence": original["sentence"],   # sentence's ordinal
-                        "content": original["content"]}
+                        "content": original["content"],
+                        "icon": icon}
             if npc:
                 sentence["npc"] = npc.dbref             # NPC's dbref
-
-            if icon:
-                sentence["icon"] = icon
+            else:
+                sentence["npc"] = ""
 
             sentences_list.append(sentence)
 

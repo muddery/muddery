@@ -1,7 +1,7 @@
 
 var controller = {
 
-    clear_scene: function() {
+    clearScene: function() {
         ///////////////////////
         // clear scene box
         ///////////////////////
@@ -9,23 +9,23 @@ var controller = {
         $("#name_content").empty();
         $("#desc_content").empty();
         
-        this.clear_items("#commands_content");
-        this.clear_items("#things_content");
-        this.clear_items("#npcs_content");
-        this.clear_items("#players_content");
+        this.clearItems("#commands_content");
+        this.clearItems("#things_content");
+        this.clearItems("#npcs_content");
+        this.clearItems("#players_content");
 
         for (var i = 0; i < 9; ++i) {
-            this.clear_items("#exits_" + i);
+            this.clearItems("#exits_" + i);
             $("#link_" + i).hide();
         }
     },
 
-    set_scene: function(data) {
+    setScene: function(data) {
         ///////////////////////
         // set scene box
         ///////////////////////
 
-        this.clear_scene();
+        this.clearScene();
 
         // add room's dbref
         var dbref = "";
@@ -56,19 +56,19 @@ var controller = {
 
         // add commands
         var contents = "cmds" in data ? data["cmds"]: null;
-        this.add_buttons("#commands", "#commands_content", contents);
+        this.addButtons("#commands", "#commands_content", contents);
 
         // add things
         contents = "things" in data ? data["things"]: null;
-        this.add_links("#things", "#things_content", contents, "look");
+        this.addLinks("#things", "#things_content", contents, "look");
 
         // add NPCs
         contents = "npcs" in data ? data["npcs"]: null;
-        this.add_links("#npcs", "#npcs_content", contents, "look");
+        this.addLinks("#npcs", "#npcs_content", contents, "look");
 
         // add players
         contents = "players" in data ? data["players"]: null;
-        this.add_links("#players", "#players_content", contents, "look");
+        this.addLinks("#players", "#players_content", contents, "look");
 
         // add exits
         // sort exits by direction
@@ -104,12 +104,12 @@ var controller = {
         for (var i in exit_grids) {
             var grid_id = "#exits_" + i;
             var link_id = "#link_" + i;
-            this.add_links(link_id, grid_id, exit_grids[i], "goto");
+            this.addLinks(link_id, grid_id, exit_grids[i], "goto");
         }
 
         // If the center grid is empty, show room's name in the center grid.
         if (exit_grids[4].length == 0) {
-            this.add_text("", "#exits_4", room_name);
+            this.addText("", "#exits_4", room_name);
         }
 
         // set background
@@ -123,12 +123,12 @@ var controller = {
         }
     },
         
-    clear_items: function(item_id) {
-    	// remove items that are not template..
+    clearItems: function(item_id) {
+    	// Remove items that are not template.
     	$(item_id).children().not(".template").remove();
     },
-    
-    add_buttons: function(block_id, content_id, data) {
+
+    addButtons: function(block_id, content_id, data) {
     	var content = $(content_id);
 		var item_template = content.find("input.template");
 
@@ -141,9 +141,9 @@ var controller = {
                     var name = text2html.parseHtml(cmd["name"]);
                     item_template.clone()
                         .removeClass("template")
-                        .attr("value", name)
                         .attr("cmd_name", cmd["cmd"])
                         .attr("cmd_args", cmd["args"])
+                        .html(name)
                         .appendTo(content);
 
                     has_button = true;
@@ -164,7 +164,7 @@ var controller = {
 		}
     },
     
-    add_links: function(block_id, content_id, data, command) {
+    addLinks: function(block_id, content_id, data, command) {
     	var content = $(content_id);
 		var item_template = content.find("a.template");
 
@@ -208,7 +208,7 @@ var controller = {
 		}
     },
 
-    add_text: function(block_id, content_id, text) {
+    addText: function(block_id, content_id, text) {
     	var content = $(content_id);
 		var item_template = content.find("span.template");
 
