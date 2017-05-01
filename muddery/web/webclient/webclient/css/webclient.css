@@ -32,6 +32,20 @@ body {
 	overflow: auto;
 }
 
+#popup_container {
+	display: none;
+}
+
+#popup_modal {
+ 	display: block;
+}
+
+.popup_frame {
+	padding: 5px;
+	border-style: none;
+	overflow: auto;
+}
+
 #game_title {
     margin: 2px 0px;
 }
@@ -394,31 +408,6 @@ button.btn-combat div.cooldown {
 .prompt_name {
     color: #0ff;
     margin: 0px 5px;
-}
-
-.room_element {
-    margin: 0px 5px;
-}
-
-.exit_table {
-    line-height: 1;
-    background: #333;
-    border-width: 1px;
-    border-color: #666;
-    border-style: solid;
-}
-
-.exit_table td {
-    min-width: 52px;
-    height: 16px;
-}
-
-.exit_element {
-    margin: 0px 5px;
-}
-
-.exit_cmd a {
-    color: #0ff;
 }
 
 .obj_icon {

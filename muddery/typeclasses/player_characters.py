@@ -158,9 +158,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Player<->Object links have been established.
 
         """
-        # Send puppet info to the client.
+        # Send puppet info to the client first.
         self.msg({"puppet": {"dbref": self.dbref,
-                             "name": self.get_name()}})
+                             "name": self.get_name(),
+                             "icon": getattr(self, "icon", None)}})
 
         # send character's data to player
         message = {"status": self.return_status(),
@@ -739,10 +740,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
                   "attack": self.attack,
                   "defence": self.defence}
 
-        icon = getattr(self, "icon", None)
-        if icon:
-            status["icon"] = icon
-
         return status
 
     def show_equipments(self):
@@ -767,8 +764,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                         info = {"dbref": obj.dbref,
                                 "name": obj.name,
                                 "desc": obj.db.desc}
-            position_name = self.db.position_names[position]
-            equipments[position_name] = info
+            equipments[position] = info
 
         return equipments
 

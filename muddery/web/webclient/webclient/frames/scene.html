@@ -5,40 +5,43 @@
         <meta charset="utf-8" />
 
         <!--CSS style sheet -->
-        <link rel="stylesheet" href="/static/public/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css">
+        <link rel="stylesheet" href="/static/public/css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/scene.css" />
 
         <script src="/static/public/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/webclient/js/settings.js" type="text/javascript" charset="utf-8"></script>
+
     	<script src="/webclient/js/text2html.js" type="text/javascript" charset="utf-8"></script>
         <script src="/webclient/controllers/scene.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div id="box_scene">
             <div id="name">
-                <span id="name_content" class="cyan"></span>
+                <span id="name_content"></span>
             </div>
             <div id="desc">
             	<div id="desc_content"></div>
             </div>
             <div id="commands">
                 <div id="commands_content">
-                	<input type="button" class="btn btn-default scene_object template" onclick="controller.doCommandLink(this); return false;" value=""/>
+                	<button type="button" class="btn btn-default scene_object template" onclick="controller.doCommandLink(this)"></button>
                 </div>
             </div>
             <div><br></div>
             <div id="things">物体：<br>
                 <div id="things_content">
-					<a class="scene_object template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+					<a class="scene_object template" href="#" onclick="controller.doCommandLink(this)"></a>
                 </div>
             </div>
             <div id="npcs">人物：<br>
                 <div id="npcs_content">
-					<a class="scene_object template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+					<a class="scene_object template" href="#" onclick="controller.doCommandLink(this)"></a>
                 </div>
             </div>
             <div id="players">玩家：<br>
                 <div id="players_content">
-					<a class="scene_object template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+					<a class="scene_object template" href="#" onclick="controller.doCommandLink(this)"></a>
                 </div>
             </div>
             <div><br></div>
@@ -47,14 +50,20 @@
                     <table class="exit_table">
                         <tbody>
                             <tr>
-                                <td id="exits_0" align="right">
-                                    <a class="exit_element template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+                                <td align="right">
+                                    <span id="exits_0">
+                                        <a class="exit_element template" href="#" onclick="controller.doCommandLink(this)"></a>
+                                    </span>
                                 </td>
-                                <td id="exits_1" align="center">
-                                    <a class="exit_element template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+                                <td align="center">
+                                    <span id="exits_1">
+                                        <a class="exit_element template" href="#" onclick="controller.doCommandLink(this)"></a>
+                                    </span>
                                 </td>
-                                <td id="exits_2" align="left">
-                                    <a class="exit_element template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+                                <td align="left">
+                                    <span id="exits_2">
+                                        <a class="exit_element template" href="#" onclick="controller.doCommandLink(this)"></a>
+                                    </span>
                                 </td>
                             </tr>
                             <tr>
@@ -69,17 +78,23 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td id="exits_3" align="right">
-                                    <a class="exit_element template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+                                <td align="right">
+                                    <span id="exits_3">
+                                        <a class="exit_element template" href="#" onclick="controller.doCommandLink(this)"></a>
+                                    </span>
                                     <span id="link_3">--</span>
                                 </td>
-                                <td id="exits_4" align="center">
-                                    <a class="exit_element template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
-                                    <span class="template"></span>
+                                <td align="center">
+                                    <span id="exits_4">
+                                        <a class="exit_element template" href="#" onclick="controller.doCommandLink(this)"></a>
+                                        <span class="template"></span>
+                                    </span>
                                 </td>
-                                <td id="exits_5" align="left">
+                                <td align="left">
                                     <span id="link_5">--</span>
-                                    <a class="exit_element template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+                                    <span id="exits_5">
+                                        <a class="exit_element template" href="#" onclick="controller.doCommandLink(this)"></a>
+                                    </span>
                                 </td>
                             </tr>
                             <tr>
@@ -94,14 +109,20 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td id="exits_6" align="right">
-                                    <a class="exit_element template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+                                <td align="right">
+                                    <span id="exits_6">
+                                        <a class="exit_element template" href="#" onclick="controller.doCommandLink(this)"></a>
+                                    </span>
                                 </td>
-                                <td id="exits_7" align="center">
-                                    <a class="exit_element template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+                                <td align="center">
+                                    <span id="exits_7">
+                                        <a class="exit_element template" href="#" onclick="controller.doCommandLink(this)"></a>
+                                    </span>
                                 </td>
-                                <td id="exits_8" align="left">
-                                    <a class="exit_element template" href="#" onclick="controller.doCommandLink(this); return false;"></a>
+                                <td align="left">
+                                    <span id="exits_8">
+                                        <a class="exit_element template" href="#" onclick="controller.doCommandLink(this)"></a>
+                                    </span>
                                 </td>
                             </tr>
                         </tbody>

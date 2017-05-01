@@ -72,18 +72,14 @@ var commands = {
     },
     
     // dialogue
-    doDialogue : function(caller) {
+    doDialogue : function(dialogue, sentence, npc) {
         if(data_handler.dialogues_list.length > 0) {
             popupmgr.showDialogue(data_handler.dialogues_list.shift());
         }
         else {
-            var args = {"dialogue": $(caller).attr("dialogue"),
-                        "sentence": $(caller).attr("sentence")};
-
-            var npc = $(caller).attr("npc");
-            if (npc) {
-                args["npc"] = npc;
-            }
+            var args = {"dialogue": dialogue,
+                        "sentence": sentence,
+                        "npc": npc};
             Evennia.msg("text", this.cmdString("dialogue", args));
         }
     },

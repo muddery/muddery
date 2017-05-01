@@ -5,10 +5,12 @@
         <meta charset="utf-8" />
 
         <!--CSS style sheet -->
-        <link rel="stylesheet" href="/static/public/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css">
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/public/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css" />
 
-        <script src="/static/public/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/webclient/js/public/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="/webclient/js/local_string.js" type="text/javascript" charset="utf-8"></script>
+
         <script src="/webclient/controllers/login.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
@@ -18,13 +20,13 @@
                 <tbody>
                     <tr>
                         <td>
-                            <input id="login_name" type="text" placeholder="用户名" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox">
+                            <input id="login_name" type="text" placeholder="用户名" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
                         </td>
                         <td>
-                            <input id="login_password" type="password" placeholder="密码" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox">
+                            <input id="login_password" type="password" placeholder="密码" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
                         </td>
                     </tr>
-                    <tr colspan="2"> 
+                    <tr>
                         <td>
                             <div>保存密码<input id="cb_save_password" type="checkbox" onclick="controller.doSavePassword()"></div>
                             <div>自动登录<input id="cb_auto_login" type="checkbox"></div>
@@ -32,7 +34,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <input type="button" onclick="controller.doLogin()" class="btn btn-default" value="登录">
+                            <button onclick="controller.doLogin()" class="btn btn-default">登录</button>
                         </td>
                     </tr>
                 </tbody>
