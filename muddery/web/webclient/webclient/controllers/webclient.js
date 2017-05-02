@@ -31,22 +31,34 @@ var controller = {
     	$("#popup_content").children().hide();
     },
 
-    // show player's basic information
+    // set player's basic information
     setInfo: function(name, icon) {
         var controller = this.getFrameController("#frame_information");
         controller.setInfo(name, icon);
     },
 
-    // show player's status
+    // set player's status
     setStatus: function(level, exp, max_exp, hp, max_hp, attack, defence) {
         var controller = this.getFrameController("#frame_information");
         controller.setStatus(level, exp, max_exp, hp, max_hp, attack, defence);
     },
 
-    // show player's equipments
+    // set player's equipments
     setEquipments: function(equipments) {
         var controller = this.getFrameController("#frame_information");
         controller.setEquipments(equipments);
+    },
+    
+    // set player's inventory
+    setInventory: function(inventory) {
+        var controller = this.getFrameController("#frame_inventory");
+        controller.setInventory(inventory);
+    },
+    
+    // show player's skills
+    setSkills: function(skills) {
+        var controller = this.getFrameController("#frame_skills");
+        controller.setSkills(skills);
     },
 
     showDialogue: function(dialogues) {
@@ -59,6 +71,12 @@ var controller = {
         $(frame_id).show();
         $("#popup_container").show();
         webclient.doSetVisiblePopupSize();
+    },
+    
+    showScene: function(scene) {
+	    var frame_id = "#frame_scene";
+        var controller = this.getFrameController(frame_id);
+        controller.setScene(scene);
     },
 
     getFrameController: function(frame_id) {

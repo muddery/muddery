@@ -704,11 +704,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
             info = {"dbref": item.dbref,        # item's dbref
                     "name": item.name,          # item's name
                     "number": item.db.number,   # item's number
-                    "desc": item.db.desc}       # item's desc
-            
-            icon = getattr(item, "icon", None)
-            if icon:
-                info["icon"] = icon
+                    "desc": item.db.desc,       # item's desc
+                    "icon": getattr(item, "icon", None)}  # item's icon
             
             if getattr(item, "equipped", False):
                 info["equipped"] = item.equipped
@@ -900,11 +897,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     "dbref": skill.dbref,
                     "name": skill.get_name(),
                     "desc": skill.db.desc,
-                    "cd_remain": skill.get_remain_cd()}
-
-            icon = getattr(skill, "icon", None)
-            if icon:
-                info["icon"] = icon
+                    "cd_remain": skill.get_remain_cd(),
+                    "icon": getattr(skill, "icon", None)}
 
             skills.append(info)
 

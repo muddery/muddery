@@ -181,11 +181,9 @@ class MudderyCombatHandler(DefaultScript):
             info = {"dbref": character.dbref,
                     "name": character.get_name(),
                     "max_hp": character.max_hp,
-                    "hp": character.db.hp}
+                    "hp": character.db.hp,
+                    "icon": getattr(character, "icon", None)}
 
-            icon = getattr(character, "icon", None)
-            if icon:
-                info["icon"] = icon
             appearance["characters"].append(info)
 
         return appearance

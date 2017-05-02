@@ -489,11 +489,8 @@ class MudderyObject(DefaultObject):
         info = {"dbref": self.dbref,
                 "name": self.name,
                 "desc": self.db.desc,
-                "cmds": self.get_available_commands(caller)}
-
-        icon = getattr(self, "icon", None)
-        if icon:
-            info["icon"] = icon
+                "cmds": self.get_available_commands(caller),
+                "icon": getattr(self, "icon", None)}
 
         return info
 

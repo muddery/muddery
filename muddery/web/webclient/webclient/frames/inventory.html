@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/public/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/inventory.css" />
+
+        <script src="/webclient/js/public/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/webclient/js/settings.js" type="text/javascript" charset="utf-8"></script>
+		<script src="/webclient/js/local_string.js" type="text/javascript" charset="utf-8"></script>
+    	<script src="/webclient/js/text2html.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="/webclient/controllers/inventory.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="box_inventory">
+        	<table id="tab_inventory">
+        		<thead>
+        			<tr>
+        				<th>名称</th>
+        				<th>数量</th>
+        				<th>描述</th>
+        			</tr>
+        		</thead>
+        		<tbody id="inventory_items">
+        			<tr class="template">
+        				<td>
+        					<center class="obj_icon">
+        						<img class="img_icon" src="" />
+        					</center>
+        					<a class="obj_name" href="#" onclick="controller.doLook(this)"></a>
+        				</td>
+        				<td class="obj_number"></td>
+        				<td class="obj_desc"></td>
+        			</tr>
+        		</tbody>
+        	</table>
+        </div>
+    </body>
+</html>

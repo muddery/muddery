@@ -679,11 +679,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                 continue
 
             command = {"name": skill.name,
-                       "key": skill.get_data_key()}
-
-            icon = getattr(skill, "icon", None)
-            if icon:
-                command["icon"] = icon
+                       "key": skill.get_data_key(),
+                       "icon": getattr(skill, "icon", None)}
 
             commands.append(command)
 
