@@ -52,9 +52,9 @@ var controller = {
                 $("#content").show();
 
                 $("#button")
-                    .attr("npc", dlg["npc"])
-                    .attr("dialogue", dlg["dialogue"])
-                    .attr("sentence", dlg["sentence"])
+                    .data("npc", dlg["npc"])
+                    .data("dialogue", dlg["dialogue"])
+                    .data("sentence", dlg["sentence"])
                     .attr("onClick", "controller.doDialogue(this)")
                     .text(_("Next"));
             }
@@ -69,9 +69,9 @@ var controller = {
 
                     item_template.clone()
                         .removeClass("template")
-                        .attr("npc", dlg["npc"])
-                        .attr("dialogue", dlg["dialogue"])
-                        .attr("sentence", dlg["sentence"])
+                        .data("npc", dlg["npc"])
+                        .data("dialogue", dlg["dialogue"])
+                        .data("sentence", dlg["sentence"])
                         .html(content)
                         .appendTo(body);
                 }
@@ -95,9 +95,9 @@ var controller = {
         $("#body a").not(".template").remove();
 
         $("#button")
-            .removeAttr("npc")
-            .removeAttr("dialogue")
-            .removeAttr("sentence")
+            .removeData("npc")
+            .removeData("dialogue")
+            .removeData("sentence")
             .removeAttr("onClick")
             .empty();
     },
@@ -105,9 +105,9 @@ var controller = {
     doDialogue: function(caller) {
         this.doClosePopupBox();
 
-        var dialogue = $(caller).attr("dialogue");
-        var sentence = $(caller).attr("sentence");
-        var npc = $(caller).attr("npc");
+        var dialogue = $(caller).data("dialogue");
+        var sentence = $(caller).data("sentence");
+        var npc = $(caller).data("npc");
         parent.commands.doDialogue(dialogue, sentence, npc);
     },
 };

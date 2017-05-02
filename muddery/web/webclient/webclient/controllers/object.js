@@ -59,8 +59,8 @@ var controller = {
                     var name = text2html.parseHtml(cmd["name"]);
                     item_template.clone()
                         .removeClass("template")
-                        .attr("cmd_name", cmd["cmd"])
-                        .attr("cmd_args", cmd["args"])
+                        .data("cmd_name", cmd["cmd"])
+                        .data("cmd_args", cmd["args"])
                         .html(name)
                         .appendTo(content);
 
@@ -76,8 +76,8 @@ var controller = {
     doCommandLink: function(caller) {
         this.doClosePopupBox();
 
-        var cmd = $(caller).attr("cmd_name");
-        var args = $(caller).attr("cmd_args");
+        var cmd = $(caller).data("cmd_name");
+        var args = $(caller).data("cmd_args");
         if (cmd) {
             parent.commands.doCommandLink(cmd, args);
         }

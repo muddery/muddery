@@ -62,13 +62,18 @@ var commands = {
     },
     
     // look
-    doLook : function(object) {
-        Evennia.msg("text", this.cmdString("look", object));
+    doLook : function(dbref) {
+        Evennia.msg("text", this.cmdString("look", dbref));
+    },
+
+    // go to
+    doGoto : function(dbref) {
+        Evennia.msg("text", this.cmdString("goto", dbref));
     },
     
     // talk
-    doTalk : function(object) {
-        Evennia.msg("text", this.cmdString("talk", object));
+    doTalk : function(dbref) {
+        Evennia.msg("text", this.cmdString("talk", dbref));
     },
     
     // dialogue

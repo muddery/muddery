@@ -27,17 +27,21 @@ var controller = {
     setEquipments(equipments) {
         for (var pos in equipments) {
             var equip = equipments[pos];
-            var args = "";
+            var dbref = "";
             var name = "";
             if (equip) {
-                args = equip["dbref"];
+                dbref = equip["dbref"];
                 name = equip["name"];
             }
 
             $("#" + pos)
-                .attr("cmd_name", "look")
-                .attr("cmd_args", args)
+                .data("dbref", dbref)
                 .html(name);
         }
+    },
+
+    doLook: function(caller) {
+        var dbref = $(caller).data("dbref");
+        parent.commands.doLook(dbref);
     },
 };
