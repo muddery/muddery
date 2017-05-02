@@ -20,7 +20,7 @@ var controller = {
         }
     },
 
-    setScene: function(data) {
+    setScene: function(scene) {
         ///////////////////////
         // set scene box
         ///////////////////////
@@ -29,15 +29,15 @@ var controller = {
 
         // add room's dbref
         var dbref = "";
-        if ("dbref" in data) {
-            dbref = data["dbref"];
+        if ("dbref" in scene) {
+            dbref = scene["dbref"];
         }
         $("#box_scene").data("dbref", dbref);
 
         // add room's name
         var room_name = "";
         try {
-            room_name = text2html.parseHtml(data["name"]);
+            room_name = text2html.parseHtml(scene["name"]);
         }
         catch(error) {
             console.error(error.message);
@@ -47,7 +47,7 @@ var controller = {
         // add room's desc
         var room_desc = "";
         try {
-            room_desc = text2html.parseHtml(data["desc"]);
+            room_desc = text2html.parseHtml(scene["desc"]);
         }
         catch(error) {
             console.error(error.message);
@@ -55,33 +55,33 @@ var controller = {
 		$("#desc_content").html(room_desc);
 
         // add commands
-        var contents = "cmds" in data ? data["cmds"]: null;
+        var contents = "cmds" in scene ? scene["cmds"]: null;
         this.addButtons("#commands", "#commands_content", contents);
 
         // add things
-        contents = "things" in data ? data["things"]: null;
-        this.addLinks("#things", "#things_content", contents, "look");
+        contents = "things" in scene ? scene["things"]: null;
+        this.addLinks("#things", "#things_content", contents);
 
         // add NPCs
-        contents = "npcs" in data ? data["npcs"]: null;
-        this.addLinks("#npcs", "#npcs_content", contents, "look");
+        contents = "npcs" in scene ? scene["npcs"]: null;
+        this.addLinks("#npcs", "#npcs_content", contents);
 
         // add players
-        contents = "players" in data ? data["players"]: null;
-        this.addLinks("#players", "#players_content", contents, "look");
+        contents = "players" in scene ? scene["players"]: null;
+        this.addLinks("#players", "#players_content", contents);
 
         // add exits
         // sort exits by direction
         var map = parent.map;
         var room_exits = [];
-        if ("exits" in data) {
-            for (var i in data["exits"]) {
-                var direction = map.getExitDirection(data.exits[i].key);
+        if ("exits" in scene) {
+            for (var i in scene["exits"]) {
+                var direction = map.getExitDirection(scene.exits[i].key);
                 // sort from north (67.5)
                 if (direction < 67.5) {
                     direction += 360;
                 }
-                room_exits.push({"data": data.exits[i],
+                room_exits.push({"data": scene.exits[i],
                                  "direction": direction
                                  });
             }
@@ -104,7 +104,7 @@ var controller = {
         for (var i in exit_grids) {
             var grid_id = "#exits_" + i;
             var link_id = "#link_" + i;
-            this.addLinks(link_id, grid_id, exit_grids[i], "goto");
+            this.addLinks(link_id, grid_id, exit_grids[i]);
         }
 
         // If the center grid is empty, show room's name in the center grid.
@@ -114,8 +114,8 @@ var controller = {
 
         // set background
         var backview = $("#box_scene");
-        if ("background" in data && data["background"]) {
-            var url = settings.resource_location + data["background"];
+        if ("background" in scene && scene["background"]) {
+            var url = settings.resource_location + scene["background"];
             backview.css("background", "url(" + url + ") no-repeat center center");
         }
         else {
@@ -141,8 +141,8 @@ var controller = {
                     var name = text2html.parseHtml(cmd["name"]);
                     item_template.clone()
                         .removeClass("template")
-                        .attr("cmd_name", cmd["cmd"])
-                        .attr("cmd_args", cmd["args"])
+                        .data("cmd_name", cmd["cmd"])
+                        .data("cmd_args", cmd["args"])
                         .html(name)
                         .appendTo(content);
 
@@ -184,9 +184,7 @@ var controller = {
 
                     item_template.clone()
                         .removeClass("template")
-                        .attr("cmd_name", command)
-                        .attr("cmd_args", obj["dbref"])
-                        .attr("dbref", obj["dbref"])
+                        .data("dbref", obj["dbref"])
                         .html(name)
                         .appendTo(content);
 
@@ -238,8 +236,18 @@ var controller = {
     },
 
     doCommandLink: function(caller) {
-        var cmd = $(caller).attr("cmd_name");
-        var args = $(caller).attr("cmd_args");
+        var cmd = $(caller).data("cmd_name");
+        var args = $(caller).data("cmd_args");
         parent.commands.doCommandLink(cmd, args);
+    },
+
+    doLook: function(caller) {
+        var dbref = $(caller).data("dbref");
+        parent.commands.doLook(dbref);
+    },
+
+    doGoto: function(caller) {
+        var dbref = $(caller).data("dbref");
+        parent.commands.doGoto(dbref);
     },
 };

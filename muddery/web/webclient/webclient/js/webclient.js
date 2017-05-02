@@ -265,8 +265,7 @@ var webclient = {
     },
 
     displayLookAround : function(data) {
-        var scene = $("#frame_scene")[0].contentWindow.controller;
-        scene.setScene(data);
+        controller.showScene(data);
     },
     
     displayObjMovedIn : function(data) {
@@ -344,28 +343,11 @@ var webclient = {
     },
     
     displayInventory : function(data) {
-        // display player's inventory
-        var page = $("#box_inventory").html("");
-        uimgr.tableInventory(data).appendTo(page);
+        controller.setInventory(data);
     },
 
     displaySkills : function(data) {
-        // set CDs
-        var current_time = (new Date()).valueOf();
-        for (var i in data) {
-            // CD in milliseconds
-            var cd_finish_time = current_time + data[i].cd_remain * 1000;
-            if (cd_finish_time > current_time) {
-                data_handler.skill_cd_time[data[i].key] = cd_finish_time;
-            }
-            else {
-                data_handler.skill_cd_time[data[i].key] = 0;
-            }
-        }
-
-        // display player's skills
-        var page = $("#box_skill").html("");
-        uimgr.tableSkills(data).appendTo(page);
+        controller.setSkills(data);
     },
 
     displayQuests : function(data) {

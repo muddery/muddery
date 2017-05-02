@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/public/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/skills.css" />
+
+        <script src="/webclient/js/public/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/webclient/js/settings.js" type="text/javascript" charset="utf-8"></script>
+		<script src="/webclient/js/local_string.js" type="text/javascript" charset="utf-8"></script>
+    	<script src="/webclient/js/text2html.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="/webclient/controllers/skills.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+		<div id="box_skills">
+			<table id="tab_skills">
+				<thead>
+					<tr>
+						<th>名称</th>
+						<th>描述</th>
+					</tr>
+				</thead>
+				<tbody id="skill_list">
+					<tr class="template">
+						<td>
+							<center class="skill_icon">
+								<img class="img_icon" src="" />
+							</center>
+							<a class="skill_name" href="#" onclick="controller.doLook(this)"></a>
+						</td>
+						<td class="skill_desc"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+    </body>
+</html>
