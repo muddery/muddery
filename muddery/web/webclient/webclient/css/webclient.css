@@ -359,9 +359,8 @@ button.btn-combat div.cooldown {
     margin: 0px 5px;
 }
 
-.prompt_name {
+#prompt_name {
     color: #0ff;
-    margin: 0px 5px;
 }
 
 .obj_icon {

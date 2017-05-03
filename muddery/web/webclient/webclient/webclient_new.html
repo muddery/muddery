@@ -56,6 +56,7 @@
                     <div id="popup_content" class="modal-content">
                         <iframe id="frame_message" class="popup_frame" src="/webclient/frames/message.html"></iframe>
                         <iframe id="frame_object" class="popup_frame" src="/webclient/frames/object.html"></iframe>
+                        <iframe id="frame_get_objects" class="popup_frame" src="/webclient/frames/get_objects.html"></iframe>
                         <iframe id="frame_dialogue" class="popup_frame" src="/webclient/frames/dialogue.html"></iframe>
                     </div>
                 </div>
@@ -72,12 +73,18 @@
     
         <!-- Window's body. -->
         <div id="wrapper">
-              <div id="middlewindow">
+            <div id="middlewindow">
                 <div id="prompt_bar">
-                      <span class="prompt_name">AA</span><span class="prompt_element">等级：1</span><span class="prompt_element">经验：--</span><span class="prompt_element">生命：50/50</span>
+                    <div id="prompt_content" style="display: none">
+                        <span class="prompt_element"><span id="prompt_name"></span></span>
+                        <span class="prompt_element">等级：<span id="prompt_level"></span></span>
+                        <span class="prompt_element">经验：<span id="prompt_exp"></span></span>
+                        <span class="prompt_element">生命：<span id="prompt_hp"></span></span>
+                    </div>
                 </div>
                 <div class="panel panel-default">
                       <div id="msg_wnd" class="panel-body">
+                          <div class="msg template"></div>
                       </div>
                 </div>
                 <div class="panel panel-default">
@@ -88,6 +95,7 @@
                         <iframe id="frame_information" class="content_frame" src="/webclient/frames/information.html"></iframe>
                         <iframe id="frame_inventory" class="content_frame" src="/webclient/frames/inventory.html"></iframe>
                         <iframe id="frame_skills" class="content_frame" src="/webclient/frames/skills.html"></iframe>
+                        <iframe id="frame_quests" class="content_frame" src="/webclient/frames/quests.html"></iframe>
                       </div>
                 </div>
                 <div id="tab_bar">
@@ -117,7 +125,7 @@
                                     <a onclick="webclient.showContent('skills')" class="dropdown-item">技能</a>
                                 </li>
                                 <li>
-                                    <a onclick="webclient.showContent('quest')" class="dropdown-item">任务</a>
+                                    <a onclick="webclient.showContent('quests')" class="dropdown-item">任务</a>
                                 </li>
                             </ul>
                         </li>

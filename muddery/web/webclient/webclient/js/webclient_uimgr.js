@@ -68,58 +68,6 @@ var uimgr = {
         return divObjectCmdsElement;
     },
 
-    tableQuests : function(data) {
-        var tableQuestsElement = $("<table>")
-            .attr("class", "tab_quests");
-        var tableHeadElement = $("<thead>").appendTo(tableQuestsElement);
-        var tableHeadTRElement = $("<tr>").appendTo(tableHeadElement)
-            .append($("<th>").text(LS("NAME")))
-            .append($("<th>").text(LS("DESC")))
-            .append($("<th>").text(LS("OBJECTIVE")));
-
-        var tbodyElement = $("<tbody>").appendTo(tableQuestsElement);
-        for (var i in data) {
-            try {
-                var quest = data[i];
-                var trElement = $("<tr>").appendTo(tbodyElement);
-                var tdElement = $("<td>").appendTo(trElement);
-
-                var name = quest["name"];
-                if (quest["accomplished"]) {
-                    name += LS("(Accomplished)");
-                }
-                var aHrefElement = $("<a>").appendTo(tdElement)
-                    .attr("href", "#")
-                    .attr("onclick", "commands.doCommandLink(this); return false;")
-                    .attr("cmd_name", "look")
-                    .attr("cmd_args", quest["dbref"])
-                    .text(name);
-
-                tdElement = $("<td>").appendTo(trElement)
-                    .append(quest["desc"]);
-
-                tdElement = $("<td>").appendTo(trElement);
-                for (var o in quest["objectives"]) {
-                    if (tdElement.text() != "") {
-                        tdElement.append($("<br>"));
-                    }
-
-                    var obj = quest["objectives"][o];
-                    if ("desc" in obj) {
-                        tdElement.append(obj.desc);
-                    }
-                    else {
-                        tdElement.append(obj.target + " " + obj.object);
-                        tdElement.append(" " + obj.accomplished + "/" + obj.total);
-                    }
-                }
-            }
-            catch(error) {
-            }
-        }
-        return tableQuestsElement;
-    },
-
     connectBox: function() {
         var box = $('<div>')
             .attr('id', 'box_connect');
@@ -127,27 +75,6 @@ var uimgr = {
         $('<div>')
             .text(LS('Please connect to the server.'))
             .appendTo(box);
-
-        return box;
-    },
-
-    statusBox: function() {
-        var box = $('<div>')
-            .attr('id', 'box_status');
-
-        return box;
-    },
-
-    skillBox: function() {
-        var box = $('<div>')
-            .attr('id', 'box_skill');
-
-        return box;
-    },
-
-    questBox: function() {
-        var box = $('<div>')
-            .attr('id', 'box_quest');
 
         return box;
     },

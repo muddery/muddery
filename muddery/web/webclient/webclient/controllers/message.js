@@ -6,7 +6,7 @@ var controller = {
         parent.controller.doClosePopupBox();
     },
 
-	setPopup: function(header, content, commands) {
+	setMessage: function(header, content, commands) {
 	    try {
 	        header = text2html.parseHtml(header);
 	    	$("#popup_header").html(header);
@@ -34,7 +34,7 @@ var controller = {
 
 	clearButtons: function() {
     	// remove buttons that are not template..
-    	$("#button_content").children().not(".template").remove();
+    	$("#button_content>:not(.template)").remove();
     },
 
 	addButtons: function(data) {

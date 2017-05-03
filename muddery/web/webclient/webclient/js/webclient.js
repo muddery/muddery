@@ -59,31 +59,38 @@ var webclient = {
         for (var key in data) {
             try {
                 if (key == "msg") {
-                    this.displayMsg(data[key]);
+                	var msg = data[key];
+                	try {
+                		msg = text2html.parseHtml(msg);
+                	}
+                	catch(error) {
+                		console.error(error.message);
+    	    		}
+                    controller.displayMsg(msg);
                 }
                 else if (key == "alert") {
-                    this.displayAlert(data[key]);
+              		controller.showAlert(data[key]);
                 }
                 else if (key == "out") {
-                    this.displayOut(data[key]);
+                    controller.displayMsg(data[key], "out");
                 }
                 else if (key == "err") {
-                    this.displayErr(data[key]);
+                    controller.displayMsg(data[key]);
                 }
                 else if (key == "sys") {
-                    this.displaySystem(data[key]);
+                    controller.displayMsg(data[key], "sys");
                 }
                 else if (key == "debug") {
-                    this.displayDebug(data[key]);
+                	controller.displayMsg(data[key], "debug");
                 }
                 else if (key == "prompt") {
-                    this.displayPrompt(data[key]);
+                	controller.displayMsg(data[key], "prompt");
                 }
                 else if (key == "settings") {
                     settings.set(data[key]);
                 }
                 else if (key == "look_around") {
-                    this.displayLookAround(data[key]);
+                    controller.setScene(data[key]);
                 }
                 else if (key == "obj_moved_in") {
                     this.displayObjMovedIn(data[key]);
@@ -98,28 +105,36 @@ var webclient = {
                     this.displayPlayerOffline(data[key]);
                 }
                 else if (key == "look_obj") {
-                    this.displayLookObj(data[key]);
+                    var obj = data[key];
+        			controller.showObject(obj["name"], obj["icon"], obj["desc"], obj["cmds"]);
                 }
                 else if (key == "dialogues_list") {
                     this.displayDialogue(data[key]);
                 }
                 else if (key == "status") {
-                    this.displayStatus(data[key]);
+                    var status = data[key];
+                    controller.setStatus(status["level"],
+                                         status["exp"],
+                                         status["max_exp"],
+                                         status["hp"],
+                                         status["max_hp"],
+                                         status["attack"],
+                                         status["defence"]);
                 }
                 else if (key == "equipments") {
-                    this.displayEquipments(data[key]);
+			        controller.setEquipments(data[key]);
                 }
                 else if (key == "inventory") {
-                    this.displayInventory(data[key]);
+                    controller.setInventory(data[key]);
                 }
                 else if (key == "skills") {
-                    this.displaySkills(data[key]);
+                    controller.setSkills(data[key]);
                 }
                 else if (key == "quests") {
-                    this.displayQuests(data[key]);
+                	controller.setQuests(data[key]);
                 }
                 else if (key == "get_object") {
-                    this.displayGetObject(data[key]);
+                    controller.showGetObjects(data[key]["accepted"], data[key]["rejected"]);
                 }
                 else if (key == "joined_combat") {
                     if (data_handler.dialogue_target != "") {
@@ -142,7 +157,14 @@ var webclient = {
                     combat.displayCombatCommands(data[key]);
                 }
                 else if (key == "combat_status") {
-                    combat.displayStatus(data[key])
+                    var status = data[key];
+                    controller.setStatus(status["level"],
+                                         status["exp"],
+                                         status["max_exp"],
+                                         status["hp"],
+                                         status["max_hp"],
+                                         status["attack"],
+                                         status["defence"]);
                 }
                 else if (key == "skill_cd") {
                     this.displaySkillCD(data[key]);
@@ -151,7 +173,7 @@ var webclient = {
                     this.displaySkillResult(data[key]);
                 }
                 else if (key == "get_exp") {
-                    this.displayGetExp(data[key])
+                    controller.showGetExp(data[key])
                 }
                 else if (key == "current_location") {
                     map.setCurrentLocation(data[key]);
@@ -175,97 +197,14 @@ var webclient = {
                     this.displayShop(data[key])
                 }
                 else {
-                    this.displayMsg(data[key]);
+                    controller.displayMsg(data[key]);
                 }
             }
             catch(error) {
                 console.log(key, data[key])
-                this.displayErr("Data error.");
                 console.error(error.message);
             }
         }
-    },
-
-    displayMsg : function(data) {
-        this.displayTextMsg("msg", text2html.parseHtml(data));
-    },
-        
-    displayAlert : function(data) {
-        try {
-            var header = _("Message");
-            var content = "";
-            var commands = null;
-            
-            var type = Object.prototype.toString.call(data);
-            if (type == "[object String]") {
-                content = data;
-            }
-            else {
-                if ("msg" in data) {
-                    content = data["msg"];
-                }
-                
-                if ("button" in data) {
-                    commands = [{"name": data["button"],
-                                 "cmd": "",
-                                 "args": ""}];
-                }
-            }
-
-            controller.showMessage(header, content, commands);
-        }
-        catch(error) {
-            this.displayErr("Data error.");
-            console.error(error);
-        }
-    },
-
-    displayOut : function(data) {
-        this.displayTextMsg("out", data);
-    },
-
-    displayErr : function(data) {
-        this.displayTextMsg("err", data);
-    },
-
-    displaySystem : function(data) {
-        this.displayTextMsg("sys", data);
-    },
-
-    displayDebug : function(data) {
-        this.displayTextMsg("debug", data);
-    },
-
-    displayPrompt : function(data) {
-        this.displayTextMsg("prompt", data);
-    },
-
-    displayTextMsg : function(type, msg) {
-        var msg_wnd = $("#msg_wnd");
-        if (msg_wnd.length > 0) {
-            msg_wnd.stop(true);
-            msg_wnd.scrollTop(msg_wnd[0].scrollHeight);
-        }
-
-        uimgr.divEmpty("", {"class":"msg " + type})
-            .append(msg)
-            .appendTo(msg_wnd);
-
-        // remove old messages
-        var divs = msg_wnd.children("div");
-        var max = 40;
-        var size = divs.size();
-        if (size > max) {
-            divs.slice(0, size - max).remove();
-        }
-        
-        // scroll message window to bottom
-        // $("#msg_wnd").scrollTop($("#msg_wnd")[0].scrollHeight);
-        msg_wnd.animate({scrollTop: msg_wnd[0].scrollHeight});
-    },
-
-    displayLookAround : function(data) {
-        controller.showScene(data);
     },
     
     displayObjMovedIn : function(data) {
@@ -334,223 +273,9 @@ var webclient = {
         }
     },
 
-    displayLookObj : function(data) {
-        var header = data["name"];
-        var icon = data["icon"];
-        var content = data["desc"];
-        var commands = data["cmds"];
-        controller.showObject(header, icon, content, commands);
-    },
-    
-    displayInventory : function(data) {
-        controller.setInventory(data);
-    },
-
-    displaySkills : function(data) {
-        controller.setSkills(data);
-    },
-
-    displayQuests : function(data) {
-        // display player's quests
-        var page = $("#box_quest").html("");
-        uimgr.tableQuests(data).appendTo(page);
-    },
-
-    displayGetObject : function(data) {
-        // show accepted objects
-        try {
-            var first = true;
-            var accepted = data["accepted"]
-            for (var key in accepted) {
-                if (first) {
-                    this.displayMsg(LS("You got:"));
-                    first = false;
-                }
-
-                this.displayMsg(key + ": " + accepted[key]);
-            }
-        }
-        catch(error) {
-        }
-
-        // show rejected objects
-        try {
-            var first = true;
-            var rejected = data["rejected"];
-            for (var key in rejected) {
-                if (first) {
-                    this.displayMsg(LS("You can not get:"));
-                    first = false;
-                }
-
-                this.displayMsg(key + ": " + rejected[key]);
-            }
-        }
-        catch(error) {
-        }
-
-        var combat_box = $('#combat_box');
-        if (combat_box.length == 0) {
-            // If not in combat.
-            var popup_box = $('#popup_box');
-            if (popup_box.length == 0) {
-                // If there is no other boxes, show getting object box.
-                this.displayGetObjectBox(data);
-            }
-        }
-        else {
-            // If in combat, show objects in the combat box.
-            combat.setGetObject(data);
-        }
-    },
-
-    displayGetObjectBox : function(data) {
-        popupmgr.doCloseBox();
-        popupmgr.createBox(true)
-            .attr('id', 'popup_box')
-            .prependTo($("#popup_container"));
-
-        $('#popup_header').text(LS('Get Object'));
-
-        var page = $("#popup_body");
-
-        // object's info
-        var content = "";
-        var element = "";
-        var count = 0;
-
-        // add object's name
-        try {
-            var first = true;
-            var accepted = data["accepted"]
-            for (var key in accepted) {
-                element = key + ": " + accepted[key] + "<br>";
-                
-                if (first) {
-                    content += LS("You got:") + "<br>";
-                    first = false;
-                }
-                content += element;
-                count += 1;
-            }
-        }
-        catch(error) {
-        }
-
-        try {
-            var first = true;
-            var rejected = data["rejected"];
-            for (var key in rejected) {
-                element = key + ": " + rejected[key] + "<br>";
-                
-                if (first) {
-                    if (count > 0) {
-                        content += "<br>"
-                    }
-                    first = false;
-                }
-                content += element;
-                count += 1;
-            }
-        }
-        catch(error) {
-        }
-        
-        if (count == 0) {
-            content = LS("You got nothing.");
-        }
-
-        page.html(content);
-        
-        // button
-        var br = $("<div>").append($("<br>"));
-        $('#popup_footer').append(br);
-
-        var div = $("<div>");
-        var html_button = $("<center>")
-            .append($("<button>")
-                .addClass("btn btn-default")
-                .attr("type", "button")
-                .attr("id", "button_center")
-                .attr('data-dismiss', 'modal')
-                .attr("onClick", "popupmgr.doCloseBox()")
-                .text(LS("OK")))
-            .appendTo(div);
-
-        $('#popup_footer').append(div);
-        this.doSetPopupSize();
-    },
-
-    displayGetExp : function(data) {
-        // show exp
-        this.displayMsg(LS("You got exp: ") + data);
-
-        var combat_box = $('#combat_box');
-        if (combat_box.length > 0) {
-            // If in combat, show exp in the combat box.
-            combat.setGetExp(data);
-        }
-    },
-
-    displayStatus : function(data) {
-        // refresh prompt bar
-        var bar = $("#prompt_bar");
-        var prompt = $("<div>");
-
-        var exp = "--";
-        try {
-            if (data["max_exp"] > 0) {
-                exp = data["exp"].toString() + "/" + data["max_exp"].toString();
-            }
-        }
-        catch(error) {
-        }
-
-        var hp = data["hp"].toString() + "/" + data["max_hp"].toString();
-
-        try {
-            $("<span>")
-                .addClass("prompt_name")
-                .text(data_handler.character_name)
-                .appendTo(prompt);
-
-            $("<span>")
-                .addClass("prompt_element")
-                .text(LS("Level") + LS(": ") + data["level"].toString())
-                .appendTo(prompt);
-
-            $("<span>")
-                .addClass("prompt_element")
-                .text(LS("Exp") + LS(": ") + exp)
-                .appendTo(prompt);
-
-            $("<span>")
-                .addClass("prompt_element")
-                .text(LS("HP") + LS(": ") + hp)
-                .appendTo(prompt);
-        }
-        catch(error) {
-        }
-        bar.html(prompt);
-        
-        // display player's status
-        var level = data["level"];
-        var exp = data["exp"];
-        var max_exp = data["max_exp"];
-        var hp = data["hp"];
-        var max_hp = data["max_hp"];
-        var attack = data["attack"];
-        var defence = data["defence"];
-        controller.setStatus(level, exp, max_exp, hp, max_hp, attack, defence);
-    },
-        
-    displayEquipments : function(data) {
-        controller.setEquipments(data);
-    },
-
     displayDialogue : function(data) {
         if (data.length == 0) {
-            popupmgr.doCloseDialogue();
+            controller.doClosePopupBox();
         }
         else {
             if ($('#combat_box').length > 0) {
@@ -605,7 +330,7 @@ var webclient = {
     displaySkillResult: function(data) {
 		if ("message" in data) {
 		    if (data.message) {
-			    this.displayMsg(data.message);
+			    controller.displayMsg(data.message);
 			}
 		}
 		
@@ -616,16 +341,19 @@ var webclient = {
 
     onLogin : function(data) {
         // show login UI
-        $("#msg_wnd").empty();
-        $("#prompt_bar").empty();
+        controller.clearMsgWindow();
+
+        controller.clearPromptBar();
+        $("#prompt_content").show();
+
         this.showLoginTabs();
         this.showContent("scene");
     },
     
     onLogout : function(data) {
         // show unlogin UI
-        $("#msg_wnd").empty();
-        $("#prompt_bar").empty();
+        controller.clearMsgWindow();
+        $("#prompt_content").hide();
         this.showUnloginTabs();
         this.showPage("login");
         
@@ -786,8 +514,8 @@ var webclient = {
     },
     
     onConnectionOpen: function() {
-        $("#msg_wnd").empty();
-        $("#prompt_bar").empty();
+        controller.clearMsgWindow();
+        $("#prompt_content").hide();
         webclient.showUnloginTabs();
         webclient.showContent("login");
 

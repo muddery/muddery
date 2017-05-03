@@ -92,7 +92,7 @@ var controller = {
             .hide();
 
         $("#content").empty();
-        $("#body a").not(".template").remove();
+        $("#body>a:not(.template)").remove();
 
         $("#button")
             .removeData("npc")
