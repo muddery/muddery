@@ -6,15 +6,16 @@ var controller = {
         parent.controller.doClosePopupBox();
     },
 
-	setPopup: function(header, icon, content, commands) {
+	setObject: function(name, icon, desc, commands) {
+		// add name
 	    try {
-	        header = text2html.parseHtml(header);
-	    	$("#popup_header").html(header);
+	        name = text2html.parseHtml(name);
 	    }
 	    catch(error) {
             console.error(error.message);
         }
-
+	    $("#popup_header").html(name);
+	    	
 		// add icon
 		if (icon) {
 			var url = settings.resource_location + icon;
@@ -24,14 +25,15 @@ var controller = {
             $("#img_icon").hide();
         }
 
+		// add desc
         try {
-	        content = text2html.parseHtml(content);
-		    $("#popup_body").html(content);
+	        desc = text2html.parseHtml(desc);
 	    }
 	    catch(error) {
             console.error(error.message);
         }
-
+		$("#popup_body").html(desc);
+		    
         this.clearButtons();
 		if (!commands) {
             commands = [{"name": _("OK"),
@@ -43,7 +45,7 @@ var controller = {
 
 	clearButtons: function() {
     	// remove buttons that are not template..
-    	$("#button_content").children().not(".template").remove();
+    	$("#button_content>:not(.template)").remove();
     },
 
 	addButtons: function(data) {

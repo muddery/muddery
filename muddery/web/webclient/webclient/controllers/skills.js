@@ -11,11 +11,10 @@ var controller = {
             var obj = skills[i];
             var item = item_template.clone()
 	            .removeClass("template");
-            
-            var name = obj["name"];
+
             item.find(".skill_name")
                 .data("dbref", obj["dbref"])
-            	.text(name);
+            	.text(obj["name"]);
             
             if (obj["icon"]) {
             	var icon = settings.resource_location + obj["icon"];
@@ -40,7 +39,7 @@ var controller = {
     
     clearItems: function() {
     	// Remove items that are not template.
-    	$("#tab_skills tbody").children().not(".template").remove();
+    	$("#skill_list>:not(.template)").remove();
     },
     
     doLook: function(caller) {

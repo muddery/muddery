@@ -11,11 +11,10 @@ var controller = {
             var obj = inventory[i];
             var item = item_template.clone()
 	            .removeClass("template");
-            
-            var name = obj["name"];
+
             item.find(".obj_name")
                 .data("dbref", obj["dbref"])
-            	.text(name);
+            	.text(obj["name"]);
             
             if (obj["icon"]) {
             	var icon = settings.resource_location + obj["icon"];
@@ -46,7 +45,7 @@ var controller = {
     
     clearItems: function() {
     	// Remove items that are not template.
-    	$("#tab_inventory tbody").children().not(".template").remove();
+    	$("#inventory_items>:not(.template)").remove();
     },
     
     doLook: function(caller) {
