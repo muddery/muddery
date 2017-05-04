@@ -6,40 +6,59 @@ var controller = {
         parent.controller.doClosePopupBox();
     },
 
-	setObject: function(name, icon, desc, commands) {
+	setShop: function(name, icon, desc, goods) {
 		// add name
 	    name = text2html.parseHtml(name);
-	    $("#popup_header").html(name);
+	    $("#shop_name").html(name);
 
 		// add icon
 		if (icon) {
 			var url = settings.resource_location + icon;
 			$("#img_icon").attr("src", url);
-			$("#div_icon").show();
+			$("#shop_icon").show();
         }
         else {
-            $("#div_icon").hide();
+            $("#shop_icon").hide();
         }
 
 		// add desc
 	    desc = text2html.parseHtml(desc);
-		$("#popup_body").html(desc);
+		$("#shop_desc").html(desc);
 		    
-        this.clearButtons();
-		if (!commands) {
-            commands = [{"name": _("OK"),
-                         "cmd": "",
-                         "args": ""}];
+		// set goods
+		// remove rolls that are not template..
+    	$("#goods_list>:not(.template)").remove();
+    	
+    	var content = $("#goods_list");
+		var item_template = content.find("tr.template");
+
+		if (goods) {
+            for (var i in goods) {
+                var obj = goods[i];
+
+				var item = item_template.clone()
+                	.removeClass("template");
+
+				var goods_name = text2html.parseHtml(obj["name"]);
+
+				item.find(".goods_name")
+                	.data("dbref", obj["dbref"])
+            		.html(obj["name"]);
+            	
+                item.find(".goods_number")
+                	.text(obj["number"]);
+                
+                var price = obj["price"] + " " + obj["unit"];
+                item.find(".goods_price")
+                	.text(price);
+            }
         }
-		this.addButtons(commands);
 	},
 
-	clearButtons: function() {
-    	// remove buttons that are not template..
-    	$("#button_content>:not(.template)").remove();
-    },
-
 	addButtons: function(data) {
+		// remove rolls that are not template..
+    	$("#button_content>:not(.template)").remove();
+    	
     	var content = $("#button_content");
 		var item_template = content.find("button.template");
 

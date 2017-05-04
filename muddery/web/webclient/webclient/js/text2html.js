@@ -102,24 +102,30 @@ var text2html = {
 
     parseHtml: function(string) {
         // Parses a string, replace markup with html
-        
-        // Convert html codes.
-        string = string.replace(text2html.regexp_html, text2html.convertHtml);
+        var org_string = string;
+        try {
+			// Convert html codes.
+			string = string.replace(text2html.regexp_html, text2html.convertHtml);
 
-        // Convert marks
-        string = string.replace(text2html.regexp_mark, text2html.convertMark);
+			// Convert marks
+			string = string.replace(text2html.regexp_mark, text2html.convertMark);
 
-        if (text2html.last_convert.substring(0, 5) == "<span") {
-            // close span
-            string += "</span>";
+			if (text2html.last_convert.substring(0, 5) == "<span") {
+				// close span
+				string += "</span>";
+			}
+			else if (text2html.last_convert.substring(0, 8) == "<strong>") {
+				// close strong
+				string += "</strong>";
+			}
+
+			// Clear last convert.
+			text2html.last_convert = "";
+		}
+		catch(error) {
+            console.error(error.message);
+            string = org_string;
         }
-        else if (text2html.last_convert.substring(0, 8) == "<strong>") {
-            // close strong
-            string += "</strong>";
-        }
-
-        // Clear last convert.
-        text2html.last_convert = "";
         
         return string;
     },

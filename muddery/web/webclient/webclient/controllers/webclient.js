@@ -78,6 +78,18 @@ var controller = {
         webclient.doSetVisiblePopupSize();
     },
     
+    showShop: function(name, icon, desc, goods) {
+    	this.doClosePopupBox();
+
+        var frame_id = "#frame_shop";
+        var controller = this.getFrameController(frame_id);
+        controller.setShop(name, icon, desc, goods);
+
+        $(frame_id).show();
+        $("#popup_container").show();
+        webclient.doSetVisiblePopupSize();
+    },
+    
     showGetObjects: function(accepted, rejected) {
         // show accepted objects
         try {

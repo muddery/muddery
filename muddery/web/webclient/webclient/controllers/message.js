@@ -7,21 +7,11 @@ var controller = {
     },
 
 	setMessage: function(header, content, commands) {
-	    try {
-	        header = text2html.parseHtml(header);
-	    	$("#popup_header").html(header);
-	    }
-	    catch(error) {
-            console.error(error.message);
-        }
+	    header = text2html.parseHtml(header);
+	    $("#popup_header").html(header);
 
-        try {
-	        content = text2html.parseHtml(content);
-		    $("#popup_body").html(content);
-	    }
-	    catch(error) {
-            console.error(error.message);
-        }
+	    content = text2html.parseHtml(content);
+		$("#popup_body").html(content);
 
         this.clearButtons();
 		if (!commands) {
@@ -46,20 +36,15 @@ var controller = {
             for (var i in data) {
                 var cmd = data[i];
 
-                try {
-                    var name = text2html.parseHtml(cmd["name"]);
-                    item_template.clone()
-                        .removeClass("template")
-                        .data("cmd_name", cmd["cmd"])
-                        .data("cmd_args", cmd["args"])
-                        .html(name)
-                        .appendTo(content);
+                var name = text2html.parseHtml(cmd["name"]);
+                item_template.clone()
+                    .removeClass("template")
+                    .data("cmd_name", cmd["cmd"])
+                    .data("cmd_args", cmd["args"])
+                    .html(name)
+                    .appendTo(content);
 
-                    has_button = true;
-                }
-                catch(error) {
-                    console.error(error.message);
-                }
+                has_button = true;
             }
         }
     },

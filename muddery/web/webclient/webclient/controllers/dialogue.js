@@ -14,14 +14,7 @@ var controller = {
         }
 
         // speaker
-        var speaker = dialogues[0]["speaker"];
-        try {
-            speaker = text2html.parseHtml(speaker);
-        }
-        catch(error) {
-            console.error(error.message);
-        }
-
+        var speaker = text2html.parseHtml(dialogues[0]["speaker"]);
         if (!speaker) {
             // placeholder
             speaker = "&nbsp;";
@@ -32,12 +25,11 @@ var controller = {
         var icon = dialogues[0]["icon"];
         if (icon) {
             var url = settings.resource_location + icon;
-            $("#img_icon")
-                .attr("src", url)
-                .show();
+            $("#img_icon").attr("src", url);
+            $("#div_icon").show();
         }
         else {
-            $("#img_icon").hide();
+            $("#div_icon").hide();
         }
 
         // set contents and buttons

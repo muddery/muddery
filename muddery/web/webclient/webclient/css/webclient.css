@@ -212,11 +212,6 @@ a:focus {
     text-align: center;
 }
 
-.shop-header {
-    color: #0ff;
-    text-align: center;
-}
-
 /* Style specific classes corresponding to formatted, narative text. */
 .red { color: red; }
 .maroon { color: maroon; }
@@ -299,59 +294,9 @@ a:focus {
     padding: 4px 8px 4px 8px;
 }
 
-.fighter_team {
-    padding: 0px;
-    position: absolute;
-    left: 12%;
-    text-align: left;
-    line-height: 1.2em;
-}
-
-.fighter_enemy {
-    padding: 0px;
-    position: absolute;
-    right: 12%;
-    text-align: right;
-    line-height: 1.2em;
-}
-
 .hp {
     position: absolute;
     top: -15px;
-}
-
-/* combat button */
-button.btn-combat,
-button.btn-combat:focus,
-button.btn-combat:hover,
-button.btn-combat:active {
-    position: absolute;
-    width: 72px;
-    height: 72px;
-    font-size: 12px;
-    padding: 3px 3px 0px 3px;
-    margin: 0px;
-    background-color: #000;
-    border-style: none;
-    outline: none;
-    color: #333;
-}
-
-div.combat-skill-name {
-    border: 1px solid;
-    border-color: #ccc;
-    border-radius: 4px;
-    background-color: #ddd;
-    margin: 3px 0px 0px 0px;
-}
-
-button.btn-combat div.cooldown {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    background-color: #600;
-    opacity: 0.5;
 }
 
 .prompt_element {
@@ -381,19 +326,6 @@ button.btn-combat div.cooldown {
 .shop_icon {
 	width: 40px;
 	height: 40px;
-}
-
-.shop_goods_name {
-    min-width: 60px;
-}
-
-.shop_goods_price {
-    min-width: 60px;
-}
-
-.fighter_icon {
-	width: 30px;
-	height: 30px;
 }
 
 .command_icon {

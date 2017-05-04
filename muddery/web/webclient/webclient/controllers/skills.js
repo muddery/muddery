@@ -24,13 +24,7 @@ var controller = {
             	item.find(".skill_icon").hide();
             }
 
-			var desc = "";
-            try {
-            	desc = text2html.parseHtml(obj["desc"]);
-            }
-			catch(error) {
-                console.error(error.message);
-    	    }
+			var desc = text2html.parseHtml(obj["desc"]);
             item.find(".skill_desc").html(desc);
             
 			item.appendTo(container);

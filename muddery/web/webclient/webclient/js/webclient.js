@@ -59,13 +59,7 @@ var webclient = {
         for (var key in data) {
             try {
                 if (key == "msg") {
-                	var msg = data[key];
-                	try {
-                		msg = text2html.parseHtml(msg);
-                	}
-                	catch(error) {
-                		console.error(error.message);
-    	    		}
+                	var msg = text2html.parseHtml(data[key]);
                     controller.displayMsg(msg);
                 }
                 else if (key == "alert") {
@@ -139,7 +133,7 @@ var webclient = {
                 else if (key == "joined_combat") {
                     if (data_handler.dialogue_target != "") {
                         // If the player is talking, close the dialog window.
-                        popupmgr.doCloseDialogue();
+                        controller.doClosePopupBox();
                     }
 
                     combat.createCombat(data[key]);
@@ -296,7 +290,7 @@ var webclient = {
 
     displayShop: function(data) {
         data_handler.shop_data = data;
-        popupmgr.showShop();
+        controller.setShop(data["name"], data["icon"], data["desc"], data["goods"]);
     },
 
     displaySkillCD: function(data) {

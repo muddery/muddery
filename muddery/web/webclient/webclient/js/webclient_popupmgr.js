@@ -116,13 +116,7 @@ var popupmgr = {
             .prependTo($("#popup_container"));
 
         // add object's name
-        var title = "";
-        try {
-            title = text2html.parseHtml(data["name"]);
-        }
-        catch(error) {
-        }
-
+        var title = text2html.parseHtml(data["name"]);
         $('#popup_header').html(title);
 
         var page = $('#popup_body');
@@ -153,12 +147,8 @@ var popupmgr = {
         }
 
         // add object's desc
-        try {
-            element = text2html.parseHtml(data["desc"]);
-            uimgr.divEmpty(element).appendTo(page);
-        }
-        catch(error) {
-        }
+        element = text2html.parseHtml(data["desc"]);
+        uimgr.divEmpty(element).appendTo(page);
 
         uimgr.divBR().appendTo(footer);
 
