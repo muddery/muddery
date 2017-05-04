@@ -1,0 +1,22 @@
+
+#goods_icon {
+    text-align: center;
+}
+
+#img_icon {
+	width: 40px;
+	height: 40px;
+}
+
+#name {
+    color: #0ff;
+    text-align: center;
+}
+
+#header_goods_name {
+    min-width: 60px;
+}
+
+#header_goods_price {
+    min-width: 60px;
+}

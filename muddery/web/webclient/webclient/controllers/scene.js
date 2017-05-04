@@ -35,23 +35,11 @@ var controller = {
         $("#box_scene").data("dbref", dbref);
 
         // add room's name
-        var room_name = "";
-        try {
-            room_name = text2html.parseHtml(scene["name"]);
-        }
-        catch(error) {
-            console.error(error.message);
-        }
-        $("#name_content").html("&gt;&gt;&gt;&gt;&gt; " + room_name +  " &lt;&lt;&lt;&lt;&lt;");
+        var room_name = text2html.parseHtml(scene["name"]);
+        $("#name_content").html(room_name);
 
         // add room's desc
-        var room_desc = "";
-        try {
-            room_desc = text2html.parseHtml(scene["desc"]);
-        }
-        catch(error) {
-            console.error(error.message);
-        }
+        var room_desc = text2html.parseHtml(scene["desc"]);
 		$("#desc_content").html(room_desc);
 
         // add commands
@@ -137,20 +125,15 @@ var controller = {
             for (var i in data) {
                 var cmd = data[i];
 
-                try {
-                    var name = text2html.parseHtml(cmd["name"]);
-                    item_template.clone()
-                        .removeClass("template")
-                        .data("cmd_name", cmd["cmd"])
-                        .data("cmd_args", cmd["args"])
-                        .html(name)
-                        .appendTo(content);
+                var name = text2html.parseHtml(cmd["name"]);
+                item_template.clone()
+                    .removeClass("template")
+                    .data("cmd_name", cmd["cmd"])
+                    .data("cmd_args", cmd["args"])
+                    .html(name)
+                    .appendTo(content);
 
-                    has_button = true;
-                }
-                catch(error) {
-                    console.error(error.message);
-                }
+                has_button = true;
             }
         }
 
@@ -173,26 +156,21 @@ var controller = {
             for (var i in data) {
                 var obj = data[i];
 
-                try {
-                    var name = text2html.parseHtml(obj["name"]);
-                    if ("complete_quest" in obj && obj["complete_quest"]) {
-                        name += "[?]";
-                    }
-                    else if ("provide_quest" in obj && obj["provide_quest"]) {
-                        name += "[!]";
-                    }
-
-                    item_template.clone()
-                        .removeClass("template")
-                        .data("dbref", obj["dbref"])
-                        .html(name)
-                        .appendTo(content);
-
-                    has_link = true;
+                var name = text2html.parseHtml(obj["name"]);
+                if ("complete_quest" in obj && obj["complete_quest"]) {
+                    name += "[?]";
                 }
-                catch(error) {
-                    console.error(error.message);
+                else if ("provide_quest" in obj && obj["provide_quest"]) {
+                    name += "[!]";
                 }
+
+                item_template.clone()
+                    .removeClass("template")
+                    .data("dbref", obj["dbref"])
+                    .html(name)
+                    .appendTo(content);
+
+                has_link = true;
             }
         }
 

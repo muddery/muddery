@@ -16,13 +16,7 @@ var controller = {
                 .data("dbref", quest["dbref"])
             	.text(quest["name"]);
             
-			var desc = "";
-            try {
-            	desc = text2html.parseHtml(quest["desc"]);
-            }
-			catch(error) {
-                console.error(error.message);
-    	    }
+			var desc = text2html.parseHtml(quest["desc"]);
             item.find(".quest_desc").html(desc);
             
             var obj_container = item.find(".quest_objective");
