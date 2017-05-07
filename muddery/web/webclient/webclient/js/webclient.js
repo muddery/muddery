@@ -131,40 +131,27 @@ var webclient = {
                     controller.showGetObjects(data[key]["accepted"], data[key]["rejected"]);
                 }
                 else if (key == "joined_combat") {
-                    if (data_handler.dialogue_target != "") {
-                        // If the player is talking, close the dialog window.
-                        controller.doClosePopupBox();
-                    }
-
-                    combat.createCombat(data[key]);
+                    controller.showCombat(data[key]);
                 }
                 else if (key == "left_combat") {
-                    combat.leftCombat(data[key]);
+                    controller.closeCombat(data[key]);
                 }
                 else if (key == "combat_finish") {
-                    combat.finishCombat(data[key]);
+                    controller.finishCombat(data[key]);
                 }
                 else if (key == "combat_info") {
-                    combat.displayCombatInfo(data[key]);
+                	var info = data[key];
+                    controller.setCombatInfo(info["desc"], info["characters"]);
                 }
                 else if (key == "combat_commands") {
-                    combat.displayCombatCommands(data[key]);
-                }
-                else if (key == "combat_status") {
-                    var status = data[key];
-                    controller.setStatus(status["level"],
-                                         status["exp"],
-                                         status["max_exp"],
-                                         status["hp"],
-                                         status["max_hp"],
-                                         status["attack"],
-                                         status["defence"]);
+                    controller.setCombatCommands(data[key]);
                 }
                 else if (key == "skill_cd") {
-                    this.displaySkillCD(data[key]);
+                	var skill_cd = data[key];
+                    controller.setSkillCD(skill_cd["skill"], skill_cd["cd"], skill_cd["gcd"]);
                 }
                 else if (key == "skill_result") {
-                    this.displaySkillResult(data[key]);
+                    controller.setSkillResult(data[key]);
                 }
                 else if (key == "get_exp") {
                     controller.showGetExp(data[key])
@@ -291,46 +278,6 @@ var webclient = {
     displayShop: function(data) {
         data_handler.shop_data = data;
         controller.setShop(data["name"], data["icon"], data["desc"], data["goods"]);
-    },
-
-    displaySkillCD: function(data) {
-        // update skill's cd
-        var cd = data["cd"];
-        var gcd = data["gcd"];
-        var skill = data["skill"];
-        var current_time = (new Date()).valueOf();
-
-        // cd_time in milliseconds
-        var cd_time = current_time + cd * 1000;
-        if (skill in data_handler.skill_cd_time) {
-            if (data_handler.skill_cd_time[skill] < cd_time) {
-                data_handler.skill_cd_time[skill] = cd_time;
-            }
-        }
-
-        var gcd_time = current_time + gcd * 1000;
-        for (var key in data_handler.skill_cd_time) {
-            if (data_handler.skill_cd_time[key] < gcd_time) {
-                data_handler.skill_cd_time[key] = gcd_time;
-            }
-        }
-
-        if ($('#combat_box').length > 0) {
-            // has combat box
-            combat.displaySkillCD();
-        }
-    },
-
-    displaySkillResult: function(data) {
-		if ("message" in data) {
-		    if (data.message) {
-			    controller.displayMsg(data.message);
-			}
-		}
-		
-		if (!combat.isLeftCombat()) {
-			combat.displaySkillResult(data);
-		}
     },
 
     onLogin : function(data) {

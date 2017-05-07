@@ -9,10 +9,10 @@ var controller = {
         $("#name_content").empty();
         $("#desc_content").empty();
         
-        this.clearItems("#commands_content");
-        this.clearItems("#things_content");
-        this.clearItems("#npcs_content");
-        this.clearItems("#players_content");
+        this.clearItems("#commands_container");
+        this.clearItems("#things_container");
+        this.clearItems("#npcs_container");
+        this.clearItems("#players_container");
 
         for (var i = 0; i < 9; ++i) {
             this.clearItems("#exits_" + i);
@@ -43,20 +43,20 @@ var controller = {
 		$("#desc_content").html(room_desc);
 
         // add commands
-        var contents = "cmds" in scene ? scene["cmds"]: null;
-        this.addButtons("#commands", "#commands_content", contents);
+        var commands = "cmds" in scene ? scene["cmds"]: null;
+        this.addButtons("#commands", "#commands_container", commands);
 
         // add things
-        contents = "things" in scene ? scene["things"]: null;
-        this.addLinks("#things", "#things_content", contents);
+        var things = "things" in scene ? scene["things"]: null;
+        this.addLinks("#things", "#things_container", things);
 
         // add NPCs
-        contents = "npcs" in scene ? scene["npcs"]: null;
-        this.addLinks("#npcs", "#npcs_content", contents);
+        var npcs = "npcs" in scene ? scene["npcs"]: null;
+        this.addLinks("#npcs", "#npcs_container", npcs);
 
         // add players
-        contents = "players" in scene ? scene["players"]: null;
-        this.addLinks("#players", "#players_content", contents);
+        var players = "players" in scene ? scene["players"]: null;
+        this.addLinks("#players", "#players_containert", players);
 
         // add exits
         // sort exits by direction
@@ -116,9 +116,9 @@ var controller = {
     	$(item_id).children().not(".template").remove();
     },
 
-    addButtons: function(block_id, content_id, data) {
-    	var content = $(content_id);
-		var item_template = content.find("input.template");
+    addButtons: function(block_id, container_id, data) {
+    	var container = $(container_id);
+		var item_template = container.find("input.template");
 
 		var has_button = false;
 		if (data) {
@@ -131,7 +131,7 @@ var controller = {
                     .data("cmd_name", cmd["cmd"])
                     .data("cmd_args", cmd["args"])
                     .html(name)
-                    .appendTo(content);
+                    .appendTo(container);
 
                 has_button = true;
             }
@@ -147,9 +147,9 @@ var controller = {
 		}
     },
     
-    addLinks: function(block_id, content_id, data, command) {
-    	var content = $(content_id);
-		var item_template = content.find("a.template");
+    addLinks: function(block_id, container_id, data) {
+    	var container = $(container_id);
+		var item_template = container.find("a.template");
 
 		var has_link = false;
 		if (data) {
@@ -168,7 +168,7 @@ var controller = {
                     .removeClass("template")
                     .data("dbref", obj["dbref"])
                     .html(name)
-                    .appendTo(content);
+                    .appendTo(container);
 
                 has_link = true;
             }
@@ -184,9 +184,9 @@ var controller = {
 		}
     },
 
-    addText: function(block_id, content_id, text) {
-    	var content = $(content_id);
-		var item_template = content.find("span.template");
+    addText: function(block_id, container_id, text) {
+    	var container = $(container_id);
+		var item_template = container.find("span.template");
 
 		var has_text = false;
 		if (text) {
@@ -194,7 +194,7 @@ var controller = {
                 item_template.clone()
                     .removeClass("template")
                     .html(text)
-                    .appendTo(content);
+                    .appendTo(container);
 
                 has_text = true;
             }

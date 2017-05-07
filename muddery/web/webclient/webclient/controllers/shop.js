@@ -29,8 +29,8 @@ var controller = {
 		// remove rolls that are not template..
     	$("#goods_list>:not(.template)").remove();
     	
-    	var content = $("#goods_list");
-		var item_template = content.find("tr.template");
+    	var container = $("#goods_list");
+		var item_template = container.find("tr.template");
 
 		if (goods) {
             for (var i in goods) {
@@ -51,34 +51,11 @@ var controller = {
                 var price = obj["price"] + " " + obj["unit"];
                 item.find(".goods_price")
                 	.text(price);
+                	
+                item.appendTo(container);
             }
         }
 	},
-
-	addButtons: function(data) {
-		// remove rolls that are not template..
-    	$("#button_content>:not(.template)").remove();
-    	
-    	var content = $("#button_content");
-		var item_template = content.find("button.template");
-
-		var has_button = false;
-		if (data) {
-            for (var i in data) {
-                var cmd = data[i];
-
-                var name = text2html.parseHtml(cmd["name"]);
-                item_template.clone()
-                    .removeClass("template")
-                    .data("cmd_name", cmd["cmd"])
-                    .data("cmd_args", cmd["args"])
-                    .html(name)
-                    .appendTo(content);
-
-                has_button = true;
-            }
-        }
-    },
 
     doCommandLink: function(caller) {
         this.doClosePopupBox();

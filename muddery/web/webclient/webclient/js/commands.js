@@ -14,18 +14,10 @@ var commands = {
         Evennia.msg("text", this.cmdString(cmd, args));
     },
     
-    doCastSkill : function(skill) {
-        if (skill in data_handler.skill_cd_time) {
-            var cd_time = data_handler.skill_cd_time[skill];
-            var current_time = (new Date()).valueOf();
-            if (cd_time > current_time) {
-                return;
-            }
-        }
-
+    doCastSkill : function(skill, target) {
         var cmd = "castskill";
         var args = {"skill": skill,
-                    "target": data_handler.current_target};
+                    "target": target};
         Evennia.msg("text", this.cmdString(cmd, args));
     },
     

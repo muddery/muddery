@@ -124,10 +124,10 @@ var controller = {
 			return;
 		}
 			
-		if (result.key == "skill_normal_hit" ||
-		    result.key == "skill_dunt") {
+		if (skill.key == "skill_normal_hit" ||
+		    skill.key == "skill_dunt") {
 
-			var caller = $('#char_' + result.caller.slice(1));
+			var caller = $('#char_' + skill.caller.slice(1));
 			if (caller.hasClass("teammate")) {
 				caller.animate({left: '50%'}, 100);
 				caller.animate({left: '12%'}, 100);
@@ -137,25 +137,25 @@ var controller = {
 				caller.animate({right: '12%'}, 100);
 			}
 		}
-		else if (result.key == "skill_normal_heal" ||
-		         result.key == "skill_powerful_heal") {
+		else if (skill.key == "skill_normal_heal" ||
+		         skill.key == "skill_powerful_heal") {
 		}
-		else if (result.key == "skill_escape") {
-			if (result.effect == 1) {
-				var item_id = "#char_" + result["target"].slice(1) + ".status";
+		else if (skill.key == "skill_escape") {
+			if (skill.effect == 1) {
+				var item_id = "#char_" + skill["target"].slice(1) + ".status";
 				$(item_id).text(LS("Escaped"));
 			}
 		}
 	
         // Update status.
-        if ("status" in result) {
-            this.updateStatus(result["status"]);
+        if ("status" in skill) {
+            this.updateStatus(skill["status"]);
         }
     },
     
     updateStatus: function(status) {
         for (var i in status) {
-            var item_id = "#char_" + status[i]["dbref"].slice(1) + ">div.status";
+            var item_id = "#char_" + status[i]["dbref"].slice(1) + ".status";
             $(item_id).text(status[i]["hp"] + "/" + status[i]["max_hp"])
         }
     },
@@ -174,9 +174,6 @@ var controller = {
             if (this._skill_cd_time[skill] < cd_time) {
                 this._skill_cd_time[skill] = cd_time;
             }
-        }
-        else {
-            this._skill_cd_time[skill] = cd_time;
         }
 
         var gcd_time = current_time + gcd * 1000;
@@ -202,8 +199,8 @@ var controller = {
         var key = button.data("key");
 
         var cd_time = 0;
-        if (key in this._skill_cd_time) {
-            cd_time = this._skill_cd_time[key];
+        if (key in _skill_cd_time) {
+            cd_time = _skill_cd_time[key];
         }
 
         var current_cd = button.data("cd");
@@ -221,26 +218,24 @@ var controller = {
         }
         
         cooldown.animate({height: "0%", top: "100%"}, cd_time - current_time, "linear");
-        button.data("cd", cd_time);
+        btn.data("cd", cd_time);
     },
 
     doCombatSkill: function(caller) {
         if (this._finished) {
             return;
         }
-
-        var key = $(caller).data("key");
-
-        // Check CD.
-        if (key in this._skill_cd_time) {
-            var cd_time = this._skill_cd_time[key];
+        
+        if (skill in _skill_cd_time) {
+            var cd_time = _skill_cd_time[skill];
             var current_time = (new Date()).valueOf();
             if (cd_time > current_time) {
                 return;
             }
         }
 
-        parent.commands.doCastSkill(key, this._target);
+        var key = $(caller).data('key');
+        parent.commands.doCastSkill(key)
     },
     
     finishCombat: function(result) {

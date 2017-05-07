@@ -27,24 +27,21 @@ var controller = {
     	$("#button_content>:not(.template)").remove();
     },
 
-	addButtons: function(data) {
-    	var content = $("#button_content");
-		var item_template = content.find("button.template");
+	addButtons: function(buttons) {
+    	var container = $("#popup_footer");
+		var item_template = container.find("button.template");
 
-		var has_button = false;
-		if (data) {
-            for (var i in data) {
-                var cmd = data[i];
+		if (buttons) {
+            for (var i in buttons) {
+                var button = buttons[i];
 
-                var name = text2html.parseHtml(cmd["name"]);
+                var name = text2html.parseHtml(button["name"]);
                 item_template.clone()
                     .removeClass("template")
-                    .data("cmd_name", cmd["cmd"])
-                    .data("cmd_args", cmd["args"])
+                    .data("cmd_name", button["cmd"])
+                    .data("cmd_args", button["args"])
                     .html(name)
-                    .appendTo(content);
-
-                has_button = true;
+                    .appendTo(container);
             }
         }
     },

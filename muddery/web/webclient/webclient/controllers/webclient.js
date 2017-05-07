@@ -147,15 +147,68 @@ var controller = {
         $("#popup_container").show();
         webclient.doSetVisiblePopupSize();
     },
+    
+    showCombat: function(combat) {     
+    	this.doClosePopupBox();
+
+        var frame_id = "#frame_combat";
+        var controller = this.getFrameController(frame_id);
+        controller.reset();
+
+        $(frame_id).show();
+        $("#popup_container").show();
+        webclient.doSetVisiblePopupSize();
+    },
+
+    closeCombat: function(data) {
+        var frame_id = "#frame_combat";
+        var controller = this.getFrameController(frame_id);
+        if (!controller.isCombatFinished()) {
+            controller.finishCombat();
+        }
+    },
+    
+    setCombatInfo: function(desc, characters) {
+        var frame_id = "#frame_combat";
+        var controller = this.getFrameController(frame_id);
+        controller.setInfo(desc, characters, data_handler.character_dbref);
+    },
+    
+    setCombatCommands: function(commands) {
+    	var frame_id = "#frame_combat";
+        var controller = this.getFrameController(frame_id);
+        controller.setCommands(commands);
+    },
+    
+    setSkillResult: function(result) {
+		if ("message" in result && result["message"]) {
+		    var msg = text2html.parseHtml(result["message"]);
+			this.displayMsg(msg);
+		}
+		
+		var frame_id = "#frame_combat";
+        var controller = this.getFrameController(frame_id);
+		controller.setSkillResult(result);
+    },
+    
+    setSkillCD: function(skill, cd, gcd) {
+    	var frame_id = "#frame_combat";
+        var controller = this.getFrameController(frame_id);
+		controller.setSkillCD(skill, cd, gcd);
+    },
+    
+    finishCombat: function(result) {
+    	//controller.finishCombat(result);
+    },
 
     showGetExp: function(exp) {
         // show exp
-        controller.displayMsg(LS("You got exp: ") + data);
+        controller.displayMsg(LS("You got exp: ") + exp);
 
         var combat_box = $('#combat_box');
         if (combat_box.length > 0) {
             // If in combat, show exp in the combat box.
-            combat.setGetExp(data);
+            combat.setGetExp(exp);
         }
     },
     

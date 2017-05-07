@@ -22,10 +22,8 @@ var controller = {
         $("#header").html(speaker);
 
         // add icon
-        var icon = dialogues[0]["icon"];
-        if (icon) {
-            var url = settings.resource_location + icon;
-            $("#img_icon").attr("src", url);
+        if (dialogues[0]["icon"]) {
+            $("#img_icon").attr("src", settings.resource_location + dialogues[0]["icon"]);
             $("#div_icon").show();
         }
         else {

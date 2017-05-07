@@ -529,7 +529,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     # Combat methods.
     #
     ########################################
-    def at_enter_combat(self, combat_handler):
+    def at_enter_combat_mode(self, combat_handler):
         """
         Called when the character enters a combat.
 
@@ -598,7 +598,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         pass
 
-    def at_leave_combat(self):
+    def at_leave_combat_mode(self):
         """
         Called when the character leaves a combat.
 

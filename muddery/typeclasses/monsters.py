@@ -76,14 +76,14 @@ class MudderyMonster(MudderyCharacter):
         # stop auto cast
         self.skill_handler.stop_auto_combat_skill()
 
-    def at_leave_combat(self):
+    def at_leave_combat_mode(self):
         """
         Called when the character leaves a combat.
 
         Returns:
             None
         """
-        super(MudderyMonster, self).at_leave_combat()
+        super(MudderyMonster, self).at_leave_combat_mode()
 
         if self.is_alive():
             # Recover all hp.
