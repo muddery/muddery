@@ -4,7 +4,15 @@
 	height: 30px;
 }
 
-.team {
+#characters {
+	min-height: 100px;
+}
+
+#buttons {
+    height: 90px;
+}
+
+.teammate {
     padding: 0px;
     position: absolute;
     left: 12%;
@@ -46,7 +54,7 @@
     opacity: 0.5;
 }
 
-div.combat-skill-name {
+.command_name {
     border: 1px solid;
     border-color: #ccc;
     border-radius: 4px;

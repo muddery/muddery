@@ -3,6 +3,10 @@
     color: #00ffff;
 }
 
+.scene_object {
+    margin: 0px 5px;
+}
+
 .exit_table {
     line-height: 1;
     background: #333;

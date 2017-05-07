@@ -17,8 +17,8 @@ var controller = {
             	.text(obj["name"]);
             
             if (obj["icon"]) {
-            	var icon = settings.resource_location + obj["icon"];
-            	item.find(".img_icon").attr("src", icon);
+            	item.find(".img_icon").attr("src", settings.resource_location + obj["icon"]);
+            	item.find(".skill_icon").show();
             }
             else {
             	item.find(".skill_icon").hide();

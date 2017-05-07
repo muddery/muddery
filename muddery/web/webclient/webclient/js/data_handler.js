@@ -7,7 +7,6 @@ var data_handler = {
     character_name: "",
     current_target: "",
     name_list: {},
-    skill_cd_time: {},
     dialogue_target: "",
     dialogues_list: [],
     shop_data: {},

@@ -904,14 +904,14 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         return skills
 
-    def at_enter_combat(self, combat_handler):
+    def at_enter_combat_mode(self, combat_handler):
         """
         Called when the character enters a combat.
 
         Returns:
             None
         """
-        super(MudderyPlayerCharacter, self).at_enter_combat(combat_handler)
+        super(MudderyPlayerCharacter, self).at_enter_combat_mode(combat_handler)
 
         self.show_enter_combat(combat_handler)
 
@@ -975,14 +975,14 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         self.msg({"combat_finish": {"escaped": True}})
 
-    def at_leave_combat(self):
+    def at_leave_combat_mode(self):
         """
         Called when the character leaves a combat.
 
         Returns:
             None
         """
-        super(MudderyPlayerCharacter, self).at_leave_combat()
+        super(MudderyPlayerCharacter, self).at_leave_combat_mode()
 
         if self.has_player:
             # notify combat finished

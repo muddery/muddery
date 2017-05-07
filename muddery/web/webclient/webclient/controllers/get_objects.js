@@ -12,14 +12,14 @@ var controller = {
 		this.setItems("#rejected", "#rejected_list", rejected);
 	},
 
-    setItems: function(block_id, content_id, objects) {
-    	var content = $(content_id);
+    setItems: function(block_id, container_id, objects) {
+    	var container = $(container_id);
     	
     	// Remove items that are not template.
-    	content.children().not(".template").remove();
+    	container.children().not(".template").remove();
     	
     	// Add new items.
-		var item_template = content.find("p.template");
+		var item_template = container.find("p.template");
 
 		var has_item = false;
 		if (objects) {
@@ -28,7 +28,7 @@ var controller = {
 					.removeClass("template")
 				item.find(".name").text(name);
 				item.find(".info").text(objects[name]);
-				item.appendTo(content);
+				item.appendTo(container);
 				
 				has_item = true;
             }
