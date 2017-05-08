@@ -7,3 +7,7 @@
 	width: 40px;
 	height: 40px;
 }
+
+#body {
+    min-height: 80px;
+}

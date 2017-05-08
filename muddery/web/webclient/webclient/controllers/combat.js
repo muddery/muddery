@@ -3,7 +3,7 @@ var controller = {
 
 	_self_dbref: "",
 	_target: "",
-	_combat_finished: false,
+	_combat_finished: true,
 	_skill_cd_time: {},
 
     // close popup box
@@ -11,7 +11,7 @@ var controller = {
         parent.controller.doClosePopupBox();
     },
     
-    reset: function() {
+    reset: function(skill_cd_time) {
 		$("#desc").empty();
 	
     	// Remove characters that are not template.
@@ -23,6 +23,7 @@ var controller = {
     	this._self_dbref = "";
     	this._target = "";
 		this._combat_finished = false;
+		this._skill_cd_time = skill_cd_time;
     },
 
 	setInfo: function(desc, characters, self_dbref) {
@@ -225,7 +226,7 @@ var controller = {
     },
 
     doCombatSkill: function(caller) {
-        if (this._finished) {
+        if (this._combat_finished) {
             return;
         }
 
@@ -244,94 +245,10 @@ var controller = {
     },
     
     finishCombat: function(result) {
-        this._finished = true;
-        this._result = result;
-        setTimeout(controller.showCombatResult, 750);
+        this._combat_finished = true;
     },
     
     isCombatFinished: function() {
-        return this._finished;
-    },
-
-    showCombatResult: function() {
-        var self = controller;
-
-        $('#combat_desc').remove();
-        $('#combat_characters').remove();
-        $('#combat_commands').remove();
-        
-        var box = $('#combat_box').empty();
-
-        var boxDialog = $('<div>')
-            .addClass('modal-dialog modal-sm')
-            .addClass('vertical-center')
-            .appendTo(box);
-
-        var boxContent = $('<div>')
-            .addClass('modal-content')
-            .appendTo(boxDialog);
-
-        var boxHeader = $('<div>')
-            .attr('id', 'combat_messages')
-            .addClass('modal-header')
-            .appendTo(boxContent);
-
-        var boxBodyResult = $('<div>')
-            .attr('id', 'combat_result')
-            .addClass('modal-body')
-            .appendTo(boxContent);
-
-        var boxBodyExp = $('<div>')
-            .attr('id', 'combat_exp')
-            .addClass('modal-body')
-            .appendTo(boxContent);
-            
-        var boxBodyLoot = $('<div>')
-            .attr('id', 'combat_loot')
-            .addClass('modal-body')
-            .appendTo(boxContent);
-
-        var boxFooter = $('<div>')
-            .addClass('modal-footer')
-            .appendTo(boxContent);
-
-        $('<center>')
-            .append($('<h4>')
-                .addClass('modal-title')
-                .text(LS('BATTLE RESULT')).appendTo(boxHeader));
-
-        // result
-        if ("escaped" in self._result) {
-            boxBodyResult.text(LS("Escaped !"));
-        }
-        else if ("win" in self._result) {
-            boxBodyResult.text(LS("You win !"));
-        }
-        else if ("lose" in self._result) {
-            boxBodyResult.text(LS("You lost !"));
-        }
-
-        if (self._exp) {
-            self.displayGetExp(self._exp);
-        }
-
-        if (self._loots) {
-            self.displayGetObject(self._loots);
-        }
-
-        // button
-        var center = $('<center>');
-        var button = $('<button>')
-            .addClass('btn btn-default')
-            .attr('type', 'button')
-            .attr('id', 'button_center')
-            .attr('onClick', 'combat.closeCombat()')
-            .text(LS('OK'))
-            .addClass('btn btn-primary');
-
-        button.appendTo(center);
-        center.appendTo(boxFooter);
-
-        webclient.doSetPopupSize();
+        return this._combat_finished;
     },
 };

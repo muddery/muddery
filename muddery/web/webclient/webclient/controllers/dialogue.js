@@ -50,20 +50,23 @@ var controller = {
             }
             else {
                 var body = $("#body");
-                var item_template = $("#body a.template");
+                var item_template = $("#body>p.template");
                 for (var i in dialogues) {
                     var dlg = dialogues[i];
 
                     var content = text2html.parseHtml(dlg["content"]);
                     content = escape.parse(content, escapes);
 
-                    item_template.clone()
-                        .removeClass("template")
+                    var item = item_template.clone()
+                        .removeClass("template");
+
+                    item.find("a")
                         .data("npc", dlg["npc"])
                         .data("dialogue", dlg["dialogue"])
                         .data("sentence", dlg["sentence"])
                         .html(content)
-                        .appendTo(body);
+
+                    item.appendTo(body);
                 }
 
                 $("#button").text(_("Select One"));
@@ -77,9 +80,9 @@ var controller = {
     clearDialogues: function() {
         // Remove all dialogues.
         $("#header").empty();
-        $("#img_icon")
-            .removeAttr("src")
-            .hide();
+
+        $("#div_icon").hide();
+        $("#img_icon").removeAttr("src");
 
         $("#content").empty();
         $("#body>a:not(.template)").remove();

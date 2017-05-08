@@ -87,10 +87,10 @@ var webclient = {
                     controller.setScene(data[key]);
                 }
                 else if (key == "obj_moved_in") {
-                    this.displayObjMovedIn(data[key]);
+                    controller.showObjMovedIn(data[key]);
                 }
                 else if (key == "obj_moved_out") {
-                    this.displayObjMovedOut(data[key]);
+                    controller.showObjMovedOut(data[key]);
                 }
                 else if (key == "player_online") {
                     this.displayPlayerOnline(data[key]);
@@ -103,7 +103,7 @@ var webclient = {
         			controller.showObject(obj["name"], obj["icon"], obj["desc"], obj["cmds"]);
                 }
                 else if (key == "dialogues_list") {
-                    this.displayDialogue(data[key]);
+                    controller.setDialogueList(data[key]);
                 }
                 else if (key == "status") {
                     var status = data[key];
@@ -188,46 +188,6 @@ var webclient = {
         }
     },
     
-    displayObjMovedIn : function(data) {
-        for (var key in data) {
-            var page = $("#room_" + key);
-            page.css("display", "");
-
-            for (var i in data[key]) {
-                try {
-                    var obj = data[key][i];
-                    var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, obj["name"],
-                        {"cmd_name": "look", "cmd_args": obj["dbref"], "dbref": obj["dbref"], "style":"margin-left:10px;"});
-                    page.append(aHrefElement);
-                }
-                catch(error) {
-                }
-            }
-        }
-    },
-
-    displayObjMovedOut : function(data) {
-        for (var key in data) {
-            var page = $("#room_" + key);
-            for (var i in data[key]) {
-                try {
-                    var dbref = data[key][i]["dbref"];
-                    if (data_handler.dialogue_target == dbref) {
-                        // If the player is talking to it, close the dialog window.
-                        popupmgr.doCloseDialogue();
-                    }
-                    page.find("a[dbref=" + dbref + "]").remove();
-                }
-                catch(error) {
-                }
-            }
-            
-            if (page.find("a").length == 0) {
-                page.css("display", "none");
-            }
-        }
-    },
-    
     displayPlayerOnline : function(data) {
         var page = $("#room_players");
         page.css("display", "");
@@ -251,27 +211,6 @@ var webclient = {
         
         if (page.find("a").length == 0) {
             page.css("display", "none");
-        }
-    },
-
-    displayDialogue : function(data) {
-        if (data.length == 0) {
-            controller.doClosePopupBox();
-        }
-        else {
-            if ($('#combat_box').length > 0) {
-                // has combat box
-                combat.setDialogue(data);
-            }
-            else {
-                data_handler.dialogues_list = data;
-                dialogues = data_handler.dialogues_list.shift();
-                if (dialogues.length > 0) {
-                    data_handler.dialogue_target = dialogues[0].npc;
-                }
-
-                controller.showDialogue(dialogues);
-            }
         }
     },
 
@@ -468,11 +407,12 @@ var webclient = {
         webclient.showContent("connect");
 
         // close all popup windows
-        combat.closeCombat();
         popupmgr.doCloseBox();
         popupmgr.doCloseDialogue();
         popupmgr.doCloseMap();
         popupmgr.doCloseShop();
+        
+        controller.doClosePopupBox();
 
         // show message
         controller.showMessage(_("Message"), _("The client connection was closed cleanly."));

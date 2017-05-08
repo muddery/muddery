@@ -36,7 +36,7 @@ var controller = {
 
 	clearButtons: function() {
     	// remove buttons that are not template..
-    	$("#button_content>:not(.template)").remove();
+    	$("#popup_footer>:not(.template)").remove();
     },
 
 	addButtons: function(buttons) {
