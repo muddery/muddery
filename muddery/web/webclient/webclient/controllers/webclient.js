@@ -46,8 +46,8 @@ var controller = {
 		this.doClosePopupBox();
 
         var frame_id = "#frame_message";
-        var controller = this.getFrameController(frame_id);
-        controller.setMessage(header, content, commands);
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.setMessage(header, content, commands);
 
         $(frame_id).show();
         $("#popup_container").show();
@@ -58,20 +58,42 @@ var controller = {
 		this.doClosePopupBox();
 
         var frame_id = "#frame_object";
-        var controller = this.getFrameController(frame_id);
-        controller.setObject(name, icon, desc, commands);
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.setObject(name, icon, desc, commands);
 
         $(frame_id).show();
         $("#popup_container").show();
         webclient.doSetVisiblePopupSize();
 	},
 
+    setDialogueList: function(data) {
+        if (data.length == 0) {
+            this.doClosePopupBox();
+        }
+        else {
+            if ($("#frame_combat").is(":visible")) {
+                // show dialogue after a combat
+        		var frame_id = "#frame_combat_result";
+				var result_ctrl = this.getFrameController(frame_id);
+				result_ctrl.setDialogue(data);
+            }
+            else {
+                data_handler.dialogues_list = data;
+                dialogues = data_handler.dialogues_list.shift();
+                if (dialogues.length > 0) {
+                    data_handler.dialogue_target = dialogues[0].npc;
+                }
+                this.showDialogue(dialogues);
+            }
+        }
+    },
+
     showDialogue: function(dialogues) {
         this.doClosePopupBox();
 
         var frame_id = "#frame_dialogue";
-        var controller = this.getFrameController(frame_id);
-        controller.setDialogues(dialogues, data_handler.getEscapes());
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.setDialogues(dialogues, data_handler.getEscapes());
 
         $(frame_id).show();
         $("#popup_container").show();
@@ -82,8 +104,8 @@ var controller = {
     	this.doClosePopupBox();
 
         var frame_id = "#frame_shop";
-        var controller = this.getFrameController(frame_id);
-        controller.setShop(name, icon, desc, goods);
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.setShop(name, icon, desc, goods);
 
         $(frame_id).show();
         $("#popup_container").show();
@@ -96,7 +118,7 @@ var controller = {
             var first = true;
             for (var key in accepted) {
                 if (first) {
-                    controller.displayMsg(LS("You got:"));
+                    this.displayMsg(LS("You got:"));
                     first = false;
                 }
                 this.displayMsg(key + ": " + accepted[key]);
@@ -111,7 +133,7 @@ var controller = {
             var first = true;
             for (var key in rejected) {
                 if (first) {
-                    controller.displayMsg(LS("You can not get:"));
+                    this.displayMsg(LS("You can not get:"));
                     first = false;
                 }
                 this.displayMsg(key + ": " + rejected[key]);
@@ -140,8 +162,8 @@ var controller = {
     	this.doClosePopupBox();
 
         var frame_id = "#frame_get_objects";
-        var controller = this.getFrameController(frame_id);
-        controller.setGetObjects(accepted, rejected);
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.setGetObjects(accepted, rejected);
 
         $(frame_id).show();
         $("#popup_container").show();
@@ -151,33 +173,39 @@ var controller = {
     showCombat: function(combat) {     
     	this.doClosePopupBox();
 
-        var frame_id = "#frame_combat";
-        var controller = this.getFrameController(frame_id);
-        controller.reset();
+        var combat_id = "#frame_combat";
+        var combat_ctrl = this.getFrameController(combat_id);
+        combat_ctrl.reset(data_handler.skill_cd_time);
+        
+        var result_id = "#frame_combat_result";
+		var result_ctrl = this.getFrameController(result_id);
+		result_ctrl.clear();
 
-        $(frame_id).show();
+        $(combat_id).show();
         $("#popup_container").show();
         webclient.doSetVisiblePopupSize();
     },
 
     closeCombat: function(data) {
         var frame_id = "#frame_combat";
-        var controller = this.getFrameController(frame_id);
-        if (!controller.isCombatFinished()) {
-            controller.finishCombat();
+        var frame_ctrl = this.getFrameController(frame_id);
+        if (!frame_ctrl.isCombatFinished()) {
+            frame_ctrl.finishCombat();
         }
     },
     
     setCombatInfo: function(desc, characters) {
         var frame_id = "#frame_combat";
-        var controller = this.getFrameController(frame_id);
-        controller.setInfo(desc, characters, data_handler.character_dbref);
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.setInfo(desc, characters, data_handler.character_dbref);
+
+        webclient.doSetVisiblePopupSize();
     },
     
     setCombatCommands: function(commands) {
     	var frame_id = "#frame_combat";
-        var controller = this.getFrameController(frame_id);
-        controller.setCommands(commands);
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.setCommands(commands);
     },
     
     setSkillResult: function(result) {
@@ -187,29 +215,45 @@ var controller = {
 		}
 		
 		var frame_id = "#frame_combat";
-        var controller = this.getFrameController(frame_id);
-		controller.setSkillResult(result);
+        var frame_ctrl = this.getFrameController(frame_id);
+		frame_ctrl.setSkillResult(result);
     },
     
     setSkillCD: function(skill, cd, gcd) {
+    	data_handler.setSkillCD(skill, cd, gcd);
+    	
     	var frame_id = "#frame_combat";
-        var controller = this.getFrameController(frame_id);
-		controller.setSkillCD(skill, cd, gcd);
+        var frame_ctrl = this.getFrameController(frame_id);
+		frame_ctrl.setSkillCD(skill, cd, gcd);
     },
     
     finishCombat: function(result) {
-    	//controller.finishCombat(result);
+		var combat_id = "#frame_combat";
+		var combat_ctrl = this.getFrameController(combat_id);
+		combat_ctrl.finishCombat();
+
+		var result_id = "#frame_combat_result";
+		var result_ctrl = this.getFrameController(result_id);
+		result_ctrl.setResult(result);
+
+        setTimeout(this.showCombatResult, 750);
+    },
+    
+    showCombatResult: function() {
+		var self = this;
+		
+    	$("#popup_content").children().hide();
+        $("#frame_combat_result").show();
+        webclient.doSetVisiblePopupSize();
     },
 
     showGetExp: function(exp) {
         // show exp
-        controller.displayMsg(LS("You got exp: ") + exp);
+        this.displayMsg(LS("You got exp: ") + exp);
 
-        var combat_box = $('#combat_box');
-        if (combat_box.length > 0) {
-            // If in combat, show exp in the combat box.
-            combat.setGetExp(exp);
-        }
+        var frame_id = "#frame_combat_result";
+        var frame_ctrl = this.getFrameController(frame_id);
+		frame_ctrl.setGetExp(exp);
     },
     
     // close popup box
@@ -229,8 +273,8 @@ var controller = {
     setInfo: function(name, icon) {
         $("#prompt_name").text(name);
 
-        var controller = this.getFrameController("#frame_information");
-        controller.setInfo(name, icon);
+        var frame_ctrl = this.getFrameController("#frame_information");
+        frame_ctrl.setInfo(name, icon);
     },
 
     // set player's status
@@ -246,43 +290,69 @@ var controller = {
         var hp_str = hp + "/" + max_hp;
         $("#prompt_hp").text(hp_str);
 
-        var controller = this.getFrameController("#frame_information");
-        controller.setStatus(level, exp, max_exp, hp, max_hp, attack, defence);
+        var frame_ctrl = this.getFrameController("#frame_information");
+        frame_ctrl.setStatus(level, exp, max_exp, hp, max_hp, attack, defence);
     },
 
     // set player's equipments
     setEquipments: function(equipments) {
-        var controller = this.getFrameController("#frame_information");
-        controller.setEquipments(equipments);
+        var frame_ctrl = this.getFrameController("#frame_information");
+        frame_ctrl.setEquipments(equipments);
     },
     
     // set player's inventory
     setInventory: function(inventory) {
-        var controller = this.getFrameController("#frame_inventory");
-        controller.setInventory(inventory);
+        var frame_ctrl = this.getFrameController("#frame_inventory");
+        frame_ctrl.setInventory(inventory);
     },
     
     // set player's skills
     setSkills: function(skills) {
-        var controller = this.getFrameController("#frame_skills");
-        controller.setSkills(skills);
+        var frame_ctrl = this.getFrameController("#frame_skills");
+        frame_ctrl.setSkills(skills);
     },
     
     // set player's quests
     setQuests: function(quests) {
-        var controller = this.getFrameController("#frame_quests");
-        controller.setQuests(quests);
+        var frame_ctrl = this.getFrameController("#frame_quests");
+        frame_ctrl.setQuests(quests);
     },
     
     setScene: function(scene) {
 	    var frame_id = "#frame_scene";
-        var controller = this.getFrameController(frame_id);
-        controller.setScene(scene);
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.setScene(scene);
+    },
+
+    showObjMovedIn: function(objects) {
+        var frame_id = "#frame_scene";
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.addObjects(objects);
+    },
+
+    showObjMovedOut: function(objects) {
+        // If the player is talking to it, close the dialog window.
+        if ($("#frame_dialogue").is(":visible")) {
+            for (var key in objects) {
+                for (var i in objects[key]) {
+                    var dbref = objects[key][i]["dbref"];
+                    if (data_handler.dialogue_target == dbref) {
+                        this.doClosePopupBox();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // remove objects from scene
+        var frame_id = "#frame_scene";
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.removeObjects(objects);
     },
 
     getFrameController: function(frame_id) {
         var frame = $(frame_id);
-        if (frame) {
+        if (frame.length > 0) {
             return frame[0].contentWindow.controller;
         }
     },

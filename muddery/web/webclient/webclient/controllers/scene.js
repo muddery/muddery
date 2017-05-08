@@ -56,7 +56,7 @@ var controller = {
 
         // add players
         var players = "players" in scene ? scene["players"]: null;
-        this.addLinks("#players", "#players_containert", players);
+        this.addLinks("#players", "#players_container", players);
 
         // add exits
         // sort exits by direction
@@ -110,6 +110,48 @@ var controller = {
             backview.css("background", "");
         }
     },
+
+    addObjects: function(objects) {
+        // add things
+        var things = "things" in objects ? objects["things"]: null;
+        if (things) {
+            this.addLinks("#things", "#things_container", things);
+        }
+
+        // add NPCs
+        var npcs = "npcs" in objects ? objects["npcs"]: null;
+        if (npcs) {
+            this.addLinks("#npcs", "#npcs_container", npcs);
+        }
+
+        // add players
+        var players = "players" in objects ? objects["players"]: null;
+        if (players) {
+            this.addLinks("#players", "#players_container", players);
+        }
+    },
+
+    removeObjects: function(objects) {
+        for (var key in objects) {
+            for (var i in objects[key]) {
+                var selector = "a[data-dbref='" + objects[key][i]["dbref"] + "']";
+                var item = $(selector);
+                $(selector).remove();
+            }
+        }
+
+        if ($("#things_container>:not(.template)").length == 0) {
+			$("#things").hide();
+		}
+
+		if ($("#npcs_container>:not(.template)").length == 0) {
+			$("#npcs").hide();
+		}
+
+		if ($("#players_container>:not(.template)").length == 0) {
+			$("#players").hide();
+		}
+    },
         
     clearItems: function(item_id) {
     	// Remove items that are not template.
@@ -120,7 +162,6 @@ var controller = {
     	var container = $(container_id);
 		var item_template = container.find("input.template");
 
-		var has_button = false;
 		if (data) {
             for (var i in data) {
                 var cmd = data[i];
@@ -132,13 +173,11 @@ var controller = {
                     .data("cmd_args", cmd["args"])
                     .html(name)
                     .appendTo(container);
-
-                has_button = true;
             }
         }
 
 		if (block_id) {
-			if (has_button) {
+			if (container.children().not(".template").length > 0) {
 				$(block_id).show();
 			}
 			else {
@@ -151,7 +190,6 @@ var controller = {
     	var container = $(container_id);
 		var item_template = container.find("a.template");
 
-		var has_link = false;
 		if (data) {
             for (var i in data) {
                 var obj = data[i];
@@ -169,13 +207,11 @@ var controller = {
                     .data("dbref", obj["dbref"])
                     .html(name)
                     .appendTo(container);
-
-                has_link = true;
             }
         }
 
 		if (block_id) {
-			if (has_link) {
+			if (container.children().not(".template").length > 0) {
 				$(block_id).show();
 			}
 			else {
