@@ -58,7 +58,10 @@ var webclient = {
     displayData : function(data) {
         for (var key in data) {
             try {
-                if (key == "msg") {
+                if (key == "settings") {
+                    settings.set(data[key]);
+                }
+                else if (key == "msg") {
                 	var msg = text2html.parseHtml(data[key]);
                     controller.displayMsg(msg);
                 }
@@ -80,9 +83,6 @@ var webclient = {
                 else if (key == "prompt") {
                 	controller.displayMsg(data[key], "prompt");
                 }
-                else if (key == "settings") {
-                    settings.set(data[key]);
-                }
                 else if (key == "look_around") {
                     controller.setScene(data[key]);
                 }
@@ -93,14 +93,18 @@ var webclient = {
                     controller.showObjMovedOut(data[key]);
                 }
                 else if (key == "player_online") {
-                    this.displayPlayerOnline(data[key]);
+                    controller.showPlayerOnline(data[key]);
                 }
                 else if (key == "player_offline") {
-                    this.displayPlayerOffline(data[key]);
+                    controller.showPlayerOffline(data[key]);
                 }
                 else if (key == "look_obj") {
                     var obj = data[key];
-        			controller.showObject(obj["name"], obj["icon"], obj["desc"], obj["cmds"]);
+        			controller.showObject(obj["dbref"],
+        								  obj["name"],
+        								  obj["icon"],
+        								  obj["desc"],
+        								  obj["cmds"]);
                 }
                 else if (key == "dialogues_list") {
                     controller.setDialogueList(data[key]);
@@ -127,8 +131,9 @@ var webclient = {
                 else if (key == "quests") {
                 	controller.setQuests(data[key]);
                 }
-                else if (key == "get_object") {
-                    controller.showGetObjects(data[key]["accepted"], data[key]["rejected"]);
+                else if (key == "get_objects") {
+                	var get_objects = data[key];
+                    controller.showGetObjects(get_objects["accepted"], get_objects["rejected"], get_objects["combat"]);
                 }
                 else if (key == "joined_combat") {
                     controller.showCombat(data[key]);
@@ -154,7 +159,8 @@ var webclient = {
                     controller.setSkillResult(data[key]);
                 }
                 else if (key == "get_exp") {
-                    controller.showGetExp(data[key])
+                	var get_exp = data[key];
+                    controller.showGetExp(get_exp["exp"], get_exp["combat"]);
                 }
                 else if (key == "current_location") {
                     map.setCurrentLocation(data[key]);
@@ -175,7 +181,11 @@ var webclient = {
                     this.onPuppet(data[key]);
                 }
                 else if (key == "shop") {
-                    this.displayShop(data[key])
+                	var shop = data[key];
+                    controller.showShop(shop["name"],
+                    		 			shop["icon"],
+                    		 			shop["desc"],
+                    		 			shop["goods"]);
                 }
                 else {
                     controller.displayMsg(data[key]);
@@ -186,37 +196,6 @@ var webclient = {
                 console.error(error.message);
             }
         }
-    },
-    
-    displayPlayerOnline : function(data) {
-        var page = $("#room_players");
-        page.css("display", "");
-
-        try {
-            var aHrefElement = uimgr.aHref("#", uimgr.CONST_A_HREF_ONCLICK, data["name"],
-                {"cmd_name": "look", "cmd_args": data["dbref"], "dbref": data["dbref"], "style":"margin-left:10px;"});
-            page.append(aHrefElement);
-        }
-        catch(error) {
-        }
-    },
-    
-    displayPlayerOffline : function(data) {
-        var page = $("#room_players");
-        try {
-            page.find("a[dbref=" + data["dbref"] + "]").remove();
-        }
-        catch(error) {
-        }
-        
-        if (page.find("a").length == 0) {
-            page.css("display", "none");
-        }
-    },
-
-    displayShop: function(data) {
-        data_handler.shop_data = data;
-        controller.setShop(data["name"], data["icon"], data["desc"], data["goods"]);
     },
 
     onLogin : function(data) {
@@ -321,10 +300,6 @@ var webclient = {
     	frame.height(tab_content.height() - 5);
     },
 
-    doCancel: function() {
-        popupmgr.doCloseBox();
-    },
-
     // hide all tabs
     hideTabs : function() {
         $("#tab_pills").children().css("display", "none");
@@ -406,12 +381,7 @@ var webclient = {
         webclient.showConnectTabs();
         webclient.showContent("connect");
 
-        // close all popup windows
-        popupmgr.doCloseBox();
-        popupmgr.doCloseDialogue();
-        popupmgr.doCloseMap();
-        popupmgr.doCloseShop();
-        
+        // close popup windows
         controller.doClosePopupBox();
 
         // show message

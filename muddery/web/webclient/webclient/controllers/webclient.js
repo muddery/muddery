@@ -54,12 +54,12 @@ var controller = {
         webclient.doSetVisiblePopupSize();
 	},
 
-	showObject: function(name, icon, desc, commands) {
+	showObject: function(dbref, name, icon, desc, commands) {
 		this.doClosePopupBox();
 
         var frame_id = "#frame_object";
         var frame_ctrl = this.getFrameController(frame_id);
-        frame_ctrl.setObject(name, icon, desc, commands);
+        frame_ctrl.setObject(dbref, name, icon, desc, commands);
 
         $(frame_id).show();
         $("#popup_container").show();
@@ -80,9 +80,6 @@ var controller = {
             else {
                 data_handler.dialogues_list = data;
                 dialogues = data_handler.dialogues_list.shift();
-                if (dialogues.length > 0) {
-                    data_handler.dialogue_target = dialogues[0].npc;
-                }
                 this.showDialogue(dialogues);
             }
         }
@@ -112,7 +109,27 @@ var controller = {
         webclient.doSetVisiblePopupSize();
     },
     
-    showGetObjects: function(accepted, rejected) {
+    openShop: function() {
+    	this.doClosePopupBox();
+
+        $("#frame_shop").show();
+        $("#popup_container").show();
+        webclient.doSetVisiblePopupSize();
+    },
+    
+    showGoods: function(dbref, name, number, icon, desc, price, unit) {
+		this.doClosePopupBox();
+
+        var frame_id = "#frame_goods";
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.setGoods(dbref, name, number, icon, desc, price, unit);
+
+        $(frame_id).show();
+        $("#popup_container").show();
+        webclient.doSetVisiblePopupSize();
+    },
+    
+    showGetObjects: function(accepted, rejected, combat) {
         // show accepted objects
         try {
             var first = true;
@@ -143,18 +160,18 @@ var controller = {
         	console.error(error.message);
         }
 
-        var combat_box = $('#combat_box');
-        if (combat_box.length == 0) {
+        if (combat) {
+        	var frame_id = "#frame_combat_result";
+			var frame_ctrl = this.getFrameController(frame_id);
+        	frame_ctrl.setGetObjects(accepted, rejected);
+        }
+        else {
             // If not in combat.
             var popup_box = $('#popup_box');
             if (popup_box.length == 0) {
                 // If there is no other boxes, show getting object box.
                 this.popupGetObjects(accepted, rejected);
             }
-        }
-        else {
-            // If in combat, show objects in the combat box.
-            combat.setGetObject(accepted, rejected);
         }
     },
     
@@ -247,13 +264,15 @@ var controller = {
         webclient.doSetVisiblePopupSize();
     },
 
-    showGetExp: function(exp) {
+    showGetExp: function(exp, combat) {
         // show exp
         this.displayMsg(LS("You got exp: ") + exp);
 
-        var frame_id = "#frame_combat_result";
-        var frame_ctrl = this.getFrameController(frame_id);
-		frame_ctrl.setGetExp(exp);
+		if (combat) {
+        	var frame_id = "#frame_combat_result";
+       	 	var frame_ctrl = this.getFrameController(frame_id);
+			frame_ctrl.setGetExp(exp);
+		}
     },
     
     // close popup box
@@ -323,6 +342,28 @@ var controller = {
         var frame_ctrl = this.getFrameController(frame_id);
         frame_ctrl.setScene(scene);
     },
+    
+    showPlayerOnline: function(player) {
+    	var frame_id = "#frame_scene";
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.addPlayer(player);
+    },
+    
+    showPlayerOffline: function(player) {
+        // If the player is looking to it, close the look window.
+        var object_id = "#frame_object";
+        if ($(object_id).is(":visible")) {
+        	var object_ctrl = this.getFrameController(object_id);
+        	var target = object_ctrl.getObject();
+			if (target == player["dbref"]) {
+				this.doClosePopupBox();
+            }
+        }
+
+    	var frame_id = "#frame_scene";
+        var frame_ctrl = this.getFrameController(frame_id);
+        frame_ctrl.removePlayer(player);
+    },
 
     showObjMovedIn: function(objects) {
         var frame_id = "#frame_scene";
@@ -332,11 +373,30 @@ var controller = {
 
     showObjMovedOut: function(objects) {
         // If the player is talking to it, close the dialog window.
-        if ($("#frame_dialogue").is(":visible")) {
+        var dialogue_id = "#frame_dialogue";
+        if ($(dialogue_id).is(":visible")) {
+        	var dialogue_ctrl = this.getFrameController(dialogue_id);
+        	var target = dialogue_ctrl.getTarget();
             for (var key in objects) {
                 for (var i in objects[key]) {
                     var dbref = objects[key][i]["dbref"];
-                    if (data_handler.dialogue_target == dbref) {
+                    if (target == dbref) {
+                        this.doClosePopupBox();
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // If the player is looking to it, close the look window.
+        var object_id = "#frame_object";
+        if ($(object_id).is(":visible")) {
+        	var object_ctrl = this.getFrameController(object_id);
+        	var target = object_ctrl.getObject();
+            for (var key in objects) {
+                for (var i in objects[key]) {
+                    var dbref = objects[key][i]["dbref"];
+                    if (target == dbref) {
                         this.doClosePopupBox();
                         break;
                     }

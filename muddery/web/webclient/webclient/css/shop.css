@@ -1,14 +1,5 @@
 
-#goods_icon {
-    text-align: center;
-}
-
-#img_icon {
-	width: 40px;
-	height: 40px;
-}
-
-#name {
+#shop_name {
     color: #0ff;
     text-align: center;
 }
@@ -19,4 +10,17 @@
 
 #header_goods_price {
     min-width: 60px;
+}
+
+.div_name {
+    text-align: center;
+}
+
+.goods_icon {
+    text-align: center;
+}
+
+.img_icon {
+	width: 30px;
+	height: 30px;
 }

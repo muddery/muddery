@@ -1,12 +1,20 @@
 
 var controller = {
+	
+	_dbref: null,
+	
+	getObject: function() {
+		return this._dbref;
+	},
 
     // close popup box
     doClosePopupBox: function() {
         parent.controller.doClosePopupBox();
     },
 
-	setObject: function(name, icon, desc, commands) {
+	setObject: function(dbref, name, icon, desc, commands) {
+		this._dbref = dbref;
+		
 		// add name
 	    name = text2html.parseHtml(name);
 	    $("#popup_header").html(name);

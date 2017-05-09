@@ -1,6 +1,12 @@
 
 var controller = {
 
+	_target: null,
+	
+	getTarget: function() {
+		return this._target;
+	},
+
     // close popup box
     doClosePopupBox: function() {
         parent.controller.doClosePopupBox();
@@ -12,6 +18,8 @@ var controller = {
         if (dialogues.length == 0) {
             return;
         }
+        
+        this._target = dialogues[0].npc;
 
         // speaker
         var speaker = text2html.parseHtml(dialogues[0]["speaker"]);

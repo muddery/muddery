@@ -7,9 +7,7 @@ var data_handler = {
     character_name: "",
     current_target: "",
     name_list: {},
-    dialogue_target: "",
     dialogues_list: [],
-    shop_data: {},
     skill_cd_time: {},
 
     getEscapes: function() {
