@@ -573,7 +573,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         if exp:
             # give experience to the winner
-            self.add_exp(exp)
+            self.add_exp(exp, combat=True)
 
     def at_combat_lose(self, winners, losers):
         """
@@ -700,7 +700,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         return 0
 
-    def add_exp(self, exp):
+    def add_exp(self, exp, combat=False):
         """
         Add character's exp.
         Args:

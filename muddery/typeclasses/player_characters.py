@@ -367,7 +367,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 obj_list = [{"object": object_record.object, "number": object_record.number}]
                 self.receive_objects(obj_list, mute=True)
 
-    def receive_objects(self, obj_list, mute=False):
+    def receive_objects(self, obj_list, mute=False, combat=False):
         """
         Add objects to the inventory.
 
@@ -376,6 +376,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                              list item: {"object": object's key
                                          "number": object's number}
             mute: (boolean) do not send messages to the owner
+            combat: (boolean) get objects in combat.
 
         Returns:
             (dict) a list of objects that not have been received and their reasons.
@@ -512,9 +513,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         if not mute:
             # Send results to the player.
-            message = {"get_object":
+            message = {"get_objects":
                             {"accepted": accepted_names,
-                             "rejected": reject_reason}}
+                             "rejected": reject_reason,
+                             "combat": combat}}
             self.msg(message)
             self.show_inventory()
 
@@ -926,9 +928,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Returns:
             None
         """
-        super(MudderyPlayerCharacter, self).at_combat_win( winners, losers)
-
         self.msg({"combat_finish": {"win": True}})
+        
+        super(MudderyPlayerCharacter, self).at_combat_win( winners, losers)
 
         # loot
         # get object list
@@ -943,7 +945,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         if loots:
             # give objects to winner
-            self.receive_objects(loots)
+            self.receive_objects(loots, combat=True)
 
         # call quest handler
         for loser in losers:
@@ -960,9 +962,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Returns:
             None
         """
-        super(MudderyPlayerCharacter, self).at_combat_lose(winners, losers)
-
         self.msg({"combat_finish": {"lose": True}})
+        
+        super(MudderyPlayerCharacter, self).at_combat_lose(winners, losers)
 
     def at_combat_escape(self):
         """
@@ -1220,18 +1222,19 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.save_current_dialogue(sentences_list, npc)
         self.msg({"dialogues_list": sentences_list})
 
-    def add_exp(self, exp):
+    def add_exp(self, exp, combat=False):
         """
         Add character's exp.
         Args:
-            exp: the exp value to add.
-
+            exp: (number) the exp value to add.
+            combat: (boolean) get exp in combat.
         Returns:
             None
         """
         super(MudderyPlayerCharacter, self).add_exp(exp)
 
-        self.msg({"get_exp": exp})
+        self.msg({"get_exp": {"exp": exp,
+                              "combat": combat}})
 
     def level_up(self):
         """

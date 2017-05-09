@@ -1,12 +1,16 @@
 
 var controller = {
 
+	_goods: [],
+
     // close popup box
     doClosePopupBox: function() {
         parent.controller.doClosePopupBox();
     },
 
 	setShop: function(name, icon, desc, goods) {
+		this._goods = goods;
+		
 		// add name
 	    name = text2html.parseHtml(name);
 	    $("#shop_name").html(name);
@@ -39,31 +43,57 @@ var controller = {
 				var item = item_template.clone()
                 	.removeClass("template");
 
-				var goods_name = text2html.parseHtml(obj["name"]);
+                if (obj["icon"]) {
+            	    item.find(".img_icon").attr("src", settings.resource_location + obj["icon"]);
+            	    item.find(".obj_icon").show();
+                }
+                else {
+            	    item.find(".obj_icon").hide();
+                }
 
+                item.find(".div_name")
+                    .data("dbref", obj["dbref"]);
+
+				var goods_name = text2html.parseHtml(obj["name"]);
 				item.find(".goods_name")
-                	.data("dbref", obj["dbref"])
             		.html(obj["name"]);
-            	
-                item.find(".goods_number")
-                	.text(obj["number"]);
-                
-                var price = obj["price"] + " " + obj["unit"];
-                item.find(".goods_price")
-                	.text(price);
+
+            	if (obj["number"] == 1) {
+            	    item.find(".number_mark")
+            	        .hide();
+            	}
+            	else {
+            	    item.find(".number_mark")
+            	        .show();
+                    item.find(".goods_number")
+                	    .text(obj["number"]);
+                }
+
+                item.find(".price")
+                	.text(obj["price"]);
+                	
+                item.find(".unit")
+                	.text(obj["unit"]);
                 	
                 item.appendTo(container);
             }
         }
 	},
 
-    doCommandLink: function(caller) {
-        this.doClosePopupBox();
-
-        var cmd = $(caller).data("cmd_name");
-        var args = $(caller).data("cmd_args");
-        if (cmd) {
-            parent.commands.doCommandLink(cmd, args);
+    showGoods: function(caller) {
+    	var dbref = $(caller).data("dbref");
+        for (var i in this._goods) {
+            if (dbref == this._goods[i]["dbref"]) {
+            	var goods = this._goods[i];
+                parent.controller.showGoods(goods["dbref"],
+                							goods["name"],
+                							goods["number"],
+                							goods["icon"],
+                							goods["desc"],
+                							goods["price"],
+                							goods["unit"]);
+                break;
+            }
         }
     },
 };

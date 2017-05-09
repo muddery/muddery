@@ -111,6 +111,19 @@ var controller = {
         }
     },
 
+	addPlayer: function(player) {
+        // add players
+        this.addLinks("#players", "#players_container", [player]);
+    },
+    
+    removePlayer: function(player) {
+    	$("#obj_" + player["dbref"].slice(1)).remove();
+
+		if ($("#players_container>:not(.template)").length == 0) {
+			$("#players").hide();
+		}
+    },
+    
     addObjects: function(objects) {
         // add things
         var things = "things" in objects ? objects["things"]: null;
@@ -134,9 +147,7 @@ var controller = {
     removeObjects: function(objects) {
         for (var key in objects) {
             for (var i in objects[key]) {
-                var selector = "a[data-dbref='" + objects[key][i]["dbref"] + "']";
-                var item = $(selector);
-                $(selector).remove();
+                $("#obj_" + objects[key][i]["dbref"].slice(1)).remove();
             }
         }
 
@@ -204,6 +215,7 @@ var controller = {
 
                 item_template.clone()
                     .removeClass("template")
+                    .attr("id", "obj_" + obj["dbref"].slice(1))
                     .data("dbref", obj["dbref"])
                     .html(name)
                     .appendTo(container);
