@@ -18,7 +18,6 @@
         <script src="/static/public/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="/static/public/js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
            <script src="/static/public/js/bootstrap.min.js"></script>
-           <script src="/static/public/js/d3.v3.min.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript" charset="utf-8">
             if(!window.jQuery){document.write("<div class='err'>jQuery library not found or the online version could not be reached.</div>");}
            </script>
@@ -36,10 +35,8 @@
 
         <script src="/webclient/js/evennia.js" type="text/javascript" charset="utf-8"></script>
         <script src="/webclient/js/webclient.js" type="text/javascript" charset="utf-8"></script>
-        <script src="/webclient/js/webclient_uimgr.js" type="text/javascript" charset="utf-8"></script>
-        <script src="/webclient/js/webclient_popupmgr.js" type="text/javascript" charset="utf-8"></script>
         <script src="/webclient/js/commands.js" type="text/javascript" charset="utf-8"></script>
-        <script src="/webclient/js/map.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/webclient/js/map_data.js" type="text/javascript" charset="utf-8"></script>
         <script src="/webclient/js/text2html.js" type="text/javascript" charset="utf-8"></script>
         <script src="/webclient/js/data_handler.js" type="text/javascript" charset="utf-8"></script>
         <script src="/webclient/js/escape.js" type="text/javascript" charset="utf-8"></script>
@@ -51,16 +48,49 @@
         <!-- Show popup windows in this div. -->
         <div id="popup_container" class="container">
             <div id="popup_modal" role="dialog" class="modal in">
-                <div id="box_pop" class="modal-dialog modal-sm vertical-center">
-                    <div id="popup_content" class="modal-content">
-                        <iframe id="frame_message" class="popup_frame" src="/webclient/frames/message.html"></iframe>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_message" class="modal-content popup_frame" src="/webclient/frames/message.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
                         <iframe id="frame_object" class="popup_frame" src="/webclient/frames/object.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
                         <iframe id="frame_get_objects" class="popup_frame" src="/webclient/frames/get_objects.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
                         <iframe id="frame_dialogue" class="popup_frame" src="/webclient/frames/dialogue.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
                         <iframe id="frame_shop" class="popup_frame" src="/webclient/frames/shop.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
                         <iframe id="frame_goods" class="popup_frame" src="/webclient/frames/goods.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
                         <iframe id="frame_combat" class="popup_frame" src="/webclient/frames/combat.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
                         <iframe id="frame_combat_result" class="popup_frame" src="/webclient/frames/combat_result.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-lg vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_map" class="popup_frame" src="/webclient/frames/map.html"></iframe>
                     </div>
                 </div>
             </div>
@@ -141,7 +171,7 @@
                             </ul>
                         </li>
                         <li id="tab_map" role="presentation" class="">
-                            <a onclick="map.showMap()">地图</a>
+                            <a onclick="controller.showMap()">地图</a>
                         </li>
                         <li id="tab_system" role="presentation" class="dropup">
                             <a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">系统<span class="caret"></span></a>

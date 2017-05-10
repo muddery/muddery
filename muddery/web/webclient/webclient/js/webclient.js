@@ -163,13 +163,13 @@ var webclient = {
                     controller.showGetExp(get_exp["exp"], get_exp["combat"]);
                 }
                 else if (key == "current_location") {
-                    map.setCurrentLocation(data[key]);
+                    map_data.setCurrentLocation(data[key]);
                 }
                 else if (key == "reveal_map") {
-                    map.revealMap(data[key]);
+                    map_data.revealMap(data[key]);
                 }
                 else if (key == "revealed_map") {
-                    map.setData(data[key]);
+                    map_data.setData(data[key]);
                 }
                 else if (key == "login") {
                     this.onLogin(data[key]);
@@ -267,8 +267,8 @@ var webclient = {
     },
 
     doSetVisiblePopupSize: function() {
-        var popup_content = $("#popup_content");
-        var frame = popup_content.find("iframe:visible:first");
+        var popup_content = $("#popup_container .modal-content:visible:first");
+        var frame = popup_content.find("iframe");
         if (frame.length == 0) {
             return;
         }
@@ -282,9 +282,9 @@ var webclient = {
 
         // model dialogue
         var win_h = $(window).innerHeight();
-        var dlg = $('#box_pop');
+        var dlg = $(".modal-dialog:visible:first");
         if (dlg.length > 0) {
-            dlg.css('top', (win_h - dlg.height()) / 2);
+            dlg.css("top", (win_h - dlg.height()) / 2);
         }
     },
     

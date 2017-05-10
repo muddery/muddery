@@ -60,11 +60,11 @@ var controller = {
 
         // add exits
         // sort exits by direction
-        var map = parent.map;
+        var map_data = parent.map_data;
         var room_exits = [];
         if ("exits" in scene) {
             for (var i in scene["exits"]) {
-                var direction = map.getExitDirection(scene.exits[i].key);
+                var direction = map_data.getExitDirection(scene.exits[i].key);
                 // sort from north (67.5)
                 if (direction < 67.5) {
                     direction += 360;
@@ -79,7 +79,7 @@ var controller = {
         
         var exit_grids = [[], [], [] ,[] ,[], [], [], [], []];
         for (var i in room_exits) {
-        	var index = map.getDirectionIndex(room_exits[i]["direction"]);
+        	var index = map_data.getDirectionIndex(room_exits[i]["direction"]);
         	exit_grids[index].push(room_exits[i]["data"]);
         }
         

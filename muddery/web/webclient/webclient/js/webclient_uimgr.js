@@ -68,17 +68,6 @@ var uimgr = {
         return divObjectCmdsElement;
     },
 
-    connectBox: function() {
-        var box = $('<div>')
-            .attr('id', 'box_connect');
-
-        $('<div>')
-            .text(LS('Please connect to the server.'))
-            .appendTo(box);
-
-        return box;
-    },
-
     speechBox: function() {
         var box = $('<div>')
             .attr('id', 'box_speech');

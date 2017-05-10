@@ -49,9 +49,7 @@ var controller = {
         var frame_ctrl = this.getFrameController(frame_id);
         frame_ctrl.setMessage(header, content, commands);
 
-        $(frame_id).show();
-        $("#popup_container").show();
-        webclient.doSetVisiblePopupSize();
+        this.showFrame(frame_id);
 	},
 
 	showObject: function(dbref, name, icon, desc, commands) {
@@ -61,9 +59,7 @@ var controller = {
         var frame_ctrl = this.getFrameController(frame_id);
         frame_ctrl.setObject(dbref, name, icon, desc, commands);
 
-        $(frame_id).show();
-        $("#popup_container").show();
-        webclient.doSetVisiblePopupSize();
+        this.showFrame(frame_id);
 	},
 
     setDialogueList: function(data) {
@@ -92,9 +88,7 @@ var controller = {
         var frame_ctrl = this.getFrameController(frame_id);
         frame_ctrl.setDialogues(dialogues, data_handler.getEscapes());
 
-        $(frame_id).show();
-        $("#popup_container").show();
-        webclient.doSetVisiblePopupSize();
+        this.showFrame(frame_id);
     },
     
     showShop: function(name, icon, desc, goods) {
@@ -104,17 +98,12 @@ var controller = {
         var frame_ctrl = this.getFrameController(frame_id);
         frame_ctrl.setShop(name, icon, desc, goods);
 
-        $(frame_id).show();
-        $("#popup_container").show();
-        webclient.doSetVisiblePopupSize();
+        this.showFrame(frame_id);
     },
     
     openShop: function() {
     	this.doClosePopupBox();
-
-        $("#frame_shop").show();
-        $("#popup_container").show();
-        webclient.doSetVisiblePopupSize();
+        this.showFrame("#frame_shop");
     },
     
     showGoods: function(dbref, name, number, icon, desc, price, unit) {
@@ -124,9 +113,7 @@ var controller = {
         var frame_ctrl = this.getFrameController(frame_id);
         frame_ctrl.setGoods(dbref, name, number, icon, desc, price, unit);
 
-        $(frame_id).show();
-        $("#popup_container").show();
-        webclient.doSetVisiblePopupSize();
+        this.showFrame(frame_id);
     },
     
     showGetObjects: function(accepted, rejected, combat) {
@@ -182,9 +169,7 @@ var controller = {
         var frame_ctrl = this.getFrameController(frame_id);
         frame_ctrl.setGetObjects(accepted, rejected);
 
-        $(frame_id).show();
-        $("#popup_container").show();
-        webclient.doSetVisiblePopupSize();
+        this.showFrame(frame_id);
     },
     
     showCombat: function(combat) {     
@@ -198,9 +183,7 @@ var controller = {
 		var result_ctrl = this.getFrameController(result_id);
 		result_ctrl.clear();
 
-        $(combat_id).show();
-        $("#popup_container").show();
-        webclient.doSetVisiblePopupSize();
+        this.showFrame(combat_id);
     },
 
     closeCombat: function(data) {
@@ -257,11 +240,8 @@ var controller = {
     },
     
     showCombatResult: function() {
-		var self = this;
-		
-    	$("#popup_content").children().hide();
-        $("#frame_combat_result").show();
-        webclient.doSetVisiblePopupSize();
+        controller.doClosePopupBox();
+        controller.showFrame("#frame_combat_result");
     },
 
     showGetExp: function(exp, combat) {
@@ -275,10 +255,36 @@ var controller = {
 		}
     },
     
+    showMap: function() {
+    	this.doClosePopupBox();
+
+   		var frame_id = "#frame_map";
+   		var frame = $(frame_id);
+        var frame_ctrl = this.getFrameController(frame_id);
+
+        frame.parents().show();
+
+        //set size
+        var width = frame.parent().width();
+        var height = $('#middlewindow').height() * 0.8;
+
+        frame.innerWidth(width)
+        	 .innerHeight(height);
+
+        // model dialogue
+        var win_h = $(window).innerHeight();
+        var dlg = $(".modal-dialog:visible:first");
+        if (dlg.length > 0) {
+            dlg.css("top", (win_h - dlg.height()) / 2);
+        }
+
+        frame_ctrl.showMap(map_data._current_location);
+    },
+    
     // close popup box
     doClosePopupBox: function() {
 		$("#popup_container").hide();
-    	$("#popup_content").children().hide();
+    	$("#popup_container .modal-dialog").hide();
     },
 
     clearPromptBar: function() {
@@ -415,5 +421,10 @@ var controller = {
         if (frame.length > 0) {
             return frame[0].contentWindow.controller;
         }
+    },
+
+    showFrame: function(frame_id) {
+        $(frame_id).parents().show();
+        webclient.doSetVisiblePopupSize();
     },
 };
