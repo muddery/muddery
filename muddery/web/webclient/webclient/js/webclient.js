@@ -9,7 +9,7 @@ var webclient = {
  		}
  	},
  	
-    doShow : function(type, msg) {
+    doShow: function(type, msg) {
         var data = null;
         
         if (type == "out") {
@@ -162,6 +162,22 @@ var webclient = {
                 	var get_exp = data[key];
                     controller.showGetExp(get_exp["exp"], get_exp["combat"]);
                 }
+                else if (key == "login") {
+                    controller.onLogin(data[key]);
+                }
+                else if (key == "logout") {
+                    controller.onLogout(data[key]);
+                }
+                else if (key == "puppet") {
+                    controller.onPuppet(data[key]);
+                }
+                else if (key == "shop") {
+                	var shop = data[key];
+                    controller.showShop(shop["name"],
+                    		 			shop["icon"],
+                    		 			shop["desc"],
+                    		 			shop["goods"]);
+                }
                 else if (key == "current_location") {
                     map_data.setCurrentLocation(data[key]);
                 }
@@ -170,22 +186,6 @@ var webclient = {
                 }
                 else if (key == "revealed_map") {
                     map_data.setData(data[key]);
-                }
-                else if (key == "login") {
-                    this.onLogin(data[key]);
-                }
-                else if (key == "logout") {
-                    this.onLogout(data[key]);
-                }
-                else if (key == "puppet") {
-                    this.onPuppet(data[key]);
-                }
-                else if (key == "shop") {
-                	var shop = data[key];
-                    controller.showShop(shop["name"],
-                    		 			shop["icon"],
-                    		 			shop["desc"],
-                    		 			shop["goods"]);
                 }
                 else {
                     controller.displayMsg(data[key]);
@@ -197,219 +197,6 @@ var webclient = {
             }
         }
     },
-
-    onLogin : function(data) {
-        // show login UI
-        controller.clearMsgWindow();
-
-        controller.clearPromptBar();
-        $("#prompt_content").show();
-
-        this.showLoginTabs();
-        this.showContent("scene");
-    },
-    
-    onLogout : function(data) {
-        // show unlogin UI
-        controller.clearMsgWindow();
-        $("#prompt_content").hide();
-        this.showUnloginTabs();
-        this.showPage("login");
-        
-        //reconnect, show the connection screen
-        Evennia.connect();
-    },
-    
-    onPuppet: function(data) {
-        data_handler.character_dbref = data["dbref"];
-        data_handler.character_name = data["name"];
-
-        controller.setInfo(data["name"], data["icon"]);
-    },
-
-    doSetSizes: function() {
-        webclient.doSetWindowSize();
-        webclient.doSetVisiblePopupSize();
-    },
-
-    doSetWindowSize: function() {
-        // Sets the size of the message window
-        var win_h = $(window).innerHeight();
-        var win_w = $(window).innerWidth();
-
-        //var head_h = $('header').outerHeight(true);
-        var head_h = 20;
-        $('#header').height(head_h);
-
-        var wrapper_h = win_h - head_h - 20;
-        $('#wrapper').height(wrapper_h);
-
-        var margin_h = 55
-        var prompt_h = 18;
-        var tab_bar_h = 32;
-        var tab_content_h = (wrapper_h - prompt_h - tab_bar_h - margin_h) * 0.7;
-        $('#prompt_bar').height(prompt_h);
-        $('#tab_bar').height(tab_bar_h);
-        $('#tab_content').height(tab_content_h);
-
-        tab_content_h = $('#tab_content').height();
-        var msg_wnd_h = wrapper_h - prompt_h - tab_bar_h - margin_h - tab_content_h;
-        $('#msg_wnd').height(msg_wnd_h);
-
-        if (win_w >= 960) {
-            $('#middlewindow').width(960 - 20);
-        }
-        else {
-            $('#middlewindow').width(win_w - 20);
-        }
-        
-        webclient.doChangeVisibleFrameSize();
-    },
-
-    doSetVisiblePopupSize: function() {
-        var popup_content = $("#popup_container .modal-content:visible:first");
-        var frame = popup_content.find("iframe");
-        if (frame.length == 0) {
-            return;
-        }
-
-        var width = popup_content.width();
-        frame.innerWidth(popup_content.width());
-        frame.height(0);
-        
-        var frame_body = frame[0].contentWindow.document.body;
-		frame.height(frame_body.scrollHeight);
-
-        // model dialogue
-        var win_h = $(window).innerHeight();
-        var dlg = $(".modal-dialog:visible:first");
-        if (dlg.length > 0) {
-            dlg.css("top", (win_h - dlg.height()) / 2);
-        }
-    },
-    
-    doChangeVisibleFrameSize: function() {
-		var frame = $("#tab_content iframe:visible");
-		this.doChangeFrameSize(frame);
-    },
-
-	doChangeFrameSize: function(frame) {
-		var tab_content = $("#tab_content");
-
-    	frame.width(tab_content.width());
-    	frame.height(tab_content.height() - 5);
-    },
-
-    // hide all tabs
-    hideTabs : function() {
-        $("#tab_pills").children().css("display", "none");
-    },
-
-    // show connect tabs
-    showConnectTabs : function() {
-        this.hideTabs();
-
-        $("#tab_connect").css("display", "");
-    },
-    
-    // show unlogin tabs
-    showUnloginTabs : function() {
-        this.hideTabs();
-
-        $("#tab_register").css("display", "");
-        $("#tab_login").css("display", "");
-    },
-    
-    // show login tabs
-    showLoginTabs : function() {
-        this.hideTabs();
-
-        $("#tab_scene").css("display", "");
-        $("#tab_character").css("display", "");
-        if (settings.show_social_box) {
-        	$("#tab_social").css("display", "");
-        }
-        $("#tab_map").css("display", "");
-        $("#tab_system").css("display", "");
-    },
-    
-    unselectAllTabs : function() {
-        $("#tab_bar li")
-            .removeClass("active")
-            .removeClass("pill_active");
-        $("#tab_content").children().css("display", "none");
-    },
-    
-    showPage : function(pagename) {
-        this.unselectAllTabs();
-        $("#tab_" + pagename)
-            .addClass("active")
-            .addClass("pill_active");
-        $("#box_" + pagename).css("display", "");
-    },
-    
-    hideAllContents: function() {
-        $("#tab_bar li")
-            .removeClass("active")
-            .removeClass("pill_active");
-
-    	$("#tab_content").children().hide();
-    },
-    
-    showContent: function(frame_name) {
-        this.hideAllContents();
-        
-        $("#tab_" + frame_name)
-            .addClass("active")
-            .addClass("pill_active");
-
-		var frame = $("#frame_" + frame_name);
-		this.doChangeFrameSize(frame);
-        frame.show();
-    },
-    
-    onConnectionOpen: function() {
-        controller.clearMsgWindow();
-        $("#prompt_content").hide();
-        webclient.showUnloginTabs();
-        webclient.showContent("login");
-
-        webclient.doAutoLoginCheck();
-    },
-    
-    onConnectionClose: function() {
-        webclient.showConnectTabs();
-        webclient.showContent("connect");
-
-        // close popup windows
-        controller.doClosePopupBox();
-
-        // show message
-        controller.showMessage(_("Message"), _("The client connection was closed cleanly."));
-    },
-
-    doAutoLoginCheck : function() {
-        setTimeout(function(){
-            if($.cookie("is_save_password")) {
-                $("#login_name").val($.cookie("login_name"));
-                $("#login_password").val($.cookie("login_password"));
-                $("#cb_save_password").attr("checked", "true");
-
-                if($.cookie("is_auto_login")) {
-                    $("#cb_auto_login").attr("checked", "true");
-                    commands.doLogin();
-                }
-            } else {
-                $("#cb_save_password").removeAttr("checked");
-                $.cookie("is_auto_login", '', {expires: -1});
-                $("#cb_auto_login").removeAttr("checked");
-            }
-
-            if(!$.cookie("is_auto_login")) {
-                $("#cb_auto_login").removeAttr("checked");
-            }
-        }, 1);
-    },
 }
 
 // Input jQuery callbacks
@@ -419,16 +206,10 @@ var webclient = {
 //$(window).unbind("resize");
 //$(window).resize(webclient.doSetSizes);
 
-$(window).ready(function(){
-    webclient.showUnloginTabs();
-    webclient.showContent("login");
-    webclient.doSetSizes();
-});
-
 // Event when client finishes loading
 $(document).ready(function() {
     // Event when client window changes
-    $(window).bind("resize", webclient.doSetSizes);
+    $(window).bind("resize", controller.doSetSizes);
 
     // This is safe to call, it will always only
     // initialize once.
@@ -437,12 +218,15 @@ $(document).ready(function() {
     Evennia.emitter.on("text", webclient.onText);
     //Evennia.emitter.on("prompt", onPrompt);
     //Evennia.emitter.on("default", onDefault);
-    Evennia.emitter.on("connection_close", webclient.onConnectionClose);
+    Evennia.emitter.on("connection_close", controller.onConnectionClose);
     // silence currently unused events
-    Evennia.emitter.on("connection_open", webclient.onConnectionOpen);
+    Evennia.emitter.on("connection_open", controller.onConnectionOpen);
     //Evennia.emitter.on("connection_error", onSilence);
 
-    webclient.doSetSizes();
+    controller.showUnloginTabs();
+    controller.showContent("login");
+    controller.doSetSizes();
+
     // set an idle timer to send idle every 3 minutes,
     // to avoid proxy servers timing out on us
     setInterval(function() {

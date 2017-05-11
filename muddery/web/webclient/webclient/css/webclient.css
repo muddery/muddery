@@ -93,6 +93,10 @@ input[type=checkbox], input[type=radio] {
     margin: 4px 4px;
 }
 
+.wordbox {
+	width: 100%;
+}
+
 .nav-tabs {
     border-bottom: 0px;
 }
@@ -335,4 +339,29 @@ a:focus {
 
 .template {
     display: none;
+}
+
+#input_bar {
+    margin: 2px 0px 0px 0px;
+}
+
+#message_words {
+    width: 56px;
+    height: 38px;
+    float: left;
+    display: inline;
+}
+
+#message_input {
+    width: 56px;
+    height: 38px;
+    margin: auto;
+    display: inline;
+}
+
+#message_send {
+    width: 56px;
+    height: 38px;
+    float: right;
+    display: inline;
 }

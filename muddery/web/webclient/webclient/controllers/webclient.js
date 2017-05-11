@@ -39,7 +39,7 @@ var controller = {
     
 	// popup boxes
 	showAlert: function(message) {
-        controller.showMessage(_("Message"), message);
+        this.showMessage(_("Message"), message);
 	},
 
 	showMessage: function(header, content, commands) {
@@ -199,7 +199,7 @@ var controller = {
         var frame_ctrl = this.getFrameController(frame_id);
         frame_ctrl.setInfo(desc, characters, data_handler.character_dbref);
 
-        webclient.doSetVisiblePopupSize();
+        this.doSetVisiblePopupSize();
     },
     
     setCombatCommands: function(commands) {
@@ -240,8 +240,8 @@ var controller = {
     },
     
     showCombatResult: function() {
-        controller.doClosePopupBox();
-        controller.showFrame("#frame_combat_result");
+        this.doClosePopupBox();
+        this.showFrame("#frame_combat_result");
     },
 
     showGetExp: function(exp, combat) {
@@ -425,6 +425,215 @@ var controller = {
 
     showFrame: function(frame_id) {
         $(frame_id).parents().show();
-        webclient.doSetVisiblePopupSize();
+        this.doSetVisiblePopupSize();
+    },
+
+    onLogin : function(data) {
+        // show login UI
+        this.clearMsgWindow();
+
+        this.clearPromptBar();
+        $("#prompt_content").show();
+
+        this.showLoginTabs();
+        this.showContent("scene");
+    },
+    
+    onLogout : function(data) {
+        // show unlogin UI
+        this.clearMsgWindow();
+        $("#prompt_content").hide();
+        this.showUnloginTabs();
+        this.showContent("login");
+        
+        //reconnect, show the connection screen
+        Evennia.connect();
+    },
+    
+    onPuppet: function(data) {
+        data_handler.character_dbref = data["dbref"];
+        data_handler.character_name = data["name"];
+
+        this.setInfo(data["name"], data["icon"]);
+    },
+    
+    doSetSizes: function() {
+        controller.doSetWindowSize();
+        controller.doSetVisiblePopupSize();
+    },
+
+    doSetWindowSize: function() {
+        // Sets the size of the message window
+        var win_h = $(window).innerHeight();
+        var win_w = $(window).innerWidth();
+
+        //var head_h = $('header').outerHeight(true);
+        var head_h = 20;
+        $('#header').height(head_h);
+
+        var wrapper_h = win_h - head_h - 20;
+        $('#wrapper').height(wrapper_h);
+
+        var margin_h = 55
+        var prompt_h = 18;
+        var tab_bar_h = 32;
+        var input_bar_h = 42;
+        var tab_content_h = (wrapper_h - prompt_h - tab_bar_h - margin_h - input_bar_h) * 0.7;
+        $('#prompt_bar').height(prompt_h);
+        $('#tab_bar').height(tab_bar_h);
+        $('#tab_content').height(tab_content_h);
+
+        tab_content_h = $('#tab_content').height();
+        var msg_wnd_h = wrapper_h - prompt_h - tab_bar_h - margin_h - tab_content_h - input_bar_h;
+        $('#msg_wnd').height(msg_wnd_h);
+
+        if (win_w >= 960) {
+            $('#middlewindow').width(960 - 20);
+        }
+        else {
+            $('#middlewindow').width(win_w - 20);
+        }
+
+        $("#message_input").outerWidth($('#middlewindow').width() - 118);
+        
+        this.doChangeVisibleFrameSize();
+    },
+
+    doSetVisiblePopupSize: function() {
+        var popup_content = $("#popup_container .modal-content:visible:first");
+        var frame = popup_content.find("iframe");
+        if (frame.length == 0) {
+            return;
+        }
+
+        var width = popup_content.width();
+        frame.innerWidth(popup_content.width());
+        frame.height(0);
+        
+        var frame_body = frame[0].contentWindow.document.body;
+		frame.height(frame_body.scrollHeight);
+
+        // model dialogue
+        var win_h = $(window).innerHeight();
+        var dlg = $(".modal-dialog:visible:first");
+        if (dlg.length > 0) {
+            dlg.css("top", (win_h - dlg.height()) / 2);
+        }
+    },
+    
+    doChangeVisibleFrameSize: function() {
+		var frame = $("#tab_content iframe:visible");
+		this.doChangeFrameSize(frame);
+    },
+
+	doChangeFrameSize: function(frame) {
+		var tab_content = $("#tab_content");
+
+    	frame.width(tab_content.width());
+    	frame.height(tab_content.height() - 5);
+    },
+    
+    
+    // hide all tabs
+    hideTabs : function() {
+        $("#tab_pills").children().css("display", "none");
+    },
+
+    // show connect tabs
+    showConnectTabs : function() {
+        this.hideTabs();
+
+        $("#tab_connect").css("display", "");
+    },
+    
+    // show unlogin tabs
+    showUnloginTabs : function() {
+        this.hideTabs();
+
+        $("#tab_register").css("display", "");
+        $("#tab_login").css("display", "");
+    },
+    
+    // show login tabs
+    showLoginTabs : function() {
+        this.hideTabs();
+
+        $("#tab_scene").css("display", "");
+        $("#tab_character").css("display", "");
+        if (settings.show_social_box) {
+        	$("#tab_social").css("display", "");
+        }
+        $("#tab_map").css("display", "");
+        $("#tab_system").css("display", "");
+    },
+    
+    unselectAllTabs : function() {
+        $("#tab_bar li")
+            .removeClass("active")
+            .removeClass("pill_active");
+        $("#tab_content").children().css("display", "none");
+    },
+    
+    hideAllContents: function() {
+        $("#tab_bar li")
+            .removeClass("active")
+            .removeClass("pill_active");
+
+    	$("#tab_content").children().hide();
+    },
+    
+    showContent: function(frame_name) {
+        this.hideAllContents();
+        
+        $("#tab_" + frame_name)
+            .addClass("active")
+            .addClass("pill_active");
+
+		var frame = $("#frame_" + frame_name);
+		this.doChangeFrameSize(frame);
+        frame.show();
+    },
+    
+    onConnectionOpen: function() {
+        controller.clearMsgWindow();
+        $("#prompt_content").hide();
+        controller.showUnloginTabs();
+        controller.showContent("login");
+
+        controller.doAutoLoginCheck();
+    },
+    
+    onConnectionClose: function() {
+        controller.showConnectTabs();
+        controller.showContent("connect");
+
+        // close popup windows
+        controller.doClosePopupBox();
+
+        // show message
+        controller.showMessage(_("Message"), _("The client connection was closed cleanly."));
+    },
+
+    doAutoLoginCheck : function() {
+        setTimeout(function(){
+            if($.cookie("is_save_password")) {
+                $("#login_name").val($.cookie("login_name"));
+                $("#login_password").val($.cookie("login_password"));
+                $("#cb_save_password").attr("checked", "true");
+
+                if($.cookie("is_auto_login")) {
+                    $("#cb_auto_login").attr("checked", "true");
+                    commands.doLogin();
+                }
+            } else {
+                $("#cb_save_password").removeAttr("checked");
+                $.cookie("is_auto_login", '', {expires: -1});
+                $("#cb_auto_login").removeAttr("checked");
+            }
+
+            if(!$.cookie("is_auto_login")) {
+                $("#cb_auto_login").removeAttr("checked");
+            }
+        }, 1);
     },
 };
