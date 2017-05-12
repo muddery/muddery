@@ -129,31 +129,31 @@ var map_data = {
         var direction = "";
         degree = degree - Math.floor(degree / 360) * 360;
         if (degree < 22.5) {
-            direction = LS("(E)");
+            direction = _("(E)");
         }
         else if (degree < 67.5) {
-            direction = LS("(NE)");
+            direction = _("(NE)");
         }
         else if (degree < 112.5) {
-            direction = LS("(N)");
+            direction = _("(N)");
         }
         else if (degree < 157.5) {
-            direction = LS("(NW)");
+            direction = _("(NW)");
         }
         else if (degree < 202.5) {
-            direction = LS("(W)");
+            direction = _("(W)");
         }
         else if (degree < 247.5) {
-            direction = LS("(SW)");
+            direction = _("(SW)");
         }
         else if (degree < 292.5) {
-            direction = LS("(S)");
+            direction = _("(S)");
         }
         else if (degree < 337.5) {
-            direction = LS("(SE)");
+            direction = _("(SE)");
         }
         else {
-            direction = LS("(E)");
+            direction = _("(E)");
         }
 
         return direction;

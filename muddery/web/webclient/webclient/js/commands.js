@@ -44,7 +44,7 @@ var commands = {
         }
 
         if (password != password_again) {
-            webclient.displayAlert(LS("Password does not match."));
+            webclient.displayAlert(_("Password does not match."));
             return;
         }
 

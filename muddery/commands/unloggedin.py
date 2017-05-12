@@ -587,6 +587,7 @@ class CmdUnconnectedLoginStart(Command):
         client_settings = CLIENT_SETTINGS.all_values()
         client_settings["game_name"] = GAME_SETTINGS.get("game_name")
         client_settings["show_social_box"] = not GAME_SETTINGS.get("solo_mode")
+        client_settings["language"] = settings.LANGUAGE_CODE
         self.caller.msg({"settings": client_settings})
 
         "Show the connect screen."
