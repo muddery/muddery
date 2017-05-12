@@ -147,7 +147,7 @@ var controller = {
             var first = true;
             for (var key in accepted) {
                 if (first) {
-                    this.displayMsg(LS("You got:"));
+                    this.displayMsg(_("You got:"));
                     first = false;
                 }
                 this.displayMsg(key + ": " + accepted[key]);
@@ -162,7 +162,7 @@ var controller = {
             var first = true;
             for (var key in rejected) {
                 if (first) {
-                    this.displayMsg(LS("You can not get:"));
+                    this.displayMsg(_("You can not get:"));
                     first = false;
                 }
                 this.displayMsg(key + ": " + rejected[key]);
@@ -272,7 +272,7 @@ var controller = {
 
     showGetExp: function(exp, combat) {
         // show exp
-        this.displayMsg(LS("You got exp: ") + exp);
+        this.displayMsg(_("You got exp: ") + exp);
 
 		if (combat) {
         	var frame_id = "#frame_combat_result";

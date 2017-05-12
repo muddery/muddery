@@ -149,7 +149,7 @@ var controller = {
 		else if (result.key == "skill_escape") {
 			if (result.effect == 1) {
 				var item_id = "#char_" + result["target"].slice(1) + ".status";
-				$(item_id).text(LS("Escaped"));
+				$(item_id).text(_("Escaped"));
 			}
 		}
 	
