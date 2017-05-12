@@ -59,7 +59,7 @@ var webclient = {
         for (var key in data) {
             try {
                 if (key == "settings") {
-                    settings.set(data[key]);
+                    client_settings.setValues(data[key]);
                 }
                 else if (key == "msg") {
                 	var msg = text2html.parseHtml(data[key]);
@@ -223,9 +223,7 @@ $(document).ready(function() {
     Evennia.emitter.on("connection_open", controller.onConnectionOpen);
     //Evennia.emitter.on("connection_error", onSilence);
 
-    controller.showUnloginTabs();
-    controller.showContent("login");
-    controller.doSetSizes();
+	controller.onInit();
 
     // set an idle timer to send idle every 3 minutes,
     // to avoid proxy servers timing out on us

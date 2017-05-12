@@ -345,23 +345,26 @@ a:focus {
     margin: 2px 0px 0px 0px;
 }
 
-#message_words {
+#msg_select {
     width: 56px;
-    height: 38px;
+    height: 32px;
+    margin: 0px 2px 0px 0px;
     float: left;
     display: inline;
 }
 
-#message_input {
+#msg_input {
     width: 56px;
-    height: 38px;
+    height: 32px;
     margin: auto;
+    padding: 2px 4px;
     display: inline;
 }
 
-#message_send {
+#msg_send {
     width: 56px;
-    height: 38px;
+    height: 32px;
+    margin: 0px 0px 0px 2px;
     float: right;
     display: inline;
 }

@@ -1,4 +1,7 @@
 
+var _ = parent._;
+var commands = parent.commands;
+
 var controller = {
 
     // register
@@ -8,7 +11,7 @@ var controller = {
         var password = $("#reg_password").val();
         var password_again = $("#reg_password_again").val();
 
-        parent.commands.doRegister(playername, nickname, password, password_again);
+        commands.doRegister(playername, nickname, password, password_again);
         
         this.clear();
     },

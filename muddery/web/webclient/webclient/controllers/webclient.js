@@ -1,11 +1,22 @@
 
 var controller = {
 
-	// message window
+	_login: false,
+
+	_message_type: null,
+	
+	//////////////////////////////////////////
+	//
+	// Message Window
+	//
+	//////////////////////////////////////////
+	
+	// clear messages in message window
 	clearMsgWindow: function() {
 	    $("#msg_wnd>div:not(.template)").remove();
 	},
 
+	// display a message in message window
 	displayMsg : function(msg, type) {
         var msg_wnd = $("#msg_wnd");
         if (msg_wnd.length > 0) {
@@ -37,11 +48,18 @@ var controller = {
         msg_wnd.animate({scrollTop: msg_wnd[0].scrollHeight});
     },
     
-	// popup boxes
+    //////////////////////////////////////////
+	//
+	// Popup dialogues
+	//
+	//////////////////////////////////////////
+	
+	// popup an alert message
 	showAlert: function(message) {
         this.showMessage(_("Message"), message);
 	},
 
+	// popup a normal message
 	showMessage: function(header, content, commands) {
 		this.doClosePopupBox();
 
@@ -52,6 +70,7 @@ var controller = {
         this.showFrame(frame_id);
 	},
 
+	// popup an object view
 	showObject: function(dbref, name, icon, desc, commands) {
 		this.doClosePopupBox();
 
@@ -62,6 +81,7 @@ var controller = {
         this.showFrame(frame_id);
 	},
 
+	// popup dialogues
     setDialogueList: function(data) {
         if (data.length == 0) {
             this.doClosePopupBox();
@@ -81,16 +101,18 @@ var controller = {
         }
     },
 
+	// popup a single dialogue window
     showDialogue: function(dialogues) {
         this.doClosePopupBox();
 
         var frame_id = "#frame_dialogue";
         var frame_ctrl = this.getFrameController(frame_id);
-        frame_ctrl.setDialogues(dialogues, data_handler.getEscapes());
+        frame_ctrl.setDialogues(dialogues, data_handler.getEscapes(), client_settings.can_close_dialogue);
 
         this.showFrame(frame_id);
     },
     
+    // popup a shop
     showShop: function(name, icon, desc, goods) {
     	this.doClosePopupBox();
 
@@ -101,11 +123,13 @@ var controller = {
         this.showFrame(frame_id);
     },
     
+    // show shop window
     openShop: function() {
     	this.doClosePopupBox();
         this.showFrame("#frame_shop");
     },
     
+    // popup shop goods
     showGoods: function(dbref, name, number, icon, desc, price, unit) {
 		this.doClosePopupBox();
 
@@ -116,6 +140,7 @@ var controller = {
         this.showFrame(frame_id);
     },
     
+    // show get objects messages
     showGetObjects: function(accepted, rejected, combat) {
         // show accepted objects
         try {
@@ -162,6 +187,7 @@ var controller = {
         }
     },
     
+    // popup a getting objects message box
     popupGetObjects: function(accepted, rejected) {
     	this.doClosePopupBox();
 
@@ -240,8 +266,8 @@ var controller = {
     },
     
     showCombatResult: function() {
-        this.doClosePopupBox();
-        this.showFrame("#frame_combat_result");
+        controller.doClosePopupBox();
+        controller.showFrame("#frame_combat_result");
     },
 
     showGetExp: function(exp, combat) {
@@ -287,6 +313,12 @@ var controller = {
     	$("#popup_container .modal-dialog").hide();
     },
 
+	//////////////////////////////////////////
+	//
+	// Prompt Bar
+	//
+	//////////////////////////////////////////
+	
     clearPromptBar: function() {
         $("#prompt_name").empty();
         $("#prompt_level").empty();
@@ -319,6 +351,12 @@ var controller = {
         frame_ctrl.setStatus(level, exp, max_exp, hp, max_hp, attack, defence);
     },
 
+	//////////////////////////////////////////
+	//
+	// Functional Windows
+	//
+	//////////////////////////////////////////
+	
     // set player's equipments
     setEquipments: function(equipments) {
         var frame_ctrl = this.getFrameController("#frame_information");
@@ -428,23 +466,49 @@ var controller = {
         this.doSetVisiblePopupSize();
     },
 
+	//////////////////////////////////////////
+	//
+	// Events
+	//
+	//////////////////////////////////////////
+	
+	onInit: function() {
+		this.setMsgTypes();
+		this.showUnlogin();
+    	this.showContent("login");
+    	this.doSetSizes();
+	},
+
+    onConnectionOpen: function() {
+    	this._login = false;
+    	
+        controller.showUnlogin();
+        controller.doAutoLoginCheck();
+    },
+    
+    onConnectionClose: function() {
+    	this._login = false;
+    	
+        controller.showConnect();
+
+        // close popup windows
+        controller.doClosePopupBox();
+        
+        // show message
+        controller.showMessage(_("Message"), _("The client connection was closed cleanly."));
+    },
+    
     onLogin : function(data) {
-        // show login UI
-        this.clearMsgWindow();
-
-        this.clearPromptBar();
-        $("#prompt_content").show();
-
-        this.showLoginTabs();
-        this.showContent("scene");
+    	this._login = true;
+    
+        this.showLogin();
     },
     
     onLogout : function(data) {
+    	this._login = false;
+    	
         // show unlogin UI
-        this.clearMsgWindow();
-        $("#prompt_content").hide();
-        this.showUnloginTabs();
-        this.showContent("login");
+        this.showUnlogin();
         
         //reconnect, show the connection screen
         Evennia.connect();
@@ -457,6 +521,12 @@ var controller = {
         this.setInfo(data["name"], data["icon"]);
     },
     
+    //////////////////////////////////////////
+	//
+	// Sizes
+	//
+	//////////////////////////////////////////
+	
     doSetSizes: function() {
         controller.doSetWindowSize();
         controller.doSetVisiblePopupSize();
@@ -477,7 +547,7 @@ var controller = {
         var margin_h = 55
         var prompt_h = 18;
         var tab_bar_h = 32;
-        var input_bar_h = 42;
+        var input_bar_h = 32;
         var tab_content_h = (wrapper_h - prompt_h - tab_bar_h - margin_h - input_bar_h) * 0.7;
         $('#prompt_bar').height(prompt_h);
         $('#tab_bar').height(tab_bar_h);
@@ -494,7 +564,7 @@ var controller = {
             $('#middlewindow').width(win_w - 20);
         }
 
-        $("#message_input").outerWidth($('#middlewindow').width() - 118);
+        $("#msg_input").outerWidth($('#middlewindow').width() - 116);
         
         this.doChangeVisibleFrameSize();
     },
@@ -532,41 +602,18 @@ var controller = {
     	frame.width(tab_content.width());
     	frame.height(tab_content.height() - 5);
     },
-    
-    
+
+    //////////////////////////////////////////
+	//
+	// Layouts
+	//
+	//////////////////////////////////////////
+	
     // hide all tabs
     hideTabs : function() {
         $("#tab_pills").children().css("display", "none");
     },
-
-    // show connect tabs
-    showConnectTabs : function() {
-        this.hideTabs();
-
-        $("#tab_connect").css("display", "");
-    },
-    
-    // show unlogin tabs
-    showUnloginTabs : function() {
-        this.hideTabs();
-
-        $("#tab_register").css("display", "");
-        $("#tab_login").css("display", "");
-    },
-    
-    // show login tabs
-    showLoginTabs : function() {
-        this.hideTabs();
-
-        $("#tab_scene").css("display", "");
-        $("#tab_character").css("display", "");
-        if (settings.show_social_box) {
-        	$("#tab_social").css("display", "");
-        }
-        $("#tab_map").css("display", "");
-        $("#tab_system").css("display", "");
-    },
-    
+        
     unselectAllTabs : function() {
         $("#tab_bar li")
             .removeClass("active")
@@ -593,25 +640,51 @@ var controller = {
 		this.doChangeFrameSize(frame);
         frame.show();
     },
-    
-    onConnectionOpen: function() {
-        controller.clearMsgWindow();
-        $("#prompt_content").hide();
-        controller.showUnloginTabs();
-        controller.showContent("login");
 
-        controller.doAutoLoginCheck();
+	// login layout
+    showLogin : function() {
+        // show login UI
+        this.clearMsgWindow();
+
+        this.clearPromptBar();
+        $("#prompt_content").show();
+
+   		// show login tabs
+        this.hideTabs();
+
+        $("#tab_scene").css("display", "");
+        $("#tab_character").css("display", "");
+        if (client_settings.show_social_box) {
+        	$("#tab_social").css("display", "");
+        }
+        $("#tab_map").css("display", "");
+        $("#tab_system").css("display", "");
+    
+        this.showContent("scene");
     },
+	
+	// unlogin layout
+	showUnlogin : function() {
+        // show unlogin UI
+        this.clearMsgWindow();
+        $("#prompt_content").hide();
+
+    	// show unlogin tabs
+        this.hideTabs();
+
+        $("#tab_register").css("display", "");
+        $("#tab_login").css("display", "");
     
-    onConnectionClose: function() {
-        controller.showConnectTabs();
+        this.showContent("login");
+    },
+	
+    // connect layout
+    showConnect : function() {
+        this.hideTabs();
+        
+        $("#tab_connect").css("display", "");
+        
         controller.showContent("connect");
-
-        // close popup windows
-        controller.doClosePopupBox();
-
-        // show message
-        controller.showMessage(_("Message"), _("The client connection was closed cleanly."));
     },
 
     doAutoLoginCheck : function() {
@@ -635,5 +708,83 @@ var controller = {
                 $("#cb_auto_login").removeAttr("checked");
             }
         }, 1);
+    },
+    
+    //////////////////////////////////////////
+	//
+	// Commands
+	//
+	//////////////////////////////////////////
+	
+    // send out a speech
+    sendMessage: function() {
+    	if (!this._login) {
+    		return;
+    	}
+    	
+        var message = $("#msg_input").val();
+        $("#msg_input").val("");
+
+        if (!message) {
+            return;
+        }
+
+		if (this._message_type == "say") {
+	        commands.say(message);
+	    }
+	    else if (this._message_type == "command") {
+	    	commands.sendRawCommand(message);
+	    }
+    },
+    
+    setMsgTypes: function() {
+    	$("#msg_type_menu>:not(.template)").remove();
+    	
+    	var container = $("#msg_type_menu");
+    	var item_template = container.find("li.template");
+    	
+    	var first = true;
+    	for (var key in client_settings.msg_types) {
+    		var text = _(client_settings.msg_types[key]);
+    		
+    		var item = item_template.clone()
+    			.removeClass("template")
+    			.attr("id", "msg_type_" + key);
+
+    		item.find("a")
+    			.data("key", key)
+    			.text(text);
+
+    		item.appendTo(container);
+    		
+    		if (first) {
+    			item.find("a")
+    				.removeClass("dropdown-item")
+    				.addClass("first-dropdown-item");
+
+		    	controller._message_type = key;
+    			$("#msg_select").text(text);
+    			
+    			first = false;
+    		}
+    	}
+    },
+    
+    showMsgTypes: function() {
+    	var button = $("#msg_select");
+	    var menu = $("#msg_type_menu");
+	    menu.show();
+	    
+	    var left = button.offset().left;
+	    var top = button.offset().top - menu.outerHeight();
+	    
+	    menu.offset({top: top, left: left});
+    },
+    
+    selectMsgType: function(caller) {
+    	controller._message_type = $(caller).data("key");
+    	$("#msg_select").text($(caller).text());
+
+    	$("#msg_type_menu").hide();
     },
 };

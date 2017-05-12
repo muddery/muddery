@@ -1,4 +1,10 @@
 
+var _ = parent._;
+var text2html = parent.text2html;
+var net_settings = parent.net_settings;
+var escape = parent.escape;
+var commands = parent.commands;
+
 var controller = {
 
 	_target: null,
@@ -12,7 +18,7 @@ var controller = {
         parent.controller.doClosePopupBox();
     },
 
-    setDialogues: function(dialogues, escapes) {
+    setDialogues: function(dialogues, escapes, can_close) {
         this.clearDialogues();
 
         if (dialogues.length == 0) {
@@ -20,6 +26,13 @@ var controller = {
         }
         
         this._target = dialogues[0].npc;
+        
+    	if (can_close) {
+    		$("#close_box").show();
+    	}
+    	else {
+    		$("#close_box").hide();
+    	}
 
         // speaker
         var speaker = text2html.parseHtml(dialogues[0]["speaker"]);
@@ -31,7 +44,7 @@ var controller = {
 
         // add icon
         if (dialogues[0]["icon"]) {
-            $("#img_icon").attr("src", settings.resource_location + dialogues[0]["icon"]);
+            $("#img_icon").attr("src", net_settings.resource_url + dialogues[0]["icon"]);
             $("#div_icon").show();
         }
         else {
@@ -109,6 +122,6 @@ var controller = {
         var dialogue = $(caller).data("dialogue");
         var sentence = $(caller).data("sentence");
         var npc = $(caller).data("npc");
-        parent.commands.doDialogue(dialogue, sentence, npc);
+        commands.doDialogue(dialogue, sentence, npc);
     },
 };

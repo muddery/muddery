@@ -1,4 +1,8 @@
 
+var _ = parent._;
+var text2html = parent.text2html;
+var net_settings = parent.net_settings;
+
 var controller = {
 
 	_goods: [],
@@ -17,7 +21,7 @@ var controller = {
 
 		// add icon
 		if (icon) {
-			var url = settings.resource_location + icon;
+			var url = net_settings.resource_url + icon;
 			$("#img_icon").attr("src", url);
 			$("#shop_icon").show();
         }
@@ -44,7 +48,7 @@ var controller = {
                 	.removeClass("template");
 
                 if (obj["icon"]) {
-            	    item.find(".img_icon").attr("src", settings.resource_location + obj["icon"]);
+            	    item.find(".img_icon").attr("src", net_settings.resource_url + obj["icon"]);
             	    item.find(".obj_icon").show();
                 }
                 else {

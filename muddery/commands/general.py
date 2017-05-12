@@ -11,6 +11,7 @@ from evennia.commands.command import Command
 from evennia.commands.default.muxcommand import MuxCommand
 from evennia import create_script
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.localized_strings_handler import LS
 from muddery.utils.exception import MudderyError
 import traceback
@@ -395,10 +396,12 @@ class CmdSay(Command):
         # Feedback for the object doing the talking.
         caller.msg(LS("You say, '%s'") % speech)
 
-        # Build the string to emit to neighbors.
-        emit_string = LS("%s says, '%s'") % (caller.get_name(), speech)
-        caller.location.msg_contents(emit_string,
-                                     exclude=caller)
+        solo_mode = GAME_SETTINGS.get("solo_mode")
+        if not solo_mode:
+            # Build the string to emit to neighbors.
+            emit_string = LS("%s says, '%s'") % (caller.get_name(), speech)
+            caller.location.msg_contents(emit_string,
+                                         exclude=caller)
 
 
 class CmdPose(MuxCommand):

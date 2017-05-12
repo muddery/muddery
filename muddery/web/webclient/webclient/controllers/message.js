@@ -1,4 +1,8 @@
 
+var _ = parent._;
+var text2html = parent.text2html;
+var commands = parent.commands;
+
 var controller = {
 
     // close popup box
@@ -52,7 +56,7 @@ var controller = {
         var cmd = $(caller).data("cmd_name");
         var args = $(caller).data("cmd_args");
         if (cmd) {
-            parent.commands.doCommandLink(cmd, args);
+            commands.doCommandLink(cmd, args);
         }
     },
 };

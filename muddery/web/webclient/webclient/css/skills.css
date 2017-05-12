@@ -22,7 +22,15 @@
     padding: 4px 8px 4px 8px;
 }
 
+.skill_icon {
+    text-align: center;
+}
+
 .img_icon {
 	width: 30px;
 	height: 30px;
+}
+
+.skill_name {
+    text-align: center;
 }

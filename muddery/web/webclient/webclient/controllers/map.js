@@ -1,4 +1,12 @@
 
+var _ = parent._;
+var text2html = parent.text2html;
+var net_settings = parent.net_settings;
+var client_settings = parent.client_settings;
+var map_data = parent.map_data;
+var util = parent.util;
+var commands = parent.commands;
+
 var controller = {
 
     // close popup box
@@ -13,8 +21,6 @@ var controller = {
     
     showMap: function(location) {
     	this.clear();
-    	
-    	var map_data = parent.map_data;
 
         if (!(location && location.key in map_data._map_rooms)){
             // does not have current location, can not show map.
@@ -33,8 +39,8 @@ var controller = {
 
         var map_width = w_width;
         var map_height = w_height - $("div.modal-header").outerHeight();
-        var scale = settings.map_scale;
-        var room_size = settings.map_room_size;
+        var scale = client_settings.map_scale;
+        var room_size = client_settings.map_room_size;
         var origin_x = map_width / 2;
         var origin_y = map_height / 2;
         var current_area_key = "";		// Only show rooms and exits in the same area.
