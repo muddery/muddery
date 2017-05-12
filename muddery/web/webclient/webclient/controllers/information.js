@@ -1,4 +1,7 @@
 
+var _ = parent._;
+var commands = parent.commands;
+
 var controller = {
 
     // Set player's basic information
@@ -42,6 +45,6 @@ var controller = {
 
     doLook: function(caller) {
         var dbref = $(caller).data("dbref");
-        parent.commands.doLook(dbref);
+        commands.doLook(dbref);
     },
 };

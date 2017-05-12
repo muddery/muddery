@@ -1,4 +1,10 @@
 
+var _ = parent._;
+var text2html = parent.text2html;
+var net_settings = parent.net_settings;
+var map_data = parent.map_data;
+var commands = parent.commands;
+
 var controller = {
 
     clearScene: function() {
@@ -60,7 +66,6 @@ var controller = {
 
         // add exits
         // sort exits by direction
-        var map_data = parent.map_data;
         var room_exits = [];
         if ("exits" in scene) {
             for (var i in scene["exits"]) {
@@ -103,7 +108,7 @@ var controller = {
         // set background
         var backview = $("#box_scene");
         if ("background" in scene && scene["background"]) {
-            var url = settings.resource_location + scene["background"];
+            var url = net_settings.resource_url + scene["background"];
             backview.css("background", "url(" + url + ") no-repeat center center");
         }
         else {
@@ -264,16 +269,16 @@ var controller = {
     doCommandLink: function(caller) {
         var cmd = $(caller).data("cmd_name");
         var args = $(caller).data("cmd_args");
-        parent.commands.doCommandLink(cmd, args);
+        commands.doCommandLink(cmd, args);
     },
 
     doLook: function(caller) {
         var dbref = $(caller).data("dbref");
-        parent.commands.doLook(dbref);
+        commands.doLook(dbref);
     },
 
     doGoto: function(caller) {
         var dbref = $(caller).data("dbref");
-        parent.commands.doGoto(dbref);
+        commands.doGoto(dbref);
     },
 };

@@ -1,4 +1,9 @@
 
+var _ = parent._;
+var text2html = parent.text2html;
+var net_settings = parent.net_settings;
+var commands = parent.commands;
+
 var controller = {
 	
 	_dbref: null,
@@ -29,7 +34,7 @@ var controller = {
 
 		// add icon
 		if (icon) {
-			var url = settings.resource_location + icon;
+			var url = net_settings.resource_url + icon;
 			$("#img_icon").attr("src", url);
 			$("#div_icon").show();
         }
@@ -50,7 +55,7 @@ var controller = {
         this.doClosePopupBox();
 
         if (this._dbref) {
-            parent.commands.buyGoods(this._dbref);
+            commands.buyGoods(this._dbref);
         }
     },
 };

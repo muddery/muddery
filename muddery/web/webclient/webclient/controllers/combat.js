@@ -1,4 +1,9 @@
 
+var _ = parent._;
+var text2html = parent.text2html;
+var net_settings = parent.net_settings;
+var commands = parent.commands;
+
 var controller = {
 
 	_self_dbref: "",
@@ -64,7 +69,7 @@ var controller = {
            	item.find(".status").text(character["hp"] + "/" + character["max_hp"]);
            	
            	if (character["icon"]) {
-           		item.find(".img_icon").attr("src", settings.resource_location + character["icon"]);
+           		item.find(".img_icon").attr("src", net_settings.resource_url + character["icon"]);
            		item.find(".div_icon").show();
            	}
            	else {
@@ -109,7 +114,7 @@ var controller = {
                     .css({"left": 20 + i * 80});
                     
                 if (command["icon"]) {
-                    item.find(".command_icon").attr("src", settings.resource_location + command["icon"]);
+                    item.find(".command_icon").attr("src", net_settings.resource_url + command["icon"]);
                 }
 
                 var name = text2html.parseHtml(command["name"]);
@@ -241,7 +246,7 @@ var controller = {
             }
         }
 
-        parent.commands.doCastSkill(key, this._target);
+        commands.doCastSkill(key, this._target);
     },
     
     finishCombat: function(result) {

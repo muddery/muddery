@@ -1,4 +1,7 @@
 
+var _ = parent._;
+var commands = parent.commands;
+
 var controller = {
 
     // login
@@ -10,13 +13,13 @@ var controller = {
 
         $("#login_password").val("");
 
-        parent.commands.doLogin(playername, password);
-        parent.commands.doAutoLoginConfig(playername, password, save_password, auto_login);
+        commands.doLogin(playername, password);
+        commands.doAutoLoginConfig(playername, password, save_password, auto_login);
     },
 
     doSavePassword: function() {
         var save_password = $("#cb_save_password").is(":checked");
-        parent.commands.doSavePassword(save_password);
+        commands.doSavePassword(save_password);
 
         if (!save_password) {
             $("#cb_auto_login").removeAttr("checked");

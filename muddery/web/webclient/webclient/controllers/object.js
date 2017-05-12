@@ -1,4 +1,9 @@
 
+var _ = parent._;
+var text2html = parent.text2html;
+var net_settings = parent.net_settings;
+var commands = parent.commands;
+
 var controller = {
 	
 	_dbref: null,
@@ -21,7 +26,7 @@ var controller = {
 
 		// add icon
 		if (icon) {
-			var url = settings.resource_location + icon;
+			var url = net_settings.resource_url + icon;
 			$("#img_icon").attr("src", url);
 			$("#div_icon").show();
         }
@@ -72,7 +77,7 @@ var controller = {
         var cmd = $(caller).data("cmd_name");
         var args = $(caller).data("cmd_args");
         if (cmd) {
-            parent.commands.doCommandLink(cmd, args);
+            commands.doCommandLink(cmd, args);
         }
     },
 };

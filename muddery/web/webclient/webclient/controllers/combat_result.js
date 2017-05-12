@@ -1,4 +1,6 @@
 
+var _ = parent._;
+
 var controller = {
 
 	_dialogue: null,

@@ -1,4 +1,9 @@
 
+var _ = parent._;
+var text2html = parent.text2html;
+var net_settings = parent.net_settings;
+var commands = parent.commands;
+
 var controller = {
 
     // Set player's inventory
@@ -17,7 +22,7 @@ var controller = {
             	.text(obj["name"]);
             
             if (obj["icon"]) {
-            	item.find(".img_icon").attr("src", settings.resource_location + obj["icon"]);
+            	item.find(".img_icon").attr("src", net_settings.resource_url + obj["icon"]);
             	item.find(".obj_icon").show();
             }
             else {
@@ -44,6 +49,6 @@ var controller = {
     
     doLook: function(caller) {
         var dbref = $(caller).data("dbref");
-        parent.commands.doLook(dbref);
+        commands.doLook(dbref);
     },
 };

@@ -8,6 +8,10 @@ var commands = {
         return JSON.stringify({"cmd" : command, "args" : args});
     },
     
+    sendRawCommand: function(cmd) {
+    	Evennia.msg("text", cmd);
+    },
+    
     // functions when user click a command link
     //
     doCommandLink: function(cmd, args) {
@@ -106,15 +110,8 @@ var commands = {
     },
     
     // send out a speech
-    doSay: function() {
-        var speech = $("#box_speech :text").val();
-        $("#box_speech :text").val("");
-
-        if (!speech) {
-            return;
-        }
-
-        Evennia.msg("text", this.cmdString("say", speech));
+    say: function(message) {
+        Evennia.msg("text", this.cmdString("say", message));
     },
     
     // do test

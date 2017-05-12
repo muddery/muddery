@@ -1,4 +1,8 @@
 
+var _ = parent._;
+var text2html = parent.text2html;
+var commands = parent.commands;
+
 var controller = {
 
     // Set player's quests
@@ -50,6 +54,6 @@ var controller = {
     
     doLook: function(caller) {
         var dbref = $(caller).data("dbref");
-        parent.commands.doLook(dbref);
+        commands.doLook(dbref);
     },
 };

@@ -1,8 +1,8 @@
 
-var settings = {
+var client_settings = {
     // default values
-    // language file's pathname
-    language: '',
+
+    language: "en-us",
 
     // map settings
     map_room_size: 40,
@@ -21,20 +21,29 @@ var settings = {
     // game title
     game_title: '',
     
-    // resource location
-    resource_location: window.location.protocol + "//" + window.location.host,
+    // types of players messages
+    msg_types: {
+    	"say": "Say",
+    	"command": "Cmd",
+    },
 
-    set: function(values) {
+    setValues: function(values) {
         for (var key in values) {
             this[key] = values[key];
         }
 
+        // language
+        $.getScript("./js/lang/" + this.language + "/strings.js");
+
+		// command box
         if (this.show_command_box) {
-            $("#item_command").css("display", "");
-        } else {
-            $("#item_command").css("display", "none");
+            $("#msg_type_command").css("display", "");
+        }
+        else {
+            $("#msg_type_command").css("display", "none");
         }
         
+        // social ui
         var login = $("#tab_scene").css("display");
         if (self.show_social_box && login) {
         	$("#tab_social").css("display", "");
@@ -42,7 +51,8 @@ var settings = {
         else {
         	$("#tab_social").css("display", "none");
         }
-
+        
+		// game's name
         if (this.game_name) {
             $("#game_title").text(this.game_name);
         }
