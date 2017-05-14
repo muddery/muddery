@@ -13,7 +13,7 @@ from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.loot_handler import LootHandler
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
 
@@ -37,7 +37,7 @@ class MudderyObjectCreator(MudderyObject):
         # Load creator info.
         self.loot_verb = getattr(self.dfield, "loot_verb", None)
         if not self.loot_verb:
-            self.loot_verb = LS("Loot")
+            self.loot_verb = _("Loot")
         self.loot_condition = getattr(self.dfield, "loot_condition", None)
 
     def get_available_commands(self, caller):

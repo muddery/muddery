@@ -44,7 +44,7 @@ var commands = {
         }
 
         if (password != password_again) {
-            webclient.displayAlert(_("Password does not match."));
+            controller.displayAlert(_("Password does not match."));
             return;
         }
 
@@ -110,8 +110,10 @@ var commands = {
     },
     
     // send out a speech
-    say: function(message) {
-        Evennia.msg("text", this.cmdString("say", message));
+    say: function(channel, message) {
+        var args = {"channel": channel,
+                    "message": message}
+        Evennia.msg("text", this.cmdString("say", args));
     },
     
     // do test

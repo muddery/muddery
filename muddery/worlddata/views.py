@@ -19,8 +19,8 @@ from muddery.utils import importer
 from muddery.utils import readers
 from muddery.utils import writers
 from muddery.utils.builder import build_all
-from muddery.utils.localized_strings_handler import LS, LOCALIZED_STRINGS_HANDLER
-from muddery.utils.game_settings import CLIENT_SETTINGS, GAME_SETTINGS
+from muddery.utils.localized_strings_handler import _, LOCALIZED_STRINGS_HANDLER
+from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.editor import page_view
 from muddery.worlddata.editor.form_view import FormView
 from muddery.worlddata.editor.single_form_view import SingleFormView
@@ -61,7 +61,7 @@ def world_editor(request):
     Render the world editor.
     """
     data_handlers = DATA_SETS.all_handlers
-    models = [{"key": data_handler.model_name, "name": LS(data_handler.model_name, category="models") + "(" + data_handler.model_name + ")"} for data_handler in data_handlers]
+    models = [{"key": data_handler.model_name, "name": _(data_handler.model_name, category="models") + "(" + data_handler.model_name + ")"} for data_handler in data_handlers]
 
     context = {"models": models,
                "writers": writers.get_writers()}
@@ -294,10 +294,7 @@ def apply_changes(request):
         build_all()
 
         # send client settings
-        CLIENT_SETTINGS.reset()
-        client_settings = CLIENT_SETTINGS.all_values()
-        client_settings["game_name"] = GAME_SETTINGS.get("game_name")
-        client_settings["show_social_box"] = not GAME_SETTINGS.get("solo_mode")
+        client_settings = GAME_SETTINGS.get_client_settings()
         text = json.dumps({"settings": client_settings})
         SESSIONS.announce_all(text)
 
@@ -309,7 +306,7 @@ def apply_changes(request):
         logger.log_tracemsg(message)
         return render(request, 'fail.html', {"message": message})
 
-    return render(request, 'success.html', {"message": LS("Data applied.")})
+    return render(request, 'success.html', {"message": _("Data applied.")})
 
 
 @staff_member_required
@@ -424,7 +421,7 @@ def get_view(request):
 
     if form_name in relative_forms:
         view = RelativeView(form_name, request, relative_forms[form_name])
-    elif form_name == "game_settings" or form_name == "client_settings":
+    elif form_name == "game_settings":
         view = SingleFormView(form_name, request)
     elif form_name == "dialogues":
         view = DialogueView(form_name, request)

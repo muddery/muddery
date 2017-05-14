@@ -8,7 +8,7 @@ import random
 from django.conf import settings
 from evennia import TICKER_HANDLER
 from muddery.utils.builder import build_object
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 
 
@@ -61,13 +61,13 @@ class SkillHandler(object):
             return False
 
         if skill_key in self.skills:
-            self.owner.msg({"msg": LS("You have already learned this skill.")})
+            self.owner.msg({"msg": _("You have already learned this skill.")})
             return False
 
         # Create skill object.
         skill_obj = build_object(skill_key)
         if not skill_obj:
-            self.owner.msg({"msg": LS("Can not learn this skill.")})
+            self.owner.msg({"msg": _("Can not learn this skill.")})
             return False
 
         # set default
@@ -89,7 +89,7 @@ class SkillHandler(object):
         # Notify the player
         if self.owner.has_player:
             self.owner.show_skills()
-            self.owner.msg({"msg": LS("You learned skill {c%s{n.") % skill_obj.get_name()})
+            self.owner.msg({"msg": _("You learned skill {c%s{n.") % skill_obj.get_name()})
 
         return True
 
@@ -121,11 +121,11 @@ class SkillHandler(object):
 
         if time.time() < self.gcd_finish_time:
             # In GCD.
-            self.owner.msg({"msg": LS("This skill is not ready yet!")})
+            self.owner.msg({"msg": _("This skill is not ready yet!")})
             return
 
         if skill_key not in self.skills:
-            self.owner.msg({"alert": LS("You do not have this skill.")})
+            self.owner.msg({"alert": _("You do not have this skill.")})
             return
 
         skill = self.skills[skill_key]

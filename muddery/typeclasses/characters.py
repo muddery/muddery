@@ -10,14 +10,12 @@ creation commands.
 
 from __future__ import print_function
 
-import random
 from django.conf import settings
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils.localized_strings_handler import LS
 from muddery.utils import utils
 from muddery.utils.builder import build_object
 from muddery.utils.skill_handler import SkillHandler

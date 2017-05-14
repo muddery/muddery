@@ -23,7 +23,7 @@ from muddery.utils import utils
 from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.event_handler import EventHandler
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.data_sets import DATA_SETS
 

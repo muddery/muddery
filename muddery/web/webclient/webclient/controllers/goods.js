@@ -1,11 +1,11 @@
 
 var _ = parent._;
+var parent_controller = parent.controller;
 var text2html = parent.text2html;
 var net_settings = parent.net_settings;
 var commands = parent.commands;
 
 var controller = {
-	
 	_dbref: null,
 	
 	getObject: function() {
@@ -14,7 +14,7 @@ var controller = {
 
     // close popup box
     doClosePopupBox: function() {
-        parent.controller.openShop();
+        parent_controller.openShop();
     },
 
 	setGoods: function(dbref, name, number, icon, desc, price, unit) {

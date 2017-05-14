@@ -1,5 +1,6 @@
 
 var _ = parent._;
+var parent_controller = parent.controller;
 var commands = parent.commands;
 
 var controller = {

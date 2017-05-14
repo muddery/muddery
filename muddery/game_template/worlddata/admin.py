@@ -10,10 +10,6 @@ class GameSettingsAdmin(admin_base.GameSettingsAdmin):
     pass
 
 
-class ClientSettingsAdmin(admin_base.ClientSettingsAdmin):
-    pass
-
-
 class ClassCategoriesAdmin(admin_base.ClassCategoriesAdmin):
     pass
 
@@ -175,7 +171,6 @@ class ImageResourcesAdmin(admin_base.ImageResourcesAdmin):
 
 
 admin.site.register(game_settings, GameSettingsAdmin)
-admin.site.register(client_settings, ClientSettingsAdmin)
 admin.site.register(class_categories, ClassCategoriesAdmin)
 admin.site.register(typeclasses, TypeclassesAdmin)
 admin.site.register(world_rooms, WorldRoomsAdmin)

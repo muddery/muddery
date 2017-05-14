@@ -20,7 +20,7 @@ from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.quest_handler import QuestHandler
 from muddery.utils.attribute_handler import AttributeHandler
 from muddery.utils.exception import MudderyError
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
@@ -97,6 +97,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.reborn_cd = GAME_SETTINGS.get("player_reborn_cd")
         self.solo_mode = GAME_SETTINGS.get("solo_mode")
 
+        self.available_channels = self.get_available_channels()
+
         # refresh data
         self.refresh_data()
 
@@ -149,7 +151,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         We make sure to look around after a move.
 
         """
-        self.msg({"msg": LS("Moving to %s ...") % self.location.name})
+        self.msg({"msg": _("Moving to %s ...") % self.location.name})
         self.show_location()
 
     def at_post_puppet(self):
@@ -169,7 +171,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
                    "inventory": self.return_inventory(),
                    "skills": self.return_skills(),
                    "quests": self.quest_handler.return_quests(),
-                   "revealed_map": self.get_revealed_map()}
+                   "revealed_map": self.get_revealed_map(),
+                   "channels": self.available_channels}
         self.msg(message)
 
         self.show_location()
@@ -230,8 +233,30 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         commands = []
         if self.is_alive():
-            commands.append({"name": LS("Attack"), "cmd": "attack", "args": self.dbref})
+            commands.append({"name": _("Attack"), "cmd": "attack", "args": self.dbref})
         return commands
+
+    def get_available_channels(self):
+        """
+        Get available channel's info.
+
+        Returns:
+            (dict) channels
+        """
+        channels = {"say": _("Say")}
+
+        commands = False
+        if self.is_superuser:
+            commands = True
+        else:
+            for perm in self.permissions.all():
+                if perm in settings.PERMISSION_COMMANDS:
+                    commands = True
+                    break
+        if commands:
+            channels["cmd"] = _("Cmd")
+
+        return channels
 
     def get_revealed_map(self):
         """
@@ -417,7 +442,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 object_record = get_object_record(key)
                 if not object_record:
                     # can not find object's data record
-                    reason = LS("Can not get %s.") % name
+                    reason = _("Can not get %s.") % name
                     rejected_keys[key] = 0
                     reject_reason[name] = reason
                     continue
@@ -431,7 +456,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 # create a new content
                 new_obj = build_object(key)
                 if not new_obj:
-                    reason = LS("Can not get %s.") % name
+                    reason = _("Can not get %s.") % name
                     rejected_keys[key] = 0
                     reject_reason[name] = reason
                     continue
@@ -441,7 +466,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 # move the new object to the character
                 if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
                     new_obj.delete()
-                    reason = LS("Can not get %s.") % name
+                    reason = _("Can not get %s.") % name
                     rejected_keys[key] = 0
                     reject_reason[name] = reason
                     break
@@ -473,13 +498,13 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 while number > 0:
                     if unique:
                         # can not have more than one unique objects
-                        reason = LS("Can not get more %s.") % name
+                        reason = _("Can not get more %s.") % name
                         break
 
                     # create a new content
                     new_obj = build_object(key)
                     if not new_obj:
-                        reason = LS("Can not get %s.") % name
+                        reason = _("Can not get %s.") % name
                         break
 
                     name = new_obj.get_name()
@@ -488,7 +513,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     # move the new object to the character
                     if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
                         new_obj.delete()
-                        reason = LS("Can not get %s.") % name
+                        reason = _("Can not get %s.") % name
                         break
 
                     # Get the number that actually added.
@@ -586,10 +611,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
             result: (string) the description of the result
         """
         if not obj:
-            return LS("Can not find this object.")
+            return _("Can not find this object.")
 
         if obj.db.number < number:
-            return LS("Not enough number.")
+            return _("Not enough number.")
 
         # take effect
         try:
@@ -602,7 +627,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
             ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
             logger.log_tracemsg(ostring)
 
-        return LS("No effect.")
+        return _("No effect.")
 
     def remove_objects(self, obj_list):
         """
@@ -773,16 +798,16 @@ class MudderyPlayerCharacter(MudderyCharacter):
         args: obj(object): the equipment object.
         """
         if obj.location != self:
-            raise MudderyError(LS("Can not find this equipment."))
+            raise MudderyError(_("Can not find this equipment."))
 
         type = obj.type
         position = obj.position
 
         if position not in self.db.equipments:
-            raise MudderyError(LS("Can not equip it on this position."))
+            raise MudderyError(_("Can not equip it on this position."))
 
         if not EQUIP_TYPE_HANDLER.can_equip(self.db.career, type):
-            raise MudderyError(LS("Can not use this equipment."))
+            raise MudderyError(_("Can not use this equipment."))
 
         # Take off old equipment
         if self.db.equipments[position]:
@@ -813,10 +838,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Take off an object from position.
         """
         if not position in self.db.equipments:
-            raise MudderyError(LS("Can not find this equipment."))
+            raise MudderyError(_("Can not find this equipment."))
 
         if not self.db.equipments[position]:
-            raise MudderyError(LS("Can not find this equipment."))
+            raise MudderyError(_("Can not find this equipment."))
 
         # Set object's attribute 'equipped' to False
         dbref = self.db.equipments[position]
@@ -842,7 +867,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         args: equipment(object): the equipment object.
         """
         if equipment.location != self:
-            raise MudderyError(LS("Can not find this equipment."))
+            raise MudderyError(_("Can not find this equipment."))
 
         if equipment.position in self.db.equipments:
             self.db.equipments[equipment.position] = None
@@ -867,7 +892,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
             return True
 
         if not exit.can_unlock(self):
-            self.msg({"msg": LS("Can not open this exit.")})
+            self.msg({"msg": _("Can not open this exit.")})
             return False
 
         self.db.unlocked_exits.add(exit_key)
@@ -1027,7 +1052,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         super(MudderyPlayerCharacter, self).die(killers)
         
-        self.msg({"msg": LS("You died.")})
+        self.msg({"msg": _("You died.")})
 
         if self.reborn_cd <= 0:
             # Reborn immediately
@@ -1036,7 +1061,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
             # Set reborn timer.
             TICKER_HANDLER.add(self.reborn_cd, self.reborn)
 
-            self.msg({"msg": LS("You will be reborn at {c%(p)s{n in {c%(s)s{n seconds.") %
+            self.msg({"msg": _("You will be reborn at {c%(p)s{n in {c%(s)s{n seconds.") %
                              {'p': self.home.get_name(), 's': self.reborn_cd}})
 
     def reborn(self):
@@ -1052,7 +1077,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         # Reborn at its home.
         if self.home:
             self.move_to(self.home, quiet=True)
-            self.msg({"msg": LS("You are reborn at {c%s{n.") % self.home.get_name()})
+            self.msg({"msg": _("You are reborn at {c%s{n.") % self.home.get_name()})
 
     def save_current_dialogue(self, sentences_list, npc):
         """
@@ -1246,4 +1271,33 @@ class MudderyPlayerCharacter(MudderyCharacter):
         super(MudderyPlayerCharacter, self).level_up()
 
         # notify the player
-        self.msg({"msg": LS("{c%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})
+        self.msg({"msg": _("{c%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})
+
+    def say(self, channel, message):
+        """
+        Say something in the channel.
+
+        Args:
+            channel: (string) channel's key.
+            message: (string) message to say.
+
+        Returns:
+            None
+        """
+        if not channel in self.available_channels:
+            self.msg({"alert":_("You can not say here.")})
+            return
+
+        if channel == "say":
+            # calling the speech hook on the location
+            message = self.location.at_say(self, message)
+
+            # Feedback for the object doing the talking.
+            self.msg(_("You say, '%s'") % message)
+
+            solo_mode = GAME_SETTINGS.get("solo_mode")
+            if not solo_mode:
+                # Build the string to emit to neighbors.
+                emit_string = _("%s says, '%s'") % (self.get_name(), message)
+                self.location.msg_contents(emit_string,
+                                           exclude=self)

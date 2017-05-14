@@ -1,5 +1,6 @@
 
 var _ = parent._;
+var parent_controller = parent.controller;
 var text2html = parent.text2html;
 var net_settings = parent.net_settings;
 
@@ -9,7 +10,7 @@ var controller = {
 
     // close popup box
     doClosePopupBox: function() {
-        parent.controller.doClosePopupBox();
+        parent_controller.doClosePopupBox();
     },
 
 	setShop: function(name, icon, desc, goods) {
@@ -89,7 +90,7 @@ var controller = {
         for (var i in this._goods) {
             if (dbref == this._goods[i]["dbref"]) {
             	var goods = this._goods[i];
-                parent.controller.showGoods(goods["dbref"],
+                parent_controller.showGoods(goods["dbref"],
                 							goods["name"],
                 							goods["number"],
                 							goods["icon"],

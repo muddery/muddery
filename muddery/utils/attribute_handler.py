@@ -2,7 +2,7 @@
 AttributeHandler handles a character's custom attributes.
 """
 
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from django.conf import settings
 from evennia.utils import logger
 

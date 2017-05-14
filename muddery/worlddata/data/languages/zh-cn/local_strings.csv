@@ -96,3 +96,6 @@ category,origin,local
 ,"Sorry, there is already a player with the name '%s'.","对不起，已经有名为“%s”的用户了。"
 ,"You say, '%s'","你说：%s"
 ,"%s says, '%s'","%s说：%s"
+,"You should choose a channel to say.","你需要选择一个说话频道。"
+,"You should say something.","你需要说点什么。"
+,"You can not say here.","你不能在这里说话。"

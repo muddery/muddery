@@ -1,17 +1,29 @@
 
 var _ = parent._;
+var parent_controller = parent.controller;
 var text2html = parent.text2html;
 var net_settings = parent.net_settings;
-var client_settings = parent.client_settings;
 var map_data = parent.map_data;
 var util = parent.util;
 var commands = parent.commands;
 
 var controller = {
 
+    // the scale of the map
+    _scale: 75,
+
+    // the size of a room
+    _room_size: 40,
+
+    // settings
+    setMap: function(scale, room_size) {
+        this._scale = scale;
+        this._room_size = room_size;
+    },
+
     // close popup box
     doClosePopupBox: function() {
-        parent.controller.doClosePopupBox();
+        parent_controller.doClosePopupBox();
     },
     
     clear: function() {
@@ -39,8 +51,8 @@ var controller = {
 
         var map_width = w_width;
         var map_height = w_height - $("div.modal-header").outerHeight();
-        var scale = client_settings.map_scale;
-        var room_size = client_settings.map_room_size;
+        var scale = this._scale;
+        var room_size = this._room_size;
         var origin_x = map_width / 2;
         var origin_y = map_height / 2;
         var current_area_key = "";		// Only show rooms and exits in the same area.

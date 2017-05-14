@@ -5,7 +5,7 @@ CommonObject is the object that players can put into their inventory.
 
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 
 
 class MudderyCommonObject(MudderyObject):
@@ -89,7 +89,7 @@ class MudderyCommonObject(MudderyObject):
         commands = []
         if self.db.number > 0:
             if self.location and self.can_discard:
-                commands.append({"name":LS("Discard"), "cmd":"discard", "args":self.dbref})
+                commands.append({"name":_("Discard"), "cmd":"discard", "args":self.dbref})
         return commands
 
     def take_effect(self, user, number):
@@ -105,7 +105,7 @@ class MudderyCommonObject(MudderyObject):
                 result: (string) a description of the result
                 number: (int) actually used number
         """
-        return LS("No effect."), 0
+        return _("No effect."), 0
 
 
 class MudderyFood(MudderyCommonObject):
@@ -120,9 +120,9 @@ class MudderyFood(MudderyCommonObject):
         """
         commands = []
         if self.db.number > 0:
-            commands.append({"name": LS("Use"), "cmd": "use", "args": self.dbref})
+            commands.append({"name": _("Use"), "cmd": "use", "args": self.dbref})
             if self.location and self.can_discard:
-                commands.append({"name": LS("Discard"), "cmd": "discard", "args": self.dbref})
+                commands.append({"name": _("Discard"), "cmd": "discard", "args": self.dbref})
         return commands
 
 
@@ -181,13 +181,13 @@ class MudderyEquipment(MudderyCommonObject):
         commands = []
         if self.db.number > 0:
             if getattr(self, "equipped", False):
-                commands.append({"name":LS("Take Off"), "cmd":"takeoff", "args":self.dbref})
+                commands.append({"name":_("Take Off"), "cmd":"takeoff", "args":self.dbref})
             else:
-                commands.append({"name":LS("Equip"), "cmd":"equip", "args":self.dbref})
+                commands.append({"name":_("Equip"), "cmd":"equip", "args":self.dbref})
 
                 # Can not discard when equipped
                 if self.location and self.can_discard:
-                    commands.append({"name":LS("Discard"), "cmd":"discard", "args":self.dbref})
+                    commands.append({"name":_("Discard"), "cmd":"discard", "args":self.dbref})
 
         return commands
 
@@ -203,9 +203,9 @@ class MudderySkillBook(MudderyCommonObject):
         """
         commands = []
         if self.db.number > 0:
-            commands.append({"name": LS("Use"), "cmd": "use", "args": self.dbref})
+            commands.append({"name": _("Use"), "cmd": "use", "args": self.dbref})
             if self.location and self.can_discard:
-                commands.append({"name": LS("Discard"), "cmd": "discard", "args": self.dbref})
+                commands.append({"name": _("Discard"), "cmd": "discard", "args": self.dbref})
         return commands
 
     def take_effect(self, user, number):
@@ -226,9 +226,9 @@ class MudderySkillBook(MudderyCommonObject):
 
         skill_key = getattr(self.dfield, "skill", None)
         if not skill_key:
-            return LS("No effect."), 0
+            return _("No effect."), 0
 
         if user.learn_skill(skill_key):
-            return LS("You learned skill."), 1
+            return _("You learned skill."), 1
         else:
-            return LS("No effect."), 0
+            return _("No effect."), 0

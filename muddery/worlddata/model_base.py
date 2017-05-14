@@ -120,6 +120,9 @@ class game_settings(models.Model):
     # Allow players to give up quests.
     can_give_up_quests = models.BooleanField(blank=True, default=True)
 
+    # can close dialogue box or not.
+    can_close_dialogue = models.BooleanField(blank=True, default=False)
+
     # Send one dialogue to the client a time.
     single_dialogue_sentence = models.BooleanField(blank=True, default=True)
 
@@ -146,45 +149,21 @@ class game_settings(models.Model):
     # Default character of players.
     default_player_character_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        verbose_name = "Game Setting"
-        verbose_name_plural = "Game Settings"
-
-
-# ------------------------------------------------------------
-#
-# Webclient's basic settings.
-#
-# ------------------------------------------------------------
-class client_settings(models.Model):
-    """
-    Html webclient's basic settings.
-    NOTE: The server only uses the first record!
-    """
+    # Map's scale
+    map_scale = models.FloatField(blank=True,
+                                  default=75.0,
+                                  validators=[MinValueValidator(0.0)])
 
     # Room's pixel size on the map.
     map_room_size = models.FloatField(blank=True,
                                       default=40.0,
                                       validators=[MinValueValidator(0.0)])
 
-    # Map's scale
-    map_scale = models.FloatField(blank=True,
-                                  default=75.0,
-                                  validators=[MinValueValidator(0.0)])
-
-    # Show command box or not.
-    show_command_box = models.BooleanField(blank=True, default=False)
-
-    # can close dialogue box or not.
-    can_close_dialogue = models.BooleanField(blank=True, default=False)
-
     class Meta:
         "Define Django meta options"
         abstract = True
-        verbose_name = "Webclient Setting"
-        verbose_name_plural = "Webclient Settings"
+        verbose_name = "Game Setting"
+        verbose_name_plural = "Game Settings"
 
 
 # ------------------------------------------------------------

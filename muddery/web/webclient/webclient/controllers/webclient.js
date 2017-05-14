@@ -3,6 +3,8 @@ var controller = {
 
 	_login: false,
 
+    _solo_mode: false,
+
 	_message_type: null,
 	
 	//////////////////////////////////////////
@@ -107,7 +109,7 @@ var controller = {
 
         var frame_id = "#frame_dialogue";
         var frame_ctrl = this.getFrameController(frame_id);
-        frame_ctrl.setDialogues(dialogues, data_handler.getEscapes(), client_settings.can_close_dialogue);
+        frame_ctrl.setDialogues(dialogues, data_handler.getEscapes());
 
         this.showFrame(frame_id);
     },
@@ -472,8 +474,7 @@ var controller = {
 	//
 	//////////////////////////////////////////
 	
-	onInit: function() {
-		this.setMsgTypes();
+	onReady: function() {
 		this.showUnlogin();
     	this.showContent("login");
     	this.doSetSizes();
@@ -611,14 +612,14 @@ var controller = {
 	
     // hide all tabs
     hideTabs : function() {
-        $("#tab_pills").children().css("display", "none");
+        $("#tab_pills").children().hide();
     },
         
     unselectAllTabs : function() {
         $("#tab_bar li")
             .removeClass("active")
             .removeClass("pill_active");
-        $("#tab_content").children().css("display", "none");
+        $("#tab_content").children().hide();
     },
     
     hideAllContents: function() {
@@ -652,13 +653,14 @@ var controller = {
    		// show login tabs
         this.hideTabs();
 
-        $("#tab_scene").css("display", "");
-        $("#tab_character").css("display", "");
-        if (client_settings.show_social_box) {
-        	$("#tab_social").css("display", "");
+        $("#tab_scene").show();
+        $("#tab_character").show();
+        $("#tab_map").show();
+        $("#tab_system").show();
+
+        if (!this._solo_mode) {
+        	$("#tab_social").show();
         }
-        $("#tab_map").css("display", "");
-        $("#tab_system").css("display", "");
     
         this.showContent("scene");
     },
@@ -666,23 +668,25 @@ var controller = {
 	// unlogin layout
 	showUnlogin : function() {
         // show unlogin UI
-        this.clearMsgWindow();
+        //this.clearMsgWindow();
         $("#prompt_content").hide();
 
     	// show unlogin tabs
         this.hideTabs();
 
-        $("#tab_register").css("display", "");
-        $("#tab_login").css("display", "");
+        $("#tab_register").show();
+        $("#tab_login").show();
     
         this.showContent("login");
+
+        this.clearChannels();
     },
 	
     // connect layout
     showConnect : function() {
         this.hideTabs();
         
-        $("#tab_connect").css("display", "");
+        $("#tab_connect").show();
         
         controller.showContent("connect");
     },
@@ -729,23 +733,64 @@ var controller = {
             return;
         }
 
-		if (this._message_type == "say") {
-	        commands.say(message);
-	    }
-	    else if (this._message_type == "command") {
-	    	commands.sendRawCommand(message);
+		if (this._message_type == "cmd") {
+		    commands.sendRawCommand(message);
+		}
+		else {
+	        commands.say(this._message_type, message);
 	    }
     },
-    
-    setMsgTypes: function() {
+
+    //////////////////////////////////////////
+	//
+	// Settings
+	//
+	//////////////////////////////////////////
+
+    setClient: function(settings) {
+        // language
+        var code = settings["language"];
+        if (code in language_dict) {
+            LOCAL_STRING = language_dict[code];
+        }
+        else {
+            LOCAL_STRING = {};
+        }
+
+		// game's name
+        $("#game_title").text(settings["game_name"]);
+
+        // social tab
+        this._solo_mode = settings["solo_mode"];
+        if (this._login) {
+            if (this._solo_mode) {
+                $("#tab_social").hide();
+            }
+            else {
+                $("#tab_social").show();
+            }
+        }
+
+        // map settings
+        var map_id = "#frame_map";
+        var map_ctrl = this.getFrameController(map_id);
+        map_ctrl.setMap(settings["map_scale"], settings["map_room_size"]);
+    },
+
+    clearChannels: function() {
+        $("#msg_type_menu>:not(.template)").remove();
+        $("#msg_select").empty();
+    },
+
+    setChannels: function(channels) {
     	$("#msg_type_menu>:not(.template)").remove();
     	
     	var container = $("#msg_type_menu");
     	var item_template = container.find("li.template");
     	
     	var first = true;
-    	for (var key in client_settings.msg_types) {
-    		var text = _(client_settings.msg_types[key]);
+    	for (var key in channels) {
+    		var text = _(channels[key]);
     		
     		var item = item_template.clone()
     			.removeClass("template")
@@ -771,13 +816,17 @@ var controller = {
     },
     
     showMsgTypes: function() {
+        if ($("#msg_type_menu>:not(.template)").length == 0) {
+            return;
+        }
+
     	var button = $("#msg_select");
 	    var menu = $("#msg_type_menu");
-	    menu.show();
-	    
+
 	    var left = button.offset().left;
 	    var top = button.offset().top - menu.outerHeight();
-	    
+
+	    menu.show();
 	    menu.offset({top: top, left: left});
     },
     
