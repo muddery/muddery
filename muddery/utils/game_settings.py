@@ -2,7 +2,7 @@
 Set the game's configuration.
 """
 
-
+from django.conf import settings
 from muddery.worlddata.data_sets import DATA_SETS
 from evennia.utils import logger
 
@@ -64,6 +64,20 @@ class GameSettings(object):
         """
         return self.values
 
+    def get_client_settings(self):
+        """
+        Get settings for the webclient.
+
+        Returns:
+            (dict) settings
+        """
+        client_settings = {"language": settings.LANGUAGE_CODE,
+                           "game_name": self.get("game_name"),
+                           "solo_mode": self.get("solo_mode"),
+                           "map_scale": self.get("map_scale"),
+                           "map_room_size": self.get("map_room_size"),}
+        return client_settings
+
 
 GAME_SETTINGS = GameSettings(DATA_SETS.game_settings.objects,
                              {"game_name": "Muddery",
@@ -74,18 +88,13 @@ GAME_SETTINGS = GameSettings(DATA_SETS.game_settings.objects,
                               "player_reborn_cd": 10.0,
                               "npc_reborn_cd": 10.0,
                               "can_give_up_quests": True,
+                              "can_close_dialogue": False,
                               "single_dialogue_sentence": False,
                               "auto_resume_dialogues": True,
                               "default_home_key": True,
                               "start_location_key": True,
                               "default_player_home_key": True,
                               "default_player_character_key": "",
+                              "map_scale": 75.0,
+                              "map_room_size": 40.0,
                               })
-
-
-CLIENT_SETTINGS = GameSettings(DATA_SETS.client_settings.objects,
-                               {"map_room_size": 40,
-                                "map_scale": 75,
-                                "show_command_box": False,
-                                "can_close_dialogue": False,
-                                })

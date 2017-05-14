@@ -12,7 +12,7 @@ from evennia.commands.default.muxcommand import MuxCommand
 from evennia import create_script
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.utils.exception import MudderyError
 import traceback
 
@@ -72,20 +72,20 @@ class CmdLook(Command):
         args = self.args
 
         if not caller.is_alive():
-            caller.msg({"alert":LS("You are died.")})
+            caller.msg({"alert":_("You are died.")})
             return
 
         if args:
             # Use search to handle duplicate/nonexistant results.
             looking_at_obj = caller.search(args, location=caller.location)
             if not looking_at_obj:
-                caller.msg({"alert":LS("Can not find it.")})
+                caller.msg({"alert":_("Can not find it.")})
                 return
         else:
             # Observes the caller's location
             looking_at_obj = caller.location
             if not looking_at_obj:
-                caller.msg({"msg":LS("You have no location to look at!")})
+                caller.msg({"msg":_("You have no location to look at!")})
                 return
 
         if not hasattr(looking_at_obj, 'return_appearance'):
@@ -94,7 +94,7 @@ class CmdLook(Command):
 
         if not looking_at_obj.access(caller, "view"):
             # The caller does not have the permission to look.
-            caller.msg({"msg":LS("Can not find '%s'.") % looking_at_obj.name})
+            caller.msg({"msg":_("Can not find '%s'.") % looking_at_obj.name})
             return
 
         if looking_at_obj == caller.location:
@@ -370,7 +370,8 @@ class CmdSay(Command):
 
     Usage:
         {"cmd":"say",
-         "args":<message>
+         "args":{"channel": <channel's key>,
+                 "msg": <message>
         }
 
     Talk to those in your current location.
@@ -388,20 +389,17 @@ class CmdSay(Command):
         if not self.args:
             return
 
-        speech = self.args
+        if not "channel" in self.args:
+            caller.msg({"alert":_("You should choose a channel to say.")})
+            return
 
-        # calling the speech hook on the location
-        speech = caller.location.at_say(caller, speech)
+        if not "message" in self.args:
+            caller.msg({"alert":_("You should say something.")})
+            return
 
-        # Feedback for the object doing the talking.
-        caller.msg(LS("You say, '%s'") % speech)
-
-        solo_mode = GAME_SETTINGS.get("solo_mode")
-        if not solo_mode:
-            # Build the string to emit to neighbors.
-            emit_string = LS("%s says, '%s'") % (caller.get_name(), speech)
-            caller.location.msg_contents(emit_string,
-                                         exclude=caller)
+        channel = self.args["channel"]
+        message = self.args["message"]
+        caller.say(channel, message)
 
 
 class CmdPose(MuxCommand):
@@ -508,17 +506,17 @@ class CmdGoto(Command):
         caller = self.caller
 
         if not caller.is_alive():
-            caller.msg({"alert":LS("You are died.")})
+            caller.msg({"alert":_("You are died.")})
             return
 
         if not self.args:
-            caller.msg({"alert":LS("Should appoint an exit to go.")})
+            caller.msg({"alert":_("Should appoint an exit to go.")})
             return
 
         obj = caller.search(self.args, location=caller.location)
         if not obj:
             # Can not find exit.
-            caller.msg({"alert":LS("Can not find exit.")})
+            caller.msg({"alert":_("Can not find exit.")})
             return
             
         if obj.access(self.caller, 'traverse'):
@@ -560,13 +558,13 @@ class CmdTalk(Command):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":LS("You should talk to someone.")})
+            caller.msg({"alert":_("You should talk to someone.")})
             return
 
         npc = caller.search(self.args, location=caller.location)
         if not npc:
             # Can not find the NPC in the caller's location.
-            caller.msg({"alert":LS("Can not find the one to talk.")})
+            caller.msg({"alert":_("Can not find the one to talk.")})
             return
 
         caller.talk_to_npc(npc)
@@ -599,7 +597,7 @@ class CmdDialogue(Command):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":LS("You should talk to someone.")})
+            caller.msg({"alert":_("You should talk to someone.")})
             return
 
         npc = None
@@ -608,7 +606,7 @@ class CmdDialogue(Command):
                 # get NPC
                 npc = caller.search(self.args["npc"], location=caller.location)
                 if not npc:
-                    caller.msg({"msg":LS("Can not find it.")})
+                    caller.msg({"msg":_("Can not find it.")})
                     return
 
         # Get the current sentence.
@@ -654,13 +652,13 @@ class CmdLoot(Command):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":LS("You should loot something.")})
+            caller.msg({"alert":_("You should loot something.")})
             return
 
         obj = caller.search(self.args, location=caller.location)
         if not obj:
             # Can not find the specified object.
-            caller.msg({"alert":LS("Can not find the object to loot.")})
+            caller.msg({"alert":_("Can not find the object to loot.")})
             return
 
         try:
@@ -696,17 +694,17 @@ class CmdUse(Command):
         caller = self.caller
 
         if not caller.is_alive():
-            caller.msg({"alert":LS("You are died.")})
+            caller.msg({"alert":_("You are died.")})
             return
 
         if not self.args:
-            caller.msg({"alert":LS("You should use something.")})
+            caller.msg({"alert":_("You should use something.")})
             return
 
         obj = caller.search(self.args, location=caller)
         if not obj:
             # If the caller does not have this object.
-            caller.msg({"alert":LS("You don't have this object.")})
+            caller.msg({"alert":_("You don't have this object.")})
             return
 
         result = ""
@@ -719,7 +717,7 @@ class CmdUse(Command):
 
         # Send result to the player.
         if not result:
-            result = LS("No result.")
+            result = _("No result.")
         caller.msg({"alert":result})
 
 
@@ -747,24 +745,24 @@ class CmdDiscard(Command):
         caller = self.caller
 
         if not caller.is_alive():
-            caller.msg({"alert":LS("You are died.")})
+            caller.msg({"alert":_("You are died.")})
             return
 
         if not self.args:
-            caller.msg({"alert":LS("You should discard something.")})
+            caller.msg({"alert":_("You should discard something.")})
             return
 
         obj = caller.search(self.args, location=caller)
         if not obj:
             # If the caller does not have this object.
-            caller.msg({"alert":LS("You don't have this object.")})
+            caller.msg({"alert":_("You don't have this object.")})
             return
 
         # remove used object
         try:
             caller.remove_object(obj.get_data_key(), 1)
         except Exception, e:
-            caller.msg({"alert": LS("Can not discard this object.")})
+            caller.msg({"alert": _("Can not discard this object.")})
             logger.log_tracemsg("Can not discard object %s: %s" % (obj.get_data_key(), e))
             return
 
@@ -792,13 +790,13 @@ class CmdEquip(Command):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":LS("You should equip something.")})
+            caller.msg({"alert":_("You should equip something.")})
             return
 
         obj = caller.search(self.args, location=caller)
         if not obj:
             # If the caller does not have this equipment.
-            caller.msg({"alert":LS("You don't have this equipment.")})
+            caller.msg({"alert":_("You don't have this equipment.")})
             return
 
         try:
@@ -808,12 +806,12 @@ class CmdEquip(Command):
             caller.msg({"alert": str(e)})
             return
         except Exception, e:
-            caller.msg({"alert": LS("Can not use this equipment.")})
+            caller.msg({"alert": _("Can not use this equipment.")})
             logger.log_tracemsg("Can not use equipment %s: %s" % (obj.get_data_key(), e))
             return
 
         # Send lastest status to the player.
-        message = {"alert": LS("Equipped!")}
+        message = {"alert": _("Equipped!")}
         caller.msg(message)
 
 
@@ -840,13 +838,13 @@ class CmdTakeOff(Command):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":LS("You should take off something.")})
+            caller.msg({"alert":_("You should take off something.")})
             return
 
         obj = caller.search(self.args, location=caller)
         if not obj:
             # If the caller does not have this equipment.
-            caller.msg({"alert":LS("You don't have this equipment.")})
+            caller.msg({"alert":_("You don't have this equipment.")})
             return
 
         try:
@@ -856,12 +854,12 @@ class CmdTakeOff(Command):
             caller.msg({"alert": str(e)})
             return
         except Exception, e:
-            caller.msg({"alert": LS("Can not take off this equipment.")})
+            caller.msg({"alert": _("Can not take off this equipment.")})
             logger.log_tracemsg("Can not take off %s: %s" % (obj.get_data_key(), e))
             return
 
         # Send lastest status to the player.
-        message = {"alert": LS("Taken off!")}
+        message = {"alert": _("Taken off!")}
         caller.msg(message)
 
 
@@ -895,11 +893,11 @@ class CmdCastSkill(Command):
         caller = self.caller
 
         if not caller.is_alive():
-            caller.msg({"alert":LS("You are died.")})
+            caller.msg({"alert":_("You are died.")})
             return
 
         if not self.args:
-            caller.msg({"alert":LS("You should select a skill to cast.")})
+            caller.msg({"alert":_("You should select a skill to cast.")})
             return
 
         skill_key = None
@@ -909,7 +907,7 @@ class CmdCastSkill(Command):
         else:
             # If the args is skill's key and target.
             if not "skill" in self.args:
-                caller.msg({"alert":LS("You should select a skill to cast.")})
+                caller.msg({"alert":_("You should select a skill to cast.")})
                 return
             skill_key = self.args["skill"]
 
@@ -922,7 +920,7 @@ class CmdCastSkill(Command):
             # Prepare to cast this skill.
             caller.prepare_skill(skill_key, target)
         except Exception, e:
-            caller.msg({"alert":LS("Can not cast this skill.")})
+            caller.msg({"alert":_("Can not cast this skill.")})
             logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
             return
 
@@ -954,24 +952,24 @@ class CmdAttack(Command):
             return
 
         if not caller.is_alive():
-            caller.msg({"alert":LS("You are died.")})
+            caller.msg({"alert":_("You are died.")})
             return
 
         if not self.args:
-            caller.msg({"alert":LS("You should select a target.")})
+            caller.msg({"alert":_("You should select a target.")})
             return
 
         target = caller.search(self.args)
         if not target:
-            caller.msg({"alert":LS("You should select a target.")})
+            caller.msg({"alert":_("You should select a target.")})
             return
 
         if not target.is_alive():
-            caller.msg({"alert":LS("%s is died." % target.get_name())})
+            caller.msg({"alert":_("%s is died." % target.get_name())})
             return
 
         if caller.location != target.location:
-            caller.msg({"alert":LS("You can not attack %s." % target.get_name())})
+            caller.msg({"alert":_("You can not attack %s." % target.get_name())})
             return
 
         # Set caller's target.
@@ -980,13 +978,13 @@ class CmdAttack(Command):
         # set up combat
         if caller.is_in_combat():
             # caller is in battle
-            message = {"alert": LS("You are already in a combat.")}
+            message = {"alert": _("You are already in a combat.")}
             caller.msg(message)
             return
 
         if target.is_in_combat():
             # caller is in battle
-            message = {"alert": LS("%s is already in a combat." % target.name)}
+            message = {"alert": _("%s is already in a combat." % target.name)}
             caller.msg(message)
             return
 
@@ -996,8 +994,8 @@ class CmdAttack(Command):
         # set combat team and desc
         chandler.set_combat({1: [target], 2:[self.caller]}, "")
         
-        self.caller.msg(LS("You are attacking {c%s{n! You are in combat.") % target.get_name())
-        target.msg(LS("{c%s{n is attacking you! You are in combat.") % self.caller.get_name())
+        self.caller.msg(_("You are attacking {c%s{n! You are in combat.") % target.get_name())
+        target.msg(_("{c%s{n is attacking you! You are in combat.") % self.caller.get_name())
 
 
 #------------------------------------------------------------
@@ -1028,7 +1026,7 @@ class CmdGiveUpQuest(Command):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":LS("You should give up a quest.")})
+            caller.msg({"alert":_("You should give up a quest.")})
             return
 
         quest_key = self.args
@@ -1040,12 +1038,12 @@ class CmdGiveUpQuest(Command):
             caller.msg({"alert": str(e)})
             return
         except Exception, e:
-            caller.msg({"alert": LS("Can not give up this quest.")})
+            caller.msg({"alert": _("Can not give up this quest.")})
             logger.log_tracemsg("Can not give up quest %s: %s" % (quest_key, e))
             return
 
         # Send lastest status to the player.
-        message = {"alert": LS("Given up!")}
+        message = {"alert": _("Given up!")}
         caller.msg(message)
 
 
@@ -1071,21 +1069,21 @@ class CmdUnlockExit(Command):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":LS("You should unlock something.")})
+            caller.msg({"alert":_("You should unlock something.")})
             return
 
         obj = caller.search(self.args, location=caller)
         if not obj:
-            caller.msg({"alert":LS("Can not find this exit.")})
+            caller.msg({"alert":_("Can not find this exit.")})
             return
 
         try:
             # Unlock the exit.
             if not caller.unlock_exit(obj):
-                caller.msg({"alert":LS("Can not open this exit.") % obj.name})
+                caller.msg({"alert":_("Can not open this exit.") % obj.name})
                 return
         except Exception, e:
-            caller.msg({"alert": LS("Can not open this exit.")})
+            caller.msg({"alert": _("Can not open this exit.")})
             logger.log_tracemsg("Can not open exit %s: %s" % (obj.name, e))
             return
 
@@ -1116,12 +1114,12 @@ class CmdShopping(Command):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":LS("You should shopping in someplace.")})
+            caller.msg({"alert":_("You should shopping in someplace.")})
             return
 
         shop = caller.search(self.args)
         if not shop:
-            caller.msg({"alert":LS("Can not find this shop.")})
+            caller.msg({"alert":_("Can not find this shop.")})
             return
 
         shop.show_shop(caller)
@@ -1148,19 +1146,19 @@ class CmdBuy(Command):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":LS("You should buy something.")})
+            caller.msg({"alert":_("You should buy something.")})
             return
 
         goods = caller.search(self.args)
         if not goods:
-            caller.msg({"alert":LS("Can not find this goods.")})
+            caller.msg({"alert":_("Can not find this goods.")})
             return
 
         # buy goods
         try:
             goods.sell_to(caller)
         except Exception, e:
-            caller.msg({"alert":LS("Can not buy this goods.")})
+            caller.msg({"alert":_("Can not buy this goods.")})
             logger.log_err("Can not buy %s: %s" % (goods.get_data_key(), e))
             return
 

@@ -341,6 +341,10 @@ a:focus {
     display: none;
 }
 
+.hidden {
+    display: none;
+}
+
 #input_bar {
     margin: 2px 0px 0px 0px;
 }

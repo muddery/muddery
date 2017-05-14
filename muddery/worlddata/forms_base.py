@@ -49,18 +49,6 @@ class GameSettingsForm(forms.ModelForm):
         form_template = "common_form.html"
 
 
-class ClientSettingsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ClientSettingsForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-    class Meta:
-        model = DATA_SETS.client_settings.model
-        fields = '__all__'
-        list_template = "common_list.html"
-        form_template = "common_form.html"
-
-
 class ClassCategoriesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ClassCategoriesForm, self).__init__(*args, **kwargs)

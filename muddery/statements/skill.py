@@ -3,7 +3,7 @@ Default skills.
 """
 
 import random, re
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 
 
 from muddery.statements.statement_function import StatementFunction
@@ -123,13 +123,13 @@ class FuncEscape(SkillFunction):
         rand = random.random()
         if rand >= odd:
             # escape failed
-            result = self.result_message(effect=0, message_model=LS("%(c)s tried to escape, but failed."))
+            result = self.result_message(effect=0, message_model=_("%(c)s tried to escape, but failed."))
             self.caller.send_skill_result(result)
             return
 
         # send skill's result to the combat handler manually
         # before the handler is removed from the character
-        result = self.result_message(effect=1, message_model=LS("%(c)s tried to escape. Succeeded!"))
+        result = self.result_message(effect=1, message_model=_("%(c)s tried to escape. Succeeded!"))
         self.caller.send_skill_result(result)
 
         combat_handler.skill_escape(self.caller)

@@ -1,6 +1,5 @@
 category,origin,local
 models,"game_settings","游戏设置"
-models,"client_settings","网页客户端设置"
 models,"class_categories","物体分类"
 models,"typeclasses","类型"
 models,"equipment_types","装备类型"

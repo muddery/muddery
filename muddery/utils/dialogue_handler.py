@@ -36,6 +36,8 @@ class DialogueHandler(object):
         """
         Initialize the handler.
         """
+        self.can_close_dialogue = GAME_SETTINGS.get("can_close_dialogue")
+        self.single_sentence_mode = GAME_SETTINGS.get("single_dialogue_sentence")
         self.dialogue_storage = {}
     
     
@@ -86,7 +88,8 @@ class DialogueHandler(object):
                                       "content": sentence.content,
                                       "action": sentence.action,
                                       "provide_quest": sentence.provide_quest,
-                                      "complete_quest": sentence.complete_quest})
+                                      "complete_quest": sentence.complete_quest,
+                                      "can_close": self.can_close_dialogue})
 
         # sort sentences by ordinal
         data["sentences"].sort(key=lambda x:x["ordinal"])
@@ -137,7 +140,7 @@ class DialogueHandler(object):
         If a sentence will effect the character's status, it should not be
         added to the sentence list.
         """
-        if GAME_SETTINGS.get("single_dialogue_sentence"):
+        if self.single_sentence_mode:
             return False
 
         if len(sentences) != 1:

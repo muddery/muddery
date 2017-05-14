@@ -9,7 +9,7 @@ from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.statements.statement_handler import STATEMENT_HANDLER
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
@@ -49,7 +49,7 @@ class QuestHandler(object):
         new_quest.set_owner(self.owner)
         self.current_quests[quest_key] = new_quest
 
-        self.owner.msg({"msg": LS("Accepted quest {c%s{n.") % new_quest.get_name()})
+        self.owner.msg({"msg": _("Accepted quest {c%s{n.") % new_quest.get_name()})
         self.show_quests()
         self.owner.show_location()
 
@@ -65,10 +65,10 @@ class QuestHandler(object):
         """
         if not GAME_SETTINGS.get("can_give_up_quests"):
             logger.log_tracemsg("Can not give up quests.")
-            raise MudderyError(LS("Can not give up this quest."))
+            raise MudderyError(_("Can not give up this quest."))
 
         if quest_key not in self.current_quests:
-            raise MudderyError(LS("Can not find this quest."))
+            raise MudderyError(_("Can not find this quest."))
 
         del(self.current_quests[quest_key])
 
@@ -105,7 +105,7 @@ class QuestHandler(object):
 
         self.completed_quests.add(quest_key)
 
-        self.owner.msg({"msg": LS("Completed quest {c%s{n.") % name})
+        self.owner.msg({"msg": _("Completed quest {c%s{n.") % name})
         self.show_quests()
         self.owner.show_location()
 
@@ -277,7 +277,7 @@ class QuestHandler(object):
                 status_changed = True
                 if quest.is_accomplished():
                     self.owner.msg({"msg":
-                        LS("Quest {c%s{n's goals are accomplished.") % quest.name})
+                        _("Quest {c%s{n's goals are accomplished.") % quest.name})
 
         if status_changed:
             self.show_quests()

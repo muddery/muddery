@@ -2,7 +2,7 @@
 This model localize other models.
 """
 
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from django.db.models import Model
 from worlddata import models
 
@@ -19,8 +19,8 @@ def localize_model_fields():
 
         # get model fields
         for field in model._meta.fields:
-            field.verbose_name = LS(field.name, "field_" + model.__name__)
-            field.help_text = LS(field.name, "help_" + model.__name__, "")
+            field.verbose_name = _(field.name, "field_" + model.__name__)
+            field.help_text = _(field.name, "help_" + model.__name__, "")
 
 
 def localize_form_field(form, field_name):

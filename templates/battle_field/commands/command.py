@@ -8,7 +8,7 @@ Commands describe the input the player can do to the game.
 from evennia import Command as BaseCommand
 from evennia import default_cmds
 from muddery.commands.general import CmdAttack as CmdAttackDefault
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 
 
 #------------------------------------------------------------
@@ -39,13 +39,13 @@ class CmdAttack(CmdAttackDefault):
             return
 
         if not caller.is_alive():
-            caller.msg({"alert":LS("You are died.")})
+            caller.msg({"alert":_("You are died.")})
             return
 
         if caller.location:
             peaceful = getattr(caller.location.dfield, "peaceful", False)
             if peaceful:
-                caller.msg({"alert":LS("You can not attack in this place.")})
+                caller.msg({"alert":_("You can not attack in this place.")})
                 return
         
         super(CmdAttack, self).func()

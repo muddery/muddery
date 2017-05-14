@@ -9,7 +9,7 @@ from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
 from muddery.utils.builder import build_object, get_object_record
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.data_sets import DATA_SETS
 
 
@@ -97,17 +97,17 @@ class MudderyShopGoods(MudderyObject):
         # check price
         unit_number = caller.get_object_number(self.unit_key)
         if unit_number < self.price:
-            caller.msg({"alert": LS("Sorry, %s is not enough.") % self.unit_name})
+            caller.msg({"alert": _("Sorry, %s is not enough.") % self.unit_name})
             return
 
         # check if can get these objects
         if not caller.can_get_object(self.db.goods.get_data_key(), self.number):
-            caller.msg({"alert": LS("Sorry, you can not take more %s.") % self.db.goods.get_name()})
+            caller.msg({"alert": _("Sorry, you can not take more %s.") % self.db.goods.get_name()})
             return
 
         # Reduce price units.
         if not caller.remove_object(self.unit_key, self.price):
-            caller.msg({"alert": LS("Sorry, %s is not enough.") % self.unit_name})
+            caller.msg({"alert": _("Sorry, %s is not enough.") % self.unit_name})
             return
 
         # Give goods.

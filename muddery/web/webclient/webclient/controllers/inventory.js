@@ -1,5 +1,6 @@
 
 var _ = parent._;
+var parent_controller = parent.controller;
 var text2html = parent.text2html;
 var net_settings = parent.net_settings;
 var commands = parent.commands;

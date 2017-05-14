@@ -295,6 +295,7 @@ function log() {
 }
 
 // Called when page has finished loading (kicks the client into gear)
+/*
 $(document).ready(function() {
     setTimeout( function () {
         // the short timeout supposedly causes the load indicator
@@ -304,3 +305,4 @@ $(document).ready(function() {
         500
     );
 });
+*/

@@ -59,7 +59,7 @@ var webclient = {
         for (var key in data) {
             try {
                 if (key == "settings") {
-                    client_settings.setValues(data[key]);
+                    controller.setClient(data[key]);
                 }
                 else if (key == "msg") {
                 	var msg = text2html.parseHtml(data[key]);
@@ -171,6 +171,9 @@ var webclient = {
                 else if (key == "puppet") {
                     controller.onPuppet(data[key]);
                 }
+                else if (key == "channels") {
+                    controller.setChannels(data[key])
+                }
                 else if (key == "shop") {
                 	var shop = data[key];
                     controller.showShop(shop["name"],
@@ -208,12 +211,20 @@ var webclient = {
 
 // Event when client finishes loading
 $(document).ready(function() {
+
+	controller.onReady();
+
     // Event when client window changes
     $(window).bind("resize", controller.doSetSizes);
+});
+
+$(window).load(function() {
+    // It is called
 
     // This is safe to call, it will always only
     // initialize once.
     Evennia.init();
+
     // register listeners
     Evennia.emitter.on("text", webclient.onText);
     //Evennia.emitter.on("prompt", onPrompt);
@@ -222,8 +233,6 @@ $(document).ready(function() {
     // silence currently unused events
     Evennia.emitter.on("connection_open", controller.onConnectionOpen);
     //Evennia.emitter.on("connection_error", onSilence);
-
-	controller.onInit();
 
     // set an idle timer to send idle every 3 minutes,
     // to avoid proxy servers timing out on us

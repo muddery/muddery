@@ -1,12 +1,12 @@
 
 var _ = parent._;
+var parent_controller = parent.controller;
 var text2html = parent.text2html;
 var net_settings = parent.net_settings;
 var escape = parent.escape;
 var commands = parent.commands;
 
 var controller = {
-
 	_target: null,
 	
 	getTarget: function() {
@@ -15,19 +15,19 @@ var controller = {
 
     // close popup box
     doClosePopupBox: function() {
-        parent.controller.doClosePopupBox();
+        parent_controller.doClosePopupBox();
     },
 
-    setDialogues: function(dialogues, escapes, can_close) {
+    setDialogues: function(dialogues, escapes) {
         this.clearDialogues();
 
         if (dialogues.length == 0) {
             return;
         }
         
-        this._target = dialogues[0].npc;
-        
-    	if (can_close) {
+        this._target = dialogues[0]["npc"];
+
+    	if (dialogues[0]["can_close"]) {
     		$("#close_box").show();
     	}
     	else {

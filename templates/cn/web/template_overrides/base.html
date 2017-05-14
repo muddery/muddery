@@ -69,7 +69,7 @@
         <a href="{% url 'admin:index' %}">管理页面</a> |
         <a href="{% url 'worlddata:index' %}">编辑游戏</a>
         {% if webclient_enabled %}
-         | <a href="{% url 'webclient:index' %}">开始游戏</a>
+         | <a href="/webclient/webclient.html">开始游戏</a>
         {% endif %}
         
       </div>

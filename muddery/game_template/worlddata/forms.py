@@ -8,9 +8,6 @@ from muddery.worlddata import forms_base
 class GameSettingsForm(forms_base.GameSettingsForm):
     pass
 
-class ClientSettingsForm(forms_base.ClientSettingsForm):
-    pass
-
 class ClassCategoriesForm(forms_base.ClassCategoriesForm):
     pass
 

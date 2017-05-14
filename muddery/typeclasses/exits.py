@@ -13,7 +13,7 @@ import traceback
 from muddery.utils import utils
 from muddery.typeclasses.objects import MudderyObject
 from muddery.statements.statement_handler import STATEMENT_HANDLER
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from evennia.utils import logger
 from evennia.objects.objects import DefaultExit
 from django.conf import settings
@@ -55,7 +55,7 @@ class MudderyExit(MudderyObject, DefaultExit):
         self.set_obj_destination(getattr(self.dfield, "destination", None))
 
         # set action verb
-        self.verb = getattr(self.dfield, "verb", LS("GOTO"))
+        self.verb = getattr(self.dfield, "verb", _("GOTO"))
 
     def at_before_traverse(self, traversing_object):
         """
@@ -222,7 +222,7 @@ class MudderyLockedExit(MudderyExit):
             # show unlock command
             verb = self.unlock_verb
             if not verb:
-                verb = LS("Unlock")
+                verb = _("Unlock")
             cmds = [{"name": verb, "cmd": "unlock_exit", "args": self.dbref}]
         
         info = {"dbref": self.dbref,
@@ -247,7 +247,7 @@ class MudderyLockedExit(MudderyExit):
             # show unlock command
             verb = self.unlock_verb
             if not verb:
-                verb = LS("Unlock")
+                verb = _("Unlock")
             cmds = [{"name": verb, "cmd": "unlock", "args": self.dbref}]
 
         return cmds

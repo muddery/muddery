@@ -1,11 +1,11 @@
 
 var _ = parent._;
+var parent_controller = parent.controller;
 
 var controller = {
-
     // close popup box
     doClosePopupBox: function() {
-        parent.controller.doClosePopupBox();
+        parent_controller.doClosePopupBox();
     },
 
 	setGetObjects: function(accepted, rejected) {

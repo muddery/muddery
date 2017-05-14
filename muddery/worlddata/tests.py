@@ -29,9 +29,6 @@ class TestEditor(TestCase):
         response = self.client.get('/worlddata/editor/defines/game_settings/form.html')
         self.failUnlessEqual(response.status_code, 200)
         
-        response = self.client.get('/worlddata/editor/defines/client_settings/form.html')
-        self.failUnlessEqual(response.status_code, 200)
-        
         response = self.client.get('/worlddata/editor/defines/class_categories/form.html')
         self.failUnlessEqual(response.status_code, 200)
         
