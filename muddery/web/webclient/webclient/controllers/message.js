@@ -5,7 +5,15 @@ var text2html = parent.text2html;
 var commands = parent.commands;
 
 var controller = {
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
 
+	// reset view's language
+	resetLanguage: function() {
+	},
+	
     // close popup box
     doClosePopupBox: function() {
         parent_controller.doClosePopupBox();
@@ -61,3 +69,7 @@ var controller = {
         }
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

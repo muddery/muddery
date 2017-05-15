@@ -1,5 +1,5 @@
 
-var net_settings = {
+var settings = {
     // default values
 
 	// websocket's url
@@ -9,4 +9,7 @@ var net_settings = {
 	    
     // resource's url
     resource_url: window.location.protocol + "//" + window.location.host,
+
+    // default language
+    default_language: "zh-cn",
 };

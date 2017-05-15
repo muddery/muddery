@@ -2,12 +2,23 @@
 var _ = parent._;
 var parent_controller = parent.controller;
 var text2html = parent.text2html;
-var net_settings = parent.net_settings;
+var settings = parent.settings;
 var map_data = parent.map_data;
 var commands = parent.commands;
 
 var controller = {
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
 
+	// reset view's language
+	resetLanguage: function() {
+		$("#view_objects").text(_("Objects: "));
+		$("#view_npcs").text(_("NPCs: "));
+		$("#view_players").text(_("Players: "));
+	},
+	
     clearScene: function() {
         ///////////////////////
         // clear scene box
@@ -109,7 +120,7 @@ var controller = {
         // set background
         var backview = $("#box_scene");
         if ("background" in scene && scene["background"]) {
-            var url = net_settings.resource_url + scene["background"];
+            var url = settings.resource_url + scene["background"];
             backview.css("background", "url(" + url + ") no-repeat center center");
         }
         else {
@@ -283,3 +294,7 @@ var controller = {
         commands.doGoto(dbref);
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

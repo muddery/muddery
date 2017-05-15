@@ -2,10 +2,10 @@
 Muddery webclient (javascript component)
 */
 
-var webclient = {
+var client = {
  	onText: function(args, kwargs) {
  	    for (index in args) {
- 		    webclient.doShow("out", args[index]);
+ 		    client.doShow("out", args[index]);
  		}
  	},
  	
@@ -207,10 +207,12 @@ var webclient = {
 
 // Callback function - called when the browser window resizes
 //$(window).unbind("resize");
-//$(window).resize(webclient.doSetSizes);
+//$(window).resize(controller.doSetSizes);
 
 // Event when client finishes loading
 $(document).ready(function() {
+
+    local_string.setLanguage(settings.default_language);
 
 	controller.onReady();
 
@@ -226,7 +228,7 @@ $(window).load(function() {
     Evennia.init();
 
     // register listeners
-    Evennia.emitter.on("text", webclient.onText);
+    Evennia.emitter.on("text", client.onText);
     //Evennia.emitter.on("prompt", onPrompt);
     //Evennia.emitter.on("default", onDefault);
     Evennia.emitter.on("connection_close", controller.onConnectionClose);

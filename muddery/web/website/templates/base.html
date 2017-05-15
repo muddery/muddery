@@ -67,11 +67,8 @@
         <a href="/">Home</a> |
         <a href="http://cn.muddery.org/">About Us</a> |
         <a href="{% url 'admin:index' %}">Administer</a> |
-        <a href="{% url 'worlddata:index' %}">Edit Game</a>
-        {% if webclient_enabled %}
-         | <a href="/webclient/webclient.html">Play Online</a>
-        {% endif %}
-        
+        <a href="{% url 'worlddata:index' %}">Edit Game</a> |
+        <a href="/webclient/main.html">Play Online</a>
       </div>
     </div>
 

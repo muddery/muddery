@@ -2,12 +2,21 @@
 var _ = parent._;
 var parent_controller = parent.controller;
 var text2html = parent.text2html;
-var net_settings = parent.net_settings;
+var settings = parent.settings;
 var commands = parent.commands;
 
 var controller = {
 	
 	_dbref: null,
+
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
+
+	// reset view's language
+	resetLanguage: function() {
+	},
 	
 	getObject: function() {
 		return this._dbref;
@@ -27,7 +36,7 @@ var controller = {
 
 		// add icon
 		if (icon) {
-			var url = net_settings.resource_url + icon;
+			var url = settings.resource_url + icon;
 			$("#img_icon").attr("src", url);
 			$("#div_icon").show();
         }
@@ -82,3 +91,7 @@ var controller = {
         }
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

@@ -4,7 +4,24 @@ var parent_controller = parent.controller;
 var commands = parent.commands;
 
 var controller = {
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
 
+	// reset view's language
+	resetLanguage: function() {
+		$("#view_level").text(_("LEVEL: "));
+		$("#view_exp").text(_("EXP: "));
+		$("#view_hp").text(_("HP: "));
+		$("#view_attack").text(_("ATTACK: "));
+		$("#view_defence").text(_("DEFENCE: "));
+		$("#view_head").text(_("HEAD: "));
+		$("#view_hand").text(_("HAND: "));
+		$("#view_chest").text(_("CHEST: "));
+		$("#view_leg").text(_("LEG: "));
+	},
+	
     // Set player's basic information
     setInfo: function(name, icon) {
         $("#name").text(name);
@@ -49,3 +66,7 @@ var controller = {
         commands.doLook(dbref);
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

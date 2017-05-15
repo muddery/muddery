@@ -4,6 +4,21 @@ var parent_controller = parent.controller;
 var commands = parent.commands;
 
 var controller = {
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
+
+	// reset view's language
+	resetLanguage: function() {
+		$("#view_name").text(_("Name"));
+		$("#reg_name").attr("placeholder", _("username"));
+		$("#reg_nickname").attr("placeholder", _("nickname"));
+		$("#view_password").text(_("Password"));
+		$("#reg_password").attr("placeholder", _("password"));
+		$("#reg_password_again").attr("placeholder", _("password again"));
+		$("#view_register").text(_("Register"));
+	},
 
     // register
     doRegister: function() {
@@ -25,3 +40,7 @@ var controller = {
         $("#reg_password_again").val("");
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

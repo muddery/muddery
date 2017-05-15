@@ -213,8 +213,8 @@ An "emitter" object must have a function
         var open = false;
         var ever_open = false;
         var websocket = null;
-        var wsurl = net_settings.wsurl;
-        var csessid = net_settings.csessid;
+        var wsurl = settings.wsurl;
+        var csessid = settings.csessid;
 
         var connect = function() {
             if (websocket && websocket.readyState != websocket.CLOSED) {

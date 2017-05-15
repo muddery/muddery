@@ -2,12 +2,21 @@
 var _ = parent._;
 var parent_controller = parent.controller;
 var text2html = parent.text2html;
-var net_settings = parent.net_settings;
+var settings = parent.settings;
 var escape = parent.escape;
 var commands = parent.commands;
 
 var controller = {
 	_target: null,
+
+	// on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
+
+	// reset view's language
+	resetLanguage: function() {
+	},
 	
 	getTarget: function() {
 		return this._target;
@@ -44,7 +53,7 @@ var controller = {
 
         // add icon
         if (dialogues[0]["icon"]) {
-            $("#img_icon").attr("src", net_settings.resource_url + dialogues[0]["icon"]);
+            $("#img_icon").attr("src", settings.resource_url + dialogues[0]["icon"]);
             $("#div_icon").show();
         }
         else {
@@ -125,3 +134,7 @@ var controller = {
         commands.doDialogue(dialogue, sentence, npc);
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});
