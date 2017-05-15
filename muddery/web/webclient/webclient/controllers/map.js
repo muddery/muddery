@@ -2,7 +2,7 @@
 var _ = parent._;
 var parent_controller = parent.controller;
 var text2html = parent.text2html;
-var net_settings = parent.net_settings;
+var settings = parent.settings;
 var map_data = parent.map_data;
 var util = parent.util;
 var commands = parent.commands;
@@ -14,6 +14,15 @@ var controller = {
 
     // the size of a room
     _room_size: 40,
+
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
+
+	// reset view's language
+	resetLanguage: function() {
+	},
 
     // settings
     setMap: function(scale, room_size) {
@@ -160,7 +169,7 @@ var controller = {
 						}
 							
                         room_data.push({"name": util.truncate_string(room["name"], 10, true),
-                                        "icon": room["icon"],
+                                        "icon": settings.resource_url + room["icon"],
                                         "area": room["area"],
                                         "pos": room["pos"]});
                         if (key == location.key) {
@@ -247,3 +256,7 @@ var controller = {
         }
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

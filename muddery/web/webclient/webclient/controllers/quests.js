@@ -5,7 +5,18 @@ var text2html = parent.text2html;
 var commands = parent.commands;
 
 var controller = {
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
 
+	// reset view's language
+	resetLanguage: function() {
+		$("#view_name").text(_("NAME"));
+		$("#view_desc").text(_("DESC"));
+		$("#view_objective").text(_("OBJECTIVE"));
+	},
+	
     // Set player's quests
     setQuests: function(quests) {
         this.clearItems();
@@ -58,3 +69,7 @@ var controller = {
         commands.doLook(dbref);
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

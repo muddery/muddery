@@ -5,12 +5,12 @@
         <meta charset="utf-8" />
 
         <!--CSS style sheet -->
-        <link rel="stylesheet" href="/static/public/css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/scene.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/scene.css" />
 
-        <script src="/static/public/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="/webclient/controllers/scene.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/scene.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div id="box_scene">
@@ -26,17 +26,20 @@
                 </span>
             </div>
             <div><br></div>
-            <div id="things">物体：
+            <div id="things">
+            	<span id="view_objects">Objects: </span>
                 <span id="things_container">
 					<a class="scene_object template" href="#" onclick="controller.doLook(this)"></a>
                 </span>
             </div>
-            <div id="npcs">人物：
+            <div id="npcs">
+            	<span id="view_npcs">NPCs: </span>
                 <span id="npcs_container">
 					<a class="scene_object template" href="#" onclick="controller.doLook(this)"></a>
                 </span>
             </div>
-            <div id="players">玩家：
+            <div id="players">
+            	<span id="view_players">Players: </span>
                 <span id="players_container">
 					<a class="scene_object template" href="#" onclick="controller.doLook(this)"></a>
                 </span>

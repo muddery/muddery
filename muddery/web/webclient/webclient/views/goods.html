@@ -5,12 +5,12 @@
         <meta charset="utf-8" />
 
         <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/public/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/goods.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/goods.css" />
 
-        <script src="/webclient/js/public/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="/webclient/controllers/goods.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/goods.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div class="modal-header">
@@ -32,7 +32,7 @@
             <p id="desc"></p>
         </div>
         <div id="popup_footer" class="modal-footer">
-            <button type="button" class="btn btn-default" onclick="controller.buyGoods(this)">购买</button>
+            <button id="view_button_buy" type="button" class="btn btn-default" onclick="controller.buyGoods(this)">Buy</button>
         </div>
     </body>
 </html>

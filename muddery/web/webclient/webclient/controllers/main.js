@@ -475,6 +475,7 @@ var controller = {
 	//////////////////////////////////////////
 	
 	onReady: function() {
+	    this.resetLanguage();
 		this.showUnlogin();
     	this.showContent("login");
     	this.doSetSizes();
@@ -749,13 +750,7 @@ var controller = {
 
     setClient: function(settings) {
         // language
-        var code = settings["language"];
-        if (code in language_dict) {
-            LOCAL_STRING = language_dict[code];
-        }
-        else {
-            LOCAL_STRING = {};
-        }
+        this.setLanguage(settings["language"]);
 
 		// game's name
         $("#game_title").text(settings["game_name"]);
@@ -777,6 +772,49 @@ var controller = {
         map_ctrl.setMap(settings["map_scale"], settings["map_room_size"]);
     },
 
+	setLanguage: function(language) {
+	    if (!local_string.setLanguage(language)) {
+        	return;
+        }
+        
+        this.resetLanguage();
+		this.getFrameController("#frame_combat_result").resetLanguage();
+		this.getFrameController("#frame_combat").resetLanguage();
+		this.getFrameController("#frame_dialogue").resetLanguage();
+		this.getFrameController("#frame_get_objects").resetLanguage();
+		this.getFrameController("#frame_goods").resetLanguage();
+		this.getFrameController("#frame_information").resetLanguage();
+		this.getFrameController("#frame_inventory").resetLanguage();
+		this.getFrameController("#frame_login").resetLanguage();
+		this.getFrameController("#frame_map").resetLanguage();
+		this.getFrameController("#frame_message").resetLanguage();
+		this.getFrameController("#frame_object").resetLanguage();
+		this.getFrameController("#frame_quests").resetLanguage();
+		this.getFrameController("#frame_register").resetLanguage();
+		this.getFrameController("#frame_scene").resetLanguage();
+		this.getFrameController("#frame_shop").resetLanguage();
+	},
+	
+	resetLanguage: function() {
+		$("#view_level").text(_("LEVEL: "));
+		$("#view_exp").text(_("EXP: "));
+		$("#view_hp").text(_("HP: "));
+		$("#view_connect").text(_("Connect"));
+		$("#view_login").text(_("Login"));
+		$("#view_register").text(_("Register"));
+		$("#view_scene").text(_("Scene"));
+		$("#view_char").text(_("Char"));
+		$("#view_status").text(_("Status"));
+		$("#view_inventory").text(_("Inventory"));
+		$("#view_skills").text(_("Skills"));
+		$("#view_quests").text(_("Quests"));
+		$("#view_social").text(_("Social"));
+		$("#view_map").text(_("Map"));
+		$("#view_system").text(_("Sys"));
+		$("#view_logout").text(_("Logout"));
+		$("#msg_send").text(_("Send"));
+	},
+	
     clearChannels: function() {
         $("#msg_type_menu>:not(.template)").remove();
         $("#msg_select").empty();

@@ -3,6 +3,19 @@ var _ = parent._;
 var parent_controller = parent.controller;
 
 var controller = {
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
+
+	// reset view's language
+	resetLanguage: function() {
+		$("#popup_header").text(_("Get Objects"));
+		$("#view_get_objects").text(_("Get Objects: "));
+		$("#view_rejected").text(_("Can Not Get: "));
+		$("#view_button_ok").text(_("OK"));
+	},
+	
     // close popup box
     doClosePopupBox: function() {
         parent_controller.doClosePopupBox();
@@ -44,3 +57,7 @@ var controller = {
 		}
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

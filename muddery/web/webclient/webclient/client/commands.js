@@ -44,7 +44,7 @@ var commands = {
         }
 
         if (password != password_again) {
-            controller.displayAlert(_("Password does not match."));
+            controller.showAlert(_("Password does not match."));
             return;
         }
 

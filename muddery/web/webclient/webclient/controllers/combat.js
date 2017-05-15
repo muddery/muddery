@@ -2,7 +2,7 @@
 var _ = parent._;
 var parent_controller = parent.controller;
 var text2html = parent.text2html;
-var net_settings = parent.net_settings;
+var settings = parent.settings;
 var commands = parent.commands;
 
 var controller = {
@@ -10,6 +10,15 @@ var controller = {
 	_target: "",
 	_combat_finished: true,
 	_skill_cd_time: {},
+
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
+
+	// reset view's language
+	resetLanguage: function() {
+	},
 
     // close popup box
     doClosePopupBox: function() {
@@ -69,7 +78,7 @@ var controller = {
            	item.find(".status").text(character["hp"] + "/" + character["max_hp"]);
            	
            	if (character["icon"]) {
-           		item.find(".img_icon").attr("src", net_settings.resource_url + character["icon"]);
+           		item.find(".img_icon").attr("src", settings.resource_url + character["icon"]);
            		item.find(".div_icon").show();
            	}
            	else {
@@ -114,7 +123,7 @@ var controller = {
                     .css({"left": 20 + i * 80});
                     
                 if (command["icon"]) {
-                    item.find(".command_icon").attr("src", net_settings.resource_url + command["icon"]);
+                    item.find(".command_icon").attr("src", settings.resource_url + command["icon"]);
                 }
 
                 var name = text2html.parseHtml(command["name"]);
@@ -257,3 +266,7 @@ var controller = {
         return this._combat_finished;
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

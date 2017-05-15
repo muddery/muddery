@@ -2,12 +2,24 @@
 var _ = parent._;
 var parent_controller = parent.controller;
 var text2html = parent.text2html;
-var net_settings = parent.net_settings;
+var settings = parent.settings;
 
 var controller = {
 
 	_goods: [],
 
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
+
+	// reset view's language
+	resetLanguage: function() {
+		$("#header_name").text(_("NAME"));
+		$("#header_price").text(_("PRICE"));
+		$("#header_desc").text(_("DESC"));
+	},
+	
     // close popup box
     doClosePopupBox: function() {
         parent_controller.doClosePopupBox();
@@ -22,7 +34,7 @@ var controller = {
 
 		// add icon
 		if (icon) {
-			var url = net_settings.resource_url + icon;
+			var url = settings.resource_url + icon;
 			$("#img_icon").attr("src", url);
 			$("#shop_icon").show();
         }
@@ -49,7 +61,7 @@ var controller = {
                 	.removeClass("template");
 
                 if (obj["icon"]) {
-            	    item.find(".img_icon").attr("src", net_settings.resource_url + obj["icon"]);
+            	    item.find(".img_icon").attr("src", settings.resource_url + obj["icon"]);
             	    item.find(".obj_icon").show();
                 }
                 else {
@@ -102,3 +114,7 @@ var controller = {
         }
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

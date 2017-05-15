@@ -2,11 +2,22 @@
 var _ = parent._;
 var parent_controller = parent.controller;
 var text2html = parent.text2html;
-var net_settings = parent.net_settings;
+var settings = parent.settings;
 var commands = parent.commands;
 
 var controller = {
+    // on document ready
+    onReady: function() {
+        this.resetLanguage();
+    },
 
+	// reset view's language
+	resetLanguage: function() {
+		$("#view_name").text(_("NAME"));
+		$("#view_number").text(_("NUM"));
+		$("#view_desc").text(_("DESC"));
+	},
+	
     // Set player's inventory
     setInventory: function(inventory) {
         this.clearItems();
@@ -23,7 +34,7 @@ var controller = {
             	.text(obj["name"]);
             
             if (obj["icon"]) {
-            	item.find(".img_icon").attr("src", net_settings.resource_url + obj["icon"]);
+            	item.find(".img_icon").attr("src", settings.resource_url + obj["icon"]);
             	item.find(".obj_icon").show();
             }
             else {
@@ -53,3 +64,7 @@ var controller = {
         commands.doLook(dbref);
     },
 };
+
+$(document).ready(function() {
+	controller.onReady();
+});

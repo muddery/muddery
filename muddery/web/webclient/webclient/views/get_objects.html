@@ -5,21 +5,21 @@
         <meta charset="utf-8" />
 
         <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/public/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="/webclient/css/get_objects.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/get_objects.css" />
 
-        <script src="/webclient/js/public/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="/webclient/controllers/get_objects.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/get_objects.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div class="modal-header">
             <button type="button" onclick="controller.doClosePopupBox()" class="close">×</button>
-            <h4 id="popup_header" class="modal-title">获取物品</h4>
+            <h4 id="popup_header" class="modal-title">Get Objects</h4>
         </div>
         <div class="modal-body">
             <div id="accepted">
-            	<div>你获得：</div>
+            	<div id="view_get_objects">Get Objects: </div>
             	<div id="accepted_list">
 	                <p class="template">
 	                	<span class="name"></span>: <span class="info"></span>
@@ -27,7 +27,7 @@
 	            </div>
             </div>
             <div id="rejected">
-            	<div>未获得：</div>
+            	<div id="view_rejected">Can Not Get: </div>
             	<div id="rejected_list">
 	                <p class="template">
 		                <span class="name"></span>: <span class="info"></span>
@@ -37,7 +37,7 @@
         </div>
         <div id="popup_footer" class="modal-footer">
             <center id="button_content">
-                <button type="button" class="btn btn-default" onclick="controller.doClosePopupBox()">确定</button>
+                <button id="view_button_ok" type="button" class="btn btn-default" onclick="controller.doClosePopupBox()">OK</button>
             </center>
         </div>
     </body>
