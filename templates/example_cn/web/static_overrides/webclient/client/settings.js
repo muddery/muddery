@@ -11,5 +11,5 @@ var settings = {
     resource_url: window.location.protocol + "//" + window.location.host,
 
     // default language
-    default_language: "en-us",
+    default_language: "zh-cn",
 };

@@ -15,11 +15,11 @@ class Upgrader(BaseUpgrader):
     Upgrade a game dir to a specified version.
     """
     # Can upgrade the game of version between from_version and to_version.
-    # from version 0.2.0
-    from_version = (0, 2, 0)
+    # from min version 0.2.0 (include this version)
+    from_min_version = (0, 2, 0)
 
-    # to version 0.2.1
-    to_version = (0, 2, 1)
+    # from max version 0.2.2 (not include this version)
+    from_max_version = (0, 2, 2)
 
     target_version = None
     
@@ -31,7 +31,7 @@ class Upgrader(BaseUpgrader):
             game_dir: (string) the game dir to be upgraded.
             game_template: (string) the game template used to upgrade the game dir.
         """
-        print("Upgrading game %s." % game_dir)
+        print("Upgrading game 0.2.0-0.2.2 %s." % game_dir)
 
         os.chdir(game_dir)
         init_game_directory(game_dir, check_db=False)
