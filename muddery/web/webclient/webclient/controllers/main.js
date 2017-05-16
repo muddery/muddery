@@ -818,6 +818,7 @@ var controller = {
     clearChannels: function() {
         $("#msg_type_menu>:not(.template)").remove();
         $("#msg_select").empty();
+        $("#input_bar").css("visibility", "hidden");
     },
 
     setChannels: function(channels) {
@@ -850,6 +851,14 @@ var controller = {
     			
     			first = false;
     		}
+    	}
+    	
+    	if (first) {
+    		// no channel
+    		$("#input_bar").css("visibility", "hidden");
+    	}
+    	else {
+    		$("#input_bar").css("visibility", "visible");
     	}
     },
     
