@@ -3,6 +3,7 @@ CommonObject is the object that players can put into their inventory.
 
 """
 
+from muddery.utils.localiztion_handler import _
 from muddery.typeclasses.common_objects import MudderyFood, MudderyEquipment
 
 

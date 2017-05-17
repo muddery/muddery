@@ -43,20 +43,20 @@ class Upgrader(BaseUpgrader):
         
         # add world_area to models
         utils.file_append(file_path, ["\n",
-        							  "class world_areas(model_base.world_areas):\n",
-        							  "    pass\n",
-        							  "\n"])
-        							  
+                                      "class world_areas(model_base.world_areas):\n",
+                                      "    pass\n",
+                                      "\n"])
+                                      
         # comment out ClientSettingsForm in forms
         file_path = os.path.join(game_dir, "worlddata", "forms.py")
         utils.comment_out_class(file_path, "ClientSettingsForm")
         
         # add world_area to forms
         utils.file_append(file_path, ["\n",
-        							  "class WorldAreasForm(forms_base.WorldAreasForm):\n",
-        							  "    pass\n",
-        							  "\n"])
-        							  
+                                      "class WorldAreasForm(forms_base.WorldAreasForm):\n",
+                                      "    pass\n",
+                                      "\n"])
+                                      
         # comment out ClientSettingsAdmin in admin
         file_path = os.path.join(game_dir, "worlddata", "admin.py")
         utils.comment_out_class(file_path, "ClientSettingsAdmin")
@@ -84,12 +84,13 @@ class Upgrader(BaseUpgrader):
         django_kwargs = {}
         django.core.management.call_command(*django_args, **django_kwargs)
 
-    def upgrade_data(self, data_path, game_template):
+    def upgrade_data(self, data_path, game_template, muddery_lib):
         """
         Upgrade game data.
 
         Args:
             data_path: (string) the data path to be upgraded.
             game_template: (string) the game template used to upgrade the game dir.
+            muddery_lib: (string) muddery's dir
         """
         pass
