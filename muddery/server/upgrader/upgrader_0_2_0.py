@@ -70,7 +70,12 @@ class Upgrader(BaseUpgrader):
         
         if game_template:
             game_template_dir = os.path.join(muddery_launcher.MUDDERY_TEMPLATE, game_template)
+
+            # update web folder
             utils.copy_path(game_template_dir, game_dir, "web")
+
+            # update typeclasses
+            utils.copy_path(game_template_dir, game_dir, "typeclasses")
 
         os.chdir(game_dir)
         init_game_directory(game_dir, check_db=False)
