@@ -107,13 +107,14 @@ class Upgrader(BaseUpgrader):
                 # remove temp dir
                 shutil.rmtree(temp_dir)
 
-    def upgrade_data(self, data_path, game_template):
+    def upgrade_data(self, data_path, game_template, muddery_lib):
         """
         Upgrade game data.
 
         Args:
             data_path: (string) the data path to be upgraded.
             game_template: (string) the game template used to upgrade the game dir.
+            muddery_lib: (string) muddery's dir
         """
         print("Upgrading game data 0.0.0-0.2.0 %s." % data_path)
 

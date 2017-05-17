@@ -20,13 +20,14 @@ class BaseUpgrader(object):
     # Upgrade to the target version. None means the latest version.
     target_version = None
     
-    def upgrade_game(self, game_dir, game_template):
+    def upgrade_game(self, game_dir, game_template, muddery_lib):
         """
         Upgrade a game.
 
         Args:
             game_dir: (string) the game dir to be upgraded.
             game_template: (string) the game template used to upgrade the game dir.
+            muddery_lib: (string) muddery's dir
         """
         pass
 
