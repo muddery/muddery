@@ -1,0 +1,28 @@
+
+#tab_quests {
+    border-collapse: collapse;
+    border-color: #aaa;
+    border-style: solid;
+    border-width: 1px;
+    margin: 8px;
+}
+
+#tab_quests th {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+    font-weight: normal;
+}
+
+#tab_quests td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+}
+
+.img_icon {
+	width: 30px;
+	height: 30px;
+}

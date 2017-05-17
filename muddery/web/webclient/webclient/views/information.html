@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/information.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/information.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="box_infomation">
+            <table id="info_table" style="width: 100%;">
+                <tbody>
+                    <tr>
+                        <td>
+                            <div id="box_status">
+                                <div>
+                                    <div>
+                                        <img id="obj_icon" src="" />
+                                        <span id="name"></span>
+                                    </div>
+                                    <div><span id="view_level">LEVEL: </span><span id="level"></span></div>
+                                    <div><span id="view_exp">EXP: </span><span id="exp"></span></div>
+                                    <div><span id="view_hp">HP: </span><span id="hp"></span></div>
+                                    <div><span id="view_attack">ATTACK: </span><span id="attack"></span></div>
+                                    <div><span id="view_defence">DEFENCE: </span><span id="defence"></span></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="box_equipment">
+                                <div>
+                                	<span id="view_head">HEAD: </span>
+                                    <a id="POSITION_HEAD" href="#" onclick="controller.doLook(this)"></a>
+                                </div>
+                                <div>
+                                	<span id="view_hand">HAND: </span>
+                                    <a id="POSITION_HAND" href="#" onclick="controller.doLook(this)"></a>
+                                </div>
+                                <div>
+                                	<span id="view_chest">CHEST: </span>
+                                    <a id="POSITION_CHEST" href="#" onclick="controller.doLook(this)"></a>
+                                </div>
+                                <div>
+                                	<span id="view_leg">LEG: </span>
+                                    <a id="POSITION_LEG" href="#" onclick="controller.doLook(this)"></a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

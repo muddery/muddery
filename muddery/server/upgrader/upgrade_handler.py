@@ -49,7 +49,7 @@ class UpgradeHandler(object):
             utils.make_backup(game_dir)
 
             # do upgrade
-            upgrader.upgrade_game(game_dir, game_template)
+            upgrader.upgrade_game(game_dir, game_template, muddery_lib)
             print("\nYour game has been upgraded to muddery version %s.\n" % muddery.__version__)
 
             # copy version file

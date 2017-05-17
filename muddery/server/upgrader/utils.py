@@ -176,3 +176,75 @@ def get_settings(game_dir, setting_list):
                 if key in setting_list:
                     setting_dict[key] = contents[1].strip()
     return setting_dict
+
+
+def comment_out_class(file_path, class_name):
+    """
+    Comment out specified class in the file.
+
+    Args:
+        file_path: (string) file's path
+        class_name: (string) the name of the class to comment out
+
+    Returns:
+        None
+    """
+    lines = []
+    with open(file_path, "r") as f:
+        lines = f.readlines()
+
+    first_line = True
+    comment_out = False
+    for i, line in enumerate(lines):
+        if line[:5] == "class" and class_name in line:
+            comment_out = True
+
+        if comment_out:
+            if len(line.strip()) > 0:
+                lines[i] = "# " + line
+
+            if not first_line and line[0] != " ":
+                break
+
+            first_line = False
+
+    with open(file_path, "w+") as f:
+        f.writelines(lines)
+
+
+def comment_out_lines(file_path, comment_lines):
+    """
+    Comment out specified class in the file.
+
+    Args:
+        file_path: (string) file's path
+        comment_lines: (set) lines to append
+
+    Returns:
+        None
+    """
+    lines = []
+    with open(file_path, "r") as f:
+        lines = f.readlines()
+
+    for i, line in enumerate(lines):
+        if line.strip() in comment_lines:
+            lines[i] = "# " + line
+
+    with open(file_path, "w+") as f:
+        f.writelines(lines)
+
+
+def file_append(file_path, lines):
+    """
+    Append lines to the file.
+
+    Args:
+        file_path: (string) file's path
+        lines: (list) lines to append
+
+    Returns:
+        None
+    """
+    with open(file_path, "a") as f:
+        f.writelines(lines)

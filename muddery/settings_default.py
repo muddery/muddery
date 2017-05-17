@@ -15,7 +15,7 @@ always be sure of what you have changed and what is default behaviour.
 
 import os
 from evennia.settings_default import EVENNIA_DIR, GAME_DIR
-from evennia.settings_default import WEBSITE_TEMPLATE, WEBCLIENT_TEMPLATE
+from evennia.settings_default import WEBSITE_TEMPLATE
 from evennia.settings_default import INSTALLED_APPS
 
 
@@ -187,13 +187,17 @@ ROOT_URLCONF = 'web.urls'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(GAME_DIR, "web", "static")
 
+# URL that handles the webclient.
+WEBCLIENT_ROOT = os.path.join(GAME_DIR, "web", "static", "webclient")
+
 # Directories from which static files will be gathered from.
 STATICFILES_DIRS = (
     os.path.join(GAME_DIR, "worlddata", "editor", "static"),
     os.path.join(MUDDERY_DIR, "worlddata", "editor", "static"),
     os.path.join(GAME_DIR, "web", "static_overrides"),
     os.path.join(MUDDERY_DIR, "web", "website", "static"),
-    os.path.join(MUDDERY_DIR, "web", "webclient", "static"),)
+    os.path.join(GAME_DIR, "web", "webclient_overrides"),
+    os.path.join(MUDDERY_DIR, "web", "webclient"),)
 
 # We setup the location of the website template as well as the admin site.
 TEMPLATES = [{
@@ -202,12 +206,9 @@ TEMPLATES = [{
             os.path.join(GAME_DIR, "worlddata", "editor", "templates"),
             os.path.join(MUDDERY_DIR, "worlddata", "editor", "templates"),
             os.path.join(GAME_DIR, "web", "template_overrides", WEBSITE_TEMPLATE),
-            os.path.join(GAME_DIR, "web", "template_overrides", WEBCLIENT_TEMPLATE),
             os.path.join(GAME_DIR, "web", "template_overrides"),
             os.path.join(MUDDERY_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
             os.path.join(MUDDERY_DIR, "web", "website", "templates"),
-            os.path.join(MUDDERY_DIR, "web", "webclient", "templates", WEBCLIENT_TEMPLATE),
-            os.path.join(MUDDERY_DIR, "web", "webclient", "templates"),
             os.path.join(EVENNIA_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
             os.path.join(EVENNIA_DIR, "web", "website", "templates")],
         'APP_DIRS': True,
@@ -324,8 +325,11 @@ REVERSE_EXIT_TYPECLASS_PATH = "muddery.typeclasses.exits.MudderyReverseExit"
 # Reverse exit's key's prefix.
 REVERSE_EXIT_PREFIX = "__reverse__"
 
-# Characters who have equal or higher permission can bypass events.
-PERMISSION_BYPASS_EVENTS = {"Builders", "Wizards", "Immortals"}
+# Characters who have these permission can bypass events.
+PERMISSION_BYPASS_EVENTS = {"builders", "wizards", "immortals"}
+
+# Characters who have these permission can use text commands.
+PERMISSION_COMMANDS = {"playerhelpers", "builders", "wizards", "immortals"}
 
 # Localized string data's folder
 LOCALIZED_STRINGS_FOLDER = "languages"

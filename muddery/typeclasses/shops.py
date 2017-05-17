@@ -81,11 +81,8 @@ class MudderyShop(MudderyObject):
         """
         info = {"dbref": self.dbref,
                 "name": self.get_name(),
-                "desc": self.db.desc}
-
-        icon = getattr(self, "icon", None)
-        if icon:
-            info["icon"] = icon
+                "desc": self.db.desc,
+                "icon": getattr(self, "icon", None)}
 
         goods_list = self.return_shop_goods()
         info["goods"] = goods_list
@@ -108,10 +105,8 @@ class MudderyShop(MudderyObject):
                      "desc": item.desc,
                      "number": item.number,
                      "price": item.price,
-                     "unit": item.unit_name}
-
-            if item.icon:
-                goods["icon"] = item.icon
+                     "unit": item.unit_name,
+                     "icon": item.icon}
             
             goods_list.append(goods)
 

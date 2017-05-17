@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/get_objects.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/get_objects.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div class="modal-header">
+            <button type="button" onclick="controller.doClosePopupBox()" class="close">×</button>
+            <h4 id="popup_header" class="modal-title">Get Objects</h4>
+        </div>
+        <div class="modal-body">
+            <div id="accepted">
+            	<div id="view_get_objects">Get Objects: </div>
+            	<div id="accepted_list">
+	                <p class="template">
+	                	<span class="name"></span>: <span class="info"></span>
+	                </p>
+	            </div>
+            </div>
+            <div id="rejected">
+            	<div id="view_rejected">Can Not Get: </div>
+            	<div id="rejected_list">
+	                <p class="template">
+		                <span class="name"></span>: <span class="info"></span>
+	                </p>
+	            </div>
+            </div>
+        </div>
+        <div id="popup_footer" class="modal-footer">
+            <center id="button_content">
+                <button id="view_button_ok" type="button" class="btn btn-default" onclick="controller.doClosePopupBox()">OK</button>
+            </center>
+        </div>
+    </body>
+</html>

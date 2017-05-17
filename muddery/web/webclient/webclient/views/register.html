@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/register.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="box_register">
+        <table>
+            <tbody>
+                <tr>
+                    <td id="view_name">Name</td>
+                </tr>
+                <tr>
+                    <td>
+                        <input id="reg_name" type="text" placeholder="username" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
+                    </td>
+                    <td>
+                        <input id="reg_nickname" type="text" placeholder="nickname" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
+                    </td>
+                </tr>
+                <tr>
+                    <td id="view_password">Password</td>
+                </tr>
+                <tr>
+                    <td>
+                        <input id="reg_password" type="password" placeholder="password" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
+                    </td>
+                    <td>
+                        <input id="reg_password_again" type="password" placeholder="password again" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><br></td>
+                </tr>
+                <tr>
+                    <td>
+                        <button id="view_register" type="button" onclick="controller.doRegister()" class="btn btn-default">Register</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>

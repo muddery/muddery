@@ -10,7 +10,7 @@ from evennia.utils import logger
 from evennia import TICKER_HANDLER
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.utils.builder import delete_object
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 
 class MudderyMonster(MudderyCharacter):
@@ -34,7 +34,7 @@ class MudderyMonster(MudderyCharacter):
         """
         commands = []
         if self.is_alive():
-            commands.append({"name": LS("Attack"), "cmd": "attack", "args": self.dbref})
+            commands.append({"name": _("Attack"), "cmd": "attack", "args": self.dbref})
         return commands
 
     def at_combat_start(self):
@@ -76,14 +76,14 @@ class MudderyMonster(MudderyCharacter):
         # stop auto cast
         self.skill_handler.stop_auto_combat_skill()
 
-    def at_leave_combat(self):
+    def at_leave_combat_mode(self):
         """
         Called when the character leaves a combat.
 
         Returns:
             None
         """
-        super(MudderyMonster, self).at_leave_combat()
+        super(MudderyMonster, self).at_leave_combat_mode()
 
         if self.is_alive():
             # Recover all hp.

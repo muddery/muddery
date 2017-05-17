@@ -10,14 +10,12 @@ creation commands.
 
 from __future__ import print_function
 
-import random
 from django.conf import settings
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils.localized_strings_handler import LS
 from muddery.utils import utils
 from muddery.utils.builder import build_object
 from muddery.utils.skill_handler import SkillHandler
@@ -529,7 +527,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     # Combat methods.
     #
     ########################################
-    def at_enter_combat(self, combat_handler):
+    def at_enter_combat_mode(self, combat_handler):
         """
         Called when the character enters a combat.
 
@@ -573,7 +571,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         if exp:
             # give experience to the winner
-            self.add_exp(exp)
+            self.add_exp(exp, combat=True)
 
     def at_combat_lose(self, winners, losers):
         """
@@ -598,7 +596,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         pass
 
-    def at_leave_combat(self):
+    def at_leave_combat_mode(self):
         """
         Called when the character leaves a combat.
 
@@ -679,11 +677,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                 continue
 
             command = {"name": skill.name,
-                       "key": skill.get_data_key()}
-
-            icon = getattr(skill, "icon", None)
-            if icon:
-                command["icon"] = icon
+                       "key": skill.get_data_key(),
+                       "icon": getattr(skill, "icon", None)}
 
             commands.append(command)
 
@@ -703,7 +698,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         return 0
 
-    def add_exp(self, exp):
+    def add_exp(self, exp, combat=False):
         """
         Add character's exp.
         Args:
