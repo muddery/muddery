@@ -26,13 +26,14 @@ class Upgrader(BaseUpgrader):
 
     target_version = None
     
-    def upgrade_game(self, game_dir, game_template):
+    def upgrade_game(self, game_dir, game_template, muddery_lib):
         """
         Upgrade a game.
 
         Args:
             game_dir: (string) the game dir to be upgraded.
             game_template: (string) the game template used to upgrade the game dir.
+            muddery_lib: (string) muddery's dir
         """
         print("Upgrading game 0.0.0-0.2.0 %s." % game_dir)
 
@@ -52,16 +53,14 @@ class Upgrader(BaseUpgrader):
 
             # create new game
             utils.create_game(game_dir, game_template, setting_dict)
-                    
+
             # copy old files
             # database
             utils.copy_path(temp_dir, game_dir, os.path.join("server", "muddery.db3"))
 
             # migrations
+            shutil.rmtree(os.path.join(game_dir, "worlddata", "migrations"))
             utils.copy_path(temp_dir, game_dir, os.path.join("worlddata", "migrations"))
-
-            # web
-            utils.copy_path(temp_dir, game_dir, "web")
 
             # make new migrations
             os.chdir(game_dir)
@@ -116,7 +115,7 @@ class Upgrader(BaseUpgrader):
             data_path: (string) the data path to be upgraded.
             game_template: (string) the game template used to upgrade the game dir.
         """
-        print("Upgrading game data %s." % data_path)
+        print("Upgrading game data 0.0.0-0.2.0 %s." % data_path)
 
         from muddery.worlddata.data_sets import DATA_SETS
         file_names = glob.glob(os.path.join(data_path, DATA_SETS.typeclasses.model_name + ".*"))
