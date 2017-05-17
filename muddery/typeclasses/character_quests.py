@@ -11,7 +11,7 @@ from muddery.typeclasses.objects import MudderyObject
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.loot_handler import LootHandler
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
@@ -86,7 +86,7 @@ class MudderyQuest(MudderyObject):
         """
         commands = []
         if GAME_SETTINGS.get("can_give_up_quests"):
-            commands.append({"name": LS("Give Up"), "cmd": "giveup_quest", "args": self.get_data_key()})
+            commands.append({"name": _("Give Up"), "cmd": "giveup_quest", "args": self.get_data_key()})
         return commands
 
     def return_objectives(self):
@@ -107,7 +107,7 @@ class MudderyQuest(MudderyObject):
                 
                 if self.objectives[ordinal]["type"] == defines.OBJECTIVE_TALK:
                     # talking
-                    target = LS("Talk to")
+                    target = _("Talk to")
                     name = DIALOGUE_HANDLER.get_npc_name(self.objectives[ordinal]["object"])
         
                     objectives.append({"target": target,
@@ -117,7 +117,7 @@ class MudderyQuest(MudderyObject):
                                        })
                 elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_OBJECT:
                     # getting
-                    target = LS("Get")
+                    target = _("Get")
                     name = ""
                     
                     # Get the name of the objective object.
@@ -140,7 +140,7 @@ class MudderyQuest(MudderyObject):
                                        })
                 elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_KILL:
                     # getting
-                    target = LS("Kill")
+                    target = _("Kill")
                     name = ""
 
                     # Get the name of the objective character.

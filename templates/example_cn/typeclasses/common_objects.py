@@ -3,7 +3,6 @@ CommonObject is the object that players can put into their inventory.
 
 """
 
-from muddery.utils.localized_strings_handler import LS
 from muddery.typeclasses.common_objects import MudderyFood, MudderyEquipment
 
 
@@ -55,7 +54,7 @@ class Food(MudderyFood):
                 user.db.hp += recover_hp
                 user.show_status()
 
-            result += LS("HP recovered by %s.") % int(recover_hp)
+            result += _("HP recovered by %s.") % int(recover_hp)
 
         return result, used
 

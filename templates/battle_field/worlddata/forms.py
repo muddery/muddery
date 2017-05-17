@@ -7,10 +7,6 @@ class GameSettingsForm(forms_base.GameSettingsForm):
     pass
 
 
-class ClientSettingsForm(forms_base.ClientSettingsForm):
-    pass
-
-
 class ClassCategoriesForm(forms_base.ClassCategoriesForm):
     pass
 

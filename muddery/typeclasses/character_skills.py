@@ -11,7 +11,7 @@ import ast
 from django.conf import settings
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 
@@ -86,7 +86,7 @@ class MudderySkill(MudderyObject):
         if self.passive:
             return
 
-        commands = [{"name": LS("Cast"), "cmd": "castskill", "args": self.get_data_key()}]
+        commands = [{"name": _("Cast"), "cmd": "castskill", "args": self.get_data_key()}]
         return commands
 
     def set_owner(self, owner):
@@ -126,7 +126,7 @@ class MudderySkill(MudderyObject):
             if time_now < self.db.cd_finish_time:
                 # skill in CD
                 if owner:
-                    owner.msg({"msg": LS("This skill is not ready yet!")})
+                    owner.msg({"msg": _("This skill is not ready yet!")})
                 return
 
         # call skill function
@@ -151,10 +151,10 @@ class MudderySkill(MudderyObject):
                      If the skill is available, return "".
         """
         if self.passive:
-            return LS("This is a passive skill!")
+            return _("This is a passive skill!")
 
         if self.is_cooling_down():
-            return LS("This skill is not ready yet!")
+            return _("This skill is not ready yet!")
 
         return ""
 

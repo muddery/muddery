@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/skills.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/skills.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+		<div id="box_skills">
+			<table id="tab_skills">
+				<thead>
+					<tr>
+						<th id="view_name">NAME</th>
+						<th id="view_desc">DESC</th>
+					</tr>
+				</thead>
+				<tbody id="skill_list">
+					<tr class="template">
+						<td>
+							<div class="skill_icon">
+								<img class="img_icon" src="" />
+							</div>
+							<a class="skill_name" href="#" onclick="controller.doLook(this)"></a>
+						</td>
+						<td class="skill_desc"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+    </body>
+</html>

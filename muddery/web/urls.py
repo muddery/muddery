@@ -5,8 +5,9 @@
 # See:
 # http://diveintopython.org/regular_expressions/street_addresses.html#re.matching.2.3
 #
-
+from django.conf import settings
 from django.conf.urls import url, include
+from django.views.static import serve
 from django.views.generic import RedirectView
 
 # Setup the root url tree from /
@@ -17,7 +18,7 @@ urlpatterns = [
     url(r'^', include('muddery.web.website.urls')),#, namespace='website', app_name='website')),
 
     # webclient
-    url(r'^webclient/', include('muddery.web.webclient.urls', namespace='webclient', app_name='webclient')),
+    url(r'^webclient/(?P<path>.*)$', serve, {'document_root': settings.WEBCLIENT_ROOT}),
 
     # World Editor
     url(r'^worlddata/', include('muddery.worlddata.urls', namespace='worlddata', app_name='worlddata')),

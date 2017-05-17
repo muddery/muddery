@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/scene.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/scene.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="box_scene">
+            <div id="name">
+                &gt;&gt;&gt;&gt;&gt; <span id="name_content"></span>  &lt;&lt;&lt;&lt;&lt;
+            </div>
+            <div id="desc">
+            	<div id="desc_content"></div>
+            </div>
+            <div id="commands">
+                <span id="commands_container">
+                	<button type="button" class="btn btn-default scene_object template" onclick="controller.doCommandLink(this)"></button>
+                </span>
+            </div>
+            <div><br></div>
+            <div id="things">
+            	<span id="view_objects">Objects: </span>
+                <span id="things_container">
+					<a class="scene_object template" href="#" onclick="controller.doLook(this)"></a>
+                </span>
+            </div>
+            <div id="npcs">
+            	<span id="view_npcs">NPCs: </span>
+                <span id="npcs_container">
+					<a class="scene_object template" href="#" onclick="controller.doLook(this)"></a>
+                </span>
+            </div>
+            <div id="players">
+            	<span id="view_players">Players: </span>
+                <span id="players_container">
+					<a class="scene_object template" href="#" onclick="controller.doLook(this)"></a>
+                </span>
+            </div>
+            <div><br></div>
+            <div id="exits">
+                <center id="exits_container">
+                    <table class="exit_table">
+                        <tbody>
+                            <tr>
+                                <td align="right">
+                                    <span id="exits_0">
+                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                    </span>
+                                </td>
+                                <td align="center">
+                                    <span id="exits_1">
+                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                    </span>
+                                </td>
+                                <td align="left">
+                                    <span id="exits_2">
+                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                	<span id="link_0">\</span>
+                                </td>
+                                <td align="center">
+                                    <span id="link_1">|</span>
+                                </td>
+                                <td align="left">
+                                    <span id="link_2">/</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    <span id="exits_3">
+                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                    </span>
+                                    <span id="link_3">--</span>
+                                </td>
+                                <td align="center">
+                                    <span id="exits_4">
+                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                        <span class="template"></span>
+                                    </span>
+                                </td>
+                                <td align="left">
+                                    <span id="link_5">--</span>
+                                    <span id="exits_5">
+                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    <span id="link_6">/</span>
+                                </td>
+                                <td align="center">
+                                    <span id="link_7">|</span>
+                                </td>
+                                <td align="left">
+                                    <span id="link_8">\</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">
+                                    <span id="exits_6">
+                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                    </span>
+                                </td>
+                                <td align="center">
+                                    <span id="exits_7">
+                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                    </span>
+                                </td>
+                                <td align="left">
+                                    <span id="exits_8">
+                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </center>
+            </div>
+        </div>
+    </body>
+</html>

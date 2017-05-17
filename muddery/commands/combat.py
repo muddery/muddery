@@ -3,7 +3,7 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 from evennia import Command
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from evennia.utils import logger
 import traceback
 
@@ -30,7 +30,7 @@ class CmdCombatInfo(Command):
 
         if not caller.is_in_combat():
             # If the caller is not in combat.
-            caller.msg({"msg":LS("You are not in combat!")})
+            caller.msg({"msg":_("You are not in combat!")})
             return
 
         # Get combat's appearance and the character's available commands.

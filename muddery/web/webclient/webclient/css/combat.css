@@ -1,0 +1,63 @@
+
+.img_icon {
+	width: 30px;
+	height: 30px;
+}
+
+#characters {
+	min-height: 100px;
+}
+
+#buttons {
+    height: 90px;
+}
+
+.teammate {
+    padding: 0px;
+    position: absolute;
+    left: 12%;
+    text-align: left;
+    line-height: 1.2em;
+}
+
+.enemy {
+    padding: 0px;
+    position: absolute;
+    right: 12%;
+    text-align: right;
+    line-height: 1.2em;
+}
+
+/* combat button */
+.btn_combat,
+.btn_combat:focus,
+.btn_combat:hover,
+.btn_combat:active {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    font-size: 12px;
+    padding: 3px 3px 0px 3px;
+    margin: 0px;
+    background-color: #000;
+    border-style: none;
+    outline: none;
+    color: #333;
+}
+
+.btn_combat div.cooldown {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    background-color: #600;
+    opacity: 0.5;
+}
+
+.command_name {
+    border: 1px solid;
+    border-color: #ccc;
+    border-radius: 4px;
+    background-color: #ddd;
+    margin: 3px 0px 0px 0px;
+}

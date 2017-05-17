@@ -16,18 +16,6 @@ class game_settings(model_base.game_settings):
 
 # ------------------------------------------------------------
 #
-# webclient's settings
-#
-# ------------------------------------------------------------
-class client_settings(model_base.client_settings):
-    """
-    Html webclient's basic settings.
-    """
-    pass
-
-
-# ------------------------------------------------------------
-#
 # all class's categories
 #
 # ------------------------------------------------------------

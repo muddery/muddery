@@ -37,7 +37,7 @@ class MudderyCombatHandler(DefaultScript):
         and combat cmdset on a character
         """
         if character:
-            character.at_enter_combat(self)
+            character.at_enter_combat_mode(self)
 
     def _cleanup_character(self, character):
         """
@@ -45,7 +45,7 @@ class MudderyCombatHandler(DefaultScript):
         it of the back-reference and cmdset
         """
         if character:
-            character.at_leave_combat()
+            character.at_leave_combat_mode()
 
     def at_start(self):
         """
@@ -150,6 +150,8 @@ class MudderyCombatHandler(DefaultScript):
         """
         Finish a combat. Send results to players, and kill all failed characters.
         """
+        self.db.finished = True
+        
         if self.db.characters:
             # get winners and losers
             winner_team = None
@@ -167,25 +169,23 @@ class MudderyCombatHandler(DefaultScript):
             for character in losers:
                 character.at_combat_lose(winners, losers)
 
-        self.db.finished = True
         self.stop()
 
     def get_appearance(self):
         """
         Get the combat appearance.
         """
-        appearance = {"characters": [],
-                      "desc": self.db.desc}
+        appearance = {"desc": self.db.desc,
+        			  "characters": []}
         
         for character in self.db.characters.values():
             info = {"dbref": character.dbref,
                     "name": character.get_name(),
+                    "team": character.get_team(),
                     "max_hp": character.max_hp,
-                    "hp": character.db.hp}
+                    "hp": character.db.hp,
+                    "icon": getattr(character, "icon", None)}
 
-            icon = getattr(character, "icon", None)
-            if icon:
-                info["icon"] = icon
             appearance["characters"].append(info)
 
         return appearance
@@ -198,15 +198,6 @@ class MudderyCombatHandler(DefaultScript):
             return []
 
         return self.db.characters.values()
-
-    def msg_all_combat_info(self):
-        """
-        Send combat info to all player characters.
-        """
-        appearance = self.get_appearance()
-        for character in self.db.characters.values():
-            if character.has_player:
-                character.msg({"combat_info": appearance})
 
     def prepare_skill(self, skill_key, caller, target):
         """

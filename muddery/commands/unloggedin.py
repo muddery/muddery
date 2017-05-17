@@ -16,8 +16,8 @@ from evennia.comms.models import ChannelDB
 from evennia.utils import create, logger, utils
 from evennia.commands.command import Command
 from evennia.commands.cmdhandler import CMD_LOGINSTART
-from muddery.utils.localized_strings_handler import LS
-from muddery.utils.game_settings import GAME_SETTINGS, CLIENT_SETTINGS
+from muddery.utils.localized_strings_handler import _
+from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.utils import search_obj_data_key
 
 
@@ -160,7 +160,7 @@ def create_normal_player(session, name, password):
 
     if not (player and pswd):
         # No playername or password match
-        session.msg({"alert":LS("Incorrect username or password.")})
+        session.msg({"alert":_("Incorrect username or password.")})
         # this just updates the throttle
         _throttle(session)
         # calls player hook for a failed login if possible.
@@ -222,7 +222,7 @@ class CmdUnconnectedConnect(Command):
         # check for too many login errors too quick.
         if _throttle(session, maxlim=5, timeout=5*60, storage=_LATEST_FAILED_LOGINS):
             # timeout is 5 minutes.
-            session.msg({"alert":LS("{RYou made too many connection attempts. Try again in a few minutes.{n")})
+            session.msg({"alert":_("{RYou made too many connection attempts. Try again in a few minutes.{n")})
             return
 
         # Guest login
@@ -235,7 +235,7 @@ class CmdUnconnectedConnect(Command):
                 return
 
         if not password:
-            session.msg({"alert":LS("{Please input password.")})
+            session.msg({"alert":_("{Please input password.")})
             return
 
         player = create_normal_player(session, playername, password)
@@ -302,7 +302,7 @@ class CmdUnconnectedCreate(Command):
         playername = re.sub(r"\s+", " ", playername).strip()
         if PlayerDB.objects.filter(username__iexact=playername):
             # player already exists (we also ignore capitalization here)
-            session.msg({"alert":LS("Sorry, there is already a player with the name '%s'.") % playername})
+            session.msg({"alert":_("Sorry, there is already a player with the name '%s'.") % playername})
             return
         # Reserve playernames found in GUEST_LIST
         if settings.GUEST_LIST and playername.lower() in (guest.lower() for guest in settings.GUEST_LIST):
@@ -429,7 +429,7 @@ class CmdUnconnectedCreateConnect(Command):
         playername = re.sub(r"\s+", " ", playername).strip()
         if PlayerDB.objects.filter(username__iexact=playername):
             # player already exists (we also ignore capitalization here)
-            session.msg({"alert":LS("Sorry, there is already a player with the name '%s'.") % playername})
+            session.msg({"alert":_("Sorry, there is already a player with the name '%s'.") % playername})
             return
         # Reserve playernames found in GUEST_LIST
         if settings.GUEST_LIST and playername.lower() in (guest.lower() for guest in settings.GUEST_LIST):
@@ -584,9 +584,7 @@ class CmdUnconnectedLoginStart(Command):
 
     def func(self):
         "Send settings to the client."
-        client_settings = CLIENT_SETTINGS.all_values()
-        client_settings["game_name"] = GAME_SETTINGS.get("game_name")
-        client_settings["show_social_box"] = not GAME_SETTINGS.get("solo_mode")
+        client_settings = GAME_SETTINGS.get_client_settings()
         self.caller.msg({"settings": client_settings})
 
         "Show the connect screen."

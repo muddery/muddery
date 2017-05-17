@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en-us" xmlns="http://www.w3.org/1999/html">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/combat_result.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/combat_result.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="header" class="modal-header">
+        </div>
+        <div id="result" class="modal-body">
+            <div id="desc"></div>
+            <div id="div_exp">
+                <span id="view_get_exp">Get Exp: </span><span id="exp"></span>
+            </div>
+            <div id="accepted">
+                <div id="view_get_objects">Get Objects: </div>
+            	<div id="accepted_list">
+	                <p class="template">
+	                	<span class="name"></span>: <span class="info"></span>
+	                </p>
+	            </div>
+	        </div>
+            <div id="rejected">
+            	<div id="view_rejected">Rejected: </div>
+            	<div id="rejected_list">
+	            	<p class="template">
+		            	<span class="name"></span>: <span class="info"></span>
+	            	</p>
+            	</div>
+            </div>
+        </div>
+        <div id="buttons" class="modal-footer">
+            <button id="view_button_ok" class="btn btn-default btn-primary" type="button" onclick="controller.doClosePopupBox()">OK</button>
+        </div>
+    </body>
+</html>

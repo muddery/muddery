@@ -10,19 +10,15 @@ class GameSettingsAdmin(admin.ModelAdmin):
                     'player_reborn_cd',
                     'npc_reborn_cd',
                     'can_give_up_quests',
+                    'can_close_dialogue',
                     'single_dialogue_sentence',
                     'auto_resume_dialogues',
                     'default_home_key',
                     'start_location_key',
                     'default_player_home_key',
-                    'default_player_character_key')
-
-
-class ClientSettingsAdmin(admin.ModelAdmin):
-    list_display = ('map_room_size',
+                    'default_player_character_key',
                     'map_scale',
-                    'show_command_box',
-                    'can_close_dialogue',)
+                    'map_room_size',)
 
 
 class ClassCategoriesAdmin(admin.ModelAdmin):

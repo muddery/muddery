@@ -18,23 +18,24 @@ class Upgrader(BaseUpgrader):
     Upgrade a game dir to a specified version.
     """
     # Can upgrade the game of version between from_version and to_version.
-    # from version 0.0
-    from_version = (0, 0, 0)
+    # from min version 0.0.0 (include this version)
+    from_min_version = (0, 0, 0)
 
-    # to version 0.2.0
-    to_version = (0, 2, 0)
+    # from max version 0.2.0 (not include this version)
+    from_max_version = (0, 2, 0)
 
     target_version = None
     
-    def upgrade_game(self, game_dir, game_template):
+    def upgrade_game(self, game_dir, game_template, muddery_lib):
         """
         Upgrade a game.
 
         Args:
             game_dir: (string) the game dir to be upgraded.
             game_template: (string) the game template used to upgrade the game dir.
+            muddery_lib: (string) muddery's dir
         """
-        print("Upgrading game %s." % game_dir)
+        print("Upgrading game 0.0.0-0.2.0 %s." % game_dir)
 
         temp_dir = None
         try:
@@ -52,16 +53,14 @@ class Upgrader(BaseUpgrader):
 
             # create new game
             utils.create_game(game_dir, game_template, setting_dict)
-                    
+
             # copy old files
             # database
             utils.copy_path(temp_dir, game_dir, os.path.join("server", "muddery.db3"))
 
             # migrations
+            shutil.rmtree(os.path.join(game_dir, "worlddata", "migrations"))
             utils.copy_path(temp_dir, game_dir, os.path.join("worlddata", "migrations"))
-
-            # web
-            utils.copy_path(temp_dir, game_dir, "web")
 
             # make new migrations
             os.chdir(game_dir)
@@ -116,7 +115,7 @@ class Upgrader(BaseUpgrader):
             data_path: (string) the data path to be upgraded.
             game_template: (string) the game template used to upgrade the game dir.
         """
-        print("Upgrading game data %s." % data_path)
+        print("Upgrading game data 0.0.0-0.2.0 %s." % data_path)
 
         from muddery.worlddata.data_sets import DATA_SETS
         file_names = glob.glob(os.path.join(data_path, DATA_SETS.typeclasses.model_name + ".*"))

@@ -8,7 +8,7 @@ import traceback
 from evennia import TICKER_HANDLER
 from evennia.utils import logger
 from muddery.typeclasses.characters import MudderyCharacter
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.builder import build_object, delete_object
 from muddery.utils.game_settings import GAME_SETTINGS
@@ -93,7 +93,7 @@ class MudderyNPC(MudderyCharacter):
         commands = []
         if self.dialogues or self.default_dialogues:
             # If the character have something to talk, add talk command.
-            commands.append({"name":LS("Talk"), "cmd":"talk", "args":self.dbref})
+            commands.append({"name":_("Talk"), "cmd":"talk", "args":self.dbref})
         
         # Add shops.
         for shop_obj in self.db.shops.values():

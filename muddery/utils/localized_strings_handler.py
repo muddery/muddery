@@ -61,7 +61,7 @@ LOCALIZED_STRINGS_HANDLER = LocalizedStringsHandler()
 
 
 # translator
-def LS(origin, category="", default=None):
+def _(origin, category="", default=None):
     """
     This function returns the localized string.
     """

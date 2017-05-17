@@ -6,7 +6,7 @@ import random
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
-from muddery.utils.localized_strings_handler import LS
+from muddery.utils.localized_strings_handler import _
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.exception import MudderyError
 
