@@ -51,7 +51,7 @@ class MudderyArea(MudderyObject):
             if background_point:
                 self.background_point = ast.literal_eval(background_point)
         except Exception, e:
-            logger.log_tracemsg("load background point error: %s" % e)
+            logger.log_tracemsg("load background point '%s' error: %s" % (background_point, e))
             
         self.corresp_map_pos = None
         try:
@@ -60,7 +60,7 @@ class MudderyArea(MudderyObject):
             if corresp_map_pos:
                 self.corresp_map_pos = ast.literal_eval(corresp_map_pos)
         except Exception, e:
-            logger.log_tracemsg("load corresponding map position error: %s" % e)
+            logger.log_tracemsg("load corresponding map position '%s' error: %s" % (corresp_map_pos, e))
 
     def get_appearance(self, caller):
         """

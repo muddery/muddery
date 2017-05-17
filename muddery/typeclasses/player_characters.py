@@ -97,7 +97,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.reborn_cd = GAME_SETTINGS.get("player_reborn_cd")
         self.solo_mode = GAME_SETTINGS.get("solo_mode")
 
-        self.available_channels = self.get_available_channels()
+        self.available_channels = {}
 
         # refresh data
         self.refresh_data()
@@ -160,6 +160,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Player<->Object links have been established.
 
         """
+        self.available_channels = self.get_available_channels()
+        
         # Send puppet info to the client first.
         self.msg({"puppet": {"dbref": self.dbref,
                              "name": self.get_name(),
@@ -246,13 +248,14 @@ class MudderyPlayerCharacter(MudderyCharacter):
         channels = {"say": _("Say")}
 
         commands = False
-        if self.is_superuser:
-            commands = True
-        else:
-            for perm in self.permissions.all():
-                if perm in settings.PERMISSION_COMMANDS:
-                    commands = True
-                    break
+        if self.player:
+            if self.is_superuser:
+                commands = True
+            else:
+                for perm in self.player.permissions.all():
+                    if perm in settings.PERMISSION_COMMANDS:
+                        commands = True
+                        break
         if commands:
             channels["cmd"] = _("Cmd")
 

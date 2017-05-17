@@ -30,13 +30,14 @@ class BaseUpgrader(object):
         """
         pass
 
-    def upgrade_data(self, data_path, game_template):
+    def upgrade_data(self, data_path, game_template, muddery_lib):
         """
         Upgrade game data.
 
         Args:
             data_path: (string) the data path to be upgraded.
             game_template: (string) the game template used to upgrade the game dir.
+            muddery_lib: (string) muddery's dir
         """
         pass
         

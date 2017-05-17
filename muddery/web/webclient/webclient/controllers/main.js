@@ -690,6 +690,8 @@ var controller = {
         $("#tab_connect").show();
         
         controller.showContent("connect");
+        
+        this.clearChannels();
     },
 
     doAutoLoginCheck : function() {
@@ -829,7 +831,7 @@ var controller = {
     	
     	var first = true;
     	for (var key in channels) {
-    		var text = _(channels[key]);
+    		var text = channels[key];
     		
     		var item = item_template.clone()
     			.removeClass("template")

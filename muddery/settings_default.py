@@ -326,10 +326,10 @@ REVERSE_EXIT_TYPECLASS_PATH = "muddery.typeclasses.exits.MudderyReverseExit"
 REVERSE_EXIT_PREFIX = "__reverse__"
 
 # Characters who have these permission can bypass events.
-PERMISSION_BYPASS_EVENTS = {"Builders", "Wizards", "Immortals"}
+PERMISSION_BYPASS_EVENTS = {"builders", "wizards", "immortals"}
 
 # Characters who have these permission can use text commands.
-PERMISSION_COMMANDS = {"PlayerHelpers", "Builders", "Wizards", "Immortals"}
+PERMISSION_COMMANDS = {"playerhelpers", "builders", "wizards", "immortals"}
 
 # Localized string data's folder
 LOCALIZED_STRINGS_FOLDER = "languages"
