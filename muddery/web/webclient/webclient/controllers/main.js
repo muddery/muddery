@@ -86,7 +86,9 @@ var controller = {
 	// popup dialogues
     setDialogueList: function(data) {
         if (data.length == 0) {
-            this.doClosePopupBox();
+            // close dialogue box
+            var frame_id = "#frame_dialogue";
+            $(frame_id).hide();
         }
         else {
             if ($("#frame_combat").is(":visible")) {
@@ -373,6 +375,8 @@ var controller = {
     
     // set player's skills
     setSkills: function(skills) {
+        data_handler.setSkills(skills);
+
         var frame_ctrl = this.getFrameController("#frame_skills");
         frame_ctrl.setSkills(skills);
     },
@@ -464,6 +468,7 @@ var controller = {
     },
 
     showFrame: function(frame_id) {
+        $(frame_id).show();
         $(frame_id).parents().show();
         this.doSetVisiblePopupSize();
     },
@@ -820,6 +825,7 @@ var controller = {
     clearChannels: function() {
         $("#msg_type_menu>:not(.template)").remove();
         $("#msg_select").empty();
+        $("#msg_type_menu").hide();
         $("#input_bar").css("visibility", "hidden");
     },
 
