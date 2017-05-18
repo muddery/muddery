@@ -5,6 +5,8 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
+from __future__ import print_function
+
 import re
 from muddery.utils import defines
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
@@ -39,7 +41,6 @@ class DialogueHandler(object):
         self.can_close_dialogue = GAME_SETTINGS.get("can_close_dialogue")
         self.single_sentence_mode = GAME_SETTINGS.get("single_dialogue_sentence")
         self.dialogue_storage = {}
-    
     
     def load_cache(self, dialogue):
         """
@@ -410,7 +411,8 @@ class DialogueHandler(object):
                         "dialogue": original["dialogue"],   # dialogue's key
                         "sentence": original["sentence"],   # sentence's ordinal
                         "content": original["content"],
-                        "icon": icon}
+                        "icon": icon,
+                        "can_close": original["can_close"],}
             if npc:
                 sentence["npc"] = npc.dbref             # NPC's dbref
             else:

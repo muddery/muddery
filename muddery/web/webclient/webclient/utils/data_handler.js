@@ -13,7 +13,19 @@ var data_handler = {
     getEscapes: function() {
         return {"$PLAYER_NAME": this.character_name};
     },
-    
+
+    setSkills: function(skills) {
+        var current_time = (new Date()).valueOf();
+
+        for (var i in skills) {
+            var key = skills[i]["key"];
+
+            // cd_time in milliseconds
+            var cd_time = current_time + skills[i]["cd_remain"] * 1000;
+            this.skill_cd_time[key] = cd_time;
+        }
+    },
+
     setSkillCD: function(skill, cd, gcd) {
         // update skill's cd
         var current_time = (new Date()).valueOf();

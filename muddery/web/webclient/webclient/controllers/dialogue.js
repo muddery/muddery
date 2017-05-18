@@ -115,7 +115,7 @@ var controller = {
         $("#img_icon").removeAttr("src");
 
         $("#content").empty();
-        $("#body>a:not(.template)").remove();
+        $("#body>p:not(.template)").remove();
 
         $("#button")
             .removeData("npc")

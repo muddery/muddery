@@ -48,9 +48,11 @@ var controller = {
             return;
         }
         
-        var area_name = text2html.parseHtml(location.area["name"]);
-        if (area_name) {
-			$("#name").html(area_name);
+        if (location["area"]) {
+            var area_name = text2html.parseHtml(location["area"]["name"]);
+            if (area_name) {
+    			$("#name").html(area_name);
+    		}
 		}
         
         var current_room = map_data._map_rooms[location.key];
@@ -80,24 +82,24 @@ var controller = {
            .attr("height", map_height);
         
         // background
-        if (location.area && location.area["background"]) {
+        if (location["area"] && location["area"]["background"]) {
              var x = 0;
              var y = 0;
              
-             if (location.area["background_point"]) {
-             	x -= location.area["background_point"][0];
-             	y -= location.area["background_point"][1];
+             if (location["area"]["background_point"]) {
+             	x -= location["area"]["background_point"][0];
+             	y -= location["area"]["background_point"][1];
              }
              
-             if (location.area["corresp_map_pos"]) {
-             	x += location.area["corresp_map_pos"][0] * scale + origin_x;
-             	y += -location.area["corresp_map_pos"][1] * scale + origin_y;
+             if (location["area"]["corresp_map_pos"]) {
+             	x += location["area"]["corresp_map_pos"][0] * scale + origin_x;
+             	y += -location["area"]["corresp_map_pos"][1] * scale + origin_y;
              }
 
              svg.append("image")
                 .attr("x", x)
                 .attr("y", y)
-                .attr("xlink:href", location.area["background"]);
+                .attr("xlink:href", location["area"]["background"]);
         }
 
         if (current_room["pos"] &&
@@ -169,7 +171,7 @@ var controller = {
 						}
 							
                         room_data.push({"name": util.truncate_string(room["name"], 10, true),
-                                        "icon": settings.resource_url + room["icon"],
+                                        "icon": room["icon"]? settings.resource_url + room["icon"]: null,
                                         "area": room["area"],
                                         "pos": room["pos"]});
                         if (key == location.key) {
