@@ -40,7 +40,7 @@ class MudderyArea(MudderyObject):
         if resource_key:
             try:
                 resource_info = DATA_SETS.image_resources.objects.get(key=resource_key)
-                self.background = resource_info.resource.url
+                self.background = resource_info.resource.name
             except Exception, e:
                 logger.log_tracemsg("Load background %s error: %s" % (resource_key, e))
 

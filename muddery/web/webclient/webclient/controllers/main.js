@@ -583,7 +583,6 @@ var controller = {
             return;
         }
 
-        var width = popup_content.width();
         frame.innerWidth(popup_content.width());
         frame.height(0);
         
