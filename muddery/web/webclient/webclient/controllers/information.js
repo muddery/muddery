@@ -2,6 +2,7 @@
 var _ = parent._;
 var parent_controller = parent.controller;
 var commands = parent.commands;
+var settings = parent.settings;
 
 var controller = {
     // on document ready
@@ -25,7 +26,8 @@ var controller = {
     // Set player's basic information
     setInfo: function(name, icon) {
         $("#name").text(name);
-        $("#obj_icon").attr("src", icon);
+        var url = settings.resource_url + icon;
+        $("#obj_icon").attr("src", url);
     },
 
     // Set player character's information

@@ -8,7 +8,7 @@ var settings = {
     csessid: false,
         
     // resource's url
-    resource_url: window.location.protocol + "//" + window.location.host,
+    resource_url: window.location.protocol + "//" + window.location.host + "/media/",
 
     // default language
     default_language: "zh-cn",
