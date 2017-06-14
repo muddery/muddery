@@ -1,0 +1,4 @@
+key,typeclass,name,desc,background,background_point,corresp_map_pos
+area_intro,CLASS_COMMON_AREA,起始界面,,,,
+area_hole,CLASS_COMMON_AREA,未知区域,,,,
+area_park,CLASS_COMMON_AREA,公园,,image_park_map,"(450,270)","(0,8)"

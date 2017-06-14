@@ -1,0 +1,36 @@
+
+#tab_skills {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    border-collapse: collapse;
+    margin: 8px;
+}
+
+#tab_skills th {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+    font-weight: normal;
+}
+
+#tab_skills td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+}
+
+.skill_icon {
+    text-align: center;
+}
+
+.img_icon {
+	width: 30px;
+	height: 30px;
+}
+
+.skill_name {
+    text-align: center;
+}

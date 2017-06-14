@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>物体</h1>
+    欢迎来到物体界面。
+
+    <h3><a href="../">返回</a></h3>
+
+    <h2><a href="./objects/world_objects/list.html">世界物体</a></h2>
+    世界物体在世界范围内是唯一的，它们的初始位置是固定的。
+
+    <h2><a href="./objects/common_objects/list.html">普通物品</a></h2>
+    普通物品可以由玩家携带，放入他们的行囊中。
+    
+    <h2><a href="./objects/foods/list.html">食物</a></h2>
+    玩家可以通过吃食物来提高他们的生命值、魔法值或其它属性。
+
+    <h2><a href="./objects/skill_books/list.html">技能书</a></h2>
+    玩家可以通过技能书学习技能。
+
+    <h2><a href="./objects/equipments/list.html">装备</a></h2>
+    所有装备的数据。
+
+    <h2><a href="./objects/object_creators/list.html">物品生成器</a></h2>
+    物品生成器的附加信息，物品生成器可以创造出新的物品。
+
+    <h2><a href="./objects/creator_loot_list/list.html">物品生成表</a></h2>
+    物品生成表设置了物品的来源和生成几率，玩家可以从物品生成器获得这些物品。
+
+    <h2><a href="./objects/default_objects/list.html">默认物品</a></h2>
+    角色的默认物品，角色一出生就带有这些默认物品。
+
+{% endblock content %}

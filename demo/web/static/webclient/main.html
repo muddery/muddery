@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-us">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <title>Muddery Webclient</title>
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="./css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="./css/webclient.css" />
+
+        <!-- Importing the online jQuery javascript library -->
+        <!--script src="http://code.jquery.com/jquery-1.6.1.js" type="text/javascript" charset="utf-8"></script-->
+        <!--script src="http://code.jquery.com/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script-->
+
+        <!--for offline testing, download the jquery library from jquery.com-->
+        <script src="./libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./libs/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./libs/bootstrap.min.js"></script>
+
+        <!-- settings -->
+        <script src="./client/settings.js" type="text/javascript" charset="utf-8"></script>
+
+		<!-- languages -->
+        <script src="./lang/en-us/strings.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./lang/zh-cn/strings.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./lang/local_string.js" type="text/javascript" charset="utf-8"></script>
+        
+        <!-- client -->
+        <script src="./client/evennia.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./client/client.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./client/commands.js" type="text/javascript" charset="utf-8"></script>
+        
+        <!-- utils -->
+        <script src="./utils/map_data.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/text2html.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/data_handler.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/escape.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/utils.js" type="text/javascript" charset="utf-8"></script>
+        
+        <!-- main controller -->
+        <script src="./controllers/main.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <!-- Show popup windows in this div. -->
+        <div id="popup_container" class="container">
+            <div id="popup_modal" role="dialog" class="modal in">
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_message" class="modal-content popup_frame" src="./views/message.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_object" class="popup_frame" src="./views/object.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_get_objects" class="popup_frame" src="./views/get_objects.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_dialogue" class="popup_frame" src="./views/dialogue.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_shop" class="popup_frame" src="./views/shop.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_goods" class="popup_frame" src="./views/goods.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_combat" class="popup_frame" src="./views/combat.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_combat_result" class="popup_frame" src="./views/combat_result.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-lg vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_map" class="popup_frame" src="./views/map.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Window's header. -->
+        <header id="header">
+              <center>
+                <!-- Game title. -->
+                <h5 id="game_title">Muddery</h5>
+              </center>
+        </header>
+    
+        <!-- Window's body. -->
+        <div id="wrapper">
+            <div id="middlewindow">
+                <div id="prompt_bar">
+                    <div id="prompt_content" style="display: none">
+                        <span class="prompt_element"><span id="prompt_name"></span></span>
+                        <span class="prompt_element"><span id="view_level">LEVEL: </span><span id="prompt_level"></span></span>
+                        <span class="prompt_element"><span id="view_exp">EXP: </span><span id="prompt_exp"></span></span>
+                        <span class="prompt_element"><span id="view_hp">HP: </span><span id="prompt_hp"></span></span>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div id="msg_wnd" class="panel-body">
+                        <div class="msg template"></div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div id="tab_content" class="panel-body">
+                        <iframe id="frame_login" class="content_frame" src="./views/login.html"></iframe>
+                        <iframe id="frame_register" class="content_frame" src="./views/register.html"></iframe>
+                        <iframe id="frame_scene" class="content_frame" src="./views/scene.html"></iframe>
+                        <iframe id="frame_information" class="content_frame" src="./views/information.html"></iframe>
+                        <iframe id="frame_inventory" class="content_frame" src="./views/inventory.html"></iframe>
+                        <iframe id="frame_skills" class="content_frame" src="./views/skills.html"></iframe>
+                        <iframe id="frame_quests" class="content_frame" src="./views/quests.html"></iframe>
+                    </div>
+                </div>
+                <div id="tab_bar">
+                    <ul id="tab_pills" class="nav nav-tabs">
+                        <li id="tab_connect" role="presentation" class="" style="display: none;">
+                            <a id="view_connect" onclick="Evennia.connect()">Connect</a>
+                        </li>
+                        <li id="tab_login" role="presentation" class="" style="display: none;">
+                            <a id="view_login" onclick="controller.showContent('login')">Login</a>
+                        </li>
+                        <li id="tab_register" role="presentation" class="" style="display: none;">
+                            <a id="view_register" onclick="controller.showContent('register')">Register</a>
+                        </li>
+                        <li id="tab_scene" role="presentation" class="">
+                            <a id="view_scene" onclick="controller.showContent('scene')">Scene</a>
+                        </li>
+                        <li id="tab_character" role="presentation" class="dropup">
+                            <a id="view_char" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Char<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a id="view_status" onclick="controller.showContent('information')" class="first-dropdown-item">Status</a>
+                                </li>
+                                <li>
+                                    <a id="view_inventory" onclick="controller.showContent('inventory')" class="dropdown-item">Inventory</a>
+                                </li>
+                                <li>
+                                    <a id="view_skills" onclick="controller.showContent('skills')" class="dropdown-item">Skills</a>
+                                </li>
+                                <li>
+                                    <a id="view_quests" onclick="controller.showContent('quests')" class="dropdown-item">Quests</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li id="tab_social" role="presentation" class="dropup hidden">
+                            <a id="view_social" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Social<span class="caret"></span></a>
+                        </li>
+                        <li id="tab_map" role="presentation" class="">
+                            <a id="view_map" onclick="controller.showMap()">Map</a>
+                        </li>
+                        <li id="tab_system" role="presentation" class="dropup">
+                            <a id="view_system" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Sys<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a id="view_logout" onclick="commands.doLogout()" class="first-dropdown-item">Logout</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div id="input_bar">
+                    <button id="msg_select" onclick="controller.showMsgTypes()" class="btn btn-default"></button>
+                    <input id="msg_input" type="text" aria-describedby="basic-addon2" autocomplete="off" class="form-control" />
+                    <button id="msg_send" onclick="controller.sendMessage()" class="btn btn-default">Send</button>
+                    <ul id="msg_type_menu" class="dropdown-menu">
+                        <li class="template">
+                            <a onclick="controller.selectMsgType(this)" class="dropdown-item"></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

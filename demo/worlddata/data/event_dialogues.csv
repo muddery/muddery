@@ -1,0 +1,4 @@
+key,dialogue,npc
+event_colorfulworld_alley,dlg_alley_soliloquy,
+event_colorfulworld_street_quest,dlg_street_find_survivor,
+event_colorfulworld_find_survivor,dlg_colorfulworld_find_survivor,npc_wu

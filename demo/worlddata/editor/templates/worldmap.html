@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>世界地图</h1>
+    欢迎来到世界地图界面，在这里可以编辑整个游戏世界的外观。
+
+    <h3><a href="../">返回</a></h3>
+
+    <h2><a href="./worldmap/world_areas/list.html">区域</a></h2>
+    游戏地图是由一个个区域构成的。
+
+    <h2><a href="./worldmap/world_rooms/list.html">房间</a></h2>
+    每个区域中有若干房间，玩家身处在一个个房间中。
+
+    <h2><a href="./worldmap/world_exits/list.html">出口</a></h2>
+    出口将房间连接在了一起，玩家可以通过出口从一个房间移动到另一个房间。
+
+    <h2><a href="./worldmap/world_objects/list.html">世界物体</a></h2>
+    世界物体在世界范围内是唯一的，它们的初始位置是固定的。
+
+    <h2><a href="./worldmap/world_npcs/list.html">世界NPC</a></h2>
+    世界NPC在整个世界中是独一无二的，他们的初始位置是固定不变的。
+
+    <p>If you are an advanced user who needs access to the raw Django Admin, it is available <a href="{% url "django_admin" %}">here</a>.</p>
+
+{% endblock content %}

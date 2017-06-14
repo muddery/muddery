@@ -1,0 +1,7 @@
+key,name,typeclass,desc,location,condition,icon
+object_alley_box_01,木箱,CLASS_WORLD_OBJECT,一个空的木箱，里面什么都没有。,room_colorfulworld_alley,,
+object_colorfulworld_hole,电缆井,CLASS_WORLD_OBJECT,这是我掉进去过的电缆井，我可不想再进去了！,room_colorfulworld_alley,,
+creator_alley_pile,杂物堆,CLASS_OBJECT_CREATOR,在小巷的尽头杂乱地堆着一些木棍和木板。,room_colorfulworld_alley,,
+creator_street_body,尸体,CLASS_OBJECT_CREATOR,这个人身穿着保安制服，面朝下躺着，周围流了很多血，他的身体冰凉，应该已经死了。,room_colorfulworld_street,is_quest_in_progress("quest_find_guardhouse_key"),
+creator_storeroom_box,纸箱,CLASS_OBJECT_CREATOR,一个纸箱，好像是放食品的。,room_colorfulworld_storeroom,,
+creator_photo_studio_box,小箱子,CLASS_OBJECT_CREATOR,一个小箱子，像是医药箱。,room_colorfulworld_printing_room,,

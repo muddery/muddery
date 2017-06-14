@@ -1,0 +1,5 @@
+key,name,typeclass,desc,max_stack,unique,can_remove,can_discard,icon
+obj_money,金钱,CLASS_COMMON_OBJECT,有钱能使鬼推磨。,99999999,1,0,0,icon_money
+obj_guardhouse_key,钥匙,CLASS_COMMON_OBJECT,钥匙圈上扣着一串铜质的钥匙，它们是用来开什么门的呢？,1,1,1,1,icon_key
+obj_binder,绷带,CLASS_COMMON_OBJECT,一卷绷带，还没拆封过，可以帮助止血。,1,1,1,1,icon_binder
+obj_screw,螺丝,CLASS_COMMON_OBJECT,一颗螺丝，能派什么用处呢？,5,1,1,1,icon_screw

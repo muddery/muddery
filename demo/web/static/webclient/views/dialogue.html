@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/dialogue.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/dialogue.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div class="modal-header">
+            <button id="close_box" type="button" onclick="controller.doClosePopupBox()" class="close">×</button>
+            <h4 id="header" class="modal-title"></h4>
+        </div>
+        <div class="modal-body">
+            <div id="div_icon">
+                <img id="img_icon" src="" />
+            </div>
+            <div id="body">
+                <div id="content"></div>
+                <p class="template" >
+                    <a href="#" onclick="controller.doDialogue(this)"></a>
+                </p>
+            </div>
+        </div>
+        <div id="footer" class="modal-footer">
+            <center>
+                <button id="button" type="button" class="btn btn-default" onclick="controller.doClosePopupBox()"></button>
+            </center>
+        </div>
+    </body>
+</html>

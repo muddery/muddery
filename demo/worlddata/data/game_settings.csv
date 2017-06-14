@@ -1,0 +1,8 @@
+game_name,connection_screen,solo_mode,global_cd,auto_cast_skill_cd,player_reborn_cd,npc_reborn_cd,can_give_up_quests,can_close_dialogue,single_dialogue_sentence,auto_resume_dialogues,default_home_key,start_location_key,default_player_home_key,default_player_character_key,map_scale,map_room_size
+"梦幻乐园","{b=============================================================={n
+欢迎来到开源软件 Muddery 的演示游戏！
+
+这是一款很小的单人游戏，游戏情节很短，仅用于展示 Muddery 系统的特性。由于会不定期地更改游戏代码及数据库结构，{r用户的游戏信息可能会丢失，如果原用户名无法登陆，请重新注册{n，敬请谅解。
+
+Muddery 是一个用Python编写的开源的在线文字游戏框架，更多信息欢迎访问网站 {whttp://cn.muddery.org{n 。
+{b=============================================================={n",True,1.0,1.5,5.0,5.0,False,True,True,True,room_intro,room_intro,room_colorfulworld_hole,player,75,40

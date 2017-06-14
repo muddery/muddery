@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/inventory.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/inventory.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="box_inventory">
+        	<table id="tab_inventory">
+        		<thead>
+        			<tr>
+        				<th id="view_name">NAME</th>
+        				<th id="view_number">NUM</th>
+        				<th id="view_desc">DESC</th>
+        			</tr>
+        		</thead>
+        		<tbody id="inventory_items">
+        			<tr class="template">
+        				<td>
+        					<div class="obj_icon">
+        						<img class="img_icon" src="" />
+        					</div>
+        					<a class="obj_name" href="#" onclick="controller.doLook(this)"></a>
+        				</td>
+        				<td class="obj_number"></td>
+        				<td class="obj_desc"></td>
+        			</tr>
+        		</tbody>
+        	</table>
+        </div>
+    </body>
+</html>

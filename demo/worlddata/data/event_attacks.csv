@@ -1,0 +1,4 @@
+key,mob,level,odds,desc
+event_colorfulworld_street,mob_robot_a,1,0.7,"突然有一个机器人从隐蔽处冲出来攻击你。"
+event_colorfulworld_gift_shop,mob_robot_a,1,0.3,"在礼品店里有一个机器人，它一见你就对你发起了攻击。"
+event_colorfulworld_storeroom,mob_wu,1,1,"就在你开门进入储藏室的一刹那，躲藏在里面的一个陌生人挥拳向你打来！"

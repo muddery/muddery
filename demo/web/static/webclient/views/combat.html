@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en-us" xmlns="http://www.w3.org/1999/html">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/combat.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/combat.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="desc" class="modal-header">
+        </div>
+        <div id="characters" class="modal-body">
+            <div class="template">
+                <div class="status"></div>
+                <div class="div_icon">
+                    <img class="img_icon" src="" />
+                </div>
+                <div class="name"></div>
+            </div>
+        </div>
+        <div id="buttons" class="modal-footer">
+            <button class="btn_combat template" type="button" onclick="controller.doCombatSkill(this)">
+                <center>
+                    <img class="command_icon" src="">
+                </center>
+                <div class="command_name"></div>
+                <div class="cooldown"></div>
+            </button>
+        </div>
+    </body>
+</html>

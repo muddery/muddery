@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>角色</h1>
+    欢迎进入角色设置界面，角色是可以自主活动或被玩家操控的物体。
+
+    <h3><a href="../">返回</a></h3>
+
+    <h2><a href="./characters/character_careers/list.html">角色职业</a></h2>
+    角色的职业决定了角色的基本特性，包括属性、技能、装备等方面的特点。
+
+    <h2><a href="./characters/character_models/list.html">角色模版</a></h2>
+    角色数据的模版，包括生命、魔法、攻击、防御等数值。通过模版可以很方便地生成大批相似的角色。
+
+    <h2><a href="./characters/world_npcs/list.html">世界NPC</a></h2>
+    世界NPC在整个世界中是独一无二的，他们的初始位置是固定不变的。
+
+    <h2><a href="./characters/common_characters/list.html">普通角色</a></h2>
+    普通角色可以在世界上多次出现，他们的位置不固定。包括普通玩家角色、小怪等。
+
+    <h2><a href="./characters/default_objects/list.html">角色默认物品</a></h2>
+    角色的默认物品，角色一出生就带有这些默认物品。
+
+    <h2><a href="./characters/skills/list.html">技能</a></h2>
+    角色可用的所有技能都在这里。
+
+    <h2><a href="./characters/default_skills/list.html">角色默认技能</a></h2>
+    角色的默认技能，角色一出生就带有这些默认技能。
+
+    <h2><a href="./characters/npc_dialogues/list.html">NPC对话</a></h2>
+    NPC的对话，可以通过设置这些对话让NPC说话。
+
+    <h2><a href="./characters/character_loot_list/list.html">角色掉落表</a></h2>
+    角色掉落表设置了掉落的物品，当玩家杀死角色时可以获得这些物品。
+
+{% endblock content %}

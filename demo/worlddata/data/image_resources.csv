@@ -1,0 +1,3 @@
+key,name,resource,image_width,image_height
+image_street,大街,resource/image/street.jpg,499,280
+image_park_map,乐园地图,resource/image/park_map.png,800,600

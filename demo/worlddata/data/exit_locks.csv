@@ -1,0 +1,3 @@
+key,unlock_condition,unlock_verb,locked_desc,auto_unlock
+exit_colorfulworld_street_1,has_object("weapon_wood_stick"),用力撬动,通向外面的道路被一块巨大的广告板堵住了，希望能找到合适的工具挪动它。,0
+exit_colorfulworld_gate_path,is_quest_completed("quest_none"),,那里太远了，我就在附近找找看吧。,1

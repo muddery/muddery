@@ -1,0 +1,24 @@
+
+hr {
+    width: 33%;
+    text-align: left;
+    margin: 20px 0 0 0;
+    border-top:2px solid #999;
+}
+
+#dialogue-chains {
+    height: 100%;
+    width: 49%;
+    float: right;
+    display: block;
+}
+
+#chain-box {
+    border:1px solid #ccc;
+    width: 100%;
+    margin: 0px 10px 10px 0px;
+}
+
+thead th {
+    background: #e7e7e7;
+}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block header_ext %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+<link rel="stylesheet" type="text/css" href="/static/worldeditor/css/worldeditor.css" />
+{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<div>{{ desc }}</div>
+<div id="content-main">
+    <form enctype="multipart/form-data" action="submit.html" method="post">
+        {% csrf_token %}
+        <div>
+            <fieldset class="module aligned">
+                {% for field in data %}
+                <div class="form-row">
+                    {{ field.label_tag }}{{ field }}
+                    {% if field.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ field.help_text }}</li></ul>
+                    {% endif %}
+                    {{ field.errors }}
+                </div>
+                {% endfor %}
+            </fieldset>
+            <input type="hidden" name="_record" value="{{ record }}" />
+            <input type="hidden" name="_page" value="{{ page }}" />
+            <div class="submit-row">
+                {% if can_delete %}
+                <input type="submit" name="_delete" value="删除" class="delete-box" />
+                {% endif %}
+                <input type="submit" name="_back" value="返回" />
+                <input type="submit" name="_continue" value="保存并继续编辑" />
+                <input type="submit" name="_save" value="保存" class="default" />
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock content %}

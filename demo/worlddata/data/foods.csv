@@ -1,0 +1,3 @@
+key,name,typeclass,desc,max_stack,unique,can_remove,can_discard,icon,hp,mp
+food_bread,面包,CLASS_FOOD,面包可以帮你恢复少许生命。,10,1,1,1,icon_bread,10,0
+food_apple,苹果,CLASS_FOOD,苹果可以帮你恢复一些生命。,20,1,1,1,icon_apple,20,0
