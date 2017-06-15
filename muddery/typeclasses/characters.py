@@ -73,6 +73,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         if not self.attributes.has("team"):
             self.db.team = 0
 
+
         # init equipments
         if not self.attributes.has("equipments"):
             self.db.equipments = {}
@@ -102,6 +103,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         Init the character.
         """
+        # By Mars
+        #if not self.attributes.has("hunger"):
+        self.db.hunger = 320
+        #if not self.attributes.has("hungerMax"):
+        self.db.hungerMax = 500
+
         super(MudderyCharacter, self).after_data_loaded()
 
         # update equipment positions
