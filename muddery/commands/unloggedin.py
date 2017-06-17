@@ -349,7 +349,7 @@ class CmdUnconnectedCreate(Command):
                     try:
                         default_home_key = GAME_SETTINGS.get("default_player_home_key")
                         if default_home_key:
-                            rooms = utils.search_obj_data_key(default_home_key)
+                            rooms = search_obj_data_key(default_home_key)
                             default_home = rooms[0]
                     except:
                         pass
@@ -473,19 +473,25 @@ class CmdUnconnectedCreateConnect(Command):
             if new_player:
                 if MULTISESSION_MODE < 2:
                     default_home = settings.DEFAULT_HOME
+                    print("default_home: %s" % default_home)
                     try:
                         default_home_key = GAME_SETTINGS.get("default_player_home_key")
+                        print("default_home_key: %s" % default_home_key)
                         if default_home_key:
-                            rooms = utils.search_obj_data_key(default_home_key)
+                            rooms = search_obj_data_key(default_home_key)
+                            print("rooms1: %s" % rooms)
                             default_home = rooms[0]
                     except:
                         pass
 
                     start_location = default_home
+                    print("start_location: %s" % start_location)
                     try:
                         start_location_key = GAME_SETTINGS.get("start_location_key")
+                        print("start_location_key: %s" % start_location_key)
                         if start_location_key:
                             rooms = search_obj_data_key(start_location_key)
+                            print("rooms2: %s" % rooms)
                             start_location = rooms[0]
                     except:
                         pass
@@ -627,6 +633,8 @@ def _create_character(character_key, level, session,
     Helper function, creates a character based on a player's name.
     This is meant for Guest and MULTISESSION_MODE < 2 situations.
     """
+    print("location: %s" % location)
+    print("home: %s" % home)
     try:
         new_character = create.create_object(typeclass, key=new_player.key, location=location,
                                              home=home, permissions=permissions)

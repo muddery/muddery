@@ -10,7 +10,8 @@ import muddery
 from muddery.server.upgrader import utils
 from muddery.server.upgrader import upgrader_0_0_0
 from muddery.server.upgrader import upgrader_0_2_0
-
+from muddery.server.upgrader import upgrader_0_2_2
+from muddery.server.launcher import utils as launcher_utils
 
 class UpgradeHandler(object):
     """
@@ -23,8 +24,9 @@ class UpgradeHandler(object):
         self.upgrader_list = []
         self.upgrader_list.append(upgrader_0_0_0.Upgrader())
         self.upgrader_list.append(upgrader_0_2_0.Upgrader())
+        self.upgrader_list.append(upgrader_0_2_2.Upgrader())
 
-    def upgrade_game(self, game_dir, game_template, muddery_lib):
+    def upgrade_game(self, game_dir, template, muddery_lib):
         # Get first two version numbers.
         if not os.path.exists(game_dir):
             print("\nCan not find dir '%s'.\n" % game_dir)
@@ -34,9 +36,13 @@ class UpgradeHandler(object):
             print("\nThe game is still running, stop it first.\n")
             return
 
-        # Get game version
-        game_ver = utils.get_data_version(game_dir)
-        print("Game version: %s" % (game_ver,))
+        # Get game config
+        game_ver, game_template = launcher_utils.get_game_config(game_dir)
+        ver_str = ".".join([str(v) for v in game_ver])
+        print("Current game's version is %s." % ver_str)
+
+        if not template:
+            template = game_template
 
         # Get proper upgrader.
         upgrader = self.get_upgrader(game_ver)
@@ -49,13 +55,11 @@ class UpgradeHandler(object):
             utils.make_backup(game_dir)
 
             # do upgrade
-            upgrader.upgrade_game(game_dir, game_template, muddery_lib)
+            upgrader.upgrade_game(game_dir, template, muddery_lib)
             print("\nYour game has been upgraded to muddery version %s.\n" % muddery.__version__)
 
-            # copy version file
-            version_src = os.path.join(muddery_lib, "VERSION.txt")
-            version_dest = os.path.join(game_dir, "muddery_version.txt")
-            shutil.copy2(version_src, version_dest)
+            # create config file
+            launcher_utils.create_config_file(game_dir, template)
 
         except Exception, e:
             print("\nUpgrade failed: %s\n" % e)
@@ -72,9 +76,10 @@ class UpgradeHandler(object):
         Returns:
             None
         """
-        # Get game version
-        game_ver = utils.get_data_version(data_path)
-        print("Game data version: %s" % (game_ver,))
+        # Get game config
+        game_ver, game_template = launcher_utils.get_game_config(data_path)
+        ver_str = ".".join([str(v) for v in game_ver])
+        print("Data's version is %s." % ver_str)
 
         # Get proper upgrader.
         upgrader = self.get_upgrader(game_ver)
@@ -113,5 +118,19 @@ class UpgradeHandler(object):
                 return upgrader
         return None
 
+    def can_upgrade(self, game_ver):
+        """
+        Check if the game need upgrade.
+
+        Args:
+            game_ver: (tuple) version number's list.
+
+        Returns:
+            (bool)need upgrade or not
+        """
+        for upgrader in self.upgrader_list:
+            if upgrader.can_upgrade(game_ver):
+                return True
+        return False
 
 UPGRADE_HANDLER = UpgradeHandler()
