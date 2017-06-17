@@ -10,7 +10,6 @@ import zipfile
 import shutil
 from django.conf import settings
 from muddery.server.upgrader.upgrade_handler import UPGRADE_HANDLER
-from muddery.server.upgrader.utils import get_data_version
 from muddery.worlddata.data_sets import DATA_SETS
 
 
