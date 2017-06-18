@@ -107,16 +107,6 @@ class game_settings(models.Model):
                                            default=1.5,
                                            validators=[MinValueValidator(0.0)])
 
-    # Player's reborn time after being killed. If it is below 0, players will be reborn immediately.
-    player_reborn_cd = models.FloatField(blank=True,
-                                         default=10.0,
-                                         validators=[MinValueValidator(0.0)])
-
-    # NPC's reborn time after being killed. If it is below 0, NPCs will not be reborn.
-    npc_reborn_cd = models.FloatField(blank=True,
-                                      default=10.0,
-                                      validators=[MinValueValidator(0.0)])
-
     # Allow players to give up quests.
     can_give_up_quests = models.BooleanField(blank=True, default=True)
 
@@ -880,6 +870,9 @@ class world_npcs(models.Model):
 
     # NPC's level
     level = models.PositiveIntegerField(blank=True, default=1)
+    
+    # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
+    reborn_time = models.PositiveIntegerField(blank=True, default=0)
 
     # the condition for showing the NPC
     condition = models.TextField(blank=True)
@@ -927,6 +920,9 @@ class common_characters(models.Model):
 
     # Character's level.
     level = models.PositiveIntegerField(blank=True, default=1)
+    
+    # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
+    reborn_time = models.PositiveIntegerField(blank=True, default=0)
 
     # Character's icon resource.
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
