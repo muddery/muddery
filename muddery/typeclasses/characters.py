@@ -10,6 +10,8 @@ creation commands.
 
 from __future__ import print_function
 
+from twisted.internet import reactor
+from twisted.internet.task import deferLater
 from django.conf import settings
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
@@ -21,6 +23,8 @@ from muddery.utils.builder import build_object
 from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.loot_handler import LootHandler
 from muddery.worlddata.data_sets import DATA_SETS
+from muddery.utils.builder import delete_object
+from muddery.utils.localized_strings_handler import _
 
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
@@ -88,6 +92,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             self.db.completed_quests = set()
         if not self.attributes.has("current_quests"):
             self.db.current_quests = {}
+        
+        self.target = None
+        self.reborn_time = 0
 
     def at_init(self):
         """
@@ -97,12 +104,17 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # clear target
         self.target = None
+        
+        # clear reborn time
+        self.reborn_time = 0
 
     def after_data_loaded(self):
         """
         Init the character.
         """
         super(MudderyCharacter, self).after_data_loaded()
+        
+        self.reborn_time = getattr(self.dfield, "reborn_time", 0)
 
         # update equipment positions
         self.reset_equip_positions()
@@ -662,6 +674,35 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.event.at_character_die()
         self.event.at_character_kill(killers)
 
+        # notify its location
+        location = self.location
+
+        if self.reborn_time <= 0:
+            # Can not reborn.
+            delete_object(self.dbref)
+        else:
+            # Set reborn timer.
+            self.defer = deferLater(reactor, self.reborn_time, self.reborn)
+
+        if location:
+            for content in location.contents:
+                if content.has_player:
+                    content.show_location()
+
+    def reborn(self):
+        """
+        Reborn after being killed.
+        """
+        # Recover all hp.
+        self.db.hp = self.max_hp
+
+        # Reborn at its home.
+        if self.home:
+            self.move_to(self.home, quiet=True)
+            for content in self.home.contents:
+                if content.has_player:
+                    content.show_location()
+        
     def get_combat_commands(self):
         """
         This returns a list of combat commands.

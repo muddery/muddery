@@ -7,8 +7,6 @@ class GameSettingsAdmin(admin.ModelAdmin):
     list_display = ('connection_screen',
                     'global_cd',
                     'auto_cast_skill_cd',
-                    'player_reborn_cd',
-                    'npc_reborn_cd',
                     'can_give_up_quests',
                     'can_close_dialogue',
                     'single_dialogue_sentence',

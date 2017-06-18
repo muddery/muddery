@@ -94,7 +94,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         super(MudderyPlayerCharacter, self).after_data_loaded()
 
-        self.reborn_cd = GAME_SETTINGS.get("player_reborn_cd")
         self.solo_mode = GAME_SETTINGS.get("solo_mode")
 
         self.available_channels = {}
@@ -1053,34 +1052,27 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         This character is killed. Move it to it's home.
         """
+
+        # player's character can always reborn
+        if self.reborn_time < 1:
+            self.reborn_time = 1
+
         super(MudderyPlayerCharacter, self).die(killers)
         
         self.msg({"msg": _("You died.")})
 
-        if self.reborn_cd <= 0:
-            # Reborn immediately
-            self.reborn()
-        else:
-            # Set reborn timer.
-            TICKER_HANDLER.add(self.reborn_cd, self.reborn)
-
+        if self.reborn_time > 0:
             self.msg({"msg": _("You will be reborn at {c%(p)s{n in {c%(s)s{n seconds.") %
-                             {'p': self.home.get_name(), 's': self.reborn_cd}})
+                             {'p': self.home.get_name(), 's': self.reborn_time}})
 
     def reborn(self):
         """
         Reborn after being killed.
         """
-        TICKER_HANDLER.remove(self.reborn_cd, self.reborn)
+        super(MudderyPlayerCharacter, self).reborn()
 
-        # Recover all hp.
-        self.db.hp = self.max_hp
         self.show_status()
-
-        # Reborn at its home.
-        if self.home:
-            self.move_to(self.home, quiet=True)
-            self.msg({"msg": _("You are reborn at {c%s{n.") % self.home.get_name()})
+        self.msg({"msg": _("You are reborn at {c%s{n.") % self.home.get_name()})
 
     def save_current_dialogue(self, sentences_list, npc):
         """
