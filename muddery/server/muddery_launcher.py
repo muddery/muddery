@@ -19,11 +19,11 @@ import sys
 import django.core.management
 from argparse import ArgumentParser
 from muddery.server.launcher import configs
-from muddery.server.launcher import utils
-from evennia.server import evennia_launcher
 
 # add evennia's path
-# sys.path.insert(1, configs.EVENNIA_LIB)
+sys.path.insert(1, configs.EVENNIA_LIB)
+from evennia.server import evennia_launcher
+from muddery.server.launcher import utils
 
 
 def main():
