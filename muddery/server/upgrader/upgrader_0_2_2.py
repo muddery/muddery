@@ -20,7 +20,7 @@ class Upgrader(BaseUpgrader):
     from_min_version = (0, 2, 2)
 
     # from max version 0.2.2 (not include this version)
-    from_max_version = (0, 2, 3)
+    from_max_version = (0, 2, 4)
 
     target_version = None
     
@@ -33,7 +33,7 @@ class Upgrader(BaseUpgrader):
             game_template: (string) the game template used to upgrade the game dir.
             muddery_lib: (string) muddery's dir
         """
-        print("Upgrading game 0.2.2-0.2.3 %s." % game_dir)
+        print("Upgrading game 0.2.2-0.2.4 %s." % game_dir)
 
         os.chdir(game_dir)
         init_game_directory(game_dir, check_db=False)
