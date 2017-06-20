@@ -954,6 +954,10 @@ class CmdAttack(Command):
         if not caller.is_alive():
             caller.msg({"alert":_("You are died.")})
             return
+            
+        if not caller.location or caller.location.peaceful:
+            caller.msg({"alert":_("You can not attack in this place.")})
+            return
 
         if not self.args:
             caller.msg({"alert":_("You should select a target.")})
@@ -978,13 +982,13 @@ class CmdAttack(Command):
         # set up combat
         if caller.is_in_combat():
             # caller is in battle
-            message = {"alert": _("You are already in a combat.")}
+            message = {"alert": _("You are in another combat.")}
             caller.msg(message)
             return
 
         if target.is_in_combat():
             # caller is in battle
-            message = {"alert": _("%s is already in a combat." % target.name)}
+            message = {"alert": _("%s is in another combat." % target.name)}
             caller.msg(message)
             return
 

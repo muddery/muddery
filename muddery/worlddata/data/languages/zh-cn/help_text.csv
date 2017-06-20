@@ -54,6 +54,7 @@ help_world_rooms,"key","房间的标识，必须在所有数据中保持唯一�
 help_world_rooms,"name","游戏中显示出的房间名称。"
 help_world_rooms,"typeclass","房间的类型。"
 help_world_rooms,"desc","游戏中显示出的房间描述信息。"
+help_world_rooms,"peaceful","玩家不能在和平区域里攻击。"
 help_world_rooms,"location","房间所在的区域。"
 help_world_rooms,"position","房间位置的坐标，格式：(x坐标, y坐标)。"
 help_world_rooms,"icon","游戏中显示的图标。"

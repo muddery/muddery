@@ -33,6 +33,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         """
         super(MudderyRoom, self).at_object_creation()
 
+        self.peaceful = False
         self.position = None
         self.background = None
 
@@ -41,6 +42,8 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         Set data_info to the object.
         """
         super(MudderyRoom, self).after_data_loaded()
+        
+        self.peaceful = getattr(self.dfield, "peaceful", False)
 
         self.position = None
         try:
@@ -109,6 +112,9 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         command to call.
         """
         info = super(MudderyRoom, self).get_appearance(caller)
+        
+        # peaceful
+        info["peaceful"] = getattr(self, "peaceful", False)
 
         # add background
         info["background"] = getattr(self, "background", None)

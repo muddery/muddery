@@ -26,6 +26,7 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
+from evennia.comms.models import ChannelDB
 from evennia import TICKER_HANDLER
 
 
@@ -244,7 +245,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Returns:
             (dict) channels
         """
-        channels = {"say": _("Say")}
+        channels = {"": _("Say", category="channels"),
+                    "Public": _("Public", category="channels")}
 
         commands = False
         if self.player:
@@ -1279,20 +1281,29 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Returns:
             None
         """
-        if not channel in self.available_channels:
+        if not (channel in self.available_channels):
             self.msg({"alert":_("You can not say here.")})
             return
 
-        if channel == "say":
-            # calling the speech hook on the location
-            message = self.location.at_say(self, message)
-
-            # Feedback for the object doing the talking.
-            self.msg(_("You say, '%s'") % message)
-
+        # Build the string to emit to neighbors.
+        emit_string = "%s: %s" % (self.get_name(), message)
+            
+        if not channel:
+            # Say in the room.
             solo_mode = GAME_SETTINGS.get("solo_mode")
-            if not solo_mode:
-                # Build the string to emit to neighbors.
-                emit_string = _("%s says, '%s'") % (self.get_name(), message)
-                self.location.msg_contents(emit_string,
-                                           exclude=self)
+            if solo_mode:
+                self.msg(emit_string)
+            else:
+                self.location.msg_contents(emit_string)
+        else:
+            channels = ChannelDB.objects.filter(db_key=channel)
+            if not channels:
+                self.msg(_("You can not talk in this channel."))
+                return
+                
+            channel_obj = channels[0]
+            if not channel_obj.access(self, channel, "send"):
+                self.msg(_("You can not access this channel."))
+                return
+
+            channel_obj.msg(emit_string)
