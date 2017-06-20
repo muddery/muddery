@@ -150,7 +150,7 @@ class MudderyObject(DefaultObject):
         """
         pass
 
-    def set_data_key(self, key):
+    def set_data_key(self, key, set_location=True):
         """
         Set data_info's model and key. It puts info into attributes.
             
@@ -168,7 +168,7 @@ class MudderyObject(DefaultObject):
         utils.set_obj_data_key(self, key)
         
         # Load data.
-        self.load_data()
+        self.load_data(set_location=set_location)
 
         # call data_key hook
         self.after_data_key_changed()
@@ -213,7 +213,7 @@ class MudderyObject(DefaultObject):
             for field in data._meta.fields:
                 setattr(self.dfield, field.name, data.serializable_value(field.name))
 
-    def load_data(self):
+    def load_data(self, set_location=True):
         """
         Set data to the object."
         """
@@ -230,7 +230,10 @@ class MudderyObject(DefaultObject):
             self.set_typeclass(typeclass)
 
         self.after_data_loaded()
-        
+
+        if not self.location and set_location:
+            self.set_location(getattr(self.dfield, "location", ""))
+
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded().
 
@@ -245,9 +248,6 @@ class MudderyObject(DefaultObject):
         Called after self.data_loaded().
         """        
         self.set_name(getattr(self.dfield, "name", ""))
-
-        if not self.location:
-            self.set_location(getattr(self.dfield, "location", ""))
 
         self.set_desc(getattr(self.dfield, "desc", ""))
 

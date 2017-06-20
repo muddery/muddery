@@ -13,6 +13,7 @@ to be modified.
 """
 
 from evennia.comms.comms import DefaultChannel
+from muddery.utils.localized_strings_handler import _
 
 class MudderyChannel(DefaultChannel):
     """
@@ -57,4 +58,19 @@ class MudderyChannel(DefaultChannel):
         post_send_message(msg) - called just after message was sent to channel
 
     """
-    pass
+
+    def channel_prefix(self, msg=None, emit=False):
+
+        """
+        Hook method. How the channel should prefix itself for users.
+
+        Args:
+            msg (str, optional): Prefix text
+            emit (bool, optional): Switches to emit mode, which usually
+                means to not prefix the channel's info.
+
+        Returns:
+            prefix (str): The created channel prefix.
+
+        """
+        return '' if emit else '[%s] ' % _(self.key, category="channels")
