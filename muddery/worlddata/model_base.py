@@ -287,6 +287,9 @@ class world_rooms(models.Model):
 
     # room's description for display
     desc = models.TextField(blank=True)
+    
+    # players can not fight in peaceful romms
+    peaceful = models.BooleanField(blank=True, default=False)
 
     # The key of a world area.
     # The room's location, it must be a area.
