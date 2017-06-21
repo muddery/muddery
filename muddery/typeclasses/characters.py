@@ -10,6 +10,8 @@ creation commands.
 
 from __future__ import print_function
 
+from twisted.internet import reactor
+from twisted.internet.task import deferLater
 from django.conf import settings
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
@@ -21,6 +23,8 @@ from muddery.utils.builder import build_object
 from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.loot_handler import LootHandler
 from muddery.worlddata.data_sets import DATA_SETS
+from muddery.utils.builder import delete_object
+from muddery.utils.localized_strings_handler import _
 
 
 class MudderyCharacter(MudderyObject, DefaultCharacter):
@@ -89,27 +93,41 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             self.db.completed_quests = set()
         if not self.attributes.has("current_quests"):
             self.db.current_quests = {}
-
-    def at_init(self):
-        """
-        Init the character.
-        """
-        super(MudderyCharacter, self).at_init()
-
-        # clear target
+        
         self.target = None
+        self.reborn_time = 0
+        
+        # A cloned character will be deleted after the combat finished.
+        self.is_clone = False
 
     def after_data_loaded(self):
         """
         Init the character.
         """
+        super(MudderyCharacter, self).after_data_loaded()
+
+        # clear target
+        self.target = None
+
+
+    def after_data_loaded(self):
+        """
+        Init the character.
+        """
+        super(MudderyCharacter, self).after_data_loaded()
+
+        # set reborn time
+        self.reborn_time = getattr(self.dfield, "reborn_time", 0)
+
+        # A cloned character will be deleted after the combat finished.
+        self.is_clone = False
+        
         # By Mars
         #if not self.attributes.has("hunger"):
         self.db.hunger = 320
         #if not self.attributes.has("hungerMax"):
         self.db.hungerMax = 500
 
-        super(MudderyCharacter, self).after_data_loaded()
 
         # update equipment positions
         self.reset_equip_positions()
@@ -521,12 +539,13 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             target_level = obj.db.level
 
         # Create a target.
-        target = build_object(target_key)
+        target = build_object(target_key, set_location=False)
         if not target:
             logger.log_errmsg("Can not create the target %s." % target_key)
             return False
 
         target.set_level(target_level)
+        target.is_clone = True
         return self.attack_target(target, desc)
 
     ########################################
@@ -615,6 +634,15 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # remove combat commands
         self.cmdset.delete(settings.CMDSET_COMBAT)
+        
+        if self.is_clone:
+            # notify its location
+            location = self.location
+            delete_object(self.dbref)
+            if location:
+                for content in location.contents:
+                    if content.has_player:
+                        content.show_location()
 
     def is_in_combat(self):
         """
@@ -669,6 +697,21 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.event.at_character_die()
         self.event.at_character_kill(killers)
 
+        if self.reborn_time > 0:
+            # Set reborn timer.
+            self.defer = deferLater(reactor, self.reborn_time, self.reborn)
+
+    def reborn(self):
+        """
+        Reborn after being killed.
+        """
+        # Recover all hp.
+        self.db.hp = self.max_hp
+
+        # Reborn at its home.
+        if self.home:
+            self.move_to(self.home, quiet=True)
+        
     def get_combat_commands(self):
         """
         This returns a list of combat commands.

@@ -39,9 +39,6 @@ class Upgrader(BaseUpgrader):
 
         temp_dir = None
         try:
-            # Move game dir to temp dir.
-            temp_dir = utils.to_temp_dir(game_dir)
-
             # get settings
             setting_list = {"ALLOWED_HOSTS",
                             "WEBSERVER_PORTS",
@@ -49,21 +46,22 @@ class Upgrader(BaseUpgrader):
                             "AMP_PORT",
                             "LANGUAGE_CODE",
                             "SECRET_KEY"}
-            setting_dict = utils.get_settings(temp_dir, setting_list)
+            setting_dict = utils.get_settings(game_dir, setting_list)
 
-            # create new game
-            utils.create_game(game_dir, game_template, setting_dict)
+            # create new game in temp dir
+            temp_dir = utils.get_temp_dir_name(game_dir)
+            utils.create_game(temp_dir, game_template, setting_dict)
 
             # copy old files
             # database
-            utils.copy_path(temp_dir, game_dir, os.path.join("server", "muddery.db3"))
+            utils.copy_path(game_dir, temp_dir, os.path.join("server", "muddery.db3"))
 
             # migrations
-            shutil.rmtree(os.path.join(game_dir, "worlddata", "migrations"))
-            utils.copy_path(temp_dir, game_dir, os.path.join("worlddata", "migrations"))
+            shutil.rmtree(os.path.join(temp_dir, "worlddata", "migrations"))
+            utils.copy_path(game_dir, temp_dir, os.path.join("worlddata", "migrations"))
 
             # make new migrations
-            os.chdir(game_dir)
+            os.chdir(temp_dir)
             django_args = ["makemigrations"]
             django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
@@ -101,6 +99,12 @@ class Upgrader(BaseUpgrader):
             for data in DATA_SETS.shop_goods.objects.all():
                 data.full_clean()
                 data.save()
+
+            # clear web dir
+            shutil.rmtree(os.path.join(game_dir, "web"))
+
+            # copy temp dir to game dir
+            utils.copy_tree(temp_dir, game_dir)
 
         finally:
             if temp_dir:

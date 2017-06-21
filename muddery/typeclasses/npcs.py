@@ -45,8 +45,6 @@ class MudderyNPC(MudderyCharacter):
         
         # load shops
         self.load_shops()
-        
-        self.reborn_cd = GAME_SETTINGS.get("npc_reborn_cd")
 
     def load_dialogues(self):
         """
@@ -113,42 +111,3 @@ class MudderyNPC(MudderyCharacter):
         Returns (can_provide_quest, can_complete_quest).
         """
         return DIALOGUE_HANDLER.have_quest(caller, self)
-
-    def die(self, killers):
-        """
-        This npc is killed. Reborn in settings.NPC_REBORN_CD seconds.
-        """
-        super(MudderyNPC, self).die(killers)
-
-        location = self.location
-
-        if self.reborn_cd <= 0:
-            # Can not reborn.
-            delete_object(self.dbref)
-        else:
-            # Remove from its location.
-            self.move_to(None, quiet=True, to_none=True)
-            # Set reborn timer.
-            TICKER_HANDLER.add(self.reborn_cd, self.reborn)
-
-        if location:
-            for content in location.contents:
-                if content.has_player:
-                    content.show_location()
-
-    def reborn(self):
-        """
-        Reborn after being killed.
-        """
-        TICKER_HANDLER.remove(self.reborn_cd, self.reborn)
-
-        # Recover all hp.
-        self.db.hp = self.max_hp
-
-        # Reborn at its home.
-        if self.home:
-            self.move_to(self.home, quiet=True)
-
-            for content in self.home.contents:
-                if content.has_player:
-                    content.show_location()
