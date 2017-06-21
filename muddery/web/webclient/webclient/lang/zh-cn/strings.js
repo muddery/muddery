@@ -81,7 +81,6 @@ var local_string_zh_cn = {
     "EXP": "经验",
     "Exp": "经验",
     "HP": "生命",
-    "HUNGER": "饱食度",
     "ATTACK": "攻击",
     "Attack": "攻击",
     "DEFENCE": "防御",

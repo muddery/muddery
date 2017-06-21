@@ -54,4 +54,4 @@ LANGUAGE_CODE = 'zh-cn'
 # Django's cookies. Do not share this with anyone. Changing it will
 # log out all active web browsing sessions. Game web client sessions
 # may survive.
-SECRET_KEY = '4"{`>BF5*@NhH9r;PA:]Jvn#Tc(X1C%<7i0Vo|s='
+SECRET_KEY = '6zP]+lG{[:f,(%7^k5RNJdT0iZcs*>Y.r2}Vm$HI'

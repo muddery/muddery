@@ -116,6 +116,8 @@ var client = {
                                          status["max_exp"],
                                          status["hp"],
                                          status["max_hp"],
+                                         status["hunger"],
+                                         status["hungerMax"],
                                          status["attack"],
                                          status["defence"]);
                 }

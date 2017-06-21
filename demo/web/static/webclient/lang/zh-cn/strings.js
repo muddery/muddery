@@ -122,4 +122,5 @@ var local_string_zh_cn = {
     "HAND: ": "手：",
     "CHEST: ": "身：",
     "LEG: ": "腿：",
+    "HUNGER: ": "饱食度: ",
 };

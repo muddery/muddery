@@ -339,7 +339,7 @@ var controller = {
     },
 
     // set player's status
-    setStatus: function(level, exp, max_exp, hp, max_hp, attack, defence) {
+    setStatus: function(level, exp, max_exp, hp, max_hp,hunger,hungerMax, attack, defence) {
         $("#prompt_level").text(level);
 
         var exp_str = "--";
@@ -352,7 +352,7 @@ var controller = {
         $("#prompt_hp").text(hp_str);
 
         var frame_ctrl = this.getFrameController("#frame_information");
-        frame_ctrl.setStatus(level, exp, max_exp, hp, max_hp, attack, defence);
+        frame_ctrl.setStatus(level, exp, max_exp, hp, max_hp, hunger, hungerMax, attack, defence);
     },
 
 	//////////////////////////////////////////
@@ -583,7 +583,6 @@ var controller = {
             return;
         }
 
-        var width = popup_content.width();
         frame.innerWidth(popup_content.width());
         frame.height(0);
         
