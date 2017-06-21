@@ -26,6 +26,7 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
+from evennia.comms.models import ChannelDB
 from evennia import TICKER_HANDLER
 
 
@@ -94,7 +95,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         super(MudderyPlayerCharacter, self).after_data_loaded()
 
-        self.reborn_cd = GAME_SETTINGS.get("player_reborn_cd")
         self.solo_mode = GAME_SETTINGS.get("solo_mode")
 
         self.available_channels = {}
@@ -245,7 +245,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Returns:
             (dict) channels
         """
-        channels = {"say": _("Say")}
+        channels = {"": _("Say", category="channels"),
+                    "Public": _("Public", category="channels")}
 
         commands = False
         if self.player:
@@ -1056,34 +1057,27 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         This character is killed. Move it to it's home.
         """
+
+        # player's character can always reborn
+        if self.reborn_time < 1:
+            self.reborn_time = 1
+
         super(MudderyPlayerCharacter, self).die(killers)
         
         self.msg({"msg": _("You died.")})
 
-        if self.reborn_cd <= 0:
-            # Reborn immediately
-            self.reborn()
-        else:
-            # Set reborn timer.
-            TICKER_HANDLER.add(self.reborn_cd, self.reborn)
-
+        if self.reborn_time > 0:
             self.msg({"msg": _("You will be reborn at {c%(p)s{n in {c%(s)s{n seconds.") %
-                             {'p': self.home.get_name(), 's': self.reborn_cd}})
+                             {'p': self.home.get_name(), 's': self.reborn_time}})
 
     def reborn(self):
         """
         Reborn after being killed.
         """
-        TICKER_HANDLER.remove(self.reborn_cd, self.reborn)
+        super(MudderyPlayerCharacter, self).reborn()
 
-        # Recover all hp.
-        self.db.hp = self.max_hp
         self.show_status()
-
-        # Reborn at its home.
-        if self.home:
-            self.move_to(self.home, quiet=True)
-            self.msg({"msg": _("You are reborn at {c%s{n.") % self.home.get_name()})
+        self.msg({"msg": _("You are reborn at {c%s{n.") % self.home.get_name()})
 
     def save_current_dialogue(self, sentences_list, npc):
         """
@@ -1290,20 +1284,29 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Returns:
             None
         """
-        if not channel in self.available_channels:
+        if not (channel in self.available_channels):
             self.msg({"alert":_("You can not say here.")})
             return
 
-        if channel == "say":
-            # calling the speech hook on the location
-            message = self.location.at_say(self, message)
-
-            # Feedback for the object doing the talking.
-            self.msg(_("You say, '%s'") % message)
-
+        # Build the string to emit to neighbors.
+        emit_string = "%s: %s" % (self.get_name(), message)
+            
+        if not channel:
+            # Say in the room.
             solo_mode = GAME_SETTINGS.get("solo_mode")
-            if not solo_mode:
-                # Build the string to emit to neighbors.
-                emit_string = _("%s says, '%s'") % (self.get_name(), message)
-                self.location.msg_contents(emit_string,
-                                           exclude=self)
+            if solo_mode:
+                self.msg(emit_string)
+            else:
+                self.location.msg_contents(emit_string)
+        else:
+            channels = ChannelDB.objects.filter(db_key=channel)
+            if not channels:
+                self.msg(_("You can not talk in this channel."))
+                return
+                
+            channel_obj = channels[0]
+            if not channel_obj.access(self, channel, "send"):
+                self.msg(_("You can not access this channel."))
+                return
+
+            channel_obj.msg(emit_string)

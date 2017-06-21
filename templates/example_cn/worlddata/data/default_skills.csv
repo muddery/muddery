@@ -1,5 +1,6 @@
 character,skill
-MODEL_PLAYER,skill_normal_hit
 MODEL_PLAYER,skill_normal_hp
+MODEL_PLAYER,skill_normal_hit
+MODEL_PLAYER,skill_escape
 MODEL_NPC_COMMON,skill_normal_hit
 MODEL_MOB_ROBOT_A,skill_normal_hit

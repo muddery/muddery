@@ -10,35 +10,7 @@ import os
 import shutil
 from datetime import datetime
 from evennia.server import evennia_launcher
-from muddery.server import muddery_launcher
-
-
-def get_data_version(path):
-    """
-    Transform a vesion string to version and sub version numbers.
-
-    Args:
-        path: (string) the path of the game or data.
-
-    Returns:
-        (tuple): data's version number list.
-    """
-    game_ver = ""
-    try:
-        with open(os.path.join(path, "muddery_version.txt"), 'r') as f:
-            game_ver = f.read().strip()
-    except Exception, e:
-        pass
-
-    ver_list = game_ver.split('.')
-    num_list = [0, 0, 0]
-    for i, ver in enumerate(ver_list):
-        if i >= len(num_list):
-            break
-        if ver:
-            num_list[i] = int(ver)
-
-    return tuple(num_list)
+from muddery.server.launcher import utils as launcher_utils
 
 
 def compare_version(ver1, ver2):
@@ -83,7 +55,7 @@ def make_backup(game_dir):
         raise(Exception)
 
 
-def to_temp_dir(game_dir):
+def get_temp_dir_name(game_dir):
     """
     Move game dir to temp dir.
     """
@@ -93,8 +65,6 @@ def to_temp_dir(game_dir):
     while os.path.exists(temp_dir):
         temp_dir = "%s(%s)" % (base_temp_dir, count)
         count += 1
-
-    os.rename(game_dir, temp_dir)
 
     return temp_dir
 
@@ -109,7 +79,7 @@ def create_game(game_dir, game_template, setting_dict):
     Returns:
         None
     """
-    muddery_launcher.create_game_directory(game_dir, game_template, setting_dict)
+    launcher_utils.create_game_directory(game_dir, game_template, setting_dict)
 
     os.chdir(game_dir)
     evennia_launcher.init_game_directory(game_dir, check_db=False)

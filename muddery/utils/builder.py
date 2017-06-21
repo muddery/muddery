@@ -41,7 +41,7 @@ def get_object_record(obj_key):
     return record
 
 
-def build_object(obj_key, caller=None):
+def build_object(obj_key, caller=None, set_location=True):
     """
     Build objects of a model.
 
@@ -86,7 +86,7 @@ def build_object(obj_key, caller=None):
 
     try:
         # Set data info.
-        obj.set_data_key(record.key)
+        obj.set_data_key(record.key, set_location=set_location)
     except Exception, e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
         print(ostring)

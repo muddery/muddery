@@ -349,7 +349,7 @@ class CmdUnconnectedCreate(Command):
                     try:
                         default_home_key = GAME_SETTINGS.get("default_player_home_key")
                         if default_home_key:
-                            rooms = utils.search_obj_data_key(default_home_key)
+                            rooms = search_obj_data_key(default_home_key)
                             default_home = rooms[0]
                     except:
                         pass
@@ -476,7 +476,7 @@ class CmdUnconnectedCreateConnect(Command):
                     try:
                         default_home_key = GAME_SETTINGS.get("default_player_home_key")
                         if default_home_key:
-                            rooms = utils.search_obj_data_key(default_home_key)
+                            rooms = search_obj_data_key(default_home_key)
                             default_home = rooms[0]
                     except:
                         pass

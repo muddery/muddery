@@ -11,6 +11,7 @@ from django.apps import apps
 from django.conf import settings
 from evennia.utils import logger
 from evennia.settings_default import GAME_DIR
+from muddery.server.launcher import configs
 from muddery.utils.exception import MudderyError
 from muddery.utils import writers
 
@@ -116,8 +117,8 @@ def export_zip_all(file, file_type=None):
                 archive.write(temp, filename)
 
             # add version file
-            version_file = os.path.join(GAME_DIR, "muddery_version.txt")
-            archive.write(version_file, "muddery_version.txt")
+            version_file = os.path.join(GAME_DIR, configs.CONFIG_FILE)
+            archive.write(version_file, configs.CONFIG_FILE)
         finally:
             os.remove(temp)
 
