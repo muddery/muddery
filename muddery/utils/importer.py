@@ -10,6 +10,7 @@ import zipfile
 import shutil
 from django.conf import settings
 from muddery.server.upgrader.upgrade_handler import UPGRADE_HANDLER
+from muddery.server.launcher import configs
 from muddery.worlddata.data_sets import DATA_SETS
 
 
@@ -24,7 +25,7 @@ def unzip_data_all(file):
         archive.extractall(temp_path)
 
         # Upgrade game data.
-        UPGRADE_HANDLER.upgrade_data(temp_path)
+        UPGRADE_HANDLER.upgrade_data(temp_path, None, configs.MUDDERY_LIB)
 
         # import models one by one
         data_handlers = DATA_SETS.all_handlers
