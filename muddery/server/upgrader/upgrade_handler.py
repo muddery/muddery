@@ -66,7 +66,7 @@ class UpgradeHandler(object):
 
         return
 
-    def upgrade_data(self, data_path):
+    def upgrade_data(self, data_path, template, muddery_lib):
         """
         Upgrade game data.
 
@@ -81,6 +81,9 @@ class UpgradeHandler(object):
         ver_str = ".".join([str(v) for v in game_ver])
         print("Data's version is %s." % ver_str)
 
+        if not template:
+            template = game_template
+
         # Get proper upgrader.
         upgrader = self.get_upgrader(game_ver)
         if not upgrader:
@@ -88,7 +91,7 @@ class UpgradeHandler(object):
             return
 
         try:
-            upgrader.upgrade_data(data_path, None)
+            upgrader.upgrade_data(data_path, template, muddery_lib)
             print("\nYour game data have been upgraded to muddery version %s.\n" % muddery.__version__)
 
         except Exception, e:
