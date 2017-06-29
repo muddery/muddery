@@ -76,7 +76,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             self.db.mp = 1
         if not self.attributes.has("team"):
             self.db.team = 0
-
+        # By Mars
+        if not self.attributes.has("hunger"):
+            self.db.hunger = 100
+        if not self.attributes.has("hungerMax"):
+            self.db.hungerMax = 100
 
         # init equipments
         if not self.attributes.has("equipments"):
@@ -121,13 +125,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # A cloned character will be deleted after the combat finished.
         self.is_clone = False
-        
-        # By Mars
-        #if not self.attributes.has("hunger"):
-        self.db.hunger = 320
-        #if not self.attributes.has("hungerMax"):
-        self.db.hungerMax = 500
-
 
         # update equipment positions
         self.reset_equip_positions()
