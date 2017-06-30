@@ -1,0 +1,97 @@
+{% load staticfiles %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-AU">
+  <head>
+    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+    <meta name="author" content="haran" />
+    <meta name="generator" content="haran" />
+
+    {% if sidebar %}
+    <link rel="stylesheet" type="text/css" href="{% static "website/css/prosimii-screen-alt.css" %}" media="screen" title="Prosimii (Sidebar)" />
+    {% else %}
+    <link rel="stylesheet" type="text/css" href="{% static "website/css/prosimii-screen.css" %}" media="screen" title="Prosimii" />
+    {% endif %}
+    <link rel="stylesheet alternative" type="text/css" href="{% static "website/css/prosimii-print.css" %}" media="screen" title="Print Preview" />
+    <link rel="stylesheet" type="text/css" href="{% static "website/css/prosimii-print.css" %}" media="print" />
+    <link rel="stylesheet" type="text/css" href="{% static "public/css/bootstrap.min.css" %}" media="screen" />
+    <script src="{% static "public/js/jquery-1.11.1.min.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "public/js/jquery.cookie.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "public/js/bootstrap.min.js" %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static "public/js/d3.v3.min.js" %}" type="text/javascript" charset="utf-8"></script>
+
+    {% block header_ext %}
+    {% endblock %}
+
+    <title>{{game_name}} - {% if flatpage %}{{flatpage.title}}{% else %}{% block titleblock %}{{page_title}}{% endblock %}{% endif %}</title>
+  </head>
+
+  <body>
+    <!-- For non-visual user agents: -->
+      <div id="top"><a href="#main-copy" class="doNotDisplay doNotPrint">Skip to main content.</a></div>
+
+    <!-- ##### Header ##### -->
+
+    <div id="header">
+      <div class="superHeader">
+        <!--span>Sites:</span-->
+        <a href="http://cn.muddery.org" title="基于Python的开源在线文字游戏框架">cn.muddery.org</a>
+      </div>
+
+      <div class="midHeader">
+        <img src="{% static "website/images/muddery_logo.png" %}" align='left'/> <h1 class="headerTitle" lang="la">{{game_name}}</h1>
+        <div class="headerSubTitle" title="Slogan">
+        <!-- Insert a slogan here if you want -->
+        {{game_slogan}}			&nbsp;
+        </div>
+
+        <br class="doNotDisplay doNotPrint" />
+
+        <div class="headerLinks">
+          <span class="doNotDisplay">Tools:</span>
+          {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">登出 &laquo;</a>
+            <span class="doNotDisplay">|</span>
+            登录为 {{user.username}} &laquo;
+          {% else %}
+            <a href="{% url 'login' %}">登录 &laquo;</a>
+            <span class="doNotDisplay">|</span>
+            <a href="{% url 'to_be_implemented' %}">注册 &laquo;</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="subHeader">
+        <!--span class="doNotDisplay">Navigation:</span-->
+        <a href="/">主页</a> |
+        <a href="http://cn.muddery.org/">关于我们</a> |
+        <a href="{% url 'admin:index' %}">管理页面</a> |
+        <a href="{% url 'worlddata:index' %}">编辑游戏</a> |
+        <a href="/webclient/main.html">开始游戏</a>
+      </div>
+    </div>
+
+    <!-- ##### Side Menu ##### -->
+    {% block sidebar %}{% endblock %}
+    <!-- ##### Main Copy ##### -->
+
+    <div id="main-copy">
+      {% block content %}
+      {% endblock %}
+    </div>
+
+    <!-- ##### Footer ##### -->
+
+    <div id="footer">
+      <span class="doNotPrint">
+        Template design by 
+        <a href="http://www.oswd.org/designs/search/designer/id/3013/"
+        title="Other designs by haran">haran</a>. 
+        Powered by  
+        <a href="http://www.muddery.org">Muddery.</a>
+        <br />
+      </span>
+    </div>
+  </body>
+</html>

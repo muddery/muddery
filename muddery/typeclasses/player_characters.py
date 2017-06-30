@@ -765,9 +765,12 @@ class MudderyPlayerCharacter(MudderyCharacter):
                   "hp": self.db.hp,
                   "max_mp": self.max_mp,
                   "mp": self.db.mp,
+                  "hunger": self.db.hunger,
+                  "hungerMax": self.db.hungerMax,
                   "attack": self.attack,
                   "defence": self.defence}
 
+        print ("status:%s" % status)
         return status
 
     def show_equipments(self):

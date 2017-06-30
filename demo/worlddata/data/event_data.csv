@@ -1,0 +1,7 @@
+key,name,type,trigger_type,trigger_obj,condition
+event_colorfulworld_alley,初始对话,EVENT_DIALOGUE,EVENT_TRIGGER_ARRIVE,room_colorfulworld_alley,"can_provide_quest(""quest_find_survivor"")"
+event_colorfulworld_street,街道战斗,EVENT_ATTACK,EVENT_TRIGGER_ARRIVE,room_colorfulworld_street,"is_quest_completed(""quest_find_survivor"")"
+event_colorfulworld_street_quest,街道对话,EVENT_DIALOGUE,EVENT_TRIGGER_ARRIVE,room_colorfulworld_street,"can_provide_quest(""quest_find_survivor"")"
+event_colorfulworld_storeroom,储藏室战斗,EVENT_ATTACK,EVENT_TRIGGER_ARRIVE,room_colorfulworld_storeroom,"is_quest_in_progress(""quest_find_survivor"")"
+event_colorfulworld_gift_shop,礼品店战斗,EVENT_ATTACK,EVENT_TRIGGER_ARRIVE,room_colorfulworld_gift_shop,
+event_colorfulworld_find_survivor,幸存者对话,EVENT_DIALOGUE,EVENT_TRIGGER_KILL,mob_wu,

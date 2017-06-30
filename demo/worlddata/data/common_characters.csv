@@ -1,0 +1,4 @@
+key,name,typeclass,desc,model,level,icon
+player,玩家,CLASS_PLAYER,这是玩家。,MODEL_PLAYER,1,icon_player
+mob_wu,陌生人,CLASS_COMMON_MONSTER,这个人身材高大，但身上受了伤，活动有些不灵活。,MODEL_NPC_COMMON,1,icon_guard
+mob_robot_a,机器人A,CLASS_COMMON_MONSTER,这是个A型机器人。,MODEL_MOB_ROBOT_A,1,icon_robot

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+{% endblock %}
+
+{% block header_ext %}
+{% endblock %}
+
+{% block content %}
+<div class="rowOfBoxes">
+   <!--div class="twoThirds noBorderOnLeft"-->
+   <div class="noBorderOnLeft">
+      <h1>欢迎</h1>
+      <p>欢迎来到游戏的主页，这是Muddery的单人游戏演示，你可以通过<a href="/webclient/main.html">网页客户端</a>直接开始游戏。<br></br>
+      这个游戏是通过Muddery构建的，Muddery是一个用Python编写的在线文字游戏框架，所有的代码都是开源的，可以帮你快速构建起游戏框架。如果你想了解更多信息，欢迎访问我们的主页<a href="http://cn.muddery.org">cn.muddery.org</a>。
+   </div>
+</div>
+
+<div class="rowOfBoxes dividingBorderAbove">
+
+   <div class="quarter noBorderOnLeft">
+      <h1>玩家信息</h1>
+      <p>
+      共有<strong>{{num_players_registered}}</strong>个玩家注册，当前有<strong>{{num_players_connected}}</strong>个玩家在线。<br><br>
+      最近一周有<strong>{{num_players_registered_recent}}</strong>个玩家注册，有<strong>{{num_players_connected_recent}}</strong>个玩家登录过。
+      </p>
+   </div>
+
+   <div class="quarter">
+      <h1>最近登录</h1>
+      <ul>
+      {% for player in players_connected_recent %}
+      <li>{{player.username}} -- <em>{{player.last_login|timesince}} 之前</em></li>
+      {% endfor %}
+      </ul>
+      <p class="filler"><!-- Filler para to extend left vertical line --></p>
+   </div>
+
+   <div class="quarter">
+      <h1>数据统计</h1>
+      <ul>
+      <li>{{num_players_registered}}个玩家，{{num_characters}}个角色。</li>
+      <li>{{num_rooms}}个房间，{{num_exits}}个出口。</li>
+      <li>{{num_others}}个其它物体。</li>
+
+      </ul>
+   </div>
+
+   <div class="quarter">
+      <h1>游戏简介</h1>
+      <p>你从噩梦中醒来，却看到原本熟悉的世界已经变得满目疮痍。你站在无人的街道上，没发觉在幽暗的角落里正有一双碧绿的眼睛紧紧盯着你……</p>
+   </div>
+
+</div>
+{% endblock %}

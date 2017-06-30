@@ -1126,7 +1126,7 @@ def server_operation(mode, service, interactive, profiler, logserver=False, doex
                 cmdstr.append('--iportal')
             cmdstr.append('--noserver')
             django.core.management.call_command(
-                'collectstatic', verbosity=1, interactive=False)
+                'collectstatic', verbosity=0, interactive=False)
         else:
             # all
             # for convenience we don't start logging of
@@ -1139,7 +1139,7 @@ def server_operation(mode, service, interactive, profiler, logserver=False, doex
             if logserver:
                 cmdstr.append('--logserver')
             django.core.management.call_command(
-                'collectstatic', verbosity=1, interactive=False)
+                'collectstatic', verbosity=0, interactive=False)
         if doexit:
             cmdstr.append('--doexit')
         cmdstr.extend([

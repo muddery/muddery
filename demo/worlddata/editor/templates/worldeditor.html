@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block header_ext %}
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static "worldeditor/css/worldeditor.css" %}">
+    <script src="{% static "worldeditor/js/worldeditor.js" %}" type="text/javascript" charset="utf-8"></script>
+{% endblock %}
+
+{% block content %}
+    <h1>世界编辑器</h1>
+    在世界编辑器中，你可以构建整个游戏世界。
+
+    <h2><a href="editor/defines.html">基本定义</a></h2>
+    这里定义了各种类型的基本值。
+
+    <h2><a href="editor/worldmap.html">世界地图</a></h2>
+    在这里可以编辑整个游戏世界的外观。
+
+    <h2><a href="editor/characters.html">角色</a></h2>
+    角色是可以自主活动或被玩家操控的物体，所有和角色有关的内容都可以在这里编辑。
+
+    <h2><a href="editor/objects.html">物体</a></h2>
+    基本的物体不会自己移动、不会自己思考，有些物体可以放入玩家的行囊，有些则固定在世界的某个地方。
+
+    <h2><a href="editor/equipments.html">装备</a></h2>
+    玩家可以把装备穿在身上，提高自己的相关属性。
+
+    <h2><a href="editor/quests.html">任务</a></h2>
+    游戏可以提供各种任务让玩家去完成。
+
+    <h2><a href="editor/events.html">事件</a></h2>
+    事件会在特定条件下触发，引发指定的操作。
+
+    <h2><a href="editor/dialogues.html">对话</a></h2>
+    玩家可以和NPC对话，也可以通过对话显示一段旁白或讲述一个故事。
+    
+    <h2><a href="editor/shops.html">商店</a></h2>
+    玩家可以向NPC购买东西。
+
+    <h2><a href="editor/localization.html">本地化</a></h2>
+    本地化可以将原语言的游戏内容翻译为本地语言。
+
+    <h2><a href="editor/resources.html">资源</a></h2>
+    网页客户端使用这些资源来显示图像和图标。
+    
+    <div><br></div>
+    <hr/>
+
+    <h2>下载游戏世界的数据</h2>
+    <div><br></div>
+    <div>下载游戏世界的数据到zip压缩包中。</div>
+    <form method="GET">
+      <input type="submit" value="下载"/>
+      <select name="file_type">
+        {% for writer in writers %}
+        <option value={{ writer.type }}>{{ writer.name }}</option>
+        {% endfor %}
+      </select>
+      <input type="hidden" name="export_game_data"/>
+    </form>
+    <div><br></div>
+
+    <div>下载一张数据表。</div>
+    <form method="GET">
+      <input type="submit" value="下载"/>
+      <select name="model_name">
+        {% for model in models %}
+        <option value="{{ model.key }}">{{ model.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="file_type">
+        {% for writer in writers %}
+        <option value={{ writer.type }}>{{ writer.name }}</option>
+        {% endfor %}
+      </select>
+      <div><br></div>
+      <input type="hidden" name="export_data_single"/>
+    </form>
+    <div><br></div>
+
+    <div>下载游戏资源文件到zip压缩包中。</div>
+    <form method="GET">
+      <input type="hidden" name="export_resources"/>
+      <input type="submit" value="下载"/>
+    </form>
+    <div><br></div>
+
+    <hr/>
+    <h2>上传游戏世界的数据</h2>
+    <div><br></div>
+    <div>上传zip压缩包中的数据文件。</div>
+    <div><span style="color: red">注意：当前游戏世界的数据会被替换！</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <input type="file" name="import_data_all" accept="application/zip"/>
+      <input type="submit" value="上传"/>
+    </form>
+    <div><br></div>
+
+    <div>上传单个数据文件到数据库。</div>
+    <div><span style="color: red">注意：当前游戏世界的数据会被替换！</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <select name="model_name">
+        <option value="">---------</option>
+        {% for model in models %}
+        <option value="{{ model.key }}">{{ model.name }}</option>
+        {% endfor %}
+      </select>
+      <input type="file" name="import_data_single" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
+      <input type="submit" value="上传"/>
+    </form>
+    <div><br></div>
+
+    <div>上传zip压缩包中的资源文件。</div>
+    <div><span style="color: red">注意：当前的资源文件会被替换！</span></div>
+    <form enctype="multipart/form-data" method="POST">
+      {% csrf_token %}
+      <input type="file" name="import_resources_all" accept="application/zip"/>
+      <input type="submit" value="上传"/>
+    </form>
+    <div><br></div>
+    <hr/>
+
+    <h2>将变化应用到游戏</h2>
+    <div>将游戏世界的数据应用到游戏中。然后需要重启服务器。</div>
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="apply"/>
+      <input type="submit" value="应用"/>
+    </form>
+    <div><br></div>
+    <hr/>
+
+{% endblock content %}

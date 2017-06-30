@@ -1,0 +1,3 @@
+key,name,typeclass,desc,model,level,location,condition,icon
+npc_wu,保安,CLASS_COMMON_NPC,"这个人身材高大，但身上受了伤，活动有些不灵活。",MODEL_NPC_COMMON,1,room_colorfulworld_storeroom,is_quest_completed("quest_find_survivor"),icon_guard
+mob_doll,人偶,CLASS_COMMON_MONSTER,"这个人偶斜靠在墙上，一双大眼睛好像正在盯着你看。你越瞧它越不爽，真想打它一顿！",MODEL_MOB_DOLL,1,room_colorfulworld_photo_studio,,icon_model

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block header_ext %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/changelists.css" />
+<link rel="stylesheet" type="text/css" href="/static/worldeditor/css/worldeditor.css" />
+{% endblock %}
+{% block content %}
+<h1 xmlns="http://www.w3.org/1999/html">{{ title }}</h1>
+<div>{{ desc }}</div>
+<div id="content-main">
+    <div class="object-tools">
+        <form action="add.html" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="_form" value="{{ form }}" />
+            <input type="hidden" name="_page" value="{{ page.number }}" />
+            <input type="submit" name="_add" value="添加 {{ title }}" class="add-box" />
+        </form>
+    </div>
+    <div class="module" id="changelist">
+        <div class="results">
+            <table id="result_list">
+                <thead>
+                    <tr>
+                        {% for title in titles %}
+                        <th scope="col" class="sortable">
+                            <div class="text">{{ title|upper }}</div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                        <tr class="{% cycle 'row1' 'row2' %}">
+                            {% for item in record.items %}
+                            <td class="field">
+                                {% if forloop.first %}
+                                    <a class="table_head" href="./form.html?_page={{ page.number }}&_record={{ record.pk }}">
+                                {% endif %}
+                                {{ item }}
+                                {% if forloop.first %}
+                                    </a>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="submit-row">
+            <span class="page_list">页码:&nbsp;
+                &gt;&gt;
+                {% for i in page_range %}
+                    {% ifequal i page.number %}
+                        &nbsp;{{ i }}&nbsp;
+                    {% else %}
+                        <a href="?_page={{ i }}" class="page_link">&nbsp;{{ i }}&nbsp;</a>
+                    {% endifequal %}
+                {% endfor %}
+                &lt;&lt;
+            </span>
+            <input type="submit" name="_back" value="返回" />
+        </div>
+    </form>
+</div>
+{% endblock content %}

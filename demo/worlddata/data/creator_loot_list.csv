@@ -1,0 +1,5 @@
+provider,object,number,odds,quest,condition
+creator_alley_pile,weapon_wood_stick,1,1,,
+creator_street_body,obj_guardhouse_key,1,1,quest_find_guardhouse_key,
+creator_storeroom_box,food_bread,1,1,,
+creator_photo_studio_box,obj_binder,1,1,quest_find_binder,

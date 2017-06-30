@@ -1,0 +1,3 @@
+key,name,path,category,desc
+CLASS_FOOD,Food,typeclasses.common_objects.Food,CATE_OBJECT,Foods can be eaten.
+CLASS_EQUIPMENT,Equipment,typeclasses.common_objects.Equipment,CATE_OBJECT,Equipments.

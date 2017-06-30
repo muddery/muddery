@@ -1,0 +1,6 @@
+key,name,typeclass,desc,condition,action
+quest_find_survivor,寻找幸存者,CLASS_QUEST,搜索周围，看看能不能找到幸存者。,,
+quest_find_guardhouse_key,取得警卫室钥匙,CLASS_QUEST,帮助保安找到警卫室的钥匙。,,
+quest_find_binder,找到绷带,CLASS_QUEST,把绷带交给保安，在各个房间中多找找吧。,,
+quest_find_screws,寻找螺丝,CLASS_QUEST,把2个螺丝交给保安，在机器人身上能找到螺丝。,,
+quest_kill_robots,杀死机器人,CLASS_QUEST,杀死3个机器人！,,

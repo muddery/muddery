@@ -1,0 +1,374 @@
+
+/* colors */
+body {
+    background-color: #000;
+    color: #ccc;
+}
+
+#middlewindow {
+    height: 100%;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#msg_wnd {
+    min-height: 80px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#tab_content {
+    min-height: 185px;
+    max-height: 360px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-top: 10px;
+    padding-bottom: 0px;
+}
+
+.content_frame {
+	border-style: none;
+	overflow: auto;
+}
+
+#popup_container {
+	display: none;
+}
+
+#popup_modal {
+ 	display: block;
+}
+
+.popup_frame {
+	padding: 5px;
+	border-style: none;
+	overflow: auto;
+}
+
+#game_title {
+    margin: 2px 0px;
+}
+
+.panel {
+    background-color: #000;
+    margin-bottom: 5px;
+}
+
+.modal-content {
+    background-color: #000;
+    border-color: #aaa;
+}
+
+.modal-header {
+    border-bottom: 0px;
+    padding: 8px 15px 3px 15px;
+    position: relative;
+}
+
+.modal-body {
+    padding: 3px 15px 8px 15px;
+}
+
+.modal-footer {
+    text-align: left;
+    border-top: 0px;
+}
+
+.editbox {
+    width: 120px;
+    padding: 2px 4px;
+    margin: 2px 2px;
+    color: #111;
+}
+
+.inputbox {
+    width: 240px;
+    padding: 2px 4px;
+    margin: 2px 2px;
+    color: #111;
+}
+
+input[type=checkbox], input[type=radio] {
+    margin: 4px 4px;
+}
+
+.wordbox {
+	width: 100%;
+}
+
+.nav-tabs {
+    border-bottom: 0px;
+}
+
+.nav-tabs>li {
+    min-width: 60px;
+    text-align: center;
+}
+
+.nav-tabs>li>a {
+    border-color: #aaa;
+    color: #ddd;
+    padding: 5px 5px;
+}
+
+.nav-tabs>li>a:hover {
+    background-color: #666;
+}
+
+.nav-tabs>li.active>a {
+    color: #000;
+}
+
+.nav-tabs>li.open>a {
+    color: #000;
+    background-color: #888;
+    border-color: #000;
+}
+
+.nav-tabs>li.open>a:hover {
+    color: #000;
+    background-color: #ccc;
+    border-color: #000;
+}
+
+.nav-tabs .dropdown-menu {
+    border-radius: 4px;
+    margin: 2px 0 0;
+}
+
+.dropdown-menu {
+    min-width: 60px;
+}
+
+.dropdown-menu>li>a {
+    padding: 3px 10px;
+}
+
+.dropdown-menu>li>a:hover {
+    background-color: #bbb;
+}
+
+.first-dropdown-item {
+    border-top: 0px;
+}
+
+.dropdown-item {
+    border-top: 1px solid rgba(0,0,0,.3);
+}
+
+.modal-header .close {
+    color: #ccc;
+    opacity: 1.0;
+    text-shadow: 0 1px 0 #888;
+    padding: 10px 10px;
+    margin-top: -10px;
+    margin-right: -10px;
+    position: absolute;
+    right: 10px;
+    top: 5px;
+}
+
+.modal-header .close:hover {
+    color: #fff;
+    opacity: 1.0;
+    text-shadow: 0 1px 0 #bbb;
+}
+
+.modal-title {
+    color: #0ff;
+    text-align: center;
+}
+
+.btn {
+    color: #333;
+    background-color: #fff;
+}
+
+.btn:hover {
+    color: #000;
+    background-color: #ccc;
+}
+
+a {
+    color: #6bf;
+}
+
+a:hover {
+    color: #39d;
+}
+
+a:focus {
+    color: #39d;
+}
+
+.vertical-center {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.dialogue-header {
+    color: #0ff;
+    text-align: center;
+}
+
+/* Style specific classes corresponding to formatted, narative text. */
+.red { color: red; }
+.maroon { color: maroon; }
+.lime { color: lime; }
+.green { color: green; }
+.yellow { color: yellow; }
+.olive { color: olive; }
+.blue { color: blue; }
+.navy { color: navy; }
+.magenta { color: #FF00FF; }
+.purple { color: purple; }
+.cyan { color: #00FFFF; }
+.teal { color: teal; }
+.white { color: white; }
+.gray { color: gray; }
+.dimgray {color: #696969;}
+.black {color: black;}
+.underline { text-decoration: underline; }
+
+.bgred { background-color: red;}
+.bgmaroon { background-color: maroon;}
+.bglime { background-color: lime;}
+.bggreen { background-color: green;}
+.bgyellow { background-color: yellow;}
+.bgolive { background-color: olive;}
+.bgblue { background-color: blue;}
+.bgnavy { background-color: navy;}
+.bgmagenta { background-color: #FF00FF;}
+.bgpurple { background-color: purple;}
+.bgcyan { background-color: #00FFFF;}
+.bgteal { background-color: teal;}
+.bgwhite { background-color: white;}
+.bggray { background-color: gray;}
+.bgdimgray { background-color: #696969;}
+.bgblack { background-color: black;}
+
+.tab_quests {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    border-collapse: collapse;
+    margin: 8px;
+}
+
+.tab_quests th {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+    font-weight: normal;
+}
+
+.tab_quests td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+}
+
+.tab_shop {
+    border-collapse: collapse;
+    border-color: #aaa;
+    border-style: solid;
+    border-width: 1px;
+    margin: 8px;
+}
+
+.tab_shop th {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+    font-weight: normal;
+}
+
+.tab_shop td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    padding: 4px 8px 4px 8px;
+}
+
+.hp {
+    position: absolute;
+    top: -15px;
+}
+
+.prompt_element {
+    color: #fff;
+    margin: 0px 5px;
+}
+
+#prompt_name {
+    color: #0ff;
+}
+
+.obj_icon {
+	width: 40px;
+	height: 40px;
+}
+
+.skill_list_icon {
+	width: 20px;
+	height: 20px;
+}
+
+.dialogue_icon {
+	width: 40px;
+	height: 40px;
+}
+
+.shop_icon {
+	width: 40px;
+	height: 40px;
+}
+
+.command_icon {
+	width: 40px;
+	height: 40px;
+}
+
+.scene_object {
+	margin-left: 10px;
+}
+
+.template {
+    display: none;
+}
+
+.hidden {
+    display: none;
+}
+
+#input_bar {
+    margin: 2px 0px 0px 0px;
+}
+
+#msg_select {
+    width: 56px;
+    height: 32px;
+    margin: 0px 2px 0px 0px;
+    float: left;
+    display: inline;
+}
+
+#msg_input {
+    width: 56px;
+    height: 32px;
+    margin: auto;
+    padding: 2px 4px;
+    display: inline;
+}
+
+#msg_send {
+    width: 56px;
+    height: 32px;
+    margin: 0px 0px 0px 2px;
+    float: right;
+    display: inline;
+}

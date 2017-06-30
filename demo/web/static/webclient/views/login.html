@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/login.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="box_login">
+            <div id="view_header">Please login.</div>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input id="login_name" type="text" placeholder="username" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
+                        </td>
+                        <td>
+                            <input id="login_password" type="password" placeholder="password" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div><span id="view_save_password">Save Password</span><input id="cb_save_password" type="checkbox" onclick="controller.doSavePassword()"></div>
+                            <div><span id="view_auto_login">Auto Login</span><input id="cb_auto_login" type="checkbox"></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button id="view_button_login" onclick="controller.doLogin()" class="btn btn-default">Login</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

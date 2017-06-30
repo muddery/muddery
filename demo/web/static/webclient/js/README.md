@@ -1,0 +1,1 @@
+Put static resources here.

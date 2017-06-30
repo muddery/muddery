@@ -1,0 +1,6 @@
+quest,ordinal,type,object,number,desc
+quest_find_survivor,1,OBJECTIVE_ARRIVE,room_colorfulworld_storeroom,1,找到幸存者
+quest_find_guardhouse_key,1,OBJECTIVE_OBJECT,obj_guardhouse_key,1,
+quest_find_binder,1,OBJECTIVE_OBJECT,obj_binder,1,
+quest_find_screws,1,OBJECTIVE_OBJECT,obj_screw,2,
+quest_kill_robots,1,OBJECTIVE_KILL,mob_robot_a,3,

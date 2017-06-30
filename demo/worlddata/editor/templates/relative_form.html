@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block header_ext %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+<link rel="stylesheet" type="text/css" href="/static/worldeditor/css/worldeditor.css" />
+<script type="text/javascript">
+    var relative_data = {{ relative_typeclasses | safe }};
+
+    function in_list(value, list) {
+        for (var i in list) {
+            if (value == list[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function hide_classes(list) {
+        for (var i in list) {
+            $("." + list[i]).hide();
+        }
+    }
+
+    function typeclassChanged(value) {
+        hide_classes(relative_data);
+        if (in_list(value, relative_data)) {
+            $("." + value).show();
+        }
+    }
+
+    $(document).ready(function(){
+        $("#id_typeclass").attr("onchange", "typeclassChanged(this.value);");
+
+        var value = $("#id_typeclass").val();
+        hide_classes(relative_data);
+        if (in_list(value, relative_data)) {
+            $("." + value).show();
+        }
+    });
+</script>
+{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<div>{{ desc }}</div>
+<div id="content-main">
+    <form action="submit.html" method="post">
+        {% csrf_token %}
+        <div>
+            <fieldset class="module aligned">
+                {% for item in data %}
+                <div class="form-row">
+                    {{ item.label_tag }}{{ item }}
+                    {% if item.help_text %}
+                    <br><br>
+                    <ul class="helplist"><li>{{ item.help_text }}</li></ul>
+                    {% endif %}
+                    {{ item.errors }}
+                </div>
+                {% endfor %}
+                {% for data in relative_data %}
+                    {% for item in data.data %}
+                        {% ifnotequal item.name "key" %}
+                        <div class="form-row {{ data.typeclass }}">
+                            {{ item.label_tag }}{{ item }}
+                            {% if item.help_text %}
+                            <br><br>
+                            <ul class="helplist"><li>{{ item.help_text }}</li></ul>
+                            {% endif %}
+                            {{ item.errors }}
+                        </div>
+                        {% endifnotequal %}
+                    {% endfor %}
+                {% endfor %}
+            </fieldset>
+            <input type="hidden" name="_record" value="{{ record }}" />
+            <input type="hidden" name="_page" value="{{ page }}" />
+            <div class="submit-row">
+                {% if can_delete %}
+                <input type="submit" name="_delete" value="删除" class="delete-box" />
+                {% endif %}
+                <input type="submit" name="_back" value="返回" />
+                <input type="submit" name="_continue" value="保存并继续编辑" />
+                <input type="submit" name="_save" value="保存" class="default" />
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock content %}
