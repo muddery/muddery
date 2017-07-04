@@ -1,2 +1,2 @@
-key,name,level,max_exp,max_hp,max_mp,attack,defence,give_exp
-MODEL_PLAYER,Player,1,1,1,1,1,1
+key,name,level,max_hp,max_exp,give_exp,attr_1,attr_2,attr_3,attr_4,attr_5,attr_6,attr_7,attr_8,attr_9,attr_10
+MODEL_PLAYER,Player,1,1,,,,,,,,,,,,

@@ -10,6 +10,7 @@ creation commands.
 
 from __future__ import print_function
 
+import ast
 from twisted.internet import reactor
 from twisted.internet.task import deferLater
 from django.conf import settings
@@ -24,6 +25,7 @@ from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.loot_handler import LootHandler
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.builder import delete_object
+from muddery.utils.character_attributes_handler import CHARACTER_ATTRIBUTES_HANDLER
 from muddery.utils.localized_strings_handler import _
 
 
@@ -56,6 +58,37 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     @lazy_property
     def loot_handler(self):
         return LootHandler(self, DATA_SETS.character_loot_list.model)
+        
+    @lazy_property
+    def char_attributes_handler(self):
+        return DataFieldHandler(self)
+
+    #@property attr
+    def __attr_get(self):
+        """
+        A non-attr_obj store (ndb: NonDataBase). Everything stored
+        to this is guaranteed to be cleared when a server is shutdown.
+        Syntax is same as for the _get_db_holder() method and
+        property, e.g. obj.ndb.attr = value etc.
+        """
+        try:
+            return self._attr_holder
+        except AttributeError:
+            self._attr_holder = self.char_attributes_handler()
+            return self._attr_holder
+
+    #@attr.setter
+    def __attr_set(self, value):
+        "Stop accidentally replacing the ndb object"
+        string = "Cannot assign directly to ndb object! "
+        string += "Use self.attr.name=value instead."
+        raise Exception(string)
+
+    #@attr.deleter
+    def __attr_del(self):
+        "Stop accidental deletion."
+        raise Exception("Cannot delete the attr object!")
+    attr = property(__attr_get, __attr_set, __attr_del)
 
     def at_object_creation(self):
         """
@@ -96,8 +129,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.target = None
         self.reborn_time = 0
         
-        # A cloned character will be deleted after the combat finished.
-        self.is_clone = False
+        # A temporary character will be deleted after the combat finished.
+        self.is_temp = False
 
     def after_data_loaded(self):
         """
@@ -111,8 +144,8 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # set reborn time
         self.reborn_time = getattr(self.dfield, "reborn_time", 0)
 
-        # A cloned character will be deleted after the combat finished.
-        self.is_clone = False
+        # A temporary character will be deleted after the combat finished.
+        self.is_temp = False
 
         # update equipment positions
         self.reset_equip_positions()
@@ -212,16 +245,30 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             for field in model_data._meta.fields:
                 if field.name in reserved_fields:
                     continue
-                setattr(self.dfield, field.name, model_data.serializable_value(field.name))
+
+                serializable_value = model_data.serializable_value(field.name)
+                attribute_info = CHARACTER_ATTRIBUTES_HANDLER.for_field(field.name)
+                if not attribute_info:
+                    setattr(self.dfield, field.name, serializable_value)
+                else:
+                    # get value
+                    if serializable_value == "":
+                        value = None
+                    else:
+                        try:
+                            value = ast.literal_eval(serializable_value)
+                        except (SyntaxError, ValueError), e:
+                            # treat as a raw string
+                            value = serializable_value
+                    setattr(self.dfield, field.name, value)
+                    setattr(self.attr, attribute_info["key"], value)
+
         except Exception, e:
             logger.log_errmsg("Can't load character %s's level info (%s, %s): %s" %
                               (self.get_data_key(), model_name, self.db.level, e))
 
         self.max_exp = getattr(self.dfield, "max_exp", 0)
         self.max_hp = getattr(self.dfield, "max_hp", 1)
-        self.max_mp = getattr(self.dfield, "max_mp", 1)
-        self.attack = getattr(self.dfield, "attack", 0)
-        self.defence = getattr(self.dfield, "defence", 0)
         self.give_exp = getattr(self.dfield, "give_exp", 0)
 
     def search_inventory(self, obj_key):
@@ -489,9 +536,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         target = self.search(target_key)
         self.attack_target(target, desc)
 
-    def attack_clone_current_target(self, desc=""):
+    def attack_temp_current_target(self, desc=""):
         """
-        Attack current target.
+        Attack current target's temporary clone object.
 
         Args:
             desc: (string) string to describe this attack
@@ -499,11 +546,11 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             None
         """
-        self.attack_clone_target(self.target.get_data_key(), self.target.db.level, desc)
+        self.attack_temp_target(self.target.get_data_key(), self.target.db.level, desc)
 
-    def attack_clone_target(self, target_key, target_level=0, desc=""):
+    def attack_temp_target(self, target_key, target_level=0, desc=""):
         """
-        Attack the image of a target. This creates a new character object for attack.
+        Attack a temporary clone of a target. This creates a new character object for attack.
         The origin target will not be affected.
 
         Args:
@@ -530,7 +577,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             return False
 
         target.set_level(target_level)
-        target.is_clone = True
+        target.is_temp = True
         return self.attack_target(target, desc)
 
     ########################################
@@ -620,7 +667,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         # remove combat commands
         self.cmdset.delete(settings.CMDSET_COMBAT)
         
-        if self.is_clone:
+        if self.is_temp:
             # notify its location
             location = self.location
             delete_object(self.dbref)

@@ -18,7 +18,7 @@ from muddery.utils import defines, utils
 from muddery.utils.builder import build_object, get_object_record
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.quest_handler import QuestHandler
-from muddery.utils.attribute_handler import AttributeHandler
+from muddery.utils.statement_attribute_handler import StatementAttributeHandler
 from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
@@ -55,9 +55,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
     def quest_handler(self):
         return QuestHandler(self)
 
+    # attributes used in statements
     @lazy_property
-    def custom_attr(self):
-        return AttributeHandler(self)
+    def statement_attr(self):
+        return StatementAttributeHandler(self)
 
     def at_object_creation(self):
         """

@@ -193,6 +193,17 @@ class career_equipments(model_base.career_equipments):
     pass
 
 
+
+# ------------------------------------------------------------
+#
+# character attributes
+#
+# ------------------------------------------------------------
+class character_attributes(model_base.character_attributes):
+    "character attributes"
+    pass
+
+
 #------------------------------------------------------------
 #
 # character levels

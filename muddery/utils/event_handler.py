@@ -207,7 +207,7 @@ class EventHandler(object):
         # There can be several mods with different odds.
         if rand <= event["odds"]:
             # Attack mob.
-            character.attack_clone_target(event["mob"], event["level"], event["desc"])
+            character.attack_temp_target(event["mob"], event["level"], event["desc"])
 
     def do_dialogue(self, event, character):
         """

@@ -11,6 +11,7 @@ KEY_LENGTH = 255
 NAME_LENGTH = 80
 TYPECLASS_LENGTH = 80
 POSITION_LENGTH = 80
+VALUE_LENGTH = 80
 
 
 def auto_generate_key(model):
@@ -158,7 +159,7 @@ class game_settings(models.Model):
 
 # ------------------------------------------------------------
 #
-# store all typeclasses
+# store all categories
 #
 # ------------------------------------------------------------
 class class_categories(SystemData):
@@ -794,6 +795,33 @@ class career_equipments(models.Model):
         verbose_name = "Career Equip Relation"
         verbose_name_plural = "Career Equip Relations"
         unique_together = ("career", "equipment")
+        
+        
+# ------------------------------------------------------------
+#
+# character attributes
+#
+# ------------------------------------------------------------
+class character_attributes(models.Model):
+    "character's all available attributes"
+    
+    # attribute db field's name. It must be a attribute field name in character models.
+    field = models.CharField(max_length=KEY_LENGTH, unique=True)
+    
+    # attribute's key, chars and numbers only.
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    
+    # attribute's readable name.
+    name = models.CharField(max_length=KEY_LENGTH)
+    
+    # attribute's desc
+    desc = models.TextField(blank=True)
+    
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Character Attrubute"
+        verbose_name_plural = "Character Attributes"
 
 
 # ------------------------------------------------------------
@@ -813,24 +841,36 @@ class character_models(models.Model):
     # model's level
     level = models.PositiveIntegerField(blank=True, default=1)
 
+    # max hp of the character
+    max_hp = models.PositiveIntegerField(blank=True, default=1)
+    
     # If a character's exp is larger than max_exp, the character can upgrade.
     # If max_exp is 0, the character can not upgrade any more.
     max_exp = models.PositiveIntegerField(blank=True, default=0)
 
-    # max hp of the character
-    max_hp = models.PositiveIntegerField(blank=True, default=1)
-
-    # max mp of the character
-    max_mp = models.PositiveIntegerField(blank=True, default=1)
-
-    # attack value of the character
-    attack = models.IntegerField(blank=True, default=1)
-
-    # defence value of the character
-    defence = models.IntegerField(blank=True, default=0)
-
     # exp provided to the character who killed this character
     give_exp = models.IntegerField(blank=True, default=0)
+    
+    # Attributes. Value's type must be a python default value type.
+    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+    
+    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+    
+    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+    
+    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+    
+    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+    
+    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+    
+    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+    
+    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+    
+    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"

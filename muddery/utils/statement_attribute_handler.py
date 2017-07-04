@@ -1,5 +1,5 @@
 """
-AttributeHandler handles a character's custom attributes.
+Handles a character's attributes used in statements.
 """
 
 from muddery.utils.localized_strings_handler import _
@@ -7,9 +7,9 @@ from django.conf import settings
 from evennia.utils import logger
 
 
-class AttributeHandler(object):
+class StatementAttributeHandler(object):
     """
-    Handles a character's custom attributes.
+    Handles a character's attributes used in statements.
     """
     def __init__(self, owner):
         """

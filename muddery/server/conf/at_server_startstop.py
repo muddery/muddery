@@ -16,13 +16,13 @@ at_server_cold_stop()
 
 """
 
+from muddery.utils.character_attributes_handler import CHARACTER_ATTRIBUTES_HANDLER
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.typeclasses.character_skills import MudderySkill
 from muddery.utils import builder
 from muddery.utils.localiztion_handler import localize_model_fields
 
@@ -36,6 +36,9 @@ def at_server_start():
 
     # reload keys
     OBJECT_KEY_HANDLER.reload()
+    
+    # reload character's attributes
+    CHARACTER_ATTRIBUTES_HANDLER.reload()
 
     # reset default locations
     builder.reset_default_locations()
@@ -45,7 +48,7 @@ def at_server_start():
 
     # clear quest dependencies
     QUEST_DEP_HANDLER.clear()
-
+    
     # reload equipment types
     EQUIP_TYPE_HANDLER.reload()
 

@@ -88,6 +88,7 @@ class DataSets(object):
 
         # Other data
         self.game_settings = DataHandler("game_settings")
+        self.character_attributes = DataHandler("character_attributes")
         self.creator_loot_list = DataHandler("creator_loot_list")
         self.character_loot_list = DataHandler("character_loot_list")
         self.quest_reward_list = DataHandler("quest_reward_list")
@@ -106,6 +107,7 @@ class DataSets(object):
         self.icon_resources = DataHandler("icon_resources")
 
         self.other_data = [self.game_settings,
+                           self.character_attributes,
                            self.creator_loot_list,
                            self.character_loot_list,
                            self.quest_reward_list,

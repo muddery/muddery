@@ -59,7 +59,7 @@ class MudderyObject(DefaultObject):
     def __dfield_set(self, value):
         "Stop accidentally replacing the ndb object"
         string = "Cannot assign directly to ndb object! "
-        string += "Use dfield.attr=value instead."
+        string += "Use self.dfield.name=value instead."
         raise Exception(string)
 
     #@dfield.deleter

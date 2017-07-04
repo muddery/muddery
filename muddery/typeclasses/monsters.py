@@ -83,7 +83,7 @@ class MudderyMonster(MudderyCharacter):
         """
         super(MudderyMonster, self).at_leave_combat_mode()
 
-        if not self.is_clone:
+        if not self.is_temp:
             if self.is_alive():
                 # Recover all hp.
                 self.db.hp = self.max_hp

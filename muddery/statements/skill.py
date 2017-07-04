@@ -213,8 +213,8 @@ class FuncHit(SkillFunction):
             return
 
         # calculate the damage
-        damage = float(self.caller.attack) / (self.caller.attack + self.obj.defence) * self.caller.attack
-        damage = round(damage * effect)
+        # damage = float(self.caller.attack) / (self.caller.attack + self.obj.defence) * self.caller.attack
+        damage = round(effect)
 
         # hurt target
         self.obj.db.hp -= damage

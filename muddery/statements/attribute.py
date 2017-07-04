@@ -33,7 +33,7 @@ class FuncSetAttr(StatementFunction):
         if len(self.args) > 1:
             value = self.args[1]
 
-        self.caller.custom_attr.set(attr_key, value)
+        self.caller.statement_attr.set(attr_key, value)
         return True
 
 
@@ -64,7 +64,7 @@ class FuncGetAttr(StatementFunction):
         if len(self.args) > 1:
             default = self.args[1]
 
-        return self.caller.custom_attr.get(key, default)
+        return self.caller.statement_attr.get(key, default)
 
 
 class FuncRemoveAttr(StatementFunction):
@@ -89,7 +89,7 @@ class FuncRemoveAttr(StatementFunction):
             return False
 
         key = self.args[0]
-        return self.caller.custom_attr.remove(key)
+        return self.caller.statement_attr.remove(key)
 
 
 class FuncHasAttr(StatementFunction):
@@ -114,7 +114,7 @@ class FuncHasAttr(StatementFunction):
             return False
 
         attr_key = self.args[0]
-        return self.caller.custom_attr.has(attr_key)
+        return self.caller.statement_attr.has(attr_key)
 
 
 class FuncCheckAttr(StatementFunction):
@@ -144,7 +144,7 @@ class FuncCheckAttr(StatementFunction):
         attr_key = self.args[0]
 
         if len(self.args) < 2:
-            return self.caller.custom_attr.has(attr_key)
+            return self.caller.statement_attr.has(attr_key)
         else:
             value = self.args[1]
-            return self.caller.custom_attr.check_value(attr_key, value)
+            return self.caller.statement_attr.check_value(attr_key, value)

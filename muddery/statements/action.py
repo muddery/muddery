@@ -158,7 +158,7 @@ class FuncFightMob(StatementFunction):
         if len(self.args) > 2:
             desc = self.args[2]
 
-        return self.caller.attack_clone_target(mob_key, level, desc)
+        return self.caller.attack_temp_target(mob_key, level, desc)
 
 
 class FuncFightTarget(StatementFunction):
