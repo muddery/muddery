@@ -1,6 +1,7 @@
 
 from django.contrib.admin.forms import forms
 from muddery.utils.localiztion_handler import localize_form_fields
+from muddery.utils.character_attributes_info import CHARACTER_ATTRIBUTES_INFO
 from muddery.worlddata.data_sets import DATA_SETS
 
 
@@ -468,12 +469,23 @@ class SkillBooksForm(forms.ModelForm):
     class Meta:
         model = DATA_SETS.skill_books.model
         fields = '__all__'
-        
+
+
+class CharacterAttributesForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CharacterAttributesForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    class Meta:
+        model = DATA_SETS.character_attributes_info.model
+        fields = '__all__'
+
 
 class CharacterModelsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CharacterModelsForm, self).__init__(*args, **kwargs)
         localize_form_fields(self)
+        CHARACTER_ATTRIBUTES_INFO.set_form_fields(self)
 
     class Meta:
         model = DATA_SETS.character_models.model

@@ -16,7 +16,7 @@ at_server_cold_stop()
 
 """
 
-from muddery.utils.character_attributes_handler import CHARACTER_ATTRIBUTES_HANDLER
+from muddery.utils.character_attributes_info import CHARACTER_ATTRIBUTES_INFO
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
@@ -38,7 +38,7 @@ def at_server_start():
     OBJECT_KEY_HANDLER.reload()
     
     # reload character's attributes
-    CHARACTER_ATTRIBUTES_HANDLER.reload()
+    CHARACTER_ATTRIBUTES_INFO.reload()
 
     # reset default locations
     builder.reset_default_locations()
@@ -58,6 +58,8 @@ def at_server_start():
     # localize model fields
     localize_model_fields()
 
+    # set character attribute field names
+    CHARACTER_ATTRIBUTES_INFO.set_model_fields()
 
 def at_server_stop():
     """

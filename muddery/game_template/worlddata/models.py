@@ -199,7 +199,7 @@ class career_equipments(model_base.career_equipments):
 # character attributes
 #
 # ------------------------------------------------------------
-class character_attributes(model_base.character_attributes):
+class character_attributes_info(model_base.character_attributes_info):
     "character attributes"
     pass
 

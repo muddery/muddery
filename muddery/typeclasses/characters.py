@@ -25,7 +25,7 @@ from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.loot_handler import LootHandler
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.builder import delete_object
-from muddery.utils.character_attributes_handler import CHARACTER_ATTRIBUTES_HANDLER
+from muddery.utils.character_attributes_info import CHARACTER_ATTRIBUTES_INFO
 from muddery.utils.localized_strings_handler import _
 
 
@@ -247,7 +247,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                     continue
 
                 serializable_value = model_data.serializable_value(field.name)
-                attribute_info = CHARACTER_ATTRIBUTES_HANDLER.for_field(field.name)
+                attribute_info = CHARACTER_ATTRIBUTES_INFO.for_field(field.name)
                 if not attribute_info:
                     setattr(self.dfield, field.name, serializable_value)
                 else:
