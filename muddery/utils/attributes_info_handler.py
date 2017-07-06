@@ -3,21 +3,19 @@ Handles characters attributes.
 """
 
 from muddery.utils.localized_strings_handler import _
-from django.db.models import Model
-from worlddata import models
-from muddery.worlddata.model_base import character_attributes
 from muddery.worlddata.data_sets import DATA_SETS
-from muddery.utils.utils import is_child
 
 
-class CharacterAttributesInfo(object):
+class AttributesInfoHandler(object):
     """
     Handles character attribute's information.
     """
-    def __init__(self):
+    def __init__(self, model_data_handler, info_data_handler):
         """
         Initialize handler
         """
+        self.model_data_handler = model_data_handler
+        self.info_data_handler = info_data_handler
         self.clear()
 
     def clear(self):
@@ -35,16 +33,16 @@ class CharacterAttributesInfo(object):
 
         # Load localized string model.
         try:
-            for record in DATA_SETS.character_attributes_info.objects.all():
+            for record in self.info_data_handler.objects.all():
                 # Add db fields to dict.
                 values = {"field": record.field,
                           "key": record.key,
                           "name": record.name,
                           "desc": record.desc}
                 self.fields[record.field] = values
-                self.keys[record.field] = values
+                self.keys[record.key] = values
         except Exception, e:
-            print("Can not load character attribute: %s" % e)
+            print("Can not load attribute: %s" % e)
 
         self.set_model_fields()
 
@@ -72,26 +70,24 @@ class CharacterAttributesInfo(object):
         """
         return self.keys.get(key, None)
 
+    def all_keys(self):
+        """
+        Get all keys.
+        """
+        return self.keys.keys()
+
     def set_model_fields(self):
         """
         Set model fields names to attribute names.
         """
-        for model_name in dir(models):
-            # get model classes
-            model = getattr(models, model_name)
-            if type(model) != type(Model):
-                continue
+        model = self.model_data_handler.model
 
-            if not is_child(model, character_attributes):
-                continue
-
-            # get model fields
-            for field in model._meta.fields:
-                print "field: %s" % field
-                info = self.keys.get(field.name, None)
-                if info:
-                    field.verbose_name = info["name"]
-                    field.help_text = info["desc"]
+        # get model fields
+        for field in model._meta.fields:
+            info = self.fields.get(field.name, None)
+            if info:
+                field.verbose_name = info["name"]
+                field.help_text = info["desc"]
 
     def set_form_fields(self, form):
         """
@@ -109,4 +105,6 @@ class CharacterAttributesInfo(object):
 
 
 # character attribute handler
-CHARACTER_ATTRIBUTES_INFO = CharacterAttributesInfo()
+CHARACTER_ATTRIBUTES_INFO = AttributesInfoHandler(DATA_SETS.character_models, DATA_SETS.character_attributes_info)
+EQUIPMENT_ATTRIBUTES_INFO = AttributesInfoHandler(DATA_SETS.equipments, DATA_SETS.equipment_attributes_info)
+FOOD_ATTRIBUTES_INFO = AttributesInfoHandler(DATA_SETS.foods, DATA_SETS.food_attributes_info)
