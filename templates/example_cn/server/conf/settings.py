@@ -55,3 +55,11 @@ LANGUAGE_CODE = 'zh-cn'
 # log out all active web browsing sessions. Game web client sessions
 # may survive.
 SECRET_KEY = {SECRET_KEY}
+
+
+######################################################################
+# Default statement sets
+######################################################################
+
+# Skill functions set
+SKILL_FUNC_SET = "statements.statement_func_set.SkillFuncSet"

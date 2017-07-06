@@ -44,6 +44,8 @@ class DataFieldHandler(object):
             the value of the Data.
         """
         if key not in self._store:
+            if key == "all":
+                return self.all
             raise AttributeError
         return self._store.get(key)
 

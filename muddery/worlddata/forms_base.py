@@ -1,7 +1,7 @@
 
 from django.contrib.admin.forms import forms
 from muddery.utils.localiztion_handler import localize_form_fields
-from muddery.utils.character_attributes_info import CHARACTER_ATTRIBUTES_INFO
+from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO, FOOD_ATTRIBUTES_INFO
 from muddery.worlddata.data_sets import DATA_SETS
 
 
@@ -439,6 +439,7 @@ class FoodsForm(forms.ModelForm):
         self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
+        FOOD_ATTRIBUTES_INFO.set_form_fields(self)
 
     class Meta:
         model = DATA_SETS.foods.model
@@ -478,6 +479,26 @@ class CharacterAttributesForm(forms.ModelForm):
 
     class Meta:
         model = DATA_SETS.character_attributes_info.model
+        fields = '__all__'
+
+
+class EquipmentAttributesForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(EquipmentAttributesForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    class Meta:
+        model = DATA_SETS.equipment_attributes_info.model
+        fields = '__all__'
+
+
+class FoodAttributesForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(FoodAttributesForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    class Meta:
+        model = DATA_SETS.food_attributes_info.model
         fields = '__all__'
 
 
@@ -769,6 +790,7 @@ class EquipmentsForm(forms.ModelForm):
         self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
         
         localize_form_fields(self)
+        EQUIPMENT_ATTRIBUTES_INFO.set_form_fields(self)
 
     class Meta:
         model = DATA_SETS.equipments.model

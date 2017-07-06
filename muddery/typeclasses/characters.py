@@ -16,6 +16,7 @@ from twisted.internet.task import deferLater
 from django.conf import settings
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
+from evennia.typeclasses.models import DbHolder
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 from muddery.typeclasses.objects import MudderyObject
@@ -25,7 +26,7 @@ from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.loot_handler import LootHandler
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.builder import delete_object
-from muddery.utils.character_attributes_info import CHARACTER_ATTRIBUTES_INFO
+from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
 from muddery.utils.localized_strings_handler import _
 
 
@@ -58,37 +59,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
     @lazy_property
     def loot_handler(self):
         return LootHandler(self, DATA_SETS.character_loot_list.model)
-        
-    @lazy_property
-    def char_attributes_handler(self):
-        return DataFieldHandler(self)
-
-    #@property attr
-    def __attr_get(self):
-        """
-        A non-attr_obj store (ndb: NonDataBase). Everything stored
-        to this is guaranteed to be cleared when a server is shutdown.
-        Syntax is same as for the _get_db_holder() method and
-        property, e.g. obj.ndb.attr = value etc.
-        """
-        try:
-            return self._attr_holder
-        except AttributeError:
-            self._attr_holder = self.char_attributes_handler()
-            return self._attr_holder
-
-    #@attr.setter
-    def __attr_set(self, value):
-        "Stop accidentally replacing the ndb object"
-        string = "Cannot assign directly to ndb object! "
-        string += "Use self.attr.name=value instead."
-        raise Exception(string)
-
-    #@attr.deleter
-    def __attr_del(self):
-        "Stop accidental deletion."
-        raise Exception("Cannot delete the attr object!")
-    attr = property(__attr_get, __attr_set, __attr_del)
 
     def at_object_creation(self):
         """
@@ -222,6 +192,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         # load level data
         self.load_model_data()
+        self.load_custom_attributes(CHARACTER_ATTRIBUTES_INFO)
         
         # load equips
         self.ues_equipments()
@@ -245,24 +216,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             for field in model_data._meta.fields:
                 if field.name in reserved_fields:
                     continue
-
-                serializable_value = model_data.serializable_value(field.name)
-                attribute_info = CHARACTER_ATTRIBUTES_INFO.for_field(field.name)
-                if not attribute_info:
-                    setattr(self.dfield, field.name, serializable_value)
-                else:
-                    # get value
-                    if serializable_value == "":
-                        value = None
-                    else:
-                        try:
-                            value = ast.literal_eval(serializable_value)
-                        except (SyntaxError, ValueError), e:
-                            # treat as a raw string
-                            value = serializable_value
-                    setattr(self.dfield, field.name, value)
-                    setattr(self.attr, attribute_info["key"], value)
-
+                setattr(self.dfield, field.name, model_data.serializable_value(field.name))
         except Exception, e:
             logger.log_errmsg("Can't load character %s's level info (%s, %s): %s" %
                               (self.get_data_key(), model_name, self.db.level, e))

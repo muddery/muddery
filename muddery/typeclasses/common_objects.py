@@ -5,6 +5,7 @@ CommonObject is the object that players can put into their inventory.
 
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
+from muddery.utils.attributes_info_handler import FOOD_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO
 from muddery.utils.localized_strings_handler import _
 
 
@@ -113,6 +114,15 @@ class MudderyFood(MudderyCommonObject):
     This is a food. Players can use it to change their properties, such as hp, mp,
     strength, etc.
     """
+    def after_data_loaded(self):
+        """
+        Init the character.
+        """
+        super(MudderyFood, self).after_data_loaded()
+
+        # Load custom attributes.
+        self.load_custom_attributes(FOOD_ATTRIBUTES_INFO)
+
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -137,17 +147,11 @@ class MudderyEquipment(MudderyCommonObject):
         """
         super(MudderyEquipment, self).after_data_loaded()
 
+        # Load custom attributes.
+        self.load_custom_attributes(EQUIPMENT_ATTRIBUTES_INFO)
+
         self.type = getattr(self.dfield, "type", "")
         self.position = getattr(self.dfield, "position", "")
-
-    def get_effect_fields(self):
-        """
-        Get data field names which can add to the user.
-
-        Returns:
-            (list) a list of field names.
-        """
-        return []
 
     def equip_to(self, user):
         """
@@ -168,10 +172,10 @@ class MudderyEquipment(MudderyCommonObject):
         if not user:
             return
 
-        for field_name in self.get_effect_fields():
-            value = getattr(user, field_name, 0)
-            value += getattr(self.dfield, field_name, 0)
-            setattr(user, field_name, value)
+        for key in self.cattr.all:
+            value = getattr(user, key, 0)
+            value += getattr(self.dfield, key, 0)
+            setattr(user, key, value)
 
     def get_available_commands(self, caller):
         """

@@ -38,8 +38,8 @@ class Food(MudderyFood):
         if used > self.db.number:
             used = self.db.number
 
-        if hasattr(self.dfield, "hp"):
-            hp = self.dfield.hp * used
+        if hasattr(self.cattr, "hp"):
+            hp = self.cattr.hp * used
 
             # recover caller's hp
             recover_hp = int(hp)
@@ -58,18 +58,3 @@ class Food(MudderyFood):
             result += _("HP recovered by %s.") % int(recover_hp)
 
         return result, used
-
-
-class Equipment(MudderyEquipment):
-    """
-    This is a equipment. Players can equip it to change their properties, such as attack, defence,
-    etc.
-    """
-    def get_effect_fields(self):
-        """
-        Get data field names which can add to the user.
-
-        Returns:
-            (list) a list of field names.
-        """
-        return ["attack", "defence"]

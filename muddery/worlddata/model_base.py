@@ -79,41 +79,6 @@ class SystemData(models.Model):
 
 # ------------------------------------------------------------
 #
-# character's dynamic attributes
-#
-# ------------------------------------------------------------
-class character_attributes(models.Model):
-    "character's all dynamic attributes"
-
-    # Attributes. Value's type must be a python default value type.
-    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        verbose_name = "Character Attrubute Information"
-        verbose_name_plural = "Character Attribute Information"
-
-# ------------------------------------------------------------
-#
 # Game's basic settings.
 #
 # ------------------------------------------------------------
@@ -668,11 +633,26 @@ class common_objects(models.Model):
 class foods(common_objects):
     "Foods inherit from common objects."
 
-    # food's hp effect
-    hp = models.IntegerField(blank=True, default=0)
+    # Attributes. Value's type must be a python default value type.
+    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
 
-    # food's mp effect
-    mp = models.IntegerField(blank=True, default=0)
+    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -768,11 +748,26 @@ class equipments(common_objects):
     # equipment's type
     type = models.CharField(max_length=KEY_LENGTH)
 
-    # attack effect
-    attack = models.IntegerField(blank=True, default=0)
+    # Attributes. Value's type must be a python default value type.
+    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
 
-    # defence effect
-    defence = models.IntegerField(blank=True, default=0)
+    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -834,11 +829,11 @@ class career_equipments(models.Model):
         
 # ------------------------------------------------------------
 #
-# character attribute's information
+# attribute's information
 #
 # ------------------------------------------------------------
-class character_attributes_info(models.Model):
-    "character's all available attributes"
+class attributes_info(models.Model):
+    "attributes's information"
     
     # attribute db field's name. It must be a attribute field name in character models.
     field = models.CharField(max_length=KEY_LENGTH, unique=True)
@@ -855,8 +850,53 @@ class character_attributes_info(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        verbose_name = "Attrubute Information"
+        verbose_name_plural = "Attribute Information"
+        
+
+# ------------------------------------------------------------
+#
+# Character attribute's information.
+#
+# ------------------------------------------------------------
+class character_attributes_info(attributes_info):
+    "Character's all available attributes"
+    
+    class Meta:
+        "Define Django meta options"
+        abstract = True
         verbose_name = "Character Attrubute Information"
         verbose_name_plural = "Character Attribute Information"
+        
+        
+# ------------------------------------------------------------
+#
+# Equipment attribute's information.
+#
+# ------------------------------------------------------------
+class equipment_attributes_info(attributes_info):
+    "Equipment's all available attributes"
+    
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Equipment Attrubute Information"
+        verbose_name_plural = "Equipment Attribute Information"
+        
+        
+# ------------------------------------------------------------
+#
+# Food attribute's information.
+#
+# ------------------------------------------------------------
+class food_attributes_info(attributes_info):
+    "Food's all available attributes"
+    
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Food Attrubute Information"
+        verbose_name_plural = "Food Attribute Information"
 
 
 # ------------------------------------------------------------
@@ -864,7 +904,7 @@ class character_attributes_info(models.Model):
 # character models
 #
 # ------------------------------------------------------------
-class character_models(character_attributes):
+class character_models(models.Model):
     "Store all character level informations."
 
     # model's key
@@ -885,6 +925,27 @@ class character_models(character_attributes):
 
     # exp provided to the character who killed this character
     give_exp = models.IntegerField(blank=True, default=0)
+
+    # Attributes. Value's type must be a python default value type.
+    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"

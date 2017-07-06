@@ -68,6 +68,37 @@ class MudderyObject(DefaultObject):
         raise Exception("Cannot delete the dfield object!")
     dfield = property(__dfield_get, __dfield_set, __dfield_del)
 
+    @lazy_property
+    def custom_attributes_handler(self):
+        return DataFieldHandler(self)
+
+    #@property cattr
+    def __cattr_get(self):
+        """
+        A non-attr_obj store (ndb: NonDataBase). Everything stored
+        to this is guaranteed to be cleared when a server is shutdown.
+        Syntax is same as for the _get_db_holder() method and
+        property, e.g. obj.ndb.attr = value etc.
+        """
+        try:
+            return self._cattr_holder
+        except AttributeError:
+            self._cattr_holder = DbHolder(self, "custom_attribute", manager_name='custom_attributes_handler')
+            return self._cattr_holder
+
+    #@cattr.setter
+    def __cattr_set(self, value):
+        "Stop accidentally replacing the ndb object"
+        string = "Cannot assign directly to ndb object! "
+        string += "Use self.attr.name=value instead."
+        raise Exception(string)
+
+    #@cattr.deleter
+    def __cattr_del(self):
+        "Stop accidental deletion."
+        raise Exception("Cannot delete the attr object!")
+    cattr = property(__cattr_get, __cattr_set, __cattr_del)
+
     def at_object_creation(self):
         """
         Called once, when this object is first created. This is the
@@ -236,6 +267,28 @@ class MudderyObject(DefaultObject):
 
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded().
+
+    def load_custom_attributes(self, attributes_info):
+        """
+        Load custom attributes.
+
+        Args:
+            attributes_info: relative attributes info
+        """
+        for key in self.dfield.all():
+            attribute_info = attributes_info.for_field(key)
+            if attribute_info:
+                # get value
+                serializable_value = getattr(self.dfield, key)
+                if serializable_value == "":
+                    value = None
+                else:
+                    try:
+                        value = ast.literal_eval(serializable_value)
+                    except (SyntaxError, ValueError), e:
+                        # treat as a raw string
+                        value = serializable_value
+                setattr(self.cattr, attribute_info["key"], value)
 
     def after_data_key_changed(self):
         """

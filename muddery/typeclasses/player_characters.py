@@ -24,6 +24,7 @@ from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
+from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia.comms.models import ChannelDB
@@ -763,11 +764,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
                   "max_exp": self.max_exp,
                   "exp": self.db.exp,
                   "max_hp": self.max_hp,
-                  "hp": self.db.hp,
-                  "max_mp": self.max_mp,
-                  "mp": self.db.mp,
-                  "attack": self.attack,
-                  "defence": self.defence}
+                  "hp": self.db.hp}
+                  
+        for key in CHARACTER_ATTRIBUTES_INFO.all_keys():
+            status[key] = getattr(self.cattr, key)
 
         return status
 

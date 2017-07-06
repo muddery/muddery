@@ -89,6 +89,8 @@ class DataSets(object):
         # Other data
         self.game_settings = DataHandler("game_settings")
         self.character_attributes_info = DataHandler("character_attributes_info")
+        self.equipment_attributes_info = DataHandler("equipment_attributes_info")
+        self.food_attributes_info = DataHandler("food_attributes_info")
         self.creator_loot_list = DataHandler("creator_loot_list")
         self.character_loot_list = DataHandler("character_loot_list")
         self.quest_reward_list = DataHandler("quest_reward_list")
