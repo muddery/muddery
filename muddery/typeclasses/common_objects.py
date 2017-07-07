@@ -123,6 +123,89 @@ class MudderyFood(MudderyCommonObject):
         # Load custom attributes.
         self.load_custom_attributes(FOOD_ATTRIBUTES_INFO)
 
+    def take_effect(self, user, number):
+        """
+        Use this object.
+
+        Args:
+            user: (object) the object who uses this
+            number: (int) the number of the object to use
+
+        Returns:
+            (result, number):
+                result: (string) a description of the result
+                number: (int) actually used number
+        """
+        if not user:
+            raise ValueError("User should not be None.")
+
+        if number <= 0:
+            raise ValueError("Number should be above zero.")
+
+        status_changed = False
+
+        result = ""
+        used = number
+        if used > self.db.number:
+            used = self.db.number
+
+        status_changed = False
+        for key in self.custom_attributes_handler.all():
+            if user.attributes.has(key):
+                # try to add to user's db
+                target = user.db
+            elif hasattr(user, key):
+                # try to add to user's attribute
+                target = user
+            elif user.custom_attributes_handler.has(key):
+                # try to add to user's cattr
+                target = user.cattr
+            else:
+                # no target
+                continue
+
+            origin_value = getattr(target, key)
+            increment = getattr(self.cattr, key) * used
+            
+            # check limit
+            limit_key = "max_" + key
+            limit_source = None
+            if user.attributes.has(limit_key):
+                # try to add to user's db
+                limit_source = user.db
+            elif hasattr(user, limit_key):
+                # try to add to user's attribute
+                limit_source = user
+            elif user.custom_attributes_handler.has(limit_key):
+                # try to add to user's cattr
+                limit_source = user.cattr
+
+            if limit_source is not None:
+                limit_value = getattr(limit_source, limit_key)
+                if origin_value + increment > limit_value:
+                    increment = limit_value - origin_value
+
+            # add value
+            if increment != 0:
+                setattr(target, key, origin_value + increment)
+                status_changed = True
+
+            # set result
+            attribute_info = FOOD_ATTRIBUTES_INFO.for_key(key)
+                
+            if result:
+                result += ", "
+
+            if increment >= 0:
+                result += "%s +%s" % (attribute_info["name"], increment)
+            else:
+                result += "%s %s" % (attribute_info["name"], increment)
+
+        if status_changed:
+            user.show_status()
+
+        return result, used
+
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -172,10 +255,23 @@ class MudderyEquipment(MudderyCommonObject):
         if not user:
             return
 
-        for key in self.cattr.all:
-            value = getattr(user, key, 0)
-            value += getattr(self.dfield, key, 0)
-            setattr(user, key, value)
+        for key in self.custom_attributes_handler.all():
+            if hasattr(user, key):
+                # try to add to user's attribute
+                target = user
+            elif user.custom_attributes_handler.has(key):
+                # try to add to user's cattr
+                target = user.cattr
+            elif user.attributes.has(key):
+                # try to add to user's db
+                target = user.db
+            else:
+                # no target
+                return
+
+            value = getattr(self.cattr, key)
+            value += getattr(target, key)
+            setattr(target, key, value)
 
     def get_available_commands(self, caller):
         """

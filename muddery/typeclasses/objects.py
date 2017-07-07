@@ -38,7 +38,7 @@ class MudderyObject(DefaultObject):
         return EventHandler(self)
 
     @lazy_property
-    def datafields(self):
+    def data_fields_handler(self):
         return DataFieldHandler(self)
 
     #@property dfield
@@ -52,7 +52,7 @@ class MudderyObject(DefaultObject):
         try:
             return self._dfield_holder
         except AttributeError:
-            self._dfield_holder = DbHolder(self, "datafield", manager_name='datafields')
+            self._dfield_holder = DbHolder(self, "data_fields", manager_name='data_fields_handler')
             return self._dfield_holder
 
     #@dfield.setter
@@ -83,7 +83,7 @@ class MudderyObject(DefaultObject):
         try:
             return self._cattr_holder
         except AttributeError:
-            self._cattr_holder = DbHolder(self, "custom_attribute", manager_name='custom_attributes_handler')
+            self._cattr_holder = DbHolder(self, "custom_attributes", manager_name='custom_attributes_handler')
             return self._cattr_holder
 
     #@cattr.setter
@@ -275,7 +275,7 @@ class MudderyObject(DefaultObject):
         Args:
             attributes_info: relative attributes info
         """
-        for key in self.dfield.all():
+        for key in self.data_fields_handler.all():
             attribute_info = attributes_info.for_field(key)
             if attribute_info:
                 # get value

@@ -110,6 +110,8 @@ class DataSets(object):
 
         self.other_data = [self.game_settings,
                            self.character_attributes_info,
+                           self.equipment_attributes_info,
+                           self.food_attributes_info,
                            self.creator_loot_list,
                            self.character_loot_list,
                            self.quest_reward_list,
