@@ -111,13 +111,7 @@ var client = {
                 }
                 else if (key == "status") {
                     var status = data[key];
-                    controller.setStatus(status["level"],
-                                         status["exp"],
-                                         status["max_exp"],
-                                         status["hp"],
-                                         status["max_hp"],
-                                         status["attack"],
-                                         status["defence"]);
+                    controller.setStatus(status);
                 }
                 else if (key == "equipments") {
 			        controller.setEquipments(data[key]);

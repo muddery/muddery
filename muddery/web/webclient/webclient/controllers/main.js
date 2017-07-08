@@ -339,20 +339,20 @@ var controller = {
     },
 
     // set player's status
-    setStatus: function(level, exp, max_exp, hp, max_hp, attack, defence) {
-        $("#prompt_level").text(level);
+    setStatus: function(status) {
+        $("#prompt_level").text(status["level"]["value"]);
 
         var exp_str = "--";
-        if (max_exp > 0) {
-            exp_str = exp + "/" + max_exp;
+        if (status["max_exp"]["value"] > 0) {
+            exp_str = status["exp"]["value"] + "/" + status["max_exp"]["value"];
         }
         $("#prompt_exp").text(exp_str);
 
-        var hp_str = hp + "/" + max_hp;
+        var hp_str = status["hp"]["value"] + "/" + status["max_hp"]["value"];
         $("#prompt_hp").text(hp_str);
 
         var frame_ctrl = this.getFrameController("#frame_information");
-        frame_ctrl.setStatus(level, exp, max_exp, hp, max_hp, attack, defence);
+        frame_ctrl.setStatus(status);
     },
 
 	//////////////////////////////////////////

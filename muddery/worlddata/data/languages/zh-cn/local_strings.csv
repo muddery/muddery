@@ -102,3 +102,6 @@ category,origin,local
 ,"Cmd","命令"
 ,"Say","说话"
 ,"You can not attack in this place.","你不能在这里攻击。"
+,"LEVEL","等级"
+,"EXP","经验"
+,"HP","生命"

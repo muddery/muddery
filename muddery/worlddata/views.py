@@ -286,7 +286,25 @@ def apply_changes(request):
     """
     Apply the game world's data.
     """
+    def import_syetem_data():
+        """
+        Import all system data files to models.
+        """
+        # system data file's path
+        system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
+
+        # load system data
+        for data_handlers in DATA_SETS.system_data:
+            try:
+                data_handlers.import_from_path(system_data_path, system_data=True)
+            except Exception, e:
+                err_message = "Cannot import game data. %s" % e
+                logger.log_tracemsg(err_message)
+
     try:
+        # reload system data
+        import_syetem_data()
+
         # reload localized strings
         LOCALIZED_STRINGS_HANDLER.reload()
 

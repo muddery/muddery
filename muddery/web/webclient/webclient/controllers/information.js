@@ -12,11 +12,6 @@ var controller = {
 
 	// reset view's language
 	resetLanguage: function() {
-		$("#view_level").text(_("LEVEL: "));
-		$("#view_exp").text(_("EXP: "));
-		$("#view_hp").text(_("HP: "));
-		$("#view_attack").text(_("ATTACK: "));
-		$("#view_defence").text(_("DEFENCE: "));
 		$("#view_head").text(_("HEAD: "));
 		$("#view_hand").text(_("HAND: "));
 		$("#view_chest").text(_("CHEST: "));
@@ -31,7 +26,51 @@ var controller = {
     },
 
     // Set player character's information
-    setStatus: function(level, exp, max_exp, hp, max_hp, attack, defence) {
+    setStatus: function(status) {
+        this.clearItems();
+        var container = $("#attributes");
+        var item_template = container.find("div.template");
+
+        var attributes = [];
+        for (var key in status) {
+            attributes.push(status[key]);
+        }
+        attributes.sort(function(a, b){return a["order"] - b["order"]});
+
+        for (var i in attributes) {
+            var key = attributes[i]["key"];
+            if (key.substring(0, 4) == "max_") {
+                var relative_key = key.substring(4);
+                if (relative_key in status) {
+                    // Value and max value will show in the same line, so skip max.
+                    continue;
+                }
+            }
+
+            var obj = attributes[i];
+            var item = item_template.clone()
+	            .removeClass("template");
+
+            var value = obj["value"];
+            var max_key = "max_" + key;
+            if (max_key in status) {
+                // Add max value.
+                var max_value = status[max_key]["value"];
+                if (max_value <= 0) {
+                    value = "--";
+                }
+                else {
+                    value = value + "/" + max_value;
+                }
+            }
+
+            item.find(".attr_name").text(obj["name"]);
+            item.find(".attr_value").text(value);
+
+			item.appendTo(container);
+        }
+
+        /*
         var hp_str = hp + "/" + max_hp;
 
         var exp_str = "--";
@@ -44,6 +83,7 @@ var controller = {
         $("#hp").text(hp_str);
         $("#attack").text(attack);
         $("#defence").text(defence);
+        */
     },
 
     // Set player's equipments.
@@ -66,6 +106,11 @@ var controller = {
     doLook: function(caller) {
         var dbref = $(caller).data("dbref");
         commands.doLook(dbref);
+    },
+
+    clearItems: function() {
+    	// Remove items that are not template.
+    	$("#attributes>:not(.template)").remove();
     },
 };
 

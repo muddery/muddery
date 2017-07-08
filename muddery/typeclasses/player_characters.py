@@ -760,14 +760,34 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Get character's status.
         """
-        status = {"level": self.db.level,
-                  "max_exp": self.max_exp,
-                  "exp": self.db.exp,
-                  "max_hp": self.max_hp,
-                  "hp": self.db.hp}
-                  
-        for key in CHARACTER_ATTRIBUTES_INFO.all_keys():
-            status[key] = getattr(self.cattr, key)
+        status = {"level": {"key": "level",
+                            "name": _("LEVEL"),
+                            "value": self.db.level,
+                            "order": 0},
+                  "max_exp": {"key": "max_exp",
+                              "name": _("MAX EXP"),
+                              "value": self.max_exp,
+                              "order": 1},
+                  "exp": {"key": "exp",
+                          "name": _("EXP"),
+                          "value": self.db.exp,
+                          "order": 2},
+                  "max_hp": {"key": "max_hp",
+                             "name": _("MAX HP"),
+                             "value": self.max_hp,
+                             "order": 3},
+                  "hp": {"key": "hp",
+                         "name": _("HP"),
+                         "value": self.db.hp,
+                         "order": 4}}
+
+        order = 5
+        for value in CHARACTER_ATTRIBUTES_INFO.all_values():
+            status[value["key"]] = {"key": value["key"],
+                                    "name": value["name"],
+                                    "value": getattr(self.cattr, value["key"]),
+                                    "order": order}
+            order += 1
 
         return status
 

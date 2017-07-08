@@ -76,6 +76,12 @@ class AttributesInfoHandler(object):
         """
         return self.keys.keys()
 
+    def all_values(self):
+        """
+        Get all values.
+        """
+        return self.keys.values()
+
     def set_model_fields(self):
         """
         Set model fields names to attribute names.
