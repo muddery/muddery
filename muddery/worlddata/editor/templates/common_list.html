@@ -9,6 +9,7 @@
 <h1 xmlns="http://www.w3.org/1999/html">{{ title }}</h1>
 <div>{{ desc }}</div>
 <div id="content-main">
+    {% if can_add %}
     <div class="object-tools">
         <form action="add.html" method="post">
             {% csrf_token %}
@@ -17,6 +18,7 @@
             <input type="submit" name="_add" value="Add {{ title }}" class="add-box" />
         </form>
     </div>
+    {% endif %}
     <div class="module" id="changelist">
         <div class="results">
             <table id="result_list">

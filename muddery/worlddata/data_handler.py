@@ -259,7 +259,10 @@ class DataHandler(object):
             for item in error_list:
                 print("item.message: %s" % item.message)
                 print("item.params: %s" % item.params)
-                err_message += item.message % item.params + "  "
+                if item.params:
+                    err_message += item.message % item.params + "  "
+                else:
+                    err_message += item.message + "  "
             count += 1
         return "%s (model: %s, line: %s)" % (err_message, self.model_name, line)
 

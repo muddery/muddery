@@ -34,6 +34,10 @@ class AttributesInfoHandler(object):
         # Load localized string model.
         try:
             for record in self.info_data_handler.objects.all():
+                if not record.key:
+                    # skip empty fields
+                    continue
+
                 # Add db fields to dict.
                 values = {"field": record.field,
                           "key": record.key,

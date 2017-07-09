@@ -839,10 +839,10 @@ class attributes_info(models.Model):
     field = models.CharField(max_length=KEY_LENGTH, unique=True)
     
     # attribute's key, chars and numbers only.
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, blank=True)
     
     # attribute's readable name.
-    name = models.CharField(max_length=KEY_LENGTH)
+    name = models.CharField(max_length=KEY_LENGTH, blank=True)
     
     # attribute's desc
     desc = models.TextField(blank=True)
