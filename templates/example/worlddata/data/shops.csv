@@ -1,1 +1,2 @@
 key,name,typeclass,desc,verb,condition,icon
+shop_fruits,Buy Fruits,CLASS_SHOP,"I have some fruits.",Buy Fruits,,

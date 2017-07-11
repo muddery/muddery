@@ -1,7 +1,7 @@
-key,name,typeclass,desc,location,condition
-object_alley_box_01,Wood Box,CLASS_WORLD_OBJECT,"It is an empty wood box. There is nothing in it.",room_colorfulworld_alley
-object_colorfulworld_hole,Cable Pit,CLASS_WORLD_OBJECT,"This is the cable pit that I have felt in. I don't want to drop in it again.",room_colorfulworld_alley
-creator_alley_pile,a Pile of Junk,CLASS_OBJECT_CREATOR,"There is a pile of wood sticks and boards at the end of the alley.",room_colorfulworld_alley,
-creator_street_body,Human Body,CLASS_OBJECT_CREATOR,"This man is in security's uniform with his face down. There are a lot bloods near him. His body is so cold that he must have been died for a long time.",room_colorfulworld_street,is_quest_in_progress("quest_find_guardhouse_key")
-creator_storeroom_box,Carton,CLASS_OBJECT_CREATOR,"This is a carton. It seems full of foods.",room_colorfulworld_storeroom,
-creator_photo_studio_box,Small Box,CLASS_OBJECT_CREATOR,"It is a small box, looks like a medicine box.",room_colorfulworld_printing_room,
+key,name,typeclass,desc,location,condition,icon
+object_alley_box_01,Wood Box,CLASS_WORLD_OBJECT,"It is an empty wood box. There is nothing in it.",room_colorfulworld_alley,,
+object_colorfulworld_hole,Cable Pit,CLASS_WORLD_OBJECT,"This is the cable pit that I have felt in. I don't want to drop in it again.",room_colorfulworld_alley,,
+creator_alley_pile,a Pile of Junk,CLASS_OBJECT_CREATOR,"There is a pile of wood sticks and boards at the end of the alley.",room_colorfulworld_alley,,
+creator_street_body,Human Body,CLASS_OBJECT_CREATOR,"This man is in security's uniform with his face down. There are a lot bloods near him. His body is so cold that he must have been died for a long time.",room_colorfulworld_street,is_quest_in_progress("quest_find_guardhouse_key"),
+creator_storeroom_box,Carton,CLASS_OBJECT_CREATOR,"This is a carton. It seems full of foods.",room_colorfulworld_storeroom,,
+creator_photo_studio_box,Small Box,CLASS_OBJECT_CREATOR,"It is a small box, looks like a medicine box.",room_colorfulworld_printing_room,,

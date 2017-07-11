@@ -1,3 +1,4 @@
 key,name,typeclass,desc,model,level,reborn_time,location,condition,icon
-npc_wu,Security Man,CLASS_COMMON_NPC,"This man is tall, but he is wounded and can not move freely.",MODEL_NPC_COMMON,1,0,room_colorfulworld_storeroom,is_quest_completed("quest_find_survivor"),
-mob_doll,Doll,CLASS_COMMON_MONSTER,"This doll leans against a wall. Its eyes seem staring at you which makes you feel violated. You want to give it a good beat!",MODEL_MOB_DOLL,1,10,room_colorfulworld_photo_studio,,
+npc_wu,Security Man,CLASS_COMMON_NPC,"This man is tall and strong. He is looking at you with his fist clenched. He will rush up to you at any moment.",MODEL_NPC_COMMON,1,0,room_colorfulworld_storeroom,is_quest_completed("quest_find_survivor"),icon_guard
+npc_stranger,Stranger,CLASS_COMMON_MONSTER,"This man is tall and strong. He is looking at you with his fist clenched. He will rush up to you at any moment.",MODEL_NPC_COMMON,1,1,room_colorfulworld_storeroom,not is_quest_completed("quest_find_survivor"),icon_guard
+npc_doll,Doll,CLASS_COMMON_MONSTER,"This doll leans against a wall. Its eyes seem staring at you which makes you feel violated. You want to give it a good beat!",MODEL_MOB_DOLL,1,1,room_colorfulworld_photo_studio,,icon_model

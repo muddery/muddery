@@ -1,1 +1,4 @@
-key,name,background
+key,typeclass,name,desc,background,background_point,corresp_map_pos
+area_intro,CLASS_COMMON_AREA,Intro Screen,,,,
+area_hole,CLASS_COMMON_AREA,Unknown Area,,,,
+area_park,CLASS_COMMON_AREA,Park,,image_park_map,"(450,270)","(0,8)"

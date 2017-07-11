@@ -1,10 +1,9 @@
 key,name,typeclass,desc,verb,location,destination,condition
-exit_game_start,Enter Game,CLASS_COMMON_EXIT,"Welcome to the demo game!",Enter,room_intro,room_colorfulworld_hole,
+exit_game_start,Enter Game,CLASS_COMMON_EXIT,"Welcome to this game!",Enter,room_intro,room_colorfulworld_hole,
 exit_colorfulworld_alley_1,Climb Out,CLASS_COMMON_EXIT,"This cable pit is not deep, I can climb out.",Climb,room_colorfulworld_hole,room_colorfulworld_alley,
 exit_colorfulworld_street_1,Street,CLASS_LOCKED_EXIT,"The ad. board has been moved and there appears a small gap which is just enough for a man to walk through.",Move Out,room_colorfulworld_alley,room_colorfulworld_street,
 exit_colorfulworld_alley_2,Alley,CLASS_COMMON_EXIT,"Walk into a dark alley.",Go To,room_colorfulworld_street,room_colorfulworld_alley,
-exit_colorfulworld_conv_store_1,Conv. Store,CLASS_COMMON_EXIT,"There is a convenient store near the street. Its door is broken.",Enter,room_colorfulworld_street,room_colorfulworld_conv_store,
-exit_colorfulworld_street_2,Street,CLASS_COMMON_EXIT,"Leave the convenient store, back to the street.",Leave,room_colorfulworld_conv_store,room_colorfulworld_street,
+exit_colorfulworld_conv_store_1,,CLASS_TWO_WAY_EXIT,,,room_colorfulworld_street,room_colorfulworld_conv_store,
 exit_colorfulworld_storeroom_1,Storeroom,CLASS_COMMON_EXIT,"There is a door in the convenient store with a name {wSTOREROOM{n on it.",Enter,room_colorfulworld_conv_store,room_colorfulworld_storeroom,
 exit_colorfulworld_conv_store_2,Conv. Store,CLASS_COMMON_EXIT,"Leave the storeroom.",Leave,room_colorfulworld_storeroom,room_colorfulworld_conv_store,
 exit_colorfulworld_gift_shop_1,Gift Shop,CLASS_COMMON_EXIT,"There is a gift shop across the street. Its windows are all broken.",Enter,room_colorfulworld_street,room_colorfulworld_gift_shop,

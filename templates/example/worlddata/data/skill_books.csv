@@ -1,1 +1,2 @@
 key,name,typeclass,desc,max_stack,unique,can_remove,can_discard,icon,skill
+book_dunt,Skill of Dunt,CLASS_SKILL_BOOK,"It keeps the secret of Dunt. You can learn this skill when you use this book.",1,0,1,1,icon_dunt,skill_dunt

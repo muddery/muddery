@@ -1,2 +1,4 @@
 provider,object,number,odds,quest,condition
-mob_robot_a,obj_screw,1,0.8,quest_find_screws,
+char_robot_mob,obj_screw,1,0.8,quest_find_screws,
+char_robot_mob,obj_money,10,0.5,,
+char_robot_mob,book_dunt,1,0.2,,

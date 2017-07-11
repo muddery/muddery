@@ -1,4 +1,6 @@
-key,name,typeclass,desc,cd,passive,function
-skill_normal_hit,Hit,CLASS_SKILL,"Hit an enemy. Make a little damage.",1,0,hit(1)
-skill_normal_heal,Heal,CLASS_SKILL,"Heal yourself. Recover a little HP.",5,0,heal(20)
-skill_normal_hp,Strong Body,CLASS_SKILL,"Passive skill. Increase max HP.",0,1,max_hp(20)
+key,name,typeclass,desc,message,cd,passive,function,icon
+skill_normal_hit,Hit,CLASS_SKILL,"Hit an enemy. Make a little damage.","{c%c{n hits %t. Gives %e points damage.",1,0,hit(1),icon_hit
+skill_normal_heal,Heal,CLASS_SKILL,"Heal yourself. Recover a little HP.","{c%c{n heals self. Recovers %e points HP.",5,0,heal(20),icon_heal
+skill_normal_hp,Strong Body,CLASS_SKILL,"Passive skill. Increase max HP.",,0,1,max_hp(20),icon_strong
+skill_dunt,Dunt,CLASS_SKILL,"Hit an enemy. Make a lot of damage.","{c%c{n hits %t hard. Gives %e points damage.",1,0,hit(2),icon_dunt
+skill_escape,Escape,CLASS_SKILL,"Run away.",,5,0,escape(0.5),icon_escape

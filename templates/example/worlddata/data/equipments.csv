@@ -1,4 +1,2 @@
-key,name,typeclass,desc,max_stack,unique,can_remove,can_discard,icon,position,type,attack,defence
-equip_01,Hat,CLASS_EQUIPMENT,"This is a hat.",1,0,1,1,,POSITION_HEAD,EQUIP_CLOTH,,10
-equip_02,Helm,CLASS_EQUIPMENT,"This is a helm.",1,1,1,1,,POSITION_HEAD,EQUIP_PLATE,,40
-weapon_wood_stick,Wood Stick,CLASS_EQUIPMENT,"This stick is not thick, but it is heavy enough to hit.",1,1,1,1,,POSITION_HAND,EQUIP_WEAPON,10,
+key,name,typeclass,desc,max_stack,unique,can_remove,can_discard,icon,position,type,attr_1,attr_2,attr_3,attr_4,attr_5,attr_6,attr_7,attr_8,attr_9,attr_10
+weapon_wood_stick,Wood Stick,CLASS_EQUIPMENT,"This stick is not thick, but it is heavy enough to hit.",1,1,1,1,icon_club,POSITION_HAND,EQUIP_WEAPON,10,0,,,,,,,,

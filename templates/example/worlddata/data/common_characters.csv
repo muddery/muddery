@@ -1,4 +1,3 @@
 key,name,typeclass,desc,model,level,reborn_time,icon
-player,Player,CLASS_PLAYER,"This is a player.",MODEL_PLAYER,1,10,
-mob_wu,Stranger,CLASS_COMMON_MONSTER,"This man is tall, but he is wounded and can not move freely.",MODEL_NPC_COMMON,1,0,
-mob_robot_a,Robot A,CLASS_COMMON_MONSTER,"This is a robot of TYPE-A.",MODEL_MOB_ROBOT_A,1,0,
+player,Player,CLASS_PLAYER,"This is a player.",MODEL_PLAYER,1,10,icon_player
+char_robot_mob,Robot A,CLASS_COMMON_MONSTER,"This is a robot of TYPE-A.",MODEL_MOB_ROBOT_A,1,0,icon_robot

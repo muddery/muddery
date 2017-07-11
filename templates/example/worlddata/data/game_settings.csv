@@ -1,9 +1,9 @@
 game_name,connection_screen,solo_mode,global_cd,auto_cast_skill_cd,can_give_up_quests,can_close_dialogue,single_dialogue_sentence,auto_resume_dialogues,default_home_key,start_location_key,default_player_home_key,default_player_character_key,map_scale,map_room_size
-"Game Land","{b=============================================================={n
+"Dream Park","{b=============================================================={n
   Welcome to Muddery's demo game!
 
   This is a small solo game. It's very short, only to demonstrate Muddery's abilities.
   Because the game codes and the database structure may change frequently, user's data may lose. {rIf you can not login with your username, please register again.{n
  
   Muddery is an open source online text game framework in Python. For more information, please visit our website {whttp://www.muddery.org{n.
-{b=============================================================={n",True,1.0,1.5,False,True,True,True,room_intro,room_intro,room_colorfulworld_hole,player,75,40
+{b=============================================================={n",False,1.0,1.5,False,False,True,True,room_intro,room_intro,room_colorfulworld_hole,player,75,40

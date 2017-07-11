@@ -58,7 +58,8 @@ SECRET_KEY = {SECRET_KEY}
 
 
 ######################################################################
-# Default command sets
+# Default statement sets
 ######################################################################
-# Default set for logged in player with characters (fallback)
-CMDSET_CHARACTER = "commands.default_cmdsets.CharacterCmdSet"
+
+# Skill functions set
+SKILL_FUNC_SET = "statements.statement_func_set.SkillFuncSet"
