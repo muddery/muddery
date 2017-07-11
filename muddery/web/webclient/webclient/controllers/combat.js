@@ -120,7 +120,7 @@ var controller = {
                     .attr("id", "cmd_" + command["key"])
                     .data("key", command["key"])
                     .data("cd", 0)
-                    .css({"left": 20 + i * 80});
+                    .css({"left": 10 + i * 70});
                     
                 if (command["icon"]) {
                     item.find(".command_icon").attr("src", settings.resource_url + command["icon"]);
@@ -255,7 +255,7 @@ var controller = {
             }
         }
 
-        commands.doCastSkill(key, this._target);
+        commands.doCastSkill(key, this._target, true);
     },
     
     finishCombat: function(result) {

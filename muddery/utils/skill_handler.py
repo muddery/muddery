@@ -7,6 +7,7 @@ import time
 import random
 from django.conf import settings
 from evennia import TICKER_HANDLER
+from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
@@ -159,6 +160,9 @@ class SkillHandler(object):
             return
 
         if not self.owner:
+            return
+
+        if not self.owner.is_alive():
             return
 
         if not self.owner.ndb.combat_handler:

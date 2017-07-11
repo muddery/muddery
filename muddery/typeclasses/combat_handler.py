@@ -203,6 +203,9 @@ class MudderyCombatHandler(DefaultScript):
         """
         Cast a skill.
         """
+        if self.db.finished:
+            return
+
         if caller:
             caller.cast_skill(skill_key, target)
         

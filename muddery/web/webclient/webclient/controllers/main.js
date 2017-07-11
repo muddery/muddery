@@ -87,8 +87,7 @@ var controller = {
     setDialogueList: function(data) {
         if (data.length == 0) {
             // close dialogue box
-            var frame_id = "#frame_dialogue";
-            $(frame_id).hide();
+            this.doClosePopupBox();
         }
         else {
             if ($("#frame_combat").is(":visible")) {
@@ -100,7 +99,7 @@ var controller = {
             else {
                 data_handler.dialogues_list = data;
                 dialogues = data_handler.dialogues_list.shift();
-                this.showDialogue(dialogues);
+	            this.showDialogue(dialogues);
             }
         }
     },
