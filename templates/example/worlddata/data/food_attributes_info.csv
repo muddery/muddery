@@ -1,5 +1,5 @@
 field,key,name,desc
-attr_1,hp,生命,恢复生命值。
+attr_1,hp,HP,Recover HP.
 attr_2,,,
 attr_3,,,
 attr_4,,,
