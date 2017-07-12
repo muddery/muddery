@@ -47,6 +47,24 @@ class Upgrader(BaseUpgrader):
                                       "    pass\n",
                                       "\n"])
                                       
+        # add character_attributes_info to models
+        utils.file_append(file_path, ["\n",
+                                      "class character_attributes_info(model_base.character_attributes_info):\n",
+                                      "    pass\n",
+                                      "\n"])
+
+        # add equipment_attributes_info to models
+        utils.file_append(file_path, ["\n",
+                                      "class equipment_attributes_info(model_base.equipment_attributes_info):\n",
+                                      "    pass\n",
+                                      "\n"])
+
+        # add food_attributes_info to models
+        utils.file_append(file_path, ["\n",
+                                      "class food_attributes_info(model_base.food_attributes_info):\n",
+                                      "    pass\n",
+                                      "\n"])
+                                      
         # comment out ClientSettingsForm in forms
         file_path = os.path.join(game_dir, "worlddata", "forms.py")
         utils.comment_out_class(file_path, "ClientSettingsForm")
@@ -54,6 +72,24 @@ class Upgrader(BaseUpgrader):
         # add world_area to forms
         utils.file_append(file_path, ["\n",
                                       "class WorldAreasForm(forms_base.WorldAreasForm):\n",
+                                      "    pass\n",
+                                      "\n"])
+        
+        # add character_attributes_info to forms       
+        utils.file_append(file_path, ["\n",
+                                      "class CharacterAttributesForm(forms_base.CharacterAttributesForm):\n",
+                                      "    pass\n",
+                                      "\n"])
+
+        # add equipment_attributes_info to forms
+        utils.file_append(file_path, ["\n",
+                                      "class EquipmentAttributesForm(forms_base.EquipmentAttributesForm):\n",
+                                      "    pass\n",
+                                      "\n"])
+
+        # add food_attributes_info to forms
+        utils.file_append(file_path, ["\n",
+                                      "class FoodAttributesForm(forms_base.FoodAttributesForm):\n",
                                       "    pass\n",
                                       "\n"])
                                       
