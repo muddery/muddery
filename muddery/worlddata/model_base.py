@@ -1,6 +1,7 @@
 
 from __future__ import print_function
 
+import re
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
@@ -12,6 +13,8 @@ NAME_LENGTH = 80
 TYPECLASS_LENGTH = 80
 POSITION_LENGTH = 80
 VALUE_LENGTH = 80
+
+re_attribute_key = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 
 
 def auto_generate_key(model):
@@ -852,6 +855,12 @@ class attributes_info(models.Model):
         abstract = True
         verbose_name = "Attrubute Information"
         verbose_name_plural = "Attribute Information"
+        
+    def clean(self):
+        if self.key:
+            if not re.match(re_attribute_key, self.key):
+                error = ValidationError("Keys can only contain letters, numbers and underscores and must begin with a letter or an underscore.")
+                raise ValidationError({"key": error})
         
 
 # ------------------------------------------------------------

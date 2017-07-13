@@ -475,6 +475,8 @@ class SkillBooksForm(forms.ModelForm):
 class CharacterAttributesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CharacterAttributesForm, self).__init__(*args, **kwargs)
+        self.fields['field'].disabled = True;
+        
         localize_form_fields(self)
 
     class Meta:
@@ -485,6 +487,8 @@ class CharacterAttributesForm(forms.ModelForm):
 class EquipmentAttributesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentAttributesForm, self).__init__(*args, **kwargs)
+        self.fields['field'].disabled = True;
+        
         localize_form_fields(self)
 
     class Meta:
@@ -495,6 +499,8 @@ class EquipmentAttributesForm(forms.ModelForm):
 class FoodAttributesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FoodAttributesForm, self).__init__(*args, **kwargs)
+        self.fields['field'].disabled = True;
+        
         localize_form_fields(self)
 
     class Meta:
