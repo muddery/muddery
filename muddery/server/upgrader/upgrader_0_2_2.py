@@ -10,6 +10,7 @@ import django.core.management
 from evennia.server.evennia_launcher import init_game_directory
 from muddery.server.upgrader.base_upgrader import BaseUpgrader
 from muddery.server.upgrader import utils
+from muddery.server.launcher import configs
 
 
 class Upgrader(BaseUpgrader):
@@ -59,7 +60,10 @@ class Upgrader(BaseUpgrader):
 
         # add new forms
         file_path = os.path.join(game_dir, "worlddata", "forms.py")
-        
+
+        # move init to the end of the file
+        utils.comment_out_lines(file_path, ["Manager.init_data()"])
+
         # add character_attributes_info to forms
         utils.file_append(file_path, ["\n",
                                       "class CharacterAttributesForm(forms_base.CharacterAttributesForm):\n",
@@ -78,6 +82,28 @@ class Upgrader(BaseUpgrader):
                                       "    pass\n",
                                       "\n"])
 
+        # add init method
+        utils.file_append(file_path, ["\n",
+                                      "Manager.init_data()\n",
+                                      "\n"])
+
+        default_template_dir = os.path.join(muddery_lib, "game_template")
+
+        # update game editor
+        utils.copy_path(default_template_dir, game_dir, os.path.join("worlddata", "editor"))
+
+        if game_template:
+            game_template_dir = os.path.join(configs.MUDDERY_TEMPLATE, game_template)
+
+            # update statements
+            utils.copy_path(game_template_dir, game_dir, "statements")
+
+            # update game editor
+            utils.copy_path(game_template_dir, game_dir, os.path.join("worlddata", "editor"))
+
+            # template data
+            utils.copy_path(game_template_dir, game_dir, os.path.join("worlddata", "data"))
+
         os.chdir(game_dir)
         init_game_directory(game_dir, check_db=False)
 
@@ -89,6 +115,15 @@ class Upgrader(BaseUpgrader):
         django_args = ["migrate"]
         django_kwargs = {}
         django.core.management.call_command(*django_args, **django_kwargs)
+
+        if game_template:
+            # load custom attributes
+            from muddery.worlddata.data_sets import DATA_SETS
+
+            data_path = os.path.join(game_dir, "worlddata", "data")
+            DATA_SETS.get_handler("character_attributes_info").import_from_path(data_path)
+            DATA_SETS.get_handler("equipment_attributes_info").import_from_path(data_path)
+            DATA_SETS.get_handler("food_attributes_info").import_from_path(data_path)
 
     def upgrade_data(self, data_path, game_template, muddery_lib):
         """
