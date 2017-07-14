@@ -110,6 +110,9 @@ var controller = {
 	setCommands: function(commands) {
 		var container = $('#buttons');
 		var item_template = container.find("button.template");
+		var left = 0;
+		var top = 150;
+        var line = 4;
 
 		if (commands) {
             for (var i in commands) {
@@ -120,7 +123,8 @@ var controller = {
                     .attr("id", "cmd_" + command["key"])
                     .data("key", command["key"])
                     .data("cd", 0)
-                    .css({"left": 10 + i * 70});
+                    .css({"left": left + 10 + i % line * 70,
+                          "top": top + parseInt(i / line) * 80});
                     
                 if (command["icon"]) {
                     item.find(".command_icon").attr("src", settings.resource_url + command["icon"]);

@@ -52,16 +52,24 @@ var controller = {
 	            .removeClass("template");
 
             var value = obj["value"];
+            if (value == null || typeof(value) == "undefined") {
+                value = "--";
+            }
+            
             var max_key = "max_" + key;
             if (max_key in status) {
                 // Add max value.
                 var max_value = status[max_key]["value"];
-                if (max_value <= 0) {
+                
+                if (max_value == null || typeof(max_value) == "undefined") {
+                	max_value = "--";
+            	}
+                else if (max_value == 0 && value == 0) {
                     value = "--";
+                    max_value = "--";
                 }
-                else {
-                    value = value + "/" + max_value;
-                }
+
+                value = value + "/" + max_value;
             }
 
             item.find(".attr_name").text(obj["name"]);

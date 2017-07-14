@@ -235,6 +235,8 @@ var controller = {
     	var frame_id = "#frame_combat";
         var frame_ctrl = this.getFrameController(frame_id);
         frame_ctrl.setCommands(commands);
+
+        this.doSetVisiblePopupSize();
     },
     
     setSkillResult: function(result) {
@@ -341,9 +343,12 @@ var controller = {
     setStatus: function(status) {
         $("#prompt_level").text(status["level"]["value"]);
 
-        var exp_str = "--";
+        var exp_str = "";
         if (status["max_exp"]["value"] > 0) {
             exp_str = status["exp"]["value"] + "/" + status["max_exp"]["value"];
+        }
+        else {
+            exp_str = "--/--";
         }
         $("#prompt_exp").text(exp_str);
 

@@ -116,10 +116,20 @@ class Upgrader(BaseUpgrader):
         django_kwargs = {}
         django.core.management.call_command(*django_args, **django_kwargs)
 
+        # load data
+        system_data_path = os.path.join(muddery_lib, "worlddata", "data")
+        from muddery.worlddata.data_sets import DATA_SETS
+        
+        # load system data
+        for data_handlers in DATA_SETS.system_data:
+            try:
+                data_handlers.import_from_path(system_data_path, system_data=True)
+            except Exception, e:
+                err_message = "Cannot import system game data. %s" % e
+                logger.log_errmsg(err_message)
+
         if game_template:
             # load custom attributes
-            from muddery.worlddata.data_sets import DATA_SETS
-
             data_path = os.path.join(game_dir, "worlddata", "data")
             DATA_SETS.get_handler("character_attributes_info").import_from_path(data_path)
             DATA_SETS.get_handler("equipment_attributes_info").import_from_path(data_path)
