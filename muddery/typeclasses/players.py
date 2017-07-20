@@ -90,6 +90,34 @@ class MudderyPlayer(DefaultPlayer):
         for session in sessions:
             session.msg(text=text, **kwargs)
 
+    def at_post_login(self, session=None):
+        """
+        Called at the end of the login process, just before letting
+        the player loose.
+
+        Args:
+            session (Session, optional): Session logging in, if any.
+
+        Notes:
+            This is called *before* an eventual Character's
+            `at_post_login` hook. By default it is used to set up
+            auto-puppeting based on `MULTISESSION_MODE`.
+
+        """
+        # if we have saved protocol flags on ourselves, load them here.
+        protocol_flags = self.attributes.get("_saved_protocol_flags", None)
+        if session and protocol_flags:
+            session.update_flags(**protocol_flags)
+
+        # inform the client that we logged in through an OOB message
+        if session:
+            session.msg(logged_in={})
+
+            char_all = [{"name": char.get_name(), "dbref": char.dbref} for char in self.db._playable_characters]
+            session.msg({"char_all": char_all})
+
+        self._send_to_connect_channel("|G%s connected|n" % self.key)
+
 
 class MudderyGuest(DefaultGuest):
     """
