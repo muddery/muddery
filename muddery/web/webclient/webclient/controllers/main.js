@@ -1,7 +1,7 @@
 
 var controller = {
 
-	_login: false,
+	_puppet: false,
 
     _solo_mode: false,
 
@@ -491,14 +491,14 @@ var controller = {
 	},
 
     onConnectionOpen: function() {
-    	this._login = false;
+    	this._puppet = false;
     	
         controller.showUnlogin();
         controller.doAutoLoginCheck();
     },
     
     onConnectionClose: function() {
-    	this._login = false;
+    	this._puppet = false;
     	
         controller.showConnect();
 
@@ -510,13 +510,11 @@ var controller = {
     },
     
     onLogin : function(data) {
-    	this._login = true;
-    
-        this.showLogin();
+
     },
     
     onLogout : function(data) {
-    	this._login = false;
+    	this._puppet = false;
     	
         // show unlogin UI
         this.showUnlogin();
@@ -530,6 +528,10 @@ var controller = {
         data_handler.character_name = data["name"];
 
         this.setInfo(data["name"], data["icon"]);
+        
+        this.showPuppet();
+        
+        this._puppet = true;
     },
     
     //////////////////////////////////////////
@@ -651,8 +653,8 @@ var controller = {
         frame.show();
     },
 
-	// login layout
-    showLogin : function() {
+	// puppet layout
+    showPuppet : function() {
         // show login UI
         this.clearMsgWindow();
 
@@ -733,7 +735,7 @@ var controller = {
 	
     // send out a speech
     sendMessage: function() {
-    	if (!this._login) {
+    	if (!this._puppet) {
     		return;
     	}
     	
@@ -767,7 +769,7 @@ var controller = {
 
         // social tab
         this._solo_mode = settings["solo_mode"];
-        if (this._login) {
+        if (this._puppet) {
             if (this._solo_mode) {
                 $("#tab_social").hide();
             }

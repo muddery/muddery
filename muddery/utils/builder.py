@@ -11,6 +11,7 @@ from muddery.worlddata.data_sets import DATA_SETS
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import create, search, logger
+from evennia.comms.models import ChannelDB
 import traceback
 
 
@@ -352,3 +353,91 @@ def delete_object(obj_dbref):
     if not okay:
         ostring = "Can not delete %s." % obj_dbref
         print(ostring)
+
+
+def create_player(playername, password, permissions=None, typeclass=None):
+    """
+    Helper function, creates a player of the specified typeclass.
+    """
+    if not permissions:
+        permissions = settings.PERMISSION_PLAYER_DEFAULT
+
+    new_player = create.create_player(playername, None, password,
+                                      permissions=permissions, typeclass=typeclass)
+
+    # This needs to be set so the engine knows this player is
+    # logging in for the first time. (so it knows to call the right
+    # hooks during login later)
+    new_player.db.FIRST_LOGIN = True
+
+    # join the new player to the public channel
+    pchannel = ChannelDB.objects.get_channel(settings.DEFAULT_CHANNELS[0]["key"])
+    if not pchannel.connect(new_player):
+        string = "New player '%s' could not connect to public channel!" % new_player.key
+        logger.log_err(string)
+
+    return new_player
+    
+
+def create_character(new_player, nickname, permissions=None, character_key=None,
+                     level=1, typeclass=None, location=None, home=None):
+    """
+    Helper function, creates a character based on a player's name.
+    """
+    if not character_key:
+        character_key = GAME_SETTINGS.get("default_player_character_key")
+
+    if not typeclass:
+        typeclass = settings.BASE_CHARACTER_TYPECLASS
+        
+    if not permissions:
+        permissions = settings.PERMISSION_PLAYER_DEFAULT
+    
+    if not home:
+        home = settings.DEFAULT_HOME
+        try:
+            default_home_key = GAME_SETTINGS.get("default_player_home_key")
+            if default_home_key:
+                rooms = search_obj_data_key(default_home_key)
+                home = rooms[0]
+        except:
+            pass
+                        
+    if not location:
+        location = default_home
+        try:
+            start_location_key = GAME_SETTINGS.get("start_location_key")
+            if start_location_key:
+                rooms = search_obj_data_key(start_location_key)
+                location = rooms[0]
+        except:
+            pass
+
+    new_character = create.create_object(typeclass, key=new_player.key, location=location,
+                                         home=home, permissions=permissions)
+
+    # set character info
+    new_character.set_data_key(character_key)
+    new_character.set_level(level)
+
+    # set playable character list
+    new_player.db._playable_characters.append(new_character)
+
+    # allow only the character itself and the player to puppet this character (and Immortals).
+    new_character.locks.add("puppet:id(%i) or pid(%i) or perm(Immortals) or pperm(Immortals)" %
+                            (new_character.id, new_player.id))
+
+    # If no description is set, set a default description
+    if not new_character.db.desc:
+        new_character.db.desc = "This is a Player."
+
+    # Add nickname
+    if not nickname:
+        nickname = character_key
+    new_character.set_nickname(nickname)
+        
+    # We need to set this to have @ic auto-connect to this character
+    new_player.db._last_puppet = new_character
+    
+    return new_character
+

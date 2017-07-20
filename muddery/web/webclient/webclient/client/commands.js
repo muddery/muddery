@@ -38,7 +38,7 @@ var commands = {
     },
 
     // register
-    doRegister: function(playername, nickname, password, password_again) {
+    doRegister: function(playername, password, password_again, connect) {
         
         if (!Evennia.isConnected()) {
             Evennia.connect();
@@ -49,10 +49,10 @@ var commands = {
             return;
         }
 
-        var args = {"playername" : playername,
-                    "nickname" : nickname,
-                    "password" : password};
-        Evennia.msg("text", this.cmdString("create_connect", args));
+        var args = {"playername": playername,
+                    "password": password,
+                    "connect": connect};
+        Evennia.msg("text", this.cmdString("create", args));
         
         var login = $("#frame_login")[0].contentWindow.controller;
         login.setPlayerName(playername);

@@ -13,21 +13,19 @@ var controller = {
 	resetLanguage: function() {
 		$("#view_name").text(_("Name"));
 		$("#reg_name").attr("placeholder", _("username"));
-		$("#reg_nickname").attr("placeholder", _("nickname"));
 		$("#view_password").text(_("Password"));
 		$("#reg_password").attr("placeholder", _("password"));
-		$("#reg_password_again").attr("placeholder", _("password again"));
+		$("#reg_password_verify").attr("placeholder", _("password verify"));
 		$("#view_register").text(_("Register"));
 	},
 
     // register
     doRegister: function() {
         var playername = $("#reg_name").val();
-        var nickname = $("#reg_nickname").val();
         var password = $("#reg_password").val();
-        var password_again = $("#reg_password_again").val();
+        var password_verify = $("#reg_password_verify").val();
 
-        commands.doRegister(playername, nickname, password, password_again);
+        commands.doRegister(playername, password, password_verify, true);
         
         this.clear();
     },
@@ -35,9 +33,8 @@ var controller = {
     // clear contents
     clear: function() {
         $("#reg_name").val("");
-        $("#reg_nickname").val("");
         $("#reg_password").val("");
-        $("#reg_password_again").val("");
+        $("#reg_password_verify").val("");
     },
 };
 

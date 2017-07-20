@@ -30,6 +30,20 @@ def set_obj_data_key(obj, key):
     obj.attributes.add("key", key, category=settings.DATA_KEY_CATEGORY, strattr=True)
 
 
+def search_obj_data(key, value):
+    """
+    Search objects which have the given value.
+
+    Args:
+        key: (string) Value's key.
+        value: (string) Value.
+    """
+    if not key:
+        return None
+
+    return search.search_object_attribute(key=key, strvalue=value, category=settings.DATA_KEY_CATEGORY)
+
+
 def search_obj_data_key(key):
     """
     Search objects which have the given key.
@@ -40,8 +54,15 @@ def search_obj_data_key(key):
     if not key:
         return None
 
-    obj = search.search_object_attribute(key="key", strvalue=key, category=settings.DATA_KEY_CATEGORY)
-    return obj
+    return search_obj_data("key", key)
+    
+    
+def search_obj_data_type(key, value, typeclass):
+    """
+    Search objects of the given typeclass which have the given value.
+    """
+    objs = search_obj_data(key, value)
+    return [obj for obj in objs if obj.is_typeclass(typeclass, exact=False)]
 
 
 def set_obj_unique_type(obj, type):

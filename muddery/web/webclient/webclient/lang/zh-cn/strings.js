@@ -4,7 +4,7 @@ var local_string_zh_cn = {
     "Please login.": "请登录。",
     "username": "用户名",
     "password": "密码",
-    "password again": "再输入密码",
+    "password verify": "再输入密码",
     "nickname": "昵称",
     "Name": "名字",
     "Password": "密码",
