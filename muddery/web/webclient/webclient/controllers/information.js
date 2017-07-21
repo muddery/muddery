@@ -21,8 +21,13 @@ var controller = {
     // Set player's basic information
     setInfo: function(name, icon) {
         $("#name").text(name);
-        var url = settings.resource_url + icon;
-        $("#obj_icon").attr("src", url);
+        if (icon) {
+        	var url = settings.resource_url + icon;
+        	$("#obj_icon").attr("src", url);
+        }
+        else {
+            $("#obj_icon").attr("src", "");
+        }
     },
 
     // Set player character's information

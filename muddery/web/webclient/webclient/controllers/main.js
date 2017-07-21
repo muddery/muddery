@@ -312,6 +312,23 @@ var controller = {
         frame_ctrl.showMap(map_data._current_location);
     },
     
+    // Set new character's information.
+    showNewCharacter: function() {
+        this.doClosePopupBox();
+        this.showFrame("#frame_new_char");
+    },
+
+    // Delete a character.
+    showDeleteCharacter: function(name, dbref) {
+        this.doClosePopupBox();
+
+        var frame_id = "#frame_delete_char";
+       	var frame_ctrl = this.getFrameController(frame_id);
+		frame_ctrl.setData(name, dbref);
+
+        this.showFrame(frame_id);
+    },
+    
     // close popup box
     doClosePopupBox: function() {
 		$("#popup_container").hide();
@@ -357,6 +374,12 @@ var controller = {
 
         var frame_ctrl = this.getFrameController("#frame_information");
         frame_ctrl.setStatus(status);
+    },
+    
+    // set player's all playable characters
+    setAllCharacters: function(data) {
+    	var frame_ctrl = this.getFrameController("#frame_select_char");
+        frame_ctrl.setCharacters(data);
     },
 
 	//////////////////////////////////////////
@@ -510,7 +533,7 @@ var controller = {
     },
     
     onLogin : function(data) {
-
+        this.showSelectChar();
     },
     
     onLogout : function(data) {
@@ -523,15 +546,29 @@ var controller = {
         Evennia.connect();
     },
     
+    onCharacterCreated: function(data) {
+		// close popup windows
+        controller.doClosePopupBox();
+    },
+
+    onCharacterDeleted: function(data) {
+		// close popup windows
+        controller.doClosePopupBox();
+    },
+    
     onPuppet: function(data) {
         data_handler.character_dbref = data["dbref"];
         data_handler.character_name = data["name"];
 
         this.setInfo(data["name"], data["icon"]);
-        
         this.showPuppet();
         
         this._puppet = true;
+    },
+    
+    onUnpuppet: function(data) {
+	    this._puppet = false;
+        this.showSelectChar();
     },
     
     //////////////////////////////////////////
@@ -679,7 +716,7 @@ var controller = {
 	// unlogin layout
 	showUnlogin : function() {
         // show unlogin UI
-        //this.clearMsgWindow();
+        this.clearMsgWindow();
         $("#prompt_content").hide();
 
     	// show unlogin tabs
@@ -689,6 +726,22 @@ var controller = {
         $("#tab_login").show();
     
         this.showContent("login");
+
+        this.clearChannels();
+    },
+    
+    // shown when players logged in and going to select a character
+	showSelectChar: function() {
+        //this.clearMsgWindow();
+        $("#prompt_content").hide();
+
+    	// show select character tabs
+        this.hideTabs();
+
+        $("#tab_select_char").show();
+        $("#tab_system_char").show();
+    
+        this.showContent("select_char");
 
         this.clearChannels();
     },
@@ -804,6 +857,7 @@ var controller = {
 		this.getFrameController("#frame_quests").resetLanguage();
 		this.getFrameController("#frame_register").resetLanguage();
 		this.getFrameController("#frame_scene").resetLanguage();
+		this.getFrameController("#frame_select_char").resetLanguage();
 		this.getFrameController("#frame_shop").resetLanguage();
 	},
 	
@@ -814,6 +868,7 @@ var controller = {
 		$("#view_connect").text(_("Connect"));
 		$("#view_login").text(_("Login"));
 		$("#view_register").text(_("Register"));
+		$("#view_select_char").text(_("Select Char"));
 		$("#view_scene").text(_("Scene"));
 		$("#view_char").text(_("Char"));
 		$("#view_status").text(_("Status"));
@@ -823,7 +878,9 @@ var controller = {
 		$("#view_social").text(_("Social"));
 		$("#view_map").text(_("Map"));
 		$("#view_system").text(_("Sys"));
+		$("#view_system_char").text(_("System"));
 		$("#view_logout").text(_("Logout"));
+		$("#view_unpuppet").text(_("Unpuppet"));
 		$("#msg_send").text(_("Send"));
 	},
 	

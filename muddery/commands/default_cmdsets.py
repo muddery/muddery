@@ -79,6 +79,11 @@ class PlayerCmdSet(default_cmds.PlayerCmdSet):
         # any commands you add below will overload the default ones.
         #
         self.add(player.CmdQuit())
+        self.add(player.CmdPuppet())
+        self.add(player.CmdUnpuppet())
+        self.add(player.CmdCharCreate())
+        self.add(player.CmdCharDelete())
+        self.add(player.CmdCharAll())
 
 
 class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):

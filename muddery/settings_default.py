@@ -286,7 +286,7 @@ MULTISESSION_MODE = 2
 # The maximum number of characters allowed for MULTISESSION_MODE 2,3. This is
 # checked by the default ooc char-creation command. Forced to 1 for
 # MULTISESSION_MODE 0 and 1.
-MAX_NR_CHARACTERS = 1
+MAX_NR_CHARACTERS = 3
 
 
 ######################################################################

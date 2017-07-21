@@ -91,6 +91,16 @@
                         <iframe id="frame_map" class="popup_frame" src="./views/map.html"></iframe>
                     </div>
                 </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_new_char" class="popup_frame" src="./views/new_char.html"></iframe>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <iframe id="frame_delete_char" class="popup_frame" src="./views/delete_char.html"></iframe>
+                    </div>
+                </div>
             </div>
         </div>
     
@@ -122,6 +132,7 @@
                     <div id="tab_content" class="panel-body">
                         <iframe id="frame_login" class="content_frame" src="./views/login.html"></iframe>
                         <iframe id="frame_register" class="content_frame" src="./views/register.html"></iframe>
+                        <iframe id="frame_select_char" class="content_frame" src="./views/select_char.html"></iframe>
                         <iframe id="frame_scene" class="content_frame" src="./views/scene.html"></iframe>
                         <iframe id="frame_information" class="content_frame" src="./views/information.html"></iframe>
                         <iframe id="frame_inventory" class="content_frame" src="./views/inventory.html"></iframe>
@@ -139,6 +150,9 @@
                         </li>
                         <li id="tab_register" role="presentation" class="" style="display: none;">
                             <a id="view_register" onclick="controller.showContent('register')">Register</a>
+                        </li>
+                        <li id="tab_select_char" role="presentation" class="" style="display: none;">
+                            <a id="view_select_char" onclick="controller.showContent('select_char')">Select Char</a>
                         </li>
                         <li id="tab_scene" role="presentation" class="">
                             <a id="view_scene" onclick="controller.showContent('scene')">Scene</a>
@@ -166,11 +180,22 @@
                         <li id="tab_map" role="presentation" class="">
                             <a id="view_map" onclick="controller.showMap()">Map</a>
                         </li>
+                        <li id="tab_system_char" role="presentation" class="dropup">
+                            <a id="view_system_char" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">System<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a id="view_logout" onclick="commands.doLogout()" class="first-dropdown-item">Logout</a>
+                                </li>
+                            </ul>
+                        </li>
                         <li id="tab_system" role="presentation" class="dropup">
                             <a id="view_system" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Sys<span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li>
                                     <a id="view_logout" onclick="commands.doLogout()" class="first-dropdown-item">Logout</a>
+                                </li>
+                                <li>
+                                    <a id="view_unpuppet" onclick="commands.unpuppetCharacter()" class="dropdown-item">Unpuppet</a>
                                 </li>
                             </ul>
                         </li>

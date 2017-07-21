@@ -54,16 +54,16 @@ class CmdQuit(Command):
 
         nsess = len(player.sessions.all())
         if nsess == 2:
-            player.msg({"msg":"{RQuitting{n. One session is still connected.",
+            session.msg({"msg":"{RQuitting{n. One session is still connected.",
                        "logout":""},
                        session=session)
         elif nsess > 2:
-            player.msg({"msg":"{RQuitting{n. %i session are still connected." % (nsess-1),
+            session.msg({"msg":"{RQuitting{n. %i session are still connected." % (nsess-1),
                        "logout":""},
                        session=session)
         else:
             # we are quitting the last available session
-            player.msg({"msg":"{RQuitting{n. Hope to see you again, soon.",
+            session.msg({"msg":"{RQuitting{n. Hope to see you again, soon.",
                        "logout":""},
                        session=session)
         player.disconnect_session_from_player(session)
@@ -105,22 +105,62 @@ class CmdPuppet(Command):
             # search for a matching character
             new_character = [char for char in search.object_search(args) if char.access(player, "puppet")]
             if not new_character:
-                player.msg({"alert":_("That is not a valid character choice.")})
+                session.msg({"alert":_("That is not a valid character choice.")})
                 return
             new_character = new_character[0]
         else: 
             # Puppet last character.
             new_character = player.db._last_puppet
             if not new_character:
-                player.msg({"alert":_("You should puppet a character.")})
+                session.msg({"alert":_("You should puppet a character.")})
                 return
 
         try:
             player.puppet_object(session, new_character)
             player.db._last_puppet = new_character
         except RuntimeError as exc:
-            player.msg({"alert":_("{rYou cannot become {C%s{n: %s") % (new_character.name, exc)})
+            session.msg({"alert":_("{rYou cannot become {C%s{n: %s") % (new_character.name, exc)})
 
+
+class CmdUnpuppet(Command):
+    """
+    stop puppeting
+
+    Usage:
+        {"cmd":"unpuppet",
+         "args":""
+        }
+
+    Go out-of-character (OOC).
+
+    This will leave your current character and put you in a incorporeal OOC state.
+    """
+
+    key = "unpuppet"
+    locks = "cmd:all()"
+
+    # this is used by the parent
+    player_caller = True
+
+    def func(self):
+        "Implement function"
+
+        player = self.player
+        session = self.session
+
+        old_char = player.get_puppet(session)
+        if not old_char:
+            return
+
+        player.db._last_puppet = old_char
+
+        # disconnect
+        try:
+            player.unpuppet_object(session)
+            session.msg({"unpuppet": True})
+        except RuntimeError as exc:
+            session.msg({"alert":_("{rCould not unpuppet from {c%s{n: %s" % (old_char, exc))})
+            
 
 class CmdCharCreate(Command):
     """
@@ -146,12 +186,12 @@ class CmdCharCreate(Command):
         args = self.args
         
         if not args:
-            player.msg({"alert":_("You should give the character a name.")})
+            session.msg({"alert":_("You should give the character a name.")})
             return
         
         name = args["name"]
         if not name:
-            player.msg({"alert":_("Name chould not be empty.")})
+            session.msg({"alert":_("Name chould not be empty.")})
             return
 
         # sanity checks
@@ -166,12 +206,12 @@ class CmdCharCreate(Command):
         charmax = settings.MAX_NR_CHARACTERS if settings.MULTISESSION_MODE > 1 else 1
 
         if player.db._playable_characters and len(player.db._playable_characters) >= charmax:
-            player.msg(_("You may only create a maximum of %i characters.") % charmax)
+            session.msg({"alert":_("You may only create a maximum of %i characters.") % charmax})
             return
 
         if utils.search_obj_data_type("name", name, settings.BASE_PLAYER_TYPECLASS):
             # check if this name already exists.
-            player.msg({"alert":_("{rA character named '{w%s{r' already exists.{n") % name})
+            session.msg({"alert":_("{rA character named '{w%s{r' already exists.{n") % name})
             return
 
         try:
@@ -182,8 +222,10 @@ class CmdCharCreate(Command):
             # we won't see any errors at all.
             session.msg({"alert":_("There was an error creating the Player: %s" % e)})
             logger.log_trace()
+            return
             
-        player.msg({"alert":_("Character created.")})
+        session.msg({"char_created": True,
+                     "char_all": player.get_all_characters()})
 
 
 class CmdCharDelete(Command):
@@ -192,7 +234,7 @@ class CmdCharDelete(Command):
 
     Usage:
         {"cmd":"char_delete",
-         "args":{"char": <character's dbref>,
+         "args":{"dbref": <character's dbref>,
                  "password": <player's password>}
         }
 
@@ -211,29 +253,31 @@ class CmdCharDelete(Command):
             self.msg({"alert":_("Please select a character")})
             return
             
-        character = args["char"]
+        dbref = args["dbref"]
         password = args["password"]
             
         check = player.check_password(password)
         if not check:
             # No password match
-            player.msg({"alert":_("Incorrect password.")})
+            session.msg({"alert":_("Incorrect password.")})
             return
 
         # use the playable_characters list to search
-        match = [char for char in make_iter(player.db._playable_characters) if char.dbref == character]
+        match = [char for char in make_iter(player.db._playable_characters) if char.dbref == dbref]
         if not match:
-            player.msg("You have no such character to delete.")
+            session.msg({"alert":_("You have no such character to delete.")})
             return
         elif len(match) > 1:
-            player.msg("Aborting - there are two characters with the same name. Ask an admin to delete the right one.")
+            session.msg({"alert":_("Aborting - there are two characters with the same name. Ask an admin to delete the right one.")})
             return
         else: # one match
             delobj = match[0]
             key = delobj.key
             player.db._playable_characters = [char for char in player.db._playable_characters if char != delobj]
             delobj.delete()
-            player.msg({"alert":_("Character '%s' was permanently deleted.") % key})
+
+            session.msg({"char_deleted": True,
+                         "char_all": player.get_all_characters()})
 
 
 class CmdCharAll(Command):
@@ -254,5 +298,4 @@ class CmdCharAll(Command):
         player = self.player
         session = self.session
         
-        char_all = [{"name": char.get_name(), "dbref": char.dbref} for char in player.db._playable_characters]
-        player.msg({"char_all": char_all})
+        session.msg({"char_all": player.get_all_characters()})

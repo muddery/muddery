@@ -404,7 +404,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
             pass
                         
     if not location:
-        location = default_home
+        location = home
         try:
             start_location_key = GAME_SETTINGS.get("start_location_key")
             if start_location_key:

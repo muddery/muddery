@@ -231,7 +231,7 @@ class CmdUnconnectedConnect(Command):
                 return
 
         if not password:
-            session.msg({"alert":_("{Please input password.")})
+            session.msg({"alert":_("Please input password.")})
             return
 
         player = connect_normal_player(session, playername, password)

@@ -58,6 +58,33 @@ var commands = {
         login.setPlayerName(playername);
     },
     
+    // create new character
+    createCharacter: function(name) {
+   	 	var args = {"name": name};
+		Evennia.msg("text", this.cmdString("char_create", args));
+    },
+
+    // delete a character
+    deleteCharacter: function(dbref, password) {
+        if (!password) {
+            return;
+        }
+
+        var args = {"dbref": dbref,
+                    "password": password};
+		Evennia.msg("text", this.cmdString("char_delete", args));
+    },
+    
+    // puppet a character
+    puppetCharacter: function(dbref) {
+    	Evennia.msg("text", this.cmdString("puppet", dbref));
+    },
+    
+    // unpuppet current character
+    unpuppetCharacter: function() {
+        Evennia.msg("text", this.cmdString("unpuppet", ""));
+    },
+    
     // look
     doLook : function(dbref) {
         Evennia.msg("text", this.cmdString("look", dbref));

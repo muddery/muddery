@@ -162,6 +162,18 @@ var client = {
                 else if (key == "logout") {
                     controller.onLogout(data[key]);
                 }
+                else if (key == "unpuppet") {
+	                controller.onUnpuppet(data[key]);
+                }
+                else if (key == "char_all") {
+                    controller.setAllCharacters(data[key]);
+                }
+                else if (key == "char_created") {
+                    controller.onCharacterCreated(data[key]);
+                }
+                else if (key == "char_deleted") {
+                    controller.onCharacterDeleted(data[key]);
+                }
                 else if (key == "puppet") {
                     controller.onPuppet(data[key]);
                 }

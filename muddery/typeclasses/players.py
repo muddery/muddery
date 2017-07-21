@@ -118,6 +118,13 @@ class MudderyPlayer(DefaultPlayer):
 
         self._send_to_connect_channel("|G%s connected|n" % self.key)
 
+    def get_all_characters(self):
+        """
+        Get this player's all playable characters.
+        """
+        char_all = [{"name": char.get_name(), "dbref": char.dbref} for char in self.db._playable_characters]
+        return char_all
+
 
 class MudderyGuest(DefaultGuest):
     """
