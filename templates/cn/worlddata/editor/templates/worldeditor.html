@@ -8,6 +8,11 @@
 {% endblock %}
 
 {% block content %}
+    <nav class="editor_nav">
+        <a class="nav_button" href="{% url 'worlddata:index' %}">编辑器</a>
+		<a class="nav_button" href="editor/tools.html">工具</a>
+	</nav>
+	
     <h1>世界编辑器</h1>
     在世界编辑器中，你可以构建整个游戏世界。
 

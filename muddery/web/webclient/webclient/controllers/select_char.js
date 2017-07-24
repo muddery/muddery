@@ -12,7 +12,7 @@ var controller = {
 	// reset view's language
 	resetLanguage: function() {
 		$("#view_character").text(_("Characters"));
-		$("#view_new_char").text(_("New Character"));
+		$("#button_new_char").text(_("New Character"));
 	},
 	
     // Set playable characters.

@@ -8,6 +8,11 @@
 {% endblock %}
 
 {% block content %}
+    <nav class="editor_nav">
+        <a class="nav_button" href="{% url 'worlddata:index' %}">Editor</a>
+		<a class="nav_button" href="editor/tools.html">Tools</a>
+	</nav>
+				
     <h1>World Editor</h1>
     In World Editor, you can edit the whole game world.
 

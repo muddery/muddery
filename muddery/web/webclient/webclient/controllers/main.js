@@ -880,6 +880,7 @@ var controller = {
 		$("#view_system").text(_("Sys"));
 		$("#view_system_char").text(_("System"));
 		$("#view_logout").text(_("Logout"));
+		$("#view_logout_puppet").text(_("Logout"));
 		$("#view_unpuppet").text(_("Unpuppet"));
 		$("#msg_send").text(_("Send"));
 	},

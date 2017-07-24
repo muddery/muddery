@@ -14,10 +14,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
 from evennia.server.sessionhandler import SESSIONS
 from evennia.utils import logger
-from muddery.utils import exporter
-from muddery.utils import importer
-from muddery.utils import readers
-from muddery.utils import writers
+from muddery.utils import exporter, importer, readers, writers, utils
 from muddery.utils.builder import build_all
 from muddery.utils.localized_strings_handler import _, LOCALIZED_STRINGS_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
@@ -70,19 +67,6 @@ def world_editor(request):
     return render(request, 'worldeditor.html', context)
 
 
-def file_iterator(file, erase=False, chunk_size=512):
-    while True:
-        c = file.read(chunk_size)
-        if c:
-            yield c
-        else:
-            # remove temp file
-            file.close()
-            if erase:
-                os.remove(file.name)
-            break
-
-
 @staff_member_required
 def export_game_data(request):
     """
@@ -99,7 +83,7 @@ def export_game_data(request):
         zipfile.seek(0)
 
         filename = time.strftime("worlddata_%Y%m%d_%H%M%S.zip", time.localtime())
-        response = http.StreamingHttpResponse(file_iterator(zipfile))
+        response = http.StreamingHttpResponse(utils.file_iterator(zipfile))
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
     except Exception, e:
@@ -137,7 +121,7 @@ def export_data_single(request):
         temp_file = open(temp_name, "rb")
 
         filename = model_name + "." + writer_class.file_ext
-        response = http.StreamingHttpResponse(file_iterator(temp_file, erase=True))
+        response = http.StreamingHttpResponse(utils.file_iterator(temp_file, erase=True))
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
     except Exception, e:
@@ -172,7 +156,7 @@ def export_resources(request):
         zipfile.seek(0)
 
         filename = time.strftime("resources_%Y%m%d_%H%M%S.zip", time.localtime())
-        response = http.StreamingHttpResponse(file_iterator(zipfile))
+        response = http.StreamingHttpResponse(utils.file_iterator(zipfile))
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
     except Exception, e:

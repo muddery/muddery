@@ -191,7 +191,7 @@ class CmdCharCreate(Command):
         
         name = args["name"]
         if not name:
-            session.msg({"alert":_("Name chould not be empty.")})
+            session.msg({"alert":_("Name should not be empty.")})
             return
 
         # sanity checks
@@ -209,7 +209,7 @@ class CmdCharCreate(Command):
             session.msg({"alert":_("You may only create a maximum of %i characters.") % charmax})
             return
 
-        if utils.search_obj_data_type("name", name, settings.BASE_PLAYER_TYPECLASS):
+        if utils.search_db_data_type("nickname", name, settings.BASE_CHARACTER_TYPECLASS):
             # check if this name already exists.
             session.msg({"alert":_("{rA character named '{w%s{r' already exists.{n") % name})
             return

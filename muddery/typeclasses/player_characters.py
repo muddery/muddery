@@ -209,14 +209,14 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Set player character's nickname.
         """
-        self.db.nick_name = nickname
+        self.db.nickname = nickname
 
     def get_name(self):
         """
         Get player character's name.
         """
         # Use nick name instead of normal name.
-        return self.db.nick_name
+        return self.db.nickname
 
     def get_appearance(self, caller):
         """

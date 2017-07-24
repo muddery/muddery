@@ -398,7 +398,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
         try:
             default_home_key = GAME_SETTINGS.get("default_player_home_key")
             if default_home_key:
-                rooms = search_obj_data_key(default_home_key)
+                rooms = utils.search_obj_data_key(default_home_key)
                 home = rooms[0]
         except:
             pass
@@ -408,7 +408,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
         try:
             start_location_key = GAME_SETTINGS.get("start_location_key")
             if start_location_key:
-                rooms = search_obj_data_key(start_location_key)
+                rooms = utils.search_obj_data_key(start_location_key)
                 location = rooms[0]
         except:
             pass
