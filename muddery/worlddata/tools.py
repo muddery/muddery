@@ -45,7 +45,7 @@ def export_py_localized_strings(request):
         file.write('"category","origin","local"\n')
         
         # get strings
-        strings = utils.all_unlocalized_strings("py", True)
+        strings = utils.all_unlocalized_py_strings(True)
         
         for s in strings:
             if s[1]:
@@ -79,14 +79,11 @@ def export_js_localized_strings(request):
         # write to a file
         file = tempfile.TemporaryFile()
         
-        # header
-        file.write('"origin": "local",\n')
-        
         # get strings
-        strings = utils.all_unlocalized_strings("js", False)
+        strings = utils.all_unlocalized_js_strings(True)
 
         for s in strings:
-            file.write('"%s": "",\n' % (s[0]))
+            file.write('"%s": "",\n' % s)
 
         file.seek(0)
         filename = time.strftime("strings_%Y%m%d_%H%M%S.js", time.localtime())

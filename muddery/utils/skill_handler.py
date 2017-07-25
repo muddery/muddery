@@ -3,6 +3,8 @@ Skill handler handles a character's skills.
 
 """
 
+from __future__ import print_function
+
 import time
 import random
 from django.conf import settings
@@ -105,6 +107,16 @@ class SkillHandler(object):
             None
         """
         return skill in self.skills
+        
+    def remove_all(self):
+        """
+        Remove all skills.
+        
+        It will be called when skills' owner will be deleted.
+        """
+        for skill in self.skills.values():
+            skill.delete()
+        self.skills = {}
 
     def cast_skill(self, skill_key, target):
         """

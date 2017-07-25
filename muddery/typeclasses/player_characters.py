@@ -8,7 +8,8 @@ creation commands.
 
 """
 
-import traceback
+from __future__ import print_function
+
 import random
 from django.conf import settings
 from django.apps import apps
@@ -1328,3 +1329,19 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 return
 
             channel_obj.msg(emit_string)
+
+    def at_object_delete(self):
+        """
+        Called just before the database object is permanently
+        delete()d from the database. If this method returns False,
+        deletion is aborted.
+
+        All skills, contents will be removed too.
+        """
+        result = super(MudderyPlayerCharacter, self).at_object_delete()
+        if not result:
+            return result
+        
+        self.quest_handler.remove_all()
+        return True
+

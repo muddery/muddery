@@ -3,6 +3,9 @@ This is adapt from evennia/evennia/commands/default/player.py.
 The licence of Evennia can be found in evennia/LICENSE.txt.
 
 """
+
+from __future__ import print_function
+
 import time
 import re
 from django.conf import settings
@@ -272,10 +275,14 @@ class CmdCharDelete(Command):
             return
         else: # one match
             delobj = match[0]
-            key = delobj.key
-            player.db._playable_characters = [char for char in player.db._playable_characters if char != delobj]
-            delobj.delete()
-
+            new_characters = [char for char in player.db._playable_characters if char != delobj]
+            deleted = delobj.delete()
+            
+            if not deleted:
+                session.msg({"alert":_("Can not delete this character.")})
+                return
+            
+            player.db._playable_characters = new_characters
             session.msg({"char_deleted": True,
                          "char_all": player.get_all_characters()})
 

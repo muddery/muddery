@@ -771,3 +771,27 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Show character's status.
         """
         pass
+
+    def at_object_delete(self):
+        """
+        Called just before the database object is permanently
+        delete()d from the database. If this method returns False,
+        deletion is aborted.
+
+        All skills, contents will be removed too.
+        """
+        result = super(MudderyCharacter, self).at_object_delete()
+        if not result:
+            return result
+            
+        # leave combat
+        if self.ndb.combat_handler:
+            self.ndb.combat_handler.remove_character(self)
+        
+        self.skill_handler.remove_all()
+        
+        for content in self.contents:
+            content.delete()
+        
+        return True
+        

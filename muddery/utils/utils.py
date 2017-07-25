@@ -113,7 +113,7 @@ def file_iterator(file, erase=False, chunk_size=512):
             break
 
 
-def get_unlocalized_strings(filename, filter):
+def get_unlocalized_py_strings(filename, filter):
     """
     Get all unlocalized strings.
 
@@ -163,7 +163,7 @@ def get_unlocalized_strings(filename, filter):
     return strings
 
 
-def all_unlocalized_strings(file_type, filter):
+def all_unlocalized_py_strings(filter):
     """
     Get all unlocalized strings.
     
@@ -176,7 +176,7 @@ def all_unlocalized_strings(file_type, filter):
     """
     rootdir = configs.MUDDERY_LIB
     strings = set()
-    ext = "." + file_type
+    ext = ".py"
     
     # get all _() args in all files
     for parent, dirnames, filenames in os.walk(rootdir):
@@ -184,10 +184,92 @@ def all_unlocalized_strings(file_type, filter):
             file_ext = os.path.splitext(filename)[1].lower()
             if file_ext == ext:
                 full_name = os.path.join(parent, filename)
-                strings.update(get_unlocalized_strings(full_name, filter))
+                strings.update(get_unlocalized_py_strings(full_name, filter))
     return strings
-                                
 
 
+def get_unlocalized_js_strings(filename, filter_set):
+    """
+    Get all unlocalized strings.
+
+    Args:
+        file_type: (string) type of file.
+        filter_set: (set) current localized stings set.
+        
+    Returns:
+        (set): a list of strings.
+    """
+    re_func = re.compile(r'_\(\s*".+?\)')
+    re_string = re.compile(r'".*?"')
+    strings = set()
+    
+    # search in python files
+    with open(filename, "r") as file:
+        lines = file.readlines()
+        for line in lines:
+            # parse _() function
+            for func in re_func.findall(line):
+                str = ""
+                cate = ""
+                
+                str_search = re_string.search(func)
+                if str_search:
+                    str = str_search.group()
+                    #remove quotations
+                    str = str[1:-1]
+
+                if str:
+                    if filter_set:
+                        # check dict
+                        if str not in filter_set:
+                            strings.add(str)
+                    else:
+                        strings.add(str)
+    return strings
 
 
+def all_unlocalized_js_strings(filter):
+    """
+    Get all unlocalized strings.
+    
+    Args:
+        file_type: (string) type of file.
+        filter: (boolean) filter exits strings or not.
+
+    Returns:
+        (set): a list of tuple (string, category).
+    """
+    rootdir = configs.MUDDERY_LIB
+    strings = set()
+    ext = ".js"
+    
+    filter_set = set()
+    # get filter
+    if filter:
+        local_string_filename = os.path.join(configs.MUDDERY_LIB, "web", "webclient", "webclient",
+                                             "lang", settings.LANGUAGE_CODE, "strings.js")
+        with open(local_string_filename, "r") as file:
+            re_dict = re.compile(r'".+?"\s*:\s*".+?"')
+            re_string = re.compile(r'".*?"')
+
+            lines = file.readlines()
+            for line in lines:
+                # find localization dict
+                dict_search = re_dict.search(line)
+                if dict_search:
+                    word_dict = dict_search.group()
+                    str_search = re_string.search(word_dict)
+                    str = str_search.group()
+
+                    #remove quotations
+                    str = str[1:-1]
+                    filter_set.add(str)
+    
+    # get all _() args in all files
+    for parent, dirnames, filenames in os.walk(rootdir):
+        for filename in filenames:
+            file_ext = os.path.splitext(filename)[1].lower()
+            if file_ext == ext:
+                full_name = os.path.join(parent, filename)
+                strings.update(get_unlocalized_js_strings(full_name, filter_set))
+    return strings

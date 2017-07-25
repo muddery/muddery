@@ -2,6 +2,8 @@
 QuestHandler handles a character's quests.
 """
 
+from __future__ import print_function
+
 from django.conf import settings
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
@@ -52,6 +54,17 @@ class QuestHandler(object):
         self.owner.msg({"msg": _("Accepted quest {c%s{n.") % new_quest.get_name()})
         self.show_quests()
         self.owner.show_location()
+        
+    def remove_all(self):
+        """
+        Remove all quests.
+        
+        It will be called when quests' owner will be deleted.
+        """
+        for quest in self.current_quests:
+            quest.delete()
+        self.current_quests = []
+        
 
     def give_up(self, quest_key):
         """

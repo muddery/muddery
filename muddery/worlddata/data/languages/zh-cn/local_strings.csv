@@ -139,3 +139,4 @@ category,origin,local
 ,"There was an error creating the Player: %s","创建玩家时出错：%s"
 ,"You have no such character to delete.","你没有这个角色。"
 ,"Aborting - there are two characters with the same name. Ask an admin to delete the right one.","终止：你有两个同名的角色，请联系管理员删除其中的一个角色。"
+,"Can not delete this character.","无法删除这个角色。"
