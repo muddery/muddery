@@ -87,7 +87,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         if moved_obj.has_player:
             self.event.at_character_move_in(moved_obj)
 
-    def at_object_left(self, moved_obj, target_location):
+    def at_object_leave(self, moved_obj, target_location):
         """
         Called after an object has been removed from this object.
         
@@ -96,7 +96,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         target_location (Object): Where `moved_obj` is going.
         
         """
-        super(MudderyRoom, self).at_object_left(moved_obj, target_location)
+        super(MudderyRoom, self).at_object_leave(moved_obj, target_location)
 
         if not GAME_SETTINGS.get("solo_mode"):
             # send surrounding changes to player
