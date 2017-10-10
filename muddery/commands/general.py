@@ -338,6 +338,8 @@ class CmdLoot(Command):
         except Exception, e:
             ostring = "Can not loot %s: %s" % (obj.get_data_key(), e)
             logger.log_tracemsg(ostring)
+            
+        caller.show_location()
 
 
 #------------------------------------------------------------
@@ -635,10 +637,6 @@ class CmdAttack(Command):
         if not caller.is_alive():
             caller.msg({"alert":_("You are died.")})
             return
-            
-        if not caller.location or caller.location.peaceful:
-            caller.msg({"alert":_("You can not attack in this place.")})
-            return
 
         if not self.args:
             caller.msg({"alert":_("You should select a target.")})
@@ -648,6 +646,11 @@ class CmdAttack(Command):
         if not target:
             caller.msg({"alert":_("You should select a target.")})
             return
+
+        if not caller.location or caller.location.peaceful:
+            if target.has_player:
+                caller.msg({"alert":_("You can not attack in this place.")})
+                return
 
         if not target.is_alive():
             caller.msg({"alert":_("%s is died." % target.get_name())})
@@ -848,6 +851,49 @@ class CmdBuy(Command):
             return
 
 
+#------------------------------------------------------------
+# common action
+#------------------------------------------------------------
+class CmdAction(Command):
+    """
+    Object's common action.
+
+    Usage:
+        {"cmd":"action",
+         "args":<object's dbref>
+        }
+      
+    Show everything in your inventory.
+    """
+    key = "action"
+    locks = "cmd:all()"
+
+    def func(self):
+        "do action"
+        caller = self.caller
+        args = self.args
+        
+        if not caller.is_alive():
+            caller.msg({"alert":_("You are died.")})
+            return
+
+        if not args:
+            caller.msg({"alert":_("You should act to something.")})
+            return
+
+        # Use search to handle duplicate/nonexistant results.
+        obj = caller.search(args, location=caller.location)
+        if not obj:
+            caller.msg({"alert":_("Can not find it.")})
+            return
+
+        try:
+            obj.do_action(caller)
+        except Exception, e:
+            logger.log_err("Can not act to %s %s." % (caller.get_data_key(), e))
+            return
+        
+        
 #------------------------------------------------------------
 # connect
 #------------------------------------------------------------

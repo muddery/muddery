@@ -149,6 +149,9 @@ class DialogueRelationsForm(forms_base.DialogueRelationsForm):
 class DialogueSentencesForm(forms_base.DialogueSentencesForm):
     pass
 
+class ConditionDescForm(forms_base.ConditionDescForm):
+    pass
+    
 class LocalizedStringsForm(forms_base.LocalizedStringsForm):
     pass
     

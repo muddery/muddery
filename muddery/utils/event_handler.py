@@ -196,6 +196,29 @@ class EventHandler(object):
                         function(event, character)
 
         return not triggered
+        
+    def at_action(self, character, obj):
+        """
+        Called when a character act to an object.
+        """
+        if not character:
+            return True
+
+        if self.can_bypass(character):
+            return True
+
+        triggered = False
+        if defines.EVENT_TRIGGER_ACTION in self.events:
+            for event in self.events[defines.EVENT_TRIGGER_ACTION]:
+                # If has traverse event.
+                if STATEMENT_HANDLER.match_condition(event["condition"], character, self.owner):
+                    # If matches the condition.
+                    triggered = True
+                    function = self.get_function(event["type"])
+                    if function:
+                        function(event, character)
+
+        return not triggered
 
     def do_attack(self, event, character):
         """

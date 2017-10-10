@@ -61,7 +61,7 @@ class DataSets(object):
         self.skill_books = DataHandler("skill_books")
         self.shops = DataHandler("shops")
         self.shop_goods = DataHandler("shop_goods")
-
+        
         self.object_data = [self.world_areas,
                             self.world_rooms,
                             self.world_exits,
@@ -105,6 +105,7 @@ class DataSets(object):
         self.default_objects = DataHandler("default_objects")
         self.default_skills = DataHandler("default_skills")
         self.npc_shops = DataHandler("npc_shops")
+        self.condition_desc = DataHandler("condition_desc")
         self.image_resources = DataHandler("image_resources")
         self.icon_resources = DataHandler("icon_resources")
 
@@ -125,10 +126,10 @@ class DataSets(object):
                            self.dialogue_quest_dependencies,
                            self.default_objects,
                            self.default_skills,
-                           self.shop_goods,
                            self.npc_shops,
                            self.image_resources,
-                           self.icon_resources]
+                           self.icon_resources,
+                           self.condition_desc]
 
         # Event additional data
         self.event_attacks = DataHandler("event_attacks")

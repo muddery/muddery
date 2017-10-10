@@ -187,3 +187,22 @@ class FuncFightTarget(StatementFunction):
             desc = self.args[0]
 
         return self.caller.attack_clone_target(self.obj.get_data_key(), self.obj.db.level, desc)
+        
+        
+class FuncKillCaller(StatementFunction):
+    """
+    Kill the caller.
+
+    Returns:
+        (boolean) killed
+    """
+    key = "kill_caller"
+    const = False
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        self.caller.db.hp = 0
+        self.caller.die(None)
+        return True

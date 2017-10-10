@@ -12,6 +12,8 @@ from muddery.typeclasses.characters import MudderyCharacter
 from muddery.utils.builder import delete_object
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.worlddata.data_sets import DATA_SETS
+
 
 class MudderyMonster(MudderyCharacter):
     """
@@ -25,6 +27,19 @@ class MudderyMonster(MudderyCharacter):
 
         # set home
         self.home = self.location
+        
+        # load dialogues.
+        self.load_dialogues()
+
+    def load_dialogues(self):
+        """
+        Load dialogues.
+        """
+        npc_key = self.get_data_key()
+        dialogues = DATA_SETS.npc_dialogues.objects.filter(npc=npc_key)
+
+        self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.default]
+        self.dialogues = [dialogue.dialogue for dialogue in dialogues if not dialogue.default]
 
     def get_available_commands(self, caller):
         """
@@ -32,6 +47,10 @@ class MudderyMonster(MudderyCharacter):
         """
         commands = []
         if self.is_alive():
+            if self.dialogues or self.default_dialogues:
+                # If the character have something to talk, add talk command.
+                commands.append({"name":_("Talk"), "cmd":"talk", "args":self.dbref})
+            
             commands.append({"name": _("Attack"), "cmd": "attack", "args": self.dbref})
         return commands
 

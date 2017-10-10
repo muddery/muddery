@@ -5,6 +5,18 @@ from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO, EQU
 from muddery.worlddata.data_sets import DATA_SETS
 
 
+def get_all_objects():
+    """
+    Get all objects that can be put in player's pockets.
+    """
+    choices = []
+    for data in DATA_SETS.object_data:
+        objects = data.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+
+    return choices
+    
+    
 def get_all_pocketable_objects():
     """
     Get all objects that can be put in player's pockets.
@@ -937,6 +949,20 @@ class DialogueSentencesForm(forms.ModelForm):
         model = DATA_SETS.dialogue_sentences.model
         fields = '__all__'
 
+
+class ConditionDescForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ConditionDescForm, self).__init__(*args, **kwargs)
+
+        choices = get_all_objects()
+        self.fields['key'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+
+    class Meta:
+        model = DATA_SETS.condition_desc.model
+        fields = '__all__'
+        
 
 class LocalizedStringsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

@@ -449,6 +449,9 @@ class world_objects(models.Model):
     # The key of a world room.
     # object's location, it must be a room
     location = models.CharField(max_length=KEY_LENGTH)
+    
+    # Action's name
+    action = models.CharField(max_length=NAME_LENGTH)
 
     # the condition for showing the object
     condition = models.TextField(blank=True)
@@ -1163,6 +1166,9 @@ class shop_goods(models.Model):
 
     # the typeclass of this goods
     typeclass = models.CharField(max_length=KEY_LENGTH)
+    
+    # goods's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
 
     # shop's key
     shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
@@ -1752,6 +1758,31 @@ class event_dialogues(models.Model):
         abstract = True
         verbose_name = "Event Dialogues"
         verbose_name_plural = "Event Dialogues"
+        
+        
+# ------------------------------------------------------------
+#
+# condition descriptions
+#
+# ------------------------------------------------------------
+class condition_desc(models.Model):
+    "Object descriptions in different conditions."
+
+    # The key of an object.
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # condition
+    condition = models.TextField(blank=True)
+    
+    # exit's description for display
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Condition Description"
+        verbose_name_plural = "Condition Descriptions"
+        unique_together = ("key", "condition")
 
 
 # ------------------------------------------------------------

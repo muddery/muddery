@@ -25,6 +25,7 @@ from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.event_handler import EventHandler
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.utils.desc_handler import DESC_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
 
 
@@ -305,6 +306,8 @@ class MudderyObject(DefaultObject):
         self.set_desc(getattr(self.dfield, "desc", ""))
 
         self.condition = getattr(self.dfield, "condition", "")
+        
+        self.action = getattr(self.dfield, "action", "")
 
         # set icon
         self.set_icon(getattr(self.dfield, "icon", ""))
@@ -547,19 +550,36 @@ class MudderyObject(DefaultObject):
         # Get name, description and available commands.
         info = {"dbref": self.dbref,
                 "name": self.name,
-                "desc": self.db.desc,
+                "desc": self.get_desc(caller),
                 "cmds": self.get_available_commands(caller),
                 "icon": getattr(self, "icon", None)}
-
         return info
 
+    def get_desc(self, caller):
+        """
+        This returns object's descriptions on different conditions.
+        """
+        desc_conditions = DESC_HANDLER.get(self.get_data_key())
+        if desc_conditions:
+            for item in desc_conditions:
+                if STATEMENT_HANDLER.match_condition(item["condition"], caller, self):
+                    return item["desc"]
+        return self.db.desc
+        
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         commands = []
+        if self.action:
+            commands = [{"name":self.action, "cmd":"action", "args":self.dbref}]
         return commands
+        
+    def do_action(self, caller):
+        # called when caller act to self.
+        # call action event by default
+        self.event.at_action(caller, self)
 
     def msg(self, text=None, from_obj=None, session=None, **kwargs):
         """

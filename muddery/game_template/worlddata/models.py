@@ -484,6 +484,16 @@ class event_dialogues(model_base.event_dialogues):
     pass
 
 
+# ------------------------------------------------------------
+#
+# condition descriptions
+#
+# ------------------------------------------------------------
+class condition_desc(model_base.condition_desc):
+    "Object descriptions in different conditions."
+    pass
+    
+
 #------------------------------------------------------------
 #
 # localized strings

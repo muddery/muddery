@@ -185,6 +185,12 @@ class MudderyLockedExit(MudderyExit):
         # Only can pass exits which have already unlockde.
         if traversing_object.is_exit_unlocked(self.get_data_key()):
             return True
+            
+        if self.auto_unlock:
+            if self.can_unlock(traversing_object):
+                # Automatically unlock the exit when a character looking at it.
+                traversing_object.unlock_exit(self)
+                return True
 
         # Show the object's appearance.
         appearance = self.get_appearance(traversing_object)
@@ -208,9 +214,9 @@ class MudderyLockedExit(MudderyExit):
             # If is unlocked, use common appearance.
             return super(MudderyLockedExit, self).get_appearance(caller)
 
-        can_unlock = STATEMENT_HANDLER.match_condition(self.unlock_condition, caller, self)
+        can_unlock = self.can_unlock(caller)
 
-        if can_unlock and self.auto_unlock:
+        if self.auto_unlock and can_unlock:
             # Automatically unlock the exit when a character looking at it.
             caller.unlock_exit(self)
             

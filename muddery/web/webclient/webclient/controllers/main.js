@@ -86,8 +86,10 @@ var controller = {
 	// popup dialogues
     setDialogueList: function(data) {
         if (data.length == 0) {
-            // close dialogue box
-            this.doClosePopupBox();
+            if ($("#frame_dialogue").is(":visible")) {
+                // close dialogue box
+                this.doClosePopupBox();
+            }
         }
         else {
             if ($("#frame_combat").is(":visible")) {

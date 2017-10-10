@@ -23,6 +23,7 @@ from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.utils.desc_handler import DESC_HANDLER
 from muddery.utils import builder
 from muddery.utils.localiztion_handler import localize_model_fields
 
@@ -64,6 +65,9 @@ def at_server_start():
     CHARACTER_ATTRIBUTES_INFO.set_model_fields()
     EQUIPMENT_ATTRIBUTES_INFO.set_model_fields()
     FOOD_ATTRIBUTES_INFO.set_model_fields()
+    
+    # load condition descriptions
+    DESC_HANDLER.reload()
 
 def at_server_stop():
     """

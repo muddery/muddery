@@ -89,7 +89,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
 
     def at_object_leave(self, moved_obj, target_location):
         """
-        Called after an object has been removed from this object.
+        Called when an object leaves this object in any fashion.
         
         Args:
         moved_obj (Object): The object leaving

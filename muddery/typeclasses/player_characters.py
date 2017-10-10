@@ -1265,6 +1265,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
         # Send dialogues_list to the player.
         self.save_current_dialogue(sentences_list, npc)
         self.msg({"dialogues_list": sentences_list})
+        if not sentences_list:
+            # dialogue finished, refresh surroundings
+            self.show_location()            
 
     def add_exp(self, exp, combat=False):
         """
