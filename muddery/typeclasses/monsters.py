@@ -25,6 +25,9 @@ class MudderyMonster(MudderyCharacter):
         """
         super(MudderyMonster, self).after_data_loaded()
 
+        # Character can auto fight.
+        self.auto_fight = True
+        
         # set home
         self.home = self.location
         
@@ -53,56 +56,3 @@ class MudderyMonster(MudderyCharacter):
             
             commands.append({"name": _("Attack"), "cmd": "attack", "args": self.dbref})
         return commands
-
-    def at_combat_start(self):
-        """
-        Called when a character enters a combat.
-
-        Args:
-            combat_handler: the combat's handler
-
-        Returns:
-            None
-        """
-        super(MudderyMonster, self).at_combat_start()
-
-        # begin auto cast
-        self.skill_handler.start_auto_combat_skill()
-
-    def at_combat_win(self, winners, losers):
-        """
-        Called when the character wins a combat.
-
-        Returns:
-            None
-        """
-        super(MudderyMonster, self).at_combat_win(winners, losers)
-
-        # stop auto cast
-        self.skill_handler.stop_auto_combat_skill()
-
-    def at_combat_lose(self, winners, losers):
-        """
-        Called when the character loses a combat.
-
-        Returns:
-            None
-        """
-        super(MudderyMonster, self).at_combat_lose(winners, losers)
-
-        # stop auto cast
-        self.skill_handler.stop_auto_combat_skill()
-
-    def at_leave_combat_mode(self):
-        """
-        Called when the character leaves a combat.
-
-        Returns:
-            None
-        """
-        super(MudderyMonster, self).at_leave_combat_mode()
-
-        if not self.is_temp:
-            if self.is_alive():
-                # Recover all hp.
-                self.db.hp = self.max_hp

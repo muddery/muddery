@@ -46,7 +46,7 @@ class FuncGiveObject(StatementFunction):
         (boolean) Whether all objects accepted.
     """
 
-    key = "give_objects"
+    key = "give_object"
     const = False
 
     def func(self):
@@ -186,7 +186,7 @@ class FuncFightTarget(StatementFunction):
         if self.args:
             desc = self.args[0]
 
-        return self.caller.attack_clone_target(self.obj.get_data_key(), self.obj.db.level, desc)
+        return self.caller.attack_temp_target(self.obj.get_data_key(), self.obj.db.level, desc)
         
         
 class FuncKillCaller(StatementFunction):

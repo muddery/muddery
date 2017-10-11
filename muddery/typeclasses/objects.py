@@ -111,6 +111,7 @@ class MudderyObject(DefaultObject):
         super(MudderyObject, self).at_object_creation()
 
         self.typeclass_key = None
+        self.action = None
         self.condition = None
         self.icon = None
 
@@ -122,6 +123,7 @@ class MudderyObject(DefaultObject):
 
         self.typeclass_key = None
         self.condition = None
+        self.action = None
         self.icon = None
         
         try:

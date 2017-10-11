@@ -37,6 +37,9 @@ class MudderyNPC(MudderyCharacter):
         """
         super(MudderyNPC, self).after_data_loaded()
 
+        # Character can auto fight.
+        self.auto_fight = True
+        
         # set home
         self.home = self.location
 

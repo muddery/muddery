@@ -116,6 +116,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # A temporary character will be deleted after the combat finished.
         self.is_temp = False
+        
+        # Character can auto fight.
+        self.auto_fight = False
 
         # update equipment positions
         self.reset_equip_positions()
@@ -557,12 +560,17 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
     def at_combat_start(self):
         """
-        Called when the combat begins.
+        Called when a character enters a combat.
+
+        Args:
+            combat_handler: the combat's handler
 
         Returns:
             None
         """
-        pass
+        if self.auto_fight:
+            # begin auto cast
+            self.skill_handler.start_auto_combat_skill()
 
     def at_combat_win(self, winners, losers):
         """
@@ -575,6 +583,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             None
         """
+        if self.auto_fight:
+            # stop auto cast
+            self.skill_handler.stop_auto_combat_skill()
+        
         # add exp
         # get total exp
         exp = 0
@@ -596,6 +608,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             None
         """
+        if self.auto_fight:
+            # stop auto cast
+            self.skill_handler.stop_auto_combat_skill()
+        
         # The character is killed.
         self.die(winners)
 
@@ -629,7 +645,12 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
                 for content in location.contents:
                     if content.has_player:
                         content.show_location()
-
+        else:
+            if self.is_alive():
+                # Recover all hp.
+                self.db.hp = self.max_hp
+                
+                
     def is_in_combat(self):
         """
         Check if the character is in combat.
@@ -683,7 +704,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         self.event.at_character_die()
         self.event.at_character_kill(killers)
 
-        if self.reborn_time > 0:
+        if not self.is_temp and self.reborn_time > 0:
             # Set reborn timer.
             self.defer = deferLater(reactor, self.reborn_time, self.reborn)
 
