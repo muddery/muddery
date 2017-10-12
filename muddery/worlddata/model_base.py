@@ -451,7 +451,7 @@ class world_objects(models.Model):
     location = models.CharField(max_length=KEY_LENGTH)
     
     # Action's name
-    action = models.CharField(max_length=NAME_LENGTH)
+    action = models.CharField(max_length=NAME_LENGTH, blank=True)
 
     # the condition for showing the object
     condition = models.TextField(blank=True)
