@@ -3,6 +3,7 @@ var local_string = {
 	language_list: {
     	"en-us": local_string_en_us,
     	"zh-cn": local_string_zh_cn,
+    	"zh-tw": local_string_zh_tw,
 	},
 
 	language_code: "",

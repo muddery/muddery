@@ -6,6 +6,7 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 import re
 import traceback
 import time
+import hashlib
 from collections import defaultdict
 from random import getrandbits
 from django.conf import settings
@@ -129,6 +130,63 @@ def create_guest_player(session):
         return True, new_player
 
 
+def create_normal_player(session, playername, password):
+    """
+    Create a new player.
+    """
+    # sanity checks
+    if not re.findall('^[\w. @+-]+$', playername) or not (0 < len(playername) <= 32):
+        # this echoes the restrictions made by django's auth
+        # module (except not allowing spaces, for convenience of
+        # logging in).
+        string = "\n\r Playername can max be 32 characters or fewer. Letters, spaces, digits and @/./+/-/_ only."
+        session.msg({"alert":string})
+        return
+    # strip excessive spaces in playername
+    playername = re.sub(r"\s+", " ", playername).strip()
+    if PlayerDB.objects.filter(username__iexact=playername):
+        # player already exists (we also ignore capitalization here)
+        session.msg({"alert":_("Sorry, there is already a player with the name '%s'.") % playername})
+        return
+    # Reserve playernames found in GUEST_LIST
+    if settings.GUEST_LIST and playername.lower() in (guest.lower() for guest in settings.GUEST_LIST):
+        string = "\n\r That name is reserved. Please choose another Playername."
+        session.msg({"alert":string})
+        return
+
+    if not re.findall('^[\w. @+-]+$', password) or not (3 < len(password)):
+        string = "\n\r Password should be longer than 3 characers. Letters, spaces, digits and @\.\+\-\_ only." \
+                 "\nFor best security, make it longer than 8 characters. You can also use a phrase of" \
+                 "\nmany words if you enclose the password in quotes."
+        session.msg({"alert":string})
+        return
+
+    # Check IP and/or name bans
+    bans = ServerConfig.objects.conf("server_bans")
+    if bans and (any(tup[0]==playername.lower() for tup in bans)
+                 or
+                 any(tup[2].match(session.address) for tup in bans if tup[2])):
+        # this is a banned IP or name!
+        string = "{rYou have been banned and cannot continue from here." \
+                 "\nIf you feel this ban is in error, please email an admin.{x"
+        session.msg({"alert":string})
+        session.execute_cmd('{"cmd":"quit","args":""}')
+        return
+
+    # everything's ok. Create the new player account.
+    new_player = None
+    try:
+        new_player = create_player(playername, password)
+    except Exception, e:
+        # We are in the middle between logged in and -not, so we have
+        # to handle tracebacks ourselves at this point. If we don't,
+        # we won't see any errors at all.
+        session.msg({"alert":_("There was an error creating the Player: %s" % e)})
+        logger.log_tracemsg()
+
+    return new_player
+
+
 def connect_normal_player(session, name, password):
     """
     Connect a player with the given name and password.
@@ -162,7 +220,6 @@ def connect_normal_player(session, name, password):
         if player:
             player.at_failed_login(session)
         return None
-
 
     # Check IP and/or name bans
     bans = ServerConfig.objects.conf("server_bans")
@@ -288,60 +345,64 @@ class CmdUnconnectedCreate(Command):
             session.msg({"alert":string})
             return
 
-        # sanity checks
-        if not re.findall('^[\w. @+-]+$', playername) or not (0 < len(playername) <= 30):
-            # this echoes the restrictions made by django's auth
-            # module (except not allowing spaces, for convenience of
-            # logging in).
-            string = "\n\r Playername can max be 30 characters or fewer. Letters, spaces, digits and @/./+/-/_ only."
-            session.msg({"alert":string})
-            return
-        # strip excessive spaces in playername
-        playername = re.sub(r"\s+", " ", playername).strip()
-        if PlayerDB.objects.filter(username__iexact=playername):
-            # player already exists (we also ignore capitalization here)
-            session.msg({"alert":_("Sorry, there is already a player with the name '%s'.") % playername})
-            return
-        # Reserve playernames found in GUEST_LIST
-        if settings.GUEST_LIST and playername.lower() in (guest.lower() for guest in settings.GUEST_LIST):
-            string = "\n\r That name is reserved. Please choose another Playername."
-            session.msg({"alert":string})
-            return
+        new_player = create_normal_player(session, playername, password)
+        if connect:
+            session.msg({"login":{"name": playername, "dbref": new_player.dbref}})
+            session.sessionhandler.login(session, new_player)
+        else:
+            session.msg({"created":{"name": playername, "dbref": new_player.dbref}})
 
-        if not re.findall('^[\w. @+-]+$', password) or not (3 < len(password)):
-            string = "\n\r Password should be longer than 3 characers. Letters, spaces, digits and @\.\+\-\_ only." \
-                     "\nFor best security, make it longer than 8 characters. You can also use a phrase of" \
-                     "\nmany words if you enclose the password in quotes."
-            session.msg({"alert":string})
-            return
 
-        # Check IP and/or name bans
-        bans = ServerConfig.objects.conf("server_bans")
-        if bans and (any(tup[0]==playername.lower() for tup in bans)
-                     or
-                     any(tup[2].match(session.address) for tup in bans if tup[2])):
-            # this is a banned IP or name!
-            string = "{rYou have been banned and cannot continue from here." \
-                     "\nIf you feel this ban is in error, please email an admin.{x"
-            session.msg({"alert":string})
-            session.execute_cmd('{"cmd":"quit","args":""}')
-            return
+class CmdQuickLogin(Command):
+    """
+    Login only with player's name.
 
-        # everything's ok. Create the new player account.
+    Usage:
+        {"cmd":"create",
+         "args":{
+            "playername":<playername>,
+            }
+        }
+    """
+    key = "quick_login"
+    locks = "cmd:all()"
+
+    def func(self):
+        "Do checks, create account and login."
+        session = self.caller
+        args = self.args
+
         try:
-            new_player = create_player(playername, password)
-            if connect:
-                session.msg({"login":{"name": playername, "dbref": new_player.dbref}})
-                session.sessionhandler.login(session, new_player)
-            else:
-                session.msg({"created":{"name": playername, "dbref": new_player.dbref}})
+            playername = args["playername"]
+            md5 = hashlib.md5()
+            md5.update(playername)
+            name_md5 = md5.hexdigest()
+        except Exception:
+            string = 'Syntax error!'
+            logger.log_errmsg(string)
+            session.msg({"alert":string})
+            return
 
-        except Exception, e:
-            # We are in the middle between logged in and -not, so we have
-            # to handle tracebacks ourselves at this point. If we don't,
-            # we won't see any errors at all.
-            session.msg({"alert":_("There was an error creating the Player: %s" % e)})
-            logger.log_tracemsg()
+        character = None
+        if PlayerDB.objects.filter(username__iexact=name_md5):
+            # Already has this player. Login.
+            player = connect_normal_player(session, name_md5, name_md5)
+            if player:
+                session.sessionhandler.login(session, player)
+                character = player.db._last_puppet
+        else:
+            # Register
+            player = create_normal_player(session, name_md5, name_md5)
+            if player:
+                session.sessionhandler.login(session, player)
+                character = create_character(player, playername)
+
+        if character:
+            try:
+                player.puppet_object(session, character)
+                player.db._last_puppet = character
+            except RuntimeError as exc:
+                session.msg({"alert":_("{rYou cannot become {C%s{n: %s") % (character.name, exc)})
 
 
 class CmdUnconnectedQuit(Command):

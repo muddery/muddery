@@ -29,6 +29,11 @@ var commands = {
     
     // functions when user click a button
 
+    doQuickLogin: function(playername) {
+        var args = {"playername" : playername};
+        Evennia.msg("text", this.cmdString("quick_login", args));
+    },
+
     // login
     doLogin: function(playername, password) {
         var args = {"playername" : playername,

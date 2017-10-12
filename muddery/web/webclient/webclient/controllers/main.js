@@ -852,6 +852,7 @@ var controller = {
 		this.getFrameController("#frame_goods").resetLanguage();
 		this.getFrameController("#frame_information").resetLanguage();
 		this.getFrameController("#frame_inventory").resetLanguage();
+		this.getFrameController("#frame_quick_login").resetLanguage();
 		this.getFrameController("#frame_login").resetLanguage();
 		this.getFrameController("#frame_map").resetLanguage();
 		this.getFrameController("#frame_message").resetLanguage();

@@ -132,4 +132,5 @@ var local_string_zh_cn = {
     "Delete": "删除",
     "Characters": "角色",
     "System": "系统",
+    "Please input your name.": "请输入你的名字。",
 };
