@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>基本定义</h1>
+    欢迎进入基本定义界面，这里定义了各种类型的基本值。
+
+    <h3><a href="../">返回</a></h3>
+
+    <h2><a href="./defines/game_settings/form.html?_record=1&_referrer={{ self }}">游戏设置</a></h2>
+    游戏的基本设置。
+    
+    <h2><a href="./defines/class_categories/list.html">物体分类</a></h2>
+    划分了最基本的物体分类。
+
+    <h2><a href="./defines/typeclasses/list.html">类型</a></h2>
+    保存类型类的数据，类型类的路径必须与代码中的路径相符。
+
+    <h2><a href="./defines/equipment_types/list.html">装备类型</a></h2>
+    装备类型用来限制角色的可用装备，角色职能穿戴符合他们职业的装备。
+
+    <h2><a href="./defines/equipment_positions/list.html">装备位置</a></h2>
+    装备只能穿戴在合适的位置上，比如手或腿。
+
+    <h2><a href="./defines/character_careers/list.html">角色职业</a></h2>
+    角色的职业决定了角色的基本特性，包括属性、技能、装备等方面的特点。
+
+    <h2><a href="./defines/quest_objective_types/list.html">任务目标类型</a></h2>
+    任务目标的类型，它们必须与 utils.defines 中的定义一致。
+
+    <h2><a href="./defines/quest_dependency_types/list.html">任务依赖类型</a></h2>
+    定义了各种任务依赖关系，它们必须与 utils.defines 中的定义一致。
+
+    <h2><a href="./defines/event_types/list.html">事件类型</a></h2>
+    触发出的事件的类型，它们必须与 utils.defines 中的定义一致。
+
+    <h2><a href="./defines/event_trigger_types/list.html">事件触发器类型</a></h2>
+    事件触发器的类型，它们必须与 utils.defines 中的定义一致。
+
+{% endblock content %}

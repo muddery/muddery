@@ -1,0 +1,10 @@
+id,key,typeclass,name,desc,verb,location,destination,condition
+1,exit_begin,CLASS_TWO_WAY_EXIT,,,,room_begin,room_house,
+2,exit_house_front,CLASS_LOCKED_EXIT,,,,room_house,room_road_front,
+3,exit_front_cross,CLASS_LOCKED_EXIT,,,,room_road_front,room_cross,
+4,exit_cross_front,CLASS_COMMON_EXIT,,,,room_cross,room_road_front,
+5,exit_left,CLASS_TWO_WAY_EXIT,,,,room_cross,room_road_left,
+6,exit_center,CLASS_TWO_WAY_EXIT,,,,room_cross,room_road_center,
+7,exit_right,CLASS_TWO_WAY_EXIT,,,,room_cross,room_road_right,
+8,exit_cross_secret,CLASS_TWO_WAY_EXIT,,,,room_cross,room_road_secret,"has_attr(""kill_beauty"") and has_attr(""kill_pirate"") and has_attr(""kill_tiger"")"
+9,exit_front_house,CLASS_COMMON_EXIT,,,,room_road_front,room_house,

@@ -1,0 +1,2 @@
+id,quest,ordinal,type,object,number,desc
+1,quest_find_cat,0,OBJECTIVE_OBJECT,obj_cat,1,找到小花，把它带给女孩。

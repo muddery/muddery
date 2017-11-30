@@ -1,0 +1,5 @@
+id,key,system_data,name,desc
+33,OBJECTIVE_TALK,True,Talk,Finishes a dialogue. object field: dialogue's id.
+34,OBJECTIVE_ARRIVE,True,Arrive,Arrives a room. object: room's id.
+35,OBJECTIVE_OBJECT,True,Object,Get some objects. object: object's id.
+36,OBJECTIVE_KILL,True,Kill,Kill some characters. object: character's id.

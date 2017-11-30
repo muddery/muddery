@@ -1,0 +1,6 @@
+id,key,system_data,name,desc
+41,EVENT_TRIGGER_ARRIVE,True,Arrive,Triggers when players attrive a room. trigger_obj field: room's id.
+42,EVENT_TRIGGER_DIE,True,Die,Triggers when characters die. trigger_obj field: killer's id.
+43,EVENT_TRIGGER_KILL,True,Kill,Triggers when players kill mobs. trigger_obj field: mob's id.
+44,EVENT_TRIGGER_TRAVERSE,True,Traverse,Triggers just before players traverse an exit. trigger_obj field: exit's id.
+45,EVENT_TRIGGER_ACTION,True,Action,Triggers when characters act to an object. trigger_obj field: object's id

@@ -1,0 +1,15 @@
+id,key,name,condition
+1,dlg_find_cat,Find,"can_provide_quest(""quest_find_cat"")"
+2,dlg_finding_cat,Finding Cat,"is_quest_in_progress(""quest_find_cat"")  and not has_object(""obj_cat"")"
+3,dlg_found_cat,Found Cat,"is_quest_completed(""quest_find_cat"")"
+4,dlg_kill_wolf,Kill Wolf,
+5,dlg_beauty,Beauty,
+6,dlg_beauty_eat,Eat Apple,
+7,dlg_beauty_deny,Deny Apple,
+8,dlg_kill_beauty,Kill Beauty,
+9,dlg_pirate,Pirate,
+10,dlg_kill_pirate,Kill Pirate,
+11,dlg_kill_tiger,Kill Tiger,
+12,dlg_boss,Boss,
+13,dlg_kill_boss,Kill Boss,
+14,dlg_give_cat,Give Cat,"is_quest_in_progress(""quest_find_cat"") and has_object(""obj_cat"")"
