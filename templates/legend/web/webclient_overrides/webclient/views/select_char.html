@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/select_char.css" />
+        
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/select_char.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="box_character">
+            <div id="view_character">Characters</div>
+            <div id="character_items">
+                <div class="template">
+        			<a class="char_name" href="#" onclick="controller.selectCharacter(this)"></a>
+        			<button type="button" onclick="controller.deleteCharacter(this)" class="button_delete">×</button>
+        		</div>
+        	</div>
+        	<button id="button_new_char" type="button" class="btn btn-default" onclick="controller.newCharacter(this)">New Character</button>
+        </div>
+    </body>
+</html>

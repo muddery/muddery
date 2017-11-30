@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/goods.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/goods.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div class="modal-header">
+            <button type="button" onclick="controller.doClosePopupBox()" class="close">×</button>
+            <h4 id="header" class="modal-title">
+                <span id="name"></span>
+                <span id="number_mark">×</span>
+				<span id="number"></span>
+            </h4>
+        </div>
+        <div class="modal-body">
+            <div id="div_icon">
+                <img id="img_icon" src="" />
+            </div>
+            <p id="goods_price">
+				<span id="price"></span>
+				<span id="unit"></span>
+            </p>
+            <p id="desc"></p>
+        </div>
+        <div id="popup_footer" class="modal-footer">
+            <button id="view_button_buy" type="button" class="btn btn-default" onclick="controller.buyGoods(this)">Buy</button>
+        </div>
+    </body>
+</html>
