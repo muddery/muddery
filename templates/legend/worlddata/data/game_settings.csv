@@ -5,4 +5,4 @@ id,game_name,connection_screen,solo_mode,global_cd,auto_cast_skill_cd,can_give_u
 
 拿起武器吧，勇敢的人！这个世界需要你！
 
-{b=============================================================={n",True,1.0,1.5,False,False,True,True,room_limbo,room_begin,room_begin,player,75.0,40.0
+{b=============================================================={n",False,1.0,1.5,False,False,True,True,room_limbo,room_begin,room_begin,player,75.0,40.0

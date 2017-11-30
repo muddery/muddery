@@ -519,7 +519,6 @@ var controller = {
     	this._puppet = false;
     	
         controller.showUnlogin();
-        controller.doAutoLoginCheck();
     },
     
     onConnectionClose: function() {
@@ -535,7 +534,16 @@ var controller = {
     },
     
     onLogin : function(data) {
-        this.showSelectChar();
+    },
+    
+    onPuppet : function(data) {
+        data_handler.character_dbref = data["dbref"];
+        data_handler.character_name = data["name"];
+
+        this.setInfo(data["name"], data["icon"]);
+    	this._puppet = true;
+    
+        this.showPuppet();
     },
     
     onLogout : function(data) {
@@ -548,29 +556,15 @@ var controller = {
         Evennia.connect();
     },
     
-    onCharacterCreated: function(data) {
-		// close popup windows
-        controller.doClosePopupBox();
-    },
-
-    onCharacterDeleted: function(data) {
-		// close popup windows
-        controller.doClosePopupBox();
-    },
-    
-    onPuppet: function(data) {
-        data_handler.character_dbref = data["dbref"];
-        data_handler.character_name = data["name"];
-
-        this.setInfo(data["name"], data["icon"]);
-        this.showPuppet();
+    // connect layout
+    showConnect : function() {
+        this.hideTabs();
         
-        this._puppet = true;
-    },
-    
-    onUnpuppet: function(data) {
-	    this._puppet = false;
-        this.showSelectChar();
+        $("#tab_connect").show();
+        
+        controller.showContent("connect");
+        
+        this.clearChannels();
     },
     
     //////////////////////////////////////////
@@ -704,8 +698,8 @@ var controller = {
         this.hideTabs();
 
         $("#tab_scene").show();
-        $("#tab_character").show();
-        $("#tab_map").show();
+        $("#tab_status").show();
+        $("#tab_inventory").show();
         $("#tab_system").show();
 
         if (!this._solo_mode) {
@@ -724,38 +718,10 @@ var controller = {
     	// show unlogin tabs
         this.hideTabs();
 
-        $("#tab_register").show();
-        $("#tab_login").show();
+        $("#tab_quick_login").show();
     
-        this.showContent("login");
+        this.showContent("quick_login");
 
-        this.clearChannels();
-    },
-    
-    // shown when players logged in and going to select a character
-	showSelectChar: function() {
-        //this.clearMsgWindow();
-        $("#prompt_content").hide();
-
-    	// show select character tabs
-        this.hideTabs();
-
-        $("#tab_select_char").show();
-        $("#tab_system_char").show();
-    
-        this.showContent("select_char");
-
-        this.clearChannels();
-    },
-	
-    // connect layout
-    showConnect : function() {
-        this.hideTabs();
-        
-        $("#tab_connect").show();
-        
-        controller.showContent("connect");
-        
         this.clearChannels();
     },
 
@@ -853,14 +819,11 @@ var controller = {
 		this.getFrameController("#frame_information").resetLanguage();
 		this.getFrameController("#frame_inventory").resetLanguage();
 		this.getFrameController("#frame_quick_login").resetLanguage();
-		this.getFrameController("#frame_login").resetLanguage();
 		this.getFrameController("#frame_map").resetLanguage();
 		this.getFrameController("#frame_message").resetLanguage();
 		this.getFrameController("#frame_object").resetLanguage();
 		this.getFrameController("#frame_quests").resetLanguage();
-		this.getFrameController("#frame_register").resetLanguage();
 		this.getFrameController("#frame_scene").resetLanguage();
-		this.getFrameController("#frame_select_char").resetLanguage();
 		this.getFrameController("#frame_shop").resetLanguage();
 	},
 	
@@ -869,9 +832,7 @@ var controller = {
 		$("#view_exp").text(_("EXP: "));
 		$("#view_hp").text(_("HP: "));
 		$("#view_connect").text(_("Connect"));
-		$("#view_login").text(_("Login"));
-		$("#view_register").text(_("Register"));
-		$("#view_select_char").text(_("Select Char"));
+		$("#view_quick_login").text(_("Login"));
 		$("#view_scene").text(_("Scene"));
 		$("#view_char").text(_("Char"));
 		$("#view_status").text(_("Status"));
@@ -884,7 +845,6 @@ var controller = {
 		$("#view_system_char").text(_("System"));
 		$("#view_logout").text(_("Logout"));
 		$("#view_logout_puppet").text(_("Logout"));
-		$("#view_unpuppet").text(_("Unpuppet"));
 		$("#msg_send").text(_("Send"));
 	},
 	

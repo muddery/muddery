@@ -131,7 +131,7 @@
                 </div>
                 <div class="panel panel-default">
                     <div id="tab_content" class="panel-body">
-                        <iframe id="frame_login" class="content_frame" src="./views/login.html"></iframe>
+                        <iframe id="frame_quick_login" class="content_frame" src="./views/quick_login.html"></iframe>
                         <iframe id="frame_register" class="content_frame" src="./views/register.html"></iframe>
                         <iframe id="frame_select_char" class="content_frame" src="./views/select_char.html"></iframe>
                         <iframe id="frame_scene" class="content_frame" src="./views/scene.html"></iframe>
@@ -146,69 +146,20 @@
                         <li id="tab_connect" role="presentation" class="" style="display: none;">
                             <a id="view_connect" onclick="Evennia.connect()">Connect</a>
                         </li>
-                        <li id="tab_login" role="presentation" class="" style="display: none;">
-                            <a id="view_login" onclick="controller.showContent('login')">Login</a>
-                        </li>
-                        <li id="tab_register" role="presentation" class="" style="display: none;">
-                            <a id="view_register" onclick="controller.showContent('register')">Register</a>
-                        </li>
-                        <li id="tab_select_char" role="presentation" class="" style="display: none;">
-                            <a id="view_select_char" onclick="controller.showContent('select_char')">Select Char</a>
+                        <li id="tab_quick_login" role="presentation" class="" style="display: none;">
+                            <a id="view_quick_login" onclick="controller.showContent('quick_login')">Login</a>
                         </li>
                         <li id="tab_scene" role="presentation" class="">
                             <a id="view_scene" onclick="controller.showContent('scene')">Scene</a>
                         </li>
-                        <li id="tab_character" role="presentation" class="dropup">
-                            <a id="view_char" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Char<span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a id="view_status" onclick="controller.showContent('information')" class="first-dropdown-item">Status</a>
-                                </li>
-                                <li>
-                                    <a id="view_inventory" onclick="controller.showContent('inventory')" class="dropdown-item">Inventory</a>
-                                </li>
-                                <li>
-                                    <a id="view_skills" onclick="controller.showContent('skills')" class="dropdown-item">Skills</a>
-                                </li>
-                                <li>
-                                    <a id="view_quests" onclick="controller.showContent('quests')" class="dropdown-item">Quests</a>
-                                </li>
-                            </ul>
+                        <li id="tab_status" role="presentation" class="">
+                            <a id="view_status" onclick="controller.showContent('information')">Status</a>
                         </li>
-                        <li id="tab_social" role="presentation" class="dropup hidden">
-                            <a id="view_social" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Social<span class="caret"></span></a>
+                        <li id="tab_inventory" role="presentation" class="">
+                            <a id="view_inventory" onclick="controller.showContent('inventory')">Map</a>
                         </li>
-                        <li id="tab_map" role="presentation" class="">
-                            <a id="view_map" onclick="controller.showMap()">Map</a>
-                        </li>
-                        <li id="tab_system_char" role="presentation" class="dropup">
-                            <a id="view_system_char" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">System<span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a id="view_logout" onclick="commands.doLogout()" class="first-dropdown-item">Logout</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li id="tab_system" role="presentation" class="dropup">
-                            <a id="view_system" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Sys<span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a id="view_logout_puppet" onclick="commands.doLogout()" class="first-dropdown-item">Logout</a>
-                                </li>
-                                <li>
-                                    <a id="view_unpuppet" onclick="commands.unpuppetCharacter()" class="dropdown-item">Unpuppet</a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-                <div id="input_bar">
-                    <button id="msg_select" onclick="controller.showMsgTypes()" class="btn btn-default"></button>
-                    <input id="msg_input" type="text" aria-describedby="basic-addon2" autocomplete="off" class="form-control" />
-                    <button id="msg_send" onclick="controller.sendMessage()" class="btn btn-default">Send</button>
-                    <ul id="msg_type_menu" class="dropdown-menu">
-                        <li class="template">
-                            <a onclick="controller.selectMsgType(this)" class="dropdown-item"></a>
+                        <li id="tab_system" role="presentation" class="">
+                            <a id="view_logout" onclick="commands.doLogout()">Logout</a>
                         </li>
                     </ul>
                 </div>
