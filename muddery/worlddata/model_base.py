@@ -13,6 +13,7 @@ NAME_LENGTH = 80
 TYPECLASS_LENGTH = 80
 POSITION_LENGTH = 80
 VALUE_LENGTH = 80
+CONDITION_LENGTH = 255
 
 re_attribute_key = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 
@@ -357,7 +358,7 @@ class world_exits(models.Model):
     destination = models.CharField(max_length=KEY_LENGTH)
 
     # the condition to show the exit
-    condition = models.TextField(blank=True)
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -386,7 +387,7 @@ class exit_locks(models.Model):
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # condition of the lock
-    unlock_condition = models.TextField(blank=True)
+    unlock_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     # action to unlock the exit (optional)
     unlock_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -454,7 +455,7 @@ class world_objects(models.Model):
     action = models.CharField(max_length=NAME_LENGTH, blank=True)
 
     # the condition for showing the object
-    condition = models.TextField(blank=True)
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     # object's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -489,7 +490,7 @@ class object_creators(models.Model):
     loot_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
 
     # loot's condition
-    loot_condition = models.TextField(blank=True)
+    loot_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -523,7 +524,7 @@ class loot_list(models.Model):
     quest = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # condition of the drop
-    condition = models.TextField(blank=True)
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1005,7 +1006,7 @@ class world_npcs(models.Model):
     reborn_time = models.PositiveIntegerField(blank=True, default=0)
 
     # the condition for showing the NPC
-    condition = models.TextField(blank=True)
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     # NPC's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -1137,7 +1138,7 @@ class shops(models.Model):
     verb = models.CharField(max_length=NAME_LENGTH, blank=True)
 
     # condition of the shop
-    condition = models.TextField(blank=True)
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     # shop's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -1186,7 +1187,7 @@ class shop_goods(models.Model):
     unit = models.CharField(max_length=KEY_LENGTH)
 
     # visible condition of the goods
-    condition = models.TextField(blank=True)
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1318,7 +1319,7 @@ class quests(models.Model):
     desc = models.TextField(blank=True)
 
     # the condition to accept this quest.
-    condition = models.TextField(blank=True)
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     # will do this action after a quest completed
     action = models.TextField(blank=True)
@@ -1538,7 +1539,7 @@ class event_data(models.Model):
     trigger_obj = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # the condition to enable this event
-    condition = models.TextField(blank=True)
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1568,7 +1569,7 @@ class dialogues(models.Model):
     name = models.CharField(max_length=NAME_LENGTH, default="")
 
     # condition to show this dialogue
-    condition = models.TextField(blank=True)
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1769,10 +1770,10 @@ class condition_desc(models.Model):
     "Object descriptions in different conditions."
 
     # The key of an object.
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH)
 
     # condition
-    condition = models.TextField(blank=True)
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
     
     # exit's description for display
     desc = models.TextField(blank=True)
