@@ -99,7 +99,7 @@ var controller = {
              svg.append("image")
                 .attr("x", x)
                 .attr("y", y)
-                .attr("xlink:href", location["area"]["background"]);
+                .attr("xlink:href", settings.resource_url + location["area"]["background"]);
         }
 
         if (current_room["pos"] &&
