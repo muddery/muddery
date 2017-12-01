@@ -100,37 +100,36 @@ def create_settings_file(setting_dict=None):
         f.write(settings_string)
 
 
+def copy_tree(source, destination):
+    """
+    copy file tree
+    """
+    if not os.path.exists(destination):
+        # If does not exist, create one.
+        os.mkdir(destination)
+        
+    # traverse files and folders
+    names = os.listdir(source)
+    for name in names:
+        srcname = os.path.join(source, name)
+        dstname = os.path.join(destination, name)
+        try:
+            if os.path.isdir(srcname):
+                # If it is a folder, copy it recursively.
+                copy_tree(srcname, dstname)
+            else:
+                # Copy file.
+                shutil.copy2(srcname, dstname)
+        except Exception, e:
+            print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
+                
+
 def create_game_directory(gamedir, template, setting_dict=None):
     """
     Initialize a new game directory named dirname
     at the current path. This means copying the
     template directory from muddery's root.
     """
-    
-    def copy_tree(source, destination):
-        """
-        copy file tree
-        """
-        if not os.path.exists(destination):
-            # If does not exist, create one.
-            os.mkdir(destination)
-        
-        # traverse files and folders
-        names = os.listdir(source)
-        for name in names:
-            srcname = os.path.join(source, name)
-            dstname = os.path.join(destination, name)
-            try:
-                if os.path.isdir(srcname):
-                    # If it is a folder, copy it recursively.
-                    copy_tree(srcname, dstname)
-                else:
-                    # Copy file.
-                    shutil.copy2(srcname, dstname)
-            except Exception, e:
-                print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
-
-
     global GAME_DIR
     GAME_DIR = gamedir
     if os.path.exists(GAME_DIR):
