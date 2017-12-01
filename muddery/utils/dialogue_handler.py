@@ -376,7 +376,7 @@ class DialogueHandler(object):
         if icon_str:
             try:
                 resource_info = DATA_SETS.icon_resources.objects.get(key=icon_str)
-                icon = resource_info.resource.name
+                icon = resource_info.resource
             except Exception, e:
                 logger.log_errmsg("Load icon %s error: %s" % (icon_str, e))
         else:

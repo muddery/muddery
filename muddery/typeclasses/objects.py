@@ -509,7 +509,7 @@ class MudderyObject(DefaultObject):
         if icon_key:
             try:
                 resource_info = DATA_SETS.icon_resources.objects.get(key=icon_key)
-                self.icon = resource_info.resource.name
+                self.icon = resource_info.resource
             except Exception, e:
                 logger.log_errmsg("Load icon %s error: %s" % (icon_key, e))
 

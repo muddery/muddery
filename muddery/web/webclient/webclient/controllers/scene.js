@@ -120,7 +120,7 @@ var controller = {
         // set background
         var backview = $("#box_scene");
         if ("background" in scene && scene["background"]) {
-            var url = settings.resource_url + scene["background"];
+            var url = settings.resource_url + scene["background"]["name"];
             backview.css("background", "url(" + url + ") no-repeat center center");
         }
         else {

@@ -1826,12 +1826,15 @@ class ImageResources(models.Model):
 
     # image's name
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
+    
+    # resource's path
+    resource = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # resource'e width
-    image_width = models.PositiveIntegerField(null=True, blank=True)
+    image_width = models.PositiveIntegerField(blank=True, default=0)
     
     # resource'e height
-    image_height = models.PositiveIntegerField(null=True, blank=True)
+    image_height = models.PositiveIntegerField(blank=True, default=0)
     
     class Meta:
         "Define Django meta options"
@@ -1851,9 +1854,6 @@ class ImageResources(models.Model):
 class image_resources(ImageResources):
     "Store image resource's information."
 
-    # resource    
-    resource = models.ImageField(upload_to=settings.IMAGE_RESOURCE_DIR, null=True, blank=True, width_field='image_width', height_field='image_height')
-
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -1870,9 +1870,6 @@ class image_resources(ImageResources):
 # ------------------------------------------------------------
 class icon_resources(ImageResources):
     "Store icon resource's information."
-
-    # resource    
-    resource = models.ImageField(upload_to=settings.ICON_RESOURCE_DIR, null=True, blank=True, width_field='image_width', height_field='image_height')
 
     class Meta:
         "Define Django meta options"
