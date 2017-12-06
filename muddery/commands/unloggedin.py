@@ -383,18 +383,22 @@ class CmdQuickLogin(Command):
             session.msg({"alert":string})
             return
 
+        player = None
         character = None
         if PlayerDB.objects.filter(username__iexact=name_md5):
             # Already has this player. Login.
             player = connect_normal_player(session, name_md5, name_md5)
-            if player:
-                session.sessionhandler.login(session, player)
-                character = player.db._last_puppet
         else:
             # Register
             player = create_normal_player(session, name_md5, name_md5)
-            if player:
-                session.sessionhandler.login(session, player)
+
+        if player:
+            session.sessionhandler.login(session, player)
+            if player.db._last_puppet:
+                character = player.db._last_puppet
+            elif player.db._playable_characters:
+                character = player.db._playable_characters[0]
+            else:
                 character = create_character(player, playername)
 
         if character:
