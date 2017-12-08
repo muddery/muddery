@@ -56,3 +56,50 @@ class MudderyMonster(MudderyCharacter):
             
             commands.append({"name": _("Attack"), "cmd": "attack", "args": self.dbref})
         return commands
+
+    def at_combat_start(self):
+        """
+        Called when a character enters a combat.
+
+        Args:
+            combat_handler: the combat's handler
+
+        Returns:
+            None
+        """
+        super(MudderyMonster, self).at_combat_start()
+            
+        # begin auto cast
+        self.skill_handler.start_auto_combat_skill()
+        
+    def at_combat_win(self, winners, losers):
+        """
+        Called when the character wins the combat.
+        
+        Args:
+            winners: (List) all combat winners.
+            losers: (List) all combat losers.
+
+        Returns:
+            None
+        """
+        # stop auto cast
+        self.skill_handler.stop_auto_combat_skill()
+        
+        super(MudderyMonster, self).at_combat_win()
+
+    def at_combat_lose(self, winners, losers):
+        """
+        Called when the character loses the combat.
+        
+        Args:
+            winners: (List) all combat winners.
+            losers: (List) all combat losers.
+
+        Returns:
+            None
+        """
+        # stop auto cast
+        self.skill_handler.stop_auto_combat_skill()
+        
+        super(MudderyMonster, self).at_combat_lose()

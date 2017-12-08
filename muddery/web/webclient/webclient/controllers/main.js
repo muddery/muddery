@@ -260,6 +260,12 @@ var controller = {
 		frame_ctrl.setSkillCD(skill, cd, gcd);
     },
     
+    setRankings: function(rankings) {
+    	var frame_id = "#frame_honours";
+        var frame_ctrl = this.getFrameController(frame_id);
+		frame_ctrl.setRankings(rankings);
+    },
+    
     finishCombat: function(result) {
 		var combat_id = "#frame_combat";
 		var combat_ctrl = this.getFrameController(combat_id);
@@ -691,6 +697,11 @@ var controller = {
 		this.doChangeFrameSize(frame);
         frame.show();
     },
+    
+    showHonours: function() {
+        this.showContent("honours");
+        commands.get_rankings();
+    },
 
 	// puppet layout
     showPuppet : function() {
@@ -705,6 +716,7 @@ var controller = {
 
         $("#tab_scene").show();
         $("#tab_character").show();
+        $("#tab_honours").show();
         $("#tab_map").show();
         $("#tab_system").show();
 

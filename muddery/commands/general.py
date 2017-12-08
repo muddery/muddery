@@ -687,9 +687,69 @@ class CmdAttack(Command):
 
 
 #------------------------------------------------------------
+# Make a match.
+#------------------------------------------------------------
+class CmdMakeMatch(Command):
+    """
+	Make a match between the caller and a proper opponent.
+
+	Usage:
+	{"cmd": "make_match",
+	 "args": None
+	}
+	"""
+    key = "make_match"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+        
+        try:
+            if not caller.make_match():
+                self.caller.msg({"alert":_("Can not make match.")})
+        except Exception, e:
+            logger.log_err("Find match error: %s" % e)
+            self.caller.msg({"alert":_("Can not make match.")})
+
+
+#------------------------------------------------------------
+# Show top rankings
+#------------------------------------------------------------
+class CmdGetRankings(Command):
+    """
+    Get top ranking characters.
+
+    Usage:
+        {"cmd": "get_rankings",
+         "args": None
+        }
+    """
+    key = "get_rankings"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        """
+        Get characters rankings.
+
+        Returns:
+            None
+        """
+        caller = self.caller
+        if not caller:
+            return
+
+        caller.show_rankings()
+        
+
+#------------------------------------------------------------
 # give up a quest
 #------------------------------------------------------------
-
 class CmdGiveUpQuest(Command):
     """
     Give up a quest.
@@ -698,7 +758,6 @@ class CmdGiveUpQuest(Command):
         {"cmd":"giveup_quest",
          "args":<quest's key>
         }
-    Give up a quest.
     """
     key = "giveup_quest"
     locks = "cmd:all()"
@@ -712,6 +771,8 @@ class CmdGiveUpQuest(Command):
             None
         """
         caller = self.caller
+        if not caller:
+            return
 
         if not self.args:
             caller.msg({"alert":_("You should give up a quest.")})

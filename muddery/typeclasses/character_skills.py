@@ -71,6 +71,8 @@ class MudderySkill(MudderyObject):
         self.cd = getattr(self.dfield, "cd", 0)
         self.passive = getattr(self.dfield, "passive", False)
         self.message = getattr(self.dfield, "message", "")
+        self.main_type = getattr(self.dfield, "main_type", "")
+        self.sub_type = getattr(self.dfield, "sub_type", "")
 
     def get_available_commands(self, caller):
         """

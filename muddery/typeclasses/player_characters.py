@@ -24,6 +24,9 @@ from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.defines import COMBAT_HONOUR
+from muddery.utils.honours_handler import HONOURS_HANDLER
+from muddery.dao.honours_mapper import HONOURS_MAPPER
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
 from evennia.utils.utils import lazy_property
@@ -69,6 +72,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
             
         """
         super(MudderyPlayerCharacter, self).at_object_creation()
+        
+        # honour
+        if not HONOURS_MAPPER.has_info(self):
+            HONOURS_MAPPER.set_honour(self, 0)
 
         # Set default data.
         if not self.attributes.has("nickname"):
@@ -968,6 +975,22 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         self.show_enter_combat(combat_handler)
 
+    def at_combat_start(self):
+        """
+        Called when a character enters a combat.
+
+        Args:
+            combat_handler: the combat's handler
+
+        Returns:
+            None
+        """
+        super(MudderyPlayerCharacter, self).at_combat_start()
+            
+        # begin auto cast
+        if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
+            self.skill_handler.start_auto_combat_skill()
+
     def at_combat_win(self, winners, losers):
         """
         Called when the character wins the combat.
@@ -979,9 +1002,19 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Returns:
             None
         """
+        # stop auto cast
+        if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
+            self.skill_handler.stop_auto_combat_skill()
+
         self.msg({"combat_finish": {"win": True}})
         
-        super(MudderyPlayerCharacter, self).at_combat_win( winners, losers)
+        super(MudderyPlayerCharacter, self).at_combat_win(winners, losers)
+        
+        # set honour
+        if losers and self.ndb.combat_handler:
+            if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
+                HONOURS_HANDLER.set_winner_honour(self, winners, losers)
+                self.show_rankings()
 
         # loot
         # get object list
@@ -1013,6 +1046,16 @@ class MudderyPlayerCharacter(MudderyCharacter):
         Returns:
             None
         """
+        # stop auto cast
+        if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
+            self.skill_handler.stop_auto_combat_skill()
+
+        # set honour
+        if losers and self.ndb.combat_handler:
+            if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
+                HONOURS_HANDLER.set_loser_honour(self, winners, losers)
+                self.show_rankings()
+
         self.msg({"combat_finish": {"lose": True}})
         
         super(MudderyPlayerCharacter, self).at_combat_lose(winners, losers)
@@ -1347,4 +1390,34 @@ class MudderyPlayerCharacter(MudderyCharacter):
         
         self.quest_handler.remove_all()
         return True
+        
+    def show_rankings(self):
+        """
+        Show character's rankings.
+        """
+        top_rankings = HONOURS_MAPPER.get_top_rankings(HONOURS_HANDLER.top_rankings_number)
+        nearest_rankings = HONOURS_MAPPER.get_nearest_rankings(self, HONOURS_HANDLER.nearest_rankings_number)
+        
+        rankings = top_rankings
+        rankings.extend([id for id in nearest_rankings if id not in top_rankings])
 
+        characters = [self.search("#%s" % id) for id in rankings]
+        data = [{"name": char.get_name(),
+                 "dbref": char.dbref,
+                 "ranking": HONOURS_MAPPER.get_ranking(char),
+                 "honour": HONOURS_MAPPER.get_honour(char)} for char in characters]
+        self.msg({"rankings": data})
+
+    def make_match(self):
+        """
+        Make a match between self and a proper opponent.
+        """
+        ids = HONOURS_MAPPER.get_characters(self, HONOURS_HANDLER.opponents_number)
+        characters = [self.search("#%s" % id) for id in ids]
+        candidates = [char for char in characters if char and not char.is_in_combat()]
+        if candidates:
+            match = random.choice(candidates)
+            return self.attack_target(match, "", COMBAT_HONOUR)
+
+        return False
+        

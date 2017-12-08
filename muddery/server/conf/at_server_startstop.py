@@ -24,6 +24,7 @@ from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.desc_handler import DESC_HANDLER
+from muddery.dao.honours_mapper import HONOURS_MAPPER
 from muddery.utils import builder
 from muddery.utils.localiztion_handler import localize_model_fields
 
@@ -68,6 +69,9 @@ def at_server_start():
     
     # load condition descriptions
     DESC_HANDLER.reload()
+    
+    # load honours    
+    HONOURS_MAPPER.reload()
 
 def at_server_stop():
     """

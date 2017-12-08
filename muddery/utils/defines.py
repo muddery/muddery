@@ -33,3 +33,6 @@ EVENT_TRIGGER_ACTION = "EVENT_TRIGGER_ACTION"       # called when a character ac
 EVENT_NONE = ""
 EVENT_ATTACK = "EVENT_ATTACK"               # event to begin a combat
 EVENT_DIALOGUE = "EVENT_DIALOGUE"           # event to begin a dialogue
+
+# combat mode
+COMBAT_HONOUR = "COMBAT_HONOUR"             # combat that can get honours

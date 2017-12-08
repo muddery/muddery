@@ -149,6 +149,16 @@ var commands = {
         Evennia.msg("text", this.cmdString("say", args));
     },
     
+    // make a match
+    makeMatch() {
+    	Evennia.msg("text", this.cmdString("make_match", ""));
+    },
+    
+    // get character rankings
+    get_rankings() {
+    	Evennia.msg("text", this.cmdString("get_rankings", ""));
+    },
+    
     // do test
     doTest : function() {
         // test codes

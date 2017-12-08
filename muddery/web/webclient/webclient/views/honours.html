@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <!--CSS style sheet -->
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/honours.css" />
+
+        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/honours.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="box_honours">
+            <button id="button_match" type="button" class="btn btn-default" onclick="controller.makeMatch()">Make Match</button>
+            <div><br></div>
+        	<table id="tab_honours">
+        		<thead>
+        			<tr>
+        			    <th id="view_ranking">RANKING</th>
+        				<th id="view_name">NAME</th>
+        				<th id="view_honour">HONOUR</th>
+        			</tr>
+        		</thead>
+        		<tbody id="character_items">
+        			<tr class="template">
+        			    <td class="character_ranking"></td>
+        				<td class="character_name"></td>
+        				<td class="character_honour"></td>
+        			</tr>
+        		</tbody>
+        	</table>
+        </div>
+    </body>
+</html>

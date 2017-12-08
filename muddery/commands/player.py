@@ -16,6 +16,7 @@ from evennia.utils.utils import make_iter
 from muddery.utils import utils
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.builder import create_player, create_character
+from muddery.dao.honours_mapper import HONOURS_MAPPER
 
 MAX_NR_CHARACTERS = settings.MAX_NR_CHARACTERS
 MULTISESSION_MODE = settings.MULTISESSION_MODE
@@ -275,7 +276,13 @@ class CmdCharDelete(Command):
             return
         else: # one match
             delobj = match[0]
+            
+            # get new playable characters
             new_characters = [char for char in player.db._playable_characters if char != delobj]
+            
+            # remove honour
+            HONOURS_MAPPER.remove_honour(delobj)
+            # remove object
             deleted = delobj.delete()
             
             if not deleted:

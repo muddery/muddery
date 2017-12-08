@@ -13,6 +13,7 @@ from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.ai.choose_skill import ChooseSkill
 
 
 class SkillHandler(object):
@@ -33,7 +34,6 @@ class SkillHandler(object):
         self.gcd = GAME_SETTINGS.get("global_cd")
         self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
         self.can_auto_cast = False
-        self.skill_target = None
         self.gcd_finish_time = 0
 
     def __del__(self):
@@ -182,36 +182,11 @@ class SkillHandler(object):
             TICKER_HANDLER.remove(self.auto_cast_skill_cd, self.owner.auto_cast_skill)
             return
 
-        # Get target.
-        choose_new_target = True
-        if self.skill_target:
-            if self.skill_target.is_alive():
-                choose_new_target = False
-
-        if choose_new_target:
-            self.skill_target = self.choose_skill_target()
-
-        if not self.skill_target:
-            # No target.
-            return
-
-        # Get available skills.
-        available_skills = self.get_available_skills()
-        if not available_skills:
-            # No available skill.
-            return
-
-        # Random chooses a skill.
-        skill = random.choice(available_skills)
-        if skill:
-            self.owner.ndb.combat_handler.prepare_skill(skill, self.owner, self.skill_target)
-
-    def get_available_skills(self):
-        """
-        Get available skills without cd.
-        """
-        skills = [skill for skill in self.skills if self.skills[skill].is_available()]
-        return skills
+        # Choose a skill and the skill's target.
+        result = ChooseSkill.choose(self.owner)
+        if result:
+            skill, target = result
+            self.owner.ndb.combat_handler.prepare_skill(skill, self.owner, target)
 
     def get_passive_skills(self):
         """
@@ -227,25 +202,6 @@ class SkillHandler(object):
         for skill in self.skills:
             if self.skills[skill].passive:
                 self.skills[skill].cast_skill(None)
-
-    def choose_skill_target(self):
-        """
-        Choose a target automatically.
-        """
-        if not self.owner:
-            return
-
-        if not self.owner.ndb.combat_handler:
-            "Not in combat."
-            return
-
-        # Get all combat characters.
-        characters = self.owner.ndb.combat_handler.get_all_characters()
-        for character in characters:
-            if character.is_alive() and character.dbref != self.owner.dbref:
-                return character
-
-        return
 
     def start_auto_combat_skill(self):
         """

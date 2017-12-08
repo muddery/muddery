@@ -107,6 +107,9 @@ class NPCShopsForm(forms_base.NPCShopsForm):
 class SkillsForm(forms_base.SkillsForm):
     pass
 
+class SkillTypesForm(forms_base.SkillTypesForm):
+    pass
+
 class DefaultSkillsForm(forms_base.DefaultSkillsForm):
     pass
 

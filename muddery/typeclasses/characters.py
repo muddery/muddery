@@ -27,6 +27,7 @@ from muddery.utils.loot_handler import LootHandler
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.builder import delete_object
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
+from muddery.utils.defines import COMBAT_HONOUR
 from muddery.utils.localized_strings_handler import _
 
 
@@ -116,9 +117,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
 
         # A temporary character will be deleted after the combat finished.
         self.is_temp = False
-        
-        # Character can auto fight.
-        self.auto_fight = False
 
         # update equipment positions
         self.reset_equip_positions()
@@ -414,7 +412,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         self.target = None
 
-    def attack_target(self, target, desc=""):
+    def attack_target(self, target, desc="", mode=""):
         """
         Attack a target.
 
@@ -449,7 +447,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         chandler = create_script(settings.COMBAT_HANDLER)
                         
         # set combat team and desc
-        chandler.set_combat({1: [target], 2: [self]}, desc)
+        chandler.set_combat({1: [target], 2: [self]}, desc, mode)
 
         return True
 
@@ -568,9 +566,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             None
         """
-        if self.auto_fight:
-            # begin auto cast
-            self.skill_handler.start_auto_combat_skill()
+        pass
 
     def at_combat_win(self, winners, losers):
         """
@@ -583,10 +579,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             None
         """
-        if self.auto_fight:
-            # stop auto cast
-            self.skill_handler.stop_auto_combat_skill()
-        
         # add exp
         # get total exp
         exp = 0
@@ -608,10 +600,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             None
         """
-        if self.auto_fight:
-            # stop auto cast
-            self.skill_handler.stop_auto_combat_skill()
-        
         # The character is killed.
         self.die(winners)
 
@@ -726,6 +714,9 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             (list) available commands for combat
         """
+        if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
+            return []
+
         commands = []
         for key in self.db.skills:
             skill = self.db.skills[key]

@@ -187,6 +187,9 @@ var client = {
                     		 			shop["desc"],
                     		 			shop["goods"]);
                 }
+                else if (key == "rankings") {
+                	controller.setRankings(data[key]);
+                }
                 else if (key == "current_location") {
                     map_data.setCurrentLocation(data[key]);
                 }

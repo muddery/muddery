@@ -23,6 +23,7 @@ from muddery.utils import builder, importer, utils
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.typeclasses.character_skills import MudderySkill
+from muddery.dao.honours_mapper import HONOURS_MAPPER
 import traceback
 
 LIMBO_DESC = "Welcome to your new {wMuddery{n-based game! " +\
@@ -72,6 +73,10 @@ def at_initial_setup():
             superuser.set_data_key(GAME_SETTINGS.get("default_player_character_key"))
             superuser.set_level(1)
             superuser.set_nickname("superuser")
+
+            # set superuser's honour to -1
+            HONOURS_MAPPER.set_honour(superuser, -1)
+
             print("Set supervisor.")
 
     except Exception, e:

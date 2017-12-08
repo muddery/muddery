@@ -78,14 +78,17 @@ class MudderyCombatHandler(DefaultScript):
 #        character.msg(message)
 
 
-    def set_combat(self, teams, desc):
+    def set_combat(self, teams, desc, mode):
         """
         Add combatant to handler
         
-        args:
-            teams: {<team id>: [<characters>]}
+        Args:
+            teams: (dict) {<team id>: [<characters>]}
+            desc: (string) combat's description
+            mode: (string) combat's mode
         """
         self.db.desc = desc
+        self.db.mode = mode
 
         for team in teams:
             for character in teams[team]:

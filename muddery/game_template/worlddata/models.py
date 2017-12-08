@@ -314,6 +314,16 @@ class skills(model_base.skills):
     pass
 
 
+# ------------------------------------------------------------
+#
+# skill types
+#
+# ------------------------------------------------------------
+class skill_types(model_base.skill_types):
+    "Skill's types."
+    pass
+
+
 #------------------------------------------------------------
 #
 # character skills
@@ -492,7 +502,17 @@ class event_dialogues(model_base.event_dialogues):
 class condition_desc(model_base.condition_desc):
     "Object descriptions in different conditions."
     pass
-    
+
+
+#------------------------------------------------------------
+#
+# character's honour
+#
+#------------------------------------------------------------
+class honours(model_base.honours):
+    "All character's honour"
+    pass
+
 
 #------------------------------------------------------------
 #

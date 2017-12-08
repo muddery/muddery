@@ -661,11 +661,27 @@ class SkillsForm(forms.ModelForm):
         objects = DATA_SETS.icon_resources.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
         self.fields['icon'] = forms.ChoiceField(choices=choices, required=False)
+        
+        choices = [("", "---------")]
+        objects = DATA_SETS.skill_types.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+        self.fields['main_type'] = forms.ChoiceField(choices=choices, required=False)
+        self.fields['sub_type'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 
     class Meta:
         model = DATA_SETS.skills.model
+        fields = '__all__'
+        
+        
+class SkillTypesForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SkillTypesForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    class Meta:
+        model = DATA_SETS.skill_types.model
         fields = '__all__'
 
 

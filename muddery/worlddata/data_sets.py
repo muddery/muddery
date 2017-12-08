@@ -103,6 +103,7 @@ class DataSets(object):
         self.npc_dialogues = DataHandler("npc_dialogues")
         self.dialogue_quest_dependencies = DataHandler("dialogue_quest_dependencies")
         self.default_objects = DataHandler("default_objects")
+        self.skill_types = DataHandler("skill_types")
         self.default_skills = DataHandler("default_skills")
         self.npc_shops = DataHandler("npc_shops")
         self.condition_desc = DataHandler("condition_desc")
@@ -125,11 +126,12 @@ class DataSets(object):
                            self.npc_dialogues,
                            self.dialogue_quest_dependencies,
                            self.default_objects,
+                           self.skill_types,
                            self.default_skills,
                            self.npc_shops,
+                           self.condition_desc,
                            self.image_resources,
-                           self.icon_resources,
-                           self.condition_desc]
+                           self.icon_resources]
 
         # Event additional data
         self.event_attacks = DataHandler("event_attacks")

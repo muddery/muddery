@@ -1257,8 +1257,14 @@ class skills(models.Model):
     # skill function's name
     function = models.CharField(max_length=KEY_LENGTH, blank=True)
 
-    # Skill's icon resource.
+    # skill's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+    
+    # skill's main type, used in autocasting skills.
+    main_type = models.CharField(max_length=KEY_LENGTH, blank=True)
+    
+    # skill's sub type, used in autocasting skills.
+    sub_type = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1272,6 +1278,35 @@ class skills(models.Model):
     def clean(self):
         auto_generate_key(self)
         validate_object_key(self)
+
+
+# ------------------------------------------------------------
+#
+# skill types
+#
+# ------------------------------------------------------------
+class skill_types(models.Model):
+    """
+    Skill's type, used in skill's main_type and sub_type.
+    """
+    
+    # type's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+
+    # the readable name of the skill type
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Skill's Type"
+        verbose_name_plural = "Skill's Types"
+
+    def __unicode__(self):
+        return self.name + " (" + self.key + ")"
+
+    def clean(self):
+        auto_generate_key(self)
 
 
 # ------------------------------------------------------------
@@ -1784,6 +1819,27 @@ class condition_desc(models.Model):
         verbose_name = "Condition Description"
         verbose_name_plural = "Condition Descriptions"
         unique_together = ("key", "condition")
+
+
+#------------------------------------------------------------
+#
+# character's honour
+#
+#------------------------------------------------------------
+class honours(models.Model):
+    "All character's honours."
+   
+    # character's database id
+    character = models.IntegerField(unique=True)
+    
+    # character's honour. special character's honour is -1, such as the superuser.
+    honour = models.IntegerField(blank=True, default=-1, db_index=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Honour"
+        verbose_name_plural = "Honours"
 
 
 # ------------------------------------------------------------

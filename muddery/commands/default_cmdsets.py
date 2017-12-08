@@ -48,6 +48,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdTakeOff())
         self.add(general.CmdCastSkill())
         self.add(general.CmdAttack())
+        self.add(general.CmdMakeMatch())
+        self.add(general.CmdGetRankings())
         self.add(general.CmdUnlockExit())
         self.add(general.CmdGiveUpQuest())
         self.add(general.CmdShopping())
