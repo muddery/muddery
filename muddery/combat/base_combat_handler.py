@@ -13,7 +13,7 @@ from evennia.utils import logger
 from muddery.utils import builder, defines
 
 
-class MudderyCombatHandler(DefaultScript):
+class BaseCombatHandler(DefaultScript):
     """
     This implements the combat handler.
     """
@@ -37,15 +37,48 @@ class MudderyCombatHandler(DefaultScript):
         and combat cmdset on a character
         """
         if character:
-            character.at_enter_combat_mode(self)
+            # add the combat handler
+            character.ndb.combat_handler = self
+
+            # Change the command set.
+            character.cmdset.add(settings.CMDSET_COMBAT)
+
+            if character.has_player:
+                self.show_combat(character)
+
+    def show_combat(self, character):
+        """
+        Show combat information to a character.
+        Args:
+            character: (object) character
+
+        Returns:
+            None
+        """
+        # Show combat information to the player.
+        character.msg({"joined_combat": True})
+
+        # send messages in order
+        character.msg({"combat_info": self.get_appearance(),
+                       "combat_commands": character.get_combat_commands()})
 
     def _cleanup_character(self, character):
         """
         Remove character from handler and clean 
         it of the back-reference and cmdset
         """
-        if character:
-            character.at_leave_combat_mode()
+        # remove the combat handler
+        del character.ndb.combat_handler
+
+        # remove combat commands
+        character.cmdset.delete(settings.CMDSET_COMBAT)
+
+        if character.has_player:
+            # notify combat finished
+            character.msg({"left_combat": True})
+
+            # show status
+            character.show_status()
 
     def at_start(self):
         """
@@ -78,7 +111,7 @@ class MudderyCombatHandler(DefaultScript):
 #        character.msg(message)
 
 
-    def set_combat(self, teams, desc, mode):
+    def set_combat(self, teams, desc):
         """
         Add combatant to handler
         
@@ -88,7 +121,6 @@ class MudderyCombatHandler(DefaultScript):
             mode: (string) combat's mode
         """
         self.db.desc = desc
-        self.db.mode = mode
 
         for team in teams:
             for character in teams[team]:
@@ -146,9 +178,6 @@ class MudderyCombatHandler(DefaultScript):
             self.finish()
             return
 
-        for character in self.db.characters.values():
-            character.at_combat_start()
-
     def finish(self):
         """
         Finish a combat. Send results to players, and kill all failed characters.
@@ -166,13 +195,28 @@ class MudderyCombatHandler(DefaultScript):
             winners = [c for c in self.db.characters.values() if c.get_team() == winner_team]
             losers = [c for c in self.db.characters.values() if c.get_team() != winner_team]
             
-            for character in winners:
-                character.at_combat_win(winners, losers)
-                
-            for character in losers:
-                character.at_combat_lose(winners, losers)
+            self.set_combat_results(winners, losers)
 
         self.stop()
+
+    def set_combat_results(self, winners, losers):
+        """
+        Called when the character wins the combat.
+
+        Args:
+            winners: (List) all combat winners.
+            losers: (List) all combat losers.
+
+        Returns:
+            None
+        """
+        for character in winners:
+            if character.has_player:
+                character.msg({"combat_finish": {"win": True}})
+
+        for character in losers:
+            if character.has_player:
+                character.msg({"combat_finish": {"lose": True}})
 
     def get_appearance(self):
         """
@@ -227,7 +271,8 @@ class MudderyCombatHandler(DefaultScript):
             None
         """
         if caller:
-            caller.at_combat_escape()
+            if caller.has_player:
+                caller.msg({"combat_finish": {"escaped": True}})
 
             # Skill function will call finish func later, so should not check finish here.
             if caller.dbref in self.db.characters:

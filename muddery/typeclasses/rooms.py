@@ -185,7 +185,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
         if obj.destination:
             return "exits"
         elif obj.is_typeclass(settings.BASE_GENERAL_CHARACTER_TYPECLASS, exact=False):
-            if obj.is_typeclass(settings.BASE_CHARACTER_TYPECLASS, exact=False):
+            if obj.is_typeclass(settings.BASE_PLAYER_CHARACTER_TYPECLASS, exact=False):
                 if obj.has_player:
                     return "players"
                 else:

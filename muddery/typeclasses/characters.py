@@ -25,7 +25,6 @@ from muddery.utils.builder import build_object
 from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.loot_handler import LootHandler
 from muddery.worlddata.data_sets import DATA_SETS
-from muddery.utils.builder import delete_object
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
 from muddery.utils.defines import COMBAT_HONOUR
 from muddery.utils.localized_strings_handler import _
@@ -412,7 +411,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         self.target = None
 
-    def attack_target(self, target, desc="", mode=""):
+    def attack_target(self, target, desc=""):
         """
         Attack a target.
 
@@ -447,7 +446,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         chandler = create_script(settings.COMBAT_HANDLER)
                         
         # set combat team and desc
-        chandler.set_combat({1: [target], 2: [self]}, desc, mode)
+        chandler.set_combat({1: [target], 2: [self]}, desc)
 
         return True
 
@@ -535,110 +534,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         target.is_temp = True
         return self.attack_target(target, desc)
 
-    ########################################
-    #
-    # Combat methods.
-    #
-    ########################################
-    def at_enter_combat_mode(self, combat_handler):
-        """
-        Called when the character enters a combat.
-
-        Returns:
-            None
-        """
-        if not combat_handler:
-            return
-
-        # add the combat handler
-        self.ndb.combat_handler = combat_handler
-
-        # Change the command set.
-        self.cmdset.add(settings.CMDSET_COMBAT)
-
-    def at_combat_start(self):
-        """
-        Called when a character enters a combat.
-
-        Args:
-            combat_handler: the combat's handler
-
-        Returns:
-            None
-        """
-        pass
-
-    def at_combat_win(self, winners, losers):
-        """
-        Called when the character wins the combat.
-        
-        Args:
-            winners: (List) all combat winners.
-            losers: (List) all combat losers.
-
-        Returns:
-            None
-        """
-        # add exp
-        # get total exp
-        exp = 0
-        for loser in losers:
-            exp += loser.provide_exp(self)
-
-        if exp:
-            # give experience to the winner
-            self.add_exp(exp, combat=True)
-
-    def at_combat_lose(self, winners, losers):
-        """
-        Called when the character loses the combat.
-        
-        Args:
-            winners: (List) all combat winners.
-            losers: (List) all combat losers.
-
-        Returns:
-            None
-        """
-        # The character is killed.
-        self.die(winners)
-
-    def at_combat_escape(self):
-        """
-        Called when the character escaped from the combat.
-
-        Returns:
-            None
-        """
-        pass
-
-    def at_leave_combat_mode(self):
-        """
-        Called when the character leaves a combat.
-
-        Returns:
-            None
-        """
-        # remove the combat handler
-        del self.ndb.combat_handler
-
-        # remove combat commands
-        self.cmdset.delete(settings.CMDSET_COMBAT)
-        
-        if self.is_temp:
-            # notify its location
-            location = self.location
-            delete_object(self.dbref)
-            if location:
-                for content in location.contents:
-                    if content.has_player:
-                        content.show_location()
-        else:
-            if self.is_alive():
-                # Recover all hp.
-                self.db.hp = self.max_hp
-                
-                
     def is_in_combat(self):
         """
         Check if the character is in combat.

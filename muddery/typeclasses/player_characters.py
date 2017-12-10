@@ -24,7 +24,6 @@ from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
-from muddery.utils.defines import COMBAT_HONOUR
 from muddery.utils.honours_handler import HONOURS_HANDLER
 from muddery.dao.honours_mapper import HONOURS_MAPPER
 from muddery.worlddata.data_sets import DATA_SETS
@@ -964,145 +963,6 @@ class MudderyPlayerCharacter(MudderyCharacter):
 
         return skills
 
-    def at_enter_combat_mode(self, combat_handler):
-        """
-        Called when the character enters a combat.
-
-        Returns:
-            None
-        """
-        super(MudderyPlayerCharacter, self).at_enter_combat_mode(combat_handler)
-
-        self.show_enter_combat(combat_handler)
-
-    def at_combat_start(self):
-        """
-        Called when a character enters a combat.
-
-        Args:
-            combat_handler: the combat's handler
-
-        Returns:
-            None
-        """
-        super(MudderyPlayerCharacter, self).at_combat_start()
-            
-        # begin auto cast
-        if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
-            self.skill_handler.start_auto_combat_skill()
-
-    def at_combat_win(self, winners, losers):
-        """
-        Called when the character wins the combat.
-        
-        Args:
-            winners: (List) all combat winners.
-            losers: (List) all combat losers.
-
-        Returns:
-            None
-        """
-        # stop auto cast
-        if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
-            self.skill_handler.stop_auto_combat_skill()
-
-        self.msg({"combat_finish": {"win": True}})
-        
-        super(MudderyPlayerCharacter, self).at_combat_win(winners, losers)
-        
-        # set honour
-        if losers and self.ndb.combat_handler:
-            if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
-                HONOURS_HANDLER.set_winner_honour(self, winners, losers)
-                self.show_rankings()
-
-        # loot
-        # get object list
-        loots = None
-        for loser in losers:
-            obj_list = loser.loot_handler.get_obj_list(self)
-            if obj_list:
-                if not loots:
-                    loots = obj_list
-                else:
-                    loots.extend(obj_list)
-
-        if loots:
-            # give objects to winner
-            self.receive_objects(loots, combat=True)
-
-        # call quest handler
-        for loser in losers:
-            self.quest_handler.at_objective(defines.OBJECTIVE_KILL, loser.get_data_key())
-
-    def at_combat_lose(self, winners, losers):
-        """
-        Called when the character loses the combat.
-
-        Args:
-            winners: (List) all combat winners.
-            losers: (List) all combat losers.
-
-        Returns:
-            None
-        """
-        # stop auto cast
-        if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
-            self.skill_handler.stop_auto_combat_skill()
-
-        # set honour
-        if losers and self.ndb.combat_handler:
-            if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
-                HONOURS_HANDLER.set_loser_honour(self, winners, losers)
-                self.show_rankings()
-
-        self.msg({"combat_finish": {"lose": True}})
-        
-        super(MudderyPlayerCharacter, self).at_combat_lose(winners, losers)
-
-    def at_combat_escape(self):
-        """
-        Called when the character escaped from the combat.
-
-        Returns:
-            None
-        """
-        super(MudderyPlayerCharacter, self).at_combat_escape()
-
-        self.msg({"combat_finish": {"escaped": True}})
-
-    def at_leave_combat_mode(self):
-        """
-        Called when the character leaves a combat.
-
-        Returns:
-            None
-        """
-        super(MudderyPlayerCharacter, self).at_leave_combat_mode()
-
-        if self.has_player:
-            # notify combat finished
-            self.msg({"left_combat": True})
-
-            # show status
-            self.show_status()
-
-    def show_enter_combat(self, combat_handler):
-        """
-        Show combat information to the player.
-
-        Returns:
-            None
-        """
-        if not combat_handler:
-            return
-        # notify character
-        self.msg({"joined_combat": True})
-
-        # send messages in order
-        self.msg({"combat_info": combat_handler.get_appearance(),
-                  "combat_commands": self.get_combat_commands()})
-
     def resume_combat(self):
         """
         Resume unfinished combat.
@@ -1113,7 +973,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         combat_handler = getattr(self.ndb, "combat_handler", None)
         if combat_handler:
             # show combat infomation
-            self.show_enter_combat(combat_handler)
+            combat_handler.show_combat(self)
 
     def die(self, killers):
         """
@@ -1417,7 +1277,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         candidates = [char for char in characters if char and not char.is_in_combat()]
         if candidates:
             match = random.choice(candidates)
-            return self.attack_target(match, "", COMBAT_HONOUR)
+            return self.attack_target(match, "")
 
         return False
         

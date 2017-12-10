@@ -213,7 +213,7 @@ class CmdCharCreate(Command):
             session.msg({"alert":_("You may only create a maximum of %i characters.") % charmax})
             return
 
-        if utils.search_db_data_type("nickname", name, settings.BASE_CHARACTER_TYPECLASS):
+        if utils.search_db_data_type("nickname", name, settings.BASE_PLAYER_CHARACTER_TYPECLASS):
             # check if this name already exists.
             session.msg({"alert":_("{rA character named '{w%s{r' already exists.{n") % name})
             return

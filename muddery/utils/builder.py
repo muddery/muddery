@@ -388,7 +388,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
         character_key = GAME_SETTINGS.get("default_player_character_key")
 
     if not typeclass:
-        typeclass = settings.BASE_CHARACTER_TYPECLASS
+        typeclass = settings.BASE_PLAYER_CHARACTER_TYPECLASS
         
     if not permissions:
         permissions = settings.PERMISSION_PLAYER_DEFAULT

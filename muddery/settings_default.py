@@ -243,8 +243,11 @@ BASE_PLAYER_TYPECLASS = "muddery.typeclasses.players.MudderyPlayer"
 # Typeclass and base for all objects (fallback)
 BASE_OBJECT_TYPECLASS = "muddery.typeclasses.objects.MudderyObject"
 
+# Typeclass for character objects (fallback)
+BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_characters.MudderyCharacter"
+
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_characters.MudderyPlayerCharacter"
+BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.typeclasses.player_characters.MudderyPlayerCharacter"
 
 # Typeclass for rooms (fallback)
 BASE_ROOM_TYPECLASS = "muddery.typeclasses.rooms.MudderyRoom"
