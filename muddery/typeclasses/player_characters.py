@@ -32,6 +32,7 @@ from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia.comms.models import ChannelDB
 from evennia import TICKER_HANDLER
+from evennia import create_script
 
 
 class MudderyPlayerCharacter(MudderyCharacter):
@@ -1267,17 +1268,3 @@ class MudderyPlayerCharacter(MudderyCharacter):
                  "ranking": HONOURS_MAPPER.get_ranking(char),
                  "honour": HONOURS_MAPPER.get_honour(char)} for char in characters]
         self.msg({"rankings": data})
-
-    def make_match(self):
-        """
-        Make a match between self and a proper opponent.
-        """
-        ids = HONOURS_MAPPER.get_characters(self, HONOURS_HANDLER.opponents_number)
-        characters = [self.search("#%s" % id) for id in ids]
-        candidates = [char for char in characters if char and not char.is_in_combat()]
-        if candidates:
-            match = random.choice(candidates)
-            return self.attack_target(match, "")
-
-        return False
-        

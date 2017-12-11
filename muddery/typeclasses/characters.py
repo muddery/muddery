@@ -26,7 +26,6 @@ from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.loot_handler import LootHandler
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
-from muddery.utils.defines import COMBAT_HONOUR
 from muddery.utils.localized_strings_handler import _
 
 
@@ -443,10 +442,10 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             return False
 
         # create a new combat handler
-        chandler = create_script(settings.COMBAT_HANDLER)
+        chandler = create_script(settings.NORMAL_COMBAT_HANDLER)
                         
         # set combat team and desc
-        chandler.set_combat({1: [target], 2: [self]}, desc)
+        chandler.set_combat({1: [target], 2: [self]}, desc, 0)
 
         return True
 
@@ -609,9 +608,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             (list) available commands for combat
         """
-        if self.ndb.combat_handler.db.mode == COMBAT_HONOUR:
-            return []
-
         commands = []
         for key in self.db.skills:
             skill = self.db.skills[key]

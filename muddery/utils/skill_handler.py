@@ -213,7 +213,7 @@ class SkillHandler(object):
         self.auto_cast_skill()
 
         # Set timer of auto cast.
-        TICKER_HANDLER.add(self.auto_cast_skill_cd, self.owner.auto_cast_skill)
+        TICKER_HANDLER.add(self.auto_cast_skill_cd, self.owner.auto_cast_skill, persistent=False)
 
     def stop_auto_combat_skill(self):
         """

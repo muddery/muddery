@@ -23,13 +23,15 @@ class BaseCombatHandler(DefaultScript):
         "Called when script is first created"
         self.desc = "handles combat"
         self.interval = 0  # keep running until the battle ends
-        self.persistent = True
+        self.persistent = False
 
         # store all combatants
         self.db.characters = {}
 
         # if battle is finished
         self.db.finished = False
+
+        self.db.timeout = 0
 
     def _init_character(self, character):
         """
@@ -59,8 +61,7 @@ class BaseCombatHandler(DefaultScript):
         character.msg({"joined_combat": True})
 
         # send messages in order
-        character.msg({"combat_info": self.get_appearance(),
-                       "combat_commands": character.get_combat_commands()})
+        character.msg({"combat_info": self.get_appearance()})
 
     def _cleanup_character(self, character):
         """
@@ -80,47 +81,30 @@ class BaseCombatHandler(DefaultScript):
             # show status
             character.show_status()
 
-    def at_start(self):
-        """
-        This is called on first start but also when the script is restarted
-        after a server reboot. We need to re-assign this combat handler to 
-        all characters as well as re-assign the cmdset.
-        """
-        for character in self.db.characters.values():
-            self._init_character(character)
-        self.start_combat()
-
     def at_stop(self):
         "Called just before the script is stopped/destroyed."
         for character in self.db.characters.values():
             # note: the list() call above disconnects list from database
             self._cleanup_character(character)
 
+    def at_server_shutdown(self):
+        """
+        This hook is called whenever the server is shutting down fully
+        (i.e. not for a restart).
+        """
+        self.stop()
 
-    # Combat-handler methods
-
-#    def add_character(self, character):
-#        "Add combatant to handler"
-#        self.db.characters[character.dbref] = character
-#        self._init_character(character)
-#
-#        # notify character
-#        character.msg({"joined_combat": True})
-#        message = {"combat_info": self.get_appearance(),
-#                   "combat_commands": character.get_combat_commands()}
-#        character.msg(message)
-
-
-    def set_combat(self, teams, desc):
+    def set_combat(self, teams, desc, timeout):
         """
         Add combatant to handler
         
         Args:
             teams: (dict) {<team id>: [<characters>]}
             desc: (string) combat's description
-            mode: (string) combat's mode
+            timeout: (int) Total combat time in seconds. Zero means no limit.
         """
         self.db.desc = desc
+        self.db.timeout = timeout
 
         for team in teams:
             for character in teams[team]:
@@ -173,10 +157,7 @@ class BaseCombatHandler(DefaultScript):
         """
         Start a combat, make all NPCs to cast skills automatically.
         """
-        if self.can_finish():
-            # if this is only one team left, kill this handler
-            self.finish()
-            return
+        pass
 
     def finish(self):
         """

@@ -25,6 +25,43 @@ class NormalCombatHandler(BaseCombatHandler):
                 # Monsters auto cast skills
                 character.skill_handler.start_auto_combat_skill()
 
+    def at_server_shutdown(self):
+        """
+        This hook is called whenever the server is shutting down fully
+        (i.e. not for a restart).
+        """
+        for character in self.db.characters.values():
+            if not character.player:
+                # Stop auto cast skills
+                character.skill_handler.stop_auto_combat_skill()
+
+        super(NormalCombatHandler, self).at_server_shutdown()
+
+    def show_combat(self, character):
+        """
+        Show combat information to a character.
+        Args:
+            character: (object) character
+
+        Returns:
+            None
+        """
+        super(NormalCombatHandler, self).show_combat(character)
+
+        # send messages in order
+        character.msg({"combat_commands": character.get_combat_commands()})
+
+    def finish(self):
+        """
+        Finish a combat. Send results to players, and kill all failed characters.
+        """
+        for character in self.db.characters.values():
+            if not character.player:
+                # Stop auto cast skills
+                character.skill_handler.stop_auto_combat_skill()
+
+        super(NormalCombatHandler, self).finish()
+
     def set_combat_results(self, winners, losers):
         """
         Called when the character wins the combat.
@@ -37,11 +74,6 @@ class NormalCombatHandler(BaseCombatHandler):
             None
         """
         super(NormalCombatHandler, self).set_combat_results(winners, losers)
-
-        for character in self.db.characters.values():
-            if not character.player:
-                # Stop auto cast skills
-                character.skill_handler.stop_auto_combat_skill()
 
         # add exp to winners
         # get total exp
@@ -72,7 +104,7 @@ class NormalCombatHandler(BaseCombatHandler):
 
                 # call quest handler
                 for loser in losers:
-                    self.quest_handler.at_objective(defines.OBJECTIVE_KILL, loser.get_data_key())
+                    character.quest_handler.at_objective(defines.OBJECTIVE_KILL, loser.get_data_key())
 
         # losers are killed.
         for character in losers:

@@ -13,7 +13,10 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.exception import MudderyError
+from muddery.utils.honours_handler import HONOURS_HANDLER
+from muddery.dao.honours_mapper import HONOURS_MAPPER
 import traceback
+import random
 
 
 class CmdLook(Command):
@@ -677,7 +680,7 @@ class CmdAttack(Command):
             return
 
         # create a new combat handler
-        chandler = create_script(settings.COMBAT_HANDLER)
+        chandler = create_script(settings.NORMAL_COMBAT_HANDLER)
         
         # set combat team and desc
         chandler.set_combat({1: [target], 2:[self.caller]}, "")
@@ -710,11 +713,21 @@ class CmdMakeMatch(Command):
             return
         
         try:
-            if not caller.make_match():
-                self.caller.msg({"alert":_("Can not make match.")})
+            # getcandidates
+            ids = HONOURS_MAPPER.get_characters(caller, HONOURS_HANDLER.opponents_number)
+            characters = [caller.search("#%s" % id) for id in ids]
+            candidates = [char for char in characters if char and not char.is_in_combat()]
+            if candidates:
+                match = random.choice(candidates)
+                # create a new combat handler
+                chandler = create_script(settings.HONOUR_COMBAT_HANDLER)
+                # set combat team and desc
+                chandler.set_combat({1:[match], 2:[caller]}, "", HONOURS_HANDLER.combat_timeout)
+            else:
+                caller.msg({"alert":_("Can not make match.")})
         except Exception, e:
             logger.log_err("Find match error: %s" % e)
-            self.caller.msg({"alert":_("Can not make match.")})
+            caller.msg({"alert":_("Can not make match.")})
 
 
 #------------------------------------------------------------

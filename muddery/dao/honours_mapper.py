@@ -168,16 +168,17 @@ class HonoursMapper(object):
         Set a set of characters' honours.
         
         Args:
-            new_honours: (dict) {character object: character's honour}
+            new_honours: (dict) {character's id: character's honour}
         """
         success = False
         with transaction.atomic():
-            for character, value in new_honours.iteritems():
-                self.objects.get(character=character.id).update(honour=value)
+            for key, value in new_honours.iteritems():
+                self.objects.filter(character=key).update(honour=value)
             success = True
         
         if success:
-            self.honours.update(new_honours)
+            for key, value in new_honours.iteritems():
+                self.honours[key]["honour"] = value
             self.make_rankings()
         else:
             print("Can not set character's honours")

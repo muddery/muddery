@@ -306,7 +306,9 @@ CONDITION_FUNC_SET = "muddery.statements.default_statement_func_set.ConditionFun
 SKILL_FUNC_SET = "muddery.statements.default_statement_func_set.SkillFuncSet"
 
 # Handler of the combat
-COMBAT_HANDLER = "muddery.typeclasses.combat_handler.MudderyCombatHandler"
+NORMAL_COMBAT_HANDLER = "muddery.combat.normal_combat_handler.NormalCombatHandler"
+
+HONOUR_COMBAT_HANDLER = "muddery.combat.honour_combat_handler.HonourCombatHandler"
 
 
 ######################################################################

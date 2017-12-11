@@ -27,6 +27,7 @@ var controller = {
     createCharacter: function(caller) {
         var char_name = $("#char_name").val();
         commands.createCharacter(char_name);
+        $("#char_name").val("");
     },
 };
 

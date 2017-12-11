@@ -22,6 +22,25 @@ class HonourCombatHandler(BaseCombatHandler):
             # All characters auto cast skills.
             character.skill_handler.start_auto_combat_skill()
 
+    def at_server_shutdown(self):
+        """
+        This hook is called whenever the server is shutting down fully
+        (i.e. not for a restart).
+        """
+        for character in self.db.characters.values():
+            character.skill_handler.stop_auto_combat_skill()
+
+        super(HonourCombatHandler, self).at_server_shutdown()
+
+    def finish(self):
+        """
+        Finish a combat. Send results to players, and kill all failed characters.
+        """
+        for character in self.db.characters.values():
+            character.skill_handler.stop_auto_combat_skill()
+
+        super(HonourCombatHandler, self).finish()
+
     def set_combat_results(self, winners, losers):
         """
         Called when the character wins the combat.
@@ -35,12 +54,18 @@ class HonourCombatHandler(BaseCombatHandler):
         """
         super(HonourCombatHandler, self).set_combat_results(winners, losers)
 
-        for character in self.db.characters.values():
-            # Stop auto cast skills
-            character.skill_handler.stop_auto_combat_skill()
-
         # set honour
-        HONOURS_HANDLER.set_winner_honour(self, winners, losers)
-        HONOURS_HANDLER.set_loser_honour(self, winners, losers)
+        HONOURS_HANDLER.set_honours(winners, losers)
         for character in self.db.characters.values():
             character.show_rankings()
+            character.show_status()
+
+    def _cleanup_character(self, character):
+        """
+        Remove character from handler and clean
+        it of the back-reference and cmdset
+        """
+        super(HonourCombatHandler, self)._cleanup_character(character)
+
+        # Recover all hp.
+        character.db.hp = character.max_hp
