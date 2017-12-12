@@ -12,11 +12,6 @@ class HonoursHandler(object):
     """
     This model stores all descriptions on all conditions.
     """
-    top_rankings_number = 10
-    nearest_rankings_number = 10
-    opponents_number = 100
-    combat_timeout = 60
-    
     def set_honours(self, winners, losers):
         """
         Set combat winner's honour.

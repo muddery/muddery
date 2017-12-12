@@ -54,6 +54,9 @@ var controller = {
         else if ("lose" in result) {
             header = _("You lost !");
         }
+        else if ("draw" in result) {
+            header = _("Draw !");
+        }
         
         $("#header").text(header);
 	},

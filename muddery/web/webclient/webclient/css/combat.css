@@ -4,6 +4,10 @@
 	height: 30px;
 }
 
+#center_time {
+    text-align: center;
+}
+
 #characters {
 	min-height: 100px;
 }

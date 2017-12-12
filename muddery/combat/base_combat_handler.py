@@ -26,27 +26,12 @@ class BaseCombatHandler(DefaultScript):
         self.persistent = False
 
         # store all combatants
-        self.db.characters = {}
+        self.characters = {}
 
         # if battle is finished
-        self.db.finished = False
+        self.finished = False
 
-        self.db.timeout = 0
-
-    def _init_character(self, character):
-        """
-        This initializes handler back-reference 
-        and combat cmdset on a character
-        """
-        if character:
-            # add the combat handler
-            character.ndb.combat_handler = self
-
-            # Change the command set.
-            character.cmdset.add(settings.CMDSET_COMBAT)
-
-            if character.has_player:
-                self.show_combat(character)
+        self.timeout = 0
 
     def show_combat(self, character):
         """
@@ -83,7 +68,10 @@ class BaseCombatHandler(DefaultScript):
 
     def at_stop(self):
         "Called just before the script is stopped/destroyed."
-        for character in self.db.characters.values():
+        if self.timeout:
+            TICKER_HANDLER.remove(self.timeout, self.at_timeout)
+
+        for character in self.characters.values():
             # note: the list() call above disconnects list from database
             self._cleanup_character(character)
 
@@ -103,24 +91,44 @@ class BaseCombatHandler(DefaultScript):
             desc: (string) combat's description
             timeout: (int) Total combat time in seconds. Zero means no limit.
         """
-        self.db.desc = desc
-        self.db.timeout = timeout
+        self.desc = desc
+        self.timeout = timeout
 
         for team in teams:
             for character in teams[team]:
                 character.set_team(team)
-                self.db.characters[character.dbref] = character
+                self.characters[character.dbref] = character
 
-        for character in self.db.characters.values():
-            self._init_character(character)
+        for character in self.characters.values():
+            # add the combat handler
+            character.ndb.combat_handler = self
+
+            # Change the command set.
+            character.cmdset.add(settings.CMDSET_COMBAT)
+
+            if character.has_player:
+                self.show_combat(character)
 
         self.start_combat()
 
+        if self.timeout:
+            TICKER_HANDLER.add(self.timeout, self.at_timeout, persistent=False)
+
+    def at_timeout(self):
+        """
+        Combat timeout.
+
+        Returns:
+            None.
+        """
+        self.set_combat_draw()
+        self.stop()
+
     def remove_character(self, character):
         "Remove combatant from handler"
-        if character.dbref in self.db.characters:
+        if character.dbref in self.characters:
             self._cleanup_character(character)
-            del self.db.characters[character.dbref]
+            del self.characters[character.dbref]
 
             if self.can_finish():
                 # if we have no more characters in battle, kill this handler
@@ -128,7 +136,7 @@ class BaseCombatHandler(DefaultScript):
 
     def msg_all(self, message):
         "Send message to all combatants"
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             character.msg(message)
 
     def can_finish(self):
@@ -138,14 +146,14 @@ class BaseCombatHandler(DefaultScript):
 
         Return True or False
         """
-        if not self.db.characters:
+        if not self.characters:
             return False
 
-        if not len(self.db.characters):
+        if not len(self.characters):
             return False
 
         teams = set()
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             if character.is_alive():
                 teams.add(character.get_team())
                 if len(teams) > 1:
@@ -163,22 +171,33 @@ class BaseCombatHandler(DefaultScript):
         """
         Finish a combat. Send results to players, and kill all failed characters.
         """
-        self.db.finished = True
+        self.finished = True
         
-        if self.db.characters:
+        if self.characters:
             # get winners and losers
             winner_team = None
-            for character in self.db.characters.values():
+            for character in self.characters.values():
                 if character.is_alive():
                     winner_team = character.get_team()
                     break
 
-            winners = [c for c in self.db.characters.values() if c.get_team() == winner_team]
-            losers = [c for c in self.db.characters.values() if c.get_team() != winner_team]
+            winners = [c for c in self.characters.values() if c.get_team() == winner_team]
+            losers = [c for c in self.characters.values() if c.get_team() != winner_team]
             
             self.set_combat_results(winners, losers)
 
         self.stop()
+
+    def set_combat_draw(self):
+        """
+        Called when the combat ended in a draw.
+
+        Returns:
+            None.
+        """
+        for character in self.characters.values():
+            if character.has_player:
+                character.msg({"combat_finish": {"draw": True}})
 
     def set_combat_results(self, winners, losers):
         """
@@ -203,10 +222,11 @@ class BaseCombatHandler(DefaultScript):
         """
         Get the combat appearance.
         """
-        appearance = {"desc": self.db.desc,
-        			  "characters": []}
+        appearance = {"desc": self.desc,
+                      "timeout": self.timeout,
+                      "characters": []}
         
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             info = {"dbref": character.dbref,
                     "name": character.get_name(),
                     "team": character.get_team(),
@@ -222,16 +242,16 @@ class BaseCombatHandler(DefaultScript):
         """
         Get all characters in combat.
         """
-        if not self.db.characters:
+        if not self.characters:
             return []
 
-        return self.db.characters.values()
+        return self.characters.values()
 
     def prepare_skill(self, skill_key, caller, target):
         """
         Cast a skill.
         """
-        if self.db.finished:
+        if self.finished:
             return
 
         if caller:
@@ -256,9 +276,9 @@ class BaseCombatHandler(DefaultScript):
                 caller.msg({"combat_finish": {"escaped": True}})
 
             # Skill function will call finish func later, so should not check finish here.
-            if caller.dbref in self.db.characters:
+            if caller.dbref in self.characters:
                 self._cleanup_character(caller)
-                del self.db.characters[caller.dbref]
+                del self.characters[caller.dbref]
             
     def send_skill_result(self, result):
         """
@@ -270,6 +290,6 @@ class BaseCombatHandler(DefaultScript):
         Returns:
             None
         """
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             if character.has_player:
                 character.msg({"skill_result": result})

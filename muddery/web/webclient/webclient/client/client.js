@@ -139,8 +139,7 @@ var client = {
                     controller.finishCombat(data[key]);
                 }
                 else if (key == "combat_info") {
-                	var info = data[key];
-                    controller.setCombatInfo(info["desc"], info["characters"]);
+                    controller.setCombatInfo(data[key]);
                 }
                 else if (key == "combat_commands") {
                     controller.setCombatCommands(data[key]);

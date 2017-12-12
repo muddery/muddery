@@ -305,11 +305,6 @@ CONDITION_FUNC_SET = "muddery.statements.default_statement_func_set.ConditionFun
 # Skill functions set
 SKILL_FUNC_SET = "muddery.statements.default_statement_func_set.SkillFuncSet"
 
-# Handler of the combat
-NORMAL_COMBAT_HANDLER = "muddery.combat.normal_combat_handler.NormalCombatHandler"
-
-HONOUR_COMBAT_HANDLER = "muddery.combat.honour_combat_handler.HonourCombatHandler"
-
 
 ######################################################################
 # Default command sets
@@ -368,9 +363,27 @@ LOCALIZED_STRINGS_FOLDER = "languages"
 # World data sets
 DATA_SETS = "muddery.worlddata.data_sets.DataSets"
 
+
 ###################################
 # world editor
 ###################################
 DEFUALT_LIST_TEMPLATE = "common_list.html"
 
 DEFUALT_FORM_TEMPLATE = "common_form.html"
+
+
+###################################
+# combat settings
+###################################
+# Handler of the combat
+NORMAL_COMBAT_HANDLER = "muddery.combat.normal_combat_handler.NormalCombatHandler"
+
+HONOUR_COMBAT_HANDLER = "muddery.combat.honour_combat_handler.HonourCombatHandler"
+
+TOP_RANKINGS_NUMBER = 10
+
+NEAREST_RANKINGS_NUMBER = 10
+
+HONOUR_OPPONENTS_NUMBER = 100
+
+HONOUR_COMBAT_TIMEOUT = 20

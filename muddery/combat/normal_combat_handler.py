@@ -20,7 +20,7 @@ class NormalCombatHandler(BaseCombatHandler):
         """
         super(NormalCombatHandler, self).start_combat()
 
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             if not character.player:
                 # Monsters auto cast skills
                 character.skill_handler.start_auto_combat_skill()
@@ -30,7 +30,7 @@ class NormalCombatHandler(BaseCombatHandler):
         This hook is called whenever the server is shutting down fully
         (i.e. not for a restart).
         """
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             if not character.player:
                 # Stop auto cast skills
                 character.skill_handler.stop_auto_combat_skill()
@@ -55,7 +55,7 @@ class NormalCombatHandler(BaseCombatHandler):
         """
         Finish a combat. Send results to players, and kill all failed characters.
         """
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             if not character.player:
                 # Stop auto cast skills
                 character.skill_handler.stop_auto_combat_skill()
@@ -79,7 +79,7 @@ class NormalCombatHandler(BaseCombatHandler):
         # get total exp
         exp = 0
         for loser in losers:
-            exp += loser.provide_exp(self)
+            exp += loser.provide_exp(loser)
 
         if exp:
             # give experience to the winner
@@ -89,7 +89,7 @@ class NormalCombatHandler(BaseCombatHandler):
         # get object list
         loots = None
         for loser in losers:
-            obj_list = loser.loot_handler.get_obj_list(self)
+            obj_list = loser.loot_handler.get_obj_list(loser)
             if obj_list:
                 if not loots:
                     loots = obj_list

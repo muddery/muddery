@@ -8,6 +8,9 @@ var commands = parent.commands;
 var controller = {
 	_self_dbref: "",
 	_target: "",
+	_interval_id: null,
+	_timeout: 0,
+	_timeline: 0,
 	_combat_finished: true,
 	_skill_cd_time: {},
 
@@ -38,9 +41,12 @@ var controller = {
     	this._target = "";
 		this._combat_finished = false;
 		this._skill_cd_time = skill_cd_time;
+		if (this._interval_id != null) {
+            this._interval_id = window.clearInterval(this._interval_id);
+        }
     },
 
-	setInfo: function(desc, characters, self_dbref) {
+	setInfo: function(desc, timeout, characters, self_dbref) {
 		if (this._combat_finished) {
 			return;
 		}
@@ -57,6 +63,21 @@ var controller = {
 		// add desc
 	    desc = text2html.parseHtml(desc);
 	    $("#desc").html(desc);
+
+	    // add timeout
+	    if (timeout > 0) {
+	        var current_time = new Date().getTime();
+	        this._timeout = timeout;
+	        this._timeline = current_time + timeout * 1000;
+
+	        $("#timeout").text(timeout);
+	        $("#center_time").show();
+	        this._interval_id = window.setInterval("refreshTimeout()", 1000);
+	    }
+	    else {
+	        $("#timeout").empty();
+	        $("#center_time").hide();
+	    }
 	    
 	    // add characters
 	    var container = $("#characters");
@@ -268,12 +289,31 @@ var controller = {
     
     finishCombat: function(result) {
         this._combat_finished = true;
+        if (this._interval_id != null) {
+            this._interval_id = window.clearInterval(this._interval_id);
+        }
     },
     
     isCombatFinished: function() {
         return this._combat_finished;
     },
 };
+
+
+function refreshTimeout() {
+    var current_time = new Date().getTime();
+
+    var remain = Math.ceil((controller._timeline - current_time) / 1000);
+    if (remain > controller._timeout) {
+        remain = controller._timeout;
+    }
+    if (remain < 0) {
+        remain = 0;
+    }
+
+    $("#timeout").text(remain);
+};
+
 
 $(document).ready(function() {
 	controller.onReady();

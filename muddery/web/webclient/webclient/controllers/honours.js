@@ -13,6 +13,7 @@ var controller = {
 
 	// reset view's language
 	resetLanguage: function() {
+	    $("#button_fight").text(_("FIGHT"));
 		$("#view_ranking").text(_("RANKING"));
 		$("#view_name").text(_("NAME"));
 		$("#view_honour").text(_("HONOUR"));

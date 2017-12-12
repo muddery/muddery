@@ -18,7 +18,7 @@ class HonourCombatHandler(BaseCombatHandler):
         """
         super(HonourCombatHandler, self).start_combat()
 
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             # All characters auto cast skills.
             character.skill_handler.start_auto_combat_skill()
 
@@ -27,7 +27,7 @@ class HonourCombatHandler(BaseCombatHandler):
         This hook is called whenever the server is shutting down fully
         (i.e. not for a restart).
         """
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             character.skill_handler.stop_auto_combat_skill()
 
         super(HonourCombatHandler, self).at_server_shutdown()
@@ -36,7 +36,7 @@ class HonourCombatHandler(BaseCombatHandler):
         """
         Finish a combat. Send results to players, and kill all failed characters.
         """
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             character.skill_handler.stop_auto_combat_skill()
 
         super(HonourCombatHandler, self).finish()
@@ -56,7 +56,7 @@ class HonourCombatHandler(BaseCombatHandler):
 
         # set honour
         HONOURS_HANDLER.set_honours(winners, losers)
-        for character in self.db.characters.values():
+        for character in self.characters.values():
             character.show_rankings()
             character.show_status()
 

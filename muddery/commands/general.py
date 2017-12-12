@@ -694,13 +694,13 @@ class CmdAttack(Command):
 #------------------------------------------------------------
 class CmdMakeMatch(Command):
     """
-	Make a match between the caller and a proper opponent.
+    Make a match between the caller and a proper opponent.
 
-	Usage:
-	{"cmd": "make_match",
-	 "args": None
-	}
-	"""
+    Usage:
+    {"cmd": "make_match",
+     "args": None
+    }
+    """
     key = "make_match"
     locks = "cmd:all()"
     help_category = "General"
@@ -714,7 +714,7 @@ class CmdMakeMatch(Command):
         
         try:
             # getcandidates
-            ids = HONOURS_MAPPER.get_characters(caller, HONOURS_HANDLER.opponents_number)
+            ids = HONOURS_MAPPER.get_characters(caller, settings.HONOUR_OPPONENTS_NUMBER)
             characters = [caller.search("#%s" % id) for id in ids]
             candidates = [char for char in characters if char and not char.is_in_combat()]
             if candidates:
@@ -722,7 +722,7 @@ class CmdMakeMatch(Command):
                 # create a new combat handler
                 chandler = create_script(settings.HONOUR_COMBAT_HANDLER)
                 # set combat team and desc
-                chandler.set_combat({1:[match], 2:[caller]}, "", HONOURS_HANDLER.combat_timeout)
+                chandler.set_combat({1:[match], 2:[caller]}, _("Fight of Honour"), settings.HONOUR_COMBAT_TIMEOUT)
             else:
                 caller.msg({"alert":_("Can not make match.")})
         except Exception, e:

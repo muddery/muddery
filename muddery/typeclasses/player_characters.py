@@ -1256,8 +1256,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
         """
         Show character's rankings.
         """
-        top_rankings = HONOURS_MAPPER.get_top_rankings(HONOURS_HANDLER.top_rankings_number)
-        nearest_rankings = HONOURS_MAPPER.get_nearest_rankings(self, HONOURS_HANDLER.nearest_rankings_number)
+        top_rankings = HONOURS_MAPPER.get_top_rankings(settings.TOP_RANKINGS_NUMBER)
+        nearest_rankings = HONOURS_MAPPER.get_nearest_rankings(self, settings.NEAREST_RANKINGS_NUMBER)
         
         rankings = top_rankings
         rankings.extend([id for id in nearest_rankings if id not in top_rankings])
