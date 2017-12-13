@@ -711,6 +711,10 @@ class CmdMakeMatch(Command):
         caller = self.caller
         if not caller:
             return
+            
+        if caller.db.level < settings.MIN_HONOUR_LEVEL:
+            caller.msg({"alert":_("You need to reach level %s." % settings.MIN_HONOUR_LEVEL)})
+            return
         
         try:
             # getcandidates
@@ -722,7 +726,7 @@ class CmdMakeMatch(Command):
                 # create a new combat handler
                 chandler = create_script(settings.HONOUR_COMBAT_HANDLER)
                 # set combat team and desc
-                chandler.set_combat({1:[match], 2:[caller]}, _("Fight of Honour"), settings.HONOUR_COMBAT_TIMEOUT)
+                chandler.set_combat({1:[match], 2:[caller]}, _("Fight of Honour"), settings.AUTO_COMBAT_TIMEOUT)
             else:
                 caller.msg({"alert":_("Can not make match.")})
         except Exception, e:

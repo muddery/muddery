@@ -380,10 +380,16 @@ NORMAL_COMBAT_HANDLER = "muddery.combat.normal_combat_handler.NormalCombatHandle
 
 HONOUR_COMBAT_HANDLER = "muddery.combat.honour_combat_handler.HonourCombatHandler"
 
+AUTO_COMBAT_TIMEOUT = 20
+
+
+###################################
+# honour settings
+###################################
+MIN_HONOUR_LEVEL = 2
+
 TOP_RANKINGS_NUMBER = 10
 
 NEAREST_RANKINGS_NUMBER = 10
 
 HONOUR_OPPONENTS_NUMBER = 100
-
-HONOUR_COMBAT_TIMEOUT = 20

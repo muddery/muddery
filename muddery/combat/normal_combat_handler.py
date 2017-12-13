@@ -86,18 +86,18 @@ class NormalCombatHandler(BaseCombatHandler):
             for character in winners:
                 character.add_exp(exp, combat=True)
 
-        # get object list
-        loots = None
-        for loser in losers:
-            obj_list = loser.loot_handler.get_obj_list(loser)
-            if obj_list:
-                if not loots:
-                    loots = obj_list
-                else:
-                    loots.extend(obj_list)
-
         for character in winners:
             if character.is_typeclass(settings.BASE_PLAYER_CHARACTER_TYPECLASS):
+                # get object list
+                loots = None
+                for loser in losers:
+                    obj_list = loser.loot_handler.get_obj_list(character)
+                    if obj_list:
+                        if not loots:
+                            loots = obj_list
+                        else:
+                            loots.extend(obj_list)
+
                 # give objects to winner
                 if loots:
                     character.receive_objects(loots, combat=True)

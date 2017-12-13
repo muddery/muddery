@@ -140,3 +140,7 @@ category,origin,local
 ,"You have no such character to delete.","你没有这个角色。"
 ,"Aborting - there are two characters with the same name. Ask an admin to delete the right one.","终止：你有两个同名的角色，请联系管理员删除其中的一个角色。"
 ,"Can not delete this character.","无法删除这个角色。"
+,"You need to reach level %s.","你需要达到等级%s。"
+,"Fight of Honour","荣誉之战"
+,"Can not make match.","无法匹配战斗。"
+,"The honour hall is now opened.","荣誉大厅已开放。"

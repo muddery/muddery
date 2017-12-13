@@ -75,7 +75,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         
         # honour
         if not HONOURS_MAPPER.has_info(self):
-            HONOURS_MAPPER.set_honour(self, 0)
+            HONOURS_MAPPER.set_honour(self, -1)
 
         # Set default data.
         if not self.attributes.has("nickname"):
@@ -1195,6 +1195,11 @@ class MudderyPlayerCharacter(MudderyCharacter):
             None
         """
         super(MudderyPlayerCharacter, self).level_up()
+        
+        # set honour
+        if self.db.level >= settings.MIN_HONOUR_LEVEL:
+            HONOURS_MAPPER.set_honour(self, 0)
+            self.msg({"alert": _("The honour hall is now opened.")})
 
         # notify the player
         self.msg({"msg": _("{c%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})
