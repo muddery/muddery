@@ -10,10 +10,10 @@ import random
 from twisted.internet import task
 from django.conf import settings
 from evennia.utils import logger
+from evennia.utils.utils import class_from_module
 from muddery.utils.builder import build_object
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.ai.choose_skill import ChooseSkill
 
 
 class SkillHandler(object):
@@ -24,6 +24,9 @@ class SkillHandler(object):
         """
         Initialize handler.
         """
+        ai_choose_skill_class = class_from_module(settings.AI_CHOOSE_SKILL)
+        self.choose_skill = ai_choose_skill_class()
+        
         self.owner = owner
 
         self.skills = {}
@@ -195,7 +198,7 @@ class SkillHandler(object):
             return
 
         # Choose a skill and the skill's target.
-        result = ChooseSkill.choose(self.owner)
+        result = self.choose_skill.choose(self.owner)
         if result:
             skill, target = result
             self.owner.ndb.combat_handler.prepare_skill(skill, self.owner, target)

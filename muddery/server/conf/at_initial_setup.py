@@ -77,7 +77,7 @@ def at_initial_setup():
             # set superuser's honour to -1
             HONOURS_MAPPER.set_honour(superuser, -1)
 
-            print("Set supervisor.")
+            print("Set superuser.")
 
     except Exception, e:
         ostring = "Can't set initial data: %s" % e

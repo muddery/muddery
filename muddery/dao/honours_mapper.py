@@ -79,7 +79,7 @@ class HonoursMapper(object):
         except Exception, e:
             print("Can not get character's honour: %s" % e)
             
-    def get_honour(self, character):
+    def get_honour(self, character, default=None):
         """
         Get a character's honour.
         
@@ -92,7 +92,10 @@ class HonoursMapper(object):
         try:
             return self.honours[character.id]["honour"]
         except Exception, e:
-            print("Can not get character's honour: %s" % e)
+            if default is not None:
+                return default
+            else:
+                print("Can not get character's honour: %s" % e)
             
     def get_ranking(self, character):
         """

@@ -74,7 +74,10 @@ class MudderyPlayerCharacter(MudderyCharacter):
         
         # honour
         if not HONOURS_MAPPER.has_info(self):
-            HONOURS_MAPPER.set_honour(self, -1)
+            if self.db.level >= settings.MIN_HONOUR_LEVEL:
+                HONOURS_MAPPER.set_honour(self, 0)
+            else:
+                HONOURS_MAPPER.set_honour(self, -1)
 
         # Set default data.
         if not self.attributes.has("nickname"):

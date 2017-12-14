@@ -60,8 +60,9 @@ class LootHandler(object):
                 return False
 
             if obj["quest"]:
-                if not looter.quest_handler.is_not_accomplished(obj["quest"]):
-                    return False
+                if looter.quest_handler:
+                    if not looter.quest_handler.is_not_accomplished(obj["quest"]):
+                        return False
 
             if not STATEMENT_HANDLER.match_condition(obj["condition"], looter, self.owner):
                 return False

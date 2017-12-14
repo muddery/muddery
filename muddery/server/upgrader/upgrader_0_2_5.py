@@ -18,11 +18,11 @@ class Upgrader(BaseUpgrader):
     Upgrade a game dir to a specified version.
     """
     # Can upgrade the game of version between from_version and to_version.
-    # from min version 0.2.2 (include this version)
-    from_min_version = (0, 2, 2)
+    # from min version 0.2.5 (include this version)
+    from_min_version = (0, 2, 5)
 
-    # from max version 0.2.5 (not include this version)
-    from_max_version = (0, 2, 5)
+    # from max version 0.2.6 (not include this version)
+    from_max_version = (0, 2, 6)
 
     target_version = None
     
@@ -35,28 +35,10 @@ class Upgrader(BaseUpgrader):
             game_template: (string) the game template used to upgrade the game dir.
             muddery_lib: (string) muddery's dir
         """
-        print("Upgrading game 0.2.2-0.2.4 %s." % game_dir)
+        print("Upgrading game 0.2.5 %s." % game_dir)
         
         # add new models
         file_path = os.path.join(game_dir, "worlddata", "models.py")
-                
-        # add character_attributes_info to models
-        utils.file_append(file_path, ["\n",
-                                      "class character_attributes_info(model_base.character_attributes_info):\n",
-                                      "    pass\n",
-                                      "\n"])
-
-        # add equipment_attributes_info to models
-        utils.file_append(file_path, ["\n",
-                                      "class equipment_attributes_info(model_base.equipment_attributes_info):\n",
-                                      "    pass\n",
-                                      "\n"])
-
-        # add food_attributes_info to models
-        utils.file_append(file_path, ["\n",
-                                      "class food_attributes_info(model_base.food_attributes_info):\n",
-                                      "    pass\n",
-                                      "\n"])
 
         # add condition_desc to models
         utils.file_append(file_path, ["\n",
@@ -81,24 +63,6 @@ class Upgrader(BaseUpgrader):
 
         # move init to the end of the file
         utils.comment_out_lines(file_path, ["Manager.init_data()"])
-
-        # add character_attributes_info to forms
-        utils.file_append(file_path, ["\n",
-                                      "class CharacterAttributesForm(forms_base.CharacterAttributesForm):\n",
-                                      "    pass\n",
-                                      "\n"])
-
-        # add equipment_attributes_info to forms
-        utils.file_append(file_path, ["\n",
-                                      "class EquipmentAttributesForm(forms_base.EquipmentAttributesForm):\n",
-                                      "    pass\n",
-                                      "\n"])
-
-        # add food_attributes_info to forms
-        utils.file_append(file_path, ["\n",
-                                      "class FoodAttributesForm(forms_base.FoodAttributesForm):\n",
-                                      "    pass\n",
-                                      "\n"])
 
         # add condition_desc to forms
         utils.file_append(file_path, ["\n",
@@ -136,9 +100,6 @@ class Upgrader(BaseUpgrader):
                                               "AI_CHOOSE_SKILL = 'ai.choose_skill.ChooseSkill'\n",
                                               "\n"])
 
-            # update statements
-            utils.copy_path(game_template_dir, game_dir, "statements")
-
             # update game editor
             utils.copy_path(game_template_dir, game_dir, os.path.join("worlddata", "editor"))
 
@@ -156,25 +117,6 @@ class Upgrader(BaseUpgrader):
         django_args = ["migrate"]
         django_kwargs = {}
         django.core.management.call_command(*django_args, **django_kwargs)
-
-        # load data
-        system_data_path = os.path.join(muddery_lib, "worlddata", "data")
-        from muddery.worlddata.data_sets import DATA_SETS
-        
-        # load system data
-        for data_handlers in DATA_SETS.system_data:
-            try:
-                data_handlers.import_from_path(system_data_path, system_data=True)
-            except Exception, e:
-                err_message = "Cannot import system game data. %s" % e
-                logger.log_errmsg(err_message)
-
-        if game_template:
-            # load custom attributes
-            data_path = os.path.join(game_dir, "worlddata", "data")
-            DATA_SETS.get_handler("character_attributes_info").import_from_path(data_path)
-            DATA_SETS.get_handler("equipment_attributes_info").import_from_path(data_path)
-            DATA_SETS.get_handler("food_attributes_info").import_from_path(data_path)
 
     def upgrade_data(self, data_path, game_template, muddery_lib):
         """

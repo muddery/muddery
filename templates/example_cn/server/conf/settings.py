@@ -63,3 +63,9 @@ SECRET_KEY = {SECRET_KEY}
 
 # Skill functions set
 SKILL_FUNC_SET = "statements.statement_func_set.SkillFuncSet"
+
+
+###################################
+# AI modules
+###################################
+AI_CHOOSE_SKILL = "ai.choose_skill.ChooseSkill"

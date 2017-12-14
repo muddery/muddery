@@ -243,10 +243,13 @@ BASE_PLAYER_TYPECLASS = "muddery.typeclasses.players.MudderyPlayer"
 # Typeclass and base for all objects (fallback)
 BASE_OBJECT_TYPECLASS = "muddery.typeclasses.objects.MudderyObject"
 
-# Typeclass for character objects (fallback)
-BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_characters.MudderyCharacter"
-
 # Typeclass for character objects linked to a player (fallback)
+BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_characters.MudderyPlayerCharacter"
+
+# Typeclass for general characters, include NPCs, mobs and player characters.
+BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.characters.MudderyCharacter"
+
+# Typeclass for player characters.
 BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.typeclasses.player_characters.MudderyPlayerCharacter"
 
 # Typeclass for rooms (fallback)
@@ -261,9 +264,6 @@ BASE_CHANNEL_TYPECLASS = "muddery.typeclasses.channels.MudderyChannel"
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.
 BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
-
-# Typeclass for general characters, include NPCs, mobs and player characters.
-BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.characters.MudderyCharacter"
 
 
 ######################################################################
@@ -393,3 +393,10 @@ TOP_RANKINGS_NUMBER = 10
 NEAREST_RANKINGS_NUMBER = 10
 
 HONOUR_OPPONENTS_NUMBER = 100
+
+
+###################################
+# AI modules
+###################################
+AI_CHOOSE_SKILL = "muddery.ai.choose_skill.ChooseSkill"
+

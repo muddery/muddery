@@ -1884,7 +1884,7 @@ class ImageResources(models.Model):
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
     
     # resource's path
-    resource = models.CharField(max_length=KEY_LENGTH, blank=True)
+    resource = models.CharField(max_length=KEY_LENGTH, blank=True, default=None)
 
     # resource'e width
     image_width = models.PositiveIntegerField(blank=True, default=0)
