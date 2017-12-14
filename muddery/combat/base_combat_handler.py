@@ -6,9 +6,9 @@ from __future__ import print_function
 
 import random
 import traceback
+from twisted.internet import reactor
 from django.conf import settings
 from evennia import DefaultScript
-from evennia import TICKER_HANDLER
 from evennia.utils import logger
 from muddery.utils import builder, defines
 
@@ -32,6 +32,7 @@ class BaseCombatHandler(DefaultScript):
         self.finished = False
 
         self.timeout = 0
+        self.timer = None
 
     def show_combat(self, character):
         """
@@ -68,8 +69,8 @@ class BaseCombatHandler(DefaultScript):
 
     def at_stop(self):
         "Called just before the script is stopped/destroyed."
-        if self.timeout:
-            TICKER_HANDLER.remove(self.timeout, self.at_timeout)
+        if self.timer and self.timer.active():
+            self.timer.cancel()
 
         for character in self.characters.values():
             # note: the list() call above disconnects list from database
@@ -112,7 +113,7 @@ class BaseCombatHandler(DefaultScript):
         self.start_combat()
 
         if self.timeout:
-            TICKER_HANDLER.add(self.timeout, self.at_timeout, persistent=False)
+            self.timer = reactor.callLater(self.timeout, self.at_timeout)
 
     def at_timeout(self):
         """
@@ -121,6 +122,9 @@ class BaseCombatHandler(DefaultScript):
         Returns:
             None.
         """
+        if self.finished:
+            return
+
         self.set_combat_draw()
         self.stop()
 
@@ -172,6 +176,9 @@ class BaseCombatHandler(DefaultScript):
         Finish a combat. Send results to players, and kill all failed characters.
         """
         self.finished = True
+        
+        if self.timer and self.timer.active():
+            self.timer.cancel()
         
         if self.characters:
             # get winners and losers

@@ -5,7 +5,6 @@ MudderyNPC is NPC's base class.
 
 import json
 import traceback
-from evennia import TICKER_HANDLER
 from evennia.utils import logger
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.utils.localized_strings_handler import _

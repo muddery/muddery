@@ -34,6 +34,9 @@ var controller = {
     	// Remove characters that are not template.
     	$("#characters>:not(.template)").remove();
     	
+    	// Remove combat messages.
+    	$("#messages>:not(.template)").remove();
+    	
     	// Remove skill buttons that are not template.
     	$("#buttons>:not(.template)").remove();
     	
@@ -132,7 +135,8 @@ var controller = {
 		var container = $('#buttons');
 		var item_template = container.find("button.template");
 		var left = 10;
-		var top = 150;
+		var msg_box = $("#messages");
+		var top = msg_box.position().top + msg_box.height() + 10;
         var line = 4;
         var width = 70;
         var line_height = 80;
@@ -167,27 +171,34 @@ var controller = {
 		if (this._combat_finished) {
 			return;
 		}
-			
-		if (result.key == "skill_normal_hit" ||
-		    result.key == "skill_dunt") {
+		
+		if ("message" in result && result["message"]) {
+		    var msg = text2html.parseHtml(result["message"]);
+			this.displayMsg(msg);
+		}
+		
+		if ("key" in result) {
+			if (result.key == "skill_normal_hit" ||
+				result.key == "skill_dunt") {
 
-			var caller = $('#char_' + result.caller.slice(1));
-			if (caller.hasClass("teammate")) {
-				caller.animate({left: '50%'}, 100);
-				caller.animate({left: '12%'}, 100);
+				var caller = $('#char_' + result.caller.slice(1));
+				if (caller.hasClass("teammate")) {
+					caller.animate({left: '50%'}, 100);
+					caller.animate({left: '12%'}, 100);
+				}
+				else {
+					caller.animate({right: '50%'}, 100);
+					caller.animate({right: '12%'}, 100);
+				}
 			}
-			else {
-				caller.animate({right: '50%'}, 100);
-				caller.animate({right: '12%'}, 100);
+			else if (result.key == "skill_normal_heal" ||
+					 result.key == "skill_powerful_heal") {
 			}
-		}
-		else if (result.key == "skill_normal_heal" ||
-		         result.key == "skill_powerful_heal") {
-		}
-		else if (result.key == "skill_escape") {
-			if (result.effect == 1) {
-				var item_id = "#char_" + result["target"].slice(1) + ".status";
-				$(item_id).text(_("Escaped"));
+			else if (result.key == "skill_escape") {
+				if (result.effect == 1) {
+					var item_id = "#char_" + result["target"].slice(1) + ".status";
+					$(item_id).text(_("Escaped"));
+				}
 			}
 		}
 	
@@ -195,6 +206,33 @@ var controller = {
         if ("status" in result) {
             this.updateStatus(result["status"]);
         }
+    },
+    
+	// display a message in message window
+	displayMsg: function(msg) {
+        var msg_wnd = $("#messages");
+        if (msg_wnd.length > 0) {
+            msg_wnd.stop(true);
+            msg_wnd.scrollTop(msg_wnd[0].scrollHeight);
+        }
+
+		var item_template = msg_wnd.find("div.template");
+		var item = item_template.clone()
+			.removeClass("template")
+			.addClass("msg-normal")
+        	.html(msg)
+            .appendTo(msg_wnd);
+
+        // remove old messages
+        var divs = msg_wnd.find("div:not(.template)");
+        var max = 10;
+        var size = divs.size();
+        if (size > max) {
+            divs.slice(0, size - max).remove();
+        }
+        
+        // scroll message window to bottom
+        msg_wnd.animate({scrollTop: msg_wnd[0].scrollHeight});
     },
     
     updateStatus: function(status) {

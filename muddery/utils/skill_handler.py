@@ -7,8 +7,8 @@ from __future__ import print_function
 
 import time
 import random
+from twisted.internet import task
 from django.conf import settings
-from evennia import TICKER_HANDLER
 from evennia.utils import logger
 from muddery.utils.builder import build_object
 from muddery.utils.localized_strings_handler import _
@@ -20,7 +20,6 @@ class SkillHandler(object):
     """
     Skill handler handles a character's skills.
     """
-
     def __init__(self, owner):
         """
         Initialize handler.
@@ -33,15 +32,17 @@ class SkillHandler(object):
 
         self.gcd = GAME_SETTINGS.get("global_cd")
         self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
-        self.can_auto_cast = False
         self.gcd_finish_time = 0
+        
+        # loop for auto cast skills
+        self.loop = None
 
     def __del__(self):
         """
         Remove tickers.
         """
-        if self.can_auto_cast:
-            TICKER_HANDLER.remove(callback=self.owner.auto_cast_skill)
+        if self.loop and self.loop.running:
+            self.loop.stop()
 
     def get_all(self):
         """
@@ -132,13 +133,23 @@ class SkillHandler(object):
         if not self.owner:
             return
 
-        if time.time() < self.gcd_finish_time:
+        time_now = time.time()
+        if time_now < self.gcd_finish_time:
             # In GCD.
-            self.owner.msg({"msg": _("This skill is not ready yet!")})
+            message = _("Global cooling down!")
+            if self.owner.is_in_combat():
+                self.owner.msg({"skill_result": {"message": message}})
+            else:
+                self.owner.msg({"msg": message})
+
             return
 
         if skill_key not in self.skills:
-            self.owner.msg({"alert": _("You do not have this skill.")})
+            message = _("You do not have this skill.")
+            if self.owner.is_in_combat():
+                self.owner.msg({"skill_result": {"message": message}})
+            else:
+                self.owner.msg({"alert": message})
             return
 
         skill = self.skills[skill_key]
@@ -146,14 +157,17 @@ class SkillHandler(object):
         message = skill.check_available()
         if message:
             # Skill is not available.
-            self.owner.msg({"msg": message})
+            if self.owner.is_in_combat():
+                self.owner.msg({"skill_result": {"message": message}})
+            else:
+                self.owner.msg({"msg": message})
             return
 
         skill.cast_skill(target)
 
         if self.gcd > 0:
             # set GCD
-            self.gcd_finish_time = time.time() + self.gcd
+            self.gcd_finish_time = time_now + self.gcd
 
         # send CD to the player
         cd = {"skill": skill.get_data_key(),    # skill's key
@@ -168,9 +182,6 @@ class SkillHandler(object):
         """
         Cast a new skill automatically.
         """
-        if not self.can_auto_cast:
-            return
-
         if not self.owner:
             return
 
@@ -179,7 +190,8 @@ class SkillHandler(object):
 
         if not self.owner.ndb.combat_handler:
             # combat is finished, stop ticker
-            TICKER_HANDLER.remove(self.auto_cast_skill_cd, self.owner.auto_cast_skill)
+            if self.loop and self.loop.running:
+                self.loop.stop()
             return
 
         # Choose a skill and the skill's target.
@@ -207,17 +219,19 @@ class SkillHandler(object):
         """
         Start auto cast skill.
         """
-        self.can_auto_cast = True
+        if self.loop and self.loop.running:
+            return
 
         # Cast a skill immediately
-        self.auto_cast_skill()
+        # self.auto_cast_skill()
 
         # Set timer of auto cast.
-        TICKER_HANDLER.add(self.auto_cast_skill_cd, self.owner.auto_cast_skill, persistent=False)
+        self.loop = task.LoopingCall(self.auto_cast_skill)
+        self.loop.start(self.auto_cast_skill_cd)
 
     def stop_auto_combat_skill(self):
         """
         Stop auto cast skill.
         """
-        self.can_auto_cast = False
-        TICKER_HANDLER.remove(self.auto_cast_skill_cd, self.owner.auto_cast_skill)
+        if self.loop and self.loop.running:
+            self.loop.stop()

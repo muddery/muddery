@@ -7,7 +7,6 @@ import json
 import traceback
 from django.conf import settings
 from evennia.utils import logger
-from evennia import TICKER_HANDLER
 from muddery.typeclasses.characters import MudderyCharacter
 from muddery.utils.builder import delete_object
 from muddery.utils.localized_strings_handler import _

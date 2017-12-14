@@ -359,16 +359,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         """
         self.skill_handler.cast_skill(skill_key, target)
 
-    def auto_cast_skill(self):
-        """
-        Auto cast an available skill.
-        Put this method on the character because TICKER_HANDLER needs a typeclass.
-
-        Returns:
-            None
-        """
-        self.skill_handler.auto_cast_skill()
-
     def send_skill_result(self, result):
         """
         Set the result of the skill. The character can send these messages to its surroundings.

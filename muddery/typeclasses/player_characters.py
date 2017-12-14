@@ -31,7 +31,6 @@ from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia.comms.models import ChannelDB
-from evennia import TICKER_HANDLER
 from evennia import create_script
 
 

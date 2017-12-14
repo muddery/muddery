@@ -127,7 +127,7 @@ class MudderySkill(MudderyObject):
             if time_now < self.db.cd_finish_time:
                 # skill in CD
                 if owner:
-                    owner.msg({"msg": _("This skill is not ready yet!")})
+                    owner.msg({"msg": _("{c%s{n is not ready yet!" % self.get_name())})
                 return
 
         # call skill function
@@ -152,10 +152,10 @@ class MudderySkill(MudderyObject):
                      If the skill is available, return "".
         """
         if self.passive:
-            return _("This is a passive skill!")
+            return _("{c%s{n is a passive skill!" % self.get_name())
 
         if self.is_cooling_down():
-            return _("This skill is not ready yet!")
+            return _("{c%s{n is not ready yet!" % self.get_name())
 
         return ""
 

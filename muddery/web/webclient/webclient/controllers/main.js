@@ -241,15 +241,18 @@ var controller = {
         this.doSetVisiblePopupSize();
     },
     
-    setSkillResult: function(result) {
-		if ("message" in result && result["message"]) {
-		    var msg = text2html.parseHtml(result["message"]);
-			this.displayMsg(msg);
-		}
-		
+    setSkillResult: function(result) {		
 		var frame_id = "#frame_combat";
         var frame_ctrl = this.getFrameController(frame_id);
-		frame_ctrl.setSkillResult(result);
+        if (frame_ctrl.isCombatFinished()) {
+			if ("message" in result && result["message"]) {
+				var msg = text2html.parseHtml(result["message"]);
+				this.displayMsg(msg);
+			}
+        }
+        else {
+			frame_ctrl.setSkillResult(result);
+		}
     },
     
     setSkillCD: function(skill, cd, gcd) {
