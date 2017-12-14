@@ -18,17 +18,17 @@ class HonoursHandler(object):
         """
         total_losers = 0
         for char in losers:
-            total_losers += HONOURS_MAPPER.get_honour(char)
+            total_losers += HONOURS_MAPPER.get_honour(char, 0)
         average_losers = total_losers / len(losers)
         
         total_winners = 0
         for char in winners:
-            total_winners += HONOURS_MAPPER.get_honour(char)
+            total_winners += HONOURS_MAPPER.get_honour(char, 0)
         average_winners = total_winners / len(winners)
         
         total_honours = {}
         for char in winners:
-            self_honour = HONOURS_MAPPER.get_honour(char)
+            self_honour = HONOURS_MAPPER.get_honour(char, 0)
             diff = average_losers - self_honour
             change = 0
             if diff > 200:
@@ -48,7 +48,7 @@ class HonoursHandler(object):
             total_honours[char.id] = value
 
         for char in losers:
-            self_honour = HONOURS_MAPPER.get_honour(char)
+            self_honour = HONOURS_MAPPER.get_honour(char, 0)
             diff = average_winners - self_honour
             change = 0
             if diff > 200:

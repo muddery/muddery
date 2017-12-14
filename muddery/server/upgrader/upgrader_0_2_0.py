@@ -64,6 +64,24 @@ class Upgrader(BaseUpgrader):
                                       "class food_attributes_info(model_base.food_attributes_info):\n",
                                       "    pass\n",
                                       "\n"])
+
+        # add condition_desc to models
+        utils.file_append(file_path, ["\n",
+                                      "class condition_desc(model_base.condition_desc):\n",
+                                      "    pass\n",
+                                      "\n"])
+
+        # add skill_types to models
+        utils.file_append(file_path, ["\n",
+                                      "class skill_types(model_base.skill_types):\n",
+                                      "    pass\n",
+                                      "\n"])
+
+        # add honours to models
+        utils.file_append(file_path, ["\n",
+                                      "class honours(model_base.honours):\n",
+                                      "    pass\n",
+                                      "\n"])
                                       
         # comment out ClientSettingsForm in forms
         file_path = os.path.join(game_dir, "worlddata", "forms.py")
@@ -94,6 +112,18 @@ class Upgrader(BaseUpgrader):
                                       "    pass\n",
                                       "\n"])
 
+        # add condition_desc to forms
+        utils.file_append(file_path, ["\n",
+                                      "class ConditionDescForm(forms_base.ConditionDescForm):\n",
+                                      "    pass\n",
+                                      "\n"])
+
+        # add skill_types to forms
+        utils.file_append(file_path, ["\n",
+                                      "class SkillTypesForm(forms_base.SkillsForm):\n",
+                                      "    pass\n",
+                                      "\n"])
+
         # add init method
         utils.file_append(file_path, ["\n",
                                       "Manager.init_data()\n",
@@ -117,6 +147,17 @@ class Upgrader(BaseUpgrader):
         
         if game_template:
             game_template_dir = os.path.join(configs.MUDDERY_TEMPLATE, game_template)
+
+            # update AI
+            if os.path.exists(os.path.join(game_template_dir, "ai")):
+                utils.copy_path(game_template_dir, game_dir, "ai")
+
+                # update settings file
+                file_path = os.path.join(game_dir, "server", "conf", "settings.py")
+
+                utils.file_append(file_path, ["\n",
+                                              "AI_CHOOSE_SKILL = 'ai.choose_skill.ChooseSkill'\n",
+                                              "\n"])
 
             # update web folder
             utils.copy_path(game_template_dir, game_dir, "web")
