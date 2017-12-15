@@ -224,11 +224,11 @@ var controller = {
             frame_ctrl.finishCombat();
         }
     },
-    
-    setCombatInfo: function(desc, characters) {
+
+    setCombatInfo: function(info) {
         var frame_id = "#frame_combat";
         var frame_ctrl = this.getFrameController(frame_id);
-        frame_ctrl.setInfo(desc, characters, data_handler.character_dbref);
+        frame_ctrl.setInfo(info["desc"], info["timeout"], info["characters"], data_handler.character_dbref);
 
         this.doSetVisiblePopupSize();
     },

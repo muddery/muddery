@@ -149,7 +149,7 @@ class Upgrader(BaseUpgrader):
             game_template_dir = os.path.join(configs.MUDDERY_TEMPLATE, game_template)
 
             # update AI
-            if os.path.exists(os.path.join(game_template_dir, "ai")):
+            if game_template == "example_cn":
                 utils.copy_path(game_template_dir, game_dir, "ai")
 
                 # update settings file
@@ -201,6 +201,7 @@ class Upgrader(BaseUpgrader):
             DATA_SETS.get_handler("character_attributes_info").import_from_path(data_path)
             DATA_SETS.get_handler("equipment_attributes_info").import_from_path(data_path)
             DATA_SETS.get_handler("food_attributes_info").import_from_path(data_path)
+            DATA_SETS.get_handler("skill_types").import_from_path(data_path)
 
     def upgrade_data(self, data_path, game_template, muddery_lib):
         """

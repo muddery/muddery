@@ -89,8 +89,8 @@ class Upgrader(BaseUpgrader):
         if game_template:
             game_template_dir = os.path.join(configs.MUDDERY_TEMPLATE, game_template)
 
-            # update AI
-            if os.path.exists(os.path.join(game_template_dir, "ai")):
+            if game_template == "example_cn":
+                # update AI
                 utils.copy_path(game_template_dir, game_dir, "ai")
 
                 # update settings file
@@ -99,6 +99,10 @@ class Upgrader(BaseUpgrader):
                 utils.file_append(file_path, ["\n",
                                               "AI_CHOOSE_SKILL = 'ai.choose_skill.ChooseSkill'\n",
                                               "\n"])
+
+            if game_template == "legend":
+                # update main.js
+                utils.copy_path(game_template_dir, game_dir, os.path.join("web", "webclient_overrides", "webclient", "controllers", "main.js"))
 
             # update game editor
             utils.copy_path(game_template_dir, game_dir, os.path.join("worlddata", "editor"))
@@ -118,7 +122,7 @@ class Upgrader(BaseUpgrader):
         django_kwargs = {}
         django.core.management.call_command(*django_args, **django_kwargs)
 
-        if game_template:
+        if game_template == "example_cn":
             # load data
             from muddery.worlddata.data_sets import DATA_SETS
 
