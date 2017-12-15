@@ -167,7 +167,7 @@ class Upgrader(BaseUpgrader):
                 data_handlers.import_from_path(system_data_path, system_data=True)
             except Exception, e:
                 err_message = "Cannot import system game data. %s" % e
-                logger.log_errmsg(err_message)
+                print(err_message)
 
         if game_template:
             # load custom attributes

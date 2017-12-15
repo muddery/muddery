@@ -118,6 +118,13 @@ class Upgrader(BaseUpgrader):
         django_kwargs = {}
         django.core.management.call_command(*django_args, **django_kwargs)
 
+        if game_template:
+            # load data
+            from muddery.worlddata.data_sets import DATA_SETS
+
+            data_path = os.path.join(game_dir, "worlddata", "data")
+            DATA_SETS.get_handler("skill_types").import_from_path(data_path)
+
     def upgrade_data(self, data_path, game_template, muddery_lib):
         """
         Upgrade game data.
