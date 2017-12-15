@@ -683,10 +683,10 @@ class CmdAttack(Command):
         chandler = create_script(settings.NORMAL_COMBAT_HANDLER)
         
         # set combat team and desc
-        chandler.set_combat({1: [target], 2:[self.caller]}, "")
+        chandler.set_combat({1: [target], 2:[caller]}, "", 0)
         
-        self.caller.msg(_("You are attacking {c%s{n! You are in combat.") % target.get_name())
-        target.msg(_("{c%s{n is attacking you! You are in combat.") % self.caller.get_name())
+        caller.msg(_("You are attacking {c%s{n! You are in combat.") % target.get_name())
+        target.msg(_("{c%s{n is attacking you! You are in combat.") % caller.get_name())
 
 
 #------------------------------------------------------------
