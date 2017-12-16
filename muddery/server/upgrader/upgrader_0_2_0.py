@@ -120,7 +120,7 @@ class Upgrader(BaseUpgrader):
 
         # add skill_types to forms
         utils.file_append(file_path, ["\n",
-                                      "class SkillTypesForm(forms_base.SkillsForm):\n",
+                                      "class SkillTypesForm(forms_base.SkillTypesForm):\n",
                                       "    pass\n",
                                       "\n"])
 
