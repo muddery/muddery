@@ -2,10 +2,9 @@
 var controller = {
 
 	_puppet: false,
-
     _solo_mode: false,
-
 	_message_type: null,
+	_waiting_begin: 0,
 	
 	//////////////////////////////////////////
 	//
@@ -260,6 +259,35 @@ var controller = {
 		frame_ctrl.setSkillCD(skill, cd, gcd);
     },
     
+    setRankings: function(rankings) {
+    	var frame_id = "#frame_honours";
+        var frame_ctrl = this.getFrameController(frame_id);
+		frame_ctrl.setRankings(rankings);
+    },
+
+    inCombatQueue: function(ave_time) {
+        $("#prompt_queue").text(_("QUEUE: ") + utils.time_to_string(0));
+        $("#prompt_ave_waiting").text(_("AVE: ") + utils.time_to_string(ave_time));
+
+        this._waiting_begin = new Date().getTime();
+        this._interval_id = window.setInterval("refreshWaitingTime()", 1000);
+    },
+
+    leftCombatQueue: function(ave_time) {
+        if (this._interval_id != null) {
+            this._interval_id = window.clearInterval(this._interval_id);
+        }
+
+        $("#prompt_queue").empty();
+        $("#prompt_ave_waiting").empty();
+    },
+
+    prepareMatch: function(data) {
+    },
+    
+    prepareMatchCanceled: function(data) {
+    },
+
     finishCombat: function(result) {
 		var combat_id = "#frame_combat";
 		var combat_ctrl = this.getFrameController(combat_id);
@@ -348,6 +376,7 @@ var controller = {
         $("#prompt_level").empty();
         $("#prompt_exp").empty();
         $("#prompt_hp").empty();
+        $("#prompt_queue").empty();
     },
 
     // set player's basic information
@@ -686,6 +715,11 @@ var controller = {
         frame.show();
     },
 
+    showHonours: function() {
+        this.showContent("honours");
+        commands.getRankings();
+    },
+
 	// puppet layout
     showPuppet : function() {
         // show login UI
@@ -700,6 +734,7 @@ var controller = {
         $("#tab_scene").show();
         $("#tab_status").show();
         $("#tab_inventory").show();
+        $("#tab_honours").show();
         $("#tab_system").show();
 
         if (!this._solo_mode) {
@@ -714,6 +749,8 @@ var controller = {
         // show unlogin UI
         this.clearMsgWindow();
         $("#prompt_content").hide();
+
+        this.leftCombatQueue();
 
     	// show unlogin tabs
         this.hideTabs();
@@ -825,6 +862,7 @@ var controller = {
 		this.getFrameController("#frame_quests").resetLanguage();
 		this.getFrameController("#frame_scene").resetLanguage();
 		this.getFrameController("#frame_shop").resetLanguage();
+		this.getFrameController("#frame_honours").resetLanguage();
 	},
 	
 	resetLanguage: function() {
@@ -839,6 +877,7 @@ var controller = {
 		$("#view_inventory").text(_("Inventory"));
 		$("#view_skills").text(_("Skills"));
 		$("#view_quests").text(_("Quests"));
+		$("#view_honours").text(_("Honours"));
 		$("#view_social").text(_("Social"));
 		$("#view_map").text(_("Map"));
 		$("#view_system").text(_("Sys"));
@@ -919,3 +958,9 @@ var controller = {
     },
 };
 
+
+function refreshWaitingTime() {
+    var current_time = new Date().getTime();
+    var total_time = Math.floor((current_time - controller._waiting_begin) / 1000);
+    $("#prompt_queue").text(_("QUEUE: ") + utils.time_to_string(total_time));
+};

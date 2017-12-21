@@ -4,7 +4,6 @@ var parent_controller = parent.controller;
 var text2html = parent.text2html;
 var settings = parent.settings;
 var map_data = parent.map_data;
-var util = parent.util;
 var commands = parent.commands;
 
 var controller = {

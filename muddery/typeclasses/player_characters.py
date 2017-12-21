@@ -25,6 +25,7 @@ from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.honours_handler import HONOURS_HANDLER
+from muddery.utils.match_queue_handler import MATCH_QUEUE_HANDLER
 from muddery.dao.honours_mapper import HONOURS_MAPPER
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
@@ -214,6 +215,8 @@ class MudderyPlayerCharacter(MudderyCharacter):
                 change = {"dbref": self.dbref,
                           "name": self.get_name()}
                 self.location.msg_contents({"player_offline":change}, exclude=self)
+
+        MATCH_QUEUE_HANDLER.remove(self)
 
     def set_nickname(self, nickname):
         """

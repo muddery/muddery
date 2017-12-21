@@ -139,4 +139,6 @@ var local_string_zh_cn = {
     "FIGHT": "战斗",
     "RANKING": "排名",
     "HONOUR": "荣誉",
+    "QUEUE UP": "排队",
+    "QUIT QUEUE": "退出队列",
 };

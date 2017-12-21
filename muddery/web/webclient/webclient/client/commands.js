@@ -153,9 +153,19 @@ var commands = {
     makeMatch() {
     	Evennia.msg("text", this.cmdString("make_match", ""));
     },
+
+    // queue up an honour combat
+    queueUpCombat() {
+    	Evennia.msg("text", this.cmdString("queue_up_combat", ""));
+    },
+    
+    // quit a combat queue
+    quitCombatQueue() {
+    	Evennia.msg("text", this.cmdString("quit_combat_queue", ""));
+    },
     
     // get character rankings
-    get_rankings() {
+    getRankings() {
     	Evennia.msg("text", this.cmdString("get_rankings", ""));
     },
     

@@ -189,6 +189,18 @@ var client = {
                 else if (key == "rankings") {
                 	controller.setRankings(data[key]);
                 }
+                else if (key == "in_combat_queue") {
+                    controller.inCombatQueue(data[key]);
+                }
+                else if (key == "left_combat_queue") {
+                    controller.leftCombatQueue(data[key]);
+                }
+                else if (key == "prepare_match") {
+                	controller.prepareMatch(data[key]);
+                }
+                else if (key == "prepare_match_canceled") {
+                	controller.prepareMatchCanceled(data[key]);
+                }
                 else if (key == "current_location") {
                     map_data.setCurrentLocation(data[key]);
                 }

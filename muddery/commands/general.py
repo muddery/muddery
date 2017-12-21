@@ -14,6 +14,7 @@ from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.exception import MudderyError
 from muddery.utils.honours_handler import HONOURS_HANDLER
+from muddery.utils.match_queue_handler import MATCH_QUEUE_HANDLER
 from muddery.dao.honours_mapper import HONOURS_MAPPER
 import traceback
 import random
@@ -732,6 +733,61 @@ class CmdMakeMatch(Command):
         except Exception, e:
             logger.log_err("Find match error: %s" % e)
             caller.msg({"alert":_("Can not make match.")})
+
+
+#------------------------------------------------------------
+# Queue up for an honour combat.
+#------------------------------------------------------------
+class CmdQueueUpCombat(Command):
+    """
+    Queue up to make a match between the caller and a proper opponent.
+
+    Usage:
+    {"cmd": "queue_up_combat",
+     "args": None
+    }
+    """
+    key = "queue_up_combat"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+        caller = self.caller
+        if not caller:
+            return
+            
+        if caller.db.level < settings.MIN_HONOUR_LEVEL:
+            caller.msg({"alert":_("You need to reach level %s." % settings.MIN_HONOUR_LEVEL)})
+            return
+        
+        MATCH_QUEUE_HANDLER.add(caller)
+
+
+#------------------------------------------------------------
+# Queue up for an honour combat.
+#------------------------------------------------------------
+class CmdQuitCombatQueue(Command):
+    """
+    Quit the combat queue.
+
+    Usage:
+    {"cmd": "quit_combat_queue",
+     "args": None
+    }
+    """
+    key = "quit_combat_queue"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+        
+        MATCH_QUEUE_HANDLER.remove(caller)
 
 
 #------------------------------------------------------------

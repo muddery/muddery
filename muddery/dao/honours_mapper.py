@@ -89,8 +89,20 @@ class HonoursMapper(object):
         Return:
             number: Character's honour.
         """
+        return self.get_honour_by_id(character.id, default)
+
+    def get_honour_by_id(self, character_id, default=None):
+        """
+        Get a character's honour.
+        
+        Args:
+            character_id: (string) A character's id.
+            
+        Return:
+            number: Character's honour.
+        """
         try:
-            return self.honours[character.id]["honour"]
+            return self.honours[character_id]["honour"]
         except Exception, e:
             if default is not None:
                 return default

@@ -1,5 +1,5 @@
 
-var util = {
+var utils = {
     visual_length: function(str) {
         var length = 0;
         for (var i = 0; i < str.length; i++) {
@@ -79,5 +79,18 @@ var util = {
         }
         
         return str;
+    },
+
+    time_to_string: function(time) {
+        if (time < 0) {
+            return "--";
+        }
+
+        var minutes = parseInt(time / 60);
+        var seconds = time - minutes * 60;
+        if (seconds < 10) {
+            seconds = "0" + seconds;
+        }
+        return minutes + ":" + seconds;
     },
 };

@@ -50,11 +50,14 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdAttack())
         self.add(general.CmdMakeMatch())
         self.add(general.CmdGetRankings())
+        self.add(general.CmdQueueUpCombat())
+        self.add(general.CmdQuitCombatQueue())
         self.add(general.CmdUnlockExit())
         self.add(general.CmdGiveUpQuest())
         self.add(general.CmdShopping())
         self.add(general.CmdBuy())
         self.add(general.CmdSay())
+        self.add(general.CmdAction())
         self.add(general.CmdAction())
 
         # Add empty login commands to the normal cmdset to

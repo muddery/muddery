@@ -2,9 +2,7 @@
 var controller = {
 
 	_puppet: false,
-
     _solo_mode: false,
-
 	_message_type: null,
 	
 	//////////////////////////////////////////
@@ -268,7 +266,19 @@ var controller = {
         var frame_ctrl = this.getFrameController(frame_id);
 		frame_ctrl.setRankings(rankings);
     },
+
+    inCombatQueue: function(ave_time) {
+    },
+
+    leftCombatQueue: function(ave_time) {
+    },
+
+    prepareMatch: function(data) {
+    },
     
+    prepareMatchCanceled: function(data) {
+    },
+
     finishCombat: function(result) {
 		var combat_id = "#frame_combat";
 		var combat_ctrl = this.getFrameController(combat_id);
@@ -703,7 +713,7 @@ var controller = {
     
     showHonours: function() {
         this.showContent("honours");
-        commands.get_rankings();
+        commands.getRankings();
     },
 
 	// puppet layout
@@ -736,6 +746,8 @@ var controller = {
         this.clearMsgWindow();
         $("#prompt_content").hide();
 
+        this.leftCombatQueue();
+
     	// show unlogin tabs
         this.hideTabs();
 
@@ -751,6 +763,8 @@ var controller = {
 	showSelectChar: function() {
         //this.clearMsgWindow();
         $("#prompt_content").hide();
+
+        this.leftCombatQueue();
 
     	// show select character tabs
         this.hideTabs();
