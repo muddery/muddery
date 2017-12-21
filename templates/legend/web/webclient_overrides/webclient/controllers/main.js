@@ -918,3 +918,4 @@ var controller = {
     	$("#msg_type_menu").hide();
     },
 };
+

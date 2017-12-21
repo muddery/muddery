@@ -63,3 +63,4 @@ SECRET_KEY = {SECRET_KEY}
 
 # Skill functions set
 SKILL_FUNC_SET = "statements.statement_func_set.SkillFuncSet"
+
