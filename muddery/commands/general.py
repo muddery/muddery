@@ -791,6 +791,58 @@ class CmdQuitCombatQueue(Command):
 
 
 #------------------------------------------------------------
+# Confirm an honour combat.
+#------------------------------------------------------------
+class CmdConfirmCombat(Command):
+    """
+    Confirm an honour combat.
+
+    Usage:
+    {"cmd": "confirm_combat",
+     "args": None
+    }
+    """
+    key = "confirm_combat"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+        
+        MATCH_QUEUE_HANDLER.confirm(caller)
+
+
+#------------------------------------------------------------
+# Reject an honour combat.
+#------------------------------------------------------------
+class CmdRejectCombat(Command):
+    """
+    Reject an honour combat queue.
+
+    Usage:
+    {"cmd": "reject_combat",
+     "args": None
+    }
+    """
+    key = "reject_combat"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+        
+        MATCH_QUEUE_HANDLER.reject(caller)
+
+
+#------------------------------------------------------------
 # Show top rankings
 #------------------------------------------------------------
 class CmdGetRankings(Command):

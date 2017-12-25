@@ -52,6 +52,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdGetRankings())
         self.add(general.CmdQueueUpCombat())
         self.add(general.CmdQuitCombatQueue())
+        self.add(general.CmdConfirmCombat())
+        self.add(general.CmdRejectCombat())
         self.add(general.CmdUnlockExit())
         self.add(general.CmdGiveUpQuest())
         self.add(general.CmdShopping())

@@ -8,6 +8,7 @@ from collections import deque
 import time
 import math
 from twisted.internet import reactor
+from twisted.internet import task
 from evennia.utils import logger
 from evennia.utils.search import search_object
 from muddery.dao.honours_mapper import HONOURS_MAPPER
@@ -22,6 +23,7 @@ class MatchQueueHandler(object):
     min_waiting_time = 5
     preparing_time = 10
     ave_samples_number = 20
+    match_interval = 10
     
     def __init__(self):
         """
@@ -32,6 +34,16 @@ class MatchQueueHandler(object):
         self.preparing = {}
         self.ave_samples = deque()
         self.ave_waiting = -1
+        
+        self.loop = task.LoopingCall(self.match)
+        self.loop.start(self.match_interval)
+        
+    def __del__(self):
+        """
+        Clear all resources.
+        """
+        if self.loop and self.loop.running:
+            self.loop.stop()
 
     def add(self, character):
         """
@@ -46,6 +58,15 @@ class MatchQueueHandler(object):
         self.waiting_time[character_id] = time.time()
         character.msg({"in_combat_queue": self.ave_waiting})
         
+
+    def remove_by_id(self, character_id):
+        """
+        Remove a character from the queue.
+        """
+        character = search_object("#%s" % character_id)
+        if character:
+            self.remove(character[0])
+
     def remove(self, character):
         """
         Remove a character from the queue.
@@ -57,14 +78,14 @@ class MatchQueueHandler(object):
             self.queue.remove(character_id)
             
             if character_id in self.preparing:
-                opponent = self.preparing[character_id]["opponent"]
-                del self.preparing[opponent]
-                character = search_object("#%s" % opponent)
-                if character:
-                    character.msg({"prepare_match_canceled": ""})
+                opponent_id = self.preparing[character_id]["opponent"]
+                del self.preparing[opponent_id]
+                opponent = search_object("#%s" % opponent_id)
+                if opponent:
+                    opponent[0].msg({"prepare_match_canceled": ""})
                 del self.preparing[character_id]
 
-            character.msg({"left_combat_queue": ""})
+        character.msg({"left_combat_queue": ""})
 
     def match(self):
         """
@@ -72,6 +93,10 @@ class MatchQueueHandler(object):
         The longer a character in the queue, the score is higher.
         The nearer of two character's rank, the score is higher.
         """
+        print("match")
+        print("queue: %s" % self.queue)
+        print("waiting: %s" % self.waiting_time)
+        
         if len(self.queue) < 2:
             return
 
@@ -86,13 +111,14 @@ class MatchQueueHandler(object):
             if id in self.preparing:
                 continue
                 
-            character = search_object("#%s" % id)
-            if character.is_in_combat():
+            characters = search_object("#%s" % id)
+            if not characters or characters[0].is_in_combat():
                 continue
 
             candidates.append(id)
             count += 1
 
+        print("candidates: %s" % candidates)
         max_score = 0
         opponents = ()
         for i in xrange(len(candidates) - 1):
@@ -109,21 +135,26 @@ class MatchQueueHandler(object):
                 score = score_A + score_B + score_C
                 if score > max_score:
                     max_score = score
-                opponents = i, j
+                opponents = candidates[i], candidates[j]
         
         if opponents:
+            print("matched")
+            print("opponents: %s" % (opponents,))
             self.preparing[opponents[0]] = {"time": time.time(),
-                                            "opponent": opponents[1]}
+                                            "opponent": opponents[1],
+                                            "confirmed": False}
             self.preparing[opponents[1]] = {"time": time.time(),
-                                            "opponent": opponents[0]}
+                                            "opponent": opponents[0],
+                                            "confirmed": False}
             character_A = search_object("#%s" % opponents[0])
             character_B = search_object("#%s" % opponents[1])
             if character_A:
-                character_A.msg({"prepare_match": self.preparing_time})
+                character_A[0].msg({"prepare_match": self.preparing_time})
             if character_B:
-                character_B.msg({"prepare_match": self.preparing_time})
+                character_B[0].msg({"prepare_match": self.preparing_time})
             reactor.callLater(self.preparing_time, self.fight, opponents)
 
+            print("waiting: %s" % self.waiting_time)
             self.ave_samples.append(self.waiting_time[opponents[0]])
             self.ave_samples.append(self.waiting_time[opponents[1]])
 
@@ -131,12 +162,44 @@ class MatchQueueHandler(object):
                 self.ave_samples.popleft()
 
             self.ave_waiting = float(sum(self.ave_samples)) / len(self.ave_samples)
+            
+    def confirm(self, character):
+        """
+        Confirm an honour combat.
+        """
+        character_id = character.id
+        if character_id not in self.preparing:
+            return
+            
+        self.preparing[character_id]["confirmed"] = True
+
+    def reject(self, character):
+        """
+        Reject an honour combat.
+        """
+        character_id = character.id
+        if character_id not in self.preparing:
+            return
+            
+        opponent_id = self.preparing[character_id]["opponent"]
+        opponent = search_object("#%s" % opponent_id)
+        if opponent:
+            opponent[0].msg({"combat_rejected": True})
+
+        del self.preparing[opponent_id]
+        self.remove_by_id(character_id)
 
     def fight(self, opponents):
         """
         Create a combat.
         """
-        print("opponents: %s" % opponents)
+        print("fight")
+        if opponents[0] in self.preparing and self.preparing[opponents[0]]["confirmed"]:
+            if opponents[1] in self.preparing and self.preparing[opponents[1]]["confirmed"]:
+                print("opponents: %s" % opponents)
+
+        self.remove_by_id(opponents[0])
+        self.remove_by_id(opponents[1])
 
 # main handler
 MATCH_QUEUE_HANDLER = MatchQueueHandler()

@@ -283,6 +283,13 @@ var controller = {
     },
 
     prepareMatch: function(data) {
+        var prepare_id = "#frame_confirm_combat";
+		var prepare_ctrl = this.getFrameController(prepare_id);
+		prepare_ctrl.setPrepareTime(data);
+
+        controller.showFrame(prepare_id);
+        var popup_content = $("#popup_confirm_combat .modal-content:visible:first");
+        this.setPopupSize(popup_content);
     },
     
     prepareMatchCanceled: function(data) {
@@ -593,6 +600,8 @@ var controller = {
         
         controller.showContent("connect");
         
+        this.leftCombatQueue();
+
         this.clearChannels();
     },
     
@@ -646,6 +655,10 @@ var controller = {
 
     doSetVisiblePopupSize: function() {
         var popup_content = $("#popup_container .modal-content:visible:first");
+        this.setPopupSize(popup_content);
+    },
+    
+    setPopupSize: function(popup_content) {
         var frame = popup_content.find("iframe");
         if (frame.length == 0) {
             return;

@@ -164,6 +164,16 @@ var commands = {
     	Evennia.msg("text", this.cmdString("quit_combat_queue", ""));
     },
     
+    // confirm an honour combat
+    confirmCombat() {
+    	Evennia.msg("text", this.cmdString("confirm_combat", ""));
+    },
+
+    // reject an honour combat
+    rejectCombat() {
+    	Evennia.msg("text", this.cmdString("reject_combat", ""));
+    },
+    
     // get character rankings
     getRankings() {
     	Evennia.msg("text", this.cmdString("get_rankings", ""));

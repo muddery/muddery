@@ -36,7 +36,11 @@ body {
 	display: none;
 }
 
-#popup_modal {
+#popup_confirm_combat {
+	display: none;
+}
+
+.popup_modal {
  	display: block;
 }
 
