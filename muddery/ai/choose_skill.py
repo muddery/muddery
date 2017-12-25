@@ -37,5 +37,5 @@ class ChooseSkill(object):
         opponents = [c for c in characters if c.get_team() != team]
 
         skill = random.choice(skills)
-        target = caller
+        target = random.choice(opponents)
         return skill.get_data_key(), target
