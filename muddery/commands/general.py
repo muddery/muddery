@@ -6,7 +6,7 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 """
 
 from django.conf import settings
-from evennia.utils import utils, prettytable, logger
+from evennia.utils import utils, logger
 from evennia.commands.command import Command
 from evennia import create_script
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER

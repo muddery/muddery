@@ -198,8 +198,8 @@ var client = {
                 else if (key == "prepare_match") {
                 	controller.prepareMatch(data[key]);
                 }
-                else if (key == "prepare_match_canceled") {
-                	controller.prepareMatchCanceled(data[key]);
+                else if (key == "match_rejected") {
+                	controller.matchRejected(data[key]);
                 }
                 else if (key == "current_location") {
                     map_data.setCurrentLocation(data[key]);

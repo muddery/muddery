@@ -18,16 +18,24 @@ var controller = {
 	},
 	
     // close popup box
-    doClosePopupBox: function() {
+    doClose: function() {
         commands.rejectCombat();
-        parent_controller.doClosePopupBox();
+        this.closeBox();
     },
 
 	setPrepareTime: function(time) {
-	    this.prepare_time = new Date().getTime() + time;
-        $("#time").text(parseInt(time));
-        
+	    this._prepare_time = new Date().getTime() + time * 1000;
+        $("#time").text(parseInt(time - 1));
+
         this._interval_id = window.setInterval("refreshPrepareTime()", 1000);
+	},
+
+	closeBox: function() {
+	    if (this._interval_id != null) {
+            this._interval_id = window.clearInterval(this._interval_id);
+        }
+
+        parent_controller.closePrepareMatchBox();
 	},
 	
 	confirmCombat: function() {
@@ -46,13 +54,13 @@ $(document).ready(function() {
 
 function refreshPrepareTime() {
     var current_time = new Date().getTime();
-    var remain_time = Math.floor((current_time - controller._prepare_time) / 1000);
+    var remain_time = Math.floor((controller._prepare_time - current_time) / 1000);
+    if (remain_time < 0) {
+        remain_time = 0;
+    }
     $("#time").text(parseInt(remain_time));
     
-    if (current_time - controller._prepare_time <= 0) {
-        commands.rejectCombat();
-        if (this._interval_id != null) {
-            this._interval_id = window.clearInterval(this._interval_id);
-        }
+    if (remain_time <= 0) {
+        controller.closeBox();
     }
 };

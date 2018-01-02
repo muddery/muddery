@@ -276,7 +276,7 @@ var controller = {
     prepareMatch: function(data) {
     },
     
-    prepareMatchCanceled: function(data) {
+    matchRejected: function(data) {
     },
 
     finishCombat: function(result) {

@@ -267,7 +267,7 @@ var controller = {
 
     inCombatQueue: function(ave_time) {
         $("#prompt_queue").text(_("QUEUE: ") + utils.time_to_string(0));
-        $("#prompt_ave_waiting").text(_("AVE: ") + utils.time_to_string(ave_time));
+        this.displayMsg(_("You are in queue now. Average waiting time is " + utils.time_to_string(ave_time) + "."));
 
         this._waiting_begin = new Date().getTime();
         this._interval_id = window.setInterval("refreshWaitingTime()", 1000);
@@ -287,12 +287,27 @@ var controller = {
 		var prepare_ctrl = this.getFrameController(prepare_id);
 		prepare_ctrl.setPrepareTime(data);
 
-        controller.showFrame(prepare_id);
+        this.showFrame(prepare_id);
         var popup_content = $("#popup_confirm_combat .modal-content:visible:first");
         this.setPopupSize(popup_content);
     },
     
-    prepareMatchCanceled: function(data) {
+    matchRejected: function(character_id) {
+        var prepare_id = "#frame_confirm_combat";
+		var prepare_ctrl = this.getFrameController(prepare_id);
+		prepare_ctrl.closeBox();
+
+		if ("#" + character_id == data_handler.character_dbref) {
+		    this.displayMsg(_("You have rejected the combat."));
+		}
+		else {
+		    this.displayMsg(_("Your opponent has rejected the combat."));
+		}
+    },
+
+    closePrepareMatchBox: function() {
+		$("#popup_confirm_combat").hide();
+		$("#frame_confirm_combat").hide();
     },
 
     finishCombat: function(result) {
