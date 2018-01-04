@@ -45,6 +45,15 @@
     </head>
     <body>
         <!-- Show popup windows in this div. -->
+		<div id="popup_confirm_combat" class="container">
+            <div role="dialog" class="modal in popup_modal">
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                    	<iframe id="frame_confirm_combat" class="modal-content popup_frame" src="./views/confirm_combat.html"></iframe>
+        			</div>
+        		</div>
+        	</div>
+        </div>
         <div id="popup_container" class="container">
             <div id="popup_modal" role="dialog" class="modal in">
                 <div class="modal-dialog modal-sm vertical-center">
@@ -122,6 +131,7 @@
                         <span class="prompt_element"><span id="view_level">LEVEL: </span><span id="prompt_level"></span></span>
                         <span class="prompt_element"><span id="view_exp">EXP: </span><span id="prompt_exp"></span></span>
                         <span class="prompt_element"><span id="view_hp">HP: </span><span id="prompt_hp"></span></span>
+                        <span class="prompt_element"><span id="prompt_queue"></span></span>
                     </div>
                 </div>
                 <div class="panel panel-default">
@@ -131,6 +141,7 @@
                 </div>
                 <div class="panel panel-default">
                     <div id="tab_content" class="panel-body">
+                        <iframe id="frame_quick_login" class="content_frame" src="./views/quick_login.html"></iframe>
                         <iframe id="frame_login" class="content_frame" src="./views/login.html"></iframe>
                         <iframe id="frame_register" class="content_frame" src="./views/register.html"></iframe>
                         <iframe id="frame_select_char" class="content_frame" src="./views/select_char.html"></iframe>

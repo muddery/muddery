@@ -4,6 +4,7 @@ var controller = {
 	_puppet: false,
     _solo_mode: false,
 	_message_type: null,
+	_waiting_begin: 0,
 	
 	//////////////////////////////////////////
 	//
@@ -239,18 +240,18 @@ var controller = {
         this.doSetVisiblePopupSize();
     },
     
-    setSkillResult: function(result) {		
+    setSkillResult: function(result) {
 		var frame_id = "#frame_combat";
         var frame_ctrl = this.getFrameController(frame_id);
         if (frame_ctrl.isCombatFinished()) {
-			if ("message" in result && result["message"]) {
-				var msg = text2html.parseHtml(result["message"]);
-				this.displayMsg(msg);
-			}
+            if ("message" in result && result["message"]) {
+                var msg = text2html.parseHtml(result["message"]);
+                this.displayMsg(msg);
+            }
         }
         else {
-			frame_ctrl.setSkillResult(result);
-		}
+            frame_ctrl.setSkillResult(result);
+        }
     },
     
     setSkillCD: function(skill, cd, gcd) {
@@ -268,15 +269,53 @@ var controller = {
     },
 
     inCombatQueue: function(ave_time) {
+        $("#prompt_queue").text(_("QUEUE: ") + utils.time_to_string(0));
+        this.displayMsg(_("You are in queue now. Average waiting time is ") + utils.time_to_string(ave_time) + _("."));
+
+        this._waiting_begin = new Date().getTime();
+        this._interval_id = window.setInterval("refreshWaitingTime()", 1000);
     },
 
     leftCombatQueue: function(ave_time) {
+        if (this._interval_id != null) {
+            this._interval_id = window.clearInterval(this._interval_id);
+        }
+
+        $("#prompt_queue").empty();
+
+        var frame_id = "#frame_honours";
+        var frame_ctrl = this.getFrameController(frame_id);
+        if (frame_ctrl) {
+	        frame_ctrl.quitCombatQueue();
+	    }
     },
 
     prepareMatch: function(data) {
+        var prepare_id = "#frame_confirm_combat";
+		var prepare_ctrl = this.getFrameController(prepare_id);
+		prepare_ctrl.init(data);
+
+        this.showFrame(prepare_id);
+        var popup_content = $("#popup_confirm_combat .modal-content:visible:first");
+        this.setPopupSize(popup_content);
     },
     
-    matchRejected: function(data) {
+    matchRejected: function(character_id) {
+        var prepare_id = "#frame_confirm_combat";
+		var prepare_ctrl = this.getFrameController(prepare_id);
+		prepare_ctrl.closeBox();
+
+		if ("#" + character_id == data_handler.character_dbref) {
+		    this.displayMsg(_("You have rejected the combat."));
+		}
+		else {
+		    this.displayMsg(_("Your opponent has rejected the combat."));
+		}
+    },
+
+    closePrepareMatchBox: function() {
+		$("#popup_confirm_combat").hide();
+		$("#frame_confirm_combat").hide();
     },
 
     finishCombat: function(result) {
@@ -367,6 +406,7 @@ var controller = {
         $("#prompt_level").empty();
         $("#prompt_exp").empty();
         $("#prompt_hp").empty();
+        $("#prompt_queue").empty();
     },
 
     // set player's basic information
@@ -379,6 +419,7 @@ var controller = {
 
     // set player's status
     setStatus: function(status) {
+        data_handler.character_level = status["level"]["value"];
         $("#prompt_level").text(status["level"]["value"]);
 
         var exp_str = "";
@@ -568,28 +609,29 @@ var controller = {
     },
     
     onCharacterCreated: function(data) {
-		// close popup windows
+        // close popup windows
         controller.doClosePopupBox();
     },
 
     onCharacterDeleted: function(data) {
-		// close popup windows
+        // close popup windows
         controller.doClosePopupBox();
     },
-    
+
     onPuppet: function(data) {
         data_handler.character_dbref = data["dbref"];
         data_handler.character_name = data["name"];
 
         this.setInfo(data["name"], data["icon"]);
         this.showPuppet();
-        
+
         this._puppet = true;
     },
-    
+
     onUnpuppet: function(data) {
-	    this._puppet = false;
+        this._puppet = false;
         this.showSelectChar();
+        this.leftCombatQueue();
     },
     
     //////////////////////////////////////////
@@ -642,6 +684,10 @@ var controller = {
 
     doSetVisiblePopupSize: function() {
         var popup_content = $("#popup_container .modal-content:visible:first");
+        this.setPopupSize(popup_content);
+    },
+    
+    setPopupSize: function(popup_content) {
         var frame = popup_content.find("iframe");
         if (frame.length == 0) {
             return;
@@ -710,7 +756,7 @@ var controller = {
 		this.doChangeFrameSize(frame);
         frame.show();
     },
-    
+
     showHonours: function() {
         this.showContent("honours");
         commands.getRankings();
@@ -760,13 +806,13 @@ var controller = {
     },
     
     // shown when players logged in and going to select a character
-	showSelectChar: function() {
+    showSelectChar: function() {
         //this.clearMsgWindow();
         $("#prompt_content").hide();
 
         this.leftCombatQueue();
 
-    	// show select character tabs
+        // show select character tabs
         this.hideTabs();
 
         $("#tab_select_char").show();
@@ -776,7 +822,7 @@ var controller = {
 
         this.clearChannels();
     },
-	
+    
     // connect layout
     showConnect : function() {
         this.hideTabs();
@@ -862,6 +908,11 @@ var controller = {
             }
         }
 
+        // honour settings
+        var honour_id = "#frame_honours";
+        var honour_ctrl = this.getFrameController(honour_id);
+        honour_ctrl.setMinHonourLevel(settings["min_honour_level"]);
+
         // map settings
         var map_id = "#frame_map";
         var map_ctrl = this.getFrameController(map_id);
@@ -882,15 +933,16 @@ var controller = {
 		this.getFrameController("#frame_information").resetLanguage();
 		this.getFrameController("#frame_inventory").resetLanguage();
 		this.getFrameController("#frame_quick_login").resetLanguage();
-		this.getFrameController("#frame_login").resetLanguage();
+        this.getFrameController("#frame_login").resetLanguage();
 		this.getFrameController("#frame_map").resetLanguage();
 		this.getFrameController("#frame_message").resetLanguage();
 		this.getFrameController("#frame_object").resetLanguage();
 		this.getFrameController("#frame_quests").resetLanguage();
-		this.getFrameController("#frame_register").resetLanguage();
+        this.getFrameController("#frame_register").resetLanguage();
 		this.getFrameController("#frame_scene").resetLanguage();
-		this.getFrameController("#frame_select_char").resetLanguage();
+        this.getFrameController("#frame_select_char").resetLanguage();
 		this.getFrameController("#frame_shop").resetLanguage();
+		this.getFrameController("#frame_honours").resetLanguage();
 	},
 	
 	resetLanguage: function() {
@@ -898,23 +950,23 @@ var controller = {
 		$("#view_exp").text(_("EXP: "));
 		$("#view_hp").text(_("HP: "));
 		$("#view_connect").text(_("Connect"));
-		$("#view_login").text(_("Login"));
-		$("#view_register").text(_("Register"));
-		$("#view_select_char").text(_("Select Char"));
+        $("#view_login").text(_("Login"));
+        $("#view_register").text(_("Register"));
+        $("#view_select_char").text(_("Select Char"));
 		$("#view_scene").text(_("Scene"));
 		$("#view_char").text(_("Char"));
 		$("#view_status").text(_("Status"));
 		$("#view_inventory").text(_("Inventory"));
 		$("#view_skills").text(_("Skills"));
 		$("#view_quests").text(_("Quests"));
-		$("#view_social").text(_("Social"));
+        $("#view_social").text(_("Social"));
 		$("#view_honours").text(_("Honours"));
 		$("#view_map").text(_("Map"));
 		$("#view_system").text(_("Sys"));
 		$("#view_system_char").text(_("System"));
 		$("#view_logout").text(_("Logout"));
 		$("#view_logout_puppet").text(_("Logout"));
-		$("#view_unpuppet").text(_("Unpuppet"));
+        $("#view_unpuppet").text(_("Unpuppet"));
 		$("#msg_send").text(_("Send"));
 	},
 	
@@ -987,4 +1039,11 @@ var controller = {
 
     	$("#msg_type_menu").hide();
     },
+};
+
+
+function refreshWaitingTime() {
+    var current_time = new Date().getTime();
+    var total_time = Math.floor((current_time - controller._waiting_begin) / 1000);
+    $("#prompt_queue").text(_("QUEUE: ") + utils.time_to_string(total_time));
 };

@@ -198,15 +198,34 @@ class MatchQueueHandler(object):
         confirmed0 = opponents[0] in self.preparing and self.preparing[opponents[0]]["confirmed"]
         confirmed1 = opponents[1] in self.preparing and self.preparing[opponents[1]]["confirmed"]
 
-        if not confirmed0:
+        if not confirmed0 and not confirmed1:
+            if opponents[0] in self.waiting_time:
+                del self.waiting_time[opponents[0]]
+                self.queue.remove(opponents[0])
+
+            if opponents[0] in self.preparing:
+                del self.preparing[opponents[0]]
+
+            if opponents[1] in self.waiting_time:
+                del self.waiting_time[opponents[1]]
+                self.queue.remove(opponents[1])
+
+            if opponents[1] in self.preparing:
+                del self.preparing[opponents[1]]
+
+            opponent0 = search_object("#%s" % opponents[0])
+            opponent0[0].msg({"match_rejected": opponents[0],
+                              "left_combat_queue": ""})
+            opponent1 = search_object("#%s" % opponents[1])
+            opponent1[0].msg({"match_rejected": opponents[1],
+                              "left_combat_queue": ""})
+        elif not confirmed0:
             # opponents 0 not confirmed
             self.remove_by_id(opponents[0])
-
-        if not confirmed1:
+        elif not confirmed1:
             # opponents 1 not confirmed
             self.remove_by_id(opponents[1])
-
-        if confirmed0 and confirmed1:
+        elif confirmed0 and confirmed1:
             # all confirmed
             opponent0 = search_object("#%s" % opponents[0])
             opponent1 = search_object("#%s" % opponents[1])

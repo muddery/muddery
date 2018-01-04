@@ -147,4 +147,7 @@ var local_string_zh_cn = {
     "QUEUE: ": "排队: ",
     "You have rejected the combat.": "你拒绝了战斗。",
     "Your opponent has rejected the combat.": "你的对手拒绝了战斗。",
+    "Found an opponent.": "找到了一个对手。",
+    "Confirm": "确认",
+    "You need to reach level ": "你需要达到等级",
 };

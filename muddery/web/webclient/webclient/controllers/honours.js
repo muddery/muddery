@@ -4,11 +4,17 @@ var parent_controller = parent.controller;
 var text2html = parent.text2html;
 var settings = parent.settings;
 var commands = parent.commands;
+var data_handler = parent.data_handler;
 
 var controller = {
+    _min_honour_level: 1,
+
     // on document ready
     onReady: function() {
         this.resetLanguage();
+
+        $("#button_queue").bind("click", this.onQueueUpCombat);
+        $("#button_quit").bind("click", this.onQuitCombatQueue);
     },
 
 	// reset view's language
@@ -17,6 +23,12 @@ var controller = {
 		$("#view_ranking").text(_("RANKING"));
 		$("#view_name").text(_("NAME"));
 		$("#view_honour").text(_("HONOUR"));
+		$("#button_queue").text(_("QUEUE UP"));
+		$("#button_quit").text(_("QUIT QUEUE"));
+	},
+
+	setMinHonourLevel: function(level) {
+	    this._min_honour_level = level;
 	},
 	
     // Set top characters
@@ -41,6 +53,31 @@ var controller = {
             
 			item.appendTo(container);
         }
+    },
+    
+    onQueueUpCombat: function() {
+        if (data_handler.character_level < controller._min_honour_level) {
+            parent_controller.showAlert(_("You need to reach level ") + controller._min_honour_level + _("."));
+            return;
+        }
+
+        controller.queueUpCombat();
+        commands.queueUpCombat();
+    },
+
+    queueUpCombat: function() {
+        $("#button_queue").hide();
+	    $("#button_quit").show();
+    },
+
+    onQuitCombatQueue: function() {
+	    controller.quitCombatQueue();
+        commands.quitCombatQueue();
+    },
+
+    quitCombatQueue: function() {
+	    $("#button_queue").show();
+	    $("#button_quit").hide();
     },
     
     clearItems: function() {

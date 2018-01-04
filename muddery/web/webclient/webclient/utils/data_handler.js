@@ -5,6 +5,7 @@ Client Data Handler
 var data_handler = {
     character_dbref: "",
     character_name: "",
+    character_level: 0,
     current_target: "",
     name_list: {},
     dialogues_list: [],
