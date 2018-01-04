@@ -153,14 +153,12 @@ class MatchQueueHandler(object):
 
             self.ave_samples.append(time_now - self.waiting_time[opponents[0]])
             self.ave_samples.append(time_now - self.waiting_time[opponents[1]])
-            print("self.ave_samples: %s" % self.ave_samples)
 
             while len(self.ave_samples) > self.ave_samples_number:
                 self.ave_samples.popleft()
 
             self.ave_waiting = float(sum(self.ave_samples)) / len(self.ave_samples)
-            print("self.ave_waiting: %s" % self.ave_waiting)
-            
+
     def confirm(self, character):
         """
         Confirm an honour combat.
@@ -179,24 +177,46 @@ class MatchQueueHandler(object):
         if character_id not in self.preparing:
             return
 
+        opponent_id = self.preparing[character_id]["opponent"]
+
+        character = search_object("#%s" % character_id)
+        if character:
+            character[0].msg({"match_rejected": character_id})
+            del self.preparing[character_id]
+
+        opponent = search_object("#%s" % opponent_id)
+        if opponent:
+            opponent[0].msg({"match_rejected": character_id})
+            del self.preparing[opponent_id]
+
         self.remove_by_id(character_id)
 
     def fight(self, opponents):
         """
         Create a combat.
         """
-        if opponents[0] in self.preparing and self.preparing[opponents[0]]["confirmed"]:
-            if opponents[1] in self.preparing and self.preparing[opponents[1]]["confirmed"]:
-                # all confirmed
-                opponent0 = search_object("#%s" % opponents[0])
-                opponent1 = search_object("#%s" % opponents[1])
-                # create a new combat handler
-                chandler = create_script(settings.HONOUR_COMBAT_HANDLER)
-                # set combat team and desc
-                chandler.set_combat({1:[opponent0], 2:[opponent1]}, _("Fight of Honour"), settings.AUTO_COMBAT_TIMEOUT)
+        confirmed0 = opponents[0] in self.preparing and self.preparing[opponents[0]]["confirmed"]
+        confirmed1 = opponents[1] in self.preparing and self.preparing[opponents[1]]["confirmed"]
 
-        self.remove_by_id(opponents[0])
-        self.remove_by_id(opponents[1])
+        if not confirmed0:
+            # opponents 0 not confirmed
+            self.remove_by_id(opponents[0])
+
+        if not confirmed1:
+            # opponents 1 not confirmed
+            self.remove_by_id(opponents[1])
+
+        if confirmed0 and confirmed1:
+            # all confirmed
+            opponent0 = search_object("#%s" % opponents[0])
+            opponent1 = search_object("#%s" % opponents[1])
+            # create a new combat handler
+            chandler = create_script(settings.HONOUR_COMBAT_HANDLER)
+            # set combat team and desc
+            chandler.set_combat({1:[opponent0[0]], 2:[opponent1[0]]}, _("Fight of Honour"), settings.AUTO_COMBAT_TIMEOUT)
+
+            self.remove_by_id(opponents[0])
+            self.remove_by_id(opponents[1])
 
 # main handler
 MATCH_QUEUE_HANDLER = MatchQueueHandler()

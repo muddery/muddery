@@ -9,6 +9,9 @@ var controller = {
     // on document ready
     onReady: function() {
         this.resetLanguage();
+
+        $("#button_queue").bind("click", this.onQueueUpCombat);
+        $("#button_quit").bind("click", this.onQuitCombatQueue);
     },
 
 	// reset view's language
@@ -45,18 +48,24 @@ var controller = {
         }
     },
     
+    onQueueUpCombat: function() {
+        controller.queueUpCombat();
+        commands.queueUpCombat();
+    },
+
     queueUpCombat: function() {
         $("#button_queue").hide();
 	    $("#button_quit").show();
+    },
 
-        commands.queueUpCombat();
+    onQuitCombatQueue: function() {
+	    controller.quitCombatQueue();
+        commands.quitCombatQueue();
     },
 
     quitCombatQueue: function() {
 	    $("#button_queue").show();
 	    $("#button_quit").hide();
-
-        commands.quitCombatQueue();
     },
     
     clearItems: function() {

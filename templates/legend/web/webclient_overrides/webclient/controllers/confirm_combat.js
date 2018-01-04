@@ -7,23 +7,22 @@ var commands = parent.commands;
 var controller = {
     _prepare_time: 0,
     _interval_id: null,
+    _confirmed: false,
 
     // on document ready
     onReady: function() {
         this.resetLanguage();
+
+        $("#button_close").bind("click", this.onRejectCombat);
+        $("#button_confirm").bind("click", this.onConfirmCombat);
     },
 
 	// reset view's language
 	resetLanguage: function() {
 	},
-	
-    // close popup box
-    doClose: function() {
-        commands.rejectCombat();
-        this.closeBox();
-    },
 
-	setPrepareTime: function(time) {
+	init: function(time) {
+	    this._confirmed = false;
 	    this._prepare_time = new Date().getTime() + time * 1000;
         $("#time").text(parseInt(time - 1));
 
@@ -38,12 +37,28 @@ var controller = {
         parent_controller.closePrepareMatchBox();
 	},
 	
-	confirmCombat: function() {
+	onConfirmCombat: function() {
+	    if (controller._confirmed) {
+	        return;
+	    }
+	    controller._confirmed = true;
+
 	    commands.confirmCombat();
+
+	    if (controller._interval_id != null) {
+            controller._interval_id = window.clearInterval(this._interval_id);
+        }
+
+        $("#time").text(_("Confirmed."));
 	},
 	
-	rejectCombat: function() {
+	onRejectCombat: function() {
+	    if (controller._confirmed) {
+	        return;
+	    }
+
 	    commands.rejectCombat();
+	    controller.closeBox();
 	},
 };
 

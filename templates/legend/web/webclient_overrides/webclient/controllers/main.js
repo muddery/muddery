@@ -267,7 +267,7 @@ var controller = {
 
     inCombatQueue: function(ave_time) {
         $("#prompt_queue").text(_("QUEUE: ") + utils.time_to_string(0));
-        this.displayMsg(_("You are in queue now. Average waiting time is " + utils.time_to_string(ave_time) + "."));
+        this.displayMsg(_("You are in queue now. Average waiting time is ") + utils.time_to_string(ave_time) + _("."));
 
         this._waiting_begin = new Date().getTime();
         this._interval_id = window.setInterval("refreshWaitingTime()", 1000);
@@ -279,13 +279,18 @@ var controller = {
         }
 
         $("#prompt_queue").empty();
-        $("#prompt_ave_waiting").empty();
+
+        var frame_id = "#frame_honours";
+        var frame_ctrl = this.getFrameController(frame_id);
+        if (frame_ctrl) {
+	        frame_ctrl.quitCombatQueue();
+	    }
     },
 
     prepareMatch: function(data) {
         var prepare_id = "#frame_confirm_combat";
 		var prepare_ctrl = this.getFrameController(prepare_id);
-		prepare_ctrl.setPrepareTime(data);
+		prepare_ctrl.init(data);
 
         this.showFrame(prepare_id);
         var popup_content = $("#popup_confirm_combat .modal-content:visible:first");
