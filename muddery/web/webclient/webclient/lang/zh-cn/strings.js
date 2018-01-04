@@ -141,4 +141,10 @@ var local_string_zh_cn = {
     "HONOUR": "荣誉",
     "QUEUE UP": "排队",
     "QUIT QUEUE": "退出队列",
+    "Confirmed.": "已确认。",
+    "You are in queue now. Average waiting time is ": "你已在队列中。平均等待时间",
+    ".": "。",
+    "QUEUE: ": "排队: ",
+    "You have rejected the combat.": "你拒绝了战斗。",
+    "Your opponent has rejected the combat.": "你的对手拒绝了战斗。",
 };
