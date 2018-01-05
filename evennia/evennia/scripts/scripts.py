@@ -18,9 +18,6 @@ from future.utils import with_metaclass
 __all__ = ["DefaultScript", "DoNothing", "Store"]
 
 
-_GA = object.__getattribute__
-_SESSIONS = None
-
 class ExtendedLoopingCall(LoopingCall):
     """
     LoopingCall that can start at a delay different
@@ -100,7 +97,7 @@ class ExtendedLoopingCall(LoopingCall):
         if self.start_delay:
             self.start_delay = None
             self.starttime = self.clock.seconds()
-        super(ExtendedLoopingCall, self).__call__()
+        LoopingCall.__call__(self)
 
     def force_repeat(self):
         """
@@ -117,7 +114,6 @@ class ExtendedLoopingCall(LoopingCall):
         self.call = None
         self.starttime = self.clock.seconds()
         self()
-
 
     def next_call_time(self):
         """
@@ -205,11 +201,12 @@ class DefaultScript(ScriptBase):
         """
         cname = self.__class__.__name__
         estring = _("Script %(key)s(#%(dbid)s) of type '%(cname)s': at_repeat() error '%(err)s'.") % \
-                          {"key": self.key, "dbid": self.dbid, "cname": cname,
-                           "err": e.getErrorMessage()}
+            {"key": self.key, "dbid": self.dbid, "cname": cname,
+             "err": e.getErrorMessage()}
         try:
             self.db_obj.msg(estring)
         except Exception:
+            # we must not crash inside the errback, even if db_obj is None.
             pass
         logger.log_err(estring)
 
@@ -240,6 +237,7 @@ class DefaultScript(ScriptBase):
             return maybeDeferred(self._step_callback).addErrback(self._step_errback)
         except Exception:
             logger.log_trace()
+        return None
 
     # Public methods
 
@@ -278,6 +276,7 @@ class DefaultScript(ScriptBase):
         task = self.ndb._task
         if task:
             return max(0, self.db_repeats - task.callcount)
+        return None
 
     def start(self, force_restart=False):
         """
@@ -473,11 +472,16 @@ class DefaultScript(ScriptBase):
         if task:
             task.force_repeat()
 
-    def at_first_save(self):
+    def at_first_save(self, **kwargs):
         """
         This is called after very first time this object is saved.
         Generally, you don't need to overload this, but only the hooks
         called by this method.
+
+        Args:
+            **kwargs (dict): Arbitrary, optional arguments for users
+                overriding the call (unused by default).
+
         """
         self.at_script_creation()
 
@@ -516,10 +520,10 @@ class DefaultScript(ScriptBase):
         # auto-start script (default)
         self.start()
 
-
     def at_script_creation(self):
         """
         Only called once, by the create function.
+
         """
         pass
 
@@ -528,28 +532,44 @@ class DefaultScript(ScriptBase):
         Is called to check if the script is valid to run at this time.
         Should return a boolean. The method is assumed to collect all
         needed information from its related self.obj.
+
         """
         return not self._is_deleted
 
-    def at_start(self):
+    def at_start(self, **kwargs):
         """
         Called whenever the script is started, which for persistent
         scripts is at least once every server start. It will also be
         called when starting again after a pause (such as after a
         server reload)
+
+        Args:
+            **kwargs (dict): Arbitrary, optional arguments for users
+                overriding the call (unused by default).
+
         """
         pass
 
-    def at_repeat(self):
+    def at_repeat(self, **kwargs):
         """
         Called repeatedly if this Script is set to repeat regularly.
+
+        Args:
+            **kwargs (dict): Arbitrary, optional arguments for users
+                overriding the call (unused by default).
+
         """
         pass
 
-    def at_stop(self):
+    def at_stop(self, **kwargs):
         """
         Called whenever when it's time for this script to stop (either
         because is_valid returned False or it runs out of iterations)
+
+        Args
+            **kwargs (dict): Arbitrary, optional arguments for users
+                overriding the call (unused by default).
+
         """
         pass
 
@@ -576,6 +596,7 @@ class DoNothing(DefaultScript):
     """
     A script that does nothing. Used as default fallback.
     """
+
     def at_script_creation(self):
         """
         Setup the script
@@ -588,6 +609,7 @@ class Store(DefaultScript):
     """
     Simple storage script
     """
+
     def at_script_creation(self):
         """
         Setup the script

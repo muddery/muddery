@@ -28,17 +28,26 @@ evennia._init()
 from evennia.utils.utils import get_evennia_version, mod_import, make_iter
 from evennia.server.portal.portalsessionhandler import PORTAL_SESSIONS
 from evennia.server.webserver import EvenniaReverseProxyResource
+from django.db import connection
+
+
+# we don't need a connection to the database so close it right away
+try:
+    connection.close()
+except Exception:
+    pass
 
 PORTAL_SERVICES_PLUGIN_MODULES = [mod_import(module) for module in make_iter(settings.PORTAL_SERVICES_PLUGIN_MODULES)]
 LOCKDOWN_MODE = settings.LOCKDOWN_MODE
 
+PORTAL_PIDFILE = ""
 if os.name == 'nt':
     # For Windows we need to handle pid files manually.
     PORTAL_PIDFILE = os.path.join(settings.GAME_DIR, "server", 'portal.pid')
 
-#------------------------------------------------------------
+# -------------------------------------------------------------
 # Evennia Portal settings
-#------------------------------------------------------------
+# -------------------------------------------------------------
 
 VERSION = get_evennia_version()
 
@@ -72,33 +81,9 @@ AMP_INTERFACE = settings.AMP_INTERFACE
 AMP_ENABLED = AMP_HOST and AMP_PORT and AMP_INTERFACE
 
 
-# Maintenance function - this is called repeatedly by the portal.
-
-_IDLE_TIMEOUT = settings.IDLE_TIMEOUT
-def _portal_maintenance():
-    """
-    The maintenance function handles repeated checks and updates that
-    the server needs to do. It is called every minute.
-
-    """
-    # check for idle sessions
-    now = time.time()
-
-    reason = "Idle timeout exceeded, disconnecting."
-    for session in [sess for sess in PORTAL_SESSIONS.values()
-                    if (now - sess.cmd_last) > _IDLE_TIMEOUT]:
-        session.disconnect(reason=reason)
-        PORTAL_SESSIONS.disconnect(session)
-
-if _IDLE_TIMEOUT > 0:
-    # only start the maintenance task if we care about idling.
-    _maintenance_task = LoopingCall(_portal_maintenance)
-    _maintenance_task.start(60) # called every minute
-
-
-#------------------------------------------------------------
+# -------------------------------------------------------------
 # Portal Service object
-#------------------------------------------------------------
+# -------------------------------------------------------------
 class Portal(object):
 
     """
@@ -179,11 +164,12 @@ class Portal(object):
             self.shutdown_complete = True
             reactor.callLater(0, reactor.stop)
 
-#------------------------------------------------------------
+# -------------------------------------------------------------
 #
 # Start the Portal proxy server and add all active services
 #
-#------------------------------------------------------------
+# -------------------------------------------------------------
+
 
 # twistd requires us to define the variable 'application' so it knows
 # what to execute from.
@@ -291,6 +277,7 @@ if SSH_ENABLED:
 
 
 if WEBSERVER_ENABLED:
+    from evennia.server.webserver import Website
 
     # Start a reverse proxy to relay data to the Server-side webserver
 
@@ -307,9 +294,9 @@ if WEBSERVER_ENABLED:
                 # create ajax client processes at /webclientdata
                 from evennia.server.portal import webclient_ajax
 
-                webclient = webclient_ajax.WebClient()
-                webclient.sessionhandler = PORTAL_SESSIONS
-                web_root.putChild("webclientdata", webclient)
+                ajax_webclient = webclient_ajax.AjaxWebClient()
+                ajax_webclient.sessionhandler = PORTAL_SESSIONS
+                web_root.putChild("webclientdata", ajax_webclient)
                 webclientstr = "\n   + webclient (ajax only)"
 
                 if WEBSOCKET_CLIENT_ENABLED and not websocket_started:
@@ -334,7 +321,7 @@ if WEBSERVER_ENABLED:
                     websocket_started = True
                     webclientstr = "\n   + webclient%s" % pstring
 
-            web_root = server.Site(web_root, logPath=settings.HTTP_LOG_FILE)
+            web_root = Website(web_root, logPath=settings.HTTP_LOG_FILE)
             proxy_service = internet.TCPServer(proxyport,
                                                web_root,
                                                interface=interface)
@@ -350,7 +337,6 @@ for plugin_module in PORTAL_SERVICES_PLUGIN_MODULES:
 print('-' * 50)  # end of terminal output
 
 if os.name == 'nt':
-    factory.noisy = False
     # Windows only: Set PID file manually
     with open(PORTAL_PIDFILE, 'w') as f:
         f.write(str(os.getpid()))

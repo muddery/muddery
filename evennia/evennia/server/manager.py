@@ -16,6 +16,7 @@ class ServerConfigManager(models.Manager):
     the server at run-time.
 
     """
+
     def conf(self, key=None, value=None, delete=False, default=None):
         """
         Add, retrieve and manipulate config values.
@@ -49,4 +50,4 @@ class ServerConfigManager(models.Manager):
             if not conf:
                 return default
             return conf[0].value
-
+        return None

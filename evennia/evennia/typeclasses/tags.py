@@ -10,6 +10,7 @@ respective handlers.
 
 """
 from builtins import object
+from collections import defaultdict
 
 from django.conf import settings
 from django.db import models
@@ -23,6 +24,7 @@ _TYPECLASS_AGGRESSIVE_CACHE = settings.TYPECLASS_AGGRESSIVE_CACHE
 # Tags
 #
 #------------------------------------------------------------
+
 
 class Tag(models.Model):
     """
@@ -61,8 +63,8 @@ class Tag(models.Model):
     class Meta(object):
         "Define Django meta options"
         verbose_name = "Tag"
-        unique_together = (('db_key', 'db_category', 'db_tagtype'),)
-        index_together = (('db_key', 'db_category', 'db_tagtype'),)
+        unique_together = (('db_key', 'db_category', 'db_tagtype', 'db_model'),)
+        index_together = (('db_key', 'db_category', 'db_tagtype', 'db_model'),)
 
     def __unicode__(self):
         return u"<Tag: %s%s>" % (self.db_key, "(category:%s)" % self.db_category if self.db_category else "")
@@ -104,8 +106,9 @@ class TagHandler(object):
 
     def _fullcache(self):
         "Cache all tags of this object"
-        query = {"%s__id" % self._model : self._objid,
-                 "tag__db_tagtype" : self._tagtype}
+        query = {"%s__id" % self._model: self._objid,
+                 "tag__db_model": self._model,
+                 "tag__db_tagtype": self._tagtype}
         tags = [conn.tag for conn in getattr(self.obj, self._m2m_fieldname).through.objects.filter(**query)]
         self._cache = dict(("%s-%s" % (to_str(tag.db_key).lower(),
                                        tag.db_category.lower() if tag.db_category else None),
@@ -147,10 +150,11 @@ class TagHandler(object):
             if tag:
                 return [tag]  # return cached entity
             else:
-                query = {"%s__id" % self._model : self._objid,
-                         "tag__db_tagtype" : self._tagtype,
-                         "tag__db_key__iexact" : key.lower(),
-                         "tag__db_category__iexact" : category.lower() if category else None}
+                query = {"%s__id" % self._model: self._objid,
+                         "tag__db_model": self._model,
+                         "tag__db_tagtype": self._tagtype,
+                         "tag__db_key__iexact": key.lower(),
+                         "tag__db_category__iexact": category.lower() if category else None}
                 conn = getattr(self.obj, self._m2m_fieldname).through.objects.filter(**query)
                 if conn:
                     tag = conn[0].tag
@@ -165,11 +169,12 @@ class TagHandler(object):
                 return [tag for key, tag in self._cache.items() if key.endswith(catkey)]
             else:
                 # we have to query to make this category up-date in the cache
-                query = {"%s__id" % self._model : self._objid,
-                         "tag__db_tagtype" : self._tagtype,
-                         "tag__db_category__iexact" : category.lower() if category else None}
+                query = {"%s__id" % self._model: self._objid,
+                         "tag__db_model": self._model,
+                         "tag__db_tagtype": self._tagtype,
+                         "tag__db_category__iexact": category.lower() if category else None}
                 tags = [conn.tag for conn in getattr(self.obj,
-                            self._m2m_fieldname).through.objects.filter(**query)]
+                                                     self._m2m_fieldname).through.objects.filter(**query)]
                 for tag in tags:
                     cachekey = "%s-%s" % (tag.db_key, category)
                     self._cache[cachekey] = tag
@@ -188,8 +193,9 @@ class TagHandler(object):
             tag_obj (tag): The newly saved tag
 
         """
-        if not key: # don't allow an empty key in cache
+        if not key:  # don't allow an empty key in cache
             return
+        key, category = key.strip().lower(), category.strip().lower() if category else category
         cachekey = "%s-%s" % (key, category)
         catkey = "-%s" % category
         self._cache[cachekey] = tag_obj
@@ -206,6 +212,7 @@ class TagHandler(object):
             category (str or None): A cleaned category name
 
         """
+        key, category = key.strip().lower(), category.strip().lower() if category else category
         catkey = "-%s" % category
         if key:
             cachekey = "%s-%s" % (key, category)
@@ -234,7 +241,7 @@ class TagHandler(object):
             category (str, optional): Category of Tag. `None` is the default category.
             data (str, optional): Info text about the tag(s) added.
                 This can not be used to store object-unique info but only
-                eventual info about the text itself.
+                eventual info about the tag itself.
 
         Notes:
             If the tag + category combination matches an already
@@ -244,21 +251,23 @@ class TagHandler(object):
         """
         if not tag:
             return
+        if not self._cache_complete:
+            self._fullcache()
         for tagstr in make_iter(tag):
             if not tagstr:
                 continue
             tagstr = tagstr.strip().lower()
-            category = category.strip().lower() if category is not None else None
+            category = category.strip().lower() if category else category
             data = str(data) if data is not None else None
             # this will only create tag if no matches existed beforehand (it
             # will overload data on an existing tag since that is not
             # considered part of making the tag unique)
             tagobj = self.obj.__class__.objects.create_tag(key=tagstr, category=category, data=data,
-                                            tagtype=self._tagtype)
+                                                           tagtype=self._tagtype)
             getattr(self.obj, self._m2m_fieldname).add(tagobj)
             self._setcache(tagstr, category, tagobj)
 
-    def get(self, key=None, default=None, category=None, return_tagobj=False):
+    def get(self, key=None, default=None, category=None, return_tagobj=False, return_list=False):
         """
         Get the tag for the given key or list of tags.
 
@@ -270,17 +279,23 @@ class TagHandler(object):
                 category.
             return_tagobj (bool, optional): Return the Tag object itself
                 instead of a string representation of the Tag.
+            return_list (bool, optional): Always return a list, regardless
+                of number of matches.
 
         Returns:
-            tags (str, TagObject or list): The matches, either string
+            tags (list): The matches, either string
                 representations of the tags or the Tag objects themselves
-                depending on `return_tagobj`.
+                depending on `return_tagobj`. If 'default' is set, this
+                will be a list with the default value as its only element.
 
         """
         ret = []
         for keystr in make_iter(key):
+            # note - the _getcache call removes case sensitivity for us
             ret.extend([tag if return_tagobj else to_str(tag.db_key)
-                            for tag in self._getcache(key, category)])
+                        for tag in self._getcache(keystr, category)])
+        if return_list:
+            return ret if ret else [default] if default is not None else []
         return ret[0] if len(ret) == 1 else (ret if ret else default)
 
     def remove(self, key, category=None):
@@ -298,11 +313,13 @@ class TagHandler(object):
             if not (key or key.strip()):  # we don't allow empty tags
                 continue
             tagstr = key.strip().lower()
-            category = category.strip().lower() if category is not None else None
+            category = category.strip().lower() if category else category
 
             # This does not delete the tag object itself. Maybe it should do
-            # that when no objects reference the tag anymore (how to check)?
-            tagobj = self.obj.db_tags.filter(db_key=tagstr, db_category=category)
+            # that when no objects reference the tag anymore (but how to check)?
+            # For now, tags are never deleted, only their connection to objects.
+            tagobj = getattr(self.obj, self._m2m_fieldname).filter(db_key=tagstr, db_category=category,
+                                                                   db_model=self._model, db_tagtype=self._tagtype)
             if tagobj:
                 getattr(self.obj, self._m2m_fieldname).remove(tagobj[0])
             self._delcache(key, category)
@@ -317,10 +334,12 @@ class TagHandler(object):
                 category.
 
         """
-        if not category:
-            getattr(self.obj, self._m2m_fieldname).clear()
-        else:
-            getattr(self.obj, self._m2m_fieldname).filter(db_category=category).delete()
+        if not self._cache_complete:
+            self._fullcache()
+        query = {"%s__id" % self._model: self._objid, "tag__db_model": self._model, "tag__db_tagtype": self._tagtype}
+        if category:
+            query["tag__db_category"] = category.strip().lower()
+        getattr(self.obj, self._m2m_fieldname).through.objects.filter(**query).delete()
         self._cache = {}
         self._catcache = {}
         self._cache_complete = False
@@ -347,7 +366,36 @@ class TagHandler(object):
             return [(to_str(tag.db_key), to_str(tag.db_category)) for tag in tags]
         else:
             return [to_str(tag.db_key) for tag in tags]
-        return []
+
+    def batch_add(self, *args):
+        """
+        Batch-add tags from a list of tuples.
+
+        Args:
+            tuples (tuple or str): Any number of `tagstr` keys, `(keystr, category)` or
+                `(keystr, category, data)` tuples.
+
+        Notes:
+            This will generate a mimimal number of self.add calls,
+            based on the number of categories involved (including
+            `None`) (data is not unique and may be overwritten by the content
+            of a latter tuple with the same category).
+
+        """
+        keys = defaultdict(list)
+        data = {}
+        for tup in args:
+            tup = make_iter(tup)
+            nlen = len(tup)
+            if nlen == 1:  # just a key
+                keys[None].append(tup[0])
+            elif nlen == 2:
+                keys[tup[1]].append(tup[0])
+            else:
+                keys[tup[1]].append(tup[0])
+                data[tup[1]] = tup[2]  # overwrite previous
+        for category, key in keys.iteritems():
+            self.add(tag=key, category=category, data=data.get(category, None))
 
     def __str__(self):
         return ",".join(self.all())
@@ -370,4 +418,3 @@ class PermissionHandler(TagHandler):
 
     """
     _tagtype = "permission"
-

@@ -42,26 +42,37 @@ class WebSocketClient(Protocol, Session):
         client_address = client_address[0] if client_address else None
         self.init_session("websocket", client_address, self.factory.sessionhandler)
 
-    def validationMade(self):
+    def get_client_session(self):
         """
-        This is called from the (modified) txws websocket library when
-        the ws handshake and validation has completed fully.
+        Get the Client browser session (used for auto-login based on browser session)
+
+        Returns:
+            csession (ClientSession): This is a django-specific internal representation
+                of the browser session.
 
         """
-
         try:
             self.csessid = self.transport.location.split("?", 1)[1]
         except IndexError:
             # this may happen for custom webclients not caring for the
             # browser session.
             self.csessid = None
+            return None
         if self.csessid:
-            csession = _CLIENT_SESSIONS(session_key=self.csessid)
-            uid = csession and csession.get("logged_in", False)
-            if uid:
-                # the client session is already logged in.
-                self.uid = uid
-                self.logged_in = True
+            return _CLIENT_SESSIONS(session_key=self.csessid)
+
+    def validationMade(self):
+        """
+        This is called from the (modified) txws websocket library when
+        the ws handshake and validation has completed fully.
+
+        """
+        csession = self.get_client_session()
+        uid = csession and csession.get("webclient_authenticated_uid", None)
+        if uid:
+            # the client session is already logged in.
+            self.uid = uid
+            self.logged_in = True
 
         # watch for dead links
         self.transport.setTcpKeepAlive(1)
@@ -78,6 +89,13 @@ class WebSocketClient(Protocol, Session):
 
         """
         self.data_out(text=((reason or "",), {}))
+
+        csession = self.get_client_session()
+
+        if csession:
+            csession["webclient_authenticated_uid"] = None
+            csession.save()
+            self.logged_in = False
         self.connectionLost(reason)
 
     def connectionLost(self, reason):
@@ -90,6 +108,7 @@ class WebSocketClient(Protocol, Session):
             reason (str): Motivation for the lost connection.
 
         """
+        print("In connectionLost of webclient")
         self.sessionhandler.disconnect(self)
         self.transport.close()
 
@@ -104,7 +123,7 @@ class WebSocketClient(Protocol, Session):
         """
         cmdarray = json.loads(string)
         if cmdarray:
-            self.data_in(**{cmdarray[0]:[cmdarray[1], cmdarray[2]]})
+            self.data_in(**{cmdarray[0]: [cmdarray[1], cmdarray[2]]})
 
     def sendLine(self, line):
         """
@@ -115,6 +134,12 @@ class WebSocketClient(Protocol, Session):
 
         """
         return self.transport.write(line)
+
+    def at_login(self):
+        csession = self.get_client_session()
+        if csession:
+            csession["webclient_authenticated_uid"] = self.uid
+            csession.save()
 
     def data_in(self, **kwargs):
         """
@@ -164,7 +189,7 @@ class WebSocketClient(Protocol, Session):
         Kwargs:
             options (dict): Options-dict with the following keys understood:
                 - raw (bool): No parsing at all (leave ansi-to-html markers unparsed).
-                - nomarkup (bool): Clean out all ansi/html markers and tokens.
+                - nocolor (bool): Clean out all color.
                 - screenreader (bool): Use Screenreader mode.
                 - send_prompt (bool): Send a prompt with parsed html
 
@@ -182,7 +207,7 @@ class WebSocketClient(Protocol, Session):
 
         options = kwargs.pop("options", {})
         raw = options.get("raw", flags.get("RAW", False))
-        nomarkup = options.get("nomarkup", flags.get("NOMARKUP", False))
+        nocolor = options.get("nocolor", flags.get("NOCOLOR", False))
         screenreader = options.get("screenreader", flags.get("SCREENREADER", False))
         prompt = options.get("send_prompt", False)
 
@@ -194,17 +219,16 @@ class WebSocketClient(Protocol, Session):
         if raw:
             args[0] = text
         else:
-            args[0] = parse_html(text, strip_ansi=nomarkup)
+            args[0] = parse_html(text, strip_ansi=nocolor)
 
         # send to client on required form [cmdname, args, kwargs]
         self.sendLine(json.dumps([cmd, args, kwargs]))
-
 
     def send_prompt(self, *args, **kwargs):
         kwargs["options"].update({"send_prompt": True})
         self.send_text(*args, **kwargs)
 
-    def send_default(session, cmdname, *args, **kwargs):
+    def send_default(self, cmdname, *args, **kwargs):
         """
         Data Evennia -> User.
 
@@ -219,4 +243,4 @@ class WebSocketClient(Protocol, Session):
 
         """
         if not cmdname == "options":
-            session.sendLine(json.dumps([cmdname, args, kwargs]))
+            self.sendLine(json.dumps([cmdname, args, kwargs]))

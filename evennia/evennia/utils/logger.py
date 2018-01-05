@@ -19,12 +19,15 @@ import os
 import time
 from datetime import datetime
 from traceback import format_exc
-from twisted.python import log
+from twisted.python import log, logfile
 from twisted.internet.threads import deferToThread
 
 
 _LOGDIR = None
+_LOG_ROTATE_SIZE = None
 _TIMEZONE = None
+_CHANNEL_LOG_NUM_TAIL_LINES = None
+
 
 def timeformat(when=None):
     """
@@ -56,6 +59,22 @@ def timeformat(when=None):
         tz_sign, tz_hour, tz_mins)
 
 
+def log_msg(msg):
+    """
+    Wrapper around log.msg call to catch any exceptions that might
+    occur in logging. If an exception is raised, we'll print to
+    stdout instead.
+
+    Args:
+        msg: The message that was passed to log.msg
+
+    """
+    try:
+        log.msg(msg)
+    except Exception:
+        print("Exception raised while writing message to log. Original message: %s" % msg)
+
+
 def log_trace(errmsg=None):
     """
     Log a traceback to the log. This should be called from within an
@@ -77,9 +96,11 @@ def log_trace(errmsg=None):
             except Exception as e:
                 errmsg = str(e)
             for line in errmsg.splitlines():
-                log.msg('[EE] %s' % line)
+                log_msg('[EE] %s' % line)
     except Exception:
-        log.msg('[EE] %s' % errmsg)
+        log_msg('[EE] %s' % errmsg)
+
+
 log_tracemsg = log_trace
 
 
@@ -88,7 +109,7 @@ def log_err(errmsg):
     Prints/logs an error message to the server log.
 
     Args:
-        errormsg (str): The message to be logged.
+        errmsg (str): The message to be logged.
 
     """
     try:
@@ -96,8 +117,10 @@ def log_err(errmsg):
     except Exception as e:
         errmsg = str(e)
     for line in errmsg.splitlines():
-        log.msg('[EE] %s' % line)
-    #log.err('ERROR: %s' % (errormsg,))
+        log_msg('[EE] %s' % line)
+
+
+    # log.err('ERROR: %s' % (errmsg,))
 log_errmsg = log_err
 
 
@@ -114,8 +137,10 @@ def log_warn(warnmsg):
     except Exception as e:
         warnmsg = str(e)
     for line in warnmsg.splitlines():
-        log.msg('[WW] %s' % line)
-    #log.msg('WARNING: %s' % (warnmsg,))
+        log_msg('[WW] %s' % line)
+
+
+    # log.msg('WARNING: %s' % (warnmsg,))
 log_warnmsg = log_warn
 
 
@@ -130,7 +155,9 @@ def log_info(infomsg):
     except Exception as e:
         infomsg = str(e)
     for line in infomsg.splitlines():
-        log.msg('[..] %s' % line)
+        log_msg('[..] %s' % line)
+
+
 log_infomsg = log_info
 
 
@@ -146,13 +173,69 @@ def log_dep(depmsg):
     except Exception as e:
         depmsg = str(e)
     for line in depmsg.splitlines():
-        log.msg('[DP] %s' % line)
+        log_msg('[DP] %s' % line)
+
+
 log_depmsg = log_dep
 
 
 # Arbitrary file logger
 
-_LOG_FILE_HANDLES = {} # holds open log handles
+class EvenniaLogFile(logfile.LogFile):
+    """
+    A rotating logfile based off Twisted's LogFile. It overrides
+    the LogFile's rotate method in order to append some of the last
+    lines of the previous log to the start of the new log, in order
+    to preserve a continuous chat history for channel log files.
+    """
+    # we delay import of settings to keep logger module as free
+    # from django as possible.
+    global _CHANNEL_LOG_NUM_TAIL_LINES
+    if _CHANNEL_LOG_NUM_TAIL_LINES is None:
+        from django.conf import settings
+        _CHANNEL_LOG_NUM_TAIL_LINES = settings.CHANNEL_LOG_NUM_TAIL_LINES
+    num_lines_to_append = _CHANNEL_LOG_NUM_TAIL_LINES
+
+    def rotate(self):
+        """
+        Rotates our log file and appends some number of lines from
+        the previous log to the start of the new one.
+        """
+        append_tail = self.num_lines_to_append > 0
+        if not append_tail:
+            logfile.LogFile.rotate(self)
+            return
+        lines = tail_log_file(self.path, 0, self.num_lines_to_append)
+        logfile.LogFile.rotate(self)
+        for line in lines:
+            self.write(line)
+
+    def seek(self, *args, **kwargs):
+        """
+        Convenience method for accessing our _file attribute's seek method,
+        which is used in tail_log_function.
+        Args:
+            *args: Same args as file.seek
+            **kwargs: Same kwargs as file.seek
+        """
+        return self._file.seek(*args, **kwargs)
+
+    def readlines(self, *args, **kwargs):
+        """
+        Convenience method for accessing our _file attribute's readlines method,
+        which is used in tail_log_function.
+        Args:
+            *args: same args as file.readlines
+            **kwargs: same kwargs as file.readlines
+
+        Returns:
+            lines (list): lines from our _file attribute.
+        """
+        return self._file.readlines(*args, **kwargs)
+
+
+_LOG_FILE_HANDLES = {}  # holds open log handles
+
 
 def _open_log_file(filename):
     """
@@ -160,10 +243,13 @@ def _open_log_file(filename):
     handle.  Will create a new file in the log dir if one didn't
     exist.
     """
-    global _LOG_FILE_HANDLES, _LOGDIR
+    # we delay import of settings to keep logger module as free
+    # from django as possible.
+    global _LOG_FILE_HANDLES, _LOGDIR, _LOG_ROTATE_SIZE
     if not _LOGDIR:
         from django.conf import settings
         _LOGDIR = settings.LOG_DIR
+        _LOG_ROTATE_SIZE = settings.CHANNEL_LOG_ROTATE_SIZE
 
     filename = os.path.join(_LOGDIR, filename)
     if filename in _LOG_FILE_HANDLES:
@@ -171,7 +257,8 @@ def _open_log_file(filename):
         return _LOG_FILE_HANDLES[filename]
     else:
         try:
-            filehandle = open(filename, "a+") # append mode + reading
+            filehandle = EvenniaLogFile.fromFullPath(filename, rotateLength=_LOG_ROTATE_SIZE)
+            # filehandle = open(filename, "a+")  # append mode + reading
             _LOG_FILE_HANDLES[filename] = filehandle
             return filehandle
         except IOError:
@@ -184,13 +271,14 @@ def log_file(msg, filename="game.log"):
     Arbitrary file logger using threads.
 
     Args:
+        msg (str): String to append to logfile.
         filename (str, optional): Defaults to 'game.log'. All logs
             will appear in the logs directory and log entries will start
             on new lines following datetime info.
 
     """
     def callback(filehandle, msg):
-        "Writing to file and flushing result"
+        """Writing to file and flushing result"""
         msg = "\n%s [-] %s" % (timeformat(), msg.strip())
         filehandle.write(msg)
         # since we don't close the handle, we need to flush
@@ -199,7 +287,7 @@ def log_file(msg, filename="game.log"):
         filehandle.flush()
 
     def errback(failure):
-        "Catching errors to normal log"
+        """Catching errors to normal log"""
         log_trace()
 
     # save to server/logs/ directory
@@ -230,7 +318,7 @@ def tail_log_file(filename, offset, nlines, callback=None):
 
     """
     def seek_file(filehandle, offset, nlines, callback):
-        "step backwards in chunks and stop only when we have enough lines"
+        """step backwards in chunks and stop only when we have enough lines"""
         lines_found = []
         buffer_size = 4098
         block_count = -1
@@ -246,14 +334,15 @@ def tail_log_file(filename, offset, nlines, callback=None):
             lines_found = filehandle.readlines()
             block_count -= 1
         # return the right number of lines
-        lines_found = lines_found[-nlines-offset:-offset if offset else None]
+        lines_found = lines_found[-nlines - offset:-offset if offset else None]
         if callback:
             callback(lines_found)
+            return None
         else:
             return lines_found
 
     def errback(failure):
-        "Catching errors to normal log"
+        """Catching errors to normal log"""
         log_trace()
 
     filehandle = _open_log_file(filename)
@@ -262,6 +351,5 @@ def tail_log_file(filename, offset, nlines, callback=None):
             return deferToThread(seek_file, filehandle, offset, nlines, callback).addErrback(errback)
         else:
             return seek_file(filehandle, offset, nlines, callback)
-
-
-
+    else:
+        return None

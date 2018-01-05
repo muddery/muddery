@@ -22,7 +22,7 @@ from os.path import join as osjoin
 from importlib import import_module
 from inspect import ismodule, trace, getmembers, getmodule
 from collections import defaultdict, OrderedDict
-from twisted.internet import threads, defer, reactor
+from twisted.internet import threads, reactor, task
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext as _
@@ -44,6 +44,7 @@ _DA = object.__delattr__
 
 _DEFAULT_WIDTH = settings.CLIENT_DEFAULT_WIDTH
 
+
 def is_iter(iterable):
     """
     Checks if an object behaves iterably.
@@ -61,6 +62,7 @@ def is_iter(iterable):
 
     """
     return hasattr(iterable, '__iter__')
+
 
 def make_iter(obj):
     """
@@ -95,6 +97,8 @@ def wrap(text, width=_DEFAULT_WIDTH, indent=0):
     text = to_unicode(text)
     indent = " " * indent
     return to_str(textwrap.fill(text, width, initial_indent=indent, subsequent_indent=indent))
+
+
 # alias - fill
 fill = wrap
 
@@ -201,7 +205,7 @@ def justify(text, width=_DEFAULT_WIDTH, align="f", indent=0):
         distribute odd spaces randomly to one of the gaps.
         """
         line_rest = width - (wlen + ngaps)
-        gap = " " # minimum gap between words
+        gap = " "  # minimum gap between words
         if line_rest > 0:
             if align == 'l':
                 line[-1] += " " * line_rest
@@ -211,7 +215,7 @@ def justify(text, width=_DEFAULT_WIDTH, align="f", indent=0):
                 pad = " " * (line_rest // 2)
                 line[0] = pad + line[0]
                 line[-1] = line[-1] + pad + " " * (line_rest % 2)
-            else: # align 'f'
+            else:  # align 'f'
                 gap += " " * (line_rest // max(1, ngaps))
                 rest_gap = line_rest % max(1, ngaps)
                 for i in range(rest_gap):
@@ -250,8 +254,7 @@ def justify(text, width=_DEFAULT_WIDTH, align="f", indent=0):
                 wlen += word[1]
                 ngaps += 1
 
-
-    if line: # catch any line left behind
+    if line:  # catch any line left behind
         lines.append(_process_line(line))
     indentstring = " " * indent
     return "\n".join([indentstring + line for line in lines])
@@ -344,6 +347,9 @@ def time_format(seconds, style=0):
             1. "1d"
             2. "1 day, 8 hours, 30 minutes"
             3. "1 day, 8 hours, 30 minutes, 10 seconds"
+            4. highest unit (like "3 years" or "8 months" or "1 second")
+    Returns:
+        timeformatted (str): A pretty time string.
     """
     if seconds < 0:
         seconds = 0
@@ -358,7 +364,8 @@ def time_format(seconds, style=0):
     minutes = seconds // 60
     seconds -= minutes * 60
 
-    if style is 0:
+    retval = ""
+    if style == 0:
         """
         Standard colon-style output.
         """
@@ -368,7 +375,7 @@ def time_format(seconds, style=0):
             retval = '%02i:%02i' % (hours, minutes,)
         return retval
 
-    elif style is 1:
+    elif style == 1:
         """
         Simple, abbreviated form that only shows the highest time amount.
         """
@@ -380,7 +387,7 @@ def time_format(seconds, style=0):
             return '%im' % (minutes,)
         else:
             return '%is' % (seconds,)
-    elif style is 2:
+    elif style == 2:
         """
         Full-detailed, long-winded format. We ignore seconds.
         """
@@ -403,7 +410,7 @@ def time_format(seconds, style=0):
             else:
                 minutes_str = '%i minutes ' % minutes
         retval = '%s%s%s' % (days_str, hours_str, minutes_str)
-    elif style is 3:
+    elif style == 3:
         """
         Full-detailed, long-winded format. Includes seconds.
         """
@@ -429,6 +436,38 @@ def time_format(seconds, style=0):
             else:
                 seconds_str = '%i seconds ' % seconds
         retval = '%s%s%s%s' % (days_str, hours_str, minutes_str, seconds_str)
+    elif style == 4:
+        """
+        Only return the highest unit.
+        """
+        if days >= 730:  # Several years
+            return "{} years".format(days // 365)
+        elif days >= 365:  # One year
+            return "a year"
+        elif days >= 62:  # Several months
+            return "{} months".format(days // 31)
+        elif days >= 31:  # One month
+            return "a month"
+        elif days >= 2:  # Several days
+            return "{} days".format(days)
+        elif days > 0:
+            return "a day"
+        elif hours >= 2:  # Several hours
+            return "{} hours".format(hours)
+        elif hours > 0:  # One hour
+            return "an hour"
+        elif minutes >= 2:  # Several minutes
+            return "{} minutes".format(minutes)
+        elif minutes > 0:  # One minute
+            return "a minute"
+        elif seconds >= 2:  # Several seconds
+            return "{} seconds".format(seconds)
+        elif seconds == 1:
+            return "a second"
+        else:
+            return "0 seconds"
+    else:
+        raise ValueError("Unknown style for time format: %s" % style)
 
     return retval.strip()
 
@@ -519,13 +558,13 @@ def pypath_to_realpath(python_path, file_ending='.py', pypath_prefixes=None):
     """
     path = python_path.strip().split('.')
     plong = osjoin(*path) + file_ending
-    pshort = osjoin(*path[1:]) + file_ending if len(path) > 1 else plong # in case we had evennia. or mygame.
+    pshort = osjoin(*path[1:]) + file_ending if len(path) > 1 else plong  # in case we had evennia. or mygame.
     prefixlong = [osjoin(*ppath.strip().split('.'))
-            for ppath in make_iter(pypath_prefixes)] \
-                if pypath_prefixes else []
+                  for ppath in make_iter(pypath_prefixes)] \
+        if pypath_prefixes else []
     prefixshort = [osjoin(*ppath.strip().split('.')[1:])
-            for ppath in make_iter(pypath_prefixes) if len(ppath.strip().split('.')) > 1] \
-                if pypath_prefixes else []
+                   for ppath in make_iter(pypath_prefixes) if len(ppath.strip().split('.')) > 1]\
+        if pypath_prefixes else []
     paths = [plong] + \
             [osjoin(_EVENNIA_DIR, prefix, plong) for prefix in prefixlong] + \
             [osjoin(_GAME_DIR, prefix, plong) for prefix in prefixlong] + \
@@ -541,12 +580,12 @@ def pypath_to_realpath(python_path, file_ending='.py', pypath_prefixes=None):
     return list(set(p for p in paths if os.path.isfile(p)))
 
 
-def dbref(dbref, reqhash=True):
+def dbref(inp, reqhash=True):
     """
     Converts/checks if input is a valid dbref.
 
     Args:
-        dbref (int or str): A database ref on the form N or #N.
+        inp (int, str): A database ref on the form N or #N.
         reqhash (bool, optional): Require the #N form to accept
             input as a valid dbref.
 
@@ -556,16 +595,16 @@ def dbref(dbref, reqhash=True):
 
     """
     if reqhash:
-        num = (int(dbref.lstrip('#')) if (isinstance(dbref, basestring) and
-                                           dbref.startswith("#") and
-                                           dbref.lstrip('#').isdigit())
-                                       else None)
+        num = (int(inp.lstrip('#')) if (isinstance(inp, basestring) and
+                                        inp.startswith("#") and
+                                        inp.lstrip('#').isdigit())
+               else None)
         return num if num > 0 else None
-    elif isinstance(dbref, basestring):
-        dbref = dbref.lstrip('#')
-        return int(dbref) if dbref.isdigit() and int(dbref) > 0 else None
+    elif isinstance(inp, basestring):
+        inp = inp.lstrip('#')
+        return int(inp) if inp.isdigit() and int(inp) > 0 else None
     else:
-        return dbref if isinstance(dbref, int) else None
+        return inp if isinstance(inp, int) else None
 
 
 def dbref_to_obj(inp, objclass, raise_errors=True):
@@ -605,6 +644,7 @@ def dbref_to_obj(inp, objclass, raise_errors=True):
             raise
         return inp
 
+
 # legacy alias
 dbid_to_obj = dbref_to_obj
 
@@ -612,6 +652,7 @@ dbid_to_obj = dbref_to_obj
 # some direct translations for the latinify
 _UNICODE_MAP = {"EM DASH": "-", "FIGURE DASH": "-", "EN DASH": "-", "HORIZONTAL BAR": "-",
                 "HORIZONTAL ELLIPSIS": "...", "RIGHT SINGLE QUOTATION MARK": "'"}
+
 
 def latinify(unicode_string, default='?', pure_ascii=False):
     """
@@ -640,7 +681,7 @@ def latinify(unicode_string, default='?', pure_ascii=False):
             # point name; e.g., since `name(u'á') == 'LATIN SMALL
             # LETTER A WITH ACUTE'` translate `á` to `a`.  However, in
             # some cases the unicode name is still "LATIN LETTER"
-            # although no direct equivalent in the Latin alphabeth
+            # although no direct equivalent in the Latin alphabet
             # exists (e.g., Þ, "LATIN CAPITAL LETTER THORN") -- we can
             # avoid these cases by checking that the letter name is
             # composed of one letter only.
@@ -703,6 +744,7 @@ def to_unicode(obj, encoding='utf-8', force_string=False):
                     obj = unicode(obj, alt_encoding)
                     return obj
                 except UnicodeDecodeError:
+                    # if we still have an error, give up
                     pass
         raise Exception("Error: '%s' contains invalid character(s) not in %s." % (obj, encoding))
     return obj
@@ -744,12 +786,13 @@ def to_str(obj, encoding='utf-8', force_string=False):
                     obj = obj.encode(alt_encoding)
                     return obj
                 except UnicodeEncodeError:
+                    # if we still have an error, give up
                     pass
 
         # if we get to this point we have not found any way to convert this string. Try to parse it manually,
         try:
             return latinify(obj, '?')
-        except Exception, err:
+        except Exception as err:
             raise Exception("%s, Error: Unicode could not encode unicode string '%s'(%s) to a bytestring. " % (err, obj, encoding))
     return obj
 
@@ -880,31 +923,51 @@ def uses_database(name="sqlite3"):
     return engine == "django.db.backends.%s" % name
 
 
-def delay(delay, callback, *args, **kwargs):
+_TASK_HANDLER = None
+
+
+def delay(timedelay, callback, *args, **kwargs):
     """
     Delay the return of a value.
 
     Args:
-      delay (int or float): The delay in seconds
+      timedelay (int or float): The delay in seconds
       callback (callable): Will be called with optional
-        arguments after `delay` seconds.
+        arguments after `timedelay` seconds.
       args (any, optional): Will be used as arguments to callback
     Kwargs:
-        any (any): Will be used to call the callback.
+       persistent (bool, optional): should make the delay persistent
+           over a reboot or reload
+       any (any): Will be used to call the callback.
 
     Returns:
         deferred (deferred): Will fire fire with callback after
-            `delay` seconds. Note that if `delay()` is used in the
+            `timedelay` seconds. Note that if `timedelay()` is used in the
             commandhandler callback chain, the callback chain can be
             defined directly in the command body and don't need to be
             specified here.
 
+    Note:
+        The task handler (`evennia.scripts.taskhandler.TASK_HANDLER`) will
+        be called for persistent or non-persistent tasks.
+        If persistent is set to True, the callback, its arguments
+        and other keyword arguments will be saved in the database,
+        assuming they can be.  The callback will be executed even after
+        a server restart/reload, taking into account the specified delay
+        (and server down time).
+
     """
-    return reactor.callLater(delay, callback, *args, **kwargs)
+    global _TASK_HANDLER
+    # Do some imports here to avoid circular import and speed things up
+    if _TASK_HANDLER is None:
+        from evennia.scripts.taskhandler import TASK_HANDLER as _TASK_HANDLER
+    return _TASK_HANDLER.add(timedelay, callback, *args, **kwargs)
 
 
 _TYPECLASSMODELS = None
 _OBJECTMODELS = None
+
+
 def clean_object_caches(obj):
     """
     Clean all object caches on the given object.
@@ -926,21 +989,25 @@ def clean_object_caches(obj):
     try:
         _SA(obj, "_contents_cache", None)
     except AttributeError:
+        # if the cache cannot be reached, move on anyway
         pass
 
     # on-object property cache
     [_DA(obj, cname) for cname in viewkeys(obj.__dict__)
-                     if cname.startswith("_cached_db_")]
+     if cname.startswith("_cached_db_")]
     try:
         hashid = _GA(obj, "hashid")
         _TYPECLASSMODELS._ATTRIBUTE_CACHE[hashid] = {}
     except AttributeError:
+        # skip caching
         pass
 
 
 _PPOOL = None
 _PCMD = None
 _PROC_ERR = "A process has ended with a probable error condition: process ended by signal 9."
+
+
 def run_async(to_execute, *args, **kwargs):
     """
     Runs a function or executes a code snippet asynchronously.
@@ -1034,7 +1101,7 @@ def check_evennia_dependencies():
     errstring = errstring.strip()
     if errstring:
         mlen = max(len(line) for line in errstring.split("\n"))
-        logger.log_err("%s\n%s\n%s" % ("-"*mlen, errstring, '-'*mlen))
+        logger.log_err("%s\n%s\n%s" % ("-" * mlen, errstring, '-' * mlen))
     return not_error
 
 
@@ -1103,7 +1170,7 @@ def mod_import(module):
                 result = imp.find_module(modname, [path])
             except ImportError:
                 logger.log_trace("Could not find module '%s' (%s.py) at path '%s'" % (modname, modname, path))
-                return
+                return None
             try:
                 mod = imp.load_module(modname, *result)
             except ImportError:
@@ -1139,8 +1206,6 @@ def all_from_module(module):
     # module if available (try to avoid not imports)
     members = getmembers(mod, predicate=lambda obj: getmodule(obj) in (mod, None))
     return dict((key, val) for key, val in members if not key.startswith("_"))
-    #return dict((key, val) for key, val in mod.__dict__.items()
-    #                        if not (key.startswith("_") or ismodule(val)))
 
 
 def callables_from_module(module):
@@ -1202,7 +1267,7 @@ def variable_from_module(module, variable=None, default=None):
     else:
         # get all
         result = [val for key, val in mod.__dict__.items()
-                         if not (key.startswith("_") or ismodule(val))]
+                  if not (key.startswith("_") or ismodule(val))]
 
     if len(result) == 1:
         return result[0]
@@ -1273,9 +1338,9 @@ def fuzzy_import_from_module(path, variable, default=None, defaultpaths=None):
     paths = [path] + make_iter(defaultpaths)
     for modpath in paths:
         try:
-            mod = import_module(path)
+            mod = import_module(modpath)
         except ImportError as ex:
-            if not str(ex).startswith ("No module named %s" % path):
+            if not str(ex).startswith("No module named %s" % modpath):
                 # this means the module was found but it
                 # triggers an ImportError on import.
                 raise ex
@@ -1338,15 +1403,18 @@ def class_from_module(path, defaultpaths=None):
             err += "."
         raise ImportError(err)
     return cls
+
+
 # alias
 object_from_module = class_from_module
 
-def init_new_player(player):
+
+def init_new_account(account):
     """
     Deprecated.
     """
     from evennia.utils import logger
-    logger.log_dep("evennia.utils.utils.init_new_player is DEPRECATED and should not be used.")
+    logger.log_dep("evennia.utils.utils.init_new_account is DEPRECATED and should not be used.")
 
 
 def string_similarity(string1, string2):
@@ -1371,7 +1439,7 @@ def string_similarity(string1, string2):
     vec2 = [string2.count(v) for v in vocabulary]
     try:
         return float(sum(vec1[i] * vec2[i] for i in range(len(vocabulary)))) / \
-               (math.sqrt(sum(v1**2 for v1 in vec1)) * math.sqrt(sum(v2**2 for v2 in vec2)))
+            (math.sqrt(sum(v1**2 for v1 in vec1)) * math.sqrt(sum(v2**2 for v2 in vec2)))
     except ZeroDivisionError:
         # can happen if empty-string cmdnames appear for some reason.
         # This is a no-match.
@@ -1397,9 +1465,9 @@ def string_suggestions(string, vocabulary, cutoff=0.6, maxnum=3):
 
     """
     return [tup[1] for tup in sorted([(string_similarity(string, sugg), sugg)
-                                       for sugg in vocabulary],
-                                           key=lambda tup: tup[0], reverse=True)
-                                           if tup[0] >= cutoff][:maxnum]
+                                      for sugg in vocabulary],
+                                     key=lambda tup: tup[0], reverse=True)
+            if tup[0] >= cutoff][:maxnum]
 
 
 def string_partial_matching(alternatives, inp, ret_index=True):
@@ -1435,7 +1503,7 @@ def string_partial_matching(alternatives, inp, ret_index=True):
             # (this will invalidate input in the wrong word order)
             submatch = [last_index + alt_num for alt_num, alt_word
                         in enumerate(alt_words[last_index:])
-                                     if alt_word.startswith(inp_word)]
+                        if alt_word.startswith(inp_word)]
             if submatch:
                 last_index = min(submatch) + 1
                 score += 1
@@ -1481,7 +1549,7 @@ def format_table(table, extra_space=1):
         for ir, row in enumarate(ftable):
             if ir == 0:
                 # make first row white
-                string += "\n{w" + ""join(row) + "{n"
+                string += "\n|w" + ""join(row) + "|n"
             else:
                 string += "\n" + "".join(row)
         print string
@@ -1521,19 +1589,20 @@ def get_evennia_pids():
     portal_pidfile = os.path.join(settings.GAME_DIR, 'portal.pid')
     server_pid, portal_pid = None, None
     if os.path.exists(server_pidfile):
-        f = open(server_pidfile, 'r')
-        server_pid = f.read()
-        f.close()
+        with open(server_pidfile, 'r') as f:
+            server_pid = f.read()
     if os.path.exists(portal_pidfile):
-        f = open(portal_pidfile, 'r')
-        portal_pid = f.read()
-        f.close()
+        with open(portal_pidfile, 'r') as f:
+            portal_pid = f.read()
     if server_pid and portal_pid:
         return int(server_pid), int(portal_pid)
     return None, None
 
+
 from gc import get_referents
 from sys import getsizeof
+
+
 def deepsize(obj, max_depth=4):
     """
     Get not only size of the given object, but also the size of
@@ -1557,21 +1626,23 @@ def deepsize(obj, max_depth=4):
 
     """
     def _recurse(o, dct, depth):
-        if max_depth >= 0 and depth > max_depth:
+        if 0 <= max_depth < depth:
             return
         for ref in get_referents(o):
             idr = id(ref)
-            if not idr in dct:
+            if idr not in dct:
                 dct[idr] = (ref, getsizeof(ref, default=0))
-                _recurse(ref, dct, depth+1)
+                _recurse(ref, dct, depth + 1)
     sizedict = {}
     _recurse(obj, sizedict, 0)
-    #count = len(sizedict) + 1
     size = getsizeof(obj) + sum([p[1] for p in sizedict.values()])
     return size
 
+
 # lazy load handler
 _missing = object()
+
+
 class lazy_property(object):
     """
     Delays loading of property until first access. Credit goes to the
@@ -1591,15 +1662,16 @@ class lazy_property(object):
     property "attributes" on the object.
 
     """
+
     def __init__(self, func, name=None, doc=None):
-        "Store all properties for now"
+        """Store all properties for now"""
         self.__name__ = name or func.__name__
         self.__module__ = func.__module__
         self.__doc__ = doc or func.__doc__
         self.func = func
 
     def __get__(self, obj, type=None):
-        "Triggers initialization"
+        """Triggers initialization"""
         if obj is None:
             return self
         value = obj.__dict__.get(self.__name__, _missing)
@@ -1608,8 +1680,11 @@ class lazy_property(object):
         obj.__dict__[self.__name__] = value
         return value
 
+
 _STRIP_ANSI = None
-_RE_CONTROL_CHAR = re.compile('[%s]' % re.escape(''.join([unichr(c) for c in range(0,32)])))# + range(127,160)])))
+_RE_CONTROL_CHAR = re.compile('[%s]' % re.escape(''.join([unichr(c) for c in range(0, 32)])))  # + range(127,160)])))
+
+
 def strip_control_sequences(string):
     """
     Remove non-print text sequences.
@@ -1641,11 +1716,11 @@ def calledby(callerdepth=1):
             us.
 
     """
-    import inspect, os
+    import inspect
     stack = inspect.stack()
     # we must step one extra level back in stack since we don't want
     # to include the call of this function itself.
-    callerdepth = min(max(2, callerdepth + 1), len(stack)-1)
+    callerdepth = min(max(2, callerdepth + 1), len(stack) - 1)
     frame = inspect.stack()[callerdepth]
     path = os.path.sep.join(frame[1].rsplit(os.path.sep, 2)[-2:])
     return "[called by '%s': %s:%s %s]" % (frame[3], path, frame[2], frame[4])
@@ -1670,12 +1745,12 @@ def m_len(target):
         return len(ANSI_PARSER.strip_mxp(target))
     return len(target)
 
-#------------------------------------------------------------------
+# -------------------------------------------------------------------
 # Search handler function
-#------------------------------------------------------------------
+# -------------------------------------------------------------------
 #
 # Replace this hook function by changing settings.SEARCH_AT_RESULT.
-#
+
 
 def at_search_result(matches, caller, query="", quiet=False, **kwargs):
     """
@@ -1691,7 +1766,7 @@ def at_search_result(matches, caller, query="", quiet=False, **kwargs):
             should the result pass through.
         caller (Object): The object performing the search and/or which should
         receive error messages.
-    query (str, optional): The search query used to produce `matches`.
+        query (str, optional): The search query used to produce `matches`.
         quiet (bool, optional): If `True`, no messages will be echoed to caller
             on errors.
 
@@ -1712,15 +1787,15 @@ def at_search_result(matches, caller, query="", quiet=False, **kwargs):
         matches = None
     elif len(matches) > 1:
         error = kwargs.get("multimatch_string") or \
-                _("More than one match for '%s' (please narrow target):\n" % query)
+            _("More than one match for '%s' (please narrow target):\n" % query)
         for num, result in enumerate(matches):
             # we need to consider Commands, where .aliases is a list
             aliases = result.aliases.all() if hasattr(result.aliases, "all") else result.aliases
             error += _MULTIMATCH_TEMPLATE.format(
-                 number=num + 1,
-                 name=result.get_display_name(caller) if hasattr(result, "get_display_name") else query,
-                 aliases=" [%s]" % ";".join(aliases) if aliases else "",
-                 info=result.get_extra_info(caller))
+                number=num + 1,
+                name=result.get_display_name(caller) if hasattr(result, "get_display_name") else query,
+                aliases=" [%s]" % ";".join(aliases) if aliases else "",
+                info=result.get_extra_info(caller))
         matches = None
     else:
         # exactly one match
@@ -1738,6 +1813,7 @@ class LimitedSizeOrderedDict(OrderedDict):
     grow out of bounds.
 
     """
+
     def __init__(self, *args, **kwargs):
         """
         Limited-size ordered dict.
@@ -1752,8 +1828,19 @@ class LimitedSizeOrderedDict(OrderedDict):
         """
         super(LimitedSizeOrderedDict, self).__init__()
         self.size_limit = kwargs.get("size_limit", None)
-        self.filo = not kwargs.get("fifo", True) # FIFO inverse of FILO
+        self.filo = not kwargs.get("fifo", True)  # FIFO inverse of FILO
         self._check_size()
+
+    def __eq__(self, other):
+        ret = super(LimitedSizeOrderedDict, self).__eq__(other)
+        if ret:
+            return (ret and
+                    hasattr(other, 'size_limit') and self.size_limit == other.size_limit and
+                    hasattr(other, 'fifo') and self.fifo == other.fifo)
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def _check_size(self):
         filo = self.filo
@@ -1769,6 +1856,7 @@ class LimitedSizeOrderedDict(OrderedDict):
         super(LimitedSizeOrderedDict, self).update(*args, **kwargs)
         self._check_size()
 
+
 def get_game_dir_path():
     """
     This is called by settings_default in order to determine the path
@@ -1779,7 +1867,7 @@ def get_game_dir_path():
 
     """
     # current working directory, assumed to be somewhere inside gamedir.
-    for i in range(10):
+    for _ in range(10):
         gpath = os.getcwd()
         if "server" in os.listdir(gpath):
             if os.path.isfile(os.path.join("server", "conf", "settings.py")):

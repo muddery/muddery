@@ -24,7 +24,7 @@ import django
 
 # Signal processing
 SIG = signal.SIGINT
-CTRL_C_EVENT = 0 # Windows SIGINT-like signal
+CTRL_C_EVENT = 0  # Windows SIGINT-like signal
 
 # Set up the main python paths to Evennia
 EVENNIA_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -64,8 +64,8 @@ ENFORCED_SETTING = False
 # requirements
 PYTHON_MIN = '2.7'
 TWISTED_MIN = '16.0.0'
-DJANGO_MIN = '1.8'
-DJANGO_REC = '1.9'
+DJANGO_MIN = '1.11'
+DJANGO_REC = '1.11'
 
 sys.path[1] = EVENNIA_ROOT
 
@@ -95,13 +95,13 @@ CREATED_NEW_GAMEDIR = \
     Make sure to create a superuser when asked for it (the email can
     be blank if you want). You should now be able to (by default)
     connect to your server on 'localhost', port 4000 using a
-    telnet/mud client or http://localhost:8000 using your web browser.
+    telnet/mud client or http://localhost:4001 using your web browser.
     If things don't work, check so those ports are open.
 
     """
 
 ERROR_INPUT = \
-"""
+    """
     Command
       {args} {kwargs}
     raised an error: '{traceback}'.
@@ -132,15 +132,15 @@ ERROR_NO_GAMEDIR = \
 
 WARNING_MOVING_SUPERUSER = \
     """
-    WARNING: Evennia expects a Player superuser with id=1. No such
-    Player was found. However, another superuser ('{other_key}',
+    WARNING: Evennia expects an Account superuser with id=1. No such
+    Account was found. However, another superuser ('{other_key}',
     id={other_id}) was found in the database. If you just created this
     superuser and still see this text it is probably due to the
     database being flushed recently - in this case the database's
     internal auto-counter might just start from some value higher than
     one.
 
-    We will fix this by assigning the id 1 to Player '{other_key}'.
+    We will fix this by assigning the id 1 to Account '{other_key}'.
     Please confirm this is acceptable before continuing.
     """
 
@@ -167,7 +167,7 @@ ERROR_SETTINGS = \
            errors mentioning 'DJANGO_SETTINGS_MODULE'. If you run a
            virtual machine, it might be worth to restart it to see if
            this resolves the issue.
-    """.format(settingsfile=SETTINGFILE, settingspath=SETTINGS_PATH)
+    """.format(settingspath=SETTINGS_PATH)
 
 ERROR_INITSETTINGS = \
     """
@@ -182,7 +182,7 @@ RECREATED_SETTINGS = \
 
     Note that if you were using an existing database, the password
     salt of this new settings file will be different from the old one.
-    This means that any existing players may not be able to log in to
+    This means that any existing accounts may not be able to log in to
     their accounts with their old passwords.
     """
 
@@ -270,7 +270,7 @@ HELP_ENTRY = \
     adding new protocols or are debugging Evennia itself.
 
     Reload with (5) to update the server with your changes without
-    disconnecting any players.
+    disconnecting any accounts.
 
     Note: Reload and stop are sometimes poorly supported in Windows. If you
     have issues, log into the game to stop or restart the server instead.
@@ -315,7 +315,7 @@ ERROR_LOGDIR_MISSING = \
     will be created automatically).
 
     (Explanation: Evennia creates the log directory automatically when
-    initializating a new game directory. This error usually happens if
+    initializing a new game directory. This error usually happens if
     you used git to clone a pre-created game directory - since log
     files are in .gitignore they will not be cloned, which leads to
     the log directory also not being created.)
@@ -344,10 +344,13 @@ ERROR_DJANGO_MIN = \
     ERROR: Django {dversion} found. Evennia requires version {django_min}
     or higher.
 
-    Install it with for example `pip install --upgrade django`
+    If you are using a virtualenv, use the command `pip install --upgrade -e evennia` where
+    `evennia` is the folder to where you cloned the Evennia library. If not
+    in a virtualenv you can install django with for example `pip install --upgrade django`
     or with `pip install django=={django_min}` to get a specific version.
 
-    It's also a good idea to run `evennia migrate` after this upgrade.
+    It's also a good idea to run `evennia migrate` after this upgrade. Ignore
+    any warnings and don't run `makemigrate` even if told to.
     """
 
 NOTE_DJANGO_MIN = \
@@ -402,9 +405,9 @@ def evennia_version():
     """
     version = "Unknown"
     try:
-        import evennia
         version = evennia.__version__
     except ImportError:
+        # even if evennia is not found, we should not crash here.
         pass
     try:
         rev = check_output(
@@ -412,8 +415,10 @@ def evennia_version():
             shell=True, cwd=EVENNIA_ROOT, stderr=STDOUT).strip()
         version = "%s (rev %s)" % (version, rev)
     except (IOError, CalledProcessError):
+        # move on if git is not answering
         pass
     return version
+
 
 EVENNIA_VERSION = evennia_version()
 
@@ -430,7 +435,7 @@ def check_main_evennia_dependencies():
     error = False
 
     # Python
-    pversion = ".".join(str(num) for num in sys.version_info if type(num) == int)
+    pversion = ".".join(str(num) for num in sys.version_info if isinstance(num, int))
     if LooseVersion(pversion) < LooseVersion(PYTHON_MIN):
         print(ERROR_PYTHON_VERSION.format(pversion=pversion, python_min=PYTHON_MIN))
         error = True
@@ -447,7 +452,7 @@ def check_main_evennia_dependencies():
         error = True
     # Django
     try:
-        dversion = ".".join(str(num) for num in django.VERSION if type(num) == int)
+        dversion = ".".join(str(num) for num in django.VERSION if isinstance(num, int))
         # only the main version (1.5, not 1.5.4.0)
         dversion_main = ".".join(dversion.split(".")[:2])
         if LooseVersion(dversion) < LooseVersion(DJANGO_MIN):
@@ -498,14 +503,14 @@ def create_secret_key():
     import random
     import string
     secret_key = list((string.letters +
-        string.digits + string.punctuation).replace("\\", "")\
-                .replace("'", '"').replace("{","_").replace("}","-"))
+                       string.digits + string.punctuation).replace("\\", "")
+                      .replace("'", '"').replace("{", "_").replace("}", "-"))
     random.shuffle(secret_key)
     secret_key = "".join(secret_key[:40])
     return secret_key
 
 
-def create_settings_file(init=True):
+def create_settings_file(init=True, secret_settings=False):
     """
     Uses the template settings file to build a working settings file.
 
@@ -513,18 +518,27 @@ def create_settings_file(init=True):
         init (bool): This is part of the normal evennia --init
             operation.  If false, this function will copy a fresh
             template file in (asking if it already exists).
+        secret_settings (bool, optional): If False, create settings.py, otherwise
+            create the secret_settings.py file.
 
     """
-    settings_path = os.path.join(GAMEDIR, "server", "conf", "settings.py")
+    if secret_settings:
+        settings_path = os.path.join(GAMEDIR, "server", "conf", "secret_settings.py")
+        setting_dict = {"secret_key": "\'%s\'" % create_secret_key()}
+    else:
+        settings_path = os.path.join(GAMEDIR, "server", "conf", "settings.py")
+        setting_dict = {
+            "settings_default": os.path.join(EVENNIA_LIB, "settings_default.py"),
+            "servername": "\"%s\"" % GAMEDIR.rsplit(os.path.sep, 1)[1],
+            "secret_key": "\'%s\'" % create_secret_key()}
 
     if not init:
         # if not --init mode, settings file may already exist from before
         if os.path.exists(settings_path):
-            inp = raw_input("server/conf/settings.py already exists. "
-                            "Do you want to reset it? y/[N]> ")
+            inp = input("%s already exists. Do you want to reset it? y/[N]> " % settings_path)
             if not inp.lower() == 'y':
                 print ("Aborted.")
-                sys.exit()
+                return
             else:
                 print ("Reset the settings file.")
 
@@ -533,12 +547,6 @@ def create_settings_file(init=True):
 
     with open(settings_path, 'r') as f:
         settings_string = f.read()
-
-    # tweak the settings
-    setting_dict = {
-        "settings_default": os.path.join(EVENNIA_LIB, "settings_default.py"),
-        "servername": "\"%s\"" % GAMEDIR.rsplit(os.path.sep, 1)[1].capitalize(),
-        "secret_key": "\'%s\'" % create_secret_key()}
 
     settings_string = settings_string.format(**setting_dict)
 
@@ -563,17 +571,22 @@ def create_game_directory(dirname):
         sys.exit()
     # copy template directory
     shutil.copytree(EVENNIA_TEMPLATE, GAMEDIR)
+    # rename gitignore to .gitignore
+    os.rename(os.path.join(GAMEDIR, 'gitignore'),
+              os.path.join(GAMEDIR, '.gitignore'))
+
     # pre-build settings file in the new GAMEDIR
     create_settings_file()
+    create_settings_file(secret_settings=True)
 
 
 def create_superuser():
     """
-    Create the superuser player
+    Create the superuser account
 
     """
     print(
-        "\nCreate a superuser below. The superuser is Player #1, the 'owner' "
+        "\nCreate a superuser below. The superuser is Account #1, the 'owner' "
         "account of the server.\n")
     django.core.management.call_command("createsuperuser", interactive=True)
 
@@ -588,23 +601,22 @@ def check_database():
     # Check so a database exists and is accessible
     from django.db import connection
     tables = connection.introspection.get_table_list(connection.cursor())
-    if not tables or not isinstance(tables[0], basestring): # django 1.8+
+    if not tables or not isinstance(tables[0], basestring):  # django 1.8+
         tables = [tableinfo.name for tableinfo in tables]
-    if tables and u'players_playerdb' in tables:
+    if tables and u'accounts_accountdb' in tables:
         # database exists and seems set up. Initialize evennia.
-        import evennia
         evennia._init()
-    # Try to get Player#1
-    from evennia.players.models import PlayerDB
+    # Try to get Account#1
+    from evennia.accounts.models import AccountDB
     try:
-        PlayerDB.objects.get(id=1)
+        AccountDB.objects.get(id=1)
     except django.db.utils.OperationalError as e:
         print(ERROR_DATABASE.format(traceback=e))
         sys.exit()
-    except PlayerDB.DoesNotExist:
+    except AccountDB.DoesNotExist:
         # no superuser yet. We need to create it.
 
-        other_superuser = PlayerDB.objects.filter(is_superuser=True)
+        other_superuser = AccountDB.objects.filter(is_superuser=True)
         if other_superuser:
             # Another superuser was found, but not with id=1. This may
             # happen if using flush (the auto-id starts at a higher
@@ -659,14 +671,14 @@ def get_pid(pidfile):
         pidfile (str): The path of the pid file.
 
     Returns:
-        pid (str): The process id.
+        pid (str or None): The process id.
 
     """
-    pid = None
     if os.path.exists(pidfile):
-        f = open(pidfile, 'r')
-        pid = f.read()
-    return pid
+        with open(pidfile, 'r') as f:
+            pid = f.read()
+            return pid
+    return None
 
 
 def del_pid(pidfile):
@@ -683,7 +695,7 @@ def del_pid(pidfile):
         os.remove(pidfile)
 
 
-def kill(pidfile, signal=SIG, succmsg="", errmsg="",
+def kill(pidfile, killsignal=SIG, succmsg="", errmsg="",
          restart_file=SERVER_RESTART, restart=False):
     """
     Send a kill signal to a process based on PID. A customized
@@ -692,7 +704,7 @@ def kill(pidfile, signal=SIG, succmsg="", errmsg="",
 
     Args:
         pidfile (str): The path of the pidfile to get the PID from.
-        signal (int, optional): Signal identifier.
+        killsignal (int, optional): Signal identifier for signal to send.
         succmsg (str, optional): Message to log on success.
         errmsg (str, optional): Message to log on failure.
         restart_file (str, optional): Restart file location.
@@ -722,15 +734,16 @@ def kill(pidfile, signal=SIG, succmsg="", errmsg="",
                     SetConsoleCtrlHandler(None, True)
                     GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0)
                 except KeyboardInterrupt:
+                    # We must catch and ignore the interrupt sent.
                     pass
             else:
                 # Linux can send the SIGINT signal directly
                 # to the specified PID.
-                os.kill(int(pid), signal)
+                os.kill(int(pid), killsignal)
 
         except OSError:
-            print("Process %(pid)s cannot be stopped. "\
-                  "The PID file 'server/%(pidfile)s' seems stale. "\
+            print("Process %(pid)s cannot be stopped. "
+                  "The PID file 'server/%(pidfile)s' seems stale. "
                   "Try removing it." % {'pid': pid, 'pidfile': pidfile})
             return
         print("Evennia:", succmsg)
@@ -749,10 +762,8 @@ def show_version_info(about=False):
         version_info (str): A complete version info string.
 
     """
-    import os
     import sys
     import twisted
-    import django
 
     return VERSION_INFO.format(
         version=EVENNIA_VERSION, about=ABOUT_INFO if about else "",
@@ -769,81 +780,48 @@ def error_check_python_modules():
     python source files themselves). Best they fail already here
     before we get any further.
 
-    Raises:
-        DeprecationWarning: For trying to access various modules
-        (usually in `settings.py`) which are no longer supported.
-
     """
+
     from django.conf import settings
-    def imp(path, split=True):
+
+    def _imp(path, split=True):
+        "helper method"
         mod, fromlist = path, "None"
         if split:
             mod, fromlist = path.rsplit('.', 1)
         __import__(mod, fromlist=[fromlist])
 
+    # check the historical deprecations
+    from evennia.server import deprecations
+    try:
+        deprecations.check_errors(settings)
+        deprecations.check_warnings(settings)
+    except DeprecationWarning as err:
+        print(err)
+        sys.exit()
+
     # core modules
-    imp(settings.COMMAND_PARSER)
-    imp(settings.SEARCH_AT_RESULT)
-    imp(settings.CONNECTION_SCREEN_MODULE)
+    _imp(settings.COMMAND_PARSER)
+    _imp(settings.SEARCH_AT_RESULT)
+    _imp(settings.CONNECTION_SCREEN_MODULE)
     #imp(settings.AT_INITIAL_SETUP_HOOK_MODULE, split=False)
     for path in settings.LOCK_FUNC_MODULES:
-        imp(path, split=False)
-    # cmdsets
-
-    deprstring = ("settings.%s should be renamed to %s. If defaults are used, "
-                  "their path/classname must be updated "
-                  "(see evennia/settings_default.py).")
-    if hasattr(settings, "CMDSET_DEFAULT"):
-        raise DeprecationWarning(deprstring % (
-            "CMDSET_DEFAULT", "CMDSET_CHARACTER"))
-    if hasattr(settings, "CMDSET_OOC"):
-        raise DeprecationWarning(deprstring % ("CMDSET_OOC", "CMDSET_PLAYER"))
-    if settings.WEBSERVER_ENABLED and not isinstance(settings.WEBSERVER_PORTS[0], tuple):
-        raise DeprecationWarning(
-            "settings.WEBSERVER_PORTS must be on the form "
-            "[(proxyport, serverport), ...]")
-    if hasattr(settings, "BASE_COMM_TYPECLASS"):
-        raise DeprecationWarning(deprstring % (
-            "BASE_COMM_TYPECLASS", "BASE_CHANNEL_TYPECLASS"))
-    if hasattr(settings, "COMM_TYPECLASS_PATHS"):
-        raise DeprecationWarning(deprstring % (
-            "COMM_TYPECLASS_PATHS", "CHANNEL_TYPECLASS_PATHS"))
-    if hasattr(settings, "CHARACTER_DEFAULT_HOME"):
-        raise DeprecationWarning(
-            "settings.CHARACTER_DEFAULT_HOME should be renamed to "
-            "DEFAULT_HOME. See also settings.START_LOCATION "
-            "(see evennia/settings_default.py).")
-    deprstring = ("settings.%s is now merged into settings.TYPECLASS_PATHS. "
-                  "Update your settings file.")
-    if hasattr(settings, "OBJECT_TYPECLASS_PATHS"):
-        raise DeprecationWarning(deprstring % "OBJECT_TYPECLASS_PATHS")
-    if hasattr(settings, "SCRIPT_TYPECLASS_PATHS"):
-        raise DeprecationWarning(deprstring % "SCRIPT_TYPECLASS_PATHS")
-    if hasattr(settings, "PLAYER_TYPECLASS_PATHS"):
-        raise DeprecationWarning(deprstring % "PLAYER_TYPECLASS_PATHS")
-    if hasattr(settings, "CHANNEL_TYPECLASS_PATHS"):
-        raise DeprecationWarning(deprstring % "CHANNEL_TYPECLASS_PATHS")
-    if hasattr(settings, "SEARCH_MULTIMATCH_SEPARATOR"):
-        raise DeprecationWarning(
-        "settings.SEARCH_MULTIMATCH_SEPARATOR was replaced by "
-        "SEARCH_MULTIMATCH_REGEX and SEARCH_MULTIMATCH_TEMPLATE. "
-        "Update your settings file (see evennia/settings_default.py "
-        "for more info).")
+        _imp(path, split=False)
 
     from evennia.commands import cmdsethandler
     if not cmdsethandler.import_cmdset(settings.CMDSET_UNLOGGEDIN, None):
         print("Warning: CMDSET_UNLOGGED failed to load!")
     if not cmdsethandler.import_cmdset(settings.CMDSET_CHARACTER, None):
         print("Warning: CMDSET_CHARACTER failed to load")
-    if not cmdsethandler.import_cmdset(settings.CMDSET_PLAYER, None):
-        print("Warning: CMDSET_PLAYER failed to load")
+    if not cmdsethandler.import_cmdset(settings.CMDSET_ACCOUNT, None):
+        print("Warning: CMDSET_ACCOUNT failed to load")
     # typeclasses
-    imp(settings.BASE_PLAYER_TYPECLASS)
-    imp(settings.BASE_OBJECT_TYPECLASS)
-    imp(settings.BASE_CHARACTER_TYPECLASS)
-    imp(settings.BASE_ROOM_TYPECLASS)
-    imp(settings.BASE_EXIT_TYPECLASS)
-    imp(settings.BASE_SCRIPT_TYPECLASS)
+    _imp(settings.BASE_ACCOUNT_TYPECLASS)
+    _imp(settings.BASE_OBJECT_TYPECLASS)
+    _imp(settings.BASE_CHARACTER_TYPECLASS)
+    _imp(settings.BASE_ROOM_TYPECLASS)
+    _imp(settings.BASE_EXIT_TYPECLASS)
+    _imp(settings.BASE_SCRIPT_TYPECLASS)
 
 
 def init_game_directory(path, check_db=True):
@@ -913,10 +891,10 @@ def init_game_directory(path, check_db=True):
     # verify existence of log file dir (this can be missing e.g.
     # if the game dir itself was cloned since log files are in .gitignore)
     logdirs = [logfile.rsplit(os.path.sep, 1)
-                for logfile in (SERVER_LOGFILE, PORTAL_LOGFILE, HTTP_LOGFILE)]
+               for logfile in (SERVER_LOGFILE, PORTAL_LOGFILE, HTTP_LOGFILE)]
     if not all(os.path.isdir(pathtup[0]) for pathtup in logdirs):
         errstr = "\n    ".join("%s (log file %s)" % (pathtup[0], pathtup[1]) for pathtup in logdirs
-                if not os.path.isdir(pathtup[0]))
+                               if not os.path.isdir(pathtup[0]))
         print(ERROR_LOGDIR_MISSING.format(logfiles=errstr))
         sys.exit()
 
@@ -970,10 +948,10 @@ def run_dummyrunner(number_of_dummies):
     Start an instance of the dummyrunner
 
     Args:
-        number_of_dummies (int): The number of dummy players to start.
+        number_of_dummies (int): The number of dummy accounts to start.
 
     Notes:
-        The dummy players' behavior can be customized by adding a
+        The dummy accounts' behavior can be customized by adding a
         `dummyrunner_settings.py` config file in the game's conf/
         directory.
 
@@ -986,6 +964,8 @@ def run_dummyrunner(number_of_dummies):
     try:
         call(cmdstr, env=getenv())
     except KeyboardInterrupt:
+        # this signals the dummyrunner to stop cleanly and should
+        # not lead to a traceback here.
         pass
 
 
@@ -1008,7 +988,7 @@ def list_settings(keys):
         table = evtable.EvTable()
         confs = [key for key in sorted(evsettings.__dict__) if key.isupper()]
         for i in range(0, len(confs), 4):
-            table.add_row(*confs[i:i+4])
+            table.add_row(*confs[i:i + 4])
     else:
         # a specific key
         table = evtable.EvTable(width=131)
@@ -1188,8 +1168,8 @@ def server_operation(mode, service, interactive, profiler, logserver=False, doex
     elif mode == 'stop':
         if os.name == "nt":
             print (
-                    "(Obs: You can use a single Ctrl-C to skip "
-                    "Windows' annoying 'Terminate batch job (Y/N)?' prompts.)")
+                "(Obs: You can use a single Ctrl-C to skip "
+                "Windows' annoying 'Terminate batch job (Y/N)?' prompts.)")
         # stop processes, avoiding reload
         if service == 'server':
             kill(SERVER_PIDFILE, SIG,
@@ -1238,7 +1218,7 @@ def main():
     parser.add_argument(
         '--dummyrunner', nargs=1, action='store', dest='dummyrunner',
         metavar="N",
-        help="Test a running server by connecting N dummy players to it.")
+        help="Test a running server by connecting N dummy accounts to it.")
     parser.add_argument(
         '--settings', nargs=1, action='store', dest='altsettings',
         default=None, metavar="filename.py",
@@ -1260,7 +1240,7 @@ def main():
         help=("Which component to operate on: "
               "'server', 'portal' or 'all' (default if not set)."))
     parser.epilog = (
-            "Common usage: evennia start|stop|reload. Django-admin database commands:"
+        "Common usage: evennia start|stop|reload. Django-admin database commands:"
         "evennia migration|flush|shell|dbshell (see the django documentation for more django-admin commands.)")
 
     args, unknown_args = parser.parse_known_args()
@@ -1298,7 +1278,6 @@ def main():
         print("Using settings file '%s' (%s)." % (
             SETTINGSFILE, SETTINGS_DOTPATH))
 
-
     if args.initsettings:
         # create new settings file
         global GAMEDIR
@@ -1331,9 +1310,9 @@ def main():
         check_db = False
         if option in ('runserver', 'testserver'):
             print(WARNING_RUNSERVER)
-        if option == "shell":
-            # to use the shell we need to initialize it first,
-            # and this only works if the database is set up
+        if option in ("shell", "check"):
+            # some django commands requires the database to exist,
+            # or evennia._init to have run before they work right.
             check_db = True
         if option == "test":
             global TEST_MODE
@@ -1352,7 +1331,7 @@ def main():
                         arg, value = [p.strip() for p in arg.split("=", 1)]
                     else:
                         value = True
-                    kwargs[arg.lstrip("--")] = [value]
+                    kwargs[arg.lstrip("--")] = value
                 else:
                     args.append(arg)
         try:

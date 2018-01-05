@@ -1,13 +1,14 @@
 """
 The command template for the default MUX-style command set. There
-is also an Player/OOC version that makes sure caller is a Player object.
+is also an Account/OOC version that makes sure caller is an Account object.
 """
 
 from evennia.utils import utils
 from evennia.commands.command import Command
 
 # limit symbol import for API
-__all__ = ("MuxCommand", "MuxPlayerCommand")
+__all__ = ("MuxCommand", "MuxAccountCommand")
+
 
 class MuxCommand(Command):
     """
@@ -21,6 +22,7 @@ class MuxCommand(Command):
     used by Evennia to create the automatic help entry for
     the command, so make sure to document consistently here.
     """
+
     def has_perm(self, srcobj):
         """
         This is called by the cmdhandler to determine
@@ -98,7 +100,7 @@ class MuxCommand(Command):
 
         # split out switches
         switches = []
-        if args and len(args) > 1 and args[0] == "/":
+        if args and len(args) > 1 and raw[0] == "/":
             # we have a switch, or a set of switches. These end with a space.
             switches = args[1:].split(None, 1)
             if len(switches) > 1:
@@ -127,17 +129,17 @@ class MuxCommand(Command):
         self.rhs = rhs
         self.rhslist = rhslist
 
-        # if the class has the player_caller property set on itself, we make
-        # sure that self.caller is always the player if possible. We also create
+        # if the class has the account_caller property set on itself, we make
+        # sure that self.caller is always the account if possible. We also create
         # a special property "character" for the puppeted object, if any. This
-        # is convenient for commands defined on the Player only.
-        if hasattr(self, "player_caller") and self.player_caller:
+        # is convenient for commands defined on the Account only.
+        if hasattr(self, "account_caller") and self.account_caller:
             if utils.inherits_from(self.caller, "evennia.objects.objects.DefaultObject"):
                 # caller is an Object/Character
                 self.character = self.caller
-                self.caller = self.caller.player
-            elif utils.inherits_from(self.caller, "evennia.players.players.DefaultPlayer"):
-                # caller was already a Player
+                self.caller = self.caller.account
+            elif utils.inherits_from(self.caller, "evennia.accounts.accounts.DefaultAccount"):
+                # caller was already an Account
                 self.character = self.caller.get_puppet(self.session)
             else:
                 self.character = None
@@ -150,59 +152,59 @@ class MuxCommand(Command):
         """
         # a simple test command to show the available properties
         string = "-" * 50
-        string += "\n{w%s{n - Command variables from evennia:\n" % self.key
+        string += "\n|w%s|n - Command variables from evennia:\n" % self.key
         string += "-" * 50
-        string += "\nname of cmd (self.key): {w%s{n\n" % self.key
-        string += "cmd aliases (self.aliases): {w%s{n\n" % self.aliases
-        string += "cmd locks (self.locks): {w%s{n\n" % self.locks
-        string += "help category (self.help_category): {w%s{n\n" % self.help_category
-        string += "object calling (self.caller): {w%s{n\n" % self.caller
-        string += "object storing cmdset (self.obj): {w%s{n\n" % self.obj
-        string += "command string given (self.cmdstring): {w%s{n\n" % self.cmdstring
+        string += "\nname of cmd (self.key): |w%s|n\n" % self.key
+        string += "cmd aliases (self.aliases): |w%s|n\n" % self.aliases
+        string += "cmd locks (self.locks): |w%s|n\n" % self.locks
+        string += "help category (self.help_category): |w%s|n\n" % self.help_category
+        string += "object calling (self.caller): |w%s|n\n" % self.caller
+        string += "object storing cmdset (self.obj): |w%s|n\n" % self.obj
+        string += "command string given (self.cmdstring): |w%s|n\n" % self.cmdstring
         # show cmdset.key instead of cmdset to shorten output
-        string += utils.fill("current cmdset (self.cmdset): {w%s{n\n" % self.cmdset)
-
-
+        string += utils.fill("current cmdset (self.cmdset): |w%s|n\n" % self.cmdset)
         string += "\n" + "-" * 50
-        string +=  "\nVariables from MuxCommand baseclass\n"
+        string += "\nVariables from MuxCommand baseclass\n"
         string += "-" * 50
-        string += "\nraw argument (self.raw): {w%s{n \n" % self.raw
-        string += "cmd args (self.args): {w%s{n\n" % self.args
-        string += "cmd switches (self.switches): {w%s{n\n" % self.switches
-        string += "space-separated arg list (self.arglist): {w%s{n\n" % self.arglist
-        string += "lhs, left-hand side of '=' (self.lhs): {w%s{n\n" % self.lhs
-        string += "lhs, comma separated (self.lhslist): {w%s{n\n" % self.lhslist
-        string += "rhs, right-hand side of '=' (self.rhs): {w%s{n\n" % self.rhs
-        string += "rhs, comma separated (self.rhslist): {w%s{n\n" % self.rhslist
+        string += "\nraw argument (self.raw): |w%s|n \n" % self.raw
+        string += "cmd args (self.args): |w%s|n\n" % self.args
+        string += "cmd switches (self.switches): |w%s|n\n" % self.switches
+        string += "space-separated arg list (self.arglist): |w%s|n\n" % self.arglist
+        string += "lhs, left-hand side of '=' (self.lhs): |w%s|n\n" % self.lhs
+        string += "lhs, comma separated (self.lhslist): |w%s|n\n" % self.lhslist
+        string += "rhs, right-hand side of '=' (self.rhs): |w%s|n\n" % self.rhs
+        string += "rhs, comma separated (self.rhslist): |w%s|n\n" % self.rhslist
         string += "-" * 50
         self.caller.msg(string)
 
-class MuxPlayerCommand(MuxCommand):
+
+class MuxAccountCommand(MuxCommand):
     """
-    This is an on-Player version of the MuxCommand. Since these commands sit
-    on Players rather than on Characters/Objects, we need to check
+    This is an on-Account version of the MuxCommand. Since these commands sit
+    on Accounts rather than on Characters/Objects, we need to check
     this in the parser.
 
-    Player commands are available also when puppeting a Character, it's
+    Account commands are available also when puppeting a Character, it's
     just that they are applied with a lower priority and are always
     available, also when disconnected from a character (i.e. "ooc").
 
-    This class makes sure that caller is always a Player object, while
+    This class makes sure that caller is always an Account object, while
     creating a new property "character" that is set only if a
-    character is actually attached to this Player and Session.
+    character is actually attached to this Account and Session.
     """
+
     def parse(self):
         """
         We run the parent parser as usual, then fix the result
         """
-        super(MuxPlayerCommand, self).parse()
+        super(MuxAccountCommand, self).parse()
 
         if utils.inherits_from(self.caller, "evennia.objects.objects.DefaultObject"):
             # caller is an Object/Character
             self.character = self.caller
-            self.caller = self.caller.player
-        elif utils.inherits_from(self.caller, "evennia.players.players.DefaultPlayer"):
-            # caller was already a Player
+            self.caller = self.caller.account
+        elif utils.inherits_from(self.caller, "evennia.accounts.accounts.DefaultAccount"):
+            # caller was already an Account
             self.character = self.caller.get_puppet(self.session)
         else:
             self.character = None

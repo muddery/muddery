@@ -42,10 +42,12 @@ MOVE_DELAY = {"stroll": 6,
               "run": 2,
               "sprint": 1}
 
+
 class SlowExit(DefaultExit):
     """
     This overloads the way moving happens.
     """
+
     def at_traverse(self, traversing_object, target_location):
         """
         Implements the actual traversal, using utils.delay to delay the move_to.
@@ -86,6 +88,7 @@ SPEED_DESCS = {"stroll": "strolling",
                "walk": "walking",
                "run": "running",
                "sprint": "sprinting"}
+
 
 class CmdSetSpeed(Command):
     """
@@ -135,9 +138,10 @@ class CmdStop(Command):
         stored deferred from the exit traversal above.
         """
         currently_moving = self.caller.ndb.currently_moving
-        if currently_moving:
+        if currently_moving and not currently_moving.called:
             currently_moving.cancel()
             self.caller.msg("You stop moving.")
-            self.caller.location.msg_contents("%s stops." % self.get_display_name())
+            for observer in self.caller.location.contents_get(self.caller):
+                observer.msg("%s stops." % self.caller.get_display_name(observer))
         else:
             self.caller.msg("You are not moving.")

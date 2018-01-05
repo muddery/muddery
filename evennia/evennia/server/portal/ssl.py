@@ -10,13 +10,18 @@ import sys
 try:
     import OpenSSL
     from twisted.internet import ssl as twisted_ssl
-except ImportError as err:
+except ImportError as error:
     errstr = """
     {err}
-    SSL requires the PyOpenSSL library:
-        pip install pyopenssl
+    SSL requires the PyOpenSSL library and dependencies:
+
+        pip install pyopenssl pycrypto enum pyasn1 service_identity
+
+    Stop and start Evennia again. If no certificate can be generated, you'll
+    get a suggestion for a (linux) command to generate this locally.
+
     """
-    raise ImportError(errstr.format(err=err))
+    raise ImportError(errstr.format(err=error))
 
 from django.conf import settings
 from evennia.server.portal.telnet import TelnetProtocol
@@ -50,9 +55,11 @@ class SSLProtocol(TelnetProtocol):
     Communication is the same as telnet, except data transfer
     is done with encryption.
     """
+
     def __init__(self, *args, **kwargs):
-        super(TelnetProtocol, self).__init__(*args, **kwargs)
+        super(SSLProtocol, self).__init__(*args, **kwargs)
         self.protocol_name = "ssl"
+
 
 def verify_SSL_key_and_cert(keyfile, certfile):
     """
@@ -82,7 +89,7 @@ def verify_SSL_key_and_cert(keyfile, certfile):
         # try to create the certificate
         CERT_EXPIRE = 365 * 20  # twenty years validity
         # default:
-        #openssl req -new -x509 -key ssl.key -out ssl.cert -days 7300
+        # openssl req -new -x509 -key ssl.key -out ssl.cert -days 7300
         exestring = "openssl req -new -x509 -key %s -out %s -days %s" % (keyfile, certfile, CERT_EXPIRE)
         try:
             subprocess.call(exestring)

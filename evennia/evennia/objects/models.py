@@ -18,6 +18,7 @@ from builtins import object
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.validators import validate_comma_separated_integer_list
 
 from evennia.typeclasses.models import TypedObject
 from evennia.objects.manager import ObjectDBManager
@@ -32,6 +33,7 @@ class ContentsHandler(object):
     for object-cmdsets). It is stored on the 'contents_cache' property
     of the ObjectDB.
     """
+
     def __init__(self, obj):
         """
         Sets up the contents handler.
@@ -51,8 +53,7 @@ class ContentsHandler(object):
         Re-initialize the content cache
 
         """
-        self._pkcache.update(dict((obj.pk, None) for obj in
-                            ObjectDB.objects.filter(db_location=self.obj) if obj.pk))
+        self._pkcache.update(dict((obj.pk, None) for obj in ObjectDB.objects.filter(db_location=self.obj) if obj.pk))
 
     def get(self, exclude=None):
         """
@@ -79,7 +80,7 @@ class ContentsHandler(object):
                 return [self._idcache[pk] for pk in pks]
             except KeyError:
                 # this means an actual failure of caching. Return real database match.
-                logger.log_err("contents cache failed for %s." % (self.obj.key))
+                logger.log_err("contents cache failed for %s." % self.obj.key)
                 return list(ObjectDB.objects.filter(db_location=self.obj))
 
     def add(self, obj):
@@ -110,11 +111,12 @@ class ContentsHandler(object):
         self._pkcache = {}
         self.init()
 
-#------------------------------------------------------------
+# -------------------------------------------------------------
 #
 # ObjectDB
 #
-#------------------------------------------------------------
+# -------------------------------------------------------------
+
 
 class ObjectDB(TypedObject):
     """
@@ -140,16 +142,16 @@ class ObjectDB(TypedObject):
 
     The ObjectDB adds the following properties:
 
-      - player - optional connected player (always together with sessid)
-      - sessid - optional connection session id (always together with player)
+      - account - optional connected account (always together with sessid)
+      - sessid - optional connection session id (always together with account)
       - location - in-game location of object
       - home - safety location for object (handler)
       - scripts - scripts assigned to object (handler from typeclass)
       - cmdset - active cmdset on object (handler from typeclass)
       - aliases - aliases for this object (property)
       - nicks - nicknames for *other* things in Evennia (handler)
-      - sessions - sessions connected to this object (see also player)
-      - has_player - bool if an active player is currently connected
+      - sessions - sessions connected to this object (see also account)
+      - has_account - bool if an active account is currently connected
       - contents - other objects having this object as location
       - exits - exits from this object
 
@@ -168,22 +170,25 @@ class ObjectDB(TypedObject):
     # self.key instead). The wrappers are created at the metaclass level and
     # will automatically save and cache the data more efficiently.
 
-    # If this is a character object, the player is connected here.
-    db_player = models.ForeignKey("players.PlayerDB", null=True, verbose_name='player', on_delete=models.SET_NULL,
-                                  help_text='a Player connected to this object, if any.')
-    # the session id associated with this player, if any
-    db_sessid = models.CommaSeparatedIntegerField(null=True, max_length=32, verbose_name="session id",
-                                    help_text="csv list of session ids of connected Player, if any.")
+    # If this is a character object, the account is connected here.
+    db_account = models.ForeignKey("accounts.AccountDB", null=True, verbose_name='account', on_delete=models.SET_NULL,
+                                   help_text='an Account connected to this object, if any.')
+
+    # the session id associated with this account, if any
+    db_sessid = models.CharField(null=True, max_length=32, validators=[validate_comma_separated_integer_list],
+                                 verbose_name="session id",
+                                 help_text="csv list of session ids of connected Account, if any.")
     # The location in the game world. Since this one is likely
     # to change often, we set this with the 'location' property
     # to transparently handle Typeclassing.
     db_location = models.ForeignKey('self', related_name="locations_set", db_index=True, on_delete=models.SET_NULL,
-                                     blank=True, null=True, verbose_name='game location')
+                                    blank=True, null=True, verbose_name='game location')
     # a safety location, this usually don't change much.
     db_home = models.ForeignKey('self', related_name="homes_set", on_delete=models.SET_NULL,
-                                 blank=True, null=True, verbose_name='home location')
+                                blank=True, null=True, verbose_name='home location')
     # destination of this object - primarily used by exits.
-    db_destination = models.ForeignKey('self', related_name="destinations_set", db_index=True, on_delete=models.SET_NULL,
+    db_destination = models.ForeignKey('self', related_name="destinations_set",
+                                       db_index=True, on_delete=models.SET_NULL,
                                        blank=True, null=True, verbose_name='destination',
                                        help_text='a destination, used only by exit objects.')
     # database storage of persistant cmdsets.
@@ -195,7 +200,7 @@ class ObjectDB(TypedObject):
 
     # defaults
     __settingsclasspath__ = settings.BASE_OBJECT_TYPECLASS
-    __defaultclasspath__ = "muddery.typeclasses.objects.MudderyObject"
+    __defaultclasspath__ = "evennia.objects.objects.DefaultObject"
     __applabel__ = "objects"
 
     @lazy_property
@@ -204,28 +209,28 @@ class ObjectDB(TypedObject):
 
     # cmdset_storage property handling
     def __cmdset_storage_get(self):
-        "getter"
+        """getter"""
         storage = self.db_cmdset_storage
         return [path.strip() for path in storage.split(',')] if storage else []
 
     def __cmdset_storage_set(self, value):
-        "setter"
-        self.db_cmdset_storage =  ",".join(str(val).strip() for val in make_iter(value))
+        """setter"""
+        self.db_cmdset_storage = ",".join(str(val).strip() for val in make_iter(value))
         self.save(update_fields=["db_cmdset_storage"])
 
     def __cmdset_storage_del(self):
-        "deleter"
+        """deleter"""
         self.db_cmdset_storage = None
         self.save(update_fields=["db_cmdset_storage"])
     cmdset_storage = property(__cmdset_storage_get, __cmdset_storage_set, __cmdset_storage_del)
 
     # location getsetter
     def __location_get(self):
-        "Get location"
+        """Get location"""
         return self.db_location
 
     def __location_set(self, location):
-        "Set location, checking for loops and allowing dbref"
+        """Set location, checking for loops and allowing dbref"""
         if isinstance(location, (basestring, int)):
             # allow setting of #dbref
             dbid = dbref(location, reqhash=False)
@@ -237,17 +242,19 @@ class ObjectDB(TypedObject):
                     pass
         try:
             def is_loc_loop(loc, depth=0):
-                "Recursively traverse target location, trying to catch a loop."
+                """Recursively traverse target location, trying to catch a loop."""
                 if depth > 10:
-                    return
+                    return None
                 elif loc == self:
                     raise RuntimeError
-                elif loc == None:
+                elif loc is None:
                     raise RuntimeWarning
                 return is_loc_loop(loc.db_location, depth + 1)
             try:
                 is_loc_loop(location)
             except RuntimeWarning:
+                # we caught an infinite location loop!
+                # (location1 is in location2 which is in location1 ...)
                 pass
 
             # if we get to this point we are ready to change location
@@ -276,9 +283,10 @@ class ObjectDB(TypedObject):
         except Exception as e:
             errmsg = "Error (%s): %s is not a valid location." % (str(e), location)
             raise RuntimeError(errmsg)
+        return
 
     def __location_del(self):
-        "Cleanly delete the location reference"
+        """Cleanly delete the location reference"""
         self.db_location = None
         self.save(update_fields=["db_location"])
     location = property(__location_get, __location_set, __location_del)
@@ -308,7 +316,6 @@ class ObjectDB(TypedObject):
                 [o.contents_cache.init() for o in self.__dbclass__.get_all_cached_instances()]
 
     class Meta(object):
-        "Define Django meta options"
+        """Define Django meta options"""
         verbose_name = "Object"
         verbose_name_plural = "Objects"
-

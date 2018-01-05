@@ -32,7 +32,7 @@ packages).
 try:
     from twisted.conch.ssh.keys import Key
 except ImportError:
-    raise ImportError (_SSH_IMPORT_ERROR)
+    raise ImportError(_SSH_IMPORT_ERROR)
 
 from twisted.conch.ssh.userauth import SSHUserAuthServer
 from twisted.conch.ssh import common
@@ -45,11 +45,11 @@ from twisted.python import components
 from django.conf import settings
 
 from evennia.server import session
-from evennia.players.models import PlayerDB
+from evennia.accounts.models import AccountDB
 from evennia.utils import ansi
 from evennia.utils.utils import to_str
 
-_RE_N = re.compile(r"\{n$")
+_RE_N = re.compile(r"\|n$")
 _RE_SCREENREADER_REGEX = re.compile(r"%s" % settings.SCREENREADER_REGEX_STRIP, re.DOTALL + re.MULTILINE)
 _GAME_DIR = settings.GAME_DIR
 
@@ -61,21 +61,22 @@ CTRL_L = '\x0c'
 
 class SshProtocol(Manhole, session.Session):
     """
-    Each player connecting over ssh gets this protocol assigned to
-    them.  All communication between game and player goes through
+    Each account connecting over ssh gets this protocol assigned to
+    them.  All communication between game and account goes through
     here.
 
     """
+
     def __init__(self, starttuple):
         """
-        For setting up the player.  If player is not None then we'll
+        For setting up the account.  If account is not None then we'll
         login automatically.
 
         Args:
-            starttuple (tuple): A (player, factory) tuple.
+            starttuple (tuple): A (account, factory) tuple.
 
         """
-        self.authenticated_player = starttuple[0]
+        self.authenticated_account = starttuple[0]
         # obs must not be called self.factory, that gets overwritten!
         self.cfactory = starttuple[1]
 
@@ -101,9 +102,9 @@ class SshProtocol(Manhole, session.Session):
         self.init_session("ssh", client_address, self.cfactory.sessionhandler)
 
         # since we might have authenticated already, we might set this here.
-        if self.authenticated_player:
+        if self.authenticated_account:
             self.logged_in = True
-            self.uid = self.authenticated_player.user.id
+            self.uid = self.authenticated_account.user.id
         self.sessionhandler.connect(self)
 
     def connectionMade(self):
@@ -206,11 +207,17 @@ class SshProtocol(Manhole, session.Session):
 
         """
         for line in string.split('\n'):
-            #this is the telnet-specific method for sending
+            # the telnet-specific method for sending
             self.terminal.write(line)
             self.terminal.nextLine()
 
     # session-general method hooks
+
+    def at_login(self):
+        """
+        Called when this session gets authenticated by the server.
+        """
+        pass
 
     def disconnect(self, reason="Connection closed. Goodbye for now."):
         """
@@ -246,8 +253,7 @@ class SshProtocol(Manhole, session.Session):
                    - mxp: Enforce MXP link support.
                    - ansi: Enforce no ANSI colors.
                    - xterm256: Enforce xterm256 colors, regardless of TTYPE setting.
-                   - noxterm256: Enforce no xterm256 color support, regardless of TTYPE.
-                   - nomarkup: Strip all ANSI markup. This is the same as noxterm256,noansi
+                   - nocolor: Strip all colors.
                    - raw: Pass string through without any ansi processing
                         (i.e. include Evennia ansi markers but do not
                         convert them into ansi tokens)
@@ -256,7 +262,7 @@ class SshProtocol(Manhole, session.Session):
                         Note that it must be actively turned back on again!
 
         """
-        #print "telnet.send_text", args,kwargs
+        # print "telnet.send_text", args,kwargs  # DEBUG
         text = args[0] if args else ""
         if text is None:
             return
@@ -265,12 +271,12 @@ class SshProtocol(Manhole, session.Session):
         # handle arguments
         options = kwargs.get("options", {})
         flags = self.protocol_flags
-        xterm256 = options.get("xterm256", flags.get('XTERM256', False) if flags.get("TTYPE") else True)
-        useansi = options.get("ansi", flags.get('ANSI', False) if flags.get("TTYPE") else True)
+        xterm256 = options.get("xterm256", flags.get('XTERM256', True))
+        useansi = options.get("ansi", flags.get('ANSI', True))
         raw = options.get("raw", flags.get("RAW", False))
-        nomarkup = options.get("nomarkup", flags.get("NOMARKUP", not (xterm256 or useansi)))
-        #echo = options.get("echo", None)
-        screenreader =  options.get("screenreader", flags.get("SCREENREADER", False))
+        nocolor = options.get("nocolor", flags.get("NOCOLOR") or not (xterm256 or useansi))
+        # echo = options.get("echo", None)  # DEBUG
+        screenreader = options.get("screenreader", flags.get("SCREENREADER", False))
 
         if screenreader:
             # screenreader mode cleans up output
@@ -284,7 +290,8 @@ class SshProtocol(Manhole, session.Session):
         else:
             # we need to make sure to kill the color at the end in order
             # to match the webclient output.
-            linetosend = ansi.parse_ansi(_RE_N.sub("", text) + "{n", strip_ansi=nomarkup, xterm256=xterm256, mxp=False)
+            linetosend = ansi.parse_ansi(_RE_N.sub("", text) + ("||n" if text.endswith("|") else "|n"),
+                                         strip_ansi=nocolor, xterm256=xterm256, mxp=False)
             self.sendLine(linetosend)
 
     def send_prompt(self, *args, **kwargs):
@@ -310,13 +317,13 @@ class ExtraInfoAuthServer(SSHUserAuthServer):
         c = credentials.UsernamePassword(self.user, password)
         c.transport = self.transport
         return self.portal.login(c, None, IConchUser).addErrback(
-                                                        self._ebPassword)
+            self._ebPassword)
 
 
-class PlayerDBPasswordChecker(object):
+class AccountDBPasswordChecker(object):
     """
     Checks the django db for the correct credentials for
-    username/password otherwise it returns the player or None which is
+    username/password otherwise it returns the account or None which is
     useful for the Realm.
 
     """
@@ -331,7 +338,7 @@ class PlayerDBPasswordChecker(object):
 
         """
         self.factory = factory
-        super(PlayerDBPasswordChecker, self).__init__()
+        super(AccountDBPasswordChecker, self).__init__()
 
     def requestAvatarId(self, c):
         """
@@ -341,10 +348,10 @@ class PlayerDBPasswordChecker(object):
         up = credentials.IUsernamePassword(c, None)
         username = up.username
         password = up.password
-        player = PlayerDB.objects.get_player_from_name(username)
+        account = AccountDB.objects.get_account_from_name(username)
         res = (None, self.factory)
-        if player and player.check_password(password):
-            res = (player, self.factory)
+        if account and account.check_password(password):
+            res = (account, self.factory)
         return defer.succeed(res)
 
 
@@ -375,6 +382,7 @@ class TerminalSessionTransport_getPeer(object):
     provide getPeer to the transport.  This one does.
 
     """
+
     def __init__(self, proto, chainedProtocol, avatar, width, height):
         self.proto = proto
         self.avatar = avatar
@@ -454,15 +462,14 @@ def makeFactory(configdict):
         factory.publicKeys = {'ssh-rsa': publicKey}
         factory.privateKeys = {'ssh-rsa': privateKey}
     except Exception as err:
-        print ( "getKeyPair error: {err}\n WARNING: Evennia could not " \
-                "auto-generate SSH keypair. Using conch default keys instead.\n" \
-                "If this error persists, create {pub} and " \
-                "{priv} yourself using third-party tools.".format(
-                    err=err, pub=pubkeyfile, priv=privkeyfile))
+        print("getKeyPair error: {err}\n WARNING: Evennia could not "
+              "auto-generate SSH keypair. Using conch default keys instead.\n"
+              "If this error persists, create {pub} and "
+              "{priv} yourself using third-party tools.".format(err=err, pub=pubkeyfile, priv=privkeyfile))
 
     factory.services = factory.services.copy()
     factory.services['ssh-userauth'] = ExtraInfoAuthServer
 
-    factory.portal.registerChecker(PlayerDBPasswordChecker(factory))
+    factory.portal.registerChecker(AccountDBPasswordChecker(factory))
 
     return factory

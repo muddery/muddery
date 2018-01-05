@@ -8,10 +8,8 @@ are stored on the Portal side)
 """
 from builtins import object
 
-import re
 import weakref
-import importlib
-from time import time
+import time
 from django.utils import timezone
 from django.conf import settings
 from evennia.comms.models import ChannelDB
@@ -19,8 +17,7 @@ from evennia.utils import logger
 from evennia.utils.utils import make_iter, lazy_property
 from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.server.session import Session
-
-ClientSessionStore = importlib.import_module(settings.SESSION_ENGINE).SessionStore
+from evennia.scripts.monitorhandler import MONITOR_HANDLER
 
 _GA = object.__getattribute__
 _SA = object.__setattr__
@@ -32,8 +29,10 @@ from django.utils.translation import ugettext as _
 
 # Handlers for Session.db/ndb operation
 
+
 class NDbHolder(object):
-    "Holder for allowing property access of attributes"
+    """Holder for allowing property access of attributes"""
+
     def __init__(self, obj, name, manager_name='attributes'):
         _SA(self, name, _GA(obj, manager_name))
         _SA(self, 'name', name)
@@ -64,6 +63,7 @@ class NAttributeHandler(object):
     by the `.ndb` handler in the same way as `.db` does
     for the `AttributeHandler`.
     """
+
     def __init__(self, obj):
         """
         Initialized on the object
@@ -145,24 +145,25 @@ class NAttributeHandler(object):
         return [key for key in self._store if not key.startswith("_")]
 
 
-#------------------------------------------------------------
+# -------------------------------------------------------------
 # Server Session
-#------------------------------------------------------------
+# -------------------------------------------------------------
 
 class ServerSession(Session):
     """
-    This class represents a player's session and is a template for
+    This class represents an account's session and is a template for
     individual protocols to communicate with Evennia.
 
-    Each player gets a session assigned to them whenever they connect
-    to the game server. All communication between game and player goes
+    Each account gets a session assigned to them whenever they connect
+    to the game server. All communication between game and account goes
     through their session.
 
     """
+
     def __init__(self):
-        "Initiate to avoid AttributeErrors down the line"
+        """Initiate to avoid AttributeErrors down the line"""
         self.puppet = None
-        self.player = None
+        self.account = None
         self.cmdset_storage_string = ""
         self.cmdset = CmdSetHandler(self, True)
 
@@ -177,7 +178,7 @@ class ServerSession(Session):
         """
         This is called whenever a session has been resynced with the
         portal.  At this point all relevant attributes have already
-        been set and self.player been assigned (if applicable).
+        been set and self.account been assigned (if applicable).
 
         Since this is often called after a server restart we need to
         set up the session as it was.
@@ -200,75 +201,70 @@ class ServerSession(Session):
             # hooks, echoes or access checks.
             obj = _ObjectDB.objects.get(id=self.puid)
             obj.sessions.add(self)
-            obj.player = self.player
+            obj.account = self.account
             self.puid = obj.id
             self.puppet = obj
-            #obj.scripts.validate()
+            # obj.scripts.validate()
             obj.locks.cache_lock_bypass(obj)
 
-    def at_login(self, player):
+    def at_login(self, account):
         """
         Hook called by sessionhandler when the session becomes authenticated.
 
         Args:
-            player (Player): The player associated with the session.
+            account (Account): The account associated with the session.
 
         """
-        self.player = player
-        self.uid = self.player.id
-        self.uname = self.player.username
+        self.account = account
+        self.uid = self.account.id
+        self.uname = self.account.username
         self.logged_in = True
-        self.conn_time = time()
+        self.conn_time = time.time()
         self.puid = None
         self.puppet = None
         self.cmdset_storage = settings.CMDSET_SESSION
 
-        if self.csessid:
-            # An existing client sessid is registered, thus a matching
-            # Client Session must also exist. Update it so the website
-            # can also see we are logged in.
-            csession = ClientSessionStore(session_key=self.csessid)
-            if not csession.get("logged_in"):
-                csession["logged_in"] = player.id
-                csession.save()
-
         # Update account's last login time.
-        self.player.last_login = timezone.now()
-        self.player.save()
+        self.account.last_login = timezone.now()
+        self.account.save()
 
         # add the session-level cmdset
         self.cmdset = CmdSetHandler(self, True)
 
-    def at_disconnect(self):
+    def at_disconnect(self, reason=None):
         """
         Hook called by sessionhandler when disconnecting this session.
 
         """
         if self.logged_in:
-            player = self.player
+            account = self.account
             if self.puppet:
-                player.unpuppet_object(self)
-            uaccount = player
+                account.unpuppet_object(self)
+            uaccount = account
             uaccount.last_login = timezone.now()
             uaccount.save()
-            # calling player hook
-            player.at_disconnect()
+            # calling account hook
+            account.at_disconnect(reason)
             self.logged_in = False
-            if not self.sessionhandler.sessions_from_player(player):
-                # no more sessions connected to this player
-                player.is_connected = False
-            # this may be used to e.g. delete player after disconnection etc
-            player.at_post_disconnect()
+            if not self.sessionhandler.sessions_from_account(account):
+                # no more sessions connected to this account
+                account.is_connected = False
+            # this may be used to e.g. delete account after disconnection etc
+            account.at_post_disconnect()
+            # remove any webclient settings monitors associated with this
+            # session
+            MONITOR_HANDLER.remove(account, "_saved_webclient_options",
+                                   self.sessid)
 
-    def get_player(self):
+    def get_account(self):
         """
-        Get the player associated with this session
+        Get the account associated with this session
 
         Returns:
-            player (Player): The associated Player.
+            account (Account): The associated Account.
 
         """
-        return self.logged_in and self.player
+        return self.logged_in and self.account
 
     def get_puppet(self):
         """
@@ -281,17 +277,17 @@ class ServerSession(Session):
         return self.logged_in and self.puppet
     get_character = get_puppet
 
-    def get_puppet_or_player(self):
+    def get_puppet_or_account(self):
         """
-        Get puppet or player.
+        Get puppet or account.
 
         Returns:
-            controller (Object or Player): The puppet if one exists,
-                otherwise return the player.
+            controller (Object or Account): The puppet if one exists,
+                otherwise return the account.
 
         """
         if self.logged_in:
-            return self.puppet if self.puppet else self.player
+            return self.puppet if self.puppet else self.account
         return None
 
     def log(self, message, channel=True):
@@ -304,13 +300,13 @@ class ServerSession(Session):
                 in addition to the server log.
 
         """
-        if channel:
+        cchan = channel and settings.CHANNEL_CONNECTINFO
+        if cchan:
             try:
-                cchan = settings.CHANNEL_CONNECTINFO
                 cchan = ChannelDB.objects.get_channel(cchan[0])
                 cchan.msg("[%s]: %s" % (cchan.key, message))
             except Exception:
-                pass
+                logger.log_trace()
         logger.log_info(message)
 
     def get_client_size(self):
@@ -332,13 +328,13 @@ class ServerSession(Session):
 
         """
         # Idle time used for timeout calcs.
-        self.cmd_last = time()
+        self.cmd_last = time.time()
 
         # Store the timestamp of the user's last command.
         if not idle:
             # Increment the user's command counter.
             self.cmd_total += 1
-            # Player-visible idle time, not used in idle timeout calcs.
+            # Account-visible idle time, not used in idle timeout calcs.
             self.cmd_last_visible = self.cmd_last
 
     def update_flags(self, **kwargs):
@@ -358,7 +354,6 @@ class ServerSession(Session):
         if kwargs:
             self.protocol_flags.update(kwargs)
             self.sessionhandler.session_portal_sync(self)
-
 
     def data_out(self, **kwargs):
         """
@@ -391,7 +386,7 @@ class ServerSession(Session):
 
     def msg(self, text=None, **kwargs):
         """
-        Wrapper to mimic msg() functionality of Objects and Players.
+        Wrapper to mimic msg() functionality of Objects and Accounts.
 
         Args:
             text (str): String input.
@@ -405,6 +400,7 @@ class ServerSession(Session):
         # this can happen if this is triggered e.g. a command.msg
         # that auto-adds the session, we'd get a kwarg collision.
         kwargs.pop("session", None)
+        kwargs.pop("from_obj", None)
         if text is not None:
             self.data_out(text=text, **kwargs)
         else:
@@ -432,11 +428,17 @@ class ServerSession(Session):
         self.sessionhandler.data_in(self, **kwargs)
 
     def __eq__(self, other):
-        "Handle session comparisons"
+        """Handle session comparisons"""
         try:
             return self.address == other.address
         except AttributeError:
             return False
+
+    def __ne__(self, other):
+        try:
+            return self.address != other.address
+        except AttributeError:
+            return True
 
     def __str__(self):
         """
@@ -445,8 +447,8 @@ class ServerSession(Session):
 
         """
         symbol = ""
-        if self.logged_in and hasattr(self, "player") and self.player:
-            symbol = "(#%s)" % self.player.id
+        if self.logged_in and hasattr(self, "account") and self.account:
+            symbol = "(#%s)" % self.account.id
         try:
             if hasattr(self.address, '__iter__'):
                 address = ":".join([str(part) for part in self.address])
@@ -457,10 +459,8 @@ class ServerSession(Session):
         return "%s%s@%s" % (self.uname, symbol, address)
 
     def __unicode__(self):
-        "Unicode representation"
+        """Unicode representation"""
         return u"%s" % str(self)
-
-
 
     # Dummy API hooks for use during non-loggedin operation
 
@@ -483,7 +483,7 @@ class ServerSession(Session):
     def attributes(self):
         return self.nattributes
 
-    #@property
+    # @property
     def ndb_get(self):
         """
         A non-persistent store (ndb: NonDataBase). Everything stored
@@ -498,7 +498,7 @@ class ServerSession(Session):
             self._ndb_holder = NDbHolder(self, "nattrhandler", manager_name="nattributes")
             return self._ndb_holder
 
-    #@ndb.setter
+    # @ndb.setter
     def ndb_set(self, value):
         """
         Stop accidentally replacing the db object
@@ -508,12 +508,12 @@ class ServerSession(Session):
 
         """
         string = "Cannot assign directly to ndb object! "
-        string = "Use ndb.attr=value instead."
+        string += "Use ndb.attr=value instead."
         raise Exception(string)
 
-    #@ndb.deleter
+    # @ndb.deleter
     def ndb_del(self):
-        "Stop accidental deletion."
+        """Stop accidental deletion."""
         raise Exception("Cannot delete the ndb object!")
     ndb = property(ndb_get, ndb_set, ndb_del)
     db = property(ndb_get, ndb_set, ndb_del)
@@ -521,5 +521,5 @@ class ServerSession(Session):
     # Mock access method for the session (there is no lock info
     # at this stage, so we just present a uniform API)
     def access(self, *args, **kwargs):
-        "Dummy method to mimic the logged-in API."
+        """Dummy method to mimic the logged-in API."""
         return True

@@ -23,7 +23,7 @@ from evennia.contrib.tutorial_world.objects import LightSource
 from django.conf import settings
 _SEARCH_AT_RESULT = utils.object_from_module(settings.SEARCH_AT_RESULT)
 
-#------------------------------------------------------------
+# -------------------------------------------------------------
 #
 # Tutorial room - parent room class
 #
@@ -31,11 +31,11 @@ _SEARCH_AT_RESULT = utils.object_from_module(settings.SEARCH_AT_RESULT)
 # It defines a tutorial command on itself (available to
 # all those who are in a tutorial room).
 #
-#------------------------------------------------------------
+# -------------------------------------------------------------
 
 #
 # Special command available in all tutorial rooms
-#
+
 
 class CmdTutorial(Command):
     """
@@ -62,16 +62,16 @@ class CmdTutorial(Command):
         caller = self.caller
 
         if not self.args:
-            target = self.obj # this is the room the command is defined on
+            target = self.obj  # this is the room the command is defined on
         else:
             target = caller.search(self.args.strip())
             if not target:
                 return
         helptext = target.db.tutorial_info
         if helptext:
-            caller.msg("{G%s{n" % helptext)
+            caller.msg("|G%s|n" % helptext)
         else:
-            caller.msg("{RSorry, there is no tutorial help available here.{n")
+            caller.msg("|RSorry, there is no tutorial help available here.|n")
 
 
 # for the @detail command we inherit from MuxCommand, since
@@ -98,7 +98,7 @@ class CmdTutorialSetDetail(default_cmds.MuxCommand):
     multiple aliases to the detail all at once.
     """
     key = "@detail"
-    locks = "cmd:perm(Builders)"
+    locks = "cmd:perm(Builder)"
     help_category = "TutorialWorld"
 
     def func(self):
@@ -126,7 +126,7 @@ class CmdTutorialLook(default_cmds.CmdLook):
     Usage:
         look <obj>
         look <room detail>
-        look *<player>
+        look *<account>
 
     Observes your location, details at your location or objects
     in your vicinity.
@@ -168,7 +168,7 @@ class CmdTutorialLook(default_cmds.CmdLook):
                 else:
                     # no detail found, delegate our result to the normal
                     # error message handler.
-                    _SEARCH_AT_RESULT(None, caller, args, looking_at_obj)
+                    _SEARCH_AT_RESULT(looking_at_obj, caller, args)
                     return
             else:
                 # we found a match, extract it from the list and carry on
@@ -182,7 +182,7 @@ class CmdTutorialLook(default_cmds.CmdLook):
                 return
 
         if not hasattr(looking_at_obj, 'return_appearance'):
-            # this is likely due to us having a player instead
+            # this is likely due to us having an account instead
             looking_at_obj = looking_at_obj.character
         if not looking_at_obj.access(caller, "view"):
             caller.msg("Could not find '%s'." % args)
@@ -191,7 +191,7 @@ class CmdTutorialLook(default_cmds.CmdLook):
         caller.msg(looking_at_obj.return_appearance(caller))
         # the object's at_desc() method.
         looking_at_obj.at_desc(looker=caller)
-
+        return
 
 
 class TutorialRoomCmdSet(CmdSet):
@@ -204,7 +204,7 @@ class TutorialRoomCmdSet(CmdSet):
     priority = 1
 
     def at_cmdset_creation(self):
-        "add the tutorial-room commands"
+        """add the tutorial-room commands"""
         self.add(CmdTutorial())
         self.add(CmdTutorialSetDetail())
         self.add(CmdTutorialLook())
@@ -215,8 +215,9 @@ class TutorialRoom(DefaultRoom):
     This is the base room type for all rooms in the tutorial world.
     It defines a cmdset on itself for reading tutorial info about the location.
     """
+
     def at_object_creation(self):
-        "Called when room is first created"
+        """Called when room is first created"""
         self.db.tutorial_info = "This is a tutorial room. It allows you to use the 'tutorial' command."
         self.cmdset.add_default(TutorialRoomCmdSet)
 
@@ -232,7 +233,7 @@ class TutorialRoom(DefaultRoom):
             source_location (Object): the previous location of new_arrival.
 
         """
-        if new_arrival.has_player and not new_arrival.is_superuser:
+        if new_arrival.has_account and not new_arrival.is_superuser:
             # this is a character
             for obj in self.contents_get(exclude=new_arrival):
                 if hasattr(obj, "at_new_arrival"):
@@ -270,25 +271,26 @@ class TutorialRoom(DefaultRoom):
             self.db.details = {detailkey.lower(): description}
 
 
-#------------------------------------------------------------
+# -------------------------------------------------------------
 #
 # Weather room - room with a ticker
 #
-#------------------------------------------------------------
+# -------------------------------------------------------------
 
 # These are rainy weather strings
 WEATHER_STRINGS = (
-        "The rain coming down from the iron-grey sky intensifies.",
-        "A gush of wind throws the rain right in your face. Despite your cloak you shiver.",
-        "The rainfall eases a bit and the sky momentarily brightens.",
-        "For a moment it looks like the rain is slowing, then it begins anew with renewed force.",
-        "The rain pummels you with large, heavy drops. You hear the rumble of thunder in the distance.",
-        "The wind is picking up, howling around you, throwing water droplets in your face. It's cold.",
-        "Bright fingers of lightning flash over the sky, moments later followed by a deafening rumble.",
-        "It rains so hard you can hardly see your hand in front of you. You'll soon be drenched to the bone.",
-        "Lightning strikes in several thundering bolts, striking the trees in the forest to your west.",
-        "You hear the distant howl of what sounds like some sort of dog or wolf.",
-        "Large clouds rush across the sky, throwing their load of rain over the world.")
+    "The rain coming down from the iron-grey sky intensifies.",
+    "A gust of wind throws the rain right in your face. Despite your cloak you shiver.",
+    "The rainfall eases a bit and the sky momentarily brightens.",
+    "For a moment it looks like the rain is slowing, then it begins anew with renewed force.",
+    "The rain pummels you with large, heavy drops. You hear the rumble of thunder in the distance.",
+    "The wind is picking up, howling around you, throwing water droplets in your face. It's cold.",
+    "Bright fingers of lightning flash over the sky, moments later followed by a deafening rumble.",
+    "It rains so hard you can hardly see your hand in front of you. You'll soon be drenched to the bone.",
+    "Lightning strikes in several thundering bolts, striking the trees in the forest to your west.",
+    "You hear the distant howl of what sounds like some sort of dog or wolf.",
+    "Large clouds rush across the sky, throwing their load of rain over the world.")
+
 
 class WeatherRoom(TutorialRoom):
     """
@@ -299,6 +301,7 @@ class WeatherRoom(TutorialRoom):
     inherit from this.
 
     """
+
     def at_object_creation(self):
         """
         Called when object is first created.
@@ -312,8 +315,8 @@ class WeatherRoom(TutorialRoom):
         # subscribe ourselves to a ticker to repeatedly call the hook
         # "update_weather" on this object. The interval is randomized
         # so as to not have all weather rooms update at the same time.
-        interval = random.randint(50, 70)
-        TICKER_HANDLER.add(interval=interval, callback=self.update_weather, idstring="tutorial")
+        self.db.interval = random.randint(50, 70)
+        TICKER_HANDLER.add(interval=self.db.interval, callback=self.update_weather, idstring="tutorial")
         # this is parsed by the 'tutorial' command on TutorialRooms.
         self.db.tutorial_info = \
             "This room has a Script running that has it echo a weather-related message at irregular intervals."
@@ -328,8 +331,7 @@ class WeatherRoom(TutorialRoom):
         """
         if random.random() < 0.2:
             # only update 20 % of the time
-            self.msg_contents("{w%s{n" % random.choice(WEATHER_STRINGS))
-
+            self.msg_contents("|w%s|n" % random.choice(WEATHER_STRINGS))
 
 
 SUPERUSER_WARNING = "\nWARNING: You are playing as a superuser ({name}). Use the {quell} command to\n" \
@@ -338,14 +340,15 @@ SUPERUSER_WARNING = "\nWARNING: You are playing as a superuser ({name}). Use the
                     "the scenes later).\n" \
 
 
-#-----------------------------------------------------------
+# ------------------------------------------------------------
 #
 # Intro Room - unique room
 #
 # This room marks the start of the tutorial. It sets up properties on
 # the player char that is needed for the tutorial.
 #
-#------------------------------------------------------------
+# -------------------------------------------------------------
+
 
 class IntroRoom(TutorialRoom):
     """
@@ -354,6 +357,7 @@ class IntroRoom(TutorialRoom):
     properties to customize:
      char_health - integer > 0 (default 20)
     """
+
     def at_object_creation(self):
         """
         Called when the room is first created.
@@ -361,7 +365,7 @@ class IntroRoom(TutorialRoom):
         super(IntroRoom, self).at_object_creation()
         self.db.tutorial_info = "The first room of the tutorial. " \
                                 "This assigns the health Attribute to "\
-                                "the player."
+                                "the account."
 
     def at_object_receive(self, character, source_location):
         """
@@ -371,30 +375,30 @@ class IntroRoom(TutorialRoom):
         # setup character for the tutorial
         health = self.db.char_health or 20
 
-        if character.has_player:
+        if character.has_account:
             character.db.health = health
             character.db.health_max = health
 
         if character.is_superuser:
-            string = "-"*78 + SUPERUSER_WARNING + "-"*78
-            character.msg("{r%s{n" % string.format(name=character.key, quell="{w@quell{r"))
+            string = "-" * 78 + SUPERUSER_WARNING + "-" * 78
+            character.msg("|r%s|n" % string.format(name=character.key, quell="|w@quell|r"))
 
 
-#------------------------------------------------------------
+# -------------------------------------------------------------
 #
 # Bridge - unique room
 #
 # Defines a special west-eastward "bridge"-room, a large room that takes
 # several steps to cross. It is complete with custom commands and a
 # chance of falling off the bridge. This room has no regular exits,
-# instead the exitings are handled by custom commands set on the player
+# instead the exitings are handled by custom commands set on the account
 # upon first entering the room.
 #
 # Since one can enter the bridge room from both ends, it is
 # divided into five steps:
 #       westroom <- 0 1 2 3 4 -> eastroom
 #
-#------------------------------------------------------------
+# -------------------------------------------------------------
 
 
 class CmdEast(Command):
@@ -419,7 +423,7 @@ class CmdEast(Command):
     help_category = "TutorialWorld"
 
     def func(self):
-        "move one step eastwards"
+        """move one step eastwards"""
         caller = self.caller
 
         bridge_step = min(5, caller.db.tutorial_bridge_position + 1)
@@ -463,7 +467,7 @@ class CmdWest(Command):
     help_category = "TutorialWorld"
 
     def func(self):
-        "move one step westwards"
+        """move one step westwards"""
         caller = self.caller
 
         bridge_step = max(-1, caller.db.tutorial_bridge_position - 1)
@@ -484,25 +488,31 @@ class CmdWest(Command):
         caller.execute_cmd("look")
 
 
-BRIDGE_POS_MESSAGES = ("You are standing {wvery close to the the bridge's western foundation{n. If you go west you will be back on solid ground ...",
-                       "The bridge slopes precariously where it extends eastwards towards the lowest point - the center point of the hang bridge.",
-                       "You are {whalfways{n out on the unstable bridge.",
-                       "The bridge slopes precariously where it extends westwards towards the lowest point - the center point of the hang bridge.",
-                       "You are standing {wvery close to the bridge's eastern foundation{n. If you go east you will be back on solid ground ...")
+BRIDGE_POS_MESSAGES = ("You are standing |wvery close to the the bridge's western foundation|n."
+                       " If you go west you will be back on solid ground ...",
+                       "The bridge slopes precariously where it extends eastwards"
+                       " towards the lowest point - the center point of the hang bridge.",
+                       "You are |whalfways|n out on the unstable bridge.",
+                       "The bridge slopes precariously where it extends westwards"
+                       " towards the lowest point - the center point of the hang bridge.",
+                       "You are standing |wvery close to the bridge's eastern foundation|n."
+                       " If you go east you will be back on solid ground ...")
 BRIDGE_MOODS = ("The bridge sways in the wind.", "The hanging bridge creaks dangerously.",
                 "You clasp the ropes firmly as the bridge sways and creaks under you.",
                 "From the castle you hear a distant howling sound, like that of a large dog or other beast.",
                 "The bridge creaks under your feet. Those planks does not seem very sturdy.",
-                "Far below you the ocean roars and throws its waves against the cliff, as if trying its best to reach you.",
+                "Far below you the ocean roars and throws its waves against the cliff,"
+                " as if trying its best to reach you.",
                 "Parts of the bridge come loose behind you, falling into the chasm far below!",
                 "A gust of wind causes the bridge to sway precariously.",
                 "Under your feet a plank comes loose, tumbling down. For a moment you dangle over the abyss ...",
-                "The section of rope you hold onto crumble in your hands, parts of it breaking apart. You sway trying to regain balance.")
+                "The section of rope you hold onto crumble in your hands,"
+                " parts of it breaking apart. You sway trying to regain balance.")
 
 FALL_MESSAGE = "Suddenly the plank you stand on gives way under your feet! You fall!" \
                "\nYou try to grab hold of an adjoining plank, but all you manage to do is to " \
                "divert your fall westwards, towards the cliff face. This is going to hurt ... " \
-               "\n ... The world goes dark ...\n\n" \
+               "\n ... The world goes dark ...\n\n"
 
 
 class CmdLookBridge(Command):
@@ -520,20 +530,20 @@ class CmdLookBridge(Command):
     help_category = "TutorialWorld"
 
     def func(self):
-        "Looking around, including a chance to fall."
+        """Looking around, including a chance to fall."""
         caller = self.caller
         bridge_position = self.caller.db.tutorial_bridge_position
         # this command is defined on the room, so we get it through self.obj
         location = self.obj
         # randomize the look-echo
-        message = "{c%s{n\n%s\n%s" % (location.key,
+        message = "|c%s|n\n%s\n%s" % (location.key,
                                       BRIDGE_POS_MESSAGES[bridge_position],
                                       random.choice(BRIDGE_MOODS))
 
-        chars = [obj for obj in self.obj.contents_get(exclude=caller) if obj.has_player]
+        chars = [obj for obj in self.obj.contents_get(exclude=caller) if obj.has_account]
         if chars:
             # we create the You see: message manually here
-            message += "\n You see: %s" % ", ".join("{c%s{n" % char.key for char in chars)
+            message += "\n You see: %s" % ", ".join("|c%s|n" % char.key for char in chars)
         self.caller.msg(message)
 
         # there is a chance that we fall if we are on the western or central
@@ -542,10 +552,10 @@ class CmdLookBridge(Command):
             # we fall 5% of time.
             fall_exit = search_object(self.obj.db.fall_exit)
             if fall_exit:
-                self.caller.msg("{r%s{n" % FALL_MESSAGE)
+                self.caller.msg("|r%s|n" % FALL_MESSAGE)
                 self.caller.move_to(fall_exit[0], quiet=True)
                 # inform others on the bridge
-                self.obj.msg_contents("A plank gives way under %s's feet and " \
+                self.obj.msg_contents("A plank gives way under %s's feet and "
                                       "they fall from the bridge!" % self.caller.key)
 
 
@@ -555,24 +565,25 @@ class CmdBridgeHelp(Command):
     Overwritten help command while on the bridge.
     """
     key = "help"
-    aliases = ["h"]
+    aliases = ["h", "?"]
     locks = "cmd:all()"
     help_category = "Tutorial world"
 
     def func(self):
-        "Implements the command."
-        string = "You are trying hard not to fall off the bridge ..."
-        string += "\n\nWhat you can do is trying to cross the bridge {weast{n "
-        string += "or try to get back to the mainland {wwest{n)."
+        """Implements the command."""
+        string = "You are trying hard not to fall off the bridge ..." \
+                 "\n\nWhat you can do is trying to cross the bridge |weast|n" \
+                 " or try to get back to the mainland |wwest|n)."
         self.caller.msg(string)
 
 
 class BridgeCmdSet(CmdSet):
-    "This groups the bridge commands. We will store it on the room."
+    """This groups the bridge commands. We will store it on the room."""
     key = "Bridge commands"
-    priority = 1 # this gives it precedence over the normal look/help commands.
+    priority = 1  # this gives it precedence over the normal look/help commands.
+
     def at_cmdset_creation(self):
-        "Called at first cmdset creation"
+        """Called at first cmdset creation"""
         self.add(CmdTutorial())
         self.add(CmdEast())
         self.add(CmdWest())
@@ -581,16 +592,16 @@ class BridgeCmdSet(CmdSet):
 
 
 BRIDGE_WEATHER = (
-        "The rain intensifies, making the planks of the bridge even more slippery.",
-        "A gush of wind throws the rain right in your face.",
-        "The rainfall eases a bit and the sky momentarily brightens.",
-        "The bridge shakes under the thunder of a closeby thunder strike.",
-        "The rain pummels you with large, heavy drops. You hear the distinct howl of a large hound in the distance.",
-        "The wind is picking up, howling around you and causing the bridge to sway from side to side.",
-        "Some sort of large bird sweeps by overhead, giving off an eery screech. Soon it has disappeared in the gloom.",
-        "The bridge sways from side to side in the wind.",
-        "Below you a particularly large wave crashes into the rocks.",
-        "From the ruin you hear a distant, otherwordly howl. Or maybe it was just the wind.")
+    "The rain intensifies, making the planks of the bridge even more slippery.",
+    "A gust of wind throws the rain right in your face.",
+    "The rainfall eases a bit and the sky momentarily brightens.",
+    "The bridge shakes under the thunder of a closeby thunder strike.",
+    "The rain pummels you with large, heavy drops. You hear the distinct howl of a large hound in the distance.",
+    "The wind is picking up, howling around you and causing the bridge to sway from side to side.",
+    "Some sort of large bird sweeps by overhead, giving off an eery screech. Soon it has disappeared in the gloom.",
+    "The bridge sways from side to side in the wind.",
+    "Below you a particularly large wave crashes into the rocks.",
+    "From the ruin you hear a distant, otherwordly howl. Or maybe it was just the wind.")
 
 
 class BridgeRoom(WeatherRoom):
@@ -598,7 +609,7 @@ class BridgeRoom(WeatherRoom):
     The bridge room implements an unsafe bridge. It also enters the player into
     a state where they get new commands so as to try to cross the bridge.
 
-     We want this to result in the player getting a special set of
+     We want this to result in the account getting a special set of
      commands related to crossing the bridge. The result is that it
      will take several steps to cross it, despite it being represented
      by only a single room.
@@ -617,8 +628,9 @@ class BridgeRoom(WeatherRoom):
      the CmdLookBridge command).
 
     """
+
     def at_object_creation(self):
-        "Setups the room"
+        """Setups the room"""
         # this will start the weather room's ticker and tell
         # it to call update_weather regularly.
         super(BridgeRoom, self).at_object_creation()
@@ -644,21 +656,21 @@ class BridgeRoom(WeatherRoom):
         """
         if random.random() < 80:
             # send a message most of the time
-            self.msg_contents("{w%s{n" % random.choice(BRIDGE_WEATHER))
+            self.msg_contents("|w%s|n" % random.choice(BRIDGE_WEATHER))
 
     def at_object_receive(self, character, source_location):
         """
         This hook is called by the engine whenever the player is moved
         into this room.
         """
-        if character.has_player:
+        if character.has_account:
             # we only run this if the entered object is indeed a player object.
             # check so our east/west exits are correctly defined.
             wexit = search_object(self.db.west_exit)
             eexit = search_object(self.db.east_exit)
             fexit = search_object(self.db.fall_exit)
             if not (wexit and eexit and fexit):
-                character.msg("The bridge's exits are not properly configured. "\
+                character.msg("The bridge's exits are not properly configured. "
                               "Contact an admin. Forcing west-end placement.")
                 character.db.tutorial_bridge_position = 0
                 return
@@ -674,12 +686,12 @@ class BridgeRoom(WeatherRoom):
         """
         This is triggered when the player leaves the bridge room.
         """
-        if character.has_player:
+        if character.has_account:
             # clean up the position attribute
             del character.db.tutorial_bridge_position
 
 
-#------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 #
 # Dark Room - a room with states
 #
@@ -687,7 +699,7 @@ class BridgeRoom(WeatherRoom):
 # LightSource object (LightSource is defined in
 #                     tutorialworld.objects.LightSource)
 #
-#------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 
 DARK_MESSAGES = ("It is pitch black. You are likely to be eaten by a grue.",
@@ -695,16 +707,20 @@ DARK_MESSAGES = ("It is pitch black. You are likely to be eaten by a grue.",
                  "You don't see a thing. You feel around, managing to bump your fingers hard against something. Ouch!",
                  "You don't see a thing! Blindly grasping the air around you, you find nothing.",
                  "It's totally dark here. You almost stumble over some un-evenness in the ground.",
-                 "You are completely blind. For a moment you think you hear someone breathing nearby ... \n ... surely you must be mistaken.",
+                 "You are completely blind. For a moment you think you hear someone breathing nearby ... "
+                 "\n ... surely you must be mistaken.",
                  "Blind, you think you find some sort of object on the ground, but it turns out to be just a stone.",
-                 "Blind, you bump into a wall. The wall seems to be covered with some sort of vegetation, but its too damp to burn.",
+                 "Blind, you bump into a wall. The wall seems to be covered with some sort of vegetation,"
+                 " but its too damp to burn.",
                  "You can't see anything, but the air is damp. It feels like you are far underground.")
 
 ALREADY_LIGHTSOURCE = "You don't want to stumble around in blindness anymore. You already " \
                       "found what you need. Let's get light already!"
 
-FOUND_LIGHTSOURCE = "Your fingers bump against a splinter of wood in a corner. It smells of resin and seems dry enough to burn! " \
-                    "You pick it up, holding it firmly. Now you just need to {wlight{n it using the flint and steel you carry with you."
+FOUND_LIGHTSOURCE = "Your fingers bump against a splinter of wood in a corner." \
+                    " It smells of resin and seems dry enough to burn! " \
+                    "You pick it up, holding it firmly. Now you just need to" \
+                    " |wlight|n it using the flint and steel you carry with you."
 
 
 class CmdLookDark(Command):
@@ -774,7 +790,7 @@ class CmdDarkNoMatch(Command):
     locks = "cmd:all()"
 
     def func(self):
-        "Implements the command."
+        """Implements the command."""
         self.caller.msg("Until you find some light, there's not much you can do. Try feeling around.")
 
 
@@ -793,7 +809,7 @@ class DarkCmdSet(CmdSet):
     priority = 2
 
     def at_cmdset_creation(self):
-        "populate the cmdset."
+        """populate the cmdset."""
         self.add(CmdTutorial())
         self.add(CmdLookDark())
         self.add(CmdDarkHelp())
@@ -815,6 +831,7 @@ class DarkRoom(TutorialRoom):
     may have been beaten up by the ghostly apparition at this point.
 
     """
+
     def at_object_creation(self):
         """
         Called when object is first created.
@@ -864,7 +881,7 @@ class DarkRoom(TutorialRoom):
             self.locks.add("view:all()")
             self.cmdset.remove(DarkCmdSet)
             self.db.is_lit = True
-            for char in (obj for obj in self.contents if obj.has_player):
+            for char in (obj for obj in self.contents if obj.has_account):
                 # this won't do anything if it is already removed
                 char.msg("The room is lit up.")
         else:
@@ -872,7 +889,7 @@ class DarkRoom(TutorialRoom):
             self.db.is_lit = False
             self.locks.add("view:false()")
             self.cmdset.add(DarkCmdSet, permanent=True)
-            for char in (obj for obj in self.contents if obj.has_player):
+            for char in (obj for obj in self.contents if obj.has_account):
                 if char.is_superuser:
                     char.msg("You are Superuser, so you are not affected by the dark state.")
                 else:
@@ -883,7 +900,7 @@ class DarkRoom(TutorialRoom):
         """
         Called when an object enters the room.
         """
-        if obj.has_player:
+        if obj.has_account:
             # a puppeted object, that is, a Character
             self._heal(obj)
             # in case the new guy carries light with them
@@ -901,7 +918,7 @@ class DarkRoom(TutorialRoom):
         self.check_light_state(exclude=obj)
 
 
-#------------------------------------------------------------
+# -------------------------------------------------------------
 #
 # Teleport room - puzzles solution
 #
@@ -914,7 +931,7 @@ class DarkRoom(TutorialRoom):
 # oneself, and then pick the grave chamber with the
 # matching imagery for this attribute.
 #
-#------------------------------------------------------------
+# -------------------------------------------------------------
 
 
 class TeleportRoom(TutorialRoom):
@@ -930,8 +947,9 @@ class TeleportRoom(TutorialRoom):
       failure_teleport_msg - message to echo while teleporting to failure
 
     """
+
     def at_object_creation(self):
-        "Called at first creation"
+        """Called at first creation"""
         super(TeleportRoom, self).at_object_creation()
         # what character.db.puzzle_clue must be set to, to avoid teleportation.
         self.db.puzzle_value = 1
@@ -948,7 +966,7 @@ class TeleportRoom(TutorialRoom):
         This hook is called by the engine whenever the player is moved into
         this room.
         """
-        if not character.has_player:
+        if not character.has_account:
             # only act on player characters.
             return
         # determine if the puzzle is a success or not
@@ -977,13 +995,13 @@ class TeleportRoom(TutorialRoom):
         results[0].at_object_receive(character, self)
 
 
-#------------------------------------------------------------
+# -------------------------------------------------------------
 #
 # Outro room - unique exit room
 #
 # Cleans up the character from all tutorial-related properties.
 #
-#------------------------------------------------------------
+# -------------------------------------------------------------
 
 class OutroRoom(TutorialRoom):
     """
@@ -1008,7 +1026,7 @@ class OutroRoom(TutorialRoom):
         """
         Do cleanup.
         """
-        if character.has_player:
+        if character.has_account:
             del character.db.health_max
             del character.db.health
             del character.db.last_climbed

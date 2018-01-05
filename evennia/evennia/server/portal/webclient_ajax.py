@@ -4,8 +4,8 @@ AJAX/COMET fallback webclient
 The AJAX/COMET web client consists of two components running on
 twisted and django. They are both a part of the Evennia website url
 tree (so the testing website might be located on
-http://localhost:8000/, whereas the webclient can be found on
-http://localhost:8000/webclient.)
+http://localhost:4001/, whereas the webclient can be found on
+http://localhost:4001/webclient.)
 
 /webclient - this url is handled through django's template
              system and serves the html page for the client
@@ -18,8 +18,8 @@ http://localhost:8000/webclient.)
 """
 import json
 import re
+import time
 
-from time import time
 from twisted.web import server, resource
 from twisted.internet.task import LoopingCall
 from django.utils.functional import Promise
@@ -33,12 +33,13 @@ from evennia.server import session
 _CLIENT_SESSIONS = utils.mod_import(settings.SESSION_ENGINE).SessionStore
 _RE_SCREENREADER_REGEX = re.compile(r"%s" % settings.SCREENREADER_REGEX_STRIP, re.DOTALL + re.MULTILINE)
 _SERVERNAME = settings.SERVERNAME
-_KEEPALIVE = 30 # how often to check keepalive
+_KEEPALIVE = 30  # how often to check keepalive
 
 # defining a simple json encoder for returning
 # django data to the client. Might need to
 # extend this if one wants to send more
 # complex database objects too.
+
 
 class LazyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -52,11 +53,11 @@ def jsonify(obj):
 
 
 #
-# WebClient resource - this is called by the ajax client
+# AjaxWebClient resource - this is called by the ajax client
 # using POST requests to /webclientdata.
 #
 
-class WebClient(resource.Resource):
+class AjaxWebClient(resource.Resource):
     """
     An ajax/comet long-polling transport
 
@@ -76,16 +77,17 @@ class WebClient(resource.Resource):
         try:
             del self.requests[csessid]
         except KeyError:
+            # nothing left to delete
             pass
 
     def _keepalive(self):
         """
         Callback for checking the connection is still alive.
         """
-        now = time()
+        now = time.time()
         to_remove = []
         keep_alives = ((csessid, remove) for csessid, (t, remove)
-                        in self.last_alive.iteritems() if now - t > _KEEPALIVE)
+                       in self.last_alive.iteritems() if now - t > _KEEPALIVE)
         for csessid, remove in keep_alives:
             if remove:
                 # keepalive timeout. Line is dead.
@@ -104,6 +106,12 @@ class WebClient(resource.Resource):
                 # no more ajax clients. Stop the keepalive
                 self.keep_alive.stop()
                 self.keep_alive = None
+
+    def at_login(self):
+        """
+        Called when this session gets authenticated by the server.
+        """
+        pass
 
     def lineSend(self, csessid, data):
         """
@@ -155,13 +163,13 @@ class WebClient(resource.Resource):
         remote_addr = request.getClientIP()
         host_string = "%s (%s:%s)" % (_SERVERNAME, request.getRequestHostname(), request.getHost().port)
 
-        sess = WebClientSession()
+        sess = AjaxWebClientSession()
         sess.client = self
         sess.init_session("ajax/comet", remote_addr, self.sessionhandler)
 
         sess.csessid = csessid
         csession = _CLIENT_SESSIONS(session_key=sess.csessid)
-        uid = csession and csession.get("logged_in", False)
+        uid = csession and csession.get("webclient_authenticated_uid", False)
         if uid:
             # the client session is already logged in
             sess.uid = uid
@@ -169,7 +177,7 @@ class WebClient(resource.Resource):
 
         sess.sessionhandler.connect(sess)
 
-        self.last_alive[csessid] = (time(), False)
+        self.last_alive[csessid] = (time.time(), False)
         if not self.keep_alive:
             # the keepalive is not running; start it.
             self.keep_alive = LoopingCall(self._keepalive)
@@ -183,7 +191,7 @@ class WebClient(resource.Resource):
         client is replying to the keepalive.
         """
         csessid = request.args.get('csessid')[0]
-        self.last_alive[csessid] = (time(), False)
+        self.last_alive[csessid] = (time.time(), False)
         return '""'
 
     def mode_input(self, request):
@@ -197,12 +205,12 @@ class WebClient(resource.Resource):
         """
         csessid = request.args.get('csessid')[0]
 
-        self.last_alive[csessid] = (time(), False)
+        self.last_alive[csessid] = (time.time(), False)
         sess = self.sessionhandler.sessions_from_csessid(csessid)
         if sess:
             sess = sess[0]
             cmdarray = json.loads(request.args.get('data')[0])
-            sess.sessionhandler.data_in(sess, **{cmdarray[0]:[cmdarray[1], cmdarray[2]]})
+            sess.sessionhandler.data_in(sess, **{cmdarray[0]: [cmdarray[1], cmdarray[2]]})
         return '""'
 
     def mode_receive(self, request):
@@ -217,7 +225,7 @@ class WebClient(resource.Resource):
 
         """
         csessid = request.args.get('csessid')[0]
-        self.last_alive[csessid] = (time(), False)
+        self.last_alive[csessid] = (time.time(), False)
 
         dataentries = self.databuffer.get(csessid, [])
         if dataentries:
@@ -243,7 +251,6 @@ class WebClient(resource.Resource):
             sess.sessionhandler.disconnect(sess)
         except IndexError:
             self.client_disconnect(csessid)
-            pass
         return '""'
 
     def render_POST(self, request):
@@ -285,14 +292,26 @@ class WebClient(resource.Resource):
 # web client interface.
 #
 
-class WebClientSession(session.Session):
+class AjaxWebClientSession(session.Session):
     """
-    This represents a session running in a webclient.
+    This represents a session running in an AjaxWebclient.
     """
 
     def __init__(self, *args, **kwargs):
         self.protocol_name = "ajax/comet"
-        super(WebClientSession, self).__init__(*args, **kwargs)
+        super(AjaxWebClientSession, self).__init__(*args, **kwargs)
+
+    def get_client_session(self):
+        """
+        Get the Client browser session (used for auto-login based on browser session)
+
+        Returns:
+            csession (ClientSession): This is a django-specific internal representation
+                of the browser session.
+
+        """
+        if self.csessid:
+            return _CLIENT_SESSIONS(session_key=self.csessid)
 
     def disconnect(self, reason="Server disconnected."):
         """
@@ -301,9 +320,21 @@ class WebClientSession(session.Session):
         Args:
             reason (str): Motivation for the disconnect.
         """
+        csession = self.get_client_session()
+
+        if csession:
+            csession["webclient_authenticated_uid"] = None
+            csession.save()
+            self.logged_in = False
         self.client.lineSend(self.csessid, ["connection_close", [reason], {}])
         self.client.client_disconnect(self.csessid)
         self.sessionhandler.disconnect(self)
+
+    def at_login(self):
+        csession = self.get_client_session()
+        if csession:
+            csession["webclient_authenticated_uid"] = self.uid
+            csession.save()
 
     def data_out(self, **kwargs):
         """
@@ -325,7 +356,7 @@ class WebClientSession(session.Session):
         Kwargs:
             options (dict): Options-dict with the following keys understood:
                 - raw (bool): No parsing at all (leave ansi-to-html markers unparsed).
-                - nomarkup (bool): Clean out all ansi/html markers and tokens.
+                - nocolor (bool): Remove all color.
                 - screenreader (bool): Use Screenreader mode.
                 - send_prompt (bool): Send a prompt with parsed html
 
@@ -343,7 +374,9 @@ class WebClientSession(session.Session):
 
         options = kwargs.pop("options", {})
         raw = options.get("raw", flags.get("RAW", False))
-        nomarkup = options.get("nomarkup", flags.get("NOMARKUP", False))
+        xterm256 = options.get("xterm256", flags.get('XTERM256', True))
+        useansi = options.get("ansi", flags.get('ANSI', True))
+        nocolor = options.get("nocolor", flags.get("NOCOLOR") or not (xterm256 or useansi))
         screenreader = options.get("screenreader", flags.get("SCREENREADER", False))
         prompt = options.get("send_prompt", False)
 
@@ -355,7 +388,7 @@ class WebClientSession(session.Session):
         if raw:
             args[0] = text
         else:
-            args[0] = parse_html(text, strip_ansi=nomarkup)
+            args[0] = parse_html(text, strip_ansi=nocolor)
 
         # send to client on required form [cmdname, args, kwargs]
         self.client.lineSend(self.csessid, [cmd, args, kwargs])
@@ -379,5 +412,5 @@ class WebClientSession(session.Session):
 
         """
         if not cmdname == "options":
-            #print "ajax.send_default", cmdname, args, kwargs
+            # print "ajax.send_default", cmdname, args, kwargs
             self.client.lineSend(self.csessid, [cmdname, args, kwargs])

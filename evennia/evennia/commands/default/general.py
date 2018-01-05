@@ -1,5 +1,5 @@
 """
-General Character commands usually availabe to all characters
+General Character commands usually available to all characters
 """
 from django.conf import settings
 from evennia.utils import utils, evtable
@@ -9,8 +9,8 @@ COMMAND_DEFAULT_CLASS = utils.class_from_module(settings.COMMAND_DEFAULT_CLASS)
 
 # limit symbol import for API
 __all__ = ("CmdHome", "CmdLook", "CmdNick",
-           "CmdInventory", "CmdGet", "CmdDrop", "CmdGive",
-           "CmdSay", "CmdPose", "CmdAccess")
+           "CmdInventory", "CmdSetDesc", "CmdGet", "CmdDrop", "CmdGive",
+           "CmdSay", "CmdWhisper", "CmdPose", "CmdAccess")
 
 
 class CmdHome(COMMAND_DEFAULT_CLASS):
@@ -24,11 +24,11 @@ class CmdHome(COMMAND_DEFAULT_CLASS):
     """
 
     key = "home"
-    locks = "cmd:perm(home) or perm(Builders)"
+    locks = "cmd:perm(home) or perm(Builder)"
     arg_regex = r"$"
 
     def func(self):
-        "Implement the command"
+        """Implement the command"""
         caller = self.caller
         home = caller.home
         if not home:
@@ -39,6 +39,7 @@ class CmdHome(COMMAND_DEFAULT_CLASS):
             caller.msg("There's no place like home ...")
             caller.move_to(home)
 
+
 class CmdLook(COMMAND_DEFAULT_CLASS):
     """
     look at location or object
@@ -46,7 +47,7 @@ class CmdLook(COMMAND_DEFAULT_CLASS):
     Usage:
       look
       look <obj>
-      look *<player>
+      look *<account>
 
     Observes your location or objects in your vicinity.
     """
@@ -59,16 +60,17 @@ class CmdLook(COMMAND_DEFAULT_CLASS):
         """
         Handle the looking.
         """
+        caller = self.caller
         if not self.args:
-            target = self.caller.location
+            target = caller.location
             if not target:
-                self.caller.msg("You have no location to look at!")
+                caller.msg("You have no location to look at!")
                 return
         else:
-            target = self.caller.search(self.args)
+            target = caller.search(self.args)
             if not target:
                 return
-        self.msg(self.caller.at_look(target))
+        self.msg(caller.at_look(target))
 
 
 class CmdNick(COMMAND_DEFAULT_CLASS):
@@ -84,7 +86,7 @@ class CmdNick(COMMAND_DEFAULT_CLASS):
     Switches:
       inputline - replace on the inputline (default)
       object    - replace on object-lookup
-      player    - replace on player-lookup
+      account    - replace on account-lookup
       delete    - remove nick by name or by index given by /list
       clearall  - clear all nicks
       list      - show all defined aliases (also "nicks" works)
@@ -111,28 +113,28 @@ class CmdNick(COMMAND_DEFAULT_CLASS):
 
     """
     key = "nick"
-    aliases = ["nickname", "nicks", "@nick", "@nicks", "alias"]
+    aliases = ["nickname", "nicks", "alias"]
     locks = "cmd:all()"
 
     def func(self):
-        "Create the nickname"
+        """Create the nickname"""
 
         caller = self.caller
         switches = self.switches
-        nicktypes = [switch for switch in switches if switch in ("object", "player", "inputline")] or ["inputline"]
+        nicktypes = [switch for switch in switches if switch in ("object", "account", "inputline")] or ["inputline"]
 
         nicklist = utils.make_iter(caller.nicks.get(return_obj=True) or [])
 
         if 'list' in switches or self.cmdstring in ("nicks", "@nicks"):
 
             if not nicklist:
-                string = "{wNo nicks defined.{n"
+                string = "|wNo nicks defined.|n"
             else:
                 table = evtable.EvTable("#", "Type", "Nick match", "Replacement")
                 for inum, nickobj in enumerate(nicklist):
                     _, _, nickvalue, replacement = nickobj.value
                     table.add_row(str(inum + 1), nickobj.db_category, nickvalue, replacement)
-                string = "{wDefined Nicks:{n\n%s" % table
+                string = "|wDefined Nicks:|n\n%s" % table
             caller.msg(string)
             return
 
@@ -168,29 +170,26 @@ class CmdNick(COMMAND_DEFAULT_CLASS):
                     # we are given a index in nicklist
                     delindex = int(arg)
                     if 0 < delindex <= len(nicklist):
-                        oldnick = nicklist[delindex-1]
+                        oldnick = nicklist[delindex - 1]
                         _, _, old_nickstring, old_replstring = oldnick.value
                     else:
                         errstring += "Not a valid nick index."
                 else:
                     errstring += "Nick not found."
-
             if "delete" in switches or "del" in switches:
                 # clear the nick
-                if caller.nicks.has(old_nickstring, category=nicktype):
+                if old_nickstring and caller.nicks.has(old_nickstring, category=nicktype):
                     caller.nicks.remove(old_nickstring, category=nicktype)
                     string += "\nNick removed: '|w%s|n' -> |w%s|n." % (old_nickstring, old_replstring)
                 else:
                     errstring += "\nNick '|w%s|n' was not deleted." % old_nickstring
-
-
             elif replstring:
                 # creating new nick
                 errstring = ""
                 if oldnick:
-                    string += "\nNick '{w%s{n' updated to map to '{w%s{n'." % (old_nickstring, replstring)
+                    string += "\nNick '|w%s|n' updated to map to '|w%s|n'." % (old_nickstring, replstring)
                 else:
-                    string += "\nNick '{w%s{n' mapped to '{w%s{n'." % (nickstring, replstring)
+                    string += "\nNick '|w%s|n' mapped to '|w%s|n'." % (nickstring, replstring)
                 try:
                     caller.nicks.add(nickstring, replstring, category=nicktype)
                 except NickTemplateInvalid:
@@ -198,7 +197,7 @@ class CmdNick(COMMAND_DEFAULT_CLASS):
                     return
             elif old_nickstring and old_replstring:
                 # just looking at the nick
-                string += "\nNick '{w%s{n' maps to '{w%s{n'." % (old_nickstring, old_replstring)
+                string += "\nNick '|w%s|n' maps to '|w%s|n'." % (old_nickstring, old_replstring)
                 errstring = ""
         string = errstring if errstring else string
         caller.msg(string)
@@ -220,15 +219,15 @@ class CmdInventory(COMMAND_DEFAULT_CLASS):
     arg_regex = r"$"
 
     def func(self):
-        "check inventory"
+        """check inventory"""
         items = self.caller.contents
         if not items:
             string = "You are not carrying anything."
         else:
             table = evtable.EvTable(border="header")
             for item in items:
-                table.add_row("{C%s{n" % item.name, item.db.desc or "")
-            string = "{wYou are carrying:\n%s" % table
+                table.add_row("|C%s|n" % item.name, item.db.desc or "")
+            string = "|wYou are carrying:\n%s" % table
         self.caller.msg(string)
 
 
@@ -248,7 +247,7 @@ class CmdGet(COMMAND_DEFAULT_CLASS):
     arg_regex = r"\s|$"
 
     def func(self):
-        "implements the command."
+        """implements the command."""
 
         caller = self.caller
 
@@ -271,8 +270,8 @@ class CmdGet(COMMAND_DEFAULT_CLASS):
         obj.move_to(caller, quiet=True)
         caller.msg("You pick up %s." % obj.name)
         caller.location.msg_contents("%s picks up %s." %
-                                        (caller.name,
-                                         obj.name),
+                                     (caller.name,
+                                      obj.name),
                                      exclude=caller)
         # calling hook method
         obj.at_get(caller)
@@ -294,7 +293,7 @@ class CmdDrop(COMMAND_DEFAULT_CLASS):
     arg_regex = r"\s|$"
 
     def func(self):
-        "Implement command"
+        """Implement command"""
 
         caller = self.caller
         if not self.args:
@@ -312,7 +311,7 @@ class CmdDrop(COMMAND_DEFAULT_CLASS):
         obj.move_to(caller.location, quiet=True)
         caller.msg("You drop %s." % (obj.name,))
         caller.location.msg_contents("%s drops %s." %
-                                         (caller.name, obj.name),
+                                     (caller.name, obj.name),
                                      exclude=caller)
         # Call the object script's at_drop() method.
         obj.at_drop(caller)
@@ -333,7 +332,7 @@ class CmdGive(COMMAND_DEFAULT_CLASS):
     arg_regex = r"\s|$"
 
     def func(self):
-        "Implement give"
+        """Implement give"""
 
         caller = self.caller
         if not self.args or not self.rhs:
@@ -355,25 +354,27 @@ class CmdGive(COMMAND_DEFAULT_CLASS):
         caller.msg("You give %s to %s." % (to_give.key, target.key))
         to_give.move_to(target, quiet=True)
         target.msg("%s gives you %s." % (caller.key, to_give.key))
+        # Call the object script's at_give() method.
+        to_give.at_give(caller, target)
 
 
-class CmdDesc(COMMAND_DEFAULT_CLASS):
+class CmdSetDesc(COMMAND_DEFAULT_CLASS):
     """
     describe yourself
 
     Usage:
-      desc <description>
+      setdesc <description>
 
     Add a description to yourself. This
     will be visible to people when they
     look at you.
     """
-    key = "desc"
+    key = "setdesc"
     locks = "cmd:all()"
     arg_regex = r"\s|$"
 
     def func(self):
-        "add the description"
+        """add the description"""
 
         if not self.args:
             self.caller.msg("You must add a description.")
@@ -381,6 +382,7 @@ class CmdDesc(COMMAND_DEFAULT_CLASS):
 
         self.caller.db.desc = self.args.strip()
         self.caller.msg("You set your description.")
+
 
 class CmdSay(COMMAND_DEFAULT_CLASS):
     """
@@ -397,7 +399,7 @@ class CmdSay(COMMAND_DEFAULT_CLASS):
     locks = "cmd:all()"
 
     def func(self):
-        "Run the say command"
+        """Run the say command"""
 
         caller = self.caller
 
@@ -407,17 +409,57 @@ class CmdSay(COMMAND_DEFAULT_CLASS):
 
         speech = self.args
 
-        # calling the speech hook on the location
-        speech = caller.location.at_say(caller, speech)
+        # Calling the at_before_say hook on the character
+        speech = caller.at_before_say(speech)
 
-        # Feedback for the object doing the talking.
-        caller.msg('You say, "%s{n"' % speech)
+        # If speech is empty, stop here
+        if not speech:
+            return
 
-        # Build the string to emit to neighbors.
-        emit_string = '%s says, "%s{n"' % (caller.name,
-                                               speech)
-        caller.location.msg_contents(emit_string,
-                                     exclude=caller, from_obj=caller)
+        # Call the at_after_say hook on the character
+        caller.at_say(speech, msg_self=True)
+
+
+class CmdWhisper(COMMAND_DEFAULT_CLASS):
+    """
+    Speak privately as your character to another
+
+    Usage:
+      whisper <character> = <message>
+      whisper <char1>, <char2> = <message?
+
+    Talk privately to one or more characters in your current location, without
+    others in the room being informed.
+    """
+
+    key = "whisper"
+    locks = "cmd:all()"
+
+    def func(self):
+        """Run the whisper command"""
+
+        caller = self.caller
+
+        if not self.lhs or not self.rhs:
+            caller.msg("Usage: whisper <character> = <message>")
+            return
+
+        receivers = [recv.strip() for recv in self.lhs.split(",")]
+
+        receivers = [caller.search(receiver) for receiver in receivers]
+        receivers = [recv for recv in receivers if recv]
+
+        speech = self.rhs
+        # If the speech is empty, abort the command
+        if not speech or not receivers:
+            return
+
+        # Call a hook to change the speech before whispering
+        speech = caller.at_before_say(speech, whisper=True, receivers=receivers)
+
+        # no need for self-message if we are whispering to ourselves (for some reason)
+        msg_self = None if caller in receivers else True
+        caller.at_say(speech, msg_self=msg_self, receivers=receivers, whisper=True)
 
 
 class CmdPose(COMMAND_DEFAULT_CLASS):
@@ -454,13 +496,14 @@ class CmdPose(COMMAND_DEFAULT_CLASS):
         self.args = args
 
     def func(self):
-        "Hook function"
+        """Hook function"""
         if not self.args:
             msg = "What do you want to do?"
             self.caller.msg(msg)
         else:
             msg = "%s%s" % (self.caller.name, self.args)
-            self.caller.location.msg_contents(msg, from_obj=self.caller)
+            self.caller.location.msg_contents(text=(msg, {"type": "pose"}),
+                                              from_obj=self.caller)
 
 
 class CmdAccess(COMMAND_DEFAULT_CLASS):
@@ -479,22 +522,21 @@ class CmdAccess(COMMAND_DEFAULT_CLASS):
     arg_regex = r"$"
 
     def func(self):
-        "Load the permission groups"
+        """Load the permission groups"""
 
         caller = self.caller
         hierarchy_full = settings.PERMISSION_HIERARCHY
-        string = "\n{wPermission Hierarchy{n (climbing):\n %s" % ", ".join(hierarchy_full)
-        #hierarchy = [p.lower() for p in hierarchy_full]
+        string = "\n|wPermission Hierarchy|n (climbing):\n %s" % ", ".join(hierarchy_full)
 
-        if self.caller.player.is_superuser:
+        if self.caller.account.is_superuser:
             cperms = "<Superuser>"
             pperms = "<Superuser>"
         else:
             cperms = ", ".join(caller.permissions.all())
-            pperms = ", ".join(caller.player.permissions.all())
+            pperms = ", ".join(caller.account.permissions.all())
 
-        string += "\n{wYour access{n:"
-        string += "\nCharacter {c%s{n: %s" % (caller.key, cperms)
-        if hasattr(caller, 'player'):
-            string += "\nPlayer {c%s{n: %s" % (caller.player.key, pperms)
+        string += "\n|wYour access|n:"
+        string += "\nCharacter |c%s|n: %s" % (caller.key, cperms)
+        if hasattr(caller, 'account'):
+            string += "\nAccount |c%s|n: %s" % (caller.account.key, pperms)
         caller.msg(string)

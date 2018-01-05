@@ -7,12 +7,15 @@ All commands in Evennia inherit from the 'Command' class in this module.
 from builtins import range
 
 import re
+
+from django.conf import settings
+
 from evennia.locks.lockhandler import LockHandler
 from evennia.utils.utils import is_iter, fill, lazy_property, make_iter
 from future.utils import with_metaclass
 
 
-def _init_command(mcs, **kwargs):
+def _init_command(cls, **kwargs):
     """
     Helper command.
     Makes sure all data are stored as lowercase and
@@ -26,60 +29,60 @@ def _init_command(mcs, **kwargs):
     for i in range(len(kwargs)):
         # used for dynamic creation of commands
         key, value = kwargs.popitem()
-        setattr(mcs, key, value)
+        setattr(cls, key, value)
 
-    mcs.key = mcs.key.lower()
-    if mcs.aliases and not is_iter(mcs.aliases):
+    cls.key = cls.key.lower()
+    if cls.aliases and not is_iter(cls.aliases):
         try:
-            mcs.aliases = [str(alias).strip().lower()
-                          for alias in mcs.aliases.split(',')]
+            cls.aliases = [str(alias).strip().lower()
+                           for alias in cls.aliases.split(',')]
         except Exception:
-            mcs.aliases = []
-    mcs.aliases = list(set(alias for alias in mcs.aliases
-                           if alias and alias != mcs.key))
+            cls.aliases = []
+    cls.aliases = list(set(alias for alias in cls.aliases
+                           if alias and alias != cls.key))
 
     # optimization - a set is much faster to match against than a list
-    mcs._matchset = set([mcs.key] + mcs.aliases)
+    cls._matchset = set([cls.key] + cls.aliases)
     # optimization for looping over keys+aliases
-    mcs._keyaliases = tuple(mcs._matchset)
+    cls._keyaliases = tuple(cls._matchset)
 
     # by default we don't save the command between runs
-    if not hasattr(mcs, "save_for_next"):
-        mcs.save_for_next = False
+    if not hasattr(cls, "save_for_next"):
+        cls.save_for_next = False
 
     # pre-process locks as defined in class definition
     temp = []
-    if hasattr(mcs, 'permissions'):
-        mcs.locks = mcs.permissions
-    if not hasattr(mcs, 'locks'):
+    if hasattr(cls, 'permissions'):
+        cls.locks = cls.permissions
+    if not hasattr(cls, 'locks'):
         # default if one forgets to define completely
-        mcs.locks = "cmd:all()"
-    if not "cmd:" in mcs.locks:
-        mcs.locks = "cmd:all();" + mcs.locks
-    for lockstring in mcs.locks.split(';'):
-        if lockstring and not ':' in lockstring:
+        cls.locks = "cmd:all()"
+    if "cmd:" not in cls.locks:
+        cls.locks = "cmd:all();" + cls.locks
+    for lockstring in cls.locks.split(';'):
+        if lockstring and ':' not in lockstring:
             lockstring = "cmd:%s" % lockstring
         temp.append(lockstring)
-    mcs.lock_storage = ";".join(temp)
+    cls.lock_storage = ";".join(temp)
 
-    if hasattr(mcs, 'arg_regex') and isinstance(mcs.arg_regex, basestring):
-        mcs.arg_regex = re.compile(r"%s" % mcs.arg_regex, re.I + re.UNICODE)
-    if not hasattr(mcs, "auto_help"):
-        mcs.auto_help = True
-    if not hasattr(mcs, 'is_exit'):
-        mcs.is_exit = False
-    if not hasattr(mcs, "help_category"):
-        mcs.help_category = "general"
-    mcs.help_category = mcs.help_category.lower()
+    if hasattr(cls, 'arg_regex') and isinstance(cls.arg_regex, basestring):
+        cls.arg_regex = re.compile(r"%s" % cls.arg_regex, re.I + re.UNICODE)
+    if not hasattr(cls, "auto_help"):
+        cls.auto_help = True
+    if not hasattr(cls, 'is_exit'):
+        cls.is_exit = False
+    if not hasattr(cls, "help_category"):
+        cls.help_category = "general"
+    cls.help_category = cls.help_category.lower()
 
 
 class CommandMeta(type):
     """
     The metaclass cleans up all properties on the class
     """
-    def __init__(mcs, *args, **kwargs):
-        _init_command(mcs, **kwargs)
-        super(CommandMeta, mcs).__init__(*args, **kwargs)
+    def __init__(cls, *args, **kwargs):
+        _init_command(cls, **kwargs)
+        super(CommandMeta, cls).__init__(*args, **kwargs)
 
 #    The Command class is the basic unit of an Evennia command; when
 #    defining new commands, the admin subclass this class and
@@ -127,7 +130,11 @@ class Command(with_metaclass(CommandMeta, object)):
 
     (Note that if auto_help is on, this initial string is also used by the
     system to create the help entry for the command, so it's a good idea to
-    format it similar to this one)
+    format it similar to this one).  This behavior can be changed by
+    overriding the method 'get_help' of a command: by default, this
+    method returns cmd.__doc__ (that is, this very docstring, or
+    the docstring of your command).  You can, however, extend or
+    replace this without disabling auto_help.
     """
 
     # the main way to call this command (e.g. 'look')
@@ -136,20 +143,23 @@ class Command(with_metaclass(CommandMeta, object)):
     aliases = []
     # a list of lock definitions on the form
     #   cmd:[NOT] func(args) [ AND|OR][ NOT] func2(args)
-    locks = ""
+    locks = settings.COMMAND_DEFAULT_LOCKS
     # used by the help system to group commands in lists.
-    help_category = "general"
+    help_category = settings.COMMAND_DEFAULT_HELP_CATEGORY
     # This allows to turn off auto-help entry creation for individual commands.
     auto_help = True
     # optimization for quickly separating exit-commands from normal commands
     is_exit = False
     # define the command not only by key but by the regex form of its arguments
-    arg_regex = None
+    arg_regex = settings.COMMAND_DEFAULT_ARG_REGEX
+    # whether self.msg sends to all sessions of a related account/object (default
+    # is to only send to the session sending the command).
+    msg_all_sessions = settings.COMMAND_DEFAULT_MSG_ALL_SESSIONS
 
     # auto-set (by Evennia on command instantiation) are:
     #   obj - which object this command is defined on
     #   session - which session is responsible for triggering this command. Only set
-    #             if triggered by a player.
+    #             if triggered by an account.
 
     def __init__(self, **kwargs):
         """
@@ -187,7 +197,6 @@ class Command(with_metaclass(CommandMeta, object)):
         try:
             # first assume input is a command (the most common case)
             return self._matchset.intersection(cmd._matchset)
-            #return cmd.key in self._matchset
         except AttributeError:
             # probably got a string
             return cmd in self._matchset
@@ -201,9 +210,8 @@ class Command(with_metaclass(CommandMeta, object)):
         """
         try:
             return self._matchset.isdisjoint(cmd._matchset)
-            #return not cmd.key in self._matcheset
         except AttributeError:
-            return not cmd in self._matchset
+            return cmd not in self._matchset
 
     def __contains__(self, query):
         """
@@ -298,16 +306,16 @@ class Command(with_metaclass(CommandMeta, object)):
     def msg(self, text=None, to_obj=None, from_obj=None,
             session=None, **kwargs):
         """
-        This is a shortcut instad of calling msg() directly on an
-        object - it will detect if caller is an Object or a Player and
-        also appends self.session automatically.
+        This is a shortcut instead of calling msg() directly on an
+        object - it will detect if caller is an Object or an Account and
+        also appends self.session automatically if self.msg_all_sessions is False.
 
         Args:
             text (str, optional): Text string of message to send.
             to_obj (Object, optional): Target object of message. Defaults to self.caller.
             from_obj (Object, optional): Source of message. Defaults to to_obj.
             session (Session, optional): Supply data only to a unique
-                session.
+                session (ignores the value of `self.msg_all_sessions`).
 
         Kwargs:
             options (dict): Options to the protocol.
@@ -317,7 +325,7 @@ class Command(with_metaclass(CommandMeta, object)):
         """
         from_obj = from_obj or self.caller
         to_obj = to_obj or from_obj
-        if not session:
+        if not session and not self.msg_all_sessions:
             if to_obj == self.caller:
                 session = self.session
             else:
@@ -332,7 +340,7 @@ class Command(with_metaclass(CommandMeta, object)):
         Args:
             raw_string (str): Execute this string as a command input.
             session (Session, optional): If not given, the current command's Session will be used.
-            obj (Object or Player, optional): Object or Player on which to call the execute_cmd.
+            obj (Object or Account, optional): Object or Account on which to call the execute_cmd.
                 If not given, self.caller will be used.
 
         Kwargs:
@@ -388,17 +396,18 @@ class Command(with_metaclass(CommandMeta, object)):
         """
         # a simple test command to show the available properties
         string = "-" * 50
-        string += "\n{w%s{n - Command variables from evennia:\n" % self.key
+        string += "\n|w%s|n - Command variables from evennia:\n" % self.key
         string += "-" * 50
-        string += "\nname of cmd (self.key): {w%s{n\n" % self.key
-        string += "cmd aliases (self.aliases): {w%s{n\n" % self.aliases
-        string += "cmd locks (self.locks): {w%s{n\n" % self.locks
-        string += "help category (self.help_category): {w%s{n\n" % self.help_category.capitalize()
-        string += "object calling (self.caller): {w%s{n\n" % self.caller
-        string += "object storing cmdset (self.obj): {w%s{n\n" % self.obj
-        string += "command string given (self.cmdstring): {w%s{n\n" % self.cmdstring
+        string += "\nname of cmd (self.key): |w%s|n\n" % self.key
+        string += "cmd aliases (self.aliases): |w%s|n\n" % self.aliases
+        string += "cmd locks (self.locks): |w%s|n\n" % self.locks
+        string += "help category (self.help_category): |w%s|n\n" % self.help_category.capitalize()
+        string += "object calling (self.caller): |w%s|n\n" % self.caller
+        string += "object storing cmdset (self.obj): |w%s|n\n" % self.obj
+        string += "command string given (self.cmdstring): |w%s|n\n" % self.cmdstring
         # show cmdset.key instead of cmdset to shorten output
-        string += fill("current cmdset (self.cmdset): {w%s{n\n" % (self.cmdset.key if self.cmdset.key else self.cmdset.__class__))
+        string += fill("current cmdset (self.cmdset): |w%s|n\n" %
+                       (self.cmdset.key if self.cmdset.key else self.cmdset.__class__))
 
         self.caller.msg(string)
 
@@ -420,6 +429,32 @@ class Command(with_metaclass(CommandMeta, object)):
             object, conventionally with a preceding space.
 
         """
-        if hasattr(self, 'obj') and self.obj != caller:
+        if hasattr(self, 'obj') and self.obj and self.obj != caller:
             return " (%s)" % self.obj.get_display_name(caller).strip()
         return ""
+
+    def get_help(self, caller, cmdset):
+        """
+        Return the help message for this command and this caller.
+
+        By default, return self.__doc__ (the docstring just under
+        the class definition).  You can override this behavior,
+        though, and even customize it depending on the caller, or other
+        commands the caller can use.
+
+        Args:
+            caller (Object or Account): the caller asking for help on the command.
+            cmdset (CmdSet): the command set (if you need additional commands).
+
+        Returns:
+            docstring (str): the help text to provide the caller for this command.
+
+        """
+        return self.__doc__
+
+
+class InterruptCommand(Exception):
+
+    """Cleanly interrupt a command."""
+
+    pass

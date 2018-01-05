@@ -5,7 +5,11 @@ Contribution - Griatch 2016
 
 A simple two-way exit that represents a door that can be opened and
 closed. Can easily be expanded from to make it lockable, destroyable
-etc.
+etc.  Note that the simpledoor is based on Evennia locks, so it will
+not work for a superuser (which bypasses all locks) - the superuser
+will always appear to be able to close/open the door over and over
+without the locks stopping you. To use the door, use `@quell` or a
+non-superuser account.
 
 Installation:
 
@@ -36,6 +40,7 @@ class SimpleDoor(DefaultExit):
     sides using `exitname.setlock("traverse:false())`
 
     """
+
     def at_object_creation(self):
         """
         Called the very first time the door is created.
@@ -97,21 +102,21 @@ class CmdOpen(default_cmds.CmdOpen):
         """
         Simple wrapper for the default CmdOpen.create_exit
         """
+        # create a new exit as normal
+        new_exit = super(CmdOpen, self).create_exit(exit_name, location, destination,
+                                                    exit_aliases=exit_aliases, typeclass=typeclass)
         if hasattr(self, "return_exit_already_created"):
             # we don't create a return exit if it was already created (because
             # we created a door)
             del self.return_exit_already_created
-            return
-        # create a new exit as normal
-        new_exit = super(CmdOpen, self).create_exit(exit_name, location, destination,
-                                                    exit_aliases=exit_aliases, typeclass=typeclass)
+            return new_exit
         if inherits_from(new_exit, SimpleDoor):
             # a door - create its counterpart and make sure to turn off the default
             # return-exit creation of CmdOpen
             self.caller.msg("Note: A door-type exit was created - ignored eventual custom return-exit type.")
             self.return_exit_already_created = True
-            back_exit = super(CmdOpen, self).create_exit(exit_name, destination, location,
-                                                         exit_aliases=exit_aliases, typeclass=typeclass)
+            back_exit = self.create_exit(exit_name, destination, location,
+                                         exit_aliases=exit_aliases, typeclass=typeclass)
             new_exit.db.return_exit = back_exit
             back_exit.db.return_exit = new_exit
         return new_exit
@@ -155,10 +160,9 @@ class CmdOpenCloseDoor(default_cmds.MuxCommand):
             else:
                 door.setlock("traverse:true()")
                 self.caller.msg("You open %s." % door.key)
-        else: # close
+        else:  # close
             if not door.locks.check(self.caller, "traverse"):
                 self.caller.msg("%s is already closed." % door.key)
             else:
                 door.setlock("traverse:false()")
                 self.caller.msg("You close %s." % door.key)
-
