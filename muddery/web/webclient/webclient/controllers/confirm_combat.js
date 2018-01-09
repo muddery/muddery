@@ -47,11 +47,7 @@ var controller = {
 
 	    commands.confirmCombat();
 
-	    if (controller._interval_id != null) {
-            controller._interval_id = window.clearInterval(controller._interval_id);
-        }
-
-        $("#time").text(_("Confirmed."));
+        $("#popup_body").text(_("Confirmed."));
 	},
 	
 	onRejectCombat: function() {

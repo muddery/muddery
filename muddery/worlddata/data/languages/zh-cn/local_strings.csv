@@ -145,3 +145,6 @@ category,origin,local
 ,"Can not make match.","无法匹配战斗。"
 ,"The honour hall is now opened.","荣誉大厅已开放。"
 ,"Global cooling down!","公共CD冷却中。"
+,"{object} is leaving {origin}, heading for {destination}.","{object}离开{origin}去往{destination}。"
+,"{object} arrives to {destination} from {origin}.","{object}从{origin}来到{destination}。"
+,"{object} arrives to {destination}.","{object}来到{destination}。"

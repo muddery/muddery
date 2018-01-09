@@ -241,14 +241,17 @@ var controller = {
     },
     
     setSkillResult: function(result) {
-		if ("message" in result && result["message"]) {
-		    var msg = text2html.parseHtml(result["message"]);
-			this.displayMsg(msg);
-		}
-		
 		var frame_id = "#frame_combat";
         var frame_ctrl = this.getFrameController(frame_id);
-		frame_ctrl.setSkillResult(result);
+        if (frame_ctrl.isCombatFinished()) {
+            if ("message" in result && result["message"]) {
+                var msg = text2html.parseHtml(result["message"]);
+                this.displayMsg(msg);
+            }
+        }
+        else {
+            frame_ctrl.setSkillResult(result);
+        }
     },
     
     setSkillCD: function(skill, cd, gcd) {
@@ -285,6 +288,12 @@ var controller = {
         if (frame_ctrl) {
 	        frame_ctrl.quitCombatQueue();
 	    }
+
+	    var prepare_id = "#frame_confirm_combat";
+		var prepare_ctrl = this.getFrameController(prepare_id);
+		if (prepare_ctrl) {
+			prepare_ctrl.closeBox();
+		}
     },
 
     prepareMatch: function(data) {
@@ -293,8 +302,8 @@ var controller = {
 		prepare_ctrl.init(data);
 
         this.showFrame(prepare_id);
-        var popup_content = $("#popup_confirm_combat .modal-content:visible:first");
-        this.setPopupSize(popup_content);
+        var popup_dialog = $("#popup_confirm_combat .modal-dialog:visible:first");
+        this.setPopupSize(popup_dialog);
     },
     
     matchRejected: function(character_id) {
@@ -416,6 +425,7 @@ var controller = {
 
     // set player's status
     setStatus: function(status) {
+        data_handler.character_level = status["level"]["value"];
         $("#prompt_level").text(status["level"]["value"]);
 
         var exp_str = "";
@@ -674,17 +684,21 @@ var controller = {
     },
 
     doSetVisiblePopupSize: function() {
-        var popup_content = $("#popup_container .modal-content:visible:first");
-        this.setPopupSize(popup_content);
+        var popup_dialog = $("#popup_container .modal-dialog:visible:first");
+        this.setPopupSize(popup_dialog);
     },
     
-    setPopupSize: function(popup_content) {
-        var frame = popup_content.find("iframe");
+    setPopupSize: function(dialog) {
+        var content = dialog.find(".modal-content");
+        if (content.length == 0) {
+            return;
+        }
+        var frame = content.find("iframe");
         if (frame.length == 0) {
             return;
         }
 
-        frame.innerWidth(popup_content.width());
+        frame.innerWidth(content.width());
         frame.height(0);
         
         var frame_body = frame[0].contentWindow.document.body;
@@ -692,10 +706,7 @@ var controller = {
 
         // model dialogue
         var win_h = $(window).innerHeight();
-        var dlg = $(".modal-dialog:visible:first");
-        if (dlg.length > 0) {
-            dlg.css("top", (win_h - dlg.height()) / 2);
-        }
+        dialog.css("top", (win_h - dialog.height()) / 2);
     },
     
     doChangeVisibleFrameSize: function() {
@@ -868,6 +879,11 @@ var controller = {
                 $("#tab_social").show();
             }
         }
+
+        // honour settings
+        var honour_id = "#frame_honours";
+        var honour_ctrl = this.getFrameController(honour_id);
+        honour_ctrl.setMinHonourLevel(settings["min_honour_level"]);
 
         // map settings
         var map_id = "#frame_map";

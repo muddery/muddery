@@ -68,4 +68,4 @@ SKILL_FUNC_SET = "statements.statement_func_set.SkillFuncSet"
 ###################################
 # honour settings
 ###################################
-MIN_HONOUR_LEVEL = 1
+MIN_HONOUR_LEVEL = 2
