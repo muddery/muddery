@@ -21,6 +21,8 @@ settings file:
 
 """
 
+from __future__ import print_function
+
 import json
 from evennia.server.serversession import ServerSession as BaseServerSession
 from evennia.utils import logger
@@ -40,7 +42,14 @@ class ServerSession(BaseServerSession):
         Send Evennia -> User
         Convert to JSON.
         """
-        options = kwargs.get("options", {})
+        options = None
+        if kwargs.has_key("options"):
+            options = kwargs.get("options", None)
+
+        if options is None:
+            options = {}
+            kwargs["options"] = {}
+
         raw = options.get("raw", False)
         if not raw:
             try:
@@ -51,10 +60,6 @@ class ServerSession(BaseServerSession):
                 logger.log_tracemsg("json.dumps failed: %s" % e)
 
         # set raw=True
-        if kwargs:
-            kwargs["options"] = {"raw": True}
-        else:
-            kwargs = {"options": {"raw": True}}
+        kwargs["options"].update({"raw": True})
 
         return super(ServerSession, self).data_out(text=text, **kwargs)
-

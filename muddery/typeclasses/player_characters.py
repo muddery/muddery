@@ -116,7 +116,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         self.refresh_data()
 
     def move_to(self, destination, quiet=False,
-                emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True):
+                emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True, **kwargs):
         """
         Moves this object to a new location.
         """
@@ -131,7 +131,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
                                                            to_none,
                                                            move_hooks)
 
-    def at_object_receive(self, moved_obj, source_location):
+    def at_object_receive(self, moved_obj, source_location, **kwargs):
         """
         Called after an object has been moved into this object.
         
@@ -264,11 +264,11 @@ class MudderyPlayerCharacter(MudderyCharacter):
                     "Public": _("Public", category="channels")}
 
         commands = False
-        if self.player:
+        if self.account:
             if self.is_superuser:
                 commands = True
             else:
-                for perm in self.player.permissions.all():
+                for perm in self.account.permissions.all():
                     if perm in settings.PERMISSION_COMMANDS:
                         commands = True
                         break
@@ -1273,7 +1273,7 @@ class MudderyPlayerCharacter(MudderyCharacter):
         rankings = top_rankings
         rankings.extend([id for id in nearest_rankings if id not in top_rankings])
 
-        characters = [self.search("#%s" % id) for id in rankings]
+        characters = [self.search_dbref("#%s" % id) for id in rankings]
         data = [{"name": char.get_name(),
                  "dbref": char.dbref,
                  "ranking": HONOURS_MAPPER.get_ranking(char),

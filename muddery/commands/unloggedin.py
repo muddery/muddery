@@ -10,7 +10,7 @@ import hashlib
 from collections import defaultdict
 from random import getrandbits
 from django.conf import settings
-from evennia.players.models import PlayerDB
+from evennia.accounts.models import AccountDB
 from evennia.objects.models import ObjectDB
 from evennia.server.models import ServerConfig
 from evennia.utils import logger, utils
@@ -107,7 +107,7 @@ def create_guest_player(session):
         # Find an available guest name.
         playername = None
         for playername in settings.GUEST_LIST:
-            if not PlayerDB.objects.filter(username__iexact=playername):
+            if not AccountDB.objects.filter(username__iexact=playername).count():
                 break
             playername = None
         if playername == None:
@@ -144,7 +144,7 @@ def create_normal_player(session, playername, password):
         return
     # strip excessive spaces in playername
     playername = re.sub(r"\s+", " ", playername).strip()
-    if PlayerDB.objects.filter(username__iexact=playername):
+    if AccountDB.objects.filter(username__iexact=playername):
         # player already exists (we also ignore capitalization here)
         session.msg({"alert":_("Sorry, there is already a player with the name '%s'.") % playername})
         return
@@ -206,7 +206,7 @@ def connect_normal_player(session, name, password):
         return None
 
     # Match account name and check password
-    player = PlayerDB.objects.get_player_from_name(name)
+    player = AccountDB.objects.get_account_from_name(name)
     pswd = None
     if player:
         pswd = player.check_password(password)
@@ -346,11 +346,12 @@ class CmdUnconnectedCreate(Command):
             return
 
         new_player = create_normal_player(session, playername, password)
-        if connect:
-            session.msg({"login":{"name": playername, "dbref": new_player.dbref}})
-            session.sessionhandler.login(session, new_player)
-        else:
-            session.msg({"created":{"name": playername, "dbref": new_player.dbref}})
+        if new_player:
+            if connect:
+                session.msg({"login":{"name": playername, "dbref": new_player.dbref}})
+                session.sessionhandler.login(session, new_player)
+            else:
+                session.msg({"created":{"name": playername, "dbref": new_player.dbref}})
 
 
 class CmdQuickLogin(Command):
@@ -385,7 +386,7 @@ class CmdQuickLogin(Command):
 
         player = None
         character = None
-        if PlayerDB.objects.filter(username__iexact=name_md5):
+        if AccountDB.objects.filter(username__iexact=name_md5):
             # Already has this player. Login.
             player = connect_normal_player(session, name_md5, name_md5)
         else:

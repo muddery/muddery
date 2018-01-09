@@ -12,7 +12,7 @@ from django.shortcuts import render
 
 from evennia import SESSION_HANDLER
 from evennia.objects.models import ObjectDB
-from evennia.players.models import PlayerDB
+from evennia.accounts.models import AccountDB
 from evennia.utils import logger
 
 from django.contrib.auth import login
@@ -26,36 +26,48 @@ def _shared_login(request):
 
     """
     csession = request.session
-    player = request.user
-    sesslogin = csession.get("logged_in", None)
+    account = request.user
+    website_uid = csession.get("website_authenticated_uid", None)
+    webclient_uid = csession.get("webclient_authenticated_uid", None)
 
-    if csession.session_key is None:
+    if not csession.session_key:
         # this is necessary to build the sessid key
         csession.save()
-    elif player.is_authenticated():
-        if not sesslogin:
-            csession["logged_in"] = player.id
-    elif sesslogin:
-        # The webclient has previously registered a login to this csession
-        player = PlayerDB.objects.get(id=sesslogin)
-        try:
-            login(request, player)
-        except AttributeError:
-            logger.log_trace()
+
+    if account.is_authenticated():
+        # Logged into website
+        if not website_uid:
+            # fresh website login (just from login page)
+            csession["website_authenticated_uid"] = account.id
+            if webclient_uid is None:
+                # auto-login web client
+                csession["webclient_authenticated_uid"] = account.id
+
+    elif webclient_uid:
+        # Not logged into website, but logged into webclient
+        if not website_uid:
+            csession["website_authenticated_uid"] = account.id
+            account = AccountDB.objects.get(id=webclient_uid)
+            try:
+                # calls our custom authenticate, in web/utils/backend.py
+                authenticate(autologin=account)
+                login(request, account)
+            except AttributeError:
+                logger.log_trace()
 
 
 def _gamestats():
     # Some misc. configurable stuff.
     # TODO: Move this to either SQL or settings.py based configuration.
-    fpage_player_limit = 4
+    fpage_account_limit = 4
 
-    # A QuerySet of the most recently connected players.
-    recent_users = PlayerDB.objects.get_recently_connected_players()[:fpage_player_limit]
+    # A QuerySet of the most recently connected accounts.
+    recent_users = AccountDB.objects.get_recently_connected_accounts()[:fpage_account_limit]
     nplyrs_conn_recent = len(recent_users)
-    nplyrs = PlayerDB.objects.num_total_players()
-    nplyrs_reg_recent = len(PlayerDB.objects.get_recently_created_players())
-    nsess = SESSION_HANDLER.player_count()
-    # nsess = len(PlayerDB.objects.get_connected_players()) or "no one"
+    nplyrs = AccountDB.objects.num_total_accounts()
+    nplyrs_reg_recent = len(AccountDB.objects.get_recently_created_accounts())
+    nsess = SESSION_HANDLER.account_count()
+    # nsess = len(AccountDB.objects.get_connected_accounts()) or "no one"
 
     nobjs = ObjectDB.objects.all().count()
     nrooms = ObjectDB.objects.filter(db_location__isnull=True).exclude(db_typeclass_path=_BASE_CHAR_TYPECLASS).count()
@@ -113,7 +125,7 @@ def evennia_admin(request):
     """
     return render(
         request, 'evennia_admin.html', {
-            'playerdb': PlayerDB})
+            'accountdb': AccountDB})
 
 
 def admin_wrapper(request):

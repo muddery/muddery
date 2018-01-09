@@ -60,7 +60,7 @@ class BaseCombatHandler(DefaultScript):
         # remove combat commands
         character.cmdset.delete(settings.CMDSET_COMBAT)
 
-        if character.has_player:
+        if character.has_account:
             # notify combat finished
             character.msg({"left_combat": True})
 
@@ -107,7 +107,7 @@ class BaseCombatHandler(DefaultScript):
             # Change the command set.
             character.cmdset.add(settings.CMDSET_COMBAT)
 
-            if character.has_player:
+            if character.has_account:
                 self.show_combat(character)
 
         self.start_combat()
@@ -203,7 +203,7 @@ class BaseCombatHandler(DefaultScript):
             None.
         """
         for character in self.characters.values():
-            if character.has_player:
+            if character.has_account:
                 character.msg({"combat_finish": {"draw": True}})
 
     def set_combat_results(self, winners, losers):
@@ -218,11 +218,11 @@ class BaseCombatHandler(DefaultScript):
             None
         """
         for character in winners:
-            if character.has_player:
+            if character.has_account:
                 character.msg({"combat_finish": {"win": True}})
 
         for character in losers:
-            if character.has_player:
+            if character.has_account:
                 character.msg({"combat_finish": {"lose": True}})
 
     def get_appearance(self):
@@ -279,7 +279,7 @@ class BaseCombatHandler(DefaultScript):
             None
         """
         if caller:
-            if caller.has_player:
+            if caller.has_account:
                 caller.msg({"combat_finish": {"escaped": True}})
 
             # Skill function will call finish func later, so should not check finish here.
@@ -298,5 +298,5 @@ class BaseCombatHandler(DefaultScript):
             None
         """
         for character in self.characters.values():
-            if character.has_player:
+            if character.has_account:
                 character.msg({"skill_result": result})

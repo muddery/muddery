@@ -12,10 +12,10 @@ import json
 import ast
 from django.conf import settings
 from django.apps import apps
+from evennia.objects.models import ObjectDB
 from evennia.objects.objects import DefaultObject
 from evennia.utils import logger
-from evennia.utils.utils import make_iter
-from evennia.utils.utils import lazy_property
+from evennia.utils.utils import make_iter, is_iter, lazy_property
 from evennia.typeclasses.models import DbHolder
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.data_field_handler import DataFieldHandler
@@ -136,7 +136,7 @@ class MudderyObject(DefaultObject):
         # codes here. You can add codes in after_data_loaded() which is called
         # after load_data().
     
-    def at_post_unpuppet(self, player, session=None):
+    def at_post_unpuppet(self, player, session=None, **kwargs):
         """
         We stove away the character when the player goes ooc/logs off,
         otherwise the character object will remain in the room also
@@ -159,7 +159,7 @@ class MudderyObject(DefaultObject):
                 self.db.prelogout_location = self.location
                 self.location = None
 
-    def at_object_receive(self, moved_obj, source_location):
+    def at_object_receive(self, moved_obj, source_location, **kwargs):
         """
         Called after an object has been moved into this object.
 
@@ -583,7 +583,7 @@ class MudderyObject(DefaultObject):
         # call action event by default
         self.event.at_action(caller, self)
 
-    def msg(self, text=None, from_obj=None, session=None, **kwargs):
+    def msg(self, text=None, from_obj=None, session=None, options=None, **kwargs):
         """
         Emits something to a session attached to the object.
 
@@ -602,24 +602,6 @@ class MudderyObject(DefaultObject):
 
         """
         # Send messages to the client. Messages are in format of JSON.
-        """
-        raw = kwargs.get("raw", False)
-        if not raw:
-            try:
-                text = json.dumps(text)
-            except Exception, e:
-                text = json.dumps({"err": "There is an error occurred while outputing messages."})
-                logger.log_errmsg("json.dumps failed: %s" % e)
-        else:
-            text = to_str(text, force_string=True) if text != None else ""
-
-        # set raw=True
-        if kwargs:
-            kwargs["raw"] = True
-        else:
-            kwargs = {"raw": True}
-        """
-
         # try send hooks
         if from_obj:
             try:
@@ -632,8 +614,58 @@ class MudderyObject(DefaultObject):
                 return
         except Exception:
             logger.log_trace()
+
+        kwargs["options"] = options
                                                         
         # relay to session(s)
         sessions = make_iter(session) if session else self.sessions.all()
         for session in sessions:
             session.msg(text=text, **kwargs)
+
+    def msg_contents(self, text=None, exclude=None, from_obj=None, options=None, **kwargs):
+        """
+        Emits a message to all objects inside this object.
+
+        Send text in JSON format.
+        """
+        if not options:
+            options = {}
+
+        raw = options.get("raw", False)
+        if not raw:
+            try:
+                text = json.dumps(text)
+            except Exception, e:
+                text = json.dumps({"err": "There is an error occurred while outputing messages."})
+                logger.log_errmsg("json.dumps failed: %s" % e)
+
+        options["raw"] = True
+
+        contents = self.contents
+        if exclude:
+            exclude = make_iter(exclude)
+            contents = [obj for obj in contents if obj not in exclude]
+        for obj in contents:
+            obj.msg(text=text, from_obj=from_obj, options=options, **kwargs)
+
+    def search_dbref(self, dbref, location=None):
+        """
+        Search as an object by its dbref.
+
+        Args:
+            dbref: (string)dbref.
+
+        Returns:
+            The object or None.
+        """
+        match = ObjectDB.objects.dbref_search(dbref)
+
+        if match and location:
+            # match the location
+            if is_iter(location):
+                if not [l for l in location if match.location == l]:
+                    match = None
+            elif match.location != location:
+                match = None
+
+        return match

@@ -11,7 +11,7 @@ import re
 from django.conf import settings
 from evennia.server.sessionhandler import SESSIONS
 from evennia.commands.command import Command
-from evennia.utils import create, search, prettytable, logger
+from evennia.utils import create, search, logger
 from evennia.utils.utils import make_iter
 from muddery.utils import utils
 from muddery.utils.localized_strings_handler import _
@@ -26,7 +26,7 @@ __all__ = ("CmdQuit")
 
 # force max nr chars to 1 if mode is 0 or 1
 MAX_NR_CHARACTERS = MULTISESSION_MODE < 2 and 1 or MAX_NR_CHARACTERS
-BASE_PLAYER_TYPECLASS = settings.BASE_PLAYER_TYPECLASS
+BASE_ACCOUNT_TYPECLASS = settings.BASE_ACCOUNT_TYPECLASS
 
 PERMISSION_HIERARCHY = settings.PERMISSION_HIERARCHY
 PERMISSION_HIERARCHY_LOWER = [perm.lower() for perm in PERMISSION_HIERARCHY]
@@ -54,7 +54,7 @@ class CmdQuit(Command):
     def func(self):
         "hook function"
         session = self.session
-        player = self.player
+        player = self.account
 
         nsess = len(player.sessions.all())
         if nsess == 2:
@@ -70,7 +70,7 @@ class CmdQuit(Command):
             session.msg({"msg":"{RQuitting{n. Hope to see you again, soon.",
                        "logout":""},
                        session=session)
-        player.disconnect_session_from_player(session)
+        player.disconnect_session_from_account(session)
 
 
 class CmdPuppet(Command):
@@ -93,14 +93,14 @@ class CmdPuppet(Command):
     locks = "cmd:all()"
 
     # this is used by the parent
-    player_caller = True
+    account_caller = True
 
     def func(self):
         """
         Main puppet method
         """
         session = self.session
-        player = self.player
+        player = self.account
         args = self.args
 
         # Find the character to puppet.
@@ -144,12 +144,12 @@ class CmdUnpuppet(Command):
     locks = "cmd:all()"
 
     # this is used by the parent
-    player_caller = True
+    account_caller = True
 
     def func(self):
         "Implement function"
 
-        player = self.player
+        player = self.account
         session = self.session
 
         old_char = player.get_puppet(session)
@@ -181,12 +181,12 @@ class CmdCharCreate(Command):
     locks = "cmd:all()"
 
     # this is used by the parent
-    player_caller = True
+    account_caller = True
 
     def func(self):
         "create the new character"
         session = self.session
-        player = self.player
+        player = self.account
         args = self.args
         
         if not args:
@@ -249,7 +249,7 @@ class CmdCharDelete(Command):
 
     def func(self):
         "delete the character"
-        player = self.player
+        player = self.account
         session = self.session
         args = self.args
 
@@ -309,7 +309,7 @@ class CmdCharAll(Command):
     
     def func(self):
         "delete the character"
-        player = self.player
+        player = self.account
         session = self.session
         
         session.msg({"char_all": player.get_all_characters()})

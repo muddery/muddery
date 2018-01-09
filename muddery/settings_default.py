@@ -237,8 +237,8 @@ SERVER_SESSION_CLASS = "muddery.server.conf.serversession.ServerSession"
 # or start from the evennia library.
 TYPECLASS_PATHS = ["muddery.typeclasses"]
 
-# Typeclass for player objects (linked to a character) (fallback)
-BASE_PLAYER_TYPECLASS = "muddery.typeclasses.players.MudderyPlayer"
+# Typeclass for account objects (linked to a character) (fallback)
+BASE_ACCOUNT_TYPECLASS = "muddery.typeclasses.accounts.MudderyAccount"
 
 # Typeclass and base for all objects (fallback)
 BASE_OBJECT_TYPECLASS = "muddery.typeclasses.objects.MudderyObject"
@@ -319,8 +319,8 @@ CMDSET_SESSION = "muddery.commands.default_cmdsets.SessionCmdSet"
 # Default set for logged in player with characters (fallback)
 CMDSET_CHARACTER = "muddery.commands.default_cmdsets.CharacterCmdSet"
 
-# Command set for players without a character (ooc)
-CMDSET_PLAYER = "muddery.commands.default_cmdsets.PlayerCmdSet"
+# Command set for accounts without a character (ooc)
+CMDSET_ACCOUNT = "muddery.commands.default_cmdsets.AccountCmdSet"
 
 # Command set for players in combat
 CMDSET_COMBAT = "muddery.commands.default_cmdsets.CombatCmdSet"

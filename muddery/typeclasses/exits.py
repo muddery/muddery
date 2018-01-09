@@ -74,12 +74,12 @@ class MudderyExit(MudderyObject, DefaultExit):
 
         """
         # trigger event
-        if traversing_object.has_player:
+        if traversing_object.has_account:
             return self.event.at_character_traverse(traversing_object)
         
         return True
 
-    def at_failed_traverse(self, traversing_object):
+    def at_failed_traverse(self, traversing_object, **kwargs):
         """
         Overloads the default hook to implement a simple default error message.
 

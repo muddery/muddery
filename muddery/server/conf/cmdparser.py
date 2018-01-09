@@ -62,11 +62,10 @@ def cmdparser(raw_string, cmdset, caller, match_index=None):
         # Find the matching command in cmdset.
         for cmdobj in cmdset:
             if cmdobj.key == cmd:
-                return [(cmd, args, cmdobj,)]
+                return [(cmd, args, cmdobj, len(cmd), 1, raw_string)]
 
         # can not find
         return []
     except Exception:
         # Command is not in JSON, call evennia's cmdparser.
         return evennia_cmdparser.cmdparser(raw_string, cmdset, caller, match_index)
-

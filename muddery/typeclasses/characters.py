@@ -10,7 +10,7 @@ creation commands.
 
 from __future__ import print_function
 
-import ast
+import traceback
 from twisted.internet import reactor
 from twisted.internet.task import deferLater
 from django.conf import settings
@@ -462,21 +462,7 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
         Returns:
             None
         """
-        target = self.search(target_dbref)
-        self.attack_target(target, desc)
-
-    def attack_target_key(self, target_key, desc=""):
-        """
-        Attack a target.
-
-        Args:
-            target_key: (string) the info key of the target.
-            desc: (string) string to describe this attack
-
-        Returns:
-            None
-        """
-        target = self.search(target_key)
+        target = self.search_dbref(target_dbref)
         self.attack_target(target, desc)
 
     def attack_temp_current_target(self, desc=""):

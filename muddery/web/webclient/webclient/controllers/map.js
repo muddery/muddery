@@ -5,6 +5,7 @@ var text2html = parent.text2html;
 var settings = parent.settings;
 var map_data = parent.map_data;
 var commands = parent.commands;
+var utils = parent.utils;
 
 var controller = {
 
@@ -171,7 +172,7 @@ var controller = {
 							continue;
 						}
 							
-                        room_data.push({"name": util.truncate_string(room["name"], 10, true),
+                        room_data.push({"name": utils.truncate_string(room["name"], 10, true),
                                         "icon": room["icon"]? settings.resource_url + room["icon"]: null,
                                         "area": room["area"],
                                         "pos": room["pos"]});
@@ -184,7 +185,7 @@ var controller = {
             }
             else {
                 // does not have current position, only show current room at center.
-                room_data.push({"name": util.truncate_string(current_room["name"], 10, true),
+                room_data.push({"name": utils.truncate_string(current_room["name"], 10, true),
                                 "icon": current_room["icon"],
                                 "area": current_room["area"],
                                 "pos": [0, 0]});

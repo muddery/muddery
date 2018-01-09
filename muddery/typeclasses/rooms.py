@@ -86,10 +86,10 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                 self.msg_contents({"obj_moved_in": change}, exclude=moved_obj)
 
         # trigger event
-        if moved_obj.has_player:
+        if moved_obj.has_account:
             self.event.at_character_move_in(moved_obj)
 
-    def at_object_leave(self, moved_obj, target_location):
+    def at_object_leave(self, moved_obj, target_location, **kwargs):
         """
         Called when an object leaves this object in any fashion.
         
@@ -150,7 +150,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
                    cont.access(caller, "view"))
 
         if GAME_SETTINGS.get("solo_mode"):
-            visible = (cont for cont in visible if not cont.has_player)
+            visible = (cont for cont in visible if not cont.has_account)
 
         for cont in visible:
             # only show objects that match the condition
@@ -186,7 +186,7 @@ class MudderyRoom(MudderyObject, DefaultRoom):
             return "exits"
         elif obj.is_typeclass(settings.BASE_GENERAL_CHARACTER_TYPECLASS, exact=False):
             if obj.is_typeclass(settings.BASE_PLAYER_CHARACTER_TYPECLASS, exact=False):
-                if obj.has_player:
+                if obj.has_account:
                     return "players"
                 else:
                     return "offlines"

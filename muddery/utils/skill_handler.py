@@ -6,7 +6,7 @@ Skill handler handles a character's skills.
 from __future__ import print_function
 
 import time
-import random
+import traceback
 from twisted.internet import task
 from django.conf import settings
 from evennia.utils import logger
@@ -90,11 +90,11 @@ class SkillHandler(object):
             self.owner.refresh_data()
 
             # Notify the player
-            if self.owner.has_player:
+            if self.owner.has_account:
                 self.owner.show_status()
 
         # Notify the player
-        if self.owner.has_player:
+        if self.owner.has_account:
             self.owner.show_skills()
             self.owner.msg({"msg": _("You learned skill {c%s{n.") % skill_obj.get_name()})
 

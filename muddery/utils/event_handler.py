@@ -80,11 +80,11 @@ class EventHandler(object):
         if not character:
             return False
 
-        if character.player:
-            if character.player.is_superuser:
+        if character.account:
+            if character.account.is_superuser:
                 # superusers can bypass events
                 return True
-            for perm in character.player.permissions.all():
+            for perm in character.account.permissions.all():
                 if perm in PERMISSION_BYPASS_EVENTS:
                     # has permission to bypass events
                     return True

@@ -360,10 +360,10 @@ def create_player(playername, password, permissions=None, typeclass=None):
     Helper function, creates a player of the specified typeclass.
     """
     if not permissions:
-        permissions = settings.PERMISSION_PLAYER_DEFAULT
+        permissions = settings.PERMISSION_ACCOUNT_DEFAULT
 
-    new_player = create.create_player(playername, None, password,
-                                      permissions=permissions, typeclass=typeclass)
+    new_player = create.create_account(playername, None, password,
+                                       permissions=permissions, typeclass=typeclass)
 
     # This needs to be set so the engine knows this player is
     # logging in for the first time. (so it knows to call the right
@@ -391,7 +391,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
         typeclass = settings.BASE_PLAYER_CHARACTER_TYPECLASS
         
     if not permissions:
-        permissions = settings.PERMISSION_PLAYER_DEFAULT
+        permissions = settings.PERMISSION_ACCOUNT_DEFAULT
     
     if not home:
         home = settings.DEFAULT_HOME

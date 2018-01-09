@@ -47,7 +47,7 @@ class CmdLook(Command):
 
         if args:
             # Use search to handle duplicate/nonexistant results.
-            looking_at_obj = caller.search(args, location=caller.location)
+            looking_at_obj = caller.search_dbref(args)
             if not looking_at_obj:
                 caller.msg({"alert":_("Can not find it.")})
                 return
@@ -188,7 +188,7 @@ class CmdGoto(Command):
             caller.msg({"alert":_("Should appoint an exit to go.")})
             return
 
-        obj = caller.search(self.args, location=caller.location)
+        obj = caller.search_dbref(self.args, location=caller.location)
         if not obj:
             # Can not find exit.
             caller.msg({"alert":_("Can not find exit.")})
@@ -236,7 +236,7 @@ class CmdTalk(Command):
             caller.msg({"alert":_("You should talk to someone.")})
             return
 
-        npc = caller.search(self.args, location=caller.location)
+        npc = caller.search_dbref(self.args, location=caller.location)
         if not npc:
             # Can not find the NPC in the caller's location.
             caller.msg({"alert":_("Can not find the one to talk.")})
@@ -279,7 +279,7 @@ class CmdDialogue(Command):
         if "npc" in self.args:
             if self.args["npc"]:
                 # get NPC
-                npc = caller.search(self.args["npc"], location=caller.location)
+                npc = caller.search_dbref(self.args["npc"], location=caller.location)
                 if not npc:
                     caller.msg({"msg":_("Can not find it.")})
                     return
@@ -330,7 +330,7 @@ class CmdLoot(Command):
             caller.msg({"alert":_("You should loot something.")})
             return
 
-        obj = caller.search(self.args, location=caller.location)
+        obj = caller.search_dbref(self.args, location=caller.location)
         if not obj:
             # Can not find the specified object.
             caller.msg({"alert":_("Can not find the object to loot.")})
@@ -378,7 +378,7 @@ class CmdUse(Command):
             caller.msg({"alert":_("You should use something.")})
             return
 
-        obj = caller.search(self.args, location=caller)
+        obj = caller.search_dbref(self.args, location=caller)
         if not obj:
             # If the caller does not have this object.
             caller.msg({"alert":_("You don't have this object.")})
@@ -429,7 +429,7 @@ class CmdDiscard(Command):
             caller.msg({"alert":_("You should discard something.")})
             return
 
-        obj = caller.search(self.args, location=caller)
+        obj = caller.search_dbref(self.args, location=caller)
         if not obj:
             # If the caller does not have this object.
             caller.msg({"alert":_("You don't have this object.")})
@@ -470,7 +470,7 @@ class CmdEquip(Command):
             caller.msg({"alert":_("You should equip something.")})
             return
 
-        obj = caller.search(self.args, location=caller)
+        obj = caller.search_dbref(self.args, location=caller)
         if not obj:
             # If the caller does not have this equipment.
             caller.msg({"alert":_("You don't have this equipment.")})
@@ -518,7 +518,7 @@ class CmdTakeOff(Command):
             caller.msg({"alert":_("You should take off something.")})
             return
 
-        obj = caller.search(self.args, location=caller)
+        obj = caller.search_dbref(self.args, location=caller)
         if not obj:
             # If the caller does not have this equipment.
             caller.msg({"alert":_("You don't have this equipment.")})
@@ -601,7 +601,7 @@ class CmdCastSkill(Command):
                         return
             # Get target
             if "target" in args:
-                target = caller.search(args["target"])
+                target = caller.search_dbref(args["target"])
 
         try:
             # Prepare to cast this skill.
@@ -646,22 +646,22 @@ class CmdAttack(Command):
             caller.msg({"alert":_("You should select a target.")})
             return
 
-        target = caller.search(self.args)
+        target = caller.search_dbref(self.args)
         if not target:
             caller.msg({"alert":_("You should select a target.")})
             return
 
         if not caller.location or caller.location.peaceful:
-            if target.has_player:
+            if target.has_account:
                 caller.msg({"alert":_("You can not attack in this place.")})
                 return
 
         if not target.is_alive():
-            caller.msg({"alert":_("%s is died." % target.get_name())})
+            caller.msg({"alert": _("%s is died." % target.get_name())})
             return
 
         if caller.location != target.location:
-            caller.msg({"alert":_("You can not attack %s." % target.get_name())})
+            caller.msg({"alert": _("You can not attack %s." % target.get_name())})
             return
 
         # Set caller's target.
@@ -720,7 +720,7 @@ class CmdMakeMatch(Command):
         try:
             # getcandidates
             ids = HONOURS_MAPPER.get_characters(caller, settings.HONOUR_OPPONENTS_NUMBER)
-            characters = [caller.search("#%s" % id) for id in ids]
+            characters = [caller.search_dbref("#%s" % id) for id in ids]
             candidates = [char for char in characters if char and not char.is_in_combat()]
             if candidates:
                 match = random.choice(candidates)
@@ -946,7 +946,7 @@ class CmdUnlockExit(Command):
             caller.msg({"alert":_("You should unlock something.")})
             return
 
-        obj = caller.search(self.args, location=caller)
+        obj = caller.search_dbref(self.args, location=caller.location)
         if not obj:
             caller.msg({"alert":_("Can not find this exit.")})
             return
@@ -991,7 +991,7 @@ class CmdShopping(Command):
             caller.msg({"alert":_("You should shopping in someplace.")})
             return
 
-        shop = caller.search(self.args)
+        shop = caller.search_dbref(self.args)
         if not shop:
             caller.msg({"alert":_("Can not find this shop.")})
             return
@@ -1023,7 +1023,7 @@ class CmdBuy(Command):
             caller.msg({"alert":_("You should buy something.")})
             return
 
-        goods = caller.search(self.args)
+        goods = caller.search_dbref(self.args)
         if not goods:
             caller.msg({"alert":_("Can not find this goods.")})
             return
@@ -1068,7 +1068,7 @@ class CmdAction(Command):
             return
 
         # Use search to handle duplicate/nonexistant results.
-        obj = caller.search(args, location=caller.location)
+        obj = caller.search_dbref(args, location=caller.location)
         if not obj:
             caller.msg({"alert":_("Can not find it.")})
             return

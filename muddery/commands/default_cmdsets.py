@@ -69,20 +69,20 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdCreateConnect())
 
 
-class PlayerCmdSet(default_cmds.PlayerCmdSet):
+class AccountCmdSet(default_cmds.AccountCmdSet):
     """
     This is the cmdset available to the Player at all times. It is
     combined with the `CharacterCmdSet` when the Player puppets a
     Character. It holds game-account-specific commands, channel
     commands, etc.
     """
-    key = "DefaultPlayer"
+    key = "DefaultAccount"
 
     def at_cmdset_creation(self):
         """
         Populates the cmdset
         """
-        super(PlayerCmdSet, self).at_cmdset_creation()
+        super(AccountCmdSet, self).at_cmdset_creation()
         #
         # any commands you add below will overload the default ones.
         #

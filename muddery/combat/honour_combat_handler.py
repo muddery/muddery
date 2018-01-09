@@ -69,5 +69,5 @@ class HonourCombatHandler(BaseCombatHandler):
 
         # Recover all hp.
         character.db.hp = character.max_hp
-        if character.has_player:
+        if character.has_account:
             character.show_status()

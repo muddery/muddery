@@ -21,7 +21,7 @@ class NormalCombatHandler(BaseCombatHandler):
         super(NormalCombatHandler, self).start_combat()
 
         for character in self.characters.values():
-            if not character.player:
+            if not character.account:
                 # Monsters auto cast skills
                 character.skill_handler.start_auto_combat_skill()
 
@@ -31,7 +31,7 @@ class NormalCombatHandler(BaseCombatHandler):
         (i.e. not for a restart).
         """
         for character in self.characters.values():
-            if not character.player:
+            if not character.account:
                 # Stop auto cast skills
                 character.skill_handler.stop_auto_combat_skill()
 
@@ -56,7 +56,7 @@ class NormalCombatHandler(BaseCombatHandler):
         Finish a combat. Send results to players, and kill all failed characters.
         """
         for character in self.characters.values():
-            if not character.player:
+            if not character.account:
                 # Stop auto cast skills
                 character.skill_handler.stop_auto_combat_skill()
 
@@ -124,7 +124,7 @@ class NormalCombatHandler(BaseCombatHandler):
                 delete_object(character.dbref)
                 if location:
                     for content in location.contents:
-                        if content.has_player:
+                        if content.has_account:
                             content.show_location()
             else:
                 if character.is_alive():
