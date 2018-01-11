@@ -11,6 +11,7 @@ from evennia.server.evennia_launcher import init_game_directory
 from muddery.server.upgrader.base_upgrader import BaseUpgrader
 from muddery.server.upgrader import utils
 from muddery.server.launcher import configs
+from muddery.utils.exception import MudderyError
 
 
 class Upgrader(BaseUpgrader):
@@ -36,6 +37,16 @@ class Upgrader(BaseUpgrader):
             muddery_lib: (string) muddery's dir
         """
         print("Upgrading game 0.2.0-0.2.2 %s." % game_dir)
+
+        print("""
+    We are very sorry that the Evennia has changed
+    its database structure so much that we can not
+    upgrade your game automatically.
+
+    If you want to upgrade your game nevertheless,
+    please contact the author.""")
+
+        raise MudderyError("Can not upgrade.")
 
         # comment out client_settings in models
         file_path = os.path.join(game_dir, "worlddata", "models.py")

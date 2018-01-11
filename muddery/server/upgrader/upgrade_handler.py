@@ -12,6 +12,7 @@ from muddery.server.upgrader import upgrader_0_0_0
 from muddery.server.upgrader import upgrader_0_2_0
 from muddery.server.upgrader import upgrader_0_2_2
 from muddery.server.upgrader import upgrader_0_2_5
+from muddery.server.upgrader import upgrader_0_2_6
 from muddery.server.launcher import utils as launcher_utils
 
 class UpgradeHandler(object):
@@ -27,6 +28,7 @@ class UpgradeHandler(object):
         self.upgrader_list.append(upgrader_0_2_0.Upgrader())
         self.upgrader_list.append(upgrader_0_2_2.Upgrader())
         self.upgrader_list.append(upgrader_0_2_5.Upgrader())
+        self.upgrader_list.append(upgrader_0_2_6.Upgrader())
 
     def upgrade_game(self, game_dir, template, muddery_lib):
         # Get first two version numbers.
