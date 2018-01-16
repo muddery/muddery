@@ -1,63 +1,78 @@
+//@ sourceURL=/controller/select_char.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function Controller(root_controller) {
+	BaseController.call(this, root_controller);
+}
 
-var controller = {
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+Controller.prototype = prototype(BaseController.prototype);
+Controller.prototype.constructor = Controller;
 
-	// reset view's language
-	resetLanguage: function() {
-		$("#view_character").text(_("Characters"));
-		$("#button_new_char").text(_("New Character"));
-	},
-	
-    // Set playable characters.
-    setCharacters: function(characters) {
-        this.clearItems();
-        
-        var container = $("#character_items");
-        var item_template = container.find("div.template");
-        for (var i in characters) {
-            var obj = characters[i];
-            var item = item_template.clone()
-	            .removeClass("template");
+/*
+ * Reset the view's language.
+ */
+Controller.prototype.resetLanguage = function() {
+    $("#view_character").text($$("Characters"));
+	$("#button_new_char").text($$("New Character"));
+}
 
-            item.find(".char_name")
-                .data("dbref", obj["dbref"])
-            	.text(obj["name"]);
+/*
+ * Bind events.
+ */
+Controller.prototype.bindEvents = function() {
+    $("#button_new_char").bind("click", this.onNewCharacter);
+}
 
-            item.find(".button_delete")
-                .data("name", obj["name"])
-                .data("dbref", obj["dbref"]);
-            
-			item.appendTo(container);
-        }
-    },
+/*
+ * On click new character button.
+ */
+Controller.prototype.onNewCharacter = function(event) {
+    $$.controller.showNewCharacter();
+}
+
+/*
+ * On select a character.
+ */
+Controller.prototype.onSelectCharacter = function(event) {
+    var dbref = $(this).data("dbref");
+    $$.commands.puppetCharacter(dbref);
+}
     
-    clearItems: function() {
-    	// Remove items that are not template.
-    	$("#character_items>:not(.template)").remove();
-    },
+/*
+ * On delete a character.
+ */
+Controller.prototype.onDeleteCharacter = function(event) {
+	var name = $(this).data("name");
+	var dbref = $(this).data("dbref");
+	$$.controller.showDeleteCharacter(name, dbref);
+}
     
-    selectCharacter: function(caller) {
-        var dbref = $(caller).data("dbref");
-        commands.puppetCharacter(dbref);
-    },
-    
-    newCharacter: function(caller) {
-        parent_controller.showNewCharacter();
-    },
+/*
+ * Set playable characters.
+ */
+Controller.prototype.setCharacters = function(characters) {
+    this.clearElements("#character_items");
+	var template = $("#character_items>.template");
 
-    deleteCharacter: function(caller) {
-        var name = $(caller).data("name");
-        var dbref = $(caller).data("dbref");
-        parent_controller.showDeleteCharacter(name, dbref);
-    },
-};
+	for (var i in characters) {
+		var obj = characters[i];
+		var item = this.cloneTemplate(template);
+
+		item.find(".char_name")
+			.data("dbref", obj["dbref"])
+			.text(obj["name"])
+			.bind("click", this.onSelectCharacter);
+
+		item.find(".button_delete")
+			.data("name", obj["name"])
+			.data("dbref", obj["dbref"])
+			.bind("click", this.onDeleteCharacter);
+	}
+}
+
+var controller = new Controller(parent);
 
 $(document).ready(function() {
 	controller.onReady();

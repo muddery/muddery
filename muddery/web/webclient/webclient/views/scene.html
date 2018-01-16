@@ -8,9 +8,6 @@
         <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/scene.css" />
-
-        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/scene.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div id="box_scene">
@@ -22,26 +19,26 @@
             </div>
             <div id="commands">
                 <span id="commands_container">
-                	<button type="button" class="btn btn-default scene_object template" onclick="controller.doCommandLink(this)"></button>
+                	<button type="button" class="btn btn-default scene_object template"></button>
                 </span>
             </div>
             <div><br></div>
             <div id="things">
             	<span id="view_objects">Objects: </span>
                 <span id="things_container">
-					<a class="scene_object template" href="#" onclick="controller.doLook(this)"></a>
+					<a class="scene_object template"></a>
                 </span>
             </div>
             <div id="npcs">
             	<span id="view_npcs">NPCs: </span>
                 <span id="npcs_container">
-					<a class="scene_object template" href="#" onclick="controller.doLook(this)"></a>
+					<a class="scene_object template"></a>
                 </span>
             </div>
             <div id="players">
             	<span id="view_players">Players: </span>
                 <span id="players_container">
-					<a class="scene_object template" href="#" onclick="controller.doLook(this)"></a>
+					<a class="scene_object template"></a>
                 </span>
             </div>
             <div><br></div>
@@ -52,17 +49,17 @@
                             <tr>
                                 <td align="right">
                                     <span id="exits_0">
-                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                        <a class="exit_element template"></a>
                                     </span>
                                 </td>
                                 <td align="center">
                                     <span id="exits_1">
-                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                        <a class="exit_element template"></a>
                                     </span>
                                 </td>
                                 <td align="left">
                                     <span id="exits_2">
-                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                        <a class="exit_element template"></a>
                                     </span>
                                 </td>
                             </tr>
@@ -80,20 +77,20 @@
                             <tr>
                                 <td align="right">
                                     <span id="exits_3">
-                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                        <a class="exit_element template"></a>
                                     </span>
                                     <span id="link_3">--</span>
                                 </td>
                                 <td align="center">
                                     <span id="exits_4">
-                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                        <a class="exit_element template"></a>
                                         <span class="template"></span>
                                     </span>
                                 </td>
                                 <td align="left">
                                     <span id="link_5">--</span>
                                     <span id="exits_5">
-                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                        <a class="exit_element template"></a>
                                     </span>
                                 </td>
                             </tr>
@@ -111,17 +108,17 @@
                             <tr>
                                 <td align="right">
                                     <span id="exits_6">
-                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                        <a class="exit_element template"></a>
                                     </span>
                                 </td>
                                 <td align="center">
                                     <span id="exits_7">
-                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                        <a class="exit_element template"></a>
                                     </span>
                                 </td>
                                 <td align="left">
                                     <span id="exits_8">
-                                        <a class="exit_element template" href="#" onclick="controller.doGoto(this)"></a>
+                                        <a class="exit_element template"></a>
                                     </span>
                                 </td>
                             </tr>
@@ -130,5 +127,9 @@
                 </center>
             </div>
         </div>
+
+        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/scripts.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>

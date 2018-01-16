@@ -216,7 +216,7 @@ var client = {
             }
             catch(error) {
                 console.log(key, data[key])
-                console.error(error.message);
+                console.error(error.stack);
             }
         }
     },

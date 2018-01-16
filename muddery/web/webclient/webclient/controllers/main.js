@@ -57,7 +57,7 @@ var controller = {
 	
 	// popup an alert message
 	showAlert: function(message) {
-        this.showMessage(_("Message"), message);
+        this.showMessage($$("Message"), message);
 	},
 
 	// popup a normal message
@@ -151,7 +151,7 @@ var controller = {
             var first = true;
             for (var key in accepted) {
                 if (first) {
-                    this.displayMsg(_("You got:"));
+                    this.displayMsg($$("You got:"));
                     first = false;
                 }
                 this.displayMsg(key + ": " + accepted[key]);
@@ -166,7 +166,7 @@ var controller = {
             var first = true;
             for (var key in rejected) {
                 if (first) {
-                    this.displayMsg(_("You can not get:"));
+                    this.displayMsg($$("You can not get:"));
                     first = false;
                 }
                 this.displayMsg(key + ": " + rejected[key]);
@@ -269,8 +269,8 @@ var controller = {
     },
 
     inCombatQueue: function(ave_time) {
-        $("#prompt_queue").text(_("QUEUE: ") + utils.time_to_string(0));
-        this.displayMsg(_("You are in queue now. Average waiting time is ") + utils.time_to_string(ave_time) + _("."));
+        $("#prompt_queue").text($$("QUEUE: ") + utils.time_to_string(0));
+        this.displayMsg($$("You are in queue now. Average waiting time is ") + utils.time_to_string(ave_time) + $$("."));
 
         this._waiting_begin = new Date().getTime();
         this._interval_id = window.setInterval("refreshWaitingTime()", 1000);
@@ -312,10 +312,10 @@ var controller = {
 		prepare_ctrl.closeBox();
 
 		if ("#" + character_id == data_handler.character_dbref) {
-		    this.displayMsg(_("You have rejected the combat."));
+		    this.displayMsg($$("You have rejected the combat."));
 		}
 		else {
-		    this.displayMsg(_("Your opponent has rejected the combat."));
+		    this.displayMsg($$("Your opponent has rejected the combat."));
 		}
     },
 
@@ -343,7 +343,7 @@ var controller = {
 
     showGetExp: function(exp, combat) {
         // show exp
-        this.displayMsg(_("You got exp: ") + exp);
+        this.displayMsg($$("You got exp: ") + exp);
 
 		if (combat) {
         	var frame_id = "#frame_combat_result";
@@ -597,7 +597,7 @@ var controller = {
         controller.doClosePopupBox();
         
         // show message
-        controller.showMessage(_("Message"), _("The client connection was closed cleanly."));
+        controller.showMessage($$("Message"), $$("The client connection was closed cleanly."));
     },
     
     onLogin : function(data) {
@@ -953,28 +953,28 @@ var controller = {
 	},
 	
 	resetLanguage: function() {
-		$("#view_level").text(_("LEVEL: "));
-		$("#view_exp").text(_("EXP: "));
-		$("#view_hp").text(_("HP: "));
-		$("#view_connect").text(_("Connect"));
-        $("#view_login").text(_("Login"));
-        $("#view_register").text(_("Register"));
-        $("#view_select_char").text(_("Select Char"));
-		$("#view_scene").text(_("Scene"));
-		$("#view_char").text(_("Char"));
-		$("#view_status").text(_("Status"));
-		$("#view_inventory").text(_("Inventory"));
-		$("#view_skills").text(_("Skills"));
-		$("#view_quests").text(_("Quests"));
-        $("#view_social").text(_("Social"));
-		$("#view_honours").text(_("Honours"));
-		$("#view_map").text(_("Map"));
-		$("#view_system").text(_("Sys"));
-		$("#view_system_char").text(_("System"));
-		$("#view_logout").text(_("Logout"));
-		$("#view_logout_puppet").text(_("Logout"));
-        $("#view_unpuppet").text(_("Unpuppet"));
-		$("#msg_send").text(_("Send"));
+		$("#view_level").text($$("LEVEL: "));
+		$("#view_exp").text($$("EXP: "));
+		$("#view_hp").text($$("HP: "));
+		$("#view_connect").text($$("Connect"));
+        $("#view_login").text($$("Login"));
+        $("#view_register").text($$("Register"));
+        $("#view_select_char").text($$("Select Char"));
+		$("#view_scene").text($$("Scene"));
+		$("#view_char").text($$("Char"));
+		$("#view_status").text($$("Status"));
+		$("#view_inventory").text($$("Inventory"));
+		$("#view_skills").text($$("Skills"));
+		$("#view_quests").text($$("Quests"));
+        $("#view_social").text($$("Social"));
+		$("#view_honours").text($$("Honours"));
+		$("#view_map").text($$("Map"));
+		$("#view_system").text($$("Sys"));
+		$("#view_system_char").text($$("System"));
+		$("#view_logout").text($$("Logout"));
+		$("#view_logout_puppet").text($$("Logout"));
+        $("#view_unpuppet").text($$("Unpuppet"));
+		$("#msg_send").text($$("Send"));
 	},
 	
     clearChannels: function() {
@@ -1052,5 +1052,20 @@ var controller = {
 function refreshWaitingTime() {
     var current_time = new Date().getTime();
     var total_time = Math.floor((current_time - controller._waiting_begin) / 1000);
-    $("#prompt_queue").text(_("QUEUE: ") + utils.time_to_string(total_time));
+    $("#prompt_queue").text($$("QUEUE: ") + utils.time_to_string(total_time));
 };
+
+
+var $$ = $$ || function(str) {
+    return local_string.translate(str);
+};
+
+var _ = $$;
+
+$$.controller = controller;
+$$.text2html = text2html;
+$$.escape = escape;
+$$.commands = commands;
+$$.settings = settings;
+$$.data_handler = data_handler;
+$$.map_data = map_data;

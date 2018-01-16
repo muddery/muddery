@@ -10,12 +10,12 @@ old and does not support websockets, it will instead fall back to a
 long-polling (AJAX/COMET) type of connection (using
 evennia/server/portal/webclient_ajax.py)
 
-All messages is a valid JSON array on single form:
+All messages are valid JSON arrays on this single form:
 
     ["cmdname", args, kwargs],
 
-where args is an JSON array and kwargs is a JSON object that will be
-used as argument to call the cmdname function.
+where args is an JSON array and kwargs is a JSON object. These will be both
+used as arguments emitted to a callback named "cmdname" as cmdname(args, kwargs).
 
 This library makes the "Evennia" object available. It has the
 following official functions:
@@ -45,7 +45,7 @@ An "emitter" object must have a function
         relay the data to its correct gui element.
     - The default emitter also has the following methods:
         - on(cmdname, listener) - this ties a listener to the backend. This function
-            should be called as listener(kwargs) when the backend calls emit.
+            should be called as listener(args, kwargs) when the backend calls emit.
         - off(cmdname) - remove the listener for this cmdname.
 */
 
@@ -66,8 +66,9 @@ An "emitter" object must have a function
         //       emitter - custom emitter. If not given,
         //          will use a default emitter. Must have
         //          an "emit" function.
-        //       connection - This defaults to using 
-        //          WebsocketConnection. If given
+        //       connection - This defaults to using either
+        //          a WebsocketConnection or a AjaxCometConnection
+        //          depending on what the browser supports. If given
         //          it must have a 'msg' method and make use of
         //          Evennia.emit to return data to Client.
         //
@@ -121,9 +122,11 @@ An "emitter" object must have a function
             if (!cmdname) {
                 return;
             }
+            if (kwargs) {
+                kwargs.cmdid = cmdid++;
+            }
             var outargs = args ? args : [];
             var outkwargs = kwargs ? kwargs : {};
-            outkwargs.cmdid = cmdid++;
             var data = [cmdname, outargs, outkwargs];
 
             if (typeof callback === 'function') {

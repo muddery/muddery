@@ -8,20 +8,21 @@
         <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/select_char.css" />
-        
-        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/select_char.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div id="box_character">
             <div id="view_character">Characters</div>
             <div id="character_items">
                 <div class="template">
-        			<a class="char_name" href="#" onclick="controller.selectCharacter(this)"></a>
-        			<button type="button" onclick="controller.deleteCharacter(this)" class="button_delete">×</button>
+        			<a class="char_name"></a>
+        			<button type="button" class="button_delete">×</button>
         		</div>
         	</div>
-        	<button id="button_new_char" type="button" class="btn btn-default" onclick="controller.newCharacter(this)">New Character</button>
+        	<button id="button_new_char" type="button" class="btn btn-default">New Character</button>
         </div>
+
+        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/scripts.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>

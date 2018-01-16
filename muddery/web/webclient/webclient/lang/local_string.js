@@ -35,7 +35,3 @@ var local_string = {
     	return str;
 	},
 }
-
-function _(str) {
-    return local_string.translate(str);
-};
