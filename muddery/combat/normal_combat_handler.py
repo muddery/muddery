@@ -31,9 +31,8 @@ class NormalCombatHandler(BaseCombatHandler):
         (i.e. not for a restart).
         """
         for character in self.characters.values():
-            if not character.account:
-                # Stop auto cast skills
-                character.skill_handler.stop_auto_combat_skill()
+            # Stop auto cast skills
+            character.skill_handler.stop_auto_combat_skill()
 
         super(NormalCombatHandler, self).at_server_shutdown()
 
@@ -56,9 +55,8 @@ class NormalCombatHandler(BaseCombatHandler):
         Finish a combat. Send results to players, and kill all failed characters.
         """
         for character in self.characters.values():
-            if not character.account:
-                # Stop auto cast skills
-                character.skill_handler.stop_auto_combat_skill()
+            # Stop auto cast skills
+            character.skill_handler.stop_auto_combat_skill()
 
         super(NormalCombatHandler, self).finish()
 
