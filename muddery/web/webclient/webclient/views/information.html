@@ -8,9 +8,6 @@
         <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/information.css" />
-
-        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/information.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div id="box_infomation">
@@ -36,19 +33,19 @@
                             <div id="box_equipment">
                                 <div>
                                 	<span id="view_head">HEAD: </span>
-                                    <a id="POSITION_HEAD" href="#" onclick="controller.doLook(this)"></a>
+                                    <a id="POSITION_HEAD"></a>
                                 </div>
                                 <div>
                                 	<span id="view_hand">HAND: </span>
-                                    <a id="POSITION_HAND" href="#" onclick="controller.doLook(this)"></a>
+                                    <a id="POSITION_HAND"></a>
                                 </div>
                                 <div>
                                 	<span id="view_chest">CHEST: </span>
-                                    <a id="POSITION_CHEST" href="#" onclick="controller.doLook(this)"></a>
+                                    <a id="POSITION_CHEST"></a>
                                 </div>
                                 <div>
                                 	<span id="view_leg">LEG: </span>
-                                    <a id="POSITION_LEG" href="#" onclick="controller.doLook(this)"></a>
+                                    <a id="POSITION_LEG"></a>
                                 </div>
                             </div>
                         </td>
@@ -56,5 +53,9 @@
                 </tbody>
             </table>
         </div>
+
+        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/scripts.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>

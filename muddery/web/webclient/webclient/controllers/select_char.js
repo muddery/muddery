@@ -26,7 +26,7 @@ Controller.prototype.bindEvents = function() {
 }
 
 /*
- * On click new character button.
+ * Event when clicks the new character button.
  */
 Controller.prototype.onNewCharacter = function(event) {
     $$.controller.showNewCharacter();

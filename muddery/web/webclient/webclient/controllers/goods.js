@@ -1,74 +1,86 @@
+//@ sourceURL=/controller/honours.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var settings = parent.settings;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function Controller(root_controller) {
+	BaseController.call(this, root_controller);
 
-var controller = {
-	_dbref: null,
+	this.dbref = null;
+}
 
-	// on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+Controller.prototype = prototype(BaseController.prototype);
+Controller.prototype.constructor = Controller;
 
-	// reset view's language
-	resetLanguage: function() {
-		$("#view_button_buy").text(_("Buy"));
-	},
-	
-	getObject: function() {
-		return this._dbref;
-	},
+/*
+ * Reset the view's language.
+ */
+Controller.prototype.resetLanguage = function() {
+	$("#button_buy").text($$("Buy"));
+}
 
-    // close popup box
-    doClosePopupBox: function() {
-        parent_controller.openShop();
-    },
+/*
+ * Bind events.
+ */
+Controller.prototype.bindEvents = function() {
+	$("#close_box").bind("click", this.onClose);
+	$("#button_buy").bind("click", this.onBuy);
+}
 
-	setGoods: function(dbref, name, number, icon, desc, price, unit) {
-		this._dbref = dbref;
-		
-		// add name
-	    name = text2html.parseHtml(name);
-	    $("#name").html(name);
+/*
+ * Event when clicks the close button.
+ */
+Controller.prototype.onClose = function() {
+	$$.controller.doClosePopupBox();
+}
 
-        if (number == 1) {
-            $("#number_mark").hide();
-        }
-        else {
-            $("#number_mark").show();
-	        $("#number").html(number);
-	    }
+/*
+ * Event when clicks the buy button.
+ */
+Controller.prototype.onBuy = function(caller) {
+    controller.onClose();
 
-		// add icon
-		if (icon) {
-			var url = settings.resource_url + icon;
-			$("#img_icon").attr("src", url);
-			$("#div_icon").show();
-        }
-        else {
-            $("#div_icon").hide();
-        }
-        
-        // add price
-        $("#price").text(price);
-        $("#unit").text(unit);
+    if (controller.dbref) {
+        $$.commands.buyGoods(controller.dbref);
+    }
+}
 
-		// add desc
-	    desc = text2html.parseHtml(desc);
-		$("#desc").html(desc);
-	},
+/*
+ * Set goods data.
+ */
+Controller.prototype.setGoods = function(dbref, name, number, icon, desc, price, unit) {
+    this.dbref = dbref;
 
-    buyGoods: function(caller) {
-        this.doClosePopupBox();
+    // add name
+    $("#name").html($$.text2html.parseHtml(name));
 
-        if (this._dbref) {
-            commands.buyGoods(this._dbref);
-        }
-    },
-};
+    if (number == 1) {
+        $("#number_mark").hide();
+    }
+    else {
+        $("#number_mark").show();
+        $("#number").html(number);
+    }
+
+    // add icon
+    if (icon) {
+        var url = $$.settings.resource_url + icon;
+        $("#img_icon").attr("src", url);
+        $("#div_icon").show();
+    }
+    else {
+        $("#div_icon").hide();
+    }
+
+    // add price
+    $("#price").text(price);
+    $("#unit").text(unit);
+
+    // add desc
+    $("#desc").html($$.text2html.parseHtml(desc));
+}
+
+var controller = new Controller(parent);
 
 $(document).ready(function() {
 	controller.onReady();

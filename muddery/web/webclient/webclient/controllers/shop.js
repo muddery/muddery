@@ -20,19 +20,19 @@ Controller.prototype.resetLanguage = function() {
 	$("#header_price").text($$("PRICE"));
 	$("#header_desc").text($$("DESC"));
 }
-	
-/*
- * Event then the user clicks the close button.
- */
-Controller.prototype.onClose = function(event) {
-    $$.controller.doClosePopupBox();
-}
 
 /*
  * Bind events.
  */
-BaseController.prototype.bindEvents = function() {
+Controller.prototype.bindEvents = function() {
 	$("#close_box").bind("click", this.onClose);
+}
+	
+/*
+ * Event when clicks the close button.
+ */
+Controller.prototype.onClose = function(event) {
+    $$.controller.doClosePopupBox();
 }
 
 /*

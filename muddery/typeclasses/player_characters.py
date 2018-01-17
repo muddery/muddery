@@ -1203,9 +1203,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
         
         # set honour
         if self.db.level >= settings.MIN_HONOUR_LEVEL:
-            if not HONOURS_MAPPER.has_info(self):
+            if not HONOURS_MAPPER.has_info(self) or HONOURS_MAPPER.get_honour(self) < 0:
                 HONOURS_MAPPER.set_honour(self, 0)
-                self.msg({"msg": _("{rThe honour hall is now opened.{n")})
+                self.msg({"msg": _("{cThe honour hall is now opened.{n")})
 
         # notify the player
         self.msg({"msg": _("{c%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})

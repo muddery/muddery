@@ -1,96 +1,118 @@
+//@ sourceURL=/controller/object.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var settings = parent.settings;
-var commands = parent.commands;
-
-var controller = {
+/*
+ * Derive from the base class.
+ */
+function Controller(root_controller) {
+	BaseController.call(this, root_controller);
 	
-	_dbref: null,
+	this.dbref = null;
+}
 
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+Controller.prototype = prototype(BaseController.prototype);
+Controller.prototype.constructor = Controller;
 
-	// reset view's language
-	resetLanguage: function() {
-	},
-	
-	getObject: function() {
-		return this._dbref;
-	},
+/*
+ * Bind events.
+ */
+Controller.prototype.bindEvents = function() {
+	$("#close_box").bind("click", this.onClose);
+}
 
-    // close popup box
-    doClosePopupBox: function() {
-        parent_controller.doClosePopupBox();
-    },
+/*
+ * Event when clicks the close button.
+ */
+Controller.prototype.onClose = function(event) {
+	$$.controller.doClosePopupBox();
+}
 
-	setObject: function(dbref, name, icon, desc, commands) {
-		this._dbref = dbref;
-		
-		// add name
-	    name = text2html.parseHtml(name);
-	    $("#popup_header").html(name);
+/*
+ * Event when clicks a command button.
+ */
+Controller.prototype.onCommand = function(event) {
+	controller.onClose();
 
-		// add icon
-		if (icon) {
-			var url = settings.resource_url + icon;
-			$("#img_icon").attr("src", url);
-			$("#div_icon").show();
-        }
-        else {
-            $("#div_icon").hide();
-        }
+	var cmd = $(this).data("cmd_name");
+	var args = $(this).data("cmd_args");
+	if (cmd) {
+		$$.commands.doCommandLink(cmd, args);
+	}
+}
 
-		// add desc
-	    desc = text2html.parseHtml(desc);
-		$("#popup_body").html(desc);
-		    
-        this.clearButtons();
-		if (!commands) {
-            commands = [{"name": _("OK"),
-                         "cmd": "",
-                         "args": ""}];
-        }
-		this.addButtons(commands);
-	},
+/*
+ * Event when an object moved out from the current place.
+ */
+Controller.prototype.onObjMovedOut = function(dbref) {
+	if (dbref == this.dbref) {
+		this.onClose();
+	}
+}
 
-	clearButtons: function() {
-    	// remove buttons that are not template..
-    	$("#popup_footer>:not(.template)").remove();
-    },
-
-	addButtons: function(buttons) {
-    	var container = $("#popup_footer");
-		var item_template = container.find("button.template");
-
-		if (buttons) {
-            for (var i in buttons) {
-                var button = buttons[i];
-
-                var name = text2html.parseHtml(button["name"]);
-                item_template.clone()
-                    .removeClass("template")
-                    .data("cmd_name", button["cmd"])
-                    .data("cmd_args", button["args"])
-                    .html(name)
-                    .appendTo(container);
+/*
+ * Event when objects moved out from the current place.
+ */
+Controller.prototype.onObjsMovedOut = function(objects) {
+    for (var key in objects) {
+        for (var i in objects[key]) {
+            if (objects[key][i]["dbref"] == this.dbref) {
+                this.onClose();
+                return;
             }
         }
-    },
+    }
+}
 
-    doCommandLink: function(caller) {
-        this.doClosePopupBox();
+/*
+ * Set object's data.
+ */
+Controller.prototype.setObject = function(dbref, name, icon, desc, commands) {
+	this.dbref = dbref;
+		
+	// add name
+	$("#popup_header").html($$.text2html.parseHtml(name));
 
-        var cmd = $(caller).data("cmd_name");
-        var args = $(caller).data("cmd_args");
-        if (cmd) {
-            commands.doCommandLink(cmd, args);
-        }
-    },
-};
+	// add icon
+	if (icon) {
+		var url = $$.settings.resource_url + icon;
+		$("#img_icon").attr("src", url);
+		$("#div_icon").show();
+    }
+    else {
+        $("#div_icon").hide();
+    }
+
+	// add desc
+	desc = $$.text2html.parseHtml(desc);
+	$("#popup_body").html(desc);
+		    
+    this.clearElements("#popup_footer");
+	if (!commands) {
+        commands = [{"name": $$("OK"),
+                     "cmd": "",
+                     "args": ""}];
+    }
+	this.addButtons(commands);
+}
+
+/*
+ * Set command buttons.
+ */
+Controller.prototype.addButtons = function(commands) {
+	var template = $("#popup_footer>button.template");
+
+	for (var i in commands) {
+		var button = commands[i];
+		var item = this.cloneTemplate(template);
+
+		var name = $$.text2html.parseHtml(button["name"]);
+		item.data("cmd_name", button["cmd"])
+			.data("cmd_args", button["args"])
+			.html(name)
+			.bind("click", this.onCommand);
+	}
+}
+
+var controller = new Controller(parent);
 
 $(document).ready(function() {
 	controller.onReady();

@@ -30,7 +30,7 @@ Controller.prototype.bindEvents = function() {
 }
 
 /*
- * Event then the user clicks the register button.
+ * Event when clicks the register button.
  */
 Controller.prototype.onRegister = function(event) {
     var playername = $("#reg_name").val();

@@ -1,56 +1,71 @@
+//@ sourceURL=/controller/login.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function Controller(root_controller) {
+	BaseController.call(this, root_controller);
+}
 
-var controller = {
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+Controller.prototype = prototype(BaseController.prototype);
+Controller.prototype.constructor = Controller;
 
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+/*
+ * Reset the view's language.
+ */
+Controller.prototype.resetLanguage = function() {
+    $("#view_header").text($$("Please login."));
+    $("#login_name").attr("placeholder", $$("username"));
+    $("#login_password").attr("placeholder", $$("password"));
+    $("#check_save_password").text($$("Save Password"));
+    $("#check_auto_login").text($$("Auto Login"));
+    $("#button_login").text($$("Login"));
+}
 
-	// reset view's language
-	resetLanguage: function() {
-		$("#view_header").text(_("Please login."));
-		$("#login_name").attr("placeholder", _("username"));
-		$("#login_password").attr("placeholder", _("password"));
-		$("#view_save_password").text(_("Save Password"));
-		$("#view_auto_login").text(_("Auto Login"));
-		$("#view_button_login").text(_("Login"));
-	},
-	
-    // login
-    doLogin: function() {
-        var playername = $("#login_name").val();
-        var password = $("#login_password").val();
-        var save_password = $("#cb_save_password").is(":checked");
-        var auto_login = $("#cb_auto_login").is(":checked");
+/*
+ * Bind events.
+ */
+Controller.prototype.bindEvents = function() {
+    $("#check_save_password").bind("click", this.onSavePassword);
+	$("#button_login").bind("click", this.onLogin);
+}
 
-        $("#login_password").val("");
+/*
+ * Event on click the login button.
+ */
+Controller.prototype.onLogin = function() {
+    var playername = $("#login_name").val();
+    var password = $("#login_password").val();
+    var save_password = $("#cb_save_password").is(":checked");
+    var auto_login = $("#cb_auto_login").is(":checked");
 
-        commands.doLogin(playername, password);
-        commands.doAutoLoginConfig(playername, password, save_password, auto_login);
-    },
+    $("#login_password").val("");
 
-    doSavePassword: function() {
-        var save_password = $("#cb_save_password").is(":checked");
-        commands.doSavePassword(save_password);
+    $$.commands.doLogin(playername, password);
+    $$.commands.doAutoLoginConfig(playername, password, save_password, auto_login);
+}
 
-        if (!save_password) {
-            $("#cb_auto_login").removeAttr("checked");
-        }
-    },
+/*
+ * Event on click the save password checkbox.
+ */
+Controller.prototype.onSavePassword = function() {
+    var save_password = $("#cb_save_password").is(":checked");
+    $$.commands.doSavePassword(save_password);
+
+    if (!save_password) {
+        $("#cb_auto_login").removeAttr("checked");
+    }
+}
     
-    setPlayerName: function(playername) {
-    	$("#login_name").val(playername);
-    	$("#login_password").val("");
-    },
-};
+/*
+ * Set player's name.
+ */
+Controller.prototype.setPlayerName = function(playername) {
+    $("#login_name").val(playername);
+    $("#login_password").val("");
+}
+
+var controller = new Controller(parent);
 
 $(document).ready(function() {
 	controller.onReady();

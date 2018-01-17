@@ -8,13 +8,10 @@
         <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/goods.css" />
-
-        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/goods.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div class="modal-header">
-            <button type="button" onclick="controller.doClosePopupBox()" class="close">×</button>
+            <button type="button" id="close_box" class="close">×</button>
             <h4 id="header" class="modal-title">
                 <span id="name"></span>
                 <span id="number_mark">×</span>
@@ -32,7 +29,11 @@
             <p id="desc"></p>
         </div>
         <div id="popup_footer" class="modal-footer">
-            <button id="view_button_buy" type="button" class="btn btn-default" onclick="controller.buyGoods(this)">Buy</button>
+            <button id="button_buy" type="button" class="btn btn-default">Buy</button>
         </div>
+
+        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/scripts.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>

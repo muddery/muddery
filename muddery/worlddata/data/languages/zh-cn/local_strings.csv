@@ -143,7 +143,7 @@ category,origin,local
 ,"You need to reach level %s.","你需要达到等级%s。"
 ,"Fight of Honour","荣誉之战"
 ,"Can not make match.","无法匹配战斗。"
-,"The honour hall is now opened.","荣誉大厅已开放。"
+,"{cThe honour hall is now opened.{n","{c荣誉大厅已开放。{n"
 ,"Global cooling down!","公共CD冷却中。"
 ,"{object} is leaving {origin}, heading for {destination}.","{object}离开{origin}去往{destination}。"
 ,"{object} arrives to {destination} from {origin}.","{object}从{origin}来到{destination}。"

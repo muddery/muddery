@@ -14,7 +14,7 @@ class HonourCombatHandler(BaseCombatHandler):
     """
     def start_combat(self):
         """
-        Start a combat, make all NPCs to cast skills automatically.
+        Start a combat, make all characters to cast skills automatically.
         """
         super(HonourCombatHandler, self).start_combat()
 

@@ -499,10 +499,7 @@ var controller = {
         var object_id = "#frame_object";
         if ($(object_id).is(":visible")) {
         	var object_ctrl = this.getFrameController(object_id);
-        	var target = object_ctrl.getObject();
-			if (target == player["dbref"]) {
-				this.doClosePopupBox();
-            }
+        	object_ctrl.onObjMovedOut(player["dbref"]);
         }
 
     	var frame_id = "#frame_scene";
@@ -537,16 +534,7 @@ var controller = {
         var object_id = "#frame_object";
         if ($(object_id).is(":visible")) {
         	var object_ctrl = this.getFrameController(object_id);
-        	var target = object_ctrl.getObject();
-            for (var key in objects) {
-                for (var i in objects[key]) {
-                    var dbref = objects[key][i]["dbref"];
-                    if (target == dbref) {
-                        this.doClosePopupBox();
-                        break;
-                    }
-                }
-            }
+        	object_ctrl.onObjsMovedOut(objects);
         }
 
         // remove objects from scene
@@ -1069,3 +1057,4 @@ $$.commands = commands;
 $$.settings = settings;
 $$.data_handler = data_handler;
 $$.map_data = map_data;
+$$.utils = utils;

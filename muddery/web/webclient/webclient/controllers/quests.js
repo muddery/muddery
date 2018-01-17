@@ -1,74 +1,76 @@
+//@ sourceURL=/controller/quests.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function Controller(root_controller) {
+	BaseController.call(this, root_controller);
+}
 
-var controller = {
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+Controller.prototype = prototype(BaseController.prototype);
+Controller.prototype.constructor = Controller;
 
-	// reset view's language
-	resetLanguage: function() {
-		$("#view_name").text(_("NAME"));
-		$("#view_desc").text(_("DESC"));
-		$("#view_objective").text(_("OBJECTIVE"));
-	},
-	
-    // Set player's quests
-    setQuests: function(quests) {
-        this.clearItems();
-        
-        var container = $("#quest_list");
-        var item_template = container.find("tr.template");
-        for (var i in quests) {
-            var quest = quests[i];
-            var item = item_template.clone()
-	            .removeClass("template");
+/*
+ * Reset the view's language.
+ */
+Controller.prototype.resetLanguage = function() {
+	$("#view_name").text($$("NAME"));
+	$("#view_desc").text($$("DESC"));
+	$("#view_objective").text($$("OBJECTIVE"));
+}
 
-            item.find(".quest_name")
-                .data("dbref", quest["dbref"])
-            	.text(quest["name"]);
-            
-			var desc = text2html.parseHtml(quest["desc"]);
-            item.find(".quest_desc").html(desc);
-            
-            var obj_container = item.find(".quest_objective");
-            var obj_template = obj_container.find("p.template");
-            for (var o in quest["objectives"]) {
-				var objective = quest["objectives"][o];
-				var obj_item = obj_template.clone()
-					.removeClass("template");
+/*
+ * Event when clicks the quest link.
+ */
+Controller.prototype.onLook = function(event) {
+    var dbref = $(this).data("dbref");
+    $$.commands.doLook(dbref);
+}
 
-				if ("desc" in objective) {
-					obj_item.text(objective["desc"]);
-				}
-				else {
-					obj_item.text(objective.target + " " +
-								  objective.object + " " +
-								  objective.accomplished + "/" +
-								  objective.total);
-				}
-				
-				obj_item.appendTo(obj_container);
-			}
-            
-			item.appendTo(container);
-        }
-    },
+/*
+ * Set the player's quests.
+ */
+Controller.prototype.setQuests = function(quests) {
+	this.clearElements("#quest_list");
+    var template = $("#quest_list>tr.template");
     
-    clearItems: function() {
-    	// Remove items that are not template.
-    	$("#quest_list>:not(.template)").remove();
-    },
-    
-    doLook: function(caller) {
-        var dbref = $(caller).data("dbref");
-        commands.doLook(dbref);
-    },
-};
+	for (var i in quests) {
+		var quest = quests[i];
+		var item = this.cloneTemplate(template);
+
+		item.find(".quest_name")
+			.data("dbref", quest["dbref"])
+			.text(quest["name"])
+			.bind("click", this.onLook);
+		
+		var desc = $$.text2html.parseHtml(quest["desc"]);
+		item.find(".quest_desc").html(desc);
+		
+		this.addObjectives(item, quest["objectives"]);
+	}
+}
+
+/*
+ * Add quest's objectives.
+ */
+Controller.prototype.addObjectives = function(container, objectives) {
+	var template = container.find(".quest_objective>p.template");
+	for (var i in objectives) {
+		var item = this.cloneTemplate(template);
+
+		if ("desc" in objectives[i]) {
+			item.text(objectives[i]["desc"]);
+		}
+		else {
+			item.text(objectives[i]["target"] + " " +
+					  objectives[i]["object"] + " " +
+					  objectives[i]["accomplished"] + "/" +
+					  objectives[i]["total"]);
+		}
+	}
+}
+
+var controller = new Controller(parent);
 
 $(document).ready(function() {
 	controller.onReady();

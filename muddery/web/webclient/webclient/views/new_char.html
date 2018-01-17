@@ -8,13 +8,10 @@
         <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/new_char.css" />
-        
-        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/new_char.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div class="modal-header">
-            <button type="button" onclick="controller.doClosePopupBox()" class="close">×</button>
+            <button type="button" id="close_box" class="close">×</button>
             <h4 id="view_header" class="modal-title">Set Character</h4>
         </div>
         <div class="modal-body">
@@ -22,7 +19,11 @@
             <input id="char_name" type="text" placeholder="name" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
         </div>
         <div id="popup_footer" class="modal-footer">
-            <button id="button_create" type="button" class="btn btn-default" onclick="controller.createCharacter(this)">Create</button>
+            <button id="button_create" type="button" class="btn btn-default">Create</button>
         </div>
+
+        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/scripts.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>

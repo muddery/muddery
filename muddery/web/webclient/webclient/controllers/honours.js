@@ -1,94 +1,104 @@
+//@ sourceURL=/controller/honours.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var settings = parent.settings;
-var commands = parent.commands;
-var data_handler = parent.data_handler;
+/*
+ * Derive from the base class.
+ */
+function Controller(root_controller) {
+	BaseController.call(this, root_controller);
 
-var controller = {
-    _min_honour_level: 1,
+	this.min_honour_level = 1;
+}
 
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
+Controller.prototype = prototype(BaseController.prototype);
+Controller.prototype.constructor = Controller;
 
-        $("#button_queue").bind("click", this.onQueueUpCombat);
-        $("#button_quit").bind("click", this.onQuitCombatQueue);
-    },
+/*
+ * Reset the view's language.
+ */
+Controller.prototype.resetLanguage = function() {
+    $("#button_fight").text($$("FIGHT"));
+    $("#view_ranking").text($$("RANKING"));
+    $("#view_name").text($$("NAME"));
+    $("#view_honour").text($$("HONOUR"));
+    $("#button_queue").text($$("QUEUE UP"));
+    $("#button_quit").text($$("QUIT QUEUE"));
+}
 
-	// reset view's language
-	resetLanguage: function() {
-	    $("#button_fight").text(_("FIGHT"));
-		$("#view_ranking").text(_("RANKING"));
-		$("#view_name").text(_("NAME"));
-		$("#view_honour").text(_("HONOUR"));
-		$("#button_queue").text(_("QUEUE UP"));
-		$("#button_quit").text(_("QUIT QUEUE"));
-	},
+/*
+ * Bind events.
+ */
+Controller.prototype.bindEvents = function() {
+    $("#button_queue").bind("click", this.onQueueUpCombat);
+    $("#button_quit").bind("click", this.onQuitCombatQueue);
+}
 
-	setMinHonourLevel: function(level) {
-	    this._min_honour_level = level;
-	},
-	
-    // Set top characters
-    setRankings: function(rankings) {
-        this.clearItems();
-        
-        var container = $("#character_items");
-        var item_template = container.find("tr.template");
-        for (var i in rankings) {
-            var data = rankings[i];
-            var item = item_template.clone()
-	            .removeClass("template");
+/*
+ * Event when clicks the queue up button.
+ */
+Controller.prototype.onQueueUpCombat = function() {
+    if ($$.data_handler.character_level < controller.min_honour_level) {
+        $$.controller.showAlert($$("You need to reach level ") + controller.min_honour_level + $$("."));
+        return;
+    }
 
-            item.find(".character_ranking")
-            	.text(data["ranking"]);
+    controller.queueUpCombat();
+    $$.commands.queueUpCombat();
+}
 
-            item.find(".character_name")
-            	.text(data["name"]);
+/*
+ * Event when clicks the quit queue button.
+ */
+Controller.prototype.onQuitCombatQueue = function() {
+	controller.quitCombatQueue();
+    $$.commands.quitCombatQueue();
+}
 
-			item.find(".character_honour")
-            	.text(data["honour"]);
-            
-			item.appendTo(container);
-        }
-    },
-    
-    onQueueUpCombat: function() {
-        if (data_handler.character_level < controller._min_honour_level) {
-            parent_controller.showAlert(_("You need to reach level ") + controller._min_honour_level + _("."));
-            return;
-        }
+/*
+ * Set the minimum level that a player can attend the honour combat.
+ */
+Controller.prototype.setMinHonourLevel = function(level) {
+	this.min_honour_level = level;
+}
 
-        controller.queueUpCombat();
-        commands.queueUpCombat();
-    },
+/*
+ * Set top characters.
+ */
+Controller.prototype.setRankings = function(rankings) {
+    this.clearElements("#character_items");
+    var template = $("#character_items>tr.template");
 
-    queueUpCombat: function() {
-        $("#button_queue").hide();
-	    $("#button_quit").show();
-    },
+    for (var i in rankings) {
+        var data = rankings[i];
+        var item = this.cloneTemplate(template);
 
-    onQuitCombatQueue: function() {
-	    controller.quitCombatQueue();
-        commands.quitCombatQueue();
-    },
+        item.find(".character_ranking")
+            .text(data["ranking"]);
 
-    quitCombatQueue: function() {
-	    $("#button_queue").show();
-	    $("#button_quit").hide();
-    },
-    
-    clearItems: function() {
-    	// Remove items that are not template.
-    	$("#character_items>:not(.template)").remove();
-    },
-    
-    makeMatch: function() {
-        commands.makeMatch();
-    },
-};
+        item.find(".character_name")
+            .text(data["name"]);
+
+        item.find(".character_honour")
+            .text(data["honour"]);
+    }
+}
+
+/*
+ * Set the queue up state.
+ */
+Controller.prototype.queueUpCombat = function() {
+    $("#button_queue").hide();
+    $("#button_quit").show();
+}
+
+/*
+ * Set the quit queue state.
+ */
+Controller.prototype.quitCombatQueue = function() {
+    $("#button_queue").show();
+    $("#button_quit").hide();
+}
+
+var controller = new Controller(parent);
 
 $(document).ready(function() {
 	controller.onReady();

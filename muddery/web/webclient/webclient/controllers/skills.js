@@ -19,7 +19,7 @@ Controller.prototype.resetLanguage = function() {
 }
 
 /*
- * Event then the user clicks the skill link.
+ * Event when clicks the skill link.
  */
 Controller.prototype.onLook = function(event) {
     var dbref = $(this).data("dbref");
@@ -39,7 +39,8 @@ Controller.prototype.setSkills = function(skills) {
 
         item.find(".skill_name")
             .data("dbref", obj["dbref"])
-        	.text(obj["name"]);
+        	.text(obj["name"])
+        	.bind("click", this.onLook);
             
         if (obj["icon"]) {
             item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
@@ -51,8 +52,6 @@ Controller.prototype.setSkills = function(skills) {
 
 		var desc = $$.text2html.parseHtml(obj["desc"]);
         item.find(".skill_desc").html(desc);
-        
-        item.find("a").bind("click", this.onLook);
 	}
 }
 
