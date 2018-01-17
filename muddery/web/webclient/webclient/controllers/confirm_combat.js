@@ -26,7 +26,7 @@ var controller = {
 	init: function(time) {
 	    this._confirmed = false;
 	    this._prepare_time = new Date().getTime() + time * 1000;
-        $("#time").text(parseInt(time - 1));
+        $("#time").text(parseInt(time - 1) + _(" seconds to confirm."));
 
         this._interval_id = window.setInterval("refreshPrepareTime()", 1000);
 	},
@@ -48,6 +48,8 @@ var controller = {
 	    commands.confirmCombat();
 
         $("#popup_body").text(_("Confirmed."));
+        $("#button_confirm").hide();
+        refreshPrepareTime();
 	},
 	
 	onRejectCombat: function() {
@@ -71,7 +73,15 @@ function refreshPrepareTime() {
     if (remain_time < 0) {
         remain_time = 0;
     }
-    $("#time").text(parseInt(remain_time));
+    var text;
+    if (controller._confirmed) {
+        text = _(" seconds to start the combat.");
+    }
+    else {
+        text = _(" seconds to confirm.");
+    }
+
+    $("#time").text(parseInt(remain_time) + text);
     
     if (remain_time <= 0) {
         controller.closeBox();

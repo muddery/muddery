@@ -150,4 +150,6 @@ var local_string_zh_cn = {
     "Found an opponent.": "找到了一个对手。",
     "Confirm": "确认",
     "You need to reach level ": "你需要达到等级",
+    " seconds to confirm.": "秒后结束确认。",
+    " seconds to start the combat.": "秒后开始战斗。",
 };
