@@ -142,7 +142,10 @@ class MatchQueueHandler(object):
                 character_A[0].msg({"prepare_match": self.preparing_time})
             if character_B:
                 character_B[0].msg({"prepare_match": self.preparing_time})
-            reactor.callLater(self.preparing_time, self.fight, opponents)
+            
+            call_id = reactor.callLater(self.preparing_time, self.fight, opponents)
+            self.preparing[opponents[0]]["call_id"] = call_id
+            self.preparing[opponents[1]]["call_id"] = call_id
 
             self.ave_samples.append(time_now - self.waiting_time[opponents[0]])
             self.ave_samples.append(time_now - self.waiting_time[opponents[1]])
@@ -170,6 +173,11 @@ class MatchQueueHandler(object):
         if character_id not in self.preparing:
             return
 
+        # stop the call
+        call_id = self.preparing[character_id]["call_id"]
+        call_id.cancel()
+        
+        # remove characters from the preparing queue
         opponent_id = self.preparing[character_id]["opponent"]
 
         character = search_object("#%s" % character_id)
