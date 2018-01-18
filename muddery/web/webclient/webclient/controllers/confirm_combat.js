@@ -1,84 +1,103 @@
+//@ sourceURL=/controller/confirm_combat.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var commands = parent.commands;
-
-var controller = {
-    _prepare_time: 0,
-    _interval_id: null,
-    _confirmed: false,
-
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
-
-        $("#button_close").bind("click", this.onRejectCombat);
-        $("#button_confirm").bind("click", this.onConfirmCombat);
-    },
-
-	// reset view's language
-	resetLanguage: function() {
-	    $("#popup_body").text(_("Found an opponent."));
-		$("#button_confirm").text(_("Confirm"));
-	},
-
-	init: function(time) {
-	    this._confirmed = false;
-	    this._prepare_time = new Date().getTime() + time * 1000;
-        $("#time").text(parseInt(time - 1) + _(" seconds to confirm."));
-
-        this._interval_id = window.setInterval("refreshPrepareTime()", 1000);
-	},
-
-	closeBox: function() {
-	    if (this._interval_id != null) {
-            this._interval_id = window.clearInterval(this._interval_id);
-        }
-
-        parent_controller.closePrepareMatchBox();
-	},
+/*
+ * Derive from the base class.
+ */
+function Controller(root_controller) {
+	BaseController.call(this, root_controller);
 	
-	onConfirmCombat: function() {
-	    if (controller._confirmed) {
-	        return;
-	    }
-	    controller._confirmed = true;
+    this.prepare_time = 0;
+    this.interval_id = null;
+    this.confirmed = false;
+}
 
-	    commands.confirmCombat();
+Controller.prototype = prototype(BaseController.prototype);
+Controller.prototype.constructor = Controller;
 
-        $("#popup_body").text(_("Confirmed."));
-        $("#button_confirm").hide();
-        refreshPrepareTime();
-	},
+/*
+ * Reset the view's language.
+ */
+Controller.prototype.resetLanguage = function() {
+	$("#popup_body").text($$("Found an opponent."));
+	$("#button_confirm").text($$("Confirm"));
+}
 	
-	onRejectCombat: function() {
-	    if (controller._confirmed) {
-	        return;
-	    }
+/*
+ * Bind events.
+ */
+Controller.prototype.bindEvents = function() {
+    $("#close_box").bind("click", this.onRejectCombat);
+    $("#button_confirm").bind("click", this.onConfirmCombat);
+}
 
-	    commands.rejectCombat();
-	    controller.closeBox();
-	},
-};
+/*
+ * Event when clicks the confirm button.
+ */
+Controller.prototype.onConfirmCombat = function() {
+	if (controller.confirmed) {
+		return;
+	}
+	controller.confirmed = true;
+
+	$$.commands.confirmCombat();
+
+	$("#popup_body").text($$("Confirmed."));
+	$("#button_confirm").hide();
+	refreshPrepareTime();
+}
+	
+/*
+ * Event when clicks the close button.
+ */
+Controller.prototype.onRejectCombat = function() {
+	if (controller.confirmed) {
+		return;
+	}
+
+	$$.commands.rejectCombat();
+	controller.closeBox();
+}
+	
+/*
+ * Set count down time.
+ */
+Controller.prototype.setTime = function(time) {
+	this.confirmed = false;
+	this.prepare_time = new Date().getTime() + time * 1000;
+	$("#time").text(parseInt(time - 1) + $$(" seconds to confirm."));
+
+	this.interval_id = window.setInterval("refreshPrepareTime()", 1000);
+}
+
+/*
+ * Close this box.
+ */
+Controller.prototype.closeBox = function() {
+	if (this.interval_id != null) {
+		this.interval_id = window.clearInterval(this.interval_id);
+	}
+
+	$$.controller.closePrepareMatchBox();
+}
+
+var controller = new Controller(parent);
 
 $(document).ready(function() {
 	controller.onReady();
 });
 
-
 function refreshPrepareTime() {
     var current_time = new Date().getTime();
-    var remain_time = Math.floor((controller._prepare_time - current_time) / 1000);
+    var remain_time = Math.floor((controller.prepare_time - current_time) / 1000);
     if (remain_time < 0) {
         remain_time = 0;
     }
     var text;
-    if (controller._confirmed) {
-        text = _(" seconds to start the combat.");
+    if (controller.confirmed) {
+        text = $$(" seconds to start the combat.");
     }
     else {
-        text = _(" seconds to confirm.");
+        text = $$(" seconds to confirm.");
     }
 
     $("#time").text(parseInt(remain_time) + text);
@@ -86,4 +105,4 @@ function refreshPrepareTime() {
     if (remain_time <= 0) {
         controller.closeBox();
     }
-};
+}

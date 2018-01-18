@@ -1,4 +1,4 @@
-//@ sourceURL=/controller/get_objects.js
+//@ sourceURL=/controller/dialogue.js
 
 /*
  * Derive from the base class.
@@ -122,9 +122,6 @@ Controller.prototype.setDialogues = function(dialogues, escapes) {
 			}
 
 			$("#bottom_button").text($$("Select One"));
-			if (dialogues[0]["can_close"]) {
-				$("#bottom_button").bind("click", this.onClose);
-			}
 		}
 	}
 	catch(error) {
@@ -150,7 +147,8 @@ Controller.prototype.clearDialogues = function() {
 		.removeData("dialogue")
 		.removeData("sentence")
 		.removeAttr("onClick")
-		.empty();
+		.empty()
+		.unbind();
 }
 
 var controller = new Controller(parent);

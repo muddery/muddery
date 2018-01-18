@@ -1,47 +1,64 @@
+//@ sourceURL=/controller/delete_char.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var settings = parent.settings;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function Controller(root_controller) {
+	BaseController.call(this, root_controller);
+	
+	this.name = "";
+    this.dbref = "";
+}
 
-var controller = {
-    _name: "",
-    _dbref: "",
+Controller.prototype = prototype(BaseController.prototype);
+Controller.prototype.constructor = Controller;
 
-	// on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+/*
+ * Reset the view's language.
+ */
+Controller.prototype.resetLanguage = function() {
+	$("#view_header").text($$("Delete") + " " + this.name);
+	$("#view_password").text($$("Verify Password"));
+	$("#button_delete").text($$("Delete"));
+	$("#password").attr("placeholder", $$("password"));
+}
 
-	// reset view's language
-	resetLanguage: function() {
-		$("#view_header").text(_("Delete") + " " + this._name);
-		$("#view_password").text(_("Verify Password"));
-		$("#button_delete").text(_("Delete"));
-		$("#password").attr("placeholder", _("password"));
-	},
+/*
+ * Bind events.
+ */
+Controller.prototype.bindEvents = function() {
+	$("#close_box").bind("click", this.onClose);
+	$("#button_delete").bind("click", this.onDelete);
+}
 
-	// set character's data
-	setData: function(name, dbref) {
-	    this._name = name;
-	    this._dbref = dbref;
+/*
+ * Event when clicks the close button.
+ */
+Controller.prototype.onClose = function(event) {
+    $$.controller.doClosePopupBox();
+}
 
-	    $("#view_header").text(_("Delete") + " " + this._name);
-	},
+/*
+ * Event when clicks the delete button.
+ */
+Controller.prototype.onDelete = function(event) {
+	var password = $("#password").val();
+	$$.commands.deleteCharacter(controller.dbref, password);
 
-    // close popup box
-    doClosePopupBox: function() {
-        parent_controller.doClosePopupBox();
-    },
+	$("#password").val("");
+}
 
-    deleteCharacter: function(caller) {
-        var password = $("#password").val();
-        commands.deleteCharacter(this._dbref, password);
+/*
+ * Set character's data.
+ */
+Controller.prototype.setData = function(name, dbref) {
+	this.name = name;
+	this.dbref = dbref;
 
-        $("#password").val("");
-    },
-};
+	$("#view_header").text($$("Delete") + " " + this.name);
+}
+
+var controller = new Controller(parent);
 
 $(document).ready(function() {
 	controller.onReady();

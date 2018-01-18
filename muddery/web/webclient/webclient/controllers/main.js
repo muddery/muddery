@@ -299,7 +299,7 @@ var controller = {
     prepareMatch: function(data) {
         var prepare_id = "#frame_confirm_combat";
 		var prepare_ctrl = this.getFrameController(prepare_id);
-		prepare_ctrl.init(data);
+		prepare_ctrl.setTime(data);
 
         this.showFrame(prepare_id);
         var popup_dialog = $("#popup_confirm_combat .modal-dialog:visible:first");
