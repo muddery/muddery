@@ -2,6 +2,12 @@
 var scripts_dict = {
     "PUBLIC":			[],
 
+    "dialogue.html":	["../controllers/base_controller.js",
+                      	 "../controllers/dialogue.js",],
+                      	 
+    "get_objects.html":	["../controllers/base_controller.js",
+                      	 "../controllers/get_objects.js",],
+                      	 
     "goods.html":	    ["../controllers/base_controller.js",
                       	 "../controllers/goods.js",],
 

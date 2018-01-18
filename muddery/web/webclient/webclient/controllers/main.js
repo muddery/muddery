@@ -197,7 +197,7 @@ var controller = {
 
         var frame_id = "#frame_get_objects";
         var frame_ctrl = this.getFrameController(frame_id);
-        frame_ctrl.setGetObjects(accepted, rejected);
+        frame_ctrl.setObjects(accepted, rejected);
 
         this.showFrame(frame_id);
     },
@@ -518,16 +518,7 @@ var controller = {
         var dialogue_id = "#frame_dialogue";
         if ($(dialogue_id).is(":visible")) {
         	var dialogue_ctrl = this.getFrameController(dialogue_id);
-        	var target = dialogue_ctrl.getTarget();
-            for (var key in objects) {
-                for (var i in objects[key]) {
-                    var dbref = objects[key][i]["dbref"];
-                    if (target == dbref) {
-                        this.doClosePopupBox();
-                        break;
-                    }
-                }
-            }
+        	object_ctrl.onObjsMovedOut(objects);
         }
         
         // If the player is looking to it, close the look window.

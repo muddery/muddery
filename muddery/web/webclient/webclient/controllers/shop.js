@@ -76,12 +76,12 @@ Controller.prototype.setShop = function(name, icon, desc, goods) {
 
 	// add desc
 	$("#shop_desc").html($$.text2html.parseHtml(desc));
-		
-	// set goods
+
 	// clear shop
 	this.clearElements("#goods_list");
 	var template = $("#goods_list>.template");	
 
+	// set goods
 	for (var i in this.goods) {
 		var obj = this.goods[i];
 		var item = this.cloneTemplate(template);
