@@ -192,8 +192,7 @@ Controller.prototype.addButtons = function(block_id, container_id, data) {
             var name = $$.text2html.parseHtml(cmd["name"]);
 
             var item = this.cloneTemplate(template);
-            item.removeClass("template")
-                .data("cmd_name", cmd["cmd"])
+            item.data("cmd_name", cmd["cmd"])
                 .data("cmd_args", cmd["args"])
                 .html(name)
                 .bind("click", this.onCommand);
@@ -230,8 +229,7 @@ Controller.prototype.addLinks = function(block_id, container_id, data) {
             }
 
             var item = this.cloneTemplate(template);
-            item.removeClass("template")
-                .attr("id", "obj_" + obj["dbref"].slice(1))
+            item.attr("id", "obj_" + obj["dbref"].slice(1))
                 .data("dbref", obj["dbref"])
                 .html(name)
                 .bind("click", this.onLook);
@@ -306,8 +304,7 @@ Controller.prototype.addExits = function(line_id, container_id, data) {
             var name = $$.text2html.parseHtml(obj["name"]);
 
             var item = this.cloneTemplate(template);
-            item.removeClass("template")
-                .attr("id", "obj_" + obj["dbref"].slice(1))
+            item.attr("id", "obj_" + obj["dbref"].slice(1))
                 .data("dbref", obj["dbref"])
                 .html(name)
                 .bind("click", this.onExit);
@@ -334,8 +331,7 @@ Controller.prototype.addText = function(block_id, container_id, text) {
     var has_text = false;
     if (text) {
         var item = this.cloneTemplate(template);
-        item.removeClass("template")
-            .html(text);
+        item.html(text);
         has_text = true;
     }
 

@@ -8,9 +8,6 @@
         <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/combat_result.css" />
-
-        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/combat_result.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div id="header" class="modal-header">
@@ -38,7 +35,11 @@
             </div>
         </div>
         <div id="buttons" class="modal-footer">
-            <button id="view_button_ok" class="btn btn-default btn-primary" type="button" onclick="controller.doClosePopupBox()">OK</button>
+            <button id="button_ok" class="btn btn-default btn-primary" type="button">OK</button>
         </div>
+        
+        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/scripts.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>

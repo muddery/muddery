@@ -2,6 +2,12 @@
 var scripts_dict = {
     "PUBLIC":				[],
 
+    "combat_result.html":	["../controllers/base_controller.js",
+                      	 	 "../controllers/combat_result.js",],
+
+    "combat.html":			["../controllers/base_controller.js",
+                      	 	 "../controllers/combat.js",],
+
     "confirm_combat.html":	["../controllers/base_controller.js",
                       	 	 "../controllers/confirm_combat.js",],
 
