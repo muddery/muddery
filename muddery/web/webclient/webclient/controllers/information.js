@@ -100,7 +100,7 @@ var controller = {
     },
 
     // Set player's equipments.
-    setEquipments(equipments) {
+    setEquipments: function(equipments) {
         for (var pos in equipments) {
             var equip = equipments[pos];
             var dbref = "";
