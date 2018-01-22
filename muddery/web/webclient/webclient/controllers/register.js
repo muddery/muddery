@@ -3,17 +3,17 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyRegister(root_controller) {
 	BaseController.call(this, root_controller);
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyRegister.prototype = prototype(BaseController.prototype);
+MudderyRegister.prototype.constructor = MudderyRegister;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyRegister.prototype.resetLanguage = function() {
     $("#view_name").text($$("Name"));
     $("#reg_name").attr("placeholder", $$("username"));
     $("#view_password").text($$("Password"));
@@ -25,33 +25,27 @@ Controller.prototype.resetLanguage = function() {
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-    $("#button_register").bind("click", this.onRegister);
+MudderyRegister.prototype.bindEvents = function() {
+	this.onClick("#button_register", this.onRegister);
 }
 
 /*
  * Event when clicks the register button.
  */
-Controller.prototype.onRegister = function(event) {
+MudderyRegister.prototype.onRegister = function(element) {
     var playername = $("#reg_name").val();
     var password = $("#reg_password").val();
     var password_verify = $("#reg_password_verify").val();
 
     $$.commands.doRegister(playername, password, password_verify, true);
-    controller.clearValues();
+    this.clearValues();
 }
 
 /*
  * Clear user inputted values.
  */
-Controller.prototype.clearValues = function() {
+MudderyRegister.prototype.clearValues = function() {
     $("#reg_name").val("");
     $("#reg_password").val("");
     $("#reg_password_verify").val("");
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

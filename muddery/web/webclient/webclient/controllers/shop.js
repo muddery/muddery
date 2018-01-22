@@ -3,19 +3,19 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyShop(root_controller) {
 	BaseController.call(this, root_controller);
 	
 	this.goods = [];
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyShop.prototype = prototype(BaseController.prototype);
+MudderyShop.prototype.constructor = MudderyShop;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyShop.prototype.resetLanguage = function() {
 	$("#header_name").text($$("NAME"));
 	$("#header_price").text($$("PRICE"));
 	$("#header_desc").text($$("DESC"));
@@ -24,25 +24,26 @@ Controller.prototype.resetLanguage = function() {
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-	$("#close_box").bind("click", this.onClose);
+MudderyShop.prototype.bindEvents = function() {
+	this.onClick("#close_box", this.onClose);
+	this.onClick("#goods_list", ".div_name", this.onLook);
 }
 	
 /*
  * Event when clicks the close button.
  */
-Controller.prototype.onClose = function(event) {
+MudderyShop.prototype.onClose = function(element) {
     $$.controller.doClosePopupBox();
 }
 
 /*
  * Event then the user clicks the skill link.
  */
-Controller.prototype.onLook = function(event) {
-	var dbref = $(this).data("dbref");
-	for (var i in controller.goods) {
-		if (dbref == controller.goods[i]["dbref"]) {
-			var goods = controller.goods[i];
+MudderyShop.prototype.onLook = function(element) {
+	var dbref = $(element).data("dbref");
+	for (var i in this.goods) {
+		if (dbref == this.goods[i]["dbref"]) {
+			var goods = this.goods[i];
 			$$.controller.showGoods(goods["dbref"],
 								   goods["name"],
 				 				   goods["number"],
@@ -58,7 +59,7 @@ Controller.prototype.onLook = function(event) {
 /*
  * Set shop's data.
  */
-Controller.prototype.setShop = function(name, icon, desc, goods) {
+MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 	this.goods = goods || [];
 		
 	// add name
@@ -95,8 +96,7 @@ Controller.prototype.setShop = function(name, icon, desc, goods) {
 		}
 
 		item.find(".div_name")
-			.data("dbref", obj["dbref"])
-			.bind("click", this.onLook);
+			.data("dbref", obj["dbref"]);
 
 		var goods_name = $$.text2html.parseHtml(obj["name"]);
 		item.find(".goods_name")
@@ -120,9 +120,3 @@ Controller.prototype.setShop = function(name, icon, desc, goods) {
 			.text(obj["unit"]);
 	}
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

@@ -3,20 +3,20 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyDeleteChar(root_controller) {
 	BaseController.call(this, root_controller);
 	
 	this.name = "";
     this.dbref = "";
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyDeleteChar.prototype = prototype(BaseController.prototype);
+MudderyDeleteChar.prototype.constructor = MudderyDeleteChar;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyDeleteChar.prototype.resetLanguage = function() {
 	$("#view_header").text($$("Delete") + " " + this.name);
 	$("#view_password").text($$("Verify Password"));
 	$("#button_delete").text($$("Delete"));
@@ -26,24 +26,24 @@ Controller.prototype.resetLanguage = function() {
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-	$("#close_box").bind("click", this.onClose);
-	$("#button_delete").bind("click", this.onDelete);
+MudderyDeleteChar.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
+	this.onClick("#button_delete", this.onDelete);
 }
 
 /*
  * Event when clicks the close button.
  */
-Controller.prototype.onClose = function(event) {
+MudderyDeleteChar.prototype.onClose = function(element) {
     $$.controller.doClosePopupBox();
 }
 
 /*
  * Event when clicks the delete button.
  */
-Controller.prototype.onDelete = function(event) {
+MudderyDeleteChar.prototype.onDelete = function(element) {
 	var password = $("#password").val();
-	$$.commands.deleteCharacter(controller.dbref, password);
+	$$.commands.deleteCharacter(this.dbref, password);
 
 	$("#password").val("");
 }
@@ -51,15 +51,9 @@ Controller.prototype.onDelete = function(event) {
 /*
  * Set character's data.
  */
-Controller.prototype.setData = function(name, dbref) {
+MudderyDeleteChar.prototype.setData = function(name, dbref) {
 	this.name = name;
 	this.dbref = dbref;
 
 	$("#view_header").text($$("Delete") + " " + this.name);
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

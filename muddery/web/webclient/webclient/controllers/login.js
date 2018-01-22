@@ -3,17 +3,17 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyLogin(root_controller) {
 	BaseController.call(this, root_controller);
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyLogin.prototype = prototype(BaseController.prototype);
+MudderyLogin.prototype.constructor = MudderyLogin;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyLogin.prototype.resetLanguage = function() {
     $("#view_header").text($$("Please login."));
     $("#login_name").attr("placeholder", $$("username"));
     $("#login_password").attr("placeholder", $$("password"));
@@ -25,15 +25,15 @@ Controller.prototype.resetLanguage = function() {
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-    $("#check_save_password").bind("click", this.onSavePassword);
-	$("#button_login").bind("click", this.onLogin);
+MudderyLogin.prototype.bindEvents = function() {
+    this.onClick("#check_save_password", this.onSavePassword);
+    this.onClick("#button_login", this.onLogin);
 }
 
 /*
  * Event on click the login button.
  */
-Controller.prototype.onLogin = function() {
+MudderyLogin.prototype.onLogin = function(element) {
     var playername = $("#login_name").val();
     var password = $("#login_password").val();
     var save_password = $("#cb_save_password").is(":checked");
@@ -48,7 +48,7 @@ Controller.prototype.onLogin = function() {
 /*
  * Event on click the save password checkbox.
  */
-Controller.prototype.onSavePassword = function() {
+MudderyLogin.prototype.onSavePassword = function(element) {
     var save_password = $("#cb_save_password").is(":checked");
     $$.commands.doSavePassword(save_password);
 
@@ -60,13 +60,7 @@ Controller.prototype.onSavePassword = function() {
 /*
  * Set player's name.
  */
-Controller.prototype.setPlayerName = function(playername) {
+MudderyLogin.prototype.setPlayerName = function(playername) {
     $("#login_name").val(playername);
     $("#login_password").val("");
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

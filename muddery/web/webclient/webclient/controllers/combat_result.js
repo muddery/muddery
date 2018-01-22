@@ -3,19 +3,19 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyCombatResult(root_controller) {
 	BaseController.call(this, root_controller);
 	
     this.dialogue = null;
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyCombatResult.prototype = prototype(BaseController.prototype);
+MudderyCombatResult.prototype.constructor = MudderyCombatResult;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyCombatResult.prototype.resetLanguage = function() {
 	$("#view_get_exp").text($$("Get Exp: "));
 	$("#view_get_objects").text($$("Get Objects: "));
 	$("#view_rejected").text($$("Can Not Get: "));
@@ -25,14 +25,14 @@ Controller.prototype.resetLanguage = function() {
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-	$("#button_ok").bind("click", this.onClose);
+MudderyCombatResult.prototype.bindEvents = function() {
+    this.onClick("#button_ok", this.onClose);
 }
 
 /*
  * Event when clicks the close button.
  */
-Controller.prototype.onClose = function(event) {
+MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
     $$.controller.doClosePopupBox();
 
@@ -45,7 +45,7 @@ Controller.prototype.onClose = function(event) {
 /*
  * Clear the result box.
  */
-Controller.prototype.clear = function() {
+MudderyCombatResult.prototype.clear = function() {
 	$("#header").empty();
 	$("#desc").empty();
 	$("#exp").text(0);
@@ -58,7 +58,7 @@ Controller.prototype.clear = function() {
 /*
  * Set result data.
  */
-Controller.prototype.setResult = function(result) {
+MudderyCombatResult.prototype.setResult = function(result) {
 	// result
 	if (!result) {
 		return;
@@ -84,21 +84,21 @@ Controller.prototype.setResult = function(result) {
 /*
  * Set the experiences that the player get.
  */
-Controller.prototype.setGetExp = function(exp) {
+MudderyCombatResult.prototype.setGetExp = function(exp) {
 	$("#exp").text(exp);
 }
 	
 /*
  * Set dialogues after the combat.
  */
-Controller.prototype.setDialogue = function(dialogue) {
+MudderyCombatResult.prototype.setDialogue = function(dialogue) {
 	this.dialogue = dialogue;
 }
 	
 /*
  * Set the objects that the player get.
  */
-Controller.prototype.setGetObjects = function(accepted, rejected) {
+MudderyCombatResult.prototype.setGetObjects = function(accepted, rejected) {
 	this.setItems("#accepted", "#accepted_list", accepted);
 	this.setItems("#rejected", "#rejected_list", rejected);
 }
@@ -106,7 +106,7 @@ Controller.prototype.setGetObjects = function(accepted, rejected) {
 /*
  * Set object items.
  */
-Controller.prototype.setItems = function(block_id, container_id, objects) {
+MudderyCombatResult.prototype.setItems = function(block_id, container_id, objects) {
 	this.clearElements(container_id);
 	var template = $(container_id).find("p.template");
 
@@ -128,9 +128,3 @@ Controller.prototype.setItems = function(block_id, container_id, objects) {
 		$(block_id).hide();
 	}
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

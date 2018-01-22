@@ -3,52 +3,52 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyGoods(root_controller) {
 	BaseController.call(this, root_controller);
 
 	this.dbref = null;
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyGoods.prototype = prototype(BaseController.prototype);
+MudderyGoods.prototype.constructor = MudderyGoods;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyGoods.prototype.resetLanguage = function() {
 	$("#button_buy").text($$("Buy"));
 }
 
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-	$("#close_box").bind("click", this.onClose);
-	$("#button_buy").bind("click", this.onBuy);
+MudderyGoods.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
+    this.onClick("#button_buy", this.onBuy);
 }
 
 /*
  * Event when clicks the close button.
  */
-Controller.prototype.onClose = function() {
+MudderyGoods.prototype.onClose = function(element) {
 	$$.controller.doClosePopupBox();
 }
 
 /*
  * Event when clicks the buy button.
  */
-Controller.prototype.onBuy = function(caller) {
-    controller.onClose();
+MudderyGoods.prototype.onBuy = function(element) {
+    this.onClose();
 
-    if (controller.dbref) {
-        $$.commands.buyGoods(controller.dbref);
+    if (this.dbref) {
+        $$.commands.buyGoods(this.dbref);
     }
 }
 
 /*
  * Set goods data.
  */
-Controller.prototype.setGoods = function(dbref, name, number, icon, desc, price, unit) {
+MudderyGoods.prototype.setGoods = function(dbref, name, number, icon, desc, price, unit) {
     this.dbref = dbref;
 
     // add name
@@ -79,9 +79,3 @@ Controller.prototype.setGoods = function(dbref, name, number, icon, desc, price,
     // add desc
     $("#desc").html($$.text2html.parseHtml(desc));
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

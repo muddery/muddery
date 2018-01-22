@@ -3,19 +3,19 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyGetObjects(root_controller) {
 	BaseController.call(this, root_controller);
 	
 	this.goods = [];
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyGetObjects.prototype = prototype(BaseController.prototype);
+MudderyGetObjects.prototype.constructor = MudderyGetObjects;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyGetObjects.prototype.resetLanguage = function() {
 	$("#popup_header").text($$("Get Objects"));
 	$("#view_get_objects").text($$("Get Objects: "));
 	$("#view_rejected").text($$("Can Not Get: "));
@@ -25,22 +25,22 @@ Controller.prototype.resetLanguage = function() {
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-	$("#close_box").bind("click", this.onClose);
-	$("#button_ok").bind("click", this.onClose);
+MudderyGetObjects.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
+    this.onClick("#button_ok", this.onClose);
 }
 
 /*
  * Event when clicks the close button.
  */
-Controller.prototype.onClose = function(event) {
+MudderyGetObjects.prototype.onClose = function(element) {
     $$.controller.doClosePopupBox();
 }
 
 /*
  * Set objects that the user get.
  */
-Controller.prototype.setObjects = function(accepted, rejected) {
+MudderyGetObjects.prototype.setObjects = function(accepted, rejected) {
 	// set new objects
 	this.setItems("#accepted", "#accepted_list", accepted);
 	this.setItems("#rejected", "#rejected_list", rejected);
@@ -49,7 +49,7 @@ Controller.prototype.setObjects = function(accepted, rejected) {
 /*
  * Set object items.
  */
-Controller.prototype.setItems = function(block_id, container_id, objects) {
+MudderyGetObjects.prototype.setItems = function(block_id, container_id, objects) {
 	this.clearElements(container_id);
 	var template = $(container_id).find("p.template");
 
@@ -71,9 +71,3 @@ Controller.prototype.setItems = function(block_id, container_id, objects) {
 		$(block_id).hide();
 	}
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

@@ -3,33 +3,47 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyDialogue(root_controller) {
 	BaseController.call(this, root_controller);
 	
 	this.target = null;
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyDialogue.prototype = prototype(BaseController.prototype);
+MudderyDialogue.prototype.constructor = MudderyDialogue;
 
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-	$("#close_box").bind("click", this.onClose);
+MudderyDialogue.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
+    this.onClick("#bottom_button", this.onSelectDialogue);
+    this.onClick("#dialogue_body", "a", this.onSelectDialogue);
 }
 
 /*
  * Event when clicks the close button.
  */
-Controller.prototype.onClose = function(event) {
+MudderyDialogue.prototype.onClose = function(element) {
     $$.controller.doClosePopupBox();
+}
+
+/*
+ * Event when click a dialogue.
+ */
+MudderyDialogue.prototype.onSelectDialogue = function(element) {
+	var dialogue = $(element).data("dialogue");
+	var sentence = $(element).data("sentence");
+	var npc = $(element).data("npc");
+	if (dialogue) {
+		$$.commands.doDialogue(dialogue, sentence, npc);
+	}
 }
 
 /*
  * Event when objects moved out from the current place.
  */
-Controller.prototype.onObjsMovedOut = function(objects) {
+MudderyDialogue.prototype.onObjsMovedOut = function(objects) {
     for (var key in objects) {
         for (var i in objects[key]) {
             if (objects[key][i]["dbref"] == this.dbref) {
@@ -41,19 +55,9 @@ Controller.prototype.onObjsMovedOut = function(objects) {
 }
 
 /*
- * Event when click a dialogue.
- */
-Controller.prototype.onSelectDialogue = function(event) {
-	var dialogue = $(this).data("dialogue");
-	var sentence = $(this).data("sentence");
-	var npc = $(this).data("npc");
-	$$.commands.doDialogue(dialogue, sentence, npc);
-}
-
-/*
  * Set dialogue's data.
  */
-Controller.prototype.setDialogues = function(dialogues, escapes) {
+MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 	this.clearDialogues();
 
 	if (dialogues.length == 0) {
@@ -101,8 +105,7 @@ Controller.prototype.setDialogues = function(dialogues, escapes) {
 				.data("npc", dlg["npc"])
 				.data("dialogue", dlg["dialogue"])
 				.data("sentence", dlg["sentence"])
-				.text($$("Next"))
-				.bind("click", this.onSelectDialogue);
+				.text($$("Next"));
 		}
 		else {
 			var template = $("#dialogue_body>p.template");
@@ -117,8 +120,7 @@ Controller.prototype.setDialogues = function(dialogues, escapes) {
 					.data("npc", dlg["npc"])
 					.data("dialogue", dlg["dialogue"])
 					.data("sentence", dlg["sentence"])
-					.html(content)
-					.bind("click", this.onSelectDialogue);
+					.html(content);
 			}
 
 			$("#bottom_button").text($$("Select One"));
@@ -132,7 +134,7 @@ Controller.prototype.setDialogues = function(dialogues, escapes) {
 /*
  * Clear all contents.
  */
-Controller.prototype.clearDialogues = function() {
+MudderyDialogue.prototype.clearDialogues = function() {
 	// Remove all dialogues.
 	$("#header").empty();
 
@@ -147,12 +149,5 @@ Controller.prototype.clearDialogues = function() {
 		.removeData("dialogue")
 		.removeData("sentence")
 		.removeAttr("onClick")
-		.empty()
-		.unbind();
+		.empty();
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

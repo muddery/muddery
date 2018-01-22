@@ -3,17 +3,17 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyQuickLogin(root_controller) {
 	BaseController.call(this, root_controller);
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyQuickLogin.prototype = prototype(BaseController.prototype);
+MudderyQuickLogin.prototype.constructor = MudderyQuickLogin;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyQuickLogin.prototype.resetLanguage = function() {
 	$("#view_header").text($$("Please input your name."));
 	$("#login_name").attr("placeholder", $$("name"));
 	$("#button_login").text($$("Login"));
@@ -22,20 +22,14 @@ Controller.prototype.resetLanguage = function() {
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-    $("#button_login").bind("click", this.onLogin);
+MudderyQuickLogin.prototype.bindEvents = function() {
+    this.onClick("#button_login", this.onLogin);
 }
 
 /*
  * Event when clicks the login button.
  */
-Controller.prototype.onLogin = function(event) {
+MudderyQuickLogin.prototype.onLogin = function(element) {
     var playername = $("#login_name").val();
     $$.commands.doQuickLogin(playername);
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

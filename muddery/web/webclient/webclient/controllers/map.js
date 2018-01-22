@@ -3,7 +3,7 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyMap(root_controller) {
 	BaseController.call(this, root_controller);
 	
     // the scale of the map
@@ -13,27 +13,27 @@ function Controller(root_controller) {
     this.room_size = 40;
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyMap.prototype = prototype(BaseController.prototype);
+MudderyMap.prototype.constructor = MudderyMap;
 
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-	$("#close_box").bind("click", this.onClose);
+MudderyMap.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
 }
 
 /*
  * Event when clicks the close button.
  */
-Controller.prototype.onClose = function() {
+MudderyMap.prototype.onClose = function(element) {
 	$$.controller.doClosePopupBox();
 }
     
 /*
  * Set map's configurations.
  */
-Controller.prototype.setMap = function(scale, room_size) {
+MudderyMap.prototype.setMap = function(scale, room_size) {
     this.scale = scale;
     this.room_size = room_size;
 }
@@ -41,7 +41,7 @@ Controller.prototype.setMap = function(scale, room_size) {
 /*
  * Clear the map.
  */
-Controller.prototype.clear = function() {
+MudderyMap.prototype.clear = function() {
     $("#name").html($$("MAP"));
     $("#map_svg").empty();
 }
@@ -49,7 +49,7 @@ Controller.prototype.clear = function() {
 /*
  * Show current location's map.
  */
-Controller.prototype.showMap = function(location) {
+MudderyMap.prototype.showMap = function(location) {
 	this.clear();
 
 	if (!(location && location.key in $$.map_data._map_rooms)){
@@ -268,9 +268,3 @@ Controller.prototype.showMap = function(location) {
 				  });
 	}
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

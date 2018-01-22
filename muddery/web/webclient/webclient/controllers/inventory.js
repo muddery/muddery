@@ -3,34 +3,41 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyInventory(root_controller) {
 	BaseController.call(this, root_controller);
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyInventory.prototype = prototype(BaseController.prototype);
+MudderyInventory.prototype.constructor = MudderyInventory;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyInventory.prototype.resetLanguage = function() {
     $("#view_name").text($$("NAME"));
     $("#view_number").text($$("NUM"));
     $("#view_desc").text($$("DESC"));
 }
 
 /*
+ * Bind events.
+ */
+MudderyInventory.prototype.bindEvents = function() {
+	this.onClick("#inventory_items", ".obj_name", this.onLook);
+}
+            
+/*
  * Event when clicks the object link.
  */
-Controller.prototype.onLook = function(event) {
-    var dbref = $(this).data("dbref");
+MudderyInventory.prototype.onLook = function(element) {
+    var dbref = $(element).data("dbref");
     $$.commands.doLook(dbref);
 }
 
 /*
  * Set inventory's data.
  */
-Controller.prototype.setInventory = function(inventory) {
+MudderyInventory.prototype.setInventory = function(inventory) {
     this.clearElements("#inventory_items");
     var template = $("#inventory_items>tr.template");
 
@@ -40,8 +47,7 @@ Controller.prototype.setInventory = function(inventory) {
 
         item.find(".obj_name")
             .data("dbref", obj["dbref"])
-            .text(obj["name"])
-            .bind("click", this.onLook);
+            .text(obj["name"]);
 
         if (obj["icon"]) {
             item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
@@ -60,9 +66,3 @@ Controller.prototype.setInventory = function(inventory) {
         item.find(".obj_desc").html($$.text2html.parseHtml(obj["desc"]));
     }
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

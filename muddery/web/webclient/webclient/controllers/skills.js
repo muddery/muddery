@@ -3,33 +3,40 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderySkills(root_controller) {
 	BaseController.call(this, root_controller);
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderySkills.prototype = prototype(BaseController.prototype);
+MudderySkills.prototype.constructor = MudderySkills;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderySkills.prototype.resetLanguage = function() {
 	$("#view_name").text($$("NAME"));
 	$("#view_desc").text($$("DESC"));
 }
 
 /*
+ * Bind events.
+ */
+MudderySkills.prototype.bindEvents = function() {
+	this.onClick("#skill_list", ".skill_name", this.onLook);
+}
+
+/*
  * Event when clicks the skill link.
  */
-Controller.prototype.onLook = function(event) {
-    var dbref = $(this).data("dbref");
+MudderySkills.prototype.onLook = function(element) {
+    var dbref = $(element).data("dbref");
     $$.commands.doLook(dbref);
 }
 
 /*
  * Set skills' data.
  */
-Controller.prototype.setSkills = function(skills) {
+MudderySkills.prototype.setSkills = function(skills) {
     this.clearElements("#skill_list");
     var template = $("#skill_list>.template");
     
@@ -39,8 +46,7 @@ Controller.prototype.setSkills = function(skills) {
 
         item.find(".skill_name")
             .data("dbref", obj["dbref"])
-        	.text(obj["name"])
-        	.bind("click", this.onLook);
+        	.text(obj["name"]);
             
         if (obj["icon"]) {
             item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
@@ -54,9 +60,3 @@ Controller.prototype.setSkills = function(skills) {
         item.find(".skill_desc").html(desc);
 	}
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

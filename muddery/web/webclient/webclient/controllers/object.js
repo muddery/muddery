@@ -3,37 +3,38 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyObject(root_controller) {
 	BaseController.call(this, root_controller);
 	
 	this.dbref = null;
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyObject.prototype = prototype(BaseController.prototype);
+MudderyObject.prototype.constructor = MudderyObject;
 
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-	$("#close_box").bind("click", this.onClose);
+MudderyObject.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
+	this.onClick("#popup_footer", "button", this.onCommand);
 }
 
 /*
  * Event when clicks the close button.
  */
-Controller.prototype.onClose = function(event) {
+MudderyObject.prototype.onClose = function(element) {
 	$$.controller.doClosePopupBox();
 }
 
 /*
  * Event when clicks a command button.
  */
-Controller.prototype.onCommand = function(event) {
-	controller.onClose();
+MudderyObject.prototype.onCommand = function(element) {
+	this.onClose();
 
-	var cmd = $(this).data("cmd_name");
-	var args = $(this).data("cmd_args");
+	var cmd = $(element).data("cmd_name");
+	var args = $(element).data("cmd_args");
 	if (cmd) {
 		$$.commands.doCommandLink(cmd, args);
 	}
@@ -42,7 +43,7 @@ Controller.prototype.onCommand = function(event) {
 /*
  * Event when an object moved out from the current place.
  */
-Controller.prototype.onObjMovedOut = function(dbref) {
+MudderyObject.prototype.onObjMovedOut = function(dbref) {
 	if (dbref == this.dbref) {
 		this.onClose();
 	}
@@ -51,7 +52,7 @@ Controller.prototype.onObjMovedOut = function(dbref) {
 /*
  * Event when objects moved out from the current place.
  */
-Controller.prototype.onObjsMovedOut = function(objects) {
+MudderyObject.prototype.onObjsMovedOut = function(objects) {
     for (var key in objects) {
         for (var i in objects[key]) {
             if (objects[key][i]["dbref"] == this.dbref) {
@@ -65,7 +66,7 @@ Controller.prototype.onObjsMovedOut = function(objects) {
 /*
  * Set object's data.
  */
-Controller.prototype.setObject = function(dbref, name, icon, desc, commands) {
+MudderyObject.prototype.setObject = function(dbref, name, icon, desc, commands) {
 	this.dbref = dbref;
 		
 	// add name
@@ -97,7 +98,7 @@ Controller.prototype.setObject = function(dbref, name, icon, desc, commands) {
 /*
  * Set command buttons.
  */
-Controller.prototype.addButtons = function(commands) {
+MudderyObject.prototype.addButtons = function(commands) {
 	var template = $("#popup_footer>button.template");
 
 	for (var i in commands) {
@@ -107,13 +108,6 @@ Controller.prototype.addButtons = function(commands) {
 		var name = $$.text2html.parseHtml(button["name"]);
 		item.data("cmd_name", button["cmd"])
 			.data("cmd_args", button["args"])
-			.html(name)
-			.bind("click", this.onCommand);
+			.html(name);
 	}
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

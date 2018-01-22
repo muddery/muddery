@@ -3,51 +3,62 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyScene(root_controller) {
 	BaseController.call(this, root_controller);
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyScene.prototype = prototype(BaseController.prototype);
+MudderyScene.prototype.constructor = MudderyScene;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyScene.prototype.resetLanguage = function() {
 	$("#view_objects").text($$("Objects: "));
 	$("#view_npcs").text($$("NPCs: "));
 	$("#view_players").text($$("Players: "));
 }
 
 /*
+ * Bind events.
+ */
+MudderyScene.prototype.bindEvents = function() {
+	this.onClick("#commands_container", "button", this.onCommand);
+	this.onClick("#things_container", "a", this.onLook);
+	this.onClick("#npcs_container", "a", this.onLook);
+	this.onClick("#players_container", "a", this.onLook);
+	this.onClick("#exits_container", "a", this.onExit);
+}
+
+/*
  * On click a command.
  */
-Controller.prototype.onCommand = function(event) {
-    var cmd = $(this).data("cmd_name");
-    var args = $(this).data("cmd_args");
+MudderyScene.prototype.onCommand = function(element) {
+    var cmd = $(element).data("cmd_name");
+    var args = $(element).data("cmd_args");
     $$.commands.doCommandLink(cmd, args);
 }
 
 /*
  * On look an object.
  */
-Controller.prototype.onLook = function(caller) {
-    var dbref = $(this).data("dbref");
+MudderyScene.prototype.onLook = function(element) {
+    var dbref = $(element).data("dbref");
     $$.commands.doLook(dbref);
 }
 
 /*
  * On go to an exit.
  */
-Controller.prototype.onExit = function(caller) {
-    var dbref = $(this).data("dbref");
+MudderyScene.prototype.onExit = function(element) {
+    var dbref = $(element).data("dbref");
     $$.commands.doGoto(dbref);
 }
 
 /*
  * Clear the view.
  */
-Controller.prototype.clearScene = function() {
+MudderyScene.prototype.clearScene = function() {
     $("#name_content").empty();
     $("#desc_content").empty();
 
@@ -65,7 +76,7 @@ Controller.prototype.clearScene = function() {
 /*
  * Set the scene's data.
  */
-Controller.prototype.setScene = function(scene) {
+MudderyScene.prototype.setScene = function(scene) {
     this.clearScene();
 
     // add room's dbref
@@ -117,14 +128,14 @@ Controller.prototype.setScene = function(scene) {
 /*
  * Add a new player to this scene.
  */
-Controller.prototype.addPlayer = function(player) {
+MudderyScene.prototype.addPlayer = function(player) {
     this.addLinks("#players", "#players_container", [player]);
 }
 
 /*
  * Remove a player from this scene.
  */
-Controller.prototype.removePlayer = function(player) {
+MudderyScene.prototype.removePlayer = function(player) {
     $("#obj_" + player["dbref"].slice(1)).remove();
 
 	if ($("#players_container>:not(.template)").length == 0) {
@@ -136,7 +147,7 @@ Controller.prototype.removePlayer = function(player) {
 /*
  * Add new objects to this scene.
  */
-Controller.prototype.addObjects = function(objects) {
+MudderyScene.prototype.addObjects = function(objects) {
     // add things
     var things = "things" in objects ? objects["things"]: null;
     if (things) {
@@ -159,7 +170,7 @@ Controller.prototype.addObjects = function(objects) {
 /*
  * Remove objects from this scene.
  */
-Controller.prototype.removeObjects = function(objects) {
+MudderyScene.prototype.removeObjects = function(objects) {
     for (var key in objects) {
         for (var i in objects[key]) {
             $("#obj_" + objects[key][i]["dbref"].slice(1)).remove();
@@ -182,9 +193,9 @@ Controller.prototype.removeObjects = function(objects) {
 /*
  * Add command button to this scene.
  */
-Controller.prototype.addButtons = function(block_id, container_id, data) {
+MudderyScene.prototype.addButtons = function(block_id, container_id, data) {
     var container = $(container_id);
-    var template = container.find("input.template");
+    var template = container.find("button.template");
 
     if (data) {
         for (var i in data) {
@@ -194,8 +205,7 @@ Controller.prototype.addButtons = function(block_id, container_id, data) {
             var item = this.cloneTemplate(template);
             item.data("cmd_name", cmd["cmd"])
                 .data("cmd_args", cmd["args"])
-                .html(name)
-                .bind("click", this.onCommand);
+                .html(name);
         }
     }
 
@@ -212,7 +222,7 @@ Controller.prototype.addButtons = function(block_id, container_id, data) {
 /*
  * Add object links to this scene.
  */
-Controller.prototype.addLinks = function(block_id, container_id, data) {
+MudderyScene.prototype.addLinks = function(block_id, container_id, data) {
     var container = $(container_id);
     var template = container.find("a.template");
 
@@ -231,8 +241,7 @@ Controller.prototype.addLinks = function(block_id, container_id, data) {
             var item = this.cloneTemplate(template);
             item.attr("id", "obj_" + obj["dbref"].slice(1))
                 .data("dbref", obj["dbref"])
-                .html(name)
-                .bind("click", this.onLook);
+                .html(name);
         }
     }
 
@@ -249,7 +258,7 @@ Controller.prototype.addLinks = function(block_id, container_id, data) {
 /*
  * Set a mini map of exits.
  */
-Controller.prototype.setExitsMap = function(exits, room_name) {
+MudderyScene.prototype.setExitsMap = function(exits, room_name) {
     // sort exits by direction
     var room_exits = [];
     if (exits) {
@@ -294,7 +303,7 @@ Controller.prototype.setExitsMap = function(exits, room_name) {
 /*
  * Add exits to this scene.
  */
-Controller.prototype.addExits = function(line_id, container_id, data) {
+MudderyScene.prototype.addExits = function(line_id, container_id, data) {
     var container = $(container_id);
     var template = container.find("a.template");
 
@@ -306,8 +315,7 @@ Controller.prototype.addExits = function(line_id, container_id, data) {
             var item = this.cloneTemplate(template);
             item.attr("id", "obj_" + obj["dbref"].slice(1))
                 .data("dbref", obj["dbref"])
-                .html(name)
-                .bind("click", this.onExit);
+                .html(name);
         }
     }
 
@@ -324,7 +332,7 @@ Controller.prototype.addExits = function(line_id, container_id, data) {
 /*
  * Add object texts to this scene.
  */
-Controller.prototype.addText = function(block_id, container_id, text) {
+MudderyScene.prototype.addText = function(block_id, container_id, text) {
     var container = $(container_id);
     var template = container.find("span.template");
 
@@ -344,9 +352,3 @@ Controller.prototype.addText = function(block_id, container_id, text) {
         }
     }
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

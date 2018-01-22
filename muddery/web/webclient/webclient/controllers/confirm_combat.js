@@ -3,7 +3,7 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyConfirmCombat(root_controller) {
 	BaseController.call(this, root_controller);
 	
     this.prepare_time = 0;
@@ -11,13 +11,13 @@ function Controller(root_controller) {
     this.confirmed = false;
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyConfirmCombat.prototype = prototype(BaseController.prototype);
+MudderyConfirmCombat.prototype.constructor = MudderyConfirmCombat;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyConfirmCombat.prototype.resetLanguage = function() {
 	$("#popup_body").text($$("Found an opponent."));
 	$("#button_confirm").text($$("Confirm"));
 }
@@ -25,19 +25,19 @@ Controller.prototype.resetLanguage = function() {
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-    $("#close_box").bind("click", this.onRejectCombat);
-    $("#button_confirm").bind("click", this.onConfirmCombat);
+MudderyConfirmCombat.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onRejectCombat);
+    this.onClick("#button_confirm", this.onConfirmCombat);
 }
 
 /*
  * Event when clicks the confirm button.
  */
-Controller.prototype.onConfirmCombat = function() {
-	if (controller.confirmed) {
+MudderyConfirmCombat.prototype.onConfirmCombat = function(element) {
+	if (this.confirmed) {
 		return;
 	}
-	controller.confirmed = true;
+	this.confirmed = true;
 
 	$$.commands.confirmCombat();
 
@@ -49,19 +49,19 @@ Controller.prototype.onConfirmCombat = function() {
 /*
  * Event when clicks the close button.
  */
-Controller.prototype.onRejectCombat = function() {
-	if (controller.confirmed) {
+MudderyConfirmCombat.prototype.onRejectCombat = function(element) {
+	if (this.confirmed) {
 		return;
 	}
 
 	$$.commands.rejectCombat();
-	controller.closeBox();
+	this.closeBox();
 }
 	
 /*
  * Set count down time.
  */
-Controller.prototype.setTime = function(time) {
+MudderyConfirmCombat.prototype.setTime = function(time) {
 	this.confirmed = false;
 	this.prepare_time = new Date().getTime() + time * 1000;
 	$("#time").text(parseInt(time - 1) + $$(" seconds to confirm."));
@@ -72,19 +72,13 @@ Controller.prototype.setTime = function(time) {
 /*
  * Close this box.
  */
-Controller.prototype.closeBox = function() {
+MudderyConfirmCombat.prototype.closeBox = function() {
 	if (this.interval_id != null) {
 		this.interval_id = window.clearInterval(this.interval_id);
 	}
 
 	$$.controller.closePrepareMatchBox();
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});
 
 function refreshPrepareTime() {
     var current_time = new Date().getTime();

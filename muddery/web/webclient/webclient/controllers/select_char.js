@@ -3,17 +3,17 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderySelectChar(root_controller) {
 	BaseController.call(this, root_controller);
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderySelectChar.prototype = prototype(BaseController.prototype);
+MudderySelectChar.prototype.constructor = MudderySelectChar;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderySelectChar.prototype.resetLanguage = function() {
     $("#view_character").text($$("Characters"));
 	$("#button_new_char").text($$("New Character"));
 }
@@ -21,38 +21,40 @@ Controller.prototype.resetLanguage = function() {
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-    $("#button_new_char").bind("click", this.onNewCharacter);
+MudderySelectChar.prototype.bindEvents = function() {
+    this.onClick("#button_new_char", this.onNewCharacter);
+    this.onClick("#character_items", ".char_name", this.onSelectCharacter);
+    this.onClick("#character_items", ".button_delete", this.onDeleteCharacter);
 }
 
 /*
  * Event when clicks the new character button.
  */
-Controller.prototype.onNewCharacter = function(event) {
+MudderySelectChar.prototype.onNewCharacter = function(element) {
     $$.controller.showNewCharacter();
 }
 
 /*
  * On select a character.
  */
-Controller.prototype.onSelectCharacter = function(event) {
-    var dbref = $(this).data("dbref");
+MudderySelectChar.prototype.onSelectCharacter = function(element) {
+    var dbref = $(element).data("dbref");
     $$.commands.puppetCharacter(dbref);
 }
     
 /*
  * On delete a character.
  */
-Controller.prototype.onDeleteCharacter = function(event) {
-	var name = $(this).data("name");
-	var dbref = $(this).data("dbref");
+MudderySelectChar.prototype.onDeleteCharacter = function(element) {
+	var name = $(element).data("name");
+	var dbref = $(element).data("dbref");
 	$$.controller.showDeleteCharacter(name, dbref);
 }
     
 /*
  * Set playable characters.
  */
-Controller.prototype.setCharacters = function(characters) {
+MudderySelectChar.prototype.setCharacters = function(characters) {
     this.clearElements("#character_items");
 	var template = $("#character_items>.template");
 
@@ -62,18 +64,10 @@ Controller.prototype.setCharacters = function(characters) {
 
 		item.find(".char_name")
 			.data("dbref", obj["dbref"])
-			.text(obj["name"])
-			.bind("click", this.onSelectCharacter);
+			.text(obj["name"]);
 
 		item.find(".button_delete")
 			.data("name", obj["name"])
-			.data("dbref", obj["dbref"])
-			.bind("click", this.onDeleteCharacter);
+			.data("dbref", obj["dbref"]);
 	}
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

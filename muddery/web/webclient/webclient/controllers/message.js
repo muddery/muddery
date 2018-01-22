@@ -3,36 +3,36 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyMessage(root_controller) {
 	BaseController.call(this, root_controller);
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyMessage.prototype = prototype(BaseController.prototype);
+MudderyMessage.prototype.constructor = MudderyMessage;
 
 /*
  * Bind events.
  */
-Controller.prototype.bindEvents = function() {
-	$("#close_box").bind("click", this.onClose);
-	$("#button_create").bind("click", this.onCreate);
+MudderyMessage.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
+	this.onClick("#popup_footer", "button", this.onCommand);
 }
 	
 /*
  * Event when clicks the close button.
  */
-Controller.prototype.onClose = function() {
+MudderyMessage.prototype.onClose = function(element) {
 	$$.controller.doClosePopupBox();
 }
 
 /*
  * Event when clicks a command button.
  */
-Controller.prototype.onCommand = function(event) {
-	controller.onClose();
+MudderyMessage.prototype.onCommand = function(element) {
+	this.onClose();
 
-	var cmd = $(this).data("cmd_name");
-	var args = $(this).data("cmd_args");
+	var cmd = $(element).data("cmd_name");
+	var args = $(element).data("cmd_args");
 	if (cmd) {
 		$$.commands.doCommandLink(cmd, args);
 	}
@@ -41,7 +41,7 @@ Controller.prototype.onCommand = function(event) {
 /*
  * Set message's data.
  */
-Controller.prototype.setMessage = function(header, content, commands) {
+MudderyMessage.prototype.setMessage = function(header, content, commands) {
 	$("#popup_header").html($$.text2html.parseHtml(header));
 
 	$("#popup_body").html($$.text2html.parseHtml(content));
@@ -58,7 +58,7 @@ Controller.prototype.setMessage = function(header, content, commands) {
 /*
  * Set command buttons.
  */
-Controller.prototype.addButtons = function(commands) {
+MudderyMessage.prototype.addButtons = function(commands) {
 	var template = $("#popup_footer>button.template");
 
 	for (var i in commands) {
@@ -68,13 +68,6 @@ Controller.prototype.addButtons = function(commands) {
 		var name = $$.text2html.parseHtml(button["name"]);
 		item.data("cmd_name", button["cmd"])
 			.data("cmd_args", button["args"])
-			.html(name)
-			.bind("click", this.onCommand);
+			.html(name);
 	}
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

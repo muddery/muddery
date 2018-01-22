@@ -3,7 +3,7 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyCombat(root_controller) {
 	BaseController.call(this, root_controller);
 	
 	this.self_dbref = "";
@@ -15,35 +15,42 @@ function Controller(root_controller) {
 	this.skill_cd_time = {};
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyCombat.prototype = prototype(BaseController.prototype);
+MudderyCombat.prototype.constructor = MudderyCombat;
+
+/*
+ * Bind events.
+ */
+MudderyCombat.prototype.bindEvents = function() {
+	this.onClick("#buttons", "button", this.onCombatSkill);
+}
 
 /*
  * Event when clicks a skill button.
  */
-Controller.prototype.onCombatSkill = function(event) {
-	if (controller.combat_finished) {
+MudderyCombat.prototype.onCombatSkill = function(element) {
+	if (this.combat_finished) {
 		return;
 	}
 
-	var key = $(this).data("key");
+	var key = $(element).data("key");
 
 	// Check CD.
-	if (key in controller.skill_cd_time) {
-		var cd_time = controller.skill_cd_time[key];
+	if (key in this.skill_cd_time) {
+		var cd_time = this.skill_cd_time[key];
 		var current_time = new Date().getTime();
 		if (cd_time > current_time) {
 			return;
 		}
 	}
 
-	$$.commands.doCastSkill(key, controller.target, true);
+	$$.commands.doCastSkill(key, this.target, true);
 }
     
 /*
  * Reset the combat box.
  */
-Controller.prototype.reset = function(skill_cd_time) {
+MudderyCombat.prototype.reset = function(skill_cd_time) {
 	$("#desc").empty();
 
 	// Remove characters that are not template.
@@ -67,7 +74,7 @@ Controller.prototype.reset = function(skill_cd_time) {
 /*
  * Set combat data.
  */
-Controller.prototype.setInfo = function(desc, timeout, characters, self_dbref) {
+MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref) {
 	if (this.combat_finished) {
 		return;
 	}
@@ -146,7 +153,7 @@ Controller.prototype.setInfo = function(desc, timeout, characters, self_dbref) {
 /*
  * Set combat commands.
  */
-Controller.prototype.setCommands = function(commands) {
+MudderyCombat.prototype.setCommands = function(commands) {
 	var template = $("#buttons>button.template");
 	var left = 10;
 	var msg_box = $("#messages");
@@ -164,8 +171,7 @@ Controller.prototype.setCommands = function(commands) {
 				.data("key", command["key"])
 				.data("cd", 0)
 				.css({"left": left + i % line * width,
-					  "top": top + parseInt(i / line) * line_height})
-			    .bind("click", this.onCombatSkill);
+					  "top": top + parseInt(i / line) * line_height});
 				
 			if (command["icon"]) {
 				item.find(".command_icon").attr("src", $$.settings.resource_url + command["icon"]);
@@ -181,7 +187,7 @@ Controller.prototype.setCommands = function(commands) {
 /*
  * Set combat skill's result.
  */
-Controller.prototype.setSkillResult = function(result) {
+MudderyCombat.prototype.setSkillResult = function(result) {
 	if (this.combat_finished) {
 		return;
 	}
@@ -224,7 +230,7 @@ Controller.prototype.setSkillResult = function(result) {
 /*
  * Display a message in message window.
  */
-Controller.prototype.displayMsg = function(msg) {
+MudderyCombat.prototype.displayMsg = function(msg) {
 	var msg_wnd = $("#messages");
 	if (msg_wnd.length > 0) {
 		msg_wnd.stop(true);
@@ -251,7 +257,7 @@ Controller.prototype.displayMsg = function(msg) {
 /*
  * Update character's status.
  */
-Controller.prototype.updateStatus = function(status) {
+MudderyCombat.prototype.updateStatus = function(status) {
 	for (var i in status) {
 		var item_id = "#char_" + status[i]["dbref"].slice(1) + ">div.status";
 		$(item_id).text(status[i]["hp"] + "/" + status[i]["max_hp"])
@@ -261,7 +267,7 @@ Controller.prototype.updateStatus = function(status) {
 /*
  * Set skill's CD.
  */
-Controller.prototype.setSkillCD = function(skill, cd, gcd) {
+MudderyCombat.prototype.setSkillCD = function(skill, cd, gcd) {
 	if (this.combat_finished) {
 		return;
 	}
@@ -296,7 +302,7 @@ Controller.prototype.setSkillCD = function(skill, cd, gcd) {
 /*
  * Show skill's CD.
  */
-Controller.prototype.showButtonCD = function(button_id) {
+MudderyCombat.prototype.showButtonCD = function(button_id) {
 	var button = $(button_id);
 	var cooldown = button.find(">.cooldown");
 	
@@ -328,7 +334,7 @@ Controller.prototype.showButtonCD = function(button_id) {
 /*
  * Finish a combat.
  */
-Controller.prototype.finishCombat = function(result) {
+MudderyCombat.prototype.finishCombat = function(result) {
 	this.combat_finished = true;
 	if (this.interval_id != null) {
 		this.interval_id = window.clearInterval(this.interval_id);
@@ -338,16 +344,16 @@ Controller.prototype.finishCombat = function(result) {
 /*
  * Finish a combat.
  */
-Controller.prototype.isCombatFinished = function() {
+MudderyCombat.prototype.isCombatFinished = function() {
     return this.combat_finished;
 }
 
 function refreshTimeout() {
     var current_time = new Date().getTime();
 
-    var remain = Math.ceil((controller._timeline - current_time) / 1000);
-    if (remain > controller._timeout) {
-        remain = controller._timeout;
+    var remain = Math.ceil((controller.timeline - current_time) / 1000);
+    if (remain > controller.timeout) {
+        remain = controller.timeout;
     }
     if (remain < 0) {
         remain = 0;
@@ -355,9 +361,3 @@ function refreshTimeout() {
 
     $("#timeout").text(remain);
 };
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});

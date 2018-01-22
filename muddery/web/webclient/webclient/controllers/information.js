@@ -3,17 +3,17 @@
 /*
  * Derive from the base class.
  */
-function Controller(root_controller) {
+function MudderyInformation(root_controller) {
 	BaseController.call(this, root_controller);
 }
 
-Controller.prototype = prototype(BaseController.prototype);
-Controller.prototype.constructor = Controller;
+MudderyInformation.prototype = prototype(BaseController.prototype);
+MudderyInformation.prototype.constructor = MudderyInformation;
 
 /*
  * Reset the view's language.
  */
-Controller.prototype.resetLanguage = function() {
+MudderyInformation.prototype.resetLanguage = function() {
     $("#view_head").text($$("HEAD: "));
     $("#view_hand").text($$("HAND: "));
     $("#view_chest").text($$("CHEST: "));
@@ -21,17 +21,24 @@ Controller.prototype.resetLanguage = function() {
 }
 
 /*
+ * Bind events.
+ */
+MudderyInformation.prototype.bindEvents = function() {
+	this.onClick("#box_equipment", "a", this.onLook);
+}
+
+/*
  * Event when clicks the object link.
  */
-Controller.prototype.onLook = function(event) {
-    var dbref = $(this).data("dbref");
+MudderyInformation.prototype.onLook = function(element) {
+    var dbref = $(element).data("dbref");
     $$.commands.doLook(dbref);
 }
 
 /*
  * Set player's basic information.
  */
-Controller.prototype.setInfo = function(name, icon) {
+MudderyInformation.prototype.setInfo = function(name, icon) {
     $("#name").text(name);
     if (icon) {
         var url = $$.settings.resource_url + icon;
@@ -45,7 +52,7 @@ Controller.prototype.setInfo = function(name, icon) {
 /*
  * Set player character's information.
  */
-Controller.prototype.setStatus = function(status) {
+MudderyInformation.prototype.setStatus = function(status) {
     this.clearElements("#attributes");
     var template = $("#attributes>div.template");
 
@@ -112,7 +119,7 @@ Controller.prototype.setStatus = function(status) {
 /*
  * Set player's equipments.
  */
-Controller.prototype.setEquipments = function(equipments) {
+MudderyInformation.prototype.setEquipments = function(equipments) {
     for (var pos in equipments) {
         var equip = equipments[pos];
         var dbref = "";
@@ -124,13 +131,6 @@ Controller.prototype.setEquipments = function(equipments) {
 
         $("#" + pos)
             .data("dbref", dbref)
-            .html(name)
-            .bind("click", this.onLook);
+            .html(name);
     }
 }
-
-var controller = new Controller(parent);
-
-$(document).ready(function() {
-	controller.onReady();
-});
