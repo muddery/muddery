@@ -1,4 +1,5 @@
 key,name,desc
+CATE_BASE,Base,Base classes.
 CATE_AREA,Area,Area
 CATE_ROOM,Room,Room
 CATE_EXIT,Exit,Exit

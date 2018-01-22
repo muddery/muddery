@@ -16,6 +16,7 @@ from __future__ import print_function
 
 import os
 import sys
+import traceback
 import django.core.management
 from argparse import ArgumentParser
 from muddery.server.launcher import configs
@@ -24,6 +25,44 @@ from muddery.server.launcher import configs
 sys.path.insert(1, configs.EVENNIA_LIB)
 from evennia.server import evennia_launcher
 from muddery.server.launcher import utils
+
+
+def import_local_data():
+    """
+    Import all local data files to models.
+    """
+    from django.conf import settings
+    from muddery.worlddata.data_sets import DATA_SETS
+            
+    ##########################
+    # load system data
+    ##########################
+    # system data file's path
+    system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
+
+    # load system data
+    for data_handlers in DATA_SETS.system_data:
+        try:
+            data_handlers.import_from_path(system_data_path, system_data=True)
+        except Exception, e:
+            err_message = "Cannot import game data. %s" % e
+            print(err_message)
+            traceback.print_stack()
+
+    ##########################
+    # load custom data
+    ##########################
+    # custom data file's path
+    custom_data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
+
+    # load all custom data
+    for data_handlers in DATA_SETS.all_handlers:
+        try:
+            data_handlers.import_from_path(custom_data_path, system_data=False)
+        except Exception, e:
+            err_message = "Cannot import game data. %s" % e
+            print(err_message)
+            traceback.print_stack()
 
 
 def main():
@@ -84,6 +123,7 @@ def main():
         os.chdir(gamedir)
         evennia_launcher.init_game_directory(gamedir, check_db=False)
 
+        # make migrations
         django_args = ["makemigrations"]
         django_kwargs = {}
         try:
@@ -91,13 +131,21 @@ def main():
         except django.core.management.base.CommandError, exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
+        # migrate the database
         try:
             django_args = ["migrate"]
             django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
         except django.core.management.base.CommandError, exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
+            
+        # import worlddata
+        try:
+            print("Importing local data.")
+            import_local_data()
+        except Exception, e:
+            print("Import local data error: %s" % e)
+        
         print(configs.CREATED_NEW_GAMEDIR.format(gamedir=args.init[0],
                                                  settings_path=os.path.join(args.init[0], configs.SETTINGS_PATH)))
         sys.exit()

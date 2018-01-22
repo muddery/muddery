@@ -84,7 +84,8 @@ class CSVReader(DataReader):
             raise StopIteration
 
         # Read line.
-        return self.reader.next()
+        values = self.reader.next()
+        return [unicode(v, "utf-8") for v in values]
 
 
 class XLSReader(DataReader):

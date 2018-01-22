@@ -29,13 +29,14 @@ from muddery.utils.match_queue_handler import MATCH_QUEUE_HANDLER
 from muddery.dao.honours_mapper import HONOURS_MAPPER
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
+from muddery.utils.utils import get_class
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia.comms.models import ChannelDB
 from evennia import create_script
 
 
-class MudderyPlayerCharacter(MudderyCharacter):
+class MudderyPlayerCharacter(get_class("CLASS_BASE_CHARACTER")):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:
@@ -1203,9 +1204,9 @@ class MudderyPlayerCharacter(MudderyCharacter):
         
         # set honour
         if self.db.level >= settings.MIN_HONOUR_LEVEL:
-            if not HONOURS_MAPPER.has_info(self) or HONOURS_MAPPER.get_honour(self) < 0:
+            if not HONOURS_MAPPER.has_info(self):
                 HONOURS_MAPPER.set_honour(self, 0)
-                self.msg({"msg": _("{cThe honour hall is now opened.{n")})
+                self.msg({"msg": _("{rThe honour hall is now opened.{n")})
 
         # notify the player
         self.msg({"msg": _("{c%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})

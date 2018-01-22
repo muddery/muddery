@@ -60,6 +60,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdBuy())
         self.add(general.CmdSay())
         self.add(general.CmdAction())
+        self.add(general.CmdTest())
 
         # Add empty login commands to the normal cmdset to
         # avoid showing wrong cmd messages.

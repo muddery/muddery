@@ -6,10 +6,11 @@ CommonObject is the object that players can put into their inventory.
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
 from muddery.utils.attributes_info_handler import FOOD_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO
+from muddery.utils.utils import get_class
 from muddery.utils.localized_strings_handler import _
 
 
-class MudderyCommonObject(MudderyObject):
+class MudderyCommonObject(get_class("CLASS_BASE_OBJECT")):
     """
     This is a common object. Players can put it in their inventories.
     

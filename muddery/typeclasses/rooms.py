@@ -12,11 +12,12 @@ from django.apps import apps
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.data_sets import DATA_SETS
+from muddery.utils.utils import get_class
 from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
 
 
-class MudderyRoom(MudderyObject, DefaultRoom):
+class MudderyRoom(get_class("CLASS_BASE_OBJECT"), DefaultRoom):
     """
     Rooms are like any Object, except their location is None
     (which is default). They also use basetype_setup() to

@@ -13,10 +13,9 @@ from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.statements.statement_handler import STATEMENT_HANDLER
-from muddery.utils.utils import get_class
 
 
-class MudderySkill(get_class("CLASS_BASE_OBJECT")):
+class MudderySkill(MudderyObject):
     """
     A skill of the character.
     """

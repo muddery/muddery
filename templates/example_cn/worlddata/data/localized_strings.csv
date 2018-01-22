@@ -1,1 +1,7 @@
 category,origin,local
+field_character_models,"max_mp","最大魔法值"
+field_character_models,"max_sp","最大体力值"
+field_skills,"mp","魔法"
+help_character_models,"max_mp","角色的最大魔法值。"
+help_character_models,"max_sp","角色的最大体力值。"
+help_skills,"mp","技能消耗的魔法。"

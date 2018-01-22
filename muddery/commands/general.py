@@ -1142,3 +1142,23 @@ class CmdCreateConnect(Command):
         Just ignore it.
         """
         pass
+        
+        
+#------------------------------------------------------------
+# do some tests
+#------------------------------------------------------------
+class CmdTest(Command):
+    """
+    Do some tests.
+
+    Usage:
+        {"cmd":"test"}
+    """
+    key = "test"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Put your test here.
+        """
+        pass

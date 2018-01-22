@@ -26,10 +26,11 @@ from muddery.utils.skill_handler import SkillHandler
 from muddery.utils.loot_handler import LootHandler
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
+from muddery.utils.utils import get_class
 from muddery.utils.localized_strings_handler import _
 
 
-class MudderyCharacter(MudderyObject, DefaultCharacter):
+class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:
@@ -74,8 +75,6 @@ class MudderyCharacter(MudderyObject, DefaultCharacter):
             self.db.exp = 0
         if not self.attributes.has("hp"):
             self.db.hp = 1
-        if not self.attributes.has("mp"):
-            self.db.mp = 1
         if not self.attributes.has("team"):
             self.db.team = 0
 

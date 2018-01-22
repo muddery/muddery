@@ -1,4 +1,9 @@
 key,name,path,category,desc
+CLASS_BASE_ACCOUNT,Base Account,muddery.typeclasses.accounts.MudderyAccount,CATE_BASE,Base class of all accounts.
+CLASS_BASE_CHANNEL,Base Channel,muddery.typeclasses.channels.MudderyChannel,CATE_BASE,Base class of all channels.
+CLASS_BASE_OBJECT,Base Object,muddery.typeclasses.objects.MudderyObject,CATE_BASE,Base class of all objects.
+CLASS_BASE_SCRIPT,Base Script,muddery.typeclasses.scripts.MudderyScript,CATE_BASE,Base class of all scripts.
+CLASS_BASE_CHARACTER,Base Character,muddery.typeclasses.characters.MudderyCharacter,CATE_BASE,Base class of all characters.
 CLASS_COMMON_AREA,Common Area,muddery.typeclasses.areas.MudderyArea,CATE_AREA,Common area's typeclass.
 CLASS_COMMON_ROOM,Common Room,muddery.typeclasses.rooms.MudderyRoom,CATE_ROOM,Common room's typeclass.
 CLASS_COMMON_EXIT,Common Exit,muddery.typeclasses.exits.MudderyExit,CATE_EXIT,Common exit's typeclass.

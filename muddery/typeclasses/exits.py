@@ -14,12 +14,13 @@ from muddery.utils import utils
 from muddery.typeclasses.objects import MudderyObject
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.localized_strings_handler import _
+from muddery.utils.utils import get_class
 from evennia.utils import logger
 from evennia.objects.objects import DefaultExit
 from django.conf import settings
 
 
-class MudderyExit(MudderyObject, DefaultExit):
+class MudderyExit(get_class("CLASS_BASE_OBJECT"), DefaultExit):
     """
     Exits are connectors between rooms. Exits are normal Objects except
     they defines the `destination` property. It also does work in the

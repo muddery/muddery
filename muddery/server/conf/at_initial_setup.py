@@ -36,10 +36,6 @@ def at_initial_setup():
     """
 
     try:
-        # load world data
-        import_local_data()
-        print("Import local data.")
-
         # load game settings
         GAME_SETTINGS.reset()
         print("Reset game settings.")
@@ -83,36 +79,3 @@ def at_initial_setup():
         ostring = "Can't set initial data: %s" % e
         print(ostring)
         print(traceback.format_exc())
-
-
-def import_local_data():
-    """
-    Import all local data files to models.
-    """
-    ##########################
-    # load system data
-    ##########################
-    # system data file's path
-    system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
-
-    # load system data
-    for data_handlers in DATA_SETS.system_data:
-        try:
-            data_handlers.import_from_path(system_data_path, system_data=True)
-        except Exception, e:
-            err_message = "Cannot import game data. %s" % e
-            logger.log_tracemsg(err_message)
-
-    ##########################
-    # load custom data
-    ##########################
-    # custom data file's path
-    custom_data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
-
-    # load all custom data
-    for data_handlers in DATA_SETS.all_handlers:
-        try:
-            data_handlers.import_from_path(custom_data_path, system_data=False)
-        except Exception, e:
-            err_message = "Cannot import game data. %s" % e
-            logger.log_tracemsg(err_message)
