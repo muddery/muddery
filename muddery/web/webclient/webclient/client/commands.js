@@ -150,37 +150,37 @@ var commands = {
     },
     
     // make a match
-    makeMatch() {
+    makeMatch: function() {
     	Evennia.msg("text", this.cmdString("make_match", ""));
     },
 
     // queue up an honour combat
-    queueUpCombat() {
+    queueUpCombat: function() {
     	Evennia.msg("text", this.cmdString("queue_up_combat", ""));
     },
     
     // quit a combat queue
-    quitCombatQueue() {
+    quitCombatQueue: function() {
     	Evennia.msg("text", this.cmdString("quit_combat_queue", ""));
     },
     
     // confirm an honour combat
-    confirmCombat() {
+    confirmCombat: function() {
     	Evennia.msg("text", this.cmdString("confirm_combat", ""));
     },
 
     // reject an honour combat
-    rejectCombat() {
+    rejectCombat: function() {
     	Evennia.msg("text", this.cmdString("reject_combat", ""));
     },
     
     // get character rankings
-    getRankings() {
+    getRankings: function() {
     	Evennia.msg("text", this.cmdString("get_rankings", ""));
     },
     
     // do test
-    doTest : function() {
+    doTest: function() {
         // test codes
     },
 
