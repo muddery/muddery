@@ -8,9 +8,6 @@
         <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/quests.css" />
-
-        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/quests.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div id="box_quests">
@@ -25,7 +22,7 @@
         		<tbody id="quest_list">
         			<tr class="template">
         				<td>
-        					<a class="quest_name" href="#" onclick="controller.doLook(this)"></a>
+        					<a class="quest_name"></a>
         				</td>
         				<td class="quest_desc"></td>
         				<td class="quest_objective">
@@ -35,5 +32,9 @@
         		</tbody>
         	</table>
         </div>
+
+        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>

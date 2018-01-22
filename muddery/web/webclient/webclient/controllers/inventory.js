@@ -1,70 +1,68 @@
+//@ sourceURL=/controller/inventory.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var settings = parent.settings;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function MudderyInventory(root_controller) {
+	BaseController.call(this, root_controller);
+}
 
-var controller = {
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+MudderyInventory.prototype = prototype(BaseController.prototype);
+MudderyInventory.prototype.constructor = MudderyInventory;
 
-	// reset view's language
-	resetLanguage: function() {
-		$("#view_name").text(_("NAME"));
-		$("#view_number").text(_("NUM"));
-		$("#view_desc").text(_("DESC"));
-	},
-	
-    // Set player's inventory
-    setInventory: function(inventory) {
-        this.clearItems();
-        
-        var container = $("#inventory_items");
-        var item_template = container.find("tr.template");
-        for (var i in inventory) {
-            var obj = inventory[i];
-            var item = item_template.clone()
-	            .removeClass("template");
+/*
+ * Reset the view's language.
+ */
+MudderyInventory.prototype.resetLanguage = function() {
+    $("#view_name").text($$("NAME"));
+    $("#view_number").text($$("NUM"));
+    $("#view_desc").text($$("DESC"));
+}
 
-            item.find(".obj_name")
-                .data("dbref", obj["dbref"])
-            	.text(obj["name"]);
+/*
+ * Bind events.
+ */
+MudderyInventory.prototype.bindEvents = function() {
+	this.onClick("#inventory_items", ".obj_name", this.onLook);
+}
             
-            if (obj["icon"]) {
-            	item.find(".img_icon").attr("src", settings.resource_url + obj["icon"]);
-            	item.find(".obj_icon").show();
-            }
-            else {
-            	item.find(".obj_icon").hide();
-            }
-            
-            var number = obj["number"];
-            if ("equipped" in obj && obj["equipped"]) {
-                number += _(" (equipped)");
-            }
-            item.find(".obj_number").text(number);
+/*
+ * Event when clicks the object link.
+ */
+MudderyInventory.prototype.onLook = function(element) {
+    var dbref = $(element).data("dbref");
+    $$.commands.doLook(dbref);
+}
 
-			var desc = text2html.parseHtml(obj["desc"]);
-            item.find(".obj_desc").html(desc);
-            
-			item.appendTo(container);
+/*
+ * Set inventory's data.
+ */
+MudderyInventory.prototype.setInventory = function(inventory) {
+    this.clearElements("#inventory_items");
+    var template = $("#inventory_items>tr.template");
+
+    for (var i in inventory) {
+        var obj = inventory[i];
+        var item = this.cloneTemplate(template);
+
+        item.find(".obj_name")
+            .data("dbref", obj["dbref"])
+            .text(obj["name"]);
+
+        if (obj["icon"]) {
+            item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
+            item.find(".obj_icon").show();
         }
-    },
-    
-    clearItems: function() {
-    	// Remove items that are not template.
-    	$("#inventory_items>:not(.template)").remove();
-    },
-    
-    doLook: function(caller) {
-        var dbref = $(caller).data("dbref");
-        commands.doLook(dbref);
-    },
-};
+        else {
+            item.find(".obj_icon").hide();
+        }
 
-$(document).ready(function() {
-	controller.onReady();
-});
+        var number = obj["number"];
+        if ("equipped" in obj && obj["equipped"]) {
+            number += $$(" (equipped)");
+        }
+        item.find(".obj_number").text(number);
+
+        item.find(".obj_desc").html($$.text2html.parseHtml(obj["desc"]));
+    }
+}

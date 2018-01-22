@@ -1,48 +1,59 @@
+//@ sourceURL=/controller/delete_char.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var settings = parent.settings;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function MudderyDeleteChar(root_controller) {
+	BaseController.call(this, root_controller);
+	
+	this.name = "";
+    this.dbref = "";
+}
 
-var controller = {
-    _name: "",
-    _dbref: "",
+MudderyDeleteChar.prototype = prototype(BaseController.prototype);
+MudderyDeleteChar.prototype.constructor = MudderyDeleteChar;
 
-	// on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+/*
+ * Reset the view's language.
+ */
+MudderyDeleteChar.prototype.resetLanguage = function() {
+	$("#view_header").text($$("Delete") + " " + this.name);
+	$("#view_password").text($$("Verify Password"));
+	$("#button_delete").text($$("Delete"));
+	$("#password").attr("placeholder", $$("password"));
+}
 
-	// reset view's language
-	resetLanguage: function() {
-		$("#view_header").text(_("Delete") + " " + this._name);
-		$("#view_password").text(_("Verify Password"));
-		$("#button_delete").text(_("Delete"));
-		$("#password").attr("placeholder", _("password"));
-	},
+/*
+ * Bind events.
+ */
+MudderyDeleteChar.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
+	this.onClick("#button_delete", this.onDelete);
+}
 
-	// set character's data
-	setData: function(name, dbref) {
-	    this._name = name;
-	    this._dbref = dbref;
+/*
+ * Event when clicks the close button.
+ */
+MudderyDeleteChar.prototype.onClose = function(element) {
+    $$.controller.doClosePopupBox();
+}
 
-	    $("#view_header").text(_("Delete") + " " + this._name);
-	},
+/*
+ * Event when clicks the delete button.
+ */
+MudderyDeleteChar.prototype.onDelete = function(element) {
+	var password = $("#password").val();
+	$$.commands.deleteCharacter(this.dbref, password);
 
-    // close popup box
-    doClosePopupBox: function() {
-        parent_controller.doClosePopupBox();
-    },
+	$("#password").val("");
+}
 
-    deleteCharacter: function(caller) {
-        var password = $("#password").val();
-        commands.deleteCharacter(this._dbref, password);
+/*
+ * Set character's data.
+ */
+MudderyDeleteChar.prototype.setData = function(name, dbref) {
+	this.name = name;
+	this.dbref = dbref;
 
-        $("#password").val("");
-    },
-};
-
-$(document).ready(function() {
-	controller.onReady();
-});
+	$("#view_header").text($$("Delete") + " " + this.name);
+}

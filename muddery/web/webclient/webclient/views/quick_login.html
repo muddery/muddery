@@ -7,9 +7,6 @@
         <!--CSS style sheet -->
         <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
-
-        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/quick_login.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div id="box_login">
@@ -23,11 +20,15 @@
                     </tr>
                     <tr>
                         <td>
-                            <button id="view_button_login" onclick="controller.doLogin()" class="btn btn-default">Login</button>
+                            <button id="button_login" class="btn btn-default">Login</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
+        
+        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>

@@ -1,79 +1,102 @@
+//@ sourceURL=/controller/confirm_combat.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var commands = parent.commands;
-
-var controller = {
-    _prepare_time: 0,
-    _interval_id: null,
-    _confirmed: false,
-
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
-
-        $("#button_close").bind("click", this.onRejectCombat);
-        $("#button_confirm").bind("click", this.onConfirmCombat);
-    },
-
-	// reset view's language
-	resetLanguage: function() {
-	    $("#popup_body").text(_("Found an opponent."));
-		$("#button_confirm").text(_("Confirm"));
-	},
-
-	init: function(time) {
-	    this._confirmed = false;
-	    this._prepare_time = new Date().getTime() + time * 1000;
-        $("#time").text(parseInt(time - 1));
-
-        this._interval_id = window.setInterval("refreshPrepareTime()", 1000);
-	},
-
-	closeBox: function() {
-	    if (this._interval_id != null) {
-            this._interval_id = window.clearInterval(this._interval_id);
-        }
-
-        parent_controller.closePrepareMatchBox();
-	},
+/*
+ * Derive from the base class.
+ */
+function MudderyConfirmCombat(root_controller) {
+	BaseController.call(this, root_controller);
 	
-	onConfirmCombat: function() {
-	    if (controller._confirmed) {
-	        return;
-	    }
-	    controller._confirmed = true;
+    this.prepare_time = 0;
+    this.interval_id = null;
+    this.confirmed = false;
+}
 
-	    commands.confirmCombat();
+MudderyConfirmCombat.prototype = prototype(BaseController.prototype);
+MudderyConfirmCombat.prototype.constructor = MudderyConfirmCombat;
 
-        $("#popup_body").text(_("Confirmed."));
-	},
+/*
+ * Reset the view's language.
+ */
+MudderyConfirmCombat.prototype.resetLanguage = function() {
+	$("#popup_body").text($$("Found an opponent."));
+	$("#button_confirm").text($$("Confirm"));
+}
 	
-	onRejectCombat: function() {
-	    if (controller._confirmed) {
-	        return;
-	    }
+/*
+ * Bind events.
+ */
+MudderyConfirmCombat.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onRejectCombat);
+    this.onClick("#button_confirm", this.onConfirmCombat);
+}
 
-	    commands.rejectCombat();
-	    controller.closeBox();
-	},
-};
+/*
+ * Event when clicks the confirm button.
+ */
+MudderyConfirmCombat.prototype.onConfirmCombat = function(element) {
+	if (this.confirmed) {
+		return;
+	}
+	this.confirmed = true;
 
-$(document).ready(function() {
-	controller.onReady();
-});
+	$$.commands.confirmCombat();
 
+	$("#popup_body").text($$("Confirmed."));
+	$("#button_confirm").hide();
+	refreshPrepareTime();
+}
+	
+/*
+ * Event when clicks the close button.
+ */
+MudderyConfirmCombat.prototype.onRejectCombat = function(element) {
+	if (this.confirmed) {
+		return;
+	}
+
+	$$.commands.rejectCombat();
+	this.closeBox();
+}
+	
+/*
+ * Set count down time.
+ */
+MudderyConfirmCombat.prototype.setTime = function(time) {
+	this.confirmed = false;
+	this.prepare_time = new Date().getTime() + time * 1000;
+	$("#time").text(parseInt(time - 1) + $$(" seconds to confirm."));
+
+	this.interval_id = window.setInterval("refreshPrepareTime()", 1000);
+}
+
+/*
+ * Close this box.
+ */
+MudderyConfirmCombat.prototype.closeBox = function() {
+	if (this.interval_id != null) {
+		this.interval_id = window.clearInterval(this.interval_id);
+	}
+
+	$$.controller.closePrepareMatchBox();
+}
 
 function refreshPrepareTime() {
     var current_time = new Date().getTime();
-    var remain_time = Math.floor((controller._prepare_time - current_time) / 1000);
+    var remain_time = Math.floor((controller.prepare_time - current_time) / 1000);
     if (remain_time < 0) {
         remain_time = 0;
     }
-    $("#time").text(parseInt(remain_time));
+    var text;
+    if (controller.confirmed) {
+        text = $$(" seconds to start the combat.");
+    }
+    else {
+        text = $$(" seconds to confirm.");
+    }
+
+    $("#time").text(parseInt(remain_time) + text);
     
     if (remain_time <= 0) {
         controller.closeBox();
     }
-};
+}

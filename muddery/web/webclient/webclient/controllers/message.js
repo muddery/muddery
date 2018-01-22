@@ -1,75 +1,73 @@
+//@ sourceURL=/controller/message.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function MudderyMessage(root_controller) {
+	BaseController.call(this, root_controller);
+}
 
-var controller = {
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+MudderyMessage.prototype = prototype(BaseController.prototype);
+MudderyMessage.prototype.constructor = MudderyMessage;
 
-	// reset view's language
-	resetLanguage: function() {
-	},
+/*
+ * Bind events.
+ */
+MudderyMessage.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
+	this.onClick("#popup_footer", "button", this.onCommand);
+}
 	
-    // close popup box
-    doClosePopupBox: function() {
-        parent_controller.doClosePopupBox();
-    },
+/*
+ * Event when clicks the close button.
+ */
+MudderyMessage.prototype.onClose = function(element) {
+	$$.controller.doClosePopupBox();
+}
 
-	setMessage: function(header, content, commands) {
-	    header = text2html.parseHtml(header);
-	    $("#popup_header").html(header);
+/*
+ * Event when clicks a command button.
+ */
+MudderyMessage.prototype.onCommand = function(element) {
+	this.onClose();
 
-	    content = text2html.parseHtml(content);
-		$("#popup_body").html(content);
+	var cmd = $(element).data("cmd_name");
+	var args = $(element).data("cmd_args");
+	if (cmd) {
+		$$.commands.doCommandLink(cmd, args);
+	}
+}
 
-        this.clearButtons();
-		if (!commands) {
-            commands = [{"name": _("OK"),
-                         "cmd": "",
-                         "args": ""}];
-        }
-		this.addButtons(commands);
-	},
+/*
+ * Set message's data.
+ */
+MudderyMessage.prototype.setMessage = function(header, content, commands) {
+	$("#popup_header").html($$.text2html.parseHtml(header));
 
-	clearButtons: function() {
-    	// remove buttons that are not template..
-    	$("#popup_footer>:not(.template)").remove();
-    },
+	$("#popup_body").html($$.text2html.parseHtml(content));
 
-	addButtons: function(buttons) {
-    	var container = $("#popup_footer");
-		var item_template = container.find("button.template");
+	this.clearElements("#popup_footer");
+	if (!commands) {
+		commands = [{"name": $$("OK"),
+					 "cmd": "",
+					 "args": ""}];
+	}
+	this.addButtons(commands);
+}
 
-		if (buttons) {
-            for (var i in buttons) {
-                var button = buttons[i];
+/*
+ * Set command buttons.
+ */
+MudderyMessage.prototype.addButtons = function(commands) {
+	var template = $("#popup_footer>button.template");
 
-                var name = text2html.parseHtml(button["name"]);
-                item_template.clone()
-                    .removeClass("template")
-                    .data("cmd_name", button["cmd"])
-                    .data("cmd_args", button["args"])
-                    .html(name)
-                    .appendTo(container);
-            }
-        }
-    },
+	for (var i in commands) {
+		var button = commands[i];
+		var item = this.cloneTemplate(template);
 
-    doCommandLink: function(caller) {
-        this.doClosePopupBox();
-
-        var cmd = $(caller).data("cmd_name");
-        var args = $(caller).data("cmd_args");
-        if (cmd) {
-            commands.doCommandLink(cmd, args);
-        }
-    },
-};
-
-$(document).ready(function() {
-	controller.onReady();
-});
+		var name = $$.text2html.parseHtml(button["name"]);
+		item.data("cmd_name", button["cmd"])
+			.data("cmd_args", button["args"])
+			.html(name);
+	}
+}

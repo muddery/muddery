@@ -1,36 +1,45 @@
+//@ sourceURL=/controller/new_char.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var settings = parent.settings;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function MudderyNewChar(root_controller) {
+	BaseController.call(this, root_controller);
+}
 
-var controller = {
-	// on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+MudderyNewChar.prototype = prototype(BaseController.prototype);
+MudderyNewChar.prototype.constructor = MudderyNewChar;
 
-	// reset view's language
-	resetLanguage: function() {
-		$("#view_header").text(_("Set Character"));
-		$("#view_name").text(_("Name"));
-		$("#button_create").text(_("Create"));
-		$("#char_name").attr("placeholder", _("name"));
-	},
+/*
+ * Reset the view's language.
+ */
+MudderyNewChar.prototype.resetLanguage = function() {
+	$("#view_header").text($$("Set Character"));
+	$("#view_name").text($$("Name"));
+	$("#button_create").text($$("Create"));
+	$("#char_name").attr("placeholder", $$("name"));
+}
 
-    // close popup box
-    doClosePopupBox: function() {
-        parent_controller.doClosePopupBox();
-    },
+/*
+ * Bind events.
+ */
+MudderyNewChar.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
+    this.onClick("#button_create", this.onCreate);
+}
 
-    createCharacter: function(caller) {
-        var char_name = $("#char_name").val();
-        commands.createCharacter(char_name);
-        $("#char_name").val("");
-    },
-};
+/*
+ * Event when clicks the close button.
+ */
+MudderyNewChar.prototype.onClose = function(element) {
+	$$.controller.doClosePopupBox();
+}
 
-$(document).ready(function() {
-	controller.onReady();
-});
+/*
+ * Event when clicks the create button.
+ */
+MudderyNewChar.prototype.onCreate = function(element) {
+	var char_name = $("#char_name").val();
+	$$.commands.createCharacter(char_name);
+	$("#char_name").val("");
+}

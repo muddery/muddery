@@ -1,63 +1,62 @@
+//@ sourceURL=/controller/skills.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var settings = parent.settings;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function MudderySkills(root_controller) {
+	BaseController.call(this, root_controller);
+}
 
-var controller = {
-    // on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+MudderySkills.prototype = prototype(BaseController.prototype);
+MudderySkills.prototype.constructor = MudderySkills;
 
-	// reset view's language
-	resetLanguage: function() {
-		$("#view_name").text(_("NAME"));
-		$("#view_desc").text(_("DESC"));
-	},
-	
-    // Set player's inventory
-    setSkills: function(skills) {
-        this.clearItems();
-        
-        var container = $("#skill_list");
-        var item_template = container.find("tr.template");
-        for (var i in skills) {
-            var obj = skills[i];
-            var item = item_template.clone()
-	            .removeClass("template");
+/*
+ * Reset the view's language.
+ */
+MudderySkills.prototype.resetLanguage = function() {
+	$("#view_name").text($$("NAME"));
+	$("#view_desc").text($$("DESC"));
+}
 
-            item.find(".skill_name")
-                .data("dbref", obj["dbref"])
-            	.text(obj["name"]);
+/*
+ * Bind events.
+ */
+MudderySkills.prototype.bindEvents = function() {
+	this.onClick("#skill_list", ".skill_name", this.onLook);
+}
+
+/*
+ * Event when clicks the skill link.
+ */
+MudderySkills.prototype.onLook = function(element) {
+    var dbref = $(element).data("dbref");
+    $$.commands.doLook(dbref);
+}
+
+/*
+ * Set skills' data.
+ */
+MudderySkills.prototype.setSkills = function(skills) {
+    this.clearElements("#skill_list");
+    var template = $("#skill_list>.template");
+    
+    for (var i in skills) {
+        var obj = skills[i];
+        var item = this.cloneTemplate(template);
+
+        item.find(".skill_name")
+            .data("dbref", obj["dbref"])
+        	.text(obj["name"]);
             
-            if (obj["icon"]) {
-            	item.find(".img_icon").attr("src", settings.resource_url + obj["icon"]);
-            	item.find(".skill_icon").show();
-            }
-            else {
-            	item.find(".skill_icon").hide();
-            }
-
-			var desc = text2html.parseHtml(obj["desc"]);
-            item.find(".skill_desc").html(desc);
-            
-			item.appendTo(container);
+        if (obj["icon"]) {
+            item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
+        	item.find(".skill_icon").show();
         }
-    },
-    
-    clearItems: function() {
-    	// Remove items that are not template.
-    	$("#skill_list>:not(.template)").remove();
-    },
-    
-    doLook: function(caller) {
-        var dbref = $(caller).data("dbref");
-        commands.doLook(dbref);
-    },
-};
+        else {
+        	item.find(".skill_icon").hide();
+        }
 
-$(document).ready(function() {
-	controller.onReady();
-});
+		var desc = $$.text2html.parseHtml(obj["desc"]);
+        item.find(".skill_desc").html(desc);
+	}
+}

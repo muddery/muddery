@@ -1,75 +1,81 @@
+//@ sourceURL=/controller/honours.js
 
-var _ = parent._;
-var parent_controller = parent.controller;
-var text2html = parent.text2html;
-var settings = parent.settings;
-var commands = parent.commands;
+/*
+ * Derive from the base class.
+ */
+function MudderyGoods(root_controller) {
+	BaseController.call(this, root_controller);
 
-var controller = {
-	_dbref: null,
+	this.dbref = null;
+}
 
-	// on document ready
-    onReady: function() {
-        this.resetLanguage();
-    },
+MudderyGoods.prototype = prototype(BaseController.prototype);
+MudderyGoods.prototype.constructor = MudderyGoods;
 
-	// reset view's language
-	resetLanguage: function() {
-		$("#view_button_buy").text(_("Buy"));
-	},
-	
-	getObject: function() {
-		return this._dbref;
-	},
+/*
+ * Reset the view's language.
+ */
+MudderyGoods.prototype.resetLanguage = function() {
+	$("#button_buy").text($$("Buy"));
+}
 
-    // close popup box
-    doClosePopupBox: function() {
-        parent_controller.openShop();
-    },
+/*
+ * Bind events.
+ */
+MudderyGoods.prototype.bindEvents = function() {
+    this.onClick("#close_box", this.onClose);
+    this.onClick("#button_buy", this.onBuy);
+}
 
-	setGoods: function(dbref, name, number, icon, desc, price, unit) {
-		this._dbref = dbref;
-		
-		// add name
-	    name = text2html.parseHtml(name);
-	    $("#name").html(name);
+/*
+ * Event when clicks the close button.
+ */
+MudderyGoods.prototype.onClose = function(element) {
+	$$.controller.doClosePopupBox();
+}
 
-        if (number == 1) {
-            $("#number_mark").hide();
-        }
-        else {
-            $("#number_mark").show();
-	        $("#number").html(number);
-	    }
+/*
+ * Event when clicks the buy button.
+ */
+MudderyGoods.prototype.onBuy = function(element) {
+    this.onClose();
 
-		// add icon
-		if (icon) {
-			var url = settings.resource_url + icon;
-			$("#img_icon").attr("src", url);
-			$("#div_icon").show();
-        }
-        else {
-            $("#div_icon").hide();
-        }
-        
-        // add price
-        $("#price").text(price);
-        $("#unit").text(unit);
+    if (this.dbref) {
+        $$.commands.buyGoods(this.dbref);
+    }
+}
 
-		// add desc
-	    desc = text2html.parseHtml(desc);
-		$("#desc").html(desc);
-	},
+/*
+ * Set goods data.
+ */
+MudderyGoods.prototype.setGoods = function(dbref, name, number, icon, desc, price, unit) {
+    this.dbref = dbref;
 
-    buyGoods: function(caller) {
-        this.doClosePopupBox();
+    // add name
+    $("#name").html($$.text2html.parseHtml(name));
 
-        if (this._dbref) {
-            commands.buyGoods(this._dbref);
-        }
-    },
-};
+    if (number == 1) {
+        $("#number_mark").hide();
+    }
+    else {
+        $("#number_mark").show();
+        $("#number").html(number);
+    }
 
-$(document).ready(function() {
-	controller.onReady();
-});
+    // add icon
+    if (icon) {
+        var url = $$.settings.resource_url + icon;
+        $("#img_icon").attr("src", url);
+        $("#div_icon").show();
+    }
+    else {
+        $("#div_icon").hide();
+    }
+
+    // add price
+    $("#price").text(price);
+    $("#unit").text(unit);
+
+    // add desc
+    $("#desc").html($$.text2html.parseHtml(desc));
+}

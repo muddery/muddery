@@ -8,13 +8,10 @@
         <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/confirm_combat.css" />
-
-        <script src="../libs/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/confirm_combat.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body>
         <div class="modal-header">
-            <button id="button_close" type="button" class="close">×</button>
+            <button id="close_box" type="button" class="close">×</button>
             <h4 id="popup_header" class="modal-title"></h4>
         </div>
         <div class="modal-body">
@@ -24,5 +21,9 @@
         <div id="popup_footer" class="modal-footer">
             <button id="button_confirm" type="button" class="btn btn-default">Confirm</button>
         </div>
+
+        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>
