@@ -11,9 +11,10 @@ creation commands.
 from __future__ import print_function
 
 from muddery.typeclasses.characters import MudderyCharacter
+from muddery.utils.utils import get_class
 
 
-class Character(MudderyCharacter):
+class Character(get_class("CLASS_BASE_CHARACTER")):
     """
     Custom character class.
 

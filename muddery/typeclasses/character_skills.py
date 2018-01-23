@@ -6,7 +6,7 @@ actions of a skill.
 
 """
 
-import time
+import time, re
 from django.conf import settings
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
@@ -20,6 +20,19 @@ class MudderySkill(get_class("CLASS_BASE_OBJECT")):
     """
     A skill of the character.
     """
+    msg_escape = re.compile(r'%[%|n|c|t]')
+
+    @staticmethod
+    def escape_fun(word):
+        """
+        Change escapes to target words.
+        """
+        escape_word = word.group()
+        char = escape_word[1]
+        if char == "%":
+            return char
+        else:
+            return "%(" + char + ")s"
 
     def at_object_creation(self):
         """
@@ -40,7 +53,7 @@ class MudderySkill(get_class("CLASS_BASE_OBJECT")):
 
     def set_default(self, is_default):
         """
-        Set this skill as default skill.
+        Set this skill as the character's default skill.
         When skills in table default_skills changes, character's relative skills
         will change too.
 
@@ -51,7 +64,7 @@ class MudderySkill(get_class("CLASS_BASE_OBJECT")):
 
     def is_default(self):
         """
-        Check if this skill is a default skill or not.
+        Check if this skill is the character's default skill.
 
         Returns:
             (boolean) is default or not
@@ -71,9 +84,11 @@ class MudderySkill(get_class("CLASS_BASE_OBJECT")):
         self.function = getattr(self.dfield, "function", "")
         self.cd = getattr(self.dfield, "cd", 0)
         self.passive = getattr(self.dfield, "passive", False)
-        self.message = getattr(self.dfield, "message", "")
         self.main_type = getattr(self.dfield, "main_type", "")
         self.sub_type = getattr(self.dfield, "sub_type", "")
+        
+        message_model = getattr(self.dfield, "message", "")
+        self.message_model = self.msg_escape.sub(self.escape_fun, message_model)
 
     def get_available_commands(self, caller):
         """
@@ -109,32 +124,26 @@ class MudderySkill(get_class("CLASS_BASE_OBJECT")):
             if gcd > 0:
                 self.db.cd_finish_time = time.time() + gcd
 
-    def cast_skill(self, target):
+    def cast_skill(self, target, passive):
         """
         Cast this skill.
 
         Args:
-            target: (object) skill's target
+            target: (object) skill's target.
+            passive: (boolean) cast a passive skill.
 
         Returns:
             (result, cd):
                 result: (dict) skill's result
-                cd: (dice) skill's cd
+                cd: (dict) skill's cd
         """
-        owner = self.db.owner
-        time_now = time.time()
+        if not self.is_available(passive):
+            return False
 
-        if not self.passive:
-            if time_now < self.db.cd_finish_time:
-                # skill in CD
-                if owner:
-                    owner.msg({"msg": _("{c%s{n is not ready yet!" % self.get_name())})
-                return
+        owner = self.db.owner
 
         # call skill function
-        STATEMENT_HANDLER.do_skill(self.function, owner, target,
-                                   key=self.get_data_key(), name=self.get_name(),
-                                   message=self.message)
+        results = STATEMENT_HANDLER.do_skill(self.function, owner, target)
 
         if not self.passive:
             # set cd
@@ -142,29 +151,57 @@ class MudderySkill(get_class("CLASS_BASE_OBJECT")):
             if self.cd > 0:
                 self.db.cd_finish_time = time_now + self.cd
 
-        return
+        message = {"caller": owner.dbref,
+                   "target": target.dbref,
+                   "skill": self.get_data_key(),
+                   "cast": self.cast_message(target),
+                   "result": " ".join(results)}
 
-    def check_available(self):
+        if owner.is_in_combat():
+            status = {}
+            for char in owner.ndb.combat_handler.get_all_characters():
+                if char.combat_dirty:
+                    status[char.dbref] = char.get_combat_status()
+                    char.combat_dirty = False
+
+            message["status"] = status
+            owner.ndb.combat_handler.msg_all({"skill_cast": message})
+        else:
+            message["status"] = {owner.dbref: owner.get_combat_status()}
+            owner.location.msg_contents({"skill_cast": message})
+
+        return True
+
+    def check_available(self, passive):
         """
         Check this skill.
+        
+        Args:
+            passive: (boolean) cast a passive skill.
 
         Returns:
             message: (string) If the skill is not available, returns a string of reason.
                      If the skill is available, return "".
         """
-        if self.passive:
-            return _("{c%s{n is a passive skill!" % self.get_name())
+        if not passive and self.passive:
+            return _("{c%s{n is a passive skill!") % self.get_name()
 
         if self.is_cooling_down():
-            return _("{c%s{n is not ready yet!" % self.get_name())
+            return _("{c%s{n is not ready yet!") % self.get_name()
 
         return ""
 
-    def is_available(self):
+    def is_available(self, passive):
         """
         If this skill is available.
+        
+        Args:
+            passive: (boolean) cast a passive skill.
+
+        Returns:
+            (boolean) available or not.
         """
-        if self.passive:
+        if not passive and self.passive:
             return False
 
         if self.is_cooling_down():
@@ -193,3 +230,25 @@ class MudderySkill(get_class("CLASS_BASE_OBJECT")):
         if remain_cd < 0:
             remain_cd = 0
         return remain_cd
+
+    def cast_message(self, target):
+        """
+        Create skill's result message.
+        """
+        caller_name = ""
+        target_name = ""
+        message = ""
+
+        if self.db.owner:
+            caller_name = self.db.owner.get_name()
+
+        if target:
+            target_name = target.get_name()
+
+        if self.message_model:
+            values = {"n": self.name,
+                      "c": caller_name,
+                      "t": target_name}
+            message = self.message_model % values
+
+        return message

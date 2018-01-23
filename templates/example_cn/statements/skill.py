@@ -3,10 +3,10 @@ Default skills.
 """
 
 from muddery.utils.localized_strings_handler import _
-from muddery.statements.skill import SkillFunction
+from muddery.statements.statement_function import StatementFunction
 
 
-class FuncHit(SkillFunction):
+class FuncHit(StatementFunction):
     """
     Hit the target.
 
@@ -38,17 +38,12 @@ class FuncHit(SkillFunction):
         damage = round(damage * effect)
 
         # hurt target
-        self.obj.db.hp -= damage
-        if self.obj.db.hp < 0:
-            self.obj.db.hp = 0
+        increments = {"hp": -damage}
+        changes = self.obj.change_status(increments)
 
-        self.obj.show_status()
-
-        # character's status after skill casted
-        status = [{"dbref": self.obj.dbref,
-                   "max_hp": self.obj.max_hp,
-                   "hp": self.obj.db.hp}]
+        # characters' status
+        self.obj.combat_dirty = True
 
         # send skill result
-        result = self.result_message(effect=int(damage), status=status)
-        self.caller.send_skill_result(result)
+        return _("Hit %s by %d points.") % (self.obj.get_name(), int(-changes["hp"]))
+

@@ -127,8 +127,8 @@ class SkillHandler(object):
         Cast a skill.
 
         Args:
-            skill_key: (string) skill's key
-            target: (object) skill's target
+            skill_key: (string) skill's key.
+            target: (object) skill's target.
 
         Returns:
             (dict) result of the skill
@@ -141,44 +141,33 @@ class SkillHandler(object):
             # In GCD.
             message = _("Global cooling down!")
             if self.owner.is_in_combat():
-                self.owner.msg({"skill_result": {"message": message}})
+                self.owner.msg({"skill_cast": {"message": message}})
             else:
                 self.owner.msg({"msg": message})
-
             return
 
         if skill_key not in self.skills:
             message = _("You do not have this skill.")
             if self.owner.is_in_combat():
-                self.owner.msg({"skill_result": {"message": message}})
+                self.owner.msg({"skill_cast": {"message": message}})
             else:
                 self.owner.msg({"alert": message})
             return
 
         skill = self.skills[skill_key]
-
-        message = skill.check_available()
-        if message:
-            # Skill is not available.
-            if self.owner.is_in_combat():
-                self.owner.msg({"skill_result": {"message": message}})
-            else:
-                self.owner.msg({"msg": message})
+        if not skill.cast_skill(target, passive=False):
             return
-
-        skill.cast_skill(target)
 
         if self.gcd > 0:
             # set GCD
             self.gcd_finish_time = time_now + self.gcd
 
         # send CD to the player
-        cd = {"skill": skill.get_data_key(),    # skill's key
+        cd = {"skill": skill_key,               # skill's key
               "cd": skill.cd,                   # skill's cd
               "gcd": self.gcd}
 
         self.owner.msg({"skill_cd": cd})
-
         return
 
     def auto_cast_skill(self):
@@ -216,7 +205,7 @@ class SkillHandler(object):
         """
         for skill in self.skills:
             if self.skills[skill].passive:
-                self.skills[skill].cast_skill(None)
+                self.skills[skill].cast_skill(self.owner, passive=True)
 
     def start_auto_combat_skill(self):
         """

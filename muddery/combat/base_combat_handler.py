@@ -48,6 +48,7 @@ class BaseCombatHandler(DefaultScript):
 
         # send messages in order
         character.msg({"combat_info": self.get_appearance()})
+        character.combat_dirty = False
 
     def _cleanup_character(self, character):
         """
@@ -286,17 +287,3 @@ class BaseCombatHandler(DefaultScript):
             if caller.dbref in self.characters:
                 self._cleanup_character(caller)
                 del self.characters[caller.dbref]
-            
-    def send_skill_result(self, result):
-        """
-        Send skill's result to players
-
-        Args:
-            result: (dict) skill's result
-
-        Returns:
-            None
-        """
-        for character in self.characters.values():
-            if character.has_account:
-                character.msg({"skill_result": result})

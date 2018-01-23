@@ -30,7 +30,7 @@ class ChooseSkill(object):
         if not combat:
             return
         
-        skills = [caller.db.skills[skill] for skill in caller.db.skills if caller.db.skills[skill].is_available()]
+        skills = [caller.db.skills[skill] for skill in caller.db.skills if caller.db.skills[skill].is_available(passive=False)]
         if not skills:
             return
 

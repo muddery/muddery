@@ -148,8 +148,8 @@ var client = {
                 	var skill_cd = data[key];
                     controller.setSkillCD(skill_cd["skill"], skill_cd["cd"], skill_cd["gcd"]);
                 }
-                else if (key == "skill_result") {
-                    controller.setSkillResult(data[key]);
+                else if (key == "skill_cast") {
+                    controller.setSkillCast(data[key]);
                 }
                 else if (key == "get_exp") {
                 	var get_exp = data[key];

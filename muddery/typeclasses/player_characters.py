@@ -110,7 +110,6 @@ class MudderyPlayerCharacter(get_class("CLASS_BASE_CHARACTER")):
         super(MudderyPlayerCharacter, self).after_data_loaded()
 
         self.solo_mode = GAME_SETTINGS.get("solo_mode")
-
         self.available_channels = {}
 
         # refresh data
@@ -121,7 +120,7 @@ class MudderyPlayerCharacter(get_class("CLASS_BASE_CHARACTER")):
         """
         Moves this object to a new location.
         """
-        if (not quiet) and self.solo_mode:
+        if not quiet and self.solo_mode:
             # If in solo mode, move quietly.
             quiet = True
 
@@ -1231,8 +1230,7 @@ class MudderyPlayerCharacter(get_class("CLASS_BASE_CHARACTER")):
             
         if not channel:
             # Say in the room.
-            solo_mode = GAME_SETTINGS.get("solo_mode")
-            if solo_mode:
+            if self.solo_mode:
                 self.msg(emit_string)
             else:
                 self.location.msg_contents(emit_string)

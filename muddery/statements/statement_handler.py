@@ -161,13 +161,15 @@ class StatementHandler(object):
 
         # execute the statement
         functions = action.split(";")
+        results = []
         for function in functions:
             try:
-                exec_function(self.skill_func_set, function, caller, obj, **kwargs)
+                result = exec_function(self.skill_func_set, function, caller, obj, **kwargs)
+                results.append(result)
             except Exception, e:
                 logger.log_errmsg("Exec function error: %s %s" % (function, e))
 
-        return
+        return results
 
     def match_condition(self, condition, caller, obj, **kwargs):
         """

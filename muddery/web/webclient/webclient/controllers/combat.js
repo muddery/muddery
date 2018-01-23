@@ -185,22 +185,26 @@ MudderyCombat.prototype.setCommands = function(commands) {
 }
 
 /*
- * Set combat skill's result.
+ * Cast a skill in the combat.
  */
-MudderyCombat.prototype.setSkillResult = function(result) {
+MudderyCombat.prototype.setSkillCast = function(data) {
 	if (this.combat_finished) {
 		return;
 	}
 	
-	if ("message" in result && result["message"]) {
-		this.displayMsg($$.text2html.parseHtml(result["message"]));
+	if ("cast" in data && data["cast"]) {
+		this.displayMsg($$.text2html.parseHtml(data["cast"]));
+	}
+
+	if ("result" in data && data["result"]) {
+		this.displayMsg($$.text2html.parseHtml(data["result"]));
 	}
 	
-	if ("key" in result) {
-		if (result.key == "skill_normal_hit" ||
-			result.key == "skill_dunt") {
+	if ("skill" in data) {
+		if (data["skill"] == "skill_normal_hit" ||
+			data["skill"] == "skill_dunt") {
 
-			var caller = $('#char_' + result.caller.slice(1));
+			var caller = $('#char_' + data["caller"].slice(1));
 			if (caller.hasClass("teammate")) {
 				caller.animate({left: '50%'}, 100);
 				caller.animate({left: '12%'}, 100);
@@ -210,20 +214,20 @@ MudderyCombat.prototype.setSkillResult = function(result) {
 				caller.animate({right: '12%'}, 100);
 			}
 		}
-		else if (result.key == "skill_normal_heal" ||
-				 result.key == "skill_powerful_heal") {
+		else if (data["skill"] == "skill_normal_heal" ||
+				 data["skill"] == "skill_powerful_heal") {
 		}
-		else if (result.key == "skill_escape") {
-			if (result.effect == 1) {
-				var item_id = "#char_" + result["target"].slice(1) + ".status";
+		else if (data["skill"] == "skill_escape") {
+			if (data["data"] == 1) {
+				var item_id = "#char_" + data["target"].slice(1) + ".status";
 				$(item_id).text($$("Escaped"));
 			}
 		}
 	}
-
+	
 	// Update status.
-	if ("status" in result) {
-		this.updateStatus(result["status"]);
+	if ("status" in data) {
+		this.updateStatus(data["status"]);
 	}
 }
     
@@ -258,9 +262,9 @@ MudderyCombat.prototype.displayMsg = function(msg) {
  * Update character's status.
  */
 MudderyCombat.prototype.updateStatus = function(status) {
-	for (var i in status) {
-		var item_id = "#char_" + status[i]["dbref"].slice(1) + ">div.status";
-		$(item_id).text(status[i]["hp"] + "/" + status[i]["max_hp"])
+	for (var key in status) {
+		var item_id = "#char_" + key.slice(1) + ">div.status";
+		$(item_id).text(status[key]["hp"] + "/" + status[key]["max_hp"])
 	}
 }
     

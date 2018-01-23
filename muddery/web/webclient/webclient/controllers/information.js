@@ -74,6 +74,7 @@ MudderyInformation.prototype.setStatus = function(status) {
 
         var obj = attributes[i];
         var item = this.cloneTemplate(template);
+        item.attr("id", "info_" + key);
 
         var value = obj["value"];
         if (value == null || typeof(value) == "undefined") {
@@ -114,6 +115,46 @@ MudderyInformation.prototype.setStatus = function(status) {
     $("#attack").text(attack);
     $("#defence").text(defence);
     */
+}
+
+/*
+ * Set player character's information in combat.
+ */
+MudderyInformation.prototype.setCombatStatus = function(status) {
+    for (var key in status) {
+        if (key.substring(0, 4) == "max_") {
+            var relative_key = key.substring(4);
+            if (relative_key in status) {
+                // Value and max value will show in the same line, so skip max.
+                continue;
+            }
+        }
+
+        var item = $("#info_" + key);
+
+        var value = status[key];
+        if (value == null || typeof(value) == "undefined") {
+            value = "--";
+        }
+
+        var max_key = "max_" + key;
+        if (max_key in status) {
+            // Add max value.
+            var max_value = status[max_key];
+
+            if (max_value == null || typeof(max_value) == "undefined") {
+                max_value = "--";
+            }
+            else if (max_value == 0 && value == 0) {
+                value = "--";
+                max_value = "--";
+            }
+
+            value = value + "/" + max_value;
+        }
+
+        item.find(".attr_value").text(value);
+    }
 }
 
 /*

@@ -196,7 +196,88 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
         self.ues_equipments()
 
         # load passive skills
-        self.cast_passive_skills()
+        self.skill_handler.cast_passive_skills()
+        
+    def change_status(self, increments):
+        """
+        Change the value of specified status.
+        
+        Args:
+            increments: (dict) values to change.
+            
+        Return:
+            (dict) values that actrually changed.
+        """
+        changed = False
+        changes = {}
+        for key in increments:
+            if self.attributes.has(key):
+                # try to add to self's db
+                target = self.db
+            elif hasattr(self, key):
+                # try to add to self's attribute
+                target = self
+            elif self.custom_attributes_handler.has(key):
+                # try to add to self's cattr
+                target = self.cattr
+            else:
+                # no target
+                continue
+
+            origin_value = getattr(target, key)
+            increment = increments[key]
+            
+            # check limits
+            max_key = "max_" + key
+            max_source = None
+            if self.attributes.has(max_key):
+                # try to add to self's db
+                max_source = self.db
+            elif hasattr(self, max_key):
+                # try to add to self's attribute
+                max_source = self
+            elif self.custom_attributes_handler.has(max_key):
+                # try to add to self's cattr
+                max_source = self.cattr
+
+            if max_source is not None:
+                max_value = getattr(max_source, max_key)
+                if origin_value + increment > max_value:
+                    increment = max_value - origin_value
+            
+            min_value = 0
+            min_key = "min_" + key
+            min_source = None
+            if self.attributes.has(min_key):
+                # try to add to self's db
+                min_source = self.db
+            elif hasattr(self, min_key):
+                # try to add to self's attribute
+                min_source = self
+            elif self.custom_attributes_handler.has(min_key):
+                # try to add to self's cattr
+                min_source = self.cattr
+
+            if min_source is not None:
+                min_value = getattr(min_source, min_key)
+
+            if origin_value + increment < min_value:
+                increment = min_value - origin_value
+
+            # set value
+            if increment != 0:
+                setattr(target, key, origin_value + increment)
+                changed = True
+                changes[key] = increment
+            
+        return changes
+        
+    def get_combat_status(self):
+        """
+        Get character status used in combats.
+        """
+        return {"max_hp": self.max_hp,
+                "hp": self.db.hp}
 
     def load_model_data(self):
         """
@@ -286,13 +367,6 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
         for skill_record in skill_records:
             if not self.skill_handler.has_skill(skill_record.skill):
                 self.skill_handler.learn_skill(skill_record.skill, True)
-                
-    def cast_passive_skills(self):
-        """
-        Add passive skills' effects to the character
-        """
-        # cast passive skills
-        self.skill_handler.cast_passive_skills()
 
     def load_default_objects(self):
         """
@@ -300,7 +374,7 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
         """
         pass
 
-    def at_after_move(self, source_location):
+    def at_after_move(self, source_location, **kwargs):
         """
         Called after move has completed, regardless of quiet mode or
         not.  Allows changes to the object due to the location it is
@@ -329,7 +403,6 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
             (boolean) If the character learned this skill.
         """
         return self.skill_handler.learn_skill(skill_key)
-        
 
     def has_skill(self, skill_key):
         """
@@ -342,39 +415,12 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
             (boolean) if the character has this skill or not
         """
         self.skill_handler.has_skill(skill_key)
-        
-    def prepare_skill(self, skill_key, target):
-        """
-        Prepare to cast a skill.
-        """
-        if self.is_in_combat():
-            self.ndb.combat_handler.prepare_skill(skill_key, self, target)
-        else:
-            self.cast_skill(skill_key, target)
 
     def cast_skill(self, skill_key, target):
         """
         Cast a skill.
         """
         self.skill_handler.cast_skill(skill_key, target)
-
-    def send_skill_result(self, result):
-        """
-        Set the result of the skill. The character can send these messages to its surroundings.
-
-        Args:
-            result: (dict)the result of the skill
-
-        Returns:
-            None
-        """
-        if result:
-            if self.ndb.combat_handler:
-                # send skill's result to the combat handler
-                self.ndb.combat_handler.send_skill_result(result)
-            elif self.location:
-                # send skill's result to caller's location
-                self.location.msg_contents({"skill_result": result})
 
     ########################################
     #

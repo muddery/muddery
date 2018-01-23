@@ -326,19 +326,28 @@ MudderyMain.prototype.setCombatCommands = function(commands) {
 }
     
 /*
- * Set combat skill's result.
+ * Cast a combat skill.
  */
-MudderyMain.prototype.setSkillResult = function(result) {
+MudderyMain.prototype.setSkillCast = function(result) {
+    if ("status" in result && data_handler.character_dbref in result["status"]) {
+        setCombatStatus(result["status"][data_handler.character_dbref])
+    }
+    
 	var frame_id = "#frame_combat";
 	var frame_ctrl = this.getFrameController(frame_id);
 	if (frame_ctrl.isCombatFinished()) {
-		if ("message" in result && result["message"]) {
-			var msg = text2html.parseHtml(result["message"]);
+		if ("cast" in result && result["cast"]) {
+			var msg = text2html.parseHtml(result["cast"]);
+			this.displayMsg(msg);
+		}
+
+		if ("result" in result && result["result"]) {
+			var msg = text2html.parseHtml(result["result"]);
 			this.displayMsg(msg);
 		}
 	}
 	else {
-		frame_ctrl.setSkillResult(result);
+		frame_ctrl.setSkillCast(result);
 	}
 }
 
@@ -576,6 +585,17 @@ MudderyMain.prototype.setStatus = function(status) {
 
 	var frame_ctrl = this.getFrameController("#frame_information");
 	frame_ctrl.setStatus(status);
+}
+
+/*
+ *  Set the player's status in combat.
+ */
+MudderyMain.prototype.setCombatStatus = function(status) {
+	var hp_str = status["hp"] + "/" + status["max_hp"];
+	$("#prompt_hp").text(hp_str);
+
+	var frame_ctrl = this.getFrameController("#frame_information");
+	frame_ctrl.setCombatStatus(status);
 }
 
 /*

@@ -605,7 +605,10 @@ class CmdCastSkill(Command):
 
         try:
             # Prepare to cast this skill.
-            caller.prepare_skill(skill_key, target)
+            if caller.is_in_combat():
+                caller.ndb.combat_handler.prepare_skill(skill_key, caller, target)
+            else:
+                caller.cast_skill(skill_key, target)
         except Exception, e:
             caller.msg({"alert":_("Can not cast this skill.")})
             logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
@@ -906,7 +909,7 @@ class CmdGiveUpQuest(Command):
         quest_key = self.args
 
         try:
-            # Take off the equipment.
+            # Give up the quest.
             caller.quest_handler.give_up(quest_key)
         except MudderyError, e:
             caller.msg({"alert": str(e)})
