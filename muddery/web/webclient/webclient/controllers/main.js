@@ -330,20 +330,21 @@ MudderyMain.prototype.setCombatCommands = function(commands) {
  */
 MudderyMain.prototype.setSkillCast = function(result) {
     if ("status" in result && data_handler.character_dbref in result["status"]) {
-        setCombatStatus(result["status"][data_handler.character_dbref])
+        this.setCombatStatus(result["status"][data_handler.character_dbref])
     }
     
 	var frame_id = "#frame_combat";
 	var frame_ctrl = this.getFrameController(frame_id);
 	if (frame_ctrl.isCombatFinished()) {
+	    var message = "";
 		if ("cast" in result && result["cast"]) {
-			var msg = text2html.parseHtml(result["cast"]);
-			this.displayMsg(msg);
+			message += text2html.parseHtml(result["cast"]) + " ";
 		}
-
 		if ("result" in result && result["result"]) {
-			var msg = text2html.parseHtml(result["result"]);
-			this.displayMsg(msg);
+			message += text2html.parseHtml(result["result"]);
+		}
+		if (message) {
+			this.displayMsg(message);
 		}
 	}
 	else {

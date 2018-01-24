@@ -81,9 +81,6 @@ class FuncHeal(StatementFunction):
         # recover caller's hp
         increments = {"hp": int(effect)}
         changes = self.caller.change_status(increments)
-        
-        # characters' status
-        self.obj.combat_dirty = True
 
         # send skill result
         return _("Healed %s by %d points.") % (self.obj.get_name(), int(changes["hp"]))
@@ -124,9 +121,6 @@ class FuncHit(StatementFunction):
         increments = {"hp": -damage}
         changes = self.obj.change_status(increments)
 
-        # characters' status
-        self.obj.combat_dirty = True
-
         # send skill result
         return _("Hit %s by %d points.") % (self.obj.get_name(), int(-changes["hp"]))
 
@@ -165,9 +159,6 @@ class FuncIncreaseMaxHP(StatementFunction):
         # increase hp
         increments_hp = {"hp": changes["max_hp"]}
         self.caller.change_status(increments_hp)
-
-        # characters' status
-        self.obj.combat_dirty = True
 
         # send skill result
         return _("Raised %s's max HP by %d points.") % (self.obj.get_name(), int(changes["max_hp"]))

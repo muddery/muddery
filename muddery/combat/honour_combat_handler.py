@@ -21,7 +21,7 @@ class HonourCombatHandler(BaseCombatHandler):
         for character in self.characters.values():
             if not character.account:
                 # Monsters auto cast skills
-                character.skill_handler.start_auto_combat_skill()
+                character.start_auto_combat_skill()
 
     def at_server_shutdown(self):
         """
@@ -30,7 +30,7 @@ class HonourCombatHandler(BaseCombatHandler):
         """
         for character in self.characters.values():
             # Stop auto cast skills
-            character.skill_handler.stop_auto_combat_skill()
+            character.stop_auto_combat_skill()
 
         super(HonourCombatHandler, self).at_server_shutdown()
 
@@ -54,7 +54,7 @@ class HonourCombatHandler(BaseCombatHandler):
         """
         for character in self.characters.values():
             # Stop auto cast skills
-            character.skill_handler.stop_auto_combat_skill()
+            character.stop_auto_combat_skill()
 
         super(HonourCombatHandler, self).finish()
 

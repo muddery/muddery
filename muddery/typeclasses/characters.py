@@ -10,23 +10,22 @@ creation commands.
 
 from __future__ import print_function
 
-import traceback
-from twisted.internet import reactor
+import time, traceback
+from twisted.internet import reactor, task
 from twisted.internet.task import deferLater
 from django.conf import settings
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.typeclasses.models import DbHolder
 from evennia.utils import logger
-from evennia.utils.utils import lazy_property
+from evennia.utils.utils import lazy_property, class_from_module
 from muddery.typeclasses.objects import MudderyObject
-from muddery.utils import utils
-from muddery.utils.builder import build_object
-from muddery.utils.skill_handler import SkillHandler
-from muddery.utils.loot_handler import LootHandler
 from muddery.worlddata.data_sets import DATA_SETS
+from muddery.utils.builder import build_object
+from muddery.utils.loot_handler import LootHandler
+from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
-from muddery.utils.utils import get_class
+from muddery.utils.utils import search_obj_data_key, get_class
 from muddery.utils.localized_strings_handler import _
 
 
@@ -49,12 +48,6 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
                     has connected" message echoed to the room
 
     """
-
-    # initialize skill handler in a lazy fashion
-    @lazy_property
-    def skill_handler(self):
-        return SkillHandler(self)
-
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
@@ -94,17 +87,67 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
         if not self.attributes.has("current_quests"):
             self.db.current_quests = {}
         
+        # skill's gcd
+        self.skill_gcd = GAME_SETTINGS.get("global_cd")
+        self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
+        self.gcd_finish_time = 0
+        
+        # loop for auto cast skills
+        self.auto_cast_loop = None
+        
         self.target = None
         self.reborn_time = 0
         
         # A temporary character will be deleted after the combat finished.
         self.is_temp = False
 
+
+    def at_object_delete(self):
+        """
+        Called just before the database object is permanently
+        delete()d from the database. If this method returns False,
+        deletion is aborted.
+
+        All skills, contents will be removed too.
+        """
+        result = super(MudderyCharacter, self).at_object_delete()
+        if not result:
+            return result
+            
+        # leave combat
+        if self.ndb.combat_handler:
+            self.ndb.combat_handler.remove_character(self)
+        
+        # stop auto casting
+        self.stop_auto_combat_skill()
+        
+        # delete all skills
+        for skill in self.db.skills.values():
+            skill.delete()
+
+        # delete all contents
+        for content in self.contents:
+            content.delete()
+        
+        return True
+                            
     def after_data_loaded(self):
         """
         Init the character.
         """
         super(MudderyCharacter, self).after_data_loaded()
+        
+        # skill's ai
+        ai_choose_skill_class = class_from_module(settings.AI_CHOOSE_SKILL)
+        self.ai_choose_skill = ai_choose_skill_class()
+
+        # skill's gcd
+        self.skill_gcd = GAME_SETTINGS.get("global_cd")
+        self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
+        self.gcd_finish_time = 0
+        
+        # loop for auto cast skills
+        self.auto_cast_loop = None
 
         # clear target
         self.target = None
@@ -196,7 +239,7 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
         self.ues_equipments()
 
         # load passive skills
-        self.skill_handler.cast_passive_skills()
+        self.cast_passive_skills()
         
     def change_status(self, increments):
         """
@@ -352,21 +395,19 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
 
         # default skills
         skill_records = DATA_SETS.default_skills.objects.filter(character=model_name)
-
         default_skill_ids = set([record.skill for record in skill_records])
 
         # remove old default skills
-        for skill in self.db.skills:
-            skill_obj = self.db.skills[skill]
-            if skill_obj.is_default() and skill not in default_skill_ids:
+        for key, skill in self.db.skills.iteritems():
+            if skill.is_default() and key not in default_skill_ids:
                 # remove this skill
-                skill_obj.delete()
-                del self.db.skills[skill]
+                skill.delete()
+                del self.db.skills[key]
 
         # add new default skills
         for skill_record in skill_records:
-            if not self.skill_handler.has_skill(skill_record.skill):
-                self.skill_handler.learn_skill(skill_record.skill, True)
+            if skill_record.skill not in self.db.skills:
+                self.learn_skill(skill_record.skill, True)
 
     def load_default_objects(self):
         """
@@ -392,35 +433,128 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
     #
     ########################################
     
-    def learn_skill(self, skill_key):
+    def learn_skill(self, skill_key, is_default):
         """
-        Check if the character has this skill.
+        Learn a new skill.
 
         Args:
             skill_key: (string) skill's key
+            is_default: (boolean) if it is a default skill
 
         Returns:
-            (boolean) If the character learned this skill.
+            (boolean) learned skill
         """
-        return self.skill_handler.learn_skill(skill_key)
+        if skill_key in self.db.skills:
+            self.msg({"msg": _("You have already learned this skill.")})
+            return False
 
-    def has_skill(self, skill_key):
-        """
-        Check if the character has this skill.
+        # Create skill object.
+        skill_obj = build_object(skill_key)
+        if not skill_obj:
+            self.msg({"msg": _("Can not learn this skill.")})
+            return False
 
-        Args:
-            skill_key: (string) skill's key
+        # set default
+        if is_default:
+            skill_obj.set_default(is_default)
 
-        Returns:
-            (boolean) if the character has this skill or not
-        """
-        self.skill_handler.has_skill(skill_key)
+        # Store new skill.
+        skill_obj.set_owner(self)
+        self.db.skills[skill_key] = skill_obj
+
+        # If it is a passive skill, player's status may change.
+        if skill_obj.passive:
+            self.refresh_data()
+
+        # Notify the player
+        if self.has_account:
+            self.show_status()
+            self.show_skills()
+            self.msg({"msg": _("You learned skill {c%s{n.") % skill_obj.get_name()})
+
+        return True
 
     def cast_skill(self, skill_key, target):
         """
         Cast a skill.
+
+        Args:
+            skill_key: (string) skill's key.
+            target: (object) skill's target.
         """
-        self.skill_handler.cast_skill(skill_key, target)
+        time_now = time.time()
+        if time_now < self.gcd_finish_time:
+            # In GCD.
+            self.msg({"skill_cast": {"cast": _("Global cooling down!")}})
+            return
+
+        if skill_key not in self.db.skills:
+            self.msg({"skill_cast": {"cast": _("You do not have this skill.")}})
+            return
+
+        skill = self.db.skills[skill_key]
+        if not skill.cast_skill(target, passive=False):
+            return
+
+        if self.skill_gcd > 0:
+            # set GCD
+            self.gcd_finish_time = time_now + self.skill_gcd
+
+        # send CD to the player
+        cd = {"skill": skill_key,               # skill's key
+              "cd": skill.cd,                   # skill's cd
+              "gcd": self.skill_gcd}
+
+        self.msg({"skill_cd": cd})
+        return
+
+    def auto_cast_skill(self):
+        """
+        Cast a new skill automatically.
+        """
+        if not self.is_alive():
+            return
+
+        if not self.is_in_combat():
+            # combat is finished, stop ticker
+            self.stop_auto_combat_skill()
+            return
+
+        # Choose a skill and the skill's target.
+        result = self.ai_choose_skill.choose(self)
+        if result:
+            skill, target = result
+            self.ndb.combat_handler.prepare_skill(skill, self, target)
+            
+    def cast_passive_skills(self):
+        """
+        Cast all passive skills.
+        """
+        for skill in self.db.skills.values():
+            if skill.passive:
+                skill.cast_skill(self, passive=True)
+                
+    def start_auto_combat_skill(self):
+        """
+        Start auto cast skill.
+        """
+        if self.auto_cast_loop and self.auto_cast_loop.running:
+            return
+
+        # Cast a skill immediately
+        # self.auto_cast_skill()
+
+        # Set timer of auto cast.
+        self.auto_cast_loop = task.LoopingCall(self.auto_cast_skill)
+        self.auto_cast_loop.start(self.auto_cast_skill_cd)
+
+    def stop_auto_combat_skill(self):
+        """
+        Stop auto cast skill.
+        """
+        if self.auto_cast_loop and self.auto_cast_loop.running:
+            self.auto_cast_loop.stop()
+
 
     ########################################
     #
@@ -537,7 +671,7 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
         """
         if target_level == 0:
             # Find the target and get its level.
-            obj = utils.search_obj_data_key(target_key)
+            obj = search_obj_data_key(target_key)
             if not obj:
                 logger.log_errmsg("Can not find the target %s." % target_key)
                 return False
@@ -630,14 +764,13 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
             (list) available commands for combat
         """
         commands = []
-        for key in self.db.skills:
-            skill = self.db.skills[key]
+        for key, skill in self.db.skills.iteritems():
             if skill.passive:
                 # exclude passive skills
                 continue
 
-            command = {"name": skill.name,
-                       "key": skill.get_data_key(),
+            command = {"name": skill.get_name(),
+                       "key": key,
                        "icon": getattr(skill, "icon", None)}
 
             commands.append(command)
@@ -696,26 +829,4 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
         """
         pass
 
-    def at_object_delete(self):
-        """
-        Called just before the database object is permanently
-        delete()d from the database. If this method returns False,
-        deletion is aborted.
-
-        All skills, contents will be removed too.
-        """
-        result = super(MudderyCharacter, self).at_object_delete()
-        if not result:
-            return result
-            
-        # leave combat
-        if self.ndb.combat_handler:
-            self.ndb.combat_handler.remove_character(self)
-        
-        self.skill_handler.remove_all()
-        
-        for content in self.contents:
-            content.delete()
-        
-        return True
         

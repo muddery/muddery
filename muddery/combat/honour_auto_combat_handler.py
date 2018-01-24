@@ -20,7 +20,7 @@ class HonourAutoCombatHandler(BaseCombatHandler):
 
         # All characters auto cast skills.
         for character in self.characters.values():
-            character.skill_handler.start_auto_combat_skill()
+            character.start_auto_combat_skill()
 
     def at_server_shutdown(self):
         """
@@ -28,7 +28,7 @@ class HonourAutoCombatHandler(BaseCombatHandler):
         (i.e. not for a restart).
         """
         for character in self.characters.values():
-            character.skill_handler.stop_auto_combat_skill()
+            character.stop_auto_combat_skill()
 
         super(HonourAutoCombatHandler, self).at_server_shutdown()
 
@@ -37,7 +37,7 @@ class HonourAutoCombatHandler(BaseCombatHandler):
         Finish a combat. Send results to players, and kill all failed characters.
         """
         for character in self.characters.values():
-            character.skill_handler.stop_auto_combat_skill()
+            character.stop_auto_combat_skill()
 
         super(HonourAutoCombatHandler, self).finish()
 

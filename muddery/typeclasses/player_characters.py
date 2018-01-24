@@ -955,9 +955,7 @@ class MudderyPlayerCharacter(get_class("CLASS_BASE_CHARACTER")):
         """
         skills = []
 
-        skill_dict = self.skill_handler.get_all()
-        for key in skill_dict:
-            skill = skill_dict[key]
+        for key, skill in self.db.skills.iteritems():
             info = {"key": key,
                     "dbref": skill.dbref,
                     "name": skill.get_name(),

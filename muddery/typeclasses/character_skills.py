@@ -137,40 +137,54 @@ class MudderySkill(get_class("CLASS_BASE_OBJECT")):
                 result: (dict) skill's result
                 cd: (dict) skill's cd
         """
-        if not self.is_available(passive):
-            return False
-
         owner = self.db.owner
+        
+        not_available = self.check_available(passive)
+        if not_available:
+            message = {"cast": not_available}
+        else:
+            results = self.do_skill(target)
 
-        # call skill function
-        results = STATEMENT_HANDLER.do_skill(self.function, owner, target)
+            message = {"caller": owner.dbref,
+                       "skill": self.get_data_key(),
+                       "cast": self.cast_message(target)}
 
+            if target:
+                message["target"] = target.dbref
+
+            if results:
+                message["result"] = " ".join(results)
+
+            # set status
+            status = {}
+            if owner.is_in_combat():
+                for char in owner.ndb.combat_handler.get_all_characters():
+                    status[char.dbref] = char.get_combat_status()
+            elif owner.location:
+                status[owner.dbref] = owner.get_combat_status()
+            message["status"] = status
+
+        # send message
+        if owner.is_in_combat():
+            owner.ndb.combat_handler.msg_all({"skill_cast": message})
+        elif owner.location:
+            owner.location.msg_contents({"skill_cast": message})
+
+        return True
+        
+    def do_skill(self, target):
+        """
+        Do this skill.
+        """
+        # set cd
         if not self.passive:
             # set cd
             time_now = time.time()
             if self.cd > 0:
                 self.db.cd_finish_time = time_now + self.cd
 
-        message = {"caller": owner.dbref,
-                   "target": target.dbref,
-                   "skill": self.get_data_key(),
-                   "cast": self.cast_message(target),
-                   "result": " ".join(results)}
-
-        if owner.is_in_combat():
-            status = {}
-            for char in owner.ndb.combat_handler.get_all_characters():
-                if char.combat_dirty:
-                    status[char.dbref] = char.get_combat_status()
-                    char.combat_dirty = False
-
-            message["status"] = status
-            owner.ndb.combat_handler.msg_all({"skill_cast": message})
-        else:
-            message["status"] = {owner.dbref: owner.get_combat_status()}
-            owner.location.msg_contents({"skill_cast": message})
-
-        return True
+        # call skill function
+        return STATEMENT_HANDLER.do_skill(self.function, self.db.owner, target)
 
     def check_available(self, passive):
         """

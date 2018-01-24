@@ -192,12 +192,15 @@ MudderyCombat.prototype.setSkillCast = function(data) {
 		return;
 	}
 	
+	var message = "";
 	if ("cast" in data && data["cast"]) {
-		this.displayMsg($$.text2html.parseHtml(data["cast"]));
+	    message += $$.text2html.parseHtml(data["cast"]) + " ";
 	}
-
 	if ("result" in data && data["result"]) {
-		this.displayMsg($$.text2html.parseHtml(data["result"]));
+		message += $$.text2html.parseHtml(data["result"]);
+	}
+	if (message) {
+		this.displayMsg(message);
 	}
 	
 	if ("skill" in data) {

@@ -48,7 +48,6 @@ class BaseCombatHandler(DefaultScript):
 
         # send messages in order
         character.msg({"combat_info": self.get_appearance()})
-        character.combat_dirty = False
 
     def _cleanup_character(self, character):
         """

@@ -165,7 +165,8 @@ class StatementHandler(object):
         for function in functions:
             try:
                 result = exec_function(self.skill_func_set, function, caller, obj, **kwargs)
-                results.append(result)
+                if result:
+                    results.append(result)
             except Exception, e:
                 logger.log_errmsg("Exec function error: %s %s" % (function, e))
 
