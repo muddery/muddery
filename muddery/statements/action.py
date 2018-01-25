@@ -29,7 +29,7 @@ class FuncLearnSkill(StatementFunction):
             return False
 
         skill_key = self.args[0]
-        return self.caller.learn_skill(skill_key)
+        return self.caller.learn_skill(skill_key, False)
 
 
 class FuncGiveObject(StatementFunction):

@@ -1,6 +1,6 @@
 field,key,name,desc
 attr_1,hp,生命,恢复生命值。
-attr_2,,,
+attr_2,mp,能量,恢复能量值。
 attr_3,,,
 attr_4,,,
 attr_5,,,

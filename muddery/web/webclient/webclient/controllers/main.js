@@ -21,7 +21,7 @@ MudderyMain.prototype.constructor = MudderyMain;
 MudderyMain.prototype.onReady = function() {
     this.resetLanguage();
     this.bindEvents();
-    
+
 	this.showUnlogin();
     this.showContent("login");
     this.doSetSizes();
@@ -31,9 +31,6 @@ MudderyMain.prototype.onReady = function() {
  * Reset the view's language.
  */
 MudderyMain.prototype.resetLanguage = function() {
-	$("#view_level").text($$("LEVEL: "));
-	$("#view_exp").text($$("EXP: "));
-	$("#view_hp").text($$("HP: "));
 	$("#view_connect").text($$("Connect"));
 	$("#view_login").text($$("Login"));
 	$("#view_register").text($$("Register"));
@@ -543,16 +540,32 @@ MudderyMain.prototype.doClosePopupBox = function() {
 // Prompt Bar
 //
 //////////////////////////////////////////
-	
+MudderyMain.prototype.setPromptBar = function() {
+    this.clearPromptBar();
+
+    var template = $("#prompt_content>.template");
+
+    var item = this.cloneTemplate(template);
+    item.attr("id", "prompt_name");
+
+    item = this.cloneTemplate(template);
+    item.attr("id", "prompt_level");
+
+    item = this.cloneTemplate(template);
+    item.attr("id", "prompt_exp");
+
+    item = this.cloneTemplate(template);
+    item.attr("id", "prompt_hp");
+
+    item = this.cloneTemplate(template);
+    item.attr("id", "prompt_queue");
+}
+
 /*
  * Clear the prompt bar.
  */
 MudderyMain.prototype.clearPromptBar = function() {
-	$("#prompt_name").empty();
-	$("#prompt_level").empty();
-	$("#prompt_exp").empty();
-	$("#prompt_hp").empty();
-	$("#prompt_queue").empty();
+	this.clearElements("#prompt_content");
 }
 
 /* 
@@ -570,7 +583,7 @@ MudderyMain.prototype.setInfo = function(name, icon) {
  */
 MudderyMain.prototype.setStatus = function(status) {
 	data_handler.character_level = status["level"]["value"];
-	$("#prompt_level").text(status["level"]["value"]);
+	$("#prompt_level").text($$("LEVEL: ") + status["level"]["value"]);
 
 	var exp_str = "";
 	if (status["max_exp"]["value"] > 0) {
@@ -579,10 +592,10 @@ MudderyMain.prototype.setStatus = function(status) {
 	else {
 		exp_str = "--/--";
 	}
-	$("#prompt_exp").text(exp_str);
+	$("#prompt_exp").text($$("EXP: ") + exp_str);
 
 	var hp_str = status["hp"]["value"] + "/" + status["max_hp"]["value"];
-	$("#prompt_hp").text(hp_str);
+	$("#prompt_hp").text($$("HP: ") + hp_str);
 
 	var frame_ctrl = this.getFrameController("#frame_information");
 	frame_ctrl.setStatus(status);
@@ -593,18 +606,10 @@ MudderyMain.prototype.setStatus = function(status) {
  */
 MudderyMain.prototype.setCombatStatus = function(status) {
 	var hp_str = status["hp"] + "/" + status["max_hp"];
-	$("#prompt_hp").text(hp_str);
+	$("#prompt_hp").text($$("HP: ") + hp_str);
 
 	var frame_ctrl = this.getFrameController("#frame_information");
 	frame_ctrl.setCombatStatus(status);
-}
-
-/*
- *  Set the player's all playable characters.
- */
-MudderyMain.prototype.setAllCharacters = function(data) {
-	var frame_ctrl = this.getFrameController("#frame_select_char");
-	frame_ctrl.setCharacters(data);
 }
 
 //////////////////////////////////////////
@@ -990,8 +995,7 @@ MudderyMain.prototype.showPuppet = function() {
 	// show login UI
 	this.clearMsgWindow();
 
-	this.clearPromptBar();
-	$("#prompt_content").show();
+	this.setPromptBar();
 
 	// show login tabs
 	this.hideTabs();
@@ -1015,7 +1019,7 @@ MudderyMain.prototype.showPuppet = function() {
 MudderyMain.prototype.showUnlogin = function() {
 	// show unlogin UI
 	this.clearMsgWindow();
-	$("#prompt_content").hide();
+	this.clearPromptBar();
 
 	this.leftCombatQueue();
 
@@ -1035,7 +1039,7 @@ MudderyMain.prototype.showUnlogin = function() {
  */
 MudderyMain.prototype.showSelectChar = function() {
 	//this.clearMsgWindow();
-	$("#prompt_content").hide();
+	this.clearPromptBar();
 
 	this.leftCombatQueue();
 
@@ -1183,6 +1187,14 @@ MudderyMain.prototype.setLanguage = function(language) {
 	this.getFrameController("#frame_select_char").resetLanguage();
 	this.getFrameController("#frame_shop").resetLanguage();
 	this.getFrameController("#frame_honours").resetLanguage();
+}
+
+/*
+ *  Set the player's all playable characters.
+ */
+MudderyMain.prototype.setAllCharacters = function(data) {
+	var frame_ctrl = this.getFrameController("#frame_select_char");
+	frame_ctrl.setCharacters(data);
 }
 	
 /* 

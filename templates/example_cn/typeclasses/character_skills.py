@@ -10,13 +10,14 @@ import time
 from django.conf import settings
 from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
+from muddery.typeclasses.character_skills import MudderySkill
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.utils import get_class
+from muddery.statements.statement_handler import STATEMENT_HANDLER
 
 
-class Skill(get_class("CLASS_SKILL")):
+class Skill(MudderySkill):
     """
     A skill of the character.
     """
@@ -27,43 +28,56 @@ class Skill(get_class("CLASS_SKILL")):
         Returns:
             None
         """
-        super(MudderySkill, self).after_data_loaded()
+        super(Skill, self).after_data_loaded()
 
         # set data
-        self.function = getattr(self.dfield, "function", "")
-        self.cd = getattr(self.dfield, "cd", 0)
-        self.passive = getattr(self.dfield, "passive", False)
-        self.message = getattr(self.dfield, "message", "")
-        self.main_type = getattr(self.dfield, "main_type", "")
-        self.sub_type = getattr(self.dfield, "sub_type", "")
         self.mp = getattr(self.dfield, "mp", "")
 
-    def check_available(self):
+    def do_skill(self, target):
+        """
+        Do this skill.
+        """
+        if not self.passive:
+            # set mp
+            self.db.owner.db.mp -= self.mp
+
+        return super(Skill, self).do_skill(target)
+
+    def check_available(self, passive):
         """
         Check this skill.
+
+        Args:
+            passive: (boolean) cast a passive skill.
 
         Returns:
             message: (string) If the skill is not available, returns a string of reason.
                      If the skill is available, return "".
         """
-        message = super(Skill, self).check_available()
+        message = super(Skill, self).check_available(passive)
         if message:
             return message
             
-        if self.owner.mp < self.mp:
+        if self.db.owner.db.mp < self.mp:
             return _("Not enough mana to cast {c%s{n!") % self.get_name()
 
         return ""
 
-    def is_available(self):
+    def is_available(self, passive):
         """
         If this skill is available.
+
+        Args:
+            passive: (boolean) cast a passive skill.
+
+        Returns:
+            (boolean) available or not.
         """
-        result = super(Skill, self).is_available()
+        result = super(Skill, self).is_available(passive)
         if not result:
             return result
             
-        if self.owner.mp < self.mp:
+        if self.db.owner.db.mp < self.mp:
             return False
 
         return True

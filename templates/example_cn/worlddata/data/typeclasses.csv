@@ -1,1 +1,4 @@
 key,name,path,category,desc
+CLASS_BASE_CHARACTER,Base Character,typeclasses.characters.Character,CATE_BASE,Base class of all characters.
+CLASS_SKILL,Skill,typeclasses.character_skills.Skill,CATE_SKILL,Character's skill.
+CLASS_PLAYER,Player,typeclasses.player_characters.PlayerCharacter,CATE_CHARACTER,Player character's typeclass.

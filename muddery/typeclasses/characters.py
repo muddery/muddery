@@ -251,9 +251,10 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
         Return:
             (dict) values that actrually changed.
         """
-        changed = False
         changes = {}
         for key in increments:
+            changes[key] = 0
+
             if self.attributes.has(key):
                 # try to add to self's db
                 target = self.db
@@ -310,7 +311,6 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
             # set value
             if increment != 0:
                 setattr(target, key, origin_value + increment)
-                changed = True
                 changes[key] = increment
             
         return changes
