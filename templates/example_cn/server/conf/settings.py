@@ -58,6 +58,20 @@ SECRET_KEY = {SECRET_KEY}
 
 
 ######################################################################
+# Typeclasses and other paths
+######################################################################
+
+# Typeclass for character objects linked to a player (fallback)
+BASE_CHARACTER_TYPECLASS = "typeclasses.player_characters.PlayerCharacter"
+
+# Typeclass for general characters, include NPCs, mobs and player characters.
+BASE_GENERAL_CHARACTER_TYPECLASS = "typeclasses.characters.Character"
+
+# Typeclass for player characters.
+BASE_PLAYER_CHARACTER_TYPECLASS = "typeclasses.player_characters.PlayerCharacter"
+
+
+######################################################################
 # Default statement sets
 ######################################################################
 

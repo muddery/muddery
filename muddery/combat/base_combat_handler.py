@@ -234,12 +234,8 @@ class BaseCombatHandler(DefaultScript):
                       "characters": []}
         
         for character in self.characters.values():
-            info = {"dbref": character.dbref,
-                    "name": character.get_name(),
-                    "team": character.get_team(),
-                    "max_hp": character.max_hp,
-                    "hp": character.db.hp,
-                    "icon": getattr(character, "icon", None)}
+            info = character.get_appearance(self)
+            info["team"] = character.get_team()
 
             appearance["characters"].append(info)
 

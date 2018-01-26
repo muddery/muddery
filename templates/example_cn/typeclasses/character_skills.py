@@ -81,3 +81,14 @@ class Skill(MudderySkill):
             return False
 
         return True
+
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        info = super(Skill, self).get_appearance(caller)
+        
+        info["mp"] = self.mp
+
+        return info

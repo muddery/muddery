@@ -3,56 +3,56 @@ var frames_dict = {
     "PUBLIC":				{scripts: 		[]},
     
     "main.html":			{scripts: 		["../controllers/base_controller.js",
-                      	 	 				 "../controllers/main.js",],
+                      	 	 				 "../controllers/muddery_main.js",],
                       	 	 controller:	"MudderyMain",},
 
     "combat_result.html":	{scripts: 		["../controllers/base_controller.js",
-                      	 	 				 "../controllers/combat_result.js",],
+                      	 	 				 "../controllers/muddery_combat_result.js",],
                       	 	 controller:	"MudderyCombatResult",},
 
     "combat.html":			{scripts: 		["../controllers/base_controller.js",
-                      	 	 				 "../controllers/combat.js",],
+                      	 	 				 "../controllers/muddery_combat.js",],
                       	 	 controller:	"MudderyCombat",},
                       	 	 
     "confirm_combat.html":	{scripts: 		["../controllers/base_controller.js",
-                      	 					 "../controllers/confirm_combat.js",],
+                      	 					 "../controllers/muddery_confirm_combat.js",],
                       	 	 controller:	"MudderyConfirmCombat",},
             	 	 
     "delete_char.html":		{scripts: 		["../controllers/base_controller.js",
-                      	    				 "../controllers/delete_char.js",],
+                      	    				 "../controllers/muddery_delete_char.js",],
                       	 	 controller:	"MudderyDeleteChar",},
             	 	                       	 
     "dialogue.html":		{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/dialogue.js",],
+                      						 "../controllers/muddery_dialogue.js",],
                       	 	 controller:	"MudderyDialogue",},
                       	 	 
     "get_objects.html":		{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/get_objects.js",],
+                      						 "../controllers/muddery_get_objects.js",],
                       	 	 controller:	"MudderyGetObjects",},
                       	 	                       	 
     "goods.html":	  	  	{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/goods.js",],
+                      						 "../controllers/muddery_goods.js",],
                       	 	 controller:	"MudderyGoods",},
                       	 	 
     "honours.html":	  	  	{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/honours.js",],
+                      						 "../controllers/muddery_honours.js",],
                       	 	 controller:	"MudderyHonours",},
                       	 	 
     "information.html":		{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/information.js",],
+                      						 "../controllers/muddery_information.js",],
                       	 	 controller:	"MudderyInformation",},
                       	 	 
     "inventory.html":		{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/inventory.js",],
+                      						 "../controllers/muddery_inventory.js",],
                       	 	 controller:	"MudderyInventory",},
                       	 	 
     "login.html":			{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/login.js",],
+                      						 "../controllers/muddery_login.js",],
                       	 	 controller:	"MudderyLogin",},
                       	 	 
     "map.html":				{scripts: 		["../libs/d3.v3.min.js",
     										 "../controllers/base_controller.js",
-                      						 "../controllers/map.js",],
+                      						 "../controllers/muddery_map.js",],
                       	 	 controller:	"MudderyMap",},
                       	 	                       	 
     "message.html":			{scripts: 		["../controllers/base_controller.js",
@@ -60,38 +60,38 @@ var frames_dict = {
                       	 	 controller:	"MudderyMessage",},
                       	 	 
     "new_char.html":		{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/new_char.js",],
+                      						 "../controllers/muddery_new_char.js",],
                       	 	 controller:	"MudderyNewChar",},
                       	 	                       	
     "object.html":			{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/object.js",],
+                      						 "../controllers/muddery_object.js",],
                       	 	 controller:	"MudderyObject",},
                       	 	                       	 
     "quests.html":			{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/quests.js",],
+                      						 "../controllers/muddery_quests.js",],
                       	 	 controller:	"MudderyQuests",},
                       	 	 
 	"quick_login.html":	 	{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/quick_login.js",],
+                      						 "../controllers/muddery_quick_login.js",],
                       	 	 controller:	"MudderyQuickLogin",},
                       	 	 
     "register.html": 		{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/register.js",],
+                      						 "../controllers/muddery_register.js",],
                       	 	 controller:	"MudderyRegister",},
                       	 	 
     "scene.html":      	 	{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/scene.js",],
+                      						 "../controllers/muddery_scene.js",],
                       	 	 controller:	"MudderyScene",},
                       	 	 
 	"select_char.html": 	{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/select_char.js",],
+                      						 "../controllers/muddery_select_char.js",],
                       	 	 controller:	"MudderySelectChar",},
                       	 	 
 	"shop.html": 			{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/shop.js",],
+                      						 "../controllers/muddery_shop.js",],
                       	 	 controller:	"MudderyShop",},
                       	 	                 
 	"skills.html": 			{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/skills.js",],
+                      						 "../controllers/muddery_skills.js",],
                       	 	 controller:	"MudderySkills",},                      						 
 }

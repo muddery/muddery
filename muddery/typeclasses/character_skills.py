@@ -266,3 +266,15 @@ class MudderySkill(get_class("CLASS_BASE_OBJECT")):
             message = self.message_model % values
 
         return message
+
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        info = super(MudderySkill, self).get_appearance(caller)
+        
+        info["passive"] = self.passive
+        info["cd_remain"] = self.get_remain_cd()
+
+        return info

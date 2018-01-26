@@ -551,7 +551,7 @@ class MudderyObject(DefaultObject):
         """
         # Get name, description and available commands.
         info = {"dbref": self.dbref,
-                "name": self.name,
+                "name": self.get_name(),
                 "desc": self.get_desc(caller),
                 "cmds": self.get_available_commands(caller),
                 "icon": getattr(self, "icon", None)}

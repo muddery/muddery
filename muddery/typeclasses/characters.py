@@ -240,7 +240,19 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
 
         # load passive skills
         self.cast_passive_skills()
-        
+
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        # get name, description and available commands.
+        info = super(MudderyCharacter, self).get_appearance(caller)
+        info["max_hp"] = self.max_hp
+        info["hp"] = self.db.hp
+
+        return info
+
     def change_status(self, increments):
         """
         Change the value of specified status.

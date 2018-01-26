@@ -231,19 +231,6 @@ class MudderyPlayerCharacter(get_class("CLASS_BASE_CHARACTER")):
         # Use nick name instead of normal name.
         return self.db.nickname
 
-    def get_appearance(self, caller):
-        """
-        This is a convenient hook for a 'look'
-        command to call.
-        """
-        # get name, description and available commands.
-        info = {"dbref": self.dbref,
-                "name": self.get_name(),
-                "desc": self.db.desc,
-                "cmds": self.get_available_commands(caller)}
-
-        return info
-
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -956,14 +943,7 @@ class MudderyPlayerCharacter(get_class("CLASS_BASE_CHARACTER")):
         skills = []
 
         for key, skill in self.db.skills.iteritems():
-            info = {"key": key,
-                    "dbref": skill.dbref,
-                    "name": skill.get_name(),
-                    "desc": skill.db.desc,
-                    "cd_remain": skill.get_remain_cd(),
-                    "icon": getattr(skill, "icon", None)}
-
-            skills.append(info)
+            skills.append(skill.get_appearance(self))
 
         return skills
 

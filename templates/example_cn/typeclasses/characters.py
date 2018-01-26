@@ -74,6 +74,18 @@ class Character(MudderyCharacter):
         self.db.mp = self.max_mp
         self.db.sp = self.max_sp
 
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        # get name, description and available commands.
+        info = super(Character, self).get_appearance(caller)
+        info["max_mp"] = self.max_mp
+        info["mp"] = self.db.mp
+
+        return info
+
     def get_combat_status(self):
         """
         Get character status used in combats.

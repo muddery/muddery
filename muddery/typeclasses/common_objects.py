@@ -146,10 +146,12 @@ class MudderyFood(MudderyCommonObject):
         used = number
         if used > self.db.number:
             used = self.db.number
-            
-        increments = self.custom_attributes_handler.all().copy()
-        for key in increments:
-            increments[key] *= used
+
+        increments = {}
+        for key in self.custom_attributes_handler.all():
+            value = getattr(self.cattr, key) * used
+            if value:
+                increments[key] = value
 
         changes = user.change_status(increments)
         user.show_status()
