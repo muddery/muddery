@@ -56,7 +56,7 @@ var frames_dict = {
                       	 	 controller:	"MudderyMap",},
                       	 	                       	 
     "message.html":			{scripts: 		["../controllers/base_controller.js",
-                      						 "../controllers/message.js",],
+                      						 "../controllers/muddery_message.js",],
                       	 	 controller:	"MudderyMessage",},
                       	 	 
     "new_char.html":		{scripts: 		["../controllers/base_controller.js",

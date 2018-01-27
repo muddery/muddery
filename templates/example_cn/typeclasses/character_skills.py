@@ -6,15 +6,8 @@ actions of a skill.
 
 """
 
-import time
-from django.conf import settings
-from evennia.utils import logger
-from muddery.typeclasses.objects import MudderyObject
 from muddery.typeclasses.character_skills import MudderySkill
 from muddery.utils.localized_strings_handler import _
-from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.utils.utils import get_class
-from muddery.statements.statement_handler import STATEMENT_HANDLER
 
 
 class Skill(MudderySkill):

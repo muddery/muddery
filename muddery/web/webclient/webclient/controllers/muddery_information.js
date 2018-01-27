@@ -42,10 +42,11 @@ MudderyInformation.prototype.setInfo = function(name, icon) {
     $("#name").text(name);
     if (icon) {
         var url = $$.settings.resource_url + icon;
-        $("#obj_icon").attr("src", url);
+        $("#obj_icon").attr("src", url)
+                      .show();
     }
     else {
-        $("#obj_icon").attr("src", "");
+        $("#obj_icon").hide();
     }
 }
 

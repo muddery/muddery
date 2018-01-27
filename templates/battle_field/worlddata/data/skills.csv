@@ -1,7 +1,7 @@
 key,name,typeclass,desc,message,cd,passive,function
-skill_normal_hit,普通攻击,CLASS_SKILL,攻击敌人，伤害一般。,{c%c{n攻击了%t，造成了%e点伤害。,1,0,hit(1)
-skill_dunt,重击,CLASS_SKILL,攻击敌人，伤害较高。,{c%c{n对%t奋力一击，造成了%e点伤害。,1.5,0,hit(2)
-skill_normal_heal,普通治疗,CLASS_SKILL,治疗自己，效果一般。,{c%c{n治疗了自己，恢复了%e点生命。,5,0,heal(10)
-skill_powerful_heal,强效治疗,CLASS_SKILL,治疗自己，效果较好。,{c%c{n治疗自己，恢复了许多。,7.5,0,heal(20)
+skill_normal_hit,普通攻击,CLASS_SKILL,攻击敌人，伤害一般。,{c%c{n攻击了%t。,1,0,hit(1)
+skill_dunt,重击,CLASS_SKILL,攻击敌人，伤害较高。,{c%c{n对%t奋力一击。,1.5,0,hit(2)
+skill_normal_heal,普通治疗,CLASS_SKILL,治疗自己，效果一般。,{c%c{n治疗自己。,5,0,heal(10)
+skill_powerful_heal,强效治疗,CLASS_SKILL,治疗自己，效果较好。,{c%c{n治疗自己。,7.5,0,heal(20)
 skill_strong_body,强壮体魄,CLASS_SKILL,被动技能，提高最大生命值。,,0,1,max_hp(20)
-skill_escape,逃跑,CLASS_SKILL,逃之夭夭。,,1,0,escape(0.75)
+skill_escape,逃跑,CLASS_SKILL,逃之夭夭。,{c%c{n想要逃跑。,1,0,escape(0.75)

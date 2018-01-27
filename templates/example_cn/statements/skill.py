@@ -41,9 +41,6 @@ class FuncHit(StatementFunction):
         increments = {"hp": -damage}
         changes = self.obj.change_status(increments)
 
-        # characters' status
-        self.obj.combat_dirty = True
-
         # send skill result
         return _("Hit %s by %d points.") % (self.obj.get_name(), int(-changes["hp"]))
 

@@ -42,10 +42,10 @@ class FuncEscape(StatementFunction):
 
         # send skill's result to the combat handler manually
         # before the handler is removed from the character
-        combat_handler.msg_all({"skill_cast": {"caller": self.caller,
-                                               "target": self.obj,
+        combat_handler.msg_all({"skill_cast": {"caller": self.caller.get_name(),
+                                               "target": self.obj.get_name(),
                                                "skill": self.key,
-                                               "cast": _("%(c)s tried to escape." % self.caller.get_name()),
+                                               "cast": _("{c%s{n tried to escape.") % self.caller.get_name(),
                                                "result": _("Succeeded!")}})
 
         combat_handler.skill_escape(self.caller)

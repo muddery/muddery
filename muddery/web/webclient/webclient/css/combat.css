@@ -8,6 +8,10 @@
     text-align: center;
 }
 
+#status_bar {
+    margin: 10px 0px 0px 0px;
+}
+
 #messages {
     overflow-x: hidden;
     overflow-y: auto;

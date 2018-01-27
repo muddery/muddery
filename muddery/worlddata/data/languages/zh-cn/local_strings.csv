@@ -84,7 +84,7 @@ category,origin,local
 ,"Give Up","放弃"
 ,"You are attacking {c%s{n! You are in combat.","你正在攻击{c%s{n！你进入了战斗。"
 ,"{c%s{n is attacking you! You are in combat.","{c%s{n正在攻击你！你进入了战斗。"
-,"%(c)s tried to escape. ","%(c)s想要逃跑。"
+,"{c%s{n tried to escape.","{c%s{n想要逃跑。"
 ,"%s hitted %s.","%s打了%s。"
 ,"%s lost %s HPs.","%s损失了%s点生命。"
 ,"%s healed %s HPs.","%s治疗了%s点生命。"

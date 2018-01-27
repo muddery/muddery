@@ -9,7 +9,7 @@
 
 .exit_table {
     line-height: 1;
-    background: #333;
+    background-color: rgba(0, 0, 0, 0.2);
     border-width: 1px;
     border-color: #666;
     border-style: solid;
