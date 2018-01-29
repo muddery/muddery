@@ -185,7 +185,7 @@ class FormView(object):
         Returns:
             HttpResponse
         """
-        if not self.valid:
+        if not self.is_valid():
             raise MudderyError("Invalid form: %s." % self.form_name)
 
         # Query data.
@@ -225,6 +225,8 @@ class FormView(object):
         Returns:
             HttpResponse
         """
+        self.parse_request()
+
         try:
             # Back to record list.
             # Parse list's url from the request path.
@@ -246,7 +248,7 @@ class FormView(object):
         Returns:
             HttpResponse
         """
-        if not self.valid:
+        if not self.is_valid():
             raise MudderyError("Invalid form: %s." % self.form_name)
 
         # Delete record.

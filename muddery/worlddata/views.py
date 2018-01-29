@@ -25,6 +25,8 @@ from muddery.worlddata.editor.single_form_view import SingleFormView
 from muddery.worlddata.editor.relative_view import RelativeView
 from muddery.worlddata.editor.dialogue_view import DialogueView
 from muddery.worlddata.editor.fixed_form_view import FixedFormView
+from muddery.worlddata.editor.room_list_view import RoomListView
+from muddery.worlddata.editor.room_form_view import RoomFormView
 from muddery.worlddata.editor.dialogue_sentence_view import DialogueSentenceView
 from muddery.worlddata.editor.dialogue_chain_view import DialogueChainView
 from muddery.worlddata.editor.dialogue_chain_image import DialogueChainImage
@@ -423,7 +425,9 @@ def get_page(request):
                    "equipment_attributes_info",
                    "food_attributes_info"}
 
-    if form_name in fixed_pages:
+    if form_name == "world_rooms":
+        view = RoomListView(form_name, request)
+    elif form_name in fixed_pages:
         view = FixedPageView(form_name, request)
     else:
         view = PageView(form_name, request)
@@ -470,6 +474,8 @@ def get_view(request):
         view = DialogueSentenceView(form_name, request)
     elif form_name == "dialogue_relations":
         view = DialogueChainView(form_name, request)
+    elif form_name == "world_rooms":
+        view = RoomFormView(form_name, request)
     else:
         view = FormView(form_name, request)
 
