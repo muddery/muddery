@@ -812,8 +812,8 @@ MudderyMain.prototype.onPuppet = function(data) {
 	data_handler.character_dbref = data["dbref"];
 	data_handler.character_name = data["name"];
 
-	this.setInfo(data["name"], data["icon"]);
 	this.showPuppet();
+	this.setInfo(data["name"], data["icon"]);
 
 	this.puppet = true;
 }
