@@ -1235,7 +1235,7 @@ MudderyMain.prototype.setChannels = function(channels) {
 				.removeClass("dropdown-item")
 				.addClass("first-dropdown-item");
 
-			controller._message_type = key;
+			controller.message_type = key;
 			$("#msg_select").text(text);
 			
 			first = false;
@@ -1273,7 +1273,7 @@ MudderyMain.prototype.showMsgTypes = function() {
  * Event when select a message type.
  */
 MudderyMain.prototype.selectMsgType = function(caller) {
-	controller._message_type = $(caller).data("key");
+	controller.message_type = $(caller).data("key");
 	$("#msg_select").text($(caller).text());
 
 	$("#msg_type_menu").hide();
@@ -1282,6 +1282,6 @@ MudderyMain.prototype.selectMsgType = function(caller) {
 
 function refreshWaitingTime() {
     var current_time = new Date().getTime();
-    var total_time = Math.floor((current_time - controller._waiting_begin) / 1000);
+    var total_time = Math.floor((current_time - controller.waiting_begin) / 1000);
     $("#prompt_queue").text($$("QUEUE: ") + utils.time_to_string(total_time));
 }
