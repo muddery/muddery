@@ -98,7 +98,6 @@ MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 		item.find(".div_name")
 			.data("dbref", obj["dbref"]);
 
-		var goods_name = $$.text2html.parseHtml(obj["name"]);
 		item.find(".goods_name")
 			.html(obj["name"]);
 
@@ -118,5 +117,8 @@ MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 			
 		item.find(".unit")
 			.text(obj["unit"]);
+
+		item.find(".goods_desc")
+			.text($$.text2html.parseHtml(obj["desc"]));
 	}
 }

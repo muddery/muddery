@@ -196,6 +196,7 @@ input[type=checkbox], input[type=radio] {
 
 a {
     color: #6bf;
+    cursor: pointer;
 }
 
 a:hover {
