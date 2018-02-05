@@ -91,6 +91,8 @@ def main():
                         help="Start evennia with alternative settings file in gamedir/server/conf/.")
     parser.add_argument('--upgrade', nargs='?', const='', dest='upgrade', metavar="[template]",
                         help="Upgrade a game directory 'game_name' to the latest version.")
+    parser.add_argument('--loaddata', action='store_true', dest='loaddata', default=False,
+                        help="Load local data from the worlddata folder.")
     parser.add_argument("option", nargs='?', default="noop",
                         help="Operational mode: 'start', 'stop' or 'restart'.")
     parser.add_argument("service", metavar="component", nargs='?', default="all",
@@ -162,6 +164,21 @@ def main():
             UPGRADE_HANDLER.upgrade_game(gamedir, template, configs.MUDDERY_LIB)
         except Exception, e:
             print("Upgrade failed: %s" % e)
+
+        sys.exit()
+    elif args.loaddata:
+        # load local data
+        try:
+            print("Importing local data.")
+
+            gamedir = os.path.abspath(configs.CURRENT_DIR)
+            os.chdir(gamedir)
+            evennia_launcher.init_game_directory(gamedir, check_db=False)
+
+            import_local_data()
+            print("Import local data success.")
+        except Exception, e:
+            print("Import local data error: %s" % e)
 
         sys.exit()
 
