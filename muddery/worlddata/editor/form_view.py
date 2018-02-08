@@ -42,7 +42,7 @@ class FormView(object):
         # initialize values
         self.valid = None
         self.form_class = None
-        self.data = None
+        self.form = None
         self.page = None
         self.record = None
         self.key = None
@@ -96,20 +96,20 @@ class FormView(object):
         if not self.valid:
             raise MudderyError("Invalid form: %s." % self.form_name)
 
-        self.data = None
+        self.form = None
         self.key = None
         if self.record:
             try:
                 # Query record's data.
                 instance = self.form_class.Meta.model.objects.get(pk=self.record)
-                self.data = self.form_class(instance=instance)
+                self.form = self.form_class(instance=instance)
                 self.key = getattr(instance, "key", None)
             except Exception, e:
-                self.data = None
+                self.form = None
 
-        if not self.data:
+        if not self.form:
             # Get empty data.
-            self.data = self.form_class()
+            self.form = self.form_class()
 
     def get_context(self):
         """
@@ -122,11 +122,11 @@ class FormView(object):
             raise MudderyError("Invalid form: %s." % self.form_name)
 
         # Query data.
-        if not self.data:
+        if not self.form:
             self.query_view_data()
 
         verbose_name = self.form_class.Meta.model._meta.verbose_name_plural
-        context = {"data": self.data,
+        context = {"data": self.form,
                    "title": verbose_name,
                    "desc": getattr(self.form_class.Meta, "desc", verbose_name),
                    "can_delete": (self.record is not None)}
@@ -163,20 +163,20 @@ class FormView(object):
         if not self.valid:
             raise MudderyError("Invalid form: %s." % self.form_name)
 
-        self.data = None
+        self.form = None
         self.key = None
         if self.record:
             try:
                 # Query existing record's data.
                 instance = self.form_class.Meta.model.objects.get(pk=self.record)
-                self.data = self.form_class(self.request_data, self.files, instance=instance)
+                self.form = self.form_class(self.request_data, self.files, instance=instance)
                 self.key = getattr(instance, "key", None)
             except Exception, e:
-                self.data = None
+                self.form = None
 
-        if not self.data:
+        if not self.form:
             # Create new data.
-            self.data = self.form_class(self.request_data, self.files)
+            self.form = self.form_class(self.request_data, self.files)
 
     def submit_form(self):
         """
@@ -189,12 +189,12 @@ class FormView(object):
             raise MudderyError("Invalid form: %s." % self.form_name)
 
         # Query data.
-        if not self.data:
+        if not self.form:
             self.query_submit_data()
 
         # Save data
-        if self.data.is_valid():
-            instance = self.data.save()
+        if self.form.is_valid():
+            instance = self.form.save()
             self.record = instance.pk
 
             try:

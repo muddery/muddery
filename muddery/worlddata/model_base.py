@@ -382,9 +382,11 @@ class world_exits(models.Model):
 class exit_locks(models.Model):
     "Locked exit's additional data"
 
-    # The key of a world exit.
-    # related exit
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    # exit lock's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+    
+    # related exit's key
+    relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)
 
     # condition of the lock
     unlock_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
@@ -404,6 +406,10 @@ class exit_locks(models.Model):
         verbose_name = "Exit Lock"
         verbose_name_plural = "Exit Locks"
 
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
+
 
 # ------------------------------------------------------------
 #
@@ -413,9 +419,11 @@ class exit_locks(models.Model):
 class two_way_exits(models.Model):
     "Two way exit's additional data"
 
-    # The key of a world exit.
-    # related exit
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    # exit lock's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+    
+    # related exit's key
+    relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)
 
     # reverse exit's name
     reverse_name = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -425,6 +433,11 @@ class two_way_exits(models.Model):
         abstract = True
         verbose_name = "Two Way Exit"
         verbose_name_plural = "Two Way Exits"
+
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
+
 
 # ------------------------------------------------------------
 #
@@ -482,9 +495,11 @@ class world_objects(models.Model):
 class object_creators(models.Model):
     "Players can get new objects from an object_creator."
 
-    # The key of a world object.
-    # related object
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    # object creator's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+    
+    # related object's key
+    relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)
 
     # loot's verb
     loot_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -497,6 +512,10 @@ class object_creators(models.Model):
         abstract = True
         verbose_name = "Object Creator"
         verbose_name_plural = "Object Creators"
+
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
 
 
 # ------------------------------------------------------------

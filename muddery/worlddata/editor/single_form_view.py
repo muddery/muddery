@@ -38,20 +38,20 @@ class SingleFormView(FormView):
         if not self.valid:
             raise MudderyError("Invalid form: %s." % self.form_name)
 
-        self.data = None
+        self.form = None
         self.key = None
 
         try:
             # Query the only data.
             instance = self.form_class.Meta.model.objects.get()
-            self.data = self.form_class(instance=instance)
+            self.form = self.form_class(instance=instance)
             self.key = getattr(instance, "key", None)
         except Exception, e:
-            self.data = None
+            self.form = None
 
-        if not self.data:
+        if not self.form:
             # Get empty data.
-            self.data = self.form_class()
+            self.form = self.form_class()
 
     def query_submit_data(self):
         """
@@ -63,20 +63,20 @@ class SingleFormView(FormView):
         if not self.valid:
             raise MudderyError("Invalid form: %s." % self.form_name)
 
-        self.data = None
+        self.form = None
         self.key = None
 
         try:
             # Query the only data.
             instance = self.form_class.Meta.model.objects.get()
-            self.data = self.form_class(self.request_data, instance=instance)
+            self.form = self.form_class(self.request_data, instance=instance)
             self.key = getattr(instance, "key", None)
         except Exception, e:
-            self.data = None
+            self.form = None
 
-        if not self.data:
+        if not self.form:
             # Create new data.
-            self.data = self.form_class(self.request_data)
+            self.form = self.form_class(self.request_data)
 
     def add_form(self):
         """

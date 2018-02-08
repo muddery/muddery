@@ -60,14 +60,16 @@
                 {% for data in relative_data %}
                     {% for item in data.data %}
                         {% ifnotequal item.name "key" %}
-                        <div class="form-row {{ data.typeclass }}">
-                            {{ item.label_tag }}{{ item }}
-                            {% if item.help_text %}
-                            <br><br>
-                            <ul class="helplist"><li>{{ item.help_text }}</li></ul>
-                            {% endif %}
-                            {{ item.errors }}
-                        </div>
+                            {% ifnotequal item.name "relation" %}
+                            <div class="form-row {{ data.typeclass }}">
+                                {{ item.label_tag }}{{ item }}
+                                {% if item.help_text %}
+                                <br><br>
+                                <ul class="helplist"><li>{{ item.help_text }}</li></ul>
+                                {% endif %}
+                                {{ item.errors }}
+                            </div>
+                            {% endifnotequal %}
                         {% endifnotequal %}
                     {% endfor %}
                 {% endfor %}
