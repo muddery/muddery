@@ -5,6 +5,8 @@
  */
 function MudderyInventory() {
 	BaseController.call(this);
+
+	this.paginator = new Paginator("#inventory_wrapper");
 }
 
 MudderyInventory.prototype = prototype(BaseController.prototype);
@@ -24,6 +26,7 @@ MudderyInventory.prototype.resetLanguage = function() {
  */
 MudderyInventory.prototype.bindEvents = function() {
 	this.onClick("#inventory_items", ".obj_name", this.onLook);
+	this.on(window, "resize", this.onResize);
 }
             
 /*
@@ -32,6 +35,14 @@ MudderyInventory.prototype.bindEvents = function() {
 MudderyInventory.prototype.onLook = function(element) {
     var dbref = $(element).data("dbref");
     $$.commands.doLook(dbref);
+}
+
+/*
+ * Event then the window resizes.
+ */
+MudderyInventory.prototype.onResize = function(element) {
+	var height = $(window).innerHeight() - $("#inventory_wrapper").offset().top - 16;
+	this.paginator.tableHeight(height);
 }
 
 /*
@@ -65,4 +76,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
 
         item.find(".obj_desc").html($$.text2html.parseHtml(obj["desc"]));
     }
+
+    var height = $(window).innerHeight() - $("#inventory_wrapper").offset().top - 16;
+	this.paginator.refresh(height);
 }

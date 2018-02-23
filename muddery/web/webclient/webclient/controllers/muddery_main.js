@@ -902,14 +902,25 @@ MudderyMain.prototype.setPopupSize = function(dialog) {
 		return;
 	}
 
-	frame.innerWidth(content.width());
-	frame.height(0);
-	
-	var frame_body = frame[0].contentWindow.document.body;
-	frame.height(frame_body.scrollHeight);
-
-	// model dialogue
+	var height = 0;
 	var win_h = $(window).innerHeight();
+		
+	frame.innerWidth(content.width());
+	if (frame.attr("id") == "frame_shop") {
+		height = win_h * 0.95;
+	}
+	else {
+		frame.height(0);
+	
+		var frame_body = frame[0].contentWindow.document.body;	
+		height = frame_body.scrollHeight;
+		var max_height = win_h * 0.95;
+		if (height > max_height) {
+			height = max_height;
+		}
+	}
+	
+	frame.height(height);	
 	dialog.css("top", (win_h - dialog.height()) / 2);
 }
 

@@ -377,3 +377,8 @@ a:focus {
     float: right;
     display: inline;
 }
+
+th {
+	white-space: nowrap;
+	text-align: center;
+}

@@ -7,6 +7,7 @@ function MudderyShop() {
 	BaseController.call(this);
 	
 	this.goods = [];
+	this.paginator = new Paginator("#goods_wrapper");
 }
 
 MudderyShop.prototype = prototype(BaseController.prototype);
@@ -26,7 +27,8 @@ MudderyShop.prototype.resetLanguage = function() {
  */
 MudderyShop.prototype.bindEvents = function() {
 	this.onClick("#close_box", this.onClose);
-	this.onClick("#goods_list", ".div_name", this.onLook);
+	this.onClick("#goods_list", ".goods_name", this.onLook);
+	this.on(window, "resize", this.onResize);
 }
 	
 /*
@@ -57,6 +59,14 @@ MudderyShop.prototype.onLook = function(element) {
 }
 
 /*
+ * Event then the window resizes.
+ */
+MudderyShop.prototype.onResize = function(element) {
+	var height = $(window).innerHeight() - $("#goods_wrapper").offset().top - 16;
+	this.paginator.tableHeight(height);
+}
+
+/*
  * Set shop's data.
  */
 MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
@@ -81,7 +91,6 @@ MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 	// clear shop
 	this.clearElements("#goods_list");
 	var template = $("#goods_list>.template");	
-
 	// set goods
 	for (var i in this.goods) {
 		var obj = this.goods[i];
@@ -95,22 +104,14 @@ MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 			item.find(".obj_icon").hide();
 		}
 
-		item.find(".div_name")
-			.data("dbref", obj["dbref"]);
-
+		var goods_name = obj["name"];
+		if (obj["number"] > 1) {
+			goods_name += "×" + obj["number"];
+		}
+		
 		item.find(".goods_name")
-			.html(obj["name"]);
-
-		if (obj["number"] == 1) {
-			item.find(".number_mark")
-				.hide();
-		}
-		else {
-			item.find(".number_mark")
-				.show();
-			item.find(".goods_number")
-				.text(obj["number"]);
-		}
+			.data("dbref", obj["dbref"])
+			.html(goods_name);
 
 		item.find(".price")
 			.text(obj["price"]);
@@ -121,4 +122,7 @@ MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 		item.find(".goods_desc")
 			.text($$.text2html.parseHtml(obj["desc"]));
 	}
+
+	var height = $(window).innerHeight() - $("#goods_wrapper").offset().top - 16;
+	this.paginator.refresh(height);
 }

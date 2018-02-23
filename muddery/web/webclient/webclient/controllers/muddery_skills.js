@@ -5,6 +5,8 @@
  */
 function MudderySkills() {
 	BaseController.call(this);
+
+    this.paginator = new Paginator("#skills_wrapper");
 }
 
 MudderySkills.prototype = prototype(BaseController.prototype);
@@ -23,6 +25,7 @@ MudderySkills.prototype.resetLanguage = function() {
  */
 MudderySkills.prototype.bindEvents = function() {
 	this.onClick("#skill_list", ".skill_name", this.onLook);
+	this.on(window, "resize", this.onResize);
 }
 
 /*
@@ -31,6 +34,14 @@ MudderySkills.prototype.bindEvents = function() {
 MudderySkills.prototype.onLook = function(element) {
     var dbref = $(element).data("dbref");
     $$.commands.doLook(dbref);
+}
+
+/*
+ * Event then the window resizes.
+ */
+MudderySkills.prototype.onResize = function(element) {
+	var height = $(window).innerHeight() - $("#skills_wrapper").offset().top - 16;
+	this.paginator.tableHeight(height);
 }
 
 /*
@@ -59,4 +70,7 @@ MudderySkills.prototype.setSkills = function(skills) {
 		var desc = $$.text2html.parseHtml(obj["desc"]);
         item.find(".skill_desc").html(desc);
 	}
+
+	var height = $(window).innerHeight() - $("#skills_wrapper").offset().top - 16;
+	this.paginator.refresh(height);
 }

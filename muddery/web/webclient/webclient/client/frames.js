@@ -34,7 +34,8 @@ var frames_dict = {
                       						 "../controllers/muddery_goods.js",],
                       	 	 controller:	"MudderyGoods",},
                       	 	 
-    "honours.html":	  	  	{scripts: 		["../controllers/base_controller.js",
+    "honours.html":	  	  	{scripts: 		["../utils/paginator.js",
+    										 "../controllers/base_controller.js",
                       						 "../controllers/muddery_honours.js",],
                       	 	 controller:	"MudderyHonours",},
                       	 	 
@@ -42,7 +43,8 @@ var frames_dict = {
                       						 "../controllers/muddery_information.js",],
                       	 	 controller:	"MudderyInformation",},
                       	 	 
-    "inventory.html":		{scripts: 		["../controllers/base_controller.js",
+    "inventory.html":		{scripts: 		["../utils/paginator.js",
+                                             "../controllers/base_controller.js",
                       						 "../controllers/muddery_inventory.js",],
                       	 	 controller:	"MudderyInventory",},
                       	 	 
@@ -67,7 +69,8 @@ var frames_dict = {
                       						 "../controllers/muddery_object.js",],
                       	 	 controller:	"MudderyObject",},
                       	 	                       	 
-    "quests.html":			{scripts: 		["../controllers/base_controller.js",
+    "quests.html":			{scripts: 		["../utils/paginator.js",
+    										 "../controllers/base_controller.js",
                       						 "../controllers/muddery_quests.js",],
                       	 	 controller:	"MudderyQuests",},
                       	 	 
@@ -87,11 +90,13 @@ var frames_dict = {
                       						 "../controllers/muddery_select_char.js",],
                       	 	 controller:	"MudderySelectChar",},
                       	 	 
-	"shop.html": 			{scripts: 		["../controllers/base_controller.js",
+	"shop.html": 			{scripts: 		["../utils/paginator.js",
+	                                         "../controllers/base_controller.js",
                       						 "../controllers/muddery_shop.js",],
                       	 	 controller:	"MudderyShop",},
                       	 	                 
-	"skills.html": 			{scripts: 		["../controllers/base_controller.js",
+	"skills.html": 			{scripts: 		["../utils/paginator.js",
+	                                         "../controllers/base_controller.js",
                       						 "../controllers/muddery_skills.js",],
                       	 	 controller:	"MudderySkills",},                      						 
 }

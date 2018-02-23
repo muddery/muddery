@@ -39,4 +39,7 @@ Skills.prototype.setSkills = function(skills) {
 		var desc = $$.text2html.parseHtml(obj["desc"]);
         item.find(".skill_desc").html(desc);
 	}
+
+	var height = $(window).innerHeight() - $("#skills_wrapper").offset().top - 16;
+	this.paginator.refresh(height);
 }

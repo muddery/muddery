@@ -19,8 +19,8 @@
                 <img id="img_icon" src="" />
             </div>
             <div id="shop_desc"></div>
-        	<div>
-        		<table class="tab_shop">
+        	<div id="goods_wrapper">
+        		<table id="goods_table" class="tab_shop">
         			<thead>
         				<tr>
         					<th id="header_name">NAME</th>
@@ -34,11 +34,7 @@
 								<center class="goods_icon">
 									<img class="img_icon" src="" />
 								</center>
-								<a class="div_name">
-									<span class="goods_name"></span>
-									<span class="number_mark">×</span>
-									<span class="goods_number"></span>
-								</a>
+								<a class="goods_name"></a>
 							</td>
 							<td class="goods_price">
 								<span class="price"></span>
@@ -49,8 +45,6 @@
 					</tbody>
         		</table>
         	</div>
-        </div>
-        <div id="popup_footer" class="modal-footer">
         </div>
 
         <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>

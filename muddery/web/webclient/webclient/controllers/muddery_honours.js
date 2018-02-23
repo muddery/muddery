@@ -7,6 +7,7 @@ function MudderyHonours() {
 	BaseController.call(this);
 
 	this.min_honour_level = 1;
+	this.paginator = new Paginator("#honours_wrapper");
 }
 
 MudderyHonours.prototype = prototype(BaseController.prototype);
@@ -30,6 +31,7 @@ MudderyHonours.prototype.resetLanguage = function() {
 MudderyHonours.prototype.bindEvents = function() {
     this.onClick("#button_queue", this.onQueueUpCombat);
     this.onClick("#button_quit", this.onQuitCombatQueue);
+	this.on(window, "resize", this.onResize);
 }
 
 /*
@@ -51,6 +53,14 @@ MudderyHonours.prototype.onQueueUpCombat = function(element) {
 MudderyHonours.prototype.onQuitCombatQueue = function(element) {
 	this.quitCombatQueue();
     $$.commands.quitCombatQueue();
+}
+
+/*
+ * Event then the window resizes.
+ */
+MudderyHonours.prototype.onResize = function(element) {
+	var height = $(window).innerHeight() - $("#honours_wrapper").offset().top - 16;
+	this.paginator.tableHeight(height);
 }
 
 /*
@@ -80,6 +90,9 @@ MudderyHonours.prototype.setRankings = function(rankings) {
         item.find(".character_honour")
             .text(data["honour"]);
     }
+    
+    var height = $(window).innerHeight() - $("#honours_wrapper").offset().top - 16;
+	this.paginator.refresh(height);
 }
 
 /*
