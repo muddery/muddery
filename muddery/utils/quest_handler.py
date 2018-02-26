@@ -61,10 +61,9 @@ class QuestHandler(object):
         
         It will be called when quests' owner will be deleted.
         """
-        for quest in self.current_quests:
-            quest.delete()
+        for quest_key in self.current_quests:
+            self.current_quests[quest_key].delete()
         self.current_quests = []
-        
 
     def give_up(self, quest_key):
         """
@@ -83,9 +82,9 @@ class QuestHandler(object):
         if quest_key not in self.current_quests:
             raise MudderyError(_("Can not find this quest."))
 
+        self.current_quests[quest_key].delete()
         del(self.current_quests[quest_key])
 
-        self.completed_quests.add(quest_key)
         if quest_key in self.completed_quests:
             self.completed_quests.remove(quest_key)
 
@@ -114,6 +113,7 @@ class QuestHandler(object):
         self.current_quests[quest_key].complete()
 
         # Delete the quest.
+        self.current_quests[quest_key].delete()
         del (self.current_quests[quest_key])
 
         self.completed_quests.add(quest_key)

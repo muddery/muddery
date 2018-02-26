@@ -499,10 +499,6 @@ class object_creators(models.Model):
         verbose_name = "Object Creator"
         verbose_name_plural = "Object Creators"
 
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
-
 
 # ------------------------------------------------------------
 #
