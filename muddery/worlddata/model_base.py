@@ -20,7 +20,7 @@ re_attribute_key = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 
 def auto_generate_key(model):
     if not model.key:
-        index = 0
+        index = 1
         if model.id is not None:
             # Get this record's id.
             index = model.id
@@ -236,7 +236,7 @@ class world_areas(models.Model):
     "The game map is composed by areas."
 
     # area's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
     
     # The key of a area typeclass.
     # area's typeclass
@@ -382,11 +382,8 @@ class world_exits(models.Model):
 class exit_locks(models.Model):
     "Locked exit's additional data"
 
-    # exit lock's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-    
     # related exit's key
-    relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # condition of the lock
     unlock_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
@@ -406,10 +403,6 @@ class exit_locks(models.Model):
         verbose_name = "Exit Lock"
         verbose_name_plural = "Exit Locks"
 
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
-
 
 # ------------------------------------------------------------
 #
@@ -419,11 +412,8 @@ class exit_locks(models.Model):
 class two_way_exits(models.Model):
     "Two way exit's additional data"
 
-    # exit lock's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-    
     # related exit's key
-    relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # reverse exit's name
     reverse_name = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -433,10 +423,6 @@ class two_way_exits(models.Model):
         abstract = True
         verbose_name = "Two Way Exit"
         verbose_name_plural = "Two Way Exits"
-
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
 
 
 # ------------------------------------------------------------

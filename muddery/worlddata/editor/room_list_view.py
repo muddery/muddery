@@ -83,7 +83,7 @@ class RoomListView(PageView):
             records = model.objects.all()
 
         # Get page size and page number.
-        page_size = 5
+        page_size = 20
         page_number = self.request_data.get("_page", 1)
 
         # Divide pages.

@@ -131,7 +131,6 @@ class RelativeView(FormView):
                 if self.form.is_valid():
                     instance = self.form.save()
                     key = instance.key
-                    print("key: %s" % key)
 
                     # set relative form data
                     form_name = self.relative_form_names[typeclass]
@@ -139,16 +138,16 @@ class RelativeView(FormView):
                     relative_form = None
 
                     data = dict(self.request_data)
-                    for key in data:
-                        if data[key]:
-                            data[key] = data[key][0]
+                    for data_key in data:
+                        if data[data_key]:
+                            data[data_key] = data[data_key][0]
 
                     try:
-                        relative_instance = relative_form_class.Meta.model.objects.get(relation=key)
+                        relative_instance = relative_form_class.Meta.model.objects.get(key=key)
                         relative_form = relative_form_class(data, instance=relative_instance)
                     except Exception, e:
                         # Add key
-                        data["relation"] = key
+                        data["key"] = key
                         relative_form = relative_form_class(data)
 
                     if relative_form.is_valid():
