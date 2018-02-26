@@ -20,7 +20,7 @@ re_attribute_key = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 
 def auto_generate_key(model):
     if not model.key:
-        index = 0
+        index = 1
         if model.id is not None:
             # Get this record's id.
             index = model.id
@@ -236,7 +236,7 @@ class world_areas(models.Model):
     "The game map is composed by areas."
 
     # area's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
     
     # The key of a area typeclass.
     # area's typeclass
@@ -382,8 +382,7 @@ class world_exits(models.Model):
 class exit_locks(models.Model):
     "Locked exit's additional data"
 
-    # The key of a world exit.
-    # related exit
+    # related exit's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # condition of the lock
@@ -413,8 +412,7 @@ class exit_locks(models.Model):
 class two_way_exits(models.Model):
     "Two way exit's additional data"
 
-    # The key of a world exit.
-    # related exit
+    # related exit's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # reverse exit's name
@@ -425,6 +423,7 @@ class two_way_exits(models.Model):
         abstract = True
         verbose_name = "Two Way Exit"
         verbose_name_plural = "Two Way Exits"
+
 
 # ------------------------------------------------------------
 #
@@ -482,9 +481,11 @@ class world_objects(models.Model):
 class object_creators(models.Model):
     "Players can get new objects from an object_creator."
 
-    # The key of a world object.
-    # related object
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    # object creator's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+    
+    # related object's key
+    relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)
 
     # loot's verb
     loot_verb = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -497,6 +498,10 @@ class object_creators(models.Model):
         abstract = True
         verbose_name = "Object Creator"
         verbose_name_plural = "Object Creators"
+
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
 
 
 # ------------------------------------------------------------

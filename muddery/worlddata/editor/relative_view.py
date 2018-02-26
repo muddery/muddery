@@ -15,7 +15,7 @@ class RelativeView(FormView):
     This object deal with forms and views with two db models.
     """
 
-    def __init__(self, form_name, request, relative_forms):
+    def __init__(self, form_name, request, relative_form_names):
         """
         Set form name and request.
 
@@ -29,8 +29,8 @@ class RelativeView(FormView):
         super(RelativeView, self).__init__(form_name, request)
 
         # set relative forms's names
-        self.relative_forms = relative_forms
-        self.relative_data = {}
+        self.relative_form_names = relative_form_names
+        self.relative_forms = {}
 
     def parse_request(self):
         """
@@ -45,7 +45,7 @@ class RelativeView(FormView):
         self.template_file = getattr(self.form_class.Meta, "form_template", "relative_form.html")
 
         # Check relative form's name.
-        for typeclass, form_name in self.relative_forms.iteritems():
+        for typeclass, form_name in self.relative_form_names.iteritems():
             try:
                 forms.Manager.get_form(form_name)
             except Exception, e:
@@ -65,21 +65,21 @@ class RelativeView(FormView):
         super(RelativeView, self).query_view_data()
 
         # Get relative form's data.
-        self.relative_data = {}
-        for typeclass, form_name in self.relative_forms.iteritems():
-            relative_class = forms.Manager.get_form(form_name)
-            data = None
+        self.relative_forms = {}
+        for typeclass, form_name in self.relative_form_names.iteritems():
+            relative_form_class = forms.Manager.get_form(form_name)
+            relative_form = None
             if self.key:
                 try:
-                    relative_instance = relative_class.Meta.model.objects.get(key=self.key)
-                    data = relative_class(instance=relative_instance)
+                    relative_instance = relative_form_class.Meta.model.objects.get(relation=self.key)
+                    relative_form = relative_form_class(instance=relative_instance)
                 except Exception, e:
-                    data = None
+                    relative_form = None
 
-            if not data:
-                data = relative_class()
+            if not relative_form:
+                relative_form = relative_form_class()
 
-            self.relative_data[typeclass] = data
+            self.relative_forms[typeclass] = relative_form
 
     def get_context(self):
         """
@@ -91,40 +91,13 @@ class RelativeView(FormView):
         context = super(RelativeView, self).get_context()
 
         # Set relative form's context.
-        relative_data = [({"typeclass": key, "data": self.relative_data[key]}) for key in self.relative_data]
-        relative_typeclasses = list(self.relative_forms)
+        relative_data = [({"typeclass": key, "data": self.relative_forms[key]}) for key in self.relative_forms]
+        relative_typeclasses = list(self.relative_form_names)
 
         context["relative_data"] = relative_data
         context["relative_typeclasses"] = relative_typeclasses
 
         return context
-
-    def query_submit_data(self):
-        """
-        Get db instance to submit a record.
-
-        Returns:
-            None
-        """
-        super(RelativeView, self).query_submit_data()
-
-        # Get relative form's data.
-        self.relative_data = {}
-        for typeclass, form_name in self.relative_forms.iteritems():
-            relative_class = forms.Manager.get_form(form_name)
-            data = None
-            if self.key:
-                try:
-                    relative_instance = relative_class.Meta.model.objects.get(key=self.key)
-                    data = relative_class(self.request_data, instance=relative_instance)
-                except Exception, e:
-                    data = None
-
-            if not data:
-                data = relative_class(self.request_data)
-
-            self.relative_data[typeclass] = data
-
 
     def submit_form(self):
         """
@@ -137,30 +110,50 @@ class RelativeView(FormView):
             raise MudderyError("Invalid form: %s." % self.form_name)
 
         # Query data.
-        if not self.data:
+        if not self.form:
             self.query_submit_data()
 
         # Validate
         saved = False
         typeclass = self.request_data["typeclass"]
-        if typeclass not in self.relative_data:
-            if self.data.is_valid():
+        if typeclass not in self.relative_form_names:
+            if self.form.is_valid():
                 with transaction.atomic():
-                    self.data.save()
+                    self.form.save()
                     # Keep old lock data, comment following codes.
                     # if lock_instance:
                     #     lock_instance.delete()
                     saved = True
         else:
-            # Prevent short cut.
-            base_valid = self.data.is_valid()
-            relative_valid = self.relative_data[typeclass].is_valid()
+            # Get relative form data.            
+            with transaction.atomic():
+                # Prevent short cut.
+                if self.form.is_valid():
+                    instance = self.form.save()
+                    key = instance.key
 
-            if base_valid and relative_valid:
-                with transaction.atomic():
-                    self.data.save()
-                    self.relative_data[typeclass].save()
-                    saved = True
+                    # set relative form data
+                    form_name = self.relative_form_names[typeclass]
+                    relative_form_class = forms.Manager.get_form(form_name)
+                    relative_form = None
+
+                    data = dict(self.request_data)
+                    for data_key in data:
+                        if data[data_key]:
+                            data[data_key] = data[data_key][0]
+
+                    try:
+                        relative_instance = relative_form_class.Meta.model.objects.get(key=key)
+                        relative_form = relative_form_class(data, instance=relative_instance)
+                    except Exception, e:
+                        # Add key
+                        data["key"] = key
+                        relative_form = relative_form_class(data)
+
+                    if relative_form.is_valid():
+                        relative_form.save()
+                        self.relative_forms[typeclass] = relative_form
+                        saved = True
 
         if saved and "_save" in self.request_data:
             # save and back
@@ -180,7 +173,7 @@ class RelativeView(FormView):
 
         # Delete relative data.
         if self.key:
-            for typeclass, form_name in self.relative_forms.iteritems():
+            for typeclass, form_name in self.relative_form_names.iteritems():
                 relative_class = forms.Manager.get_form(form_name)
                 try:
                     instance = relative_class.Meta.model.objects.get(key=self.key)

@@ -59,11 +59,12 @@ class RoomListView(PageView):
         try:
             area_records = DATA_SETS.world_areas.objects.all()
             areas = [{"key": a.key, "name": a.name + "(" + a.key + ")"} for a in area_records]
+            areas.append({"key": "", "name": "------------"})
         except:
             areas = []
 
         area = self.request_data.get("_area", None)
-        if not area and areas:
+        if area is None and areas:
             area = areas[0]["key"]
 
         # Get models and recoreds.
@@ -82,7 +83,7 @@ class RoomListView(PageView):
             records = model.objects.all()
 
         # Get page size and page number.
-        page_size = 5
+        page_size = 20
         page_number = self.request_data.get("_page", 1)
 
         # Divide pages.
