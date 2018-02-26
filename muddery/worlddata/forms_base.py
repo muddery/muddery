@@ -218,8 +218,13 @@ class WorldExitsForm(forms.ModelForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
-        objects = DATA_SETS.world_rooms.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        areas = DATA_SETS.world_areas.objects.all()
+        rooms = DATA_SETS.world_rooms.objects.all()
+        choices = []
+        for area in areas:
+            area_rooms = [(r.key, r.name + " (" + r.key + ")") for r in rooms if r.location == area.key]
+            if area_rooms:
+                choices.append((area.name, area_rooms))
         self.fields['location'] = forms.ChoiceField(choices=choices)
         self.fields['destination'] = forms.ChoiceField(choices=choices)
 
@@ -270,8 +275,13 @@ class WorldObjectsForm(forms.ModelForm):
         choices.append((objects.key, objects.name + " (" + objects.key + ")"))
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
-        objects = DATA_SETS.world_rooms.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        areas = DATA_SETS.world_areas.objects.all()
+        rooms = DATA_SETS.world_rooms.objects.all()
+        choices = []
+        for area in areas:
+            area_rooms = [(r.key, r.name + " (" + r.key + ")") for r in rooms if r.location == area.key]
+            if area_rooms:
+                choices.append((area.name, area_rooms))
         self.fields['location'] = forms.ChoiceField(choices=choices)
         
         choices = [("", "---------")]
@@ -296,8 +306,13 @@ class WorldNPCsForm(forms.ModelForm):
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         # NPC's location
-        objects = DATA_SETS.world_rooms.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        areas = DATA_SETS.world_areas.objects.all()
+        rooms = DATA_SETS.world_rooms.objects.all()
+        choices = []
+        for area in areas:
+            area_rooms = [(r.key, r.name + " (" + r.key + ")") for r in rooms if r.location == area.key]
+            if area_rooms:
+                choices.append((area.name, area_rooms))
         self.fields['location'] = forms.ChoiceField(choices=choices)
         
         # NPC's model

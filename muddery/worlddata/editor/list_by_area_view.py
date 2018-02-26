@@ -17,7 +17,7 @@ from muddery.worlddata.data_sets import DATA_SETS
 from worlddata import forms, models
 
 
-class RoomListView(PageView):
+class ListByAreaView(PageView):
     """
     This object deal with room's records list.
     """
@@ -37,7 +37,7 @@ class RoomListView(PageView):
             return False
 
         # Get template file's name form the request.
-        self.template_file = "room_list.html"
+        self.template_file = "list_by_area.html"
         return True
 
     def get_context(self):
@@ -79,7 +79,9 @@ class RoomListView(PageView):
         
         # Filter by area.
         if area:
-            records = model.objects.filter(location=area)
+            rooms = DATA_SETS.world_rooms.objects.filter(location=area)
+            rooms = [room.key for room in rooms]
+            records = model.objects.filter(location__in=rooms)
         else:
             records = model.objects.all()
 

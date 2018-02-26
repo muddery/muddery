@@ -27,6 +27,8 @@ from muddery.worlddata.editor.dialogue_view import DialogueView
 from muddery.worlddata.editor.fixed_form_view import FixedFormView
 from muddery.worlddata.editor.room_list_view import RoomListView
 from muddery.worlddata.editor.room_form_view import RoomFormView
+from muddery.worlddata.editor.list_by_area_view import ListByAreaView
+from muddery.worlddata.editor.form_of_area_view import FormOfAreaView
 from muddery.worlddata.editor.dialogue_sentence_view import DialogueSentenceView
 from muddery.worlddata.editor.dialogue_chain_view import DialogueChainView
 from muddery.worlddata.editor.dialogue_chain_image import DialogueChainImage
@@ -424,9 +426,15 @@ def get_page(request):
     fixed_pages = {"character_attributes_info",
                    "equipment_attributes_info",
                    "food_attributes_info"}
+                   
+    area_pages = {"world_exits",
+                  "world_objects",
+                  "world_npcs"}
 
     if form_name == "world_rooms":
         view = RoomListView(form_name, request)
+    elif form_name in area_pages:
+        view = ListByAreaView(form_name, request)
     elif form_name in fixed_pages:
         view = FixedPageView(form_name, request)
     else:
@@ -462,8 +470,14 @@ def get_view(request):
                    "equipment_attributes_info",
                    "food_attributes_info"}
 
+    area_forms = {"world_exits",
+                  "world_objects",
+                  "world_npcs"}
+
     if form_name in relative_forms:
         view = RelativeView(form_name, request, relative_forms[form_name])
+    elif form_name in area_forms:
+        view = FormOfAreaView(form_name, request)
     elif form_name in fixed_forms:
         view = FixedFormView(form_name, request)
     elif form_name == "game_settings":

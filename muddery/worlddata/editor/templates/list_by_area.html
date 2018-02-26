@@ -17,7 +17,7 @@
 <div>{{ desc }}</div>
 <div id="content-main">
     <div class="object-tools">
-        <span id="area_name">区域</span>
+        <span id="area_name">Area</span>
         <form action="#" method="post" id="area_form" onchange="submitArea()">
             {% csrf_token %}
             <input type="hidden" name="_form" value="{{ form }}" />
@@ -32,7 +32,7 @@
             {% csrf_token %}
             <input type="hidden" name="_form" value="{{ form }}" />
             <input type="hidden" name="_page" value="{{ page.number }}" />
-            <input type="submit" name="_add" value="添加 {{ title }}" class="add-box" />
+            <input type="submit" name="_add" value="Add {{ title }}" class="add-box" />
         </form>
         {% endif %}
     </div>
@@ -71,7 +71,7 @@
     <form action="" method="post">
         {% csrf_token %}
         <div class="submit-row">
-            <span class="page_list">页码:&nbsp;
+            <span class="page_list">Pages:&nbsp;
                 &gt;&gt;
                 {% for i in page_range %}
                     {% ifequal i page.number %}
@@ -82,7 +82,7 @@
                 {% endfor %}
                 &lt;&lt;
             </span>
-            <input type="submit" name="_back" value="返回" />
+            <input type="submit" name="_back" value="Back" />
         </div>
     </form>
 </div>

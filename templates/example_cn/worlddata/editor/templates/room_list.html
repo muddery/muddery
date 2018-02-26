@@ -17,7 +17,7 @@
 <div>{{ desc }}</div>
 <div id="content-main">
     <div class="object-tools">
-        <span id="area_name">Area</span>
+        <span id="area_name">区域</span>
         <form action="#" method="post" id="area_form" onchange="submitArea()">
             {% csrf_token %}
             <input type="hidden" name="_form" value="{{ form }}" />

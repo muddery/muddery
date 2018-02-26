@@ -7,10 +7,11 @@ from django import http
 from django.http import HttpResponseRedirect
 from evennia.utils import logger
 from muddery.worlddata.editor.form_view import FormView
+from muddery.worlddata.data_sets import DATA_SETS
 from worlddata import forms
 
 
-class RoomFormView(FormView):
+class FormOfAreaView(FormView):
     """
     This object deal with common forms and views.
     """
@@ -21,10 +22,10 @@ class RoomFormView(FormView):
         Returns:
             boolean: Parse success.
         """
-        result = super(RoomFormView, self).parse_request()
+        result = super(FormOfAreaView, self).parse_request()
 
         # Get template file's name.
-        self.template_file = "room_form.html"
+        self.template_file = "form_of_area.html"
 
         return result
 
@@ -35,10 +36,14 @@ class RoomFormView(FormView):
         Returns:
             context
         """
-        context = super(RoomFormView, self).get_context()
-        
-        area = self.request_data.get("location", None)
-        if not area:
+        context = super(FormOfAreaView, self).get_context()
+
+        area = None
+        try:
+            room_key = self.request_data.get("location")
+            room = DATA_SETS.world_rooms.objects.get(key=room_key)
+            area = room.location
+        except Exception, e:
             area = self.request_data.get("_area", None)
         if area:
             context["area"] = area
@@ -65,9 +70,14 @@ class RoomFormView(FormView):
                 if self.page:
                     args += "_page=" + str(self.page)
 
-                area = self.request_data.get("location", None)
-                if not area:
+                area = None
+                try:
+                    room_key = self.request_data.get("location")
+                    room = DATA_SETS.world_rooms.objects.get(key=room_key)
+                    area = room.location
+                except Exception, e:
                     area = self.request_data.get("_area", None)
+
                 if area:
                     if args:
                         args += "&"
