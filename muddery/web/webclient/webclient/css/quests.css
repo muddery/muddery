@@ -26,3 +26,7 @@
 	width: 30px;
 	height: 30px;
 }
+
+td>p {
+    margin: 0;
+}
