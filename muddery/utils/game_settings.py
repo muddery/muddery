@@ -76,6 +76,7 @@ class GameSettings(object):
                            "solo_mode": self.get("solo_mode"),
                            "map_scale": self.get("map_scale"),
                            "map_room_size": self.get("map_room_size"),
+                           "map_room_box": self.get("map_room_box"),
                            "min_honour_level": settings.MIN_HONOUR_LEVEL,}
         return client_settings
 
@@ -96,4 +97,5 @@ GAME_SETTINGS = GameSettings(DATA_SETS.game_settings.objects,
                               "default_player_character_key": "",
                               "map_scale": 75.0,
                               "map_room_size": 40.0,
+                              "map_room_box": False,
                               })

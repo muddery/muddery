@@ -154,6 +154,9 @@ class game_settings(models.Model):
                                       default=40.0,
                                       validators=[MinValueValidator(0.0)])
 
+    # Show room's box if it does not have an icon.
+    map_room_box = models.BooleanField(blank=True, default=False)
+
     class Meta:
         "Define Django meta options"
         abstract = True

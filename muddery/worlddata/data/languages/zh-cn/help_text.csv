@@ -13,6 +13,7 @@ help_game_settings,"default_player_home_key","玩家的默认位置，如果玩�
 help_game_settings,"default_player_character_key","默认选用的玩家角色。"
 help_game_settings,"map_room_size","在网页地图中房间方块的大小。"
 help_game_settings,"map_scale","地图比例尺寸。"
+help_game_settings,"map_room_box","对没有图标的房间是否需要在地图上画房间外框。"
 help_class_categories,"key","类别的标识，必须唯一。"
 help_class_categories,"name","类别的名称，必须唯一。"
 help_class_categories,"desc","详细信息。"

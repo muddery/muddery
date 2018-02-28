@@ -145,7 +145,7 @@ class MudderyReverseExit(MudderyExit):
             None
         """
         if hasattr(self.dfield, "destination"):
-            self.set_obj_destination(self.dfield.destination)
+            self.set_location(self.dfield.destination)
 
 
 class MudderyLockedExit(MudderyExit):

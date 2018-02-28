@@ -11,6 +11,9 @@ function MudderyMap() {
 
     // the size of a room
     this.room_size = 40;
+
+    // show room box if it does not have an icon
+    this.show_room_box = false;
 }
 
 MudderyMap.prototype = prototype(BaseController.prototype);
@@ -33,9 +36,10 @@ MudderyMap.prototype.onClose = function(element) {
 /*
  * Set map's configurations.
  */
-MudderyMap.prototype.setMap = function(scale, room_size) {
+MudderyMap.prototype.setMap = function(scale, room_size, show_room_box) {
     this.scale = scale;
     this.room_size = room_size;
+    this.show_room_box = show_room_box;
 }
 
 /*
@@ -220,25 +224,25 @@ MudderyMap.prototype.showMap = function(location) {
 					return d["icon"];
 				  });
 
-		/*
-		svg.selectAll()
-			.data(room_data.filter(function(d) {
-					// Draw rect to rooms without icon.
-					return !d["icon"];
-				  }))
-			.enter()
-			.append("rect")
-			.attr("x", function(d) {
-					return d["pos"][0] * scale - room_size / 2 + origin_x;
-				  })
-			.attr("y", function(d) {
-					return -d["pos"][1] * scale - room_size / 2 + origin_y;
-				  })
-			.attr("width", room_size)
-			.attr("height", room_size)
-			.attr("stroke", "grey")
-			.attr("stroke-width", 1);
-		*/
+		if (this.show_room_box) {
+            svg.selectAll()
+                .data(room_data.filter(function(d) {
+                        // Draw rect to rooms without icon.
+                        return !d["icon"];
+                      }))
+                .enter()
+                .append("rect")
+                .attr("x", function(d) {
+                        return d["pos"][0] * scale - room_size / 2 + origin_x;
+                      })
+                .attr("y", function(d) {
+                        return -d["pos"][1] * scale - room_size / 2 + origin_y;
+                      })
+                .attr("width", room_size)
+                .attr("height", room_size)
+                .attr("stroke", "grey")
+                .attr("stroke-width", 1);
+		}
 
 		svg.selectAll()
 			.data(room_data)
@@ -257,7 +261,7 @@ MudderyMap.prototype.showMap = function(location) {
 			.attr("text-anchor", "middle")
 			.attr("font-family", "sans-serif")
 			.attr("font-size", function(d, i) {
-					return (i == current_room_index) ? "16px" : "14px";
+					return (i == current_room_index) ? "14px" : "12px";
 				  })
 			.attr("fill", function(d, i) {
 					return (i == current_room_index) ? "white" : "#eee";

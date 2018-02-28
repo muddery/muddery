@@ -1168,7 +1168,7 @@ MudderyMain.prototype.setClient = function(settings) {
 	// map settings
 	var map_id = "#frame_map";
 	var map_ctrl = this.getFrameController(map_id);
-	map_ctrl.setMap(settings["map_scale"], settings["map_room_size"]);
+	map_ctrl.setMap(settings["map_scale"], settings["map_room_size"], settings["map_room_box"]);
 }
 
 /*
