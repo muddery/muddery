@@ -138,37 +138,41 @@ class MudderySkill(get_class("CLASS_BASE_OBJECT")):
                 cd: (dict) skill's cd
         """
         owner = self.db.owner
-        
+
+        message = {}
         not_available = self.check_available(passive)
         if not_available:
             message = {"cast": not_available}
         else:
             results = self.do_skill(target)
 
-            message = {"caller": owner.dbref,
-                       "skill": self.get_data_key(),
-                       "cast": self.cast_message(target)}
+            if not passive:
+                # set message
+                message = {"caller": owner.dbref,
+                           "skill": self.get_data_key(),
+                           "cast": self.cast_message(target)}
 
-            if target:
-                message["target"] = target.dbref
+                if target:
+                    message["target"] = target.dbref
 
-            if results:
-                message["result"] = " ".join(results)
+                if results:
+                    message["result"] = " ".join(results)
 
-            # set status
-            status = {}
+                # set status
+                status = {}
+                if owner.is_in_combat():
+                    for char in owner.ndb.combat_handler.get_all_characters():
+                        status[char.dbref] = char.get_combat_status()
+                elif owner.location:
+                    status[owner.dbref] = owner.get_combat_status()
+                message["status"] = status
+
+        if not passive and message:
+            # send message
             if owner.is_in_combat():
-                for char in owner.ndb.combat_handler.get_all_characters():
-                    status[char.dbref] = char.get_combat_status()
+                owner.ndb.combat_handler.msg_all({"skill_cast": message})
             elif owner.location:
-                status[owner.dbref] = owner.get_combat_status()
-            message["status"] = status
-
-        # send message
-        if owner.is_in_combat():
-            owner.ndb.combat_handler.msg_all({"skill_cast": message})
-        elif owner.location:
-            owner.location.msg_contents({"skill_cast": message})
+                owner.location.msg_contents({"skill_cast": message})
 
         return True
         

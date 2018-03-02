@@ -58,7 +58,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
 
         item.find(".obj_name")
             .data("dbref", obj["dbref"])
-            .text(obj["name"]);
+            .html($$.text2html.parseHtml(obj["name"]));
 
         if (obj["icon"]) {
             item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
