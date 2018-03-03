@@ -317,9 +317,8 @@ class WorldNPCsForm(forms.ModelForm):
         
         # NPC's model
         choices = [("", "---------")]
-        objects = DATA_SETS.character_models.objects.all()
-        model_keys = set([obj.key for obj in objects])
-        choices.extend([(model_key, model_key) for model_key in model_keys])
+        objects = DATA_SETS.character_models.objects.all().values("key", "name").distinct()
+        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
         self.fields['model'] = forms.ChoiceField(choices=choices, required=False)
         
         # NPC's icon

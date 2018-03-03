@@ -43,14 +43,14 @@ var commands = {
     },
 
     // register
-    doRegister: function(playername, password, password_again, connect) {
+    doRegister: function(playername, password, password_verify, connect) {
         
         if (!Evennia.isConnected()) {
             Evennia.connect();
         }
 
-        if (password != password_again) {
-            controller.showAlert(_("Password does not match."));
+        if (password != password_verify) {
+            controller.showAlert($$("Password does not match."));
             return;
         }
 
@@ -62,7 +62,24 @@ var commands = {
         var login = $("#frame_login")[0].contentWindow.controller;
         login.setPlayerName(playername);
     },
-    
+
+    // change password
+    doChangePassword: function(current, password, password_verify) {
+
+        if (!Evennia.isConnected()) {
+            Evennia.connect();
+        }
+
+        if (password != password_verify) {
+            controller.showAlert($$("Password does not match."));
+            return;
+        }
+
+        var args = {"current": current,
+                    "new": password};
+        Evennia.msg("text", this.cmdString("change_pw", args));
+    },
+
     // create new character
     createCharacter: function(name) {
    	 	var args = {"name": name};

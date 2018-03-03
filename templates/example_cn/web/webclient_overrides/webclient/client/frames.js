@@ -70,7 +70,11 @@ var frames_dict = {
     "object.html":			{scripts: 		["../controllers/base_controller.js",
                       						 "../controllers/muddery_object.js",],
                       	 	 controller:	"MudderyObject",},
-                      	 	                       	 
+
+    "password.html":		{scripts: 		["../controllers/base_controller.js",
+                      						 "../controllers/muddery_password.js",],
+                      	 	 controller:	"MudderyPassword",},
+
     "quests.html":			{scripts: 		["../utils/paginator.js",
                                              "../controllers/base_controller.js",
                       						 "../controllers/muddery_quests.js",],

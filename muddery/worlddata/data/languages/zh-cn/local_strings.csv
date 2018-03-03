@@ -105,6 +105,8 @@ category,origin,local
 ,"EXP","经验"
 ,"HP","生命"
 ,"Incorrect password.","密码错误。"
+,"Password is too simple.","密码太简单。"
+,"Password changed.","密码已修改。",
 ,"Please select a character","请选择一个角色。"
 ,"MAX EXP","最大经验值"
 ,"Can not cast this skill.","无法施放这个技能。"

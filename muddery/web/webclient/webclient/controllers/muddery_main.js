@@ -34,6 +34,7 @@ MudderyMain.prototype.resetLanguage = function() {
 	$("#view_connect").text($$("Connect"));
 	$("#view_login").text($$("Login"));
 	$("#view_register").text($$("Register"));
+	$("#view_password").text($$("Password"));
 	$("#view_select_char").text($$("Select Char"));
 	$("#view_scene").text($$("Scene"));
 	$("#view_char").text($$("Char"));
@@ -48,6 +49,7 @@ MudderyMain.prototype.resetLanguage = function() {
 	$("#view_system_char").text($$("System"));
 	$("#view_logout").text($$("Logout"));
 	$("#view_logout_puppet").text($$("Logout"));
+	$("#view_password_puppet").text($$("Password"));
 	$("#view_unpuppet").text($$("Unpuppet"));
 	$("#msg_send").text($$("Send"));
 }
@@ -1189,6 +1191,7 @@ MudderyMain.prototype.setLanguage = function(language) {
 	this.getFrameController("#frame_inventory").resetLanguage();
 	this.getFrameController("#frame_quick_login").resetLanguage();
 	this.getFrameController("#frame_login").resetLanguage();
+	this.getFrameController("#frame_password").resetLanguage();
 	this.getFrameController("#frame_map").resetLanguage();
 	this.getFrameController("#frame_message").resetLanguage();
 	this.getFrameController("#frame_object").resetLanguage();

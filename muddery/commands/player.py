@@ -73,6 +73,47 @@ class CmdQuit(Command):
         player.disconnect_session_from_account(session)
 
 
+class CmdChangePassword(Command):
+    """
+    Quit the game.
+
+    Usage:
+        {"cmd":"change_pw",
+         "args":{"current": <current password>,
+                 "new": <new password>
+                }
+        }
+
+    Change player's password.
+    """
+    key = "change_pw"
+    locks = "cmd:all()"
+
+    def func(self):
+        "hook function"
+        session = self.session
+        player = self.account
+        args = self.args
+
+        current_password = args["current"]
+        new_password = args["new"]
+
+        if not player.check_password(current_password):
+            session.msg({"alert":_("Incorrect password.")},
+                        session=session)
+            return
+
+        if len(new_password) < 4:
+            session.msg({"alert":_("Password is too simple.")},
+                        session=session)
+            return
+
+        player.set_password(new_password)
+        player.save()
+        session.msg({"alert":_("Password changed.")},
+                    session=session)
+
+
 class CmdPuppet(Command):
     """
     Control an object you have permission to puppet

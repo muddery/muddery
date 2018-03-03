@@ -36,7 +36,7 @@ var controller = null;
 					 .appendTo($("body"));
 	}
 
-    if (!controller) {
+    if (!controller && frame_data.controller) {
 		// construct the controller
 		var constructor = eval(frame_data.controller);
 		controller = new constructor();

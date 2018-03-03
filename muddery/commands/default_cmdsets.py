@@ -87,6 +87,7 @@ class AccountCmdSet(default_cmds.AccountCmdSet):
         # any commands you add below will overload the default ones.
         #
         self.add(player.CmdQuit())
+        self.add(player.CmdChangePassword())
         self.add(player.CmdPuppet())
         self.add(player.CmdUnpuppet())
         self.add(player.CmdCharCreate())
