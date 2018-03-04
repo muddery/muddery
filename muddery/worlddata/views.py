@@ -307,14 +307,14 @@ def apply_changes(request):
         SESSIONS.announce_all(text)
 
         # restart the server
-        SESSIONS.announce_all(" Server restarting ...")
+        SESSIONS.announce_all("Server restarting ...")
         SESSIONS.server.shutdown(mode='reload')
     except Exception, e:
         message = "Can't build world: %s" % e
         logger.log_tracemsg(message)
         return render(request, 'fail.html', {"message": message})
 
-    return render(request, 'success.html', {"message": _("Data applied.")})
+    return render(request, 'success.html', {"message": _("Data applied. Please wait the server restart.")})
 
 
 @staff_member_required

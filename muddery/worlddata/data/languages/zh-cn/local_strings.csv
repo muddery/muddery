@@ -134,7 +134,7 @@ category,origin,local
 ,"You should discard something.","你需要丢弃某样东西。"
 ,"{RYou made too many connection attempts. Try again in a few minutes.{n","{R你尝试连接的次数过多，请在几分钟之后重试。{n"
 ,"Please input password.","请输入密码。"
-,"Data applied.","数据已应用。"
+,"Data applied. Please wait the server restart.","数据已应用，请等待服务器重启。"
 ,"You should give the character a name.","你需要给角色一个名字。"
 ,"Can not find this goods.","无法找到这件商品。"
 ,"There was an error creating the Player: %s","创建玩家时出错：%s"
