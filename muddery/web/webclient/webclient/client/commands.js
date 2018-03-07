@@ -225,4 +225,8 @@ var commands = {
             $.cookie("is_auto_login", '', {expires: -1});
         }
     },
+
+    doRemoveAutoLogin: function() {
+        $.cookie("is_auto_login", '', {expires: -1});
+    },
 }

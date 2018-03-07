@@ -1084,26 +1084,34 @@ MudderyMain.prototype.showConnect = function() {
  * Check the auto login setting.
  */
 MudderyMain.prototype.doAutoLoginCheck = function() {
+
+    var playername = "";
+    var password = "";
+    var save_password = false;
+    var auto_login = false;
+
+    if ($.cookie("is_save_password")) {
+        save_password = true;
+        playername = $.cookie("login_name");
+        password = $.cookie("login_password");
+
+        if($.cookie("is_auto_login")) {
+            auto_login = true;
+        }
+    }
+
+    var frame_ctrl = this.getFrameController("#frame_login");
+	frame_ctrl.setValues(playername, password, save_password, auto_login);
+
 	setTimeout(function(){
-		if($.cookie("is_save_password")) {
-			$("#login_name").val($.cookie("login_name"));
-			$("#login_password").val($.cookie("login_password"));
-			$("#cb_save_password").attr("checked", "true");
+		if ($.cookie("is_save_password") && $.cookie("is_auto_login")) {
+		    var playername = $.cookie("login_name");
+            var playerpassword = $.cookie("login_password");
 
-			if($.cookie("is_auto_login")) {
-				$("#cb_auto_login").attr("checked", "true");
-				commands.doLogin();
-			}
-		} else {
-			$("#cb_save_password").removeAttr("checked");
-			$.cookie("is_auto_login", '', {expires: -1});
-			$("#cb_auto_login").removeAttr("checked");
+			$("#cb_auto_login").attr("checked", "true");
+			commands.doLogin(playername, playerpassword);
 		}
-
-		if(!$.cookie("is_auto_login")) {
-			$("#cb_auto_login").removeAttr("checked");
-		}
-	}, 1);
+	}, 2000);
 }
     
 //////////////////////////////////////////

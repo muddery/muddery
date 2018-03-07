@@ -26,7 +26,8 @@ MudderyLogin.prototype.resetLanguage = function() {
  * Bind events.
  */
 MudderyLogin.prototype.bindEvents = function() {
-    this.onClick("#check_save_password", this.onSavePassword);
+    this.on("#cb_save_password", "change", this.onSavePassword);
+    this.on("#cb_auto_login", "change", this.onAutoLogin);
     this.onClick("#button_login", this.onLogin);
 }
 
@@ -36,12 +37,13 @@ MudderyLogin.prototype.bindEvents = function() {
 MudderyLogin.prototype.onLogin = function(element) {
     var playername = $("#login_name").val();
     var password = $("#login_password").val();
-    var save_password = $("#cb_save_password").is(":checked");
-    var auto_login = $("#cb_auto_login").is(":checked");
+    var save_password = $("#cb_save_password").prop("checked");
+    var auto_login = $("#cb_auto_login").prop("checked");
 
     $("#login_password").val("");
 
     $$.commands.doLogin(playername, password);
+    $$.commands.doSavePassword(save_password);
     $$.commands.doAutoLoginConfig(playername, password, save_password, auto_login);
 }
 
@@ -49,14 +51,39 @@ MudderyLogin.prototype.onLogin = function(element) {
  * Event on click the save password checkbox.
  */
 MudderyLogin.prototype.onSavePassword = function(element) {
-    var save_password = $("#cb_save_password").is(":checked");
+    var save_password = $("#cb_save_password").prop("checked");
     $$.commands.doSavePassword(save_password);
 
     if (!save_password) {
-        $("#cb_auto_login").removeAttr("checked");
+        $("#cb_auto_login").prop("checked", false);
+        $$.commands.doRemoveAutoLogin();
     }
 }
-    
+
+/*
+ * Event on click the auto login checkbox.
+ */
+MudderyLogin.prototype.onAutoLogin = function(element) {
+    var auto_login = $("#cb_auto_login").prop("checked");
+
+    if (!auto_login) {
+        $$.commands.doRemoveAutoLogin();
+    }
+}
+
+/*
+ * Set values.
+ */
+MudderyLogin.prototype.setValues = function(playername, password, save_password, auto_login) {
+    $("#login_name").val(playername);
+    $("#login_password").val("");
+
+    $("#login_name").val(playername);
+    $("#login_password").val(password);
+    $("#cb_save_password").prop("checked", save_password);
+    $("#cb_auto_login").prop("checked", auto_login);
+}
+
 /*
  * Set player's name.
  */
