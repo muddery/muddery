@@ -149,9 +149,10 @@ class MudderyFood(MudderyCommonObject):
 
         increments = {}
         for key in self.custom_attributes_handler.all():
-            value = getattr(self.cattr, key) * used
-            if value:
-                increments[key] = value
+            value = getattr(self.cattr, key)
+            if not value:
+                continue
+            increments[key] = value * used
 
         changes = user.change_status(increments)
         user.show_status()
@@ -235,6 +236,8 @@ class MudderyEquipment(MudderyCommonObject):
                 return
 
             value = getattr(self.cattr, key)
+            if value is None:
+                value = 0
             value += getattr(target, key)
             setattr(target, key, value)
 
