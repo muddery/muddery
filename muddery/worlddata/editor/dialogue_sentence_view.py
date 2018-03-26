@@ -35,10 +35,10 @@ class DialogueSentenceView(FormView):
         """
         super(DialogueSentenceView, self).query_view_data()
 
-        if self.data:
+        if self.form:
             # Can not change the relative dialogue.
-            # self.data.fields["dialogue"].disabled = True
-            self.data.fields["dialogue"].initial = self.request_data["_dialogue_key"]
+            # self.form.fields["dialogue"].disabled = True
+            self.form.fields["dialogue"].initial = self.request_data["_dialogue_key"]
 
     def get_context(self):
         """
@@ -69,10 +69,10 @@ class DialogueSentenceView(FormView):
         """
         super(DialogueSentenceView, self).query_submit_data()
 
-        if self.data:
+        if self.form:
             # Can not change the relative dialogue.
-            # self.data.fields["dialogue"].disabled = True
-            self.data.fields["dialogue"].initial = self.request_data["_dialogue_key"]
+            # self.form.fields["dialogue"].disabled = True
+            self.form.fields["dialogue"].initial = self.request_data["_dialogue_key"]
 
     def quit_form(self):
         """
