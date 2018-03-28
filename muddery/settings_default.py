@@ -65,8 +65,23 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': ''
+        },
+    'worlddata': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(GAME_DIR, "server", "worlddata.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': ''
         }}
 
+
+# Database's router
+DATABASE_ROUTERS = ['muddery.worlddata.database_router.DatabaseAppsRouter']
+
+DATABASE_APPS_MAPPING = {
+    'worlddata': 'worlddata',
+}
 
 ######################################################################
 # Evennia pluggable modules
@@ -327,6 +342,16 @@ CMDSET_COMBAT = "muddery.commands.default_cmdsets.CombatCmdSet"
 
 
 ######################################################################
+# Muddery additional data features
+######################################################################
+# data app name
+ADDITIONAL_DATA_APP = "database"
+
+# add data app
+INSTALLED_APPS = INSTALLED_APPS + (ADDITIONAL_DATA_APP,)
+
+
+######################################################################
 # World data features
 ######################################################################
 
@@ -351,17 +376,21 @@ REVERSE_EXIT_TYPECLASS_PATH = "muddery.typeclasses.exits.MudderyReverseExit"
 # Reverse exit's key's prefix.
 REVERSE_EXIT_PREFIX = "__reverse__"
 
-# Characters who have these permission can bypass events.
-PERMISSION_BYPASS_EVENTS = {"builders", "wizards", "immortals"}
-
-# Characters who have these permission can use text commands.
-PERMISSION_COMMANDS = {"playerhelpers", "builders", "wizards", "immortals"}
-
 # Localized string data's folder
 LOCALIZED_STRINGS_FOLDER = "languages"
 
 # World data sets
 DATA_SETS = "muddery.worlddata.data_sets.DataSets"
+
+
+###################################
+# permissions
+###################################
+# Characters who have these permission can bypass events.
+PERMISSION_BYPASS_EVENTS = {"builders", "wizards", "immortals"}
+
+# Characters who have these permission can use text commands.
+PERMISSION_COMMANDS = {"playerhelpers", "builders", "wizards", "immortals"}
 
 
 ###################################

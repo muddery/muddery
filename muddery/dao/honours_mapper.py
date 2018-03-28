@@ -5,7 +5,7 @@ This model translates default strings into localized strings.
 from __future__ import print_function
 
 from evennia.utils import logger
-from worlddata.models import honours
+from database.models import honours
 from django.db import transaction
 from django.apps import apps
 from django.conf import settings
@@ -16,7 +16,7 @@ class HonoursMapper(object):
     This model stores all character's honours.
     """
     def __init__(self):
-        self.objects = apps.get_model(settings.WORLD_DATA_APP, "honours").objects
+        self.objects = apps.get_model(settings.ADDITIONAL_DATA_APP, "honours").objects
         self.honours = {}
         self.rankings = []
 

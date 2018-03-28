@@ -77,6 +77,7 @@ class SystemData(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "System Data"
         verbose_name_plural = "System Data"
 
@@ -160,6 +161,7 @@ class game_settings(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Game Setting"
         verbose_name_plural = "Game Settings"
 
@@ -185,6 +187,7 @@ class class_categories(SystemData):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Class Category"
         verbose_name_plural = "Class Categories"
 
@@ -223,6 +226,7 @@ class typeclasses(SystemData):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Typeclass"
         verbose_name_plural = "Typeclasses"
 
@@ -264,6 +268,7 @@ class world_areas(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "World Area"
         verbose_name_plural = "World Areas"
 
@@ -315,6 +320,7 @@ class world_rooms(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Room"
         verbose_name_plural = "Rooms"
 
@@ -366,6 +372,7 @@ class world_exits(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Exit"
         verbose_name_plural = "Exits"
 
@@ -403,6 +410,7 @@ class exit_locks(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Exit Lock"
         verbose_name_plural = "Exit Locks"
 
@@ -424,6 +432,7 @@ class two_way_exits(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Two Way Exit"
         verbose_name_plural = "Two Way Exits"
 
@@ -465,6 +474,7 @@ class world_objects(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "World Object"
         verbose_name_plural = "World Objects"
 
@@ -499,6 +509,7 @@ class object_creators(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Object Creator"
         verbose_name_plural = "Object Creators"
 
@@ -533,6 +544,7 @@ class loot_list(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Loot List"
         verbose_name_plural = "Loot Lists"
         unique_together = ("provider", "object")
@@ -549,6 +561,7 @@ class creator_loot_list(loot_list):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Object Creator's Loot List"
         verbose_name_plural = "Object Creator's Loot Lists"
         unique_together = ("provider", "object")
@@ -565,6 +578,7 @@ class character_loot_list(loot_list):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Character's Loot List"
         verbose_name_plural = "Character's Loot Lists"
         unique_together = ("provider", "object")
@@ -581,6 +595,7 @@ class quest_reward_list(loot_list):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Quest's reward List"
         verbose_name_plural = "Quest's reward Lists"
         unique_together = ("provider", "object")
@@ -625,6 +640,7 @@ class common_objects(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Common Object"
         verbose_name_plural = "Common Objects"
 
@@ -668,6 +684,7 @@ class foods(common_objects):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Food"
         verbose_name_plural = "Foods"
 
@@ -686,6 +703,7 @@ class skill_books(common_objects):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Skill Book"
         verbose_name_plural = "Skill Books"
 
@@ -710,6 +728,7 @@ class equipment_types(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Equipment's Type"
         verbose_name_plural = "Equipment's Types"
 
@@ -737,6 +756,7 @@ class equipment_positions(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Equipment's Position"
         verbose_name_plural = "Equipment's Positions"
 
@@ -783,6 +803,7 @@ class equipments(common_objects):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Equipment"
         verbose_name_plural = "Equipments"
 
@@ -807,6 +828,7 @@ class character_careers(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Career"
         verbose_name_plural = "Careers"
 
@@ -833,6 +855,7 @@ class career_equipments(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Career Equip Relation"
         verbose_name_plural = "Career Equip Relations"
         unique_together = ("career", "equipment")
@@ -861,6 +884,7 @@ class attributes_info(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Attrubute Information"
         verbose_name_plural = "Attribute Information"
         
@@ -882,6 +906,7 @@ class character_attributes_info(attributes_info):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Character Attrubute Information"
         verbose_name_plural = "Character Attribute Information"
         
@@ -897,6 +922,7 @@ class equipment_attributes_info(attributes_info):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Equipment Attrubute Information"
         verbose_name_plural = "Equipment Attribute Information"
         
@@ -912,6 +938,7 @@ class food_attributes_info(attributes_info):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Food Attrubute Information"
         verbose_name_plural = "Food Attribute Information"
 
@@ -967,6 +994,7 @@ class character_models(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Character Model"
         verbose_name_plural = "Character Models"
         unique_together = ("key", "level")
@@ -1018,6 +1046,7 @@ class world_npcs(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "World NPC"
         verbose_name_plural = "World NPCs"
 
@@ -1065,6 +1094,7 @@ class common_characters(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Common Character List"
         verbose_name_plural = "Common Character List"
 
@@ -1112,6 +1142,7 @@ class default_objects(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Character's Default Object"
         verbose_name_plural = "Character's Default Objects"
         unique_together = ("character", "object")
@@ -1150,6 +1181,7 @@ class shops(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Shop"
         verbose_name_plural = "Shops"
 
@@ -1196,6 +1228,7 @@ class shop_goods(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Shop Object"
         verbose_name_plural = "Shop Objects"
 
@@ -1223,6 +1256,7 @@ class npc_shops(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "NPC Shop"
         verbose_name_plural = "NPC Shops"
         unique_together = ("npc", "shop")
@@ -1273,6 +1307,7 @@ class skills(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Skill"
         verbose_name_plural = "Skills"
 
@@ -1303,6 +1338,7 @@ class skill_types(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Skill's Type"
         verbose_name_plural = "Skill's Types"
 
@@ -1331,6 +1367,7 @@ class default_skills(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Character's Skill"
         verbose_name_plural = "Character's Skills"
         unique_together = ("character", "skill")
@@ -1366,6 +1403,7 @@ class quests(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Quest"
         verbose_name_plural = "Quests"
 
@@ -1398,6 +1436,7 @@ class quest_objective_types(SystemData):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Quest Objective's Type"
         verbose_name_plural = "Quest Objective's Types"
 
@@ -1436,6 +1475,7 @@ class quest_objectives(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Quest Objective"
         verbose_name_plural = "Quest Objectives"
         unique_together = ("quest", "ordinal")
@@ -1462,6 +1502,7 @@ class quest_dependency_types(SystemData):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Quest dependency's Type"
         verbose_name_plural = "Quest dependency's Types"
 
@@ -1492,6 +1533,7 @@ class quest_dependencies(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Quest Dependency"
         verbose_name_plural = "Quest Dependency"
 
@@ -1517,6 +1559,7 @@ class event_types(SystemData):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Event's Type"
         verbose_name_plural = "Event's Types"
 
@@ -1545,6 +1588,7 @@ class event_trigger_types(SystemData):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Event Trigger Type"
         verbose_name_plural = "Event Trigger Types"
 
@@ -1583,6 +1627,7 @@ class event_data(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Event"
         verbose_name_plural = "Events"
 
@@ -1613,6 +1658,7 @@ class dialogues(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Dialogue"
         verbose_name_plural = "Dialogues"
 
@@ -1646,6 +1692,7 @@ class dialogue_quest_dependencies(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Dialogue Quest Dependency"
         verbose_name_plural = "Dialogue Quest Dependencies"
 
@@ -1669,6 +1716,7 @@ class dialogue_relations(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Dialogue Relation"
         verbose_name_plural = "Dialogue Relations"
 
@@ -1711,6 +1759,7 @@ class dialogue_sentences(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Dialogue Sentence"
         verbose_name_plural = "Dialogue Sentences"
 
@@ -1737,6 +1786,7 @@ class npc_dialogues(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "NPC Dialogue"
         verbose_name_plural = "NPC Dialogues"
 
@@ -1769,6 +1819,7 @@ class event_attacks(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Event Mob"
         verbose_name_plural = "Event Mobs"
 
@@ -1796,6 +1847,7 @@ class event_dialogues(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Event Dialogues"
         verbose_name_plural = "Event Dialogues"
         
@@ -1820,30 +1872,10 @@ class condition_desc(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Condition Description"
         verbose_name_plural = "Condition Descriptions"
         unique_together = ("key", "condition")
-
-
-#------------------------------------------------------------
-#
-# character's honour
-#
-#------------------------------------------------------------
-class honours(models.Model):
-    "All character's honours."
-   
-    # character's database id
-    character = models.IntegerField(unique=True)
-    
-    # character's honour. special character's honour is -1, such as the superuser.
-    honour = models.IntegerField(blank=True, default=-1, db_index=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        verbose_name = "Honour"
-        verbose_name_plural = "Honours"
 
 
 # ------------------------------------------------------------
@@ -1869,6 +1901,7 @@ class localized_strings(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Localized String"
         verbose_name_plural = "Localized Strings"
 
@@ -1899,6 +1932,7 @@ class ImageResources(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Resource"
         verbose_name_plural = "Resources"
 
@@ -1917,11 +1951,13 @@ class image_resources(ImageResources):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Image Resource"
         verbose_name_plural = "Image Resources"
 
     def __unicode__(self):
         return self.key + " (" + self.resource + ")"
+
 
 # ------------------------------------------------------------
 #
@@ -1934,6 +1970,7 @@ class icon_resources(ImageResources):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Icon Resource"
         verbose_name_plural = "Icon Resources"
 
