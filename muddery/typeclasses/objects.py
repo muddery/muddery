@@ -263,7 +263,7 @@ class MudderyObject(DefaultObject):
                 typeclass = getattr(self.dfield, "typeclass", "")
                 
             if not typeclass:
-            	logger.log_errmsg("%s does not have a typeclass." % key)
+                logger.log_errmsg("%s does not have a typeclass." % key)
 
             self.set_typeclass(typeclass)
 
