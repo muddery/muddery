@@ -9,6 +9,7 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.views.static import serve
 from django.views.generic import RedirectView
+from muddery.worlddata.processer import PROCESSER
 
 # Setup the root url tree from /
 
@@ -17,8 +18,8 @@ urlpatterns = [
     # not be able to load django-auth/admin stuff (will probably work in Django>1.9)
     url(r'^', include('muddery.web.website.urls')),#, namespace='website', app_name='website')),
 
-    # webclient
-    url(r'^webclient/(?P<path>.*)$', serve, {'document_root': settings.WEBCLIENT_ROOT}),
+    # World editor API
+    url("^" + settings.WORLD_DATA_API_PATH, PROCESSER.process),
 
     # World Editor
     url(r'^worlddata/', include('muddery.worlddata.urls', namespace='worlddata', app_name='worlddata')),

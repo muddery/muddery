@@ -4,6 +4,18 @@ from muddery.worlddata import model_base
 
 # ------------------------------------------------------------
 #
+# Types used in world data.
+#
+# ------------------------------------------------------------
+class types(model_base.types):
+    """
+    All types used in world data.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
 # game's basic settings
 #
 # ------------------------------------------------------------
@@ -327,6 +339,30 @@ class skills(model_base.skills):
 # ------------------------------------------------------------
 class skill_types(model_base.skill_types):
     "Skill's types."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# skill costs
+#
+# ------------------------------------------------------------
+class skill_costs(model_base.skill_costs):
+    """
+    Discribs how many resources a skill costs.
+    """
+    pass
+    
+    
+# ------------------------------------------------------------
+#
+# skill effects
+#
+# ------------------------------------------------------------
+class skill_effects(model_base.skill_costs):
+    """
+    Discribs skills' effects.
+    """
     pass
 
 

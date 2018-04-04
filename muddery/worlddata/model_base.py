@@ -6,6 +6,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from muddery.worlddata.type_field import TypeField
 
 
 KEY_LENGTH = 255
@@ -58,6 +59,7 @@ def validate_object_key(model):
                                 params={"value": model.key, "model": data_settings.model_name})
         raise ValidationError({"key": error})
 
+
 # ------------------------------------------------------------
 #
 # System data flag.
@@ -80,6 +82,39 @@ class SystemData(models.Model):
         app_label = "worlddata"
         verbose_name = "System Data"
         verbose_name_plural = "System Data"
+
+
+# ------------------------------------------------------------
+#
+# Types used in world data.
+#
+# ------------------------------------------------------------
+class types(SystemData):
+    """
+    All types used in world data.
+    """
+    # the table where this type is used.
+    table = models.CharField(max_length=KEY_LENGTH)
+
+    # the field where this type is used.
+    field = models.CharField(max_length=KEY_LENGTH)
+    
+    # the readable name of the type
+    name = models.CharField(max_length=NAME_LENGTH)
+
+    # type's description (optional)
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Type"
+        verbose_name_plural = "Types"
+        unique_together = ("key", "table", "field")
+
+    def __unicode__(self):
+        return self.name + "(" + self.key + ")"
 
 
 # ------------------------------------------------------------
@@ -215,7 +250,7 @@ class typeclasses(SystemData):
 
     # The key of a typeclass category.
     # typeclass's category
-    category = models.CharField(max_length=KEY_LENGTH)
+    category = TypeField(max_length=KEY_LENGTH)
 
     # typeclass's description (optional)
     desc = models.TextField(blank=True)
@@ -1279,6 +1314,9 @@ class skills(models.Model):
 
     # skill's name for display
     name = models.CharField(max_length=NAME_LENGTH)
+    
+    # whether the skill is available
+    available = models.BooleanField(blank=True, default=True)
 
     # skill's description for display
     desc = models.TextField(blank=True)
@@ -1288,12 +1326,30 @@ class skills(models.Model):
 
     # skill's cd
     cd = models.FloatField(blank=True, default=0)
+    
+    # growth formula of the skill's cd
+    cd_growth = models.TextField(blank=True)
+    
+    # skill's prepare time
+    prepare_time = models.FloatField(blank=True, default=0)
+    
+    # growth formula of the skill's prepare time
+    prepare_time_growth = models.TextField(blank=True)
+    
+    # effect's duration
+    duration = models.FloatField(blank=True, default=0)
+    
+    # growth formula of the duration
+    duration_growth = models.TextField(blank=True)
+    
+    # skill target's typeclass
+    target_type = models.CharField(max_length=KEY_LENGTH, blank=True)
+    
+    # skill target's range
+    target_range = models.CharField(max_length=KEY_LENGTH, blank=True)
 
-    # if it is a passive skill
+    # whether it is a passive skill
     passive = models.BooleanField(blank=True, default=False)
-
-    # skill function's name
-    function = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # skill's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -1303,6 +1359,9 @@ class skills(models.Model):
     
     # skill's sub type, used in autocasting skills.
     sub_type = models.CharField(max_length=KEY_LENGTH, blank=True)
+    
+    # condition to cast skill
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1326,9 +1385,9 @@ class skills(models.Model):
 # ------------------------------------------------------------
 class skill_types(models.Model):
     """
-    Skill's type, used in skill's main_type and sub_type.
+    Skill's type, used in skill's main_type and sub_type. The type discribes the usage of a
+    skill, which is useful in auto casting skills.
     """
-    
     # type's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
@@ -1344,6 +1403,114 @@ class skill_types(models.Model):
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
+
+    def clean(self):
+        auto_generate_key(self)
+
+
+# ------------------------------------------------------------
+#
+# skill costs
+#
+# ------------------------------------------------------------
+class skill_costs(models.Model):
+    """
+    Discribs how many resources a skill costs.
+    """
+    # cost's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+
+    # The key of a skill.
+    # skill's key
+    skill = models.CharField(max_length=KEY_LENGTH)
+
+    # resource's type
+    resource_type = models.CharField(max_length=KEY_LENGTH)
+    
+    # resource's key
+    resource = models.CharField(max_length=KEY_LENGTH)
+    
+    # resource's minimum cost
+    min_cost = models.PositiveIntegerField(blank=True, default=0)
+    
+    # growth formula of the minimum cost
+    min_cost_growth = models.TextField(blank=True)
+    
+    # resource's maximum cost
+    max_cost = models.PositiveIntegerField(blank=True, default=0)
+    
+    # growth formula of the maximum cost
+    max_cost_growth = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Skill's Cost"
+        verbose_name_plural = "Skill's Costs"
+
+    def __unicode__(self):
+        return self.skill + "-" + self.resource_type + "-" + self.resource
+
+    def clean(self):
+        auto_generate_key(self)
+
+
+# ------------------------------------------------------------
+#
+# skill effects
+#
+# ------------------------------------------------------------
+class skill_effects(models.Model):
+    """
+    Discribs skills' effects.
+    """
+    # effect's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+
+    # The key of a skill.
+    # skill's key
+    skill = models.CharField(max_length=KEY_LENGTH)
+
+    # effect's type
+    effect_type = models.CharField(max_length=KEY_LENGTH)
+    
+    # effect's key
+    effect = models.CharField(max_length=KEY_LENGTH)
+    
+    # effect's minimum value
+    min_value = models.PositiveIntegerField(blank=True, default=0)
+    
+    # growth formula of the minimum value
+    min_value_growth = models.TextField(blank=True)
+    
+    # effect's maximum value
+    max_value = models.PositiveIntegerField(blank=True, default=0)
+    
+    # growth formula of the maximum value
+    max_value_growth = models.TextField(blank=True)
+    
+    # effect's duration
+    duration = models.FloatField(blank=True, default=0)
+    
+    # growth formula of the duration
+    duration_growth = models.TextField(blank=True)
+    
+    # effect's interval
+    interval = models.FloatField(blank=True, default=0)
+
+    # growth formula of the interval
+    interval_growth = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Skill's Effect"
+        verbose_name_plural = "Skill's Effects"
+
+    def __unicode__(self):
+        return self.skill + "-" + self.effect_type + "-" + self.effect
 
     def clean(self):
         auto_generate_key(self)
