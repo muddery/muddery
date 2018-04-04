@@ -91,7 +91,7 @@ MudderyMain.prototype.displayMsg = function(msg, type) {
 	// remove old messages
 	var divs = msg_wnd.find("div:not(.template)");
 	var max = 40;
-	var size = divs.size();
+	var size = divs.length;
 	if (size > max) {
 		divs.slice(0, size - max).remove();
 	}

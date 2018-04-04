@@ -411,7 +411,9 @@ class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
 
         # remove old default skills
         for key, skill in self.db.skills.iteritems():
-            if skill.is_default() and key not in default_skill_ids:
+            if not skill:
+                del self.db.skills[key]
+            elif skill.is_default() and key not in default_skill_ids:
                 # remove this skill
                 skill.delete()
                 del self.db.skills[key]

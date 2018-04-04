@@ -73,12 +73,12 @@ class DialogueView(FormView):
             raise MudderyError("Invalid form: %s." % self.form_name)
 
         # Query data.
-        if not self.data:
+        if not self.form:
             self.query_submit_data()
 
         # Save data
-        if self.data.is_valid():
-            instance = self.data.save()
+        if self.form.is_valid():
+            instance = self.form.save()
             self.record = instance.pk
 
             try:
