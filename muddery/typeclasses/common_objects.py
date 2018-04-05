@@ -3,6 +3,7 @@ CommonObject is the object that players can put into their inventory.
 
 """
 
+from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
 from muddery.utils.attributes_info_handler import FOOD_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO
@@ -149,9 +150,11 @@ class MudderyFood(MudderyCommonObject):
 
         increments = {}
         for key in self.custom_attributes_handler.all():
-            value = getattr(self.cattr, key) * used
-            if value:
-                increments[key] = value
+            value = getattr(self.cattr, key)
+            if not value:
+                logger.log_errmsg("Can not apply custom attribute: %s to %s" % (key, self.get_data_key()))
+                continue
+            increments[key] = value * used
 
         changes = user.change_status(increments)
         user.show_status()
@@ -232,9 +235,12 @@ class MudderyEquipment(MudderyCommonObject):
                 target = user.db
             else:
                 # no target
-                return
+                logger.log_errmsg("Can not apply custom attribute: %s to %s" % (key, self.get_data_key()))
+                continue
 
             value = getattr(self.cattr, key)
+            if value is None:
+                value = 0
             value += getattr(target, key)
             setattr(target, key, value)
 

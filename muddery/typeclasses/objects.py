@@ -261,6 +261,10 @@ class MudderyObject(DefaultObject):
                 typeclass = settings.REVERSE_EXIT_TYPECLASS_PATH
             else:
                 typeclass = getattr(self.dfield, "typeclass", "")
+                
+            if not typeclass:
+                logger.log_errmsg("%s does not have a typeclass." % key)
+
             self.set_typeclass(typeclass)
 
         self.after_data_loaded()

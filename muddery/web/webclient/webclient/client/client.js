@@ -240,7 +240,7 @@ $(document).ready(function() {
     $(window).bind("resize", controller.doSetSizes);
 });
 
-$(window).load(function() {
+window.onload = function() {
     // It is called
 
     // This is safe to call, it will always only
@@ -266,4 +266,4 @@ $(window).load(function() {
     },
     60000*3
     );
-});
+};
