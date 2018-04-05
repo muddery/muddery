@@ -47,6 +47,24 @@ var controller = null;
 			});
 		}
 	}
+
+    if (typeof(frameworks) != "undefined") {
+        var views_root = "../views/";
+        for (var key in frameworks) {
+            var div = $("#" + key);
+            if (div.length > 0) {
+                // load frame
+                $.ajax({url: views_root + frameworks[key].view,
+                        success: function(result) {
+                                div.html(result);
+                                var constructor = eval(frameworks[key].ctrler_name);
+		                        frameworks[key].controller = new constructor(div);
+		                        frameworks[key].controller.onReady();
+                            }
+                        });
+            }
+        }
+    }
 }();
 
 $$.controller = $$.controller || controller;

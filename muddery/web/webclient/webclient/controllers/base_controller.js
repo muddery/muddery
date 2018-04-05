@@ -3,16 +3,24 @@
 /*
  * Get the prototype of the base class.
  */
-function prototype(base) {
+function prototype(base, el) {
     var Base = function(){};
     Base.prototype = base;
-    return new Base();
+    return new Base(el);
 }
 
 /*
  * The base of view controllers.
  */
-function BaseController() {
+function BaseController(el) {
+    this.el = el || $(document);
+}
+
+/*
+ * Find DOM.
+ */
+BaseController.prototype.select = function(selector) {
+    return this.el.find(selector);
 }
 
 /*
@@ -46,7 +54,7 @@ BaseController.prototype.on = function(element_name, selector, event_name, metho
     	selector = undefined;
     }
 
-	$(element_name).on(event_name, selector, this, function(event) {
+	this.select(element_name).on(event_name, selector, this, function(event) {
 		method.call(event.data, event.currentTarget, event);
 	});
 }
@@ -73,7 +81,7 @@ BaseController.prototype.off = function(element_name, selector, event_name) {
     	selector = undefined;
     }
     
-	$(element_name).off(event_name, selector);
+	this.select(element_name).off(event_name, selector);
 }
 
 /*
@@ -84,7 +92,7 @@ BaseController.prototype.cloneTag = function(tag, root) {
         var template = root.children(tag + ".template");
     }
     else {
-    	var template = $(tag + ".template");
+    	var template = this.select(tag + ".template");
     }
     this.cloneTemplate(tempalte);
 }
@@ -103,5 +111,5 @@ BaseController.prototype.cloneTemplate = function(template) {
  */
 BaseController.prototype.clearElements = function(root_tag) {
     // Remove elements that are not template.
-	$(root_tag).children().not(".template").remove();
+	this.select(root_tag).children().not(".template").remove();
 }

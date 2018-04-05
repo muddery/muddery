@@ -35,3 +35,8 @@ var local_string = {
     	return str;
 	},
 }
+
+
+!function() {
+    local_string.setLanguage(settings.default_language);
+}();

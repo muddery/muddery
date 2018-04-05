@@ -231,9 +231,6 @@ var client = {
 
 // Event when client finishes loading
 $(document).ready(function() {
-
-    local_string.setLanguage(settings.default_language);
-
 	controller.onReady();
 
     // Event when client window changes

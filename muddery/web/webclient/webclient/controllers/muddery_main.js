@@ -1,5 +1,9 @@
 //@ sourceURL=/controller/muddery_main.js
 
+if (typeof(require) != "undefined") {
+    require("muddery_login.js")
+}
+
 /*
  * Derive from the base class.
  */
@@ -725,10 +729,15 @@ MudderyMain.prototype.showObjMovedOut = function(objects) {
  * Get a frame's controller.
  */
 MudderyMain.prototype.getFrameController = function(frame_id) {
-	var frame = $(frame_id);
-	if (frame.length > 0) {
-		return frame[0].contentWindow.controller;
-	}
+    if (frame_id in frameworks) {
+        return frameworks[frame_id].controller;
+    }
+    else {
+        var frame = $(frame_id);
+        if (frame.length > 0) {
+            return frame[0].contentWindow.controller;
+        }
+    }
 }
 
 /*
@@ -1100,7 +1109,7 @@ MudderyMain.prototype.doAutoLoginCheck = function() {
         }
     }
 
-    var frame_ctrl = this.getFrameController("#frame_login");
+    var frame_ctrl = this.getFrameController("frame_login");
 	frame_ctrl.setValues(playername, password, save_password, auto_login);
 
 	setTimeout(function(){
@@ -1198,7 +1207,7 @@ MudderyMain.prototype.setLanguage = function(language) {
 	this.getFrameController("#frame_information").resetLanguage();
 	this.getFrameController("#frame_inventory").resetLanguage();
 	this.getFrameController("#frame_quick_login").resetLanguage();
-	this.getFrameController("#frame_login").resetLanguage();
+	this.getFrameController("frame_login").resetLanguage();
 	this.getFrameController("#frame_password").resetLanguage();
 	this.getFrameController("#frame_map").resetLanguage();
 	this.getFrameController("#frame_message").resetLanguage();

@@ -58,9 +58,9 @@ var commands = {
                     "password": password,
                     "connect": connect};
         Evennia.msg("text", this.cmdString("create", args));
-        
-        var login = $("#frame_login")[0].contentWindow.controller;
-        login.setPlayerName(playername);
+
+        var controller = frameworks["frame_login"].controller;
+        controller.setPlayerName(playername);
     },
 
     // change password
