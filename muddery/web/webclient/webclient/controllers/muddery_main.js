@@ -1,6 +1,9 @@
 //@ sourceURL=/controller/muddery_main.js
 
 if (typeof(require) != "undefined") {
+    require("../css/webclient.css");
+    require("../css/main.css");
+
     require("muddery_login.js")
 }
 
