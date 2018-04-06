@@ -23,12 +23,10 @@ var controller = null;
 
 !function() {
     // load scripts
-    var public_data = ("PUBLIC" in frames_dict) ? frames_dict["PUBLIC"] : [];
-    
 	var begin = window.location.pathname.lastIndexOf("/");
     var name = begin < 0 ? window.location.pathname : window.location.pathname.substr(begin + 1);
     var frame_data = (name in frames_dict) ? frames_dict[name] : [];
-    var scripts = public_data.scripts.concat(frame_data.scripts);
+    var scripts = frame_data.scripts;
     
 	for (var i in scripts) {
 		$("<script>").attr("src", scripts[i])
@@ -50,18 +48,32 @@ var controller = null;
 
     if (typeof(frameworks) != "undefined") {
         var views_root = "../views/";
+        var ajax = (typeof(require) == "undefined");
+
         for (var key in frameworks) {
+            var frame_info = frameworks[key];
+
             var div = $("#" + key);
             if (div.length > 0) {
-                // load frame
-                $.ajax({url: views_root + frameworks[key].view,
-                        success: function(result) {
-                                div.html(result);
-                                var constructor = eval(frameworks[key].ctrler_name);
-		                        frameworks[key].controller = new constructor(div);
-		                        frameworks[key].controller.onReady();
-                            }
-                        });
+                if (ajax && frame_info.view) {
+                    // load frame
+                    $.ajax({url: views_root + frame_info.view,
+                            context: key,
+                            success: function(result) {
+                                    var frame_info = frameworks[this];
+                                    var div = $("#" + key);
+                                    div.html($("<div>").html(result));
+                                    var constructor = eval(frame_info.ctrler_name);
+                                    frame_info.controller = new constructor(div);
+                                    frame_info.controller.onReady();
+                                }
+                            });
+                }
+                else {
+                    var constructor = eval(frame_info.ctrler_name);
+                    frame_info.controller = new constructor(div);
+                    frame_info.controller.onReady();
+                }
             }
         }
     }

@@ -231,10 +231,10 @@ var client = {
 
 // Event when client finishes loading
 $(document).ready(function() {
-	controller.onReady();
+	frameworks.body.controller.onReady();
 
     // Event when client window changes
-    $(window).bind("resize", controller.doSetSizes);
+    $(window).bind("resize", frameworks.body.controller.doSetSizes);
 });
 
 window.onload = function() {
@@ -248,9 +248,9 @@ window.onload = function() {
     Evennia.emitter.on("text", client.onText);
     //Evennia.emitter.on("prompt", onPrompt);
     //Evennia.emitter.on("default", onDefault);
-    Evennia.emitter.on("connection_close", controller.onConnectionClose);
+    Evennia.emitter.on("connection_close", frameworks.body.controller.onConnectionClose);
     // silence currently unused events
-    Evennia.emitter.on("connection_open", controller.onConnectionOpen);
+    Evennia.emitter.on("connection_open", frameworks.body.controller.onConnectionOpen);
     //Evennia.emitter.on("connection_error", onSilence);
 
     // set an idle timer to send idle every 3 minutes,

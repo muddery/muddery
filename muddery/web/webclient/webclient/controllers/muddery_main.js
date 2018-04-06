@@ -4,7 +4,7 @@ if (typeof(require) != "undefined") {
     require("../css/webclient.css");
     require("../css/main.css");
 
-    require("muddery_login.js")
+    require("../controllers/muddery_login.js");
 }
 
 /*
@@ -468,8 +468,8 @@ MudderyMain.prototype.finishCombat = function(result) {
  * Set the combat's result.
  */
 MudderyMain.prototype.showCombatResult = function() {
-	controller.doClosePopupBox();
-	controller.showFrame("#frame_combat_result");
+	frameworks.body.controller.doClosePopupBox();
+	frameworks.body.controller.showFrame("#frame_combat_result");
 }
 
 /*
@@ -764,8 +764,8 @@ MudderyMain.prototype.showFrame = function(frame_id) {
 MudderyMain.prototype.onConnectionOpen = function() {
 	this.puppet = false;
 	
-	controller.showUnlogin();
-	controller.doAutoLoginCheck();
+	frameworks.body.controller.showUnlogin();
+	frameworks.body.controller.doAutoLoginCheck();
 }
 
 /*
@@ -774,13 +774,13 @@ MudderyMain.prototype.onConnectionOpen = function() {
 MudderyMain.prototype.onConnectionClose = function() {
 	this.puppet = false;
 	
-	controller.showConnect();
+	frameworks.body.controller.showConnect();
 
 	// close popup windows
-	controller.doClosePopupBox();
+	frameworks.body.controller.doClosePopupBox();
 	
 	// show message
-	controller.showMessage($$("Message"), $$("The client connection was closed cleanly."));
+	frameworks.body.controller.showMessage($$("Message"), $$("The client connection was closed cleanly."));
 }
     
 /*
@@ -808,7 +808,7 @@ MudderyMain.prototype.onLogout = function(data) {
  */
 MudderyMain.prototype.onCharacterCreated = function(data) {
 	// close popup windows
-	controller.doClosePopupBox();
+	frameworks.body.controller.doClosePopupBox();
 }
 
 /*
@@ -816,7 +816,7 @@ MudderyMain.prototype.onCharacterCreated = function(data) {
  */
 MudderyMain.prototype.onCharacterDeleted = function(data) {
 	// close popup windows
-	controller.doClosePopupBox();
+	frameworks.body.controller.doClosePopupBox();
 }
 
 /*
@@ -851,8 +851,8 @@ MudderyMain.prototype.onUnpuppet = function(data) {
  * Reset all sizes.
  */
 MudderyMain.prototype.doSetSizes = function() {
-	controller.doSetWindowSize();
-	controller.doSetVisiblePopupSize();
+	frameworks.body.controller.doSetWindowSize();
+	frameworks.body.controller.doSetVisiblePopupSize();
 }
 
 /*
@@ -1087,7 +1087,7 @@ MudderyMain.prototype.showConnect = function() {
 	
 	$("#tab_connect").show();
 	
-	controller.showContent("connect");
+	frameworks.body.controller.showContent("connect");
 	
 	this.clearChannels();
 }
@@ -1269,7 +1269,7 @@ MudderyMain.prototype.setChannels = function(channels) {
 				.removeClass("dropdown-item")
 				.addClass("first-dropdown-item");
 
-			controller.message_type = key;
+			frameworks.body.controller.message_type = key;
 			$("#msg_select").text(text);
 			
 			first = false;
@@ -1307,7 +1307,7 @@ MudderyMain.prototype.showMsgTypes = function() {
  * Event when select a message type.
  */
 MudderyMain.prototype.selectMsgType = function(caller) {
-	controller.message_type = $(caller).data("key");
+	frameworks.body.controller.message_type = $(caller).data("key");
 	$("#msg_select").text($(caller).text());
 
 	$("#msg_type_menu").hide();
@@ -1316,6 +1316,6 @@ MudderyMain.prototype.selectMsgType = function(caller) {
 
 function refreshWaitingTime() {
     var current_time = new Date().getTime();
-    var total_time = Math.floor((current_time - controller.waiting_begin) / 1000);
+    var total_time = Math.floor((current_time - frameworks.body.controller.waiting_begin) / 1000);
     $("#prompt_queue").text($$("QUEUE: ") + utils.time_to_string(total_time));
 }

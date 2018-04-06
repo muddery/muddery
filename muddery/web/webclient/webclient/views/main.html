@@ -42,7 +42,7 @@
         <script src="../utils/utils.js" type="text/javascript" charset="utf-8"></script>
 
     </head>
-    <body>
+    <body id="body">
         <!-- Show popup windows in this div. -->
 		<div id="popup_confirm_combat" class="container">
             <div role="dialog" class="modal in popup_modal">
@@ -137,7 +137,11 @@
                 <div class="panel panel-default">
                     <div id="tab_content" class="panel-body">
                         <iframe id="frame_quick_login" class="content_frame" src="./quick_login.html"></iframe>
-                        <div id="frame_login" class="content_frame"></div>
+                        <div id="frame_login" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/login.html") %>
+                            </div>
+                        </div>
                         <iframe id="frame_register" class="content_frame" src="./register.html"></iframe>
                         <iframe id="frame_password" class="content_frame" src="./password.html"></iframe>
                         <iframe id="frame_select_char" class="content_frame" src="./select_char.html"></iframe>

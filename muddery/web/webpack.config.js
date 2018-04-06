@@ -36,7 +36,6 @@ var get_html_plugins = new htmlWebpackPlugin({
     template: path.join(env.src, "views", "main.html"),
     filename: path.join("views", "main.html"),
     inject: true,
-    chunks: ["public", "main"],
     contents: {
             // config文件id
             config_id: env.config_id,

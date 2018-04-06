@@ -1,9 +1,5 @@
 
 var frames_dict = {
-    "PUBLIC":				{scripts: 		[]},
-
-    "main.html":			{scripts: 		[],
-                      	 	 controller:	"MudderyMain",},
 
     "combat_result.html":	{scripts: 		[],
                       	 	 controller:	"MudderyCombatResult",},
@@ -34,9 +30,6 @@ var frames_dict = {
                       	 	 
     "inventory.html":		{scripts: 		[],
                       	 	 controller:	"MudderyInventory",},
-                      	 	 
-    "login.html":			{scripts: 		[],
-                      	 	 controller:	"MudderyLogin",},
                       	 	 
     "map.html":				{scripts: 		[],
                       	 	 controller:	"MudderyMap",},

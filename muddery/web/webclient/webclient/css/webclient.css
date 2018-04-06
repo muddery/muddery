@@ -346,6 +346,10 @@ a:focus {
     display: none;
 }
 
+.require {
+    display: none;
+}
+
 .hidden {
     display: none;
 }
