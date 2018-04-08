@@ -14,12 +14,12 @@ MudderyRegister.prototype.constructor = MudderyRegister;
  * Reset the view's language.
  */
 MudderyRegister.prototype.resetLanguage = function() {
-    $("#view_name").text($$("Name"));
-    $("#reg_name").attr("placeholder", $$("username"));
-    $("#view_password").text($$("Password"));
-    $("#reg_password").attr("placeholder", $$("password"));
-    $("#reg_password_verify").attr("placeholder", $$("password verify"));
-    $("#button_register").text($$("Register"));
+    this.select("#register_view_name").text($$("Name"));
+    this.select("#reg_name").attr("placeholder", $$("username"));
+    this.select("#register_view_password").text($$("Password"));
+    this.select("#reg_password").attr("placeholder", $$("password"));
+    this.select("#reg_password_verify").attr("placeholder", $$("password verify"));
+    this.select("#button_register").text($$("Register"));
 }
 
 /*
@@ -33,9 +33,9 @@ MudderyRegister.prototype.bindEvents = function() {
  * Event when clicks the register button.
  */
 MudderyRegister.prototype.onRegister = function(element) {
-    var playername = $("#reg_name").val();
-    var password = $("#reg_password").val();
-    var password_verify = $("#reg_password_verify").val();
+    var playername = this.select("#reg_name").val();
+    var password = this.select("#reg_password").val();
+    var password_verify = this.select("#reg_password_verify").val();
 
     $$.commands.doRegister(playername, password, password_verify, true);
     this.clearValues();
@@ -45,7 +45,7 @@ MudderyRegister.prototype.onRegister = function(element) {
  * Clear user inputted values.
  */
 MudderyRegister.prototype.clearValues = function() {
-    $("#reg_name").val("");
-    $("#reg_password").val("");
-    $("#reg_password_verify").val("");
+    this.select("#reg_name").val("");
+    this.select("#reg_password").val("");
+    this.select("#reg_password_verify").val("");
 }

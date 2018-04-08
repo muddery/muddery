@@ -136,14 +136,26 @@
                 </div>
                 <div class="panel panel-default">
                     <div id="tab_content" class="panel-body">
-                        <iframe id="frame_quick_login" class="content_frame" src="./quick_login.html"></iframe>
+                        <div id="frame_quick_login" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/quick_login.html") %>
+                            </div>
+                        </div>
                         <div id="frame_login" class="content_frame">
                             <div class="require">
                                 <%= require("html-loader!../views/login.html") %>
                             </div>
                         </div>
-                        <iframe id="frame_register" class="content_frame" src="./register.html"></iframe>
-                        <iframe id="frame_password" class="content_frame" src="./password.html"></iframe>
+                        <div id="frame_register" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/register.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_password" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/password.html") %>
+                            </div>
+                        </div>
                         <iframe id="frame_select_char" class="content_frame" src="./select_char.html"></iframe>
                         <iframe id="frame_scene" class="content_frame" src="./scene.html"></iframe>
                         <iframe id="frame_information" class="content_frame" src="./information.html"></iframe>
@@ -238,7 +250,10 @@
 
         <script src="../controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/muddery_main.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_quick_login.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/muddery_login.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_register.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_password.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/frameworks.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>

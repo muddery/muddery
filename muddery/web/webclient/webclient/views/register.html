@@ -1,52 +1,33 @@
-<!DOCTYPE html>
-<html lang="en-us">
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
-        <meta charset="utf-8" />
-
-        <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="../libs/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
-    </head>
-    <body>
-        <div id="box_register">
-            <table>
-                <tbody>
-                    <tr>
-                        <td id="view_name">Name</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input id="reg_name" type="text" placeholder="username" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td id="view_password">Password</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input id="reg_password" type="password" placeholder="password" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
-                        </td>
-                        <td>
-                            <input id="reg_password_verify" type="password" placeholder="password verify" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><br></td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <button id="button_register" type="button" class="btn btn-default">Register</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/muddery_register.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-    </body>
-</html>
+ <div id="box_register">
+    <table>
+        <tbody>
+            <tr>
+                <td id="register_view_name">Name</td>
+            </tr>
+            <tr>
+                <td>
+                    <input id="reg_name" type="text" placeholder="username" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
+                </td>
+            </tr>
+            <tr>
+                <td id="register_view_password">Password</td>
+            </tr>
+            <tr>
+                <td>
+                    <input id="reg_password" type="password" placeholder="password" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
+                </td>
+                <td>
+                    <input id="reg_password_verify" type="password" placeholder="password verify" aria-describedby="basic-addon2" autocomplete="off" class="form-control editbox" />
+                </td>
+            </tr>
+            <tr>
+                <td><br></td>
+            </tr>
+            <tr>
+                <td>
+                    <button id="button_register" type="button" class="btn btn-default">Register</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

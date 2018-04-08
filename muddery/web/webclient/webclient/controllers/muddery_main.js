@@ -4,7 +4,10 @@ if (typeof(require) != "undefined") {
     require("../css/webclient.css");
     require("../css/main.css");
 
+    require("../controllers/muddery_quick_login.js");
     require("../controllers/muddery_login.js");
+    require("../controllers/muddery_register.js");
+    require("../controllers/muddery_password.js");
 }
 
 /*

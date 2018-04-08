@@ -60,7 +60,8 @@ var controller = null;
                     $.ajax({url: views_root + frame_info.view,
                             context: key,
                             success: function(result) {
-                                    var frame_info = frameworks[this];
+                                    var key = this;
+                                    var frame_info = frameworks[key];
                                     var div = $("#" + key);
                                     div.html($("<div>").html(result));
                                     var constructor = eval(frame_info.ctrler_name);
@@ -76,7 +77,8 @@ var controller = null;
                 }
             }
         }
+
+        controller = frameworks["body"].controller;
     }
 }();
 
-$$.controller = $$.controller || controller;

@@ -14,28 +14,28 @@ MudderyPassword.prototype.constructor = MudderyPassword;
  * Reset the view's language.
  */
 MudderyPassword.prototype.resetLanguage = function() {
-    $("#view_current").text($$("Current Password"));
-    $("#current_password").attr("placeholder", $$("current password"));
-    $("#view_password").text($$("New Password"));
-    $("#new_password").attr("placeholder", $$("new password"));
-    $("#password_verify").attr("placeholder", $$("password verify"));
-    $("#button_change").text($$("Change"));
+    this.select("#password_view_current").text($$("Current Password"));
+    this.select("#current_password").attr("placeholder", $$("current password"));
+    this.select("#password_view_password").text($$("New Password"));
+    this.select("#new_password").attr("placeholder", $$("new password"));
+    this.select("#password_verify").attr("placeholder", $$("password verify"));
+    this.select("#password_button_change").text($$("Change"));
 }
 
 /*
  * Bind events.
  */
 MudderyPassword.prototype.bindEvents = function() {
-	this.onClick("#button_change", this.onChange);
+	this.onClick("#password_button_change", this.onChange);
 }
 
 /*
  * Event when clicks the register button.
  */
 MudderyPassword.prototype.onChange = function(element) {
-    var current = $("#current_password").val();
-    var password = $("#new_password").val();
-    var password_verify = $("#password_verify").val();
+    var current = this.select("#current_password").val();
+    var password = this.select("#new_password").val();
+    var password_verify = this.select("#password_verify").val();
 
     $$.commands.doChangePassword(current, password, password_verify);
     this.clearValues();
@@ -45,7 +45,7 @@ MudderyPassword.prototype.onChange = function(element) {
  * Clear user inputted values.
  */
 MudderyPassword.prototype.clearValues = function() {
-    $("#current_password").val("");
-    $("#new_password").val("");
-    $("#password_verify").val("");
+    this.select("#current_password").val("");
+    this.select("#new_password").val("");
+    this.select("#password_verify").val("");
 }
