@@ -1,10 +1,9 @@
-//@ sourceURL=/controller/muddery_register.js
 
 /*
  * Derive from the base class.
  */
-function MudderyRegister() {
-	BaseController.call(this);
+function MudderyRegister(el) {
+	BaseController.call(this, el);
 }
 
 MudderyRegister.prototype = prototype(BaseController.prototype);

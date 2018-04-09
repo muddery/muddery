@@ -1,17 +1,17 @@
 
-#character_items {
+#frame_select_char #scene_character_items {
     padding: 2px 2px 10px 2px;
 }
 
-.character_item {
+#frame_select_char .character_item {
     line-height: 25px;
 }
 
-.char_name {
+#frame_select_char .char_name {
     padding: 5px 20px 5px 2px;
 }
 
-.button_delete {
+#frame_select_char .button_delete {
     color: #ccc;
     text-shadow: 0 1px 0 #888;
     background-color: transparent;

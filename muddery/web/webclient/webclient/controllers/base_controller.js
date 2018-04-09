@@ -1,4 +1,3 @@
-//@ sourceURL=/controller/base_controller.js
 
 /*
  * Get the prototype of the base class.

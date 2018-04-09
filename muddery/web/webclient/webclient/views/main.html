@@ -57,7 +57,11 @@
             <div id="popup_modal" role="dialog" class="modal in">
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_message" class="modal-content popup_frame" src="./message.html"></iframe>
+                        <div id="frame_message" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/message.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
@@ -102,7 +106,11 @@
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_new_char" class="popup_frame" src="./new_char.html"></iframe>
+                        <div id="frame_new_char" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/new_char.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
@@ -156,8 +164,16 @@
                                 <%= require("html-loader!../views/password.html") %>
                             </div>
                         </div>
-                        <iframe id="frame_select_char" class="content_frame" src="./select_char.html"></iframe>
-                        <iframe id="frame_scene" class="content_frame" src="./scene.html"></iframe>
+                        <div id="frame_select_char" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/select_char.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_scene" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/scene.html") %>
+                            </div>
+                        </div>
                         <iframe id="frame_information" class="content_frame" src="./information.html"></iframe>
                         <iframe id="frame_inventory" class="content_frame" src="./inventory.html"></iframe>
                         <iframe id="frame_skills" class="content_frame" src="./skills.html"></iframe>
@@ -254,6 +270,9 @@
         <script src="../controllers/muddery_login.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/muddery_register.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/muddery_password.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_select_char.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_message.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_new_char.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/frameworks.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>

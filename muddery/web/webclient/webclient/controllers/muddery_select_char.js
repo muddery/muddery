@@ -1,10 +1,9 @@
-//@ sourceURL=/controller/muddery_select_char.js
 
 /*
  * Derive from the base class.
  */
-function MudderySelectChar() {
-	BaseController.call(this);
+function MudderySelectChar(el) {
+	BaseController.call(this, el);
 }
 
 MudderySelectChar.prototype = prototype(BaseController.prototype);
@@ -14,15 +13,15 @@ MudderySelectChar.prototype.constructor = MudderySelectChar;
  * Reset the view's language.
  */
 MudderySelectChar.prototype.resetLanguage = function() {
-    $("#view_character").text($$("Characters"));
-	$("#button_new_char").text($$("New Character"));
+    this.select("#char_view_character").text($$("Characters"));
+	this.select("#char_button_new_char").text($$("New Character"));
 }
 
 /*
  * Bind events.
  */
 MudderySelectChar.prototype.bindEvents = function() {
-    this.onClick("#button_new_char", this.onNewCharacter);
+    this.onClick("#char_button_new_char", this.onNewCharacter);
     this.onClick("#character_items", ".char_name", this.onSelectCharacter);
     this.onClick("#character_items", ".button_delete", this.onDeleteCharacter);
 }
@@ -38,7 +37,7 @@ MudderySelectChar.prototype.onNewCharacter = function(element) {
  * On select a character.
  */
 MudderySelectChar.prototype.onSelectCharacter = function(element) {
-    var dbref = $(element).data("dbref");
+    var dbref = this.select(element).data("dbref");
     $$.commands.puppetCharacter(dbref);
 }
     
@@ -46,8 +45,8 @@ MudderySelectChar.prototype.onSelectCharacter = function(element) {
  * On delete a character.
  */
 MudderySelectChar.prototype.onDeleteCharacter = function(element) {
-	var name = $(element).data("name");
-	var dbref = $(element).data("dbref");
+	var name = this.select(element).data("name");
+	var dbref = this.select(element).data("dbref");
 	$$.controller.showDeleteCharacter(name, dbref);
 }
     
@@ -56,7 +55,7 @@ MudderySelectChar.prototype.onDeleteCharacter = function(element) {
  */
 MudderySelectChar.prototype.setCharacters = function(characters) {
     this.clearElements("#character_items");
-	var template = $("#character_items>.template");
+	var template = this.select("#character_items>.template");
 
 	for (var i in characters) {
 		var obj = characters[i];

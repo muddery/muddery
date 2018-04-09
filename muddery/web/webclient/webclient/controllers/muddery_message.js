@@ -1,10 +1,9 @@
-//@ sourceURL=/controller/muddery_message.js
 
 /*
  * Derive from the base class.
  */
-function MudderyMessage() {
-	BaseController.call(this);
+function MudderyMessage(el) {
+	BaseController.call(this, el);
 }
 
 MudderyMessage.prototype = prototype(BaseController.prototype);
@@ -14,8 +13,8 @@ MudderyMessage.prototype.constructor = MudderyMessage;
  * Bind events.
  */
 MudderyMessage.prototype.bindEvents = function() {
-    this.onClick("#close_box", this.onClose);
-	this.onClick("#popup_footer", "button", this.onCommand);
+    this.onClick("#msg_close_box", this.onClose);
+	this.onClick("#msg_popup_footer", "button", this.onCommand);
 }
 	
 /*
@@ -31,8 +30,8 @@ MudderyMessage.prototype.onClose = function(element) {
 MudderyMessage.prototype.onCommand = function(element) {
 	this.onClose();
 
-	var cmd = $(element).data("cmd_name");
-	var args = $(element).data("cmd_args");
+	var cmd = this.select(element).data("cmd_name");
+	var args = this.select(element).data("cmd_args");
 	if (cmd) {
 		$$.commands.doCommandLink(cmd, args);
 	}
@@ -42,11 +41,11 @@ MudderyMessage.prototype.onCommand = function(element) {
  * Set message's data.
  */
 MudderyMessage.prototype.setMessage = function(header, content, commands) {
-	$("#popup_header").html($$.text2html.parseHtml(header));
+	this.select("#msg_popup_header").html($$.text2html.parseHtml(header));
 
-	$("#popup_body").html($$.text2html.parseHtml(content));
+	this.select("#msg_popup_body").html($$.text2html.parseHtml(content));
 
-	this.clearElements("#popup_footer");
+	this.clearElements("#msg_popup_footer");
 	if (!commands) {
 		commands = [{"name": $$("OK"),
 					 "cmd": "",
@@ -59,7 +58,7 @@ MudderyMessage.prototype.setMessage = function(header, content, commands) {
  * Set command buttons.
  */
 MudderyMessage.prototype.addButtons = function(commands) {
-	var template = $("#popup_footer>button.template");
+	var template = this.select("#msg_popup_footer>button.template");
 
 	for (var i in commands) {
 		var button = commands[i];

@@ -1,10 +1,9 @@
-//@ sourceURL=/controller/muddery_quick_login.js
 
 /*
  * Derive from the base class.
  */
-function MudderyQuickLogin() {
-	BaseController.call(this);
+function MudderyQuickLogin(el) {
+	BaseController.call(this, el);
 }
 
 MudderyQuickLogin.prototype = prototype(BaseController.prototype);
