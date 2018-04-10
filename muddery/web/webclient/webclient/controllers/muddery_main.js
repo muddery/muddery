@@ -2,6 +2,14 @@
 if (typeof(require) != "undefined") {
     require("../css/webclient.css");
     require("../css/main.css");
+    require("../css/message.css");
+    require("../css/new_char.css");
+    require("../css/scene.css");
+    require("../css/select_char.css");
+    require("../css/information.css");
+    require("../css/inventory.css");
+    require("../css/skills.css");
+    require("../css/quests.css");
 
     require("../controllers/muddery_quick_login.js");
     require("../controllers/muddery_login.js");
@@ -10,6 +18,11 @@ if (typeof(require) != "undefined") {
     require("../controllers/muddery_select_char.js");
     require("../controllers/muddery_message.js");
     require("../controllers/muddery_new_char.js");
+    require("../controllers/muddery_scene.js");
+    require("../controllers/muddery_information.js");
+    require("../controllers/muddery_inventory.js");
+    require("../controllers/muddery_skills.js");
+    require("../controllers/muddery_quests.js");
 }
 
 /*

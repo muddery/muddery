@@ -16,9 +16,9 @@ MudderyQuests.prototype.constructor = MudderyQuests;
  * Reset the view's language.
  */
 MudderyQuests.prototype.resetLanguage = function() {
-	$("#view_name").text($$("NAME"));
-	$("#view_desc").text($$("DESC"));
-	$("#view_objective").text($$("OBJECTIVE"));
+	this.select("#quests_view_name").text($$("NAME"));
+	this.select("#quests_view_desc").text($$("DESC"));
+	this.select("#quests_view_objective").text($$("OBJECTIVE"));
 }
 
 /*
@@ -33,7 +33,7 @@ MudderyQuests.prototype.bindEvents = function() {
  * Event when clicks the quest link.
  */
 MudderyQuests.prototype.onLook = function(element) {
-    var dbref = $(element).data("dbref");
+    var dbref = this.select(element).data("dbref");
     $$.commands.doLook(dbref);
 }
 
@@ -41,7 +41,7 @@ MudderyQuests.prototype.onLook = function(element) {
  * Event then the window resizes.
  */
 MudderyQuests.prototype.onResize = function(element) {
-	var height = $(window).innerHeight() - $("#quests_wrapper").offset().top - 16;
+	var height = $(window).innerHeight() - this.select("#quests_wrapper").offset().top - 16;
 	this.paginator.tableHeight(height);
 }
 
@@ -50,7 +50,7 @@ MudderyQuests.prototype.onResize = function(element) {
  */
 MudderyQuests.prototype.setQuests = function(quests) {
 	this.clearElements("#quest_list");
-    var template = $("#quest_list>tr.template");
+    var template = this.select("#quest_list>tr.template");
     
 	for (var i in quests) {
 		var quest = quests[i];
@@ -66,7 +66,7 @@ MudderyQuests.prototype.setQuests = function(quests) {
 		this.addObjectives(item, quest["objectives"]);
 	}
 	
-	var height = $(window).innerHeight() - $("#quests_wrapper").offset().top - 16;
+	var height = $(window).innerHeight() - this.select("#quests_wrapper").offset().top - 16;
 	this.paginator.refresh(height);
 }
 

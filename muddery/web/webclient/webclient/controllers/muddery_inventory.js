@@ -6,7 +6,7 @@
 function MudderyInventory() {
 	BaseController.call(this);
 
-	this.paginator = new Paginator("#inventory_wrapper");
+	this.paginator = new Paginator("#inv_inventory_wrapper");
 }
 
 MudderyInventory.prototype = prototype(BaseController.prototype);
@@ -16,16 +16,16 @@ MudderyInventory.prototype.constructor = MudderyInventory;
  * Reset the view's language.
  */
 MudderyInventory.prototype.resetLanguage = function() {
-    $("#view_name").text($$("NAME"));
-    $("#view_number").text($$("NUM"));
-    $("#view_desc").text($$("DESC"));
+    this.select("#inv_view_name").text($$("NAME"));
+    this.select("#inv_view_number").text($$("NUM"));
+    this.select("#inv_view_desc").text($$("DESC"));
 }
 
 /*
  * Bind events.
  */
 MudderyInventory.prototype.bindEvents = function() {
-	this.onClick("#inventory_items", ".obj_name", this.onLook);
+	this.onClick("#inv_inventory_items", ".obj_name", this.onLook);
 	this.on(window, "resize", this.onResize);
 }
             
@@ -33,7 +33,7 @@ MudderyInventory.prototype.bindEvents = function() {
  * Event when clicks the object link.
  */
 MudderyInventory.prototype.onLook = function(element) {
-    var dbref = $(element).data("dbref");
+    var dbref = this.select(element).data("dbref");
     $$.commands.doLook(dbref);
 }
 
@@ -41,7 +41,7 @@ MudderyInventory.prototype.onLook = function(element) {
  * Event then the window resizes.
  */
 MudderyInventory.prototype.onResize = function(element) {
-	var height = $(window).innerHeight() - $("#inventory_wrapper").offset().top - 16;
+	var height = $(window).innerHeight() - this.select("#inv_inventory_wrapper").offset().top - 16;
 	this.paginator.tableHeight(height);
 }
 
@@ -49,8 +49,8 @@ MudderyInventory.prototype.onResize = function(element) {
  * Set inventory's data.
  */
 MudderyInventory.prototype.setInventory = function(inventory) {
-    this.clearElements("#inventory_items");
-    var template = $("#inventory_items>tr.template");
+    this.clearElements("#inv_inventory_items");
+    var template = this.select("#inv_inventory_items>tr.template");
 
     for (var i in inventory) {
         var obj = inventory[i];
@@ -77,6 +77,6 @@ MudderyInventory.prototype.setInventory = function(inventory) {
         item.find(".obj_desc").html($$.text2html.parseHtml(obj["desc"]));
     }
 
-    var height = $(window).innerHeight() - $("#inventory_wrapper").offset().top - 16;
+    var height = $(window).innerHeight() - this.select("#inv_inventory_wrapper").offset().top - 16;
 	this.paginator.refresh(height);
 }

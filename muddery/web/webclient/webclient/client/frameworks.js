@@ -44,4 +44,24 @@ var frameworks = {
                       	 	 ctrler_name:	"MudderyScene",
                       	 	 view:          "scene.html",
                       	 	 controller:    null},
+                      	 	 
+	frame_information:		{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyInformation",
+                      	 	 view:          "information.html",
+                      	 	 controller:    null},
+                      	 	 
+	frame_inventory:		{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyInventory",
+                      	 	 view:          "inventory.html",
+                      	 	 controller:    null},
+
+	frame_skills:    		{scripts: 		[],
+                      	 	 ctrler_name:	"MudderySkills",
+                      	 	 view:          "skills.html",
+                      	 	 controller:    null},
+
+	frame_quests:    		{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyQuests",
+                      	 	 view:          "quests.html",
+                      	 	 controller:    null},
 }

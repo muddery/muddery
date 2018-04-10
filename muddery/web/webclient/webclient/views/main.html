@@ -10,6 +10,14 @@
         <link rel="stylesheet" type="text/css" media="screen" href="../libs/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/main.css" />
+     	<link rel="stylesheet" type="text/css" media="screen" href="../css/message.css" />
+     	<link rel="stylesheet" type="text/css" media="screen" href="../css/new_char.css" />
+     	<link rel="stylesheet" type="text/css" media="screen" href="../css/scene.css" />
+     	<link rel="stylesheet" type="text/css" media="screen" href="../css/select_char.css" />
+     	<link rel="stylesheet" type="text/css" media="screen" href="../css/information.css" />
+     	<link rel="stylesheet" type="text/css" media="screen" href="../css/inventory.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/skills.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/quests.css" />
 
         <!-- Importing the online jQuery javascript library -->
         <!--script src="http://code.jquery.com/jquery-1.6.1.js" type="text/javascript" charset="utf-8"></script-->
@@ -40,6 +48,7 @@
         <script src="../utils/data_handler.js" type="text/javascript" charset="utf-8"></script>
         <script src="../utils/escape.js" type="text/javascript" charset="utf-8"></script>
         <script src="../utils/utils.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../utils/paginator.js" defer="defer" type="text/javascript" charset="utf-8"></script>
 
     </head>
     <body id="body">
@@ -174,10 +183,26 @@
                                 <%= require("html-loader!../views/scene.html") %>
                             </div>
                         </div>
-                        <iframe id="frame_information" class="content_frame" src="./information.html"></iframe>
-                        <iframe id="frame_inventory" class="content_frame" src="./inventory.html"></iframe>
-                        <iframe id="frame_skills" class="content_frame" src="./skills.html"></iframe>
-                        <iframe id="frame_quests" class="content_frame" src="./quests.html"></iframe>
+                        <div id="frame_information" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/information.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_inventory" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/inventory.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_skills" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/skills.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_quests" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/quests.html") %>
+                            </div>
+                        </div>
                         <iframe id="frame_honours" class="content_frame" src="./honours.html"></iframe>
                     </div>
                 </div>
@@ -273,6 +298,12 @@
         <script src="../controllers/muddery_select_char.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/muddery_message.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/muddery_new_char.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_scene.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_information.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_inventory.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_skills.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_quests.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+
         <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/frameworks.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>

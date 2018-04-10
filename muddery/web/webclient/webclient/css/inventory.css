@@ -1,5 +1,5 @@
 
-#tab_inventory {
+#inv_tab_inventory {
     border-collapse: collapse;
     border-color: #aaa;
     border-style: solid;
@@ -7,7 +7,7 @@
     margin: 8px;
 }
 
-#tab_inventory th {
+#inv_tab_inventory th {
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;
@@ -15,7 +15,7 @@
     font-weight: normal;
 }
 
-#tab_inventory td {
+#inv_tab_inventory td {
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;

@@ -13,28 +13,28 @@ MudderyScene.prototype.constructor = MudderyScene;
  * Reset the view's language.
  */
 MudderyScene.prototype.resetLanguage = function() {
-	$("#scene_view_objects").text($$("Objects: "));
-	$("#scene_view_npcs").text($$("NPCs: "));
-	$("#scene_view_players").text($$("Players: "));
+	this.select("#scene_view_objects").text($$("Objects: "));
+	this.select("#scene_view_npcs").text($$("NPCs: "));
+	this.select("#scene_view_players").text($$("Players: "));
 }
 
 /*
  * Bind events.
  */
 MudderyScene.prototype.bindEvents = function() {
-	this.onClick("#commands_container", "button", this.onCommand);
-	this.onClick("#things_container", "a", this.onLook);
-	this.onClick("#npcs_container", "a", this.onLook);
-	this.onClick("#players_container", "a", this.onLook);
-	this.onClick("#exits_container", "a", this.onExit);
+	this.onClick("#scene_commands_container", "button", this.onCommand);
+	this.onClick("#scene_things_container", "a", this.onLook);
+	this.onClick("#scene_npcs_container", "a", this.onLook);
+	this.onClick("#scene_players_container", "a", this.onLook);
+	this.onClick("#scene_exits_container", "a", this.onExit);
 }
 
 /*
  * On click a command.
  */
 MudderyScene.prototype.onCommand = function(element) {
-    var cmd = $(element).data("cmd_name");
-    var args = $(element).data("cmd_args");
+    var cmd = this.select(element).data("cmd_name");
+    var args = this.select(element).data("cmd_args");
     $$.commands.doCommandLink(cmd, args);
 }
 
@@ -42,7 +42,7 @@ MudderyScene.prototype.onCommand = function(element) {
  * On look an object.
  */
 MudderyScene.prototype.onLook = function(element) {
-    var dbref = $(element).data("dbref");
+    var dbref = this.select(element).data("dbref");
     $$.commands.doLook(dbref);
 }
 
@@ -50,7 +50,7 @@ MudderyScene.prototype.onLook = function(element) {
  * On go to an exit.
  */
 MudderyScene.prototype.onExit = function(element) {
-    var dbref = $(element).data("dbref");
+    var dbref = this.select(element).data("dbref");
     $$.commands.doGoto(dbref);
 }
 
@@ -58,8 +58,8 @@ MudderyScene.prototype.onExit = function(element) {
  * Clear the view.
  */
 MudderyScene.prototype.clearScene = function() {
-    $("#scene_name_content").empty();
-    $("#scene_desc_content").empty();
+    this.select("#scene_name_content").empty();
+    this.select("#scene_desc_content").empty();
 
     this.clearElements("#scene_commands_container");
     this.clearElements("#scene_things_container");
@@ -68,7 +68,7 @@ MudderyScene.prototype.clearScene = function() {
 
     for (var i = 0; i < 9; ++i) {
         this.clearElements("#scene_exits_" + i);
-        $("#scene_link_" + i).hide();
+        this.select("#scene_link_" + i).hide();
     }
 }
 
@@ -83,15 +83,15 @@ MudderyScene.prototype.setScene = function(scene) {
     if ("dbref" in scene) {
         dbref = scene["dbref"];
     }
-    $("#scene_box_scene").data("dbref", dbref);
+    this.select("#scene_box_scene").data("dbref", dbref);
 
     // add room's name
     var room_name = $$.text2html.parseHtml(scene["name"]);
-    $("#scene_name_content").html(room_name);
+    this.select("#scene_name_content").html(room_name);
 
     // add room's desc
     var room_desc = $$.text2html.parseHtml(scene["desc"]);
-    $("#scene_desc_content").html(room_desc);
+    this.select("#scene_desc_content").html(room_desc);
 
     // add commands
     var commands = "cmds" in scene ? scene["cmds"]: null;
@@ -114,7 +114,7 @@ MudderyScene.prototype.setScene = function(scene) {
     this.setExitsMap(exits, room_name);
 
     // set background
-    var backview = $("#scene_box_scene");
+    var backview = this.select("#scene_box_scene");
     if ("background" in scene && scene["background"]) {
         var url = $$.settings.resource_url + scene["background"]["name"];
         backview.css("background", "url(" + url + ") no-repeat center center");
@@ -135,11 +135,11 @@ MudderyScene.prototype.addPlayer = function(player) {
  * Remove a player from this scene.
  */
 MudderyScene.prototype.removePlayer = function(player) {
-    $("#scene_obj_" + player["dbref"].slice(1)).remove();
+    this.select("#scene_obj_" + player["dbref"].slice(1)).remove();
 
-	if ($("#scene_players_container>:not(.template)").length == 0) {
+	if (this.select("#scene_players_container>:not(.template)").length == 0) {
 	    // No other players.
-		$("#scene_players").hide();
+		this.select("#scene_players").hide();
 	}
 }
 
@@ -172,20 +172,20 @@ MudderyScene.prototype.addObjects = function(objects) {
 MudderyScene.prototype.removeObjects = function(objects) {
     for (var key in objects) {
         for (var i in objects[key]) {
-            $("#scene_obj_" + objects[key][i]["dbref"].slice(1)).remove();
+            this.select("#scene_obj_" + objects[key][i]["dbref"].slice(1)).remove();
         }
     }
 
-    if ($("#scene_things_container>:not(.template)").length == 0) {
-        $("#scene_things").hide();
+    if (this.select("#scene_things_container>:not(.template)").length == 0) {
+        this.select("#scene_things").hide();
     }
 
-    if ($("#scene_npcs_container>:not(.template)").length == 0) {
-        $("#scene_npcs").hide();
+    if (this.select("#scene_npcs_container>:not(.template)").length == 0) {
+        this.select("#scene_npcs").hide();
     }
 
-    if ($("#scene_players_container>:not(.template)").length == 0) {
-        $("#scene_players").hide();
+    if (this.select("#scene_players_container>:not(.template)").length == 0) {
+        this.select("#scene_players").hide();
     }
 }
 
@@ -193,7 +193,7 @@ MudderyScene.prototype.removeObjects = function(objects) {
  * Add command button to this scene.
  */
 MudderyScene.prototype.addButtons = function(block_id, container_id, data) {
-    var container = $(container_id);
+    var container = this.select(container_id);
     var template = container.find("button.template");
 
     if (data) {
@@ -210,10 +210,10 @@ MudderyScene.prototype.addButtons = function(block_id, container_id, data) {
 
     if (block_id) {
         if (container.children().not(".template").length > 0) {
-            $(block_id).show();
+            this.select(block_id).show();
         }
         else {
-            $(block_id).hide();
+            this.select(block_id).hide();
         }
     }
 }
@@ -222,7 +222,7 @@ MudderyScene.prototype.addButtons = function(block_id, container_id, data) {
  * Add object links to this scene.
  */
 MudderyScene.prototype.addLinks = function(block_id, container_id, data) {
-    var container = $(container_id);
+    var container = this.select(container_id);
     var template = container.find("a.template");
 
     if (data) {
@@ -246,10 +246,10 @@ MudderyScene.prototype.addLinks = function(block_id, container_id, data) {
 
     if (block_id) {
         if (container.children().not(".template").length > 0) {
-            $(block_id).show();
+            this.select(block_id).show();
         }
         else {
-            $(block_id).hide();
+            this.select(block_id).hide();
         }
     }
 }
@@ -303,7 +303,7 @@ MudderyScene.prototype.setExitsMap = function(exits, room_name) {
  * Add exits to this scene.
  */
 MudderyScene.prototype.addExits = function(line_id, container_id, data) {
-    var container = $(container_id);
+    var container = this.select(container_id);
     var template = container.find("a.template");
 
     if (data) {
@@ -320,10 +320,10 @@ MudderyScene.prototype.addExits = function(line_id, container_id, data) {
 
     if (line_id) {
         if (container.children().not(".template").length > 0) {
-            $(line_id).show();
+            this.select(line_id).show();
         }
         else {
-            $(line_id).hide();
+            this.select(line_id).hide();
         }
     }
 }
@@ -332,7 +332,7 @@ MudderyScene.prototype.addExits = function(line_id, container_id, data) {
  * Add object texts to this scene.
  */
 MudderyScene.prototype.addText = function(block_id, container_id, text) {
-    var container = $(container_id);
+    var container = this.select(container_id);
     var template = container.find("span.template");
 
     var has_text = false;
@@ -344,10 +344,10 @@ MudderyScene.prototype.addText = function(block_id, container_id, text) {
 
     if (block_id) {
         if (has_text) {
-            $(block_id).show();
+            this.select(block_id).show();
         }
         else {
-            $(block_id).hide();
+            this.select(block_id).hide();
         }
     }
 }

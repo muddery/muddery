@@ -14,24 +14,24 @@ MudderyInformation.prototype.constructor = MudderyInformation;
  * Reset the view's language.
  */
 MudderyInformation.prototype.resetLanguage = function() {
-    $("#view_head").text($$("HEAD: "));
-    $("#view_hand").text($$("HAND: "));
-    $("#view_chest").text($$("CHEST: "));
-    $("#view_leg").text($$("LEG: "));
+    this.select("#info_view_head").text($$("HEAD: "));
+    this.select("#info_view_hand").text($$("HAND: "));
+    this.select("#info_view_chest").text($$("CHEST: "));
+    this.select("#info_view_leg").text($$("LEG: "));
 }
 
 /*
  * Bind events.
  */
 MudderyInformation.prototype.bindEvents = function() {
-	this.onClick("#box_equipment", "a", this.onLook);
+	this.onClick("#info_box_equipment", "a", this.onLook);
 }
 
 /*
  * Event when clicks the object link.
  */
 MudderyInformation.prototype.onLook = function(element) {
-    var dbref = $(element).data("dbref");
+    var dbref = this.select(element).data("dbref");
     $$.commands.doLook(dbref);
 }
 
@@ -39,14 +39,14 @@ MudderyInformation.prototype.onLook = function(element) {
  * Set player's basic information.
  */
 MudderyInformation.prototype.setInfo = function(name, icon) {
-    $("#name").text(name);
+    this.select("#info_name").text(name);
     if (icon) {
         var url = $$.settings.resource_url + icon;
-        $("#obj_icon").attr("src", url)
+        this.select("#info_obj_icon").attr("src", url)
                       .show();
     }
     else {
-        $("#obj_icon").hide();
+        this.select("#info_obj_icon").hide();
     }
 }
 
@@ -54,8 +54,8 @@ MudderyInformation.prototype.setInfo = function(name, icon) {
  * Set player character's information.
  */
 MudderyInformation.prototype.setStatus = function(status) {
-    this.clearElements("#attributes");
-    var template = $("#attributes>div.template");
+    this.clearElements("#info_attributes");
+    var template = this.select("#info_attributes>div.template");
 
     var attributes = [];
     for (var key in status) {
@@ -110,11 +110,11 @@ MudderyInformation.prototype.setStatus = function(status) {
         exp_str = exp + "/" + max_exp;
     }
 
-    $("#level").text(level);
-    $("#exp").text(exp_str);
-    $("#hp").text(hp_str);
-    $("#attack").text(attack);
-    $("#defence").text(defence);
+    this.select("#level").text(level);
+    this.select("#exp").text(exp_str);
+    this.select("#hp").text(hp_str);
+    this.select("#attack").text(attack);
+    this.select("#defence").text(defence);
     */
 }
 
@@ -131,7 +131,7 @@ MudderyInformation.prototype.setCombatStatus = function(status) {
             }
         }
 
-        var item = $("#info_" + key);
+        var item = this.select("#info_" + key);
 
         var value = status[key];
         if (value == null || typeof(value) == "undefined") {
@@ -171,7 +171,7 @@ MudderyInformation.prototype.setEquipments = function(equipments) {
             name = equip["name"];
         }
 
-        $("#" + pos)
+        this.select("#" + pos)
             .data("dbref", dbref)
             .html(name);
     }
