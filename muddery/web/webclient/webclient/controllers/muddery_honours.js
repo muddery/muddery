@@ -1,4 +1,3 @@
-//@ sourceURL=/controller/muddery_honours.js
 
 /*
  * Derive from the base class.
@@ -17,20 +16,19 @@ MudderyHonours.prototype.constructor = MudderyHonours;
  * Reset the view's language.
  */
 MudderyHonours.prototype.resetLanguage = function() {
-    $("#button_fight").text($$("FIGHT"));
-    $("#view_ranking").text($$("RANKING"));
-    $("#view_name").text($$("NAME"));
-    $("#view_honour").text($$("HONOUR"));
-    $("#button_queue").text($$("QUEUE UP"));
-    $("#button_quit").text($$("QUIT QUEUE"));
+    this.select("#honours_view_ranking").text($$("RANKING"));
+    this.select("#honours_view_name").text($$("NAME"));
+    this.select("#honours_view_honour").text($$("HONOUR"));
+    this.select("#honours_button_queue").text($$("QUEUE UP"));
+    this.select("#honours_button_quit").text($$("QUIT QUEUE"));
 }
 
 /*
  * Bind events.
  */
 MudderyHonours.prototype.bindEvents = function() {
-    this.onClick("#button_queue", this.onQueueUpCombat);
-    this.onClick("#button_quit", this.onQuitCombatQueue);
+    this.onClick("#honours_button_queue", this.onQueueUpCombat);
+    this.onClick("#honours_button_quit", this.onQuitCombatQueue);
 	this.on(window, "resize", this.onResize);
 }
 
@@ -59,7 +57,7 @@ MudderyHonours.prototype.onQuitCombatQueue = function(element) {
  * Event then the window resizes.
  */
 MudderyHonours.prototype.onResize = function(element) {
-	var height = $(window).innerHeight() - $("#honours_wrapper").offset().top - 16;
+	var height = $(window).innerHeight() - this.select("#honours_wrapper").offset().top - 16;
 	this.paginator.tableHeight(height);
 }
 
@@ -74,8 +72,8 @@ MudderyHonours.prototype.setMinHonourLevel = function(level) {
  * Set top characters.
  */
 MudderyHonours.prototype.setRankings = function(rankings) {
-    this.clearElements("#character_items");
-    var template = $("#character_items>tr.template");
+    this.clearElements("#honours_character_items");
+    var template = this.select("#honours_character_items>tr.template");
 
     for (var i in rankings) {
         var data = rankings[i];
@@ -91,7 +89,7 @@ MudderyHonours.prototype.setRankings = function(rankings) {
             .text(data["honour"]);
     }
     
-    var height = $(window).innerHeight() - $("#honours_wrapper").offset().top - 16;
+    var height = $(window).innerHeight() - this.select("#honours_wrapper").offset().top - 16;
 	this.paginator.refresh(height);
 }
 
@@ -99,14 +97,14 @@ MudderyHonours.prototype.setRankings = function(rankings) {
  * Set the queue up state.
  */
 MudderyHonours.prototype.queueUpCombat = function() {
-    $("#button_queue").hide();
-    $("#button_quit").show();
+    this.select("#honours_button_queue").hide();
+    this.select("#honours_button_quit").show();
 }
 
 /*
  * Set the quit queue state.
  */
 MudderyHonours.prototype.quitCombatQueue = function() {
-    $("#button_queue").show();
-    $("#button_quit").hide();
+    this.select("#honours_button_queue").show();
+    this.select("#honours_button_quit").hide();
 }

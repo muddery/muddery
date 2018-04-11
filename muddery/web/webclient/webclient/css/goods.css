@@ -1,9 +1,9 @@
 
-#div_icon {
+#goods_div_icon {
     text-align: center;
 }
 
-#img_icon {
+#goods_img_icon {
 	width: 40px;
 	height: 40px;
 }
@@ -12,6 +12,6 @@
     text-align: center;
 }
 
-#popup_footer {
+#goods_popup_footer {
     text-align: center;
 }

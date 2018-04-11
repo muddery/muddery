@@ -4,25 +4,25 @@
 	height: 30px;
 }
 
-#center_time {
+#combat_center_time {
     text-align: center;
 }
 
-#status_bar {
+#combat_status_bar {
     margin: 10px 0px 0px 0px;
 }
 
-#messages {
+#combat_messages {
     overflow-x: hidden;
     overflow-y: auto;
 	height: 100px;
 }
 
-#characters {
+#combat_characters {
 	min-height: 100px;
 }
 
-#buttons {
+#combat_buttons {
     height: 90px;
 }
 

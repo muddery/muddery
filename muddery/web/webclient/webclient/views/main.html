@@ -18,15 +18,25 @@
      	<link rel="stylesheet" type="text/css" media="screen" href="../css/inventory.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/skills.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/quests.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/honours.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/object.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/dialogue.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/map.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/delete_char.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/combat.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/combat_result.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/confirm_combat.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/shop.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="../css/goods.css" />
 
         <!-- Importing the online jQuery javascript library -->
-        <!--script src="http://code.jquery.com/jquery-1.6.1.js" type="text/javascript" charset="utf-8"></script-->
         <!--script src="http://code.jquery.com/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script-->
 
         <!--for offline testing, download the jquery library from jquery.com-->
         <script src="../libs/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="../libs/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../libs/bootstrap.min.js"></script>
+        <script src="../libs/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../libs/d3.v3.min.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- settings -->
         <script src="../settings.js" type="text/javascript" charset="utf-8"></script>
@@ -48,7 +58,7 @@
         <script src="../utils/data_handler.js" type="text/javascript" charset="utf-8"></script>
         <script src="../utils/escape.js" type="text/javascript" charset="utf-8"></script>
         <script src="../utils/utils.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../utils/paginator.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../utils/paginator.js" type="text/javascript" charset="utf-8"></script>
 
     </head>
     <body id="body">
@@ -57,7 +67,11 @@
             <div role="dialog" class="modal in popup_modal">
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                    	<iframe id="frame_confirm_combat" class="modal-content popup_frame" src="./confirm_combat.html"></iframe>
+                    	<div id="frame_confirm_combat" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/confirm_combat.html") %>
+                            </div>
+                        </div>
         			</div>
         		</div>
         	</div>
@@ -66,7 +80,7 @@
             <div id="popup_modal" role="dialog" class="modal in">
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <div id="frame_message" class="content_frame">
+                        <div id="frame_message" class="popup_frame">
                             <div class="require">
                                 <%= require("html-loader!../views/message.html") %>
                             </div>
@@ -75,42 +89,74 @@
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_object" class="popup_frame" src="./object.html"></iframe>
+                        <div id="frame_object" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/object.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_get_objects" class="popup_frame" src="./get_objects.html"></iframe>
+                        <div id="frame_get_objects" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/get_objects.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_dialogue" class="popup_frame" src="./dialogue.html"></iframe>
+                        <div id="frame_dialogue" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/dialogue.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_shop" class="popup_frame" src="./shop.html"></iframe>
+                        <div id="frame_shop" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/shop.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_goods" class="popup_frame" src="./goods.html"></iframe>
+                        <div id="frame_goods" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/goods.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_combat" class="popup_frame" src="./combat.html"></iframe>
+                        <div id="frame_combat" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/combat.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_combat_result" class="popup_frame" src="./combat_result.html"></iframe>
+                        <div id="frame_combat_result" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/combat_result.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-dialog modal-lg vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_map" class="popup_frame" src="./map.html"></iframe>
+                        <div id="frame_map" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/map.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
@@ -124,7 +170,11 @@
                 </div>
                 <div class="modal-dialog modal-sm vertical-center">
                     <div class="modal-content">
-                        <iframe id="frame_delete_char" class="popup_frame" src="./delete_char.html"></iframe>
+                        <div id="frame_delete_char" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/delete_char.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -203,7 +253,11 @@
                                 <%= require("html-loader!../views/quests.html") %>
                             </div>
                         </div>
-                        <iframe id="frame_honours" class="content_frame" src="./honours.html"></iframe>
+                        <div id="frame_honours" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!../views/honours.html") %>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div id="tab_bar">
@@ -303,8 +357,18 @@
         <script src="../controllers/muddery_inventory.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/muddery_skills.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/muddery_quests.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_honours.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_object.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_get_objects.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_dialogue.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_map.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_delete_char.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_combat.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_combat_result.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_confirm_combat.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_shop.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/muddery_goods.js" defer="defer" type="text/javascript" charset="utf-8"></script>
 
-        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/frameworks.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
     </body>

@@ -1,44 +1,23 @@
-<!DOCTYPE html>
-<html lang="en-us">
-    <head>
-	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
-        <meta charset="utf-8" />
-
-        <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="../libs/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/honours.css" />
-    </head>
-    <body>
-        <div id="box_honours">
-            <button id="button_queue" type="button" class="btn btn-default">QUEUE UP</button>
-            <button id="button_quit" type="button" class="btn btn-default" style="display: none;">QUIT QUEUE</button>
-            <div><br></div>
-            <div id="honours_wrapper">
-				<table id="tab_honours">
-					<thead>
-						<tr>
-							<th id="view_ranking">RANKING</th>
-							<th id="view_name">NAME</th>
-							<th id="view_honour">HONOUR</th>
-						</tr>
-					</thead>
-					<tbody id="character_items">
-						<tr class="template">
-							<td class="character_ranking"></td>
-							<td class="character_name"></td>
-							<td class="character_honour"></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-        </div>
-
-		<script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-		<script src="../utils/paginator.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-    	<script src="../controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/muddery_honours.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-    </body>
-</html>
+<div id="box_honours">
+	<button id="honours_button_queue" type="button" class="btn btn-default">QUEUE UP</button>
+	<button id="honours_button_quit" type="button" class="btn btn-default" style="display: none;">QUIT QUEUE</button>
+	<div><br></div>
+	<div id="honours_wrapper">
+		<table id="table_honours">
+			<thead>
+				<tr>
+					<th id="honours_view_ranking">RANKING</th>
+					<th id="honours_view_name">NAME</th>
+					<th id="honours_view_honour">HONOUR</th>
+				</tr>
+			</thead>
+			<tbody id="honours_character_items">
+				<tr class="template">
+					<td class="character_ranking"></td>
+					<td class="character_name"></td>
+					<td class="character_honour"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

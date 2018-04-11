@@ -1,4 +1,3 @@
-//@ sourceURL=/controller/muddery_combat_result.js
 
 /*
  * Derive from the base class.
@@ -16,17 +15,17 @@ MudderyCombatResult.prototype.constructor = MudderyCombatResult;
  * Reset the view's language.
  */
 MudderyCombatResult.prototype.resetLanguage = function() {
-	$("#view_get_exp").text($$("Get Exp: "));
-	$("#view_get_objects").text($$("Get Objects: "));
-	$("#view_rejected").text($$("Can Not Get: "));
-	$("#button_ok").text($$("OK"));
+	$("#combat_result_view_get_exp").text($$("Get Exp: "));
+	$("#combat_result_view_get_objects").text($$("Get Objects: "));
+	$("#combat_result_view_rejected").text($$("Can Not Get: "));
+	$("#combat_result_button_ok").text($$("OK"));
 }
 
 /*
  * Bind events.
  */
 MudderyCombatResult.prototype.bindEvents = function() {
-    this.onClick("#button_ok", this.onClose);
+    this.onClick("#combat_result_button_ok", this.onClose);
 }
 
 /*
@@ -46,11 +45,11 @@ MudderyCombatResult.prototype.onClose = function(element) {
  * Clear the result box.
  */
 MudderyCombatResult.prototype.clear = function() {
-	$("#header").empty();
-	$("#desc").empty();
-	$("#exp").text(0);
-	$("#accepted").hide();
-	$("#rejected").hide();
+	$("#combat_result_header").empty();
+	$("#combat_result_desc").empty();
+	$("#combat_result_exp").text(0);
+	$("#combat_result_accepted").hide();
+	$("#combat_result_rejected").hide();
 		
 	this.dialogue = null;
 }
@@ -78,14 +77,14 @@ MudderyCombatResult.prototype.setResult = function(result) {
 		header = $$("Draw !");
 	}
 	
-	$("#header").text(header);
+	$("#combat_result_header").text(header);
 }
 	
 /*
  * Set the experiences that the player get.
  */
 MudderyCombatResult.prototype.setGetExp = function(exp) {
-	$("#exp").text(exp);
+	$("#combat_result_exp").text(exp);
 }
 	
 /*
@@ -99,8 +98,8 @@ MudderyCombatResult.prototype.setDialogue = function(dialogue) {
  * Set the objects that the player get.
  */
 MudderyCombatResult.prototype.setGetObjects = function(accepted, rejected) {
-	this.setItems("#accepted", "#accepted_list", accepted);
-	this.setItems("#rejected", "#rejected_list", rejected);
+	this.setItems("#combat_result_accepted", "#combat_result_accepted_list", accepted);
+	this.setItems("#combat_result_rejected", "#combat_result_rejected_list", rejected);
 }
 	
 /*

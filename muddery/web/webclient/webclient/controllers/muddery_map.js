@@ -1,4 +1,3 @@
-//@ sourceURL=/controller/muddery_map.js
 
 /*
  * Derive from the base class.
@@ -23,7 +22,7 @@ MudderyMap.prototype.constructor = MudderyMap;
  * Bind events.
  */
 MudderyMap.prototype.bindEvents = function() {
-    this.onClick("#close_box", this.onClose);
+    this.onClick("#map_close_box", this.onClose);
 }
 
 /*
@@ -46,7 +45,7 @@ MudderyMap.prototype.setMap = function(scale, room_size, show_room_box) {
  * Clear the map.
  */
 MudderyMap.prototype.clear = function() {
-    $("#name").html($$("MAP"));
+    $("#map_name").html($$("MAP"));
     $("#map_svg").empty();
 }
     
@@ -64,7 +63,7 @@ MudderyMap.prototype.showMap = function(location) {
 	if (location["area"]) {
 		var area_name = $$.text2html.parseHtml(location["area"]["name"]);
 		if (area_name) {
-			$("#name").html(area_name);
+			$("#map_name").html(area_name);
 		}
 	}
 	

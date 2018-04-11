@@ -1,4 +1,3 @@
-//@ sourceURL=/controller/paginator.js
 
 /*
  * Paginate table rows.

@@ -1,4 +1,3 @@
-//@ sourceURL=/controller/muddery_confirm_combat.js
 
 /*
  * Derive from the base class.
@@ -18,16 +17,16 @@ MudderyConfirmCombat.prototype.constructor = MudderyConfirmCombat;
  * Reset the view's language.
  */
 MudderyConfirmCombat.prototype.resetLanguage = function() {
-	$("#popup_body").text($$("Found an opponent."));
-	$("#button_confirm").text($$("Confirm"));
+	$("#confirm_combat_popup_body").text($$("Found an opponent."));
+	$("#confirm_combat_button_confirm").text($$("Confirm"));
 }
 	
 /*
  * Bind events.
  */
 MudderyConfirmCombat.prototype.bindEvents = function() {
-    this.onClick("#close_box", this.onRejectCombat);
-    this.onClick("#button_confirm", this.onConfirmCombat);
+    this.onClick("#confirm_combat_close_box", this.onRejectCombat);
+    this.onClick("#confirm_combat_button_confirm", this.onConfirmCombat);
 }
 
 /*
@@ -41,8 +40,8 @@ MudderyConfirmCombat.prototype.onConfirmCombat = function(element) {
 
 	$$.commands.confirmCombat();
 
-	$("#popup_body").text($$("Confirmed."));
-	$("#button_confirm").hide();
+	$("#confirm_combat_popup_body").text($$("Confirmed."));
+	$("#confirm_combat_button_confirm").hide();
 	refreshPrepareTime();
 }
 	
@@ -64,7 +63,7 @@ MudderyConfirmCombat.prototype.onRejectCombat = function(element) {
 MudderyConfirmCombat.prototype.setTime = function(time) {
 	this.confirmed = false;
 	this.prepare_time = new Date().getTime() + time * 1000;
-	$("#time").text(parseInt(time - 1) + $$(" seconds to confirm."));
+	$("#confirm_combat_time").text(parseInt(time - 1) + $$(" seconds to confirm."));
 
 	this.interval_id = window.setInterval("refreshPrepareTime()", 1000);
 }
@@ -94,7 +93,7 @@ function refreshPrepareTime() {
         text = $$(" seconds to confirm.");
     }
 
-    $("#time").text(parseInt(remain_time) + text);
+    $("#confirm_combat_time").text(parseInt(remain_time) + text);
     
     if (remain_time <= 0) {
         controller.closeBox();

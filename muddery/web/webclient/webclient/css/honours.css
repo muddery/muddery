@@ -1,9 +1,9 @@
 
-#button_fight {
+#honours_button_fight {
     text-align: center;
 }
 
-#tab_honours {
+#table_honours {
     border-collapse: collapse;
     border-color: #aaa;
     border-style: solid;
@@ -11,7 +11,7 @@
     margin: 8px;
 }
 
-#tab_honours th {
+#table_honours th {
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;
@@ -19,7 +19,7 @@
     font-weight: normal;
 }
 
-#tab_honours td {
+#table_honours td {
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;

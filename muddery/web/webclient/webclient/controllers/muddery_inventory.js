@@ -1,4 +1,3 @@
-//@ sourceURL=/controller/muddery_inventory.js
 
 /*
  * Derive from the base class.

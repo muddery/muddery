@@ -64,4 +64,59 @@ var frameworks = {
                       	 	 ctrler_name:	"MudderyQuests",
                       	 	 view:          "quests.html",
                       	 	 controller:    null},
+                      	 	 
+	frame_honours:    		{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyHonours",
+                      	 	 view:          "honours.html",
+                      	 	 controller:    null},
+                      	 	 
+	frame_object:    		{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyObject",
+                      	 	 view:          "object.html",
+                      	 	 controller:    null},
+                      	 	 
+	frame_get_objects:    	{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyGetObjects",
+                      	 	 view:          "get_objects.html",
+                      	 	 controller:    null},
+                      	 	 
+	frame_dialogue:	    	{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyDialogue",
+                      	 	 view:          "dialogue.html",
+                      	 	 controller:    null},
+                      	 	 
+	frame_map:		    	{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyMap",
+                      	 	 view:          "map.html",
+                      	 	 controller:    null},
+                      	 	 
+	frame_delete_char:		{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyDeleteChar",
+                      	 	 view:          "delete_char.html",
+                      	 	 controller:    null},
+                      	 	 
+	frame_combat:			{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyCombat",
+                      	 	 view:          "combat.html",
+                      	 	 controller:    null},
+
+	frame_combat_result:	{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyCombatResult",
+                      	 	 view:          "combat_result.html",
+                      	 	 controller:    null},
+                      	 	 
+    frame_confirm_combat:	{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyConfirmCombat",
+                      	 	 view:          "confirm_combat.html",
+                      	 	 controller:    null},
+                      	 	 
+	frame_shop:				{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyShop",
+                      	 	 view:          "shop.html",
+                      	 	 controller:    null},
+                      	 	 
+	frame_goods:			{scripts: 		[],
+                      	 	 ctrler_name:	"MudderyGoods",
+                      	 	 view:          "goods.html",
+                      	 	 controller:    null},
 }

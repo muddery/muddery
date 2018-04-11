@@ -1,14 +1,14 @@
 
-#shop_name {
+#shop_shop_name {
     color: #0ff;
     text-align: center;
 }
 
-#header_goods_name {
+#shop_header_goods_name {
     min-width: 60px;
 }
 
-#header_goods_price {
+#shop_header_goods_price {
     min-width: 60px;
 }
 

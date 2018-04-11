@@ -1,4 +1,3 @@
-//@ sourceURL=/controller/muddery_dialogue.js
 
 /*
  * Derive from the base class.
@@ -16,8 +15,8 @@ MudderyDialogue.prototype.constructor = MudderyDialogue;
  * Bind events.
  */
 MudderyDialogue.prototype.bindEvents = function() {
-    this.onClick("#close_box", this.onClose);
-    this.onClick("#bottom_button", this.onSelectDialogue);
+    this.onClick("#dlg_close_box", this.onClose);
+    this.onClick("#dlg_bottom_button", this.onSelectDialogue);
     this.onClick("#dialogue_body", "a", this.onSelectDialogue);
 }
 
@@ -67,10 +66,10 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 	this.target = dialogues[0]["npc"];
 
 	if (dialogues[0]["can_close"]) {
-		$("#close_box").show();
+		$("#dlg_close_box").show();
 	}
 	else {
-		$("#close_box").hide();
+		$("#dlg_close_box").hide();
 	}
 
 	// speaker
@@ -79,15 +78,15 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 		// placeholder
 		speaker = "&nbsp;";
 	}
-	$("#header").html(speaker);
+	$("#dlg_header").html(speaker);
 
 	// add icon
 	if (dialogues[0]["icon"]) {
-		$("#img_icon").attr("src", $$.settings.resource_url + dialogues[0]["icon"]);
-		$("#div_icon").show();
+		$("#dlg_img_icon").attr("src", $$.settings.resource_url + dialogues[0]["icon"]);
+		$("#dlg_div_icon").show();
 	}
 	else {
-		$("#div_icon").hide();
+		$("#dlg_div_icon").hide();
 	}
 
 	// set contents and buttons
@@ -101,7 +100,7 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 			$("#dialogue_content").html(content);
 			$("#dialogue_content").show();
 
-			$("#bottom_button")
+			$("#dlg_bottom_button")
 				.data("npc", dlg["npc"])
 				.data("dialogue", dlg["dialogue"])
 				.data("sentence", dlg["sentence"])
@@ -123,7 +122,7 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 					.html(content);
 			}
 
-			$("#bottom_button").text($$("Select One"));
+			$("#dlg_bottom_button").text($$("Select One"));
 		}
 	}
 	catch(error) {
@@ -136,15 +135,15 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
  */
 MudderyDialogue.prototype.clearDialogues = function() {
 	// Remove all dialogues.
-	$("#header").empty();
+	$("#dlg_header").empty();
 
-	$("#div_icon").hide();
-	$("#img_icon").removeAttr("src");
+	$("#dlg_div_icon").hide();
+	$("#dlg_img_icon").removeAttr("src");
 
 	$("#dialogue_content").empty();
 	$("#dialogue_body>p:not(.template)").remove();
 
-	$("#bottom_button")
+	$("#dlg_bottom_button")
 		.removeData("npc")
 		.removeData("dialogue")
 		.removeData("sentence")

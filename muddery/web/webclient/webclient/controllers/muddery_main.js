@@ -10,6 +10,15 @@ if (typeof(require) != "undefined") {
     require("../css/inventory.css");
     require("../css/skills.css");
     require("../css/quests.css");
+    require("../css/honours.css");
+    require("../css/object.css");
+    require("../css/dialogue.css");
+    require("../css/map.css");
+    require("../css/combat.css");
+    require("../css/combat_result.css");
+    require("../css/confirm_combat.css");
+    require("../css/shop.css");
+    require("../css/goods.css");
 
     require("../controllers/muddery_quick_login.js");
     require("../controllers/muddery_login.js");
@@ -23,6 +32,16 @@ if (typeof(require) != "undefined") {
     require("../controllers/muddery_inventory.js");
     require("../controllers/muddery_skills.js");
     require("../controllers/muddery_quests.js");
+    require("../controllers/muddery_honours.js");
+    require("../controllers/muddery_object.js");
+    require("../controllers/muddery_get_objects.js");
+    require("../controllers/muddery_dialogue.js");
+    require("../controllers/muddery_map.js");
+    require("../controllers/muddery_combat.js");
+    require("../controllers/muddery_combat_result.js");
+    require("../controllers/muddery_confirm_combat.js");
+    require("../controllers/muddery_shop.js");
+    require("../controllers/muddery_goods.js");
 }
 
 /*
@@ -170,13 +189,13 @@ MudderyMain.prototype.showObject = function(dbref, name, icon, desc, commands) {
  */
 MudderyMain.prototype.setDialogueList = function(data) {
 	if (data.length == 0) {
-		if ($("frame_dialogue").is(":visible")) {
+		if ($("#frame_dialogue").is(":visible")) {
 			// close dialogue box
 			this.doClosePopupBox();
 		}
 	}
 	else {
-		if ($("frame_combat").is(":visible")) {
+		if ($("#frame_combat").is(":visible")) {
 			// show dialogue after a combat
 			var frame_id = "frame_combat_result";
 			var result_ctrl = this.getFrameController(frame_id);
@@ -464,7 +483,7 @@ MudderyMain.prototype.matchRejected = function(character_id) {
  */
 MudderyMain.prototype.closePrepareMatchBox = function() {
 	$("#popup_confirm_combat").hide();
-	$("frame_confirm_combat").hide();
+	$("#frame_confirm_combat").hide();
 }
 
 /*
@@ -511,7 +530,7 @@ MudderyMain.prototype.showMap = function() {
 	this.doClosePopupBox();
 
 	var frame_id = "frame_map";
-	var frame = $(frame_id);
+	var frame = $("#" + frame_id);
 	var frame_ctrl = this.getFrameController(frame_id);
 
 	frame.parents().show();
@@ -703,7 +722,7 @@ MudderyMain.prototype.showPlayerOnline = function(player) {
 MudderyMain.prototype.showPlayerOffline = function(player) {
 	// If the player is looking to it, close the look window.
 	var object_id = "frame_object";
-	if ($(object_id).is(":visible")) {
+	if ($("#" + object_id).is(":visible")) {
 		var object_ctrl = this.getFrameController(object_id);
 		object_ctrl.onObjMovedOut(player["dbref"]);
 	}
@@ -728,14 +747,14 @@ MudderyMain.prototype.showObjMovedIn = function(objects) {
 MudderyMain.prototype.showObjMovedOut = function(objects) {
 	// If the player is talking to it, close the dialog window.
 	var dialogue_id = "frame_dialogue";
-	if ($(dialogue_id).is(":visible")) {
+	if ($("#" + dialogue_id).is(":visible")) {
 		var dialogue_ctrl = this.getFrameController(dialogue_id);
 		object_ctrl.onObjsMovedOut(objects);
 	}
         
 	// If the player is looking to it, close the look window.
 	var object_id = "frame_object";
-	if ($(object_id).is(":visible")) {
+	if ($("#" + object_id).is(":visible")) {
 		var object_ctrl = this.getFrameController(object_id);
 		object_ctrl.onObjsMovedOut(objects);
 	}
@@ -752,12 +771,6 @@ MudderyMain.prototype.showObjMovedOut = function(objects) {
 MudderyMain.prototype.getFrameController = function(frame_id) {
     if (frame_id in frameworks) {
         return frameworks[frame_id].controller;
-    }
-    else {
-        var frame = $(frame_id);
-        if (frame.length > 0) {
-            return frame[0].contentWindow.controller;
-        }
     }
 }
 
@@ -909,8 +922,6 @@ MudderyMain.prototype.doSetWindowSize = function() {
 	}
 
 	$("#msg_input").outerWidth($('#middlewindow').width() - 116);
-	
-	this.doChangeVisibleFrameSize();
 }
 
 /*
@@ -953,24 +964,6 @@ MudderyMain.prototype.setPopupSize = function(dialog) {
 	
 	frame.height(height);	
 	dialog.css("top", (win_h - dialog.height()) / 2);
-}
-
-/*
- * Reset the size of a visible frame.
- */
-MudderyMain.prototype.doChangeVisibleFrameSize = function() {
-	var frame = $("#tab_content iframe:visible");
-	this.doChangeFrameSize(frame);
-}
-
-/*
- * Reset the size of a frame.
- */
-MudderyMain.prototype.doChangeFrameSize = function(frame) {
-	var tab_content = $("#tab_content");
-
-	frame.width(tab_content.width());
-	frame.height(tab_content.height() - 5);
 }
 
 //////////////////////////////////////////
@@ -1018,7 +1011,6 @@ MudderyMain.prototype.showContent = function(frame_name) {
 		.addClass("pill_active");
 
 	var frame = $("#frame_" + frame_name);
-	this.doChangeFrameSize(frame);
 	frame.show();
 }
 
