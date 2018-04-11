@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyInventory() {
-	BaseController.call(this);
+function MudderyInventory(el) {
+	BaseController.call(this, el);
 
 	this.paginator = new Paginator("#inv_inventory_wrapper");
 }
@@ -25,7 +25,6 @@ MudderyInventory.prototype.resetLanguage = function() {
  */
 MudderyInventory.prototype.bindEvents = function() {
 	this.onClick("#inv_inventory_items", ".obj_name", this.onLook);
-	this.on(window, "resize", this.onResize);
 }
             
 /*

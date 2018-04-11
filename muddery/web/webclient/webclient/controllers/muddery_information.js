@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyInformation() {
-	BaseController.call(this);
+function MudderyInformation(el) {
+	BaseController.call(this, el);
 }
 
 MudderyInformation.prototype = prototype(BaseController.prototype);

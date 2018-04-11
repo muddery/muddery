@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyShop() {
-	BaseController.call(this);
+function MudderyShop(el) {
+	BaseController.call(this, el);
 	
 	this.goods = [];
 	this.paginator = new Paginator("#shop_goods_wrapper");
@@ -27,7 +27,6 @@ MudderyShop.prototype.resetLanguage = function() {
 MudderyShop.prototype.bindEvents = function() {
 	this.onClick("#shop_close_box", this.onClose);
 	this.onClick("#shop_goods_list", ".goods_name", this.onLook);
-	this.on(window, "resize", this.onResize);
 }
 	
 /*

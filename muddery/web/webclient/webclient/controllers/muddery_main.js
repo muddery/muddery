@@ -1,7 +1,6 @@
 
 if (typeof(require) != "undefined") {
     require("../css/webclient.css");
-    require("../css/main.css");
     require("../css/message.css");
     require("../css/new_char.css");
     require("../css/scene.css");
@@ -68,7 +67,7 @@ MudderyMain.prototype.onReady = function() {
 
 	this.showUnlogin();
     this.showContent("login");
-    this.doSetSizes();
+    this.onResize();
 }
 	
 /*
@@ -881,9 +880,17 @@ MudderyMain.prototype.onUnpuppet = function(data) {
 /*
  * Reset all sizes.
  */
-MudderyMain.prototype.doSetSizes = function() {
+MudderyMain.prototype.onResize = function() {
 	frameworks.body.controller.doSetWindowSize();
 	frameworks.body.controller.doSetVisiblePopupSize();
+
+	for (var key in frameworks) {
+	    if (key != "body") {
+            if (frameworks[key].controller) {
+                frameworks[key].controller.onResize();
+            }
+        }
+	}
 }
 
 /*
@@ -1215,25 +1222,29 @@ MudderyMain.prototype.setLanguage = function(language) {
 	}
 	
 	this.resetLanguage();
-	this.getFrameController("frame_combat_result").resetLanguage();
 	this.getFrameController("frame_combat").resetLanguage();
+	this.getFrameController("frame_combat_result").resetLanguage();
+	this.getFrameController("frame_confirm_combat").resetLanguage();
+	this.getFrameController("frame_delete_char").resetLanguage();
 	this.getFrameController("frame_dialogue").resetLanguage();
 	this.getFrameController("frame_get_objects").resetLanguage();
 	this.getFrameController("frame_goods").resetLanguage();
+	this.getFrameController("frame_honours").resetLanguage();
 	this.getFrameController("frame_information").resetLanguage();
 	this.getFrameController("frame_inventory").resetLanguage();
-	this.getFrameController("frame_quick_login").resetLanguage();
 	this.getFrameController("frame_login").resetLanguage();
-	this.getFrameController("frame_password").resetLanguage();
 	this.getFrameController("frame_map").resetLanguage();
 	this.getFrameController("frame_message").resetLanguage();
+	this.getFrameController("frame_new_char").resetLanguage();
 	this.getFrameController("frame_object").resetLanguage();
+	this.getFrameController("frame_password").resetLanguage();
 	this.getFrameController("frame_quests").resetLanguage();
+	this.getFrameController("frame_quick_login").resetLanguage();
 	this.getFrameController("frame_register").resetLanguage();
 	this.getFrameController("frame_scene").resetLanguage();
 	this.getFrameController("frame_select_char").resetLanguage();
 	this.getFrameController("frame_shop").resetLanguage();
-	this.getFrameController("frame_honours").resetLanguage();
+	this.getFrameController("frame_skills").resetLanguage();
 }
 
 /*

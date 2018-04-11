@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyDeleteChar() {
-	BaseController.call(this);
+function MudderyDeleteChar(el) {
+	BaseController.call(this, el);
 	
 	this.name = "";
     this.dbref = "";

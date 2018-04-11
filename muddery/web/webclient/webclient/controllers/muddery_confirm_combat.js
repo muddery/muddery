@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyConfirmCombat() {
-	BaseController.call(this);
+function MudderyConfirmCombat(el) {
+	BaseController.call(this, el);
 	
     this.prepare_time = 0;
     this.interval_id = null;

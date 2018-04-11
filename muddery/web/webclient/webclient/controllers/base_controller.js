@@ -43,6 +43,12 @@ BaseController.prototype.bindEvents = function() {
 }
 
 /*
+ * On resize.
+ */
+BaseController.prototype.onResize = function() {
+}
+
+/*
  * Bind an event to an element with an object method.
  * on(element_name [,selector] , event_name, method)
  */

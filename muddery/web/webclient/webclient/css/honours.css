@@ -1,9 +1,9 @@
 
-#honours_button_fight {
+#frame_honours #honours_button_fight {
     text-align: center;
 }
 
-#table_honours {
+#frame_honours #table_honours {
     border-collapse: collapse;
     border-color: #aaa;
     border-style: solid;
@@ -11,7 +11,7 @@
     margin: 8px;
 }
 
-#table_honours th {
+#frame_honours #table_honours th {
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;
@@ -19,18 +19,18 @@
     font-weight: normal;
 }
 
-#table_honours td {
+#frame_honours #table_honours td {
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;
     padding: 4px 8px 4px 8px;
 }
 
-.obj_icon {
+#frame_honours .obj_icon {
     text-align: center;
 }
 
-.img_icon {
+#frame_honours .img_icon {
 	width: 30px;
 	height: 30px;
 }

@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyPassword() {
-	BaseController.call(this);
+function MudderyPassword(el) {
+	BaseController.call(this, el);
 }
 
 MudderyPassword.prototype = prototype(BaseController.prototype);

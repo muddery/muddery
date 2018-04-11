@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyHonours() {
-	BaseController.call(this);
+function MudderyHonours(el) {
+	BaseController.call(this, el);
 
 	this.min_honour_level = 1;
 	this.paginator = new Paginator("#honours_wrapper");
@@ -29,7 +29,6 @@ MudderyHonours.prototype.resetLanguage = function() {
 MudderyHonours.prototype.bindEvents = function() {
     this.onClick("#honours_button_queue", this.onQueueUpCombat);
     this.onClick("#honours_button_quit", this.onQuitCombatQueue);
-	this.on(window, "resize", this.onResize);
 }
 
 /*

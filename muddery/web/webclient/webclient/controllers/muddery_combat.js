@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyCombat() {
-	BaseController.call(this);
+function MudderyCombat(el) {
+	BaseController.call(this, el);
 	
 	this.self_dbref = "";
 	this.target = "";

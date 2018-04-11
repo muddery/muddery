@@ -1,17 +1,17 @@
 
-#goods_div_icon {
+#frame_goods #goods_div_icon {
     text-align: center;
 }
 
-#goods_img_icon {
+#frame_goods #goods_img_icon {
 	width: 40px;
 	height: 40px;
 }
 
-#goods_price {
+#frame_goods #goods_price {
     text-align: center;
 }
 
-#goods_popup_footer {
+#frame_goods #goods_popup_footer {
     text-align: center;
 }

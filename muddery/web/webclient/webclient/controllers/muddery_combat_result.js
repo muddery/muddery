@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyCombatResult() {
-	BaseController.call(this);
+function MudderyCombatResult(el) {
+	BaseController.call(this, el);
 	
     this.dialogue = null;
 }

@@ -1,26 +1,26 @@
 
-#shop_shop_name {
+#frame_shop #shop_shop_name {
     color: #0ff;
     text-align: center;
 }
 
-#shop_header_goods_name {
+#frame_shop #shop_header_goods_name {
     min-width: 60px;
 }
 
-#shop_header_goods_price {
+#frame_shop #shop_header_goods_price {
     min-width: 60px;
 }
 
-.goods_name {
+#frame_shop .goods_name {
     text-align: center;
 }
 
-.goods_icon {
+#frame_shop .goods_icon {
     text-align: center;
 }
 
-.img_icon {
+#frame_shop .img_icon {
 	width: 30px;
 	height: 30px;
 }

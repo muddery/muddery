@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyQuests() {
-	BaseController.call(this);
+function MudderyQuests(el) {
+	BaseController.call(this, el);
 	
 	this.paginator = new Paginator("#quests_wrapper");
 }
@@ -25,7 +25,6 @@ MudderyQuests.prototype.resetLanguage = function() {
  */
 MudderyQuests.prototype.bindEvents = function() {
 	this.onClick("#quest_list", ".quest_name", this.onLook);
-	this.on(window, "resize", this.onResize);
 }
 
 /*

@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyGetObjects() {
-	BaseController.call(this);
+function MudderyGetObjects(el) {
+	BaseController.call(this, el);
 	
 	this.goods = [];
 }

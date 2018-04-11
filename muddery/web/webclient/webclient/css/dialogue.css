@@ -1,13 +1,13 @@
 
-#dlg_div_icon {
+#frame_dialogue #dlg_div_icon {
     text-align: center;
 }
 
-#dlg_img_icon {
+#frame_dialogue #dlg_img_icon {
 	width: 40px;
 	height: 40px;
 }
 
-#dialogue_body {
+#frame_dialogue #dialogue_body {
     min-height: 80px;
 }

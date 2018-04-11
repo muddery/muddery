@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyObject() {
-	BaseController.call(this);
+function MudderyObject(el) {
+	BaseController.call(this, el);
 	
 	this.dbref = null;
 }

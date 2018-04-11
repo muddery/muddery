@@ -1,13 +1,13 @@
 
-#object_div_icon {
+#frame_object #object_div_icon {
     text-align: center;
 }
 
-#object_img_icon {
+#frame_object #object_img_icon {
 	width: 40px;
 	height: 40px;
 }
 
-#object_popup_footer {
+#frame_object #object_popup_footer {
     text-align: center;
 }

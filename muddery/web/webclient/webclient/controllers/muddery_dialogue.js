@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyDialogue() {
-	BaseController.call(this);
+function MudderyDialogue(el) {
+	BaseController.call(this, el);
 	
 	this.target = null;
 }

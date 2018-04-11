@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderySkills() {
-	BaseController.call(this);
+function MudderySkills(el) {
+	BaseController.call(this, el);
 
     this.paginator = new Paginator("#skills_wrapper");
 }
@@ -24,7 +24,6 @@ MudderySkills.prototype.resetLanguage = function() {
  */
 MudderySkills.prototype.bindEvents = function() {
 	this.onClick("#skill_list", ".skill_name", this.onLook);
-	this.on(window, "resize", this.onResize);
 }
 
 /*

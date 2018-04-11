@@ -1,8 +1,8 @@
 
-#map_body {
+#frame_map #map_body {
 	overflow: hidden;
 }
 
-.modal-body {
+#frame_map .modal-body {
     padding: 0;
 }

@@ -2,8 +2,8 @@
 /*
  * Derive from the base class.
  */
-function MudderyMap() {
-	BaseController.call(this);
+function MudderyMap(el) {
+	BaseController.call(this, el);
 	
     // the scale of the map
     this.scale = 75;
@@ -69,8 +69,8 @@ MudderyMap.prototype.showMap = function(location) {
 	
 	var current_room = $$.map_data._map_rooms[location.key];
 
-	var w_width = $(window).width();
-	var w_height = $(window).height();
+	var w_width = $(this.el).width();
+	var w_height = $(this.el).height();
 
 	var map_width = w_width;
 	var map_height = w_height - $("div.modal-header").outerHeight();
