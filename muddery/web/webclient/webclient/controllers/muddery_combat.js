@@ -3,7 +3,7 @@
  * Derive from the base class.
  */
 function MudderyCombat(el) {
-	BaseController.call(this, el);
+	BasePopupController.call(this, el);
 	
 	this.self_dbref = "";
 	this.target = "";
@@ -14,7 +14,7 @@ function MudderyCombat(el) {
 	this.skill_cd_time = {};
 }
 
-MudderyCombat.prototype = prototype(BaseController.prototype);
+MudderyCombat.prototype = prototype(BasePopupController.prototype);
 MudderyCombat.prototype.constructor = MudderyCombat;
 
 /*
@@ -123,7 +123,7 @@ MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref
 			.data("dbref", character["dbref"]);
 		
 		if (character["icon"]) {
-			item.find(".img_icon").attr("src", $$.settings.resource_url + character["icon"]);
+			item.find(".img_icon").attr("src", settings.resource_url + character["icon"]);
 			item.find(".div_icon").show();
 		}
 		else {
@@ -179,7 +179,7 @@ MudderyCombat.prototype.setCommands = function(commands) {
 					  "top": top + parseInt(i / line) * line_height});
 				
 			if (command["icon"]) {
-				item.find(".command_icon").attr("src", $$.settings.resource_url + command["icon"]);
+				item.find(".command_icon").attr("src", settings.resource_url + command["icon"]);
 			}
 
 			item.find(".command_name").html($$.text2html.parseHtml(command["name"]));
@@ -228,7 +228,7 @@ MudderyCombat.prototype.setSkillCast = function(data) {
 		else if (data["skill"] == "skill_escape") {
 			if (data["data"] == 1) {
 				var item_id = "#combat_char_" + data["target"].slice(1) + ".status";
-				$(item_id).text($$("Escaped"));
+				$(item_id).text($$.trans("Escaped"));
 			}
 		}
 	}

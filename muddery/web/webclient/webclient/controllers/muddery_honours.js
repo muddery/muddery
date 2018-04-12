@@ -16,11 +16,11 @@ MudderyHonours.prototype.constructor = MudderyHonours;
  * Reset the view's language.
  */
 MudderyHonours.prototype.resetLanguage = function() {
-    this.select("#honours_view_ranking").text($$("RANKING"));
-    this.select("#honours_view_name").text($$("NAME"));
-    this.select("#honours_view_honour").text($$("HONOUR"));
-    this.select("#honours_button_queue").text($$("QUEUE UP"));
-    this.select("#honours_button_quit").text($$("QUIT QUEUE"));
+    this.select("#honours_view_ranking").text($$.trans("RANKING"));
+    this.select("#honours_view_name").text($$.trans("NAME"));
+    this.select("#honours_view_honour").text($$.trans("HONOUR"));
+    this.select("#honours_button_queue").text($$.trans("QUEUE UP"));
+    this.select("#honours_button_quit").text($$.trans("QUIT QUEUE"));
 }
 
 /*
@@ -35,8 +35,8 @@ MudderyHonours.prototype.bindEvents = function() {
  * Event when clicks the queue up button.
  */
 MudderyHonours.prototype.onQueueUpCombat = function(element) {
-    if ($$.data_handler.character_level < this.min_honour_level) {
-        $$.controller.showAlert($$("You need to reach level ") + this.min_honour_level + $$("."));
+    if ($$.$$.data_handler.character_level < this.min_honour_level) {
+        $$.main.showAlert($$.trans("You need to reach level ") + this.min_honour_level + $$.trans("."));
         return;
     }
 

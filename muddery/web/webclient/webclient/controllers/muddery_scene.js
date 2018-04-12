@@ -13,9 +13,9 @@ MudderyScene.prototype.constructor = MudderyScene;
  * Reset the view's language.
  */
 MudderyScene.prototype.resetLanguage = function() {
-	this.select("#scene_view_objects").text($$("Objects: "));
-	this.select("#scene_view_npcs").text($$("NPCs: "));
-	this.select("#scene_view_players").text($$("Players: "));
+	this.select("#scene_view_objects").text($$.trans("Objects: "));
+	this.select("#scene_view_npcs").text($$.trans("NPCs: "));
+	this.select("#scene_view_players").text($$.trans("Players: "));
 }
 
 /*
@@ -116,7 +116,7 @@ MudderyScene.prototype.setScene = function(scene) {
     // set background
     var backview = this.select("#scene_box_scene");
     if ("background" in scene && scene["background"]) {
-        var url = $$.settings.resource_url + scene["background"]["name"];
+        var url = settings.resource_url + scene["background"]["name"];
         backview.css("background", "url(" + url + ") no-repeat center center");
     }
     else {

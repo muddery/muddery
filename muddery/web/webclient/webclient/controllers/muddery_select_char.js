@@ -13,8 +13,8 @@ MudderySelectChar.prototype.constructor = MudderySelectChar;
  * Reset the view's language.
  */
 MudderySelectChar.prototype.resetLanguage = function() {
-    this.select("#char_view_character").text($$("Characters"));
-	this.select("#char_button_new_char").text($$("New Character"));
+    this.select("#char_view_character").text($$.trans("Characters"));
+	this.select("#char_button_new_char").text($$.trans("New Character"));
 }
 
 /*
@@ -30,7 +30,7 @@ MudderySelectChar.prototype.bindEvents = function() {
  * Event when clicks the new character button.
  */
 MudderySelectChar.prototype.onNewCharacter = function(element) {
-    $$.controller.showNewCharacter();
+    $$.main.showNewCharacter();
 }
 
 /*
@@ -47,7 +47,7 @@ MudderySelectChar.prototype.onSelectCharacter = function(element) {
 MudderySelectChar.prototype.onDeleteCharacter = function(element) {
 	var name = this.select(element).data("name");
 	var dbref = this.select(element).data("dbref");
-	$$.controller.showDeleteCharacter(name, dbref);
+	$$.main.showDeleteCharacter(name, dbref);
 }
     
 /*

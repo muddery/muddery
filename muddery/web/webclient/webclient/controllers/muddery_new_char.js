@@ -3,20 +3,20 @@
  * Derive from the base class.
  */
 function MudderyNewChar(el) {
-	BaseController.call(this, el);
+	BasePopupController.call(this, el);
 }
 
-MudderyNewChar.prototype = prototype(BaseController.prototype);
+MudderyNewChar.prototype = prototype(BasePopupController.prototype);
 MudderyNewChar.prototype.constructor = MudderyNewChar;
 
 /*
  * Reset the view's language.
  */
 MudderyNewChar.prototype.resetLanguage = function() {
-	this.select("#new_char_view_header").text($$("Set Character"));
-	this.select("#new_char_view_name").text($$("Name"));
-	this.select("#new_char_button_create").text($$("Create"));
-	this.select("#new_char_name").attr("placeholder", $$("name"));
+	this.select("#new_char_view_header").text($$.trans("Set Character"));
+	this.select("#new_char_view_name").text($$.trans("Name"));
+	this.select("#new_char_button_create").text($$.trans("Create"));
+	this.select("#new_char_name").attr("placeholder", $$.trans("name"));
 }
 
 /*
@@ -31,7 +31,7 @@ MudderyNewChar.prototype.bindEvents = function() {
  * Event when clicks the close button.
  */
 MudderyNewChar.prototype.onClose = function(element) {
-	$$.controller.doClosePopupBox();
+	$$.main.doClosePopupBox();
 }
 
 /*

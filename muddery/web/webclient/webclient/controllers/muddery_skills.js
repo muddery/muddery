@@ -15,8 +15,8 @@ MudderySkills.prototype.constructor = MudderySkills;
  * Reset the view's language.
  */
 MudderySkills.prototype.resetLanguage = function() {
-	this.select("#skill_view_name").text($$("NAME"));
-	this.select("#skill_view_desc").text($$("DESC"));
+	this.select("#skill_view_name").text($$.trans("NAME"));
+	this.select("#skill_view_desc").text($$.trans("DESC"));
 }
 
 /*
@@ -58,7 +58,7 @@ MudderySkills.prototype.setSkills = function(skills) {
         	.text(obj["name"]);
             
         if (obj["icon"]) {
-            item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
+            item.find(".img_icon").attr("src", settings.resource_url + obj["icon"]);
         	item.find(".skill_icon").show();
         }
         else {

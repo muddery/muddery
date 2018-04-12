@@ -3,12 +3,12 @@
  * Derive from the base class.
  */
 function MudderyObject(el) {
-	BaseController.call(this, el);
+	BasePopupController.call(this, el);
 	
 	this.dbref = null;
 }
 
-MudderyObject.prototype = prototype(BaseController.prototype);
+MudderyObject.prototype = prototype(BasePopupController.prototype);
 MudderyObject.prototype.constructor = MudderyObject;
 
 /*
@@ -23,7 +23,7 @@ MudderyObject.prototype.bindEvents = function() {
  * Event when clicks the close button.
  */
 MudderyObject.prototype.onClose = function(element) {
-	$$.controller.doClosePopupBox();
+	$$.main.doClosePopupBox();
 }
 
 /*
@@ -73,7 +73,7 @@ MudderyObject.prototype.setObject = function(dbref, name, icon, desc, commands) 
 
 	// add icon
 	if (icon) {
-		var url = $$.settings.resource_url + icon;
+		var url = settings.resource_url + icon;
 		this.select("#object_img_icon").attr("src", url);
 		this.select("#object_div_icon").show();
     }
@@ -87,7 +87,7 @@ MudderyObject.prototype.setObject = function(dbref, name, icon, desc, commands) 
 		    
     this.clearElements("#object_popup_footer");
 	if (!commands) {
-        commands = [{"name": $$("OK"),
+        commands = [{"name": $$.trans("OK"),
                      "cmd": "",
                      "args": ""}];
     }

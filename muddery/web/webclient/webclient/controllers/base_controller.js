@@ -8,8 +8,15 @@ function prototype(base, el) {
     return new Base(el);
 }
 
+
+////////////////////////////////////////
+//
+// The base of view controllers.
+//
+////////////////////////////////////////
+
 /*
- * The base of view controllers.
+ * The base controller's constructor.
  */
 function BaseController(el) {
     this.el = el || $(document);
@@ -40,6 +47,28 @@ BaseController.prototype.resetLanguage = function() {
  * Bind events.
  */
 BaseController.prototype.bindEvents = function() {
+}
+
+/*
+ * Show the element.
+ */
+BaseController.prototype.show = function() {
+    this.el.show();
+    this.el.parents().show();
+	this.setSize();
+}
+
+/*
+ * Is visible.
+ */
+BaseController.prototype.visible = function() {
+    return this.el.is(":visible");
+}
+
+/*
+ * Set element's size.
+ */
+BaseController.prototype.setSize = function() {
 }
 
 /*
@@ -117,4 +146,29 @@ BaseController.prototype.cloneTemplate = function(template) {
 BaseController.prototype.clearElements = function(root_tag) {
     // Remove elements that are not template.
 	this.select(root_tag).children().not(".template").remove();
+}
+
+
+////////////////////////////////////////
+//
+// The base of popup controllers.
+//
+////////////////////////////////////////
+ /*
+ * Derive from the base class.
+ */
+function BasePopupController(el) {
+	BaseController.call(this, el);
+	
+	this.target = null;
+}
+
+BasePopupController.prototype = prototype(BaseController.prototype);
+BasePopupController.prototype.constructor = BasePopupController;
+
+/*
+ * Set element's size.
+ */
+BasePopupController.prototype.setSize = function() {
+	$$.main.doSetVisiblePopupSize();
 }

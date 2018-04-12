@@ -1,5 +1,7 @@
 
-var escape = {
+var $$ = $$ ? $$: {};
+
+$$.text_escape = {
     regexp_escape : /\$[0-9|_|A-Z]+|\$\$/g,
 
     parse: function(string, values) {
@@ -21,7 +23,9 @@ var escape = {
     },
 };
 
-// Compile RegExps.
-escape.regexp_escape.compile(escape.regexp_escape);
+!function() {
+	// Compile RegExps.
+	$$.text_escape.regexp_escape.compile(escape.regexp_escape);
+}
 
 

@@ -60,7 +60,7 @@
         <script src="../utils/paginator.js" type="text/javascript" charset="utf-8"></script>
 
     </head>
-    <body id="body">
+    <body id="frame_main" class="template">
         <!-- Show popup windows in this div. -->
 		<div id="popup_confirm_combat" class="container">
             <div role="dialog" class="modal in popup_modal">
@@ -262,78 +262,78 @@
                 <div id="tab_bar">
                     <ul id="tab_pills" class="nav nav-tabs">
                         <li id="tab_connect" role="presentation" class="" style="display: none;">
-                            <a id="view_connect" onclick="Evennia.connect()">Connect</a>
+                            <a id="tab_button_connect">Connect</a>
                         </li>
                         <li id="tab_login" role="presentation" class="" style="display: none;">
-                            <a id="view_login" onclick="controller.showContent('login')">Login</a>
+                            <a id="tab_button_login">Login</a>
                         </li>
                         <li id="tab_register" role="presentation" class="" style="display: none;">
-                            <a id="view_register" onclick="controller.showContent('register')">Register</a>
+                            <a id="tab_button_register">Register</a>
                         </li>
                         <li id="tab_select_char" role="presentation" class="" style="display: none;">
-                            <a id="view_select_char" onclick="controller.showContent('select_char')">Select Char</a>
+                            <a id="tab_button_select_char">Select Char</a>
                         </li>
                         <li id="tab_scene" role="presentation" class="">
-                            <a id="view_scene" onclick="controller.showContent('scene')">Scene</a>
+                            <a id="tab_button_scene">Scene</a>
                         </li>
                         <li id="tab_character" role="presentation" class="dropup">
-                            <a id="view_char" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Char<span class="caret"></span></a>
+                            <a id="tab_view_char" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Char<span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a id="view_status" onclick="controller.showContent('information')" class="first-dropdown-item">Status</a>
+                                    <a id="tab_button_status" class="first-dropdown-item">Status</a>
                                 </li>
                                 <li>
-                                    <a id="view_inventory" onclick="controller.showContent('inventory')" class="dropdown-item">Inventory</a>
+                                    <a id="tab_button_inventory" class="dropdown-item">Inventory</a>
                                 </li>
                                 <li>
-                                    <a id="view_skills" onclick="controller.showContent('skills')" class="dropdown-item">Skills</a>
+                                    <a id="tab_button_skills" class="dropdown-item">Skills</a>
                                 </li>
                                 <li>
-                                    <a id="view_quests" onclick="controller.showContent('quests')" class="dropdown-item">Quests</a>
+                                    <a id="tab_button_quests" class="dropdown-item">Quests</a>
                                 </li>
                             </ul>
                         </li>
                         <li id="tab_social" role="presentation" class="dropup hidden">
-                            <a id="view_social" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Social<span class="caret"></span></a>
+                            <a id="tab_view_social" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Social<span class="caret"></span></a>
                         </li>
                         <li id="tab_honours" role="presentation" class="">
-                            <a id="view_honours" onclick="controller.showHonours()">Honours</a>
+                            <a id="tab_button_honours">Honours</a>
                         </li>
                         <li id="tab_map" role="presentation" class="">
-                            <a id="view_map" onclick="controller.showMap()">Map</a>
+                            <a id="tab_button_map">Map</a>
                         </li>
                         <li id="tab_system_char" role="presentation" class="dropup">
-                            <a id="view_system_char" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">System<span class="caret"></span></a>
+                            <a id="tab_view_system_char" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">System<span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a id="view_logout" onclick="commands.doLogout()" class="first-dropdown-item">Logout</a>
+                                    <a id="tab_button_logout" class="first-dropdown-item">Logout</a>
                                 </li>
                                 <li>
-                                    <a id="view_password" onclick="controller.showContent('password')" class="dropdown-item">Password</a>
+                                    <a id="tab_button_password" class="dropdown-item">Password</a>
                                 </li>
                             </ul>
                         </li>
                         <li id="tab_system" role="presentation" class="dropup">
-                            <a id="view_system" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Sys<span class="caret"></span></a>
+                            <a id="tab_view_system" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Sys<span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a id="view_logout_puppet" onclick="commands.doLogout()" class="first-dropdown-item">Logout</a>
+                                    <a id="tab_button_logout_puppet" class="first-dropdown-item">Logout</a>
                                 </li>
                                 <li>
-                                    <a id="view_unpuppet" onclick="commands.unpuppetCharacter()" class="dropdown-item">Unpuppet</a>
+                                    <a id="tab_button_unpuppet" class="dropdown-item">Unpuppet</a>
                                 </li>
                                 <li>
-                                    <a id="view_password_puppet" onclick="controller.showContent('password')" class="dropdown-item">Password</a>
+                                    <a id="tab_button_password_puppet" class="dropdown-item">Password</a>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </div>
                 <div id="input_bar">
-                    <button id="msg_select" onclick="controller.showMsgTypes()" class="btn btn-default"></button>
-                    <input id="msg_input" type="text" aria-describedby="basic-addon2" autocomplete="off" class="form-control" />
-                    <button id="msg_send" onclick="controller.sendMessage()" class="btn btn-default">Send</button>
-                    <ul id="msg_type_menu" class="dropdown-menu">
+                    <button id="bar_msg_select" class="btn btn-default"></button>
+                    <input id="bar_msg_input" type="text" aria-describedby="basic-addon2" autocomplete="off" class="form-control" />
+                    <button id="bar_msg_send" class="btn btn-default">Send</button>
+                    <ul id="bar_msg_type_menu" class="dropdown-menu">
                         <li class="template">
                             <a onclick="controller.selectMsgType(this)" class="dropdown-item"></a>
                         </li>

@@ -1,8 +1,7 @@
-/*
-Muddery webclient (javascript component)
-*/
 
-var commands = {
+var $$ = $$ ? $$: {};
+
+$$.commands = {
     // commands
     cmdString : function(command, args) {
         return JSON.stringify({"cmd" : command, "args" : args});
@@ -25,9 +24,6 @@ var commands = {
                     "combat": combat};
         Evennia.msg("text", this.cmdString(cmd, args));
     },
-    
-    
-    // functions when user click a button
 
     doQuickLogin: function(playername) {
         var args = {"playername" : playername};
@@ -50,7 +46,7 @@ var commands = {
         }
 
         if (password != password_verify) {
-            controller.showAlert($$("Password does not match."));
+            $$.main.showAlert($$("Password does not match."));
             return;
         }
 
@@ -59,8 +55,7 @@ var commands = {
                     "connect": connect};
         Evennia.msg("text", this.cmdString("create", args));
 
-        var controller = frameworks["frame_login"].controller;
-        controller.setPlayerName(playername);
+        $$.component.login.setPlayerName(playername);
     },
 
     // change password
@@ -71,7 +66,7 @@ var commands = {
         }
 
         if (password != password_verify) {
-            controller.showAlert($$("Password does not match."));
+            $$.main.showAlert($$("Password does not match."));
             return;
         }
 
@@ -129,8 +124,8 @@ var commands = {
     
     // dialogue
     doDialogue: function(dialogue, sentence, npc) {
-        if (data_handler.dialogues_list.length > 0) {
-            controller.showDialogue(data_handler.dialogues_list.shift());
+        if ($$.data_handler.dialogues_list.length > 0) {
+            $$.main.showDialogue($$.data_handler.dialogues_list.shift());
         }
         else {
             var args = {"dialogue": dialogue,

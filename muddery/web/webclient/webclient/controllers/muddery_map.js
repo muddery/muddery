@@ -3,7 +3,7 @@
  * Derive from the base class.
  */
 function MudderyMap(el) {
-	BaseController.call(this, el);
+	BasePopupController.call(this, el);
 	
     // the scale of the map
     this.scale = 75;
@@ -15,7 +15,7 @@ function MudderyMap(el) {
     this.show_room_box = false;
 }
 
-MudderyMap.prototype = prototype(BaseController.prototype);
+MudderyMap.prototype = prototype(BasePopupController.prototype);
 MudderyMap.prototype.constructor = MudderyMap;
 
 /*
@@ -26,10 +26,29 @@ MudderyMap.prototype.bindEvents = function() {
 }
 
 /*
+ * Set element's size.
+ */
+BasePopupController.prototype.setSize = function() {
+	//set size
+	var width = this.el.parent().width();
+	var height = $('#middlewindow').height() * 0.8;
+
+	this.el.innerWidth(width)
+		   .innerHeight(height);
+
+	// model dialogue
+	var win_h = $(window).innerHeight();
+	var dlg = $(".modal-dialog:visible:first");
+	if (dlg.length > 0) {
+		dlg.css("top", (win_h - dlg.height()) / 2);
+	}
+}
+
+/*
  * Event when clicks the close button.
  */
 MudderyMap.prototype.onClose = function(element) {
-	$$.controller.doClosePopupBox();
+	$$.main.doClosePopupBox();
 }
     
 /*
@@ -45,7 +64,7 @@ MudderyMap.prototype.setMap = function(scale, room_size, show_room_box) {
  * Clear the map.
  */
 MudderyMap.prototype.clear = function() {
-    $("#map_name").html($$("MAP"));
+    $("#map_name").html($$.trans("MAP"));
     $("#map_svg").empty();
 }
     
@@ -113,7 +132,7 @@ MudderyMap.prototype.showMap = function(location) {
 			.attr("y", y)
 			.attr("width", location["area"]["background"]["width"] + "px")
 			.attr("height", location["area"]["background"]["height"] + "px")
-			.attr("xlink:href", $$.settings.resource_url + location["area"]["background"]["name"]);
+			.attr("xlink:href", settings.resource_url + location["area"]["background"]["name"]);
 	}
 
 	if (current_room["pos"] &&
@@ -185,7 +204,7 @@ MudderyMap.prototype.showMap = function(location) {
 					}
 						
 					room_data.push({"name": $$.utils.truncate_string(room["name"], 10, true),
-									"icon": room["icon"]? $$.settings.resource_url + room["icon"]: null,
+									"icon": room["icon"]? settings.resource_url + room["icon"]: null,
 									"area": room["area"],
 									"pos": room["pos"]});
 					if (key == location.key) {

@@ -1,54 +1,54 @@
 
 // import the framework
 
-$$ = function(str) {
-	return local_string.translate(str);
-};
+var $$ = $$ ? $$: {};
 
-$$.text2html = text2html;
-$$.escape = escape;
-$$.commands = commands;
-$$.settings = settings;
-$$.data_handler = data_handler;
-$$.map_data = map_data;
-$$.utils = utils;
-
-var controller = null;
+$$.main = null;
+$$.component = {};
 
 !function() {
 	var views_root = "../views/";
 	var ajax = (typeof(require) == "undefined");
 
-	for (var key in frameworks) {
-		var frame_info = frameworks[key];
+	var constructor = eval($$.frameworks.main.ctrler_name);
+	$$.main = new constructor(div);
 
-		var div = $("#" + key);
+	for (var key in $$.frameworks.components) {
+		var component_info = $$.frameworks.components[key];
+
+		var div = $("#frame_" + key);
 		if (div.length > 0) {
-			if (ajax && frame_info.view) {
+			if (ajax && component_info.view) {
 				// load frame
-				$.ajax({url: views_root + frame_info.view,
+				$.ajax({url: views_root + component_info.view,
 						context: key,
 						success: function(result) {
 								var key = this;
-								var frame_info = frameworks[key];
-								var div = $("#" + key);
-								div.html($("<div>").html(result));
-								var constructor = eval(frame_info.ctrler_name);
-								frame_info.controller = new constructor(div);
-								frame_info.controller.onReady();
+								var component_info = $$.frameworks.components[key];
+
+								var div = $("#frame_" + key);
+								div.html($("<div>").html(result))
+								   .hide();
+
+								var constructor = eval(component_info.ctrler_name);
+								$$.component[key] = new constructor(div);
+								$$.component[key].onReady();
+
+								if (Object.keys($$.component).length == Object.keys($$.frameworks.components).length) {
+								    $$.client.onReady();
+								}
 							}
 						});
 			}
 			else {
-				var constructor = eval(frame_info.ctrler_name);
-				frame_info.controller = new constructor(div);
-				frame_info.controller.onReady();
+				var constructor = eval(component_info.ctrler_name);
+				$$.component[key] = new constructor(div);
+				$$.component[key].onReady();
+
+				if (Object.keys($$.component).length == Object.keys($$.frameworks.components).length) {
+					$$.client.onReady();
+				}
 			}
 		}
 	}
-
-	controller = frameworks["body"].controller;
 }();
-
-$$.controller = controller;
-

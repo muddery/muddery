@@ -13,12 +13,12 @@ MudderyLogin.prototype.constructor = MudderyLogin;
  * Reset the view's language.
  */
 MudderyLogin.prototype.resetLanguage = function() {
-    this.select("#login_header").text($$("Please login."));
-    this.select("#login_name").attr("placeholder", $$("username"));
-    this.select("#login_password").attr("placeholder", $$("password"));
-    this.select("#check_save_password").text($$("Save Password"));
-    this.select("#check_auto_login").text($$("Auto Login"));
-    this.select("#button_login").text($$("Login"));
+    this.select("#login_header").text($$.trans("Please login."));
+    this.select("#login_name").attr("placeholder", $$.trans("username"));
+    this.select("#login_password").attr("placeholder", $$.trans("password"));
+    this.select("#check_save_password").text($$.trans("Save Password"));
+    this.select("#check_auto_login").text($$.trans("Auto Login"));
+    this.select("#button_login").text($$.trans("Login"));
 }
 
 /*

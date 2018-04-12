@@ -3,22 +3,22 @@
  * Derive from the base class.
  */
 function MudderyShop(el) {
-	BaseController.call(this, el);
+	BasePopupController.call(this, el);
 	
 	this.goods = [];
 	this.paginator = new Paginator("#shop_goods_wrapper");
 }
 
-MudderyShop.prototype = prototype(BaseController.prototype);
+MudderyShop.prototype = prototype(BasePopupController.prototype);
 MudderyShop.prototype.constructor = MudderyShop;
 
 /*
  * Reset the view's language.
  */
 MudderyShop.prototype.resetLanguage = function() {
-	$("#shop_header_name").text($$("NAME"));
-	$("#shop_header_price").text($$("PRICE"));
-	$("#shop_header_desc").text($$("DESC"));
+	$("#shop_header_name").text($$.trans("NAME"));
+	$("#shop_header_price").text($$.trans("PRICE"));
+	$("#shop_header_desc").text($$.trans("DESC"));
 }
 
 /*
@@ -33,7 +33,7 @@ MudderyShop.prototype.bindEvents = function() {
  * Event when clicks the close button.
  */
 MudderyShop.prototype.onClose = function(element) {
-    $$.controller.doClosePopupBox();
+    $$.main.doClosePopupBox();
 }
 
 /*
@@ -44,7 +44,7 @@ MudderyShop.prototype.onLook = function(element) {
 	for (var i in this.goods) {
 		if (dbref == this.goods[i]["dbref"]) {
 			var goods = this.goods[i];
-			$$.controller.showGoods(goods["dbref"],
+			$$.main.showGoods(goods["dbref"],
 								   goods["name"],
 				 				   goods["number"],
 								   goods["icon"],
@@ -75,7 +75,7 @@ MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 
 	// add icon
 	if (icon) {
-		var url = $$.settings.resource_url + icon;
+		var url = settings.resource_url + icon;
 		$("#shop_img_icon").attr("src", url);
 		$("#shop_icon").show();
 	}
@@ -95,7 +95,7 @@ MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 		var item = this.cloneTemplate(template);
 
 		if (obj["icon"]) {
-			item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
+			item.find(".img_icon").attr("src", settings.resource_url + obj["icon"]);
 			item.find(".obj_icon").show();
 		}
 		else {

@@ -1,5 +1,7 @@
 
-var local_string = {
+var $$ = $$ ? $$: {};
+
+$$.local_string = {
 	language_list: {
     	"en-us": local_string_en_us,
     	"zh-cn": local_string_zh_cn,
@@ -36,7 +38,10 @@ var local_string = {
 	},
 }
 
+$$.trans = function(str) {
+	return $$.local_string.translate(str);
+}
 
 !function() {
-    local_string.setLanguage(settings.default_language);
+    $$.local_string.setLanguage(settings.default_language);
 }();

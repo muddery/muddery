@@ -3,22 +3,22 @@
  * Derive from the base class.
  */
 function MudderyCombatResult(el) {
-	BaseController.call(this, el);
+	BasePopupController.call(this, el);
 	
     this.dialogue = null;
 }
 
-MudderyCombatResult.prototype = prototype(BaseController.prototype);
+MudderyCombatResult.prototype = prototype(BasePopupController.prototype);
 MudderyCombatResult.prototype.constructor = MudderyCombatResult;
 
 /*
  * Reset the view's language.
  */
 MudderyCombatResult.prototype.resetLanguage = function() {
-	$("#combat_result_view_get_exp").text($$("Get Exp: "));
-	$("#combat_result_view_get_objects").text($$("Get Objects: "));
-	$("#combat_result_view_rejected").text($$("Can Not Get: "));
-	$("#combat_result_button_ok").text($$("OK"));
+	$("#combat_result_view_get_exp").text($$.trans("Get Exp: "));
+	$("#combat_result_view_get_objects").text($$.trans("Get Objects: "));
+	$("#combat_result_view_rejected").text($$.trans("Can Not Get: "));
+	$("#combat_result_button_ok").text($$.trans("OK"));
 }
 
 /*
@@ -33,11 +33,11 @@ MudderyCombatResult.prototype.bindEvents = function() {
  */
 MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
-    $$.controller.doClosePopupBox();
+    $$.main.doClosePopupBox();
 
 	// show dialogue after combat
 	if (this.dialogue) {
-		$$.controller.setDialogueList(this.dialogue);
+		$$.main.setDialogueList(this.dialogue);
 	}
 }
     
@@ -65,16 +65,16 @@ MudderyCombatResult.prototype.setResult = function(result) {
 	
 	var header = "";
 	if ("escaped" in result) {
-	   header = $$("Escaped !");
+	   header = $$.trans("Escaped !");
 	}
 	else if ("win" in result) {
-		header = $$("You win !");
+		header = $$.trans("You win !");
 	}
 	else if ("lose" in result) {
-		header = $$("You lost !");
+		header = $$.trans("You lost !");
 	}
 	else if ("draw" in result) {
-		header = $$("Draw !");
+		header = $$.trans("Draw !");
 	}
 	
 	$("#combat_result_header").text(header);

@@ -3,19 +3,19 @@
  * Derive from the base class.
  */
 function MudderyGoods(el) {
-	BaseController.call(this, el);
+	BasePopupController.call(this, el);
 
 	this.dbref = null;
 }
 
-MudderyGoods.prototype = prototype(BaseController.prototype);
+MudderyGoods.prototype = prototype(BasePopupController.prototype);
 MudderyGoods.prototype.constructor = MudderyGoods;
 
 /*
  * Reset the view's language.
  */
 MudderyGoods.prototype.resetLanguage = function() {
-	$("#goods_button_buy").text($$("Buy"));
+	$("#goods_button_buy").text($$.trans("Buy"));
 }
 
 /*
@@ -30,7 +30,7 @@ MudderyGoods.prototype.bindEvents = function() {
  * Event when clicks the close button.
  */
 MudderyGoods.prototype.onClose = function(element) {
-	$$.controller.doClosePopupBox();
+	$$.main.doClosePopupBox();
 }
 
 /*
@@ -63,7 +63,7 @@ MudderyGoods.prototype.setGoods = function(dbref, name, number, icon, desc, pric
 
     // add icon
     if (icon) {
-        var url = $$.settings.resource_url + icon;
+        var url = settings.resource_url + icon;
         $("#goods_img_icon").attr("src", url);
         $("#goods_div_icon").show();
     }

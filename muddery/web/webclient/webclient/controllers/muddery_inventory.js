@@ -15,9 +15,9 @@ MudderyInventory.prototype.constructor = MudderyInventory;
  * Reset the view's language.
  */
 MudderyInventory.prototype.resetLanguage = function() {
-    this.select("#inv_view_name").text($$("NAME"));
-    this.select("#inv_view_number").text($$("NUM"));
-    this.select("#inv_view_desc").text($$("DESC"));
+    this.select("#inv_view_name").text($$.trans("NAME"));
+    this.select("#inv_view_number").text($$.trans("NUM"));
+    this.select("#inv_view_desc").text($$.trans("DESC"));
 }
 
 /*
@@ -59,7 +59,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
             .html($$.text2html.parseHtml(obj["name"]));
 
         if (obj["icon"]) {
-            item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
+            item.find(".img_icon").attr("src", settings.resource_url + obj["icon"]);
             item.find(".obj_icon").show();
         }
         else {
@@ -68,7 +68,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
 
         var number = obj["number"];
         if ("equipped" in obj && obj["equipped"]) {
-            number += $$(" (equipped)");
+            number += $$.trans(" (equipped)");
         }
         item.find(".obj_number").text(number);
 

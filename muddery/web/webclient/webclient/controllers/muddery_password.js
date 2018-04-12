@@ -13,12 +13,12 @@ MudderyPassword.prototype.constructor = MudderyPassword;
  * Reset the view's language.
  */
 MudderyPassword.prototype.resetLanguage = function() {
-    this.select("#password_view_current").text($$("Current Password"));
-    this.select("#current_password").attr("placeholder", $$("current password"));
-    this.select("#password_view_password").text($$("New Password"));
-    this.select("#new_password").attr("placeholder", $$("new password"));
-    this.select("#password_verify").attr("placeholder", $$("password verify"));
-    this.select("#password_button_change").text($$("Change"));
+    this.select("#password_view_current").text($$.trans("Current Password"));
+    this.select("#current_password").attr("placeholder", $$.trans("current password"));
+    this.select("#password_view_password").text($$.trans("New Password"));
+    this.select("#new_password").attr("placeholder", $$.trans("new password"));
+    this.select("#password_verify").attr("placeholder", $$.trans("password verify"));
+    this.select("#password_button_change").text($$.trans("Change"));
 }
 
 /*

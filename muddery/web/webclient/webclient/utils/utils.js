@@ -1,5 +1,7 @@
 
-var utils = {
+var $$ = $$ ? $$: {};
+
+$$.utils = {
     visual_length: function(str) {
         var length = 0;
         for (var i = 0; i < str.length; i++) {

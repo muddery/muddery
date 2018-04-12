@@ -13,9 +13,9 @@ MudderyQuickLogin.prototype.constructor = MudderyQuickLogin;
  * Reset the view's language.
  */
 MudderyQuickLogin.prototype.resetLanguage = function() {
-	this.select("#quick_login_view_header").text($$("Please input your name."));
-	this.select("#quick_login_name").attr("placeholder", $$("name"));
-	this.select("#button_quick_login").text($$("Login"));
+	this.select("#quick_login_view_header").text($$.trans("Please input your name."));
+	this.select("#quick_login_name").attr("placeholder", $$.trans("name"));
+	this.select("#button_quick_login").text($$.trans("Login"));
 }
 
 /*

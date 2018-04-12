@@ -1,5 +1,7 @@
 
-var map_data = {
+var $$ = $$ ? $$: {};
+
+$$.map_data = {
 
     _map_rooms: {},     // room's key: {"name": room's name,
                         //              "icon": room's icon,

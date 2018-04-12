@@ -3,12 +3,12 @@
  * Derive from the base class.
  */
 function MudderyDialogue(el) {
-	BaseController.call(this, el);
+	BasePopupController.call(this, el);
 	
 	this.target = null;
 }
 
-MudderyDialogue.prototype = prototype(BaseController.prototype);
+MudderyDialogue.prototype = prototype(BasePopupController.prototype);
 MudderyDialogue.prototype.constructor = MudderyDialogue;
 
 /*
@@ -24,7 +24,7 @@ MudderyDialogue.prototype.bindEvents = function() {
  * Event when clicks the close button.
  */
 MudderyDialogue.prototype.onClose = function(element) {
-    $$.controller.doClosePopupBox();
+    $$.main.doClosePopupBox();
 }
 
 /*
@@ -82,7 +82,7 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 
 	// add icon
 	if (dialogues[0]["icon"]) {
-		$("#dlg_img_icon").attr("src", $$.settings.resource_url + dialogues[0]["icon"]);
+		$("#dlg_img_icon").attr("src", settings.resource_url + dialogues[0]["icon"]);
 		$("#dlg_div_icon").show();
 	}
 	else {
@@ -96,7 +96,7 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 			var dlg = dialogues[0];
 
 			var content = $$.text2html.parseHtml(dlg["content"]);
-			content = $$.escape.parse(content, escapes);
+			content = $$.text_escape.parse(content, escapes);
 			$("#dialogue_content").html(content);
 			$("#dialogue_content").show();
 
@@ -104,7 +104,7 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 				.data("npc", dlg["npc"])
 				.data("dialogue", dlg["dialogue"])
 				.data("sentence", dlg["sentence"])
-				.text($$("Next"));
+				.text($$.trans("Next"));
 		}
 		else {
 			var template = $("#dialogue_body>p.template");
@@ -112,7 +112,7 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 				var dlg = dialogues[i];
 
 				var content = $$.text2html.parseHtml(dlg["content"]);
-				content = $$.escape.parse(content, escapes);
+				content = $$.texxt_escape.parse(content, escapes);
 
 				var item = this.cloneTemplate(template);
 				item.find("a")
@@ -122,7 +122,7 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 					.html(content);
 			}
 
-			$("#dlg_bottom_button").text($$("Select One"));
+			$("#dlg_bottom_button").text($$.trans("Select One"));
 		}
 	}
 	catch(error) {

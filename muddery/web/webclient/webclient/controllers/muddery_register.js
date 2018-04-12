@@ -13,12 +13,12 @@ MudderyRegister.prototype.constructor = MudderyRegister;
  * Reset the view's language.
  */
 MudderyRegister.prototype.resetLanguage = function() {
-    this.select("#register_view_name").text($$("Name"));
-    this.select("#reg_name").attr("placeholder", $$("username"));
-    this.select("#register_view_password").text($$("Password"));
-    this.select("#reg_password").attr("placeholder", $$("password"));
-    this.select("#reg_password_verify").attr("placeholder", $$("password verify"));
-    this.select("#button_register").text($$("Register"));
+    this.select("#register_view_name").text($$.trans("Name"));
+    this.select("#reg_name").attr("placeholder", $$.trans("username"));
+    this.select("#register_view_password").text($$.trans("Password"));
+    this.select("#reg_password").attr("placeholder", $$.trans("password"));
+    this.select("#reg_password_verify").attr("placeholder", $$.trans("password verify"));
+    this.select("#button_register").text($$.trans("Register"));
 }
 
 /*

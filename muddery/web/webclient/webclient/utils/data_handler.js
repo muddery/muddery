@@ -1,8 +1,7 @@
-/*
-Client Data Handler
-*/
 
-var data_handler = {
+var $$ = $$ ? $$: {};
+
+$$.data_handler = {
     character_dbref: "",
     character_name: "",
     character_level: 0,

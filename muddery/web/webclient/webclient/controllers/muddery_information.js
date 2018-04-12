@@ -13,10 +13,10 @@ MudderyInformation.prototype.constructor = MudderyInformation;
  * Reset the view's language.
  */
 MudderyInformation.prototype.resetLanguage = function() {
-    this.select("#info_view_head").text($$("HEAD: "));
-    this.select("#info_view_hand").text($$("HAND: "));
-    this.select("#info_view_chest").text($$("CHEST: "));
-    this.select("#info_view_leg").text($$("LEG: "));
+    this.select("#info_view_head").text($$.trans("HEAD: "));
+    this.select("#info_view_hand").text($$.trans("HAND: "));
+    this.select("#info_view_chest").text($$.trans("CHEST: "));
+    this.select("#info_view_leg").text($$.trans("LEG: "));
 }
 
 /*
@@ -40,7 +40,7 @@ MudderyInformation.prototype.onLook = function(element) {
 MudderyInformation.prototype.setInfo = function(name, icon) {
     this.select("#info_name").text(name);
     if (icon) {
-        var url = $$.settings.resource_url + icon;
+        var url = settings.resource_url + icon;
         this.select("#info_obj_icon").attr("src", url)
                       .show();
     }

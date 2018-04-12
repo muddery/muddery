@@ -15,9 +15,9 @@ MudderyQuests.prototype.constructor = MudderyQuests;
  * Reset the view's language.
  */
 MudderyQuests.prototype.resetLanguage = function() {
-	this.select("#quests_view_name").text($$("NAME"));
-	this.select("#quests_view_desc").text($$("DESC"));
-	this.select("#quests_view_objective").text($$("OBJECTIVE"));
+	this.select("#quests_view_name").text($$.trans("NAME"));
+	this.select("#quests_view_desc").text($$.trans("DESC"));
+	this.select("#quests_view_objective").text($$.trans("OBJECTIVE"));
 }
 
 /*

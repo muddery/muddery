@@ -3,22 +3,22 @@
  * Derive from the base class.
  */
 function MudderyGetObjects(el) {
-	BaseController.call(this, el);
+	BasePopupController.call(this, el);
 	
 	this.goods = [];
 }
 
-MudderyGetObjects.prototype = prototype(BaseController.prototype);
+MudderyGetObjects.prototype = prototype(BasePopupController.prototype);
 MudderyGetObjects.prototype.constructor = MudderyGetObjects;
 
 /*
  * Reset the view's language.
  */
 MudderyGetObjects.prototype.resetLanguage = function() {
-	this.select("#get_obj_popup_header").text($$("Get Objects"));
-	this.select("#get_obj_view_get_objects").text($$("Get Objects: "));
-	this.select("#get_obj_view_rejected").text($$("Can Not Get: "));
-	this.select("#get_obj_view_button_ok").text($$("OK"));
+	this.select("#get_obj_popup_header").text($$.trans("Get Objects"));
+	this.select("#get_obj_view_get_objects").text($$.trans("Get Objects: "));
+	this.select("#get_obj_view_rejected").text($$.trans("Can Not Get: "));
+	this.select("#get_obj_view_button_ok").text($$.trans("OK"));
 }
 
 /*
@@ -33,7 +33,7 @@ MudderyGetObjects.prototype.bindEvents = function() {
  * Event when clicks the close button.
  */
 MudderyGetObjects.prototype.onClose = function(element) {
-    $$.controller.doClosePopupBox();
+    $$.main.doClosePopupBox();
 }
 
 /*

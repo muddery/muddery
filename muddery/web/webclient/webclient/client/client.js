@@ -1,11 +1,10 @@
-/*
-Muddery webclient (javascript component)
-*/
 
-var client = {
+var $$ = $$ ? $$: {};
+
+$$.client = {
  	onText: function(args, kwargs) {
  	    for (index in args) {
- 		    client.doShow("out", args[index]);
+ 		    $$.client.doShow("out", args[index]);
  		}
  	},
  	
@@ -59,159 +58,159 @@ var client = {
         for (var key in data) {
             try {
                 if (key == "settings") {
-                    controller.setClient(data[key]);
+                    $$.main.setClient(data[key]);
                 }
                 else if (key == "msg") {
-                	var msg = text2html.parseHtml(data[key]);
-                    controller.displayMsg(msg);
+                	var msg = $$.text2html.parseHtml(data[key]);
+                    $$.main.displayMsg(msg);
                 }
                 else if (key == "alert") {
-              		controller.showAlert(data[key]);
+              		$$.main.showAlert(data[key]);
                 }
                 else if (key == "out") {
-                    controller.displayMsg(data[key], "out");
+                    $$.main.displayMsg(data[key], "out");
                 }
                 else if (key == "err") {
-                    controller.displayMsg(data[key]);
+                    $$.main.displayMsg(data[key]);
                 }
                 else if (key == "sys") {
-                    controller.displayMsg(data[key], "sys");
+                    $$.main.displayMsg(data[key], "sys");
                 }
                 else if (key == "debug") {
-                	controller.displayMsg(data[key], "debug");
+                	$$.main.displayMsg(data[key], "debug");
                 }
                 else if (key == "prompt") {
-                	controller.displayMsg(data[key], "prompt");
+                	$$.main.displayMsg(data[key], "prompt");
                 }
                 else if (key == "look_around") {
-                    controller.setScene(data[key]);
+                    $$.main.setScene(data[key]);
                 }
                 else if (key == "obj_moved_in") {
-                    controller.showObjMovedIn(data[key]);
+                    $$.main.showObjMovedIn(data[key]);
                 }
                 else if (key == "obj_moved_out") {
-                    controller.showObjMovedOut(data[key]);
+                    $$.main.showObjMovedOut(data[key]);
                 }
                 else if (key == "player_online") {
-                    controller.showPlayerOnline(data[key]);
+                    $$.main.showPlayerOnline(data[key]);
                 }
                 else if (key == "player_offline") {
-                    controller.showPlayerOffline(data[key]);
+                    $$.main.showPlayerOffline(data[key]);
                 }
                 else if (key == "look_obj") {
                     var obj = data[key];
-        			controller.showObject(obj["dbref"],
+        			$$.main.showObject(obj["dbref"],
         								  obj["name"],
         								  obj["icon"],
         								  obj["desc"],
         								  obj["cmds"]);
                 }
                 else if (key == "dialogues_list") {
-                    controller.setDialogueList(data[key]);
+                    $$.main.setDialogueList(data[key]);
                 }
                 else if (key == "status") {
                     var status = data[key];
-                    controller.setStatus(status);
+                    $$.main.setStatus(status);
                 }
                 else if (key == "equipments") {
-			        controller.setEquipments(data[key]);
+			        $$.main.setEquipments(data[key]);
                 }
                 else if (key == "inventory") {
-                    controller.setInventory(data[key]);
+                    $$.main.setInventory(data[key]);
                 }
                 else if (key == "skills") {
-                    controller.setSkills(data[key]);
+                    $$.main.setSkills(data[key]);
                 }
                 else if (key == "quests") {
-                	controller.setQuests(data[key]);
+                	$$.main.setQuests(data[key]);
                 }
                 else if (key == "get_objects") {
                 	var get_objects = data[key];
-                    controller.showGetObjects(get_objects["accepted"], get_objects["rejected"], get_objects["combat"]);
+                    $$.main.showGetObjects(get_objects["accepted"], get_objects["rejected"], get_objects["combat"]);
                 }
                 else if (key == "joined_combat") {
-                    controller.showCombat(data[key]);
+                    $$.main.showCombat(data[key]);
                 }
                 else if (key == "left_combat") {
-                    controller.closeCombat(data[key]);
+                    $$.main.closeCombat(data[key]);
                 }
                 else if (key == "combat_finish") {
-                    controller.finishCombat(data[key]);
+                    $$.main.finishCombat(data[key]);
                 }
                 else if (key == "combat_info") {
-                    controller.setCombatInfo(data[key]);
+                    $$.main.setCombatInfo(data[key]);
                 }
                 else if (key == "combat_commands") {
-                    controller.setCombatCommands(data[key]);
+                    $$.main.setCombatCommands(data[key]);
                 }
                 else if (key == "skill_cd") {
                 	var skill_cd = data[key];
-                    controller.setSkillCD(skill_cd["skill"], skill_cd["cd"], skill_cd["gcd"]);
+                    $$.main.setSkillCD(skill_cd["skill"], skill_cd["cd"], skill_cd["gcd"]);
                 }
                 else if (key == "skill_cast") {
-                    controller.setSkillCast(data[key]);
+                    $$.main.setSkillCast(data[key]);
                 }
                 else if (key == "get_exp") {
                 	var get_exp = data[key];
-                    controller.showGetExp(get_exp["exp"], get_exp["combat"]);
+                    $$.main.showGetExp(get_exp["exp"], get_exp["combat"]);
                 }
                 else if (key == "login") {
-                    controller.onLogin(data[key]);
+                    $$.main.onLogin(data[key]);
                 }
                 else if (key == "logout") {
-                    controller.onLogout(data[key]);
+                    $$.main.onLogout(data[key]);
                 }
                 else if (key == "unpuppet") {
-	                controller.onUnpuppet(data[key]);
+	                $$.main.onUnpuppet(data[key]);
                 }
                 else if (key == "char_all") {
-                    controller.setAllCharacters(data[key]);
+                    $$.main.setAllCharacters(data[key]);
                 }
                 else if (key == "char_created") {
-                    controller.onCharacterCreated(data[key]);
+                    $$.main.onCharacterCreated(data[key]);
                 }
                 else if (key == "char_deleted") {
-                    controller.onCharacterDeleted(data[key]);
+                    $$.main.onCharacterDeleted(data[key]);
                 }
                 else if (key == "puppet") {
-                    controller.onPuppet(data[key]);
+                    $$.main.onPuppet(data[key]);
                 }
                 else if (key == "channels") {
-                    controller.setChannels(data[key])
+                    $$.main.setChannels(data[key])
                 }
                 else if (key == "shop") {
                 	var shop = data[key];
-                    controller.showShop(shop["name"],
+                    $$.main.showShop(shop["name"],
                     		 			shop["icon"],
                     		 			shop["desc"],
                     		 			shop["goods"]);
                 }
                 else if (key == "rankings") {
-                	controller.setRankings(data[key]);
+                	$$.main.setRankings(data[key]);
                 }
                 else if (key == "in_combat_queue") {
-                    controller.inCombatQueue(data[key]);
+                    $$.main.inCombatQueue(data[key]);
                 }
                 else if (key == "left_combat_queue") {
-                    controller.leftCombatQueue(data[key]);
+                    $$.main.leftCombatQueue(data[key]);
                 }
                 else if (key == "prepare_match") {
-                	controller.prepareMatch(data[key]);
+                	$$.main.prepareMatch(data[key]);
                 }
                 else if (key == "match_rejected") {
-                	controller.matchRejected(data[key]);
+                	$$.main.matchRejected(data[key]);
                 }
                 else if (key == "current_location") {
-                    map_data.setCurrentLocation(data[key]);
+                    $$.map_data.setCurrentLocation(data[key]);
                 }
                 else if (key == "reveal_map") {
-                    map_data.revealMap(data[key]);
+                    $$.map_data.revealMap(data[key]);
                 }
                 else if (key == "revealed_map") {
-                    map_data.setData(data[key]);
+                    $$.map_data.setData(data[key]);
                 }
                 else {
-                    controller.displayMsg(data[key]);
+                    $$.main.displayMsg(data[key]);
                 }
             }
             catch(error) {
@@ -220,6 +219,35 @@ var client = {
             }
         }
     },
+
+    // Event when client finishes loading
+    onReady: function() {
+        $$.main.onReady();
+
+        // This is safe to call, it will always only
+        // initialize once.
+        Evennia.init();
+
+        // register listeners
+        Evennia.emitter.on("text", $$.client.onText);
+        //Evennia.emitter.on("prompt", onPrompt);
+        //Evennia.emitter.on("default", onDefault);
+        Evennia.emitter.on("connection_close", $$.main.onConnectionClose);
+        // silence currently unused events
+        Evennia.emitter.on("connection_open", $$.main.onConnectionOpen);
+        //Evennia.emitter.on("connection_error", onSilence);
+
+        // set an idle timer to send idle every 3 minutes,
+        // to avoid proxy servers timing out on us
+        setInterval(function() {
+            // Connect to server
+            if (Evennia.isConnected()) {
+                Evennia.msg("text", ["idle"], {});
+            }
+        },
+        60000*3
+        );
+    },
 }
 
 // Input jQuery callbacks
@@ -227,40 +255,6 @@ var client = {
 
 // Callback function - called when the browser window resizes
 //$(window).unbind("resize");
-//$(window).resize(controller.doSetSizes);
+//$(window).resize($$.main.doSetSizes);
 
-// Event when client finishes loading
-$(document).ready(function() {
-	frameworks.body.controller.onReady();
 
-    // Event when client window changes
-    $(window).bind("resize", frameworks.body.controller.doSetSizes);
-});
-
-window.onload = function() {
-    // It is called
-
-    // This is safe to call, it will always only
-    // initialize once.
-    Evennia.init();
-
-    // register listeners
-    Evennia.emitter.on("text", client.onText);
-    //Evennia.emitter.on("prompt", onPrompt);
-    //Evennia.emitter.on("default", onDefault);
-    Evennia.emitter.on("connection_close", frameworks.body.controller.onConnectionClose);
-    // silence currently unused events
-    Evennia.emitter.on("connection_open", frameworks.body.controller.onConnectionOpen);
-    //Evennia.emitter.on("connection_error", onSilence);
-
-    // set an idle timer to send idle every 3 minutes,
-    // to avoid proxy servers timing out on us
-    setInterval(function() {
-        // Connect to server
-        if (Evennia.isConnected()) {
-            Evennia.msg("text", ["idle"], {});
-        }
-    },
-    60000*3
-    );
-};

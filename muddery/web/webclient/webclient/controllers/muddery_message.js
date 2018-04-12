@@ -3,10 +3,10 @@
  * Derive from the base class.
  */
 function MudderyMessage(el) {
-	BaseController.call(this, el);
+	BasePopupController.call(this, el);
 }
 
-MudderyMessage.prototype = prototype(BaseController.prototype);
+MudderyMessage.prototype = prototype(BasePopupController.prototype);
 MudderyMessage.prototype.constructor = MudderyMessage;
 
 /*
@@ -21,7 +21,7 @@ MudderyMessage.prototype.bindEvents = function() {
  * Event when clicks the close button.
  */
 MudderyMessage.prototype.onClose = function(element) {
-	$$.controller.doClosePopupBox();
+	$$.main.doClosePopupBox();
 }
 
 /*
@@ -47,7 +47,7 @@ MudderyMessage.prototype.setMessage = function(header, content, commands) {
 
 	this.clearElements("#msg_popup_footer");
 	if (!commands) {
-		commands = [{"name": $$("OK"),
+		commands = [{"name": $$.trans("OK"),
 					 "cmd": "",
 					 "args": ""}];
 	}

@@ -358,7 +358,7 @@ a:focus {
     margin: 2px 0px 0px 0px;
 }
 
-#msg_select {
+#bar_msg_select {
     width: 56px;
     height: 32px;
     margin: 0px 2px 0px 0px;
@@ -366,7 +366,7 @@ a:focus {
     display: inline;
 }
 
-#msg_input {
+#bar_msg_input {
     width: 56px;
     height: 32px;
     margin: auto;
@@ -374,7 +374,7 @@ a:focus {
     display: inline;
 }
 
-#msg_send {
+#bar_msg_send {
     width: 56px;
     height: 32px;
     margin: 0px 0px 0px 2px;
