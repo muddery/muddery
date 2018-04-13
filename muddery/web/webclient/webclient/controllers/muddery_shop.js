@@ -1,12 +1,15 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/shop.css");
+
+    require("../controllers/base_controller.js");
+    require("../utils/paginator.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyShop(el) {
+MudderyShop = function(el) {
 	BasePopupController.call(this, el);
 	
 	this.goods = [];

@@ -22,7 +22,7 @@ var entries = {};
 
 // js entries
 var js_entries = {
-    muddery_main: path.join(env.src, "controllers", "muddery_main.js")
+    muddery_main: path.join(env.src, "client", "index.js")
 }
 Object.assign(entries, js_entries);
 
@@ -33,8 +33,8 @@ var plugins = [];
 
 // html files
 var get_html_plugins = new htmlWebpackPlugin({
-    template: path.join(env.src, "views", "main.html"),
-    filename: path.join("views", "main.html"),
+    template: path.join(env.src, "main.html"),
+    filename: "main.html",
     inject: true,
     contents: {
             // config文件id
@@ -103,7 +103,7 @@ module.exports = {
   	output: {
     	filename: path.join("js", "[name]-[chunkhash:8].js"),
     	path: env.output,
-    	publicPath: "/dist/",
+    	publicPath: "/webclient/",
   	},
   	devtool: "source-map",
 	module: {

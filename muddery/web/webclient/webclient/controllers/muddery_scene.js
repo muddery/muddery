@@ -1,12 +1,14 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/scene.css");
+
+    require("../controllers/base_controller.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyScene(el) {
+MudderyScene = function(el) {
 	BaseController.call(this, el);
 }
 

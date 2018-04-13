@@ -1,12 +1,14 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/dialogue.css");
+
+    require("../controllers/base_controller.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyDialogue(el) {
+MudderyDialogue = function(el) {
 	BasePopupController.call(this, el);
 	
 	this.target = null;

@@ -1,12 +1,15 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/quests.css");
+
+    require("../controllers/base_controller.js");
+    require("../utils/paginator.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyQuests(el) {
+MudderyQuests = function(el) {
 	BaseController.call(this, el);
 	
 	this.paginator = new Paginator("#quests_wrapper");

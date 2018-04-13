@@ -1,12 +1,15 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/honours.css");
+
+    require("../controllers/base_controller.js");
+    require("../utils/paginator.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyHonours(el) {
+MudderyHonours = function(el) {
 	BaseController.call(this, el);
 
 	this.min_honour_level = 1;

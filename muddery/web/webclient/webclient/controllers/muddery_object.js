@@ -1,12 +1,14 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/object.css");
+
+    require("../controllers/base_controller.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyObject(el) {
+MudderyObject = function(el) {
 	BasePopupController.call(this, el);
 	
 	this.dbref = null;

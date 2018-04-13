@@ -1,12 +1,14 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/new_char.css");
+
+    require("../controllers/base_controller.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyNewChar(el) {
+MudderyNewChar = function(el) {
 	BasePopupController.call(this, el);
 }
 

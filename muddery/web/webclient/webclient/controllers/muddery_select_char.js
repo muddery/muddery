@@ -1,12 +1,14 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/select_char.css");
+
+    require("../controllers/base_controller.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderySelectChar(el) {
+MudderySelectChar = function(el) {
 	BaseController.call(this, el);
 }
 

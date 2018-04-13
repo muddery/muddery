@@ -1,12 +1,14 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/confirm_combat.css");
+
+    require("../controllers/base_controller.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyConfirmCombat(el) {
+MudderyConfirmCombat = function(el) {
 	BasePopupController.call(this, el);
 	
     this.prepare_time = 0;

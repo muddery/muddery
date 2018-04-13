@@ -1,12 +1,12 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../controllers/base_controller.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyDeleteChar(el) {
+MudderyDeleteChar = function(el) {
 	BasePopupController.call(this, el);
 	
 	this.name = "";

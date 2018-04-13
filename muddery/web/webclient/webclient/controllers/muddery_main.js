@@ -1,27 +1,10 @@
 
 if (typeof(require) != "undefined") {
     require("../css/webclient.css");
-    require("../css/message.css");
-    require("../css/new_char.css");
-    require("../css/scene.css");
-    require("../css/select_char.css");
-    require("../css/information.css");
-    require("../css/inventory.css");
-    require("../css/skills.css");
-    require("../css/quests.css");
-    require("../css/honours.css");
-    require("../css/object.css");
-    require("../css/dialogue.css");
-    require("../css/map.css");
-    require("../css/combat.css");
-    require("../css/combat_result.css");
-    require("../css/confirm_combat.css");
-    require("../css/shop.css");
-    require("../css/goods.css");
+    require("../css/webpack.css");
 
     require("../lang/local_string.js");
-    
-    require("../client/evennia.js");
+
     require("../client/client.js");
     require("../client/commands.js");
     require("../utils/map_data.js");
@@ -31,37 +14,13 @@ if (typeof(require) != "undefined") {
     require("../utils/utils.js");
     require("../utils/paginator.js");
 
-    require("../controllers/muddery_quick_login.js");
-    require("../controllers/muddery_login.js");
-    require("../controllers/muddery_register.js");
-    require("../controllers/muddery_password.js");
-    require("../controllers/muddery_select_char.js");
-    require("../controllers/muddery_message.js");
-    require("../controllers/muddery_new_char.js");
-    require("../controllers/muddery_scene.js");
-    require("../controllers/muddery_information.js");
-    require("../controllers/muddery_inventory.js");
-    require("../controllers/muddery_skills.js");
-    require("../controllers/muddery_quests.js");
-    require("../controllers/muddery_honours.js");
-    require("../controllers/muddery_object.js");
-    require("../controllers/muddery_get_objects.js");
-    require("../controllers/muddery_dialogue.js");
-    require("../controllers/muddery_map.js");
-    require("../controllers/muddery_combat.js");
-    require("../controllers/muddery_combat_result.js");
-    require("../controllers/muddery_confirm_combat.js");
-    require("../controllers/muddery_shop.js");
-    require("../controllers/muddery_goods.js");
-
-    require("../client/frameworks.js");
-    require("../client/importer.js");
+    require("../controllers/base_controller.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyMain() {
+MudderyMain = function() {
 	BaseController.call(this);
 	
 	this.puppet = false;

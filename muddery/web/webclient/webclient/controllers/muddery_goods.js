@@ -1,12 +1,14 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/goods.css");
+
+    require("../controllers/base_controller.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyGoods(el) {
+MudderyGoods = function(el) {
 	BasePopupController.call(this, el);
 
 	this.dbref = null;

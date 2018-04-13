@@ -1,6 +1,10 @@
 
 if (typeof(require) != "undefined") {
+    require("../client/evennia.js");
+
     require("../client/defines.js");
+    require("../client/frameworks.js");
+    require("../client/importer.js");
 }
 
 $$.client = {

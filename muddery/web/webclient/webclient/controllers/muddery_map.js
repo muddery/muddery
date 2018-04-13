@@ -1,12 +1,14 @@
 
 if (typeof(require) != "undefined") {
-    require("./base_controller.js");
+    require("../css/map.css");
+
+    require("../controllers/base_controller.js");
 }
 
 /*
  * Derive from the base class.
  */
-function MudderyMap(el) {
+MudderyMap = function(el) {
 	BasePopupController.call(this, el);
 	
     // the scale of the map
