@@ -1,5 +1,7 @@
 
-var $$ = $$ ? $$: {};
+if (typeof(require) != "undefined") {
+    require("../client/defines.js");
+}
 
 $$.data_handler = {
     character_dbref: "",

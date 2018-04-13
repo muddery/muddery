@@ -1,5 +1,7 @@
 
-var $$ = $$ ? $$: {};
+if (typeof(require) != "undefined") {
+    require("../client/defines.js");
+}
 
 $$.text2html = {
     mark_map : {

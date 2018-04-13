@@ -1,5 +1,7 @@
 
-var $$ = $$ ? $$: {};
+if (typeof(require) != "undefined") {
+    require("../client/defines.js");
+}
 
 $$.text_escape = {
     regexp_escape : /\$[0-9|_|A-Z]+|\$\$/g,

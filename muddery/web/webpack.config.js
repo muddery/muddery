@@ -105,6 +105,7 @@ module.exports = {
     	path: env.output,
     	publicPath: "/dist/",
   	},
+  	devtool: "source-map",
 	module: {
 		rules: [
 			{

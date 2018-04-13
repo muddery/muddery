@@ -1,4 +1,8 @@
 
+if (typeof(require) != "undefined") {
+    require("./base_controller.js");
+}
+
 /*
  * Derive from the base class.
  */

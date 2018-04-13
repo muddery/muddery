@@ -19,6 +19,18 @@ if (typeof(require) != "undefined") {
     require("../css/shop.css");
     require("../css/goods.css");
 
+    require("../lang/local_string.js");
+    
+    require("../client/evennia.js");
+    require("../client/client.js");
+    require("../client/commands.js");
+    require("../utils/map_data.js");
+    require("../utils/text2html.js");
+    require("../utils/data_handler.js");
+    require("../utils/escape.js");
+    require("../utils/utils.js");
+    require("../utils/paginator.js");
+
     require("../controllers/muddery_quick_login.js");
     require("../controllers/muddery_login.js");
     require("../controllers/muddery_register.js");
@@ -41,6 +53,9 @@ if (typeof(require) != "undefined") {
     require("../controllers/muddery_confirm_combat.js");
     require("../controllers/muddery_shop.js");
     require("../controllers/muddery_goods.js");
+
+    require("../client/frameworks.js");
+    require("../client/importer.js");
 }
 
 /*

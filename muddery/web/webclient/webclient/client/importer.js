@@ -1,7 +1,7 @@
 
-// import the framework
-
-var $$ = $$ ? $$: {};
+if (typeof(require) != "undefined") {
+    require("../client/defines.js");
+}
 
 $$.main = null;
 $$.component = {};

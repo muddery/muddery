@@ -5,9 +5,14 @@
         <meta charset="utf-8" />
 
         <title>Muddery Webclient</title>
-
+        
         <!--CSS style sheet -->
         <link rel="stylesheet" type="text/css" media="screen" href="../libs/bootstrap.min.css" />
+        
+		<script type="text/javascript">
+			"<%= htmlWebpackPlugin.options.contents.comment_begin %>"
+			// block the followings in webpack
+		</script>
         <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
      	<link rel="stylesheet" type="text/css" media="screen" href="../css/message.css" />
      	<link rel="stylesheet" type="text/css" media="screen" href="../css/new_char.css" />
@@ -27,11 +32,11 @@
         <link rel="stylesheet" type="text/css" media="screen" href="../css/confirm_combat.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/shop.css" />
         <link rel="stylesheet" type="text/css" media="screen" href="../css/goods.css" />
+		<script type="text/javascript">
+			"<%= htmlWebpackPlugin.options.contents.comment_end %>"
+			// block the uppers in webpack
+		</script>
 
-        <!-- Importing the online jQuery javascript library -->
-        <!--script src="http://code.jquery.com/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script-->
-
-        <!--for offline testing, download the jquery library from jquery.com-->
         <script src="../libs/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="../libs/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
         <script src="../libs/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
@@ -40,18 +45,22 @@
         <!-- settings -->
         <script src="../settings.js" type="text/javascript" charset="utf-8"></script>
 
-		<!-- languages -->
+		<script type="text/javascript">
+			"<%= htmlWebpackPlugin.options.contents.comment_begin %>"
+			// block the followings in webpack
+		</script>
+
+        <script src="../defines.js" type="text/javascript" charset="utf-8"></script>
+
         <script src="../lang/en-us/strings.js" type="text/javascript" charset="utf-8"></script>
         <script src="../lang/zh-cn/strings.js" type="text/javascript" charset="utf-8"></script>
         <script src="../lang/zh-tw/strings.js" type="text/javascript" charset="utf-8"></script>
         <script src="../lang/local_string.js" type="text/javascript" charset="utf-8"></script>
-        
-        <!-- client -->
+
         <script src="../client/evennia.js" type="text/javascript" charset="utf-8"></script>
         <script src="../client/client.js" type="text/javascript" charset="utf-8"></script>
         <script src="../client/commands.js" type="text/javascript" charset="utf-8"></script>
-        
-        <!-- utils -->
+
         <script src="../utils/map_data.js" type="text/javascript" charset="utf-8"></script>
         <script src="../utils/text2html.js" type="text/javascript" charset="utf-8"></script>
         <script src="../utils/data_handler.js" type="text/javascript" charset="utf-8"></script>
@@ -59,6 +68,10 @@
         <script src="../utils/utils.js" type="text/javascript" charset="utf-8"></script>
         <script src="../utils/paginator.js" type="text/javascript" charset="utf-8"></script>
 
+		<script type="text/javascript">
+			"<%= htmlWebpackPlugin.options.contents.comment_end %>"
+			// block the uppers in webpack
+		</script>
     </head>
     <body id="frame_main" class="template">
         <!-- Show popup windows in this div. -->
@@ -342,6 +355,11 @@
             </div>
         </div>
 
+		<script type="text/javascript">
+			"<%= htmlWebpackPlugin.options.contents.comment_begin %>"
+			// block the followings in webpack
+		</script>
+		
         <script src="../controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/muddery_main.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/muddery_quick_login.js" defer="defer" type="text/javascript" charset="utf-8"></script>
@@ -370,5 +388,10 @@
 
         <script src="../client/frameworks.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        
+		<script type="text/javascript">
+			"<%= htmlWebpackPlugin.options.contents.comment_end %>"
+			// block the uppers in webpack
+		</script>
     </body>
 </html>

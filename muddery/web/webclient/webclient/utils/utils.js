@@ -1,5 +1,7 @@
 
-var $$ = $$ ? $$: {};
+if (typeof(require) != "undefined") {
+    require("../client/defines.js");
+}
 
 $$.utils = {
     visual_length: function(str) {

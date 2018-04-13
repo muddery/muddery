@@ -2,7 +2,7 @@
 /*
  * Get the prototype of the base class.
  */
-function prototype(base, el) {
+prototype = function(base, el) {
     var Base = function(){};
     Base.prototype = base;
     return new Base(el);
@@ -18,7 +18,7 @@ function prototype(base, el) {
 /*
  * The base controller's constructor.
  */
-function BaseController(el) {
+BaseController = function(el) {
     this.el = el || $(document);
 }
 
@@ -157,7 +157,7 @@ BaseController.prototype.clearElements = function(root_tag) {
  /*
  * Derive from the base class.
  */
-function BasePopupController(el) {
+BasePopupController = function(el) {
 	BaseController.call(this, el);
 	
 	this.target = null;
