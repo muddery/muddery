@@ -1,5 +1,5 @@
 
-#tab_skills {
+#frame_skills #tab_skills {
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;
@@ -7,7 +7,7 @@
     margin: 8px;
 }
 
-#tab_skills th {
+#frame_skills #tab_skills th {
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;
@@ -15,22 +15,22 @@
     font-weight: normal;
 }
 
-#tab_skills td {
+#frame_skills #tab_skills td {
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;
     padding: 4px 8px 4px 8px;
 }
 
-.skill_icon {
+#frame_skills .skill_icon {
     text-align: center;
 }
 
-.img_icon {
+#frame_skills .img_icon {
 	width: 30px;
 	height: 30px;
 }
 
-.skill_name {
+#frame_skills .skill_name {
     text-align: center;
 }

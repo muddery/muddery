@@ -49,3 +49,7 @@ nosetests.xml
 # Windows files generated during setup
 evennia.bat
 twistd.bat
+
+# node.js modules
+node_modules/
+package-lock.json

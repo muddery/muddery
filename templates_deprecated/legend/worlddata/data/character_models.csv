@@ -1,0 +1,11 @@
+id,key,name,level,max_hp,max_exp,give_exp,attr_1,attr_2,attr_3,attr_4,attr_5,attr_6,attr_7,attr_8,attr_9,attr_10
+2,MODEL_PLAYER,Player,1,50,50,0,10,10,,,,,,,,
+3,MODEL_PLAYER,Player,2,70,70,0,12,12,,,,,,,,
+4,MODEL_PLAYER,Player,3,100,90,0,15,15,,,,,,,,
+5,MODEL_NPC_COMMON,NPC,1,25,0,10,5,5,,,,,,,,
+6,MODEL_MOB_WOLF,Wolf,1,25,0,30,5,5,,,,,,,,
+7,MODEL_MOB_BEAUTY,Beauty,1,40,0,50,7,7,,,,,,,,
+8,MODEL_MOB_PIRATE,Pirate,1,40,0,50,7,7,,,,,,,,
+9,MODEL_MOB_TIGER,Tiger,1,70,0,80,10,10,,,,,,,,
+10,MODEL_PLAYER,Player,4,150,0,0,18,18,,,,,,,,
+11,MODEL_MOB_BOSS,Boss,1,100,0,100,15,15,,,,,,,,

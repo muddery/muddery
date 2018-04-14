@@ -1,13 +1,13 @@
 
-#name_content {
+#frame_scene #name_content {
     color: #00ffff;
 }
 
-.scene_object {
+#frame_scene .scene_object {
     margin: 0px 5px;
 }
 
-.exit_table {
+#frame_scene .exit_table {
     line-height: 1;
     background-color: rgba(0, 0, 0, 0.2);
     border-width: 1px;
@@ -15,15 +15,15 @@
     border-style: solid;
 }
 
-.exit_table td {
+#frame_scene .exit_table td {
     min-width: 52px;
     height: 16px;
 }
 
-.exit_element {
+#frame_scene .exit_element {
     margin: 0px 5px;
 }
 
-.exit_cmd a {
+#frame_scene .exit_cmd a {
     color: #0ff;
 }

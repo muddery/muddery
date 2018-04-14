@@ -1,0 +1,7 @@
+id,npc,dialogue,default
+1,npc_girl,dlg_find_cat,False
+2,npc_girl,dlg_finding_cat,False
+3,npc_girl,dlg_found_cat,True
+4,npc_beauty,dlg_beauty,True
+5,npc_girl,dlg_give_cat,False
+6,npc_boss,dlg_boss,True

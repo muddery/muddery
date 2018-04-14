@@ -1,8 +1,9 @@
-/*
-Client Data Handler
-*/
 
-var data_handler = {
+if (typeof(require) != "undefined") {
+    require("../client/defines.js");
+}
+
+$$.data_handler = {
     character_dbref: "",
     character_name: "",
     character_level: 0,

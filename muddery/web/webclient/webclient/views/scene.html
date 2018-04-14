@@ -1,137 +1,117 @@
-<!DOCTYPE html>
-<html lang="en-us">
-    <head>
-	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
-        <meta charset="utf-8" />
-
-        <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/scene.css" />
-    </head>
-    <body>
-        <div id="box_scene">
-            <div id="name">
-                &gt;&gt;&gt;&gt;&gt; <span id="name_content"></span>  &lt;&lt;&lt;&lt;&lt;
-            </div>
-            <div id="desc">
-            	<div id="desc_content"></div>
-            </div>
-            <div id="commands">
-                <span id="commands_container">
-                	<button type="button" class="btn btn-default scene_object template"></button>
-                </span>
-            </div>
-            <div><br></div>
-            <div id="things">
-            	<span id="view_objects">Objects: </span>
-                <span id="things_container">
-					<a class="scene_object template"></a>
-                </span>
-            </div>
-            <div id="npcs">
-            	<span id="view_npcs">NPCs: </span>
-                <span id="npcs_container">
-					<a class="scene_object template"></a>
-                </span>
-            </div>
-            <div id="players">
-            	<span id="view_players">Players: </span>
-                <span id="players_container">
-					<a class="scene_object template"></a>
-                </span>
-            </div>
-            <div><br></div>
-            <div id="exits">
-                <center id="exits_container">
-                    <table class="exit_table">
-                        <tbody>
-                            <tr>
-                                <td align="right">
-                                    <span id="exits_0">
-                                        <a class="exit_element template"></a>
-                                    </span>
-                                </td>
-                                <td align="center">
-                                    <span id="exits_1">
-                                        <a class="exit_element template"></a>
-                                    </span>
-                                </td>
-                                <td align="left">
-                                    <span id="exits_2">
-                                        <a class="exit_element template"></a>
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td align="right">
-                                	<span id="link_0">\</span>
-                                </td>
-                                <td align="center">
-                                    <span id="link_1">|</span>
-                                </td>
-                                <td align="left">
-                                    <span id="link_2">/</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td align="right">
-                                    <span id="exits_3">
-                                        <a class="exit_element template"></a>
-                                    </span>
-                                    <span id="link_3">--</span>
-                                </td>
-                                <td align="center">
-                                    <span id="exits_4">
-                                        <a class="exit_element template"></a>
-                                        <span class="template"></span>
-                                    </span>
-                                </td>
-                                <td align="left">
-                                    <span id="link_5">--</span>
-                                    <span id="exits_5">
-                                        <a class="exit_element template"></a>
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td align="right">
-                                    <span id="link_6">/</span>
-                                </td>
-                                <td align="center">
-                                    <span id="link_7">|</span>
-                                </td>
-                                <td align="left">
-                                    <span id="link_8">\</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td align="right">
-                                    <span id="exits_6">
-                                        <a class="exit_element template"></a>
-                                    </span>
-                                </td>
-                                <td align="center">
-                                    <span id="exits_7">
-                                        <a class="exit_element template"></a>
-                                    </span>
-                                </td>
-                                <td align="left">
-                                    <span id="exits_8">
-                                        <a class="exit_element template"></a>
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </center>
-            </div>
-        </div>
-
-        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/muddery_scene.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-    </body>
-</html>
+<div id="scene_box_scene">
+	<div id="scene_name">
+		&gt;&gt;&gt;&gt;&gt; <span id="scene_name_content"></span>  &lt;&lt;&lt;&lt;&lt;
+	</div>
+	<div id="scene_desc">
+		<div id="scene_desc_content"></div>
+	</div>
+	<div id="scene_commands">
+		<span id="scene_commands_container">
+			<button type="button" class="btn btn-default scene_object template"></button>
+		</span>
+	</div>
+	<div><br></div>
+	<div id="scene_things">
+		<span id="scene_view_objects">Objects: </span>
+		<span id="scene_things_container">
+			<a class="scene_object template"></a>
+		</span>
+	</div>
+	<div id="scene_npcs">
+		<span id="scene_view_npcs">NPCs: </span>
+		<span id="scene_npcs_container">
+			<a class="scene_object template"></a>
+		</span>
+	</div>
+	<div id="scene_players">
+		<span id="scene_view_players">Players: </span>
+		<span id="scene_players_container">
+			<a class="scene_object template"></a>
+		</span>
+	</div>
+	<div><br></div>
+	<div id="scene_exits">
+		<center id="scene_exits_container">
+			<table class="exit_table">
+				<tbody>
+					<tr>
+						<td align="right">
+							<span id="scene_exits_0">
+								<a class="exit_element template"></a>
+							</span>
+						</td>
+						<td align="center">
+							<span id="scene_exits_1">
+								<a class="exit_element template"></a>
+							</span>
+						</td>
+						<td align="left">
+							<span id="scene_exits_2">
+								<a class="exit_element template"></a>
+							</span>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							<span id="scene_link_0">\</span>
+						</td>
+						<td align="center">
+							<span id="scene_link_1">|</span>
+						</td>
+						<td align="left">
+							<span id="scene_link_2">/</span>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							<span id="scene_exits_3">
+								<a class="exit_element template"></a>
+							</span>
+							<span id="scene_link_3">--</span>
+						</td>
+						<td align="center">
+							<span id="scene_exits_4">
+								<a class="exit_element template"></a>
+								<span class="template"></span>
+							</span>
+						</td>
+						<td align="left">
+							<span id="scene_link_5">--</span>
+							<span id="scene_exits_5">
+								<a class="exit_element template"></a>
+							</span>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							<span id="scene_link_6">/</span>
+						</td>
+						<td align="center">
+							<span id="scene_link_7">|</span>
+						</td>
+						<td align="left">
+							<span id="scene_link_8">\</span>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							<span id="scene_exits_6">
+								<a class="exit_element template"></a>
+							</span>
+						</td>
+						<td align="center">
+							<span id="scene_exits_7">
+								<a class="exit_element template"></a>
+							</span>
+						</td>
+						<td align="left">
+							<span id="scene_exits_8">
+								<a class="exit_element template"></a>
+							</span>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</center>
+	</div>
+</div>

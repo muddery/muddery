@@ -1,51 +1,54 @@
-//@ sourceURL=/controller/muddery_delete_char.js
+
+if (typeof(require) != "undefined") {
+    require("../controllers/base_controller.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyDeleteChar() {
-	BaseController.call(this);
+MudderyDeleteChar = function(el) {
+	BasePopupController.call(this, el);
 	
 	this.name = "";
     this.dbref = "";
 }
 
-MudderyDeleteChar.prototype = prototype(BaseController.prototype);
+MudderyDeleteChar.prototype = prototype(BasePopupController.prototype);
 MudderyDeleteChar.prototype.constructor = MudderyDeleteChar;
 
 /*
  * Reset the view's language.
  */
 MudderyDeleteChar.prototype.resetLanguage = function() {
-	$("#view_header").text($$("Delete") + " " + this.name);
-	$("#view_password").text($$("Verify Password"));
-	$("#button_delete").text($$("Delete"));
-	$("#password").attr("placeholder", $$("password"));
+	$("#del_char_view_header").text($$.trans("Delete") + " " + this.name);
+	$("#del_char_view_password").text($$.trans("Verify Password"));
+	$("#del_char_button_delete").text($$.trans("Delete"));
+	$("#del_char_password").attr("placeholder", $$.trans("password"));
 }
 
 /*
  * Bind events.
  */
 MudderyDeleteChar.prototype.bindEvents = function() {
-    this.onClick("#close_box", this.onClose);
-	this.onClick("#button_delete", this.onDelete);
+    this.onClick("#del_char_close_box", this.onClose);
+	this.onClick("#del_char_button_delete", this.onDelete);
 }
 
 /*
  * Event when clicks the close button.
  */
 MudderyDeleteChar.prototype.onClose = function(element) {
-    $$.controller.doClosePopupBox();
+    $$.main.doClosePopupBox();
 }
 
 /*
  * Event when clicks the delete button.
  */
 MudderyDeleteChar.prototype.onDelete = function(element) {
-	var password = $("#password").val();
+	var password = $("#del_char_password").val();
 	$$.commands.deleteCharacter(this.dbref, password);
 
-	$("#password").val("");
+	$("#del_char_password").val("");
 }
 
 /*
@@ -55,5 +58,5 @@ MudderyDeleteChar.prototype.setData = function(name, dbref) {
 	this.name = name;
 	this.dbref = dbref;
 
-	$("#view_header").text($$("Delete") + " " + this.name);
+	$("#del_char_view_header").text($$.trans("Delete") + " " + this.name);
 }

@@ -1,32 +1,32 @@
 
-.img_icon {
+#frame_combat .img_icon {
 	width: 30px;
 	height: 30px;
 }
 
-#center_time {
+#frame_combat #combat_center_time {
     text-align: center;
 }
 
-#status_bar {
+#frame_combat #combat_status_bar {
     margin: 10px 0px 0px 0px;
 }
 
-#messages {
+#frame_combat #combat_messages {
     overflow-x: hidden;
     overflow-y: auto;
 	height: 100px;
 }
 
-#characters {
+#frame_combat #combat_characters {
 	min-height: 100px;
 }
 
-#buttons {
+#frame_combat #combat_buttons {
     height: 90px;
 }
 
-.teammate {
+#frame_combat .teammate {
     padding: 0px;
     position: absolute;
     left: 12%;
@@ -34,7 +34,7 @@
     line-height: 1.2em;
 }
 
-.enemy {
+#frame_combat .enemy {
     padding: 0px;
     position: absolute;
     right: 12%;
@@ -43,10 +43,10 @@
 }
 
 /* combat button */
-.btn_combat,
-.btn_combat:focus,
-.btn_combat:hover,
-.btn_combat:active {
+#frame_combat .btn_combat,
+#frame_combat .btn_combat:focus,
+#frame_combat .btn_combat:hover,
+#frame_combat .btn_combat:active {
     position: absolute;
     width: 60px;
     height: 72px;
@@ -59,7 +59,7 @@
     color: #333;
 }
 
-.btn_combat div.cooldown {
+#frame_combat .btn_combat div.cooldown {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -68,7 +68,7 @@
     opacity: 0.5;
 }
 
-.command_name {
+#frame_combat .command_name {
     border: 1px solid;
     border-color: #ccc;
     border-radius: 4px;

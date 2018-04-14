@@ -1,30 +1,35 @@
-//@ sourceURL=/controller/muddery_object.js
+
+if (typeof(require) != "undefined") {
+    require("../css/object.css");
+
+    require("../controllers/base_controller.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyObject() {
-	BaseController.call(this);
+MudderyObject = function(el) {
+	BasePopupController.call(this, el);
 	
 	this.dbref = null;
 }
 
-MudderyObject.prototype = prototype(BaseController.prototype);
+MudderyObject.prototype = prototype(BasePopupController.prototype);
 MudderyObject.prototype.constructor = MudderyObject;
 
 /*
  * Bind events.
  */
 MudderyObject.prototype.bindEvents = function() {
-    this.onClick("#close_box", this.onClose);
-	this.onClick("#popup_footer", "button", this.onCommand);
+    this.onClick("#object_close_box", this.onClose);
+	this.onClick("#object_popup_footer", "button", this.onCommand);
 }
 
 /*
  * Event when clicks the close button.
  */
 MudderyObject.prototype.onClose = function(element) {
-	$$.controller.doClosePopupBox();
+	$$.main.doClosePopupBox();
 }
 
 /*
@@ -33,8 +38,8 @@ MudderyObject.prototype.onClose = function(element) {
 MudderyObject.prototype.onCommand = function(element) {
 	this.onClose();
 
-	var cmd = $(element).data("cmd_name");
-	var args = $(element).data("cmd_args");
+	var cmd = this.select(element).data("cmd_name");
+	var args = this.select(element).data("cmd_args");
 	if (cmd) {
 		$$.commands.doCommandLink(cmd, args);
 	}
@@ -70,25 +75,25 @@ MudderyObject.prototype.setObject = function(dbref, name, icon, desc, commands) 
 	this.dbref = dbref;
 		
 	// add name
-	$("#popup_header").html($$.text2html.parseHtml(name));
+	this.select("#object_popup_header").html($$.text2html.parseHtml(name));
 
 	// add icon
 	if (icon) {
-		var url = $$.settings.resource_url + icon;
-		$("#img_icon").attr("src", url);
-		$("#div_icon").show();
+		var url = settings.resource_url + icon;
+		this.select("#object_img_icon").attr("src", url);
+		this.select("#object_div_icon").show();
     }
     else {
-        $("#div_icon").hide();
+        this.select("#object_div_icon").hide();
     }
 
 	// add desc
 	desc = $$.text2html.parseHtml(desc);
-	$("#popup_body").html(desc);
+	this.select("#object_popup_body").html(desc);
 		    
-    this.clearElements("#popup_footer");
+    this.clearElements("#object_popup_footer");
 	if (!commands) {
-        commands = [{"name": $$("OK"),
+        commands = [{"name": $$.trans("OK"),
                      "cmd": "",
                      "args": ""}];
     }
@@ -99,7 +104,7 @@ MudderyObject.prototype.setObject = function(dbref, name, icon, desc, commands) 
  * Set command buttons.
  */
 MudderyObject.prototype.addButtons = function(commands) {
-	var template = $("#popup_footer>button.template");
+	var template = this.select("#object_popup_footer>button.template");
 
 	for (var i in commands) {
 		var button = commands[i];

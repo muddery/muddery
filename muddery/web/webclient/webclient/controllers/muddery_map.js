@@ -1,10 +1,15 @@
-//@ sourceURL=/controller/muddery_map.js
+
+if (typeof(require) != "undefined") {
+    require("../css/map.css");
+
+    require("../controllers/base_controller.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyMap() {
-	BaseController.call(this);
+MudderyMap = function(el) {
+	BasePopupController.call(this, el);
 	
     // the scale of the map
     this.scale = 75;
@@ -16,21 +21,40 @@ function MudderyMap() {
     this.show_room_box = false;
 }
 
-MudderyMap.prototype = prototype(BaseController.prototype);
+MudderyMap.prototype = prototype(BasePopupController.prototype);
 MudderyMap.prototype.constructor = MudderyMap;
 
 /*
  * Bind events.
  */
 MudderyMap.prototype.bindEvents = function() {
-    this.onClick("#close_box", this.onClose);
+    this.onClick("#map_close_box", this.onClose);
+}
+
+/*
+ * Set element's size.
+ */
+MudderyMap.prototype.resetSize = function() {
+	//set size
+	var width = this.el.parent().width();
+	var height = $('#middlewindow').height() * 0.8;
+
+	this.el.innerWidth(width)
+		   .innerHeight(height);
+
+	// model dialogue
+	var win_h = $(window).innerHeight();
+	var dlg = $(".modal-dialog:visible:first");
+	if (dlg.length > 0) {
+		dlg.css("top", (win_h - dlg.height()) / 2);
+	}
 }
 
 /*
  * Event when clicks the close button.
  */
 MudderyMap.prototype.onClose = function(element) {
-	$$.controller.doClosePopupBox();
+	$$.main.doClosePopupBox();
 }
     
 /*
@@ -46,7 +70,7 @@ MudderyMap.prototype.setMap = function(scale, room_size, show_room_box) {
  * Clear the map.
  */
 MudderyMap.prototype.clear = function() {
-    $("#name").html($$("MAP"));
+    $("#map_name").html($$.trans("MAP"));
     $("#map_svg").empty();
 }
     
@@ -64,14 +88,14 @@ MudderyMap.prototype.showMap = function(location) {
 	if (location["area"]) {
 		var area_name = $$.text2html.parseHtml(location["area"]["name"]);
 		if (area_name) {
-			$("#name").html(area_name);
+			$("#map_name").html(area_name);
 		}
 	}
 	
 	var current_room = $$.map_data._map_rooms[location.key];
 
-	var w_width = $(window).width();
-	var w_height = $(window).height();
+	var w_width = $(this.el).width();
+	var w_height = $(this.el).height();
 
 	var map_width = w_width;
 	var map_height = w_height - $("div.modal-header").outerHeight();
@@ -114,7 +138,7 @@ MudderyMap.prototype.showMap = function(location) {
 			.attr("y", y)
 			.attr("width", location["area"]["background"]["width"] + "px")
 			.attr("height", location["area"]["background"]["height"] + "px")
-			.attr("xlink:href", $$.settings.resource_url + location["area"]["background"]["name"]);
+			.attr("xlink:href", settings.resource_url + location["area"]["background"]["name"]);
 	}
 
 	if (current_room["pos"] &&
@@ -186,7 +210,7 @@ MudderyMap.prototype.showMap = function(location) {
 					}
 						
 					room_data.push({"name": $$.utils.truncate_string(room["name"], 10, true),
-									"icon": room["icon"]? $$.settings.resource_url + room["icon"]: null,
+									"icon": room["icon"]? settings.resource_url + room["icon"]: null,
 									"area": room["area"],
 									"pos": room["pos"]});
 					if (key == location.key) {

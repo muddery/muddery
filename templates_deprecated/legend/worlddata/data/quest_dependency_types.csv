@@ -1,0 +1,10 @@
+id,key,system_data,name,desc
+73,DPD_CAN_PROVIDE,True,Can Provide,Can provide this quest.
+74,DPD_ACCEPTED,True,Accepted,Has accepted this quest.
+75,DPD_NOT_ACCEPTED,True,Not Accepted,Has not accepted this quest.
+76,DPD_IN_PROGRESS,True,In Progress,This quest is in progress.
+77,DPD_NOT_IN_PROGRESS,True,Not In Progress,This quest is not in progress.
+78,DPD_ACCOMPLISHED,True,Accomplished,This quest is accomplished.
+79,DPD_NOT_ACCOMPLISHED,True,Not Accomplished,This quest has been accepted
+80,DPD_COMPLETED,True,Completed,This quest is completed.
+81,DPD_NOT_COMPLETED,True,Not Completed,This quest has been accepted

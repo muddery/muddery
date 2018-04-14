@@ -1,40 +1,43 @@
-//@ sourceURL=/controller/muddery_get_objects.js
+
+if (typeof(require) != "undefined") {
+    require("../controllers/base_controller.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyGetObjects() {
-	BaseController.call(this);
+MudderyGetObjects = function(el) {
+	BasePopupController.call(this, el);
 	
 	this.goods = [];
 }
 
-MudderyGetObjects.prototype = prototype(BaseController.prototype);
+MudderyGetObjects.prototype = prototype(BasePopupController.prototype);
 MudderyGetObjects.prototype.constructor = MudderyGetObjects;
 
 /*
  * Reset the view's language.
  */
 MudderyGetObjects.prototype.resetLanguage = function() {
-	$("#popup_header").text($$("Get Objects"));
-	$("#view_get_objects").text($$("Get Objects: "));
-	$("#view_rejected").text($$("Can Not Get: "));
-	$("#view_button_ok").text($$("OK"));
+	this.select("#get_obj_popup_header").text($$.trans("Get Objects"));
+	this.select("#get_obj_view_get_objects").text($$.trans("Get Objects: "));
+	this.select("#get_obj_view_rejected").text($$.trans("Can Not Get: "));
+	this.select("#get_obj_view_button_ok").text($$.trans("OK"));
 }
 
 /*
  * Bind events.
  */
 MudderyGetObjects.prototype.bindEvents = function() {
-    this.onClick("#close_box", this.onClose);
-    this.onClick("#button_ok", this.onClose);
+    this.onClick("#get_obj_close_box", this.onClose);
+    this.onClick("#get_obj_button_ok", this.onClose);
 }
 
 /*
  * Event when clicks the close button.
  */
 MudderyGetObjects.prototype.onClose = function(element) {
-    $$.controller.doClosePopupBox();
+    $$.main.doClosePopupBox();
 }
 
 /*
@@ -42,8 +45,8 @@ MudderyGetObjects.prototype.onClose = function(element) {
  */
 MudderyGetObjects.prototype.setObjects = function(accepted, rejected) {
 	// set new objects
-	this.setItems("#accepted", "#accepted_list", accepted);
-	this.setItems("#rejected", "#rejected_list", rejected);
+	this.setItems("#get_obj_accepted", "#get_obj_accepted_list", accepted);
+	this.setItems("#get_obj_rejected", "#get_obj_rejected_list", rejected);
 }
 
 /*
@@ -51,7 +54,7 @@ MudderyGetObjects.prototype.setObjects = function(accepted, rejected) {
  */
 MudderyGetObjects.prototype.setItems = function(block_id, container_id, objects) {
 	this.clearElements(container_id);
-	var template = $(container_id).find("p.template");
+	var template = this.select(container_id).find("p.template");
 
 	var has_item = false;
 	if (objects) {
@@ -65,9 +68,9 @@ MudderyGetObjects.prototype.setItems = function(block_id, container_id, objects)
 	}
 	
 	if (has_item) {
-		$(block_id).show();
+		this.select(block_id).show();
 	}
 	else {
-		$(block_id).hide();
+		this.select(block_id).hide();
 	}
 }

@@ -1,28 +1,33 @@
-//@ sourceURL=/controller/muddery_message.js
+
+if (typeof(require) != "undefined") {
+    require("../css/message.css");
+
+    require("../controllers/base_controller.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyMessage() {
-	BaseController.call(this);
+MudderyMessage = function(el) {
+	BasePopupController.call(this, el);
 }
 
-MudderyMessage.prototype = prototype(BaseController.prototype);
+MudderyMessage.prototype = prototype(BasePopupController.prototype);
 MudderyMessage.prototype.constructor = MudderyMessage;
 
 /*
  * Bind events.
  */
 MudderyMessage.prototype.bindEvents = function() {
-    this.onClick("#close_box", this.onClose);
-	this.onClick("#popup_footer", "button", this.onCommand);
+    this.onClick("#msg_close_box", this.onClose);
+	this.onClick("#msg_popup_footer", "button", this.onCommand);
 }
 	
 /*
  * Event when clicks the close button.
  */
 MudderyMessage.prototype.onClose = function(element) {
-	$$.controller.doClosePopupBox();
+	$$.main.doClosePopupBox();
 }
 
 /*
@@ -31,8 +36,8 @@ MudderyMessage.prototype.onClose = function(element) {
 MudderyMessage.prototype.onCommand = function(element) {
 	this.onClose();
 
-	var cmd = $(element).data("cmd_name");
-	var args = $(element).data("cmd_args");
+	var cmd = this.select(element).data("cmd_name");
+	var args = this.select(element).data("cmd_args");
 	if (cmd) {
 		$$.commands.doCommandLink(cmd, args);
 	}
@@ -42,13 +47,13 @@ MudderyMessage.prototype.onCommand = function(element) {
  * Set message's data.
  */
 MudderyMessage.prototype.setMessage = function(header, content, commands) {
-	$("#popup_header").html($$.text2html.parseHtml(header));
+	this.select("#msg_popup_header").html($$.text2html.parseHtml(header));
 
-	$("#popup_body").html($$.text2html.parseHtml(content));
+	this.select("#msg_popup_body").html($$.text2html.parseHtml(content));
 
-	this.clearElements("#popup_footer");
+	this.clearElements("#msg_popup_footer");
 	if (!commands) {
-		commands = [{"name": $$("OK"),
+		commands = [{"name": $$.trans("OK"),
 					 "cmd": "",
 					 "args": ""}];
 	}
@@ -59,7 +64,7 @@ MudderyMessage.prototype.setMessage = function(header, content, commands) {
  * Set command buttons.
  */
 MudderyMessage.prototype.addButtons = function(commands) {
-	var template = $("#popup_footer>button.template");
+	var template = this.select("#msg_popup_footer>button.template");
 
 	for (var i in commands) {
 		var button = commands[i];

@@ -1,40 +1,20 @@
-<!DOCTYPE html>
-<html lang="en-us">
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
-        <meta charset="utf-8" />
-
-        <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/dialogue.css" />
-    </head>
-    <body>
-        <div class="modal-header">
-            <button id="close_box" type="button" class="close">×</button>
-            <h4 id="header" class="modal-title"></h4>
-        </div>
-        <div class="modal-body">
-            <div id="div_icon">
-                <img id="img_icon" src="" />
-            </div>
-            <div id="dialogue_body">
-                <div id="dialogue_content"></div>
-                <p class="template" >
-                    <a></a>
-                </p>
-            </div>
-        </div>
-        <div id="footer" class="modal-footer">
-            <center>
-                <button id="bottom_button" type="button" class="btn btn-default"></button>
-            </center>
-        </div>
-        
-        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/muddery_dialogue.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-    </body>
-</html>
+<div class="modal-header">
+	<button id="dlg_close_box" type="button" class="close">×</button>
+	<h4 id="dlg_header" class="modal-title"></h4>
+</div>
+<div class="modal-body">
+	<div id="dlg_div_icon">
+		<img id="dlg_img_icon"/>
+	</div>
+	<div id="dialogue_body">
+		<div id="dialogue_content"></div>
+		<p class="template" >
+			<a></a>
+		</p>
+	</div>
+</div>
+<div id="dlg_footer" class="modal-footer">
+	<center>
+		<button id="dlg_bottom_button" type="button" class="btn btn-default"></button>
+	</center>
+</div>

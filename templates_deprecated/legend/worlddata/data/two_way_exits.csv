@@ -1,0 +1,7 @@
+id,key,reverse_name
+1,exit_begin,
+2,exit_front,
+3,exit_left,
+4,exit_center,
+5,exit_right,
+6,exit_cross_secret,

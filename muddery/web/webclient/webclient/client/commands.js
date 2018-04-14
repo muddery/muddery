@@ -1,8 +1,9 @@
-/*
-Muddery webclient (javascript component)
-*/
 
-var commands = {
+if (typeof(require) != "undefined") {
+    require("../client/defines.js");
+}
+
+$$.commands = {
     // commands
     cmdString : function(command, args) {
         return JSON.stringify({"cmd" : command, "args" : args});
@@ -25,9 +26,6 @@ var commands = {
                     "combat": combat};
         Evennia.msg("text", this.cmdString(cmd, args));
     },
-    
-    
-    // functions when user click a button
 
     doQuickLogin: function(playername) {
         var args = {"playername" : playername};
@@ -50,7 +48,7 @@ var commands = {
         }
 
         if (password != password_verify) {
-            controller.showAlert($$("Password does not match."));
+            $$.main.showAlert($$("Password does not match."));
             return;
         }
 
@@ -58,9 +56,8 @@ var commands = {
                     "password": password,
                     "connect": connect};
         Evennia.msg("text", this.cmdString("create", args));
-        
-        var login = $("#frame_login")[0].contentWindow.controller;
-        login.setPlayerName(playername);
+
+        $$.component.login.setPlayerName(playername);
     },
 
     // change password
@@ -71,7 +68,7 @@ var commands = {
         }
 
         if (password != password_verify) {
-            controller.showAlert($$("Password does not match."));
+            $$.main.showAlert($$("Password does not match."));
             return;
         }
 
@@ -129,8 +126,8 @@ var commands = {
     
     // dialogue
     doDialogue: function(dialogue, sentence, npc) {
-        if (data_handler.dialogues_list.length > 0) {
-            controller.showDialogue(data_handler.dialogues_list.shift());
+        if ($$.data_handler.dialogues_list.length > 0) {
+            $$.main.showDialogue($$.data_handler.dialogues_list.shift());
         }
         else {
             var args = {"dialogue": dialogue,
@@ -142,7 +139,7 @@ var commands = {
     
     // logout
     doLogout : function() {
-        $.cookie("is_auto_login", '', {expires: -1});
+        localStorage.is_auto_login = "";
         Evennia.msg("text", this.cmdString("quit", ""));
     },
     
@@ -203,30 +200,30 @@ var commands = {
 
     doAutoLoginConfig: function(playername, password, save_password, auto_login) {
         if (save_password) {
-            $.cookie("login_name", playername);
-            $.cookie("login_password", password);
+            localStorage.login_name = playername;
+            localStorage.login_password = password;
 
             if (auto_login) {
-                $.cookie("is_auto_login", 'true');
+                localStorage.is_auto_login = "1";
             } else {
-                $.cookie("is_auto_login", '', {expires: -1});
+                localStorage.is_auto_login = "";
             }
         }
     },
 
     doSavePassword: function(save_password) {
         if (save_password) {
-            $.cookie("is_save_password", 'true');
+            localStorage.is_save_password = "1";
         }
         else {
-            $.cookie("login_name", '', {expires: -1});
-            $.cookie("login_password", '', {expires: -1});
-            $.cookie("is_save_password", '', {expires: -1});
-            $.cookie("is_auto_login", '', {expires: -1});
+            localStorage.login_name = "";
+            localStorage.login_password = "";
+            localStorage.is_save_password = "";
+            localStorage.is_auto_login = "";
         }
     },
 
     doRemoveAutoLogin: function() {
-        $.cookie("is_auto_login", '', {expires: -1});
+        localStorage.is_auto_login = "";
     },
 }
