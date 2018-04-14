@@ -1,103 +1,104 @@
 
 if (typeof(require) != "undefined") {
     require("../client/defines.js");
+
+    require("../controllers/muddery_main.js");
+    require("../controllers/muddery_quick_login.js");
+    require("../controllers/muddery_login.js");
+    require("../controllers/muddery_register.js");
+    require("../controllers/muddery_password.js");
+    require("../controllers/muddery_select_char.js");
+    require("../controllers/muddery_message.js");
+    require("../controllers/muddery_new_char.js");
+    require("../controllers/muddery_scene.js");
+    require("../controllers/muddery_information.js");
+    require("../controllers/muddery_inventory.js");
+    require("../controllers/muddery_skills.js");
+    require("../controllers/muddery_quests.js");
+    require("../controllers/muddery_honours.js");
+    require("../controllers/muddery_object.js");
+    require("../controllers/muddery_get_objects.js");
+    require("../controllers/muddery_dialogue.js");
+    require("../controllers/muddery_map.js");
+    require("../controllers/muddery_delete_char.js");
+    require("../controllers/muddery_combat.js");
+    require("../controllers/muddery_combat_result.js");
+    require("../controllers/muddery_confirm_combat.js");
+    require("../controllers/muddery_shop.js");
+    require("../controllers/muddery_goods.js");
 }
 
 $$.frameworks = {
-    main:			        {scripts: 		[],
-                      	 	 ctrler_name:	"MudderyMain"},
+    main:			        {ctrler_name:	"MudderyMain"},
 
     components: {
-        quick_login:	    	{scripts: 		[],
-                                 ctrler_name:	"MudderyQuickLogin",
+        quick_login:	    	{ctrler_name:	"MudderyQuickLogin",
                                  view:          "quick_login.html"},
 
-        login:					{scripts: 		[],
-                                 ctrler_name:	"MudderyLogin",
+        login:					{ctrler_name:	"MudderyLogin",
                                  view:          "login.html"},
 
-        register:				{scripts: 		[],
-                                 ctrler_name:	"MudderyRegister",
+        register:				{ctrler_name:	"MudderyRegister",
                                  view:          "register.html"},
 
-        password:				{scripts: 		[],
-                                 ctrler_name:	"MudderyPassword",
+        password:				{ctrler_name:	"MudderyPassword",
                                  view:          "password.html"},
 
-        select_char:			{scripts: 		[],
-                                 ctrler_name:	"MudderySelectChar",
+        select_char:			{ctrler_name:	"MudderySelectChar",
                                  view:          "select_char.html"},
 
-        message:				{scripts: 		[],
-                                 ctrler_name:	"MudderyMessage",
+        message:				{ctrler_name:	"MudderyMessage",
                                  view:          "message.html"},
 
-        new_char:				{scripts: 		[],
-                                 ctrler_name:	"MudderyNewChar",
+        new_char:				{ctrler_name:	"MudderyNewChar",
                                  view:          "new_char.html"},
 
-        scene:					{scripts: 		[],
-                                 ctrler_name:	"MudderyScene",
+        scene:					{ctrler_name:	"MudderyScene",
                                  view:          "scene.html"},
 
-        information:			{scripts: 		[],
-                                 ctrler_name:	"MudderyInformation",
+        information:			{ctrler_name:	"MudderyInformation",
                                  view:          "information.html"},
 
-        inventory:				{scripts: 		[],
-                                 ctrler_name:	"MudderyInventory",
+        inventory:				{ctrler_name:	"MudderyInventory",
                                  view:          "inventory.html"},
 
-        skills:    				{scripts: 		[],
-                                 ctrler_name:	"MudderySkills",
+        skills:    				{ctrler_name:	"MudderySkills",
                                  view:          "skills.html"},
 
-        quests:    				{scripts: 		[],
-                                 ctrler_name:	"MudderyQuests",
+        quests:    				{ctrler_name:	"MudderyQuests",
                                  view:          "quests.html"},
 
-        honours:    			{scripts: 		[],
-                                 ctrler_name:	"MudderyHonours",
+        honours:    			{ctrler_name:	"MudderyHonours",
                                  view:          "honours.html"},
 
-        object:    				{scripts: 		[],
-                                 ctrler_name:	"MudderyObject",
+        object:    				{ctrler_name:	"MudderyObject",
                                  view:          "object.html"},
 
-        get_objects:    		{scripts: 		[],
-                                 ctrler_name:	"MudderyGetObjects",
+        get_objects:    		{ctrler_name:	"MudderyGetObjects",
                                  view:          "get_objects.html"},
 
-        dialogue:	    		{scripts: 		[],
-                                 ctrler_name:	"MudderyDialogue",
+        dialogue:	    		{ctrler_name:	"MudderyDialogue",
                                  view:          "dialogue.html"},
 
-        map:		    		{scripts: 		[],
-                                 ctrler_name:	"MudderyMap",
+        map:		    		{ctrler_name:	"MudderyMap",
                                  view:          "map.html"},
 
-        delete_char:			{scripts: 		[],
-                                 ctrler_name:	"MudderyDeleteChar",
+        delete_char:			{ctrler_name:	"MudderyDeleteChar",
                                  view:          "delete_char.html"},
 
-        combat:					{scripts: 		[],
-                                 ctrler_name:	"MudderyCombat",
+        combat:					{ctrler_name:	"MudderyCombat",
                                  view:          "combat.html"},
 
-        combat_result:			{scripts: 		[],
-                                 ctrler_name:	"MudderyCombatResult",
+        combat_result:			{ctrler_name:	"MudderyCombatResult",
                                  view:          "combat_result.html"},
 
-        confirm_combat:			{scripts: 		[],
-                                 ctrler_name:	"MudderyConfirmCombat",
+        confirm_combat:			{ctrler_name:	"MudderyConfirmCombat",
                                  view:          "confirm_combat.html"},
 
-        shop:					{scripts: 		[],
-                                 ctrler_name:	"MudderyShop",
+        shop:					{ctrler_name:	"MudderyShop",
                                  view:          "shop.html"},
 
-        goods:					{scripts: 		[],
-                                 ctrler_name:	"MudderyGoods",
+        goods:					{ctrler_name:	"MudderyGoods",
                                  view:          "goods.html"},
     }
 }

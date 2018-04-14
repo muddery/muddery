@@ -9,10 +9,10 @@ if (typeof(require) != "undefined") {
  * Derive from the base class.
  */
 MudderySelectChar = function(el) {
-	BaseController.call(this, el);
+	BaseTabController.call(this, el);
 }
 
-MudderySelectChar.prototype = prototype(BaseController.prototype);
+MudderySelectChar.prototype = prototype(BaseTabController.prototype);
 MudderySelectChar.prototype.constructor = MudderySelectChar;
 
 /*

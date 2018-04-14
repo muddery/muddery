@@ -20,8 +20,8 @@ if (typeof(require) != "undefined") {
 /*
  * Derive from the base class.
  */
-MudderyMain = function() {
-	BaseController.call(this);
+MudderyMain = function(el) {
+	BaseController.call(this, el);
 	
 	this.puppet = false;
     this.solo_mode = false;
@@ -790,7 +790,7 @@ MudderyMain.prototype.onResize = function() {
 	$$.main.doSetVisiblePopupSize();
 
 	for (var key in $$.component) {
-        $$.component[key].onResize();
+        $$.component[key].resetSize();
 	}
 }
 

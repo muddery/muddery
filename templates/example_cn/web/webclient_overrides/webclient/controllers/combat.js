@@ -1,9 +1,13 @@
 
+if (typeof(require) != "undefined") {
+    require("../controllers/muddery_combat.js");
+}
+
 /*
  * Derive from the base class.
  */
-function Combat() {
-	MudderyCombat.call(this);
+Combat = function(el) {
+	MudderyCombat.call(this, el);
 }
 
 Combat.prototype = prototype(MudderyCombat.prototype);

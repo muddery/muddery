@@ -7,10 +7,10 @@ if (typeof(require) != "undefined") {
  * Derive from the base class.
  */
 MudderyRegister = function(el) {
-	BaseController.call(this, el);
+	BaseTabController.call(this, el);
 }
 
-MudderyRegister.prototype = prototype(BaseController.prototype);
+MudderyRegister.prototype = prototype(BaseTabController.prototype);
 MudderyRegister.prototype.constructor = MudderyRegister;
 
 /*

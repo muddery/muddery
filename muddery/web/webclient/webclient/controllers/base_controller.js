@@ -19,7 +19,7 @@ prototype = function(base, el) {
  * The base controller's constructor.
  */
 BaseController = function(el) {
-    this.el = el || $(document);
+    this.el = el;
 }
 
 /*
@@ -55,7 +55,7 @@ BaseController.prototype.bindEvents = function() {
 BaseController.prototype.show = function() {
     this.el.show();
     this.el.parents().show();
-	this.setSize();
+	this.resetSize();
 }
 
 /*
@@ -68,13 +68,7 @@ BaseController.prototype.visible = function() {
 /*
  * Set element's size.
  */
-BaseController.prototype.setSize = function() {
-}
-
-/*
- * On resize.
- */
-BaseController.prototype.onResize = function() {
+BaseController.prototype.resetSize = function() {
 }
 
 /*
@@ -169,6 +163,34 @@ BasePopupController.prototype.constructor = BasePopupController;
 /*
  * Set element's size.
  */
-BasePopupController.prototype.setSize = function() {
+BasePopupController.prototype.resetSize = function() {
 	$$.main.doSetVisiblePopupSize();
+}
+
+
+////////////////////////////////////////
+//
+// The base of tab controllers.
+//
+////////////////////////////////////////
+ /*
+ * Derive from the base class.
+ */
+BaseTabController = function(el) {
+	BaseController.call(this, el);
+
+	this.target = null;
+}
+
+BaseTabController.prototype = prototype(BaseController.prototype);
+BaseTabController.prototype.constructor = BaseTabController;
+
+/*
+ * Set element's size.
+ */
+BaseTabController.prototype.resetSize = function() {
+	var tab_content = $("#tab_content");
+
+	this.el.width(tab_content.width());
+	this.el.height(tab_content.height() - 5);
 }

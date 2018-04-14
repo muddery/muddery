@@ -10,12 +10,12 @@ if (typeof(require) != "undefined") {
  * Derive from the base class.
  */
 MudderyInventory = function(el) {
-	BaseController.call(this, el);
+	BaseTabController.call(this, el);
 
 	this.paginator = new Paginator("#inv_inventory_wrapper");
 }
 
-MudderyInventory.prototype = prototype(BaseController.prototype);
+MudderyInventory.prototype = prototype(BaseTabController.prototype);
 MudderyInventory.prototype.constructor = MudderyInventory;
 
 /*
@@ -45,8 +45,10 @@ MudderyInventory.prototype.onLook = function(element) {
 /*
  * Event then the window resizes.
  */
-MudderyInventory.prototype.onResize = function(element) {
-	var height = $(window).innerHeight() - this.select("#inv_inventory_wrapper").offset().top - 16;
+MudderyInventory.prototype.resetSize = function() {
+    BaseTabController.prototype.resetSize.call(this);
+
+	var height = this.el.innerHeight() - 20;
 	this.paginator.tableHeight(height);
 }
 

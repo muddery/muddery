@@ -1,0 +1,4 @@
+id,key,name,image_width,image_height,resource
+1,img_house,,300,300,resource/image/house.jpg
+2,img_hill,,300,300,resource/image/hill.jpg
+3,img_room,,300,300,resource/image/room.jpg

@@ -1,0 +1,19 @@
+id,key,system_data,name,path,category,desc,can_loot
+145,CLASS_COMMON_AREA,True,Common Area,muddery.typeclasses.areas.MudderyArea,CATE_AREA,Common area's typeclass.,False
+146,CLASS_COMMON_ROOM,True,Common Room,muddery.typeclasses.rooms.MudderyRoom,CATE_ROOM,Common room's typeclass.,False
+147,CLASS_COMMON_EXIT,True,Common Exit,muddery.typeclasses.exits.MudderyExit,CATE_EXIT,Common exit's typeclass.,False
+148,CLASS_TWO_WAY_EXIT,True,Two Way Exit,muddery.typeclasses.exits.MudderyExit,CATE_EXIT,Two way exit's typeclass. It builds two exits on both sides.,False
+149,CLASS_LOCKED_EXIT,True,Locked Exit,muddery.typeclasses.exits.MudderyLockedExit,CATE_EXIT,A kind of exits that can be locked.,False
+150,CLASS_COMMON_NPC,True,Common NPC,muddery.typeclasses.npcs.MudderyNPC,CATE_CHARACTER,Common NPC's typeclass.,False
+151,CLASS_COMMON_MONSTER,True,Common Monster,muddery.typeclasses.monsters.MudderyMonster,CATE_CHARACTER,Common monster's typeclass.,False
+152,CLASS_PLAYER,True,Player,muddery.typeclasses.player_characters.MudderyPlayerCharacter,CATE_CHARACTER,Player character's typeclass.,False
+153,CLASS_WORLD_OBJECT,True,World Object,muddery.typeclasses.objects.MudderyObject,CATE_OBJECT,World object's typeclass.,False
+154,CLASS_COMMON_OBJECT,True,Common Object,muddery.typeclasses.common_objects.MudderyCommonObject,CATE_OBJECT,Common object's typeclass.,False
+155,CLASS_OBJECT_CREATOR,True,Object Creator,muddery.typeclasses.object_creators.MudderyObjectCreator,CATE_OBJECT,Object creators can create new objects.,False
+156,CLASS_FOOD,True,Food,muddery.typeclasses.common_objects.MudderyFood,CATE_OBJECT,Foods can be eaten.,False
+157,CLASS_SKILL_BOOK,True,Skill Book,muddery.typeclasses.common_objects.MudderySkillBook,CATE_OBJECT,Players can learn skills from skill books.,False
+158,CLASS_SKILL,True,Skill,muddery.typeclasses.character_skills.MudderySkill,CATE_SKILL,Character's skill.,False
+159,CLASS_QUEST,True,Quest,muddery.typeclasses.character_quests.MudderyQuest,CATE_QUEST,Quest.,False
+160,CLASS_EQUIPMENT,True,Equipment,muddery.typeclasses.common_objects.MudderyEquipment,CATE_OBJECT,Equipments.,False
+161,CLASS_SHOP,True,Shop,muddery.typeclasses.shops.MudderyShop,CATE_SHOP,Shops.,False
+162,CLASS_SHOP_GOODS,True,Goods,muddery.typeclasses.shop_goods.MudderyShopGoods,CATE_SHOP_GOODS,Goods,False

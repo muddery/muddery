@@ -1,0 +1,9 @@
+id,key,system_data,name,desc
+65,CATE_AREA,True,Area,Area
+66,CATE_ROOM,True,Room,Room
+67,CATE_EXIT,True,Exit,Exit
+68,CATE_CHARACTER,True,Character,Character
+69,CATE_OBJECT,True,Object,Object
+70,CATE_SKILL,True,Skill,Skill
+71,CATE_QUEST,True,Quest,Quest
+72,CATE_SHOP,True,Shop,Shop

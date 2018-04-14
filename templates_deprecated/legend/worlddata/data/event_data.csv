@@ -1,0 +1,7 @@
+id,key,name,type,trigger_type,trigger_obj,condition
+1,event_kill_wolf,Kill Wolf,EVENT_DIALOGUE,EVENT_TRIGGER_KILL,npc_wolf,
+2,event_kill_beauty,Kill Beauty,EVENT_DIALOGUE,EVENT_TRIGGER_KILL,npc_beauty,
+3,event_trap,Trap,EVENT_DIALOGUE,EVENT_TRIGGER_ACTION,obj_trap,
+4,event_kill_pirate,Kill Pirate,EVENT_DIALOGUE,EVENT_TRIGGER_KILL,npc_pirate,
+5,event_kill_tiger,Kill Tiger,EVENT_DIALOGUE,EVENT_TRIGGER_KILL,npc_tiger,
+6,event_kill_boss,Kill Boss,EVENT_DIALOGUE,EVENT_TRIGGER_KILL,npc_boss,

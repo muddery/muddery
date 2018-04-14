@@ -1,10 +1,13 @@
-//@ sourceURL=/controller/main.js
+
+if (typeof(require) != "undefined") {
+    require("../controllers/muddery_main.js");
+}
 
 /*
  * Derive from the base class.
  */
-function Main() {
-	MudderyMain.call(this);
+Main = function(el) {
+	MudderyMain.call(this, el);
 	
 	this.puppet = false;
     this.solo_mode = false;
@@ -49,7 +52,7 @@ Main.prototype.setPromptBar = function() {
  *  Set the player's status.
  */
 Main.prototype.setStatus = function(status) {
-	data_handler.character_level = status["level"]["value"];
+	$$.data_handler.character_level = status["level"]["value"];
 	$("#prompt_level").text("Lv:" + status["level"]["value"]);
 
 	var exp_str = "";
@@ -67,8 +70,7 @@ Main.prototype.setStatus = function(status) {
 	var mp_str = status["mp"]["value"] + "/" + status["max_mp"]["value"];
 	$("#prompt_mp").text("MP:" + mp_str);
 
-	var frame_ctrl = this.getFrameController("#frame_information");
-	frame_ctrl.setStatus(status);
+	$$.component.information.setStatus(status);
 }
 
 /*
@@ -81,6 +83,5 @@ Main.prototype.setCombatStatus = function(status) {
 	var mp_str = status["mp"] + "/" + status["max_mp"];
 	$("#prompt_mp").text("MP:" + mp_str);
 
-	var frame_ctrl = this.getFrameController("#frame_information");
-	frame_ctrl.setCombatStatus(status);
+	$$.component.information.setCombatStatus(status);
 }

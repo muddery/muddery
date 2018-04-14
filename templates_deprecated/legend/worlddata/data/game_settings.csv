@@ -1,0 +1,8 @@
+id,game_name,connection_screen,solo_mode,global_cd,auto_cast_skill_cd,can_give_up_quests,can_close_dialogue,single_dialogue_sentence,auto_resume_dialogues,default_home_key,start_location_key,default_player_home_key,default_player_character_key,map_scale,map_room_size
+2,英雄传说,"{b=============================================================={n
+
+世界正在被恶魔吞噬，和平安宁的家园等待着你去拯救。
+
+拿起武器吧，勇敢的人！这个世界需要你！
+
+{b=============================================================={n",False,1.0,1.5,False,False,True,True,room_limbo,room_begin,room_begin,player,75.0,40.0

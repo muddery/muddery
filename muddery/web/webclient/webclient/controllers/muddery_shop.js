@@ -66,8 +66,10 @@ MudderyShop.prototype.onLook = function(element) {
 /*
  * Event then the window resizes.
  */
-MudderyShop.prototype.onResize = function(element) {
-	var height = $(window).innerHeight() - $("#shop_goods_wrapper").offset().top - 16;
+MudderyShop.prototype.resetSize = function() {
+    BasePopupController.prototype.resetSize.call(this);
+
+	var height = this.el.innerHeight() - 20;
 	this.paginator.tableHeight(height);
 }
 

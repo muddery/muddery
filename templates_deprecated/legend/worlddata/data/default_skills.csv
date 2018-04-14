@@ -1,0 +1,10 @@
+id,character,skill
+1,MODEL_PLAYER,skill_normal_hit
+2,MODEL_NPC_COMMON,skill_normal_hit
+3,MODEL_MOB_BEAUTY,skill_normal_hit
+4,MODEL_MOB_WOLF,skill_normal_hit
+5,MODEL_MOB_PIRATE,skill_normal_hit
+6,MODEL_MOB_TIGER,skill_normal_hit
+7,MODEL_MOB_TIGER,skill_dunt
+8,MODEL_MOB_BOSS,skill_normal_hit
+9,MODEL_MOB_BOSS,skill_dunt

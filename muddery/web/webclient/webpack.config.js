@@ -10,8 +10,8 @@ var rand = function() {
 };
 
 var env = {
-    src: path.resolve(__dirname, "webclient", "webclient"),
-    output: path.resolve(__dirname, "webclient", "dist"),
+    src: path.resolve(__dirname, "webclient"),
+    output: path.resolve(__dirname, "dist"),
     config_id: rand(),
 };
 

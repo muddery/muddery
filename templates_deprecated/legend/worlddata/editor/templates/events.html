@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>事件</h1>
+    欢迎来到事件界面，事件会在特定条件下触发，引发指定的操作。
+
+    <h3><a href="../">返回</a></h3>
+
+    <h2><a href="./events/event_types/list.html">事件类型</a></h2>
+    触发出的事件的类型，它们必须与 utils.defines 中的定义一致。
+
+    <h2><a href="./events/event_trigger_types/list.html">事件触发器类型</a></h2>
+    事件触发器的类型，它们必须与 utils.defines 中的定义一致。
+
+    <h2><a href="./events/event_data/list.html">事件</a></h2>
+    事件的基础信息。
+
+    <h2><a href="./events/event_attacks/list.html">攻击事件</a></h2>
+    攻击事件的附加信息，攻击事件会触发一场战斗。
+
+    <h2><a href="./events/event_dialogues/list.html">对话事件</a></h2>
+    对话事件的附加信息，对话事件会触发一次对话。
+
+{% endblock content %}

@@ -10,13 +10,13 @@ if (typeof(require) != "undefined") {
  * Derive from the base class.
  */
 MudderyHonours = function(el) {
-	BaseController.call(this, el);
+	BaseTabController.call(this, el);
 
 	this.min_honour_level = 1;
 	this.paginator = new Paginator("#honours_wrapper");
 }
 
-MudderyHonours.prototype = prototype(BaseController.prototype);
+MudderyHonours.prototype = prototype(BaseTabController.prototype);
 MudderyHonours.prototype.constructor = MudderyHonours;
 
 /*
@@ -62,8 +62,10 @@ MudderyHonours.prototype.onQuitCombatQueue = function(element) {
 /*
  * Event then the window resizes.
  */
-MudderyHonours.prototype.onResize = function(element) {
-	var height = $(window).innerHeight() - this.select("#honours_wrapper").offset().top - 16;
+MudderyHonours.prototype.resetSize = function() {
+    BaseTabController.prototype.resetSize.call(this);
+
+	var height = this.el.innerHeight() - 20;
 	this.paginator.tableHeight(height);
 }
 

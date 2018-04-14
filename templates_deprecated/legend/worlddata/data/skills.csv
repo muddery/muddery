@@ -1,0 +1,6 @@
+id,key,typeclass,name,desc,message,cd,passive,function,icon
+1,skill_normal_hit,CLASS_SKILL,普通攻击,攻击敌人，伤害一般。,{c%c{n攻击%t。,1.0,False,hit(1),icon_hit
+2,skill_normal_heal,CLASS_SKILL,普通治疗,治疗自己，效果一般。,{c%c{n治疗自己。,5.0,False,heal(20),
+3,skill_normal_hp,CLASS_SKILL,强壮体魄,被动技能，提升最大生命值。,,0.0,True,max_hp(20),
+4,skill_dunt,CLASS_SKILL,重击,攻击敌人，造成大量伤害。,{c%c{n狠狠打了%t一下。,1.0,False,hit(2),
+5,skill_escape,CLASS_SKILL,逃跑,逃之夭夭。,{c%c{n想要逃跑。,5.0,False,escape(0.5),

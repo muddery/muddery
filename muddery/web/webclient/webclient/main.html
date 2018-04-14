@@ -5,68 +5,37 @@
         <meta charset="utf-8" />
 
         <title>Muddery Webclient</title>
-        
-        <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="./libs/bootstrap.min.css" />
-        
-		<script type="text/javascript">
-			"<%= htmlWebpackPlugin.options.contents.comment_begin %>"
-			// block the followings in webpack
-		</script>
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/webclient.css" />
-     	<link rel="stylesheet" type="text/css" media="screen" href="./css/message.css" />
-     	<link rel="stylesheet" type="text/css" media="screen" href="./css/new_char.css" />
-     	<link rel="stylesheet" type="text/css" media="screen" href="./css/scene.css" />
-     	<link rel="stylesheet" type="text/css" media="screen" href="./css/select_char.css" />
-     	<link rel="stylesheet" type="text/css" media="screen" href="./css/information.css" />
-     	<link rel="stylesheet" type="text/css" media="screen" href="./css/inventory.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/skills.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/quests.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/honours.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/object.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/dialogue.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/map.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/delete_char.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/combat.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/combat_result.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/confirm_combat.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/shop.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="./css/goods.css" />
-		<script type="text/javascript">
-			"<%= htmlWebpackPlugin.options.contents.comment_end %>"
-			// block the uppers in webpack
-		</script>
 
+        <!-- libs -->
+        <link href="./libs/bootstrap.min.css" rel="stylesheet" type="text/css" media="screen" />
         <script src="./libs/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="./libs/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./libs/d3.v3.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./libs/d3-selection.v1.min.js" type="text/javascript" charset="utf-8"></script>
 
-        <!-- settings -->
-        <script src="./settings.js" type="text/javascript" charset="utf-8"></script>
-
+        <!--CSS style sheet -->
 		<script type="text/javascript">
 			"<%= htmlWebpackPlugin.options.contents.comment_begin %>"
 			// block the followings in webpack
 		</script>
-
-        <script src="./client/defines.js" type="text/javascript" charset="utf-8"></script>
-
-        <script src="./lang/en-us/strings.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./lang/zh-cn/strings.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./lang/zh-tw/strings.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./lang/local_string.js" type="text/javascript" charset="utf-8"></script>
-
-        <script src="./client/evennia.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./client/client.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./client/commands.js" type="text/javascript" charset="utf-8"></script>
-
-        <script src="./utils/map_data.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./utils/text2html.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./utils/data_handler.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./utils/text_escape.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./utils/utils.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./utils/paginator.js" type="text/javascript" charset="utf-8"></script>
-
+        <link href="./css/webclient.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/message.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/new_char.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/scene.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/select_char.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/information.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/inventory.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/skills.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/quests.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/honours.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/object.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/dialogue.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/map.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/delete_char.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/combat.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/combat_result.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/confirm_combat.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/shop.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/goods.css" rel="stylesheet" type="text/css" media="screen" />
 		<script type="text/javascript">
 			"<%= htmlWebpackPlugin.options.contents.comment_end %>"
 			// block the uppers in webpack
@@ -354,10 +323,32 @@
             </div>
         </div>
 
+        <!-- settings -->
+        <script src="./settings.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- scripts -->
 		<script type="text/javascript">
 			"<%= htmlWebpackPlugin.options.contents.comment_begin %>"
 			// block the followings in webpack
 		</script>
+
+        <script src="./client/defines.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="./lang/en-us/strings.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./lang/zh-cn/strings.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./lang/zh-tw/strings.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./lang/local_string.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="./client/evennia.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./client/client.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./client/commands.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="./utils/map_data.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/text2html.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/data_handler.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/text_escape.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/utils.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/paginator.js" type="text/javascript" charset="utf-8"></script>
 		
         <script src="./controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
         <script src="./controllers/muddery_main.js" defer="defer" type="text/javascript" charset="utf-8"></script>

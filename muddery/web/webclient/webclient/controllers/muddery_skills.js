@@ -10,12 +10,12 @@ if (typeof(require) != "undefined") {
  * Derive from the base class.
  */
 MudderySkills = function(el) {
-	BaseController.call(this, el);
+	BaseTabController.call(this, el);
 
     this.paginator = new Paginator("#skills_wrapper");
 }
 
-MudderySkills.prototype = prototype(BaseController.prototype);
+MudderySkills.prototype = prototype(BaseTabController.prototype);
 MudderySkills.prototype.constructor = MudderySkills;
 
 /*
@@ -44,8 +44,10 @@ MudderySkills.prototype.onLook = function(element) {
 /*
  * Event then the window resizes.
  */
-MudderySkills.prototype.onResize = function(element) {
-	var height = $(window).innerHeight() - this.select("#skills_wrapper").offset().top - 16;
+MudderySkills.prototype.resetSize = function() {
+    BaseTabController.prototype.resetSize.call(this);
+
+	var height = this.el.innerHeight() - 20;
 	this.paginator.tableHeight(height);
 }
 

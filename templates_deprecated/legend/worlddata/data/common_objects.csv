@@ -1,0 +1,2 @@
+id,key,typeclass,name,desc,max_stack,unique,can_remove,can_discard,icon
+1,obj_cat,CLASS_COMMON_OBJECT,小花,这是只可爱的小猫。喵～,1,True,True,False,icon_cat

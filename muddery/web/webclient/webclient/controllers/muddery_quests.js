@@ -10,12 +10,12 @@ if (typeof(require) != "undefined") {
  * Derive from the base class.
  */
 MudderyQuests = function(el) {
-	BaseController.call(this, el);
+	BaseTabController.call(this, el);
 	
 	this.paginator = new Paginator("#quests_wrapper");
 }
 
-MudderyQuests.prototype = prototype(BaseController.prototype);
+MudderyQuests.prototype = prototype(BaseTabController.prototype);
 MudderyQuests.prototype.constructor = MudderyQuests;
 
 /*
@@ -45,8 +45,10 @@ MudderyQuests.prototype.onLook = function(element) {
 /*
  * Event then the window resizes.
  */
-MudderyQuests.prototype.onResize = function(element) {
-	var height = $(window).innerHeight() - this.select("#quests_wrapper").offset().top - 16;
+MudderyQuests.prototype.resetSize = function() {
+    BaseTabController.prototype.resetSize.call(this);
+
+	var height = this.el.innerHeight() - 20;
 	this.paginator.tableHeight(height);
 }
 

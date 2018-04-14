@@ -7,31 +7,6 @@ if (typeof(require) != "undefined") {
     require("../utils/text2html.js");
     require("../utils/text_escape.js");
     require("../client/frameworks.js");
-
-    require("../controllers/muddery_main.js");
-    require("../controllers/muddery_quick_login.js");
-    require("../controllers/muddery_login.js");
-    require("../controllers/muddery_register.js");
-    require("../controllers/muddery_password.js");
-    require("../controllers/muddery_select_char.js");
-    require("../controllers/muddery_message.js");
-    require("../controllers/muddery_new_char.js");
-    require("../controllers/muddery_scene.js");
-    require("../controllers/muddery_information.js");
-    require("../controllers/muddery_inventory.js");
-    require("../controllers/muddery_skills.js");
-    require("../controllers/muddery_quests.js");
-    require("../controllers/muddery_honours.js");
-    require("../controllers/muddery_object.js");
-    require("../controllers/muddery_get_objects.js");
-    require("../controllers/muddery_dialogue.js");
-    require("../controllers/muddery_map.js");
-    require("../controllers/muddery_delete_char.js");
-    require("../controllers/muddery_combat.js");
-    require("../controllers/muddery_combat_result.js");
-    require("../controllers/muddery_confirm_combat.js");
-    require("../controllers/muddery_shop.js");
-    require("../controllers/muddery_goods.js");
 }
 
 
@@ -40,8 +15,9 @@ if (typeof(require) != "undefined") {
     $$.text2html = new Text2HTML();
     $$.text_escape = new TextEscape();
 
+    // get main controller
     var constructor = eval($$.frameworks.main.ctrler_name);
-	$$.main = new constructor(div);
+	$$.main = new constructor($("#frame_main"));
 
     $$.component = {};
 	var components_root = "./views/";

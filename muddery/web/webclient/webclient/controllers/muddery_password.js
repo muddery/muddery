@@ -7,10 +7,10 @@ if (typeof(require) != "undefined") {
  * Derive from the base class.
  */
 MudderyPassword = function(el) {
-	BaseController.call(this, el);
+	BaseTabController.call(this, el);
 }
 
-MudderyPassword.prototype = prototype(BaseController.prototype);
+MudderyPassword.prototype = prototype(BaseTabController.prototype);
 MudderyPassword.prototype.constructor = MudderyPassword;
 
 /*
