@@ -3,7 +3,22 @@ if (typeof(require) != "undefined") {
     require("../client/defines.js");
 }
 
-$$.text2html = {
+Text2HTML = function() {
+	// Compile RegExps.
+	this.regexp_html.compile(this.regexp_html);
+
+	var mark_pattern = new Array();
+	for (mark in this.mark_map) {
+		mark = mark.replace(/\[/, "\\[");
+		mark = mark.replace(/\*/, "\\*");
+		mark_pattern.push(mark);
+	}
+	mark_pattern = mark_pattern.join("|");
+	mark_pattern = new RegExp(mark_pattern, "g");
+	this.regexp_mark.compile(mark_pattern);
+}
+
+Text2HTML.prototype = {
     mark_map : {
         '{{' : '{',                  // "{"
         '{n' : '',                   // reset            Close the span.
@@ -169,20 +184,4 @@ $$.text2html = {
         string = string.replace($$.text2html.regexp_mark, $$.text2html.clearTag);
         return string;
     }
-};
-
-!function() {
-	// Compile RegExps.
-	$$.text2html.regexp_html.compile($$.text2html.regexp_html);
-
-	var mark_pattern = new Array();
-	for (mark in $$.text2html.mark_map) {
-		mark = mark.replace(/\[/, "\\[");
-		mark = mark.replace(/\*/, "\\*");
-		mark_pattern.push(mark);
-	}
-	mark_pattern = mark_pattern.join("|");
-	mark_pattern = new RegExp(mark_pattern, "g");
-	$$.text2html.regexp_mark.compile(mark_pattern);
-}();
-
+}

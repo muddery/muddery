@@ -1,10 +1,7 @@
 
 if (typeof(require) != "undefined") {
     require("../client/evennia.js");
-
     require("../client/defines.js");
-    require("../client/frameworks.js");
-    require("../client/importer.js");
 }
 
 $$.client = {
@@ -228,8 +225,6 @@ $$.client = {
 
     // Event when client finishes loading
     onReady: function() {
-        $$.main.onReady();
-
         // This is safe to call, it will always only
         // initialize once.
         Evennia.init();

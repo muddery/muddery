@@ -34,7 +34,7 @@ MudderyMap.prototype.bindEvents = function() {
 /*
  * Set element's size.
  */
-BasePopupController.prototype.setSize = function() {
+MudderyMap.prototype.setSize = function() {
 	//set size
 	var width = this.el.parent().width();
 	var height = $('#middlewindow').height() * 0.8;

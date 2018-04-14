@@ -47,6 +47,3 @@ $$.trans = function(str) {
 	return $$.local_string.translate(str);
 }
 
-!function() {
-    $$.local_string.setLanguage(settings.default_language);
-}();

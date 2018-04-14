@@ -10,7 +10,7 @@ if (typeof(require) != "undefined") {
     require("../utils/map_data.js");
     require("../utils/text2html.js");
     require("../utils/data_handler.js");
-    require("../utils/escape.js");
+    require("../utils/text_escape.js");
     require("../utils/utils.js");
     require("../utils/paginator.js");
 
@@ -918,7 +918,10 @@ MudderyMain.prototype.showContent = function(frame_name) {
 		.addClass("active")
 		.addClass("pill_active");
 
-    $$.component[frame_name].show();
+    var controller = $$.component[frame_name];
+    if (controller) {
+        controller.show();
+    }
 }
 
 /*

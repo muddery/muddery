@@ -22,7 +22,7 @@ var entries = {};
 
 // js entries
 var js_entries = {
-    muddery_main: path.join(env.src, "client", "index.js")
+    muddery_main: path.join(env.src, "client", "loader.js")
 }
 Object.assign(entries, js_entries);
 
