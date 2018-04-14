@@ -139,7 +139,7 @@ $$.commands = {
     
     // logout
     doLogout : function() {
-        $.cookie("is_auto_login", '', {expires: -1});
+        localStorage.is_auto_login = "";
         Evennia.msg("text", this.cmdString("quit", ""));
     },
     
@@ -200,30 +200,30 @@ $$.commands = {
 
     doAutoLoginConfig: function(playername, password, save_password, auto_login) {
         if (save_password) {
-            $.cookie("login_name", playername);
-            $.cookie("login_password", password);
+            localStorage.login_name = playername;
+            localStorage.login_password = password;
 
             if (auto_login) {
-                $.cookie("is_auto_login", 'true');
+                localStorage.is_auto_login = "1";
             } else {
-                $.cookie("is_auto_login", '', {expires: -1});
+                localStorage.is_auto_login = "";
             }
         }
     },
 
     doSavePassword: function(save_password) {
         if (save_password) {
-            $.cookie("is_save_password", 'true');
+            localStorage.is_save_password = "1";
         }
         else {
-            $.cookie("login_name", '', {expires: -1});
-            $.cookie("login_password", '', {expires: -1});
-            $.cookie("is_save_password", '', {expires: -1});
-            $.cookie("is_auto_login", '', {expires: -1});
+            localStorage.login_name = "";
+            localStorage.login_password = "";
+            localStorage.is_save_password = "";
+            localStorage.is_auto_login = "";
         }
     },
 
     doRemoveAutoLogin: function() {
-        $.cookie("is_auto_login", '', {expires: -1});
+        localStorage.is_auto_login = "";
     },
 }

@@ -1021,12 +1021,12 @@ MudderyMain.prototype.doAutoLoginCheck = function() {
     var save_password = false;
     var auto_login = false;
 
-    if ($.cookie("is_save_password")) {
+    if (localStorage.is_save_password) {
         save_password = true;
-        playername = $.cookie("login_name");
-        password = $.cookie("login_password");
+        playername = localStorage.login_name;
+        password = localStorage.login_password;
 
-        if($.cookie("is_auto_login")) {
+        if (localStorage.is_auto_login) {
             auto_login = true;
         }
     }
@@ -1034,9 +1034,9 @@ MudderyMain.prototype.doAutoLoginCheck = function() {
     $$.component.login.setValues(playername, password, save_password, auto_login);
 
 	setTimeout(function(){
-		if ($.cookie("is_save_password") && $.cookie("is_auto_login")) {
-		    var playername = $.cookie("login_name");
-            var playerpassword = $.cookie("login_password");
+		if (localStorage.is_save_password && localStorage.is_auto_login) {
+		    var playername = localStorage.login_name;
+            var playerpassword = localStorage.login_password;
 
 			$("#cb_auto_login").attr("checked", "true");
 			$$.commands.doLogin(playername, playerpassword);
