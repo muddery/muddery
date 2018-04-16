@@ -60,6 +60,10 @@ var copyFiles = new copyWebpackPlugin([
     	to: path.join(env.output, "settings.js",)
 	},
     {
+    	from: path.join(env.src, "index.html"),
+    	to: path.join(env.output, "index.html",)
+	},
+	{
     	from: path.join(env.src, "libs"),
     	to: path.join(env.output, "libs",)
 	},
@@ -105,7 +109,6 @@ module.exports = {
     	path: env.output,
     	publicPath: "/webclient/",
   	},
-  	devtool: "source-map",
 	module: {
 		rules: [
 			{
