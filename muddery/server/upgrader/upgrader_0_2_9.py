@@ -11,6 +11,7 @@ from evennia.server.evennia_launcher import init_game_directory
 from muddery.server.upgrader.base_upgrader import BaseUpgrader
 from muddery.server.upgrader import utils
 from muddery.server.launcher import configs
+from muddery.server.launcher.utils import copy_tree
 from muddery.utils.exception import MudderyError
 
 
@@ -38,6 +39,19 @@ class Upgrader(BaseUpgrader):
         """
         print("Upgrading game from version 0.2.9 %s." % game_dir)
 
+        # copy full webclient
+        default_template = os.path.join(configs.MUDDERY_LIB, configs.TEMPLATE_DIR)
+
+        muddery_web = os.path.join(configs.MUDDERY_LIB, "web", "webclient")
+        default_web = os.path.join(default_template, "web", "webclient_overrides")
+        dest_web = os.path.join(game_dir, "web", "webclient_full")
+        os.mkdir(dest_web)
+
+        copy_tree(os.path.join(muddery_web, "webclient"), os.path.join(dest_web, "webclient"))
+        shutil.copy2(os.path.join(muddery_web, "package.json"), os.path.join(dest_web, "package.json"))
+        shutil.copy2(os.path.join(muddery_web, "webpack.config.js"), os.path.join(dest_web, "webpack.config.js"))
+        copy_tree(os.path.join(default_web, "webclient"), os.path.join(dest_web, "webclient"))
+
         if game_template:
             game_template_dir = os.path.join(configs.MUDDERY_TEMPLATE, game_template)
 
@@ -46,6 +60,10 @@ class Upgrader(BaseUpgrader):
 
             # create dist folder
             os.mkdir(os.path.join(game_dir, "web", "webclient_overrides", "dist"))
+
+            # copy full webclient
+            template_web = os.path.join(game_template_dir, "web", "webclient_overrides")
+            copy_tree(os.path.join(template_web, "webclient"), os.path.join(dest_web, "webclient"))
 
     def upgrade_data(self, data_path, game_template, muddery_lib):
         """
