@@ -1,5 +1,24 @@
 
-var text2html = {
+if (typeof(require) != "undefined") {
+    require("../client/defines.js");
+}
+
+Text2HTML = function() {
+	// Compile RegExps.
+	this.regexp_html.compile(this.regexp_html);
+
+	var mark_pattern = new Array();
+	for (mark in this.mark_map) {
+		mark = mark.replace(/\[/, "\\[");
+		mark = mark.replace(/\*/, "\\*");
+		mark_pattern.push(mark);
+	}
+	mark_pattern = mark_pattern.join("|");
+	mark_pattern = new RegExp(mark_pattern, "g");
+	this.regexp_mark.compile(mark_pattern);
+}
+
+Text2HTML.prototype = {
     mark_map : {
         '{{' : '{',                  // "{"
         '{n' : '',                   // reset            Close the span.
@@ -83,18 +102,18 @@ var text2html = {
         var replacement = "";
         
         // <span> can contain <string>
-        if (text2html.last_convert.substring(0, 5) == "<span" && match != "{h") {
+        if ($$.text2html.last_convert.substring(0, 5) == "<span" && match != "{h") {
             // close span
             replacement = "</span>";
         }
-        else if (text2html.last_convert.substring(0, 8) == "<strong>" && match != "{H") {
+        else if ($$.text2html.last_convert.substring(0, 8) == "<strong>" && match != "{H") {
             // close strong
             replacement = "</strong>";
         }
         
-        if (match in text2html.mark_map) {
-            text2html.last_convert = text2html.mark_map[match];
-            replacement += text2html.last_convert;
+        if (match in $$.text2html.mark_map) {
+            $$.text2html.last_convert = $$.text2html.mark_map[match];
+            replacement += $$.text2html.last_convert;
         }
         
         return replacement;
@@ -105,22 +124,22 @@ var text2html = {
         var org_string = string;
         try {
 			// Convert html codes.
-			string = string.replace(text2html.regexp_html, text2html.convertHtml);
+			string = string.replace($$.text2html.regexp_html, $$.text2html.convertHtml);
 
 			// Convert marks
-			string = string.replace(text2html.regexp_mark, text2html.convertMark);
+			string = string.replace($$.text2html.regexp_mark, $$.text2html.convertMark);
 
-			if (text2html.last_convert.substring(0, 5) == "<span") {
+			if ($$.text2html.last_convert.substring(0, 5) == "<span") {
 				// close span
 				string += "</span>";
 			}
-			else if (text2html.last_convert.substring(0, 8) == "<strong>") {
+			else if ($$.text2html.last_convert.substring(0, 8) == "<strong>") {
 				// close strong
 				string += "</strong>";
 			}
 
 			// Clear last convert.
-			text2html.last_convert = "";
+			$$.text2html.last_convert = "";
 		}
 		catch(error) {
             console.error(error.message);
@@ -133,7 +152,7 @@ var text2html = {
     clearTag: function(match) {
         var replacement = "";
 
-        if (match in text2html.mark_map) {
+        if (match in $$.text2html.mark_map) {
             if (match == "{{") {
                 // "{"
                 replacement = "{";
@@ -162,21 +181,7 @@ var text2html = {
     },
 
     clearTags: function(string) {
-        string = string.replace(text2html.regexp_mark, text2html.clearTag);
+        string = string.replace($$.text2html.regexp_mark, $$.text2html.clearTag);
         return string;
     }
-};
-
-// Compile RegExps.
-text2html.regexp_html.compile(text2html.regexp_html);
-
-var mark_pattern = new Array();
-for (mark in text2html.mark_map) {
-    mark = mark.replace(/\[/, "\\[");
-    mark = mark.replace(/\*/, "\\*");
-    mark_pattern.push(mark);
 }
-mark_pattern = mark_pattern.join("|");
-mark_pattern = new RegExp(mark_pattern, "g");
-text2html.regexp_mark.compile(mark_pattern);
-

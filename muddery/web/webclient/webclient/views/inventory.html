@@ -1,46 +1,25 @@
-<!DOCTYPE html>
-<html lang="en-us">
-    <head>
-	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
-        <meta charset="utf-8" />
-
-        <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/inventory.css" />
-    </head>
-    <body>
-        <div id="box_inventory">
-			<div id="inventory_wrapper">
-                <table id="tab_inventory">
-                    <thead>
-                        <tr>
-                            <th id="view_name">NAME</th>
-                            <th id="view_number">NUM</th>
-                            <th id="view_desc">DESC</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventory_items">
-                        <tr class="template">
-                            <td>
-                                <div class="obj_icon">
-                                    <img class="img_icon" src="" />
-                                </div>
-                                <a class="obj_name"></a>
-                            </td>
-                            <td class="obj_number"></td>
-                            <td class="obj_desc"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../utils/paginator.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/muddery_inventory.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-    </body>
-</html>
+<div id="inv_box_inventory">
+	<div id="inv_inventory_wrapper">
+		<table id="inv_tab_inventory">
+			<thead>
+				<tr>
+					<th id="inv_view_name">NAME</th>
+					<th id="inv_view_number">NUM</th>
+					<th id="inv_view_desc">DESC</th>
+				</tr>
+			</thead>
+			<tbody id="inv_inventory_items">
+				<tr class="template">
+					<td>
+						<div class="obj_icon">
+							<img class="img_icon"/>
+						</div>
+						<a class="obj_name"></a>
+					</td>
+					<td class="obj_number"></td>
+					<td class="obj_desc"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

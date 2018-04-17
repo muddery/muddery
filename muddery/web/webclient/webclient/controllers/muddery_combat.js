@@ -1,10 +1,15 @@
-//@ sourceURL=/controller/muddery_combat.js
+
+if (typeof(require) != "undefined") {
+    require("../css/combat.css");
+
+    require("../controllers/base_controller.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyCombat() {
-	BaseController.call(this);
+MudderyCombat = function(el) {
+	BasePopupController.call(this, el);
 	
 	this.self_dbref = "";
 	this.target = "";
@@ -15,14 +20,14 @@ function MudderyCombat() {
 	this.skill_cd_time = {};
 }
 
-MudderyCombat.prototype = prototype(BaseController.prototype);
+MudderyCombat.prototype = prototype(BasePopupController.prototype);
 MudderyCombat.prototype.constructor = MudderyCombat;
 
 /*
  * Bind events.
  */
 MudderyCombat.prototype.bindEvents = function() {
-	this.onClick("#buttons", "button", this.onCombatSkill);
+	this.onClick("#combat_buttons", "button", this.onCombatSkill);
 }
 
 /*
@@ -51,16 +56,16 @@ MudderyCombat.prototype.onCombatSkill = function(element) {
  * Reset the combat box.
  */
 MudderyCombat.prototype.reset = function(skill_cd_time) {
-	$("#desc").empty();
+	$("#combat_desc").empty();
 
 	// Remove characters that are not template.
-	this.clearElements("#characters");
+	this.clearElements("#combat_characters");
 	
 	// Remove combat messages.
-	this.clearElements("#messages");
+	this.clearElements("#combat_messages");
 	
 	// Remove skill buttons that are not template.
-	this.clearElements("#buttons");
+	this.clearElements("#combat_buttons");
 	
 	this.self_dbref = "";
 	this.target = "";
@@ -89,7 +94,7 @@ MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref
 	}
 	
 	// add desc
-	$("#desc").html($$.text2html.parseHtml(desc));
+	$("#combat_desc").html($$.text2html.parseHtml(desc));
 
 	// add timeout
 	if (timeout > 0) {
@@ -97,13 +102,13 @@ MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref
 		this.timeout = timeout;
 		this.timeline = current_time + timeout * 1000;
 
-		$("#timeout").text(timeout);
-		$("#center_time").show();
+		$("#combat_timeout").text(timeout);
+		$("#combat_center_time").show();
 		this.interval_id = window.setInterval("refreshTimeout()", 1000);
 	}
 	else {
-		$("#timeout").empty();
-		$("#center_time").hide();
+		$("#combat_timeout").empty();
+		$("#combat_center_time").hide();
 	}
 	
 	// add characters
@@ -113,18 +118,18 @@ MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref
 	var line_height = 30;
 
 	var status = {};
-	var template = $("#characters>.template");
+	var template = $("#combat_characters>.template");
 	for (var i in characters) {
 		var character = characters[i];
 		var dbref = character["dbref"];
 		status[dbref] = character;
 
 		var item = this.cloneTemplate(template);
-		item.attr("id", "char_" + dbref.slice(1))
+		item.attr("id", "combat_char_" + dbref.slice(1))
 			.data("dbref", character["dbref"]);
 		
 		if (character["icon"]) {
-			item.find(".img_icon").attr("src", $$.settings.resource_url + character["icon"]);
+			item.find(".img_icon").attr("src", settings.resource_url + character["icon"]);
 			item.find(".div_icon").show();
 		}
 		else {
@@ -133,7 +138,7 @@ MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref
 			
 		item.find(".name").text(character["name"]);
 		if (this.self_dbref == dbref) {
-		    $("#name").text(character["name"]);
+		    $("#combat_name").text(character["name"]);
 		}
 		
 		if (character["team"] == self_team) {
@@ -160,9 +165,9 @@ MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref
  * Set combat commands.
  */
 MudderyCombat.prototype.setCommands = function(commands) {
-	var template = $("#buttons>button.template");
+	var template = $("#combat_buttons>button.template");
 	var left = 10;
-	var msg_box = $("#messages");
+	var msg_box = $("#combat_messages");
 	var top = msg_box.position().top + msg_box.height() + 10;
 	var line = 4;
 	var width = 70;
@@ -180,13 +185,13 @@ MudderyCombat.prototype.setCommands = function(commands) {
 					  "top": top + parseInt(i / line) * line_height});
 				
 			if (command["icon"]) {
-				item.find(".command_icon").attr("src", $$.settings.resource_url + command["icon"]);
+				item.find(".command_icon").attr("src", settings.resource_url + command["icon"]);
 			}
 
 			item.find(".command_name").html($$.text2html.parseHtml(command["name"]));
 		}
 
-		$('#buttons').height(5 + parseInt((commands.length - 1) / line + 1) * line_height)
+		$('#combat_buttons').height(5 + parseInt((commands.length - 1) / line + 1) * line_height)
 	}
 }
 
@@ -213,7 +218,7 @@ MudderyCombat.prototype.setSkillCast = function(data) {
 		if (data["skill"] == "skill_normal_hit" ||
 			data["skill"] == "skill_dunt") {
 
-			var caller = $('#char_' + data["caller"].slice(1));
+			var caller = $('#combat_char_' + data["caller"].slice(1));
 			if (caller.hasClass("teammate")) {
 				caller.animate({left: '50%'}, 100);
 				caller.animate({left: '12%'}, 100);
@@ -228,8 +233,8 @@ MudderyCombat.prototype.setSkillCast = function(data) {
 		}
 		else if (data["skill"] == "skill_escape") {
 			if (data["data"] == 1) {
-				var item_id = "#char_" + data["target"].slice(1) + ".status";
-				$(item_id).text($$("Escaped"));
+				var item_id = "#combat_char_" + data["target"].slice(1) + ".status";
+				$(item_id).text($$.trans("Escaped"));
 			}
 		}
 	}
@@ -244,7 +249,7 @@ MudderyCombat.prototype.setSkillCast = function(data) {
  * Display a message in message window.
  */
 MudderyCombat.prototype.displayMsg = function(msg) {
-	var msg_wnd = $("#messages");
+	var msg_wnd = $("#combat_messages");
 	if (msg_wnd.length > 0) {
 		msg_wnd.stop(true);
 		msg_wnd.scrollTop(msg_wnd[0].scrollHeight);
@@ -272,11 +277,11 @@ MudderyCombat.prototype.displayMsg = function(msg) {
  */
 MudderyCombat.prototype.updateStatus = function(status) {
 	for (var key in status) {
-		var item_id = "#char_" + key.slice(1) + ">div.status";
+		var item_id = "#combat_char_" + key.slice(1) + ">div.status";
 		$(item_id).text(status[key]["hp"] + "/" + status[key]["max_hp"]);
 
 		if (this.self_dbref == key) {
-		    $("#status").text("HP:" + status[key]["hp"] + "/" + status[key]["max_hp"]);
+		    $("#combat_status").text("HP:" + status[key]["hp"] + "/" + status[key]["max_hp"]);
 		}
 	}
 }
@@ -311,8 +316,8 @@ MudderyCombat.prototype.setSkillCD = function(skill, cd, gcd) {
 	}
 
 	// refresh button's CD
-	$("#buttons>button").each(function() {
-        controller.showButtonCD(this);
+	$("#combat_buttons>button").each(function() {
+        frameworks["frame_combat"].controller.showButtonCD(this);
     });
 }
     
@@ -366,6 +371,7 @@ MudderyCombat.prototype.isCombatFinished = function() {
 }
 
 function refreshTimeout() {
+	var controller = frameworks["frame_combat"].controller;
     var current_time = new Date().getTime();
 
     var remain = Math.ceil((controller.timeline - current_time) / 1000);
@@ -376,5 +382,5 @@ function refreshTimeout() {
         remain = 0;
     }
 
-    $("#timeout").text(remain);
+    $("#combat_timeout").text(remain);
 };

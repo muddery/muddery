@@ -1,57 +1,36 @@
-<!DOCTYPE html>
-<html lang="en-us">
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
-        <meta charset="utf-8" />
-
-        <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/shop.css" />
-    </head>
-    <body>
-        <div class="modal-header">
-            <button type="button" id="close_box" class="close">×</button>
-            <h4 id="shop_name" class="modal-title"></h4>
-        </div>
-        <div class="modal-body">
-        	<div id="shop_icon">
-                <img id="img_icon" src="" />
-            </div>
-            <div id="shop_desc"></div>
-        	<div id="goods_wrapper">
-        		<table id="goods_table" class="tab_shop">
-        			<thead>
-        				<tr>
-        					<th id="header_name">NAME</th>
-        					<th id="header_price">PRICE</th>
-        					<th id="header_desc">DESC</th>
-        				</tr>
-        			</thead>
-					<tbody id="goods_list">
-						<tr class="template">
-							<td>
-								<center class="goods_icon">
-									<img class="img_icon" src="" />
-								</center>
-								<a class="goods_name"></a>
-							</td>
-							<td class="goods_price">
-								<span class="price"></span>
-								<span class="unit"></span>
-							</td>
-							<td class="goods_desc"></td>
-						</tr>
-					</tbody>
-        		</table>
-        	</div>
-        </div>
-
-        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-		<script src="../utils/paginator.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-	    <script src="../controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/muddery_shop.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-    </body>
-</html>
+<div class="modal-header">
+	<button type="button" id="shop_close_box" class="close">×</button>
+	<h4 id="shop_name" class="modal-title"></h4>
+</div>
+<div class="modal-body">
+	<div id="shop_icon">
+		<img id="shop_img_icon"/>
+	</div>
+	<div id="shop_desc"></div>
+	<div id="shop_goods_wrapper">
+		<table id="shop_goods_table" class="tab_shop">
+			<thead>
+				<tr>
+					<th id="shop_header_name">NAME</th>
+					<th id="shop_header_price">PRICE</th>
+					<th id="shop_header_desc">DESC</th>
+				</tr>
+			</thead>
+			<tbody id="shop_goods_list">
+				<tr class="template">
+					<td>
+						<center class="goods_icon">
+							<img class="img_icon"/>
+						</center>
+						<a class="goods_name"></a>
+					</td>
+					<td class="goods_price">
+						<span class="price"></span>
+						<span class="unit"></span>
+					</td>
+					<td class="goods_desc"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

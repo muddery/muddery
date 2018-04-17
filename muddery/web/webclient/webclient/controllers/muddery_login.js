@@ -1,25 +1,28 @@
-//@ sourceURL=/controller/muddery_login.js
+
+if (typeof(require) != "undefined") {
+    require("../controllers/base_controller.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyLogin() {
-	BaseController.call(this);
+MudderyLogin = function(el) {
+	BaseTabController.call(this, el);
 }
 
-MudderyLogin.prototype = prototype(BaseController.prototype);
+MudderyLogin.prototype = prototype(BaseTabController.prototype);
 MudderyLogin.prototype.constructor = MudderyLogin;
 
 /*
  * Reset the view's language.
  */
 MudderyLogin.prototype.resetLanguage = function() {
-    $("#view_header").text($$("Please login."));
-    $("#login_name").attr("placeholder", $$("username"));
-    $("#login_password").attr("placeholder", $$("password"));
-    $("#check_save_password").text($$("Save Password"));
-    $("#check_auto_login").text($$("Auto Login"));
-    $("#button_login").text($$("Login"));
+    this.select("#login_header").text($$.trans("Please login."));
+    this.select("#login_name").attr("placeholder", $$.trans("username"));
+    this.select("#login_password").attr("placeholder", $$.trans("password"));
+    this.select("#check_save_password").text($$.trans("Save Password"));
+    this.select("#check_auto_login").text($$.trans("Auto Login"));
+    this.select("#button_login").text($$.trans("Login"));
 }
 
 /*
@@ -35,12 +38,12 @@ MudderyLogin.prototype.bindEvents = function() {
  * Event on click the login button.
  */
 MudderyLogin.prototype.onLogin = function(element) {
-    var playername = $("#login_name").val();
-    var password = $("#login_password").val();
-    var save_password = $("#cb_save_password").prop("checked");
-    var auto_login = $("#cb_auto_login").prop("checked");
+    var playername = this.select("#login_name").val();
+    var password = this.select("#login_password").val();
+    var save_password = this.select("#cb_save_password").prop("checked");
+    var auto_login = this.select("#cb_auto_login").prop("checked");
 
-    $("#login_password").val("");
+    this.select("#login_password").val("");
 
     $$.commands.doLogin(playername, password);
     $$.commands.doSavePassword(save_password);
@@ -51,11 +54,11 @@ MudderyLogin.prototype.onLogin = function(element) {
  * Event on click the save password checkbox.
  */
 MudderyLogin.prototype.onSavePassword = function(element) {
-    var save_password = $("#cb_save_password").prop("checked");
+    var save_password = this.select("#cb_save_password").prop("checked");
     $$.commands.doSavePassword(save_password);
 
     if (!save_password) {
-        $("#cb_auto_login").prop("checked", false);
+        this.select("#cb_auto_login").prop("checked", false);
         $$.commands.doRemoveAutoLogin();
     }
 }
@@ -64,7 +67,7 @@ MudderyLogin.prototype.onSavePassword = function(element) {
  * Event on click the auto login checkbox.
  */
 MudderyLogin.prototype.onAutoLogin = function(element) {
-    var auto_login = $("#cb_auto_login").prop("checked");
+    var auto_login = this.select("#cb_auto_login").prop("checked");
 
     if (!auto_login) {
         $$.commands.doRemoveAutoLogin();
@@ -75,19 +78,19 @@ MudderyLogin.prototype.onAutoLogin = function(element) {
  * Set values.
  */
 MudderyLogin.prototype.setValues = function(playername, password, save_password, auto_login) {
-    $("#login_name").val(playername);
-    $("#login_password").val("");
+    this.select("#login_name").val(playername);
+    this.select("#login_password").val("");
 
-    $("#login_name").val(playername);
-    $("#login_password").val(password);
-    $("#cb_save_password").prop("checked", save_password);
-    $("#cb_auto_login").prop("checked", auto_login);
+    this.select("#login_name").val(playername);
+    this.select("#login_password").val(password);
+    this.select("#cb_save_password").prop("checked", save_password);
+    this.select("#cb_auto_login").prop("checked", auto_login);
 }
 
 /*
  * Set player's name.
  */
 MudderyLogin.prototype.setPlayerName = function(playername) {
-    $("#login_name").val(playername);
-    $("#login_password").val("");
+    this.select("#login_name").val(playername);
+    this.select("#login_password").val("");
 }

@@ -1,37 +1,42 @@
-//@ sourceURL=/controller/muddery_goods.js
+
+if (typeof(require) != "undefined") {
+    require("../css/goods.css");
+
+    require("../controllers/base_controller.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyGoods() {
-	BaseController.call(this);
+MudderyGoods = function(el) {
+	BasePopupController.call(this, el);
 
 	this.dbref = null;
 }
 
-MudderyGoods.prototype = prototype(BaseController.prototype);
+MudderyGoods.prototype = prototype(BasePopupController.prototype);
 MudderyGoods.prototype.constructor = MudderyGoods;
 
 /*
  * Reset the view's language.
  */
 MudderyGoods.prototype.resetLanguage = function() {
-	$("#button_buy").text($$("Buy"));
+	$("#goods_button_buy").text($$.trans("Buy"));
 }
 
 /*
  * Bind events.
  */
 MudderyGoods.prototype.bindEvents = function() {
-    this.onClick("#close_box", this.onClose);
-    this.onClick("#button_buy", this.onBuy);
+    this.onClick("#goods_close_box", this.onClose);
+    this.onClick("#goods_button_buy", this.onBuy);
 }
 
 /*
  * Event when clicks the close button.
  */
 MudderyGoods.prototype.onClose = function(element) {
-	$$.controller.doClosePopupBox();
+	$$.main.doClosePopupBox();
 }
 
 /*
@@ -52,30 +57,30 @@ MudderyGoods.prototype.setGoods = function(dbref, name, number, icon, desc, pric
     this.dbref = dbref;
 
     // add name
-    $("#name").html($$.text2html.parseHtml(name));
+    $("#goods_name").html($$.text2html.parseHtml(name));
 
     if (number == 1) {
-        $("#number_mark").hide();
+        $("#goods_number_mark").hide();
     }
     else {
-        $("#number_mark").show();
-        $("#number").html(number);
+        $("#goods_number_mark").show();
+        $("#goods_number").html(number);
     }
 
     // add icon
     if (icon) {
-        var url = $$.settings.resource_url + icon;
-        $("#img_icon").attr("src", url);
-        $("#div_icon").show();
+        var url = settings.resource_url + icon;
+        $("#goods_img_icon").attr("src", url);
+        $("#goods_div_icon").show();
     }
     else {
-        $("#div_icon").hide();
+        $("#goods_div_icon").hide();
     }
 
     // add price
-    $("#price").text(price);
-    $("#unit").text(unit);
+    $("#goods_price").text(price);
+    $("#goods_unit").text(unit);
 
     // add desc
-    $("#desc").html($$.text2html.parseHtml(desc));
+    $("#goods_desc").html($$.text2html.parseHtml(desc));
 }

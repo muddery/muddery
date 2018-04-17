@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>有错误发生！</h1>
+    <h2>{{ message }}</h2>
+    <div><br></div>
+    <h2><a href="{% url 'worlddata:index' %}">返回</a></h2>
+
+{% endblock content %}

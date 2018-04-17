@@ -1,41 +1,46 @@
-//@ sourceURL=/controller/muddery_shop.js
+
+if (typeof(require) != "undefined") {
+    require("../css/shop.css");
+
+    require("../controllers/base_controller.js");
+    require("../utils/paginator.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyShop() {
-	BaseController.call(this);
+MudderyShop = function(el) {
+	BasePopupController.call(this, el);
 	
 	this.goods = [];
-	this.paginator = new Paginator("#goods_wrapper");
+	this.paginator = new Paginator("#shop_goods_wrapper");
 }
 
-MudderyShop.prototype = prototype(BaseController.prototype);
+MudderyShop.prototype = prototype(BasePopupController.prototype);
 MudderyShop.prototype.constructor = MudderyShop;
 
 /*
  * Reset the view's language.
  */
 MudderyShop.prototype.resetLanguage = function() {
-	$("#header_name").text($$("NAME"));
-	$("#header_price").text($$("PRICE"));
-	$("#header_desc").text($$("DESC"));
+	$("#shop_header_name").text($$.trans("NAME"));
+	$("#shop_header_price").text($$.trans("PRICE"));
+	$("#shop_header_desc").text($$.trans("DESC"));
 }
 
 /*
  * Bind events.
  */
 MudderyShop.prototype.bindEvents = function() {
-	this.onClick("#close_box", this.onClose);
-	this.onClick("#goods_list", ".goods_name", this.onLook);
-	this.on(window, "resize", this.onResize);
+	this.onClick("#shop_close_box", this.onClose);
+	this.onClick("#shop_goods_list", ".goods_name", this.onLook);
 }
 	
 /*
  * Event when clicks the close button.
  */
 MudderyShop.prototype.onClose = function(element) {
-    $$.controller.doClosePopupBox();
+    $$.main.doClosePopupBox();
 }
 
 /*
@@ -46,7 +51,7 @@ MudderyShop.prototype.onLook = function(element) {
 	for (var i in this.goods) {
 		if (dbref == this.goods[i]["dbref"]) {
 			var goods = this.goods[i];
-			$$.controller.showGoods(goods["dbref"],
+			$$.main.showGoods(goods["dbref"],
 								   goods["name"],
 				 				   goods["number"],
 								   goods["icon"],
@@ -61,8 +66,10 @@ MudderyShop.prototype.onLook = function(element) {
 /*
  * Event then the window resizes.
  */
-MudderyShop.prototype.onResize = function(element) {
-	var height = $(window).innerHeight() - $("#goods_wrapper").offset().top - 16;
+MudderyShop.prototype.resetSize = function() {
+    BasePopupController.prototype.resetSize.call(this);
+
+	var height = this.el.innerHeight() - 20;
 	this.paginator.tableHeight(height);
 }
 
@@ -77,8 +84,8 @@ MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 
 	// add icon
 	if (icon) {
-		var url = $$.settings.resource_url + icon;
-		$("#img_icon").attr("src", url);
+		var url = settings.resource_url + icon;
+		$("#shop_img_icon").attr("src", url);
 		$("#shop_icon").show();
 	}
 	else {
@@ -89,15 +96,15 @@ MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 	$("#shop_desc").html($$.text2html.parseHtml(desc));
 
 	// clear shop
-	this.clearElements("#goods_list");
-	var template = $("#goods_list>.template");	
+	this.clearElements("#shop_goods_list");
+	var template = $("#shop_goods_list>.template");	
 	// set goods
 	for (var i in this.goods) {
 		var obj = this.goods[i];
 		var item = this.cloneTemplate(template);
 
 		if (obj["icon"]) {
-			item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
+			item.find(".img_icon").attr("src", settings.resource_url + obj["icon"]);
 			item.find(".obj_icon").show();
 		}
 		else {
@@ -123,6 +130,6 @@ MudderyShop.prototype.setShop = function(name, icon, desc, goods) {
 			.text($$.text2html.parseHtml(obj["desc"]));
 	}
 
-	var height = $(window).innerHeight() - $("#goods_wrapper").offset().top - 16;
+	var height = $(window).innerHeight() - $("#shop_goods_wrapper").offset().top - 16;
 	this.paginator.refresh(height);
 }

@@ -1,4 +1,3 @@
-//@ sourceURL=/controller/paginator.js
 
 /*
  * Paginate table rows.
@@ -10,7 +9,7 @@
  * wrapper: a wrapper contains the table. 
  * height: table row's max height.
  */
-function Paginator(wrapper, height) {
+Paginator = function(wrapper, height) {
 	this.pages = [[]];
 	this.current_page = 0;
 	this.index_neighbours = 3;

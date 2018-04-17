@@ -50,6 +50,9 @@ LANGUAGE_CODE = {LANGUAGE_CODE}
 # Django web features
 ######################################################################
 
+# URL that handles the webclient.
+WEBCLIENT_ROOT = os.path.join(GAME_DIR, "web", "static", "webclient")
+
 # The secret key is randomly seeded upon creation. It is used to sign
 # Django's cookies. Do not share this with anyone. Changing it will
 # log out all active web browsing sessions. Game web client sessions

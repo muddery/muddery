@@ -1,47 +1,54 @@
-//@ sourceURL=/controller/muddery_inventory.js
+
+if (typeof(require) != "undefined") {
+    require("../css/inventory.css");
+
+    require("../controllers/base_controller.js");
+    require("../utils/paginator.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyInventory() {
-	BaseController.call(this);
+MudderyInventory = function(el) {
+	BaseTabController.call(this, el);
 
-	this.paginator = new Paginator("#inventory_wrapper");
+	this.paginator = new Paginator("#inv_inventory_wrapper");
 }
 
-MudderyInventory.prototype = prototype(BaseController.prototype);
+MudderyInventory.prototype = prototype(BaseTabController.prototype);
 MudderyInventory.prototype.constructor = MudderyInventory;
 
 /*
  * Reset the view's language.
  */
 MudderyInventory.prototype.resetLanguage = function() {
-    $("#view_name").text($$("NAME"));
-    $("#view_number").text($$("NUM"));
-    $("#view_desc").text($$("DESC"));
+    this.select("#inv_view_name").text($$.trans("NAME"));
+    this.select("#inv_view_number").text($$.trans("NUM"));
+    this.select("#inv_view_desc").text($$.trans("DESC"));
 }
 
 /*
  * Bind events.
  */
 MudderyInventory.prototype.bindEvents = function() {
-	this.onClick("#inventory_items", ".obj_name", this.onLook);
-	this.on(window, "resize", this.onResize);
+	this.onClick("#inv_inventory_items", ".obj_name", this.onLook);
 }
             
 /*
  * Event when clicks the object link.
  */
 MudderyInventory.prototype.onLook = function(element) {
-    var dbref = $(element).data("dbref");
+    var dbref = this.select(element).data("dbref");
     $$.commands.doLook(dbref);
 }
 
 /*
  * Event then the window resizes.
  */
-MudderyInventory.prototype.onResize = function(element) {
-	var height = $(window).innerHeight() - $("#inventory_wrapper").offset().top - 16;
+MudderyInventory.prototype.resetSize = function() {
+    BaseTabController.prototype.resetSize.call(this);
+
+	var height = this.el.innerHeight() - 20;
 	this.paginator.tableHeight(height);
 }
 
@@ -49,8 +56,8 @@ MudderyInventory.prototype.onResize = function(element) {
  * Set inventory's data.
  */
 MudderyInventory.prototype.setInventory = function(inventory) {
-    this.clearElements("#inventory_items");
-    var template = $("#inventory_items>tr.template");
+    this.clearElements("#inv_inventory_items");
+    var template = this.select("#inv_inventory_items>tr.template");
 
     for (var i in inventory) {
         var obj = inventory[i];
@@ -61,7 +68,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
             .html($$.text2html.parseHtml(obj["name"]));
 
         if (obj["icon"]) {
-            item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
+            item.find(".img_icon").attr("src", settings.resource_url + obj["icon"]);
             item.find(".obj_icon").show();
         }
         else {
@@ -70,13 +77,13 @@ MudderyInventory.prototype.setInventory = function(inventory) {
 
         var number = obj["number"];
         if ("equipped" in obj && obj["equipped"]) {
-            number += $$(" (equipped)");
+            number += $$.trans(" (equipped)");
         }
         item.find(".obj_number").text(number);
 
         item.find(".obj_desc").html($$.text2html.parseHtml(obj["desc"]));
     }
 
-    var height = $(window).innerHeight() - $("#inventory_wrapper").offset().top - 16;
+    var height = $(window).innerHeight() - this.select("#inv_inventory_wrapper").offset().top - 16;
 	this.paginator.refresh(height);
 }

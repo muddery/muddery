@@ -1,9 +1,9 @@
 
-#popup_icon {
+#frame_information #info_popup_icon {
     text-align: center;
 }
 
-#obj_icon {
+#frame_information #info_obj_icon {
 	width: 40px;
 	height: 40px;
 }

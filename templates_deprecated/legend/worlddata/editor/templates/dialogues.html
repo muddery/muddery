@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>对话</h1>
+    欢迎进入对话界面，这里定义了对话的数据。
+
+    <h3><a href="../">返回</a></h3>
+
+    <h2><a href="./dialogues/dialogues/list.html">对话列表</a></h2>
+    所有对话的列表以及它们的对应条件。只有符合条件的对话才会显示给玩家。
+
+    <h2><a href="./dialogues/dialogue_relations/list.html">对话关系</a></h2>
+    有些对话会跟在其他对话之后显示，形成一串对话，或一系列树形结构的对话。
+
+    <h2><a href="./dialogues/npc_dialogues/list.html">NPC对话</a></h2>
+    NPC的对话，可以通过设置这些对话让NPC说话。
+
+    <h2><a href="./dialogues/dialogue_quest_dependencies/list.html">对话－任务依赖关系</a></h2>
+    有些对话只有当某些任务完成或未完成时才会显示，这里记录了这些依赖关系。
+
+    <h2><a href="./dialogues/event_dialogues/list.html">对话事件</a></h2>
+    对话事件的数据，有些事件会触发对话。
+
+{% endblock content %}

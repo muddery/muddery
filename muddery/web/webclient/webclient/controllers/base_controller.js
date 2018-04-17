@@ -1,18 +1,32 @@
-//@ sourceURL=/controller/base_controller.js
 
 /*
  * Get the prototype of the base class.
  */
-function prototype(base) {
+prototype = function(base, el) {
     var Base = function(){};
     Base.prototype = base;
-    return new Base();
+    return new Base(el);
+}
+
+
+////////////////////////////////////////
+//
+// The base of view controllers.
+//
+////////////////////////////////////////
+
+/*
+ * The base controller's constructor.
+ */
+BaseController = function(el) {
+    this.el = el;
 }
 
 /*
- * The base of view controllers.
+ * Find DOM.
  */
-function BaseController() {
+BaseController.prototype.select = function(selector) {
+    return this.el.find(selector);
 }
 
 /*
@@ -36,6 +50,28 @@ BaseController.prototype.bindEvents = function() {
 }
 
 /*
+ * Show the element.
+ */
+BaseController.prototype.show = function() {
+    this.el.show();
+    this.el.parents().show();
+	this.resetSize();
+}
+
+/*
+ * Is visible.
+ */
+BaseController.prototype.visible = function() {
+    return this.el.is(":visible");
+}
+
+/*
+ * Set element's size.
+ */
+BaseController.prototype.resetSize = function() {
+}
+
+/*
  * Bind an event to an element with an object method.
  * on(element_name [,selector] , event_name, method)
  */
@@ -46,7 +82,7 @@ BaseController.prototype.on = function(element_name, selector, event_name, metho
     	selector = undefined;
     }
 
-	$(element_name).on(event_name, selector, this, function(event) {
+	this.select(element_name).on(event_name, selector, this, function(event) {
 		method.call(event.data, event.currentTarget, event);
 	});
 }
@@ -73,7 +109,7 @@ BaseController.prototype.off = function(element_name, selector, event_name) {
     	selector = undefined;
     }
     
-	$(element_name).off(event_name, selector);
+	this.select(element_name).off(event_name, selector);
 }
 
 /*
@@ -84,7 +120,7 @@ BaseController.prototype.cloneTag = function(tag, root) {
         var template = root.children(tag + ".template");
     }
     else {
-    	var template = $(tag + ".template");
+    	var template = this.select(tag + ".template");
     }
     this.cloneTemplate(tempalte);
 }
@@ -103,5 +139,58 @@ BaseController.prototype.cloneTemplate = function(template) {
  */
 BaseController.prototype.clearElements = function(root_tag) {
     // Remove elements that are not template.
-	$(root_tag).children().not(".template").remove();
+	this.select(root_tag).children().not(".template").remove();
+}
+
+
+////////////////////////////////////////
+//
+// The base of popup controllers.
+//
+////////////////////////////////////////
+ /*
+ * Derive from the base class.
+ */
+BasePopupController = function(el) {
+	BaseController.call(this, el);
+	
+	this.target = null;
+}
+
+BasePopupController.prototype = prototype(BaseController.prototype);
+BasePopupController.prototype.constructor = BasePopupController;
+
+/*
+ * Set element's size.
+ */
+BasePopupController.prototype.resetSize = function() {
+	$$.main.doSetVisiblePopupSize();
+}
+
+
+////////////////////////////////////////
+//
+// The base of tab controllers.
+//
+////////////////////////////////////////
+ /*
+ * Derive from the base class.
+ */
+BaseTabController = function(el) {
+	BaseController.call(this, el);
+
+	this.target = null;
+}
+
+BaseTabController.prototype = prototype(BaseController.prototype);
+BaseTabController.prototype.constructor = BaseTabController;
+
+/*
+ * Set element's size.
+ */
+BaseTabController.prototype.resetSize = function() {
+	var tab_content = $("#tab_content");
+
+	this.el.width(tab_content.width());
+	this.el.height(tab_content.height() - 5);
 }

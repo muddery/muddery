@@ -74,7 +74,7 @@ class RelativeView(FormView):
             relative_form = None
             if self.key:
                 try:
-                    relative_instance = relative_form_class.Meta.model.objects.get(relation=self.key)
+                    relative_instance = relative_form_class.Meta.model.objects.get(key=self.key)
                     relative_form = relative_form_class(instance=relative_instance)
                 except Exception, e:
                     relative_form = None

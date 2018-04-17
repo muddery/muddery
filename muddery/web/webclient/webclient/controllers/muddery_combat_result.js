@@ -1,32 +1,37 @@
-//@ sourceURL=/controller/muddery_combat_result.js
+
+if (typeof(require) != "undefined") {
+    require("../css/combat_result.css");
+
+    require("../controllers/base_controller.js");
+}
 
 /*
  * Derive from the base class.
  */
-function MudderyCombatResult() {
-	BaseController.call(this);
+MudderyCombatResult = function(el) {
+	BasePopupController.call(this, el);
 	
     this.dialogue = null;
 }
 
-MudderyCombatResult.prototype = prototype(BaseController.prototype);
+MudderyCombatResult.prototype = prototype(BasePopupController.prototype);
 MudderyCombatResult.prototype.constructor = MudderyCombatResult;
 
 /*
  * Reset the view's language.
  */
 MudderyCombatResult.prototype.resetLanguage = function() {
-	$("#view_get_exp").text($$("Get Exp: "));
-	$("#view_get_objects").text($$("Get Objects: "));
-	$("#view_rejected").text($$("Can Not Get: "));
-	$("#button_ok").text($$("OK"));
+	$("#combat_result_view_get_exp").text($$.trans("Get Exp: "));
+	$("#combat_result_view_get_objects").text($$.trans("Get Objects: "));
+	$("#combat_result_view_rejected").text($$.trans("Can Not Get: "));
+	$("#combat_result_button_ok").text($$.trans("OK"));
 }
 
 /*
  * Bind events.
  */
 MudderyCombatResult.prototype.bindEvents = function() {
-    this.onClick("#button_ok", this.onClose);
+    this.onClick("#combat_result_button_ok", this.onClose);
 }
 
 /*
@@ -34,11 +39,11 @@ MudderyCombatResult.prototype.bindEvents = function() {
  */
 MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
-    $$.controller.doClosePopupBox();
+    $$.main.doClosePopupBox();
 
 	// show dialogue after combat
 	if (this.dialogue) {
-		$$.controller.setDialogueList(this.dialogue);
+		$$.main.setDialogueList(this.dialogue);
 	}
 }
     
@@ -46,11 +51,11 @@ MudderyCombatResult.prototype.onClose = function(element) {
  * Clear the result box.
  */
 MudderyCombatResult.prototype.clear = function() {
-	$("#header").empty();
-	$("#desc").empty();
-	$("#exp").text(0);
-	$("#accepted").hide();
-	$("#rejected").hide();
+	$("#combat_result_header").empty();
+	$("#combat_result_desc").empty();
+	$("#combat_result_exp").text(0);
+	$("#combat_result_accepted").hide();
+	$("#combat_result_rejected").hide();
 		
 	this.dialogue = null;
 }
@@ -66,26 +71,26 @@ MudderyCombatResult.prototype.setResult = function(result) {
 	
 	var header = "";
 	if ("escaped" in result) {
-	   header = $$("Escaped !");
+	   header = $$.trans("Escaped !");
 	}
 	else if ("win" in result) {
-		header = $$("You win !");
+		header = $$.trans("You win !");
 	}
 	else if ("lose" in result) {
-		header = $$("You lost !");
+		header = $$.trans("You lost !");
 	}
 	else if ("draw" in result) {
-		header = $$("Draw !");
+		header = $$.trans("Draw !");
 	}
 	
-	$("#header").text(header);
+	$("#combat_result_header").text(header);
 }
 	
 /*
  * Set the experiences that the player get.
  */
 MudderyCombatResult.prototype.setGetExp = function(exp) {
-	$("#exp").text(exp);
+	$("#combat_result_exp").text(exp);
 }
 	
 /*
@@ -99,8 +104,8 @@ MudderyCombatResult.prototype.setDialogue = function(dialogue) {
  * Set the objects that the player get.
  */
 MudderyCombatResult.prototype.setGetObjects = function(accepted, rejected) {
-	this.setItems("#accepted", "#accepted_list", accepted);
-	this.setItems("#rejected", "#rejected_list", rejected);
+	this.setItems("#combat_result_accepted", "#combat_result_accepted_list", accepted);
+	this.setItems("#combat_result_rejected", "#combat_result_rejected_list", rejected);
 }
 	
 /*

@@ -1,31 +1,11 @@
-<!DOCTYPE html>
-<html lang="en-us">
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
-        <meta charset="utf-8" />
-
-        <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/confirm_combat.css" />
-    </head>
-    <body>
-        <div class="modal-header">
-            <button id="close_box" type="button" class="close">×</button>
-            <h4 id="popup_header" class="modal-title"></h4>
-        </div>
-        <div class="modal-body">
-            <p id="popup_body">Found an opponent.</p>
-            <p id="time"></p>
-        </div>
-        <div id="popup_footer" class="modal-footer">
-            <button id="button_confirm" type="button" class="btn btn-default">Confirm</button>
-        </div>
-
-        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/muddery_confirm_combat.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-    </body>
-</html>
+<div class="modal-header">
+	<button id="confirm_combat_close_box" type="button" class="close">×</button>
+	<h4 id="confirm_combat_popup_header" class="modal-title"></h4>
+</div>
+<div class="modal-body">
+	<p id="confirm_combat_popup_body">Found an opponent.</p>
+	<p id="confirm_combat_time"></p>
+</div>
+<div id="confirm_combat_popup_footer" class="modal-footer">
+	<button id="confirm_combat_button_confirm" type="button" class="btn btn-default">Confirm</button>
+</div>

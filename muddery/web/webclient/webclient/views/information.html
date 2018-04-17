@@ -1,63 +1,43 @@
-<!DOCTYPE html>
-<html lang="en-us">
-    <head>
-	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
-        <meta charset="utf-8" />
-
-        <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/information.css" />
-    </head>
-    <body>
-        <div id="box_infomation">
-            <table id="info_table" style="width: 100%;">
-                <tbody>
-                    <tr>
-                        <td>
-                            <div id="box_status">
-                                <div>
-                                    <div>
-                                        <img id="obj_icon" src="" />
-                                        <span id="name"></span>
-                                    </div>
-                                    <div id="attributes">
-                                        <div class="template">
-                                            <span class="attr_name"></span>: <span class="attr_value"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div id="box_equipment">
-                                <div>
-                                	<span id="view_head">HEAD: </span>
-                                    <a id="POSITION_HEAD"></a>
-                                </div>
-                                <div>
-                                	<span id="view_hand">HAND: </span>
-                                    <a id="POSITION_HAND"></a>
-                                </div>
-                                <div>
-                                	<span id="view_chest">CHEST: </span>
-                                    <a id="POSITION_CHEST"></a>
-                                </div>
-                                <div>
-                                	<span id="view_leg">LEG: </span>
-                                    <a id="POSITION_LEG"></a>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/muddery_information.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-    </body>
-</html>
+<div id="info_box_infomation">
+	<table id="info_info_table" style="width: 100%;">
+		<tbody>
+			<tr>
+				<td>
+					<div id="info_box_status">
+						<div>
+							<div>
+								<img id="info_obj_icon"/>
+								<span id="info_name"></span>
+							</div>
+							<div id="info_attributes">
+								<div class="template">
+									<span class="attr_name"></span>: <span class="attr_value"></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</td>
+				<td>
+					<div id="info_box_equipment">
+						<div>
+							<span id="info_view_head">HEAD: </span>
+							<a id="POSITION_HEAD"></a>
+						</div>
+						<div>
+							<span id="info_view_hand">HAND: </span>
+							<a id="POSITION_HAND"></a>
+						</div>
+						<div>
+							<span id="info_view_chest">CHEST: </span>
+							<a id="POSITION_CHEST"></a>
+						</div>
+						<div>
+							<span id="info_view_leg">LEG: </span>
+							<a id="POSITION_LEG"></a>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

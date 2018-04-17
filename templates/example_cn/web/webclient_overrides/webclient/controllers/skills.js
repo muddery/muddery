@@ -1,10 +1,13 @@
-//@ sourceURL=/controller/skills.js
+
+if (typeof(require) != "undefined") {
+    require("../controllers/muddery_skills.js");
+}
 
 /*
  * Derive from the base class.
  */
-function Skills() {
-	MudderySkills.call(this);
+Skills = function(el) {
+	MudderySkills.call(this, el);
 }
 
 Skills.prototype = prototype(MudderySkills.prototype);
@@ -26,7 +29,7 @@ Skills.prototype.setSkills = function(skills) {
         	.text(obj["name"]);
             
         if (obj["icon"]) {
-            item.find(".img_icon").attr("src", $$.settings.resource_url + obj["icon"]);
+            item.find(".img_icon").attr("src", settings.resource_url + obj["icon"]);
         	item.find(".skill_icon").show();
         }
         else {

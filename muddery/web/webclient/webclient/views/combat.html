@@ -1,46 +1,26 @@
-<!DOCTYPE html>
-<html lang="en-us" xmlns="http://www.w3.org/1999/html">
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
-        <meta charset="utf-8" />
-
-        <!--CSS style sheet -->
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/webclient.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="../css/combat.css" />
-    </head>
-    <body>
-        <div class="modal-header">
-            <div id="center_time">Time: <span id="timeout"></span></div>
-            <div id="desc"></div>
-            <div id="status_bar"><span id="name"></span> <span id="status"></span></div>
-        </div>
-        <div id="characters" class="modal-body">
-            <div class="template">
-                <div class="status"></div>
-                <div class="div_icon">
-                    <img class="img_icon" src="" />
-                </div>
-                <div class="name"></div>
-            </div>
-        </div>
-        <div id="messages">
-        	<div class="msg template"></div>
-        </div>
-        <div id="buttons" class="modal-footer">
-            <button class="btn_combat template" type="button">
-                <center>
-                    <img class="command_icon" src="">
-                </center>
-                <div class="command_name"></div>
-                <div class="cooldown"></div>
-            </button>
-        </div>
-        
-        <script src="../libs/jquery-3.2.1.min.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/base_controller.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../controllers/muddery_combat.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/frames.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-        <script src="../client/importer.js" defer="defer" type="text/javascript" charset="utf-8"></script>
-    </body>
-</html>
+<div class="modal-header">
+	<div id="combat_center_time">Time: <span id="combat_timeout"></span></div>
+	<div id="combat_desc"></div>
+	<div id="combat_status_bar"><span id="combat_name"></span> <span id="combat_status"></span></div>
+</div>
+<div id="combat_characters" class="modal-body">
+	<div class="template">
+		<div class="status"></div>
+		<div class="div_icon">
+			<img class="img_icon"/>
+		</div>
+		<div class="name"></div>
+	</div>
+</div>
+<div id="combat_messages">
+	<div class="msg template"></div>
+</div>
+<div id="combat_buttons" class="modal-footer">
+	<button class="btn_combat template" type="button">
+		<center>
+			<img class="command_icon">
+		</center>
+		<div class="command_name"></div>
+		<div class="cooldown"></div>
+	</button>
+</div>

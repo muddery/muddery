@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block header_ext %}
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static "worldeditor/css/worldeditor.css" %}">
+    <script src="{% static "worldeditor/js/worldeditor.js" %}" type="text/javascript" charset="utf-8"></script>
+{% endblock %}
+
+{% block content %}
+    <nav class="editor_nav">
+        <a class="nav_button" href="{% url 'worlddata:index' %}">编辑器</a>
+		<a class="nav_button" href="editor/tools.html">工具</a>
+	</nav>
+	
+    <h2>获取所有Python文件中尚未本地化的字符串。</h2>
+    <form method="GET">
+      <input type="submit" value="获取"/>
+      <input type="hidden" name="export_py_localized_strings"/>
+      <input type="hidden" name="file_type" value="py"/>
+    </form>
+    
+    <h2>获取所有Javascript文件中需要本地化的字符串。</h2>
+    <form method="GET">
+      <input type="submit" value="获取"/>
+      <input type="hidden" name="export_js_localized_strings"/>
+      <input type="hidden" name="file_type" value="js"/>
+    </form>
+
+{% endblock content %}

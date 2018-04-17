@@ -1,0 +1,7 @@
+id,key,dialogue,npc
+1,event_kill_wolf,dlg_kill_wolf,
+2,event_kill_beauty,dlg_kill_beauty,
+3,event_trap,dlg_pirate,
+4,event_kill_pirate,dlg_kill_pirate,
+5,event_kill_tiger,dlg_kill_tiger,
+6,event_kill_boss,dlg_kill_boss,

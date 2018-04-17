@@ -1,5 +1,9 @@
 
-var map_data = {
+if (typeof(require) != "undefined") {
+    require("../client/defines.js");
+}
+
+$$.map_data = {
 
     _map_rooms: {},     // room's key: {"name": room's name,
                         //              "icon": room's icon,

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-us">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+
+        <title>Muddery Webclient</title>
+
+        <!-- libs -->
+        <link href="./libs/bootstrap.min.css" rel="stylesheet" type="text/css" media="screen" />
+        <script src="./libs/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./libs/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./libs/d3-selection.v1.min.js" type="text/javascript" charset="utf-8"></script>
+
+        <!--CSS style sheet -->
+		<script type="text/javascript">
+			"<%= htmlWebpackPlugin.options.contents.comment_begin %>"
+			// block the followings in webpack
+		</script>
+        <link href="./css/webclient.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/message.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/new_char.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/scene.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/select_char.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/information.css" rel="stylesheet" type="text/css" media="screen" />
+     	<link href="./css/inventory.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/skills.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/quests.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/honours.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/object.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/dialogue.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/map.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/delete_char.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/combat.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/combat_result.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/confirm_combat.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/shop.css" rel="stylesheet" type="text/css" media="screen" />
+        <link href="./css/goods.css" rel="stylesheet" type="text/css" media="screen" />
+		<script type="text/javascript">
+			"<%= htmlWebpackPlugin.options.contents.comment_end %>"
+			// block the uppers in webpack
+		</script>
+    </head>
+    <body id="frame_main" class="template">
+        <!-- Show popup windows in this div. -->
+		<div id="popup_confirm_combat" class="container">
+            <div role="dialog" class="modal in popup_modal">
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                    	<div id="frame_confirm_combat" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/confirm_combat.html") %>
+                            </div>
+                        </div>
+        			</div>
+        		</div>
+        	</div>
+        </div>
+        <div id="popup_container" class="container">
+            <div id="popup_modal" role="dialog" class="modal in">
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_message" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/message.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_object" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/object.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_get_objects" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/get_objects.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_dialogue" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/dialogue.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_shop" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/shop.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_goods" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/goods.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_combat" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/combat.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_combat_result" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/combat_result.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-lg vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_map" class="popup_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/map.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_new_char" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/new_char.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-sm vertical-center">
+                    <div class="modal-content">
+                        <div id="frame_delete_char" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/delete_char.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Window's header. -->
+        <header id="header">
+              <center>
+                <!-- Game title. -->
+                <h5 id="game_title">Muddery</h5>
+              </center>
+        </header>
+    
+        <!-- Window's body. -->
+        <div id="wrapper">
+            <div id="middlewindow">
+                <div id="prompt_bar">
+                    <div id="prompt_content">
+                        <span class="prompt_element template"></span>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div id="msg_wnd" class="panel-body">
+                        <div class="msg template"></div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div id="tab_content" class="panel-body">
+                        <div id="frame_quick_login" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/quick_login.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_login" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/login.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_register" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/register.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_password" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/password.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_select_char" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/select_char.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_scene" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/scene.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_information" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/information.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_inventory" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/inventory.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_skills" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/skills.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_quests" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/quests.html") %>
+                            </div>
+                        </div>
+                        <div id="frame_honours" class="content_frame">
+                            <div class="require">
+                                <%= require("html-loader!./views/honours.html") %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="tab_bar">
+                    <ul id="tab_pills" class="nav nav-tabs">
+                        <li id="tab_connect" role="presentation" class="" style="display: none;">
+                            <a id="tab_button_connect">Connect</a>
+                        </li>
+                        <li id="tab_login" role="presentation" class="" style="display: none;">
+                            <a id="tab_button_login">Login</a>
+                        </li>
+                        <li id="tab_register" role="presentation" class="" style="display: none;">
+                            <a id="tab_button_register">Register</a>
+                        </li>
+                        <li id="tab_select_char" role="presentation" class="" style="display: none;">
+                            <a id="tab_button_select_char">Select Char</a>
+                        </li>
+                        <li id="tab_scene" role="presentation" class="">
+                            <a id="tab_button_scene">Scene</a>
+                        </li>
+                        <li id="tab_character" role="presentation" class="dropup">
+                            <a id="tab_view_char" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Char<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a id="tab_button_status" class="first-dropdown-item">Status</a>
+                                </li>
+                                <li>
+                                    <a id="tab_button_inventory" class="dropdown-item">Inventory</a>
+                                </li>
+                                <li>
+                                    <a id="tab_button_skills" class="dropdown-item">Skills</a>
+                                </li>
+                                <li>
+                                    <a id="tab_button_quests" class="dropdown-item">Quests</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li id="tab_social" role="presentation" class="dropup hidden">
+                            <a id="tab_view_social" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Social<span class="caret"></span></a>
+                        </li>
+                        <li id="tab_honours" role="presentation" class="">
+                            <a id="tab_button_honours">Honours</a>
+                        </li>
+                        <li id="tab_map" role="presentation" class="">
+                            <a id="tab_button_map">Map</a>
+                        </li>
+                        <li id="tab_system_char" role="presentation" class="dropup">
+                            <a id="tab_view_system_char" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">System<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a id="tab_button_logout" class="first-dropdown-item">Logout</a>
+                                </li>
+                                <li>
+                                    <a id="tab_button_password" class="dropdown-item">Password</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li id="tab_system" role="presentation" class="dropup">
+                            <a id="tab_view_system" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Sys<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a id="tab_button_logout_puppet" class="first-dropdown-item">Logout</a>
+                                </li>
+                                <li>
+                                    <a id="tab_button_unpuppet" class="dropdown-item">Unpuppet</a>
+                                </li>
+                                <li>
+                                    <a id="tab_button_password_puppet" class="dropdown-item">Password</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div id="input_bar">
+                    <button id="bar_msg_select" class="btn btn-default"></button>
+                    <input id="bar_msg_input" type="text" aria-describedby="basic-addon2" autocomplete="off" class="form-control" />
+                    <button id="bar_msg_send" class="btn btn-default">Send</button>
+                    <ul id="bar_msg_type_menu" class="dropdown-menu">
+                        <li class="template">
+                            <a onclick="controller.selectMsgType(this)" class="dropdown-item"></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- settings -->
+        <script src="./settings.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- scripts -->
+		<script type="text/javascript">
+			"<%= htmlWebpackPlugin.options.contents.comment_begin %>"
+			// block the followings in webpack
+		</script>
+
+        <script src="./client/defines.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="./lang/en-us/strings.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./lang/zh-cn/strings.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./lang/zh-tw/strings.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./lang/local_string.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="./client/evennia.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./client/client.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./client/commands.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="./utils/map_data.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/text2html.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/data_handler.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/text_escape.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/utils.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./utils/paginator.js" type="text/javascript" charset="utf-8"></script>
+		
+        <script src="./controllers/base_controller.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_main.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_quick_login.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_login.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_register.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_password.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_select_char.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_message.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_new_char.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_scene.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_information.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_inventory.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_skills.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_quests.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_honours.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_object.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_get_objects.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_dialogue.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_map.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_delete_char.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_combat.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_combat_result.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_confirm_combat.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_shop.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/muddery_goods.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+
+        <script src="./client/frameworks.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+        <script src="./client/loader.js" defer="defer" type="text/javascript" charset="utf-8"></script>
+
+		<script type="text/javascript">
+			"<%= htmlWebpackPlugin.options.contents.comment_end %>"
+			// block the uppers in webpack
+		</script>
+    </body>
+</html>

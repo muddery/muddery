@@ -1,9 +1,16 @@
 
-var local_string = {
+if (typeof(require) != "undefined") {
+    require("../client/defines.js");
+    require("../lang/en-us/strings.js");
+    require("../lang/zh-cn/strings.js");
+    require("../lang/zh-tw/strings.js");
+}
+
+$$.local_string = {
 	language_list: {
-    	"en-us": local_string_en_us,
-    	"zh-cn": local_string_zh_cn,
-    	"zh-tw": local_string_zh_tw,
+    	"en-us": $$.local_string_en_us,
+    	"zh-cn": $$.local_string_zh_cn,
+    	"zh-tw": $$.local_string_zh_tw,
 	},
 
 	language_code: "",
@@ -35,3 +42,8 @@ var local_string = {
     	return str;
 	},
 }
+
+$$.trans = function(str) {
+	return $$.local_string.translate(str);
+}
+
