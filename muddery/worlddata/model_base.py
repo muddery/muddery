@@ -6,7 +6,6 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from muddery.worlddata.type_field import TypeField
 
 
 KEY_LENGTH = 255
@@ -82,39 +81,6 @@ class SystemData(models.Model):
         app_label = "worlddata"
         verbose_name = "System Data"
         verbose_name_plural = "System Data"
-
-
-# ------------------------------------------------------------
-#
-# Types used in world data.
-#
-# ------------------------------------------------------------
-class types(SystemData):
-    """
-    All types used in world data.
-    """
-    # the table where this type is used.
-    table = models.CharField(max_length=KEY_LENGTH)
-
-    # the field where this type is used.
-    field = models.CharField(max_length=KEY_LENGTH)
-    
-    # the readable name of the type
-    name = models.CharField(max_length=NAME_LENGTH)
-
-    # type's description (optional)
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Type"
-        verbose_name_plural = "Types"
-        unique_together = ("key", "table", "field")
-
-    def __unicode__(self):
-        return self.name + "(" + self.key + ")"
 
 
 # ------------------------------------------------------------
@@ -250,7 +216,7 @@ class typeclasses(SystemData):
 
     # The key of a typeclass category.
     # typeclass's category
-    category = TypeField(max_length=KEY_LENGTH)
+    category = models.CharField(max_length=KEY_LENGTH)
 
     # typeclass's description (optional)
     desc = models.TextField(blank=True)
@@ -1393,6 +1359,9 @@ class skill_types(models.Model):
 
     # the readable name of the skill type
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
+    
+    # skill type's description
+    desc = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1400,6 +1369,66 @@ class skill_types(models.Model):
         app_label = "worlddata"
         verbose_name = "Skill's Type"
         verbose_name_plural = "Skill's Types"
+
+    def __unicode__(self):
+        return self.name + " (" + self.key + ")"
+
+    def clean(self):
+        auto_generate_key(self)
+
+
+# ------------------------------------------------------------
+#
+# skill target types
+#
+# ------------------------------------------------------------
+class skill_target_types(SystemData):
+    """
+    Skill's target type.
+    """
+
+    # the readable name of the skill target's type
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+    
+    # skill target type's description
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Skill Target Type"
+        verbose_name_plural = "Skill Target Types"
+
+    def __unicode__(self):
+        return self.name + " (" + self.key + ")"
+
+    def clean(self):
+        auto_generate_key(self)
+
+
+# ------------------------------------------------------------
+#
+# skill range types
+#
+# ------------------------------------------------------------
+class skill_range_types(SystemData):
+    """
+    Skill range's type.
+    """
+
+    # the readable name of the skill range's type
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+    
+    # skill range type's description
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Skill Range Type"
+        verbose_name_plural = "Skill Range Types"
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
@@ -1458,6 +1487,36 @@ class skill_costs(models.Model):
 
 # ------------------------------------------------------------
 #
+# skill resource types
+#
+# ------------------------------------------------------------
+class skill_resource_types(SystemData):
+    """
+    Skill resource's type.
+    """
+
+    # the readable name of the skill resource's type
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+    
+    # skill range type's description
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Skill Resource Type"
+        verbose_name_plural = "Skill Resource Types"
+
+    def __unicode__(self):
+        return self.name + " (" + self.key + ")"
+
+    def clean(self):
+        auto_generate_key(self)
+        
+
+# ------------------------------------------------------------
+#
 # skill effects
 #
 # ------------------------------------------------------------
@@ -1511,6 +1570,36 @@ class skill_effects(models.Model):
 
     def __unicode__(self):
         return self.skill + "-" + self.effect_type + "-" + self.effect
+
+    def clean(self):
+        auto_generate_key(self)
+
+
+# ------------------------------------------------------------
+#
+# skill effect types
+#
+# ------------------------------------------------------------
+class skill_effect_types(SystemData):
+    """
+    Skill effect's type.
+    """
+
+    # the readable name of the skill effect's type
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+    
+    # skill effect type's description
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Skill Effect Type"
+        verbose_name_plural = "Skill Effect Types"
+
+    def __unicode__(self):
+        return self.name + " (" + self.key + ")"
 
     def clean(self):
         auto_generate_key(self)

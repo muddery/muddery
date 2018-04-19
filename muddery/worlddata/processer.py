@@ -10,23 +10,8 @@ import json
 from django.conf import settings
 from django.http import HttpResponse
 from muddery.utils.exception import MudderyError
-
-
-def request_mapping(func, path=None, key=None):
-    """
-    A decorator which declears a web service controller.
-
-    Args:
-        func: function
-        path: (string) request's path
-        key: (string) the key of the function
-    """
-    PROCESSER.add_request_mapping(func, path, key)
-        
-    def decorate(args):
-        return func(args)
-
-    return decorate
+from muddery.worlddata.request_mapping import REQUEST_MAPPING
+import muddery.worlddata.controllers
 
 
 class Processer(object):
@@ -39,43 +24,6 @@ class Processer(object):
                 path_prefix = "/" + path_prefix
 
         self.path_prefix = path_prefix
-        self.request_dict = {}
-        
-    def add_request_mapping(self, func, path=None, key=None):
-        """
-        Declear a web service controller.
-
-        Args:
-            path: (string) request's path, begin with "/".
-                  If it's empty, use the function's name as the path.
-            key: (string) the key of the function
-        """
-        if path is None:
-            path = "/" + func.__name__
-        elif not Path:
-            path = "/"
-        elif path[0] != "/":
-            path = "/" + path
-
-        if not key:
-            key = ""
-
-        if self.request_dict.has_key((path, key,)):
-            raise MudderyError("Request's name duplicated.")
-
-        self.request_dict[(path, key,)] = func
-
-    def response(self, code=0, data=None):
-        """
-        Generate HTTP response.
-
-	    Args:
-    	    code: respond code.
-        	data: respond data.
-        """
-        content = json.dumps({"code": code,
-                              "result": data})
-        return HttpResponse(content, content_type="application/json")
 
     def process(self, request):
         """
@@ -98,13 +46,30 @@ class Processer(object):
         
         print("request: '%s' '%s' '%s'" % (path, func, args))
 
-        if self.request_dict.has_key((path, func,)):
+        function = REQUEST_MAPPING.get_function(path, func)
+        if function:
             # call function
-            response = self.response(*self.request_dict[(path, func,)](args))
+            try:
+                result = function(args)
+                response = self.response(0, result)
+            except MudderyError, e:
+                response = self.response(e.code, e.message)
         else:
-            response = self.response(1, "Can not find this api.")
+            response = self.response(-1, "Can not find this API.")
         
         return response
+
+    def response(self, code=0, data=None):
+        """
+        Generate HTTP response.
+
+	    Args:
+    	    code: respond code.
+        	data: respond data.
+        """
+        content = json.dumps({"code": code,
+                              "result": data})
+        return HttpResponse(content, content_type="application/json")
 
 
 PROCESSER = Processer(settings.WORLD_DATA_API_PATH)

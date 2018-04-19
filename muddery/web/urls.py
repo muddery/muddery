@@ -10,7 +10,6 @@ from django.conf.urls import url, include
 from django.views.static import serve
 from django.views.generic import RedirectView
 from muddery.worlddata.processer import PROCESSER
-import muddery.worlddata.controllers
 
 # Setup the root url tree from /
 

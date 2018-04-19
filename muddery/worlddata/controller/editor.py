@@ -7,25 +7,13 @@ from __future__ import print_function
 from django.apps import apps
 from django.conf import settings
 from evennia.utils import logger
-from muddery.utils.localized_strings_handler import _
-from muddery.worlddata.processer import request_mapping
-from muddery.worlddata.type_field import TypeField
+from muddery.worlddata.request_mapping import request_mapping
+from muddery.worlddata.dao.skills_mapper import SkillsMapper
 
 
 @request_mapping
-def query_type_tables(args):
+def query_all_skills(args):
     """
-    Query all tables that contain custom types.
+    Query all skills.
     """
-    app = apps.get_app_config(settings.WORLD_DATA_APP)
-    models = {}
-    for model in app.get_models():
-        fields = []
-        for field in model._meta.get_fields():
-            if isinstance(field, TypeField):
-                fields.append(field.name)
-                
-        if fields:
-            models[model._meta.object_name] = fields;
-
-    return 0, models
+    return SkillsMapper.get_all()
