@@ -6,15 +6,12 @@ from __future__ import print_function
 
 from django.conf import settings
 from evennia.utils import logger
-from muddery.worlddata.request_mapping import request_mapping
-from muddery.worlddata.service import data_query
+from muddery.worlddata.dao import common_mapper
 from muddery.worlddata.utils import utils
 
 
-@request_mapping
-def query_all_skills(args):
+def query_table(model_name):
     """
-    Query all skills.
+    Query table's data.
     """
-    return data_query.query_table("skills")
-
+    return common_mapper.to_str(model_name)

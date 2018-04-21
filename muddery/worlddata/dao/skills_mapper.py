@@ -14,11 +14,4 @@ class SkillsMapper(object):
     """
     Skills data.
     """
-    objects = apps.get_model(settings.WORLD_DATA_APP, "skills").objects
-
-    @classmethod
-    def get_all(self):
-        """
-        Get all types.
-        """
-        return self.objects.all()
+    model = apps.get_model(settings.WORLD_DATA_APP, "skills")
