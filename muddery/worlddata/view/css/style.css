@@ -1,0 +1,95 @@
+
+body {
+    overflow-x: hidden;
+}
+
+.navbar {
+    margin-bottom: 5px;
+    min-height: 40px;
+    border-radius: 0;
+}
+
+.container-fluid {
+    padding: 7px 15px 5px 15px;
+}
+
+.navbar-brand {
+    padding: 0px 15px;
+    height: auto;
+}
+
+.navbar-nav>li>a {
+    padding: 0px 15px;
+    height: auto;
+}
+
+#menu-box {
+    position: absolute;
+    padding: 0;
+    width: 130px;
+}
+
+.panel-group {
+    max-height: 770px;
+    overflow: auto;
+    border: 0px none;
+}
+
+.leftMenu {
+    margin: 5px 5px 0 5px;
+}
+
+.leftMenu .panel-heading {
+    padding: 10px 10px;
+    color: white;
+    position: relative;
+    cursor: pointer;
+}
+
+.leftMenu .panel-heading .panel-title {
+    font-size: 14px;
+}
+
+.leftMenu .panel-heading span {
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    font-size: 12px;
+}
+
+.leftMenu .menu-item-left {
+    padding: 2px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+}
+
+.leftMenu .menu-item-left:hover {
+    background: #C4E3F3;
+    border:1px solid #1E90FF;
+}
+
+.leftMenu a.menu-item-left {
+    color: #333;
+    text-decoration: none;
+}
+
+.list-group-item {
+    padding: 5px 5px;
+}
+
+#content-box {
+    position: absolute;
+    margin-left: 135px;
+    padding: 0;
+    width: auto;
+    overflow: hidden;
+}
+
+#content-frame {
+    border-style: none;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    padding: 5px 5px;
+}
