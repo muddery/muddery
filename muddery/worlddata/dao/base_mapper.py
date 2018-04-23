@@ -14,9 +14,9 @@ class BaseMapper(object):
     """
     Base class of mappers.
     """
-	model = None
-	
-	@classmethod
+    model = None
+
+    @classmethod
     def get_fields(cls):
         """
         Get all fields.

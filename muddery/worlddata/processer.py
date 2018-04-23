@@ -63,9 +63,9 @@ class Processer(object):
         """
         Generate HTTP response.
 
-	    Args:
-    	    code: respond code.
-        	data: respond data.
+        Args:
+            code: respond code.
+            data: respond data.
         """
         content = json.dumps({"code": code,
                               "result": data})
