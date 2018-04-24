@@ -10,8 +10,15 @@ from muddery.worlddata.dao import common_mapper
 from muddery.worlddata.utils import utils
 
 
+def query_fields(model_name):
+    """
+    Query table's data.
+    """
+    return common_mapper.get_all_fields(model_name)
+
+
 def query_table(model_name):
     """
     Query table's data.
     """
-    return common_mapper.to_str(model_name)
+    return common_mapper.get_all_records_lines(model_name)

@@ -13,20 +13,24 @@ from muddery.utils.exception import MudderyError
 
 
 @request_mapping
-def query_table(args):
+def query_columns(args):
     """
-    Query a table.
+    Query all fields of a table.
     """
-    if 'table' not in args:
-        raise MudderyError(10000, "Lost a table name.")
+    if not args or 'table' not in args:
+        raise MudderyError(10000, 'Missing argument: "table".')
 
-    return data_query.query_table(args["table"])
+    return data_query.query_fields(args["table"])
 
 
 @request_mapping
-def query_all_skills(args):
+def query_table(args):
     """
-    Query all skills.
+    Query all records of a table.
     """
-    return data_query.query_table("skills")
+    if not args or 'table' not in args:
+        raise MudderyError(10000, 'Missing argument: "table".')
+
+    return data_query.query_table(args["table"])
+
 

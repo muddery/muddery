@@ -9,6 +9,7 @@ from __future__ import print_function
 import json
 from django.conf import settings
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from muddery.utils.exception import MudderyError
 from muddery.worlddata.request_mapping import REQUEST_MAPPING
 import muddery.worlddata.controllers
@@ -25,6 +26,7 @@ class Processer(object):
 
         self.path_prefix = path_prefix
 
+    @csrf_exempt
     def process(self, request):
         """
         Process a request by the func key.
@@ -40,9 +42,15 @@ class Processer(object):
         if self.path_prefix:
             if path.find(self.path_prefix) == 0:
                 path = path[len(self.path_prefix):]
+
+        data = {}
+        try:
+            data = json.loads(request.body)
+        except Exception, e:
+            pass
         
-        func = request.POST.get("func", "")
-        args = request.POST.get("args", None)
+        func = data.get("func", "")
+        args = data.get("args", None)
         
         print("request: '%s' '%s' '%s'" % (path, func, args))
 
@@ -73,3 +81,4 @@ class Processer(object):
 
 
 PROCESSER = Processer(settings.WORLD_DATA_API_PATH)
+

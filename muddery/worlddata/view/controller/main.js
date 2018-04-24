@@ -31,10 +31,17 @@ function frameReady() {
 
 $(function(){
     $(window).on("resize", setFrameSize);
+
+    $("#menu-box").on("click", "button", function(e) {
+        var table = $(e.currentTarget).data("table");
+        if (table) {
+            showConent('views/common_table.html?table=' + table);
+        }
+    });
     
     $("#content-frame").on("load", frameReady);
 
-    $(".panel-heading").on("click", function(e){
+    $(".panel-heading").on("click", function(e) {
         if ($(this).find("span").hasClass("glyphicon-chevron-up")) {
             $(this).find("span").toggleClass("glyphicon-chevron-down");
             $(this).find("span").toggleClass("glyphicon-chevron-up");

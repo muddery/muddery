@@ -7,18 +7,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>表格</title>
         <meta name="HandheldFriendly" content="True" />
-        <!-- Bootstrap3.3.5 CSS -->
-        <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-        <link href="css/bootstrap-table.min.css" rel="stylesheet" type="text/css" >
-        <link href="css/style.css" rel="stylesheet" type="text/css" />
+        <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="../css/bootstrap-table.min.css" rel="stylesheet" type="text/css" >
+        <link href="../css/style.css" rel="stylesheet" type="text/css" />
     </head>
 
     <body>
+        <div class="pull-right">
+            <button id="add_record" type="button" class="btn btn-default right">Add</button>
+        </div>
         <table id="data_table"></table>
-        <script src="libs/jquery-3.2.1.min.js"></script>
-        <script src="libs/bootstrap.min.js"></script>
-        <script src="libs/bootstrap-table.min.js"></script>
-        <script src="controller/common_table.js"></script>
+        <script src="../libs/jquery-3.2.1.min.js"></script>
+        <script src="../libs/bootstrap.min.js"></script>
+        <script src="../libs/bootstrap-table.min.js"></script>
+        <script src="../utils/utils.js"></script>
+        <script src="../controller/common_table.js"></script>
     </body>
 
 </html>

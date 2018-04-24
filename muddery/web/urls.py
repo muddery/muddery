@@ -18,11 +18,14 @@ urlpatterns = [
     # not be able to load django-auth/admin stuff (will probably work in Django>1.9)
     url(r'^', include('muddery.web.website.urls')),#, namespace='website', app_name='website')),
 
-    # World editor API
-    url("^" + settings.WORLD_DATA_API_PATH, PROCESSER.process),
+    # Webclient
+    url(r'^webclient/(?P<path>.*)$', serve, {'document_root': settings.WEBCLIENT_ROOT}),
 
-    # World Editor
-    url(r'^worlddata/', include('muddery.worlddata.urls', namespace='worlddata', app_name='worlddata')),
+    # World Editor Web
+    url(r'^editor/(?P<path>.*)$', serve, {'document_root': settings.WORLDEDITOR_ROOT}),
+
+    # World Editor API
+    url(r'^' + settings.WORLD_DATA_API_PATH, PROCESSER.process),
 
     # favicon
     url(r'^favicon\.ico$',  RedirectView.as_view(url='/media/images/favicon.ico', permanent=False))
