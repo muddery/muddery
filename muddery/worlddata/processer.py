@@ -34,10 +34,6 @@ class Processer(object):
         Args:
             request: HTTP request.
         """
-        # check authentication
-        if not request.user.is_authenticated:
-            return self.response(-1, "No permission.")
-
         path = request.path_info
         if self.path_prefix:
             if path.find(self.path_prefix) == 0:
@@ -54,17 +50,28 @@ class Processer(object):
         
         print("request: '%s' '%s' '%s'" % (path, func, args))
 
-        function = REQUEST_MAPPING.get_function(path, func)
-        if function:
-            # call function
-            try:
-                result = function(args)
-                response = self.response(0, result)
-            except MudderyError, e:
-                response = self.response(e.code, e.message)
-        else:
-            response = self.response(-1, "Can not find this API.")
-        
+        func_data = REQUEST_MAPPING.get_function(path, func)
+        if not func_data:
+            return self.response(-1, "Can not find this API.")
+
+        # check authentication
+        if func_data["login"] and not request.user.is_authenticated:
+            return self.response(-1, "Need authentication.")
+
+        # check staff
+        if func_data["staff"] and not request.user.is_staff:
+            return self.response(-1, "No permission.")
+
+        # call function
+        try:
+            function = func_data["func"]
+            result = function(args, request)
+            response = self.response(0, result)
+        except MudderyError, e:
+            response = self.response(e.code, e.message)
+        except Exception, e:
+            response = self.response(-1, e.message)
+
         return response
 
     def response(self, code=0, data=None):

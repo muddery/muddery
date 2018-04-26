@@ -13,7 +13,7 @@ from muddery.utils.exception import MudderyError
 
 
 @request_mapping
-def query_columns(args):
+def query_columns(args, request):
     """
     Query all fields of a table.
     """
@@ -24,7 +24,7 @@ def query_columns(args):
 
 
 @request_mapping
-def query_table(args):
+def query_table(args, request):
     """
     Query all records of a table.
     """

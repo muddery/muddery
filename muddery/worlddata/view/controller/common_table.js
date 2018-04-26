@@ -6,45 +6,17 @@ controller = {
         this.columns = [];
         this.rows = [];
 
-        this.queryColumns();
+        service.queryColumns(this.table_name, this.queryColumnsSuccess);
     },
 
-    queryColumns: function() {
-        $.ajax({
-            url: this.api + "query_columns",
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                args: {
-                    table: this.table_name,
-                },
-            }),
-            success: function(data) {
-                if (data.code == "0") {
-                    controller.columns = data.result;
-                    controller.queryTable();
-                }
-            }
-        });
+    queryColumnsSuccess: function(data) {
+        controller.columns = data;
+        service.queryTable(this.table_name, this.queryTableSuccess);
     },
 
-    queryTable: function() {
-        $.ajax({
-            url: this.api + "query_table",
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                args: {
-                    table: this.table_name,
-                },
-            }),
-            success: function(data) {
-                if (data.code == "0") {
-                    controller.rows = data.result;
-                    controller.createTable();
-                }
-            }
-        });
+    queryTableSuccess: function(data) {
+        controller.rows = data;
+        controller.createTable();
     },
 
     parseColumns: function(data) {
