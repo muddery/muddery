@@ -9,21 +9,25 @@
         <meta name="HandheldFriendly" content="True" />
         <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
         <link href="../css/bootstrap-table.min.css" rel="stylesheet" type="text/css" >
-        <link href="../css/common_table.css" rel="stylesheet" type="text/css" />
+        <link href="../css/editor.css" rel="stylesheet" type="text/css" />
     </head>
 
     <body>
-        <div class="pull-right">
-            <button id="add_record" type="button" class="btn btn-default right">Add</button>
-        </div>
-        <table id="data_table"></table>
+        <form class="form-horizontal">
+            <fieldset>
+                <div id="legend" class="">
+                    <legend id="form-name"></legend>
+                </div>
+                <div id="fields">
+                </div>
+            </fieldset>
+        </form>
         <script src="../libs/jquery-3.2.1.min.js"></script>
         <script src="../libs/bootstrap.min.js"></script>
-        <script src="../libs/bootstrap-table.min.js"></script>
         <script src="../config.js"></script>
-        <script src="../utils/utils.js"></script>
         <script src="../service/service.js"></script>
-        <script src="../controller/common_table.js"></script>
+        <script src="../utils/utils.js"></script>
+        <script src="../controller/editor.js"></script>
     </body>
 
 </html>

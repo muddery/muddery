@@ -12,25 +12,47 @@ from muddery.worlddata.utils import utils
 from muddery.utils.exception import MudderyError
 
 
-@request_mapping
-def query_columns(args, request):
+@request_mapping()
+def query_fields(args, request):
     """
     Query all fields of a table.
     """
-    if not args or 'table' not in args:
+    if not args or ('table' not in args):
         raise MudderyError(10000, 'Missing argument: "table".')
 
     return data_query.query_fields(args["table"])
 
 
-@request_mapping
+@request_mapping()
 def query_table(args, request):
     """
     Query all records of a table.
     """
-    if not args or 'table' not in args:
+    if not args or ('table' not in args):
         raise MudderyError(10000, 'Missing argument: "table".')
 
     return data_query.query_table(args["table"])
 
 
+@request_mapping()
+def query_record(args, request):
+    """
+    Query a record of a table.
+    """
+    if not args or ('table' not in args) or ('record' not in args):
+        raise MudderyError(10000, 'Missing arguments.')
+
+    return data_query.query_record(args["table"], args["record"])
+
+
+@request_mapping()
+def query_form(args, request):
+    """
+    Query all fields of a table.
+    """
+    if not args or ('table' not in args):
+        raise MudderyError(10000, 'Missing argument: "table".')
+
+    record = args.get('record', None)
+
+    return data_query.query_form(args["table"], record)

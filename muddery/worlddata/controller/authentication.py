@@ -13,7 +13,7 @@ from muddery.worlddata.utils import utils
 from muddery.utils.exception import MudderyError
 
 
-@request_mapping(login=False)
+@request_mapping(login=False, staff=False)
 def login(args, request):
     """
     Login the editor.
@@ -30,14 +30,17 @@ def login(args, request):
     password = args['password']
 
     user = auth.authenticate(username=username, password=password)
-    if user:
-        auth.login(request, user)
-        return "success"
+    if not user:
+        raise MudderyError(10001, "Authentication fialed.")
 
-    raise MudderyError(10001, "Authentication fialed.")
+    if not user.is_staff:
+        raise MudderyError(10002, "No permission.")
+
+    auth.login(request, user)
+    return "success"
 
 
-@request_mapping
+@request_mapping()
 def logout(args, request):
     """
     Logout the editor.

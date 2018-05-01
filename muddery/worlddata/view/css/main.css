@@ -120,7 +120,8 @@ body {
     overflow: hidden;
 }
 
-#content-frame {
+.content-frame {
+    display: none;
     border-style: none;
     overflow: hidden;
     width: 100%;
@@ -130,9 +131,5 @@ body {
 
 #add_record {
     margin: 0 0 10px 0;
-}
-
-.row-operate {
-    min-width: 0;
 }
 

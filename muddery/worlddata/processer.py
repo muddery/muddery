@@ -10,6 +10,7 @@ import json
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from evennia.utils import logger
 from muddery.utils.exception import MudderyError
 from muddery.worlddata.request_mapping import REQUEST_MAPPING
 import muddery.worlddata.controllers
@@ -34,6 +35,9 @@ class Processer(object):
         Args:
             request: HTTP request.
         """
+        if request.method == "OPTIONS":
+            return self.response()
+            
         path = request.path_info
         if self.path_prefix:
             if path.find(self.path_prefix) == 0:
@@ -59,7 +63,7 @@ class Processer(object):
             return self.response(-1, "Need authentication.")
 
         # check staff
-        if func_data["staff"] and not request.user.is_staff:
+        if func_data["staff"] and not request.user.is_staff and not request.user.is_superuser:
             return self.response(-1, "No permission.")
 
         # call function
@@ -68,8 +72,10 @@ class Processer(object):
             result = function(args, request)
             response = self.response(0, result)
         except MudderyError, e:
+            logger.log_errmsg("Error: %s, %s" % (e.code, e.message))
             response = self.response(e.code, e.message)
         except Exception, e:
+            logger.log_errmsg("Error: %s" % e.message)
             response = self.response(-1, e.message)
 
         return response
@@ -84,7 +90,11 @@ class Processer(object):
         """
         content = json.dumps({"code": code,
                               "result": data})
-        return HttpResponse(content, content_type="application/json")
+        response = HttpResponse(content, content_type="application/json")
+        response["Access-Control-Allow-Origin"] = "*"
+        response["Access-Control-Allow-Methods"] = "POST,GET,OPTIONS"
+        response["Access-Control-Allow-Headers"] = "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type"
+        return response
 
 
 PROCESSER = Processer(settings.WORLD_DATA_API_PATH)

@@ -1,7 +1,5 @@
 
 controller = {
-    login: false,
-
     init: function() {
         this.login = false;
         this.bindEvents();
@@ -38,7 +36,7 @@ controller = {
     onLeftMenu: function(e) {
         var table = $(e.currentTarget).data("table");
         if (table) {
-            controller.loadTable(table);
+            controller.showTable(table);
         }
     },
 
@@ -86,7 +84,7 @@ controller = {
 
     setFrameSize: function() {
 	    var box = $("#content-box");
-	    var frame = $("#content-frame");
+	    var frame = $(".content-frame:visible");
 
         var win_width = $(window).innerWidth();
         var win_height = $(window).innerHeight();
@@ -105,12 +103,22 @@ controller = {
 	    }
     },
 
-    loadTable: function(table) {
-        this.showConent('views/common_table.html?table=' + table);
+    showTable: function(table_name) {
+        var url = "common_table.html?table=" + table_name;
+        $("#table-frame").attr("src", url);
+ 
+        $("#editor-frame").hide();
+        $("#table-frame").show();
+        this.setFrameSize();
     },
 
-    showConent: function(url) {
-        $("#content-frame").attr("src", url);
+    editRecord: function(table_name, record_id) {
+        var url = "editor.html?table=" + table_name + "&record=" + record_id;
+        $("#editor-frame").attr("src", url);
+
+        $("#table-frame").hide();
+        $("#editor-frame").show();
+        this.setFrameSize();
     },
 }
 

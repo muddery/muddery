@@ -59,7 +59,7 @@ class RequestMapping(object):
         """
         if path is None:
             path = "/" + func.__name__
-        elif not Path:
+        elif not path:
             path = "/"
         elif path[0] != "/":
             path = "/" + path

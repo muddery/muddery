@@ -1,0 +1,25 @@
+
+body {
+    overflow: hidden;
+}
+
+.text-input-control {
+    width: 300px;
+    height: 25px;
+}
+
+.text-number-control {
+    width: 300px;
+    height: 25px;
+}
+
+.text-area-control {
+    width: 450px;
+}
+
+input[type=checkbox] {
+    display: inline;
+    margin-right: 4px;
+    width: auto;
+    height: auto;
+}

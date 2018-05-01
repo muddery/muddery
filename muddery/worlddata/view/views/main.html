@@ -26,7 +26,7 @@
                             <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
                             <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码"/>
                         </div>
-                        <div id="login-message">&nbsp;
+                        <div id="login-message">
                         </div>
                         <button id="button-login" type="button" class="btn btn-success btn-block">登录</button>
                     </div>
@@ -65,7 +65,7 @@
                         <div id="collapseListGroup1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="collapseListGroupHeading1">
                             <ul class="list-group">
                               <li class="list-group-item">
-                                <button class="menu-item-left" data-table="game-settings">
+                                <button class="menu-item-left" data-table="game_settings">
                                     游戏设置
                                 </button>
                               </li>
@@ -535,15 +535,17 @@
                 </div>
             </div>
             <div class="col-xs-10" id="content-box">
-                <iframe id="content-frame">
+                <iframe id="table-frame" class="content-frame">
+                </iframe>
+                <iframe id="editor-frame" class="content-frame">
                 </iframe>
             </div>
         </div>
         <script src="../libs/jquery-3.2.1.min.js"></script>
         <script src="../libs/bootstrap.min.js"></script>
         <script src="../config.js"></script>
-        <script src="../controller/main.js"></script>
         <script src="../service/service.js"></script>
+        <script src="../controller/main.js"></script>
     </body>
 
 </html>

@@ -8,6 +8,7 @@ from evennia.utils import logger
 from django.db import transaction
 from django.apps import apps
 from django.conf import settings
+from worlddata.forms import Manager
 
 
 def get_all_fields(model_name):
@@ -19,8 +20,7 @@ def get_all_fields(model_name):
     """
     # get model
     model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
-    fields = model_obj._meta.fields
-    return [(field.name, field.verbose_name) for field in fields]
+    return model_obj._meta.fields
 
 
 def get_all_records(model_name):
@@ -32,20 +32,30 @@ def get_all_records(model_name):
     """
     # get model
     model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
-    fields = model_obj._meta.fields
-
-    # get records
-    for record in model_obj.objects.all():
-        line = [str(record.serializable_value(field.name)) for field in fields]
-        yield line
+    return model_obj.objects.all()
 
 
-def get_all_records_lines(model_name):
+def get_record_by_id(model_name, record_id):
     """
-    Transform a db table to a string table.
+    Get a table's all records.
+
+    Args:
+        model_name: (string) db model's name.
+        record_id: (number) record's id.
+    """
+    # get model
+    model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
+    return model_obj.objects.get(id=record_id)
+
+
+def get_form(model_name):
+    """
+    Get model's form.
 
     Args:
         model_name: (string) db model's name.
     """
-    return [line for line in get_all_records(model_name)]
+    return Manager.get_form(model_name)
+
+
 

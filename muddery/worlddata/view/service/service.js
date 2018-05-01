@@ -33,7 +33,7 @@ service = {
 	            }
 	            
                 if (data.code != 0) {
-		            console.log("Return error: " + data.code + "：" + data.result);
+		            console.error("Return error: " + data.code + "：" + data.result);
 		            if (callback_error) {
 			            callback_error(data.code, data.result);
 		            }
@@ -44,7 +44,11 @@ service = {
 		            }
 	            }
             },
-		    error: callback_error,
+		    error: function(request, status) {
+                if (callback_error) {
+                    callback_error(request.status, request.statusText);
+                }
+            },
 	    });
     },
 
@@ -60,11 +64,11 @@ service = {
         this.sendQuery("logout", "", {}, callback_success, callback_error);
     },
 
-    queryColumns: function(table_name, callback_success, callback_error) {
+    queryFields: function(table_name, callback_success, callback_error) {
         var args = {
             table: table_name,
         };
-        this.sendQuery("query_columns", "", args, callback_success, callback_error);
+        this.sendQuery("query_fields", "", args, callback_success, callback_error);
     },
 
     queryTable: function(table_name, callback_success, callback_error) {
@@ -72,6 +76,22 @@ service = {
             table: table_name,
         };
         this.sendQuery("query_table", "", args, callback_success, callback_error);
+    },
+
+    queryRecord: function(table_name, record_id, callback_success, callback_error) {
+        var args = {
+            table: table_name,
+            record: record_id,
+        };
+        this.sendQuery("query_record", "", args, callback_success, callback_error);
+    },
+
+    queryForm: function(table_name, record_id, callback_success, callback_error) {
+        var args = {
+            table: table_name,
+            record: record_id,
+        };
+        this.sendQuery("query_form", "", args, callback_success, callback_error);
     },
 }
 
