@@ -3,23 +3,68 @@ body {
     overflow: hidden;
 }
 
+legend {
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+#form-message {
+    padding: 6px 12px;
+    margin-bottom: 10px;
+}
+
+#form-message.message-success {
+    background: #70ff70;
+    font-weight: normal;
+}
+
+#form-message.message-error {
+    background: #ff2020;
+    font-weight: bold;
+}
+
+.control-group {
+    padding: 10px 0;
+}
+
 .text-input-control {
     width: 300px;
-    height: 25px;
+    height: 35px;
 }
 
 .text-number-control {
     width: 300px;
-    height: 25px;
+    height: 35px;
 }
 
 .text-area-control {
     width: 450px;
 }
 
-input[type=checkbox] {
+input[type=checkbox].check-box-control {
     display: inline;
     margin-right: 4px;
     width: auto;
     height: auto;
 }
+
+.select-control {
+    width: 300px;
+    height: 35px;
+}
+
+.request.status {
+    color: #ff0000;
+}
+
+.help-block {
+    margin-bottom: 5px;
+}
+
+.message-block {
+    background: #ff1010;
+    padding: 5px 5px;
+}
+
+
+

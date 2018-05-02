@@ -85,6 +85,9 @@ controller = {
     setFrameSize: function() {
 	    var box = $("#content-box");
 	    var frame = $(".content-frame:visible");
+        if (frame.length == 0)  {
+            return;
+        }
 
         var win_width = $(window).innerWidth();
         var win_height = $(window).innerHeight();
@@ -93,7 +96,7 @@ controller = {
         frame.height(0);
             
         var frame_body = frame[0].contentWindow.document.body;
-        var frame_height = frame_body.scrollHeight
+        var frame_height = frame_body.scrollHeight + 1;
         
         if (frame_height > win_height) {
 		    frame.height(frame_height);
@@ -110,6 +113,11 @@ controller = {
         $("#editor-frame").hide();
         $("#table-frame").show();
         this.setFrameSize();
+    },
+
+    showTableView: function() {
+        $("#editor-frame").hide();
+        $("#table-frame").show();
     },
 
     editRecord: function(table_name, record_id) {

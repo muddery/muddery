@@ -11,8 +11,8 @@ controller = {
     },
 
     bindEvents: function() {
-        $("#data_table").on("click", ".edit-row", this.onEdit);
-        $("#data_table").on("click", ".delete-row", this.onDelete);
+        $("#data-table").on("click", ".edit-row", this.onEdit);
+        $("#data-table").on("click", ".delete-row", this.onDelete);
     },
 
     onEdit: function(e) {
@@ -92,7 +92,7 @@ controller = {
         this.fields = table.fields;
         this.rows = table.rows;
 
-        $("#data_table").bootstrapTable({
+        $("#data-table").bootstrapTable({
             cache: false,
             striped: true,
             pagination: true,
@@ -102,7 +102,7 @@ controller = {
             columns: this.parseFields(),
             data: this.parseRows(),
             sortName: "id",
-            sortOrder: "desc",
+            sortOrder: "asc",
             clickToSelect: true,
             singleSelect: true,
         });
@@ -111,7 +111,7 @@ controller = {
     },
 
     loadData: function(data) {
-        $("#data_table").bootstrapTable("load", data);
+        $("#data-table").bootstrapTable("load", data);
     }, 
 }
 

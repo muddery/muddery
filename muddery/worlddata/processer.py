@@ -11,7 +11,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from evennia.utils import logger
-from muddery.utils.exception import MudderyError
+from muddery.utils.exception import MudderyError, ERR
 from muddery.worlddata.request_mapping import REQUEST_MAPPING
 import muddery.worlddata.controllers
 
@@ -56,27 +56,29 @@ class Processer(object):
 
         func_data = REQUEST_MAPPING.get_function(path, func)
         if not func_data:
-            return self.response(-1, "Can not find this API.")
+            logger.log_errmsg("Can not find API: %s %s" % (path, func))
+            return self.response(ERR.no_api, "Can not find API: %s %s" % (path, func))
 
         # check authentication
         if func_data["login"] and not request.user.is_authenticated:
-            return self.response(-1, "Need authentication.")
+            logger.log_errmsg("Need authentication.")
+            return self.response(ERR.no_authentication, "Need authentication.")
 
         # check staff
         if func_data["staff"] and not request.user.is_staff and not request.user.is_superuser:
-            return self.response(-1, "No permission.")
+            return self.response(ERR.no_permission, "No permission.")
 
         # call function
         try:
             function = func_data["func"]
             result = function(args, request)
-            response = self.response(0, result)
+            response = self.response(ERR.no_error, result)
         except MudderyError, e:
             logger.log_errmsg("Error: %s, %s" % (e.code, e.message))
-            response = self.response(e.code, e.message)
+            response = self.response(e.code, {"msg": e.message, "data": e.data})
         except Exception, e:
-            logger.log_errmsg("Error: %s" % e.message)
-            response = self.response(-1, e.message)
+            logger.log_tracemsg("Error: %s" % e.message)
+            response = self.response(ERR.internal, {"msg": e.message})
 
         return response
 

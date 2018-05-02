@@ -13,6 +13,16 @@ controller = {
     },
 
     bindEvents: function() {
+        $("#exit-button").on("click", this.onExit);
+        $("#save-record").on("click", this.onSave);
+    },
+
+    onExit: function() {
+        controller.exit();
+    },
+
+    onSave: function() {
+        controller.saveFields();
     },
 
     queryFormSuccess: function(data) {
@@ -31,22 +41,26 @@ controller = {
             var value = fields[i].value;
 
             var controller;
-            if (type == "CharField") {
-                controller = this.createTextInput(label, name, value, help_text);
+            if (type == "TextInput") {
+                controller = this.createTextInput(name, label, value, help_text);
             }
-            else if (type == "FloatField") {
-                controller = this.createNumberInput(label, name, value, help_text);
+            else if (type == "NumberInput") {
+                controller = this.createNumberInput(name, label, value, help_text);
             }
-            else if (type == "TextField") {
-                controller = this.createTextArea(label, name, value, help_text);
+            else if (type == "Textarea") {
+                controller = this.createTextArea(name, label, value, help_text);
             }
-            else if (type == "BooleanField") {
+            else if (type == "CheckboxInput") {
                 if (value) {
                     if (value == "False" || value == "false") {
                         value = false;
                     }
                 }
-                controller = this.createCheckBox(label, name, value, help_text);
+                controller = this.createCheckBox(name, label, value, help_text);
+            }
+            else if (type == "Select") {
+                var options = fields[i].choices;
+                controller = this.createSelect(name, label, value, help_text, options);
             }
 
             if (controller) {
@@ -57,9 +71,10 @@ controller = {
         window.parent.controller.setFrameSize();
     },
 
-    createControlGroup: function(controller, label, help_text) {
+    createControlGroup: function(name, controller, label, help_text) {
         var group = $("<div>")
-            .addClass("control-group");
+            .addClass("control-group")
+            .attr("id", "control-" + name);
 
         // label
         var label_div = $("<label>")
@@ -81,60 +96,62 @@ controller = {
 
         $("<p>")
             .addClass("message-block")
-            .html("&nbsp;")
+            .hide()
             .appendTo(ctrl_div);
 
         return group;
     },
 
-    createTextInput: function(label, name, value, help_text) {
+    createTextInput: function(name, label, value, help_text) {
         var controller = $("<input>")
             .addClass("form-control editor-control text-input-control")
             .attr("type", "text")
-            .attr("name", name)
             .val(value);
         
-        return this.createControlGroup(controller, label, help_text);
+        return this.createControlGroup(name, controller, label, help_text);
     },
 
-    createNumberInput: function(label, name, value, help_text) {
+    createNumberInput: function(name, label, value, help_text) {
         var controller = $("<input>")
             .addClass("form-control editor-control text-input-control")
             .attr("type", "number")
-            .attr("name", name)
             .val(value);
 
-        return this.createControlGroup(controller, label, help_text);
+        return this.createControlGroup(name, controller, label, help_text);
     },
 
-    createTextArea: function(label, name, value, help_text) {
+    createTextArea: function(name, label, value, help_text) {
         var controller = $("<textarea>")
             .addClass("form-control editor-control text-area-control")
-            .attr("name", name)
             .attr("rows", "5")
             .val(value);
         
-        return this.createControlGroup(controller, label, help_text);
+        return this.createControlGroup(name, controller, label, help_text);
     },
 
-    createSelect: function(label, name, value, help_text, options) {
+    createSelect: function(name, label, value, help_text, options) {
         var controller = $("<select>")
             .addClass("form-control editor-control select-control")
-            .attr("name", name)
             .val(value);
 
         for (var i = 0; i < options.length; i++) {
-            $("<option>")
-                .text(options[i])
+            var option = $("<option>")
+                .text(options[i][1])
+                .attr("value", options[i][0])
                 .appendTo(controller);
+
+            if (options[i][0] == value) {
+                option.attr("selected", "selected");
+            }
         }
         
-        return this.createControlGroup(controller, label, help_text);
+        return this.createControlGroup(name, controller, label, help_text);
     },
 
-    createCheckBox: function(label, name, value, help_text, check) {
+    createCheckBox: function(name, label, value, help_text, check) {
         var group = $("<div>")
-            .addClass("control-group");
+            .addClass("control-group")
+            .attr("id", "control-" + name);
 
         // controller
         var ctrl_div = $("<div>")
@@ -144,7 +161,6 @@ controller = {
         var controller = $("<input>")
             .addClass("form-control editor-control check-box-control")
             .attr("type", "checkbox")
-            .attr("name", name)
             .appendTo(ctrl_div);
 
         if (value) {
@@ -165,9 +181,63 @@ controller = {
         $("<p>")
             .addClass("message-block")
             .html("&nbsp;")
+            .hide()
             .appendTo(ctrl_div);
         
         return group;
+    },
+
+    exit: function() {
+        window.parent.controller.showTableView();
+    },
+
+    saveFields: function() {
+        var values = {};
+        for (var i = 0; i < this.fields.length; i++) {
+            var name = this.fields[i].name;
+            var control = $("#control-" + name + " .editor-control");
+            if (control.length > 0) {
+                values[name] = control.val();
+            }
+        }
+
+        service.saveForm(values, 
+                         this.table_name,
+                         this.record_id,
+                         this.saveFormSuccess,
+                         this.saveFormFailed);
+    },
+
+    saveFormSuccess: function(data) {
+        $("#form-message")
+            .text("Save success.")
+            .addClass("message-success")
+            .removeClass("message-error")
+            .removeClass("hidden")
+            .show();
+
+        $(".message-block")
+            .hide();
+    },
+
+    saveFormFailed: function(code, message, data) {
+        if (code == 10006) {    // invalid form
+            $("#form-message")
+                .text("Invalid input.")
+                .addClass("message-error")
+                .removeClass("message-success")
+                .removeClass("hidden")
+                .show();
+
+            $(".message-block")
+                .hide();
+
+            for (var name in data) {
+                $("#control-" + name + " .message-block")
+                    .text(data[name])
+                    .show();
+            }
+        }
     },
 }
 

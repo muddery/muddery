@@ -1,7 +1,7 @@
 
 /*
  * callback_success: function(data)
- * callback_error: function(code, message)
+ * callback_error: function(code, message, data)
  */
 service = {
     sendQuery: function(path, func_no, args, callback_success, callback_error) {
@@ -28,14 +28,14 @@ service = {
 	            else if (!("code" in data) || !("result" in data)) {
                     data = {
                         code: -1,
-                        result: "Wrong format.",
+                        result: "Wrong result format.",
                     };
 	            }
 	            
                 if (data.code != 0) {
-		            console.error("Return error: " + data.code + "：" + data.result);
+		            console.info("Return error: " + data.code + "：" + data.result.msg);
 		            if (callback_error) {
-			            callback_error(data.code, data.result);
+			            callback_error(data.code, data.result.msg, data.result.data);
 		            }
 	            }
 	            else {
@@ -46,7 +46,7 @@ service = {
             },
 		    error: function(request, status) {
                 if (callback_error) {
-                    callback_error(request.status, request.statusText);
+                    callback_error(-2, request.statusText, request.status);
                 }
             },
 	    });
@@ -92,6 +92,15 @@ service = {
             record: record_id,
         };
         this.sendQuery("query_form", "", args, callback_success, callback_error);
+    },
+
+    saveForm: function(values, table_name, record_id, callback_success, callback_error) {
+        var args = {
+            values: values,
+            table: table_name,
+            record: record_id,
+        };
+        this.sendQuery("save_form", "", args, callback_success, callback_error);
     },
 }
 
