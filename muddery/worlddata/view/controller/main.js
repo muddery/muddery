@@ -108,25 +108,54 @@ controller = {
 
     showTable: function(table_name) {
         var url = "common_table.html?table=" + table_name;
-        $("#table-frame").attr("src", url);
  
-        $("#editor-frame").hide();
-        $("#table-frame").show();
+        var table_box = $("#table-box");
+        var editor_box = $("#editor-box");
+
+        table_box.empty();
+
+        $("<iframe>")
+            .addClass("content-frame")
+            .attr("src", url)
+            .appendTo(table_box);
+
+        editor_box.hide();
+        table_box.show();
         this.setFrameSize();
     },
 
     showTableView: function() {
-        $("#editor-frame").hide();
-        $("#table-frame").show();
+        $("#editor-box").hide();
+        $("#table-box").show();
     },
 
     editRecord: function(table_name, record_id) {
-        var url = "editor.html?table=" + table_name + "&record=" + record_id;
-        $("#editor-frame").attr("src", url);
+        var url = "editor.html?table=" + table_name;
+        if (record_id) {
+            url += "&record=" + record_id;
+        }
 
-        $("#table-frame").hide();
-        $("#editor-frame").show();
+        var table_box = $("#table-box");
+        var editor_box = $("#editor-box");
+
+        editor_box.empty();
+
+        $("<iframe>")
+            .addClass("content-frame")
+            .attr("src", url)
+            .appendTo(editor_box);
+
+        table_box.hide();
+        editor_box.show();
         this.setFrameSize();
+    },
+
+    confirm: function(title, content, data, callback) {
+        $('#confirm-title').text(title);
+        $('#confirm-content').text(content);
+        
+        $("#confirm-button").one("click", data, callback);
+        $('#confirm-dialog').modal();
     },
 }
 

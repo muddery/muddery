@@ -1,0 +1,13 @@
+
+fieldset {
+    margin: 5px 5px;
+    border: 1px solid;
+}
+
+legend {
+    margin: 0 5px;
+    padding: 5px 5px;
+    border: 0;
+    width: auto;
+}
+

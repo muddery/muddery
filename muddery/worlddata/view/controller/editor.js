@@ -5,9 +5,15 @@ controller = {
         this.record_id = getQueryString("record");
         this.fields = [];
 
-        this.bindEvents();
+        $("#exit-button").removeClass("hidden");
+        $("#save-record").removeClass("hidden");
+        if (this.record_id) {
+            $("#delete-record").removeClass("hidden");
+        }
 
         $("#form-name").text(this.table_name);
+
+        this.bindEvents();
 
         service.queryForm(this.table_name, this.record_id, this.queryFormSuccess);
     },
@@ -15,14 +21,21 @@ controller = {
     bindEvents: function() {
         $("#exit-button").on("click", this.onExit);
         $("#save-record").on("click", this.onSave);
+        $("#delete-record").on("click", this.onDelete);
     },
 
     onExit: function() {
-        controller.exit();
+        controller.exit_no_change();
     },
 
     onSave: function() {
         controller.saveFields();
+    },
+
+    onDelete: function() {
+        window.parent.controller.confirm("",
+                                         "Delete this record?",
+                                         controller.confirmDelete);
     },
 
     queryFormSuccess: function(data) {
@@ -188,6 +201,10 @@ controller = {
     },
 
     exit: function() {
+        window.parent.controller.showTable(this.table_name);
+    },
+
+    exit_no_change: function() {
         window.parent.controller.showTableView();
     },
 
@@ -209,6 +226,7 @@ controller = {
     },
 
     saveFormSuccess: function(data) {
+        /*
         $("#form-message")
             .text("Save success.")
             .addClass("message-success")
@@ -218,6 +236,9 @@ controller = {
 
         $(".message-block")
             .hide();
+        */
+
+        controller.exit();
     },
 
     saveFormFailed: function(code, message, data) {
@@ -238,6 +259,16 @@ controller = {
                     .show();
             }
         }
+    },
+
+    confirmDelete: function(e) {
+        service.deleteRecord(controller.table_name,
+                             controller.record_id,
+                             controller.deleteSuccess);
+    },
+
+    deleteSuccess: function(data) {
+        controller.exit();
     },
 }
 

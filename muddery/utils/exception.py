@@ -41,7 +41,7 @@ class ERR(object):
 
     missing_args = 10004
 
-    no_model = 10005
+    no_table = 10005
 
     invalid_form = 10006
 

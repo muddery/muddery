@@ -3,6 +3,11 @@
     padding-bottom: 10px;
 }
 
+#table-name {
+    font-size: 21px;
+    color: #333;
+}
+
 .row-operate {
     min-width: 0;
 }

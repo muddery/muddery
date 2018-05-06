@@ -4,7 +4,7 @@
  * callback_error: function(code, message, data)
  */
 service = {
-    sendQuery: function(path, func_no, args, callback_success, callback_error) {
+    sendRequest: function(path, func_no, args, callback_success, callback_error) {
 	    var url = CONFIG.api_url + path;
 	    params = {
             func: func_no,
@@ -33,7 +33,7 @@ service = {
 	            }
 	            
                 if (data.code != 0) {
-		            console.info("Return error: " + data.code + "：" + data.result.msg);
+		            console.warn("Return error: " + data.code + "：" + data.result.msg);
 		            if (callback_error) {
 			            callback_error(data.code, data.result.msg, data.result.data);
 		            }
@@ -57,25 +57,25 @@ service = {
             username: username,
             password: password,
         };
-        this.sendQuery("login", "", args, callback_success, callback_error);
+        this.sendRequest("login", "", args, callback_success, callback_error);
     },
 
     logout: function(callback_success, callback_error) {
-        this.sendQuery("logout", "", {}, callback_success, callback_error);
+        this.sendRequest("logout", "", {}, callback_success, callback_error);
     },
 
     queryFields: function(table_name, callback_success, callback_error) {
         var args = {
             table: table_name,
         };
-        this.sendQuery("query_fields", "", args, callback_success, callback_error);
+        this.sendRequest("query_fields", "", args, callback_success, callback_error);
     },
 
     queryTable: function(table_name, callback_success, callback_error) {
         var args = {
             table: table_name,
         };
-        this.sendQuery("query_table", "", args, callback_success, callback_error);
+        this.sendRequest("query_table", "", args, callback_success, callback_error);
     },
 
     queryRecord: function(table_name, record_id, callback_success, callback_error) {
@@ -83,7 +83,7 @@ service = {
             table: table_name,
             record: record_id,
         };
-        this.sendQuery("query_record", "", args, callback_success, callback_error);
+        this.sendRequest("query_record", "", args, callback_success, callback_error);
     },
 
     queryForm: function(table_name, record_id, callback_success, callback_error) {
@@ -91,7 +91,7 @@ service = {
             table: table_name,
             record: record_id,
         };
-        this.sendQuery("query_form", "", args, callback_success, callback_error);
+        this.sendRequest("query_form", "", args, callback_success, callback_error);
     },
 
     saveForm: function(values, table_name, record_id, callback_success, callback_error) {
@@ -100,7 +100,15 @@ service = {
             table: table_name,
             record: record_id,
         };
-        this.sendQuery("save_form", "", args, callback_success, callback_error);
+        this.sendRequest("save_form", "", args, callback_success, callback_error);
+    },
+
+    deleteRecord: function(table_name, record_id, callback_success, callback_error) {
+        var args = {
+            table: table_name,
+            record: record_id,
+        };
+        this.sendRequest("delete_record", "", args, callback_success, callback_error);
     },
 }
 

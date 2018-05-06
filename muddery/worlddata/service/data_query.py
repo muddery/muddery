@@ -11,11 +11,11 @@ from muddery.worlddata.utils import utils
 from muddery.utils.exception import MudderyError, ERR
 
 
-def query_fields(model_name):
+def query_fields(table_name):
     """
     Query table's data.
     """
-    fields = common_mapper.get_all_fields(model_name)
+    fields = common_mapper.get_all_fields(table_name)
     return [{"name": field.get_attname(),
              "label": field.verbose_name,
              "default": field.get_default(),
@@ -24,12 +24,12 @@ def query_fields(model_name):
              "type": field.__class__.__name__} for field in fields]
 
 
-def query_table(model_name):
+def query_table(table_name):
     """
     Query table's data.
     """
-    fields = query_fields(model_name)
-    records = common_mapper.get_all_records(model_name)
+    fields = query_fields(table_name)
+    records = common_mapper.get_all_records(table_name)
     rows = []
     for record in records:
         line = [str(record.serializable_value(field["name"])) for field in fields]
@@ -37,38 +37,38 @@ def query_table(model_name):
 
     table ={
         "fields": fields,
-        "rows": rows,
+        "records": rows,
     }
     return table
 
 
-def query_record(model_name, record_id):
+def query_record(table_name, record_id):
     """
     Query a record of a table.
     """
-    fields = common_mapper.get_all_fields(model_name)
-    record = common_mapper.get_record_by_id(model_name, record_id)
+    fields = common_mapper.get_all_fields(table_name)
+    record = common_mapper.get_record_by_id(table_name, record_id)
     return [str(record.serializable_value(field.name)) for field in fields]
 
 
-def query_form(model_name, record_id=None):
+def query_form(table_name, record_id=None):
     """
     Query table's data.
 
     Args:
-        model_name: (string) data model's name.
+        table_name: (string) data table's name.
         record_id: (string, optional) record's id. If it is empty, query an empty form.
     """
-    form_class = common_mapper.get_form(model_name)
+    form_class = common_mapper.get_form(table_name)
     if not form_class:
-        raise MudderyError(ERR.no_model, "Can not find model: %s" % model_name)
+        raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
     form = None
     record = None
     if record_id:
         try:
             # Query record's data.
-            record = common_mapper.get_record_by_id(model_name, record_id)
+            record = common_mapper.get_record_by_id(table_name, record_id)
             form = form_class(instance=record)
         except Exception, e:
             form = None
@@ -84,9 +84,11 @@ def query_form(model_name, record_id=None):
             "label": field.label,
             "disabled": field.disabled,
             "help_text": field.help_text,
-            "value": str(record.serializable_value(key)),
             "type": field.widget.__class__.__name__,
         }
+
+        if record:
+            info["value"] = str(record.serializable_value(key))
 
         if info["type"] == "Select":
             info["choices"] = field.choices
@@ -96,25 +98,25 @@ def query_form(model_name, record_id=None):
     return data
 
 
-def save_form(values, model_name, record_id=None):
+def save_form(values, table_name, record_id=None):
     """
     Save data to a record.
     
     Args:
         values: (dict) values to save.
-        model_name: (string) data model's name.
+        table_name: (string) data table's name.
         record_id: (string, optional) record's id. If it is empty, add a new record.
     """
-    form_class = common_mapper.get_form(model_name)
+    form_class = common_mapper.get_form(table_name)
     if not form_class:
-        raise MudderyError(ERR.no_model, "Can not find model: %s" % model_name)
+        raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
     form = None
     record = None
     if record_id:
         try:
             # Query record's data.
-            record = common_mapper.get_record_by_id(model_name, record_id)
+            record = common_mapper.get_record_by_id(table_name, record_id)
             form = form_class(values, instance=record)
         except Exception, e:
             form = None
@@ -126,8 +128,14 @@ def save_form(values, model_name, record_id=None):
     # Save data
     if form.is_valid():
         instance = form.save()
-        return "success"
+        return instance.pk
     else:
         raise MudderyError(ERR.invalid_form, "Invalid form.", data=form.errors)
 
+
+def delete_record(table_name, record_id):
+    """
+    Delete a record of a table.
+    """
+    common_mapper.delete_record_by_id(table_name, record_id)
 

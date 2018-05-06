@@ -3,7 +3,8 @@ controller = {
     init: function() {
         this.table_name = getQueryString("table");
         this.fields = [];
-        this.rows = []
+
+        $("#table-name").text(this.table_name);
 
         this.bindEvents();
 
@@ -11,40 +12,47 @@ controller = {
     },
 
     bindEvents: function() {
+        $("#add-record").on("click", this.onAddRecord);
         $("#data-table").on("click", ".edit-row", this.onEdit);
         $("#data-table").on("click", ".delete-row", this.onDelete);
     },
 
+    onAddRecord: function(e) {
+        var table = controller.table_name;
+        window.parent.controller.editRecord(table);
+    },
+
     onEdit: function(e) {
-        var index = $(e.currentTarget).attr("data-row-index");
-        if (index) {
-            index = parseInt(index);
-            if (index >= 0 && index < controller.rows.length) {
-                var table = controller.table_name;
-                var record = controller.rows[index][0];
-                window.parent.controller.editRecord(table, record);
-            }
+        var record_id = $(e.currentTarget).attr("data-record-id");
+        if (record_id) {
+            var table = controller.table_name;
+            window.parent.controller.editRecord(table, record_id);
         }
     },
 
     onDelete: function(e) {
+        var record_id = $(e.currentTarget).attr("data-record-id");
+        window.parent.controller.confirm("",
+                                         "Delete this record?",
+                                         {record: record_id},
+                                         controller.confirmDelete);
     },
 
     queryTableSuccess: function(data) {
         controller.setTable(data);
     },
 
-    parseFields: function() {
+    parseFields: function(fields) {
         var cols = [{
             field: "operate",
             title: "Operate",
             formatter: this.operateButton,
         }];
 
-        for (var i = 0; i < this.fields.length; i++) {
+        for (var i = 0; i < fields.length; i++) {
             cols.push({
-                field: this.fields[i].name,
-                title: this.fields[i].label,
+                field: fields[i].name,
+                title: fields[i].label,
                 sortable: true,
             });
         }
@@ -62,26 +70,26 @@ controller = {
         var edit = $("<button>")
             .addClass("btn-link edit-row")
             .attr("type", "button")
-            .attr("data-row-index", index)
+            .attr("data-record-id", row["id"])
             .text("Edit")
             .appendTo(block);
 
         var edit = $("<button>")
             .addClass("btn-link delete-row")
             .attr("type", "button")
-            .attr("data-row-index", index)
+            .attr("data-record-id", row["id"])
             .text("Delete")
             .appendTo(block);
 
         return block.html();
     },
 
-    parseRows: function() {
+    parseRows: function(fields, records) {
         var rows = [];
-        for (var i = 0; i < this.rows.length; i++) {
+        for (var i = 0; i < records.length; i++) {
             var row = {ID: i + 1};
-            for (var j = 0; j < this.fields.length; j++) {
-                row[this.fields[j]["name"]] = this.rows[i][j];
+            for (var j = 0; j < fields.length; j++) {
+                row[fields[j]["name"]] = records[i][j];
             }
             rows.push(row);
         }
@@ -90,7 +98,6 @@ controller = {
     
     setTable: function(table) {
         this.fields = table.fields;
-        this.rows = table.rows;
 
         $("#data-table").bootstrapTable({
             cache: false,
@@ -99,8 +106,8 @@ controller = {
             pageList: [20, 50, 100],
             pageSize: 20,
             sidePagination: "client",
-            columns: this.parseFields(),
-            data: this.parseRows(),
+            columns: this.parseFields(table.fields),
+            data: this.parseRows(table.fields, table.records),
             sortName: "id",
             sortOrder: "asc",
             clickToSelect: true,
@@ -112,7 +119,25 @@ controller = {
 
     loadData: function(data) {
         $("#data-table").bootstrapTable("load", data);
-    }, 
+    },
+
+    confirmDelete: function(e) {
+        var table = controller.table_name;
+        var record_id = e.data.record;
+        controller.deleteRecord(table, record_id);
+    },
+
+    deleteRecord: function(table, record) {
+        service.deleteRecord(table, record, this.deleteSuccess);
+    },
+
+    deleteSuccess: function(data) {
+        var record_id = data.record;
+        $("#data-table").bootstrapTable("remove", {
+            field: "id",
+            values: [record_id],
+        });
+    },
 }
 
 $(document).ready(function() {

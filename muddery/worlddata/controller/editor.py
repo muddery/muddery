@@ -20,7 +20,9 @@ def query_fields(args, request):
     if not args or ('table' not in args):
         raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
 
-    return data_query.query_fields(args["table"])
+    table_name = args["table"]
+
+    return data_query.query_fields(table_name)
 
 
 @request_mapping()
@@ -31,7 +33,9 @@ def query_table(args, request):
     if not args or ('table' not in args):
         raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
 
-    return data_query.query_table(args["table"])
+    table_name = args["table"]
+
+    return data_query.query_table(table_name)
 
 
 @request_mapping()
@@ -42,7 +46,10 @@ def query_record(args, request):
     if not args or ('table' not in args) or ('record' not in args):
         raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-    return data_query.query_record(args["table"], args["record"])
+    table_name = args["table"]
+    record_id = args["record"]
+
+    return data_query.query_record(table_name, record_id)
 
 
 @request_mapping()
@@ -53,9 +60,10 @@ def query_form(args, request):
     if not args or ('table' not in args):
         raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
 
+    table_name = args["table"]
     record = args.get('record', None)
 
-    return data_query.query_form(args["table"], record)
+    return data_query.query_form(table_name, record)
 
 
 @request_mapping()
@@ -77,8 +85,30 @@ def save_form(args, request):
     if 'table' not in args:
         raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
 
-    record = args.get('record', None)
+    values = args["values"]
+    table_name = args["table"]
+    record_id = args.get('record', None)
 
-    return data_query.save_form(args["values"], args["table"], record)
+    record_id = data_query.save_form(values, table_name, record_id)
+    return data_query.query_record(table_name, record_id)
+
+
+@request_mapping()
+def delete_record(args, request):
+    """
+    Delete a record.
+
+    args:
+        table: (string) table's name.
+        record: (string) record's id.
+    """
+    if not args or ('table' not in args) or ('record' not in args):
+        raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+    table_name = args["table"]
+    record_id = args["record"]
+
+    data_query.delete_record(table_name, record_id)
+    return {"record": record_id}
 
 
