@@ -45,4 +45,10 @@ class ERR(object):
 
     invalid_form = 10006
 
+    upload_error = 10007
+
+    import_data_error = 10008
+
+    download_error = 10009
+
 

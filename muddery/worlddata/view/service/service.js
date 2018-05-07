@@ -4,6 +4,47 @@
  * callback_error: function(code, message, data)
  */
 service = {
+    onSuccess: function(callback_success, callback_error) {
+        var func = function(data) {
+            if (!data) {
+	            data = {
+                    code: -1,
+                    msg: "Empty result.",
+                };
+            }
+            else if (!("code" in data) || !("data" in data)) {
+                data = {
+                    code: -1,
+                    msg: "Wrong result format.",
+                };
+            }
+            
+            if (data.code != 0) {
+	            console.warn("Return error: " + data.code + "：" + data.msg);
+	            if (callback_error) {
+		            callback_error(data.code, data.msg, data.data);
+	            }
+            }
+            else {
+	            if (callback_success) {
+		            callback_success(data.data);
+	            }
+            }
+        }
+
+        return func;
+    },
+
+    onError: function(callback_error) {
+        var func = function(request, status) {
+            if (callback_error) {
+                callback_error(-2, request.statusText, request.status);
+            }
+        }
+
+        return func;
+    },
+
     sendRequest: function(path, func_no, args, callback_success, callback_error) {
 	    var url = CONFIG.api_url + path;
 	    params = {
@@ -18,38 +59,52 @@ service = {
 		    cache: false,
 		    data: JSON.stringify(params),
 		    dataType: "json",
-		    success: function(data) {
-                if (!data) {
-		            data = {
-                        code: -1,
-                        result: "Empty result.",
-                    };
-	            }
-	            else if (!("code" in data) || !("result" in data)) {
-                    data = {
-                        code: -1,
-                        result: "Wrong result format.",
-                    };
-	            }
-	            
-                if (data.code != 0) {
-		            console.warn("Return error: " + data.code + "：" + data.result.msg);
-		            if (callback_error) {
-			            callback_error(data.code, data.result.msg, data.result.data);
-		            }
-	            }
-	            else {
-		            if (callback_success) {
-			            callback_success(data.result);
-		            }
-	            }
-            },
-		    error: function(request, status) {
-                if (callback_error) {
-                    callback_error(-2, request.statusText, request.status);
-                }
-            },
+		    success: this.onSuccess(callback_success, callback_error),
+		    error: this.onError(callback_error),
 	    });
+    },
+
+    sendFile: function(path, func_no, file_obj, args, callback_success, callback_error) {
+	    var url = CONFIG.api_url + path;
+
+        var form_file = new FormData();
+        form_file.append("func", func_no);
+        form_file.append("args", JSON.stringify(args));
+        form_file.append("file", file_obj);
+
+        $.ajax({
+            url: url,
+            type: "POST",
+            contentType: false,
+            cache: false,
+            data: form_file,
+            dataType: "json",
+            processData: false,
+		    success: this.onSuccess(callback_success, callback_error),
+		    error: this.onError(callback_error),
+        });
+    },
+
+    downloadFile: function(path, func_no, args) {
+        var url = CONFIG.api_url + path;
+
+        var form = $("<form></form>")
+            .attr("action", url)
+            .attr("method", "POST");
+
+        $("<input>")
+            .attr("name", "func_no")
+            .attr("value", func_no)
+            .appendTo(form);
+        
+        for (var key in args) {
+            $("<input>")
+                .attr("name", key)
+                .attr("value", args[key])
+                .appendTo(form);
+        }
+
+        form.appendTo('body').submit().remove();
     },
 
     login: function(username, password, callback_success, callback_error) {
@@ -109,6 +164,48 @@ service = {
             record: record_id,
         };
         this.sendRequest("delete_record", "", args, callback_success, callback_error);
+    },
+
+    queryTables: function(callback_success, callback_error) {
+        this.sendRequest("query_tables", "", {}, callback_success, callback_error);
+    },
+
+    uploadDataZip: function(file_obj, callback_success, callback_error) {
+        this.sendFile("upload_zip", "", file_obj, {}, callback_success, callback_error);
+    },
+
+    uploadResourceZip: function(file_obj, callback_success, callback_error) {
+        this.sendFile("upload_recource", "", file_obj, {}, callback_success, callback_error);
+    },
+
+    uploadSingleData: function(file_obj, table_name, callback_success, callback_error) {
+        var args = {
+            table: table_name,
+        };
+        this.sendFile("upload_single_data", "", file_obj, args, callback_success, callback_error);
+    },
+
+    queryDataFileTypes: function(callback_success, callback_error) {
+        this.sendRequest("query_data_file_types", "", {}, callback_success, callback_error);
+    },
+
+    downloadDataZip: function(file_type) {
+        var args = {
+            type: file_type,
+        };
+        this.downloadFile("download_zip", "", {});
+    },
+
+    downloadResourceZip: function() {
+        this.downloadFile("download_resources", "", {});
+    },
+
+    downloadSingleData: function(table_name, file_type) {
+        var args = {
+            table: table_name,
+            type: file_type,
+        };
+        this.downloadFile("download_single_data", "", args);
     },
 }
 

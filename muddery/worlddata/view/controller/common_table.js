@@ -23,7 +23,7 @@ controller = {
     },
 
     onEdit: function(e) {
-        var record_id = $(e.currentTarget).attr("data-record-id");
+        var record_id = $(this).attr("data-record-id");
         if (record_id) {
             var table = controller.table_name;
             window.parent.controller.editRecord(table, record_id);
@@ -31,7 +31,7 @@ controller = {
     },
 
     onDelete: function(e) {
-        var record_id = $(e.currentTarget).attr("data-record-id");
+        var record_id = $(this).attr("data-record-id");
         window.parent.controller.confirm("",
                                          "Delete this record?",
                                          {record: record_id},

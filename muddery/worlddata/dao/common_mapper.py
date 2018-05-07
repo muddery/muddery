@@ -1,5 +1,5 @@
 """
-This model translates default strings into localized strings.
+Query and deal common tables.
 """
 
 from __future__ import print_function
@@ -70,4 +70,11 @@ def delete_record_by_id(table_name, record_id):
     model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
     record = model_obj.objects.get(id=record_id)
     record.delete()
+
+
+def query_all_models():
+    """
+    Query all models information.
+    """
+    return apps.get_models()
 

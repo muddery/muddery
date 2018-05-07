@@ -9,7 +9,7 @@ from django.conf import settings
 from muddery.utils.exception import MudderyError
 
 
-def request_mapping(path=None, key=None, login=True, staff=True):
+def request_mapping(*args, **kwargs):
     """
     A decorator which declears a web service controller.
 
@@ -18,20 +18,30 @@ def request_mapping(path=None, key=None, login=True, staff=True):
         key: (string) the key of the function.
         login: (boolean) need login.
         staff: (boolean) for staff only.
-    """    
-    def wrapper(func):
-        """
-        Args:
-            func: function.
-        """
-        REQUEST_MAPPING.add_request_mapping(func, path, key, login, staff)
-
+    """
+    if args:
+        func = args[0]
+        REQUEST_MAPPING.add_request_mapping(*args)
         def decorate(args):
             return func(args)
-
         return decorate
 
-    return wrapper
+    else:
+        path = kwargs.get("path", None)
+        key = kwargs.get("key", None)
+        login = kwargs.get("login", True)
+        staff = kwargs.get("staff", True)
+        
+        def wrapper(func):
+            """
+            Args:
+                func: function.
+            """
+            REQUEST_MAPPING.add_request_mapping(func, path, key, login, staff)
+            def decorate(args):
+                return func(args)
+            return decorate
+        return wrapper
 
 
 class RequestMapping(object):

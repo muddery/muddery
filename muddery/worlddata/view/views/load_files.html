@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>上传</title>
+        <meta name="HandheldFriendly" content="True" />
+        <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="../css/load_files.css" rel="stylesheet" type="text/css" />
+    </head>
+
+    <body>
+        <fieldset>
+            <legend>
+                Download
+            </legend>
+            <div id="download-zip" class="form-group control-group">
+                <div>Download a zip package of data.</div>
+                <select id="zip-file-type" class="form-control file-type-select"></select>
+                <button type="button" class="btn btn-info btn-download">Download</button>
+            </div>
+            <div id="download-file" class="form-group control-group">
+                <div>Download a data file.</div>
+                <select id="download-table-names" class="form-control table-select"></select>
+                <select id="single-file-type" class="form-control file-type-select"></select>
+                <button type="button" class="btn btn-info btn-download">Download</button>
+            </div>
+            <div id="download-resource" class="form-group control-group">
+                <div>Download a zip package of resources.</div>
+                <button type="button" class="btn btn-info btn-download">Download</button>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>
+                Upload
+            </legend>
+            <div id="notice-block">
+                NOTICE: Current data will be replaced!
+            </div>
+            <div id="upload-zip" class="form-group control-group">
+                <div>Upload a zip package of data.</div>
+                <div class="input-group file-group">
+                    <input type="text" class="form-control file-text" readonly="readonly">
+                    <input type="file" class="hidden file-input" accept="application/zip">
+                    <a class="btn input-group-addon btn-browse">Browse</a>
+                </div>
+                <button type="button" class="btn btn-success btn-upload">Upload</button>
+            </div>
+            <div id="upload-file" class="form-group control-group">
+                <div>Upload a data file.</div>
+                <select id="upload-table-names" class="form-control table-select">
+                    <option value="">---------</option>
+                </select>
+                <div class="input-group file-group">
+                    <input type="text" class="form-control file-text" readonly="readonly">
+                    <input type="file" class="hidden file-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+                    <a class="btn input-group-addon btn-browse">Browse</a>
+                </div>
+                <button type="button" class="btn btn-success btn-upload">Upload</button>
+            </div>
+            <div id="upload-resource" class="form-group control-group">
+                <div>Upload a zip package of resources.</div>
+                <div class="input-group file-group">
+                    <input type="text" class="form-control file-text" readonly="readonly">
+                    <input type="file" class="hidden file-input" accept="application/zip">
+                    <a class="btn input-group-addon btn-browse">Browse</a>
+                </div>
+                <button type="button" class="btn btn-success btn-upload">Upload</button>
+            </div>
+        </fieldset>
+
+        <script src="../libs/jquery-3.2.1.min.js"></script>
+        <script src="../libs/bootstrap.min.js"></script>
+        <script src="../config.js"></script>
+        <script src="../service/service.js"></script>
+        <script src="../utils/utils.js"></script>
+        <script src="../controller/load_files.js"></script>
+    </body>
+
+</html>

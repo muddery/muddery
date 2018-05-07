@@ -1,0 +1,48 @@
+
+body {
+    overflow: hidden;
+}
+
+fieldset {
+    margin: 5px 5px;
+    border: 1px solid;
+}
+
+legend {
+    margin: 0 10px;
+    padding: 5px 5px;
+    border: 0;
+    width: auto;
+}
+
+#notice-block {
+    padding: 10px 10px;
+    color: #ff0000;
+}
+
+.control-group {
+    padding: 10px 10px;
+}
+
+.file-group {
+    max-width: 300px;
+    margin-right: 10px;
+    float: left;
+}
+
+.file-text[readonly] {
+    background: #fff;
+}
+
+.table-select {
+    max-width: 300px;
+    margin-bottom: 5px;
+}
+
+.file-type-select {
+    max-width: 200px;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    float: left;
+}
+

@@ -91,7 +91,7 @@ def export_path_all(path, file_type=None):
             export_file(filename, model_name, file_type)
 
 
-def export_zip_all(file, file_type=None):
+def export_zip_all(file_obj, file_type=None):
     """
     Export all tables to a zip file which contains a group of csv files.
     """
@@ -106,7 +106,7 @@ def export_zip_all(file, file_type=None):
         file_ext = writer_class.file_ext
 
         try:
-            archive = zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED)
+            archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED)
 
             # get model names
             app_config = apps.get_app_config(settings.WORLD_DATA_APP)
@@ -123,19 +123,20 @@ def export_zip_all(file, file_type=None):
             os.remove(temp)
 
 
-def export_resources(file):
+def export_resources(file_obj):
     """
     Export all resource files to a zip file.
     """
     dir_name = settings.MEDIA_ROOT
     dir_length = len(dir_name)
 
-    archive = zipfile.ZipFile(file, 'w', zipfile.ZIP_DEFLATED)   
+    archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED)   
     for root, dirs, files in os.walk(dir_name):
-        for file in files:
-            if file[:1] == '.':
+        for filename in files:
+            if filename[:1] == '.':
                 continue
 
-            full_path = os.path.join(root, file)
+            full_path = os.path.join(root, filename)
             file_name = full_path[dir_length:]
             archive.write(full_path, file_name)
+

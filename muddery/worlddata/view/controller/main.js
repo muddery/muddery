@@ -34,9 +34,16 @@ controller = {
     },
 
     onLeftMenu: function(e) {
-        var table = $(e.currentTarget).data("table");
+        var table = $(this).data("table");
         if (table) {
             controller.showTable(table);
+            return;
+        }
+
+        var page = $(this).data("page");
+        if (page) {
+            controller.showPage(page);
+            return;
         }
     },
 
@@ -111,6 +118,7 @@ controller = {
  
         var table_box = $("#table-box");
         var editor_box = $("#editor-box");
+        var page_box = $("#page-box");
 
         table_box.empty();
 
@@ -120,13 +128,35 @@ controller = {
             .appendTo(table_box);
 
         editor_box.hide();
+        page_box.hide();
         table_box.show();
         this.setFrameSize();
     },
 
     showTableView: function() {
         $("#editor-box").hide();
+        $("#page-box").hide();
         $("#table-box").show();
+    },
+
+    showPage: function(page) {
+        var url = page + ".html";
+ 
+        var table_box = $("#table-box");
+        var editor_box = $("#editor-box");
+        var page_box = $("#page-box");
+
+        page_box.empty();
+
+        $("<iframe>")
+            .addClass("content-frame")
+            .attr("src", url)
+            .appendTo(page_box);
+
+        editor_box.hide();
+        table_box.hide();
+        page_box.show();
+        this.setFrameSize();
     },
 
     editRecord: function(table_name, record_id) {
@@ -137,6 +167,7 @@ controller = {
 
         var table_box = $("#table-box");
         var editor_box = $("#editor-box");
+        var page_box = $("#page-box");
 
         editor_box.empty();
 
@@ -146,6 +177,7 @@ controller = {
             .appendTo(editor_box);
 
         table_box.hide();
+        page_box.hide();
         editor_box.show();
         this.setFrameSize();
     },
@@ -154,6 +186,16 @@ controller = {
         $('#confirm-title').text(title);
         $('#confirm-content').text(content);
         
+        $("#cancel-button").show();
+        $("#confirm-button").one("click", data, callback);
+        $('#confirm-dialog').modal();
+    },
+
+    notify: function(title, content, data, callback) {
+        $('#confirm-title').text(title);
+        $('#confirm-content').text(content);
+        
+        $("#cancel-button").hide();
         $("#confirm-button").one("click", data, callback);
         $('#confirm-dialog').modal();
     },

@@ -222,12 +222,12 @@ def import_data_single(request):
     """
     response = http.HttpResponseNotModified()
     model_name = request.POST.get("model_name", None)
-    upload_file = request.FILES.get("import_data_single", None)
+    file_obj = request.FILES.get("import_data_single", None)
 
     err_message = None
-    if upload_file:
+    if file_obj:
         # Get file type.
-        (filename, ext_name) = os.path.splitext(upload_file.name)
+        (filename, ext_name) = os.path.splitext(file_obj.name)
         
         # If model name is empty, get model name from filename.
         if not model_name:
@@ -252,7 +252,7 @@ def import_data_single(request):
         with open(temp_name, "wb") as temp_file:
             try:
                 # Write to a template file.
-                for chunk in upload_file.chunks():
+                for chunk in file_obj.chunks():
                     temp_file.write(chunk)
                 temp_file.flush()
                 data_handler.import_file(temp_name, file_type=file_type)

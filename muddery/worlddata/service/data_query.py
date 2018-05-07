@@ -9,6 +9,7 @@ from evennia.utils import logger
 from muddery.worlddata.dao import common_mapper
 from muddery.worlddata.utils import utils
 from muddery.utils.exception import MudderyError, ERR
+from muddery.utils.localized_strings_handler import _
 
 
 def query_fields(table_name):
@@ -138,4 +139,15 @@ def delete_record(table_name, record_id):
     Delete a record of a table.
     """
     common_mapper.delete_record_by_id(table_name, record_id)
+
+
+def query_tables():
+    """
+    Query all tables' names.
+    """
+    models = common_mapper.query_all_models()
+    models_info = [{"key": model.__name__,
+                    "name": _(model.__name__, category="models") + "(" + model.__name__ + ")"}
+                    for model in models if model._meta.app_label == "worlddata"]
+    return models_info
 

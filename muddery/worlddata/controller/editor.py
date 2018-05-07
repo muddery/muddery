@@ -8,65 +8,69 @@ from django.conf import settings
 from evennia.utils import logger
 from muddery.worlddata.request_mapping import request_mapping
 from muddery.worlddata.service import data_query
-from muddery.worlddata.utils import utils
 from muddery.utils.exception import MudderyError, ERR
+from muddery.worlddata.utils.response import success_response
 
 
-@request_mapping()
+@request_mapping
 def query_fields(args, request):
     """
     Query all fields of a table.
     """
-    if not args or ('table' not in args):
+    if 'table' not in args:
         raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
 
     table_name = args["table"]
 
-    return data_query.query_fields(table_name)
+    data = data_query.query_fields(table_name)
+    return success_response(data)
 
 
-@request_mapping()
+@request_mapping
 def query_table(args, request):
     """
     Query all records of a table.
     """
-    if not args or ('table' not in args):
+    if 'table' not in args:
         raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
 
     table_name = args["table"]
 
-    return data_query.query_table(table_name)
+    data = data_query.query_table(table_name)
+    return success_response(data)
 
 
-@request_mapping()
+@request_mapping
 def query_record(args, request):
     """
     Query a record of a table.
     """
-    if not args or ('table' not in args) or ('record' not in args):
+    if ('table' not in args) or ('record' not in args):
         raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
     table_name = args["table"]
     record_id = args["record"]
 
-    return data_query.query_record(table_name, record_id)
+    data = data_query.query_record(table_name, record_id)
+    return success_response(data)
 
 
-@request_mapping()
+@request_mapping
 def query_form(args, request):
     """
     Query a form.
     """
-    if not args or ('table' not in args):
+    if 'table' not in args:
         raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
 
     table_name = args["table"]
     record = args.get('record', None)
 
-    return data_query.query_form(table_name, record)
+    data = data_query.query_form(table_name, record)
+    return success_response(data)
 
 
-@request_mapping()
+@request_mapping
 def save_form(args, request):
     """
     Save a form.
@@ -90,10 +94,11 @@ def save_form(args, request):
     record_id = args.get('record', None)
 
     record_id = data_query.save_form(values, table_name, record_id)
-    return data_query.query_record(table_name, record_id)
+    data = data_query.query_record(table_name, record_id)
+    return success_response(data)
 
 
-@request_mapping()
+@request_mapping
 def delete_record(args, request):
     """
     Delete a record.
@@ -102,13 +107,25 @@ def delete_record(args, request):
         table: (string) table's name.
         record: (string) record's id.
     """
-    if not args or ('table' not in args) or ('record' not in args):
+    if ('table' not in args) or ('record' not in args):
         raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
     table_name = args["table"]
     record_id = args["record"]
 
     data_query.delete_record(table_name, record_id)
-    return {"record": record_id}
+    data = {"record": record_id}
+    return success_response(data)
+
+
+@request_mapping
+def query_tables(args, request):
+    """
+    Query all tables' names.
+
+    args: None
+    """
+    data = data_query.query_tables()
+    return success_response(data)
 
 
