@@ -17,6 +17,8 @@ controller = {
         $("#content-frame").on("load", this.onContentLoad);
 
         $(".panel-heading").on("click", this.onMenuPanel);
+
+        $("#apply-button").on("click", this.onApply);
     },
 
     onResize: function(e) {
@@ -62,6 +64,10 @@ controller = {
             $(this).find("span").toggleClass("glyphicon-chevron-down");
             $(this).find("span").toggleClass("glyphicon-chevron-up");
         }
+    },
+
+    onApply: function(e) {
+        controller.confirm("", "Apply changes?", controller.confirmApply);
     },
 
     onContentLoad: function(e) {
@@ -182,22 +188,70 @@ controller = {
         this.setFrameSize();
     },
 
-    confirm: function(title, content, data, callback) {
-        $('#confirm-title').text(title);
-        $('#confirm-content').text(content);
-        
-        $("#cancel-button").show();
-        $("#confirm-button").one("click", data, callback);
-        $('#confirm-dialog').modal();
+    confirmApply: function() {
+        service.applyChanges(controller.applySuccess, controller.applyFailed);
+        controller.show_waiting("", "Applying changes. Please wait.");
     },
 
-    notify: function(title, content, data, callback) {
-        $('#confirm-title').text(title);
-        $('#confirm-content').text(content);
+    applySuccess: function(data) {
+        controller.notify("", "Changes Applied. Please wait the server to restart.");
+    },
+
+    applyFailed: function(code, message, data) {
+        controller.notify("", "Apply failed: " + code + ": " + message);
+    },
+
+    //////////////// Confirm Model ////////////////
+
+    confirm: function(title, content, callback, data) {
+        $("#confirm-title").text(title);
+        $("#confirm-content").text(content);
         
+        $("#close-button").show();
+        $("#cancel-button").show();
+        $("#confirm-button").show();
+
+        if (callback) {
+            $("#confirm-button").one("click", data, callback);
+        }
+        else {
+            $("#confirm-button").one("click", this.hide_waiting);
+        }
+
+        $("#confirm-dialog").modal();
+    },
+
+    notify: function(title, content, callback, data) {
+        $("#confirm-title").text(title);
+        $("#confirm-content").text(content);
+        
+        $("#close-button").show();
         $("#cancel-button").hide();
-        $("#confirm-button").one("click", data, callback);
-        $('#confirm-dialog').modal();
+        $("#confirm-button").show();
+
+        if (callback) {
+            $("#confirm-button").one("click", data, callback);
+        }
+        else {
+            $("#confirm-button").one("click", this.hide_waiting);
+        }
+
+        $("#confirm-dialog").modal();
+    },
+
+    show_waiting: function(title, content) {
+        $("#confirm-title").text(title);
+        $("#confirm-content").text(content);
+        
+        $("#close-button").hide();
+        $("#cancel-button").hide();
+        $("#confirm-button").hide();
+
+        $("#confirm-dialog").modal();
+    },
+
+    hide_waiting: function() {
+        $("#confirm-dialog").modal("hide");
     },
 }
 

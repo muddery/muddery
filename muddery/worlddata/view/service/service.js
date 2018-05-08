@@ -175,7 +175,7 @@ service = {
     },
 
     uploadResourceZip: function(file_obj, callback_success, callback_error) {
-        this.sendFile("upload_recource", "", file_obj, {}, callback_success, callback_error);
+        this.sendFile("upload_resources", "", file_obj, {}, callback_success, callback_error);
     },
 
     uploadSingleData: function(file_obj, table_name, callback_success, callback_error) {
@@ -206,6 +206,10 @@ service = {
             type: file_type,
         };
         this.downloadFile("download_single_data", "", args);
+    },
+
+    applyChanges: function(callback_success, callback_error) {
+        this.sendRequest("apply_changes", "", {}, callback_success, callback_error);
     },
 }
 

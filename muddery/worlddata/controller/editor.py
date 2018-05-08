@@ -4,12 +4,16 @@ Battle commands. They only can be used when a character is in a combat.
 
 from __future__ import print_function
 
+import json
 from django.conf import settings
 from evennia.utils import logger
+from evennia.server.sessionhandler import SESSIONS
 from muddery.worlddata.request_mapping import request_mapping
 from muddery.worlddata.service import data_query
 from muddery.utils.exception import MudderyError, ERR
 from muddery.worlddata.utils.response import success_response
+from muddery.utils.builder import build_all
+from muddery.utils.game_settings import GAME_SETTINGS
 
 
 @request_mapping
@@ -128,4 +132,36 @@ def query_tables(args, request):
     data = data_query.query_tables()
     return success_response(data)
 
+
+@request_mapping
+def apply_changes(args, request):
+    """
+    Apply changes to the game.
+
+    args: None
+    """
+    try:
+        # reload system data
+        #import_syetem_data()
+
+        # reload localized strings
+        #LOCALIZED_STRINGS_HANDLER.reload()
+
+        # rebuild the world
+        build_all()
+
+        # send client settings
+        client_settings = GAME_SETTINGS.get_client_settings()
+        text = json.dumps({"settings": client_settings})
+        SESSIONS.announce_all(text)
+
+        # restart the server
+        SESSIONS.announce_all("Server restarting ...")
+        SESSIONS.server.shutdown(mode='reload')
+    except Exception, e:
+        message = "Can not build the world: %s" % e
+        logger.log_tracemsg(message)
+        raise MudderyError(ERR.build_world_error, message)
+
+    return success_response("success")
 

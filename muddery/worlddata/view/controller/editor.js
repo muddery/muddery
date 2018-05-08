@@ -262,6 +262,8 @@ controller = {
     },
 
     confirmDelete: function(e) {
+        window.parent.controller.hide_waiting();
+
         service.deleteRecord(controller.table_name,
                              controller.record_id,
                              controller.deleteSuccess);

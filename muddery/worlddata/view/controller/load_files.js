@@ -45,8 +45,10 @@ controller = {
         }
         else if (group.attr("id") == "upload-file") {
             var table_name = group.find(".table-select").val();
-            service.uploadSingleFile(file_obj, table_name, controller.uploadSuccess, controller.uploadFailed);
+            service.uploadSingleData(file_obj, table_name, controller.uploadSuccess, controller.uploadFailed);
         }
+
+        window.parent.controller.show_waiting("", "Uploading...");
     },
 
     onDownload: function(e) {

@@ -51,4 +51,8 @@ class ERR(object):
 
     download_error = 10009
 
+    export_data_error = 10010
+
+    build_world_error = 10011
+
 

@@ -76,5 +76,6 @@ def query_all_models():
     """
     Query all models information.
     """
-    return apps.get_models()
+    app_config = apps.get_app_config(settings.WORLD_DATA_APP)
+    return app_config.get_models()
 

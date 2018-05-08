@@ -515,13 +515,8 @@
                                 </button>
                               </li>
                               <li class="list-group-item">
-                                <button class="menu-item-left">
+                                <button id="apply-button" class="menu-item-left">
                                     应用
-                                </button>
-                              </li>
-                              <li class="list-group-item">
-                                <button class="menu-item-left">
-                                    工具
                                 </button>
                               </li>
                             </ul>
@@ -540,17 +535,17 @@
         </div>
 
         <!-- Confirm Model -->  
-        <div class="modal fade" id="confirm-dialog">  
+        <div class="modal fade" id="confirm-dialog" data-backdrop="static">  
             <div class="modal-dialog">  
                 <div class="modal-content message_align">  
                     <div class="modal-header">  
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <button type="button" id="close-button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 id="confirm-title" class="modal-title"></h4>  
                     </div>  
                     <div id="confirm-content" class="modal-body"></div>
                     <div class="modal-footer">
                         <button type="button" id="cancel-button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button type="button" id="confirm-button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                        <button type="button" id="confirm-button" class="btn btn-primary">OK</button>
                     </div> 
                 </div>
             </div>

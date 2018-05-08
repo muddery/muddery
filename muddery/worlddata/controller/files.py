@@ -4,15 +4,15 @@ Battle commands. They only can be used when a character is in a combat.
 
 from __future__ import print_function
 
-import tempfile, time
+import os, tempfile, time
 from django.conf import settings
 from django.contrib import auth
 from evennia.utils import logger
 from muddery.worlddata.request_mapping import request_mapping
-from muddery.worlddata.service import data_query
+from muddery.worlddata.service import data_query, exporter, importer
 from muddery.worlddata.utils.response import success_response, file_response
 from muddery.utils.exception import MudderyError, ERR
-from muddery.utils import exporter, importer, writers
+from muddery.utils import writers
 
 
 @request_mapping
@@ -34,14 +34,14 @@ def upload_zip(args, request):
                 fp.write(chunk)
             importer.unzip_data_all(fp)
         except Exception, e:
-            logger.log_errmsg("Upload error: %s" % e.message)
+            logger.log_tracemsg("Upload error: %s" % e.message)
             raise MudderyError(ERR.upload_error, e.message)
 
     return success_response("success")
 
 
 @request_mapping
-def upload_resource(args, request):
+def upload_resources(args, request):
     """
     Upload a zip package of resources.
 
@@ -59,7 +59,7 @@ def upload_resource(args, request):
                 fp.write(chunk)
             importer.unzip_resources_all(fp)
         except Exception, e:
-            logger.log_errmsg("Upload error: %s" % e.message)
+            logger.log_tracemsg("Upload error: %s" % e.message)
             raise MudderyError(ERR.upload_error, e.message)
 
     return success_response("success")
@@ -79,15 +79,24 @@ def upload_single_data(args, request):
     if not file_obj:
         raise MudderyError(ERR.missing_args, 'Missing data files.')
 
+    fullname = file_obj.name
+    (filename, ext_name) = os.path.splitext(fullname)
     table_name = args.get("table", None)
 
-    with tempfile.TemporaryFile() as fp:
+    if not table_name:
+        table_name = filename
+
+    file_type = ""
+    if ext_name:
+        file_type = ext_name[1:].lower()
+
+    with tempfile.NamedTemporaryFile() as fp:
         try:
             for chunk in file_obj.chunks():
                 fp.write(chunk)
-            importer.import_data_file(fp, table_name=table_name)
+            importer.import_data_file(fp, table_name=table_name, file_type=file_type)
         except Exception, e:
-            logger.log_errmsg("Upload error: %s" % e.message)
+            logger.log_tracemsg("Upload error: %s" % e.message)
             raise MudderyError(ERR.upload_error, e.message)
 
     return success_response("success")
@@ -115,6 +124,7 @@ def download_zip(args, request):
     except Exception, e:
         if fp:
             fp.close()
+        logger.log_tracemsg("Download error: %s" % e.message)
         raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
@@ -137,6 +147,7 @@ def download_resources(args, request):
     except Exception, e:
         if fp:
             fp.close()
+        logger.log_tracemsg("Download error: %s" % e.message)
         raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
@@ -170,6 +181,7 @@ def download_single_data(args, request):
     except Exception, e:
         if fp:
             fp.close()
+        logger.log_tracemsg("Download error: %s" % e.message)
         raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 

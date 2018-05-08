@@ -34,8 +34,8 @@ controller = {
         var record_id = $(this).attr("data-record-id");
         window.parent.controller.confirm("",
                                          "Delete this record?",
-                                         {record: record_id},
-                                         controller.confirmDelete);
+                                         controller.confirmDelete,
+                                         {record: record_id});
     },
 
     queryTableSuccess: function(data) {
@@ -122,6 +122,8 @@ controller = {
     },
 
     confirmDelete: function(e) {
+        window.parent.controller.hide_waiting();
+
         var table = controller.table_name;
         var record_id = e.data.record;
         controller.deleteRecord(table, record_id);
