@@ -25,14 +25,6 @@ class ClassCategoriesAdmin(admin.ModelAdmin):
                     'desc')
 
 
-class TypeclassesAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'name',
-                    'path',
-                    'category',
-                    'desc')
-
-
 class WorldRoomsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',

@@ -16,23 +16,6 @@ class DataSets(object):
         Returns:
             None.
         """
-        # System settings
-        self.class_categories = SystemDataHandler("class_categories")
-        self.typeclasses = SystemDataHandler("typeclasses")
-        self.event_types = SystemDataHandler("event_types")
-        self.event_trigger_types = SystemDataHandler("event_trigger_types")
-        self.quest_objective_types = SystemDataHandler("quest_objective_types")
-        self.quest_dependency_types = SystemDataHandler("quest_dependency_types")
-        self.localized_strings = LocalizedStringsHandler("localized_strings")
-
-        self.system_data = [self.class_categories,
-                            self.typeclasses,
-                            self.event_types,
-                            self.event_trigger_types,
-                            self.quest_objective_types,
-                            self.quest_dependency_types,
-                            self.localized_strings]
-
         # Basic settings
         self.equipment_types = DataHandler("equipment_types")
         self.equipment_positions = DataHandler("equipment_positions")
@@ -155,7 +138,6 @@ class DataSets(object):
     def update_data_sets(self):
         # all data handlers
         self.all_handlers = []
-        self.all_handlers.extend(self.system_data)
         self.all_handlers.extend(self.basic_data)
         self.all_handlers.extend(self.object_data)
         self.all_handlers.extend(self.object_additional_data)

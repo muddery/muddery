@@ -12,10 +12,11 @@ from muddery.utils.builder import delete_object
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.data_sets import DATA_SETS
-from muddery.utils.utils import get_class
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 
 
-class MudderyMonster(get_class("CLASS_BASE_CHARACTER")):
+@typeclass_mapping("MONSTER")
+class MudderyMonster(TYPECLASS("BASE_CHARACTER")):
     """
     Default mob. Monsters are hostile to players, they can be attacked.
     """

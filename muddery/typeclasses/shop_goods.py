@@ -11,10 +11,11 @@ from muddery.utils.exception import MudderyError
 from muddery.utils.builder import build_object, get_object_record
 from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.data_sets import DATA_SETS
-from muddery.utils.utils import get_class
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 
 
-class MudderyShopGoods(get_class("CLASS_BASE_OBJECT")):
+@typeclass_mapping("SHOP_GOODS")
+class MudderyShopGoods(TYPECLASS("BASE_OBJECT")):
     """
     This is a shop goods. Shops show these objects to players. It contains a common object
     to sell and additional shop information.

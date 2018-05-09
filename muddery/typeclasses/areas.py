@@ -10,11 +10,12 @@ from django.conf import settings
 from django.apps import apps
 from muddery.typeclasses.objects import MudderyObject
 from muddery.worlddata.data_sets import DATA_SETS
-from muddery.utils.utils import get_class
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 from evennia.utils import logger
 
 
-class MudderyArea(get_class("CLASS_BASE_OBJECT")):
+@typeclass_mapping("AREA")
+class MudderyArea(TYPECLASS("BASE_OBJECT")):
     """
     Areas are compose the whole map. Rooms are belongs to areas.
     """

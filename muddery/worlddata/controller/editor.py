@@ -8,8 +8,8 @@ import json
 from django.conf import settings
 from evennia.utils import logger
 from evennia.server.sessionhandler import SESSIONS
-from muddery.worlddata.request_mapping import request_mapping
-from muddery.worlddata.service import data_query
+from muddery.mappings.request_set import request_mapping
+from muddery.worlddata.service import data_query, data_edit
 from muddery.utils.exception import MudderyError, ERR
 from muddery.worlddata.utils.response import success_response
 from muddery.utils.builder import build_all
@@ -70,7 +70,7 @@ def query_form(args, request):
     table_name = args["table"]
     record = args.get('record', None)
 
-    data = data_query.query_form(table_name, record)
+    data = data_edit.query_form(table_name, record)
     return success_response(data)
 
 
@@ -97,7 +97,7 @@ def save_form(args, request):
     table_name = args["table"]
     record_id = args.get('record', None)
 
-    record_id = data_query.save_form(values, table_name, record_id)
+    record_id = data_edit.save_form(values, table_name, record_id)
     data = data_query.query_record(table_name, record_id)
     return success_response(data)
 
@@ -117,7 +117,7 @@ def delete_record(args, request):
     table_name = args["table"]
     record_id = args["record"]
 
-    data_query.delete_record(table_name, record_id)
+    data_edit.delete_record(table_name, record_id)
     data = {"record": record_id}
     return success_response(data)
 

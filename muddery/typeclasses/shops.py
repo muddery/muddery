@@ -14,10 +14,11 @@ from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.builder import build_object, get_object_record
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.data_sets import DATA_SETS
-from muddery.utils.utils import get_class
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 
 
-class MudderyShop(get_class("CLASS_BASE_OBJECT")):
+@typeclass_mapping("SHOP")
+class MudderyShop(TYPECLASS("BASE_OBJECT")):
     """
     A shop.
     """

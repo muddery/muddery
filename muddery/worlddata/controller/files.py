@@ -8,7 +8,7 @@ import os, tempfile, time
 from django.conf import settings
 from django.contrib import auth
 from evennia.utils import logger
-from muddery.worlddata.request_mapping import request_mapping
+from muddery.mappings.request_set import request_mapping
 from muddery.worlddata.service import data_query, exporter, importer
 from muddery.worlddata.utils.response import success_response, file_response
 from muddery.utils.exception import MudderyError, ERR

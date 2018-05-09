@@ -33,21 +33,6 @@ def import_local_data():
     """
     from django.conf import settings
     from muddery.worlddata.data_sets import DATA_SETS
-            
-    ##########################
-    # load system data
-    ##########################
-    # system data file's path
-    system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
-
-    # load system data
-    for data_handlers in DATA_SETS.system_data:
-        try:
-            data_handlers.import_from_path(system_data_path, system_data=True)
-        except Exception, e:
-            err_message = "Cannot import game data. %s" % e
-            print(err_message)
-            traceback.print_stack()
 
     ##########################
     # load custom data
@@ -58,7 +43,7 @@ def import_local_data():
     # load all custom data
     for data_handlers in DATA_SETS.all_handlers:
         try:
-            data_handlers.import_from_path(custom_data_path, system_data=False)
+            data_handlers.import_from_path(custom_data_path)
         except Exception, e:
             err_message = "Cannot import game data. %s" % e
             print(err_message)

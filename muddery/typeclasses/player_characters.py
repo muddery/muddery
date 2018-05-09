@@ -29,14 +29,15 @@ from muddery.utils.match_queue_handler import MATCH_QUEUE_HANDLER
 from muddery.dao.honours_mapper import HONOURS_MAPPER
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
-from muddery.utils.utils import get_class
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia.comms.models import ChannelDB
 from evennia import create_script
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 
 
-class MudderyPlayerCharacter(get_class("CLASS_BASE_CHARACTER")):
+@typeclass_mapping("PLAYER_CHARACTER")
+class MudderyPlayerCharacter(TYPECLASS("BASE_CHARACTER")):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:

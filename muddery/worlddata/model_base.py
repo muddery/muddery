@@ -61,30 +61,6 @@ def validate_object_key(model):
 
 # ------------------------------------------------------------
 #
-# System data flag.
-#
-# ------------------------------------------------------------
-class SystemData(models.Model):
-    """
-    All system data should have this flag. This flag is used to
-    differentiate between system data and custom data.
-    """
-    # data's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
-
-    # is system data or not
-    system_data = models.BooleanField(blank=True, default=False)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "System Data"
-        verbose_name_plural = "System Data"
-
-
-# ------------------------------------------------------------
-#
 # Game's basic settings.
 #
 # ------------------------------------------------------------
@@ -169,92 +145,40 @@ class game_settings(models.Model):
 
 # ------------------------------------------------------------
 #
-# store all categories
+# Objects
 #
 # ------------------------------------------------------------
-class class_categories(SystemData):
+class BaseObjects(models.Model):
     """
-    Typeclass's category defines base types.
-
-    The key is category's key.
+    The base model of all objects.
     """
-
-    # the readable name of the category
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-
-    # category's description (optional)
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Class Category"
-        verbose_name_plural = "Class Categories"
-
-    def __unicode__(self):
-        return self.name
-
-
-# ------------------------------------------------------------
-#
-# store all typeclasses
-#
-# ------------------------------------------------------------
-class typeclasses(SystemData):
-    """
-    Defines all available typeclasses.
-
-    The key is typeclass's key.
-    """
-
-    # the readable name of the typeclass
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-
-    # the typeclass's path that related to a class
-    path = models.CharField(max_length=TYPECLASS_LENGTH, blank=True)
-
-    # The key of a typeclass category.
-    # typeclass's category
-    category = models.CharField(max_length=KEY_LENGTH)
-
-    # typeclass's description (optional)
-    desc = models.TextField(blank=True)
-
-    # Can loot from objects of this type.
-    can_loot = models.BooleanField(blank=True, default=False)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Typeclass"
-        verbose_name_plural = "Typeclasses"
-
-    def __unicode__(self):
-        return self.name
-
-
-# ------------------------------------------------------------
-#
-# world areas
-#
-# ------------------------------------------------------------
-class world_areas(models.Model):
-    "The game map is composed by areas."
-
-    # area's key
+    # object's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-    
-    # The key of a area typeclass.
-    # area's typeclass
+
+    # object's typeclass
     typeclass = models.CharField(max_length=KEY_LENGTH)
 
-    # area's name
+    # object's name
     name = models.CharField(max_length=NAME_LENGTH, default="")
     
-    # area's description for display
+    # object's description for display
     desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+
+    def __unicode__(self):
+        return self.name + " (" + self.key + ")"
+        
+    def clean(self):
+        auto_generate_key(self)
+        validate_object_key(self)
+
+
+class world_areas(BaseObjects):
+    "The game map is composed by areas."
 
     # area's map background image resource
     background = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -273,34 +197,9 @@ class world_areas(models.Model):
         verbose_name = "World Area"
         verbose_name_plural = "World Areas"
 
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
 
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
-
-
-# ------------------------------------------------------------
-#
-# store all rooms
-#
-# ------------------------------------------------------------
-class world_rooms(models.Model):
+class world_rooms(BaseObjects):
     "Defines all unique rooms."
-
-    # room's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a room typeclass.
-    # room's typeclass
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # room's name for display
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # room's description for display
-    desc = models.TextField(blank=True)
     
     # players can not fight in peaceful romms
     peaceful = models.BooleanField(blank=True, default=False)
@@ -325,35 +224,9 @@ class world_rooms(models.Model):
         verbose_name = "Room"
         verbose_name_plural = "Rooms"
 
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-        
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
 
-
-# ------------------------------------------------------------
-#
-# store all exits
-#
-# ------------------------------------------------------------
-class world_exits(models.Model):
+class world_exits(BaseObjects):
     "Defines all unique exits."
-
-    # exit's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of an exit typeclass.
-    # exit's typeclass
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # exit's name for display
-    # If it's empty, use the destination room's name.
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # exit's description for display
-    desc = models.TextField(blank=True)
 
     # the action verb to enter the exit (optional)
     verb = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -377,17 +250,328 @@ class world_exits(models.Model):
         verbose_name = "Exit"
         verbose_name_plural = "Exits"
 
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
+
+class world_objects(BaseObjects):
+    "Store all unique objects."
+
+    # The key of a world room.
+    # object's location, it must be a room
+    location = models.CharField(max_length=KEY_LENGTH)
+    
+    # Action's name
+    action = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # the condition for showing the object
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    # object's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "World Object"
+        verbose_name_plural = "World Objects"
+
+
+class common_objects(BaseObjects):
+    "Store all common objects."
+
+    # the max number of this object in one pile, must above 1
+    max_stack = models.PositiveIntegerField(blank=True, default=1)
+
+    # if can have only one pile of this object
+    unique = models.BooleanField(blank=True, default=False)
+
+    # if this object can be removed from the inventory when its number is decreased to zero.
+    can_remove = models.BooleanField(blank=True, default=True)
+
+    # if this object can discard
+    can_discard = models.BooleanField(blank=True, default=True)
+
+    # object's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Common Object"
+        verbose_name_plural = "Common Objects"
+
+
+class foods(common_objects):
+    "Foods inherit from common objects."
+
+    # Attributes. Value's type must be a python default value type.
+    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Food"
+        verbose_name_plural = "Foods"
+
+
+class skill_books(common_objects):
+    "Skill books inherit from common objects."
+
+    # skill's key
+    skill = models.CharField(max_length=KEY_LENGTH)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Skill Book"
+        verbose_name_plural = "Skill Books"
+
+
+class equipments(common_objects):
+    "equipments inherit from common objects."
+
+    # The key of an equipment position.
+    # equipment's position
+    position = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # The key of an equipment type.
+    # equipment's type
+    type = models.CharField(max_length=KEY_LENGTH)
+
+    # Attributes. Value's type must be a python default value type.
+    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Equipment"
+        verbose_name_plural = "Equipments"
+
+
+class world_npcs(BaseObjects):
+    "Store all NPCs."
+
+    # The key of a world room.
+    # NPC's location, it must be a room.
+    location = models.CharField(max_length=KEY_LENGTH)
+
+    # NPC's model. If it is empty, will use NPC's key as its model.
+    model = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # NPC's level
+    level = models.PositiveIntegerField(blank=True, default=1)
+    
+    # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
+    reborn_time = models.PositiveIntegerField(blank=True, default=0)
+
+    # the condition for showing the NPC
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    # NPC's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "World NPC"
+        verbose_name_plural = "World NPCs"
+
+
+class common_characters(BaseObjects):
+    "Store common characters."
+
+    # Character's model. If it is empty, character's key will be used as its model.
+    model = models.CharField(max_length=KEY_LENGTH)
+
+    # Character's level.
+    level = models.PositiveIntegerField(blank=True, default=1)
+    
+    # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
+    reborn_time = models.PositiveIntegerField(blank=True, default=0)
+
+    # Character's icon resource.
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Common Character List"
+        verbose_name_plural = "Common Character List"
 
     def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
+        super(common_characters, self).clean()
+
+        # check model and level
+        from muddery.worlddata.data_sets import DATA_SETS
+
+        try:
+            DATA_SETS.character_models.objects.get(key=self.model, level=self.level)
+        except Exception, e:
+            message = "Can not get this level's data."
+            levels = DATA_SETS.character_models.objects.filter(key=self.model)
+            available = [str(level.level) for level in levels]
+            if len(available) == 1:
+                message += " Available level: " + available[0]
+            elif len(available) > 1:
+                message += " Available levels: " + ", ".join(available)
+            raise ValidationError({"level": message})
+
+
+class shops(BaseObjects):
+    "Store all shops."
+
+    # the verb to open the shop
+    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # condition of the shop
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    # shop's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Shop"
+        verbose_name_plural = "Shops"
+
+
+class shop_goods(BaseObjects):
+    "All goods that sold in shops."
+
+    # shop's key
+    shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # the key of objects to sell
+    goods = models.CharField(max_length=KEY_LENGTH)
+
+    # number of shop goods
+    number = models.PositiveIntegerField(blank=True, default=1)
+
+    # the price of the goods
+    price = models.PositiveIntegerField(blank=True, default=1)
+
+    # the unit of the goods price
+    unit = models.CharField(max_length=KEY_LENGTH)
+
+    # visible condition of the goods
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Shop Object"
+        verbose_name_plural = "Shop Objects"
+
+
+class skills(models.Model):
+    "Store all skills."
+
+    # skill's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+
+    # The key of a skill typeclass.
+    # skill's typeclass
+    typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # skill's name for display
+    name = models.CharField(max_length=NAME_LENGTH)
+
+    # skill's description for display
+    desc = models.TextField(blank=True)
+
+    # skill's message when casting
+    message = models.TextField(blank=True)
+
+    # skill's cd
+    cd = models.FloatField(blank=True, default=0)
+
+    # if it is a passive skill
+    passive = models.BooleanField(blank=True, default=False)
+
+    # skill function's name
+    function = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # skill's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # skill's main type, used in autocasting skills.
+    main_type = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # skill's sub type, used in autocasting skills.
+    sub_type = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Skill"
+        verbose_name_plural = "Skills"
+
+
+class quests(BaseObjects):
+    "Store all quests."
+
+    # the condition to accept this quest.
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    # will do this action after a quest completed
+    action = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Quest"
+        verbose_name_plural = "Quests"
 
 
 # ------------------------------------------------------------
 #
-# locked exit's additional data
+# Other data.
 #
 # ------------------------------------------------------------
 class exit_locks(models.Model):
@@ -437,55 +621,6 @@ class two_way_exits(models.Model):
         verbose_name = "Two Way Exit"
         verbose_name_plural = "Two Way Exits"
 
-
-# ------------------------------------------------------------
-#
-# store all objects
-#
-# ------------------------------------------------------------
-class world_objects(models.Model):
-    "Store all unique objects."
-
-    # object's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of an object typeclass.
-    # object's typeclass
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # object's name
-    name = models.CharField(max_length=NAME_LENGTH)
-
-    # the object's destination
-    desc = models.TextField(blank=True)
-
-    # The key of a world room.
-    # object's location, it must be a room
-    location = models.CharField(max_length=KEY_LENGTH)
-    
-    # Action's name
-    action = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # the condition for showing the object
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # object's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "World Object"
-        verbose_name_plural = "World Objects"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
-        
 
 # ------------------------------------------------------------
 #
@@ -604,141 +739,6 @@ class quest_reward_list(loot_list):
 
 # ------------------------------------------------------------
 #
-# store all common objects
-#
-# ------------------------------------------------------------
-class common_objects(models.Model):
-    "Store all common objects."
-
-    # object's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of an object typeclass.
-    # object's typeclass
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # object's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-
-    # object's description for display
-    desc = models.TextField(blank=True)
-
-    # the max number of this object in one pile, must above 1
-    max_stack = models.PositiveIntegerField(blank=True, default=1)
-
-    # if can have only one pile of this object
-    unique = models.BooleanField(blank=True, default=False)
-
-    # if this object can be removed from the inventory when its number is decreased to zero.
-    can_remove = models.BooleanField(blank=True, default=True)
-
-    # if this object can discard
-    can_discard = models.BooleanField(blank=True, default=True)
-
-    # object's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Common Object"
-        verbose_name_plural = "Common Objects"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
-
-
-# ------------------------------------------------------------
-#
-# store all foods
-#
-# ------------------------------------------------------------
-class foods(common_objects):
-    "Foods inherit from common objects."
-
-    # Attributes. Value's type must be a python default value type.
-    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Food"
-        verbose_name_plural = "Foods"
-
-
-# ------------------------------------------------------------
-#
-# store all skill books
-#
-# ------------------------------------------------------------
-class skill_books(common_objects):
-    "Skill books inherit from common objects."
-
-    # skill's key
-    skill = models.CharField(max_length=KEY_LENGTH)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Skill Book"
-        verbose_name_plural = "Skill Books"
-
-
-# ------------------------------------------------------------
-#
-# store all equip_types
-#
-# ------------------------------------------------------------
-class equipment_types(models.Model):
-    "Store all equip types."
-
-    # equipment type's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
-
-    # type's name
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-
-    # type's description
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Equipment's Type"
-        verbose_name_plural = "Equipment's Types"
-
-    def __unicode__(self):
-        return self.name
-
-
-# ------------------------------------------------------------
-#
 # store all available equipment potisions
 #
 # ------------------------------------------------------------
@@ -764,103 +764,6 @@ class equipment_positions(models.Model):
     def __unicode__(self):
         return self.name
 
-# ------------------------------------------------------------
-#
-# store all equipments
-#
-# ------------------------------------------------------------
-class equipments(common_objects):
-    "equipments inherit from common objects."
-
-    # The key of an equipment position.
-    # equipment's position
-    position = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # The key of an equipment type.
-    # equipment's type
-    type = models.CharField(max_length=KEY_LENGTH)
-
-    # Attributes. Value's type must be a python default value type.
-    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Equipment"
-        verbose_name_plural = "Equipments"
-
-
-# ------------------------------------------------------------
-#
-# store all careers
-#
-# ------------------------------------------------------------
-class character_careers(models.Model):
-    "Store all careers."
-
-    # careers's type
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
-
-    # careers's name
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-
-    # careers's description
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Career"
-        verbose_name_plural = "Careers"
-
-    def __unicode__(self):
-        return self.name
-
-
-# ------------------------------------------------------------
-#
-# store career and equipment type's relationship
-#
-# ------------------------------------------------------------
-class career_equipments(models.Model):
-    "Store career and equipment type's relationship."
-
-    # The key of a character career.
-    # careers's type
-    career = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # The key of an equipment type.
-    # equipment's type
-    equipment = models.CharField(max_length=KEY_LENGTH)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Career Equip Relation"
-        verbose_name_plural = "Career Equip Relations"
-        unique_together = ("career", "equipment")
-        
         
 # ------------------------------------------------------------
 #
@@ -1006,124 +909,6 @@ class character_models(models.Model):
 
 # ------------------------------------------------------------
 #
-# store all NPCs
-#
-# ------------------------------------------------------------
-class world_npcs(models.Model):
-    "Store all NPCs."
-
-    # NPC's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a character typeclass.
-    # NPC's typeclass
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # NPC's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-
-    # NPC's description for display
-    desc = models.TextField(blank=True)
-
-    # The key of a world room.
-    # NPC's location, it must be a room.
-    location = models.CharField(max_length=KEY_LENGTH)
-
-    # NPC's model. If it is empty, will use NPC's key as its model.
-    model = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    # NPC's level
-    level = models.PositiveIntegerField(blank=True, default=1)
-    
-    # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
-    reborn_time = models.PositiveIntegerField(blank=True, default=0)
-
-    # the condition for showing the NPC
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # NPC's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "World NPC"
-        verbose_name_plural = "World NPCs"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
-
-
-# ------------------------------------------------------------
-#
-# store common characters
-#
-# ------------------------------------------------------------
-class common_characters(models.Model):
-    "Store common characters."
-
-    # Character's key.
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a character typeclass.
-    # Character's typeclass.
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # Character's name for display.
-    name = models.CharField(max_length=NAME_LENGTH)
-
-    # Character's description for display.
-    desc = models.TextField(blank=True)
-
-    # Character's model. If it is empty, character's key will be used as its model.
-    model = models.CharField(max_length=KEY_LENGTH)
-
-    # Character's level.
-    level = models.PositiveIntegerField(blank=True, default=1)
-    
-    # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
-    reborn_time = models.PositiveIntegerField(blank=True, default=0)
-
-    # Character's icon resource.
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Common Character List"
-        verbose_name_plural = "Common Character List"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
-
-        # check model and level
-        from muddery.worlddata.data_sets import DATA_SETS
-
-        try:
-            DATA_SETS.character_models.objects.get(key=self.model, level=self.level)
-        except Exception, e:
-            message = "Can not get this level's data."
-            levels = DATA_SETS.character_models.objects.filter(key=self.model)
-            available = [str(level.level) for level in levels]
-            if len(available) == 1:
-                message += " Available level: " + available[0]
-            elif len(available) > 1:
-                message += " Available levels: " + ", ".join(available)
-            raise ValidationError({"level": message})
-
-
-# ------------------------------------------------------------
-#
 # character's default objects
 #
 # ------------------------------------------------------------
@@ -1151,95 +936,6 @@ class default_objects(models.Model):
 
 # ------------------------------------------------------------
 #
-# shops
-#
-# ------------------------------------------------------------
-class shops(models.Model):
-    "Store all shops."
-
-    # shop's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a shop typeclass.
-    # Shop's typeclass.
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # shop's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-
-    # shop's description for display
-    desc = models.TextField(blank=True)
-
-    # the verb to open the shop
-    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # condition of the shop
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # shop's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Shop"
-        verbose_name_plural = "Shops"
-
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
-
-
-# ------------------------------------------------------------
-#
-# shop goods
-#
-# ------------------------------------------------------------
-class shop_goods(models.Model):
-    "All goods that sold in shops."
-
-    # goods's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # the typeclass of this goods
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-    
-    # goods's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # shop's key
-    shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # the key of objects to sell
-    goods = models.CharField(max_length=KEY_LENGTH)
-
-    # number of shop goods
-    number = models.PositiveIntegerField(blank=True, default=1)
-
-    # the price of the goods
-    price = models.PositiveIntegerField(blank=True, default=1)
-
-    # the unit of the goods price
-    unit = models.CharField(max_length=KEY_LENGTH)
-
-    # visible condition of the goods
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Shop Object"
-        verbose_name_plural = "Shop Objects"
-
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
-
-
-# ------------------------------------------------------------
-#
 # store npc's shop
 #
 # ------------------------------------------------------------
@@ -1261,87 +957,6 @@ class npc_shops(models.Model):
         verbose_name = "NPC Shop"
         verbose_name_plural = "NPC Shops"
         unique_together = ("npc", "shop")
-
-
-# ------------------------------------------------------------
-#
-# store all skills
-#
-# ------------------------------------------------------------
-class skills(models.Model):
-    "Store all skills."
-
-    # skill's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a skill typeclass.
-    # skill's typeclass
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # skill's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-    
-    # whether the skill is available
-    available = models.BooleanField(blank=True, default=True)
-
-    # skill's description for display
-    desc = models.TextField(blank=True)
-
-    # skill's message when casting
-    message = models.TextField(blank=True)
-
-    # skill's cd
-    cd = models.FloatField(blank=True, default=0)
-    
-    # growth formula of the skill's cd
-    cd_growth = models.TextField(blank=True)
-    
-    # skill's prepare time
-    prepare_time = models.FloatField(blank=True, default=0)
-    
-    # growth formula of the skill's prepare time
-    prepare_time_growth = models.TextField(blank=True)
-    
-    # effect's duration
-    duration = models.FloatField(blank=True, default=0)
-    
-    # growth formula of the duration
-    duration_growth = models.TextField(blank=True)
-    
-    # skill target's typeclass
-    target_type = models.CharField(max_length=KEY_LENGTH, blank=True)
-    
-    # skill target's range
-    target_range = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    # whether it is a passive skill
-    passive = models.BooleanField(blank=True, default=False)
-
-    # skill's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-    
-    # skill's main type, used in autocasting skills.
-    main_type = models.CharField(max_length=KEY_LENGTH, blank=True)
-    
-    # skill's sub type, used in autocasting skills.
-    sub_type = models.CharField(max_length=KEY_LENGTH, blank=True)
-    
-    # condition to cast skill
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Skill"
-        verbose_name_plural = "Skills"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
 
 
 # ------------------------------------------------------------
@@ -1379,234 +994,6 @@ class skill_types(models.Model):
 
 # ------------------------------------------------------------
 #
-# skill target types
-#
-# ------------------------------------------------------------
-class skill_target_types(SystemData):
-    """
-    Skill's target type.
-    """
-
-    # the readable name of the skill target's type
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-    
-    # skill target type's description
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Skill Target Type"
-        verbose_name_plural = "Skill Target Types"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
-
-
-# ------------------------------------------------------------
-#
-# skill range types
-#
-# ------------------------------------------------------------
-class skill_range_types(SystemData):
-    """
-    Skill range's type.
-    """
-
-    # the readable name of the skill range's type
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-    
-    # skill range type's description
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Skill Range Type"
-        verbose_name_plural = "Skill Range Types"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
-
-
-# ------------------------------------------------------------
-#
-# skill costs
-#
-# ------------------------------------------------------------
-class skill_costs(models.Model):
-    """
-    Discribs how many resources a skill costs.
-    """
-    # cost's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a skill.
-    # skill's key
-    skill = models.CharField(max_length=KEY_LENGTH)
-
-    # resource's type
-    resource_type = models.CharField(max_length=KEY_LENGTH)
-    
-    # resource's key
-    resource = models.CharField(max_length=KEY_LENGTH)
-    
-    # resource's minimum cost
-    min_cost = models.PositiveIntegerField(blank=True, default=0)
-    
-    # growth formula of the minimum cost
-    min_cost_growth = models.TextField(blank=True)
-    
-    # resource's maximum cost
-    max_cost = models.PositiveIntegerField(blank=True, default=0)
-    
-    # growth formula of the maximum cost
-    max_cost_growth = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Skill's Cost"
-        verbose_name_plural = "Skill's Costs"
-
-    def __unicode__(self):
-        return self.skill + "-" + self.resource_type + "-" + self.resource
-
-    def clean(self):
-        auto_generate_key(self)
-
-
-# ------------------------------------------------------------
-#
-# skill resource types
-#
-# ------------------------------------------------------------
-class skill_resource_types(SystemData):
-    """
-    Skill resource's type.
-    """
-
-    # the readable name of the skill resource's type
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-    
-    # skill range type's description
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Skill Resource Type"
-        verbose_name_plural = "Skill Resource Types"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
-        
-
-# ------------------------------------------------------------
-#
-# skill effects
-#
-# ------------------------------------------------------------
-class skill_effects(models.Model):
-    """
-    Discribs skills' effects.
-    """
-    # effect's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a skill.
-    # skill's key
-    skill = models.CharField(max_length=KEY_LENGTH)
-
-    # effect's type
-    effect_type = models.CharField(max_length=KEY_LENGTH)
-    
-    # effect's key
-    effect = models.CharField(max_length=KEY_LENGTH)
-    
-    # effect's minimum value
-    min_value = models.PositiveIntegerField(blank=True, default=0)
-    
-    # growth formula of the minimum value
-    min_value_growth = models.TextField(blank=True)
-    
-    # effect's maximum value
-    max_value = models.PositiveIntegerField(blank=True, default=0)
-    
-    # growth formula of the maximum value
-    max_value_growth = models.TextField(blank=True)
-    
-    # effect's duration
-    duration = models.FloatField(blank=True, default=0)
-    
-    # growth formula of the duration
-    duration_growth = models.TextField(blank=True)
-    
-    # effect's interval
-    interval = models.FloatField(blank=True, default=0)
-
-    # growth formula of the interval
-    interval_growth = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Skill's Effect"
-        verbose_name_plural = "Skill's Effects"
-
-    def __unicode__(self):
-        return self.skill + "-" + self.effect_type + "-" + self.effect
-
-    def clean(self):
-        auto_generate_key(self)
-
-
-# ------------------------------------------------------------
-#
-# skill effect types
-#
-# ------------------------------------------------------------
-class skill_effect_types(SystemData):
-    """
-    Skill effect's type.
-    """
-
-    # the readable name of the skill effect's type
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-    
-    # skill effect type's description
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Skill Effect Type"
-        verbose_name_plural = "Skill Effect Types"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
-
-
-# ------------------------------------------------------------
-#
 # character's default skills
 #
 # ------------------------------------------------------------
@@ -1627,77 +1014,6 @@ class default_skills(models.Model):
         verbose_name = "Character's Skill"
         verbose_name_plural = "Character's Skills"
         unique_together = ("character", "skill")
-
-
-# ------------------------------------------------------------
-#
-# store all quests
-#
-# ------------------------------------------------------------
-class quests(models.Model):
-    "Store all quests."
-
-    # quest's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a quest typeclass.
-    # quest's typeclass
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # quest's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-
-    # quest's description for display
-    desc = models.TextField(blank=True)
-
-    # the condition to accept this quest.
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # will do this action after a quest completed
-    action = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Quest"
-        verbose_name_plural = "Quests"
-
-    def __unicode__(self):
-        return self.name + " (" + self.key + ")"
-
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
-
-
-# ------------------------------------------------------------
-#
-# quest objective's type
-#
-# ------------------------------------------------------------
-class quest_objective_types(SystemData):
-    """
-    quest objective's type
-
-    The key is type's key. It must be the values in utils.defines.
-    """
-
-    # the readable name of the type
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-
-    # type's description (optional)
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Quest Objective's Type"
-        verbose_name_plural = "Quest Objective's Types"
-
-    def __unicode__(self):
-        return self.name
 
 
 # ------------------------------------------------------------
@@ -1739,35 +1055,6 @@ class quest_objectives(models.Model):
 
 # ------------------------------------------------------------
 #
-# quest dependency's type
-#
-# ------------------------------------------------------------
-class quest_dependency_types(SystemData):
-    """
-    quest dependency's type"
-
-    The key is dependency's key. It must be the values in utils.defines.
-    """
-
-    # the readable name of the dependency
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-
-    # dependency's description (optional)
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Quest dependency's Type"
-        verbose_name_plural = "Quest dependency's Types"
-
-    def __unicode__(self):
-        return self.name
-
-
-# ------------------------------------------------------------
-#
 # store quest dependencies
 #
 # ------------------------------------------------------------
@@ -1792,64 +1079,6 @@ class quest_dependencies(models.Model):
         app_label = "worlddata"
         verbose_name = "Quest Dependency"
         verbose_name_plural = "Quest Dependency"
-
-
-# ------------------------------------------------------------
-#
-# event's type
-#
-# ------------------------------------------------------------
-class event_types(SystemData):
-    """
-    event's type
-
-    The key is event's key. It must be the values in utils.defines.
-    """
-
-    # the readable name of the event type
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-
-    # event's description (optional)
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Event's Type"
-        verbose_name_plural = "Event's Types"
-
-    def __unicode__(self):
-        return self.name
-
-
-# ------------------------------------------------------------
-#
-# event trigger's types
-#
-# ------------------------------------------------------------
-class event_trigger_types(SystemData):
-    """
-    event trigger's type
-
-    The key is type's key. It must be the values in utils.defines.
-    """
-
-    # the readable name of the event trigger type
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-
-    # type's description (optional)
-    desc = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Event Trigger Type"
-        verbose_name_plural = "Event Trigger Types"
-
-    def __unicode__(self):
-        return self.name
 
 
 # ------------------------------------------------------------

@@ -20,16 +20,18 @@ from evennia.typeclasses.models import DbHolder
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property, class_from_module
 from muddery.typeclasses.objects import MudderyObject
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.utils.builder import build_object
 from muddery.utils.loot_handler import LootHandler
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
-from muddery.utils.utils import search_obj_data_key, get_class
+from muddery.utils.utils import search_obj_data_key
 from muddery.utils.localized_strings_handler import _
 
 
-class MudderyCharacter(get_class("CLASS_BASE_OBJECT"), DefaultCharacter):
+@typeclass_mapping("BASE_CHARACTER")
+class MudderyCharacter(TYPECLASS("BASE_OBJECT"), DefaultCharacter):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:

@@ -7,11 +7,12 @@ from evennia.utils import logger
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.exception import MudderyError
 from muddery.utils.attributes_info_handler import FOOD_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO
-from muddery.utils.utils import get_class
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 from muddery.utils.localized_strings_handler import _
 
 
-class MudderyCommonObject(get_class("CLASS_BASE_OBJECT")):
+@typeclass_mapping("COMMON_OBJECT")
+class MudderyCommonObject(TYPECLASS("BASE_OBJECT")):
     """
     This is a common object. Players can put it in their inventories.
     
@@ -111,7 +112,8 @@ class MudderyCommonObject(get_class("CLASS_BASE_OBJECT")):
         return _("No effect."), 0
 
 
-class MudderyFood(MudderyCommonObject):
+@typeclass_mapping("FOOD")
+class MudderyFood(TYPECLASS("COMMON_OBJECT")):
     """
     This is a food. Players can use it to change their properties, such as hp, mp,
     strength, etc.
@@ -187,7 +189,8 @@ class MudderyFood(MudderyCommonObject):
         return commands
 
 
-class MudderyEquipment(MudderyCommonObject):
+@typeclass_mapping("EQUIPMENT")
+class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
     """
     This is a equipment. Players can equip it to change their properties, such as attack, defence,
     etc.
@@ -263,7 +266,8 @@ class MudderyEquipment(MudderyCommonObject):
         return commands
 
 
-class MudderySkillBook(MudderyCommonObject):
+@typeclass_mapping("SKILL_BOOK")
+class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
     """
     This is a skill book. Players can use it to learn a new skill.
     """
@@ -303,3 +307,4 @@ class MudderySkillBook(MudderyCommonObject):
             return _("You learned skill."), 1
         else:
             return _("No effect."), 0
+

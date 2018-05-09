@@ -4,7 +4,6 @@ All available requests.
 
 from __future__ import print_function
 
-import json
 from django.conf import settings
 from muddery.utils.exception import MudderyError
 
@@ -21,7 +20,7 @@ def request_mapping(*args, **kwargs):
     """
     if args:
         func = args[0]
-        REQUEST_MAPPING.add_request_mapping(*args)
+        REQUEST_SET.add_request_mapping(*args)
         def decorate(args):
             return func(args)
         return decorate
@@ -37,14 +36,12 @@ def request_mapping(*args, **kwargs):
             Args:
                 func: function.
             """
-            REQUEST_MAPPING.add_request_mapping(func, path, key, login, staff)
-            def decorate(args):
-                return func(args)
-            return decorate
+            REQUEST_SET.add_request_mapping(func, path, key, login, staff)
+            return func
         return wrapper
 
 
-class RequestMapping(object):
+class RequestSet(object):
     """
     All available requests.
     """
@@ -56,7 +53,7 @@ class RequestMapping(object):
         self.path_prefix = path_prefix
         self.request_dict = {}
         
-    def add_request_mapping(self, func, path=None, key=None, login=True, staff=True):
+    def add(self, func, path=None, key=None, login=True, staff=True):
         """
         Declear a web service controller.
 
@@ -86,12 +83,12 @@ class RequestMapping(object):
             "staff": staff,
         }
 
-    def get_function(self, path, key):
+    def get(self, path, key):
         """
         Get the function responds to the request.
         """
         return self.request_dict.get((path, key,), None)
 
 
-REQUEST_MAPPING = RequestMapping(settings.WORLD_DATA_API_PATH)
+REQUEST_SET = RequestSet(settings.WORLD_DATA_API_PATH)
 

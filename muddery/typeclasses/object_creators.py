@@ -13,13 +13,14 @@ from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 from muddery.typeclasses.objects import MudderyObject
 from muddery.utils.loot_handler import LootHandler
-from muddery.utils.utils import get_class
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 from muddery.utils.localized_strings_handler import _
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
 
 
-class MudderyObjectCreator(get_class("CLASS_BASE_OBJECT")):
+@typeclass_mapping("WORLD_OBJECT_CREATOR")
+class MudderyObjectCreator(TYPECLASS("WORLD_OBJECT")):
     """
     This object loads attributes from world data on init automatically.
     """
@@ -57,3 +58,4 @@ class MudderyObjectCreator(get_class("CLASS_BASE_OBJECT")):
         Loot objects.
         """
         self.loot_handler.loot(caller)
+

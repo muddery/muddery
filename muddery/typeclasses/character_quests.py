@@ -15,14 +15,15 @@ from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
-from muddery.utils.utils import get_class
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 
 
-class MudderyQuest(get_class("CLASS_BASE_OBJECT")):
+@typeclass_mapping("QUEST")
+class MudderyQuest(TYPECLASS("BASE_OBJECT")):
     """
     This class controls quest's objectives. Hooks are called when a character doing some things.
     """

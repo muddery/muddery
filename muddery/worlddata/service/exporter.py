@@ -13,7 +13,7 @@ from evennia.settings_default import GAME_DIR
 from muddery.server.launcher import configs
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils import writers
-from muddery.worlddata.dao import common_mapper
+from muddery.worlddata.dao import general_mapper
 
 
 def export_file(filename, table_name, file_type=None):
@@ -34,11 +34,11 @@ def export_file(filename, table_name, file_type=None):
     if not writer:
         raise(MudderyError(ERR.export_data_error, "Can not export table %s" % table_name))
 
-    fields = common_mapper.get_all_fields(table_name)
+    fields = general_mapper.get_all_fields(table_name)
     header = [field.name for field in fields]
     writer.writeln(header)
 
-    records = common_mapper.get_all_records(table_name)
+    records = general_mapper.get_all_records(table_name)
     for record in records:
         line = [str(record.serializable_value(field.get_attname())) for field in fields]
         writer.writeln(line)
@@ -66,7 +66,7 @@ def export_zip_all(file_obj, file_type=None):
         archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED)
 
         # get model names
-        models = common_mapper.query_all_models()
+        models = general_mapper.get_all_models()
         for model in models:
             model_name = model._meta.object_name
             export_file(temp, model_name, file_type)

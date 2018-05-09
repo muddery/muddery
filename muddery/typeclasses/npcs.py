@@ -11,11 +11,12 @@ from muddery.utils.localized_strings_handler import _
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.builder import build_object, delete_object
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.utils.utils import get_class
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 from muddery.worlddata.data_sets import DATA_SETS
 
 
-class MudderyNPC(get_class("CLASS_BASE_CHARACTER")):
+@typeclass_mapping("NPC")
+class MudderyNPC(TYPECLASS("BASE_CHARACTER")):
     """
     Default NPC. NPCs are friendly to players, they can not be attacked.
     """

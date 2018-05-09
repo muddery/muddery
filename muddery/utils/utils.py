@@ -14,8 +14,6 @@ from django.conf import settings
 from evennia.utils import search, logger
 from evennia.utils.utils import class_from_module
 from muddery.server.launcher import configs
-from muddery.worlddata.data_sets import DATA_SETS
-import traceback
 
 
 def get_muddery_version():
@@ -25,20 +23,6 @@ def get_muddery_version():
     import muddery
     return muddery.__version__
     
-    
-def get_class(typeclass_key):
-    """
-    Get a class from the typeclass name.
-    """
-    try:
-        # get typeclass model
-        typeclass = DATA_SETS.typeclasses.objects.get(key=typeclass_key)
-        return class_from_module(typeclass.path)
-    except Exception, e:
-        ostring = "Can not get typeclass of %s: %s." % (typeclass_key, e)
-        print(ostring)
-        print(traceback.print_exc())
-
 
 def set_obj_data_key(obj, key):
     """

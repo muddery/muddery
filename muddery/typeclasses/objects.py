@@ -27,8 +27,10 @@ from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.desc_handler import DESC_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 
 
+@typeclass_mapping("BASE_OBJECT")
 class MudderyObject(DefaultObject):
     """
     This object loads attributes from world data on init automatically.
@@ -772,3 +774,8 @@ class MudderyObject(DefaultObject):
         })
 
         destination.msg_contents(string.format(**mapping), exclude=(self, ))
+
+
+@typeclass_mapping("WORLD_OBJECT")
+class MudderyWorldObject(TYPECLASS("BASE_OBJECT")):
+    pass

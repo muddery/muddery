@@ -14,13 +14,15 @@ from muddery.utils import utils
 from muddery.typeclasses.objects import MudderyObject
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.localized_strings_handler import _
-from muddery.utils.utils import get_class
+from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultExit
 from django.conf import settings
 
 
-class MudderyExit(get_class("CLASS_BASE_OBJECT"), DefaultExit):
+@typeclass_mapping("COMMON_EXIT")
+@typeclass_mapping("CLASS_TWO_WAY_EXIT")
+class MudderyExit(TYPECLASS("BASE_OBJECT"), DefaultExit):
     """
     Exits are connectors between rooms. Exits are normal Objects except
     they defines the `destination` property. It also does work in the
@@ -148,7 +150,8 @@ class MudderyReverseExit(MudderyExit):
             self.set_location(self.dfield.destination)
 
 
-class MudderyLockedExit(MudderyExit):
+@typeclass_mapping("LOCKED_EXIT")
+class MudderyLockedExit(TYPECLASS("COMMON_EXIT")):
     """
     Characters must unlock these exits to pass it.
     The view and commands of locked exits are different from unlocked exits.
@@ -258,3 +261,4 @@ class MudderyLockedExit(MudderyExit):
             cmds = [{"name": verb, "cmd": "unlock", "args": self.dbref}]
 
         return cmds
+

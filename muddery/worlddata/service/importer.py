@@ -13,7 +13,7 @@ from muddery.server.launcher.utils import copy_tree
 from muddery.utils import readers
 from muddery.utils.exception import MudderyError, ERR
 from muddery.worlddata.dao.data_importer import import_file
-from muddery.worlddata.dao import common_mapper
+from muddery.worlddata.dao import general_mapper
 
 
 def unzip_data_all(fp):
@@ -38,7 +38,7 @@ def unzip_data_all(fp):
         UPGRADE_HANDLER.upgrade_data(source_path, None, configs.MUDDERY_LIB)
 
         # import tables one by one
-        models = common_mapper.query_all_models()
+        models = general_mapper.get_all_models()
         for model in models:
             table_name = model.__name__
             filenames = glob.glob( os.path.join(source_path, table_name) + ".*")

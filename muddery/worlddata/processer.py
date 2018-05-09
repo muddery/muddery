@@ -11,7 +11,7 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError, ERR
-from muddery.worlddata.request_mapping import REQUEST_MAPPING
+from muddery.mappings.request_set import REQUEST_SET
 import muddery.worlddata.controllers
 from muddery.worlddata.utils.response import error_response
 
@@ -63,7 +63,7 @@ class Processer(object):
 
         print("request: '%s' '%s' '%s'" % (path, func, args))
 
-        func_data = REQUEST_MAPPING.get_function(path, func)
+        func_data = REQUEST_SET.get(path, func)
         if not func_data:
             logger.log_errmsg("Can not find API: %s %s" % (path, func))
             return error_response(ERR.no_api, msg="Can not find API: %s %s" % (path, func))

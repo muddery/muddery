@@ -7,7 +7,7 @@ from __future__ import print_function
 from django.conf import settings
 from django.contrib import auth
 from evennia.utils import logger
-from muddery.worlddata.request_mapping import request_mapping
+from muddery.mappings.request_set import request_mapping
 from muddery.worlddata.service import data_query
 from muddery.worlddata.utils import utils
 from muddery.utils.exception import MudderyError, ERR
