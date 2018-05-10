@@ -16,7 +16,6 @@ from __future__ import print_function
 
 import os
 import sys
-import traceback
 import django.core.management
 from argparse import ArgumentParser
 from muddery.server.launcher import configs
@@ -32,7 +31,16 @@ def import_local_data():
     Import all local data files to models.
     """
     from django.conf import settings
-    from muddery.worlddata.data_sets import DATA_SETS
+    from muddery.worlddata.service import importer
+
+    ##########################
+    # load system data
+    ##########################
+    # system data file's path
+    system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
+
+    # load all system data
+    importer.import_data_path(system_data_path)
 
     ##########################
     # load custom data
@@ -41,13 +49,7 @@ def import_local_data():
     custom_data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
 
     # load all custom data
-    for data_handlers in DATA_SETS.all_handlers:
-        try:
-            data_handlers.import_from_path(custom_data_path)
-        except Exception, e:
-            err_message = "Cannot import game data. %s" % e
-            print(err_message)
-            traceback.print_stack()
+    importer.import_data_path(custom_data_path)
 
 
 def main():

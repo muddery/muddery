@@ -337,20 +337,9 @@ class MudderyObject(DefaultObject):
         Args:
             typeclass_key: (string) Typeclass's key.
         """
-        typeclass_path = ""
-        try:
-            data = DATA_SETS.typeclasses.objects.get(key=typeclass_key)
-            typeclass_path = data.path
-        except Exception, e:
-            pass
-
-        if not typeclass_path:
-            if typeclass_key:
-                typeclass_path = typeclass_key
-            else:
-                typeclass_path = settings.BASE_OBJECT_TYPECLASS
+        typeclass_cls = TYPECLASS(typeclass_key)
         
-        if self.is_typeclass(typeclass_path, exact=True):
+        if type(self) == typeclass_cls:
             # No change.
             return
 
@@ -361,8 +350,8 @@ class MudderyObject(DefaultObject):
         # Set new typeclass.
         # It will call target typeclass's at_object_creation hook.
         # You should prevent at_object_creation rewrite current attributes.
-        self.swap_typeclass(typeclass_path, clean_attributes=False)
-        if typeclass_path != self.typeclass_path:
+        self.swap_typeclass(typeclass_cls, clean_attributes=False)
+        if typeclass_cls.path != self.typeclass_path:
             logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_data_key(), typeclass_path))
             return
         

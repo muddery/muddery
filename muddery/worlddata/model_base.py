@@ -443,13 +443,13 @@ class common_characters(BaseObjects):
         super(common_characters, self).clean()
 
         # check model and level
-        from muddery.worlddata.data_sets import DATA_SETS
+        from muddery.worlddata.dao.model_mapper import CHARACTER_MODELS
 
         try:
-            DATA_SETS.character_models.objects.get(key=self.model, level=self.level)
+            CHARACTER_MODELS.get(key=self.model, level=self.level)
         except Exception, e:
-            message = "Can not get this level's data."
-            levels = DATA_SETS.character_models.objects.filter(key=self.model)
+            message = "Can not get the level data."
+            levels = CHARACTER_MODELS.filter(key=self.model)
             available = [str(level.level) for level in levels]
             if len(available) == 1:
                 message += " Available level: " + available[0]
@@ -735,6 +735,33 @@ class quest_reward_list(loot_list):
         verbose_name = "Quest's reward List"
         verbose_name_plural = "Quest's reward Lists"
         unique_together = ("provider", "object")
+
+
+# ------------------------------------------------------------
+#
+# store all equip_types
+#
+# ------------------------------------------------------------
+class equipment_types(models.Model):
+    "Store all equip types."
+
+    # equipment type's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # type's name
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
+
+    # type's description
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        verbose_name = "Equipment's Type"
+        verbose_name_plural = "Equipment's Types"
+
+    def __unicode__(self):
+        return self.name
 
 
 # ------------------------------------------------------------

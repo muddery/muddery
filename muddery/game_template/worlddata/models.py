@@ -16,26 +16,6 @@ class game_settings(model_base.game_settings):
 
 # ------------------------------------------------------------
 #
-# all class's categories
-#
-# ------------------------------------------------------------
-class class_categories(model_base.class_categories):
-    "all class's categories"
-    pass
-
-
-# ------------------------------------------------------------
-#
-# store all typeclasses
-#
-# ------------------------------------------------------------
-class typeclasses(model_base.typeclasses):
-    "store all typeclasses"
-    pass
-
-
-# ------------------------------------------------------------
-#
 # world areas
 #
 # ------------------------------------------------------------
@@ -176,27 +156,6 @@ class equipments(model_base.equipments):
 
 # ------------------------------------------------------------
 #
-# store all careers
-#
-# ------------------------------------------------------------
-class character_careers(model_base.character_careers):
-    "Store all careers."
-    pass
-
-
-# ------------------------------------------------------------
-#
-# store career and equipment type's relationship
-#
-# ------------------------------------------------------------
-class career_equipments(model_base.career_equipments):
-    "Store career and equipment type's relationship."
-    pass
-
-
-
-# ------------------------------------------------------------
-#
 # character attributes
 #
 # ------------------------------------------------------------
@@ -325,30 +284,6 @@ class skill_types(model_base.skill_types):
     pass
 
 
-# ------------------------------------------------------------
-#
-# skill costs
-#
-# ------------------------------------------------------------
-class skill_costs(model_base.skill_costs):
-    """
-    Discribs how many resources a skill costs.
-    """
-    pass
-    
-    
-# ------------------------------------------------------------
-#
-# skill effects
-#
-# ------------------------------------------------------------
-class skill_effects(model_base.skill_costs):
-    """
-    Discribs skills' effects.
-    """
-    pass
-
-
 #------------------------------------------------------------
 #
 # character skills
@@ -379,16 +314,6 @@ class quest_reward_list(model_base.quest_reward_list):
     pass
 
 
-# ------------------------------------------------------------
-#
-# quest objective's type
-#
-# ------------------------------------------------------------
-class quest_objective_types(model_base.quest_objective_types):
-    "quest objective's type"
-    pass
-
-
 #------------------------------------------------------------
 #
 # store quest objectives
@@ -401,41 +326,11 @@ class quest_objectives(model_base.quest_objectives):
 
 #------------------------------------------------------------
 #
-# store quest dependency types
-#
-#------------------------------------------------------------
-class quest_dependency_types(model_base.quest_dependency_types):
-    "Store quest dependency."
-    pass
-
-
-#------------------------------------------------------------
-#
 # store quest dependencies
 #
 #------------------------------------------------------------
 class quest_dependencies(model_base.quest_dependencies):
     "Store quest dependency."
-    pass
-
-
-# ------------------------------------------------------------
-#
-# event's type
-#
-# ------------------------------------------------------------
-class event_types(model_base.event_types):
-    "Event's type"
-    pass
-
-
-# ------------------------------------------------------------
-#
-# event triggers
-#
-# ------------------------------------------------------------
-class event_trigger_types(model_base.event_trigger_types):
-    "Event's trigger types"
     pass
 
 

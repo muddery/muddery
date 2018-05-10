@@ -21,6 +21,12 @@ class BaseCommonMapper(object):
     def all(self):
         return self.objects.all()
 
+    def get(self, **kwargs):
+        return self.objects.get(**kwargs)
+
+    def filter(self, **kwargs):
+        return self.objects.filter(**kwargs)
+
 
 class BaseObjectsMapper(BaseCommonMapper):
     """

@@ -9,7 +9,7 @@ from evennia.utils import logger
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.dao import general_mapper
-from muddery.worlddata.dao.form_mapper import FORMS_MAPPER
+from muddery.mappings.form_set import FORM_SET
 
 
 def query_form(table_name, record_id=None):
@@ -20,7 +20,7 @@ def query_form(table_name, record_id=None):
         table_name: (string) data table's name.
         record_id: (string, optional) record's id. If it is empty, query an empty form.
     """
-    form_class = FORMS_MAPPER.get_form(table_name)
+    form_class = FORM_SET.get(table_name)
     if not form_class:
         raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
@@ -68,7 +68,7 @@ def save_form(values, table_name, record_id=None):
         table_name: (string) data table's name.
         record_id: (string, optional) record's id. If it is empty, add a new record.
     """
-    form_class = FORMS_MAPPER.get_form(table_name)
+    form_class = FORM_SET.get(table_name)
     if not form_class:
         raise MudderyError(ERR.no_table, "Can not find table: %s" % table_name)
 
@@ -99,4 +99,3 @@ def delete_record(table_name, record_id):
     Delete a record of a table.
     """
     general_mapper.delete_record_by_id(table_name, record_id)
-

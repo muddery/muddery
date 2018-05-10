@@ -20,10 +20,8 @@ def request_mapping(*args, **kwargs):
     """
     if args:
         func = args[0]
-        REQUEST_SET.add_request_mapping(*args)
-        def decorate(args):
-            return func(args)
-        return decorate
+        REQUEST_SET.add(*args)
+        return func
 
     else:
         path = kwargs.get("path", None)
@@ -36,7 +34,7 @@ def request_mapping(*args, **kwargs):
             Args:
                 func: function.
             """
-            REQUEST_SET.add_request_mapping(func, path, key, login, staff)
+            REQUEST_SET.add(func, path, key, login, staff)
             return func
         return wrapper
 
@@ -51,7 +49,7 @@ class RequestSet(object):
                 path_prefix = "/" + path_prefix
 
         self.path_prefix = path_prefix
-        self.request_dict = {}
+        self.dict = {}
         
     def add(self, func, path=None, key=None, login=True, staff=True):
         """
@@ -71,13 +69,16 @@ class RequestSet(object):
         elif path[0] != "/":
             path = "/" + path
 
+        if not path and not key:
+            raise MudderyError("Missing request's path and key.")
+
         if not key:
             key = ""
 
-        if self.request_dict.has_key((path, key,)):
+        if self.dict.has_key((path, key,)):
             raise MudderyError("Request's name duplicated.")
 
-        self.request_dict[(path, key,)] = {
+        self.dict[(path, key,)] = {
             "func": func,
             "login": login,
             "staff": staff,
@@ -87,7 +88,7 @@ class RequestSet(object):
         """
         Get the function responds to the request.
         """
-        return self.request_dict.get((path, key,), None)
+        return self.dict.get((path, key,), None)
 
 
 REQUEST_SET = RequestSet(settings.WORLD_DATA_API_PATH)

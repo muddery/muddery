@@ -33,6 +33,15 @@ EQUIPMENTS = BaseObjectsMapper("equipments")
 
 COMMON_CHARACTERS = BaseObjectsMapper("common_characters")
 
+SHOPS = BaseObjectsMapper("shops")
+
+SHOP_GOODS = BaseObjectsMapper("shop_goods")
+
+SKILLS = BaseObjectsMapper("skills")
+
+QUESTS = BaseObjectsMapper("quests")
+
+
 # ------------------------------------------------------------
 #
 # other data mapper
@@ -52,8 +61,6 @@ TWO_WAY_EXITS = BaseCommonMapper("two_way_exits")
 OBJECT_CREATORS = BaseObjectsMapper("object_creators")
 
 CREATOR_LOOT_LIST = BaseCommonMapper("creator_loot_list")
-
-LOOT_LIST = BaseCommonMapper("loot_list")
 
 CHARACTER_LOOT_LIST = BaseCommonMapper("character_loot_list")
 

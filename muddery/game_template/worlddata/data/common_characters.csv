@@ -1,2 +1,2 @@
 key,name,typeclass,desc,model,level,reborn_time
-player,Player,CLASS_PLAYER,This is a player.,MODEL_PLAYER,1,10
+player,Player,PLAYER_CHARACTER,This is a player.,MODEL_PLAYER,1,10

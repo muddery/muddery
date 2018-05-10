@@ -37,14 +37,8 @@ def unzip_data_all(fp):
         # Upgrade game data.
         UPGRADE_HANDLER.upgrade_data(source_path, None, configs.MUDDERY_LIB)
 
-        # import tables one by one
-        models = general_mapper.get_all_models()
-        for model in models:
-            table_name = model.__name__
-            filenames = glob.glob( os.path.join(source_path, table_name) + ".*")
-
-            if filenames:
-                import_file(filenames[0], table_name=table_name)
+        # import data from path
+        import_data_path(source_path)
 
     finally:
         shutil.rmtree(temp_path)
@@ -78,11 +72,27 @@ def unzip_resources_all(fp):
         shutil.rmtree(temp_path)
 
 
+def import_data_path(path):
+    """
+    Import data from path.
+
+    Args:
+        path: (string) data path.
+    """
+
+    # import tables one by one
+    models = general_mapper.get_all_models()
+    for model in models:
+        table_name = model.__name__
+        file_names = glob.glob(os.path.join(path, table_name) + ".*")
+
+        if file_names:
+            import_file(file_names[0], table_name=table_name)
+
+
 def import_data_file(fp, table_name=None, file_type=None):
     """
     Import a single data file.
     """
     fp.flush()
     import_file(fp.name, table_name=table_name, file_type=file_type)
-    
-

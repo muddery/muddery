@@ -16,9 +16,9 @@ from muddery.worlddata.data_sets import DATA_SETS
 
 
 @typeclass_mapping("NPC")
-class MudderyNPC(TYPECLASS("BASE_CHARACTER")):
+class MudderyNPC(TYPECLASS("NON_PLAYER")):
     """
-    Default NPC. NPCs are friendly to players, they can not be attacked.
+    Neutral or friendly NPC. They can not be attacked.
     """
     def at_object_creation(self):
         """

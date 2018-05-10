@@ -19,12 +19,6 @@ class GameSettingsAdmin(admin.ModelAdmin):
                     'map_room_size',)
 
 
-class ClassCategoriesAdmin(admin.ModelAdmin):
-    list_display = ('key',
-                    'name',
-                    'desc')
-
-
 class WorldRoomsAdmin(admin.ModelAdmin):
     list_display = ('key',
                     'name',

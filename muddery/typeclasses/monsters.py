@@ -16,7 +16,7 @@ from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
 
 
 @typeclass_mapping("MONSTER")
-class MudderyMonster(TYPECLASS("BASE_CHARACTER")):
+class MudderyMonster(TYPECLASS("NON_PLAYER")):
     """
     Default mob. Monsters are hostile to players, they can be attacked.
     """

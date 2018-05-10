@@ -1,6 +1,9 @@
 """
 Import table data.
 """
+
+from __future__ import print_function
+
 import os
 from django.apps import apps
 from django.conf import settings
@@ -116,6 +119,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
         Returns:
             None
         """
+        print(model_obj)
         line = 1
         try:
             # read title

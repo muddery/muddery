@@ -56,9 +56,8 @@ def query_tables():
     """
     Query all tables' names.
     """
-    models = general_mapper.query_all_models()
+    models = general_mapper.get_all_models()
     models_info = [{"key": model.__name__,
                     "name": _(model.__name__, category="models") + "(" + model.__name__ + ")"}
                     for model in models if model._meta.app_label == "worlddata"]
     return models_info
-
