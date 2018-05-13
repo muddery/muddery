@@ -6,7 +6,6 @@ from __future__ import print_function
 
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
-from muddery.worlddata import forms
 
 
 def form_mapping(form):
@@ -52,3 +51,4 @@ class FormSet(object):
 
 
 FORM_SET = FormSet()
+

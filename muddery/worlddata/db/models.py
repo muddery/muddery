@@ -18,47 +18,6 @@ CONDITION_LENGTH = 255
 re_attribute_key = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 
 
-def auto_generate_key(model):
-    if not model.key:
-        index = 1
-        if model.id is not None:
-            # Get this record's id.
-            index = model.id
-        else:
-            try:
-                # Get last id.
-                query = model.__class__.objects.last()
-                index = int(query.id)
-                index += 1
-            except Exception, e:
-                pass
-
-        model.key = model.__class__.__name__ + "_" + str(index)
-
-
-def validate_object_key(model):
-    """
-    Check if the key exists. Object's key should be unique in all objects.
-    """
-    # Get models.
-    from muddery.worlddata.data_sets import DATA_SETS
-    for data_settings in DATA_SETS.object_data:
-        if data_settings.model_name == model.__class__.__name__:
-            # Models will validate unique values of its own,
-            # so we do not validate them here.
-            continue
-
-        try:
-            data_settings.model.objects.get(key=model.key)
-        except Exception, e:
-            continue
-
-        error = ValidationError("The key '%(value)s' already exists in model %(model)s.",
-                                code="unique",
-                                params={"value": model.key, "model": data_settings.model_name})
-        raise ValidationError({"key": error})
-
-
 # ------------------------------------------------------------
 #
 # Game's basic settings.
@@ -171,10 +130,6 @@ class BaseObjects(models.Model):
 
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
-        
-    def clean(self):
-        auto_generate_key(self)
-        validate_object_key(self)
 
 
 class world_areas(BaseObjects):
@@ -438,24 +393,6 @@ class common_characters(BaseObjects):
         app_label = "worlddata"
         verbose_name = "Common Character List"
         verbose_name_plural = "Common Character List"
-
-    def clean(self):
-        super(common_characters, self).clean()
-
-        # check model and level
-        from muddery.worlddata.dao.model_mapper import CHARACTER_MODELS
-
-        try:
-            CHARACTER_MODELS.get(key=self.model, level=self.level)
-        except Exception, e:
-            message = "Can not get the level data."
-            levels = CHARACTER_MODELS.filter(key=self.model)
-            available = [str(level.level) for level in levels]
-            if len(available) == 1:
-                message += " Available level: " + available[0]
-            elif len(available) > 1:
-                message += " Available levels: " + ", ".join(available)
-            raise ValidationError({"level": message})
 
 
 class shops(BaseObjects):

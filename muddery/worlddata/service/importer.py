@@ -13,7 +13,7 @@ from muddery.server.launcher.utils import copy_tree
 from muddery.utils import readers
 from muddery.utils.exception import MudderyError, ERR
 from muddery.worlddata.dao.data_importer import import_file
-from muddery.worlddata.dao import general_mapper
+from muddery.worlddata.dao import model_mapper
 
 
 def unzip_data_all(fp):
@@ -81,12 +81,13 @@ def import_data_path(path):
     """
 
     # import tables one by one
-    models = general_mapper.get_all_models()
+    models = model_mapper.get_all_models()
     for model in models:
         table_name = model.__name__
         file_names = glob.glob(os.path.join(path, table_name) + ".*")
 
         if file_names:
+            print("Importing %s" % file_names[0])
             import_file(file_names[0], table_name=table_name)
 
 
@@ -96,3 +97,4 @@ def import_data_file(fp, table_name=None, file_type=None):
     """
     fp.flush()
     import_file(fp.name, table_name=table_name, file_type=file_type)
+

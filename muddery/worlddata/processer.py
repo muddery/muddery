@@ -13,6 +13,7 @@ from evennia.utils import logger
 from muddery.utils.exception import MudderyError, ERR
 from muddery.mappings.request_set import REQUEST_SET
 import muddery.worlddata.controllers
+import muddery.worlddata.db.forms
 from muddery.worlddata.utils.response import error_response
 
 

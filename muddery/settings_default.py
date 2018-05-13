@@ -77,7 +77,7 @@ DATABASES = {
 
 
 # Database's router
-DATABASE_ROUTERS = ['muddery.worlddata.database_router.DatabaseAppsRouter']
+DATABASE_ROUTERS = ['muddery.worlddata.db.database_router.DatabaseAppsRouter']
 
 DATABASE_APPS_MAPPING = {
     'worlddata': 'worlddata',
