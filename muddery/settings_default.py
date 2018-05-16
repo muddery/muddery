@@ -262,22 +262,22 @@ TYPECLASS_PATHS = ["muddery.typeclasses"]
 BASE_ACCOUNT_TYPECLASS = "muddery.typeclasses.accounts.MudderyAccount"
 
 # Typeclass and base for all objects (fallback)
-BASE_OBJECT_TYPECLASS = "muddery.typeclasses.objects.MudderyObject"
+BASE_OBJECT_TYPECLASS = "muddery.typeclasses.object.Object"
 
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_characters.MudderyPlayerCharacter"
+BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.PlayerCharacter"
 
 # Typeclass for general characters, include NPCs, mobs and player characters.
-BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.characters.MudderyCharacter"
+BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.character.Character"
 
 # Typeclass for player characters.
-BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.typeclasses.player_characters.MudderyPlayerCharacter"
+BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.PlayerCharacter"
 
 # Typeclass for rooms (fallback)
-BASE_ROOM_TYPECLASS = "muddery.typeclasses.rooms.MudderyRoom"
+BASE_ROOM_TYPECLASS = "muddery.typeclasses.room.Room"
 
 # Typeclass for Exit objects (fallback).
-BASE_EXIT_TYPECLASS = "muddery.typeclasses.exits.MudderyExit"
+BASE_EXIT_TYPECLASS = "muddery.typeclasses.exit.Exit"
 
 # Typeclass for Channel (fallback).
 BASE_CHANNEL_TYPECLASS = "muddery.typeclasses.channels.MudderyChannel"
@@ -285,6 +285,15 @@ BASE_CHANNEL_TYPECLASS = "muddery.typeclasses.channels.MudderyChannel"
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.
 BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
+
+# Path of base world data forms.
+PATH_DATA_FORMS_BASE = "muddery.worlddata.forms"
+
+# Path of base request processers.
+PATH_REQUEST_PROCESSERS_BASE = "muddery.worlddata.controllers"
+
+# Path of base typeclasses.
+PATH_TYPECLASSES_BASE = "muddery.typeclasses"
 
 
 ######################################################################

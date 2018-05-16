@@ -13,7 +13,6 @@ from evennia.utils import logger
 from muddery.utils.exception import MudderyError, ERR
 from muddery.mappings.request_set import REQUEST_SET
 import muddery.worlddata.controllers
-import muddery.worlddata.db.forms
 from muddery.worlddata.utils.response import error_response
 
 
@@ -64,24 +63,23 @@ class Processer(object):
 
         print("request: '%s' '%s' '%s'" % (path, func, args))
 
-        func_data = REQUEST_SET.get(path, func)
-        if not func_data:
+        processor = REQUEST_SET.get(path, func)
+        if not processor:
             logger.log_errmsg("Can not find API: %s %s" % (path, func))
             return error_response(ERR.no_api, msg="Can not find API: %s %s" % (path, func))
 
         # check authentication
-        if func_data["login"] and not request.user.is_authenticated:
+        if processor.login and not request.user.is_authenticated:
             logger.log_errmsg("Need authentication.")
             return error_response(ERR.no_authentication, msg="Need authentication.")
 
         # check staff
-        if func_data["staff"] and not request.user.is_staff and not request.user.is_superuser:
+        if processor.staff and not request.user.is_staff and not request.user.is_superuser:
             return error_response(ERR.no_permission, msg="No permission.")
 
         # call function
         try:
-            function = func_data["func"]
-            response = function(args, request)
+            response = processor.func(args, request)
         except MudderyError, e:
             logger.log_errmsg("Error: %s, %s" % (e.code, e.message))
             response = error_response(e.code, msg=e.message, data=e.data)

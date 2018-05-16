@@ -10,12 +10,12 @@ creation commands.
 
 from __future__ import print_function
 
-from muddery.mappings.typeclass_set import typeclass_mapping, TYPECLASS
+from muddery.mappings.typeclass_set import TYPECLASS
 
 
-@typeclass_mapping("NON_PLAYER")
-class MudderyPlayerCharacter(TYPECLASS("BASE_CHARACTER")):
+class PlayerCharacter(TYPECLASS("CHARACTER")):
     """
     The character not controlled by players.
     """
-    pass
+    key = "NON_PLAYER"
+

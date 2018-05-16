@@ -5,91 +5,50 @@ All available requests.
 from __future__ import print_function
 
 from django.conf import settings
+from evennia.utils import logger
 from muddery.utils.exception import MudderyError
-
-
-def request_mapping(*args, **kwargs):
-    """
-    A decorator which declears a web service controller.
-
-    Args:
-        path: (string) request's path.
-        key: (string) the key of the function.
-        login: (boolean) need login.
-        staff: (boolean) for staff only.
-    """
-    if args:
-        func = args[0]
-        REQUEST_SET.add(*args)
-        return func
-
-    else:
-        path = kwargs.get("path", None)
-        key = kwargs.get("key", None)
-        login = kwargs.get("login", True)
-        staff = kwargs.get("staff", True)
-        
-        def wrapper(func):
-            """
-            Args:
-                func: function.
-            """
-            REQUEST_SET.add(func, path, key, login, staff)
-            return func
-        return wrapper
+from muddery.utils.utils import classes_in_path
+from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
 
 
 class RequestSet(object):
     """
     All available requests.
     """
-    def __init__(self, path_prefix=None):
-        if path_prefix:
-            if path_prefix[0] != "/":
-                path_prefix = "/" + path_prefix
-
-        self.path_prefix = path_prefix
+    def __init__(self):
         self.dict = {}
-        
-    def add(self, func, path=None, key=None, login=True, staff=True):
+        self.load()
+
+    def load(self):
         """
-        Declear a web service controller.
-
-        Args:
-            path: (string) request's path, begin with "/".
-                  If it's empty, use the function's name as the path.
-            key: (string) the key of the function.
-            login: (boolean) need login.
-            staff: (boolean) for staff only.
+        Add all forms from the form path.
         """
-        if path is None:
-            path = "/" + func.__name__
-        elif not path:
-            path = "/"
-        elif path[0] != "/":
-            path = "/" + path
+        # load classes
+        for cls in classes_in_path(settings.PATH_REQUEST_PROCESSERS_BASE, BaseRequestProcesser):
+            path = cls.path
+            name = cls.name
 
-        if not path and not key:
-            raise MudderyError("Missing request's path and key.")
+            if not path and not name:
+                logger.log_errmsg("Missing request's path and name.")
+                continue
 
-        if not key:
-            key = ""
+            if path[0] != "/":
+                path = "/" + path
 
-        if self.dict.has_key((path, key,)):
-            raise MudderyError("Request's name duplicated.")
+            if name is None:
+                name = ""
 
-        self.dict[(path, key,)] = {
-            "func": func,
-            "login": login,
-            "staff": staff,
-        }
+            if self.dict.has_key((path, name,)):
+                logger.log_infomsg("Request %s-%s is replaced by %s." % (path, name, cls))
 
-    def get(self, path, key):
+            self.dict[(path, name,)] = cls()
+
+    def get(self, path, name):
         """
-        Get the function responds to the request.
+        Get the processer responds to the request.
         """
-        return self.dict.get((path, key,), None)
+        return self.dict.get((path, name,), None)
 
 
-REQUEST_SET = RequestSet(settings.WORLD_DATA_API_PATH)
+REQUEST_SET = RequestSet()
 

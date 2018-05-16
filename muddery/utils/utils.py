@@ -8,12 +8,13 @@ be of use when designing your own game.
 
 from __future__ import print_function
 
-import os
-import re
+import os, re, inspect
 from django.conf import settings
 from evennia.utils import search, logger
 from evennia.utils.utils import class_from_module
 from muddery.server.launcher import configs
+from importlib import import_module
+from pkgutil import iter_modules
 
 
 def get_muddery_version():
@@ -273,3 +274,39 @@ def all_unlocalized_js_strings(filter):
                 full_name = os.path.join(parent, filename)
                 strings.update(get_unlocalized_js_strings(full_name, filter_set))
     return strings
+
+
+def load_modules(path):
+    """
+    Load all modules ans sub modules in the path.
+
+    Args:
+        path: (string) modules' path
+    """
+    modules = []
+    m = import_module(path)
+    if hasattr(m, '__path__'):
+        for _, subpath, ispkg in iter_modules(m.__path__):
+            fullpath = path + '.' + subpath
+            if ispkg:
+                modules += load_modules(fullpath)
+            else:
+                modules.append(import_module(fullpath))
+
+    return modules
+
+
+def classes_in_path(path, cls):
+    """
+    Load all classes in the path.
+
+    Args:
+        path: (string) classes' path
+        cls: (class) classes' base class
+    """
+    modules = load_modules(path)
+    for module in modules:
+        for name, obj in vars(module).items():
+            if inspect.isclass(obj) and issubclass(obj, cls) and obj is not cls:
+                yield obj
+

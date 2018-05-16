@@ -4,29 +4,11 @@ All available requests.
 
 from __future__ import print_function
 
+from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
-from muddery.utils.utils import is_child
-
-
-def typeclass_mapping(key, name=None, desc=None):
-    """
-    A decorator which add a typeclass to the public typeclass set.
-
-    Args:
-        key: (string) the key of the typeclass.
-        name: (string, optional) the readable name of the typeclass.
-        desc: (string, opitonal) the discripion of the typeclass.
-    """
-    def wrapper(cls):
-        """
-        Args:
-            cls: (class) a typeclass.
-        """
-        TYPECLASS_SET.add(cls, key, name, desc)
-        return cls
-
-    return wrapper
+from muddery.utils.utils import classes_in_path, load_modules
+from muddery.typeclasses.base_typeclass import BaseTypeclass
 
 
 class TypeclassSet(object):
@@ -35,51 +17,61 @@ class TypeclassSet(object):
     """
     def __init__(self):
         self.dict = {}
-        
-    def add(self, cls, key, name="", desc=""):
+        self.load()
+
+    def load(self):
         """
-        Add a typeclass.
-
-        Args:
-            cls: (class) typeclass.
-            key: (string) the key of the typeclass.
+        Add all typeclasses from the typeclass path.
         """
-        if not key:
-            raise MudderyError("Need typeclass's key.")
+        for cls in classes_in_path(settings.PATH_TYPECLASSES_BASE, BaseTypeclass):
+            key = cls.key
 
-        if self.dict.has_key(key):
-            logger.log_infomsg("Typeclass %s is replaced with %s.", (key, cls))
+            if not key:
+                logger.log_errmsg("Missing typeclass's key.")
+                continue
 
-        self.dict[key] = {
-            "cls": cls,
-            "name": name,
-            "desc": desc,
-        }
+            if self.dict.has_key(key):
+                logger.log_infomsg("Typeclass %s is replaced by %s." % (key, cls))
 
-    def get(self, typeclass_key):
+            self.dict[key] = cls
+            
+        print(self.dict)
+
+    def reload(self):
+        """
+        Reload typeclasses with correct base class.
+        """
+        for module in load_modules(settings.PATH_TYPECLASSES_BASE):
+            reload(module)
+
+    def get(self, key):
         """
         Get a typeclass.
         """
-        return self.dict[typeclass_key]
+        return self.dict[key]
 
-    def cls(self, typeclass_key):
-        return self.dict[typeclass_key]["cls"]
-
-    def get_group(self, typeclass_key):
+    def get_group(self, key):
         """
         Get a typeclass and its all children.
         """
-        typeclass = self.dict[typeclass_key]
-        typeclasses = {typeclass_key: typeclass}
+        cls = self.dict[key]
+        typeclasses = {key: cls}
 
-        cls = typeclass["cls"]
         for key in self.dict:
-            if is_child(self.dict[key]["cls"], cls):
+            if is_child(self.dict[key], cls):
                 typeclasses[key] = self.dict[key]
 
-        return typeclass
+        return typeclasses
 
+
+# Set base typeclasses to default class first.
+def TYPECLASS(key):
+    return BaseTypeclass
 
 TYPECLASS_SET = TypeclassSet()
-TYPECLASS = TYPECLASS_SET.cls
+TYPECLASS = TYPECLASS_SET.get
+
+# Reload typeclasses with correct base class.
+TYPECLASS_SET.reload()
+
 

@@ -4,16 +4,11 @@ This model translates default strings into localized strings.
 
 from __future__ import print_function
 
+from django.conf import settings
+from django.contrib.admin.forms import forms
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
-
-
-def form_mapping(form):
-    """
-    A decorator which add a form to the public form set.
-    """
-    FORM_SET.add(form)
-    return form
+from muddery.utils.utils import classes_in_path
 
 
 class FormSet(object):
@@ -22,23 +17,22 @@ class FormSet(object):
     """
     def __init__(self):
         self.dict = {}
+        self.load()
         
-    def add(self, form):
+    def load(self):
         """
-        Add a form.
-
-        Args:
-            form: (class) form's class.
+        Add all forms from the form path.
         """
-        if not form:
-            raise MudderyError("Missing form.")
+        # load classes
+        for cls in classes_in_path(settings.PATH_DATA_FORMS_BASE, forms.ModelForm):
+            if hasattr(cls, "Meta") and hasattr(cls.Meta, "model"):
+                model = cls.Meta.model
+                model_name = model.__name__
 
-        model_name = form.Meta.model.__name__
+                if self.dict.has_key(model_name):
+                    logger.log_infomsg("Form %s is replaced by %s." % (model_name, cls))
 
-        if self.dict.has_key(model_name):
-            logger.log_infomsg("Form %s is replaced with %s.", (model_name, form))
-
-        self.dict[model_name] = form
+                self.dict[model_name] = cls
 
     def get(self, model_name):
         """
