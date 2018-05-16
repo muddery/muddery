@@ -4,7 +4,7 @@ Import table data.
 
 from __future__ import print_function
 
-import os
+import os, traceback
 from django.apps import apps
 from django.conf import settings
 from django.db import models
@@ -119,7 +119,6 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
         Returns:
             None
         """
-        print(model_obj)
         line = 1
         try:
             # read title
@@ -148,10 +147,14 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
         except StopIteration:
             # reach the end of file, pass this exception
             pass
+        """
         except ValidationError, e:
+            traceback.print_stack()
             raise MudderyError(ERR.import_data_error, parse_error(e, model_obj.__name__, line))
         except Exception, e:
+            traceback.print_stack()
             raise MudderyError(ERR.import_data_error, "%s (model: %s, line: %s)" % (e, model_obj.__name__, line))
+        """
 
     def clear_model_data(model_obj, **kwargs):
         """
