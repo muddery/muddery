@@ -31,7 +31,7 @@ def import_local_data():
     Import all local data files to models.
     """
     from django.conf import settings
-    from muddery.worlddata.service import importer
+    from muddery.worlddata.services import importer
 
     ##########################
     # load system data

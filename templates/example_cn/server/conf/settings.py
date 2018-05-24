@@ -65,13 +65,13 @@ SECRET_KEY = {SECRET_KEY}
 ######################################################################
 
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "typeclasses.player_characters.PlayerCharacter"
+BASE_CHARACTER_TYPECLASS = "typeclasses.player_character.PlayerCharacter"
 
 # Typeclass for general characters, include NPCs, mobs and player characters.
-BASE_GENERAL_CHARACTER_TYPECLASS = "typeclasses.characters.Character"
+BASE_GENERAL_CHARACTER_TYPECLASS = "typeclasses.character.Character"
 
 # Typeclass for player characters.
-BASE_PLAYER_CHARACTER_TYPECLASS = "typeclasses.player_characters.PlayerCharacter"
+BASE_PLAYER_CHARACTER_TYPECLASS = "typeclasses.player_character.PlayerCharacter"
 
 
 ######################################################################

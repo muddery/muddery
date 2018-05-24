@@ -39,6 +39,15 @@ def query_form(table_name, record_id=None):
         form = form_class()
 
     data = []
+    data.append({
+        "name": "id",
+        "label": "",
+        "disabled": True,
+        "help_text": "",
+        "type": "Hidden",
+        "value": record_id if record_id else "",
+    })
+
     for key, field in form.fields.items():
         info = {
             "name": key,

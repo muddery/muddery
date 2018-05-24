@@ -147,14 +147,12 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
         except StopIteration:
             # reach the end of file, pass this exception
             pass
-        """
         except ValidationError, e:
             traceback.print_stack()
             raise MudderyError(ERR.import_data_error, parse_error(e, model_obj.__name__, line))
         except Exception, e:
             traceback.print_stack()
             raise MudderyError(ERR.import_data_error, "%s (model: %s, line: %s)" % (e, model_obj.__name__, line))
-        """
 
     def clear_model_data(model_obj, **kwargs):
         """

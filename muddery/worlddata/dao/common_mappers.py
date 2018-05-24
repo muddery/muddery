@@ -98,10 +98,6 @@ DIALOGUE_SENTENCES = CommonMapper("dialogue_sentences")
 
 NPC_DIALOGUES = CommonMapper("npc_dialogues")
 
-EVENT_ATTACKS = CommonMapper("event_attacks")
-
-EVENT_DIALOGUES = CommonMapper("event_dialogues")
-
 CONDITION_DESC = CommonMapper("condition_desc")
 
 LOCALIZED_STRINGS = CommonMapper("localized_strings")

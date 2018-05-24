@@ -9,6 +9,7 @@ from django.db import transaction
 from django.apps import apps
 from django.conf import settings
 from muddery.utils.utils import is_child
+from muddery.worlddata.db.models import BaseObjects
 
 
 def get_model(model_name):

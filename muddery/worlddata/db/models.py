@@ -1242,10 +1242,22 @@ class npc_dialogues(models.Model):
 
 # ------------------------------------------------------------
 #
+# event's data
+#
+# ------------------------------------------------------------
+class BaseEventData(models.Model):
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+
+
+# ------------------------------------------------------------
+#
 # event attack's data
 #
 # ------------------------------------------------------------
-class event_attacks(models.Model):
+class event_attacks(BaseEventData):
     "event attack's data"
 
     # The key of an event.
@@ -1278,7 +1290,7 @@ class event_attacks(models.Model):
 # event dialogues
 #
 # ------------------------------------------------------------
-class event_dialogues(models.Model):
+class event_dialogues(BaseEventData):
     "Store all event dialogues."
 
     # The key of an event.

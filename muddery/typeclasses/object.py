@@ -18,19 +18,19 @@ from evennia.utils import logger
 from evennia.utils.utils import make_iter, is_iter, lazy_property
 from evennia.typeclasses.models import DbHolder
 from muddery.statements.statement_handler import STATEMENT_HANDLER
+from muddery.events.event_trigger import EventTrigger
 from muddery.utils.data_field_handler import DataFieldHandler
 from muddery.utils import utils
 from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
-from muddery.utils.event_handler import EventHandler
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.desc_handler import DESC_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
-from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.typeclasses.base_typeclass import BaseTypeclass
 
 
-class Object(TYPECLASS("BASE_TYPECLASS"), DefaultObject):
+class BaseObject(BaseTypeclass, DefaultObject):
     """
     This object loads attributes from world data on init automatically.
     """
@@ -39,7 +39,7 @@ class Object(TYPECLASS("BASE_TYPECLASS"), DefaultObject):
     # initialize all handlers in a lazy fashion
     @lazy_property
     def event(self):
-        return EventHandler(self)
+        return EventTrigger(self)
 
     @lazy_property
     def data_fields_handler(self):

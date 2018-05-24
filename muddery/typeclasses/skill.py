@@ -19,7 +19,7 @@ class Skill(TYPECLASS("OBJECT")):
     """
     A skill of the character.
     """
-    key = "COMMON_OBJECT"
+    key = "SKILL"
 
     msg_escape = re.compile(r'%[%|n|c|t]')
 

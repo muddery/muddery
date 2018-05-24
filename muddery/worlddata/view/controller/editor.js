@@ -54,7 +54,10 @@ controller = {
             var value = fields[i].value;
 
             var controller;
-            if (type == "TextInput") {
+            if (type == "Hidden") {
+                controller = this.createHiddenInput(name, label, value, help_text);
+            }
+            else if (type == "TextInput") {
                 controller = this.createTextInput(name, label, value, help_text);
             }
             else if (type == "NumberInput") {
@@ -111,6 +114,20 @@ controller = {
             .addClass("message-block")
             .hide()
             .appendTo(ctrl_div);
+
+        return group;
+    },
+
+    createHiddenInput: function(name, label, value, help_text) {
+        var group = $("<div>")
+            .addClass("control-group hidden")
+            .attr("id", "control-" + name);
+
+        var controller = $("<input>")
+            .addClass("editor-control")
+            .attr("type", "hidden")
+            .val(value)
+            .appendTo(group);
 
         return group;
     },

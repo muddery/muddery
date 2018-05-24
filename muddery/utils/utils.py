@@ -310,3 +310,17 @@ def classes_in_path(path, cls):
             if inspect.isclass(obj) and issubclass(obj, cls) and obj is not cls:
                 yield obj
 
+def get_module_path(path):
+    """
+    Transform a normal path to a python module style path.
+    """
+    root, name = os.path.split(path)
+    if not name:
+        return
+
+    root = get_module_path(root)
+    if root:
+        return root + "." + name
+    else:
+        return name
+

@@ -295,6 +295,12 @@ PATH_REQUEST_PROCESSERS_BASE = "muddery.worlddata.controllers"
 # Path of base typeclasses.
 PATH_TYPECLASSES_BASE = "muddery.typeclasses"
 
+# Path of custom typeclasses.
+PATH_TYPECLASSES_CUSTOM = "typeclasses"
+
+# Path of base event actions.
+PATH_EVENT_ACTION_BASE = "muddery.events.event_actions"
+
 
 ######################################################################
 # Default Player setup and access
