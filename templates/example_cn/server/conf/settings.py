@@ -73,6 +73,9 @@ BASE_GENERAL_CHARACTER_TYPECLASS = "typeclasses.character.Character"
 # Typeclass for player characters.
 BASE_PLAYER_CHARACTER_TYPECLASS = "typeclasses.player_character.PlayerCharacter"
 
+# Path of custom typeclasses.
+PATH_TYPECLASSES_CUSTOM = "typeclasses"
+
 
 ######################################################################
 # Default statement sets

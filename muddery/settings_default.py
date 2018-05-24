@@ -296,7 +296,7 @@ PATH_REQUEST_PROCESSERS_BASE = "muddery.worlddata.controllers"
 PATH_TYPECLASSES_BASE = "muddery.typeclasses"
 
 # Path of custom typeclasses.
-PATH_TYPECLASSES_CUSTOM = "typeclasses"
+PATH_TYPECLASSES_CUSTOM = ""
 
 # Path of base event actions.
 PATH_EVENT_ACTION_BASE = "muddery.events.event_actions"

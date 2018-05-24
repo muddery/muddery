@@ -18,7 +18,7 @@ class Character(BaseCharacter):
     Custom character class.
 
     """
-    key = "CHACACTER"
+    key = "CHARACTER"
 
     def at_object_creation(self):
         """

@@ -27,10 +27,14 @@ class TypeclassSet(object):
         """
         Get typeclasses' file path.
         """
+        if not typeclass_path:
+            return
+
         module = import_module(typeclass_path)
         base_path = module.__path__
-        for path in base_path:
-            for root, dirs, files in os.walk(path):
+        if base_path:
+            base_path = base_path[0]
+            for root, dirs, files in os.walk(base_path):
                 for filename in files:
                     name, ext = os.path.splitext(filename)
                     if ext != ".py":
@@ -40,9 +44,14 @@ class TypeclassSet(object):
                         for line in fp.readlines():
                             match = self.match_class.match(line)
                             if match:
-                                relative_path = os.path.relpath(root, settings.MUDDERY_DIR)
-                                modlue_path = get_module_path(relative_path)
-                                self.module_dict[match.group(1)] = "muddery." + modlue_path + "." + name
+                                if base_path == root:
+                                    self.module_dict[match.group(1)] = typeclass_path + "." + name
+                                else:
+                                    relative_path = os.path.relpath(root, base_path)
+                                    modlue_path = get_module_path(relative_path)
+                                    self.module_dict[match.group(1)] = typeclass_path + "." + modlue_path + "." + name
+
+        print("self.module_dict: %s" % self.module_dict)
 
     def load_classes(self, typeclass_path):
         """

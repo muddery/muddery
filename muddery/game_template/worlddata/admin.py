@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from models import *
-from muddery.worlddata import admin_base
+from muddery.worlddata.db import admin_base
 
 
 # Register your models here.
