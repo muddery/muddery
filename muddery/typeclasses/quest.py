@@ -21,7 +21,7 @@ from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 
 
-class Quest(TYPECLASS("OBJECT")):
+class MudderyQuest(TYPECLASS("OBJECT")):
     """
     This class controls quest's objectives. Hooks are called when a character doing some things.
     """

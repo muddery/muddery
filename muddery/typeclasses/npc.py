@@ -14,7 +14,7 @@ from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.worlddata.data_sets import DATA_SETS
 
 
-class NPC(TYPECLASS("NON_PLAYER")):
+class MudderyNPC(TYPECLASS("NON_PLAYER")):
     """
     Neutral or friendly NPC. They can not be attacked.
     """

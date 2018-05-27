@@ -34,7 +34,7 @@ from evennia import create_script
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
-class PlayerCharacter(TYPECLASS("CHARACTER")):
+class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:

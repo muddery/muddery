@@ -13,7 +13,7 @@ from __future__ import print_function
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
-class NonPlayerCharacter(TYPECLASS("CHARACTER")):
+class MudderyNonPlayerCharacter(TYPECLASS("CHARACTER")):
     """
     The character not controlled by players.
     """

@@ -9,6 +9,7 @@ from importlib import import_module
 from pkgutil import iter_modules
 from django.conf import settings
 from evennia.utils import logger
+from evennia.utils.utils import class_from_module
 from muddery.utils.exception import MudderyError
 from muddery.utils.utils import classes_in_path, load_modules, get_module_path
 from muddery.typeclasses.base_typeclass import BaseTypeclass
@@ -21,7 +22,8 @@ class TypeclassSet(object):
     def __init__(self):
         self.module_dict = {}
         self.class_dict = {}
-        self.match_class = re.compile(r'^ {4}key\s*=\s*"(.*)"\s*$')
+        self.match_class = re.compile(r'^class\s+(\w+)\s*.*$')
+        self.match_key = re.compile(r""" {4}key\s*=\s*("|')(.+)("|')\s*$""")
 
     def load_files(self, typeclass_path):
         """
@@ -41,57 +43,55 @@ class TypeclassSet(object):
                         continue
 
                     with open(os.path.join(root, filename), "r") as fp:
+                        class_name = ""
+                        key_name = ""
                         for line in fp.readlines():
-                            match = self.match_class.match(line)
-                            if match:
-                                if base_path == root:
-                                    self.module_dict[match.group(1)] = typeclass_path + "." + name
-                                else:
-                                    relative_path = os.path.relpath(root, base_path)
-                                    modlue_path = get_module_path(relative_path)
-                                    self.module_dict[match.group(1)] = typeclass_path + "." + modlue_path + "." + name
+                            if not class_name:
+                                match = self.match_class.match(line)
+                                if match:
+                                    class_name = match.group(1)
+                            else:
+                                match = self.match_key.match(line)
+                                if match:
+                                    key_name = match.group(2)
 
-        print("self.module_dict: %s" % self.module_dict)
+                                    module_path = typeclass_path
+                                    if base_path == root:
+                                        module_path += "." + name + "." + class_name
+                                    else:
+                                        relative_path = get_module_path(os.path.relpath(root, base_path))
+                                        modlue_path += "." + relative_path + "." + name + "." + class_name
 
-    def load_classes(self, typeclass_path):
+                                    if key_name in self.module_dict:
+                                        logger.log_infomsg("Typeclass %s is replaced by %s." % (key_name, module_path))
+
+                                    self.module_dict[key_name] = module_path
+                                    class_name = ""
+                                    key_name = ""
+
+    def load_classes(self):
         """
         Add all typeclasses from the typeclass path.
         """
-        for cls in classes_in_path(typeclass_path, BaseTypeclass):
-            if not cls.key:
+        for key in self.module_dict:
+            if self.class_dict.has_key(key):
                 continue
+            self.class_dict[key] = class_from_module(self.module_dict[key])
 
-            if self.class_dict.has_key(cls.key):
-                if self.class_dict[cls.key] == cls:
-                    continue
-                logger.log_infomsg("Typeclass %s is replaced by %s." % (cls.key, cls))
-
-            self.class_dict[cls.key] = cls
-
-    def get(self, key, path=None):
+    def get(self, key):
         """
         Get a typeclass recursively.
         """
         if key in self.class_dict:
             return self.class_dict[key]
         elif key in self.module_dict:
-            module = import_module(self.module_dict[key])
+            cls = class_from_module(self.module_dict[key])
+            if self.class_dict.has_key(key):
+                if self.class_dict[key] != cls:
+                    logger.log_infomsg("Typeclass %s is replaced by %s." % (key, cls))
 
-            # add new typeclasses
-            for name, cls in vars(module).items():
-                if inspect.isclass(cls) and issubclass(cls, BaseTypeclass):
-                    if not cls.key:
-                        continue
-
-                    if self.class_dict.has_key(cls.key):
-                        if self.class_dict[cls.key] == cls:
-                            continue
-                        logger.log_infomsg("Typeclass %s is replaced by %s." % (cls.key, cls))
-
-                    self.class_dict[cls.key] = cls
-
-            if key in self.class_dict:
-                return self.class_dict[key]
+            self.class_dict[key] = cls
+            return cls
 
         logger.log_errmsg("Can not find typeclass key: %s." % key)
 
@@ -99,6 +99,9 @@ class TypeclassSet(object):
         """
         Get a typeclass and its all children.
         """
+        if not self.class_dict:
+            self.load_classes()
+
         cls = self.class_dict[group_key]
         typeclasses = {group_key: cls}
 
@@ -113,6 +116,4 @@ TYPECLASS_SET = TypeclassSet()
 TYPECLASS = TYPECLASS_SET.get
 TYPECLASS_SET.load_files(settings.PATH_TYPECLASSES_BASE)
 TYPECLASS_SET.load_files(settings.PATH_TYPECLASSES_CUSTOM)
-TYPECLASS_SET.load_classes(settings.PATH_TYPECLASSES_BASE)
-TYPECLASS_SET.load_classes(settings.PATH_TYPECLASSES_CUSTOM)
 

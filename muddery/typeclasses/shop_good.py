@@ -13,7 +13,7 @@ from muddery.worlddata.data_sets import DATA_SETS
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
-class ShopGoods(TYPECLASS("OBJECT")):
+class MudderyShopGoods(TYPECLASS("OBJECT")):
     """
     This is a shop goods. Shops show these objects to players. It contains a common object
     to sell and additional shop information.

@@ -15,7 +15,7 @@ from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
-class Skill(TYPECLASS("OBJECT")):
+class MudderySkill(TYPECLASS("OBJECT")):
     """
     A skill of the character.
     """

@@ -2,7 +2,7 @@
 This is adapt from evennia/evennia/objects/objects.py.
 The licence of Evennia can be found in evennia/LICENSE.txt.
 
-MudderyObject is an object which can load it's data automatically.
+BaseObject is an object which can load it's data automatically.
 
 """
 
@@ -28,9 +28,10 @@ from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.desc_handler import DESC_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
 from muddery.typeclasses.base_typeclass import BaseTypeclass
+from muddery.mappings.typeclass_set import TYPECLASS
 
 
-class BaseObject(BaseTypeclass, DefaultObject):
+class MudderyBaseObject(BaseTypeclass, DefaultObject):
     """
     This object loads attributes from world data on init automatically.
     """
@@ -111,7 +112,7 @@ class BaseObject(BaseTypeclass, DefaultObject):
         It will be called when swap its typeclass, so it must keep
         old values.
         """
-        super(MudderyObject, self).at_object_creation()
+        super(MudderyBaseObject, self).at_object_creation()
 
         self.typeclass_key = None
         self.action = None
@@ -122,7 +123,7 @@ class BaseObject(BaseTypeclass, DefaultObject):
         """
         Load world data.
         """
-        super(MudderyObject, self).at_init()
+        super(MudderyBaseObject, self).at_init()
 
         self.typeclass_key = None
         self.condition = None

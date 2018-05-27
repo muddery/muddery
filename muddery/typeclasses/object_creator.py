@@ -18,7 +18,7 @@ from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.worlddata.data_sets import DATA_SETS
 
 
-class ObjectCreator(TYPECLASS("OBJECT")):
+class MudderyObjectCreator(TYPECLASS("OBJECT")):
     """
     This object loads attributes from world data on init automatically.
     """

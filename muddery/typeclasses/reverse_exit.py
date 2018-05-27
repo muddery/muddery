@@ -18,7 +18,7 @@ from evennia.utils import logger
 from django.conf import settings
 
 
-class ReverseExit(TYPECLASS("EXIT")):
+class MudderyReverseExit(TYPECLASS("EXIT")):
     """
     This is the reverse side of the two way exit.
     """

@@ -19,7 +19,7 @@ from evennia.objects.objects import DefaultExit
 from django.conf import settings
 
 
-class Exit(TYPECLASS("OBJECT"), DefaultExit):
+class MudderyExit(TYPECLASS("OBJECT"), DefaultExit):
     """
     Exits are connectors between rooms. Exits are normal Objects except
     they defines the `destination` property. It also does work in the

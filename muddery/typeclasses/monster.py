@@ -14,7 +14,7 @@ from muddery.worlddata.data_sets import DATA_SETS
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
-class Monster(TYPECLASS("NON_PLAYER")):
+class MudderyMonster(TYPECLASS("NON_PLAYER")):
     """
     Default mob. Monsters are hostile to players, they can be attacked.
     """

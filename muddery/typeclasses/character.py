@@ -29,7 +29,7 @@ from muddery.utils.utils import search_obj_data_key
 from muddery.utils.localized_strings_handler import _
 
 
-class Character(TYPECLASS("OBJECT"), DefaultCharacter):
+class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:

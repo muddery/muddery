@@ -10,12 +10,12 @@ creation commands.
 
 from __future__ import print_function
 
-from muddery.typeclasses.player_character import PlayerCharacter as BasePlayerCharacter
+from muddery.typeclasses.player_character import MudderyPlayerCharacter
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
 
 
-class PlayerCharacter(BasePlayerCharacter):
+class PlayerCharacter(MudderyPlayerCharacter):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:

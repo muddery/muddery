@@ -16,7 +16,7 @@ from muddery.worlddata.data_sets import DATA_SETS
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
-class Shop(TYPECLASS("OBJECT")):
+class MudderyShop(TYPECLASS("OBJECT")):
     """
     A shop.
     """

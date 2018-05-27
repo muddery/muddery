@@ -10,10 +10,10 @@ creation commands.
 
 from __future__ import print_function
 
-from muddery.typeclasses.character import Character as BaseCharacter
+from muddery.typeclasses.character import MudderyCharacter
 
 
-class Character(BaseCharacter):
+class Character(MudderyCharacter):
     """
     Custom character class.
 

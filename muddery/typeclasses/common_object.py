@@ -10,7 +10,7 @@ from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.utils.localized_strings_handler import _
 
 
-class CommonObject(TYPECLASS("OBJECT")):
+class MudderyCommonObject(TYPECLASS("OBJECT")):
     """
     This is a common object. Players can put it in their inventories.
     

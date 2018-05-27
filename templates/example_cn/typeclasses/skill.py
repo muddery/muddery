@@ -6,11 +6,11 @@ actions of a skill.
 
 """
 
-from muddery.typeclasses.skill import Skill as BaseSkill
+from muddery.typeclasses.skill import MudderySkill
 from muddery.utils.localized_strings_handler import _
 
 
-class Skill(BaseSkill):
+class Skill(MudderySkill):
     """
     A skill of the character.
     """

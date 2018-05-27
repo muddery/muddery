@@ -262,22 +262,22 @@ TYPECLASS_PATHS = ["muddery.typeclasses"]
 BASE_ACCOUNT_TYPECLASS = "muddery.typeclasses.accounts.MudderyAccount"
 
 # Typeclass and base for all objects (fallback)
-BASE_OBJECT_TYPECLASS = "muddery.typeclasses.object.Object"
+BASE_OBJECT_TYPECLASS = "muddery.typeclasses.object.MudderyBaseObject"
 
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.PlayerCharacter"
+BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.MudderyPlayerCharacter"
 
 # Typeclass for general characters, include NPCs, mobs and player characters.
-BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.character.Character"
+BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.character.MudderyCharacter"
 
 # Typeclass for player characters.
 BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.PlayerCharacter"
 
 # Typeclass for rooms (fallback)
-BASE_ROOM_TYPECLASS = "muddery.typeclasses.room.Room"
+BASE_ROOM_TYPECLASS = "muddery.typeclasses.room.MudderyRoom"
 
 # Typeclass for Exit objects (fallback).
-BASE_EXIT_TYPECLASS = "muddery.typeclasses.exit.Exit"
+BASE_EXIT_TYPECLASS = "muddery.typeclasses.exit.MudderyExit"
 
 # Typeclass for Channel (fallback).
 BASE_CHANNEL_TYPECLASS = "muddery.typeclasses.channels.MudderyChannel"
@@ -296,7 +296,7 @@ PATH_REQUEST_PROCESSERS_BASE = "muddery.worlddata.controllers"
 PATH_TYPECLASSES_BASE = "muddery.typeclasses"
 
 # Path of custom typeclasses.
-PATH_TYPECLASSES_CUSTOM = ""
+PATH_TYPECLASSES_CUSTOM = "typeclasses"
 
 # Path of base event actions.
 PATH_EVENT_ACTION_BASE = "muddery.events.event_actions"

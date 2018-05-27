@@ -18,7 +18,7 @@ from evennia.utils import logger
 from django.conf import settings
 
 
-class LockedExit(TYPECLASS("EXIT")):
+class MudderyLockedExit(TYPECLASS("EXIT")):
     """
     Characters must unlock these exits to pass it.
     The view and commands of locked exits are different from unlocked exits.

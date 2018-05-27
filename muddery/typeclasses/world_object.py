@@ -11,6 +11,6 @@ from __future__ import print_function
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
-class WorldObject(TYPECLASS("OBJECT")):
+class MudderyWorldObject(TYPECLASS("OBJECT")):
     key = "WORLD_OBJECT"
 

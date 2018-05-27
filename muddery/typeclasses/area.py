@@ -13,7 +13,7 @@ from muddery.mappings.typeclass_set import TYPECLASS
 from evennia.utils import logger
 
 
-class Area(TYPECLASS("OBJECT")):
+class MudderyArea(TYPECLASS("OBJECT")):
     """
     Areas are compose the whole map. Rooms are belongs to areas.
     """
