@@ -88,7 +88,10 @@ def import_data_path(path):
 
         if file_names:
             print("Importing %s" % file_names[0])
-            import_file(file_names[0], table_name=table_name)
+            try:
+                import_file(file_names[0], table_name=table_name)
+            except Exception, e:
+                print("Import error: %s" % e)
 
 
 def import_data_file(fp, table_name=None, file_type=None):

@@ -3,7 +3,7 @@ from django.contrib.admin.forms import forms
 from muddery.utils.localiztion_handler import localize_form_fields
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO, FOOD_ATTRIBUTES_INFO
 from muddery.mappings.typeclass_set import TYPECLASS_SET
-from muddery.worlddata.dao import general_mapper, model_mapper
+from muddery.worlddata.dao import general_query_mapper, model_mapper
 from muddery.worlddata.dao import common_mappers as CM
 
 
@@ -11,28 +11,6 @@ class ObjectsForm(forms.ModelForm):
     """
     Objects base form.
     """
-    def validate_object_key(self):
-        """
-        Check if the key exists. Object's key should be unique in all objects.
-        """
-        # Get models.
-        from muddery.worlddata.data_sets import DATA_SETS
-        for data_settings in DATA_SETS.object_data:
-            if data_settings.model_name == model.__class__.__name__:
-                # Models will validate unique values of its own,
-                # so we do not validate them here.
-                continue
-
-            try:
-                data_settings.model.objects.get(key=model.key)
-            except Exception, e:
-                continue
-
-            error = ValidationError("The key '%(value)s' already exists in model %(model)s.",
-                                    code="unique",
-                                    params={"value": model.key, "model": data_settings.model_name})
-            raise ValidationError({"key": error})
-
     def clean(self):
         cleaned_data = super(ObjectsForm, self).clean()
 
@@ -73,7 +51,6 @@ class ObjectsForm(forms.ModelForm):
                                         params={"value": key, "model": model.__name__})
                 raise forms.ValidationError({"key": error})
 
-        print(cleaned_data)
         return cleaned_data
 
 

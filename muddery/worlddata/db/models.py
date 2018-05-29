@@ -118,7 +118,7 @@ class BaseObjects(models.Model):
     typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # object's name
-    name = models.CharField(max_length=NAME_LENGTH, default="")
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
     
     # object's description for display
     desc = models.TextField(blank=True)
@@ -952,9 +952,6 @@ class skill_types(models.Model):
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
 
-    def clean(self):
-        auto_generate_key(self)
-
 
 # ------------------------------------------------------------
 #
@@ -1083,9 +1080,6 @@ class event_data(models.Model):
     def __unicode__(self):
         return self.key
 
-    def clean(self):
-        auto_generate_key(self)
-
 
 # ------------------------------------------------------------
 #
@@ -1114,9 +1108,6 @@ class dialogues(models.Model):
     def __unicode__(self):
         return self.name + " (" + self.key + ")"
 
-    def clean(self):
-        auto_generate_key(self)
-        
 
 # ------------------------------------------------------------
 #
@@ -1396,9 +1387,6 @@ class ImageResources(models.Model):
         app_label = "worlddata"
         verbose_name = "Resource"
         verbose_name_plural = "Resources"
-
-    def clean(self):
-        auto_generate_key(self)
 
 
 # ------------------------------------------------------------

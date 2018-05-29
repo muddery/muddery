@@ -1,3 +1,3 @@
 key,name,typeclass,desc,model,level,reborn_time,icon
-player,玩家,CLASS_PLAYER,这是玩家。,MODEL_PLAYER,1,10,icon_player
-char_robot_mob,机器人A,CLASS_COMMON_MONSTER,这是个A型机器人。,MODEL_MOB_ROBOT_A,1,0,icon_robot
+player,玩家,PLAYER_CHARACTER,这是玩家。,MODEL_PLAYER,1,10,icon_player
+char_robot_mob,机器人A,MONSTER,这是个A型机器人。,MODEL_MOB_ROBOT_A,1,0,icon_robot

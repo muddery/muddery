@@ -1,2 +1,2 @@
 key,name,typeclass,desc,max_stack,unique,can_remove,can_discard,icon,position,type,attr_1,attr_2,attr_3,attr_4,attr_5,attr_6,attr_7,attr_8,attr_9,attr_10
-weapon_wood_stick,木棍,CLASS_EQUIPMENT,这条木棍不粗，但感觉挺结实的。,1,1,1,1,icon_club,POSITION_HAND,EQUIP_WEAPON,10,0,,,,,,,,
+weapon_wood_stick,木棍,EQUIPMENT,这条木棍不粗，但感觉挺结实的。,1,1,1,1,icon_club,POSITION_HAND,EQUIP_WEAPON,10,0,,,,,,,,

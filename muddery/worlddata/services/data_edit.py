@@ -8,7 +8,7 @@ from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _
-from muddery.worlddata.dao import general_mapper
+from muddery.worlddata.dao import general_query_mapper
 from muddery.mappings.form_set import FORM_SET
 
 
@@ -29,7 +29,7 @@ def query_form(table_name, record_id=None):
     if record_id:
         try:
             # Query record's data.
-            record = general_mapper.get_record_by_id(table_name, record_id)
+            record = general_query_mapper.get_record_by_id(table_name, record_id)
             form = form_class(instance=record)
         except Exception, e:
             form = None
@@ -86,7 +86,7 @@ def save_form(values, table_name, record_id=None):
     if record_id:
         try:
             # Query record's data.
-            record = general_mapper.get_record_by_id(table_name, record_id)
+            record = general_query_mapper.get_record_by_id(table_name, record_id)
             form = form_class(values, instance=record)
         except Exception, e:
             form = None
@@ -107,4 +107,4 @@ def delete_record(table_name, record_id):
     """
     Delete a record of a table.
     """
-    general_mapper.delete_record_by_id(table_name, record_id)
+    general_query_mapper.delete_record_by_id(table_name, record_id)
