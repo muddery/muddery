@@ -15,7 +15,7 @@ from muddery.server.launcher import configs
 from muddery.server.launcher.utils import copy_tree
 from muddery.utils import readers
 from muddery.utils.exception import MudderyError, ERR
-from muddery.worlddata.dao.data_importer import DataImporter
+from muddery.worlddata.dao.data_importer import import_file
 
 
 def unzip_data_all(fp):
@@ -80,7 +80,6 @@ def import_data_file(fp, table_name=None):
     """
     Import a single data file.
     """
-    data_importer = DataImporter()
-    data_importer.import_file(fp, table_name=table_name)
+    import_file(fp, table_name=table_name)
     
 

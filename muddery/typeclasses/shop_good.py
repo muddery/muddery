@@ -18,7 +18,7 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
     This is a shop goods. Shops show these objects to players. It contains a common object
     to sell and additional shop information.
     """
-    key = "SHOP_GOODS"
+    typeclass_key = "SHOP_GOODS"
 
     def at_object_creation(self):
         """

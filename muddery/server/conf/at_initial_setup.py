@@ -21,8 +21,6 @@ from django.conf import settings
 from evennia.utils import search, logger
 from muddery.utils import builder, importer, utils
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_sets import DATA_SETS
-from muddery.typeclasses.character_skills import MudderySkill
 from muddery.dao.honours_mapper import HONOURS_MAPPER
 import traceback
 

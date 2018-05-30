@@ -26,7 +26,7 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
     See examples/object.py for a list of
     properties and methods available on all Objects.
     """
-    key = "ROOM"
+    typeclass_key = "ROOM"
 
     def at_object_creation(self):
         """

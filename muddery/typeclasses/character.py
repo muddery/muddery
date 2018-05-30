@@ -48,7 +48,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
                     has connected" message echoed to the room
 
     """
-    key = "CHARACTER"
+    typeclass_key = "CHARACTER"
 
     # initialize loot handler in a lazy fashion
     @lazy_property

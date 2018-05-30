@@ -23,7 +23,7 @@ class MudderyLockedExit(TYPECLASS("EXIT")):
     Characters must unlock these exits to pass it.
     The view and commands of locked exits are different from unlocked exits.
     """
-    key = "LOCKED_EXIT"
+    typeclass_key = "LOCKED_EXIT"
 
     def after_data_loaded(self):
         """

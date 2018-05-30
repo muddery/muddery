@@ -53,7 +53,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     has connected" message echoed to the room
 
     """
-    key = "PLAYER_CHARACTER"
+    typeclass_key = "PLAYER_CHARACTER"
 
     # initialize all handlers in a lazy fashion
     @lazy_property

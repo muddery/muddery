@@ -19,7 +19,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
     """
     A skill of the character.
     """
-    key = "SKILL"
+    typeclass_key = "SKILL"
 
     msg_escape = re.compile(r'%[%|n|c|t]')
 

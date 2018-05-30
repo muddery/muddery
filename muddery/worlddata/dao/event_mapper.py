@@ -32,7 +32,7 @@ def get_event_additional_data(event_type, event_key):
 
     if model_name:
         model = apps.get_model(settings.WORLD_DATA_APP, model_name)
-        records = model_additional.objects.filter(key=event_key)
+        records = model.objects.filter(key=event_key)
         if records:
             record = records[0]
             for field in record._meta.fields:

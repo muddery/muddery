@@ -17,5 +17,5 @@ class MudderyNonPlayerCharacter(TYPECLASS("CHARACTER")):
     """
     The character not controlled by players.
     """
-    key = "NON_PLAYER"
+    typeclass_key = "NON_PLAYER"
 

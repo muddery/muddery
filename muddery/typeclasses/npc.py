@@ -18,7 +18,7 @@ class MudderyNPC(TYPECLASS("NON_PLAYER")):
     """
     Neutral or friendly NPC. They can not be attacked.
     """
-    key = "NPC"
+    typeclass_key = "NPC"
 
     def at_object_creation(self):
         """

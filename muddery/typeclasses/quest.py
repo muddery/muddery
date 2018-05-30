@@ -25,7 +25,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
     """
     This class controls quest's objectives. Hooks are called when a character doing some things.
     """
-    key = "QUEST"
+    typeclass_key = "QUEST"
 
     # initialize loot handler in a lazy fashion
     @lazy_property

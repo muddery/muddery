@@ -23,7 +23,7 @@ class TypeclassSet(object):
         self.module_dict = {}
         self.class_dict = {}
         self.match_class = re.compile(r'^class\s+(\w+)\s*.*$')
-        self.match_key = re.compile(r""" {4}key\s*=\s*("|')(.+)("|')\s*$""")
+        self.match_key = re.compile(r""" {4}typeclass_key\s*=\s*("|')(.+)("|')\s*$""")
 
     def load_files(self, typeclass_path):
         """
@@ -60,7 +60,7 @@ class TypeclassSet(object):
                                         module_path += "." + name + "." + class_name
                                     else:
                                         relative_path = get_module_path(os.path.relpath(root, base_path))
-                                        modlue_path += "." + relative_path + "." + name + "." + class_name
+                                        module_path += "." + relative_path + "." + name + "." + class_name
 
                                     if key_name in self.module_dict:
                                         logger.log_infomsg("Typeclass %s is replaced by %s." % (key_name, module_path))
@@ -94,6 +94,12 @@ class TypeclassSet(object):
             return cls
 
         logger.log_errmsg("Can not find typeclass key: %s." % key)
+
+    def get_module(self, key):
+        """
+        Get a typeclass's module path.
+        """
+        return self.module_dict.get(key, None)
 
     def get_group(self, group_key):
         """

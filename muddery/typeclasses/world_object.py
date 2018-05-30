@@ -12,5 +12,5 @@ from muddery.mappings.typeclass_set import TYPECLASS
 
 
 class MudderyWorldObject(TYPECLASS("OBJECT")):
-    key = "WORLD_OBJECT"
+    typeclass_key = "WORLD_OBJECT"
 

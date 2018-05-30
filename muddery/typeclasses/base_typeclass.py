@@ -13,7 +13,6 @@ class BaseTypeclass(object):
     """
     This base typeclass.
     """
-    key = ""
-    name = ""
-    desc = ""
-
+    typeclass_key = ""
+    typeclass_name = ""
+    typeclass_desc = ""

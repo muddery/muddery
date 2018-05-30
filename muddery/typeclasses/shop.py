@@ -20,7 +20,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
     """
     A shop.
     """
-    key = "SHOP"
+    typeclass_key = "SHOP"
 
     def after_data_loaded(self):
         """

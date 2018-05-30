@@ -20,7 +20,7 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
     It has two additional properties: max_stack(int) and unique(bool). They decied the number
     of the object that a player can put in his inventory.
     """
-    key = "COMMON_OBJECT"
+    typeclass_key = "COMMON_OBJECT"
 
     def at_object_creation(self):
         """
@@ -117,7 +117,7 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
     This is a food. Players can use it to change their properties, such as hp, mp,
     strength, etc.
     """
-    key = "FOOD"
+    typeclass_key = "FOOD"
 
     def after_data_loaded(self):
         """
@@ -195,7 +195,7 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
     This is a equipment. Players can equip it to change their properties, such as attack, defence,
     etc.
     """
-    key = "EQUIPMENT"
+    typeclass_key = "EQUIPMENT"
 
     def after_data_loaded(self):
         """
@@ -272,7 +272,7 @@ class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
     """
     This is a skill book. Players can use it to learn a new skill.
     """
-    key = "SKILL_BOOK"
+    typeclass_key = "SKILL_BOOK"
 
     def get_available_commands(self, caller):
         """

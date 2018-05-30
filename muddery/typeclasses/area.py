@@ -17,7 +17,7 @@ class MudderyArea(TYPECLASS("OBJECT")):
     """
     Areas are compose the whole map. Rooms are belongs to areas.
     """
-    key = "AREA"
+    typeclass_key = "AREA"
 
     def at_object_creation(self):
         """

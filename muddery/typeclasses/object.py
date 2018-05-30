@@ -35,7 +35,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
     """
     This object loads attributes from world data on init automatically.
     """
-    key = "OBJECT"
+    typeclass_key = "OBJECT"
 
     # initialize all handlers in a lazy fashion
     @lazy_property
@@ -114,7 +114,6 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         super(MudderyBaseObject, self).at_object_creation()
 
-        self.typeclass_key = None
         self.action = None
         self.condition = None
         self.icon = None
@@ -125,7 +124,6 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         super(MudderyBaseObject, self).at_init()
 
-        self.typeclass_key = None
         self.condition = None
         self.action = None
         self.icon = None
@@ -340,6 +338,9 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             typeclass_key: (string) Typeclass's key.
         """
         typeclass_cls = TYPECLASS(typeclass_key)
+        if not typeclass_cls:
+            logger.log_errmsg("Can not get the typeclass of %s." % typeclass_key)
+            return
         
         if type(self) == typeclass_cls:
             # No change.
@@ -354,10 +355,8 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         # You should prevent at_object_creation rewrite current attributes.
         self.swap_typeclass(typeclass_cls, clean_attributes=False)
         if typeclass_cls.path != self.typeclass_path:
-            logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_data_key(), typeclass_path))
+            logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_data_key(), typeclass_cls.path))
             return
-        
-        self.typeclass_key = typeclass_key
 
     def set_name(self, name):
         """

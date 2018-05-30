@@ -42,7 +42,7 @@ class MudderyExit(TYPECLASS("OBJECT"), DefaultExit):
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
     """
-    key = "EXIT"
+    typeclass_key = "EXIT"
 
     def after_data_loaded(self):
         """
