@@ -7,6 +7,7 @@ from muddery.utils import defines
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils import utils
 from muddery.worlddata.dao import event_mapper
+from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
@@ -34,10 +35,10 @@ class EventTrigger(object):
         self.owner = owner
         self.events = {}
 
-        event_key = owner.get_data_key()
+        object_key = owner.get_data_key()
 
         # Load events.
-        event_records = event_mapper.get_object_event(event_key)
+        event_records = event_mapper.get_object_event(object_key)
 
         for record in event_records:
             event = {}
@@ -51,8 +52,9 @@ class EventTrigger(object):
             event["type"] = event_type
 
             # Set additional data.
-            event_additional = event_mapper.get_event_additional_data(event_type, event_key)
-            event.update(event_additional)
+            event_additional = event_mapper.get_event_additional_data(event_type, event["key"])
+            if event_additional:
+                event.update(event_additional)
 
             if not trigger_type in self.events:
                 self.events[trigger_type] = []
@@ -93,7 +95,7 @@ class EventTrigger(object):
         for event in self.events[event_type]:
             # Check condition.
             if STATEMENT_HANDLER.match_condition(event["condition"], character, target):
-                function = self.get_function(event["type"])
+                function = EVENT_ACTION_SET.get(event["type"])
                 if function:
                     function(event, character)
 
@@ -102,18 +104,6 @@ class EventTrigger(object):
     # Event triggers
     #
     #########################
-
-
-    def get_function(self, event_type):
-        """
-        Get the function of the event type.
-        """
-        if event_type == defines.EVENT_ATTACK:
-            return self.do_attack
-        elif event_type == defines.EVENT_DIALOGUE:
-            return self.do_dialogue
-
-
     def at_character_move_in(self, character):
         """
         Called when a character moves in the event handler's owner, usually a room.
@@ -129,7 +119,7 @@ class EventTrigger(object):
                 # If has arrive event.
                 if STATEMENT_HANDLER.match_condition(event["condition"], character, self.owner):
                     # If matches the condition.
-                    function = self.get_function(event["type"])
+                    function = EVENT_ACTION_SET.get(event["type"])
                     if function:
                         function(event, character)
 
@@ -158,7 +148,7 @@ class EventTrigger(object):
                 #If has die event.
                 if STATEMENT_HANDLER.match_condition(event["condition"], owner, None):
                     # If matches the condition, run event on the owner.
-                    function = self.get_function(event["type"])
+                    function = EVENT_ACTION_SET.get(event["type"])
                     if function:
                         function(event, owner)
 
@@ -176,7 +166,7 @@ class EventTrigger(object):
                         continue
 
                     if STATEMENT_HANDLER.match_condition(event["condition"], killer, self.owner):
-                        function = self.get_function(event["type"])
+                        function = EVENT_ACTION_SET.get(event["type"])
                         if function:
                             function(event, killer)
 
@@ -199,7 +189,7 @@ class EventTrigger(object):
                 if STATEMENT_HANDLER.match_condition(event["condition"], character, self.owner):
                     # If matches the condition.
                     triggered = True
-                    function = self.get_function(event["type"])
+                    function = EVENT_ACTION_SET.get(event["type"])
                     if function:
                         function(event, character)
 
@@ -222,7 +212,7 @@ class EventTrigger(object):
                 if STATEMENT_HANDLER.match_condition(event["condition"], character, self.owner):
                     # If matches the condition.
                     triggered = True
-                    function = self.get_function(event["type"])
+                    function = EVENT_ACTION_SET.get(event["type"])
                     if function:
                         function(event, character)
 

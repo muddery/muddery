@@ -12,8 +12,8 @@ from django.conf import settings
 from django.apps import apps
 from muddery.utils.builder import build_object, get_object_record
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_sets import DATA_SETS
 from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.worlddata.dao.shop_goods_mapper import SHOP_GOODS
 
 
 class MudderyShop(TYPECLASS("OBJECT")):
@@ -41,7 +41,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
         Load shop goods.
         """
         # shops records
-        goods_records = DATA_SETS.shop_goods.objects.filter(shop=self.get_data_key())
+        goods_records = SHOP_GOODS.get(self.get_data_key())
 
         goods_keys = set([record.key for record in goods_records])
 

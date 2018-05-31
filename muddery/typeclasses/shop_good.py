@@ -9,7 +9,6 @@ from evennia.utils import logger
 from muddery.utils.exception import MudderyError
 from muddery.utils.builder import build_object, get_object_record
 from muddery.utils.localized_strings_handler import _
-from muddery.worlddata.data_sets import DATA_SETS
 from muddery.mappings.typeclass_set import TYPECLASS
 
 

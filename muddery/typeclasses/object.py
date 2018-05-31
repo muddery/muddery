@@ -26,7 +26,7 @@ from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.desc_handler import DESC_HANDLER
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao.icon_resources_mapper import ICON_RESOURCES
 from muddery.typeclasses.base_typeclass import BaseTypeclass
 from muddery.mappings.typeclass_set import TYPECLASS
 
@@ -259,8 +259,8 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
 
             # reset typeclass
             if key[:len(settings.REVERSE_EXIT_PREFIX)] == settings.REVERSE_EXIT_PREFIX:
-                # Reverse exit's typeclass can only be set to settings.REVERSE_EXIT_TYPECLASS_PATH.
-                typeclass = settings.REVERSE_EXIT_TYPECLASS_PATH
+                # Reverse exit's typeclass can only be set to settings.REVERSE_EXIT_TYPECLASS_KEY.
+                typeclass = settings.REVERSE_EXIT_TYPECLASS_KEY
             else:
                 typeclass = getattr(self.dfield, "typeclass", "")
                 
@@ -504,7 +504,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         icon_key = getattr(self.dfield, "icon", None)
         if icon_key:
             try:
-                resource_info = DATA_SETS.icon_resources.objects.get(key=icon_key)
+                resource_info = ICON_RESOURCES.get(icon_key)
                 self.icon = resource_info.resource
             except Exception, e:
                 logger.log_errmsg("Load icon %s error: %s" % (icon_key, e))

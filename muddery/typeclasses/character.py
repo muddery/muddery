@@ -20,7 +20,10 @@ from evennia.typeclasses.models import DbHolder
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property, class_from_module
 from muddery.mappings.typeclass_set import TYPECLASS
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao import common_mappers as CM
+from muddery.worlddata.dao.loot_list_mapper import CHARACTER_LOOT_LIST
+from muddery.worlddata.dao.character_models_mapper import CHARACTER_MODELS
+from muddery.worlddata.dao.default_skills_mapper import DEFAULT_SKILLS
 from muddery.utils.builder import build_object
 from muddery.utils.loot_handler import LootHandler
 from muddery.utils.game_settings import GAME_SETTINGS
@@ -53,7 +56,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, DATA_SETS.character_loot_list.model)
+        return LootHandler(self, CHARACTER_LOOT_LIST.get(self.get_data_key()))
 
     def at_object_creation(self):
         """
@@ -191,7 +194,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         self.db.position_names = {}
 
         # reset equipment's position
-        for record in DATA_SETS.equipment_positions.objects.all():
+        for record in CM.EQUIPMENT_POSITIONS.all():
             positions.append(record.key)
             self.db.position_names[record.key] = record.name
 
@@ -346,13 +349,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         try:
             # get data from db
-            model_data = DATA_SETS.character_models.objects.get(key=model_name, level=self.db.level)
-
-            reserved_fields = {"id", "key", "name", "level"}
-            for field in model_data._meta.fields:
-                if field.name in reserved_fields:
-                    continue
-                setattr(self.dfield, field.name, model_data.serializable_value(field.name))
+            model_data = CHARACTER_MODELS.get(model_name, self.db.level)
+            for key, value in model_data.items():
+                setattr(self.dfield, key, value)
         except Exception, e:
             logger.log_errmsg("Can't load character %s's level info (%s, %s): %s" %
                               (self.get_data_key(), model_name, self.db.level, e))
@@ -408,7 +407,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             model_name = self.get_data_key()
 
         # default skills
-        skill_records = DATA_SETS.default_skills.objects.filter(character=model_name)
+        skill_records = DEFAULT_SKILLS.get(model_name)
         default_skill_ids = set([record.skill for record in skill_records])
 
         # remove old default skills
@@ -616,7 +615,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             logger.log_errmsg("Can not find the target.")
             return False
 
-        if not target.is_typeclass(settings.BASE_GENERAL_CHARACTER_TYPECLASS, exact=False):
+        if not target.is_typeclass(TYPECLASS(settings.GENERAL_CHARACTER_TYPECLASS_KEY), exact=False):
             # Target is not a character.
             logger.log_errmsg("Can not attack the target %s." % target.dbref)
             return False

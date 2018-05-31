@@ -10,7 +10,7 @@ from evennia.utils import logger
 from muddery.utils.builder import delete_object
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
@@ -42,8 +42,7 @@ class MudderyMonster(TYPECLASS("NON_PLAYER")):
         """
         Load dialogues.
         """
-        npc_key = self.get_data_key()
-        dialogues = DATA_SETS.npc_dialogues.objects.filter(npc=npc_key)
+        dialogues = NPC_DIALOGUES.get(self.get_data_key())
 
         self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.default]
         self.dialogues = [dialogue.dialogue for dialogue in dialogues if not dialogue.default]

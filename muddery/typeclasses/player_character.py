@@ -25,7 +25,7 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.honours_handler import HONOURS_HANDLER
 from muddery.utils.match_queue_handler import MATCH_QUEUE_HANDLER
 from muddery.dao.honours_mapper import HONOURS_MAPPER
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao.default_objects_mapper import DEFAULT_OBJECTS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
@@ -92,6 +92,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         if not self.attributes.has("attributes"):
             self.db.attributes = {}
 
+        """
         # Choose a random career.
         if not self.attributes.has("career"):
             self.db.career = ""
@@ -102,6 +103,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     self.db.career = career.key
             except Exception, e:
                 pass
+        """
         
     def after_data_loaded(self):
         """
@@ -387,7 +389,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             model_name = self.get_data_key()
         
         # default objects
-        object_records = DATA_SETS.default_objects.objects.filter(character=model_name)
+        object_records = DEFAULT_OBJECTS.get(model_name)
 
         default_object_ids = set([record.object for record in object_records])
 

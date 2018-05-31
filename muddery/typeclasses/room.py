@@ -10,7 +10,7 @@ import traceback
 from django.conf import settings
 from django.apps import apps
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao.image_resources_mapper import IMAGE_RESOURCES
 from muddery.mappings.typeclass_set import TYPECLASS
 from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
@@ -61,7 +61,7 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
         resource_key = getattr(self.dfield, "background", None)
         if resource_key:
             try:
-                resource_info = DATA_SETS.image_resources.objects.get(key=resource_key)
+                resource_info = IMAGE_RESOURCES.get(resource_key)
                 self.background = {"name": resource_info.resource,
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}

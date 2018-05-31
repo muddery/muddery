@@ -14,7 +14,7 @@ class Skill(MudderySkill):
     """
     A skill of the character.
     """
-    key = "SKILL"
+    typeclass_key = "SKILL"
 
     def after_data_loaded(self):
         """

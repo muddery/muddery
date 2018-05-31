@@ -5,7 +5,7 @@ This handles the relations of equipment types and character careers.
 from __future__ import print_function
 
 from evennia.utils import logger
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao import common_mappers as CM
 
 
 class EquipTypeHandler(object):
@@ -32,8 +32,9 @@ class EquipTypeHandler(object):
         """
         self.clear()
 
+        """
         try:
-            for record in DATA_SETS.career_equipments.objects.all():
+            for record in CM.CAREER_EQUIPMENTS.all():
                 career = record.serializable_value("career")
                 equipment = record.serializable_value("equipment")
                 if career not in self.career_equip:
@@ -42,6 +43,7 @@ class EquipTypeHandler(object):
         except Exception, e:
             logger.log_errmsg("Can not load career equipment types: %s" % e)
             pass
+        """
 
     
     def can_equip(self, career, equip):

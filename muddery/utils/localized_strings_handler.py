@@ -5,7 +5,7 @@ This model translates default strings into localized strings.
 from __future__ import print_function
 
 from evennia.utils import logger
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao.localized_strings_mapper import LOCALIZED_STRINGS
 
 
 class LocalizedStringsHandler(object):
@@ -32,7 +32,7 @@ class LocalizedStringsHandler(object):
 
         # Load localized string model.
         try:
-            for record in DATA_SETS.localized_strings.objects.all():
+            for record in LOCALIZED_STRINGS.all():
                 # Add db fields to dict. Overwrite system localized strings.
                 self.dict[(record.category, record.origin)] = record.local
         except Exception, e:

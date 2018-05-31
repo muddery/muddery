@@ -12,7 +12,12 @@ from muddery.utils import defines
 from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao.dialogues_mapper import DIALOGUES
+from muddery.worlddata.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
+from muddery.worlddata.dao.dialogue_relations_mapper import DIALOGUE_RELATIONS
+from muddery.worlddata.dao.dialogue_quest_dependencies_mapper import DIALOGUE_QUESTION_RELATIONS
+from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
+from muddery.worlddata.dao.icon_resources_mapper import ICON_RESOURCES
 from evennia.utils import logger
 
 
@@ -58,15 +63,15 @@ class DialogueHandler(object):
         
         # Get db model
         try:
-            dialogue_record = DATA_SETS.dialogues.objects.get(key=dialogue)
+            dialogue_record = DIALOGUES.get(dialogue)
         except Exception, e:
             return
 
-        sentences = DATA_SETS.dialogue_sentences.objects.filter(dialogue=dialogue)
+        sentences = DIALOGUE_SENTENCES.get(dialogue)
 
-        nexts = DATA_SETS.dialogue_relations.objects.filter(dialogue=dialogue)
+        nexts = DIALOGUE_RELATIONS.get(dialogue)
 
-        dependencies = DATA_SETS.dialogue_quest_dependencies.objects.filter(dialogue=dialogue)
+        dependencies = DIALOGUE_QUESTION_RELATIONS.GET(dialogue=dialogue)
 
         # Add db fields to data object.
         data = {}
@@ -375,7 +380,7 @@ class DialogueHandler(object):
         # use icon resource in dialogue sentence
         if icon_str:
             try:
-                resource_info = DATA_SETS.icon_resources.objects.get(key=icon_str)
+                resource_info = ICON_RESOURCES.get(icon_str)
                 icon = resource_info.resource
             except Exception, e:
                 logger.log_errmsg("Load icon %s error: %s" % (icon_str, e))
@@ -479,7 +484,7 @@ class DialogueHandler(object):
         """
         # Get record.
         try:
-            record = DATA_SETS.npc_dialogues.objects.get(dialogue=dialogue)
+            record = NPC_DIALOGUES.get(dialogue)
             return record.npc.name
         except Exception, e:
             pass

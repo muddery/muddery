@@ -19,7 +19,7 @@ from __future__ import print_function
 import os
 from django.conf import settings
 from evennia.utils import search, logger
-from muddery.utils import builder, importer, utils
+from muddery.utils import builder
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.dao.honours_mapper import HONOURS_MAPPER
 import traceback

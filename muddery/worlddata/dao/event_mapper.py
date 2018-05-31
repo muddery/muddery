@@ -36,8 +36,7 @@ def get_event_additional_data(event_type, event_key):
         if records:
             record = records[0]
             for field in record._meta.fields:
-                data[field.name] = record.serializable_value(field.name) 
+                data[field.name] = record.serializable_value(field.name)
 
-
-
+    return data
 

@@ -2,7 +2,7 @@
 Object key handler, stores key's model name.
 """
 
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao import model_mapper
 
 
 class ObjectKeyHandler(object):
@@ -29,8 +29,8 @@ class ObjectKeyHandler(object):
 
         # Get model names.
         data_settings_list = []
-        data_settings_list.extend(DATA_SETS.object_data)
-        data_settings_list.extend(DATA_SETS.object_additional_data)
+        data_settings_list.extend(model_mapper.get_objects_models())
+        data_settings_list.extend(model_mapper.get_additional_data_models())
         for data_settings in data_settings_list:
             try:
                 for record in data_settings.objects.all():

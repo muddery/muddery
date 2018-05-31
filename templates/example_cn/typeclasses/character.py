@@ -18,7 +18,7 @@ class Character(MudderyCharacter):
     Custom character class.
 
     """
-    key = "CHARACTER"
+    typeclass_key = "CHARACTER"
 
     def at_object_creation(self):
         """

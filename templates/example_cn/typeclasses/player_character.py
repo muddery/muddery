@@ -34,7 +34,7 @@ class PlayerCharacter(MudderyPlayerCharacter):
                     has connected" message echoed to the room
 
     """
-    key = "PLAYER_CHARACTER"
+    typeclass_key = "PLAYER_CHARACTER"
 
     def return_status(self):
         """

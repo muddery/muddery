@@ -3,19 +3,19 @@ Handles characters attributes.
 """
 
 from muddery.utils.localized_strings_handler import _
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao import common_mappers as CM
 
 
 class AttributesInfoHandler(object):
     """
     Handles character attribute's information.
     """
-    def __init__(self, model_data_handler, info_data_handler):
+    def __init__(self, info):
         """
         Initialize handler
         """
-        self.model_data_handler = model_data_handler
-        self.info_data_handler = info_data_handler
+        # self.model_data_handler = model_data_handler
+        self.info = info
         self.clear()
 
     def clear(self):
@@ -33,7 +33,7 @@ class AttributesInfoHandler(object):
 
         # Load localized string model.
         try:
-            for record in self.info_data_handler.objects.all():
+            for record in self.info:
                 if not record.key:
                     # skip empty fields
                     continue
@@ -48,7 +48,7 @@ class AttributesInfoHandler(object):
         except Exception, e:
             print("Can not load attribute: %s" % e)
 
-        self.set_model_fields()
+        # self.set_model_fields()
 
     def has_field(self, field):
         """
@@ -90,6 +90,7 @@ class AttributesInfoHandler(object):
         """
         Set model fields names to attribute names.
         """
+        """
         model = self.model_data_handler.model
 
         # get model fields
@@ -98,6 +99,8 @@ class AttributesInfoHandler(object):
             if info:
                 field.verbose_name = info["name"]
                 field.help_text = info["desc"]
+        """
+        pass
 
     def set_form_fields(self, form):
         """
@@ -115,6 +118,6 @@ class AttributesInfoHandler(object):
 
 
 # character attribute handler
-CHARACTER_ATTRIBUTES_INFO = AttributesInfoHandler(DATA_SETS.character_models, DATA_SETS.character_attributes_info)
-EQUIPMENT_ATTRIBUTES_INFO = AttributesInfoHandler(DATA_SETS.equipments, DATA_SETS.equipment_attributes_info)
-FOOD_ATTRIBUTES_INFO = AttributesInfoHandler(DATA_SETS.foods, DATA_SETS.food_attributes_info)
+CHARACTER_ATTRIBUTES_INFO = AttributesInfoHandler(CM.CHARACTER_ATTRIBUTES_INFO.all())
+EQUIPMENT_ATTRIBUTES_INFO = AttributesInfoHandler(CM.EQUIPMENT_ATTRIBUTES_INFO.all())
+FOOD_ATTRIBUTES_INFO = AttributesInfoHandler(CM.FOOD_ATTRIBUTES_INFO.all())

@@ -13,6 +13,7 @@ from django.conf import settings
 from evennia.utils import search, logger
 from evennia.utils.utils import class_from_module
 from muddery.server.launcher import configs
+from muddery.worlddata.dao.localized_strings_mapper import LOCALIZED_STRINGS
 from importlib import import_module
 from pkgutil import iter_modules
 
@@ -155,8 +156,7 @@ def get_unlocalized_py_strings(filename, filter):
                 if str or cate:
                     if filter:
                         # check database
-                        records = DATA_SETS.localized_strings.objects.filter(category=cate,
-                                                                             origin=str)
+                        records = LOCALIZED_STRINGS.get(str, cate)
                         if not records:
                             strings.add((str, cate,))
                     else:

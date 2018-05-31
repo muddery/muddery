@@ -15,7 +15,7 @@ from muddery.utils.loot_handler import LootHandler
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.utils.localized_strings_handler import _
 from muddery.statements.statement_handler import STATEMENT_HANDLER
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao.loot_list_mapper import CREATOR_LOOT_LIST
 
 
 class MudderyObjectCreator(TYPECLASS("OBJECT")):
@@ -27,7 +27,7 @@ class MudderyObjectCreator(TYPECLASS("OBJECT")):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, DATA_SETS.creator_loot_list.model)
+        return LootHandler(self, CREATOR_LOOT_LIST.get(self.get_data_key()))
 
     def after_data_loaded(self):
         """

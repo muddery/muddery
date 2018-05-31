@@ -14,7 +14,6 @@ from django.contrib.admin.views.decorators import staff_member_required
 from evennia.utils import logger
 from muddery.utils import utils
 from muddery.utils.localized_strings_handler import _, LOCALIZED_STRINGS_HANDLER
-from muddery.worlddata.data_sets import DATA_SETS
 
 
 @staff_member_required

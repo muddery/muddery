@@ -444,21 +444,8 @@ class shop_goods(BaseObjects):
         verbose_name_plural = "Shop Objects"
 
 
-class skills(models.Model):
+class skills(BaseObjects):
     "Store all skills."
-
-    # skill's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a skill typeclass.
-    # skill's typeclass
-    typeclass = models.CharField(max_length=KEY_LENGTH)
-
-    # skill's name for display
-    name = models.CharField(max_length=NAME_LENGTH)
-
-    # skill's description for display
-    desc = models.TextField(blank=True)
 
     # skill's message when casting
     message = models.TextField(blank=True)
@@ -508,14 +495,29 @@ class quests(BaseObjects):
 
 # ------------------------------------------------------------
 #
-# Other data.
+# Objects additional data.
 #
 # ------------------------------------------------------------
-class exit_locks(models.Model):
-    "Locked exit's additional data"
-
-    # related exit's key
+class BaseAdditionalData(models.Model):
+    """
+    The base model of object's additinal data.
+    """
+    # object's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+
+
+# ------------------------------------------------------------
+#
+# exit lock's additional data
+#
+# ------------------------------------------------------------
+class exit_locks(BaseAdditionalData):
+    "Locked exit's additional data"
 
     # condition of the lock
     unlock_condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
@@ -542,11 +544,8 @@ class exit_locks(models.Model):
 # two way exit's additional data
 #
 # ------------------------------------------------------------
-class two_way_exits(models.Model):
+class two_way_exits(BaseAdditionalData):
     "Two way exit's additional data"
-
-    # related exit's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # reverse exit's name
     reverse_name = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -564,11 +563,8 @@ class two_way_exits(models.Model):
 # object creator's additional data
 #
 # ------------------------------------------------------------
-class object_creators(models.Model):
+class object_creators(BaseAdditionalData):
     "Players can get new objects from an object_creator."
-
-    # object creator's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
     
     # related object's key
     relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)

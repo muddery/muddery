@@ -11,7 +11,8 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.builder import build_object, delete_object
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.mappings.typeclass_set import TYPECLASS
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
+from muddery.worlddata.dao.npc_shops_mapper import NPC_SHOPS
 
 
 class MudderyNPC(TYPECLASS("NON_PLAYER")):
@@ -57,8 +58,7 @@ class MudderyNPC(TYPECLASS("NON_PLAYER")):
         """
         Load dialogues.
         """
-        npc_key = self.get_data_key()
-        dialogues = DATA_SETS.npc_dialogues.objects.filter(npc=npc_key)
+        dialogues = NPC_DIALOGUES.get(self.get_data_key())
 
         self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.default]
         self.dialogues = [dialogue.dialogue for dialogue in dialogues if not dialogue.default]
@@ -68,7 +68,7 @@ class MudderyNPC(TYPECLASS("NON_PLAYER")):
         Load character's shop.
         """
         # shops records
-        shop_records = DATA_SETS.npc_shops.objects.filter(npc=self.get_data_key())
+        shop_records = NPC_SHOPS.get(self.get_data_key())
 
         shop_keys = set([record.shop for record in shop_records])
 

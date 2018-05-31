@@ -234,7 +234,8 @@ def build_unique_objects(objects_data, type_name, caller=None):
 
                 # Create object.
                 try:
-                    obj = create.create_object(settings.REVERSE_EXIT_TYPECLASS_PATH, record.name)
+                    typeclass_path = TYPECLASS_SET.get_module(settings.REVERSE_EXIT_TYPECLASS_KEY)
+                    obj = create.create_object(typeclass_path, record.name)
                     count_create += 1
                 except Exception, e:
                     ostring = "Can not create obj %s: %s" % (reverse_exit_key, e)

@@ -13,7 +13,8 @@ from muddery.utils.loot_handler import LootHandler
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao.loot_list_mapper import QUEST_REWARD_LIST
+from muddery.worlddata.dao.quest_objectives_mapper import QUEST_OBJECTIVES
 from muddery.mappings.typeclass_set import TYPECLASS
 from django.conf import settings
 from django.apps import apps
@@ -30,7 +31,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, DATA_SETS.quest_reward_list.model)
+        return LootHandler(self, QUEST_REWARD_LIST.get(self.get_data_key()))
 
     def at_object_creation(self):
         """
@@ -63,7 +64,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
             return
 
         # Get objectives.
-        obj_records = DATA_SETS.quest_objectives.objects.filter(quest=key)
+        obj_records = QUEST_OBJECTIVES.get(key)
 
         for obj_record in obj_records:
             objective_type = obj_record.type

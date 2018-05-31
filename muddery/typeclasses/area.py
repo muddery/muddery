@@ -8,8 +8,8 @@ Areas are compose the whole map. Rooms are belongs to areas.
 import ast
 from django.conf import settings
 from django.apps import apps
-from muddery.worlddata.data_sets import DATA_SETS
 from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.worlddata.dao.image_resources_mapper import IMAGE_RESOURCES
 from evennia.utils import logger
 
 
@@ -41,7 +41,7 @@ class MudderyArea(TYPECLASS("OBJECT")):
         resource_key = getattr(self.dfield, "background", None)
         if resource_key:
             try:
-                resource_info = DATA_SETS.image_resources.objects.get(key=resource_key)
+                resource_info = IMAGE_RESOURCES.get(resource_key)
                 self.background = {"name": resource_info.resource,
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}

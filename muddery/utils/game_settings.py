@@ -3,7 +3,7 @@ Set the game's configuration.
 """
 
 from django.conf import settings
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao import common_mappers as CM
 from evennia.utils import logger
 
 
@@ -11,13 +11,13 @@ class GameSettings(object):
     """
     Handles a character's custom attributes.
     """
-    def __init__(self, objects, default_values):
+    def __init__(self, record_values, default_values):
         """
         Initialize handler.
         """
         self.values = {}
         self.default_values = default_values
-        self.objects = objects
+        self.record_values = record_values
         self.reset()
 
     def reset(self):
@@ -30,9 +30,8 @@ class GameSettings(object):
 
         # Get db model
         try:
-            query = self.objects.all()
-            if len(query) > 0:
-                record = query[0]
+            if len(self.record_values) > 0:
+                record = self.record_values[0]
                 # Add db fields to dict.
                 for field in record._meta.fields:
                     self.values[field.name] = record.serializable_value(field.name)
@@ -81,7 +80,7 @@ class GameSettings(object):
         return client_settings
 
 
-GAME_SETTINGS = GameSettings(DATA_SETS.game_settings.objects,
+GAME_SETTINGS = GameSettings(CM.GAME_SETTINGS.all(),
                              {"game_name": "Muddery",
                               "connection_screen": "",
                               "solo_mode": False,

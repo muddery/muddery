@@ -5,7 +5,7 @@ This model translates default strings into localized strings.
 from __future__ import print_function
 
 from evennia.utils import logger
-from muddery.worlddata.data_sets import DATA_SETS
+from muddery.worlddata.dao import common_mappers as CM
 
 
 class DescHandler(object):
@@ -32,7 +32,7 @@ class DescHandler(object):
 
         # Load localized string model.
         try:
-            for record in DATA_SETS.condition_desc.objects.all():
+            for record in CM.CONDITION_DESC.all():
                 # Add db fields to dict.
                 if not self.dict.has_key(record.key):
                     self.dict[record.key] = []

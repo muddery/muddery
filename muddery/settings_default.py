@@ -400,9 +400,6 @@ REVERSE_EXIT_PREFIX = "__reverse__"
 # Localized string data's folder.
 LOCALIZED_STRINGS_FOLDER = "languages"
 
-# World data sets.
-DATA_SETS = "muddery.worlddata.data_sets.DataSets"
-
 # World data API's url path.
 WORLD_DATA_API_PATH = "worlddata/editor/api"
 

@@ -2,7 +2,8 @@
 Event action's base class.
 """
 
-import muddery.events.base_event_action
+import random
+from muddery.events.base_event_action import BaseEventAction
 
 
 class EventAttack(BaseEventAction):

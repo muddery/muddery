@@ -2,7 +2,8 @@
 Event action's base class.
 """
 
-import muddery.events.base_event_action
+from muddery.utils import utils
+from muddery.events.base_event_action import BaseEventAction
 
 
 class EventDialogue(BaseEventAction):
