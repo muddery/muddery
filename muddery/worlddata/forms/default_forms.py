@@ -2,9 +2,37 @@
 from django.contrib.admin.forms import forms
 from muddery.utils.localiztion_handler import localize_form_fields
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO, FOOD_ATTRIBUTES_INFO
+from muddery.mappings.quest_objective_set import QUEST_OBJECTIVE_SET
+from muddery.mappings.quest_dependency_set import QUEST_DEPENDENCY_SET
+from muddery.mappings.event_action_set import EVENT_ACTION_SET
+from muddery.mappings.event_trigger_set import EVENT_TRIGGER_SET
 from muddery.mappings.typeclass_set import TYPECLASS_SET
-from muddery.worlddata.dao import general_query_mapper, model_mapper
+from muddery.worlddata.dao import model_mapper
 from muddery.worlddata.dao import common_mappers as CM
+
+
+def get_all_objects():
+    """
+    Get all objects that can be put in player's pockets.
+    """
+    choices = []
+    for model in model_mapper.get_objects_models():
+        objects = model.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+
+    return choices
+
+
+def get_all_pocketable_objects():
+    """
+    Get all objects that can be put in player's pockets.
+    """
+    choices = []
+    for model in model_mapper.get_pocketable_object_models():
+        objects = model.objects.all()
+        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
+
+    return choices
 
 
 class ObjectsForm(forms.ModelForm):
@@ -94,7 +122,7 @@ class WorldAreasForm(ObjectsForm):
         super(WorldAreasForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("AREA")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         choices = [("", "---------")]
@@ -114,7 +142,7 @@ class WorldRoomsForm(forms.ModelForm):
         super(WorldRoomsForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("ROOM")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         choices = [("", "---------")]
@@ -144,7 +172,7 @@ class WorldExitsForm(forms.ModelForm):
         super(WorldExitsForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("EXIT")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         areas = CM.WORLD_AREAS.objects.all()
@@ -199,7 +227,7 @@ class WorldObjectsForm(forms.ModelForm):
         super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("WORLD_OBJECT")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         areas = CM.WORLD_AREAS.objects.all()
@@ -229,7 +257,7 @@ class WorldNPCsForm(forms.ModelForm):
 
         # NPC's typeclass
         typeclasses = TYPECLASS_SET.get_group("NON_PLAYER")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         # NPC's location
@@ -363,7 +391,7 @@ class CommonObjectsForm(forms.ModelForm):
         super(CommonObjectsForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("COMMON_OBJECT")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         choices = [("", "---------")]
@@ -383,7 +411,7 @@ class FoodsForm(forms.ModelForm):
         super(FoodsForm, self).__init__(*args, **kwargs)
         
         typeclasses = TYPECLASS_SET.get_group("FOOD")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         choices = [("", "---------")]
@@ -404,7 +432,7 @@ class SkillBooksForm(forms.ModelForm):
         super(SkillBooksForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("SKILL_BOOK")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         # skills
@@ -428,7 +456,7 @@ class SkillBooksForm(forms.ModelForm):
 class CharacterAttributesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CharacterAttributesForm, self).__init__(*args, **kwargs)
-        self.fields['field'].disabled = True;
+        self.fields['field'].disabled = True
         
         localize_form_fields(self)
 
@@ -440,7 +468,7 @@ class CharacterAttributesForm(forms.ModelForm):
 class EquipmentAttributesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentAttributesForm, self).__init__(*args, **kwargs)
-        self.fields['field'].disabled = True;
+        self.fields['field'].disabled = True
         
         localize_form_fields(self)
 
@@ -452,7 +480,7 @@ class EquipmentAttributesForm(forms.ModelForm):
 class FoodAttributesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FoodAttributesForm, self).__init__(*args, **kwargs)
-        self.fields['field'].disabled = True;
+        self.fields['field'].disabled = True
         
         localize_form_fields(self)
 
@@ -477,7 +505,7 @@ class CommonCharacterForm(forms.ModelForm):
         super(CommonCharacterForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("CHARACTER")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         # models
@@ -502,7 +530,7 @@ class CommonCharacterForm(forms.ModelForm):
         super(CommonCharacterForm, self).clean()
 
         # check model and level
-        from muddery.worlddata.dao.CM import CHARACTER_MODELS
+        from muddery.worlddata.dao.common_mappers import CHARACTER_MODELS
 
         try:
             CHARACTER_MODELS.get(key=self.model, level=self.level)
@@ -514,7 +542,7 @@ class CommonCharacterForm(forms.ModelForm):
                 message += " Available level: " + available[0]
             elif len(available) > 1:
                 message += " Available levels: " + ", ".join(available)
-            raise ValidationError({"level": message})
+            raise forms.ValidationError({"level": message})
 
 
 class DefaultObjectsForm(forms.ModelForm):
@@ -542,7 +570,7 @@ class ShopsForm(forms.ModelForm):
         super(ShopsForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("SHOP")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         choices = [("", "---------")]
@@ -572,7 +600,7 @@ class ShopGoodsForm(forms.ModelForm):
 
         # Goods typeclasses
         typeclasses = TYPECLASS_SET.get_group("SHOP_GOODS")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         # available units are common objects
@@ -613,7 +641,7 @@ class SkillsForm(forms.ModelForm):
         super(SkillsForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("SKILL")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         choices = [("", "---------")]
@@ -689,7 +717,7 @@ class QuestsForm(forms.ModelForm):
         super(QuestsForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("QUEST")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
@@ -707,8 +735,8 @@ class QuestObjectivesForm(forms.ModelForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['quest'] = forms.ChoiceField(choices=choices)
 
-        objects = CM.QUEST_OBJECTIVE_TYPES.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        objects = QUEST_OBJECTIVE_SET.all()
+        choices = [(obj, obj) for obj in objects]
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
@@ -727,8 +755,8 @@ class QuestDependenciesForm(forms.ModelForm):
         self.fields['quest'] = forms.ChoiceField(choices=choices)
         self.fields['dependency'] = forms.ChoiceField(choices=choices)
         
-        objects = CM.QUEST_DEPENDENCY_TYPES.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        objects = QUEST_DEPENDENCY_SET.all()
+        choices = [(obj, obj) for obj in objects]
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
@@ -750,8 +778,8 @@ class DialogueQuestDependenciesForm(forms.ModelForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['dependency'] = forms.ChoiceField(choices=choices)
         
-        objects = CM.QUEST_DEPENDENCY_TYPES.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        objects = QUEST_DEPENDENCY_SET.all()
+        choices = [obj for obj in objects]
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
@@ -766,7 +794,7 @@ class EquipmentsForm(forms.ModelForm):
         super(EquipmentsForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("EQUIPMENT")
-        choices = [(key, cls.name + " (" + key + ")") for key, cls in typeclasses.items()]
+        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         objects = CM.EQUIPMENT_POSITIONS.objects.all()
@@ -794,12 +822,12 @@ class EventDataForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EventDataForm, self).__init__(*args, **kwargs)
 
-        objects = CM.EVENT_TYPES.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        objects = EVENT_ACTION_SET.all()
+        choices = [(obj, obj) for obj in objects]
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
-        objects = CM.EVENT_TRIGGER_TYPES.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        objects = EVENT_TRIGGER_SET.all()
+        choices = [(obj, obj) for obj in objects]
         self.fields['trigger_type'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
@@ -928,7 +956,6 @@ class LocalizedStringsForm(forms.ModelForm):
     class Meta:
         model = CM.LOCALIZED_STRINGS.model
         fields = '__all__'
-
 
 
 class ImageResourcesForm(forms.ModelForm):

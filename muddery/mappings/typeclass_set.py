@@ -22,6 +22,7 @@ class TypeclassSet(object):
     def __init__(self):
         self.module_dict = {}
         self.class_dict = {}
+        self.all_loaded = False
         self.match_class = re.compile(r'^class\s+(\w+)\s*.*$')
         self.match_key = re.compile(r""" {4}typeclass_key\s*=\s*("|')(.+)("|')\s*$""")
 
@@ -105,8 +106,9 @@ class TypeclassSet(object):
         """
         Get a typeclass and its all children.
         """
-        if not self.class_dict:
+        if not self.all_loaded:
             self.load_classes()
+            self.all_loaded = True
 
         cls = self.class_dict[group_key]
         typeclasses = {group_key: cls}

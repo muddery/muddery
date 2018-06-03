@@ -44,6 +44,12 @@ class EventActionSet(object):
         if action:
             return action.func
 
+    def all(self):
+        """
+        Get all event typesl
+        """
+        return self.dict.keys()
+
 
 EVENT_ACTION_SET = EventActionSet()
 
