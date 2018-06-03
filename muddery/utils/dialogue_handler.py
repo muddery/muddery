@@ -15,7 +15,7 @@ from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.dao.dialogues_mapper import DIALOGUES
 from muddery.worlddata.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
 from muddery.worlddata.dao.dialogue_relations_mapper import DIALOGUE_RELATIONS
-from muddery.worlddata.dao.dialogue_quest_dependencies_mapper import DIALOGUE_QUESTION_RELATIONS
+from muddery.worlddata.dao.dialogue_quest_dependencies_mapper import DIALOGUE_QUESTION
 from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
 from muddery.worlddata.dao.icon_resources_mapper import ICON_RESOURCES
 from evennia.utils import logger
@@ -67,11 +67,11 @@ class DialogueHandler(object):
         except Exception, e:
             return
 
-        sentences = DIALOGUE_SENTENCES.get(dialogue)
+        sentences = DIALOGUE_SENTENCES.filter(dialogue)
 
-        nexts = DIALOGUE_RELATIONS.get(dialogue)
+        nexts = DIALOGUE_RELATIONS.filter(dialogue)
 
-        dependencies = DIALOGUE_QUESTION_RELATIONS.GET(dialogue=dialogue)
+        dependencies = DIALOGUE_QUESTION.filter(dialogue)
 
         # Add db fields to data object.
         data = {}
@@ -477,19 +477,6 @@ class DialogueHandler(object):
         clear cache
         """
         self.dialogue_storage = {}
-
-    def get_npc_name(self, dialogue):
-        """
-        Get who says this dialogue.
-        """
-        # Get record.
-        try:
-            record = NPC_DIALOGUES.get(dialogue)
-            return record.npc.name
-        except Exception, e:
-            pass
-
-        return ""
 
     def have_quest(self, caller, npc):
         """

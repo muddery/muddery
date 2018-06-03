@@ -18,7 +18,7 @@ class NPCDialoguesMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-    def get(self, npc):
+    def filter(self, npc):
         """
         Get NPC's dialogues.
 

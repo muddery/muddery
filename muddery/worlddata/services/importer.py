@@ -72,7 +72,7 @@ def unzip_resources_all(fp):
         shutil.rmtree(temp_path)
 
 
-def import_data_path(path):
+def import_data_path(path, clear=True):
     """
     Import data from path.
 
@@ -89,15 +89,42 @@ def import_data_path(path):
         if file_names:
             print("Importing %s" % file_names[0])
             try:
-                import_file(file_names[0], table_name=table_name)
+                import_file(file_names[0], table_name=table_name, clear=clear)
             except Exception, e:
                 print("Import error: %s" % e)
 
 
-def import_data_file(fp, table_name=None, file_type=None):
+def import_data_file(fp, table_name=None, file_type=None, clear=True):
     """
     Import a single data file.
     """
     fp.flush()
-    import_file(fp.name, table_name=table_name, file_type=file_type)
+    import_file(fp.name, table_name=table_name, file_type=file_type, clear=clear)
 
+
+def import_table_path(path, table_name, clear=True):
+    """
+    Import a table's data from a path.
+    """
+    # clear old data
+    model = model_mapper.get_model(table_name)
+    if not model:
+        return
+
+    if clear:
+        model.objects.all().delete()
+
+    if not os.path.isdir(path):
+        return
+
+    for file_name in os.listdir(path):
+        file_name = os.path.join(path, file_name)
+        if os.path.isdir(file_name):
+            # if it is a folder
+            continue
+
+        print("Importing %s" % file_name)
+        try:
+            import_file(file_name, table_name=table_name, clear=False)
+        except Exception, e:
+            print("Import error: %s" % e)

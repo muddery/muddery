@@ -25,7 +25,7 @@ class ImageResourcesMapper(object):
         Args:
             key: (string) object's key.
         """
-        return self.objects.filter(key=key)
+        return self.objects.get(key=key)
 
 
 IMAGE_RESOURCES = ImageResourcesMapper()

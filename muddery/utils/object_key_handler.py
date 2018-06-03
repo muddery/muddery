@@ -2,6 +2,8 @@
 Object key handler, stores key's model name.
 """
 
+from __future__ import print_function
+
 from muddery.worlddata.dao import model_mapper
 
 
@@ -14,6 +16,7 @@ class ObjectKeyHandler(object):
         Initialize handler
         """
         self.key_model = {}
+        self.reload()
 
     def clear(self):
         """
@@ -38,9 +41,9 @@ class ObjectKeyHandler(object):
                     key = record.serializable_value("key")
                     if key not in self.key_model:
                         self.key_model[key] = []
-                    self.key_model[key].append(data_settings.model_name)
+                    self.key_model[key].append(data_settings.__name__)
             except Exception, e:
-                pass
+                print("Load model error: %s" % e)
 
     def get_models(self, key):
         """

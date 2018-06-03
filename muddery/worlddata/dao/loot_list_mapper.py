@@ -18,7 +18,7 @@ class LootListMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-    def get(self, object_key):
+    def filter(self, object_key):
         """
         Get object's loot list.
         """

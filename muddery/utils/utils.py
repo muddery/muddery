@@ -156,11 +156,14 @@ def get_unlocalized_py_strings(filename, filter):
                 if str or cate:
                     if filter:
                         # check database
-                        records = LOCALIZED_STRINGS.get(str, cate)
-                        if not records:
-                            strings.add((str, cate,))
-                    else:
-                        strings.add((str, cate,))
+                        try:
+                            LOCALIZED_STRINGS.get(str, cate)
+                            continue
+                        except Exception, e:
+                            pass
+
+                    strings.add((str, cate,))
+
     return strings
 
 

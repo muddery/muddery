@@ -18,7 +18,7 @@ class DialogueQuestDependenciesMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-    def get(self, key):
+    def filter(self, key):
         """
         Get dialogue question's relation.
 
@@ -28,5 +28,5 @@ class DialogueQuestDependenciesMapper(object):
         return self.objects.filter(dialogue=key)
 
 
-DIALOGUE_QUESTION_RELATIONS = DialogueQuestDependenciesMapper()
+DIALOGUE_QUESTION = DialogueQuestDependenciesMapper()
 

@@ -56,7 +56,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, CHARACTER_LOOT_LIST.get(self.get_data_key()))
+        return LootHandler(self, CHARACTER_LOOT_LIST.filter(self.get_data_key()))
 
     def at_object_creation(self):
         """
@@ -349,7 +349,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         try:
             # get data from db
-            model_data = CHARACTER_MODELS.get(model_name, self.db.level)
+            model_data = CHARACTER_MODELS.get_data(model_name, self.db.level)
             for key, value in model_data.items():
                 setattr(self.dfield, key, value)
         except Exception, e:
@@ -407,7 +407,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             model_name = self.get_data_key()
 
         # default skills
-        skill_records = DEFAULT_SKILLS.get(model_name)
+        skill_records = DEFAULT_SKILLS.filter(model_name)
         default_skill_ids = set([record.skill for record in skill_records])
 
         # remove old default skills

@@ -27,7 +27,7 @@ class MudderyObjectCreator(TYPECLASS("OBJECT")):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, CREATOR_LOOT_LIST.get(self.get_data_key()))
+        return LootHandler(self, CREATOR_LOOT_LIST.filter(self.get_data_key()))
 
     def after_data_loaded(self):
         """

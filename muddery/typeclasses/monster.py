@@ -42,7 +42,7 @@ class MudderyMonster(TYPECLASS("NON_PLAYER")):
         """
         Load dialogues.
         """
-        dialogues = NPC_DIALOGUES.get(self.get_data_key())
+        dialogues = NPC_DIALOGUES.filter(self.get_data_key())
 
         self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.default]
         self.dialogues = [dialogue.dialogue for dialogue in dialogues if not dialogue.default]

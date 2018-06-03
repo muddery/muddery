@@ -31,7 +31,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, QUEST_REWARD_LIST.get(self.get_data_key()))
+        return LootHandler(self, QUEST_REWARD_LIST.filter(self.get_data_key()))
 
     def at_object_creation(self):
         """
@@ -64,7 +64,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
             return
 
         # Get objectives.
-        obj_records = QUEST_OBJECTIVES.get(key)
+        obj_records = QUEST_OBJECTIVES.filter(key)
 
         for obj_record in obj_records:
             objective_type = obj_record.type

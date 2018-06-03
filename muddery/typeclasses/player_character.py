@@ -389,7 +389,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             model_name = self.get_data_key()
         
         # default objects
-        object_records = DEFAULT_OBJECTS.get(model_name)
+        object_records = DEFAULT_OBJECTS.filter(model_name)
 
         default_object_ids = set([record.object for record in object_records])
 

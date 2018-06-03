@@ -317,7 +317,7 @@ MudderyCombat.prototype.setSkillCD = function(skill, cd, gcd) {
 
 	// refresh button's CD
 	$("#combat_buttons>button").each(function() {
-        frameworks["frame_combat"].controller.showButtonCD(this);
+        $$.component.combat.showButtonCD(this);
     });
 }
     
@@ -371,7 +371,7 @@ MudderyCombat.prototype.isCombatFinished = function() {
 }
 
 function refreshTimeout() {
-	var controller = frameworks["frame_combat"].controller;
+	var controller = $$.component.combat;
     var current_time = new Date().getTime();
 
     var remain = Math.ceil((controller.timeline - current_time) / 1000);

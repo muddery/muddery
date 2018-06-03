@@ -18,7 +18,7 @@ class ShopGoodsMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-    def get(self, shop):
+    def filter(self, shop):
         """
         Get shop's goods
 

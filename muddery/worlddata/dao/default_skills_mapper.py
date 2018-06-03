@@ -18,7 +18,7 @@ class DefaultSkillsMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-    def get(self, character):
+    def filter(self, character):
         """
         Get character's default skills.
 

@@ -18,7 +18,7 @@ class CharacterModelsMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-    def get(self, key, level=1):
+    def get_data(self, key, level=1):
         """
         Get model's data.
 

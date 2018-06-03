@@ -5,7 +5,7 @@ if (typeof(require) != "undefined") {
 
 TextEscape = function() {
 	// Compile RegExps.
-	this.regexp_escape.compile(escape.regexp_escape);
+	this.regexp_escape.compile(this.regexp_escape);
 }
 
 TextEscape.prototype = {
@@ -25,7 +25,7 @@ TextEscape.prototype = {
         };
 
         // Parses a string, replace escapes with values
-        string = string.replace(escape.regexp_escape, converter);
+        string = string.replace(this.regexp_escape, converter);
         return string;
     },
 };

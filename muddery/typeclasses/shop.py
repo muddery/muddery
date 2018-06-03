@@ -41,7 +41,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
         Load shop goods.
         """
         # shops records
-        goods_records = SHOP_GOODS.get(self.get_data_key())
+        goods_records = SHOP_GOODS.filter(self.get_data_key())
 
         goods_keys = set([record.key for record in goods_records])
 

@@ -97,12 +97,12 @@ def build_object(obj_key, caller=None, set_location=True):
             caller.msg(ostring)
         return
 
-    if record.typeclass == "TWO_WAY_EXIT":
+    if record.typeclass == settings.TWO_WAY_EXIT_TYPECLASS_KEY:
         # If it's a two way exit, create the reverse exit.
 
         # Create object.
         try:
-            obj = create.create_object(TYPECLASS_SET.get_module("REVERSE_EXIT"), record.name)
+            obj = create.create_object(TYPECLASS_SET.get_module(settings.REVERSE_EXIT_TYPECLASS_KEY), record.name)
         except Exception, e:
             ostring = "Can not create obj %s: %s" % (obj_key, e)
             print(ostring)

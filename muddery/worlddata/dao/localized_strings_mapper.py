@@ -32,7 +32,7 @@ class LocalizedStringsMapper(object):
             origin: (string) origin string.
             category: (string) local string's category.
         """
-        return self.objects.filter(origin=origin, category=category)
+        return self.objects.get(origin=origin, category=category)
 
 
 LOCALIZED_STRINGS = LocalizedStringsMapper()

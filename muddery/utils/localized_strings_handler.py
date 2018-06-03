@@ -56,6 +56,7 @@ class LocalizedStringsHandler(object):
         else:
             return default
 
+
 # main dialogue handler
 LOCALIZED_STRINGS_HANDLER = LocalizedStringsHandler()
 

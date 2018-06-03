@@ -58,7 +58,7 @@ class MudderyNPC(TYPECLASS("NON_PLAYER")):
         """
         Load dialogues.
         """
-        dialogues = NPC_DIALOGUES.get(self.get_data_key())
+        dialogues = NPC_DIALOGUES.filter(self.get_data_key())
 
         self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.default]
         self.dialogues = [dialogue.dialogue for dialogue in dialogues if not dialogue.default]
@@ -68,7 +68,7 @@ class MudderyNPC(TYPECLASS("NON_PLAYER")):
         Load character's shop.
         """
         # shops records
-        shop_records = NPC_SHOPS.get(self.get_data_key())
+        shop_records = NPC_SHOPS.filter(self.get_data_key())
 
         shop_keys = set([record.shop for record in shop_records])
 

@@ -25,7 +25,7 @@ class DialoguesMapper(object):
         Args:
             key: (string) dialogue's key.
         """
-        return self.objects.filter(key=key)
+        return self.objects.get(key=key)
 
 
 DIALOGUES = DialoguesMapper()

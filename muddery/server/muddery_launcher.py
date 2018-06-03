@@ -34,13 +34,18 @@ def import_local_data():
     from muddery.worlddata.services import importer
 
     ##########################
-    # load system data
+    # load system localized strings
     ##########################
     # system data file's path
     system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
 
-    # load all system data
-    importer.import_data_path(system_data_path)
+    # localized string file's path
+    localized_string_path = os.path.join(system_data_path,
+                                         settings.LOCALIZED_STRINGS_FOLDER,
+                                         settings.LANGUAGE_CODE)
+
+    # load data
+    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
 
     ##########################
     # load custom data
@@ -51,6 +56,16 @@ def import_local_data():
     # load all custom data
     importer.import_data_path(custom_data_path)
 
+    ##########################
+    # load custom localized strings
+    ##########################
+    # localized string file's path
+    localized_string_path = os.path.join(custom_data_path,
+                                         settings.LOCALIZED_STRINGS_FOLDER,
+                                         settings.LANGUAGE_CODE)
+
+    # load data
+    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False)
 
 def main():
     """

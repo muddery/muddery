@@ -389,16 +389,22 @@ INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
 
 # Two way exit's typeclass key.
-TWO_WAY_EXIT_TYPECLASS_KEY = "CLASS_TWO_WAY_EXIT"
+TWO_WAY_EXIT_TYPECLASS_KEY = "TWO_WAY_EXIT"
 
-# Reverse exit's typeclass path.
-REVERSE_EXIT_TYPECLASS_PATH = "muddery.typeclasses.exits.MudderyReverseExit"
+# Reverse exit's typeclass key.
+REVERSE_EXIT_TYPECLASS_KEY = "REVERSE_EXIT"
+
+# Character's typeclass key.
+GENERAL_CHARACTER_TYPECLASS_KEY = "CHARACTER"
 
 # Reverse exit's key's prefix.
 REVERSE_EXIT_PREFIX = "__reverse__"
 
 # Localized string data's folder.
 LOCALIZED_STRINGS_FOLDER = "languages"
+
+# Localized string model's name
+LOCALIZED_STRINGS_MODEL = "localized_strings"
 
 # World data API's url path.
 WORLD_DATA_API_PATH = "worlddata/editor/api"
