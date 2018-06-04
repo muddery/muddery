@@ -14,8 +14,7 @@ menu. Run the script with the -h flag to see usage information.
 
 from __future__ import print_function
 
-import os
-import sys
+import os, sys, glob
 import django.core.management
 from argparse import ArgumentParser
 from muddery.server.launcher import configs
@@ -32,40 +31,38 @@ def import_local_data():
     """
     from django.conf import settings
     from muddery.worlddata.services import importer
+    from muddery.worlddata.dao.data_importer import import_file
 
-    ##########################
-    # load system localized strings
-    ##########################
-    # system data file's path
-    system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
-
-    # localized string file's path
-    localized_string_path = os.path.join(system_data_path,
-                                         settings.LOCALIZED_STRINGS_FOLDER,
-                                         settings.LANGUAGE_CODE)
-
-    # load data
-    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
-
-    ##########################
     # load custom data
-    ##########################
     # custom data file's path
     custom_data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
 
     # load all custom data
     importer.import_data_path(custom_data_path)
 
-    ##########################
-    # load custom localized strings
-    ##########################
+    # load system localized strings
+    # system data file's path
+    system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
+
     # localized string file's path
-    localized_string_path = os.path.join(custom_data_path,
-                                         settings.LOCALIZED_STRINGS_FOLDER,
-                                         settings.LANGUAGE_CODE)
+    system_localized_string_path = os.path.join(system_data_path,
+                                                settings.LOCALIZED_STRINGS_FOLDER,
+                                                settings.LANGUAGE_CODE)
 
     # load data
-    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False)
+    importer.import_table_path(system_localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
+
+    # custom data file's path
+    custom_localized_string_path = os.path.join(custom_data_path, settings.LOCALIZED_STRINGS_MODEL)
+
+    file_names = glob.glob(custom_localized_string_path + ".*")
+    if file_names:
+        print("Importing %s" % file_names[0])
+        try:
+            import_file(file_names[0], table_name=settings.LOCALIZED_STRINGS_MODEL, clear=False)
+        except Exception, e:
+            print("Import error: %s" % e)
+
 
 def main():
     """

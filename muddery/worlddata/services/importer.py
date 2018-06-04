@@ -40,6 +40,30 @@ def unzip_data_all(fp):
         # import data from path
         import_data_path(source_path)
 
+        # load system localized strings
+        # system data file's path
+        system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
+
+        # localized string file's path
+        system_localized_string_path = os.path.join(system_data_path,
+                                                    settings.LOCALIZED_STRINGS_FOLDER,
+                                                    settings.LANGUAGE_CODE)
+
+        # load data
+        import_table_path(system_localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
+
+        # load custom localized strings
+        # custom data file's path
+        custom_localized_string_path = os.path.join(source_path, settings.LOCALIZED_STRINGS_MODEL)
+
+        file_names = glob.glob(custom_localized_string_path + ".*")
+        if file_names:
+            print("Importing %s" % file_names[0])
+            try:
+                import_file(file_names[0], table_name=settings.LOCALIZED_STRINGS_MODEL, clear=False)
+            except Exception, e:
+                print("Import error: %s" % e)
+
     finally:
         shutil.rmtree(temp_path)
 

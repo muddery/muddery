@@ -3,7 +3,7 @@ from django.contrib.admin.forms import forms
 from muddery.utils.localiztion_handler import localize_form_fields
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO, FOOD_ATTRIBUTES_INFO
 from muddery.mappings.quest_objective_set import QUEST_OBJECTIVE_SET
-from muddery.mappings.quest_dependency_set import QUEST_DEPENDENCY_SET
+from muddery.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.mappings.event_trigger_set import EVENT_TRIGGER_SET
 from muddery.mappings.typeclass_set import TYPECLASS_SET
@@ -755,7 +755,7 @@ class QuestDependenciesForm(forms.ModelForm):
         self.fields['quest'] = forms.ChoiceField(choices=choices)
         self.fields['dependency'] = forms.ChoiceField(choices=choices)
         
-        objects = QUEST_DEPENDENCY_SET.all()
+        objects = QUEST_STATUS_SET.all()
         choices = [(obj, obj) for obj in objects]
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
@@ -778,7 +778,7 @@ class DialogueQuestDependenciesForm(forms.ModelForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['dependency'] = forms.ChoiceField(choices=choices)
         
-        objects = QUEST_DEPENDENCY_SET.all()
+        objects = QUEST_STATUS_SET.all()
         choices = [obj for obj in objects]
         self.fields['type'] = forms.ChoiceField(choices=choices)
 

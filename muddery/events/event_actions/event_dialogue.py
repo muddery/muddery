@@ -1,5 +1,5 @@
 """
-Event action's base class.
+Event action.
 """
 
 from muddery.utils import utils

@@ -9,12 +9,13 @@ from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from muddery.utils.builder import build_object
-from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.worlddata.dao.quest_dependencies_mapper import QUEST_DEPENDENCIES
+from muddery.mappings.quest_status_set import QUEST_STATUS_SET
 
 
 class QuestHandler(object):
@@ -196,18 +197,23 @@ class QuestHandler(object):
         Returns:
             None
         """
+        print(1)
         if self.is_completed(quest_key):
             return False
 
+        print(2)
         if self.is_in_progress(quest_key):
             return False
 
+        print(3)
         if not self.match_dependencies(quest_key):
             return False
 
+        print(4)
         if not self.match_condition(quest_key):
             return False
 
+        print(5)
         return True
 
     def match_dependencies(self, quest_key):
@@ -220,7 +226,11 @@ class QuestHandler(object):
         Returns:
             (boolean) result
         """
-        return QUEST_DEP_HANDLER.match_quest_dependencies(self.owner, quest_key)
+        for dep in QUEST_DEPENDENCIES.filter(quest_key):
+            status = QUEST_STATUS_SET.get(dep["type"])
+            if not status.match(self.owner, dep["quest"]):
+                return False
+        return True
 
     def match_condition(self, quest_key):
         """

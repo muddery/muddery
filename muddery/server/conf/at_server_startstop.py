@@ -20,7 +20,6 @@ from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO, EQU
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
-from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.desc_handler import DESC_HANDLER
@@ -49,9 +48,6 @@ def at_server_start():
     
     # clear dialogues
     DIALOGUE_HANDLER.clear()
-
-    # clear quest dependencies
-    QUEST_DEP_HANDLER.clear()
     
     # reload equipment types
     EQUIP_TYPE_HANDLER.reload()

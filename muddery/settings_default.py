@@ -271,7 +271,7 @@ BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.MudderyPlayerCh
 BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.character.MudderyCharacter"
 
 # Typeclass for player characters.
-BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.PlayerCharacter"
+BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.MudderyPlayerCharacter"
 
 # Typeclass for rooms (fallback)
 BASE_ROOM_TYPECLASS = "muddery.typeclasses.room.MudderyRoom"
@@ -300,6 +300,9 @@ PATH_TYPECLASSES_CUSTOM = "typeclasses"
 
 # Path of base event actions.
 PATH_EVENT_ACTION_BASE = "muddery.events.event_actions"
+
+# Path of base quest status.
+PATH_QUEST_STATUS_BASE = "muddery.quests.quest_status"
 
 
 ######################################################################

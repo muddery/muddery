@@ -1,5 +1,5 @@
 """
-Event action's base class.
+Event action.
 """
 
 import random

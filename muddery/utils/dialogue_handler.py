@@ -9,7 +9,6 @@ from __future__ import print_function
 
 import re
 from muddery.utils import defines
-from muddery.utils.quest_dependency_handler import QUEST_DEP_HANDLER
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.dao.dialogues_mapper import DIALOGUES
@@ -18,6 +17,7 @@ from muddery.worlddata.dao.dialogue_relations_mapper import DIALOGUE_RELATIONS
 from muddery.worlddata.dao.dialogue_quest_dependencies_mapper import DIALOGUE_QUESTION
 from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
 from muddery.worlddata.dao.icon_resources_mapper import ICON_RESOURCES
+from muddery.mappings.quest_status_set import QUEST_STATUS_SET
 from evennia.utils import logger
 
 
@@ -279,9 +279,11 @@ class DialogueHandler(object):
             # Match dependencies.
             match = True
             for dep in npc_dlg["dependencies"]:
-                if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
+                status = QUEST_STATUS_SET.get(dep["type"])
+                if not status.match(caller, dep["quest"]):
                     match = False
                     break
+
             if not match:
                 continue
 
@@ -340,7 +342,8 @@ class DialogueHandler(object):
                     continue
 
                 for dep in next_dlg["dependencies"]:
-                    if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
+                    status = QUEST_STATUS_SET.get(dep["type"])
+                    if not status.match(caller, dep["quest"]):
                         continue
 
                 sentences.append(next_dlg["sentences"][0])
@@ -528,9 +531,10 @@ class DialogueHandler(object):
 
         match = True
         for dep in npc_dlg["dependencies"]:
-            if not QUEST_DEP_HANDLER.match_dependency(caller, dep["quest"], dep["type"]):
+            status = QUEST_STATUS_SET.get(dep["type"])
+            if not status.match(caller, dep["quest"]):
                 match = False
-                break;
+                break
         if not match:
             return (provide_quest, complete_quest)
 
