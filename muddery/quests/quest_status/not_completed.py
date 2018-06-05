@@ -18,5 +18,5 @@ class NotCompleted(BaseQuestStatus):
         if not caller:
             return False
 
-        return not caller.quest_handler.is_completed(quest)
+        return not caller.quest_handler.is_completed(quest_key)
     

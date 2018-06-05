@@ -18,6 +18,6 @@ class NotAccomplished(BaseQuestStatus):
         if not caller:
             return False
 
-        return caller.quest_handler.is_in_progress(quest) and \
-            not caller.quest_handler.is_accomplished(quest)
-    
+        return caller.quest_handler.is_in_progress(quest_key) and \
+            not caller.quest_handler.is_accomplished(quest_key)
+

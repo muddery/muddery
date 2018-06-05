@@ -18,6 +18,6 @@ class Accpeted(BaseQuestStatus):
         if not caller:
             return False
 
-        return caller.quest_handler.is_completed(quest) or \
-            caller.quest_handler.is_in_progress(quest)
+        return caller.quest_handler.is_completed(quest_key) or \
+            caller.quest_handler.is_in_progress(quest_key)
     

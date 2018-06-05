@@ -197,23 +197,18 @@ class QuestHandler(object):
         Returns:
             None
         """
-        print(1)
         if self.is_completed(quest_key):
             return False
 
-        print(2)
         if self.is_in_progress(quest_key):
             return False
 
-        print(3)
         if not self.match_dependencies(quest_key):
             return False
 
-        print(4)
         if not self.match_condition(quest_key):
             return False
 
-        print(5)
         return True
 
     def match_dependencies(self, quest_key):
@@ -227,8 +222,8 @@ class QuestHandler(object):
             (boolean) result
         """
         for dep in QUEST_DEPENDENCIES.filter(quest_key):
-            status = QUEST_STATUS_SET.get(dep["type"])
-            if not status.match(self.owner, dep["quest"]):
+            status = QUEST_STATUS_SET.get(dep.type)
+            if not status.match(self.owner, dep.quest):
                 return False
         return True
 

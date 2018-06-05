@@ -15,7 +15,6 @@ class CanProvide(BaseQuestStatus):
         """
         Check.
         """
-        print("can_provide_quest: %s" % quest_key)
         if not caller:
             return False
 

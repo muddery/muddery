@@ -1,0 +1,11 @@
+category,origin,local
+field_character_models,"max_mp","最大能量值"
+field_character_models,"max_sp","最大体力值"
+field_skills,"mp","能量"
+help_character_models,"max_mp","角色的最大能量值。"
+help_character_models,"max_sp","角色的最大体力值。"
+help_skills,"mp","技能消耗的能量。"
+,"MP","能量"
+,"MAX_MP","最大能量值"
+,"SP","体力"
+,"MAX_SP","最大体力值"

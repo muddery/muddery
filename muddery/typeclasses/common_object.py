@@ -154,10 +154,8 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
         increments = {}
         for key in self.custom_attributes_handler.all():
             value = getattr(self.cattr, key)
-            if not value:
-                logger.log_errmsg("Can not apply custom attribute: %s to %s" % (key, self.get_data_key()))
-                continue
-            increments[key] = value * used
+            if value:
+                increments[key] = value * used
 
         changes = user.change_status(increments)
         user.show_status()
@@ -240,7 +238,7 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
                 target = user.db
             else:
                 # no target
-                logger.log_errmsg("Can not apply custom attribute: %s to %s" % (key, self.get_data_key()))
+                logger.log_errmsg("Can not apply custom attribute: %s to %s" % (key, user.get_data_key()))
                 continue
 
             value = getattr(self.cattr, key)

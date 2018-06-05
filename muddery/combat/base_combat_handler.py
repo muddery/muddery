@@ -10,7 +10,6 @@ from twisted.internet import reactor
 from django.conf import settings
 from evennia import DefaultScript
 from evennia.utils import logger
-from muddery.utils import builder, defines
 
 
 class BaseCombatHandler(DefaultScript):

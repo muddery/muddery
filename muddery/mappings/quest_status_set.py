@@ -7,6 +7,7 @@ from __future__ import print_function
 from django.conf import settings
 from muddery.utils.utils import classes_in_path
 from muddery.quests.base_quest_status import BaseQuestStatus
+from evennia.utils import logger
 
 
 class QuestStatusSet(object):
@@ -34,10 +35,7 @@ class QuestStatusSet(object):
         """
         Get the function of the event action.
         """
-        print("status key: %s" % key)
-        status = self.dict.get(key, None)
-        if status:
-            return status.match
+        return self.dict[key]
 
     def all(self):
         """
@@ -47,4 +45,3 @@ class QuestStatusSet(object):
 
 
 QUEST_STATUS_SET = QuestStatusSet()
-

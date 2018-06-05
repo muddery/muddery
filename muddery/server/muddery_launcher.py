@@ -125,9 +125,9 @@ def main():
         evennia_launcher.init_game_directory(gamedir, check_db=False)
 
         # make migrations
-        django_args = ["makemigrations"]
-        django_kwargs = {}
         try:
+            django_args = ["makemigrations"]
+            django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
         except django.core.management.base.CommandError, exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
@@ -170,14 +170,34 @@ def main():
 
         sys.exit()
     elif args.loaddata:
+        print("Importing local data.")
+
+        gamedir = os.path.abspath(configs.CURRENT_DIR)
+        os.chdir(gamedir)
+        evennia_launcher.init_game_directory(gamedir, check_db=False)
+            
+        # make migrations
+        try:
+            django_args = ["makemigrations"]
+            django_kwargs = {}
+            django.core.management.call_command(*django_args, **django_kwargs)
+        except django.core.management.base.CommandError, exc:
+            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+        # migrate the database
+        try:
+            django_args = ["migrate"]
+            django_kwargs = {}
+            django.core.management.call_command(*django_args, **django_kwargs)
+            
+            django_args = ["migrate"]
+            django_kwargs = {"database": "worlddata"}
+            django.core.management.call_command(*django_args, **django_kwargs)
+        except django.core.management.base.CommandError, exc:
+            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+            
         # load local data
         try:
-            print("Importing local data.")
-
-            gamedir = os.path.abspath(configs.CURRENT_DIR)
-            os.chdir(gamedir)
-            evennia_launcher.init_game_directory(gamedir, check_db=False)
-
             import_local_data()
             print("Import local data success.")
         except Exception, e:
