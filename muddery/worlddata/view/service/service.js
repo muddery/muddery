@@ -193,7 +193,7 @@ service = {
         var args = {
             type: file_type,
         };
-        this.downloadFile("download_zip", "", {});
+        this.downloadFile("download_zip", "", args);
     },
 
     downloadResourceZip: function() {
