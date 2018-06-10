@@ -9,6 +9,8 @@ from evennia.utils import logger
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.dao import general_query_mapper
+from muddery.worlddata.forms.location_field import LocationField
+from muddery.worlddata.dao import common_mappers as CM
 from muddery.mappings.form_set import FORM_SET
 
 
@@ -38,8 +40,8 @@ def query_form(table_name, record_id=None):
         # Get empty data.
         form = form_class()
 
-    data = []
-    data.append({
+    fields = []
+    fields.append({
         "name": "id",
         "label": "",
         "disabled": True,
@@ -48,6 +50,7 @@ def query_form(table_name, record_id=None):
         "value": record_id if record_id else "",
     })
 
+    has_location = False
     for key, field in form.fields.items():
         info = {
             "name": key,
@@ -63,9 +66,38 @@ def query_form(table_name, record_id=None):
         if info["type"] == "Select":
             info["choices"] = field.choices
 
-        data.append(info)
+        if isinstance(field, LocationField):
+            info["location"] = True
+            has_location = True
+
+        fields.append(info)
+
+    data = {
+        "fields": fields,
+    }
+
+    if has_location:
+        data["areas"] = query_areas()
 
     return data
+
+
+def query_areas():
+    """
+    Query all areas and rooms.
+    """
+    records = CM.WORLD_AREAS.objects.all()
+    areas = {r.key: {"name": r.name + "(" + r.key + ")", "rooms": []} for r in records}
+
+    rooms = CM.WORLD_ROOMS.objects.all()
+    for record in rooms:
+        key = record.location
+        choice = (record.key, record.name + " (" + record.key + ")")
+        if key in areas:
+            areas[key]["rooms"].append(choice)
+        elif key:
+            areas[key] = {"name": key, "rooms": [choice]}
+    return areas
 
 
 def save_form(values, table_name, record_id=None):

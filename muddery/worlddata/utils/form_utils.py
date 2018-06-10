@@ -6,7 +6,7 @@ from __future__ import print_function
 
 from evennia.utils import logger
 from muddery.worlddata.dao import model_mapper
-from muddery.worlddata.dao import common_mappers as cm
+from muddery.worlddata.dao import common_mappers as CM
 
 
 def get_all_objects():
@@ -26,17 +26,16 @@ def get_all_pocketable_objects():
     Get all objects that can be put in player's pockets.
     """
     # available objects are common objects, foods skill books or equipments
-    objects = cm.COMMON_OBJECTS.all()
+    objects = CM.COMMON_OBJECTS.all()
     choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
 
-    foods = cm.FOODS.objects.all()
+    foods = CM.FOODS.objects.all()
     choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in foods])
 
-    skill_books = cm.SKILL_BOOKS.objects.all()
+    skill_books = CM.SKILL_BOOKS.objects.all()
     choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in skill_books])
 
-    equipments = cm.EQUIPMENTS.objects.all()
+    equipments = CM.EQUIPMENTS.objects.all()
     choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in equipments])
 
     return choices
-

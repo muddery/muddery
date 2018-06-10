@@ -1,5 +1,7 @@
 
 controller = {
+    areas: {},
+
     init: function() {
         this.table_name = getQueryString("table");
         this.record_id = getQueryString("record");
@@ -38,8 +40,27 @@ controller = {
                                          controller.confirmDelete);
     },
 
+    onAreaChange: function(e) {
+        var area_key = this.value;
+        var room_area = controller.areas[area_key];
+        var select_room = $(this).parent().find(".select-room");
+        select_room.find("option").remove();
+
+        for (var i = 0; i < room_area.rooms.length; i++) {
+            var room = room_area.rooms[i];
+
+            var option = $("<option>")
+                .text(room[1])
+                .attr("value", room[0])
+                .appendTo(select_room);
+        }
+    },
+
     queryFormSuccess: function(data) {
-        controller.setFields(data);
+        if (data.hasOwnProperty("areas")) {
+            controller.areas = data.areas;
+        }
+        controller.setFields(data.fields);
     },
 
     setFields: function(fields) {
@@ -54,7 +75,11 @@ controller = {
             var value = fields[i].value;
 
             var controller;
-            if (type == "Hidden") {
+
+            if (fields[i].hasOwnProperty("location")) {
+                controller = this.createAreaSelect(name, label, value, help_text, this.areas);
+            }
+            else if (type == "Hidden") {
                 controller = this.createHiddenInput(name, label, value, help_text);
             }
             else if (type == "TextInput") {
@@ -75,8 +100,7 @@ controller = {
                 controller = this.createCheckBox(name, label, value, help_text);
             }
             else if (type == "Select") {
-                var options = fields[i].choices;
-                controller = this.createSelect(name, label, value, help_text, options);
+                controller = this.createSelect(name, label, value, help_text, fields[i].choices);
             }
 
             if (controller) {
@@ -87,7 +111,7 @@ controller = {
         window.parent.controller.setFrameSize();
     },
 
-    createControlGroup: function(name, controller, label, help_text) {
+    createControlGroup: function(name, ctrl, label, help_text) {
         var group = $("<div>")
             .addClass("control-group")
             .attr("id", "control-" + name);
@@ -103,7 +127,7 @@ controller = {
             .addClass("controls")
             .appendTo(group);
 
-        controller.appendTo(ctrl_div);
+        ctrl.appendTo(ctrl_div);
 
         $("<p>")
             .addClass("help-block")
@@ -215,6 +239,65 @@ controller = {
             .appendTo(ctrl_div);
         
         return group;
+    },
+
+    createAreaSelect: function(name, label, value, help_text, areas) {
+        var ctrl = $("<div>");
+
+        // Add area.
+        var select_area = $("<select>")
+            .addClass("select-area form-control select-control");
+
+        var selected_area = "";
+        var first_area = "";
+        for (var key in areas) {
+            if (!first_area) {
+                first_area = key;
+            }
+            var area = areas[key];
+
+            var option = $("<option>")
+                .text(area.name)
+                .attr("value", key)
+                .appendTo(select_area);
+
+            if (!selected_area) {
+                for (var r = 0; r < area.rooms.length; r++) {
+                    if (area.rooms[r][0] == value) {
+                        option.attr("selected", "selected");
+                        selected_area = key;
+                        break;
+                    }
+                }
+            }
+        }
+        select_area.appendTo(ctrl);
+        select_area.on("change", this.onAreaChange);
+
+        if (!selected_area) {
+            selected_area = first_area;
+        }
+
+        // Add room.
+        var select_room = $("<select>")
+            .addClass("select-room form-control editor-control select-control");
+
+        var room_area = areas[selected_area];
+        for (var i = 0; i < room_area.rooms.length; i++) {
+            var room = room_area.rooms[i];
+
+            var option = $("<option>")
+                .text(room[1])
+                .attr("value", room[0])
+                .appendTo(select_room);
+
+            if (room[1] == value) {
+                option.attr("selected", "selected");
+            }
+        }
+        select_room.appendTo(ctrl);
+        
+        return this.createControlGroup(name, ctrl, label, help_text);
     },
 
     exit: function() {

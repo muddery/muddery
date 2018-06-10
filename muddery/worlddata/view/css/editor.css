@@ -66,5 +66,14 @@ input[type=checkbox].check-box-control {
     padding: 5px 5px;
 }
 
+.select-area, .select-room {
+    display: inline-block;
+}
+
+.select-area {
+    width: 200px;
+    margin-right: 10px;
+}
+
 
 

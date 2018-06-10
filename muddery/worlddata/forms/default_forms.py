@@ -9,6 +9,7 @@ from muddery.mappings.event_trigger_set import EVENT_TRIGGER_SET
 from muddery.mappings.typeclass_set import TYPECLASS_SET
 from muddery.worlddata.dao import model_mapper
 from muddery.worlddata.dao import common_mappers as CM
+from muddery.worlddata.forms.location_field import LocationField
 
 
 def get_all_objects():
@@ -175,15 +176,10 @@ class WorldExitsForm(forms.ModelForm):
         choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
-        areas = CM.WORLD_AREAS.objects.all()
         rooms = CM.WORLD_ROOMS.objects.all()
-        choices = []
-        for area in areas:
-            area_rooms = [(r.key, r.name + " (" + r.key + ")") for r in rooms if r.location == area.key]
-            if area_rooms:
-                choices.append((area.name, area_rooms))
-        self.fields['location'] = forms.ChoiceField(choices=choices)
-        self.fields['destination'] = forms.ChoiceField(choices=choices)
+        choices = [(r.key, r.name + " (" + r.key + ")") for r in rooms]
+        self.fields['location'] = LocationField(choices=choices)
+        self.fields['destination'] = LocationField(choices=choices)
 
         localize_form_fields(self)
 
@@ -230,14 +226,9 @@ class WorldObjectsForm(forms.ModelForm):
         choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
-        areas = CM.WORLD_AREAS.objects.all()
         rooms = CM.WORLD_ROOMS.objects.all()
-        choices = []
-        for area in areas:
-            area_rooms = [(r.key, r.name + " (" + r.key + ")") for r in rooms if r.location == area.key]
-            if area_rooms:
-                choices.append((area.name, area_rooms))
-        self.fields['location'] = forms.ChoiceField(choices=choices)
+        choices = [(r.key, r.name + " (" + r.key + ")") for r in rooms]
+        self.fields['location'] = LocationField(choices=choices)
         
         choices = [("", "---------")]
         objects = CM.ICON_RESOURCES.objects.all()
@@ -261,14 +252,9 @@ class WorldNPCsForm(forms.ModelForm):
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         # NPC's location
-        areas = CM.WORLD_AREAS.objects.all()
         rooms = CM.WORLD_ROOMS.objects.all()
-        choices = []
-        for area in areas:
-            area_rooms = [(r.key, r.name + " (" + r.key + ")") for r in rooms if r.location == area.key]
-            if area_rooms:
-                choices.append((area.name, area_rooms))
-        self.fields['location'] = forms.ChoiceField(choices=choices)
+        choices = [(r.key, r.name + " (" + r.key + ")") for r in rooms]
+        self.fields['location'] = LocationField(choices=choices)
         
         # NPC's model
         choices = [("", "---------")]
