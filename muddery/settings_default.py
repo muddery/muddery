@@ -217,7 +217,7 @@ STATICFILES_DIRS = (
     ("webclient", os.path.join(GAME_DIR, "web", "webclient_overrides", "webclient")),
     ("webclient", os.path.join(MUDDERY_DIR, "web", "webclient", "webclient")),
     ("dist", os.path.join(GAME_DIR, "web", "webclient_overrides", "dist")),
-    ("editor", os.path.join(MUDDERY_DIR, "worlddata", "view")),
+    ("editor", os.path.join(MUDDERY_DIR, "worlddata", "webclient")),
 )
 
 # We setup the location of the website template as well as the admin site.

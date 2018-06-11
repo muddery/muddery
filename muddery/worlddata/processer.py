@@ -9,6 +9,7 @@ from __future__ import print_function
 import json
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError, ERR
 from muddery.mappings.request_set import REQUEST_SET
@@ -36,7 +37,7 @@ class Processer(object):
             request: HTTP request.
         """
         if request.method == "OPTIONS":
-            return self.response()
+            return HttpResponse()
             
         path = request.path_info
         if self.path_prefix:

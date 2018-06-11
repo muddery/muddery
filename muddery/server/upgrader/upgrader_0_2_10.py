@@ -20,10 +20,10 @@ class Upgrader(BaseUpgrader):
     """
     # Can upgrade the game of version between from_version and to_version.
     # from min version 0.0.0 (include this version)
-    from_min_version = (0, 0, 0)
+    from_min_version = (0, 2, 10)
 
     # from max version 0.2.6 (not include this version)
-    from_max_version = (0, 2, 7)
+    from_max_version = (0, 3, 0)
 
     target_version = None
     

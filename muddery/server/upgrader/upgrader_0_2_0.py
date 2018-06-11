@@ -39,9 +39,8 @@ class Upgrader(BaseUpgrader):
         print("Upgrading game 0.2.0-0.2.2 %s." % game_dir)
 
         print("""
-    We are very sorry that the Evennia has changed
-    its database structure so much that we can not
-    upgrade your game automatically.
+    We are very sorry that your game is too old to
+    upgrade.
 
     If you want to upgrade your game nevertheless,
     please contact the author.""")

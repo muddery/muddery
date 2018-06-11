@@ -38,6 +38,15 @@ class Upgrader(BaseUpgrader):
         """
         print("Upgrading game from version 0.2.7 %s." % game_dir)
 
+        print("""
+    We are very sorry that your game is too old to
+    upgrade.
+
+    If you want to upgrade your game nevertheless,
+    please contact the author.""")
+
+        raise MudderyError("Can not upgrade.")
+
         if game_template:
             game_template_dir = os.path.join(configs.MUDDERY_TEMPLATE, game_template)
 
