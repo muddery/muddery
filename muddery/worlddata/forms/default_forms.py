@@ -95,7 +95,7 @@ class GameSettingsForm(forms.ModelForm):
         self.fields['default_player_home_key'] = forms.ChoiceField(choices=choices, required=False)
 
         choices = [("", "---------")]
-        objects = CM.COMMON_CHARACTERS.objects.filter(typeclass="CLASS_PLAYER")
+        objects = CM.COMMON_CHARACTERS.objects.filter(typeclass="PLAYER_CHARACTER")
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
         self.fields['default_player_character_key'] = forms.ChoiceField(choices=choices, required=False)
 
