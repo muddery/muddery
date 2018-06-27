@@ -9,9 +9,10 @@ from evennia.utils import logger
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.dao import general_query_mapper
-from muddery.worlddata.forms.location_field import LocationField
 from muddery.worlddata.dao import common_mappers as CM
 from muddery.mappings.form_set import FORM_SET
+from muddery.worlddata.forms.location_field import LocationField
+from muddery.worlddata.forms.icon_field import IconField
 
 
 def query_form(table_name, record_id=None):
@@ -67,8 +68,10 @@ def query_form(table_name, record_id=None):
             info["choices"] = field.choices
 
         if isinstance(field, LocationField):
-            info["location"] = True
+            info["type"] = "Location"
             has_location = True
+        elif isinstance(field, IconField):
+            info["type"] = "Icon"
 
         fields.append(info)
 

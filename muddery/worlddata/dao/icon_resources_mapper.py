@@ -18,14 +18,36 @@ class IconResourcesMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-    def get(self, key):
+    def get(self, resource):
         """
         Get object's icon.
 
         Args:
-            key: (string) object's key.
+            resource: (string) icon resource's path.
         """
-        return self.objects.get(key=key)
+        return self.objects.get(resource=resource)
+
+    def add(self, path, width, height):
+        """
+        Add a new icon record.
+
+        Args:
+            path: icon's path
+            width: icon's width
+            height: icon's height
+
+        Return:
+            none
+        """
+        record = {
+            "resource": path,
+            "image_width": width,
+            "image_height": height,
+        }
+
+        data = self.model(**record)
+        data.full_clean()
+        data.save()
 
 
 ICON_RESOURCES = IconResourcesMapper()

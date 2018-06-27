@@ -185,6 +185,13 @@ service = {
         this.sendFile("upload_single_data", "", file_obj, args, callback_success, callback_error);
     },
 
+    uploadIcon: function(file_obj, field_name, callback_success, callback_error) {
+        var args = {
+            field: field_name,
+        };
+        this.sendFile("upload_icon", "", file_obj, args, callback_success, callback_error);
+    },
+
     queryDataFileTypes: function(callback_success, callback_error) {
         this.sendRequest("query_data_file_types", "", {}, callback_success, callback_error);
     },

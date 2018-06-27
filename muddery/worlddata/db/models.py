@@ -1362,14 +1362,8 @@ class localized_strings(models.Model):
 class ImageResources(models.Model):
     "Store resource's information."
 
-    # The key of image.
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # image's name
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
-    
     # resource's path
-    resource = models.CharField(max_length=KEY_LENGTH, blank=True, default=None)
+    resource = models.CharField(max_length=KEY_LENGTH, unique=True)
 
     # resource'e width
     image_width = models.PositiveIntegerField(blank=True, default=0)
@@ -1401,7 +1395,7 @@ class image_resources(ImageResources):
         verbose_name_plural = "Image Resources"
 
     def __unicode__(self):
-        return self.key + " (" + self.resource + ")"
+        return self.resource
 
 
 # ------------------------------------------------------------
@@ -1420,4 +1414,4 @@ class icon_resources(ImageResources):
         verbose_name_plural = "Icon Resources"
 
     def __unicode__(self):
-        return self.key + " (" + self.resource + ")"
+        return self.resource

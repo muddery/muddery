@@ -75,5 +75,15 @@ input[type=checkbox].check-box-control {
     margin-right: 10px;
 }
 
+.image-icon {
+    width: 60px;
+    height: 60px;
+}
 
+.icon-input-control, .image-input-control {
+    padding-left: 0;
+    border: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
 

@@ -189,8 +189,12 @@ MEDIA_URL = '/media/'
 # image resource's dir
 IMAGE_RESOURCE_DIR = 'resource/image'
 
+IMAGE_PATH = os.path.join("resource", "image")
+
 # icon resource's dir
 ICON_RESOURCE_DIR = 'resource/icon'
+
+ICON_PATH = os.path.join("resource", "icon")
 
 # The master urlconf file that contains all of the sub-branches to the
 # applications. Change this to add your own URLs to the website.

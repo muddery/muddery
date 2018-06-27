@@ -2,6 +2,8 @@
 controller = {
     areas: {},
 
+    file_fields: [],
+
     init: function() {
         this.table_name = getQueryString("table");
         this.record_id = getQueryString("record");
@@ -31,7 +33,43 @@ controller = {
     },
 
     onSave: function() {
-        controller.saveFields();
+        // upload images
+        var upload_images = false;
+        this.file_fields = [];
+        var image_fields = $(".icon-input-control");
+
+        for (var i = 0; i < image_fields.length; i++) {
+            var file_obj = image_fields[i].files[0];
+            if (typeof (file_obj) != "undefined" && file_obj.size > 0) {
+                upload_images = true;
+                var name = image_fields[i].name;
+                this.file_fields.push(name);
+                service.uploadIcon(file_obj, name, controller.uploadSuccess, controller.uploadFailed);
+            }
+        }
+
+        if (!upload_images) {
+            controller.saveFields();
+        }
+    },
+
+    uploadSuccess: function(data) {
+        var field_name = data.field;
+        for (var i = 0; i < this.file_fields.length; i++) {
+            if (this.file_fields[i] == field_name) {
+                this.file_fields.splice(i, 1);
+                $("#contrle-" + field_name + " .editor-control").val(data.resource);
+                break;
+            }
+        }
+
+        if (this.file_fields.length == 0) {
+            this.saveFields();
+        }
+    },
+
+    uploadFailed: function(code, message, data) {
+        window.parent.controller.notify("ERROR", code + ": " + message);
     },
 
     onDelete: function() {
@@ -76,8 +114,11 @@ controller = {
 
             var controller;
 
-            if (fields[i].hasOwnProperty("location")) {
+            if (type == "Location") {
                 controller = this.createAreaSelect(name, label, value, help_text, this.areas);
+            }
+            else if (type == "Icon") {
+                controller = this.createIconInput(name, label, value, help_text);
             }
             else if (type == "Hidden") {
                 controller = this.createHiddenInput(name, label, value, help_text);
@@ -297,6 +338,28 @@ controller = {
         }
         select_room.appendTo(ctrl);
         
+        return this.createControlGroup(name, ctrl, label, help_text);
+    },
+
+    createIconInput: function(name, label, value, help_text) {
+        var ctrl = $("<div>");
+
+        var image = $("<img>")
+            .addClass("image-icon")
+            .attr("id", "image-" + name)
+            .appendTo(ctrl);
+
+        var input = $("<input>")
+            .addClass("form-control icon-input-control")
+            .attr("type", "file")
+            .val(value)
+            .appendTo(ctrl);
+
+        var resource = $("<input>")
+            .addClass("editor-control")
+            .attr("type", "hidden")
+            .appendTo(ctrl);
+
         return this.createControlGroup(name, ctrl, label, help_text);
     },
 

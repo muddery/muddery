@@ -4,7 +4,8 @@ Battle commands. They only can be used when a character is in a combat.
 
 from __future__ import print_function
 
-import os, tempfile, time
+import os, tempfile, time, shutil
+from PIL import Image
 from django.conf import settings
 from django.contrib import auth
 from evennia.utils import logger
@@ -13,6 +14,7 @@ from muddery.worlddata.utils.response import success_response, file_response
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils import writers
 from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
+from muddery.worlddata.dao.icon_resources_mapper import ICON_RESOURCES
 
 
 class upload_zip(BaseRequestProcesser):
@@ -89,7 +91,7 @@ class upload_single_data(BaseRequestProcesser):
             raise MudderyError(ERR.missing_args, 'Missing data files.')
 
         fullname = file_obj.name
-        (filename, ext_name) = os.path.splitext(fullname)
+        filename, ext_name = os.path.splitext(fullname)
         table_name = args.get("table", None)
 
         if not table_name:
@@ -218,3 +220,50 @@ class query_data_file_types(BaseRequestProcesser):
         return success_response(data)
 
 
+class upload_icon(BaseRequestProcesser):
+    """
+    Upload an icon.
+
+    Args:
+        args:
+            field: (string) field's name.
+    """
+    path = "upload_icon"
+    name = ""
+
+    def func(self, args, request):
+        file_obj = request.FILES.get("file", None)
+
+        if not file_obj:
+            raise MudderyError(ERR.missing_args, 'Missing icon files.')
+
+        field_name = args.get("field", "")
+
+        filename = file_obj.name
+        icon_path = settings.ICON_PATH + "/" + filename
+        path = os.path.join(settings.MEDIA_ROOT, settings.ICON_PATH, filename)
+        if os.path.exists(path):
+            raise MudderyError(ERR.upload_image_exist, 'File %s already exists.' % filename)
+
+        fp = None
+        try:
+            fp = open(path, "wb+")
+            for chunk in file_obj.chunks():
+                fp.write(chunk)
+            fp.flush()
+
+            image = Image.open(fp)
+            size = image.size
+
+            ICON_RESOURCES.add(icon_path, size[0], size[1])
+
+        except Exception, e:
+            if fp:
+                fp.close()
+            logger.log_tracemsg("Upload error: %s" % e.message)
+            raise MudderyError(ERR.upload_error, e.message)
+
+        return success_response({"resource": icon_path,
+                                 "field": field_name,
+                                 "width": size[0],
+                                 "height": size[1]})

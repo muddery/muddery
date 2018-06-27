@@ -55,4 +55,6 @@ class ERR(object):
 
     build_world_error = 10011
 
+    upload_image_exist = 10012
+
 
