@@ -42,7 +42,7 @@ MudderyHonours.prototype.bindEvents = function() {
  * Event when clicks the queue up button.
  */
 MudderyHonours.prototype.onQueueUpCombat = function(element) {
-    if ($$.$$.data_handler.character_level < this.min_honour_level) {
+    if ($$.data_handler.character_level < this.min_honour_level) {
         $$.main.showAlert($$.trans("You need to reach level ") + this.min_honour_level + $$.trans("."));
         return;
     }

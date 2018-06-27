@@ -314,7 +314,12 @@ controller = {
             var name = this.fields[i].name;
             var control = $("#control-" + name + " .editor-control");
             if (control.length > 0) {
-                values[name] = control.val();
+                if (control.attr("type") == "checkbox") {
+                    values[name] = control.prop("checked");
+                }
+                else {
+                    values[name] = control.val();
+                }
             }
         }
 

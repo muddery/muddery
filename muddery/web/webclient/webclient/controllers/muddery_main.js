@@ -104,7 +104,7 @@ MudderyMain.prototype.bindEvents = function() {
     this.onClick("#bar_msg_select", function(){$$.main.showMsgTypes()});
     this.onClick("#bar_msg_send", function(){$$.main.sendMessage()});
     
-    this.onClick("#bar_msg_type_menu", "a", function(){controller.selectMsgType(this)});
+    this.onClick("#bar_msg_type_menu", "a", function(el){$$.main.selectMsgType(el)});
 }
 
 
@@ -1206,6 +1206,7 @@ MudderyMain.prototype.showMsgTypes = function() {
  */
 MudderyMain.prototype.selectMsgType = function(caller) {
 	$$.main.message_type = $(caller).data("key");
+	var text = $(caller).text();
 	$("#bar_msg_select").text($(caller).text());
 
 	$("#bar_msg_type_menu").hide();
