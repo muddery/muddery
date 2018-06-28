@@ -42,9 +42,9 @@ controller = {
             var file_obj = image_fields[i].files[0];
             if (typeof (file_obj) != "undefined" && file_obj.size > 0) {
                 upload_images = true;
-                var name = image_fields[i].name;
+                var name = $(image_fields[i]).data("field_name");
                 this.file_fields.push(name);
-                service.uploadIcon(file_obj, name, controller.uploadSuccess, controller.uploadFailed);
+                service.uploadIcon(file_obj, name, controller.uploadSuccess(name), controller.uploadFailed);
             }
         }
 
@@ -53,19 +53,22 @@ controller = {
         }
     },
 
-    uploadSuccess: function(data) {
-        var field_name = data.field;
-        for (var i = 0; i < this.file_fields.length; i++) {
-            if (this.file_fields[i] == field_name) {
-                this.file_fields.splice(i, 1);
-                $("#contrle-" + field_name + " .editor-control").val(data.resource);
-                break;
+    uploadSuccess: function(field_name) {
+        var callback = function(data) {
+            for (var i = 0; i < controller.file_fields.length; i++) {
+                if (controller.file_fields[i] == field_name) {
+                    controller.file_fields.splice(i, 1);
+                    $("#contrle-" + field_name + " .editor-control").val(data.resource);
+                    break;
+                }
+            }
+
+            if (controller.file_fields.length == 0) {
+                controller.saveFields();
             }
         }
 
-        if (this.file_fields.length == 0) {
-            this.saveFields();
-        }
+        return callback;
     },
 
     uploadFailed: function(code, message, data) {
@@ -352,6 +355,7 @@ controller = {
         var input = $("<input>")
             .addClass("form-control icon-input-control")
             .attr("type", "file")
+            .data("field_name", name)
             .val(value)
             .appendTo(ctrl);
 

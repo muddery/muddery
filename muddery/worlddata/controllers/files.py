@@ -237,8 +237,6 @@ class upload_icon(BaseRequestProcesser):
         if not file_obj:
             raise MudderyError(ERR.missing_args, 'Missing icon files.')
 
-        field_name = args.get("field", "")
-
         filename = file_obj.name
         icon_path = settings.ICON_PATH + "/" + filename
         path = os.path.join(settings.MEDIA_ROOT, settings.ICON_PATH, filename)
@@ -264,6 +262,5 @@ class upload_icon(BaseRequestProcesser):
             raise MudderyError(ERR.upload_error, e.message)
 
         return success_response({"resource": icon_path,
-                                 "field": field_name,
                                  "width": size[0],
                                  "height": size[1]})
