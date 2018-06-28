@@ -104,7 +104,7 @@ MudderyMain.prototype.bindEvents = function() {
     this.onClick("#bar_msg_select", function(){$$.main.showMsgTypes()});
     this.onClick("#bar_msg_send", function(){$$.main.sendMessage()});
     
-    this.onClick("#bar_msg_type_menu", "a", function(){controller.selectMsgType(this)});
+    this.onClick("#bar_msg_type_menu", "a", function(el){$$.main.selectMsgType(el)});
 }
 
 
@@ -365,10 +365,10 @@ MudderyMain.prototype.setSkillCast = function(result) {
 	if (component.isCombatFinished()) {
 	    var message = "";
 		if ("cast" in result && result["cast"]) {
-			message += text2html.parseHtml(result["cast"]) + " ";
+			message += $$.text2html.parseHtml(result["cast"]) + " ";
 		}
 		if ("result" in result && result["result"]) {
-			message += text2html.parseHtml(result["result"]);
+			message += $$.text2html.parseHtml(result["result"]);
 		}
 		if (message) {
 			this.displayMsg(message);
@@ -399,8 +399,8 @@ MudderyMain.prototype.setRankings = function(rankings) {
  * Player in honour combat queue.
  */
 MudderyMain.prototype.inCombatQueue = function(ave_time) {
-	$("#prompt_queue").text($$.trans("QUEUE: ") + utils.time_to_string(0));
-	this.displayMsg($$.trans("You are in queue now. Average waiting time is ") + utils.time_to_string(ave_time) + $$.trans("."));
+	$("#prompt_queue").text($$.trans("QUEUE: ") + $$.utils.time_to_string(0));
+	this.displayMsg($$.trans("You are in queue now. Average waiting time is ") + $$.utils.time_to_string(ave_time) + $$.trans("."));
 
 	this.waiting_begin = new Date().getTime();
 	this.interval_id = window.setInterval("refreshWaitingTime()", 1000);
@@ -1206,6 +1206,7 @@ MudderyMain.prototype.showMsgTypes = function() {
  */
 MudderyMain.prototype.selectMsgType = function(caller) {
 	$$.main.message_type = $(caller).data("key");
+	var text = $(caller).text();
 	$("#bar_msg_select").text($(caller).text());
 
 	$("#bar_msg_type_menu").hide();
@@ -1215,5 +1216,5 @@ MudderyMain.prototype.selectMsgType = function(caller) {
 function refreshWaitingTime() {
     var current_time = new Date().getTime();
     var total_time = Math.floor((current_time - $$.main.waiting_begin) / 1000);
-    $("#prompt_queue").text($$.trans("QUEUE: ") + utils.time_to_string(total_time));
+    $("#prompt_queue").text($$.trans("QUEUE: ") + $$.utils.time_to_string(total_time));
 }

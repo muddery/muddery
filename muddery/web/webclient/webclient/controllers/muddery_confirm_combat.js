@@ -87,12 +87,12 @@ MudderyConfirmCombat.prototype.closeBox = function() {
 
 function refreshPrepareTime() {
     var current_time = new Date().getTime();
-    var remain_time = Math.floor((controller.prepare_time - current_time) / 1000);
+    var remain_time = Math.floor(($$.component.confirm_combat.prepare_time - current_time) / 1000);
     if (remain_time < 0) {
         remain_time = 0;
     }
     var text;
-    if (controller.confirmed) {
+    if ($$.component.confirm_combat.confirmed) {
         text = $$.trans(" seconds to start the combat.");
     }
     else {
@@ -102,6 +102,6 @@ function refreshPrepareTime() {
     $("#confirm_combat_time").text(parseInt(remain_time) + text);
     
     if (remain_time <= 0) {
-        controller.closeBox();
+        $$.component.confirm_combat.closeBox();
     }
 }
