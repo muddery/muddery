@@ -425,7 +425,7 @@ MudderyMain.prototype.leftCombatQueue = function(ave_time) {
  */
 MudderyMain.prototype.prepareMatch = function(data) {
 	var component = $$.component.confirm_combat;
-	component.setTime(data);
+	component.init(data);
 	component.show();
 
 	var popup_dialog = $("#popup_confirm_combat .modal-dialog:visible:first");
