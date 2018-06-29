@@ -36,6 +36,21 @@ MudderyConfirmCombat.prototype.bindEvents = function() {
 }
 
 /*
+ * Init the dialog with confirm time..
+ */
+MudderyConfirmCombat.prototype.init = function(time) {
+	this.confirmed = false;
+	this.prepare_time = new Date().getTime() + time * 1000;
+	$("#confirm_combat_time").text(parseInt(time - 1) + $$.trans(" seconds to confirm."));
+
+	this.interval_id = window.setInterval("refreshPrepareTime()", 1000);
+
+	$("#confirm_combat_popup_body").text($$.trans("Found an opponent."));
+	$("#confirm_combat_button_confirm").text($$.trans("Confirm"));
+	$("#confirm_combat_button_confirm").show();
+}
+
+/*
  * Event when clicks the confirm button.
  */
 MudderyConfirmCombat.prototype.onConfirmCombat = function(element) {
@@ -61,17 +76,6 @@ MudderyConfirmCombat.prototype.onRejectCombat = function(element) {
 
 	$$.commands.rejectCombat();
 	this.closeBox();
-}
-	
-/*
- * Set count down time.
- */
-MudderyConfirmCombat.prototype.setTime = function(time) {
-	this.confirmed = false;
-	this.prepare_time = new Date().getTime() + time * 1000;
-	$("#confirm_combat_time").text(parseInt(time - 1) + $$.trans(" seconds to confirm."));
-
-	this.interval_id = window.setInterval("refreshPrepareTime()", 1000);
 }
 
 /*
