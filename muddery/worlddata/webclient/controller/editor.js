@@ -35,7 +35,7 @@ controller = {
     onSave: function() {
         // upload images
         var upload_images = false;
-        this.file_fields = [];
+        controller.file_fields = [];
         var image_fields = $(".icon-input-control");
 
         for (var i = 0; i < image_fields.length; i++) {
@@ -43,7 +43,7 @@ controller = {
             if (typeof (file_obj) != "undefined" && file_obj.size > 0) {
                 upload_images = true;
                 var name = $(image_fields[i]).data("field_name");
-                this.file_fields.push(name);
+                controller.file_fields.push(name);
                 service.uploadIcon(file_obj, name, controller.uploadSuccess(name), controller.uploadFailed);
             }
         }
@@ -58,7 +58,9 @@ controller = {
             for (var i = 0; i < controller.file_fields.length; i++) {
                 if (controller.file_fields[i] == field_name) {
                     controller.file_fields.splice(i, 1);
-                    $("#contrle-" + field_name + " .editor-control").val(data.resource);
+                    var field = $("#control-" + field_name);
+                    field.find(".editor-control").val(data.resource);
+                    field.find(".image-icon").attr("src", CONFIG.resource_url + data.resource);
                     break;
                 }
             }
@@ -352,11 +354,14 @@ controller = {
             .attr("id", "image-" + name)
             .appendTo(ctrl);
 
+        if (value) {
+            image.attr("src", CONFIG.resource_url + value);
+        }
+
         var input = $("<input>")
             .addClass("form-control icon-input-control")
             .attr("type", "file")
             .data("field_name", name)
-            .val(value)
             .appendTo(ctrl);
 
         var resource = $("<input>")

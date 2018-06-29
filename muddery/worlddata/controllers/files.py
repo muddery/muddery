@@ -238,11 +238,11 @@ class upload_icon(BaseRequestProcesser):
             raise MudderyError(ERR.missing_args, 'Missing icon files.')
 
         filename = file_obj.name
-        icon_path = settings.ICON_PATH + "/" + filename
         path = os.path.join(settings.MEDIA_ROOT, settings.ICON_PATH, filename)
         if os.path.exists(path):
             raise MudderyError(ERR.upload_image_exist, 'File %s already exists.' % filename)
 
+        icon_location = settings.ICON_RESOURCE_LOCATION + "/" + filename
         fp = None
         try:
             fp = open(path, "wb+")
@@ -253,7 +253,7 @@ class upload_icon(BaseRequestProcesser):
             image = Image.open(fp)
             size = image.size
 
-            ICON_RESOURCES.add(icon_path, size[0], size[1])
+            ICON_RESOURCES.add(icon_location, size[0], size[1])
 
         except Exception, e:
             if fp:
@@ -261,6 +261,6 @@ class upload_icon(BaseRequestProcesser):
             logger.log_tracemsg("Upload error: %s" % e.message)
             raise MudderyError(ERR.upload_error, e.message)
 
-        return success_response({"resource": icon_path,
+        return success_response({"resource": icon_location,
                                  "width": size[0],
                                  "height": size[1]})

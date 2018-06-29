@@ -186,13 +186,13 @@ MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
 # Example: "http://media.lawrence.com"
 MEDIA_URL = '/media/'
 
-# image resource's dir
-IMAGE_RESOURCE_DIR = 'resource/image'
+# image resource's location
+IMAGE_RESOURCE_LOCATION = 'resource/image'
 
 IMAGE_PATH = os.path.join("resource", "image")
 
-# icon resource's dir
-ICON_RESOURCE_DIR = 'resource/icon'
+# icon resource's location
+ICON_RESOURCE_LOCATION = 'resource/icon'
 
 ICON_PATH = os.path.join("resource", "icon")
 
