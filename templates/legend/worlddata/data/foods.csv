@@ -1,2 +1,2 @@
 id,key,typeclass,name,desc,max_stack,unique,can_remove,can_discard,icon,attr_1,attr_2,attr_3,attr_4,attr_5,attr_6,attr_7,attr_8,attr_9,attr_10
-1,food_peach,CLASS_FOOD,桃子,一颗又大又红的桃子，散发着诱人的香味。,10,True,True,True,icon_peach,20,0,,,,,,,,
+1,food_peach,CLASS_FOOD,桃子,一颗又大又红的桃子，散发着诱人的香味。,10,True,True,True,resource/icon/icon_peach.jpg,20,0,,,,,,,,

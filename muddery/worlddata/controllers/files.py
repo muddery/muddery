@@ -4,7 +4,7 @@ Battle commands. They only can be used when a character is in a combat.
 
 from __future__ import print_function
 
-import os, tempfile, time, shutil
+import os, tempfile, time, shutil, filecmp
 from PIL import Image
 from django.conf import settings
 from django.contrib import auth
@@ -239,28 +239,49 @@ class upload_icon(BaseRequestProcesser):
 
         filename = file_obj.name
         path = os.path.join(settings.MEDIA_ROOT, settings.ICON_PATH, filename)
-        if os.path.exists(path):
-            raise MudderyError(ERR.upload_image_exist, 'File %s already exists.' % filename)
+        exist = False
+
+        if not os.path.exists(path):
+            # save file
+            fp = None
+            try:
+                fp = open(path, "wb+")
+                for chunk in file_obj.chunks():
+                    fp.write(chunk)
+                fp.flush()
+            except Exception, e:
+                if fp:
+                    fp.close()
+                logger.log_tracemsg("Upload error: %s" % e.message)
+                raise MudderyError(ERR.upload_error, e.message)
+        else:
+            # Compare the uploaded file with the local file.
+            with tempfile.NamedTemporaryFile() as fp:
+                try:
+                    for chunk in file_obj.chunks():
+                        fp.write(chunk)
+                    fp.flush()
+
+                    same = filecmp.cmp(path, fp.name)
+                    if not same:
+                        raise MudderyError(ERR.upload_image_exist, 'File %s already exists.' % filename)
+
+                    exist = True
+                except Exception, e:
+                    logger.log_tracemsg("Upload error: %s" % e.message)
+                    raise MudderyError(ERR.upload_error, e.message)
 
         icon_location = settings.ICON_RESOURCE_LOCATION + "/" + filename
-        fp = None
-        try:
-            fp = open(path, "wb+")
-            for chunk in file_obj.chunks():
-                fp.write(chunk)
-            fp.flush()
+        if not exist:
+            try:
+                image = Image.open(path)
+                size = image.size
 
-            image = Image.open(fp)
-            size = image.size
+                ICON_RESOURCES.add(icon_location, size[0], size[1])
+            except Exception, e:
+                if fp:
+                    fp.close()
+                logger.log_tracemsg("Upload error: %s" % e.message)
+                raise MudderyError(ERR.upload_error, e.message)
 
-            ICON_RESOURCES.add(icon_location, size[0], size[1])
-
-        except Exception, e:
-            if fp:
-                fp.close()
-            logger.log_tracemsg("Upload error: %s" % e.message)
-            raise MudderyError(ERR.upload_error, e.message)
-
-        return success_response({"resource": icon_location,
-                                 "width": size[0],
-                                 "height": size[1]})
+        return success_response({"resource": icon_location})

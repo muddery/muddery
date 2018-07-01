@@ -1,7 +1,7 @@
 id,key,typeclass,name,desc,location,model,level,reborn_time,condition,icon
-1,npc_girl,CLASS_COMMON_NPC,女孩,她的一双大眼睛看着你，笑容是那么迷人。,room_house,MODEL_NPC_COMMON,1,0,,icon_girl
-2,npc_wolf,CLASS_COMMON_MONSTER,恶狼,恶狼俯着身子，准备着向你扑过来。,room_road_front,MODEL_MOB_WOLF,1,1,"not has_attr(""kill_wolf"")",icon_wolf
-3,npc_beauty,CLASS_COMMON_MONSTER,美女,她对着你微微一笑，你的心都要从胸口跳出来了。,room_road_left,MODEL_MOB_BEAUTY,1,1,"not has_attr(""kill_beauty"")",icon_beauty
-5,npc_tiger,CLASS_COMMON_MONSTER,猛虎,猛虎对你低吼了一声，你感到一股杀气向你扑来。,room_road_center,MODEL_MOB_TIGER,1,1,"not has_attr(""kill_tiger"")",icon_tiger
-6,npc_boss,CLASS_COMMON_NPC,恶魔,恶魔张着血盆大口，仿佛要一口把你吞下去。,room_road_secret,MODEL_MOB_BOSS,1,1,"not has_attr(""kill_boss"")",icon_boss
-7,npc_cat,CLASS_COMMON_NPC,小花,这是一只可爱的小猫。它对你喵喵叫了一声，似乎在感谢你的救命之恩。,room_house,MODEL_NPC_COMMON,1,0,"is_quest_completed(""quest_find_cat"")",icon_cat
+1,npc_girl,CLASS_COMMON_NPC,女孩,她的一双大眼睛看着你，笑容是那么迷人。,room_house,MODEL_NPC_COMMON,1,0,,resource/icon/icon_girl.jpg
+2,npc_wolf,CLASS_COMMON_MONSTER,恶狼,恶狼俯着身子，准备着向你扑过来。,room_road_front,MODEL_MOB_WOLF,1,1,"not has_attr(""kill_wolf"")",resource/icon/icon_wolf.jpg
+3,npc_beauty,CLASS_COMMON_MONSTER,美女,她对着你微微一笑，你的心都要从胸口跳出来了。,room_road_left,MODEL_MOB_BEAUTY,1,1,"not has_attr(""kill_beauty"")",resource/icon/icon_beauty.jpg
+5,npc_tiger,CLASS_COMMON_MONSTER,猛虎,猛虎对你低吼了一声，你感到一股杀气向你扑来。,room_road_center,MODEL_MOB_TIGER,1,1,"not has_attr(""kill_tiger"")",resource/icon/icon_tiger.jpg
+6,npc_boss,CLASS_COMMON_NPC,恶魔,恶魔张着血盆大口，仿佛要一口把你吞下去。,room_road_secret,MODEL_MOB_BOSS,1,1,"not has_attr(""kill_boss"")",resource/icon/icon_boss.jpg
+7,npc_cat,CLASS_COMMON_NPC,小花,这是一只可爱的小猫。它对你喵喵叫了一声，似乎在感谢你的救命之恩。,room_house,MODEL_NPC_COMMON,1,0,"is_quest_completed(""quest_find_cat"")",resource/icon/icon_cat.jpg

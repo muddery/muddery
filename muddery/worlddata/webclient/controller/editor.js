@@ -354,10 +354,6 @@ controller = {
             .attr("id", "image-" + name)
             .appendTo(ctrl);
 
-        if (value) {
-            image.attr("src", CONFIG.resource_url + value);
-        }
-
         var input = $("<input>")
             .addClass("form-control icon-input-control")
             .attr("type", "file")
@@ -368,6 +364,11 @@ controller = {
             .addClass("editor-control")
             .attr("type", "hidden")
             .appendTo(ctrl);
+
+        if (value) {
+            image.attr("src", CONFIG.resource_url + value);
+            resource.val(value);
+        }
 
         return this.createControlGroup(name, ctrl, label, help_text);
     },

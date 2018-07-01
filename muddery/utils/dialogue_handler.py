@@ -16,7 +16,6 @@ from muddery.worlddata.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
 from muddery.worlddata.dao.dialogue_relations_mapper import DIALOGUE_RELATIONS
 from muddery.worlddata.dao.dialogue_quest_dependencies_mapper import DIALOGUE_QUESTION
 from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
-from muddery.worlddata.dao.icon_resources_mapper import ICON_RESOURCES
 from muddery.mappings.quest_status_set import QUEST_STATUS_SET
 from evennia.utils import logger
 
@@ -382,11 +381,7 @@ class DialogueHandler(object):
 
         # use icon resource in dialogue sentence
         if icon_str:
-            try:
-                resource_info = ICON_RESOURCES.get(icon_str)
-                icon = resource_info.resource
-            except Exception, e:
-                logger.log_errmsg("Load icon %s error: %s" % (icon_str, e))
+            icon = icon_str
         else:
             if "%(n)" in speaker_model:
                 if npc:

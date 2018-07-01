@@ -26,7 +26,6 @@ from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.desc_handler import DESC_HANDLER
-from muddery.worlddata.dao.icon_resources_mapper import ICON_RESOURCES
 from muddery.typeclasses.base_typeclass import BaseTypeclass
 from muddery.mappings.typeclass_set import TYPECLASS
 
@@ -500,14 +499,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         Returns:
             None
         """
-        self.icon = None
-        icon_key = getattr(self.dfield, "icon", None)
-        if icon_key:
-            try:
-                resource_info = ICON_RESOURCES.get(icon_key)
-                self.icon = resource_info.resource
-            except Exception, e:
-                logger.log_errmsg("Load icon %s error: %s" % (icon_key, e))
+        self.icon = getattr(self.dfield, "icon", None)
 
     def get_data_key(self, default=""):
         """
