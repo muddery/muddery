@@ -36,15 +36,26 @@ controller = {
         // upload images
         var upload_images = false;
         controller.file_fields = [];
-        var image_fields = $(".icon-input-control");
 
+        var icon_fields = $(".icon-input-control");
+        for (var i = 0; i < icon_fields.length; i++) {
+            var file_obj = icon_fields[i].files[0];
+            if (typeof (file_obj) != "undefined" && file_obj.size > 0) {
+                upload_images = true;
+                var name = $(icon_fields[i]).data("field_name");
+                controller.file_fields.push(name);
+                service.uploadImage(file_obj, name, "icon", controller.uploadSuccess(name), controller.uploadFailed);
+            }
+        }
+
+        var image_fields = $(".image-input-control");
         for (var i = 0; i < image_fields.length; i++) {
             var file_obj = image_fields[i].files[0];
             if (typeof (file_obj) != "undefined" && file_obj.size > 0) {
                 upload_images = true;
                 var name = $(image_fields[i]).data("field_name");
                 controller.file_fields.push(name);
-                service.uploadIcon(file_obj, name, controller.uploadSuccess(name), controller.uploadFailed);
+                service.uploadImage(file_obj, name, "image", controller.uploadSuccess(name), controller.uploadFailed);
             }
         }
 
@@ -60,7 +71,7 @@ controller = {
                     controller.file_fields.splice(i, 1);
                     var field = $("#control-" + field_name);
                     field.find(".editor-control").val(data.resource);
-                    field.find(".image-icon").attr("src", CONFIG.resource_url + data.resource);
+                    field.find("img").attr("src", CONFIG.resource_url + data.resource);
                     break;
                 }
             }
@@ -124,6 +135,9 @@ controller = {
             }
             else if (type == "Icon") {
                 controller = this.createIconInput(name, label, value, help_text);
+            }
+            else if (type == "Image") {
+                controller = this.createImageInput(name, label, value, help_text);
             }
             else if (type == "Hidden") {
                 controller = this.createHiddenInput(name, label, value, help_text);
@@ -350,12 +364,39 @@ controller = {
         var ctrl = $("<div>");
 
         var image = $("<img>")
-            .addClass("image-icon")
+            .addClass("img-icon")
             .attr("id", "image-" + name)
             .appendTo(ctrl);
 
         var input = $("<input>")
             .addClass("form-control icon-input-control")
+            .attr("type", "file")
+            .data("field_name", name)
+            .appendTo(ctrl);
+
+        var resource = $("<input>")
+            .addClass("editor-control")
+            .attr("type", "hidden")
+            .appendTo(ctrl);
+
+        if (value) {
+            image.attr("src", CONFIG.resource_url + value);
+            resource.val(value);
+        }
+
+        return this.createControlGroup(name, ctrl, label, help_text);
+    },
+
+    createImageInput: function(name, label, value, help_text) {
+        var ctrl = $("<div>");
+
+        var image = $("<img>")
+            .addClass("img-image")
+            .attr("id", "image-" + name)
+            .appendTo(ctrl);
+
+        var input = $("<input>")
+            .addClass("form-control image-input-control")
             .attr("type", "file")
             .data("field_name", name)
             .appendTo(ctrl);

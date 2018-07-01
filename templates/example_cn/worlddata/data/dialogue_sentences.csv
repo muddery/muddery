@@ -4,11 +4,11 @@ dlg_alley_soliloquy,1,%p,,"头好晕啊，只记得我和朋友们在游乐园�
 dlg_street_find_survivor,1,,,"眼前的景象让你吓了一跳，原本游人如织的街道现在已是满目疮痍、空无一人，像是经历了一次大灾难。",,,
 dlg_street_find_survivor,2,,,"人们都去哪里了？我该去哪里？",,,
 dlg_street_find_survivor,3,,,"你环顾了一下四周，决定先在周围找找有没有其他人。",,quest_find_survivor,
-dlg_colorfulworld_find_survivor,1,"陌生人",resource/icon/guard.png,"该死的机器人，我要和你同归于尽！",,,
+dlg_colorfulworld_find_survivor,1,"陌生人",image/icon/guard.png,"该死的机器人，我要和你同归于尽！",,,
 dlg_colorfulworld_find_survivor,2,%p,,"我可不是什么机器人啊！你疯了吗？",,,
-dlg_colorfulworld_find_survivor,3,"陌生人",resource/icon/guard.png,"什么？是我认错了吗？对不起！",,,
+dlg_colorfulworld_find_survivor,3,"陌生人",image/icon/guard.png,"什么？是我认错了吗？对不起！",,,
 dlg_colorfulworld_find_survivor,4,%p,,"你是不是傻了？连人和机器人都分不清楚了！我叫$PLAYER_NAME，看制服你是个保安吧。",,,
-dlg_colorfulworld_find_survivor,5,"陌生人",resource/icon/guard.png,"唉，我被机器人都弄得神经紧张了。机器人造反了！",,,quest_find_survivor
+dlg_colorfulworld_find_survivor,5,"陌生人",image/icon/guard.png,"唉，我被机器人都弄得神经紧张了。机器人造反了！",,,quest_find_survivor
 dlg_colorfulworld_wu_01,1,%p,,"机器人造反了？",,,
 dlg_colorfulworld_wu_01,2,%n,,"是啊。不知什么原因，它们突然开始攻击所有的人，把整个游乐园都占领了。",,,
 dlg_colorfulworld_wu_01,6,%p,,"太可怕了！",,,

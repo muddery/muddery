@@ -1,5 +1,5 @@
 key,name,typeclass,desc,max_stack,unique,can_remove,can_discard,icon
-obj_money,金钱,COMMON_OBJECT,有钱能使鬼推磨。,99999999,1,0,0,resource/icon/money.png
-obj_guardhouse_key,钥匙,COMMON_OBJECT,钥匙圈上扣着一串铜质的钥匙，它们是用来开什么门的呢？,1,1,1,1,resource/icon/key.png
-obj_binder,绷带,COMMON_OBJECT,一卷绷带，还没拆封过，可以帮助止血。,1,1,1,1,resource/icon/binder.png
-obj_screw,螺丝,COMMON_OBJECT,一颗螺丝，能派什么用处呢？,5,1,1,1,resource/icon/screw.png
+obj_money,金钱,COMMON_OBJECT,有钱能使鬼推磨。,99999999,1,0,0,image/icon/money.png
+obj_guardhouse_key,钥匙,COMMON_OBJECT,钥匙圈上扣着一串铜质的钥匙，它们是用来开什么门的呢？,1,1,1,1,image/icon/key.png
+obj_binder,绷带,COMMON_OBJECT,一卷绷带，还没拆封过，可以帮助止血。,1,1,1,1,image/icon/binder.png
+obj_screw,螺丝,COMMON_OBJECT,一颗螺丝，能派什么用处呢？,5,1,1,1,image/icon/screw.png

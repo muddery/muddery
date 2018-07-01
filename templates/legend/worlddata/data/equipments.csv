@@ -1,2 +1,2 @@
 id,key,typeclass,name,desc,max_stack,unique,can_remove,can_discard,icon,position,type,attr_1,attr_2,attr_3,attr_4,attr_5,attr_6,attr_7,attr_8,attr_9,attr_10
-1,weapon_sword,CLASS_EQUIPMENT,宝剑,这把宝剑应该已经用了很多年了，上面有不少划痕，但还算锋利。,1,True,True,True,resource/icon/icon_sword.jpg,POSITION_HAND,EQUIP_WEAPON,10,0,,,,,,,,
+1,weapon_sword,CLASS_EQUIPMENT,宝剑,这把宝剑应该已经用了很多年了，上面有不少划痕，但还算锋利。,1,True,True,True,image/icon/icon_sword.jpg,POSITION_HAND,EQUIP_WEAPON,10,0,,,,,,,,

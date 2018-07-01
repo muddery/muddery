@@ -13,6 +13,7 @@ from muddery.worlddata.dao import common_mappers as CM
 from muddery.mappings.form_set import FORM_SET
 from muddery.worlddata.forms.location_field import LocationField
 from muddery.worlddata.forms.icon_field import IconField
+from muddery.worlddata.forms.image_field import ImageField
 
 
 def query_form(table_name, record_id=None):
@@ -72,6 +73,8 @@ def query_form(table_name, record_id=None):
             has_location = True
         elif isinstance(field, IconField):
             info["type"] = "Icon"
+        elif isinstance(field, ImageField):
+            info["type"] = "Image"
 
         fields.append(info)
 

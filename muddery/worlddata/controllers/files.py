@@ -14,7 +14,7 @@ from muddery.worlddata.utils.response import success_response, file_response
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils import writers
 from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
-from muddery.worlddata.dao.icon_resources_mapper import ICON_RESOURCES
+from muddery.worlddata.dao.image_resources_mapper import IMAGE_RESOURCES
 
 
 class upload_zip(BaseRequestProcesser):
@@ -220,15 +220,15 @@ class query_data_file_types(BaseRequestProcesser):
         return success_response(data)
 
 
-class upload_icon(BaseRequestProcesser):
+class upload_image(BaseRequestProcesser):
     """
-    Upload an icon.
+    Upload a file.
 
     Args:
         args:
-            field: (string) field's name.
+            type: (string) image file's type.
     """
-    path = "upload_icon"
+    path = "upload_image"
     name = ""
 
     def func(self, args, request):
@@ -237,15 +237,22 @@ class upload_icon(BaseRequestProcesser):
         if not file_obj:
             raise MudderyError(ERR.missing_args, 'Missing icon files.')
 
+        file_type = args["type"]
         filename = file_obj.name
-        path = os.path.join(settings.MEDIA_ROOT, settings.ICON_PATH, filename)
+        path = os.path.join(settings.MEDIA_ROOT, settings.IMAGE_PATH, file_type)
+        filepath = os.path.join(path, filename)
         exist = False
 
-        if not os.path.exists(path):
+        if not os.path.exists(filepath):
+
+            if not os.path.exists(path):
+                # If does not exist, create one.
+                os.makedirs(path)
+
             # save file
             fp = None
             try:
-                fp = open(path, "wb+")
+                fp = open(filepath, "wb+")
                 for chunk in file_obj.chunks():
                     fp.write(chunk)
                 fp.flush()
@@ -262,7 +269,7 @@ class upload_icon(BaseRequestProcesser):
                         fp.write(chunk)
                     fp.flush()
 
-                    same = filecmp.cmp(path, fp.name)
+                    same = filecmp.cmp(filepath, fp.name)
                     if not same:
                         raise MudderyError(ERR.upload_image_exist, 'File %s already exists.' % filename)
 
@@ -271,13 +278,13 @@ class upload_icon(BaseRequestProcesser):
                     logger.log_tracemsg("Upload error: %s" % e.message)
                     raise MudderyError(ERR.upload_error, e.message)
 
-        icon_location = settings.ICON_RESOURCE_LOCATION + "/" + filename
+        icon_location = settings.IMAGE_PATH + "/" + file_type + "/" + filename
         if not exist:
             try:
-                image = Image.open(path)
+                image = Image.open(filepath)
                 size = image.size
 
-                ICON_RESOURCES.add(icon_location, size[0], size[1])
+                IMAGE_RESOURCES.add(icon_location, file_type, size[0], size[1])
             except Exception, e:
                 if fp:
                     fp.close()

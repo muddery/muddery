@@ -1359,11 +1359,14 @@ class localized_strings(models.Model):
 # set image resources
 #
 # ------------------------------------------------------------
-class ImageResources(models.Model):
+class image_resources(models.Model):
     "Store resource's information."
 
-    # resource's path
+    # image's path
     resource = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # image's type
+    type = models.CharField(max_length=KEY_LENGTH)
 
     # resource'e width
     image_width = models.PositiveIntegerField(blank=True, default=0)
@@ -1375,43 +1378,8 @@ class ImageResources(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Resource"
-        verbose_name_plural = "Resources"
-
-
-# ------------------------------------------------------------
-#
-# image resources
-#
-# ------------------------------------------------------------
-class image_resources(ImageResources):
-    "Store image resource's information."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
         verbose_name = "Image Resource"
         verbose_name_plural = "Image Resources"
-
-    def __unicode__(self):
-        return self.resource
-
-
-# ------------------------------------------------------------
-#
-# icon resources
-#
-# ------------------------------------------------------------
-class icon_resources(ImageResources):
-    "Store icon resource's information."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Icon Resource"
-        verbose_name_plural = "Icon Resources"
 
     def __unicode__(self):
         return self.resource

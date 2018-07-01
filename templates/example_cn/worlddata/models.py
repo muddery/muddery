@@ -447,13 +447,3 @@ class localized_strings(BaseModels.localized_strings):
 class image_resources(BaseModels.image_resources):
     "Store all image resource's information."
     pass
-
-
-#------------------------------------------------------------
-#
-# icon resources
-#
-#------------------------------------------------------------
-class icon_resources(BaseModels.icon_resources):
-    "Store all icon resource's information."
-    pass

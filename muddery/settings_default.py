@@ -186,15 +186,8 @@ MEDIA_ROOT = os.path.join(GAME_DIR, "web", "media")
 # Example: "http://media.lawrence.com"
 MEDIA_URL = '/media/'
 
-# image resource's location
-IMAGE_RESOURCE_LOCATION = 'resource/image'
-
-IMAGE_PATH = os.path.join("resource", "image")
-
-# icon resource's location
-ICON_RESOURCE_LOCATION = 'resource/icon'
-
-ICON_PATH = os.path.join("resource", "icon")
+# resource's location
+IMAGE_PATH = 'image'
 
 # The master urlconf file that contains all of the sub-branches to the
 # applications. Change this to add your own URLs to the website.

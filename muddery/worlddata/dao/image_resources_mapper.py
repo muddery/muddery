@@ -27,6 +27,30 @@ class ImageResourcesMapper(object):
         """
         return self.objects.get(key=key)
 
+    def add(self, path, type, width, height):
+        """
+        Add a new image record.
+
+        Args:
+            path: image's path
+            type: image's type
+            width: image's width
+            height: image's height
+
+        Return:
+            none
+        """
+        record = {
+            "resource": path,
+            "type": type,
+            "image_width": width,
+            "image_height": height,
+        }
+
+        data = self.model(**record)
+        data.full_clean()
+        data.save()
+
 
 IMAGE_RESOURCES = ImageResourcesMapper()
 

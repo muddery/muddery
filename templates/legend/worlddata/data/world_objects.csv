@@ -1,4 +1,4 @@
 id,key,typeclass,name,desc,location,action,condition,icon
-1,creator_sword_box,CLASS_OBJECT_CREATOR,箱子,在房间的角落里有一个箱子，里面放着一把宝剑。,room_house,,"not has_object(""weapon_sword"")",resource/icon/icon_box.jpg
-2,creator_tree,CLASS_OBJECT_CREATOR,桃树,这棵桃树上长满了桃子，看上去好诱人。,room_begin,,,resource/icon/icon_tree.jpg
-3,obj_trap,CLASS_WORLD_OBJECT,宝箱,宝箱里似乎投射出金子的光芒。,room_road_right,拾取,"not has_attr(""kill_pirate"")",resource/icon/icon_trap.jpg
+1,creator_sword_box,CLASS_OBJECT_CREATOR,箱子,在房间的角落里有一个箱子，里面放着一把宝剑。,room_house,,"not has_object(""weapon_sword"")",image/icon/icon_box.jpg
+2,creator_tree,CLASS_OBJECT_CREATOR,桃树,这棵桃树上长满了桃子，看上去好诱人。,room_begin,,,image/icon/icon_tree.jpg
+3,obj_trap,CLASS_WORLD_OBJECT,宝箱,宝箱里似乎投射出金子的光芒。,room_road_right,拾取,"not has_attr(""kill_pirate"")",image/icon/icon_trap.jpg

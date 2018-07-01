@@ -107,5 +107,3 @@ CONDITION_DESC = CommonMapper("condition_desc")
 LOCALIZED_STRINGS = CommonMapper("localized_strings")
 
 IMAGE_RESOURCES = CommonMapper("image_resources")
-
-ICON_RESOURCES = CommonMapper("icon_resources")

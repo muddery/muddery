@@ -75,9 +75,14 @@ input[type=checkbox].check-box-control {
     margin-right: 10px;
 }
 
-.image-icon {
+.img-icon {
     width: 60px;
     height: 60px;
+}
+
+.img-image {
+    width: 320px;
+    height: 240px;
 }
 
 .icon-input-control, .image-input-control {
