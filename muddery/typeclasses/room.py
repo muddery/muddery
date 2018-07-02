@@ -58,15 +58,15 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
 
         # get background
         self.background = None
-        resource_key = getattr(self.dfield, "background", None)
-        if resource_key:
+        resource = getattr(self.dfield, "background", None)
+        if resource:
             try:
-                resource_info = IMAGE_RESOURCES.get(resource_key)
-                self.background = {"name": resource_info.resource,
+                resource_info = IMAGE_RESOURCES.get(resource)
+                self.background = {"resource": resource_info.resource,
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}
             except Exception, e:
-                logger.log_tracemsg("Load background %s error: %s" % (resource_key, e))
+                logger.log_tracemsg("Load background %s error: %s" % (resource, e))
 
     def at_object_receive(self, moved_obj, source_location):
         """

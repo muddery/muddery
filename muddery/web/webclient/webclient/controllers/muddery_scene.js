@@ -122,7 +122,7 @@ MudderyScene.prototype.setScene = function(scene) {
     // set background
     var backview = this.select("#scene_box_scene");
     if ("background" in scene && scene["background"]) {
-        var url = settings.resource_url + scene["background"]["name"];
+        var url = settings.resource_url + scene["background"]["resource"];
         backview.css("background", "url(" + url + ") no-repeat center center");
     }
     else {
@@ -244,7 +244,7 @@ MudderyScene.prototype.addLinks = function(block_id, container_id, data) {
             }
 
             var item = this.cloneTemplate(template);
-            item.attr("id", "obj_" + obj["dbref"].slice(1))
+            item.attr("id", "scene_obj_" + obj["dbref"].slice(1))
                 .data("dbref", obj["dbref"])
                 .html(name);
         }

@@ -18,14 +18,14 @@ class ImageResourcesMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-    def get(self, key):
+    def get(self, resource):
         """
         Get object's image.
 
         Args:
-            key: (string) object's key.
+            resource: (string) resource's path.
         """
-        return self.objects.get(key=key)
+        return self.objects.get(resource=resource)
 
     def add(self, path, type, width, height):
         """

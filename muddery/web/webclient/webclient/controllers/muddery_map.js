@@ -138,7 +138,7 @@ MudderyMap.prototype.showMap = function(location) {
 			.attr("y", y)
 			.attr("width", location["area"]["background"]["width"] + "px")
 			.attr("height", location["area"]["background"]["height"] + "px")
-			.attr("xlink:href", settings.resource_url + location["area"]["background"]["name"]);
+			.attr("xlink:href", settings.resource_url + location["area"]["background"]["resource"]);
 	}
 
 	if (current_room["pos"] &&
