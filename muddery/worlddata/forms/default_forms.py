@@ -137,7 +137,7 @@ class WorldAreasForm(ObjectsForm):
         fields = '__all__'
         
 
-class WorldRoomsForm(forms.ModelForm):
+class WorldRoomsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldRoomsForm, self).__init__(*args, **kwargs)
 
@@ -161,7 +161,7 @@ class WorldRoomsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class WorldExitsForm(forms.ModelForm):
+class WorldExitsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldExitsForm, self).__init__(*args, **kwargs)
 
@@ -211,7 +211,7 @@ class TwoWayExitsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class WorldObjectsForm(forms.ModelForm):
+class WorldObjectsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
@@ -232,7 +232,7 @@ class WorldObjectsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class WorldNPCsForm(forms.ModelForm):
+class WorldNPCsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldNPCsForm, self).__init__(*args, **kwargs)
 
@@ -359,7 +359,7 @@ class QuestRewardListForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CommonObjectsForm(forms.ModelForm):
+class CommonObjectsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(CommonObjectsForm, self).__init__(*args, **kwargs)
 
@@ -376,7 +376,7 @@ class CommonObjectsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class FoodsForm(forms.ModelForm):
+class FoodsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(FoodsForm, self).__init__(*args, **kwargs)
         
@@ -394,7 +394,7 @@ class FoodsForm(forms.ModelForm):
         fields = '__all__'
         
 
-class SkillBooksForm(forms.ModelForm):
+class SkillBooksForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(SkillBooksForm, self).__init__(*args, **kwargs)
 
@@ -464,7 +464,7 @@ class CharacterModelsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CommonCharacterForm(forms.ModelForm):
+class CommonCharacterForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(CommonCharacterForm, self).__init__(*args, **kwargs)
 
@@ -526,7 +526,7 @@ class DefaultObjectsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class ShopsForm(forms.ModelForm):
+class ShopsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(ShopsForm, self).__init__(*args, **kwargs)
 
@@ -543,7 +543,7 @@ class ShopsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class ShopGoodsForm(forms.ModelForm):
+class ShopGoodsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(ShopGoodsForm, self).__init__(*args, **kwargs)
 
@@ -594,7 +594,7 @@ class NPCShopsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class SkillsForm(forms.ModelForm):
+class SkillsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(SkillsForm, self).__init__(*args, **kwargs)
 
@@ -667,7 +667,7 @@ class NPCDialoguesForm(forms.ModelForm):
         fields = '__all__'
 
 
-class QuestsForm(forms.ModelForm):
+class QuestsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(QuestsForm, self).__init__(*args, **kwargs)
 
@@ -744,7 +744,7 @@ class DialogueQuestDependenciesForm(forms.ModelForm):
         fields = '__all__'
 
 
-class EquipmentsForm(forms.ModelForm):
+class EquipmentsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentsForm, self).__init__(*args, **kwargs)
 
