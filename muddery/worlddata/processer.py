@@ -50,8 +50,11 @@ class Processer(object):
 
         if request.POST:
             data = request.POST.dict()
+            print("data: %s" % data)
             func = data.get("func", "")
-            args = json.loads(data.get("args", ""))
+            args_text = data.get("args", None)
+            if args_text:
+                args = json.loads(args_text)
 
         if not data:
             try:

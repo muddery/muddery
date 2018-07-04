@@ -97,12 +97,11 @@ service = {
             .attr("value", func_no)
             .appendTo(form);
         
-        for (var key in args) {
-            $("<input>")
-                .attr("name", key)
-                .attr("value", args[key])
-                .appendTo(form);
-        }
+        var args = JSON.stringify(args);
+        $("<input>")
+            .attr("name", "args")
+            .attr("value", args)
+            .appendTo(form);
 
         form.appendTo('body').submit().remove();
     },
