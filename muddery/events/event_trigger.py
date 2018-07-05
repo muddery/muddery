@@ -76,9 +76,14 @@ class EventTrigger(object):
                     # has permission to bypass events
                     return True
 
-    def trigger(self, event_type, character, target):
+    def trigger(self, event_type, character, obj):
         """
         Trigger an event.
+
+        Args:
+            event_type: (string) event's type.
+            character: (object) the character who trigger this event.
+            obj: (object) the event object.
 
         Return:
             triggered: (boolean) if an event is triggered.
@@ -92,12 +97,17 @@ class EventTrigger(object):
         if event_type not in self.events:
             return False
 
-        for event in self.events[event_type]:
-            # Check condition.
-            if STATEMENT_HANDLER.match_condition(event["condition"], character, target):
-                function = EVENT_ACTION_SET.get(event["type"])
-                if function:
-                    function(event, character)
+        event_list = self.events[event_type]
+        candidates = [e for e in event_list if STATEMENT_HANDLER.match_condition(e["condition"], character, obj)]
+
+        rand = random.random()
+        for event in candidates:
+            if rand < event["odds"]:
+                func = EVENT_ACTION_SET.get(event["type"])
+                if func:
+                    func(event, character)
+                return True
+            rand -= event["odds"]
 
     #########################
     #
@@ -108,21 +118,7 @@ class EventTrigger(object):
         """
         Called when a character moves in the event handler's owner, usually a room.
         """
-        if not character:
-            return
-
-        if self.can_bypass(character):
-            return
-
-        if defines.EVENT_TRIGGER_ARRIVE in self.events:
-            for event in self.events[defines.EVENT_TRIGGER_ARRIVE]:
-                # If has arrive event.
-                if STATEMENT_HANDLER.match_condition(event["condition"], character, self.owner):
-                    # If matches the condition.
-                    function = EVENT_ACTION_SET.get(event["type"])
-                    if function:
-                        function(event, character)
-
+        self.trigger(defines.EVENT_TRIGGER_ARRIVE, character, self.owner)
 
     def at_character_move_out(self, character):
         """
@@ -130,28 +126,11 @@ class EventTrigger(object):
         """
         pass
 
-
     def at_character_die(self):
         """
         Called when a character is killed.
         """
-        owner = self.owner
-
-        if not owner:
-            return
-
-        if self.can_bypass(owner):
-            return
-
-        if defines.EVENT_TRIGGER_DIE in self.events:
-            for event in self.events[defines.EVENT_TRIGGER_DIE]:
-                #If has die event.
-                if STATEMENT_HANDLER.match_condition(event["condition"], owner, None):
-                    # If matches the condition, run event on the owner.
-                    function = EVENT_ACTION_SET.get(event["type"])
-                    if function:
-                        function(event, owner)
-
+        self.trigger(defines.EVENT_TRIGGER_DIE, self.owner, None)
 
     def at_character_kill(self, killers):
         """
@@ -159,62 +138,21 @@ class EventTrigger(object):
         This event is set on the character who is killed, and take effect on the killer!
         """
         if defines.EVENT_TRIGGER_KILL in self.events:
-            for event in self.events[defines.EVENT_TRIGGER_KILL]:
-                # If has kill event.
-                for killer in killers:
-                    if self.can_bypass(killer):
-                        continue
-
-                    if STATEMENT_HANDLER.match_condition(event["condition"], killer, self.owner):
-                        function = EVENT_ACTION_SET.get(event["type"])
-                        if function:
-                            function(event, killer)
-
+            # If has kill event.
+            for killer in killers:
+                self.trigger(defines.EVENT_TRIGGER_DIE, killer, self.owner)
 
     def at_character_traverse(self, character):
         """
         Called before a character traverses an exit.
         If returns true, the character can pass the exit, else the character can not pass the exit.
         """
-        if not character:
-            return True
-
-        if self.can_bypass(character):
-            return True
-
-        triggered = False
-        if defines.EVENT_TRIGGER_TRAVERSE in self.events:
-            for event in self.events[defines.EVENT_TRIGGER_TRAVERSE]:
-                # If has traverse event.
-                if STATEMENT_HANDLER.match_condition(event["condition"], character, self.owner):
-                    # If matches the condition.
-                    triggered = True
-                    function = EVENT_ACTION_SET.get(event["type"])
-                    if function:
-                        function(event, character)
-
+        triggered = self.trigger(defines.EVENT_TRIGGER_TRAVERSE, character, self.owner)
         return not triggered
         
     def at_action(self, character, obj):
         """
         Called when a character act to an object.
         """
-        if not character:
-            return True
-
-        if self.can_bypass(character):
-            return True
-
-        triggered = False
-        if defines.EVENT_TRIGGER_ACTION in self.events:
-            for event in self.events[defines.EVENT_TRIGGER_ACTION]:
-                # If has traverse event.
-                if STATEMENT_HANDLER.match_condition(event["condition"], character, self.owner):
-                    # If matches the condition.
-                    triggered = True
-                    function = EVENT_ACTION_SET.get(event["type"])
-                    if function:
-                        function(event, character)
-
+        triggered = self.trigger(defines.EVENT_TRIGGER_ACTION, character, self.owner)
         return not triggered
-
