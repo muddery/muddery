@@ -351,7 +351,7 @@ controller = {
                 .attr("value", room[0])
                 .appendTo(select_room);
 
-            if (room[1] == value) {
+            if (room[0] == value) {
                 option.attr("selected", "selected");
             }
         }
