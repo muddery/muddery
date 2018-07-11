@@ -1,7 +1,7 @@
 type,image_width,image_height,resource
-image,300,300,image/image/house.jpg
-image,300,300,image/image/hill.jpg
-image,300,300,image/image/room.jpg
+image,300,300,image/background/house.jpg
+image,300,300,image/background/hill.jpg
+image,300,300,image/background/room.jpg
 icon,60,60,image/icon/icon_girl.jpg
 icon,60,60,image/icon/icon_trap.jpg
 icon,60,60,image/icon/icon_box.jpg

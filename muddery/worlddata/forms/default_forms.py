@@ -10,7 +10,6 @@ from muddery.mappings.typeclass_set import TYPECLASS_SET
 from muddery.worlddata.dao import model_mapper
 from muddery.worlddata.dao import common_mappers as CM
 from muddery.worlddata.forms.location_field import LocationField
-from muddery.worlddata.forms.icon_field import IconField
 from muddery.worlddata.forms.image_field import ImageField
 
 
@@ -110,6 +109,16 @@ class GameSettingsForm(forms.ModelForm):
         form_template = "common_form.html"
 
 
+class EquipmentTypesForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(EquipmentTypesForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    class Meta:
+        model = CM.EQUIPMENT_TYPES.model
+        fields = '__all__'
+
+
 class EquipmentPositionsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentPositionsForm, self).__init__(*args, **kwargs)
@@ -128,7 +137,7 @@ class WorldAreasForm(ObjectsForm):
         choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
-        self.fields['background'] = ImageField(required=False)
+        self.fields['background'] = ImageField(image_type="background", required=False)
 
         localize_form_fields(self)
 
@@ -150,9 +159,9 @@ class WorldRoomsForm(ObjectsForm):
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
         self.fields['location'] = forms.ChoiceField(choices=choices)
 
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
-        self.fields['background'] = ImageField(required=False)
+        self.fields['background'] = ImageField(image_type="background", required=False)
 
         localize_form_fields(self)
 
@@ -223,7 +232,7 @@ class WorldObjectsForm(ObjectsForm):
         choices = [(r.key, r.name + " (" + r.key + ")") for r in rooms]
         self.fields['location'] = LocationField(choices=choices)
 
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
 
@@ -253,7 +262,7 @@ class WorldNPCsForm(ObjectsForm):
         self.fields['model'] = forms.ChoiceField(choices=choices, required=False)
         
         # NPC's icon
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
 
@@ -367,7 +376,7 @@ class CommonObjectsForm(ObjectsForm):
         choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
 
@@ -384,7 +393,7 @@ class FoodsForm(ObjectsForm):
         choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
         FOOD_ATTRIBUTES_INFO.set_form_fields(self)
@@ -408,7 +417,7 @@ class SkillBooksForm(ObjectsForm):
         self.fields['skill'] = forms.ChoiceField(choices=choices)
         
         # icons
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
 
@@ -479,7 +488,7 @@ class CommonCharacterForm(ObjectsForm):
         choices.extend([(model_key, model_key) for model_key in model_keys])
         self.fields['model'] = forms.ChoiceField(choices=choices, required=False)
         
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
 
@@ -534,7 +543,7 @@ class ShopsForm(ObjectsForm):
         choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
         
         localize_form_fields(self)
         
@@ -602,7 +611,7 @@ class SkillsForm(ObjectsForm):
         choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
         self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
         
         choices = [("", "---------")]
         objects = CM.SKILL_TYPES.objects.all()
@@ -760,7 +769,7 @@ class EquipmentsForm(ObjectsForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
         
         localize_form_fields(self)
         EQUIPMENT_ATTRIBUTES_INFO.set_form_fields(self)
@@ -868,7 +877,7 @@ class DialogueSentencesForm(forms.ModelForm):
         self.fields['dialogue'] = forms.ChoiceField(choices=choices)
 
         # dialogue's icon
-        self.fields['icon'] = IconField(required=False)
+        self.fields['icon'] = ImageField(image_type="icon", required=False)
         
         choices = [("", "---------")]
         objects = CM.QUESTS.objects.all()
@@ -910,6 +919,11 @@ class LocalizedStringsForm(forms.ModelForm):
 class ImageResourcesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ImageResourcesForm, self).__init__(*args, **kwargs)
+
+        choices = [("background", "background"),
+                   ("icon", "icon")]
+        self.fields['type'] = forms.ChoiceField(choices=choices, required=False)
+
         localize_form_fields(self)
 
     class Meta:

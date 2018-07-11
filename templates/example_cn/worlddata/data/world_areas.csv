@@ -1,4 +1,4 @@
 key,typeclass,name,desc,background,background_point,corresp_map_pos
 area_intro,AREA,起始界面,,,,
 area_hole,AREA,未知区域,,,,
-area_park,AREA,公园,,image/image/park_map.png,"(450,270)","(0,8)"
+area_park,AREA,公园,,image/background/park_map.png,"(450,270)","(0,8)"

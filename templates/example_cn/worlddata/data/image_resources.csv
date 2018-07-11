@@ -1,6 +1,6 @@
 resource,type,image_width,image_height
-image/image/street.jpg,image,499,280
-image/image/park_map.png,image,800,600
+image/background/street.jpg,image,499,280
+image/background/park_map.png,image,800,600
 image/icon/player.png,icon,60,60
 image/icon/guard.png,icon,60,60
 image/icon/club.png,icon,60,60

@@ -37,25 +37,15 @@ controller = {
         var upload_images = false;
         controller.file_fields = [];
 
-        var icon_fields = $(".icon-input-control");
-        for (var i = 0; i < icon_fields.length; i++) {
-            var file_obj = icon_fields[i].files[0];
-            if (typeof (file_obj) != "undefined" && file_obj.size > 0) {
-                upload_images = true;
-                var name = $(icon_fields[i]).data("field_name");
-                controller.file_fields.push(name);
-                service.uploadImage(file_obj, name, "icon", controller.uploadSuccess(name), controller.uploadFailed);
-            }
-        }
-
         var image_fields = $(".image-input-control");
         for (var i = 0; i < image_fields.length; i++) {
             var file_obj = image_fields[i].files[0];
             if (typeof (file_obj) != "undefined" && file_obj.size > 0) {
                 upload_images = true;
+                var image_type = $(image_fields[i]).data("image_type");
                 var name = $(image_fields[i]).data("field_name");
                 controller.file_fields.push(name);
-                service.uploadImage(file_obj, name, "image", controller.uploadSuccess(name), controller.uploadFailed);
+                service.uploadImage(file_obj, name, image_type, controller.uploadSuccess(name), controller.uploadFailed);
             }
         }
 
@@ -129,15 +119,11 @@ controller = {
             var value = fields[i].value;
 
             var controller;
-
             if (type == "Location") {
                 controller = this.createAreaSelect(name, label, value, help_text, this.areas);
             }
-            else if (type == "Icon") {
-                controller = this.createIconInput(name, label, value, help_text);
-            }
             else if (type == "Image") {
-                controller = this.createImageInput(name, label, value, help_text);
+                controller = this.createImageInput(fields[i].image_type, name, label, value, help_text);
             }
             else if (type == "Hidden") {
                 controller = this.createHiddenInput(name, label, value, help_text);
@@ -360,44 +346,18 @@ controller = {
         return this.createControlGroup(name, ctrl, label, help_text);
     },
 
-    createIconInput: function(name, label, value, help_text) {
+    createImageInput: function(image_type, name, label, value, help_text) {
         var ctrl = $("<div>");
 
         var image = $("<img>")
-            .addClass("img-icon")
-            .attr("id", "image-" + name)
-            .appendTo(ctrl);
-
-        var input = $("<input>")
-            .addClass("form-control icon-input-control")
-            .attr("type", "file")
-            .data("field_name", name)
-            .appendTo(ctrl);
-
-        var resource = $("<input>")
-            .addClass("editor-control")
-            .attr("type", "hidden")
-            .appendTo(ctrl);
-
-        if (value) {
-            image.attr("src", CONFIG.resource_url + value);
-            resource.val(value);
-        }
-
-        return this.createControlGroup(name, ctrl, label, help_text);
-    },
-
-    createImageInput: function(name, label, value, help_text) {
-        var ctrl = $("<div>");
-
-        var image = $("<img>")
-            .addClass("img-image")
+            .addClass("image-" + image_type)
             .attr("id", "image-" + name)
             .appendTo(ctrl);
 
         var input = $("<input>")
             .addClass("form-control image-input-control")
             .attr("type", "file")
+            .data("image_type", image_type)
             .data("field_name", name)
             .appendTo(ctrl);
 
