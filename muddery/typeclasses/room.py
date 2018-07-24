@@ -197,3 +197,8 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
         else:
             return "things"
 
+    def get_event_trigger_types(self):
+        """
+        Get an object's available event triggers.
+        """
+        return [defines.EVENT_TRIGGER_ARRIVE]

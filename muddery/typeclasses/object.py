@@ -565,6 +565,13 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         if self.action:
             commands = [{"name":self.action, "cmd":"action", "args":self.dbref}]
         return commands
+
+    @staticmethod
+    def get_event_trigger_types(self):
+        """
+        Get an object's available event triggers.
+        """
+        return [defines.EVENT_TRIGGER_ACTION]
         
     def do_action(self, caller):
         # called when caller act to self.

@@ -22,6 +22,8 @@ class TypeclassSet(object):
     def __init__(self):
         self.module_dict = {}
         self.class_dict = {}
+        self.trigger_dict = {}
+
         self.all_loaded = False
         self.match_class = re.compile(r'^class\s+(\w+)\s*.*$')
         self.match_key = re.compile(r""" {4}typeclass_key\s*=\s*("|')(.+)("|')\s*$""")
@@ -77,7 +79,9 @@ class TypeclassSet(object):
         for key in self.module_dict:
             if self.class_dict.has_key(key):
                 continue
-            self.class_dict[key] = class_from_module(self.module_dict[key])
+            cls = class_from_module(self.module_dict[key])
+            self.class_dict[key] = cls
+            self.trigger_dict[key] = cls.get_event_trigger_types()
 
     def get(self, key):
         """
@@ -92,6 +96,7 @@ class TypeclassSet(object):
                     logger.log_infomsg("Typeclass %s is replaced by %s." % (key, cls))
 
             self.class_dict[key] = cls
+            self.trigger_dict[key] = cls.get_event_trigger_types()
             return cls
 
         logger.log_errmsg("Can not find typeclass key: %s." % key)
@@ -119,14 +124,11 @@ class TypeclassSet(object):
 
         return typeclasses
 
-    def get_event_triggers(self):
+    def get_trigger_types(self, key):
         """
-        Get every object's event triggers.
-
-        Return:
-            (dict) event triggers
+        Get a typeclass's trigger types.
         """
-        return {}
+        return self.trigger_dict.get(key, [])
 
 
 TYPECLASS_SET = TypeclassSet()

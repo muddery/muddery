@@ -1050,7 +1050,7 @@ class event_data(models.Model):
     key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
     # the readable name of the event
-    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+    name = models.CharField(max_length=NAME_LENGTH, unique=True)
 
     # trigger's relative object's key
     trigger_obj = models.CharField(max_length=KEY_LENGTH, db_index=True)

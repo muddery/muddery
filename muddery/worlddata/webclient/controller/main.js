@@ -37,8 +37,9 @@ controller = {
 
     onLeftMenu: function(e) {
         var table = $(this).data("table");
+        var editor = $(this).data("editor");
         if (table) {
-            controller.showTable(table);
+            controller.showTable(table, editor);
             return;
         }
 
@@ -119,8 +120,8 @@ controller = {
 	    }
     },
 
-    showTable: function(table_name) {
-        var url = "common_table.html?table=" + table_name;
+    showTable: function(table_name, editor_type) {
+        var url = "common_table.html?table=" + table_name + "&editor=" + editor_type;
  
         var table_box = $("#table-box");
         var editor_box = $("#editor-box");
@@ -165,7 +166,7 @@ controller = {
         this.setFrameSize();
     },
 
-    editRecord: function(table_name, record_id) {
+    editRecord: function(editor_type, table_name, record_id) {
         var url = "editor.html?table=" + table_name;
         if (record_id) {
             url += "&record=" + record_id;

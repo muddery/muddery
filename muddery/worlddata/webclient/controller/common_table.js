@@ -1,6 +1,7 @@
 
 controller = {
     init: function() {
+        this.editor_type = getQueryString("editor");
         this.table_name = getQueryString("table");
         this.fields = [];
 
@@ -25,8 +26,9 @@ controller = {
     onEdit: function(e) {
         var record_id = $(this).attr("data-record-id");
         if (record_id) {
+            var editor = controller.editor_type;
             var table = controller.table_name;
-            window.parent.controller.editRecord(table, record_id);
+            window.parent.controller.editRecord(editor, table, record_id);
         }
     },
 

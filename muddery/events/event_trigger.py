@@ -20,12 +20,14 @@ class EventTrigger(object):
     """
     Trigger an event.
     """
+
+    # available trigger types
     triggers = [
         defines.EVENT_TRIGGER_ARRIVE,   # at attriving a room. object: room_id
         defines.EVENT_TRIGGER_KILL,     # caller kills one. object: dead_one_id
         defines.EVENT_TRIGGER_DIE,      # caller die. object: killer_id
-        defines.EVENT_TRIGGER_TRAVERSE, # caller die. object: killer_id
-        defines.EVENT_TRIGGER_ACTION,   # before traverse an exit. object: exit_id
+        defines.EVENT_TRIGGER_TRAVERSE, # before traverse an exit. object: exit_id
+        defines.EVENT_TRIGGER_ACTION,   # when a character act to an object. object_id: 
     ]
 
     def __init__(self, owner):
@@ -156,3 +158,4 @@ class EventTrigger(object):
         """
         triggered = self.trigger(defines.EVENT_TRIGGER_ACTION, character, self.owner)
         return not triggered
+

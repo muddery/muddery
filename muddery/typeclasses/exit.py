@@ -96,6 +96,12 @@ class MudderyExit(TYPECLASS("OBJECT"), DefaultExit):
         """
         traversing_object.msg({"alert": "You cannot go there."})
 
+    def get_event_trigger_types(self):
+        """
+        Get an object's available event triggers.
+        """
+        return [defines.EVENT_TRIGGER_TRAVERSE]
+
     def get_name(self):
         """
         Get exit's name.

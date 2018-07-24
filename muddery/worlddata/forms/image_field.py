@@ -27,3 +27,4 @@ class ImageField(forms.CharField):
              (string) image type.
         """
         return self.image_type
+

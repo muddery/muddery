@@ -258,6 +258,13 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         return info
 
+    def get_event_trigger_types(self):
+        """
+        Get an object's available event triggers.
+        """
+        return [defines.EVENT_TRIGGER_KILL,
+                defines.EVENT_TRIGGER_DIE]
+
     def change_status(self, increments):
         """
         Change the value of specified status.
