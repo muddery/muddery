@@ -105,6 +105,10 @@ controller = {
             controller.areas = data.areas;
         }
         controller.setFields(data.fields);
+
+        if (data.hasOwnProperty("events")) {
+            controller.setEvents(data.events);
+        }
     },
 
     setFields: function(fields) {
@@ -372,6 +376,9 @@ controller = {
         }
 
         return this.createControlGroup(name, ctrl, label, help_text);
+    },
+
+    setEvents: function(events) {
     },
 
     exit: function() {

@@ -119,6 +119,15 @@ class TypeclassSet(object):
 
         return typeclasses
 
+    def get_event_triggers(self):
+        """
+        Get every object's event triggers.
+
+        Return:
+            (dict) event triggers
+        """
+        return {}
+
 
 TYPECLASS_SET = TypeclassSet()
 TYPECLASS = TYPECLASS_SET.get

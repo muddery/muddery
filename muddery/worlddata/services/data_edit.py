@@ -10,7 +10,10 @@ from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.dao import general_query_mapper
 from muddery.worlddata.dao import common_mappers as CM
+from muddery.worlddata.dao.event_mapper import get_object_event
 from muddery.mappings.form_set import FORM_SET
+from muddery.mappings.typeclass_set import TYPECLASS_SET
+from muddery.worlddata.forms.default_forms import ObjectsForm
 from muddery.worlddata.forms.location_field import LocationField
 from muddery.worlddata.forms.image_field import ImageField
 
@@ -82,6 +85,12 @@ def query_form(table_name, record_id=None):
 
     if has_location:
         data["areas"] = query_areas()
+
+    if isinstance(form, ObjectsForm):
+        data["events"] = []
+        if record:
+            events = get_object_event(record.key)
+            data["events"] = [e for e in events]
 
     return data
 
