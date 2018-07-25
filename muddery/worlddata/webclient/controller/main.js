@@ -167,7 +167,14 @@ controller = {
     },
 
     editRecord: function(editor_type, table_name, record_id) {
-        var url = "editor.html?table=" + table_name;
+        var url = "";
+        if (editor_type == "object") {
+            url = "object_editor.html?table=" + table_name;
+        }
+        else {
+            url = "editor.html?table=" + table_name;
+        }
+
         if (record_id) {
             url += "&record=" + record_id;
         }

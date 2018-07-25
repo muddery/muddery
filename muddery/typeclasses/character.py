@@ -26,6 +26,7 @@ from muddery.worlddata.dao.character_models_mapper import CHARACTER_MODELS
 from muddery.worlddata.dao.default_skills_mapper import DEFAULT_SKILLS
 from muddery.utils.builder import build_object
 from muddery.utils.loot_handler import LootHandler
+from muddery.utils import defines
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
 from muddery.utils.utils import search_obj_data_key
@@ -258,7 +259,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         return info
 
-    def get_event_trigger_types(self):
+    @classmethod
+    def get_event_trigger_types(cls):
         """
         Get an object's available event triggers.
         """

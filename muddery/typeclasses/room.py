@@ -9,6 +9,7 @@ import ast
 import traceback
 from django.conf import settings
 from django.apps import apps
+from muddery.utils import defines
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.dao.image_resources_mapper import IMAGE_RESOURCES
 from muddery.mappings.typeclass_set import TYPECLASS
@@ -197,7 +198,8 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
         else:
             return "things"
 
-    def get_event_trigger_types(self):
+    @classmethod
+    def get_event_trigger_types(cls):
         """
         Get an object's available event triggers.
         """

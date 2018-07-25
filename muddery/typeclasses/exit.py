@@ -12,6 +12,7 @@ from __future__ import print_function
 import traceback
 from muddery.utils import utils
 from muddery.statements.statement_handler import STATEMENT_HANDLER
+from muddery.utils import defines
 from muddery.utils.localized_strings_handler import _
 from muddery.mappings.typeclass_set import TYPECLASS
 from evennia.utils import logger
@@ -96,7 +97,8 @@ class MudderyExit(TYPECLASS("OBJECT"), DefaultExit):
         """
         traversing_object.msg({"alert": "You cannot go there."})
 
-    def get_event_trigger_types(self):
+    @classmethod
+    def get_event_trigger_types(cls):
         """
         Get an object's available event triggers.
         """

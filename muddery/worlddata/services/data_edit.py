@@ -90,7 +90,13 @@ def query_form(table_name, record_id=None):
         data["events"] = []
         if record:
             events = get_object_event(record.key)
-            data["events"] = [e for e in events]
+            data["events"] = [{"key": e.key,
+                               "name": e.name,
+                               "trigger_type": e.trigger_type,
+                               "event_type": e.type,
+                               "once": e.once,
+                               "odds": e.odds,
+                               } for e in events]
 
     return data
 

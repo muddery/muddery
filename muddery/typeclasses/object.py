@@ -21,6 +21,7 @@ from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.events.event_trigger import EventTrigger
 from muddery.utils.data_field_handler import DataFieldHandler
 from muddery.utils import utils
+from muddery.utils import defines
 from muddery.utils.exception import MudderyError
 from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.localized_strings_handler import _
@@ -566,8 +567,8 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             commands = [{"name":self.action, "cmd":"action", "args":self.dbref}]
         return commands
 
-    @staticmethod
-    def get_event_trigger_types(self):
+    @classmethod
+    def get_event_trigger_types(cls):
         """
         Get an object's available event triggers.
         """
