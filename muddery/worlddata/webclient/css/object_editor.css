@@ -1,0 +1,13 @@
+
+.event-title {
+    display: inline-block;
+}
+
+.event-table {
+    border: 1px solid #000;
+}
+
+.event-table td, .event-table th {
+    padding: 2px 5px;
+    border: 1px solid #000;
+}

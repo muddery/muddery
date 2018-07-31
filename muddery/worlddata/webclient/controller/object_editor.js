@@ -109,6 +109,8 @@ controller = {
         if (data.hasOwnProperty("events")) {
             controller.setEvents(data.events);
         }
+
+        $(window).resize();
     },
 
     setFields: function(fields) {
@@ -379,7 +381,20 @@ controller = {
     },
 
     setEvents: function(events) {
+        var table = $(".event-table");
+        if (events.length > 0) {
+            table.find("tr:not(:first)").remove();
+        }
 
+        for (var i = 0; i < events.length; i++) {
+            $("<tr>")
+                .append($("<td>").text(events[i].trigger_type))
+                .append($("<td>").text(events[i].event_type))
+                .append($("<td>").text(events[i].one_time))
+                .append($("<td>").text(events[i].odds))
+                .append($("<td>").text(events[i].condition))
+                .appendTo(table);
+        }
     },
 
     exit: function() {

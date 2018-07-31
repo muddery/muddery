@@ -1049,9 +1049,6 @@ class event_data(models.Model):
     # event's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
-    # the readable name of the event
-    name = models.CharField(max_length=NAME_LENGTH, unique=True)
-
     # trigger's relative object's key
     trigger_obj = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
@@ -1063,8 +1060,8 @@ class event_data(models.Model):
     # event's type
     type = models.CharField(max_length=KEY_LENGTH)
 
-    # This event can only trigger once.
-    once = models.BooleanField(blank=True, default=False)
+    # This event can only trigger one time.
+    one_time = models.BooleanField(blank=True, default=False)
 
     # The odds of this event.
     odds = models.FloatField(blank=True, default=1.0)

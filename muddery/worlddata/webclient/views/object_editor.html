@@ -10,6 +10,7 @@
         <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
         <link href="../css/bootstrap-table.min.css" rel="stylesheet" type="text/css" >
         <link href="../css/editor.css" rel="stylesheet" type="text/css" />
+        <link href="../css/object_editor.css" rel="stylesheet" type="text/css" />
     </head>
 
     <body>
@@ -30,15 +31,19 @@
                 </div>
             </fieldset>
         </form>
-        <div>
-            <h4>Events</h4>
-            <table>
+            <h4 class="event-title">Events</h4>
+            <button id="edit-event" type="button" class="btn btn-default">Edit</button>
+            <table class="event-table">
                 <tr>
-                    <th>KEY</th>
-                    <th>NAME</th>
+                    <th>TRIGGER</th>
+                    <th>EVENT</th>
+                    <th>ONE TIME</th>
+                    <th>ODDS</th>
+                    <th>CONDITION</th>
+                    <th></th>
                 </tr>
                 <tr>
-                    <td></td>
+                    <td>Empty</td>
                     <td></td>
                 </tr>
             </table>
