@@ -3,11 +3,14 @@
     display: inline-block;
 }
 
-.event-table {
+#event-table {
     border: 1px solid #000;
+    max-width: 100%;
 }
 
-.event-table td, .event-table th {
+#event-table td, #event-table th {
+    font-weight: normal;
+    word-wrap: break-word;
     padding: 2px 5px;
     border: 1px solid #000;
 }

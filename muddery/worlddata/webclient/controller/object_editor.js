@@ -26,6 +26,13 @@ controller = {
         $("#exit-button").on("click", this.onExit);
         $("#save-record").on("click", this.onSave);
         $("#delete-record").on("click", this.onDelete);
+        $("#add-event").on("click", this.add_event);
+        $("#event-table").on("click", ".edit-row", this.onEditEvent);
+        $("#event-table").on("click", ".delete-row", this.onDeleteEvent);
+    },
+
+    onImageLoad: function() {
+        parent.controller.setFrameSize();
     },
 
     onExit: function() {
@@ -54,6 +61,12 @@ controller = {
         }
     },
 
+    onEditEvent: function(e) {
+    },
+
+    onDeleteEvent: function(e) {
+    },
+
     uploadSuccess: function(field_name) {
         var callback = function(data) {
             for (var i = 0; i < controller.file_fields.length; i++) {
@@ -61,7 +74,9 @@ controller = {
                     controller.file_fields.splice(i, 1);
                     var field = $("#control-" + field_name);
                     field.find(".editor-control").val(data.resource);
-                    field.find("img").attr("src", CONFIG.resource_url + data.resource);
+                    field.find("img")
+                        .attr("src", CONFIG.resource_url + data.resource)
+                        .on("load", controller.onImageLoad);
                     break;
                 }
             }
@@ -111,6 +126,7 @@ controller = {
         }
 
         $(window).resize();
+        parent.controller.setFrameSize();
     },
 
     setFields: function(fields) {
@@ -358,6 +374,7 @@ controller = {
         var image = $("<img>")
             .addClass("image-" + image_type)
             .attr("id", "image-" + name)
+            .on("load", controller.onImageLoad)
             .appendTo(ctrl);
 
         var input = $("<input>")
@@ -381,19 +398,37 @@ controller = {
     },
 
     setEvents: function(events) {
-        var table = $(".event-table");
+        var table = $("#event-table");
         if (events.length > 0) {
             table.find("tr:not(:first)").remove();
         }
 
         for (var i = 0; i < events.length; i++) {
-            $("<tr>")
+            var line = $("<tr>")
                 .append($("<td>").text(events[i].trigger_type))
                 .append($("<td>").text(events[i].event_type))
                 .append($("<td>").text(events[i].one_time))
                 .append($("<td>").text(events[i].odds))
-                .append($("<td>").text(events[i].condition))
-                .appendTo(table);
+                .append($("<td>").text(events[i].condition));
+
+            var operations = $("<td>")
+                .appendTo(line);
+
+            $("<button>")
+                .addClass("btn-link edit-row")
+                .attr("type", "button")
+                .attr("data-event-key", events[i].key)
+                .text("Edit")
+                .appendTo(operations);
+
+            $("<button>")
+                .addClass("btn-link delete-row")
+                .attr("type", "button")
+                .attr("data-event-key", events[i].key)
+                .text("Delete")
+                .appendTo(operations);
+
+            line.appendTo(table);
         }
     },
 
