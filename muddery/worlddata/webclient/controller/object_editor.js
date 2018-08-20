@@ -432,6 +432,10 @@ controller = {
         }
     },
 
+    add_event: function(e) {
+        var table = "event_data";
+    },
+
     exit: function() {
         window.parent.controller.showTable(this.table_name);
     },

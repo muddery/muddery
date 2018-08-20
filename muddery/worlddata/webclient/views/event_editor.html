@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+        <meta name="HandheldFriendly" content="True" />
+        <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="../css/bootstrap-table.min.css" rel="stylesheet" type="text/css" >
+        <link href="../css/editor.css" rel="stylesheet" type="text/css" />
+    </head>
+
+    <body>
+        <form class="form-horizontal">
+            <fieldset>
+                <legend id="legend">
+                    <div id="form-name" class="pull-left">
+                    </div>
+                    <div class="pull-right">
+                        <button id="exit-button" type="button" class="btn btn-default right hidden">Back</button>
+                        <button id="save-record" type="button" class="btn btn-success right hidden">Save</button>
+                        <button id="delete-record" type="button" class="btn btn-danger right hidden">Delete</button>
+                    </div>
+                </legend>
+                <div id="form-message" class="hidden">
+                </div>
+                <div id="fields">
+                </div>
+            </fieldset>
+        </form>
+        <script src="../libs/jquery-3.2.1.min.js"></script>
+        <script src="../libs/bootstrap.min.js"></script>
+        <script src="../config.js"></script>
+        <script src="../service/service.js"></script>
+        <script src="../utils/utils.js"></script>
+        <script src="../utils/fields.js"></script>
+        <script src="../controller/event_editor.js"></script>
+    </body>
+
+</html>

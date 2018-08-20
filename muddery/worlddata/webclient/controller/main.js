@@ -146,6 +146,10 @@ controller = {
         $("#table-box").show();
     },
 
+    pushContent: function(name, url) {
+        $("#navigate-bar").append();
+    },
+
     showPage: function(page) {
         var url = page + ".html";
  
