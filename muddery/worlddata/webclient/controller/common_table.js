@@ -19,8 +19,9 @@ controller = {
     },
 
     onAddRecord: function(e) {
+        var editor = controller.editor_type;
         var table = controller.table_name;
-        window.parent.controller.editRecord(table);
+        window.parent.controller.editRecord(editor, table);
     },
 
     onEdit: function(e) {

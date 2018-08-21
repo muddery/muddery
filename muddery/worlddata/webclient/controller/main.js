@@ -1,5 +1,6 @@
 
 controller = {
+
     init: function() {
         this.login = false;
         this.bindEvents();
@@ -36,18 +37,22 @@ controller = {
     },
 
     onLeftMenu: function(e) {
+        var name = $(this).text();
         var table = $(this).data("table");
         var editor = $(this).data("editor");
+        var page = $(this).data("page");
+        var url = "";
+
         if (table) {
-            controller.showTable(table, editor);
-            return;
+            // Set table editor.
+            url = "common_table.html?table=" + table + "&editor=" + editor;
+        }
+        else if (page) {
+            // Set actions page.
+            url = page + ".html";
         }
 
-        var page = $(this).data("page");
-        if (page) {
-            controller.showPage(page);
-            return;
-        }
+        controller.setPage(name, url, 0);
     },
 
     onMenuPanel: function(e) {
@@ -120,84 +125,102 @@ controller = {
 	    }
     },
 
-    showTable: function(table_name, editor_type) {
-        var url = "common_table.html?table=" + table_name + "&editor=" + editor_type;
- 
-        var table_box = $("#table-box");
-        var editor_box = $("#editor-box");
-        var page_box = $("#page-box");
+    setPage: function(name, url, level) {
+        // Set navigate bar.
+        var selector = ">";
+        if (level > 0) {
+            selector += ":gt(" + (level - 1) + ")";
+        }
+        $("#navigate-bar" + selector).remove();
+        $("#navigate-bar>").removeClass("active");
 
-        table_box.empty();
+        var tab = $("<li>")
+            .addClass("active")
+            .append($("<a>")
+                .attr("href", "javascript:void(0)")
+                .attr("data-toggle", "tab")
+                .text(name)
+                .on('show.bs.tab', controller.onTabSelected));
+        $("#navigate-bar").append(tab);
 
-        $("<iframe>")
-            .addClass("content-frame")
-            .attr("src", url)
-            .appendTo(table_box);
-
-        editor_box.hide();
-        page_box.hide();
-        table_box.show();
-        this.setFrameSize();
-    },
-
-    showTableView: function() {
-        $("#editor-box").hide();
-        $("#page-box").hide();
-        $("#table-box").show();
-    },
-
-    pushContent: function(name, url) {
-        $("#navigate-bar").append();
-    },
-
-    showPage: function(page) {
-        var url = page + ".html";
- 
-        var table_box = $("#table-box");
-        var editor_box = $("#editor-box");
-        var page_box = $("#page-box");
-
-        page_box.empty();
+        // Add page.
+        $("#contents" + selector).remove();
+        $("#contents>").hide();
 
         $("<iframe>")
             .addClass("content-frame")
             .attr("src", url)
-            .appendTo(page_box);
+            .appendTo($("#contents"));
 
-        editor_box.hide();
-        table_box.hide();
-        page_box.show();
         this.setFrameSize();
     },
 
-    editRecord: function(editor_type, table_name, record_id) {
+    pushPage: function(name, url) {
+        // Set navigate bar.
+        $("#navigate-bar>").removeClass("active");
+
+        var tab = $("<li>")
+            .addClass("active")
+            .append($("<a>")
+                .attr("href", "javascript:void(0)")
+                .attr("data-toggle", "tab")
+                .text(name)
+                .on('show.bs.tab', controller.onTabSelected));
+        $("#navigate-bar").append(tab);
+
+        // Add page.
+        $("#contents>").hide();
+
+        $("<iframe>")
+            .addClass("content-frame")
+            .attr("src", url)
+            .appendTo($("#contents"));
+
+        this.setFrameSize();
+    },
+
+    // Pop last page.
+    popPage: function() {
+        $("#navigate-bar>:last").remove();
+        $("#contents>:last").remove();
+
+        $("#navigate-bar>:last").addClass("active");
+        $("#contents>:last").show();
+    },
+
+    onTabSelected: function(e) {
+        // Do not act.
+        e.preventDefault();
+    },
+
+    editRecord: function(editor_type, table_name, record_id, args) {
+        var name = "";
         var url = "";
         if (editor_type == "object") {
             url = "object_editor.html?table=" + table_name;
+        }
+        else if (editor_type == "event") {
+            url = "event_editor.html?table=" + table_name;
         }
         else {
             url = "editor.html?table=" + table_name;
         }
 
         if (record_id) {
+            name = "Edit " + table_name;
             url += "&record=" + record_id;
         }
+        else {
+            name = "Add " + table_name;
+        }
 
-        var table_box = $("#table-box");
-        var editor_box = $("#editor-box");
-        var page_box = $("#page-box");
+        if (args) {
+            for (key in args) {
+                url += "&" + key + "=" + args[key];
+            }
+        }
 
-        editor_box.empty();
-
-        $("<iframe>")
-            .addClass("content-frame")
-            .attr("src", url)
-            .appendTo(editor_box);
-
-        table_box.hide();
-        page_box.hide();
-        editor_box.show();
-        this.setFrameSize();
+        controller.pushPage(name, url);
     },
 
     confirmApply: function() {

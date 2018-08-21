@@ -1,5 +1,5 @@
 
-fields = {
+field_creator = {
     createControlGroup: function(name, ctrl, label, help_text) {
         var group = $("<div>")
             .addClass("control-group")

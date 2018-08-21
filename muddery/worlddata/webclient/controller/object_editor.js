@@ -1,5 +1,10 @@
 
 controller = {
+    table_name: "",
+    record_id: "",
+    object_key: "",
+    fields: [],
+
     areas: {},
 
     file_fields: [],
@@ -140,24 +145,28 @@ controller = {
             var help_text = fields[i].help_text;
             var value = fields[i].value;
 
+            if (name == "key") {
+                this.object_key = value;
+            }
+
             var controller;
             if (type == "Location") {
-                controller = this.createAreaSelect(name, label, value, help_text, this.areas);
+                controller = field_creator.createAreaSelect(name, label, value, help_text, this.areas);
             }
             else if (type == "Image") {
-                controller = this.createImageInput(fields[i].image_type, name, label, value, help_text);
+                controller = field_creator.createImageInput(fields[i].image_type, name, label, value, help_text);
             }
             else if (type == "Hidden") {
-                controller = this.createHiddenInput(name, label, value, help_text);
+                controller = field_creator.createHiddenInput(name, label, value, help_text);
             }
             else if (type == "TextInput") {
-                controller = this.createTextInput(name, label, value, help_text);
+                controller = field_creator.createTextInput(name, label, value, help_text);
             }
             else if (type == "NumberInput") {
-                controller = this.createNumberInput(name, label, value, help_text);
+                controller = field_creator.createNumberInput(name, label, value, help_text);
             }
             else if (type == "Textarea") {
-                controller = this.createTextArea(name, label, value, help_text);
+                controller = field_creator.createTextArea(name, label, value, help_text);
             }
             else if (type == "CheckboxInput") {
                 if (value) {
@@ -165,10 +174,10 @@ controller = {
                         value = false;
                     }
                 }
-                controller = this.createCheckBox(name, label, value, help_text);
+                controller = field_creator.createCheckBox(name, label, value, help_text);
             }
             else if (type == "Select") {
-                controller = this.createSelect(name, label, value, help_text, fields[i].choices);
+                controller = field_creator.createSelect(name, label, value, help_text, fields[i].choices);
             }
 
             if (controller) {
@@ -179,6 +188,7 @@ controller = {
         window.parent.controller.setFrameSize();
     },
 
+    /*
     createControlGroup: function(name, ctrl, label, help_text) {
         var group = $("<div>")
             .addClass("control-group")
@@ -396,6 +406,7 @@ controller = {
 
         return this.createControlGroup(name, ctrl, label, help_text);
     },
+    */
 
     setEvents: function(events) {
         var table = $("#event-table");
@@ -433,15 +444,24 @@ controller = {
     },
 
     add_event: function(e) {
+        if (!controller.object_key) {
+            alert("You should save this object first.");
+            return;
+        }
+
         var table = "event_data";
+        var args = {
+            trigger: this.object_key,
+        }
+        window.parent.controller.editRecord("event", table);
     },
 
     exit: function() {
-        window.parent.controller.showTable(this.table_name);
+        window.parent.controller.popPage();
     },
 
     exit_no_change: function() {
-        window.parent.controller.showTableView();
+        window.parent.controller.popPage();
     },
 
     saveFields: function() {

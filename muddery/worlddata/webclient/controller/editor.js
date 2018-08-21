@@ -1,5 +1,9 @@
 
 controller = {
+    table_name: "",
+    record_id: "",
+    fields: [],
+
     areas: {},
 
     file_fields: [],
@@ -66,22 +70,22 @@ controller = {
 
             var controller;
             if (type == "Location") {
-                controller = fields.createAreaSelect(name, label, value, help_text, this.areas);
+                controller = field_creator.createAreaSelect(name, label, value, help_text, this.areas);
             }
             else if (type == "Image") {
-                controller = fields.createImageInput(fields[i].image_type, name, label, value, help_text);
+                controller = field_creator.createImageInput(fields[i].image_type, name, label, value, help_text);
             }
             else if (type == "Hidden") {
-                controller = fields.createHiddenInput(name, label, value, help_text);
+                controller = field_creator.createHiddenInput(name, label, value, help_text);
             }
             else if (type == "TextInput") {
-                controller = fields.createTextInput(name, label, value, help_text);
+                controller = field_creator.createTextInput(name, label, value, help_text);
             }
             else if (type == "NumberInput") {
-                controller = fields.createNumberInput(name, label, value, help_text);
+                controller = field_creator.createNumberInput(name, label, value, help_text);
             }
             else if (type == "Textarea") {
-                controller = fields.createTextArea(name, label, value, help_text);
+                controller = field_creator.createTextArea(name, label, value, help_text);
             }
             else if (type == "CheckboxInput") {
                 if (value) {
@@ -89,10 +93,10 @@ controller = {
                         value = false;
                     }
                 }
-                controller = fields.createCheckBox(name, label, value, help_text);
+                controller = field_creator.createCheckBox(name, label, value, help_text);
             }
             else if (type == "Select") {
-                controller = fields.createSelect(name, label, value, help_text, fields[i].choices);
+                controller = field_creator.createSelect(name, label, value, help_text, fields[i].choices);
             }
 
             if (controller) {
@@ -104,11 +108,11 @@ controller = {
     },
 
     exit: function() {
-        window.parent.controller.showTable(this.table_name);
+        window.parent.controller.popPage();
     },
 
     exit_no_change: function() {
-        window.parent.controller.showTableView();
+        window.parent.controller.popPage();
     },
 
     saveFields: function() {
