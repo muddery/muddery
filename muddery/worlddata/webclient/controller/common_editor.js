@@ -2,13 +2,13 @@
 /*
  * Derive from the base class.
  */
-EventEditor = function() {
+CommonEditor = function() {
 	Editor.call(this);
 
     this.trigger_obj = "";
 }
 
-EventEditor.prototype = prototype(BaseEditor.prototype);
+EventEditor.prototype = prototype(Editor.prototype);
 EventEditor.prototype.constructor = EventEditor;
 
 EventEditor.prototype.init = function() {

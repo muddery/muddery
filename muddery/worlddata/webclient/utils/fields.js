@@ -161,7 +161,7 @@ field_creator = {
             }
         }
         select_area.appendTo(ctrl);
-        select_area.on("change", this.onAreaChange);
+        select_area.on("change", controller.onAreaChange);
 
         if (!selected_area) {
             selected_area = first_area;
