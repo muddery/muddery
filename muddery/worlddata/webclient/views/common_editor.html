@@ -10,7 +10,6 @@
         <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
         <link href="../css/bootstrap-table.min.css" rel="stylesheet" type="text/css" >
         <link href="../css/common_editor.css" rel="stylesheet" type="text/css" />
-        <link href="../css/object_editor.css" rel="stylesheet" type="text/css" />
     </head>
 
     <body>
@@ -31,38 +30,15 @@
                 </div>
             </fieldset>
         </form>
-        <div>
-            <h4 class="event-title">Events</h4>
-            <button id="add-event" type="button" class="btn btn-default">Add</button>
-            <table id="event-table">
-                <tr>
-                    <th>Trigger</th>
-                    <th>Event</th>
-                    <th>One Time</th>
-                    <th>Odds</th>
-                    <th>Condition</th>
-                    <th>Operations</th>
-                </tr>
-                <tr>
-                    <td>Empty</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </table>
-        </div>
-        <script src="../libs/jquery-3.2.1.min.js"></script>
-        <script src="../libs/bootstrap.min.js"></script>
-        <script src="../config.js"></script>
-        <script src="../service/service.js"></script>
-        <script src="../utils/utils.js"></script>
-        <script src="../utils/fields.js"></script>
-        <script src="../controller/common_editor.js"></script>
-        <script src="../controller/object_editor.js"></script>
+        <script src="../libs/jquery-3.2.1.min.js" type="text/javascript"></script>
+        <script src="../libs/bootstrap.min.js" type="text/javascript"></script>
+        <script src="../config.js" type="text/javascript"></script>
+        <script src="../service/service.js" type="text/javascript"></script>
+        <script src="../utils/utils.js" type="text/javascript"></script>
+        <script src="../utils/fields.js" type="text/javascript"></script>
+        <script src="../controller/editor.js" type="text/javascript"></script>
         <script type="text/javascript">
-            var controller = new ObjectEditor();
+            var controller = new CommonEditor();
             $(document).ready(function() {controller.init()});
         </script>
     </body>

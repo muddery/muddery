@@ -71,14 +71,14 @@ controller = {
             .appendTo(block);
 
         var edit = $("<button>")
-            .addClass("btn-link edit-row")
+            .addClass("btn-xs edit-row")
             .attr("type", "button")
             .attr("data-record-id", row["id"])
             .text("Edit")
             .appendTo(block);
 
         var edit = $("<button>")
-            .addClass("btn-link delete-row")
+            .addClass("btn-xs btn-danger delete-row")
             .attr("type", "button")
             .attr("data-record-id", row["id"])
             .text("Delete")

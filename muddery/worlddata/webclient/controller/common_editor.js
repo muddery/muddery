@@ -1,20 +1,34 @@
 
 /*
- * Derive from the base class.
+ * Get the prototype of the base class.
  */
-CommonEditor = function() {
-	Editor.call(this);
-
-    this.trigger_obj = "";
+prototype = function(base, el) {
+    var Base = function(){};
+    Base.prototype = base;
+    return new Base(el);
 }
 
-EventEditor.prototype = prototype(Editor.prototype);
-EventEditor.prototype.constructor = EventEditor;
 
-EventEditor.prototype.init = function() {
+////////////////////////////////////////
+//
+// The base of view controllers.
+//
+////////////////////////////////////////
+
+/*
+ * The base controller's constructor.
+ */
+CommonEditor = function() {
+    this.table_name = "";
+    this.record_id = "";
+    this.fields = [];
+    this.areas = {};
+    this.file_fields = [];
+}
+
+CommonEditor.prototype.init = function() {
     this.table_name = getQueryString("table");
     this.record_id = getQueryString("record");
-    this.trigger_obj = getQueryString("trigger");
     this.fields = [];
 
     $("#exit-button").removeClass("hidden");
@@ -30,7 +44,54 @@ EventEditor.prototype.init = function() {
     service.queryForm(this.table_name, this.record_id, this.queryFormSuccess, this.queryFormFailed);
 }
 
-EventEditor.prototype.setFields = function(fields) {
+CommonEditor.prototype.bindEvents = function() {
+    $("#exit-button").on("click", this.onExit);
+    $("#save-record").on("click", this.onSave);
+    $("#delete-record").on("click", this.onDelete);
+}
+
+CommonEditor.prototype.onExit = function() {
+    controller.exit_no_change();
+}
+
+CommonEditor.prototype.onSave = function() {
+    controller.saveFields();
+}
+
+CommonEditor.prototype.onDelete = function() {
+    window.parent.controller.confirm("",
+                                     "Delete this record?",
+                                     controller.confirmDelete);
+}
+
+CommonEditor.prototype.onAreaChange = function(e) {
+    var area_key = this.value;
+    var room_area = controller.areas[area_key];
+    var select_room = $(this).parent().find(".select-room");
+    select_room.find("option").remove();
+
+    for (var i = 0; i < room_area.rooms.length; i++) {
+        var room = room_area.rooms[i];
+
+        var option = $("<option>")
+            .text(room[1])
+            .attr("value", room[0])
+            .appendTo(select_room);
+    }
+}
+
+CommonEditor.prototype.queryFormSuccess = function(data) {
+    if (data.hasOwnProperty("areas")) {
+        controller.areas = data.areas;
+    }
+    controller.setFields(data.fields);
+}
+
+CommonEditor.prototype.queryFormFailed = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
+}
+
+CommonEditor.prototype.setFields = function(fields) {
     this.fields = fields;
 
     var container = $("#fields");
@@ -40,15 +101,6 @@ EventEditor.prototype.setFields = function(fields) {
         var name = fields[i].name;
         var help_text = fields[i].help_text;
         var value = fields[i].value;
-
-        // Users can not set the event's key and trigger object.
-        if (name == "key") {
-            type = "Hidden";
-        }
-        else if (name == "trigger_obj") {
-            type = "Hidden";
-            value = this.trigger_obj;
-        }
 
         var controller;
         if (type == "Location") {
@@ -89,10 +141,95 @@ EventEditor.prototype.setFields = function(fields) {
     window.parent.controller.setFrameSize();
 }
 
-var controller = new EventEditor();
+CommonEditor.prototype.exit = function() {
+    window.parent.controller.popPage();
+}
 
-$(document).ready(function() {
-    controller.init();
-});
+CommonEditor.prototype.exit_no_change = function() {
+    window.parent.controller.popPage();
+}
 
+CommonEditor.prototype.saveFields = function() {
+    var values = {};
+    for (var i = 0; i < this.fields.length; i++) {
+        var name = this.fields[i].name;
+        var control = $("#control-" + name + " .editor-control");
+        if (control.length > 0) {
+            if (control.attr("type") == "checkbox") {
+                values[name] = control.prop("checked");
+            }
+            else {
+                // Leave the value blank if it is an empty string.
+                var value = control.val();
+                if (value.length > 0) {
+                    values[name] = value;
+                }
+            }
+        }
+    }
 
+    service.saveForm(values,
+                     this.table_name,
+                     this.record_id,
+                     this.saveFormSuccess,
+                     this.saveFormFailed);
+}
+
+CommonEditor.prototype.saveFormSuccess = function(data) {
+    /*
+    $("#form-message")
+        .text("Save success.")
+        .addClass("message-success")
+        .removeClass("message-error")
+        .removeClass("hidden")
+        .show();
+
+    $(".message-block")
+        .hide();
+    */
+
+    controller.exit();
+}
+
+CommonEditor.prototype.saveFormFailed = function(code, message, data) {
+    if (code == 10006) {    // invalid form
+        $("#form-message")
+            .text("Invalid input.")
+            .addClass("message-error")
+            .removeClass("message-success")
+            .removeClass("hidden")
+            .show();
+
+        $(".message-block")
+            .hide();
+
+        for (var name in data) {
+            $("#control-" + name + " .message-block")
+                .text(data[name])
+                .show();
+        }
+    }
+    else {
+        $("#form-message")
+            .text("Error: [" + code + "] " + message)
+            .addClass("message-error")
+            .removeClass("message-success")
+            .removeClass("hidden")
+            .show();
+
+        $(".message-block")
+            .hide();
+    }
+}
+
+CommonEditor.prototype.confirmDelete = function(e) {
+    window.parent.controller.hide_waiting();
+
+    service.deleteRecord(controller.table_name,
+                         controller.record_id,
+                         controller.deleteSuccess);
+}
+
+CommonEditor.prototype.deleteSuccess = function(data) {
+    controller.exit();
+}

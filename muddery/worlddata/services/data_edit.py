@@ -90,7 +90,8 @@ def query_form(table_name, record_id=None):
         data["events"] = []
         if record:
             events = get_object_event(record.key)
-            data["events"] = [{"key": e.key,
+            data["events"] = [{"id": e.id,
+                               "key": e.key,
                                "trigger_type": e.trigger_type,
                                "event_type": e.type,
                                "one_time": e.one_time,

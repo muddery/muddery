@@ -3,12 +3,12 @@
  * Derive from the base class.
  */
 ObjectEditor = function() {
-	Editor.call(this);
+	CommonEditor.call(this);
 
     this.object_key = "";
 }
 
-ObjectEditor.prototype = prototype(Editor.prototype);
+ObjectEditor.prototype = prototype(CommonEditor.prototype);
 ObjectEditor.prototype.constructor = ObjectEditor;
 
 
@@ -31,7 +31,7 @@ ObjectEditor.prototype.init = function() {
 }
 
 ObjectEditor.prototype.bindEvents = function() {
-    Editor.prototype.bindEvents.call(this);
+    CommonEditor.prototype.bindEvents.call(this);
 
     $("#add-event").on("click", this.add_event);
     $("#event-table").on("click", ".edit-row", this.onEditEvent);
@@ -69,10 +69,44 @@ ObjectEditor.prototype.onSave = function() {
 }
 
 ObjectEditor.prototype.onEditEvent = function(e) {
+    var record_id = $(this).attr("data-event-id");
+    if (record_id) {
+        var editor = "event";
+        var table = "event_data";
+        var args = {
+            trigger: controller.object_key,
+        }
+        window.parent.controller.editRecord(editor, table, record_id, args);
+    }
 }
 
 ObjectEditor.prototype.onDeleteEvent = function(e) {
+    var record_id = $(this).attr("data-event-id");
+    window.parent.controller.confirm("",
+                                     "Delete this record?",
+                                     controller.confirmDelete,
+                                     {record: record_id});
 }
+
+ObjectEditor.prototype.confirmDelete = function(e) {
+    window.parent.controller.hide_waiting();
+
+    var table = controller.table_name;
+    var record_id = e.data.record;
+    controller.deleteRecord(table, record_id);
+},
+
+ObjectEditor.prototype.deleteRecord = function(table, record) {
+    service.deleteRecord(table, record, this.deleteSuccess);
+},
+
+ObjectEditor.prototype.deleteSuccess = function(data) {
+    var record_id = data.record;
+    $("#data-table").bootstrapTable("remove", {
+        field: "id",
+        values: [record_id],
+    });
+},
 
 ObjectEditor.prototype.uploadSuccess = function(field_name) {
     var callback = function(data) {
@@ -101,7 +135,7 @@ ObjectEditor.prototype.uploadFailed = function(code, message, data) {
 }
 
 ObjectEditor.prototype.queryFormSuccess = function(data) {
-    Editor.prototype.queryFormSuccess.call(this, data);
+    CommonEditor.prototype.queryFormSuccess.call(this, data);
 
     if (data.hasOwnProperty("events")) {
         controller.setEvents(data.events);
@@ -116,10 +150,11 @@ ObjectEditor.prototype.setFields = function(fields) {
     for (var i = 0; i < fields.length; i++) {
         if (fields[i].name == "key") {
             this.object_key = fields[i].value;
+            break;
         }
     }
 
-    Editor.prototype.setFields.call(this, fields);
+    CommonEditor.prototype.setFields.call(this, fields);
 }
 
 ObjectEditor.prototype.setEvents = function(events) {
@@ -140,16 +175,16 @@ ObjectEditor.prototype.setEvents = function(events) {
             .appendTo(line);
 
         $("<button>")
-            .addClass("btn-link edit-row")
+            .addClass("btn-xs edit-row")
             .attr("type", "button")
-            .attr("data-event-key", events[i].key)
+            .attr("data-event-id", events[i].id)
             .text("Edit")
             .appendTo(operations);
 
         $("<button>")
-            .addClass("btn-link delete-row")
+            .addClass("btn-xs btn-danger delete-row")
             .attr("type", "button")
-            .attr("data-event-key", events[i].key)
+            .attr("data-event-id", events[i].id)
             .text("Delete")
             .appendTo(operations);
 
@@ -169,9 +204,3 @@ ObjectEditor.prototype.add_event = function(e) {
     }
     window.parent.controller.editRecord("event", table, "", args);
 }
-
-var controller = new ObjectEditor();
-
-$(document).ready(function() {
-    controller.init();
-});

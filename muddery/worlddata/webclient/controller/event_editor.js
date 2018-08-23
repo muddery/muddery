@@ -3,12 +3,12 @@
  * Derive from the base class.
  */
 EventEditor = function() {
-	Editor.call(this);
+	CommonEditor.call(this);
 
     this.trigger_obj = "";
 }
 
-EventEditor.prototype = prototype(BaseEditor.prototype);
+EventEditor.prototype = prototype(CommonEditor.prototype);
 EventEditor.prototype.constructor = EventEditor;
 
 EventEditor.prototype.init = function() {
@@ -88,11 +88,3 @@ EventEditor.prototype.setFields = function(fields) {
 
     window.parent.controller.setFrameSize();
 }
-
-var controller = new EventEditor();
-
-$(document).ready(function() {
-    controller.init();
-});
-
-
