@@ -61,7 +61,8 @@ CommonEditor.prototype.onSave = function() {
 CommonEditor.prototype.onDelete = function() {
     window.parent.controller.confirm("",
                                      "Delete this record?",
-                                     controller.confirmDelete);
+                                     controller.confirmDelete,
+                                     {record: this.record_id});
 }
 
 CommonEditor.prototype.onAreaChange = function(e) {
@@ -80,6 +81,10 @@ CommonEditor.prototype.onAreaChange = function(e) {
     }
 }
 
+CommonEditor.prototype.refresh = function() {
+    service.queryForm(this.table_name, this.record_id, this.queryFormSuccess, this.queryFormFailed);
+}
+
 CommonEditor.prototype.queryFormSuccess = function(data) {
     if (data.hasOwnProperty("areas")) {
         controller.areas = data.areas;
@@ -95,6 +100,8 @@ CommonEditor.prototype.setFields = function(fields) {
     this.fields = fields;
 
     var container = $("#fields");
+    container.children().remove();
+
     for (var i = 0; i < fields.length; i++) {
         var type = fields[i].type;
         var label = fields[i].label;
@@ -142,11 +149,11 @@ CommonEditor.prototype.setFields = function(fields) {
 }
 
 CommonEditor.prototype.exit = function() {
-    window.parent.controller.popPage();
+    window.parent.controller.popPage(true);
 }
 
 CommonEditor.prototype.exit_no_change = function() {
-    window.parent.controller.popPage();
+    window.parent.controller.popPage(false);
 }
 
 CommonEditor.prototype.saveFields = function() {

@@ -180,12 +180,23 @@ controller = {
     },
 
     // Pop last page.
-    popPage: function() {
+    popPage: function(refresh) {
         $("#navigate-bar>:last").remove();
         $("#contents>:last").remove();
 
         $("#navigate-bar>:last").addClass("active");
         $("#contents>:last").show();
+
+        if (refresh) {
+            try {
+                var c = $("#contents>:last")[0];
+                var w = c.contentWindow;
+                var t = w.controller;
+                $("#contents>:last")[0].contentWindow.controller.refresh();
+            }
+            catch(e) {
+            }
+        }
     },
 
     onTabSelected: function(e) {

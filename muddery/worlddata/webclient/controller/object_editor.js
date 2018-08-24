@@ -84,25 +84,21 @@ ObjectEditor.prototype.onDeleteEvent = function(e) {
     var record_id = $(this).attr("data-event-id");
     window.parent.controller.confirm("",
                                      "Delete this record?",
-                                     controller.confirmDelete,
+                                     controller.confirmDeleteEvent,
                                      {record: record_id});
 }
 
-ObjectEditor.prototype.confirmDelete = function(e) {
+ObjectEditor.prototype.confirmDeleteEvent = function(e) {
     window.parent.controller.hide_waiting();
 
     var table = controller.table_name;
     var record_id = e.data.record;
-    controller.deleteRecord(table, record_id);
+    service.deleteRecord(table, record, this.deleteEventSuccess);
 },
 
-ObjectEditor.prototype.deleteRecord = function(table, record) {
-    service.deleteRecord(table, record, this.deleteSuccess);
-},
-
-ObjectEditor.prototype.deleteSuccess = function(data) {
+ObjectEditor.prototype.deleteEventSuccess = function(data) {
     var record_id = data.record;
-    $("#data-table").bootstrapTable("remove", {
+    $("#event-table").bootstrapTable("remove", {
         field: "id",
         values: [record_id],
     });

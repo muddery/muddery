@@ -41,8 +41,35 @@ controller = {
                                          {record: record_id});
     },
 
+    refresh: function() {
+        service.queryTable(this.table_name, this.refreshTableSuccess);
+    },
+
     queryTableSuccess: function(data) {
-        controller.setTable(data);
+        controller.fields = data.fields;
+
+        $("#data-table").bootstrapTable({
+            cache: false,
+            striped: true,
+            pagination: true,
+            pageList: [20, 50, 100],
+            pageSize: 20,
+            sidePagination: "client",
+            columns: controller.parseFields(data.fields),
+            data: controller.parseRows(data.fields, data.records),
+            sortName: "id",
+            sortOrder: "asc",
+            clickToSelect: true,
+            singleSelect: true,
+        });
+
+        window.parent.controller.setFrameSize();
+    },
+
+    refreshTableSuccess: function(data) {
+        $("#data-table").bootstrapTable("load", controller.parseRows(data.fields, data.records));
+
+        window.parent.controller.setFrameSize();
     },
 
     parseFields: function(fields) {
@@ -97,27 +124,6 @@ controller = {
             rows.push(row);
         }
         return rows;
-    },
-    
-    setTable: function(table) {
-        this.fields = table.fields;
-
-        $("#data-table").bootstrapTable({
-            cache: false,
-            striped: true,
-            pagination: true,
-            pageList: [20, 50, 100],
-            pageSize: 20,
-            sidePagination: "client",
-            columns: this.parseFields(table.fields),
-            data: this.parseRows(table.fields, table.records),
-            sortName: "id",
-            sortOrder: "asc",
-            clickToSelect: true,
-            singleSelect: true,
-        });
-
-        window.parent.controller.setFrameSize();
     },
 
     loadData: function(data) {
