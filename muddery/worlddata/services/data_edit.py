@@ -54,7 +54,6 @@ def query_form(table_name, record_id=None):
         "value": record_id if record_id else "",
     })
 
-    has_location = False
     for key, field in form.fields.items():
         info = {
             "name": key,
@@ -72,17 +71,13 @@ def query_form(table_name, record_id=None):
 
         if isinstance(field, LocationField):
             info["type"] = "Location"
-            has_location = True
         elif isinstance(field, ImageField):
             info["type"] = "Image"
             info["image_type"] = field.get_type()
 
         fields.append(info)
 
-    data = {
-        "fields": fields,
-    }
-
+    """
     if has_location:
         data["areas"] = query_areas()
 
@@ -98,8 +93,9 @@ def query_form(table_name, record_id=None):
                                "odds": e.odds,
                                "condition": e.condition,
                                } for e in events]
+    """
 
-    return data
+    return fields
 
 
 def query_areas():
@@ -119,6 +115,24 @@ def query_areas():
             areas[key] = {"name": key, "rooms": [choice]}
     return areas
 
+
+def query_events(object_key):
+    """
+    Query all events of the given object.
+
+    Args:
+        object_key: (string) object' key.
+    """
+    records = get_object_event(object_key)
+    events = [{"id": r.id,
+               "key": r.key,
+               "trigger_type": r.trigger_type,
+               "event_type": r.type,
+               "one_time": r.one_time,
+               "odds": r.odds,
+               "condition": r.condition,
+               } for r in records]
+    return events
 
 def save_form(values, table_name, record_id=None):
     """

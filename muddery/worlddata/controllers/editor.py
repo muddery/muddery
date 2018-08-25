@@ -79,6 +79,42 @@ class query_record(BaseRequestProcesser):
         return success_response(data)
 
 
+class query_areas(BaseRequestProcesser):
+    """
+    Query all available areas.
+
+    Args:
+        args: None
+    """
+    path = "query_areas"
+    name = ""
+
+    def func(self, args, request):
+        data = data_edit.query_areas()
+        return success_response(data)
+
+
+class query_events(BaseRequestProcesser):
+    """
+    Query all events of the given object.
+
+    Args:
+        args:
+            object: (string) object's key
+    """
+    path = "query_events"
+    name = ""
+
+    def func(self, args, request):
+        if ('object' not in args):
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        object_key = args["object"]
+
+        data = data_edit.query_events(object_key)
+        return success_response(data)
+
+
 class query_form(BaseRequestProcesser):
     """
     Query a record of a table.

@@ -131,26 +131,14 @@ ObjectEditor.prototype.uploadFailed = function(code, message, data) {
 }
 
 ObjectEditor.prototype.queryFormSuccess = function(data) {
-    CommonEditor.prototype.queryFormSuccess.call(this, data);
-
-    if (data.hasOwnProperty("events")) {
-        controller.setEvents(data.events);
-    }
-
-    $(window).resize();
-    parent.controller.setFrameSize();
-}
-
-ObjectEditor.prototype.setFields = function(fields) {
-    // Get object's key
-    for (var i = 0; i < fields.length; i++) {
-        if (fields[i].name == "key") {
-            this.object_key = fields[i].value;
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].name == "key") {
+            controller.object_key = data[i].value;
             break;
         }
     }
 
-    CommonEditor.prototype.setFields.call(this, fields);
+    CommonEditor.prototype.queryFormSuccess.call(controller, data);
 }
 
 ObjectEditor.prototype.setEvents = function(events) {

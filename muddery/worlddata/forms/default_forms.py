@@ -37,6 +37,28 @@ def get_all_pocketable_objects():
     return choices
 
 
+def generate_key(form_obj):
+    """
+    Generate a key for a new record.
+
+    Args:
+        form_obj: record's form.
+    """
+    index = 1
+    if form_obj.instance.id:
+        index = int(form_obj.instance.id)
+    else:
+        try:
+            # Get last id.
+            query = form_obj.Meta.model.objects.last()
+            index = int(query.id)
+            index += 1
+        except Exception, e:
+            pass
+
+    return form_obj.instance.__class__.__name__ + "_" + str(index)
+
+
 class ObjectsForm(forms.ModelForm):
     """
     Objects base form.
@@ -47,20 +69,7 @@ class ObjectsForm(forms.ModelForm):
         # check object's key
         key = cleaned_data["key"]
         if not key:
-            # Generate a new key.
-            index = 1
-            if self.instance.id:
-                index = int(self.instance.id)
-            else:
-                try:
-                    # Get last id.
-                    query = self.Meta.model.objects.last()
-                    index = int(query.id)
-                    index += 1
-                except Exception, e:
-                    pass
-
-            cleaned_data["key"] = self.instance.__class__.__name__ + "_" + str(index)
+            cleaned_data["key"] = generate_key(self)
         else:
             # Check the key.
             for model in model_mapper.get_objects_models():
@@ -792,6 +801,14 @@ class EventDataForm(forms.ModelForm):
         self.fields['trigger_type'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
+
+    def clean(self):
+        cleaned_data = super(EventDataForm, self).clean()
+
+        # check object's key
+        key = cleaned_data["key"]
+        if not key:
+            cleaned_data["key"] = generate_key(self)
         
     class Meta:
         model = CM.EVENT_DATA.model

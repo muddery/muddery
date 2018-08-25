@@ -30,16 +30,14 @@ EventEditor.prototype.init = function() {
     service.queryForm(this.table_name, this.record_id, this.queryFormSuccess, this.queryFormFailed);
 }
 
-EventEditor.prototype.setFields = function(fields) {
-    this.fields = fields;
-
+EventEditor.prototype.setFields = function() {
     var container = $("#fields");
-    for (var i = 0; i < fields.length; i++) {
-        var type = fields[i].type;
-        var label = fields[i].label;
-        var name = fields[i].name;
-        var help_text = fields[i].help_text;
-        var value = fields[i].value;
+    for (var i = 0; i < this.fields.length; i++) {
+        var type = this.fields[i].type;
+        var label = this.fields[i].label;
+        var name = this.fields[i].name;
+        var help_text = this.fields[i].help_text;
+        var value = this.fields[i].value;
 
         // Users can not set the event's key and trigger object.
         if (name == "key") {
@@ -78,7 +76,7 @@ EventEditor.prototype.setFields = function(fields) {
             controller = field_creator.createCheckBox(name, label, value, help_text);
         }
         else if (type == "Select") {
-            controller = field_creator.createSelect(name, label, value, help_text, fields[i].choices);
+            controller = field_creator.createSelect(name, label, value, help_text, this.fields[i].choices);
         }
 
         if (controller) {

@@ -1,5 +1,7 @@
 
 controller = {
+    field_length: 20,
+
     init: function() {
         this.editor_type = getQueryString("editor");
         this.table_name = getQueryString("table");
@@ -119,7 +121,11 @@ controller = {
         for (var i = 0; i < records.length; i++) {
             var row = {ID: i + 1};
             for (var j = 0; j < fields.length; j++) {
-                row[fields[j]["name"]] = records[i][j];
+                var value = records[i][j];
+                if (value.length > this.field_length) {
+                    value = value.slice(0, this.field_length + 1) + "...";
+                }
+                row[fields[j]["name"]] = value;
             }
             rows.push(row);
         }

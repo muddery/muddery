@@ -86,35 +86,54 @@ CommonEditor.prototype.refresh = function() {
 }
 
 CommonEditor.prototype.queryFormSuccess = function(data) {
-    if (data.hasOwnProperty("areas")) {
-        controller.areas = data.areas;
+    controller.fields = data;
+
+    var query_areas = false;
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].type == "Location") {
+            query_areas = true;
+            break;
+        }
     }
-    controller.setFields(data.fields);
+
+    if (query_areas) {
+        service.queryAreas(controller.queryAreasSuccess, controller.queryAreasFailed);
+    }
+    else {
+        controller.setFields();
+    }
 }
 
 CommonEditor.prototype.queryFormFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
 }
 
-CommonEditor.prototype.setFields = function(fields) {
-    this.fields = fields;
+CommonEditor.prototype.queryAreasSuccess = function(data) {
+    controller.areas = data;
+    controller.setFields();
+}
 
+CommonEditor.prototype.queryAreasFailed = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
+}
+
+CommonEditor.prototype.setFields = function() {
     var container = $("#fields");
     container.children().remove();
 
-    for (var i = 0; i < fields.length; i++) {
-        var type = fields[i].type;
-        var label = fields[i].label;
-        var name = fields[i].name;
-        var help_text = fields[i].help_text;
-        var value = fields[i].value;
+    for (var i = 0; i < this.fields.length; i++) {
+        var type = this.fields[i].type;
+        var label = this.fields[i].label;
+        var name = this.fields[i].name;
+        var help_text = this.fields[i].help_text;
+        var value = this.fields[i].value;
 
         var controller;
         if (type == "Location") {
             controller = field_creator.createAreaSelect(name, label, value, help_text, this.areas);
         }
         else if (type == "Image") {
-            controller = field_creator.createImageInput(fields[i].image_type, name, label, value, help_text);
+            controller = field_creator.createImageInput(this.fields[i].image_type, name, label, value, help_text);
         }
         else if (type == "Hidden") {
             controller = field_creator.createHiddenInput(name, label, value, help_text);
@@ -137,7 +156,7 @@ CommonEditor.prototype.setFields = function(fields) {
             controller = field_creator.createCheckBox(name, label, value, help_text);
         }
         else if (type == "Select") {
-            controller = field_creator.createSelect(name, label, value, help_text, fields[i].choices);
+            controller = field_creator.createSelect(name, label, value, help_text, this.fields[i].choices);
         }
 
         if (controller) {

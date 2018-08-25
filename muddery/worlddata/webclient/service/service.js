@@ -148,6 +148,10 @@ service = {
         this.sendRequest("query_form", "", args, callback_success, callback_error);
     },
 
+    queryAreas: function(callback_success, callback_error) {
+        this.sendRequest("query_areas", "", {}, callback_success, callback_error);
+    },
+
     saveForm: function(values, table_name, record_id, callback_success, callback_error) {
         var args = {
             values: values,
