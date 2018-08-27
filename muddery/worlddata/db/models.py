@@ -1252,7 +1252,7 @@ class event_attacks(BaseEventData):
 
     # The key of an event.
     # event's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH)
 
     # The key of a character.
     # mob's key
@@ -1273,6 +1273,7 @@ class event_attacks(BaseEventData):
         app_label = "worlddata"
         verbose_name = "Event Mob"
         verbose_name_plural = "Event Mobs"
+        unique_together = ("key", "mob")
 
 
 # ------------------------------------------------------------
@@ -1285,7 +1286,7 @@ class event_dialogues(BaseEventData):
 
     # The key of an event.
     # event's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+    key = models.CharField(max_length=KEY_LENGTH)
 
     # The key of a dialogue.
     # dialogue's key
@@ -1301,7 +1302,8 @@ class event_dialogues(BaseEventData):
         app_label = "worlddata"
         verbose_name = "Event Dialogues"
         verbose_name_plural = "Event Dialogues"
-        
+        unique_together = ("key", "dialogue")
+
         
 # ------------------------------------------------------------
 #

@@ -21,7 +21,7 @@ class query_fields(BaseRequestProcesser):
     Query all fields of a table.
 
     Args:
-        args: None
+        None
     """
     path = "query_fields"
     name = ""
@@ -41,7 +41,7 @@ class query_table(BaseRequestProcesser):
     Query all records of a table.
 
     Args:
-        args: None
+        None
     """
     path = "query_table"
     name = ""
@@ -61,9 +61,8 @@ class query_record(BaseRequestProcesser):
     Query a record of a table.
 
     Args:
-        args:
-            table: (string) table's name
-            record: (string) record's id
+        table: (string) table's name
+        record: (string) record's id
     """
     path = "query_record"
     name = ""
@@ -84,7 +83,7 @@ class query_areas(BaseRequestProcesser):
     Query all available areas.
 
     Args:
-        args: None
+        None
     """
     path = "query_areas"
     name = ""
@@ -99,8 +98,7 @@ class query_events(BaseRequestProcesser):
     Query all events of the given object.
 
     Args:
-        args:
-            object: (string) object's key
+        object: (string) object's key
     """
     path = "query_events"
     name = ""
@@ -115,13 +113,34 @@ class query_events(BaseRequestProcesser):
         return success_response(data)
 
 
+class query_event_data(BaseRequestProcesser):
+    """
+    Query additional data of an event.
+
+    Args:
+        type: (string) event's type
+        event: (string) event's key
+    """
+    path = "query_event_data_form"
+    name = ""
+
+    def func(self, args, request):
+        if ('type' not in args or 'event' not in args):
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        event_type = args["type"]
+        event_key = args["event"]
+
+        data = data_edit.query_event_data(event_type, event_key)
+        return success_response(data)
+
+
 class query_form(BaseRequestProcesser):
     """
     Query a record of a table.
 
     Args:
-        args:
-            table: (string) table's name
+        table: (string) table's name
     """
     path = "query_form"
     name = ""
@@ -142,10 +161,9 @@ class save_form(BaseRequestProcesser):
     Save a form.
 
     Args:
-        args:
-            values: (dict) values to save.
-            table: (string) table's name.
-            record: (string, optional) record's id. If it is empty, add a new record.
+        values: (dict) values to save.
+        table: (string) table's name.
+        record: (string, optional) record's id. If it is empty, add a new record.
     """
     path = "save_form"
     name = ""
@@ -173,7 +191,7 @@ class delete_record(BaseRequestProcesser):
     """
     Delete a record.
 
-    args:
+    Args:
         table: (string) table's name.
         record: (string) record's id.
     """
@@ -196,7 +214,8 @@ class query_tables(BaseRequestProcesser):
     """
     Query all tables' names.
 
-    args: None
+    Args:
+        None
     """
     path = "query_tables"
     name = ""
@@ -210,7 +229,8 @@ class apply_changes(BaseRequestProcesser):
     """
     Query all tables' names.
 
-    args: None
+    Args:
+        None
     """
     path = "apply_changes"
     name = ""
@@ -240,4 +260,3 @@ class apply_changes(BaseRequestProcesser):
             raise MudderyError(ERR.build_world_error, message)
 
         return success_response("success")
-

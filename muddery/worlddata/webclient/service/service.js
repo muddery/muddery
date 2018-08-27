@@ -152,6 +152,19 @@ service = {
         this.sendRequest("query_areas", "", {}, callback_success, callback_error);
     },
 
+    /*  Query an event's additional data's form.
+     *  Args:
+     *      type: (string) event's type.
+     *      event: （string) event's key.
+     */
+    queryEventDataForm: function(type, event, callback_success, callback_error) {
+        var args = {
+            type: type,
+            event: event,
+        };
+        this.sendRequest("query_event_data_form", "", args, callback_success, callback_error);
+    },
+
     saveForm: function(values, table_name, record_id, callback_success, callback_error) {
         var args = {
             values: values,

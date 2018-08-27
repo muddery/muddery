@@ -12,24 +12,6 @@ ObjectEditor.prototype = prototype(CommonEditor.prototype);
 ObjectEditor.prototype.constructor = ObjectEditor;
 
 
-ObjectEditor.prototype.init = function() {
-    this.table_name = getQueryString("table");
-    this.record_id = getQueryString("record");
-    this.fields = [];
-
-    $("#exit-button").removeClass("hidden");
-    $("#save-record").removeClass("hidden");
-    if (this.record_id) {
-        $("#delete-record").removeClass("hidden");
-    }
-
-    $("#form-name").text(this.table_name);
-
-    this.bindEvents();
-
-    service.queryForm(this.table_name, this.record_id, this.queryFormSuccess, this.queryFormFailed);
-}
-
 ObjectEditor.prototype.bindEvents = function() {
     CommonEditor.prototype.bindEvents.call(this);
 

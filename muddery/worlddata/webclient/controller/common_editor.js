@@ -51,7 +51,7 @@ CommonEditor.prototype.bindEvents = function() {
 }
 
 CommonEditor.prototype.onExit = function() {
-    controller.exit_no_change();
+    controller.exitNoChange();
 }
 
 CommonEditor.prototype.onSave = function() {
@@ -122,43 +122,7 @@ CommonEditor.prototype.setFields = function() {
     container.children().remove();
 
     for (var i = 0; i < this.fields.length; i++) {
-        var type = this.fields[i].type;
-        var label = this.fields[i].label;
-        var name = this.fields[i].name;
-        var help_text = this.fields[i].help_text;
-        var value = this.fields[i].value;
-
-        var controller;
-        if (type == "Location") {
-            controller = field_creator.createAreaSelect(name, label, value, help_text, this.areas);
-        }
-        else if (type == "Image") {
-            controller = field_creator.createImageInput(this.fields[i].image_type, name, label, value, help_text);
-        }
-        else if (type == "Hidden") {
-            controller = field_creator.createHiddenInput(name, label, value, help_text);
-        }
-        else if (type == "TextInput") {
-            controller = field_creator.createTextInput(name, label, value, help_text);
-        }
-        else if (type == "NumberInput") {
-            controller = field_creator.createNumberInput(name, label, value, help_text);
-        }
-        else if (type == "Textarea") {
-            controller = field_creator.createTextArea(name, label, value, help_text);
-        }
-        else if (type == "CheckboxInput") {
-            if (value) {
-                if (value == "False" || value == "false") {
-                    value = false;
-                }
-            }
-            controller = field_creator.createCheckBox(name, label, value, help_text);
-        }
-        else if (type == "Select") {
-            controller = field_creator.createSelect(name, label, value, help_text, this.fields[i].choices);
-        }
-
+        var controller = this.createFieldController(this.fields[i]);
         if (controller) {
             controller.appendTo(container);
         }
@@ -167,11 +131,52 @@ CommonEditor.prototype.setFields = function() {
     window.parent.controller.setFrameSize();
 }
 
+CommonEditor.prototype.createFieldController = function(field) {
+    var type = field.type;
+    var label = field.label;
+    var name = field.name;
+    var help_text = field.help_text;
+    var value = field.value;
+
+    var controller = null;
+    if (type == "Location") {
+        controller = field_creator.createAreaSelect(name, label, value, help_text, this.areas);
+    }
+    else if (type == "Image") {
+        controller = field_creator.createImageInput(field.image_type, name, label, value, help_text);
+    }
+    else if (type == "Hidden") {
+        controller = field_creator.createHiddenInput(name, label, value, help_text);
+    }
+    else if (type == "TextInput") {
+        controller = field_creator.createTextInput(name, label, value, help_text);
+    }
+    else if (type == "NumberInput") {
+        controller = field_creator.createNumberInput(name, label, value, help_text);
+    }
+    else if (type == "Textarea") {
+        controller = field_creator.createTextArea(name, label, value, help_text);
+    }
+    else if (type == "CheckboxInput") {
+        if (value) {
+            if (value == "False" || value == "false") {
+                value = false;
+            }
+        }
+        controller = field_creator.createCheckBox(name, label, value, help_text);
+    }
+    else if (type == "Select") {
+        controller = field_creator.createSelect(name, label, value, help_text, field.choices);
+    }
+
+    return controller;
+}
+
 CommonEditor.prototype.exit = function() {
     window.parent.controller.popPage(true);
 }
 
-CommonEditor.prototype.exit_no_change = function() {
+CommonEditor.prototype.exitNoChange = function() {
     window.parent.controller.popPage(false);
 }
 

@@ -5,84 +5,108 @@
 EventEditor = function() {
 	CommonEditor.call(this);
 
+    this.event_key = "";
     this.trigger_obj = "";
+    this.event_type = "";
+
+    this.event_data = [];
 }
 
 EventEditor.prototype = prototype(CommonEditor.prototype);
 EventEditor.prototype.constructor = EventEditor;
 
 EventEditor.prototype.init = function() {
-    this.table_name = getQueryString("table");
-    this.record_id = getQueryString("record");
     this.trigger_obj = getQueryString("trigger");
-    this.fields = [];
+    CommonEditor.prototype.init.call(this);
+}
 
-    $("#exit-button").removeClass("hidden");
-    $("#save-record").removeClass("hidden");
-    if (this.record_id) {
-        $("#delete-record").removeClass("hidden");
+EventEditor.prototype.queryFormSuccess = function(data) {
+    controller.fields = data;
+
+    controller.event_key = "";
+    controller.event_type = "";
+    var query_areas = false;
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].name == "key") {
+            controller.event_key = data[i].value;
+            if (!controller.event_key) {
+                controller.event_key = "";
+            }
+        }
+        else if (data[i].name == "type") {
+            controller.event_type = data[i].value;
+            if (!controller.event_type) {
+                // Get default event type.
+                if (data[i].choices.length > 0) {
+                    controller.event_type = data[i].choices[0][0];
+                }
+            }
+        }
+        else if (data[i].type == "Location") {
+            query_areas = true;
+        }
     }
 
-    $("#form-name").text(this.table_name);
+    if (query_areas) {
+        service.queryAreas(controller.queryAreasSuccess, controller.queryAreasFailed);
+    }
+    else {
+        controller.queryAreasSuccess({});
+    }
+}
 
-    this.bindEvents();
+EventEditor.prototype.queryAreasSuccess = function(data) {
+    controller.areas = data;
+    controller.setFields();
+    service.queryEventDataForm(controller.event_type, controller.event_key, controller.queryEventSuccess, controller.queryEventFailed);
+}
 
-    service.queryForm(this.table_name, this.record_id, this.queryFormSuccess, this.queryFormFailed);
+EventEditor.prototype.queryAreasFailed = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
+}
+
+EventEditor.prototype.queryEventSuccess = function(data) {
+    controller.event_data = data;
+    controller.setEventData();
+}
+
+EventEditor.prototype.queryEventFailed = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
 }
 
 EventEditor.prototype.setFields = function() {
-    var container = $("#fields");
+    // Set event fields.
+    var event_container = $("#fields");
+    event_container.children().remove();
+
     for (var i = 0; i < this.fields.length; i++) {
-        var type = this.fields[i].type;
-        var label = this.fields[i].label;
-        var name = this.fields[i].name;
-        var help_text = this.fields[i].help_text;
-        var value = this.fields[i].value;
+        var field = this.fields[i];
 
         // Users can not set the event's key and trigger object.
-        if (name == "key") {
-            type = "Hidden";
+        if (field.name == "key") {
+            field.type = "Hidden";
         }
-        else if (name == "trigger_obj") {
-            type = "Hidden";
-            value = this.trigger_obj;
-        }
-
-        var controller;
-        if (type == "Location") {
-            controller = field_creator.createAreaSelect(name, label, value, help_text, this.areas);
-        }
-        else if (type == "Image") {
-            controller = field_creator.createImageInput(fields[i].image_type, name, label, value, help_text);
-        }
-        else if (type == "Hidden") {
-            controller = field_creator.createHiddenInput(name, label, value, help_text);
-        }
-        else if (type == "TextInput") {
-            controller = field_creator.createTextInput(name, label, value, help_text);
-        }
-        else if (type == "NumberInput") {
-            controller = field_creator.createNumberInput(name, label, value, help_text);
-        }
-        else if (type == "Textarea") {
-            controller = field_creator.createTextArea(name, label, value, help_text);
-        }
-        else if (type == "CheckboxInput") {
-            if (value) {
-                if (value == "False" || value == "false") {
-                    value = false;
-                }
-            }
-            controller = field_creator.createCheckBox(name, label, value, help_text);
-        }
-        else if (type == "Select") {
-            controller = field_creator.createSelect(name, label, value, help_text, this.fields[i].choices);
+        else if (field.name == "trigger_obj") {
+            field.type = "Hidden";
+            field.value = this.trigger_obj;
         }
 
+        var controller = this.createFieldController(field);
         if (controller) {
-            controller.appendTo(container);
+            controller.appendTo(event_container);
         }
     }
 
+    // Bind the event of the type change.
+    $("#event_fields #control-type .form-control").on("change", this.onTypeChanged);
+
     window.parent.controller.setFrameSize();
+}
+
+EventEditor.prototype.onTypeChanged = function(e) {
+    controller.event_type = $(this).val();
+    service.queryEventDataForm(controller.event_type, controller.event_key, controller.queryEventSuccess, controller.queryEventFailed);
+}
+
+EventEditor.prototype.setEventData = function(e) {
 }

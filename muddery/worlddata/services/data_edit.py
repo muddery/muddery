@@ -6,16 +6,18 @@ from __future__ import print_function
 
 from django.conf import settings
 from evennia.utils import logger
+from muddery.utils import defines
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.dao import general_query_mapper
 from muddery.worlddata.dao import common_mappers as CM
-from muddery.worlddata.dao.event_mapper import get_object_event
+from muddery.worlddata.dao.event_mapper import get_object_event, get_event_additional_data
 from muddery.mappings.form_set import FORM_SET
 from muddery.mappings.typeclass_set import TYPECLASS_SET
 from muddery.worlddata.forms.default_forms import ObjectsForm
 from muddery.worlddata.forms.location_field import LocationField
 from muddery.worlddata.forms.image_field import ImageField
+from muddery.worlddata.services.data_query import query_fields
 
 
 def query_form(table_name, record_id=None):
@@ -77,24 +79,6 @@ def query_form(table_name, record_id=None):
 
         fields.append(info)
 
-    """
-    if has_location:
-        data["areas"] = query_areas()
-
-    if isinstance(form, ObjectsForm):
-        data["events"] = []
-        if record:
-            events = get_object_event(record.key)
-            data["events"] = [{"id": e.id,
-                               "key": e.key,
-                               "trigger_type": e.trigger_type,
-                               "event_type": e.type,
-                               "one_time": e.one_time,
-                               "odds": e.odds,
-                               "condition": e.condition,
-                               } for e in events]
-    """
-
     return fields
 
 
@@ -133,6 +117,38 @@ def query_events(object_key):
                "condition": r.condition,
                } for r in records]
     return events
+
+
+def query_event_data(event_type, event_key):
+    """
+    Query all additional data of an event.
+
+    Args:
+        event_type: (string) event's type
+        event_key: (string) event's key
+    """
+    # Get event table's name.
+    table_name = ""
+    if event_type == defines.EVENT_ATTACK:
+        table_name = "event_attacks"
+    elif event_type == defines.EVENT_DIALOGUE:
+        table_name = "event_dialogues"
+    else:
+        return []
+
+    fields = query_fields(table_name)
+    records = general_query_mapper.get_all_records(table_name)
+    rows = []
+    for record in records:
+        line = [str(record.serializable_value(field["name"])) for field in fields]
+        rows.append(line)
+
+    table = {
+        "fields": fields,
+        "records": rows,
+    }
+    return table
+
 
 def save_form(values, table_name, record_id=None):
     """
