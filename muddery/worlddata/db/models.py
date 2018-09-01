@@ -1052,13 +1052,13 @@ class event_data(models.Model):
     # trigger's relative object's key
     trigger_obj = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
-    # The key of an event trigger type.
+    # The type of the event trigger.
     # event's trigger
     trigger_type = models.CharField(max_length=KEY_LENGTH)
 
-    # The key of an event type.
-    # event's type
-    type = models.CharField(max_length=KEY_LENGTH)
+    # The type of an event action.
+    # event's action
+    action = models.CharField(max_length=KEY_LENGTH)
 
     # This event can only trigger one time.
     one_time = models.BooleanField(blank=True, default=False)
@@ -1236,6 +1236,9 @@ class npc_dialogues(models.Model):
 #
 # ------------------------------------------------------------
 class BaseEventData(models.Model):
+    # The key of an event.
+    event_key = models.CharField(max_length=KEY_LENGTH)
+
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -1249,10 +1252,6 @@ class BaseEventData(models.Model):
 # ------------------------------------------------------------
 class event_attacks(BaseEventData):
     "event attack's data"
-
-    # The key of an event.
-    # event's key
-    key = models.CharField(max_length=KEY_LENGTH)
 
     # The key of a character.
     # mob's key
@@ -1273,7 +1272,7 @@ class event_attacks(BaseEventData):
         app_label = "worlddata"
         verbose_name = "Event Mob"
         verbose_name_plural = "Event Mobs"
-        unique_together = ("key", "mob")
+        unique_together = ("event_key", "mob")
 
 
 # ------------------------------------------------------------
@@ -1283,10 +1282,6 @@ class event_attacks(BaseEventData):
 # ------------------------------------------------------------
 class event_dialogues(BaseEventData):
     "Store all event dialogues."
-
-    # The key of an event.
-    # event's key
-    key = models.CharField(max_length=KEY_LENGTH)
 
     # The key of a dialogue.
     # dialogue's key
@@ -1302,7 +1297,7 @@ class event_dialogues(BaseEventData):
         app_label = "worlddata"
         verbose_name = "Event Dialogues"
         verbose_name_plural = "Event Dialogues"
-        unique_together = ("key", "dialogue")
+        unique_together = ("event_key", "dialogue")
 
         
 # ------------------------------------------------------------

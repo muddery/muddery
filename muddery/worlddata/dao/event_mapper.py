@@ -9,6 +9,7 @@ from django.db import transaction
 from django.apps import apps
 from django.conf import settings
 from muddery.utils import defines
+from muddery.worlddata.dao.common_mapper_base import ObjectsMapper
 
 
 def get_object_event(object_key):
@@ -17,21 +18,3 @@ def get_object_event(object_key):
     """
     model = apps.get_model(settings.WORLD_DATA_APP, "event_data")
     return model.objects.filter(trigger_obj=object_key)
-
-
-def get_event_additional_data(event_type, event_key):
-    """
-    Get event's additional data.
-    """
-    data = {}
-    model_name = ""
-    if event_type == defines.EVENT_ATTACK:
-        model_name = "event_attacks"
-    elif event_type == defines.EVENT_DIALOGUE:
-        model_name = "event_dialogues"
-
-    if model_name:
-        model = apps.get_model(settings.WORLD_DATA_APP, model_name)
-        return model.objects.filter(key=event_key)
-
-    return data

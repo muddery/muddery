@@ -11,9 +11,10 @@ from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.dao import general_query_mapper
 from muddery.worlddata.dao import common_mappers as CM
-from muddery.worlddata.dao.event_mapper import get_object_event, get_event_additional_data
+from muddery.worlddata.dao.event_mapper import get_object_event
 from muddery.mappings.form_set import FORM_SET
 from muddery.mappings.typeclass_set import TYPECLASS_SET
+from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.worlddata.forms.default_forms import ObjectsForm
 from muddery.worlddata.forms.location_field import LocationField
 from muddery.worlddata.forms.image_field import ImageField
@@ -100,44 +101,15 @@ def query_areas():
     return areas
 
 
-def query_events(object_key):
+def query_object_events(object_key):
     """
     Query all events of the given object.
 
     Args:
         object_key: (string) object' key.
     """
+    fields = query_fields("event_data")
     records = get_object_event(object_key)
-    events = [{"id": r.id,
-               "key": r.key,
-               "trigger_type": r.trigger_type,
-               "event_type": r.type,
-               "one_time": r.one_time,
-               "odds": r.odds,
-               "condition": r.condition,
-               } for r in records]
-    return events
-
-
-def query_event_data(event_type, event_key):
-    """
-    Query all additional data of an event.
-
-    Args:
-        event_type: (string) event's type
-        event_key: (string) event's key
-    """
-    # Get event table's name.
-    table_name = ""
-    if event_type == defines.EVENT_ATTACK:
-        table_name = "event_attacks"
-    elif event_type == defines.EVENT_DIALOGUE:
-        table_name = "event_dialogues"
-    else:
-        return []
-
-    fields = query_fields(table_name)
-    records = general_query_mapper.get_all_records(table_name)
     rows = []
     for record in records:
         line = [str(record.serializable_value(field["name"])) for field in fields]
@@ -148,6 +120,22 @@ def query_event_data(event_type, event_key):
         "records": rows,
     }
     return table
+
+
+def query_event_action_data(action_type, event_key):
+    """
+    Query an event action's data.
+
+    Args:
+        action_type: (string) action's type
+        event_key: (string) event's key
+    """
+    # Get action's data.
+    action = EVENT_ACTION_SET.get(action_type)
+    if not action:
+        raise MudderyError(ERR.no_table, "Can not find action: %s" % action_type)
+
+    return action.query_event_data_table(event_key)
 
 
 def save_form(values, table_name, record_id=None):

@@ -11,6 +11,7 @@ class EventAttack(BaseEventAction):
     Event to start a combat.
     """
     key = "EVENT_ATTACK"
+    model_name = "event_attacks"
 
     def func(self, event, character):
         """

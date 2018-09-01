@@ -11,6 +11,7 @@ class EventDialogue(BaseEventAction):
     Event to start a combat.
     """
     key = "EVENT_DIALOGUE"
+    model_name = "event_dialogues"
 
     def func(self, event, character):
         """

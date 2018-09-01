@@ -93,14 +93,14 @@ class query_areas(BaseRequestProcesser):
         return success_response(data)
 
 
-class query_events(BaseRequestProcesser):
+class query_object_events(BaseRequestProcesser):
     """
     Query all events of the given object.
 
     Args:
         object: (string) object's key
     """
-    path = "query_events"
+    path = "query_object_events"
     name = ""
 
     def func(self, args, request):
@@ -109,29 +109,29 @@ class query_events(BaseRequestProcesser):
 
         object_key = args["object"]
 
-        data = data_edit.query_events(object_key)
+        data = data_edit.query_object_events(object_key)
         return success_response(data)
 
 
-class query_event_data(BaseRequestProcesser):
+class query_event_action_data(BaseRequestProcesser):
     """
-    Query additional data of an event.
+    Query an event action's data.
 
     Args:
-        type: (string) event's type
-        event: (string) event's key
+        type: (string) action's type
+        key: (string) event's key
     """
-    path = "query_event_data_form"
+    path = "query_event_action_data"
     name = ""
 
     def func(self, args, request):
-        if ('type' not in args or 'event' not in args):
+        if ('type' not in args or 'key' not in args):
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        event_type = args["type"]
-        event_key = args["event"]
+        action_type = args["type"]
+        event_key = args["key"]
 
-        data = data_edit.query_event_data(event_type, event_key)
+        data = data_edit.query_event_action_data(action_type, event_key)
         return success_response(data)
 
 

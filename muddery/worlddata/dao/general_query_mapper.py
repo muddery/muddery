@@ -35,6 +35,15 @@ def get_all_records(table_name):
     return model_obj.objects.all()
 
 
+def filter_records(table_name, **kwargs):
+    """
+    Filter records by conditions.
+    """
+    # get model
+    model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
+    return model_obj.objects.filter(**kwargs)
+
+
 def get_record_by_id(table_name, record_id):
     """
     Get a table's all records.

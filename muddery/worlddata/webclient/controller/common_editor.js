@@ -27,8 +27,8 @@ CommonEditor = function() {
 }
 
 CommonEditor.prototype.init = function() {
-    this.table_name = getQueryString("table");
-    this.record_id = getQueryString("record");
+    this.table_name = utils.getQueryString("table");
+    this.record_id = utils.getQueryString("record");
     this.fields = [];
 
     $("#exit-button").removeClass("hidden");
@@ -100,7 +100,7 @@ CommonEditor.prototype.queryFormSuccess = function(data) {
         service.queryAreas(controller.queryAreasSuccess, controller.queryAreasFailed);
     }
     else {
-        controller.setFields();
+        controller.queryAreasSuccess({});
     }
 }
 

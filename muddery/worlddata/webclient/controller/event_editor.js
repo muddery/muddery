@@ -7,25 +7,22 @@ EventEditor = function() {
 
     this.event_key = "";
     this.trigger_obj = "";
-    this.event_type = "";
+    this.action_type = "";
 
-    this.event_data = [];
+    this.action_data_fields = [];
 }
 
 EventEditor.prototype = prototype(CommonEditor.prototype);
 EventEditor.prototype.constructor = EventEditor;
 
 EventEditor.prototype.init = function() {
-    this.trigger_obj = getQueryString("trigger");
+    this.trigger_obj = utils.getQueryString("trigger");
     CommonEditor.prototype.init.call(this);
 }
 
 EventEditor.prototype.queryFormSuccess = function(data) {
-    controller.fields = data;
-
     controller.event_key = "";
-    controller.event_type = "";
-    var query_areas = false;
+    controller.action_type = "";
     for (var i = 0; i < data.length; i++) {
         if (data[i].name == "key") {
             controller.event_key = data[i].value;
@@ -33,44 +30,35 @@ EventEditor.prototype.queryFormSuccess = function(data) {
                 controller.event_key = "";
             }
         }
-        else if (data[i].name == "type") {
-            controller.event_type = data[i].value;
-            if (!controller.event_type) {
-                // Get default event type.
+        else if (data[i].name == "action") {
+            controller.action_type = data[i].value;
+            if (!controller.action_type) {
+                // Set default event action.
                 if (data[i].choices.length > 0) {
-                    controller.event_type = data[i].choices[0][0];
+                    controller.action_type = data[i].choices[0][0];
                 }
             }
         }
-        else if (data[i].type == "Location") {
-            query_areas = true;
-        }
     }
 
-    if (query_areas) {
-        service.queryAreas(controller.queryAreasSuccess, controller.queryAreasFailed);
-    }
-    else {
-        controller.queryAreasSuccess({});
-    }
+    CommonEditor.prototype.queryFormSuccess.call(this, data);
 }
 
 EventEditor.prototype.queryAreasSuccess = function(data) {
     controller.areas = data;
     controller.setFields();
-    service.queryEventDataForm(controller.event_type, controller.event_key, controller.queryEventSuccess, controller.queryEventFailed);
+    service.queryEventActionData(controller.action_type, controller.event_key, controller.queryActionSuccess, controller.queryActionFailed);
 }
 
 EventEditor.prototype.queryAreasFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
 }
 
-EventEditor.prototype.queryEventSuccess = function(data) {
-    controller.event_data = data;
-    controller.setEventData();
+EventEditor.prototype.queryActionSuccess = function(data) {
+    controller.setActionData(data);
 }
 
-EventEditor.prototype.queryEventFailed = function(code, message, data) {
+EventEditor.prototype.queryActionFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
 }
 
@@ -98,15 +86,34 @@ EventEditor.prototype.setFields = function() {
     }
 
     // Bind the event of the type change.
-    $("#event_fields #control-type .form-control").on("change", this.onTypeChanged);
+    $("#fields #control-type .form-control").on("change", this.onTypeChanged);
 
     window.parent.controller.setFrameSize();
 }
 
-EventEditor.prototype.onTypeChanged = function(e) {
+EventEditor.prototype.onActionChanged = function(e) {
     controller.event_type = $(this).val();
-    service.queryEventDataForm(controller.event_type, controller.event_key, controller.queryEventSuccess, controller.queryEventFailed);
+    service.queryEventActionData(controller.action_type, controller.event_key, controller.queryActionSuccess, controller.queryActionFailed);
 }
 
-EventEditor.prototype.setEventData = function(e) {
+EventEditor.prototype.setActionData = function(data) {
+    this.action_data_fields = data.fields;
+
+    $("#event-data").bootstrapTable("destroy");
+    $("#event-data").bootstrapTable({
+        cache: false,
+        striped: true,
+        pagination: true,
+        pageList: [20, 50, 100],
+        pageSize: 20,
+        sidePagination: "client",
+        columns: utils.parseFields(data.fields),
+        data: utils.parseRows(data.fields, data.records),
+        sortName: "id",
+        sortOrder: "asc",
+        clickToSelect: true,
+        singleSelect: true,
+    });
+
+    window.parent.controller.setFrameSize();
 }

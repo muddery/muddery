@@ -3,15 +3,15 @@ controller = {
     field_length: 20,
 
     init: function() {
-        this.editor_type = getQueryString("editor");
-        this.table_name = getQueryString("table");
+        this.editor_type = utils.getQueryString("editor");
+        this.table_name = utils.getQueryString("table");
         this.fields = [];
 
         $("#table-name").text(this.table_name);
 
         this.bindEvents();
 
-        service.queryTable(this.table_name, this.queryTableSuccess);
+        service.queryTable(this.table_name, this.queryTableSuccess, this.queryTableFailed);
     },
 
     bindEvents: function() {
@@ -57,8 +57,8 @@ controller = {
             pageList: [20, 50, 100],
             pageSize: 20,
             sidePagination: "client",
-            columns: controller.parseFields(data.fields),
-            data: controller.parseRows(data.fields, data.records),
+            columns: utils.parseFields(data.fields),
+            data: utils.parseRows(data.fields, data.records, controller.field_length),
             sortName: "id",
             sortOrder: "asc",
             clickToSelect: true,
@@ -68,68 +68,14 @@ controller = {
         window.parent.controller.setFrameSize();
     },
 
+    queryTableFailed: function() {
+        window.parent.controller.notify("ERROR", code + ": " + message);
+    },
+
     refreshTableSuccess: function(data) {
         $("#data-table").bootstrapTable("load", controller.parseRows(data.fields, data.records));
 
         window.parent.controller.setFrameSize();
-    },
-
-    parseFields: function(fields) {
-        var cols = [{
-            field: "operate",
-            title: "Operate",
-            formatter: this.operateButton,
-        }];
-
-        for (var i = 0; i < fields.length; i++) {
-            cols.push({
-                field: fields[i].name,
-                title: fields[i].label,
-                sortable: true,
-            });
-        }
-
-        return cols;
-    },
-
-    operateButton: function(value, row, index) {
-        var block = $("<div>");
-
-        var content = $("<div>")
-            .addClass("btn-group")
-            .appendTo(block);
-
-        var edit = $("<button>")
-            .addClass("btn-xs edit-row")
-            .attr("type", "button")
-            .attr("data-record-id", row["id"])
-            .text("Edit")
-            .appendTo(block);
-
-        var edit = $("<button>")
-            .addClass("btn-xs btn-danger delete-row")
-            .attr("type", "button")
-            .attr("data-record-id", row["id"])
-            .text("Delete")
-            .appendTo(block);
-
-        return block.html();
-    },
-
-    parseRows: function(fields, records) {
-        var rows = [];
-        for (var i = 0; i < records.length; i++) {
-            var row = {ID: i + 1};
-            for (var j = 0; j < fields.length; j++) {
-                var value = records[i][j];
-                if (value.length > this.field_length) {
-                    value = value.slice(0, this.field_length + 1) + "...";
-                }
-                row[fields[j]["name"]] = value;
-            }
-            rows.push(row);
-        }
-        return rows;
     },
 
     loadData: function(data) {

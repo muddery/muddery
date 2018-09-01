@@ -34,6 +34,12 @@ class EventActionSet(object):
 
     def get(self, key):
         """
+        Get the event action.
+        """
+        return self.dict.get(key, None)
+
+    def func(self, key):
+        """
         Get the function of the event action.
         """
         action = self.dict.get(key, None)

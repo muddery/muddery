@@ -105,7 +105,7 @@ class EventTrigger(object):
         rand = random.random()
         for event in candidates:
             if rand < event["odds"]:
-                func = EVENT_ACTION_SET.get(event["type"])
+                func = EVENT_ACTION_SET.func(event["type"])
                 if func:
                     func(event, character)
                 return True

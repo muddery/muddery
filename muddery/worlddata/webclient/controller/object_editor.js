@@ -6,6 +6,7 @@ ObjectEditor = function() {
 	CommonEditor.call(this);
 
     this.object_key = "";
+    this.event_fields = [];
 }
 
 ObjectEditor.prototype = prototype(CommonEditor.prototype);
@@ -22,10 +23,6 @@ ObjectEditor.prototype.bindEvents = function() {
 
 ObjectEditor.prototype.onImageLoad = function() {
     parent.controller.setFrameSize();
-}
-
-ObjectEditor.prototype.onExit = function() {
-    controller.exit_no_change();
 }
 
 ObjectEditor.prototype.onSave = function() {
@@ -51,7 +48,7 @@ ObjectEditor.prototype.onSave = function() {
 }
 
 ObjectEditor.prototype.onEditEvent = function(e) {
-    var record_id = $(this).attr("data-event-id");
+    var record_id = $(this).attr("data-record-id");
     if (record_id) {
         var editor = "event";
         var table = "event_data";
@@ -63,7 +60,7 @@ ObjectEditor.prototype.onEditEvent = function(e) {
 }
 
 ObjectEditor.prototype.onDeleteEvent = function(e) {
-    var record_id = $(this).attr("data-event-id");
+    var record_id = $(this).attr("data-record-id");
     window.parent.controller.confirm("",
                                      "Delete this record?",
                                      controller.confirmDeleteEvent,
@@ -120,42 +117,38 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
         }
     }
 
-    CommonEditor.prototype.queryFormSuccess.call(controller, data);
+    CommonEditor.prototype.queryFormSuccess.call(this, data);
 }
 
-ObjectEditor.prototype.setEvents = function(events) {
-    var table = $("#event-table");
-    if (events.length > 0) {
-        table.find("tr:not(:first)").remove();
-    }
+ObjectEditor.prototype.queryAreasSuccess = function(data) {
+    controller.areas = data;
+    controller.setFields();
+    service.queryObjectEvents(controller.object_key, controller.queryEventTableSuccess, controller.queryEventTableFailed);
+}
 
-    for (var i = 0; i < events.length; i++) {
-        var line = $("<tr>")
-            .append($("<td>").text(events[i].trigger_type))
-            .append($("<td>").text(events[i].event_type))
-            .append($("<td>").text(events[i].one_time))
-            .append($("<td>").text(events[i].odds))
-            .append($("<td>").text(events[i].condition));
+ObjectEditor.prototype.queryEventTableSuccess = function(data) {
+    controller.event_fields = data.fields;
 
-        var operations = $("<td>")
-            .appendTo(line);
+    $("#event-table").bootstrapTable({
+        cache: false,
+        striped: true,
+        pagination: true,
+        pageList: [20, 50, 100],
+        pageSize: 20,
+        sidePagination: "client",
+        columns: utils.parseFields(data.fields),
+        data: utils.parseRows(data.fields, data.records),
+        sortName: "id",
+        sortOrder: "asc",
+        clickToSelect: true,
+        singleSelect: true,
+    });
 
-        $("<button>")
-            .addClass("btn-xs edit-row")
-            .attr("type", "button")
-            .attr("data-event-id", events[i].id)
-            .text("Edit")
-            .appendTo(operations);
+    window.parent.controller.setFrameSize();
+}
 
-        $("<button>")
-            .addClass("btn-xs btn-danger delete-row")
-            .attr("type", "button")
-            .attr("data-event-id", events[i].id)
-            .text("Delete")
-            .appendTo(operations);
-
-        line.appendTo(table);
-    }
+ObjectEditor.prototype.queryEventTableFailed = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
 }
 
 ObjectEditor.prototype.add_event = function(e) {

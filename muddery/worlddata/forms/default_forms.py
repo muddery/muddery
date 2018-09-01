@@ -794,7 +794,7 @@ class EventDataForm(forms.ModelForm):
 
         objects = EVENT_ACTION_SET.all()
         choices = [(obj, obj) for obj in objects]
-        self.fields['type'] = forms.ChoiceField(choices=choices)
+        self.fields['action'] = forms.ChoiceField(choices=choices)
 
         objects = EVENT_TRIGGER_SET.all()
         choices = [(obj, obj) for obj in objects]

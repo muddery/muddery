@@ -152,17 +152,24 @@ service = {
         this.sendRequest("query_areas", "", {}, callback_success, callback_error);
     },
 
-    /*  Query an event's additional data's form.
+    queryObjectEvents: function(object_key, callback_success, callback_error) {
+        var args = {
+            object: object_key,
+        };
+        this.sendRequest("query_object_events", "", args, callback_success, callback_error);
+    },
+
+    /*  Query an event action's data.
      *  Args:
-     *      type: (string) event's type.
-     *      event: （string) event's key.
+     *      type: (string) action's type.
+     *      key: （string) action's key.
      */
-    queryEventDataForm: function(type, event, callback_success, callback_error) {
+    queryEventActionData: function(type, key, callback_success, callback_error) {
         var args = {
             type: type,
-            event: event,
+            key: key,
         };
-        this.sendRequest("query_event_data_form", "", args, callback_success, callback_error);
+        this.sendRequest("query_event_action_data", "", args, callback_success, callback_error);
     },
 
     saveForm: function(values, table_name, record_id, callback_success, callback_error) {
