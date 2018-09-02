@@ -686,8 +686,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         The origin target will not be affected.
 
         Args:
-            target_key: (string) the info key of the target.
-            target_level: (int) target's level
+            target_key: (string) the info key of the target object.
+            target_level: (int) target object's level
             desc: (string) string to describe this attack
 
         Returns:

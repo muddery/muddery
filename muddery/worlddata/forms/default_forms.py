@@ -819,9 +819,9 @@ class EventAttacksForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EventAttacksForm, self).__init__(*args, **kwargs)
 
-        objects = CM.EVENT_DATA.objects.filter(type="EVENT_ATTACK")
+        objects = CM.EVENT_DATA.objects.filter(action="EVENT_ATTACK")
         choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
-        self.fields['key'] = forms.ChoiceField(choices=choices)
+        self.fields['event_key'] = forms.ChoiceField(choices=choices)
         
         objects = CM.COMMON_CHARACTERS.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
@@ -838,9 +838,9 @@ class EventDialoguesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EventDialoguesForm, self).__init__(*args, **kwargs)
 
-        objects = CM.EVENT_DATA.objects.filter(type="EVENT_DIALOGUE")
+        objects = CM.EVENT_DATA.objects.filter(action="EVENT_DIALOGUE")
         choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
-        self.fields['key'] = forms.ChoiceField(choices=choices)
+        self.fields['event_key'] = forms.ChoiceField(choices=choices)
 
         objects = CM.DIALOGUES.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]

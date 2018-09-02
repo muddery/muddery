@@ -223,34 +223,31 @@ CommonEditor.prototype.saveFormSuccess = function(data) {
 }
 
 CommonEditor.prototype.saveFormFailed = function(code, message, data) {
+    var text = "Error: [" + code + "] " + message;
+
     if (code == 10006) {    // invalid form
-        $("#form-message")
-            .text("Invalid input.")
-            .addClass("message-error")
-            .removeClass("message-success")
-            .removeClass("hidden")
-            .show();
-
-        $(".message-block")
-            .hide();
-
         for (var name in data) {
-            $("#control-" + name + " .message-block")
-                .text(data[name])
-                .show();
+            var field = $("#control-" + name + " .message-block");
+            if (field.length > 0) {
+                field
+                    .text(data[name])
+                    .show();
+            }
+            else {
+                text += " " + data[name];
+            }
         }
     }
-    else {
-        $("#form-message")
-            .text("Error: [" + code + "] " + message)
-            .addClass("message-error")
-            .removeClass("message-success")
-            .removeClass("hidden")
-            .show();
 
-        $(".message-block")
-            .hide();
-    }
+    $("#form-message")
+        .text(text)
+        .addClass("message-error")
+        .removeClass("message-success")
+        .removeClass("hidden")
+        .show();
+
+    $(".message-block")
+        .hide();
 }
 
 CommonEditor.prototype.confirmDelete = function(e) {

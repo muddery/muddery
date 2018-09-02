@@ -46,17 +46,12 @@ class EventTrigger(object):
             event = {}
 
             # Set data.
-            event_type = record.type
+            event_action = record.action
             trigger_type = record.trigger_type
 
             for field in record._meta.fields:
                 event[field.name] = record.serializable_value(field.name)
-            event["type"] = event_type
-
-            # Set additional data.
-            event_additional = event_mapper.get_event_additional_data(event_type, event["key"])
-            if event_additional:
-                event.update(event_additional)
+            event["action"] = event_action
 
             if not trigger_type in self.events:
                 self.events[trigger_type] = []
@@ -105,9 +100,9 @@ class EventTrigger(object):
         rand = random.random()
         for event in candidates:
             if rand < event["odds"]:
-                func = EVENT_ACTION_SET.func(event["type"])
+                func = EVENT_ACTION_SET.func(event["action"])
                 if func:
-                    func(event, character)
+                    func(event["key"], character)
                 return True
             rand -= event["odds"]
 

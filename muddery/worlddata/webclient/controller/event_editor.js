@@ -8,6 +8,7 @@ EventEditor = function() {
     this.event_key = "";
     this.trigger_obj = "";
     this.action_type = "";
+    this.action_table = "";
 
     this.action_data_fields = [];
 }
@@ -18,6 +19,14 @@ EventEditor.prototype.constructor = EventEditor;
 EventEditor.prototype.init = function() {
     this.trigger_obj = utils.getQueryString("trigger");
     CommonEditor.prototype.init.call(this);
+}
+
+EventEditor.prototype.bindEvents = function() {
+    CommonEditor.prototype.bindEvents.call(this);
+
+    $("#add-action").on("click", this.add_action);
+    $("#action-table").on("click", ".edit-row", this.onEditAction);
+    $("#action-table").on("click", ".delete-row", this.onDeleteAction);
 }
 
 EventEditor.prototype.queryFormSuccess = function(data) {
@@ -85,8 +94,8 @@ EventEditor.prototype.setFields = function() {
         }
     }
 
-    // Bind the event of the type change.
-    $("#fields #control-type .form-control").on("change", this.onTypeChanged);
+    // Bind the event of the action change.
+    $("#fields #control-action .form-control").on("change", this.onTypeChanged);
 
     window.parent.controller.setFrameSize();
 }
@@ -97,10 +106,16 @@ EventEditor.prototype.onActionChanged = function(e) {
 }
 
 EventEditor.prototype.setActionData = function(data) {
+    if (!data) {
+        // No action data, hide the action table.
+        $("#action-table").hide();
+    }
+
+    this.action_table = data.table;
     this.action_data_fields = data.fields;
 
-    $("#event-data").bootstrapTable("destroy");
-    $("#event-data").bootstrapTable({
+    $("#action-table").bootstrapTable("destroy");
+    $("#action-table").bootstrapTable({
         cache: false,
         striped: true,
         pagination: true,
@@ -114,6 +129,55 @@ EventEditor.prototype.setActionData = function(data) {
         clickToSelect: true,
         singleSelect: true,
     });
+    $("#action-table").show();
 
     window.parent.controller.setFrameSize();
+}
+
+EventEditor.prototype.add_action = function(e) {
+    if (!controller.event_key) {
+        window.parent.controller.notify("You should save this object first.");
+        return;
+    }
+
+    var table = controller.action_table;
+    var args = {
+        event: controller.event_key,
+    }
+    window.parent.controller.editRecord("event_action", controller.action_table, "", args);
+}
+
+EventEditor.prototype.onEditAction = function(e) {
+    var record_id = $(this).attr("data-record-id");
+    if (record_id) {
+        var table = controller.action_table;
+        var args = {
+            event: controller.event_key,
+        }
+        window.parent.controller.editRecord("event_action", controller.action_table, record_id, args);
+    }
+}
+
+EventEditor.prototype.onDeleteAction = function(e) {
+    var record_id = $(this).attr("data-record-id");
+    window.parent.controller.confirm("",
+                                     "Delete this record?",
+                                     controller.confirmDeleteAction,
+                                     {record: record_id});
+}
+
+EventEditor.prototype.confirmDeleteAction = function(e) {
+    window.parent.controller.hide_waiting();
+
+    var table = controller.action_table;
+    var record_id = e.data.record;
+    service.deleteRecord(table, record, this.deleteActionSuccess);
+}
+
+EventEditor.prototype.deleteActionSuccess = function(data) {
+    var record_id = data.record;
+    $("#action-table").bootstrapTable("remove", {
+        field: "id",
+        values: [record_id],
+    });
 }

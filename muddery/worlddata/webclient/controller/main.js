@@ -213,8 +213,11 @@ controller = {
         else if (editor_type == "event") {
             url = "event_editor.html?table=" + table_name;
         }
+        else if (editor_type == "event_action") {
+            url = "event_action_editor.html?table=" + table_name;
+        }
         else {
-            url = "editor.html?table=" + table_name;
+            url = "common_editor.html?table=" + table_name;
         }
 
         if (record_id) {

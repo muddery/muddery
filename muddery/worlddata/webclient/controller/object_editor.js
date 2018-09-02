@@ -73,7 +73,7 @@ ObjectEditor.prototype.confirmDeleteEvent = function(e) {
     var table = controller.table_name;
     var record_id = e.data.record;
     service.deleteRecord(table, record, this.deleteEventSuccess);
-},
+}
 
 ObjectEditor.prototype.deleteEventSuccess = function(data) {
     var record_id = data.record;
@@ -81,7 +81,7 @@ ObjectEditor.prototype.deleteEventSuccess = function(data) {
         field: "id",
         values: [record_id],
     });
-},
+}
 
 ObjectEditor.prototype.uploadSuccess = function(field_name) {
     var callback = function(data) {

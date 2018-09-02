@@ -1253,12 +1253,13 @@ class BaseEventData(models.Model):
 class event_attacks(BaseEventData):
     "event attack's data"
 
-    # The key of a character.
+    # The key of a common character.
     # mob's key
     mob = models.CharField(max_length=KEY_LENGTH)
 
     # mob's level
-    level = models.PositiveIntegerField()
+    # Set the level of the mob. If it is 0, use the default level of the mob.
+    level = models.IntegerField(blank=True, default=0)
 
     # event's odds
     odds = models.FloatField(blank=True, default=0)
@@ -1272,7 +1273,6 @@ class event_attacks(BaseEventData):
         app_label = "worlddata"
         verbose_name = "Event Mob"
         verbose_name_plural = "Event Mobs"
-        unique_together = ("event_key", "mob")
 
 
 # ------------------------------------------------------------
@@ -1291,13 +1291,15 @@ class event_dialogues(BaseEventData):
     # NPC's key
     npc = models.CharField(max_length=KEY_LENGTH, blank=True)
 
+    # event's odds
+    odds = models.FloatField(blank=True, default=0)
+
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
         verbose_name = "Event Dialogues"
         verbose_name_plural = "Event Dialogues"
-        unique_together = ("event_key", "dialogue")
 
         
 # ------------------------------------------------------------

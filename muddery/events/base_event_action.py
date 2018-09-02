@@ -19,9 +19,13 @@ class BaseEventAction(object):
     # action's additional data table
     model_name = ""
 
-    def func(self, event, character):
+    def func(self, event_key, character):
         """
         Event action's function.
+
+        Args:
+            event_key: (string) event's key.
+            character: (obj) relative character.
         """
         pass
 
@@ -43,6 +47,7 @@ class BaseEventAction(object):
             rows.append(line)
 
         table = {
+            "table": self.model_name,
             "fields": fields,
             "records": rows,
         }
