@@ -22,8 +22,8 @@ class Upgrader(BaseUpgrader):
     # from min version 0.0.0 (include this version)
     from_min_version = (0, 2, 10)
 
-    # from max version 0.2.6 (not include this version)
-    from_max_version = (0, 3, 0)
+    # from max version 0.3.1 (not include this version)
+    from_max_version = (0, 3, 1)
 
     target_version = None
     
@@ -36,8 +36,6 @@ class Upgrader(BaseUpgrader):
             game_template: (string) the game template used to upgrade the game dir.
             muddery_lib: (string) muddery's dir
         """
-        print("Upgrading game from version 0.2.6 %s." % game_dir)
-
         print("""
     We are very sorry that your game is too old to
     upgrade.
