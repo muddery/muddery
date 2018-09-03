@@ -76,12 +76,10 @@ class ObjectsForm(forms.ModelForm):
                 if model == self.instance.__class__:
                     # Models will validate unique values of its own,
                     # so we do not validate them here.
-                    print("model == self.instance")
                     continue
 
                 try:
                     record = model.objects.get(key=key)
-                    print("record: %s" % record)
                 except Exception, e:
                     continue
 
@@ -506,16 +504,18 @@ class CommonCharacterForm(ObjectsForm):
         fields = '__all__'
 
     def clean(self):
-        super(CommonCharacterForm, self).clean()
+        cleaned_data = super(CommonCharacterForm, self).clean()
+        data_model = cleaned_data["model"]
+        data_level = cleaned_data["level"]
 
         # check model and level
         from muddery.worlddata.dao.common_mappers import CHARACTER_MODELS
 
         try:
-            CHARACTER_MODELS.get(key=self.model, level=self.level)
+            CHARACTER_MODELS.get(key=data_model, level=data_level)
         except Exception, e:
             message = "Can not get the level data."
-            levels = CHARACTER_MODELS.filter(key=self.model)
+            levels = CHARACTER_MODELS.filter(key=data_model)
             available = [str(level.level) for level in levels]
             if len(available) == 1:
                 message += " Available level: " + available[0]

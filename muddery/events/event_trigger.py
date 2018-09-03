@@ -94,6 +94,7 @@ class EventTrigger(object):
         if event_type not in self.events:
             return False
 
+        # Get all event's of this type.
         event_list = self.events[event_type]
         candidates = [e for e in event_list if STATEMENT_HANDLER.match_condition(e["condition"], character, obj)]
 
@@ -137,7 +138,7 @@ class EventTrigger(object):
         if defines.EVENT_TRIGGER_KILL in self.events:
             # If has kill event.
             for killer in killers:
-                self.trigger(defines.EVENT_TRIGGER_DIE, killer, self.owner)
+                self.trigger(defines.EVENT_TRIGGER_KILL, killer, self.owner)
 
     def at_character_traverse(self, character):
         """

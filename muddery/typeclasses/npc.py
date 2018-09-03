@@ -38,9 +38,6 @@ class MudderyNPC(TYPECLASS("NON_PLAYER")):
         Init the character.
         """
         super(MudderyNPC, self).after_data_loaded()
-        
-        # set level
-        self.db.level = getattr(self.dfield, "level", 1)
 
         # Character can auto fight.
         self.auto_fight = True

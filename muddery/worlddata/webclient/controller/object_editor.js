@@ -112,7 +112,13 @@ ObjectEditor.prototype.uploadFailed = function(code, message, data) {
 ObjectEditor.prototype.queryFormSuccess = function(data) {
     for (var i = 0; i < data.length; i++) {
         if (data[i].name == "key") {
-            controller.object_key = data[i].value;
+            var value = data[i].value;
+            if (value) {
+                controller.object_key = value;
+            }
+            else {
+                controller.object_key = "";
+            }
             break;
         }
     }

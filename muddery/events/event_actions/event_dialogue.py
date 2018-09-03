@@ -45,4 +45,4 @@ class EventDialogue(BaseEventAction):
                 character.show_dialogue(npc, record.dialogue, 0)
                 return
 
-            rand -= odds
+            rand -= record.odds

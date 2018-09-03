@@ -142,6 +142,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Init the character.
         """
         super(MudderyCharacter, self).after_data_loaded()
+
+        # get level
+        self.db.level = getattr(self.dfield, "level", 1)
         
         # skill's ai
         ai_choose_skill_class = class_from_module(settings.AI_CHOOSE_SKILL)
@@ -696,11 +699,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         if target_level == 0:
             # Find the target and get its level.
             obj = search_obj_data_key(target_key)
-            if not obj:
-                logger.log_errmsg("Can not find the target %s." % target_key)
-                return False
-            obj = obj[0]
-            target_level = obj.db.level
+            if obj:
+                obj = obj[0]
+                target_level = obj.db.level
 
         # Create a target.
         target = build_object(target_key, set_location=False)
@@ -708,7 +709,10 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             logger.log_errmsg("Can not create the target %s." % target_key)
             return False
 
-        target.set_level(target_level)
+        # If has target level, set level.
+        if target_level:
+            target.set_level(target_level)
+
         target.is_temp = True
         return self.attack_target(target, desc)
 

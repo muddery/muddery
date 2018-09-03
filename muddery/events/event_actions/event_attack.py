@@ -37,5 +37,5 @@ class EventAttack(BaseEventAction):
                 character.attack_temp_target(record.mob, record.level, record.desc)
                 return
 
-            rand -= odds
+            rand -= record.odds
     

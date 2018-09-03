@@ -223,10 +223,16 @@ CommonEditor.prototype.saveFormSuccess = function(data) {
 }
 
 CommonEditor.prototype.saveFormFailed = function(code, message, data) {
+    // Hide current messages.
+    $(".message-block")
+        .hide();
+
     var text = "Error: [" + code + "] " + message;
 
-    if (code == 10006) {    // invalid form
+    if (code == 10006) {
+        // Invalid form
         for (var name in data) {
+            // Set return messages.
             var field = $("#control-" + name + " .message-block");
             if (field.length > 0) {
                 field
@@ -245,9 +251,6 @@ CommonEditor.prototype.saveFormFailed = function(code, message, data) {
         .removeClass("message-success")
         .removeClass("hidden")
         .show();
-
-    $(".message-block")
-        .hide();
 }
 
 CommonEditor.prototype.confirmDelete = function(e) {
