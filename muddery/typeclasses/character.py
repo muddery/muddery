@@ -434,7 +434,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # add new default skills
         for skill_record in skill_records:
             if skill_record.skill not in self.db.skills:
-                self.learn_skill(skill_record.skill, True)
+                self.learn_skill(skill_record.skill, True, True)
 
     def load_default_objects(self):
         """
@@ -460,13 +460,14 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
     #
     ########################################
     
-    def learn_skill(self, skill_key, is_default):
+    def learn_skill(self, skill_key, is_default, silent):
         """
         Learn a new skill.
 
         Args:
             skill_key: (string) skill's key
             is_default: (boolean) if it is a default skill
+            silent: (boolean) do not show messages to the player
 
         Returns:
             (boolean) learned skill
@@ -494,7 +495,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             self.refresh_data()
 
         # Notify the player
-        if self.has_account:
+        if not silent and self.has_account:
             self.show_status()
             self.show_skills()
             self.msg({"msg": _("You learned skill {c%s{n.") % skill_obj.get_name()})

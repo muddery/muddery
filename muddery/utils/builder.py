@@ -40,6 +40,11 @@ def get_object_record(obj_key):
             print(traceback.print_exc())
             continue
 
+    if not record:
+        ostring = "Can not get record %s." % obj_key
+        print(ostring)
+        print(traceback.print_exc())
+
     return record
 
 

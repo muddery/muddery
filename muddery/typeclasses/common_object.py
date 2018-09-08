@@ -304,7 +304,7 @@ class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
         if not skill_key:
             return _("No effect."), 0
 
-        if user.learn_skill(skill_key, False):
+        if user.learn_skill(skill_key, False, False):
             return _("You learned skill."), 1
         else:
             return _("No effect."), 0
