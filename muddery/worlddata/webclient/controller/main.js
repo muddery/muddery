@@ -3,6 +3,7 @@ controller = {
 
     init: function() {
         this.login = false;
+        this.status_interval_id = 0;
         this.bindEvents();
     },
 
@@ -239,15 +240,26 @@ controller = {
 
     confirmApply: function() {
         service.applyChanges(controller.applySuccess, controller.applyFailed);
-        controller.show_waiting("", "Applying changes. Please wait.");
+        controller.showWaiting("", "Applying changes. Please wait.");
     },
 
     applySuccess: function(data) {
-        controller.notify("", "Changes Applied. Please wait the server to restart.");
+        controller.showWaiting("", "Changes Applied. Please wait the server to restart.");
+        controller.checkStatus();
+        controller.status_interval_id = window.setInterval("controller.checkStatus()", 3000);
     },
 
     applyFailed: function(code, message, data) {
         controller.notify("", "Apply failed: " + code + ": " + message);
+    },
+
+    checkStatus: function() {
+        service.checkStatus(controller.checkStatusSuccess);
+    },
+
+    checkStatusSuccess: function(data) {
+        window.clearInterval(controller.status_interval_id);
+        controller.notify("", "The server restarted.");
     },
 
     //////////////// Confirm Model ////////////////
@@ -264,7 +276,7 @@ controller = {
             $("#confirm-button").one("click", data, callback);
         }
         else {
-            $("#confirm-button").one("click", this.hide_waiting);
+            $("#confirm-button").one("click", this.hideWaiting);
         }
 
         $("#confirm-dialog").modal();
@@ -282,13 +294,13 @@ controller = {
             $("#confirm-button").one("click", data, callback);
         }
         else {
-            $("#confirm-button").one("click", this.hide_waiting);
+            $("#confirm-button").one("click", this.hideWaiting);
         }
 
         $("#confirm-dialog").modal();
     },
 
-    show_waiting: function(title, content) {
+    showWaiting: function(title, content) {
         $("#confirm-title").text(title);
         $("#confirm-content").text(content);
         
@@ -299,7 +311,7 @@ controller = {
         $("#confirm-dialog").modal();
     },
 
-    hide_waiting: function() {
+    hideWaiting: function() {
         $("#confirm-dialog").modal("hide");
     },
 }
@@ -307,4 +319,3 @@ controller = {
 $(document).ready(function() {
     controller.init();
 });
-

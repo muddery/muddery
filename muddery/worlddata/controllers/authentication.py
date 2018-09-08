@@ -67,3 +67,21 @@ class logout(BaseRequestProcesser):
         return success_response("success")
 
 
+class query_status(BaseRequestProcesser):
+    """
+    Get the server's status.
+
+    Args:
+        args: None
+    """
+    path = "status"
+    name = ""
+
+    def func(self, args, request):
+        """
+        Get the server's status.
+
+        Args:
+            args: None
+        """
+        return success_response("running")

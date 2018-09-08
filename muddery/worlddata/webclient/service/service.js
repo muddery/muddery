@@ -242,6 +242,10 @@ service = {
     applyChanges: function(callback_success, callback_error) {
         this.sendRequest("apply_changes", "", {}, callback_success, callback_error);
     },
+
+    checkStatus: function(callback_success, callback_error) {
+        this.sendRequest("status", "", {}, callback_success, callback_error);
+    },
 }
 
 
