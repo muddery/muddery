@@ -23,6 +23,7 @@ class MudderyObjectCreator(TYPECLASS("OBJECT")):
     This object loads attributes from world data on init automatically.
     """
     typeclass_key = "WORLD_OBJECT_CREATOR"
+    typeclass_name = _("Object Creator", "typeclasses")
 
     # initialize loot handler in a lazy fashion
     @lazy_property

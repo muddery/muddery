@@ -23,4 +23,4 @@ class MudderyTwoWayExit(TYPECLASS("EXIT")):
     This is the front side of the two way exit.
     """
     typeclass_key = "TWO_WAY_EXIT"
-
+    typeclass_name = _("Two Way Exit", "typeclasses")

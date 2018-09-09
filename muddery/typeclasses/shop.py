@@ -13,6 +13,7 @@ from django.apps import apps
 from muddery.utils.builder import build_object, get_object_record
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.dao.shop_goods_mapper import SHOP_GOODS
 
 
@@ -21,6 +22,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
     A shop.
     """
     typeclass_key = "SHOP"
+    typeclass_name = _("Shop", "typeclasses")
 
     def after_data_loaded(self):
         """

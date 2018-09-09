@@ -35,6 +35,9 @@ def at_server_start():
     # reset settings
     GAME_SETTINGS.reset()
 
+    # reload local strings
+    LOCALIZED_STRINGS_HANDLER.reload()
+
     # reload keys
     OBJECT_KEY_HANDLER.reload()
     
@@ -51,9 +54,6 @@ def at_server_start():
     
     # reload equipment types
     EQUIP_TYPE_HANDLER.reload()
-
-    # reload local strings
-    LOCALIZED_STRINGS_HANDLER.reload()
 
     # localize model fields
     localize_model_fields()

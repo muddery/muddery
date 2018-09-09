@@ -24,6 +24,7 @@ class MudderyLockedExit(TYPECLASS("EXIT")):
     The view and commands of locked exits are different from unlocked exits.
     """
     typeclass_key = "LOCKED_EXIT"
+    typeclass_name = _("Locked Exit", "typeclasses")
 
     def after_data_loaded(self):
         """

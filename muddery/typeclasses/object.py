@@ -36,6 +36,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
     This object loads attributes from world data on init automatically.
     """
     typeclass_key = "OBJECT"
+    typeclass_name = _("Object", "typeclasses")
 
     # initialize all handlers in a lazy fashion
     @lazy_property
@@ -572,7 +573,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         Get an object's available event triggers.
         """
-        return [defines.EVENT_TRIGGER_ACTION]
+        return []
         
     def do_action(self, caller):
         # called when caller act to self.

@@ -53,6 +53,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
     """
     typeclass_key = "CHARACTER"
+    typeclass_name = _("Character", "typeclasses")
 
     # initialize loot handler in a lazy fashion
     @lazy_property

@@ -7,6 +7,7 @@ from evennia.utils import logger
 from muddery.utils.exception import MudderyError
 from muddery.utils.attributes_info_handler import FOOD_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO
 from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.utils import defines
 from muddery.utils.localized_strings_handler import _
 
 
@@ -17,10 +18,11 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
     There can be a lot of common objects of the same kind in the game, so their haven't
     home and fixed locations.
     
-    It has two additional properties: max_stack(int) and unique(bool). They decied the number
+    It has two additional properties: max_stack(int) and unique(bool). They decide the number
     of the object that a player can put in his inventory.
     """
     typeclass_key = "COMMON_OBJECT"
+    typeclass_name = _("Common Object", "typeclasses")
 
     def at_object_creation(self):
         """
@@ -111,6 +113,13 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         """
         return _("No effect."), 0
 
+    @classmethod
+    def get_event_trigger_types(cls):
+        """
+        Get an object's available event triggers.
+        """
+        return [defines.EVENT_TRIGGER_ACTION]
+
 
 class MudderyFood(TYPECLASS("COMMON_OBJECT")):
     """
@@ -118,6 +127,7 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
     strength, etc.
     """
     typeclass_key = "FOOD"
+    typeclass_name = _("Food", "typeclasses")
 
     def after_data_loaded(self):
         """
@@ -194,6 +204,7 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
     etc.
     """
     typeclass_key = "EQUIPMENT"
+    typeclass_name = _("Equipment", "typeclasses")
 
     def after_data_loaded(self):
         """
@@ -271,6 +282,7 @@ class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
     This is a skill book. Players can use it to learn a new skill.
     """
     typeclass_key = "SKILL_BOOK"
+    typeclass_name = _("Skill Book", "typeclasses")
 
     def get_available_commands(self, caller):
         """

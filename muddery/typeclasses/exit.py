@@ -44,6 +44,7 @@ class MudderyExit(TYPECLASS("OBJECT"), DefaultExit):
                                         defined, in which case that will simply be echoed.
     """
     typeclass_key = "EXIT"
+    typeclass_name = _("Exit", "typeclasses")
 
     def after_data_loaded(self):
         """

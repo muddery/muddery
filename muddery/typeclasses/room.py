@@ -13,6 +13,7 @@ from muddery.utils import defines
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.dao.image_resources_mapper import IMAGE_RESOURCES
 from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.utils.localized_strings_handler import _
 from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
 
@@ -28,6 +29,7 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
     properties and methods available on all Objects.
     """
     typeclass_key = "ROOM"
+    typeclass_name = _("Room", "typeclasses")
 
     def at_object_creation(self):
         """

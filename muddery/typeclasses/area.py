@@ -10,6 +10,7 @@ from django.conf import settings
 from django.apps import apps
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.worlddata.dao.image_resources_mapper import IMAGE_RESOURCES
+from muddery.utils.localized_strings_handler import _
 from evennia.utils import logger
 
 
@@ -18,6 +19,7 @@ class MudderyArea(TYPECLASS("OBJECT")):
     Areas are compose the whole map. Rooms are belongs to areas.
     """
     typeclass_key = "AREA"
+    typeclass_name = _("Area", "typeclasses")
 
     def at_object_creation(self):
         """
@@ -49,18 +51,18 @@ class MudderyArea(TYPECLASS("OBJECT")):
                 logger.log_tracemsg("Load background %s error: %s" % (resource, e))
 
         self.background_point = None
+        background_point = getattr(self.dfield, "background_point", None)
         try:
             # set background point
-            background_point = getattr(self.dfield, "background_point", None)
             if background_point:
                 self.background_point = ast.literal_eval(background_point)
         except Exception, e:
             logger.log_tracemsg("load background point '%s' error: %s" % (background_point, e))
             
         self.corresp_map_pos = None
+        corresp_map_pos = getattr(self.dfield, "corresp_map_pos", None)
         try:
             # set corresponding map position
-            corresp_map_pos = getattr(self.dfield, "corresp_map_pos", None)
             if corresp_map_pos:
                 self.corresp_map_pos = ast.literal_eval(corresp_map_pos)
         except Exception, e:

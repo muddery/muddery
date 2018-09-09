@@ -18,6 +18,7 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
     to sell and additional shop information.
     """
     typeclass_key = "SHOP_GOODS"
+    typeclass_name = _("Goods", "typeclasses")
 
     def at_object_creation(self):
         """

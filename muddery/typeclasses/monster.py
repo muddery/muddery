@@ -19,6 +19,7 @@ class MudderyMonster(TYPECLASS("NON_PLAYER")):
     Default mob. Monsters are hostile to players, they can be attacked.
     """
     typeclass_key = "MONSTER"
+    typeclass_name = _("Monster", "typeclasses")
 
     def after_data_loaded(self):
         """

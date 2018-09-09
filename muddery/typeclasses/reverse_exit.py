@@ -23,6 +23,7 @@ class MudderyReverseExit(TYPECLASS("EXIT")):
     This is the reverse side of the two way exit.
     """
     typeclass_key = "REVERSE_EXIT"
+    typeclass_name = _("Reverse Exit", "typeclasses")
 
     def after_data_loaded(self):
         """
