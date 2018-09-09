@@ -248,6 +248,11 @@ $$.client = {
         },
         60000*3
         );
+
+        if (!Evennia.isConnected()) {
+            $$.main.showAlert("Can not connect to the server.");
+            return;
+        }
     },
 }
 
