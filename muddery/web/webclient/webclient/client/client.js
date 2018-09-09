@@ -249,7 +249,7 @@ $$.client = {
         60000*3
         );
 
-        if (!Evennia.isConnected()) {
+        if (Evennia.state() == WebSocket.CLOSED) {
             $$.main.showAlert("Can not connect to the server.");
             return;
         }

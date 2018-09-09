@@ -106,7 +106,12 @@ An "emitter" object must have a function
         // Returns true if the connection is open.
         //
         isConnected: function () {
-          return this.connection.isOpen();
+            return this.connection.isOpen();
+        },
+
+        // Returns the state of the connection.
+        state: function() {
+            return this.connection.state();
         },
 
         // client -> Evennia.
@@ -281,9 +286,13 @@ An "emitter" object must have a function
             return open;
         }
 
+        var state = function() {
+            return websocket.readyState;
+        }
+
         connect();
 
-        return {connect: connect, msg: msg, close: close, isOpen: isOpen};
+        return {connect: connect, msg: msg, close: close, isOpen: isOpen, state: state};
     };
 
     window.Evennia = Evennia;
