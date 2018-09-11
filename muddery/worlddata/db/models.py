@@ -1060,9 +1060,6 @@ class event_data(models.Model):
     # event's action
     action = models.CharField(max_length=KEY_LENGTH)
 
-    # This event can only trigger one time.
-    one_time = models.BooleanField(blank=True, default=False)
-
     # The odds of this event.
     odds = models.FloatField(blank=True, default=1.0)
 
@@ -1301,7 +1298,26 @@ class event_dialogues(BaseEventData):
         verbose_name = "Event Dialogues"
         verbose_name_plural = "Event Dialogues"
 
-        
+
+# ------------------------------------------------------------
+#
+# event close
+#
+# ------------------------------------------------------------
+class event_closes(BaseEventData):
+    "Store all event closes."
+
+    # The key of an event to close.
+    event = models.CharField(max_length=KEY_LENGTH)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Event Close"
+        verbose_name_plural = "Event Closes"
+
+
 # ------------------------------------------------------------
 #
 # condition descriptions

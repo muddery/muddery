@@ -93,6 +93,10 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             self.db.completed_quests = set()
         if not self.attributes.has("current_quests"):
             self.db.current_quests = {}
+
+        # set closed events
+        if not self.attributes.has("closed_events"):
+            self.db.closed_events = set()
         
         # skill's gcd
         self.skill_gcd = GAME_SETTINGS.get("global_cd")
@@ -270,6 +274,24 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         return [defines.EVENT_TRIGGER_KILL,
                 defines.EVENT_TRIGGER_DIE]
+
+    def close_event(self, event_key):
+        """
+        If an event is closed, it will never be triggered.
+
+        Args:
+            event_key: (string) event's key
+        """
+        self.db.closed_events.add(event_key)
+
+    def is_event_closed(self, event_key):
+        """
+        Return True If this event is closed.
+
+        Args:
+            event_key: (string) event's key
+        """
+        return self.db.closed_events.has(event_key)
 
     def change_status(self, increments):
         """

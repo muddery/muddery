@@ -7,6 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from muddery.utils import utils
 from muddery.events.base_event_action import BaseEventAction
+from muddery.utils.localized_strings_handler import _
 
 
 class EventDialogue(BaseEventAction):
@@ -14,6 +15,7 @@ class EventDialogue(BaseEventAction):
     Event to start a combat.
     """
     key = "EVENT_DIALOGUE"
+    name = _("Dialogue")
     model_name = "event_dialogues"
 
     def func(self, event_key, character):

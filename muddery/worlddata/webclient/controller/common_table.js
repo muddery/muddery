@@ -73,7 +73,7 @@ controller = {
     },
 
     refreshTableSuccess: function(data) {
-        $("#data-table").bootstrapTable("load", utils.parseRows(data.fields, data.records));
+        $("#data-table").bootstrapTable("load", utils.parseRows(data.fields, data.records, controller.field_length));
 
         window.parent.controller.setFrameSize();
     },

@@ -96,7 +96,9 @@ class EventTrigger(object):
 
         # Get all event's of this type.
         event_list = self.events[event_type]
-        candidates = [e for e in event_list if STATEMENT_HANDLER.match_condition(e["condition"], character, obj)]
+        candidates = [e for e in event_list
+                         if character.is_event_close(e["key"]) and
+                             STATEMENT_HANDLER.match_condition(e["condition"], character, obj)]
 
         rand = random.random()
         for event in candidates:

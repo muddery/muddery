@@ -414,6 +414,15 @@ class event_dialogues(model_base.event_dialogues):
     pass
 
 
+#------------------------------------------------------------
+#
+# event closes
+#
+#------------------------------------------------------------
+class event_closes(model_base.event_closes):
+    pass
+
+
 # ------------------------------------------------------------
 #
 # condition descriptions
