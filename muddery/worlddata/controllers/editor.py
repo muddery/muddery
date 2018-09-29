@@ -89,7 +89,7 @@ class query_areas(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        data = data_edit.query_areas()
+        data = data_query.query_areas()
         return success_response(data)
 
 
@@ -109,7 +109,7 @@ class query_object_events(BaseRequestProcesser):
 
         object_key = args["object"]
 
-        data = data_edit.query_object_events(object_key)
+        data = data_query.query_object_events(object_key)
         return success_response(data)
 
 
@@ -131,7 +131,27 @@ class query_event_action_data(BaseRequestProcesser):
         action_type = args["type"]
         event_key = args["key"]
 
-        data = data_edit.query_event_action_data(action_type, event_key)
+        data = data_query.query_event_action_data(action_type, event_key)
+        return success_response(data)
+
+
+class query_dialogue_sentences(BaseRequestProcesser):
+    """
+    Query a dialogue's sentences.
+
+    Args:
+        key: (string) dialogue's key
+    """
+    path = "query_dialogue_sentences"
+    name = ""
+
+    def func(self, args, request):
+        if ('dialogue' not in args):
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        dialogue_key = args["dialogue"]
+
+        data = data_query.query_dialogue_sentences(dialogue_key)
         return success_response(data)
 
 

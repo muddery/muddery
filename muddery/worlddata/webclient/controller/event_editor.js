@@ -24,7 +24,7 @@ EventEditor.prototype.init = function() {
 EventEditor.prototype.bindEvents = function() {
     CommonEditor.prototype.bindEvents.call(this);
 
-    $("#add-action").on("click", this.add_action);
+    $("#add-action").on("click", this.addAction);
     $("#action-table").on("click", ".edit-row", this.onEditAction);
     $("#action-table").on("click", ".delete-row", this.onDeleteAction);
 }
@@ -134,27 +134,30 @@ EventEditor.prototype.setActionData = function(data) {
     window.parent.controller.setFrameSize();
 }
 
-EventEditor.prototype.add_action = function(e) {
+EventEditor.prototype.addAction = function(e) {
     if (!controller.event_key) {
         window.parent.controller.notify("You should save this object first.");
         return;
     }
 
+    var editor = "event_action";
     var table = controller.action_table;
+    var record = "";
     var args = {
         event: controller.event_key,
     }
-    window.parent.controller.editRecord("event_action", controller.action_table, "", args);
+    window.parent.controller.editRecord(editor, controller.action_table, record, args);
 }
 
 EventEditor.prototype.onEditAction = function(e) {
     var record_id = $(this).attr("data-record-id");
     if (record_id) {
+        var editor = "event_action";
         var table = controller.action_table;
         var args = {
             event: controller.event_key,
         }
-        window.parent.controller.editRecord("event_action", controller.action_table, record_id, args);
+        window.parent.controller.editRecord(editor, controller.action_table, record_id, args);
     }
 }
 

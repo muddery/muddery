@@ -16,7 +16,7 @@ ObjectEditor.prototype.constructor = ObjectEditor;
 ObjectEditor.prototype.bindEvents = function() {
     CommonEditor.prototype.bindEvents.call(this);
 
-    $("#add-event").on("click", this.add_event);
+    $("#add-event").on("click", this.addEvent);
     $("#event-table").on("click", ".edit-row", this.onEditEvent);
     $("#event-table").on("click", ".delete-row", this.onDeleteEvent);
 }
@@ -135,6 +135,7 @@ ObjectEditor.prototype.queryAreasSuccess = function(data) {
 ObjectEditor.prototype.queryEventTableSuccess = function(data) {
     controller.event_fields = data.fields;
 
+    $("#event-table").bootstrapTable("destroy");
     $("#event-table").bootstrapTable({
         cache: false,
         striped: true,
@@ -157,15 +158,17 @@ ObjectEditor.prototype.queryEventTableFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
 }
 
-ObjectEditor.prototype.add_event = function(e) {
+ObjectEditor.prototype.addEvent = function(e) {
     if (!controller.object_key) {
         window.parent.controller.notify("You should save this object first.");
         return;
     }
 
+    var editor = "event";
     var table = "event_data";
+    var record = "";
     var args = {
         trigger: controller.object_key,
     }
-    window.parent.controller.editRecord("event", table, "", args);
+    window.parent.controller.editRecord(editor, table, record, args);
 }

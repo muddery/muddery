@@ -217,6 +217,12 @@ controller = {
         else if (editor_type == "event_action") {
             url = "event_action_editor.html?table=" + table_name;
         }
+        else if (editor_type == "dialogue") {
+            url = "dialogue_editor.html?table=" + table_name;
+        }
+        else if (editor_type == "sentence") {
+            url = "dialogue_sentence_editor.html?table=" + table_name;
+        }
         else {
             url = "common_editor.html?table=" + table_name;
         }
