@@ -88,9 +88,11 @@ QUEST_DEPENDENCIES = CommonMapper("quest_dependencies")
 
 EVENT_DATA = CommonMapper("event_data")
 
-EVENT_ATTACKS = CommonMapper("event_attacks")
+ACTION_ATTACK = CommonMapper("action_attack")
 
-EVENT_DIALOGUES = CommonMapper("event_dialogues")
+ACTION_DIALOGUE = CommonMapper("action_dialogue")
+
+ACTION_LEARN_SKILL = CommonMapper("action_learn_skill")
 
 DIALOGUES = CommonMapper("dialogues")
 

@@ -2,6 +2,8 @@
 Event action.
 """
 
+from __future__ import print_function
+
 import random
 from django.apps import apps
 from django.conf import settings
@@ -9,13 +11,13 @@ from muddery.events.base_event_action import BaseEventAction
 from muddery.utils.localized_strings_handler import _
 
 
-class EventAttack(BaseEventAction):
+class ActionAttack(BaseEventAction):
     """
-    Event to start a combat.
+    Attack a target.
     """
-    key = "EVENT_ATTACK"
+    key = "ACTION_ATTACK"
     name = _("Attack")
-    model_name = "event_attacks"
+    model_name = "action_attack"
 
     def func(self, event_key, character):
         """

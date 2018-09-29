@@ -14,7 +14,7 @@ from muddery.mappings.form_set import FORM_SET
 from muddery.worlddata.forms.default_forms import ObjectsForm
 from muddery.worlddata.forms.location_field import LocationField
 from muddery.worlddata.forms.image_field import ImageField
-from muddery.worlddata.services.data_query import query_fields
+from muddery.worlddata.services.general_query import query_fields
 
 
 def query_form(table_name, record_id=None):

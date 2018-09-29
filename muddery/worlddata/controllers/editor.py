@@ -8,7 +8,7 @@ import json
 from django.conf import settings
 from evennia.utils import logger
 from evennia.server.sessionhandler import SESSIONS
-from muddery.worlddata.services import data_query, data_edit
+from muddery.worlddata.services import data_query, data_edit, general_query
 from muddery.utils.exception import MudderyError, ERR
 from muddery.worlddata.utils.response import success_response
 from muddery.utils.builder import build_all
@@ -32,7 +32,7 @@ class query_fields(BaseRequestProcesser):
 
         table_name = args["table"]
 
-        data = data_query.query_fields(table_name)
+        data = general_query.query_fields(table_name)
         return success_response(data)
 
 
@@ -52,7 +52,7 @@ class query_table(BaseRequestProcesser):
 
         table_name = args["table"]
 
-        data = data_query.query_table(table_name)
+        data = general_query.query_table(table_name)
         return success_response(data)
 
 
@@ -74,7 +74,7 @@ class query_record(BaseRequestProcesser):
         table_name = args["table"]
         record_id = args["record"]
 
-        data = data_query.query_record(table_name, record_id)
+        data = general_query.query_record(table_name, record_id)
         return success_response(data)
 
 
@@ -89,7 +89,7 @@ class query_areas(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        data = data_query.query_areas()
+        data = general_query.query_areas()
         return success_response(data)
 
 
@@ -203,7 +203,7 @@ class save_form(BaseRequestProcesser):
         record_id = args.get('record', None)
 
         record_id = data_edit.save_form(values, table_name, record_id)
-        data = data_query.query_record(table_name, record_id)
+        data = general_query.query_record(table_name, record_id)
         return success_response(data)
 
 
@@ -241,7 +241,7 @@ class query_tables(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        data = data_query.query_tables()
+        data = general_query.query_tables()
         return success_response(data)
 
 

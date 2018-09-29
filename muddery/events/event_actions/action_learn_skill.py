@@ -2,24 +2,27 @@
 Event action.
 """
 
+from __future__ import print_function
+
 import random
 from django.apps import apps
 from django.conf import settings
+from muddery.utils import utils
 from muddery.events.base_event_action import BaseEventAction
 from muddery.utils.localized_strings_handler import _
 
 
-class EventClose(BaseEventAction):
+class ActionLearnSkill(BaseEventAction):
     """
-    Close an event.
+    Learn a skill.
     """
-    key = "EVENT_CLOSE"
-    name = _("Close")
-    model_name = "event_closes"
+    key = "ACTION_LEARN_SKILL"
+    name = _("Learn a Skill")
+    model_name = "action_learn_skill"
 
     def func(self, event_key, character):
         """
-        Close an event.
+        Learn a skill.
 
         Args:
             event_key: (string) event's key.
@@ -29,7 +32,7 @@ class EventClose(BaseEventAction):
         model_obj = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         records = model_obj.objects.filter(event_key=event_key)
 
+        # Learn skills.
         for record in records:
-            # Close event.
-            character.close_event(record.event)
-            return
+            skill_key = record.skill
+            character.learn_skill(skill_key, False, False)

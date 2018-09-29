@@ -2,7 +2,7 @@
 Event action's base class.
 """
 
-from muddery.worlddata.services.data_query import query_fields
+from muddery.worlddata.services.general_query import query_fields
 from muddery.worlddata.dao import general_query_mapper
 
 

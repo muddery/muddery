@@ -2,6 +2,8 @@
 Event action.
 """
 
+from __future__ import print_function
+
 import random
 from django.apps import apps
 from django.conf import settings
@@ -10,13 +12,13 @@ from muddery.events.base_event_action import BaseEventAction
 from muddery.utils.localized_strings_handler import _
 
 
-class EventDialogue(BaseEventAction):
+class ActionDialogue(BaseEventAction):
     """
-    Event to start a combat.
+    Begin a dialogue.
     """
-    key = "EVENT_DIALOGUE"
+    key = "ACTION_DIALOGUE"
     name = _("Dialogue")
-    model_name = "event_dialogues"
+    model_name = "action_dialogue"
 
     def func(self, event_key, character):
         """

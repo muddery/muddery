@@ -1,0 +1,16 @@
+
+.sentence-title {
+    display: inline-block;
+}
+
+#sentence-table {
+    border: 1px solid #000;
+    max-width: 100%;
+}
+
+#sentence-table td, #sentence-table th {
+    font-weight: normal;
+    word-wrap: break-word;
+    padding: 2px 5px;
+    border: 1px solid #000;
+}

@@ -1165,6 +1165,9 @@ class dialogue_relations(models.Model):
 class dialogue_sentences(models.Model):
     "Store dialogue sentences."
 
+    # sentence's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+
     # The key of a dialogue.
     # dialogue's key
     dialogue = models.CharField(max_length=KEY_LENGTH, db_index=True)
@@ -1180,9 +1183,6 @@ class dialogue_sentences(models.Model):
 
     # sentence's content
     content = models.TextField(blank=True)
-
-    # will do this action after this sentence
-    action = models.TextField(blank=True)
 
     # The key of a quest.
     # can provide this quest
@@ -1232,7 +1232,7 @@ class npc_dialogues(models.Model):
 # event's data
 #
 # ------------------------------------------------------------
-class BaseEventData(models.Model):
+class BaseEventActionData(models.Model):
     # The key of an event.
     event_key = models.CharField(max_length=KEY_LENGTH)
 
@@ -1244,11 +1244,11 @@ class BaseEventData(models.Model):
 
 # ------------------------------------------------------------
 #
-# event attack's data
+# action to attack a target
 #
 # ------------------------------------------------------------
-class event_attacks(BaseEventData):
-    "event attack's data"
+class action_attack(BaseEventActionData):
+    "action attack's data"
 
     # The key of a common character.
     # mob's key
@@ -1274,10 +1274,10 @@ class event_attacks(BaseEventData):
 
 # ------------------------------------------------------------
 #
-# event dialogues
+# action to begin a dialogue
 #
 # ------------------------------------------------------------
-class event_dialogues(BaseEventData):
+class action_dialogue(BaseEventActionData):
     "Store all event dialogues."
 
     # The key of a dialogue.
@@ -1301,10 +1301,30 @@ class event_dialogues(BaseEventData):
 
 # ------------------------------------------------------------
 #
-# event close
+# action to learn a skill
 #
 # ------------------------------------------------------------
-class event_closes(BaseEventData):
+class action_learn_skill(BaseEventActionData):
+    "Store all actions to learn skills."
+
+    # The key of a skill.
+    # skill's key
+    skill = models.CharField(max_length=KEY_LENGTH)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Action Learn Skill"
+        verbose_name_plural = "Action Learn Skills"
+
+
+# ------------------------------------------------------------
+#
+# action close
+#
+# ------------------------------------------------------------
+class action_closes(BaseEventActionData):
     "Store all event closes."
 
     # The key of an event to close.

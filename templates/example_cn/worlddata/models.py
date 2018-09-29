@@ -401,20 +401,30 @@ class npc_dialogues(BaseModels.npc_dialogues):
 
 # ------------------------------------------------------------
 #
-# event attack's data
+# action to attack a target
 #
 # ------------------------------------------------------------
-class event_attacks(BaseModels.event_attacks):
+class action_attack(BaseModels.action_attack):
     "event attack's data"
     pass
 
 
 #------------------------------------------------------------
 #
-# event dialogues
+# action to begin a dialogue
 #
 #------------------------------------------------------------
-class event_dialogues(BaseModels.event_dialogues):
+class action_dialogue(BaseModels.action_dialogue):
+    "Store all event dialogues."
+    pass
+
+
+#------------------------------------------------------------
+#
+# action to learn a skill
+#
+#------------------------------------------------------------
+class action_learn_skill(BaseModels.action_learn_skill):
     "Store all event dialogues."
     pass
 

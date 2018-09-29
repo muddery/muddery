@@ -815,11 +815,11 @@ class EventDataForm(forms.ModelForm):
         fields = '__all__'
 
 
-class EventAttacksForm(forms.ModelForm):
+class ActionAttackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(EventAttacksForm, self).__init__(*args, **kwargs)
+        super(ActionAttackForm, self).__init__(*args, **kwargs)
 
-        objects = CM.EVENT_DATA.objects.filter(action="EVENT_ATTACK")
+        objects = CM.EVENT_DATA.objects.filter(action="ACTION_ATTACK")
         choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
         self.fields['event_key'] = forms.ChoiceField(choices=choices)
         
@@ -830,15 +830,15 @@ class EventAttacksForm(forms.ModelForm):
         localize_form_fields(self)
 
     class Meta:
-        model = CM.EVENT_ATTACKS.model
+        model = CM.ACTION_ATTACK.model
         fields = '__all__'
 
 
-class EventDialoguesForm(forms.ModelForm):
+class ActionDialogueForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(EventDialoguesForm, self).__init__(*args, **kwargs)
+        super(ActionDialogueForm, self).__init__(*args, **kwargs)
 
-        objects = CM.EVENT_DATA.objects.filter(action="EVENT_DIALOGUE")
+        objects = CM.EVENT_DATA.objects.filter(action="ACTION_DIALOGUE")
         choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
         self.fields['event_key'] = forms.ChoiceField(choices=choices)
 
@@ -853,9 +853,28 @@ class EventDialoguesForm(forms.ModelForm):
         self.fields['npc'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
-        
+
     class Meta:
-        model = CM.EVENT_DIALOGUES.model
+        model = CM.ACTION_DIALOGUE.model
+        fields = '__all__'
+
+
+class ActionLearnSkillForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ActionLearnSkillForm, self).__init__(*args, **kwargs)
+
+        objects = CM.EVENT_DATA.objects.filter(action="ACTION_LEARN_SKILL")
+        choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
+        self.fields['event_key'] = forms.ChoiceField(choices=choices)
+
+        objects = CM.SKILLS.objects.all()
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['skill'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+
+    class Meta:
+        model = CM.ACTION_LEARN_SKILL.model
         fields = '__all__'
 
 
@@ -863,6 +882,14 @@ class DialoguesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DialoguesForm, self).__init__(*args, **kwargs)
         localize_form_fields(self)
+
+    def clean(self):
+        cleaned_data = super(DialoguesForm, self).clean()
+
+        # check object's key
+        key = cleaned_data["key"]
+        if not key:
+            cleaned_data["key"] = generate_key(self)
 
     class Meta:
         model = CM.DIALOGUES.model
@@ -903,6 +930,14 @@ class DialogueSentencesForm(forms.ModelForm):
         self.fields['complete_quest'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
+
+    def clean(self):
+        cleaned_data = super(DialogueSentencesForm, self).clean()
+
+        # check object's key
+        key = cleaned_data["key"]
+        if not key:
+            cleaned_data["key"] = generate_key(self)
 
     class Meta:
         model = CM.DIALOGUE_SENTENCES.model

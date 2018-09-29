@@ -863,7 +863,7 @@ MudderyMain.prototype.setPopupSize = function(dialog) {
 	else {
 		frame.height(0);
 
-		height = frame.find(">div")[0].scrollHeight;
+		height = frame.find(">div")[0].scrollHeight + 4;   // scroll height + border width
 		var max_height = win_h * 0.95;
 		if (height > max_height) {
 			height = max_height;

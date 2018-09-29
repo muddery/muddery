@@ -291,7 +291,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Args:
             event_key: (string) event's key
         """
-        return self.db.closed_events.has(event_key)
+        return event_key in self.db.closed_events
 
     def change_status(self, increments):
         """

@@ -2,6 +2,8 @@
 EventHandler handles all events. The handler sets on every object.
 """
 
+from __future__ import print_function
+
 import random
 from muddery.utils import defines
 from muddery.statements.statement_handler import STATEMENT_HANDLER
@@ -23,21 +25,23 @@ class EventTrigger(object):
 
     # available trigger types
     triggers = [
-        defines.EVENT_TRIGGER_ARRIVE,   # at attriving a room. object: room_id
-        defines.EVENT_TRIGGER_KILL,     # caller kills one. object: dead_one_id
-        defines.EVENT_TRIGGER_DIE,      # caller die. object: killer_id
-        defines.EVENT_TRIGGER_TRAVERSE, # before traverse an exit. object: exit_id
-        defines.EVENT_TRIGGER_ACTION,   # when a character act to an object. object_id: 
+        defines.EVENT_TRIGGER_ARRIVE,   # at attriving a room. trigger_obj: room_id
+        defines.EVENT_TRIGGER_KILL,     # caller kills one. trigger_obj: dead_one_id
+        defines.EVENT_TRIGGER_DIE,      # caller die. trigger_obj: killer_id
+        defines.EVENT_TRIGGER_TRAVERSE, # before traverse an exit. trigger_obj: exit_id
+        defines.EVENT_TRIGGER_ACTION,   # when a character act to an object. trigger_obj: object_id
+        defines.EVENT_TRIGGER_SENTENCE,   # when a character finishes a dialogue sentence. trigger_obj: sentence_id
     ]
 
-    def __init__(self, owner):
+    def __init__(self, owner, object_key=None):
         """
         Initialize the handler.
         """
         self.owner = owner
         self.events = {}
 
-        object_key = owner.get_data_key()
+        if not object_key:
+            object_key = owner.get_data_key()
 
         # Load events.
         event_records = event_mapper.get_object_event(object_key)
@@ -90,14 +94,15 @@ class EventTrigger(object):
 
         if self.can_bypass(character):
             return False
-        
+
         if event_type not in self.events:
             return False
 
         # Get all event's of this type.
         event_list = self.events[event_type]
+
         candidates = [e for e in event_list
-                         if character.is_event_close(e["key"]) and
+                         if not character.is_event_closed(e["key"]) and
                              STATEMENT_HANDLER.match_condition(e["condition"], character, obj)]
 
         rand = random.random()
@@ -157,3 +162,9 @@ class EventTrigger(object):
         triggered = self.trigger(defines.EVENT_TRIGGER_ACTION, character, self.owner)
         return not triggered
 
+    def at_sentence(self, character, obj):
+        """
+        Called when a character finishes a dialogue sentence.
+        """
+        triggered = self.trigger(defines.EVENT_TRIGGER_SENTENCE, character, obj)
+        return not triggered

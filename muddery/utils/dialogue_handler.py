@@ -17,6 +17,7 @@ from muddery.worlddata.dao.dialogue_relations_mapper import DIALOGUE_RELATIONS
 from muddery.worlddata.dao.dialogue_quest_dependencies_mapper import DIALOGUE_QUESTION
 from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
 from muddery.mappings.quest_status_set import QUEST_STATUS_SET
+from muddery.events.event_trigger import EventTrigger
 from evennia.utils import logger
 
 
@@ -67,6 +68,8 @@ class DialogueHandler(object):
             return
 
         sentences = DIALOGUE_SENTENCES.filter(dialogue)
+        if not sentences:
+            return
 
         nexts = DIALOGUE_RELATIONS.filter(dialogue)
 
@@ -86,12 +89,13 @@ class DialogueHandler(object):
         for sentence in sentences:
             speaker_model = self.speaker_escape.sub(self.escape_fun, sentence.speaker)
 
-            data["sentences"].append({"dialogue": dialogue,
+            data["sentences"].append({"key": sentence.key,
+                                      "dialogue": dialogue,
                                       "ordinal": sentence.ordinal,
                                       "speaker_model": speaker_model,
                                       "icon": sentence.icon,
                                       "content": sentence.content,
-                                      "action": sentence.action,
+                                      "event": EventTrigger(None, sentence.key),
                                       "provide_quest": sentence.provide_quest,
                                       "complete_quest": sentence.complete_quest,
                                       "can_close": self.can_close_dialogue})
@@ -103,6 +107,7 @@ class DialogueHandler(object):
             sentence["sentence"] = count
             sentence["is_last"] = False
             count += 1
+
         data["sentences"][-1]["is_last"] = True
 
         data["nexts"] = [next_one.next_dlg for next_one in nexts]
@@ -153,7 +158,7 @@ class DialogueHandler(object):
 
         sentence = sentences[0]
         if sentence['is_last'] or\
-           sentence['action'] or\
+           sentence['event'] or\
            sentence['complete_quest'] or\
            sentence['provide_quest']:
             return False
@@ -427,7 +432,7 @@ class DialogueHandler(object):
 
     def finish_sentence(self, caller, npc, dialogue, sentence_no):
         """
-        A sentence finished, do it's action.
+        A sentence finished, do it's event.
         """
         if not caller:
             return
@@ -444,9 +449,9 @@ class DialogueHandler(object):
         if not sentence:
             return
 
-        # do dialogue's action
-        if sentence["action"]:
-            STATEMENT_HANDLER.do_action(sentence["action"], caller, npc)
+        # do dialogue's event
+        if sentence["event"]:
+            sentence["event"].at_sentence(caller, npc)
 
         if sentence["is_last"]:
             # last sentence
