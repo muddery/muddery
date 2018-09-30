@@ -118,7 +118,7 @@ MudderyDialogue.prototype.setDialogues = function(dialogues, escapes) {
 				var dlg = dialogues[i];
 
 				var content = $$.text2html.parseHtml(dlg["content"]);
-				content = $$.texxt_escape.parse(content, escapes);
+				content = $$.text_escape.parse(content, escapes);
 
 				var item = this.cloneTemplate(template);
 				item.find("a")

@@ -10,6 +10,7 @@ from muddery.worlddata.dao import common_mappers as CM
 from muddery.worlddata.dao import general_query_mapper, model_mapper
 from muddery.worlddata.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
 from muddery.worlddata.dao.event_mapper import get_object_event
+from muddery.worlddata.services.general_query import query_fields
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _

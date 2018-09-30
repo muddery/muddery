@@ -922,12 +922,6 @@ class DialogueSentencesForm(forms.ModelForm):
 
         # dialogue's icon
         self.fields['icon'] = ImageField(image_type="icon", required=False)
-        
-        choices = [("", "---------")]
-        objects = CM.QUESTS.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-        self.fields['provide_quest'] = forms.ChoiceField(choices=choices, required=False)
-        self.fields['complete_quest'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 
