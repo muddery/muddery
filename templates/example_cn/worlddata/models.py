@@ -415,7 +415,6 @@ class action_attack(BaseModels.action_attack):
 #
 #------------------------------------------------------------
 class action_dialogue(BaseModels.action_dialogue):
-    "Store all event dialogues."
     pass
 
 
@@ -425,7 +424,24 @@ class action_dialogue(BaseModels.action_dialogue):
 #
 #------------------------------------------------------------
 class action_learn_skill(BaseModels.action_learn_skill):
-    "Store all event dialogues."
+    pass
+
+
+#------------------------------------------------------------
+#
+# action to accept a quest
+#
+#------------------------------------------------------------
+class action_accept_quest(BaseModels.action_accept_quest):
+    pass
+
+
+#------------------------------------------------------------
+#
+# action to turn in a quest
+#
+#------------------------------------------------------------
+class action_turn_in_quest(BaseModels.action_turn_in_quest):
     pass
 
 

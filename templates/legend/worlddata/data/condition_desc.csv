@@ -1,6 +1,6 @@
 id,key,condition,desc
-1,room_house,"not is_quest_completed(""quest_find_cat"")",房子里坐着一位美丽的姑娘，洁白的皮肤，红润的嘴唇，头发如瀑布一样洒落在肩上。她眼眉低垂着，看上去很忧伤。
-2,npc_junjun,"not is_quest_completed(""quest_find_cat"")",她的一双大眼睛看着你，面带着忧伤。
+1,room_house,"not is_quest_finished(""quest_find_cat"")",房子里坐着一位美丽的姑娘，洁白的皮肤，红润的嘴唇，头发如瀑布一样洒落在肩上。她眼眉低垂着，看上去很忧伤。
+2,npc_junjun,"not is_quest_finished(""quest_find_cat"")",她的一双大眼睛看着你，面带着忧伤。
 3,room_road_front,"not has_attr(""kill_wolf"")",这条路通往山上。在路中央有一只恶狼，它呲着牙，一双绿色的眼睛紧紧地盯着你。
 4,room_road_left,"not has_attr(""kill_beauty"")",在路的尽头坐着一位漂亮的女人，她胸脯丰满，白腿细长，你看着她忍不住咽了一口口水。
 5,room_road_right,"not has_attr(""kill_pirate"")",在路的尽头有一个宝箱，里面仿佛有金子在闪闪发光。

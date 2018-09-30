@@ -1184,14 +1184,6 @@ class dialogue_sentences(models.Model):
     # sentence's content
     content = models.TextField(blank=True)
 
-    # The key of a quest.
-    # can provide this quest
-    provide_quest = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    # The key of a quest.
-    # can complete this quest
-    complete_quest = models.CharField(max_length=KEY_LENGTH, blank=True)
-
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -1317,6 +1309,46 @@ class action_learn_skill(BaseEventActionData):
         app_label = "worlddata"
         verbose_name = "Action Learn Skill"
         verbose_name_plural = "Action Learn Skills"
+
+
+# ------------------------------------------------------------
+#
+# action to accept a quest
+#
+# ------------------------------------------------------------
+class action_accept_quest(BaseEventActionData):
+    "Store all actions to accept quests."
+
+    # The key of a quest.
+    # quest's key
+    quest = models.CharField(max_length=KEY_LENGTH)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Action Accept Quest"
+        verbose_name_plural = "Action Accept Quests"
+
+
+# ------------------------------------------------------------
+#
+# action to turn in a quest
+#
+# ------------------------------------------------------------
+class action_turn_in_quest(BaseEventActionData):
+    "Store all actions to turn in a quest."
+
+    # The key of a quest.
+    # quest's key
+    quest = models.CharField(max_length=KEY_LENGTH)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Action Turn in Quest"
+        verbose_name_plural = "Action Turn in Quests"
 
 
 # ------------------------------------------------------------

@@ -2,9 +2,7 @@
 This model handle statements.
 """
 
-import re
-import ast
-import traceback
+import re, ast, traceback
 from evennia.utils import logger
 from evennia.utils.utils import class_from_module
 from django.conf import settings
@@ -60,7 +58,8 @@ def get_condition_func(func_set, caller, obj, **kwargs):
             else:
                 return "False"
         except Exception, e:
-            logger.log_errmsg("Exec function error: %s %s" % (function, e))
+            logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
+            traceback.print_exc()
             return "None"
 
     return function
@@ -140,7 +139,8 @@ class StatementHandler(object):
             try:
                 exec_function(self.action_func_set, function, caller, obj, **kwargs)
             except Exception, e:
-                logger.log_errmsg("Exec function error: %s %s" % (function, e))
+                logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
+                traceback.print_exc()
 
         return
 
@@ -168,7 +168,8 @@ class StatementHandler(object):
                 if result:
                     results.append(result)
             except Exception, e:
-                logger.log_errmsg("Exec function error: %s %s" % (function, e))
+                logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
+                traceback.print_exc()
 
         return results
 
@@ -194,7 +195,8 @@ class StatementHandler(object):
             # do condition
             result = eval(exec_string)
         except Exception, e:
-            logger.log_tracemsg("Exec condition error:%s %s" % (condition, e))
+            logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
+            traceback.print_exc()
             return False
 
         return result

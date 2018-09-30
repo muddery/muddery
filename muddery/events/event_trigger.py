@@ -61,9 +61,15 @@ class EventTrigger(object):
                 self.events[trigger_type] = []
             self.events[trigger_type].append(event)
 
+    def get_events(self):
+        """
+        If this event has specified action, returns True.
+        """
+        return self.events
+
     def can_bypass(self, character):
         """
-        If the character can bypass the event.
+        If the character can bypass the event, returns True.
         """
         if not character:
             return False
@@ -160,11 +166,9 @@ class EventTrigger(object):
         Called when a character act to an object.
         """
         triggered = self.trigger(defines.EVENT_TRIGGER_ACTION, character, self.owner)
-        return not triggered
 
     def at_sentence(self, character, obj):
         """
         Called when a character finishes a dialogue sentence.
         """
         triggered = self.trigger(defines.EVENT_TRIGGER_SENTENCE, character, obj)
-        return not triggered

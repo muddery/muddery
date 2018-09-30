@@ -11,8 +11,8 @@ DEPENDENCY_QUEST_IN_PROGRESS = "IN_PROGRESS"
 DEPENDENCY_QUEST_NOT_IN_PROGRESS = "NOT_IN_PROGRESS"
 DEPENDENCY_QUEST_ACCOMPLISHED = "ACCOMPLISHED"          # quest accomplished
 DEPENDENCY_QUEST_NOT_ACCOMPLISHED = "NOT_ACCOMPLISHED"  # quest accepted but not accomplished
-DEPENDENCY_QUEST_COMPLETED = "COMPLETED"                # quest complete
-DEPENDENCY_QUEST_NOT_COMPLETED = "NOT_COMPLETED"        # quest accepted but not complete
+DEPENDENCY_QUEST_FINISHED = "FINISHED"                  # quest finished
+DEPENDENCY_QUEST_NOT_FINISHED = "NOT_FINISHED"          # quest accepted but not finished
 
 # quest objective types
 OBJECTIVE_NONE = ""

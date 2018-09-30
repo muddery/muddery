@@ -11,6 +11,7 @@ import re
 from muddery.utils import defines
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.worlddata.dao.dialogues_mapper import DIALOGUES
 from muddery.worlddata.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
 from muddery.worlddata.dao.dialogue_relations_mapper import DIALOGUE_RELATIONS
@@ -89,15 +90,29 @@ class DialogueHandler(object):
         for sentence in sentences:
             speaker_model = self.speaker_escape.sub(self.escape_fun, sentence.speaker)
 
+            # get events and quests
+            event_trigger = EventTrigger(None, sentence.key)
+            events = event_trigger.get_events()
+            provide_quest = []
+            finish_quest = []
+            if defines.EVENT_TRIGGER_SENTENCE in events:
+                for event_info in events[defines.EVENT_TRIGGER_SENTENCE]:
+                    if event_info["action"] == "ACTION_ACCEPT_QUEST":
+                        action = EVENT_ACTION_SET.get(event_info["action"])
+                        provide_quest.extend(action.get_quests(event_info["key"]))
+                    elif event_info["action"] == "ACTION_TURN_IN_QUEST":
+                        action = EVENT_ACTION_SET.get(event_info["action"])
+                        finish_quest.extend(action.get_quests(event_info["key"]))
+
             data["sentences"].append({"key": sentence.key,
                                       "dialogue": dialogue,
                                       "ordinal": sentence.ordinal,
                                       "speaker_model": speaker_model,
                                       "icon": sentence.icon,
                                       "content": sentence.content,
-                                      "event": EventTrigger(None, sentence.key),
-                                      "provide_quest": sentence.provide_quest,
-                                      "complete_quest": sentence.complete_quest,
+                                      "event": event_trigger,
+                                      "provide_quest": provide_quest,
+                                      "finish_quest": finish_quest,
                                       "can_close": self.can_close_dialogue})
 
         # sort sentences by ordinal
@@ -157,10 +172,7 @@ class DialogueHandler(object):
             return False
 
         sentence = sentences[0]
-        if sentence['is_last'] or\
-           sentence['event'] or\
-           sentence['complete_quest'] or\
-           sentence['provide_quest']:
+        if sentence['is_last'] or sentence['event']:
             return False
 
         return True
@@ -457,12 +469,6 @@ class DialogueHandler(object):
             # last sentence
             self.finish_dialogue(caller, dialogue)
 
-        if sentence["complete_quest"]:
-            caller.quest_handler.complete(sentence["complete_quest"])
-
-        if sentence["provide_quest"]:
-            caller.quest_handler.accept(sentence["provide_quest"])
-
     def finish_dialogue(self, caller, dialogue):
         """
         A dialogue finished, do it's action.
@@ -483,51 +489,49 @@ class DialogueHandler(object):
 
     def have_quest(self, caller, npc):
         """
-        Check if the npc can complete or provide quests.
+        Check if the npc can provide or finish quests.
         Completing is higher than providing.
         """
         provide_quest = False
-        complete_quest = False
+        finish_quest = False
 
         if not caller:
-            return (provide_quest, complete_quest)
+            return (provide_quest, finish_quest)
 
         if not npc:
-            return (provide_quest, complete_quest)
-
-        accomplished_quests = caller.quest_handler.get_accomplished_quests()
+            return (provide_quest, finish_quest)
 
         # get npc's default dialogues
         for dlg_key in npc.dialogues:
             # find quests by recursion
-            provide, complete = self.dialogue_have_quest(caller, npc, dlg_key, accomplished_quests)
+            provide, finish = self.dialogue_have_quest(caller, npc, dlg_key)
                 
             provide_quest = (provide_quest or provide)
-            complete_quest = (complete_quest or complete)
+            finish_quest = (finish_quest or finish)
 
-            if complete_quest:
+            if finish_quest:
                 break
 
-            if not accomplished_quests:
+            if not caller.quest_handler.get_accomplished_quests():
                 if provide_quest:
                     break
-        
-        return (provide_quest, complete_quest)
 
-    def dialogue_have_quest(self, caller, npc, dialogue, accomplished_quests):
+        return (provide_quest, finish_quest)
+
+    def dialogue_have_quest(self, caller, npc, dialogue):
         """
         Find quests by recursion.
         """
         provide_quest = False
-        complete_quest = False
+        finish_quest = False
 
         # check if the dialogue is available
         npc_dlg = self.get_dialogue(dialogue)
         if not npc_dlg:
-            return (provide_quest, complete_quest)
+            return (provide_quest, finish_quest)
 
         if not STATEMENT_HANDLER.match_condition(npc_dlg["condition"], caller, npc):
-            return (provide_quest, complete_quest)
+            return (provide_quest, finish_quest)
 
         match = True
         for dep in npc_dlg["dependencies"]:
@@ -536,36 +540,36 @@ class DialogueHandler(object):
                 match = False
                 break
         if not match:
-            return (provide_quest, complete_quest)
+            return (provide_quest, finish_quest)
 
         # find quests in its sentences
         for sen in npc_dlg["sentences"]:
-            if sen["complete_quest"] in accomplished_quests:
-                complete_quest = True
-                return (provide_quest, complete_quest)
+            for quest_key in sen["finish_quest"]:
+                if caller.quest_handler.is_accomplished(quest_key):
+                    finish_quest = True
+                    return (provide_quest, finish_quest)
 
             if not provide_quest and sen["provide_quest"]:
-                quest_key = sen["provide_quest"]
-                if caller.quest_handler.can_provide(quest_key):
-                    provide_quest = True
-                    if not accomplished_quests:
-                        return (provide_quest, complete_quest)
+                for quest_key in sen["provide_quest"]:
+                    if caller.quest_handler.can_provide(quest_key):
+                        provide_quest = True
+                        return (provide_quest, finish_quest)
 
         for dlg_key in npc_dlg["nexts"]:
             # get next dialogue
-            provide, complete = self.dialogue_have_quest(caller, npc, dlg_key, accomplished_quests)
+            provide, finish = self.dialogue_have_quest(caller, npc, dlg_key)
                 
             provide_quest = (provide_quest or provide)
-            complete_quest = (complete_quest or complete)
+            finish_quest = (finish_quest or finish)
 
-            if complete_quest:
+            if finish_quest:
                 break
 
-            if not accomplished_quests:
+            if not caller.quest_handler.get_accomplished_quests():
                 if provide_quest:
                     break
 
-        return (provide_quest, complete_quest)
+        return (provide_quest, finish_quest)
 
 
 # main dialoguehandler

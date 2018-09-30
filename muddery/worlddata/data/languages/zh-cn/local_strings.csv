@@ -55,7 +55,7 @@ category,origin,local
 ,"You should unlock something.","你需要指定打开的东西。"
 ,"Can not find this exit.","无法找到这个出口。"
 ,"Accepted quest {c%s{n.","接受任务{c%s{n。"
-,"Completed quest {c%s{n.","完成任务{c%s{n。"
+,"Turned in quest {c%s{n.","完成任务{c%s{n。"
 ,"Quest {c%s{n's goals are accomplished.","任务{c%s{n目标已完成。"
 ,"You become {c%s{n.","你登录了{c%s{n。"
 ,"HP recovered by %s.","生命回复%s。"

@@ -29,7 +29,7 @@ class QuestHandler(object):
         """
         self.owner = owner
         self.current_quests = owner.db.current_quests
-        self.completed_quests = owner.db.completed_quests
+        self.finished_quests = owner.db.finished_quests
 
     def accept(self, quest_key):
         """
@@ -86,14 +86,14 @@ class QuestHandler(object):
         self.current_quests[quest_key].delete()
         del(self.current_quests[quest_key])
 
-        if quest_key in self.completed_quests:
-            self.completed_quests.remove(quest_key)
+        if quest_key in self.finished_quests:
+            self.finished_quests.remove(quest_key)
 
         self.show_quests()
 
-    def complete(self, quest_key):
+    def turn_in(self, quest_key):
         """
-        Complete a quest.
+        Turn in a quest.
 
         Args:
             quest_key: (string) quest's key
@@ -110,16 +110,16 @@ class QuestHandler(object):
         # Get quest's name.
         name = self.current_quests[quest_key].get_name()
 
-        # Call complete function in the quest.
-        self.current_quests[quest_key].complete()
+        # Call turn in function in the quest.
+        self.current_quests[quest_key].turn_in()
 
         # Delete the quest.
         self.current_quests[quest_key].delete()
         del (self.current_quests[quest_key])
 
-        self.completed_quests.add(quest_key)
+        self.finished_quests.add(quest_key)
 
-        self.owner.msg({"msg": _("Completed quest {c%s{n.") % name})
+        self.owner.msg({"msg": _("Turned in quest {c%s{n.") % name})
         self.show_quests()
         self.owner.show_location()
 
@@ -163,9 +163,9 @@ class QuestHandler(object):
             return False
         return not self.current_quests[quest_key].is_accomplished()
 
-    def is_completed(self, quest_key):
+    def is_finished(self, quest_key):
         """
-        Whether the character completed this quest or not.
+        Whether the character finished this quest or not.
 
         Args:
             quest_key: (string) quest's key
@@ -173,7 +173,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        return quest_key in self.completed_quests
+        return quest_key in self.finished_quests
 
     def is_in_progress(self, quest_key):
         """
@@ -197,7 +197,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        if self.is_completed(quest_key):
+        if self.is_finished(quest_key):
             return False
 
         if self.is_in_progress(quest_key):
@@ -223,7 +223,7 @@ class QuestHandler(object):
         """
         for dep in QUEST_DEPENDENCIES.filter(quest_key):
             status = QUEST_STATUS_SET.get(dep.type)
-            if not status.match(self.owner, dep.quest):
+            if not status.match(self.owner, dep.dependency):
                 return False
         return True
 

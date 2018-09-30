@@ -18,6 +18,6 @@ class NotAccpeted(BaseQuestStatus):
         if not caller:
             return False
 
-        return not caller.quest_handler.is_completed(quest_key) and \
+        return not caller.quest_handler.is_finished(quest_key) and \
             not caller.quest_handler.is_in_progress(quest_key)
 

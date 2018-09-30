@@ -1,5 +1,5 @@
 quest,dependency,type
-quest_find_guardhouse_key,quest_find_survivor,COMPLETED
-quest_find_binder,quest_find_guardhouse_key,COMPLETED
-quest_find_screws,quest_find_binder,COMPLETED
-quest_kill_robots,quest_find_screws,COMPLETED
+quest_find_guardhouse_key,quest_find_survivor,FINISHED
+quest_find_binder,quest_find_guardhouse_key,FINISHED
+quest_find_screws,quest_find_binder,FINISHED
+quest_kill_robots,quest_find_screws,FINISHED

@@ -180,9 +180,9 @@ class MudderyQuest(TYPECLASS("OBJECT")):
 
         return True
 
-    def complete(self):
+    def turn_in(self):
         """
-        Complete a quest, do its action.
+        Turn in a quest, do its action.
         """
         owner = self.db.owner
 

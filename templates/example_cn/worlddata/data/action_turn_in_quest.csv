@@ -1,0 +1,6 @@
+event_key,quest
+event_turn_in_find_survivor,quest_find_survivor
+event_turn_in_find_key,quest_find_guardhouse_key
+event_turn_in_find_binder,quest_find_binder
+event_turn_in_find_screws,quest_find_screws
+event_turn_in_kill_robots,quest_kill_robots

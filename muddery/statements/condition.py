@@ -56,9 +56,9 @@ class FuncCanProvideQuest(StatementFunction):
         return self.caller.quest_handler.can_provide(quest_key)
 
 
-class FuncIsQuestCompleted(StatementFunction):
+class FuncIsQuestFinished(StatementFunction):
     """
-    If specified quest is completed.
+    If specified quest is finished.
 
     Args:
         args[0]: (string) quest's key
@@ -67,7 +67,7 @@ class FuncIsQuestCompleted(StatementFunction):
         boolean result
     """
 
-    key = "is_quest_completed"
+    key = "is_quest_finished"
     const = True
 
     def func(self):
@@ -78,7 +78,7 @@ class FuncIsQuestCompleted(StatementFunction):
             return False
 
         quest_key = self.args[0]
-        return self.caller.quest_handler.is_completed(quest_key)
+        return self.caller.quest_handler.is_finished(quest_key)
 
 
 class FuncHasObject(StatementFunction):

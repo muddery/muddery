@@ -89,8 +89,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             self.db.skills = {}
 
         # set quests
-        if not self.attributes.has("completed_quests"):
-            self.db.completed_quests = set()
+        if not self.attributes.has("finished_quests"):
+            self.db.finished_quests = set()
         if not self.attributes.has("current_quests"):
             self.db.current_quests = {}
 

@@ -5,11 +5,11 @@ Quest status.
 from muddery.quests.base_quest_status import BaseQuestStatus
 
 
-class Completed(BaseQuestStatus):
+class Finished(BaseQuestStatus):
     """
-    The quest is completed.
+    The quest is finished.
     """
-    key = "COMPLETED"
+    key = "FINISHED"
 
     def match(self, caller, quest_key):
         """
@@ -18,5 +18,5 @@ class Completed(BaseQuestStatus):
         if not caller:
             return False
 
-        return caller.quest_handler.is_completed(quest_key)
+        return caller.quest_handler.is_finished(quest_key)
     

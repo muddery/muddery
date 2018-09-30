@@ -1,4 +1,4 @@
 id,key,unlock_condition,unlock_verb,locked_desc,auto_unlock
 1,exit_front_cross,"has_attr(""kill_wolf"")",,恶狼挡住了你的去路。,True
-2,exit_colorfulworld_gate_path,"is_quest_completed(""quest_none"")",,那里太远了，我就在附近找找看吧。,True
+2,exit_colorfulworld_gate_path,"is_quest_finished(""quest_none"")",,那里太远了，我就在附近找找看吧。,True
 3,exit_house_front,"not can_provide_quest(""quest_find_cat"")",,女孩好像有话要对你说。,True
