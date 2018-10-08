@@ -399,7 +399,7 @@ class npc_dialogues(model_base.npc_dialogues):
 # event attack's data
 #
 # ------------------------------------------------------------
-class event_attacks(model_base.event_attacks):
+class action_attack(model_base.action_attack):
     "event attack's data"
     pass
 
@@ -409,7 +409,7 @@ class event_attacks(model_base.event_attacks):
 # event dialogues
 #
 #------------------------------------------------------------
-class event_dialogues(model_base.event_dialogues):
+class action_dialogue(model_base.action_dialogue):
     "Store all event dialogues."
     pass
 
@@ -419,7 +419,25 @@ class event_dialogues(model_base.event_dialogues):
 # event closes
 #
 #------------------------------------------------------------
-class event_closes(model_base.event_closes):
+class action_learn_skill(model_base.action_learn_skill):
+    pass
+
+    
+#------------------------------------------------------------
+#
+# action to accept a quest
+#
+#------------------------------------------------------------
+class action_accept_quest(model_base.action_accept_quest):
+    pass
+
+
+#------------------------------------------------------------
+#
+# action to turn in a quest
+#
+#------------------------------------------------------------
+class action_turn_in_quest(model_base.action_turn_in_quest):
     pass
 
 
