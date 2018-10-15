@@ -89,7 +89,7 @@ class query_areas(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        data = general_query.query_areas()
+        data = data_query.query_areas()
         return success_response(data)
 
 
