@@ -46,7 +46,7 @@ DialogueEditor.prototype.onDeleteSentence = function(e) {
 }
 
 DialogueEditor.prototype.confirmDeleteSentence = function(e) {
-    window.parent.controller.hide_waiting();
+    window.parent.controller.hideWaiting();
 
     var table = controller.table_name;
     var record_id = e.data.record;

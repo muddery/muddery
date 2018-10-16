@@ -254,7 +254,7 @@ CommonEditor.prototype.saveFormFailed = function(code, message, data) {
 }
 
 CommonEditor.prototype.confirmDelete = function(e) {
-    window.parent.controller.hide_waiting();
+    window.parent.controller.hideWaiting();
 
     service.deleteRecord(controller.table_name,
                          controller.record_id,

@@ -170,7 +170,7 @@ EventEditor.prototype.onDeleteAction = function(e) {
 }
 
 EventEditor.prototype.confirmDeleteAction = function(e) {
-    window.parent.controller.hide_waiting();
+    window.parent.controller.hideWaiting();
 
     var table = controller.action_table;
     var record_id = e.data.record;
