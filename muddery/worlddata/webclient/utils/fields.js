@@ -193,21 +193,38 @@ field_creator = {
         var ctrl = $("<div>");
 
         var image = $("<img>")
-            .addClass("image-" + image_type)
+            .addClass("editor-image image-" + image_type)
             .attr("id", "image-" + name)
+            .attr("src", "../images/empty.png")
             .appendTo(ctrl);
-
+            
+        var buttons = $("<div>")
+            .addClass("form-control control-buttons")
+            .appendTo(ctrl);
+            
+        var del = $("<input>")
+            .attr("type", "button")
+            .attr("value", "Delete")
+            .appendTo(buttons);
+            
         var input = $("<input>")
-            .addClass("form-control image-input-control")
+            .addClass("image-input-control")
             .attr("type", "file")
             .data("image_type", image_type)
             .data("field_name", name)
-            .appendTo(ctrl);
+            .appendTo(buttons);
 
         var resource = $("<input>")
             .addClass("editor-control")
             .attr("type", "hidden")
-            .appendTo(ctrl);
+            .appendTo(buttons);
+            
+        del.on("click", function(e){
+            var parent = $(this).parent().parent();
+            parent.find("img").attr("src", "../images/empty.png");
+            parent.find(".image-input-control").val("");
+            parent.find(".editor-control").val("");
+        });
 
         if (value) {
             image.attr("src", CONFIG.resource_url + value);
