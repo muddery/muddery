@@ -11,13 +11,13 @@ from muddery.events.base_event_action import BaseEventAction
 from muddery.utils.localized_strings_handler import _
 
 
-class ActionClose(BaseEventAction):
+class ActionCloseEvent(BaseEventAction):
     """
     Close an event.
     """
-    key = "ACTION_CLOSE"
-    name = _("Close")
-    model_name = "action_close"
+    key = "ACTION_CLOSE_EVENT"
+    name = _("Close an Event")
+    model_name = "action_close_event"
 
     def func(self, event_key, character):
         """

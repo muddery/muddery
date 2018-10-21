@@ -1353,10 +1353,10 @@ class action_turn_in_quest(BaseEventActionData):
 
 # ------------------------------------------------------------
 #
-# action close
+# action to close an event
 #
 # ------------------------------------------------------------
-class action_closes(BaseEventActionData):
+class action_close_event(BaseEventActionData):
     "Store all event closes."
 
     # The key of an event to close.

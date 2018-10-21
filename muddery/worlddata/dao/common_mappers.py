@@ -94,6 +94,12 @@ ACTION_DIALOGUE = CommonMapper("action_dialogue")
 
 ACTION_LEARN_SKILL = CommonMapper("action_learn_skill")
 
+ACTION_ACCEPT_QUEST = CommonMapper("action_accept_quest")
+
+ACTION_TURN_IN_QUEST = CommonMapper("action_turn_in_quest")
+
+ACTION_CLOSE_EVENT = CommonMapper("action_close_event")
+
 DIALOGUES = CommonMapper("dialogues")
 
 DIALOGUE_QUEST_DEPENDENCIES = CommonMapper("dialogue_quest_dependencies")

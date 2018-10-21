@@ -24,7 +24,7 @@ EventEditor.prototype.init = function() {
 EventEditor.prototype.bindEvents = function() {
     CommonEditor.prototype.bindEvents.call(this);
 
-    $("#add-action").on("click", this.addAction);
+    $("#add-action").on("click", this.onAddAction);
     $("#action-table").on("click", ".edit-row", this.onEditAction);
     $("#action-table").on("click", ".delete-row", this.onDeleteAction);
 }
@@ -51,6 +51,9 @@ EventEditor.prototype.queryFormSuccess = function(data) {
     }
 
     CommonEditor.prototype.queryFormSuccess.call(this, data);
+    
+    // Bind events
+    $("#control-action select").on("change", controller.onActionChanged);
 }
 
 EventEditor.prototype.queryAreasSuccess = function(data) {
@@ -101,7 +104,7 @@ EventEditor.prototype.setFields = function() {
 }
 
 EventEditor.prototype.onActionChanged = function(e) {
-    controller.event_type = $(this).val();
+    controller.action_type = $(this).val();
     service.queryEventActionData(controller.action_type, controller.event_key, controller.queryActionSuccess, controller.queryActionFailed);
 }
 
@@ -134,7 +137,11 @@ EventEditor.prototype.setActionData = function(data) {
     window.parent.controller.setFrameSize();
 }
 
-EventEditor.prototype.addAction = function(e) {
+EventEditor.prototype.onAddAction = function(e) {
+    controller.saveFields(controller.addAction, controller.saveFormFailed);
+}
+
+EventEditor.prototype.addAction = function() {
     if (!controller.event_key) {
         window.parent.controller.notify("You should save this object first.");
         return;
@@ -150,7 +157,15 @@ EventEditor.prototype.addAction = function(e) {
 }
 
 EventEditor.prototype.onEditAction = function(e) {
-    var record_id = $(this).attr("data-record-id");
+    var context = {
+        record_id: $(this).attr("data-record-id"),
+    }
+    
+    controller.saveFields(controller.editActionSuccess, controller.saveFormFailed, context);
+}
+
+EventEditor.prototype.editActionSuccess = function(data, context) {
+    var record_id = context.record_id;
     if (record_id) {
         var editor = "event_action";
         var table = controller.action_table;

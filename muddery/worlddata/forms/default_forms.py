@@ -878,6 +878,63 @@ class ActionLearnSkillForm(forms.ModelForm):
         fields = '__all__'
 
 
+class ActionAcceptQuestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ActionAcceptQuestForm, self).__init__(*args, **kwargs)
+
+        objects = CM.EVENT_DATA.objects.filter(action="ACTION_ACCEPT_QUEST")
+        choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
+        self.fields['event_key'] = forms.ChoiceField(choices=choices)
+
+        objects = CM.QUESTS.objects.all()
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['quest'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+
+    class Meta:
+        model = CM.ACTION_ACCEPT_QUEST.model
+        fields = '__all__'
+        
+        
+class ActionTurnInQuestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ActionTurnInQuestForm, self).__init__(*args, **kwargs)
+
+        objects = CM.EVENT_DATA.objects.filter(action="ACTION_TURN_IN_QUEST")
+        choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
+        self.fields['event_key'] = forms.ChoiceField(choices=choices)
+
+        objects = CM.QUESTS.objects.all()
+        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
+        self.fields['quest'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+
+    class Meta:
+        model = CM.ACTION_TURN_IN_QUEST.model
+        fields = '__all__'
+        
+        
+class ActionCloseEventForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ActionCloseEventForm, self).__init__(*args, **kwargs)
+
+        objects = CM.EVENT_DATA.objects.filter(action="ACTION_CLOSE_EVENT")
+        choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
+        self.fields['event_key'] = forms.ChoiceField(choices=choices)
+
+        objects = CM.EVENT_DATA.objects.all()
+        choices = [(obj.key, obj.key) for obj in objects]
+        self.fields['event'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+
+    class Meta:
+        model = CM.ACTION_CLOSE_EVENT.model
+        fields = '__all__'
+        
+        
 class DialoguesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DialoguesForm, self).__init__(*args, **kwargs)

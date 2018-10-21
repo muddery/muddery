@@ -447,6 +447,15 @@ class action_turn_in_quest(BaseModels.action_turn_in_quest):
 
 # ------------------------------------------------------------
 #
+# action to close an event
+#
+# ------------------------------------------------------------
+class action_close_event(BaseModels.action_close_event):
+    pass
+
+
+# ------------------------------------------------------------
+#
 # condition descriptions
 #
 # ------------------------------------------------------------

@@ -55,7 +55,7 @@ CommonEditor.prototype.onExit = function() {
 }
 
 CommonEditor.prototype.onSave = function() {
-    controller.saveFields();
+    controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed);
 }
 
 CommonEditor.prototype.onDelete = function() {
@@ -180,7 +180,7 @@ CommonEditor.prototype.exitNoChange = function() {
     window.parent.controller.popPage(false);
 }
 
-CommonEditor.prototype.saveFields = function() {
+CommonEditor.prototype.saveFields = function(callback_success, callback_failed, context) {
     var values = {};
     for (var i = 0; i < this.fields.length; i++) {
         var name = this.fields[i].name;
@@ -202,8 +202,9 @@ CommonEditor.prototype.saveFields = function() {
     service.saveForm(values,
                      this.table_name,
                      this.record_id,
-                     this.saveFormSuccess,
-                     this.saveFormFailed);
+                     callback_success,
+                     callback_failed,
+                     context);
 }
 
 CommonEditor.prototype.saveFormSuccess = function(data) {

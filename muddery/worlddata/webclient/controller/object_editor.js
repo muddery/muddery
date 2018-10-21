@@ -43,7 +43,7 @@ ObjectEditor.prototype.onSave = function() {
     }
 
     if (!upload_images) {
-        controller.saveFields();
+        controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed);
     }
 }
 
@@ -98,7 +98,7 @@ ObjectEditor.prototype.uploadSuccess = function(field_name) {
         }
 
         if (controller.file_fields.length == 0) {
-            controller.saveFields();
+            controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed);
         }
     }
 
