@@ -18,7 +18,7 @@ from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.worlddata.dao.loot_list_mapper import CREATOR_LOOT_LIST
 
 
-class MudderyObjectCreator(TYPECLASS("OBJECT")):
+class MudderyObjectCreator(TYPECLASS("WORLD_OBJECT")):
     """
     This object loads attributes from world data on init automatically.
     """
