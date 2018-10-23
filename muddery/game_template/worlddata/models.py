@@ -440,6 +440,15 @@ class action_accept_quest(model_base.action_accept_quest):
 class action_turn_in_quest(model_base.action_turn_in_quest):
     pass
 
+    
+# ------------------------------------------------------------
+#
+# action to close an event
+#
+# ------------------------------------------------------------
+class action_close_event(model_base.action_close_event):
+    pass
+    
 
 # ------------------------------------------------------------
 #
