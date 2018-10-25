@@ -48,7 +48,7 @@ controller = {
             service.uploadSingleData(file_obj, table_name, controller.uploadSuccess, controller.uploadFailed);
         }
 
-        window.parent.controller.show_waiting("", "Uploading...");
+        window.parent.controller.showWaiting("", "Uploading...");
     },
 
     onDownload: function(e) {

@@ -198,7 +198,7 @@ service = {
         this.sendRequest("delete_record", "", args, callback_success, callback_failed, context);
     },
 
-    queryTables: function(callback_success, callback_failed) {
+    queryTables: function(callback_success, callback_failed, context) {
         this.sendRequest("query_tables", "", {}, callback_success, callback_failed, context);
     },
 
