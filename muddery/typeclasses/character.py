@@ -603,7 +603,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Stop auto cast skill.
         """
-        if self.auto_cast_loop and self.auto_cast_loop.running:
+        if hasattr(self, "auto_cast_loop") and self.auto_cast_loop and self.auto_cast_loop.running:
             self.auto_cast_loop.stop()
 
 

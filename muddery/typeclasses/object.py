@@ -8,8 +8,7 @@ BaseObject is an object which can load it's data automatically.
 
 from __future__ import print_function
 
-import json
-import ast
+import json, ast, traceback
 from django.conf import settings
 from django.apps import apps
 from evennia.objects.models import ObjectDB
@@ -133,7 +132,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             # Load db data.
             self.load_data()
         except Exception, e:
-            logger.log_tracemsg("%s can not load data:%s" % (self.dbref, e))
+            logger.log_errmsg("%s(%s) can not load data:%s" % (self.get_data_key(), self.dbref, e))
             
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded() which is called
@@ -205,7 +204,11 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         utils.set_obj_data_key(self, key)
         
         # Load data.
-        self.load_data(set_location=set_location)
+        try:
+            # Load db data.
+            self.load_data(set_location=set_location)
+        except Exception, e:
+            logger.log_errmsg("%s(%s) can not load data:%s" % (key, self.dbref, e))
 
         # call data_key hook
         self.after_data_key_changed()
@@ -224,13 +227,15 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         if not key:
             key = self.get_data_key()
             if not key:
-                return
+                raise MudderyError("No data key.")
 
         if key[:len(settings.REVERSE_EXIT_PREFIX)] == settings.REVERSE_EXIT_PREFIX:
             # Reverse exit loads data without key's prefix.
             key = key[len(settings.REVERSE_EXIT_PREFIX):]
 
         data_models = OBJECT_KEY_HANDLER.get_models(key)
+        if not data_models:
+            raise MudderyError("No data models.")
 
         for data_model in data_models:
             # Get db model
@@ -265,10 +270,10 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             else:
                 typeclass = getattr(self.dfield, "typeclass", "")
                 
-            if not typeclass:
+            if typeclass:
+                self.set_typeclass(typeclass)
+            else:
                 logger.log_errmsg("%s does not have a typeclass." % key)
-
-            self.set_typeclass(typeclass)
 
         self.after_data_loaded()
 
@@ -340,7 +345,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         typeclass_cls = TYPECLASS(typeclass_key)
         if not typeclass_cls:
-            logger.log_errmsg("Can not get the typeclass of %s." % typeclass_key)
+            logger.log_errmsg("Can not get %s's typeclass: %s." % (self.get_data_key(), typeclass_key))
             return
         
         if type(self) == typeclass_cls:

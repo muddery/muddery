@@ -16,3 +16,4 @@ class BaseTypeclass(object):
     typeclass_key = ""
     typeclass_name = ""
     typeclass_desc = ""
+    models = []

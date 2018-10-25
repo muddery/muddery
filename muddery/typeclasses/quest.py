@@ -28,6 +28,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
     """
     typeclass_key = "QUEST"
     typeclass_name = _("Quest", "typeclasses")
+    models = ["quests"]
 
     # initialize loot handler in a lazy fashion
     @lazy_property

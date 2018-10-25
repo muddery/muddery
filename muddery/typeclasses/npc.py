@@ -21,6 +21,7 @@ class MudderyNPC(TYPECLASS("NON_PLAYER")):
     """
     typeclass_key = "NPC"
     typeclass_name = _("Neutral or Friendly NPC", "typeclasses")
+    models = ["world_npcs", "common_characters"]
 
     def at_object_creation(self):
         """

@@ -20,6 +20,7 @@ class MudderyMonster(TYPECLASS("NON_PLAYER")):
     """
     typeclass_key = "MONSTER"
     typeclass_name = _("Monster", "typeclasses")
+    models = ["world_npcs", "common_characters"]
 
     def after_data_loaded(self):
         """

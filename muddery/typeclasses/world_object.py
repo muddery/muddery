@@ -15,3 +15,4 @@ from muddery.utils.localized_strings_handler import _
 class MudderyWorldObject(TYPECLASS("OBJECT")):
     typeclass_key = "WORLD_OBJECT"
     typeclass_name = _("World Object", "typeclasses")
+    models = ["world_objects"]

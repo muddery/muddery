@@ -167,6 +167,9 @@ def build_unique_objects(objects_data, type_name, caller=None):
             if caller:
                 caller.msg(ostring)
 
+            # If default home will be removed, set default home to the Limbo.
+            if obj.dbref == settings.DEFAULT_HOME:
+                settings.DEFAULT_HOME = "#2"
             obj.delete()
             count_remove += 1
             continue
@@ -178,6 +181,9 @@ def build_unique_objects(objects_data, type_name, caller=None):
             if caller:
                 caller.msg(ostring)
 
+            # If default home will be removed, set default home to the Limbo.
+            if obj.dbref == settings.DEFAULT_HOME:
+                settings.DEFAULT_HOME = "#2"
             obj.delete()
             count_remove += 1
             continue
@@ -276,8 +282,6 @@ def build_all(caller=None):
     Args:
         caller: (command caller) If provide, running messages will send to the caller.
     """
-    print("build_all")
-
     # Reset object key's info.
     OBJECT_KEY_HANDLER.reload()
 
@@ -286,6 +290,7 @@ def build_all(caller=None):
     
     # Build rooms.
     build_unique_objects(CM.WORLD_ROOMS.all(), "world_rooms", caller)
+    reset_default_locations()
 
     # Build exits.
     build_unique_objects(CM.WORLD_EXITS.all(), "world_exits", caller)

@@ -19,6 +19,7 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
     """
     typeclass_key = "SHOP_GOODS"
     typeclass_name = _("Goods", "typeclasses")
+    models = ["shop_goods"]
 
     def at_object_creation(self):
         """
@@ -69,7 +70,12 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
         goods = self.db.goods
         if goods:
             if goods.get_data_key() == self.goods_key:
-                goods.load_data()
+                # Load data.
+                try:
+                    # Load db data.
+                    goods.load_data()
+                except Exception, e:
+                    logger.log_errmsg("%s(%s) can not load data:%s" % (self.goods_key, self.dbref, e))
             else:
                 goods.set_data_key(self.goods_key)
         else:

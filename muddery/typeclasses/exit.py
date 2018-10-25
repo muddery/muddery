@@ -45,6 +45,7 @@ class MudderyExit(TYPECLASS("OBJECT"), DefaultExit):
     """
     typeclass_key = "EXIT"
     typeclass_name = _("Exit", "typeclasses")
+    models = ["world_exits"]
 
     def after_data_loaded(self):
         """

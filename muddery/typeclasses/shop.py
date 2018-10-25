@@ -23,6 +23,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
     """
     typeclass_key = "SHOP"
     typeclass_name = _("Shop", "typeclasses")
+    models = ["shops"]
 
     def after_data_loaded(self):
         """

@@ -30,6 +30,7 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
     """
     typeclass_key = "ROOM"
     typeclass_name = _("Room", "typeclasses")
+    models = ["world_rooms"]
 
     def at_object_creation(self):
         """

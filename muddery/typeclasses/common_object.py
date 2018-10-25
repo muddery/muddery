@@ -23,6 +23,7 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
     """
     typeclass_key = "COMMON_OBJECT"
     typeclass_name = _("Common Object", "typeclasses")
+    models = ["common_objects", "foods", "skill_books", "equipments"]
 
     def at_object_creation(self):
         """

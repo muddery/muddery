@@ -24,3 +24,4 @@ class MudderyTwoWayExit(TYPECLASS("EXIT")):
     """
     typeclass_key = "TWO_WAY_EXIT"
     typeclass_name = _("Two Way Exit", "typeclasses")
+    models = ["world_exits", "two_way_exits"]
