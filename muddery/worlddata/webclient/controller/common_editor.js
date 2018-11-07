@@ -29,7 +29,6 @@ CommonEditor = function() {
 CommonEditor.prototype.init = function() {
     this.table_name = utils.getQueryString("table");
     this.record_id = utils.getQueryString("record");
-    this.fields = [];
 
     $("#exit-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");

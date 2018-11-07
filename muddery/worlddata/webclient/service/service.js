@@ -142,6 +142,13 @@ service = {
         this.sendRequest("query_record", "", args, callback_success, callback_failed, context);
     },
 
+    queryTypeclassTable: function(typeclass, callback_success, callback_failed, context) {
+        var args = {
+            typeclass: typeclass,
+        };
+        this.sendRequest("query_typeclass_table", "", args, callback_success, callback_failed, context);
+    },
+
     queryForm: function(table_name, record_id, callback_success, callback_failed, context) {
         var args = {
             table: table_name,

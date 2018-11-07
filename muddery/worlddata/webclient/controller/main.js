@@ -39,18 +39,33 @@ controller = {
 
     onLeftMenu: function(e) {
         var name = $(this).text();
-        var table = $(this).data("table");
-        var editor = $(this).data("editor");
         var page = $(this).data("page");
-        var url = "";
+        var param_text = $(this).data("params");
 
-        if (table) {
-            // Set table editor.
-            url = "common_table.html?table=" + table + "&editor=" + editor;
+        // set url
+        if (!page) {
+            console.error("No page data.");
+            return;
         }
-        else if (page) {
-            // Set actions page.
-            url = page + ".html";
+        var url = page + ".html";
+
+        // Parse params
+        if (param_text) {
+            var url_params = "";
+            var param_list = param_text.split(",");
+            for (var i = 0; i < param_list.length; i++) {
+                var key_value = param_list[i].split(":");
+                if (key_value.length >= 2) {
+                    if (url_params.length > 0) {
+                        url_params += "&";
+                    }
+                    url_params += key_value[0] + "=" + key_value[1];
+                }
+            }
+
+            if (url_params.length > 0) {
+                url += "?" + url_params;
+            }
         }
 
         controller.setPage(name, url, 0);

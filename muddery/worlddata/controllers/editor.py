@@ -14,6 +14,7 @@ from muddery.worlddata.utils.response import success_response
 from muddery.utils.builder import build_all
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
+from muddery.mappings.typeclass_set import TYPECLASS
 
 
 class query_fields(BaseRequestProcesser):
@@ -161,6 +162,7 @@ class query_form(BaseRequestProcesser):
 
     Args:
         table: (string) table's name
+        record: (string, optional) record's id. If it is empty, get a new record.
     """
     path = "query_form"
     name = ""
@@ -177,6 +179,59 @@ class query_form(BaseRequestProcesser):
 
 
 class save_form(BaseRequestProcesser):
+    """
+    Save a form.
+
+    Args:
+        values: (dict) values to save.
+        table: (string) table's name.
+        record: (string, optional) record's id. If it is empty, add a new record.
+    """
+    path = "save_form"
+    name = ""
+
+    def func(self, args, request):
+        if not args:
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        if 'values' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing argument: "values".')
+
+        if 'table' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
+
+        values = args["values"]
+        table_name = args["table"]
+        record_id = args.get('record', None)
+
+        record_id = data_edit.save_form(values, table_name, record_id)
+        data = general_query.query_record(table_name, record_id)
+        return success_response(data)
+
+
+class query_object_form(BaseRequestProcesser):
+    """
+    Query a record of an object which may include several tables.
+
+    Args:
+        table: (string) table's name
+        record: (string, optional) record's id. If it is empty, get a new record.
+    """
+    path = "query_object_form"
+    name = ""
+
+    def func(self, args, request):
+        if 'table' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
+
+        table_name = args["table"]
+        record = args.get('record', None)
+
+        data = data_edit.query_form(table_name, record)
+        return success_response(data)
+
+
+class save_object_form(BaseRequestProcesser):
     """
     Save a form.
 
