@@ -1,0 +1,22 @@
+
+.header {
+    padding-bottom: 10px;
+}
+
+#table-name {
+    font-size: 21px;
+    color: #333;
+}
+
+.row-operate {
+    min-width: 0;
+}
+
+.btn-link {
+    padding: 0px 6px;
+    border: 0 none;
+}
+
+.edit-row, .delete-row {
+    margin: 1px 2px;
+}
