@@ -12,7 +12,6 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.loot_handler import LootHandler
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.worlddata.dao.loot_list_mapper import QUEST_REWARD_LIST
 from muddery.worlddata.dao.quest_objectives_mapper import QUEST_OBJECTIVES
 from muddery.mappings.typeclass_set import TYPECLASS
@@ -28,7 +27,8 @@ class MudderyQuest(TYPECLASS("OBJECT")):
     """
     typeclass_key = "QUEST"
     typeclass_name = _("Quest", "typeclasses")
-    models = ["quests"]
+    model_name = "quests"
+    __all_models__ = None
 
     # initialize loot handler in a lazy fashion
     @lazy_property
@@ -126,16 +126,15 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                     
                     # Get the name of the objective object.
                     object_key = self.objectives[ordinal]["object"]
-                    model_names = OBJECT_KEY_HANDLER.get_models(object_key)
-                    for model_name in model_names:
-                        model = apps.get_model(settings.WORLD_DATA_APP, model_name)
-                        # Get record.
-                        try:
-                            record = model.objects.get(key=object_key)
-                            name = record.name
-                            break
-                        except Exception, e:
-                            pass
+                    model_name = TYPECLASS("OBJECT").model_name
+                    model = apps.get_model(settings.WORLD_DATA_APP, model_name)
+                    # Get record.
+                    try:
+                        record = model.objects.get(key=object_key)
+                        name = record.name
+                        break
+                    except Exception, e:
+                        pass
         
                     objectives.append({"target": target,
                                        "object": name,
@@ -149,16 +148,15 @@ class MudderyQuest(TYPECLASS("OBJECT")):
 
                     # Get the name of the objective character.
                     object_key = self.objectives[ordinal]["object"]
-                    model_names = OBJECT_KEY_HANDLER.get_models(object_key)
-                    for model_name in model_names:
-                        model = apps.get_model(settings.WORLD_DATA_APP, model_name)
-                        # Get record.
-                        try:
-                            record = model.objects.get(key=object_key)
-                            name = record.name
-                            break
-                        except Exception, e:
-                            pass
+                    model_name = TYPECLASS("OBJECT").model_name
+                    model = apps.get_model(settings.WORLD_DATA_APP, model_name)
+                    # Get record.
+                    try:
+                        record = model.objects.get(key=object_key)
+                        name = record.name
+                        break
+                    except Exception, e:
+                        pass
 
                     objectives.append({"target": target,
                                        "object": name,

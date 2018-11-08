@@ -1,6 +1,6 @@
-key,name,typeclass,desc,message,cd,passive,function,icon,main_type,sub_type,mp
-skill_normal_hit,普通攻击,SKILL,攻击敌人，伤害一般。,{c%c{n攻击了%t。,1,0,hit(1),image/icon/hit.png,ST_ATTACK,,0
-skill_normal_heal,普通治疗,SKILL,治疗自己，效果一般。,{c%c{n治疗了自己。,5,0,heal(20),image/icon/heal.png,ST_HEAL,,10
-skill_normal_hp,强壮体魄,SKILL,被动技能，提升最大生命值。,,0,1,max_hp(20),image/icon/strong.png,,,0
-skill_dunt,重击,SKILL,攻击敌人，造成大量伤害。,{c%c{n狠狠打了%t一下。,1,0,hit(2),image/icon/dunt.png,ST_ATTACK,,10
-skill_escape,逃跑,SKILL,逃之夭夭。,{c%c{n想要逃跑。,5,0,escape(0.5),image/icon/escape.png,,,0
+key,message,cd,passive,function,icon,main_type,sub_type,mp
+skill_normal_hit,{c%c{n攻击了%t。,1,0,hit(1),image/icon/hit.png,ST_ATTACK,,0
+skill_normal_heal,{c%c{n治疗了自己。,5,0,heal(20),image/icon/heal.png,ST_HEAL,,10
+skill_normal_hp,,0,1,max_hp(20),image/icon/strong.png,,,0
+skill_dunt,{c%c{n狠狠打了%t一下。,1,0,hit(2),image/icon/dunt.png,ST_ATTACK,,10
+skill_escape,{c%c{n想要逃跑。,5,0,escape(0.5),image/icon/escape.png,,,0

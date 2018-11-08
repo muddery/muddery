@@ -18,5 +18,7 @@ class MudderyNonPlayerCharacter(TYPECLASS("CHARACTER")):
     """
     The character not controlled by players.
     """
-    typeclass_key = "NON_PLAYER"
+    typeclass_key = "COMMON_CHARACTER"
     typeclass_name = _("General NPC", "typeclasses")
+    model = "common_characters"
+    __all_models__ = None

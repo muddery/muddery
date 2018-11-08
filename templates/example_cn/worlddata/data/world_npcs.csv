@@ -1,4 +1,4 @@
-key,name,typeclass,desc,model,level,reborn_time,location,condition,icon
-npc_wu,保安,NPC,"这个人身材高大，但身上受了伤，活动有些不灵活。",MODEL_NPC_COMMON,1,0,room_colorfulworld_storeroom,is_quest_finished("quest_find_survivor"),image/icon/guard.png
-npc_stranger,陌生人,MONSTER,"这个人身材高大，体格强健，双手紧握着拳头，眼睛紧紧地盯着你，时刻会向你扑过来。",MODEL_NPC_COMMON,1,1,room_colorfulworld_storeroom,not is_quest_finished("quest_find_survivor"),image/icon/guard.png
-npc_doll,人偶,MONSTER,"这个人偶斜靠在墙上，一双大眼睛好像正在盯着你看。你越瞧它越不爽，真想打它一顿！",MODEL_MOB_DOLL,1,1,room_colorfulworld_photo_studio,,image/icon/model.png
+key,model,level,reborn_time,location,condition,icon
+npc_wu,MODEL_NPC_COMMON,1,0,room_colorfulworld_storeroom,is_quest_finished("quest_find_survivor"),image/icon/guard.png
+npc_stranger,MODEL_NPC_COMMON,1,1,room_colorfulworld_storeroom,not is_quest_finished("quest_find_survivor"),image/icon/guard.png
+npc_doll,MODEL_MOB_DOLL,1,1,room_colorfulworld_photo_studio,,image/icon/model.png

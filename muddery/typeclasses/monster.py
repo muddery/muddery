@@ -14,13 +14,13 @@ from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
-class MudderyMonster(TYPECLASS("NON_PLAYER")):
+class MudderyMonster(TYPECLASS("WORLD_CHARACTER")):
     """
     Default mob. Monsters are hostile to players, they can be attacked.
     """
     typeclass_key = "MONSTER"
     typeclass_name = _("Monster", "typeclasses")
-    models = ["world_npcs", "common_characters"]
+    __all_models__ = None
 
     def after_data_loaded(self):
         """

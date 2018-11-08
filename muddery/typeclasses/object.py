@@ -22,7 +22,6 @@ from muddery.utils.data_field_handler import DataFieldHandler
 from muddery.utils import utils
 from muddery.utils import defines
 from muddery.utils.exception import MudderyError
-from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.desc_handler import DESC_HANDLER
@@ -36,6 +35,8 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
     """
     typeclass_key = "OBJECT"
     typeclass_name = _("Object", "typeclasses")
+    model_name = "objects"
+    __all_models__ = None
 
     # initialize all handlers in a lazy fashion
     @lazy_property
@@ -229,15 +230,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             if not key:
                 raise MudderyError("No data key.")
 
-        if key[:len(settings.REVERSE_EXIT_PREFIX)] == settings.REVERSE_EXIT_PREFIX:
-            # Reverse exit loads data without key's prefix.
-            key = key[len(settings.REVERSE_EXIT_PREFIX):]
-
-        data_models = OBJECT_KEY_HANDLER.get_models(key)
-        if not data_models:
-            raise MudderyError("No data models.")
-
-        for data_model in data_models:
+        for data_model in self.get_models():
             # Get db model
             model_obj = apps.get_model(settings.WORLD_DATA_APP, data_model)
             if not model_obj:
@@ -264,12 +257,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             self.load_data_fields(key)
 
             # reset typeclass
-            if key[:len(settings.REVERSE_EXIT_PREFIX)] == settings.REVERSE_EXIT_PREFIX:
-                # Reverse exit's typeclass can only be set to settings.REVERSE_EXIT_TYPECLASS_KEY.
-                typeclass = settings.REVERSE_EXIT_TYPECLASS_KEY
-            else:
-                typeclass = getattr(self.dfield, "typeclass", "")
-                
+            typeclass = getattr(self.dfield, "typeclass", "")
             if typeclass:
                 self.set_typeclass(typeclass)
             else:

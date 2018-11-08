@@ -388,17 +388,8 @@ INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
 # data file's folder under user's game directory.
 WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
 
-# Two way exit's typeclass key.
-TWO_WAY_EXIT_TYPECLASS_KEY = "TWO_WAY_EXIT"
-
-# Reverse exit's typeclass key.
-REVERSE_EXIT_TYPECLASS_KEY = "REVERSE_EXIT"
-
 # Character's typeclass key.
 GENERAL_CHARACTER_TYPECLASS_KEY = "CHARACTER"
-
-# Reverse exit's key's prefix.
-REVERSE_EXIT_PREFIX = "__reverse__"
 
 # Localized string data's folder.
 LOCALIZED_STRINGS_FOLDER = "languages"

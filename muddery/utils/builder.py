@@ -5,9 +5,8 @@ This module handles importing data from csv files and creating the whole game wo
 from __future__ import print_function
 
 from muddery.utils import utils
-from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.mappings.typeclass_set import TYPECLASS_SET
+from muddery.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
 from muddery.worlddata.dao import common_mappers as CM
 from django.conf import settings
 from django.apps import apps
@@ -27,18 +26,15 @@ def get_object_record(obj_key):
         The object's data record.
     """
     record = None
-    model_names = OBJECT_KEY_HANDLER.get_models(obj_key)
-    for model_name in model_names:
-        try:
-            # Get record.
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
-            record = model_obj.objects.get(key=obj_key)
-            break
-        except Exception, e:
-            ostring = "Can not get record %s: %s." % (obj_key, e)
-            print(ostring)
-            print(traceback.print_exc())
-            continue
+    model_name = TYPECLASS("OBJECT").model_name
+    try:
+        # Get record.
+        model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
+        record = model_obj.objects.get(key=obj_key)
+    except Exception, e:
+        ostring = "Can not get record %s: %s." % (obj_key, e)
+        print(ostring)
+        print(traceback.print_exc())
 
     if not record:
         ostring = "Can not get record %s." % obj_key
@@ -102,31 +98,6 @@ def build_object(obj_key, caller=None, set_location=True):
             caller.msg(ostring)
         return
 
-    if record.typeclass == settings.TWO_WAY_EXIT_TYPECLASS_KEY:
-        # If it's a two way exit, create the reverse exit.
-
-        # Create object.
-        try:
-            obj = create.create_object(TYPECLASS_SET.get_module(settings.REVERSE_EXIT_TYPECLASS_KEY), record.name)
-        except Exception, e:
-            ostring = "Can not create obj %s: %s" % (obj_key, e)
-            print(ostring)
-            print(traceback.print_exc())
-            if caller:
-                caller.msg(ostring)
-            return
-
-        try:
-            # Set data info.
-            obj.set_data_key(settings.REVERSE_EXIT_PREFIX + record.key)
-        except Exception, e:
-            ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
-            print(ostring)
-            print(traceback.print_exc())
-            if caller:
-                caller.msg(ostring)
-            return
-
     return obj
 
 
@@ -140,13 +111,6 @@ def build_unique_objects(objects_data, type_name, caller=None):
     """
     # new objects
     new_obj_keys = set(record.key for record in objects_data)
-
-    # reverse exits
-    reverse_exits = set(settings.REVERSE_EXIT_PREFIX + record.key
-                        for record in objects_data
-                            if record.typeclass==settings.TWO_WAY_EXIT_TYPECLASS_KEY)
-
-    new_obj_keys.update(reverse_exits)
 
     # current objects
     current_objs = utils.search_obj_unique_type(type_name)
@@ -203,6 +167,8 @@ def build_unique_objects(objects_data, type_name, caller=None):
         current_obj_keys.add(obj_key)
 
     # Create new objects.
+    object_model_name = TYPECLASS("OBJECT").model_name
+    object_model = apps.get_model(settings.WORLD_DATA_APP, object_model_name)
     for record in objects_data:
         if not record.key in current_obj_keys:
             # Create new objects.
@@ -212,8 +178,9 @@ def build_unique_objects(objects_data, type_name, caller=None):
                 caller.msg(ostring)
 
             try:
-                typeclass_path = TYPECLASS_SET.get_module(record.typeclass)
-                obj = create.create_object(typeclass_path, record.name)
+                object_record = object_model.objects.get(key=record.key)
+                typeclass_path = TYPECLASS_SET.get_module(object_record.typeclass)
+                obj = create.create_object(typeclass_path, object_record.name)
                 count_create += 1
             except Exception, e:
                 ostring = "Can not create obj %s: %s" % (record.key, e)
@@ -234,42 +201,8 @@ def build_unique_objects(objects_data, type_name, caller=None):
                     caller.msg(ostring)
                 continue
 
-        if record.typeclass == settings.TWO_WAY_EXIT_TYPECLASS_KEY:
-            # If it's a two way exit, create the reverse exit.
-            reverse_exit_key = settings.REVERSE_EXIT_PREFIX + record.key
-            if not reverse_exit_key in current_obj_keys:
-                ostring = "Creating %s." % reverse_exit_key
-                print(ostring)
-                if caller:
-                    caller.msg(ostring)
-
-                # Create object.
-                try:
-                    typeclass_path = TYPECLASS_SET.get_module(settings.REVERSE_EXIT_TYPECLASS_KEY)
-                    obj = create.create_object(typeclass_path, record.name)
-                    count_create += 1
-                except Exception, e:
-                    ostring = "Can not create obj %s: %s" % (reverse_exit_key, e)
-                    print(ostring)
-                    print(traceback.print_exc())
-                    if caller:
-                        caller.msg(ostring)
-                    return
-
-                try:
-                    # Set data info.
-                    obj.set_data_key(reverse_exit_key)
-                    utils.set_obj_unique_type(obj, type_name)
-                except Exception, e:
-                    ostring = "Can not set data info to obj %s: %s" % (reverse_exit_key, e)
-                    print(ostring)
-                    print(traceback.print_exc())
-                    if caller:
-                        caller.msg(ostring)
-                    return
-
     ostring = "Removed %d object(s). Created %d object(s). Updated %d object(s). Total %d objects.\n"\
-              % (count_remove, count_create, count_update, len(objects_data) + len(reverse_exits))
+              % (count_remove, count_create, count_update, len(objects_data))
     print(ostring)
     if caller:
         caller.msg(ostring)
@@ -282,9 +215,6 @@ def build_all(caller=None):
     Args:
         caller: (command caller) If provide, running messages will send to the caller.
     """
-    # Reset object key's info.
-    OBJECT_KEY_HANDLER.reload()
-
     # Build areas.
     build_unique_objects(CM.WORLD_AREAS.all(), "world_areas", caller)
     

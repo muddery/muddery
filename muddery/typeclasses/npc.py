@@ -15,13 +15,13 @@ from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
 from muddery.worlddata.dao.npc_shops_mapper import NPC_SHOPS
 
 
-class MudderyNPC(TYPECLASS("NON_PLAYER")):
+class MudderyNPC(TYPECLASS("WORLD_CHARACTER")):
     """
     Neutral or friendly NPC. They can not be attacked.
     """
     typeclass_key = "NPC"
     typeclass_name = _("Neutral or Friendly NPC", "typeclasses")
-    models = ["world_npcs", "common_characters"]
+    __all_models__ = None
 
     def at_object_creation(self):
         """

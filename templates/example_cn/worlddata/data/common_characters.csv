@@ -1,4 +1,4 @@
-key,name,typeclass,desc,model,level,reborn_time,icon
-player,玩家,PLAYER_CHARACTER,这是玩家。,MODEL_PLAYER,1,10,image/icon/player.png
-char_robot_mob_A,机器人A,MONSTER,这是个A型机器人。,MODEL_MOB_ROBOT_A,2,0,image/icon/robot.png
-char_robot_mob_B,机器人B,MONSTER,这是个B型机器人。,MODEL_MOB_ROBOT_A,3,0,image/icon/robot.png
+key,model,level,reborn_time,icon
+player,MODEL_PLAYER,1,10,image/icon/player.png
+char_robot_mob_A,MODEL_MOB_ROBOT_A,2,0,image/icon/robot.png
+char_robot_mob_B,MODEL_MOB_ROBOT_A,3,0,image/icon/robot.png

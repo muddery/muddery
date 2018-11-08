@@ -18,7 +18,6 @@ at_server_cold_stop()
 
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO, FOOD_ATTRIBUTES_INFO
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
-from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.equip_type_handler import EQUIP_TYPE_HANDLER
 from muddery.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
@@ -38,9 +37,6 @@ def at_server_start():
     # reload local strings
     LOCALIZED_STRINGS_HANDLER.reload()
 
-    # reload keys
-    OBJECT_KEY_HANDLER.reload()
-    
     # reload attributes
     CHARACTER_ATTRIBUTES_INFO.reload()
     EQUIPMENT_ATTRIBUTES_INFO.reload()

@@ -55,7 +55,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
     """
     typeclass_key = "PLAYER_CHARACTER"
     typeclass_name = _("Player Character", "typeclasses")
-    models = ["common_characters"]
+    __all_models__ = None
 
     # initialize all handlers in a lazy fashion
     @lazy_property
@@ -448,7 +448,14 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     accepted_names[name] = 0
                     continue
 
-                object_record = get_object_record(key)
+                object_record = None
+                try:
+                    common_model_name = TYPECLASS("COMMON_OBJECT").model_name
+                    common_model_obj = apps.get_model(settings.WORLD_DATA_APP, common_model_name)
+                    object_record = common_model_obj.objects.get(key=key)
+                except Exception, e:
+                    pass
+
                 if not object_record:
                     # can not find object's data record
                     reason = _("Can not get %s.") % name

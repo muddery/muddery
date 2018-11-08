@@ -23,7 +23,8 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
     """
     typeclass_key = "COMMON_OBJECT"
     typeclass_name = _("Common Object", "typeclasses")
-    models = ["common_objects", "foods", "skill_books", "equipments"]
+    model_name = "common_objects"
+    __all_models__ = None
 
     def at_object_creation(self):
         """
@@ -129,6 +130,8 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
     """
     typeclass_key = "FOOD"
     typeclass_name = _("Food", "typeclasses")
+    model_name = "foods"
+    __all_models__ = None
 
     def after_data_loaded(self):
         """
@@ -206,6 +209,8 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
     """
     typeclass_key = "EQUIPMENT"
     typeclass_name = _("Equipment", "typeclasses")
+    model_name = "equipments"
+    __all_models__ = None
 
     def after_data_loaded(self):
         """
@@ -284,6 +289,8 @@ class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
     """
     typeclass_key = "SKILL_BOOK"
     typeclass_name = _("Skill Book", "typeclasses")
+    model_name = "skill_books"
+    __all_models__ = None
 
     def get_available_commands(self, caller):
         """

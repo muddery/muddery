@@ -35,7 +35,8 @@ class PlayerCharacter(MudderyPlayerCharacter):
 
     """
     typeclass_key = "PLAYER_CHARACTER"
-
+    __all_models__ = None
+    
     def return_status(self):
         """
         Get character's status.

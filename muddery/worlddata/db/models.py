@@ -103,17 +103,28 @@ class game_settings(models.Model):
 
 
 # ------------------------------------------------------------
-#
-# Objects
-#
+# Object's base
 # ------------------------------------------------------------
 class BaseObjects(models.Model):
     """
-    The base model of all objects.
+    The base model of all objects. All objects data are linked with keys.
     """
     # object's key
     key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
 
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+
+    def __unicode__(self):
+        return self.key
+
+
+class objects(BaseObjects):
+    """
+    All objects.
+    """
     # object's typeclass
     typeclass = models.CharField(max_length=KEY_LENGTH)
 
@@ -537,25 +548,6 @@ class exit_locks(BaseAdditionalData):
         app_label = "worlddata"
         verbose_name = "Exit Lock"
         verbose_name_plural = "Exit Locks"
-
-
-# ------------------------------------------------------------
-#
-# two way exit's additional data
-#
-# ------------------------------------------------------------
-class two_way_exits(BaseAdditionalData):
-    "Two way exit's additional data"
-
-    # reverse exit's name
-    reverse_name = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Two Way Exit"
-        verbose_name_plural = "Two Way Exits"
 
 
 # ------------------------------------------------------------

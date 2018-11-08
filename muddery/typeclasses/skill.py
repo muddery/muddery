@@ -21,7 +21,8 @@ class MudderySkill(TYPECLASS("OBJECT")):
     """
     typeclass_key = "SKILL"
     typeclass_name = _("Skill", "typeclasses")
-    models = ["skills"]
+    model_name = "skills"
+    __all_models__ = None
 
     msg_escape = re.compile(r'%[%|n|c|t]')
 

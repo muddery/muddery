@@ -12,10 +12,10 @@ from muddery.utils.builder import build_object
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.exception import MudderyError
-from muddery.utils.object_key_handler import OBJECT_KEY_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.dao.quest_dependencies_mapper import QUEST_DEPENDENCIES
 from muddery.mappings.quest_status_set import QUEST_STATUS_SET
+from muddery.mappings.typeclass_set import TYPECLASS
 
 
 class QuestHandler(object):
@@ -237,22 +237,18 @@ class QuestHandler(object):
             (boolean) result
         """
         # Get quest's record.
-        model_names = OBJECT_KEY_HANDLER.get_models(quest_key)
-        if not model_names:
+        model_name = TYPECLASS("QUEST").model_name
+        if not model_name:
             return False
 
-        for model_name in model_names:
-            model_quest = apps.get_model(settings.WORLD_DATA_APP, model_name)
+        model_quest = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
-            try:
-                record = model_quest.objects.get(key=quest_key)
-                return STATEMENT_HANDLER.match_condition(record.condition, self.owner, None)
-            except ObjectDoesNotExist:
-                continue
-            except AttributeError:
-                continue
-
-        return True
+        try:
+            record = model_quest.objects.get(key=quest_key)
+            return STATEMENT_HANDLER.match_condition(record.condition, self.owner, None)
+        except Exception, e:
+            logger.log_errmsg("Can't get quest %s's condition: %s" % (quest_key, e))
+        return False
 
     def show_quests(self):
         """

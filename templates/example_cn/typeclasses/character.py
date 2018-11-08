@@ -19,6 +19,7 @@ class Character(MudderyCharacter):
 
     """
     typeclass_key = "CHARACTER"
+    __all_models__ = None
 
     def at_object_creation(self):
         """

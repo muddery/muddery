@@ -56,8 +56,6 @@ EXIT_LOCKS = CommonMapper("exit_locks")
 
 GAME_SETTINGS = CommonMapper("game_settings")
 
-TWO_WAY_EXITS = CommonMapper("two_way_exits")
-
 OBJECT_CREATORS = ObjectsMapper("object_creators")
 
 CREATOR_LOOT_LIST = CommonMapper("creator_loot_list")

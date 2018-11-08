@@ -16,6 +16,16 @@ class game_settings(model_base.game_settings):
 
 # ------------------------------------------------------------
 #
+# all objects
+#
+# ------------------------------------------------------------
+class objects(model_base.objects):
+    "All objects in the game."
+    pass
+
+
+# ------------------------------------------------------------
+#
 # world areas
 #
 # ------------------------------------------------------------
@@ -50,16 +60,6 @@ class world_exits(model_base.world_exits):
 #
 #------------------------------------------------------------
 class exit_locks(model_base.exit_locks):
-    "Store all exit locks."
-    pass
-
-
-#------------------------------------------------------------
-#
-# two way exit's additional data
-#
-#------------------------------------------------------------
-class two_way_exits(model_base.two_way_exits):
     "Store all exit locks."
     pass
 

@@ -15,6 +15,7 @@ class Skill(MudderySkill):
     A skill of the character.
     """
     typeclass_key = "SKILL"
+    __all_models__ = None
 
     def after_data_loaded(self):
         """

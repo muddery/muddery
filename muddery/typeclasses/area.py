@@ -20,7 +20,8 @@ class MudderyArea(TYPECLASS("OBJECT")):
     """
     typeclass_key = "AREA"
     typeclass_name = _("Area", "typeclasses")
-    models = ["world_areas"]
+    model_name = "world_areas"
+    __all_models__ = None
 
     def at_object_creation(self):
         """
