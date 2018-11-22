@@ -54,7 +54,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
     """
     typeclass_key = "CHARACTER"
     typeclass_name = _("Character", "typeclasses")
-    model_name = "common_characters"
+    model_name = "characters"
     __all_models__ = None
 
     # initialize loot handler in a lazy fashion
@@ -152,6 +152,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         # get level
         self.db.level = getattr(self.dfield, "level", 1)
+
+        # friendly
+        self.friendly = getattr(self.dfield, "friendly", 0)
         
         # skill's ai
         ai_choose_skill_class = class_from_module(settings.AI_CHOOSE_SKILL)

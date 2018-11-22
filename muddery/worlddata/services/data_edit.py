@@ -11,19 +11,20 @@ from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.dao import general_query_mapper
 from muddery.mappings.form_set import FORM_SET
+from muddery.mappings.typeclass_set import TYPECLASS_SET
 from muddery.worlddata.forms.default_forms import ObjectsForm
 from muddery.worlddata.forms.location_field import LocationField
 from muddery.worlddata.forms.image_field import ImageField
 from muddery.worlddata.services.general_query import query_fields
 
 
-def query_form(table_name, record_id=None):
+def query_form(table_name, **kwargs):
     """
     Query table's data.
 
     Args:
         table_name: (string) data table's name.
-        record_id: (string, optional) record's id. If it is empty, query an empty form.
+        kwargs: (dict) conditions.
     """
     form_class = FORM_SET.get(table_name)
     if not form_class:
@@ -31,10 +32,10 @@ def query_form(table_name, record_id=None):
 
     form = None
     record = None
-    if record_id:
+    if kwargs:
         try:
             # Query record's data.
-            record = general_query_mapper.get_record_by_id(table_name, record_id)
+            record = general_query_mapper.get_record(table_name, **kwargs)
             form = form_class(instance=record)
         except Exception, e:
             form = None
@@ -50,7 +51,7 @@ def query_form(table_name, record_id=None):
         "disabled": True,
         "help_text": "",
         "type": "Hidden",
-        "value": record_id if record_id else "",
+        "value": record.id if record else "",
     })
 
     for key, field in form.fields.items():
@@ -77,6 +78,7 @@ def query_form(table_name, record_id=None):
         fields.append(info)
 
     return fields
+
 
 def save_form(values, table_name, record_id=None):
     """
@@ -118,3 +120,38 @@ def delete_record(table_name, record_id):
     Delete a record of a table.
     """
     general_query_mapper.delete_record_by_id(table_name, record_id)
+
+
+def query_object_form(typeclass_key, object_key):
+    """
+    Query table's data.
+
+    Args:
+        typeclass_key: (string) typeclass's name.
+        object_key: (string, optional) object's key. If it is empty, query an empty form.
+    """
+    typeclass = TYPECLASS_SET.get(typeclass_key)
+    if not typeclass:
+        raise MudderyError(ERR.no_table, "Can not find typeclass: %s" % typeclass_key)
+
+    typeclasses = TYPECLASS_SET.get_group(typeclass_key)
+
+    forms = []
+    table_names = typeclass.get_models()
+    for table_name in table_names:
+        if object_key:
+            object_form = query_form(table_name, key=object_key)
+        else:
+            object_form = query_form(table_name)
+
+        forms.append({"table": table_name,
+                      "fields": object_form})
+
+    # add typeclasses
+    if forms and "typeclass" in forms[0]:
+        forms[0]["type"] = "Select"
+        forms[0]["choices"] = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
+
+    return forms
+
+

@@ -31,7 +31,7 @@ SKILL_BOOKS = ObjectsMapper("skill_books")
 
 EQUIPMENTS = ObjectsMapper("equipments")
 
-COMMON_CHARACTERS = ObjectsMapper("common_characters")
+CHARACTERS = ObjectsMapper("characters")
 
 SHOPS = ObjectsMapper("shops")
 

@@ -213,7 +213,7 @@ class world_npcs(BaseModels.world_npcs):
 # store common characters
 #
 #------------------------------------------------------------
-class common_characters(BaseModels.common_characters):
+class characters(BaseModels.characters):
     "Store all common characters."
     pass
 

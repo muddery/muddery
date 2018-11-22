@@ -360,20 +360,8 @@ class world_npcs(BaseObjects):
     # NPC's location, it must be a room.
     location = models.CharField(max_length=KEY_LENGTH)
 
-    # NPC's model. If it is empty, will use NPC's key as its model.
-    model = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    # NPC's level
-    level = models.PositiveIntegerField(blank=True, default=1)
-    
-    # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
-    reborn_time = models.PositiveIntegerField(blank=True, default=0)
-
     # the condition for showing the NPC
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # NPC's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -383,7 +371,7 @@ class world_npcs(BaseObjects):
         verbose_name_plural = "World NPCs"
 
 
-class common_characters(BaseObjects):
+class characters(BaseObjects):
     "Store common characters."
 
     # Character's model. If it is empty, character's key will be used as its model.
@@ -394,6 +382,9 @@ class common_characters(BaseObjects):
     
     # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
     reborn_time = models.PositiveIntegerField(blank=True, default=0)
+
+    # Friendly of this character.
+    friendly = models.IntegerField(blank=True, default=0)
 
     # Character's icon resource.
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)

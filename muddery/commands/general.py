@@ -281,7 +281,7 @@ class CmdDialogue(Command):
                 # get NPC
                 npc = caller.search_dbref(self.args["npc"], location=caller.location)
                 if not npc:
-                    caller.msg({"msg":_("Can not find it.")})
+                    caller.msg({"msg": _("Can not find it.")})
                     return
 
         # Get the current sentence.

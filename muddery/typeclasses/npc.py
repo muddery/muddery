@@ -1,36 +1,40 @@
 """
-MudderyNPC is NPC's base class.
+None Player Characters
+
+Player Characters are (by default) Objects setup to be puppeted by Players.
+They are what you "see" in game. The Character class in this module
+is setup to be the "default" character type created by the default
+creation commands.
 
 """
 
-import json
-import traceback
+from __future__ import print_function
+
 from evennia.utils import logger
-from muddery.utils.localized_strings_handler import _
-from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.builder import build_object, delete_object
-from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
 from muddery.worlddata.dao.npc_shops_mapper import NPC_SHOPS
+from muddery.utils.localized_strings_handler import _
 
 
-class MudderyNPC(TYPECLASS("WORLD_CHARACTER")):
+class MudderyNPC(TYPECLASS("CHARACTER")):
     """
-    Neutral or friendly NPC. They can not be attacked.
+    The character not controlled by players.
     """
     typeclass_key = "NPC"
-    typeclass_name = _("Neutral or Friendly NPC", "typeclasses")
+    typeclass_name = _("None Player Character", "typeclasses")
     __all_models__ = None
 
     def at_object_creation(self):
         """
         Called once, when this object is first created. This is the
         normal hook to overload for most object types.
-            
+
         """
         super(MudderyNPC, self).at_object_creation()
-        
+
         # NPC's shop
         if not self.attributes.has("shops"):
             self.db.shops = {}
@@ -43,13 +47,13 @@ class MudderyNPC(TYPECLASS("WORLD_CHARACTER")):
 
         # Character can auto fight.
         self.auto_fight = True
-        
+
         # set home
         self.home = self.location
 
         # load dialogues.
         self.load_dialogues()
-        
+
         # load shops
         self.load_shops()
 
@@ -89,26 +93,30 @@ class MudderyNPC(TYPECLASS("WORLD_CHARACTER")):
                     continue
 
                 self.db.shops[shop_key] = shop_obj
-                
+
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         """
         commands = []
-        if self.dialogues or self.default_dialogues:
-            # If the character have something to talk, add talk command.
-            commands.append({"name":_("Talk"), "cmd":"talk", "args":self.dbref})
-        
-        # Add shops.
-        for shop_obj in self.db.shops.values():
-            if not shop_obj.is_visible(caller):
-                continue
+        if self.is_alive():
+            if self.dialogues or self.default_dialogues:
+                # If the character have something to talk, add talk command.
+                commands.append({"name": _("Talk"), "cmd": "talk", "args": self.dbref})
 
-            verb = shop_obj.verb
-            if not verb:
-                verb = shop_obj.get_name()
-            commands.append({"name":verb, "cmd":"shopping", "args":shop_obj.dbref})
-        
+                # Add shops.
+                for shop_obj in self.db.shops.values():
+                    if not shop_obj.is_visible(caller):
+                        continue
+
+                    verb = shop_obj.verb
+                    if not verb:
+                        verb = shop_obj.get_name()
+                    commands.append({"name": verb, "cmd": "shopping", "args": shop_obj.dbref})
+
+            if self.friendly <= 0:
+                commands.append({"name": _("Attack"), "cmd": "attack", "args": self.dbref})
+
         return commands
 
     def have_quest(self, caller):
@@ -117,4 +125,3 @@ class MudderyNPC(TYPECLASS("WORLD_CHARACTER")):
         Returns (can_provide_quest, can_complete_quest).
         """
         return DIALOGUE_HANDLER.have_quest(caller, self)
-

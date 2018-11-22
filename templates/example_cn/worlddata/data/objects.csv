@@ -21,8 +21,8 @@ creator_street_body,尸体,WORLD_OBJECT_CREATOR,这个人身穿着保安制服�
 creator_storeroom_box,纸箱,WORLD_OBJECT_CREATOR,一个纸箱，好像是放食品的。
 creator_photo_studio_box,小箱子,WORLD_OBJECT_CREATOR,一个小箱子，像是医药箱。
 npc_wu,保安,WORLD_NPC,"这个人身材高大，但身上受了伤，活动有些不灵活。"
-npc_stranger,陌生人,WORLD_MONSTER,"这个人身材高大，体格强健，双手紧握着拳头，眼睛紧紧地盯着你，时刻会向你扑过来。"
-npc_doll,人偶,WORLD_MONSTER,"这个人偶斜靠在墙上，一双大眼睛好像正在盯着你看。你越瞧它越不爽，真想打它一顿！"
+npc_stranger,陌生人,WORLD_NPC,"这个人身材高大，体格强健，双手紧握着拳头，眼睛紧紧地盯着你，时刻会向你扑过来。"
+npc_doll,人偶,WORLD_NPC,"这个人偶斜靠在墙上，一双大眼睛好像正在盯着你看。你越瞧它越不爽，真想打它一顿！"
 exit_game_start,开始游戏,EXIT,欢迎您进入游戏！
 exit_colorfulworld_alley_1,爬出去,EXIT,电缆井不深，应该可以爬出去。
 exit_colorfulworld_street_1,大街,LOCKED_EXIT,广告板被撬动了，露出了一条通往外面的缝，正好可以让一个人通过。
@@ -69,5 +69,5 @@ obj_guardhouse_key,钥匙,COMMON_OBJECT,钥匙圈上扣着一串铜质的钥匙�
 obj_binder,绷带,COMMON_OBJECT,一卷绷带，还没拆封过，可以帮助止血。
 obj_screw,螺丝,COMMON_OBJECT,一颗螺丝，能派什么用处呢？
 player,玩家,PLAYER_CHARACTER,这是玩家。
-char_robot_mob_A,机器人A,COMMON_MONSTER,这是个A型机器人。
-char_robot_mob_B,机器人B,COMMON_MONSTER,这是个B型机器人。
+char_robot_mob_A,机器人A,COMMON_NPC,这是个A型机器人。
+char_robot_mob_B,机器人B,COMMON_NPC,这是个B型机器人。

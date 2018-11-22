@@ -103,7 +103,7 @@ class GameSettingsForm(forms.ModelForm):
         self.fields['default_player_home_key'] = forms.ChoiceField(choices=choices, required=False)
 
         choices = [("", "---------")]
-        objects = CM.COMMON_CHARACTERS.objects.filter(typeclass="PLAYER_CHARACTER")
+        objects = CM.CHARACTERS.objects.filter(typeclass="PLAYER_CHARACTER")
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
         self.fields['default_player_character_key'] = forms.ChoiceField(choices=choices, required=False)
 
@@ -312,7 +312,7 @@ class CharacterLootListForm(forms.ModelForm):
         npcs = CM.WORLD_NPCS.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in npcs]
 
-        characters = CM.COMMON_CHARACTERS.objects.all()
+        characters = CM.CHARACTERS.objects.all()
         choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in characters])
 
         self.fields['provider'] = forms.ChoiceField(choices=choices)
@@ -465,9 +465,9 @@ class CharacterModelsForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CommonCharacterForm(ObjectsForm):
+class CharacterForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
-        super(CommonCharacterForm, self).__init__(*args, **kwargs)
+        super(CharacterForm, self).__init__(*args, **kwargs)
 
         typeclasses = TYPECLASS_SET.get_group("CHARACTER")
         choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
@@ -485,11 +485,11 @@ class CommonCharacterForm(ObjectsForm):
         localize_form_fields(self)
 
     class Meta:
-        model = CM.COMMON_CHARACTERS.model
+        model = CM.CHARACTERS.model
         fields = '__all__'
 
     def clean(self):
-        cleaned_data = super(CommonCharacterForm, self).clean()
+        cleaned_data = super(CharacterForm, self).clean()
         data_model = cleaned_data["model"]
         data_level = cleaned_data["level"]
 
@@ -808,7 +808,7 @@ class ActionAttackForm(forms.ModelForm):
         choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
         self.fields['event_key'] = forms.ChoiceField(choices=choices)
         
-        objects = CM.COMMON_CHARACTERS.objects.all()
+        objects = CM.CHARACTERS.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['mob'] = forms.ChoiceField(choices=choices)
 

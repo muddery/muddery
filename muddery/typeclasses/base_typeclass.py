@@ -24,13 +24,12 @@ class BaseTypeclass(object):
         Get this typeclass's models.
         """
         if cls.__all_models__ is None:
-            cls.__all_models__ = set()
-            classes = cls.__bases__
-            for c in classes:
+            cls.__all_models__ = []
+            for c in cls.__bases__:
                 if hasattr(c, "get_models"):
-                    cls.__all_models__ |= c.get_models()
+                    cls.__all_models__.extend(c.get_models())
 
-            if cls.model_name:
-                cls.__all_models__.add(cls.model_name)
+            if cls.model_name and not cls.model_name in cls.__all_models__:
+                cls.__all_models__.append(cls.model_name)
 
         return cls.__all_models__

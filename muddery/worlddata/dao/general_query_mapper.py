@@ -57,6 +57,19 @@ def get_record_by_id(table_name, record_id):
     return model_obj.objects.get(id=record_id)
 
 
+def get_record(table_name, **kwargs):
+    """
+    Get a record by conditions.
+
+    Args:
+        table_name: (string) db table's name.
+        kwargs: (dict) conditions.
+    """
+    # get model
+    model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
+    return model_obj.objects.get(**kwargs)
+
+
 def delete_record_by_id(table_name, record_id):
     """
     Get a table's all records.

@@ -17,12 +17,12 @@ from muddery.worlddata.controllers.base_request_processer import BaseRequestProc
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
-class query_fields(BaseRequestProcesser):
+class QueryFields(BaseRequestProcesser):
     """
     Query all fields of a table.
 
     Args:
-        None
+        None.
     """
     path = "query_fields"
     name = ""
@@ -37,12 +37,12 @@ class query_fields(BaseRequestProcesser):
         return success_response(data)
 
 
-class query_table(BaseRequestProcesser):
+class QueryTable(BaseRequestProcesser):
     """
     Query all records of a table.
 
     Args:
-        None
+        None.
     """
     path = "query_table"
     name = ""
@@ -57,13 +57,13 @@ class query_table(BaseRequestProcesser):
         return success_response(data)
 
 
-class query_record(BaseRequestProcesser):
+class QueryRecord(BaseRequestProcesser):
     """
     Query a record of a table.
 
     Args:
-        table: (string) table's name
-        record: (string) record's id
+        table: (string) table's name.
+        record: (string) record's id.
     """
     path = "query_record"
     name = ""
@@ -79,12 +79,12 @@ class query_record(BaseRequestProcesser):
         return success_response(data)
 
 
-class query_areas(BaseRequestProcesser):
+class QueryAreas(BaseRequestProcesser):
     """
     Query all available areas.
 
     Args:
-        None
+        None.
     """
     path = "query_areas"
     name = ""
@@ -94,7 +94,7 @@ class query_areas(BaseRequestProcesser):
         return success_response(data)
 
 
-class query_object_events(BaseRequestProcesser):
+class QueryObjectEvents(BaseRequestProcesser):
     """
     Query all events of the given object.
 
@@ -105,7 +105,7 @@ class query_object_events(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        if ('object' not in args):
+        if 'object' not in args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
         object_key = args["object"]
@@ -114,7 +114,7 @@ class query_object_events(BaseRequestProcesser):
         return success_response(data)
 
 
-class query_event_action_data(BaseRequestProcesser):
+class QueryEventActionData(BaseRequestProcesser):
     """
     Query an event action's data.
 
@@ -126,7 +126,7 @@ class query_event_action_data(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        if ('type' not in args or 'key' not in args):
+        if 'type' not in args or 'key' not in args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
         action_type = args["type"]
@@ -136,7 +136,7 @@ class query_event_action_data(BaseRequestProcesser):
         return success_response(data)
 
 
-class query_dialogue_sentences(BaseRequestProcesser):
+class QueryDialogueSentences(BaseRequestProcesser):
     """
     Query a dialogue's sentences.
 
@@ -147,7 +147,7 @@ class query_dialogue_sentences(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        if ('dialogue' not in args):
+        if 'dialogue' not in args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
         dialogue_key = args["dialogue"]
@@ -156,7 +156,7 @@ class query_dialogue_sentences(BaseRequestProcesser):
         return success_response(data)
 
 
-class query_form(BaseRequestProcesser):
+class QueryForm(BaseRequestProcesser):
     """
     Query a record of a table.
 
@@ -174,11 +174,11 @@ class query_form(BaseRequestProcesser):
         table_name = args["table"]
         record = args.get('record', None)
 
-        data = data_edit.query_form(table_name, record)
+        data = data_edit.query_form(table_name, id=record)
         return success_response(data)
 
 
-class save_form(BaseRequestProcesser):
+class SaveForm(BaseRequestProcesser):
     """
     Save a form.
 
@@ -209,29 +209,32 @@ class save_form(BaseRequestProcesser):
         return success_response(data)
 
 
-class query_object_form(BaseRequestProcesser):
+class QueryObjectForm(BaseRequestProcesser):
     """
     Query a record of an object which may include several tables.
 
     Args:
-        table: (string) table's name
-        record: (string, optional) record's id. If it is empty, get a new record.
+        typeclass: (string) object's base typeclass
+        object: (string, optional) object's key. If it is empty, get a new object.
     """
     path = "query_object_form"
     name = ""
 
     def func(self, args, request):
-        if 'table' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
+        if not args:
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        table_name = args["table"]
-        record = args.get('record', None)
+        if 'typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing argument: "typeclass".')
 
-        data = data_edit.query_form(table_name, record)
+        typeclass_name = args["typeclass"]
+        object_key = args.get('object', None)
+
+        data = data_edit.query_object_form(typeclass_name, object_key)
         return success_response(data)
 
 
-class save_object_form(BaseRequestProcesser):
+class SaveObjectForm(BaseRequestProcesser):
     """
     Save a form.
 
@@ -262,7 +265,7 @@ class save_object_form(BaseRequestProcesser):
         return success_response(data)
 
 
-class delete_record(BaseRequestProcesser):
+class DeleteRecord(BaseRequestProcesser):
     """
     Delete a record.
 
@@ -285,7 +288,7 @@ class delete_record(BaseRequestProcesser):
         return success_response(data)
 
 
-class query_tables(BaseRequestProcesser):
+class QueryTables(BaseRequestProcesser):
     """
     Query all tables' names.
 
@@ -300,12 +303,12 @@ class query_tables(BaseRequestProcesser):
         return success_response(data)
 
 
-class apply_changes(BaseRequestProcesser):
+class ApplyChanges(BaseRequestProcesser):
     """
     Query all tables' names.
 
     Args:
-        None
+        None.
     """
     path = "apply_changes"
     name = ""
@@ -313,10 +316,10 @@ class apply_changes(BaseRequestProcesser):
     def func(self, args, request):
         try:
             # reload system data
-            #import_syetem_data()
+            # import_syetem_data()
 
             # reload localized strings
-            #LOCALIZED_STRINGS_HANDLER.reload()
+            # LOCALIZED_STRINGS_HANDLER.reload()
 
             # rebuild the world
             build_all()

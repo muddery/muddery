@@ -9,13 +9,13 @@ ObjectTable = function() {
 ObjectTable.prototype = prototype(CommonTable.prototype);
 ObjectTable.prototype.constructor = ObjectEditor;
 
-ObjectTable.prototype.onAddRecord: function(e) {
+ObjectTable.prototype.onAddRecord = function(e) {
     var editor = "object";
     var table = controller.table_name;
-    window.parent.controller.editRecord(editor, table);
+    window.parent.controller.editRecord(editor, typeclass);
 }
 
-ObjectTable.prototype.onEdit: function(e) {
+ObjectTable.prototype.onEdit = function(e) {
     var object_key = $(this).attr("data-object-key");
     if (object_key) {
         var editor = "object";
