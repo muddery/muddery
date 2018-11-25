@@ -21,4 +21,3 @@ class MudderyWorldNPC(TYPECLASS("NPC")):
     typeclass_key = "WORLD_NPC"
     typeclass_name = _("World NPC", "typeclasses")
     model_name = "world_npcs"
-    __all_models__ = None

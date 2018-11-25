@@ -36,7 +36,6 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
     typeclass_key = "OBJECT"
     typeclass_name = _("Object", "typeclasses")
     model_name = "objects"
-    __all_models__ = None
 
     # initialize all handlers in a lazy fashion
     @lazy_property

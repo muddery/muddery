@@ -20,7 +20,6 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
     typeclass_key = "SHOP_GOODS"
     typeclass_name = _("Goods", "typeclasses")
     model_name = "shop_goods"
-    __all_models__ = None
 
     def at_object_creation(self):
         """

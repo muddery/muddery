@@ -25,7 +25,6 @@ class MudderyNPC(TYPECLASS("CHARACTER")):
     """
     typeclass_key = "NPC"
     typeclass_name = _("None Player Character", "typeclasses")
-    __all_models__ = None
 
     def at_object_creation(self):
         """

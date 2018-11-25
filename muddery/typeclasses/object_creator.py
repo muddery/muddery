@@ -25,7 +25,6 @@ class MudderyObjectCreator(TYPECLASS("WORLD_OBJECT")):
     typeclass_key = "WORLD_OBJECT_CREATOR"
     typeclass_name = _("Object Creator", "typeclasses")
     model_name = "object_creators"
-    __all_models__ = None
 
     # initialize loot handler in a lazy fashion
     @lazy_property

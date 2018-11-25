@@ -20,4 +20,3 @@ class MudderyCommonNPC(TYPECLASS("NPC")):
     """
     typeclass_key = "COMMON_NPC"
     typeclass_name = _("Common NPC", "typeclasses")
-    __all_models__ = None

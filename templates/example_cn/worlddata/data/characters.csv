@@ -1,4 +1,4 @@
-key,model,level,reborn_time,friendship,icon
+key,model,level,reborn_time,friendly,icon
 player,MODEL_PLAYER,1,10,0,image/icon/player.png
 char_robot_mob_A,MODEL_MOB_ROBOT_A,2,0,-100,image/icon/robot.png
 char_robot_mob_B,MODEL_MOB_ROBOT_A,3,0,-100,image/icon/robot.png

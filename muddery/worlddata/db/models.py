@@ -267,7 +267,7 @@ class common_objects(BaseObjects):
         verbose_name_plural = "Common Objects"
 
 
-class foods(common_objects):
+class foods(BaseObjects):
     "Foods inherit from common objects."
 
     # Attributes. Value's type must be a python default value type.
@@ -299,7 +299,7 @@ class foods(common_objects):
         verbose_name_plural = "Foods"
 
 
-class skill_books(common_objects):
+class skill_books(BaseObjects):
     "Skill books inherit from common objects."
 
     # skill's key
@@ -313,7 +313,7 @@ class skill_books(common_objects):
         verbose_name_plural = "Skill Books"
 
 
-class equipments(common_objects):
+class equipments(BaseObjects):
     "equipments inherit from common objects."
 
     # The key of an equipment position.
@@ -497,28 +497,10 @@ class quests(BaseObjects):
 
 # ------------------------------------------------------------
 #
-# Objects additional data.
-#
-# ------------------------------------------------------------
-class BaseAdditionalData(models.Model):
-    """
-    The base model of object's additinal data.
-    """
-    # object's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-
-
-# ------------------------------------------------------------
-#
 # exit lock's additional data
 #
 # ------------------------------------------------------------
-class exit_locks(BaseAdditionalData):
+class exit_locks(BaseObjects):
     "Locked exit's additional data"
 
     # condition of the lock
@@ -546,7 +528,7 @@ class exit_locks(BaseAdditionalData):
 # object creator's additional data
 #
 # ------------------------------------------------------------
-class object_creators(BaseAdditionalData):
+class object_creators(BaseObjects):
     "Players can get new objects from an object_creator."
     
     # related object's key

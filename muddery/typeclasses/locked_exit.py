@@ -26,7 +26,6 @@ class MudderyLockedExit(TYPECLASS("EXIT")):
     typeclass_key = "LOCKED_EXIT"
     typeclass_name = _("Locked Exit", "typeclasses")
     model_name = "exit_locks"
-    __all_models__ = None
 
     def after_data_loaded(self):
         """

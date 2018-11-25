@@ -55,7 +55,6 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
     """
     typeclass_key = "PLAYER_CHARACTER"
     typeclass_name = _("Player Character", "typeclasses")
-    __all_models__ = None
 
     # initialize all handlers in a lazy fashion
     @lazy_property

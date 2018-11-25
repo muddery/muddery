@@ -16,4 +16,3 @@ class MudderyWorldObject(TYPECLASS("OBJECT")):
     typeclass_key = "WORLD_OBJECT"
     typeclass_name = _("World Object", "typeclasses")
     model_name = "world_objects"
-    __all_models__ = None
