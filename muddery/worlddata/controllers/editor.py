@@ -243,7 +243,7 @@ class SaveObjectForm(BaseRequestProcesser):
         table: (string) table's name.
         record: (string, optional) record's id. If it is empty, add a new record.
     """
-    path = "save_form"
+    path = "save_object_form"
     name = ""
 
     def func(self, args, request):

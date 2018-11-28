@@ -7,7 +7,7 @@ from __future__ import print_function
 from evennia.utils import logger
 from django.apps import apps
 from django.conf import settings
-
+from muddery.worlddata.dao.general_query_mapper import get_all_from_tables
 
 class CommonMapper(object):
     """
@@ -35,3 +35,9 @@ class ObjectsMapper(CommonMapper):
     def __init__(self, model_name):
         super(ObjectsMapper, self).__init__(model_name)
 
+    def all_base(self):
+        """
+        Get all records with its base data.
+        """
+        return get_all_from_tables([settings.WORLD_DATA_APP + "_" + "objects",
+                                     settings.WORLD_DATA_APP + "_" + self.model_name])

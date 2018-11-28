@@ -8,6 +8,7 @@ from evennia.utils import logger
 from django.db import transaction
 from django.apps import apps
 from django.conf import settings
+from django.db import connections
 from muddery.utils.utils import is_child
 
 
@@ -83,3 +84,27 @@ def delete_record_by_id(table_name, record_id):
     record = model_obj.objects.get(id=record_id)
     record.delete()
 
+
+def get_all_from_tables(tables):
+        """
+        Query all object's base data.
+
+        Args:
+            tables: (string) table's list.
+        """
+        if not tables or len(tables) <= 1:
+            return
+
+        # join tables
+        from_tables = ", ".join(tables)
+        conditions = [tables[0] + ".key=" + t + ".key" for t in tables[1:]]
+        conditions = "and ".join(conditions)
+        cursor = connections[settings.WORLD_DATA_APP].cursor()
+        cursor.execute("select * from %s where %s" % (from_tables, conditions))
+        columns = [col[0] for col in cursor.description]
+
+        # return records
+        record = cursor.fetchone()
+        while record is not None:
+            yield dict(zip(columns, record))
+            record = cursor.fetchone()

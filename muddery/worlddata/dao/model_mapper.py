@@ -9,7 +9,7 @@ from django.db import transaction
 from django.apps import apps
 from django.conf import settings
 from muddery.utils.utils import is_child
-from muddery.worlddata.db.models import BaseObjects, common_objects
+from muddery.worlddata.db.models import common_objects
 
 
 def get_model(model_name):
@@ -25,15 +25,6 @@ def get_all_models():
     """
     app_config = apps.get_app_config(settings.WORLD_DATA_APP)
     return app_config.get_models()
-
-
-def get_objects_models():
-    """
-    Query all objects' models information.
-    """
-    app_config = apps.get_app_config(settings.WORLD_DATA_APP)
-    models = [model for model in app_config.get_models() if is_child(model, BaseObjects)]
-    return models
 
 
 def get_pocketable_object_models():

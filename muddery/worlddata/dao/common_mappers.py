@@ -13,6 +13,8 @@ from muddery.worlddata.dao.common_mapper_base import CommonMapper, ObjectsMapper
 #
 # ------------------------------------------------------------
 
+OBJECTS = ObjectsMapper("objects")
+
 WORLD_AREAS = ObjectsMapper("world_areas")
 
 WORLD_EXITS = ObjectsMapper("world_exits")

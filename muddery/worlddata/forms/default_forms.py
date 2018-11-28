@@ -15,26 +15,18 @@ from muddery.worlddata.forms.image_field import ImageField
 
 def get_all_objects():
     """
-    Get all objects that can be put in player's pockets.
+    Get all objects.
     """
-    choices = []
-    for model in model_mapper.get_objects_models():
-        objects = model.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-
-    return choices
+    records = CM.OBJECTS.all()
+    return [(r.key, r.name + " (" + r.key + ")") for r in records]
 
 
 def get_all_pocketable_objects():
     """
     Get all objects that can be put in player's pockets.
     """
-    choices = []
-    for model in model_mapper.get_pocketable_object_models():
-        objects = model.objects.all()
-        choices.extend([(obj.key, obj.name + " (" + obj.key + ")") for obj in objects])
-
-    return choices
+    records = CM.COMMON_OBJECTS.all_base()
+    return [(r["key"], r["name"] + " (" + r["key"] + ")") for r in records]
 
 
 def generate_key(form_obj):
@@ -70,23 +62,6 @@ class ObjectsForm(forms.ModelForm):
         key = cleaned_data["key"]
         if not key:
             cleaned_data["key"] = generate_key(self)
-        else:
-            # Check the key.
-            for model in model_mapper.get_objects_models():
-                if model == self.instance.__class__:
-                    # Models will validate unique values of its own,
-                    # so we do not validate them here.
-                    continue
-
-                try:
-                    record = model.objects.get(key=key)
-                except Exception, e:
-                    continue
-
-                error = forms.ValidationError("The key '%(value)s' already exists in model %(model)s.",
-                                        code="unique",
-                                        params={"value": key, "model": model.__name__})
-                raise forms.ValidationError({"key": error})
 
         return cleaned_data
 
@@ -140,10 +115,6 @@ class WorldAreasForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldAreasForm, self).__init__(*args, **kwargs)
 
-        typeclasses = TYPECLASS_SET.get_group("AREA")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
-
         self.fields['background'] = ImageField(image_type="background", required=False)
 
         localize_form_fields(self)
@@ -156,10 +127,6 @@ class WorldAreasForm(ObjectsForm):
 class WorldRoomsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldRoomsForm, self).__init__(*args, **kwargs)
-
-        typeclasses = TYPECLASS_SET.get_group("ROOM")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         choices = [("", "---------")]
         objects = CM.WORLD_AREAS.objects.all()
@@ -181,12 +148,8 @@ class WorldExitsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldExitsForm, self).__init__(*args, **kwargs)
 
-        typeclasses = TYPECLASS_SET.get_group("EXIT")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
-
-        rooms = CM.WORLD_ROOMS.objects.all()
-        choices = [(r.key, r.name + " (" + r.key + ")") for r in rooms]
+        rooms = CM.WORLD_ROOMS.all_base()
+        choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
         self.fields['location'] = LocationField(choices=choices)
         self.fields['destination'] = LocationField(choices=choices)
 
@@ -216,10 +179,6 @@ class WorldObjectsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
-        typeclasses = TYPECLASS_SET.get_group("WORLD_OBJECT")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
-
         rooms = CM.WORLD_ROOMS.objects.all()
         choices = [(r.key, r.name + " (" + r.key + ")") for r in rooms]
         self.fields['location'] = LocationField(choices=choices)
@@ -236,11 +195,6 @@ class WorldObjectsForm(ObjectsForm):
 class WorldNPCsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldNPCsForm, self).__init__(*args, **kwargs)
-
-        # NPC's typeclass
-        typeclasses = TYPECLASS_SET.get_group("WORLD_CHARACTER")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         # NPC's location
         rooms = CM.WORLD_ROOMS.objects.all()
@@ -363,10 +317,6 @@ class QuestRewardListForm(forms.ModelForm):
 class CommonObjectsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(CommonObjectsForm, self).__init__(*args, **kwargs)
-
-        typeclasses = TYPECLASS_SET.get_group("COMMON_OBJECT")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         self.fields['icon'] = ImageField(image_type="icon", required=False)
 
@@ -381,10 +331,6 @@ class FoodsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(FoodsForm, self).__init__(*args, **kwargs)
         
-        typeclasses = TYPECLASS_SET.get_group("FOOD")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
-        
         self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
@@ -398,10 +344,6 @@ class FoodsForm(ObjectsForm):
 class SkillBooksForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(SkillBooksForm, self).__init__(*args, **kwargs)
-
-        typeclasses = TYPECLASS_SET.get_group("SKILL_BOOK")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         # skills
         objects = CM.SKILLS.objects.all()
@@ -469,10 +411,6 @@ class CharacterForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(CharacterForm, self).__init__(*args, **kwargs)
 
-        typeclasses = TYPECLASS_SET.get_group("CHARACTER")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
-
         # models
         choices = [("", "---------")]
         objects = CM.CHARACTER_MODELS.objects.all()
@@ -532,10 +470,6 @@ class DefaultObjectsForm(forms.ModelForm):
 class ShopsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(ShopsForm, self).__init__(*args, **kwargs)
-
-        typeclasses = TYPECLASS_SET.get_group("SHOP")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         self.fields['icon'] = ImageField(image_type="icon", required=False)
         
@@ -558,11 +492,6 @@ class ShopGoodsForm(ObjectsForm):
         # available objects
         choices = get_all_pocketable_objects()
         self.fields['goods'] = forms.ChoiceField(choices=choices)
-
-        # Goods typeclasses
-        typeclasses = TYPECLASS_SET.get_group("SHOP_GOODS")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         # available units are common objects
         objects = CM.COMMON_OBJECTS.objects.all()
@@ -600,10 +529,6 @@ class NPCShopsForm(forms.ModelForm):
 class SkillsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(SkillsForm, self).__init__(*args, **kwargs)
-
-        typeclasses = TYPECLASS_SET.get_group("SKILL")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
         
         self.fields['icon'] = ImageField(image_type="icon", required=False)
         
@@ -673,10 +598,6 @@ class NPCDialoguesForm(forms.ModelForm):
 class QuestsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(QuestsForm, self).__init__(*args, **kwargs)
-
-        typeclasses = TYPECLASS_SET.get_group("QUEST")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
 
@@ -750,10 +671,6 @@ class DialogueQuestDependenciesForm(forms.ModelForm):
 class EquipmentsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentsForm, self).__init__(*args, **kwargs)
-
-        typeclasses = TYPECLASS_SET.get_group("EQUIPMENT")
-        choices = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in typeclasses.items()]
-        self.fields['typeclass'] = forms.ChoiceField(choices=choices)
 
         objects = CM.EQUIPMENT_POSITIONS.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]

@@ -20,13 +20,13 @@ def query_areas():
     """
     Query all areas and rooms.
     """
-    records = CM.WORLD_AREAS.objects.all()
-    areas = {r.key: {"name": r.name + "(" + r.key + ")", "rooms": []} for r in records}
+    records = CM.WORLD_AREAS.all_base()
+    areas = {r["key"]: {"name": r["name"] + "(" + r["key"] + ")", "rooms": []} for r in records}
 
-    rooms = CM.WORLD_ROOMS.objects.all()
+    rooms = CM.WORLD_ROOMS.all_base()
     for record in rooms:
-        key = record.location
-        choice = (record.key, record.name + " (" + record.key + ")")
+        key = record["location"]
+        choice = (record["key"], record["name"] + " (" + record["key"] + ")")
         if key in areas:
             areas[key]["rooms"].append(choice)
         elif key:
