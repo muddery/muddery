@@ -33,7 +33,7 @@ ObjectEditor.prototype.onSave = function() {
     var image_fields = $(".image-input-control");
     for (var i = 0; i < image_fields.length; i++) {
         var file_obj = image_fields[i].files[0];
-        if (typeof (file_obj) != "undefined" && file_obj.size > 0) {
+        if (file_obj && file_obj.size > 0) {
             upload_images = true;
             var image_type = $(image_fields[i]).data("image_type");
             var name = $(image_fields[i]).data("field_name");
