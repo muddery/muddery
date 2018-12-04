@@ -14,50 +14,6 @@ utils = {
         return null;
     },
 
-    // Parse fields data to table headers.
-    parseFields: function(fields) {
-        var cols = [{
-            field: "operate",
-            title: "Operate",
-            formatter: this.operateButton,
-        }];
-
-        for (var i = 0; i < fields.length; i++) {
-            cols.push({
-                field: fields[i].name,
-                title: fields[i].label,
-                sortable: true,
-            });
-        }
-
-        return cols;
-    },
-
-    // Set table buttons.
-    operateButton: function(value, row, index) {
-        var block = $("<div>");
-
-        var content = $("<div>")
-            .addClass("btn-group")
-            .appendTo(block);
-
-        var edit = $("<button>")
-            .addClass("btn-xs edit-row")
-            .attr("type", "button")
-            .attr("data-record-id", row["id"])
-            .text("Edit")
-            .appendTo(block);
-
-        var edit = $("<button>")
-            .addClass("btn-xs btn-danger delete-row")
-            .attr("type", "button")
-            .attr("data-record-id", row["id"])
-            .text("Delete")
-            .appendTo(block);
-
-        return block.html();
-    },
-
     // Parse records to table rows.
     parseRows: function(fields, records, max_length) {
         var rows = [];

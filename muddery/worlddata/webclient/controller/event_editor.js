@@ -125,7 +125,7 @@ EventEditor.prototype.setActionData = function(data) {
         pageList: [20, 50, 100],
         pageSize: 20,
         sidePagination: "client",
-        columns: utils.parseFields(data.fields),
+        columns: this.parseFields(data.fields),
         data: utils.parseRows(data.fields, data.records),
         sortName: "id",
         sortOrder: "asc",
