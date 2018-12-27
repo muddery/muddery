@@ -11,6 +11,7 @@ from muddery.worlddata.dao import general_query_mapper, model_mapper
 from muddery.worlddata.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
 from muddery.worlddata.dao.event_mapper import get_object_event
 from muddery.worlddata.services.general_query import query_fields
+from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _
@@ -83,6 +84,41 @@ def query_dialogue_sentences(dialogue_key):
     rows = []
     for record in records:
         line = [str(record.serializable_value(field["name"])) for field in fields]
+        rows.append(line)
+
+    table = {
+        "fields": fields,
+        "records": rows,
+    }
+    return table
+
+
+def query_typeclass_table(typeclass_key):
+    """
+    Query a table of objects of the same typeclass.
+
+    Args:
+        typeclass_key: (string) typeclass's key.
+    """
+    typeclass_cls = TYPECLASS(typeclass_key)
+    if not typeclass_cls:
+        raise MudderyError(ERR.no_table, "Can not find typeclass %s" % typeclass_key)
+
+    # get all tables' name
+    tables = typeclass_cls.get_models()
+
+    # get all tables' fields
+    fields = []
+    for table in tables:
+        table_fields = query_fields(table)
+        fields.extend(table_fields)
+
+    # get all tables' data
+    records = general_query_mapper.get_all_from_tables(tables)
+
+    rows = []
+    for record in records:
+        line = [str(record[field["name"]]) for field in fields]
         rows.append(line)
 
     table = {

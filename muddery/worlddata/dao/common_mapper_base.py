@@ -39,5 +39,4 @@ class ObjectsMapper(CommonMapper):
         """
         Get all records with its base data.
         """
-        return get_all_from_tables([settings.WORLD_DATA_APP + "_" + "objects",
-                                     settings.WORLD_DATA_APP + "_" + self.model_name])
+        return get_all_from_tables(["objects", self.model_name])

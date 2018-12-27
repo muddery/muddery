@@ -61,7 +61,7 @@ service = {
 		    data: JSON.stringify(params),
 		    dataType: "json",
 		    success: this.onSuccess(callback_success, callback_failed),
-		    error: this.onError(callback_failed),
+		    error: this.onError(callback_failed)
 	    });
     },
 
@@ -83,7 +83,7 @@ service = {
             dataType: "json",
             processData: false,
 		    success: this.onSuccess(callback_success, callback_failed),
-		    error: this.onError(callback_failed),
+		    error: this.onError(callback_failed)
         });
     },
 
@@ -111,7 +111,7 @@ service = {
     login: function(username, password, callback_success, callback_failed, context) {
         var args = {
             username: username,
-            password: password,
+            password: password
         };
         this.sendRequest("login", "", args, callback_success, callback_failed, context);
     },
@@ -129,7 +129,7 @@ service = {
 
     queryTable: function(table_name, callback_success, callback_failed, context) {
         var args = {
-            table: table_name,
+            table: table_name
         };
         this.sendRequest("query_table", "", args, callback_success, callback_failed, context);
     },
@@ -137,14 +137,14 @@ service = {
     queryRecord: function(table_name, record_id, callback_success, callback_failed, context) {
         var args = {
             table: table_name,
-            record: record_id,
+            record: record_id
         };
         this.sendRequest("query_record", "", args, callback_success, callback_failed, context);
     },
 
     queryTypeclassTable: function(typeclass, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass,
+            typeclass: typeclass
         };
         this.sendRequest("query_typeclass_table", "", args, callback_success, callback_failed, context);
     },
@@ -157,20 +157,29 @@ service = {
         this.sendRequest("query_form", "", args, callback_success, callback_failed, context);
     },
 
+    queryObjectForm: function(base_typeclass, obj_typeclass, obj_key, callback_success, callback_failed, context) {
+        var args = {
+            base_typeclass: base_typeclass,
+            obj_typeclass: obj_typeclass,
+            object: obj_key
+        };
+        this.sendRequest("query_object_form", "", args, callback_success, callback_failed, context);
+    },
+
     queryAreas: function(callback_success, callback_failed, context) {
         this.sendRequest("query_areas", "", {}, callback_success, callback_failed, context);
     },
 
     queryObjectEvents: function(object_key, callback_success, callback_failed, context) {
         var args = {
-            object: object_key,
+            object: object_key
         };
         this.sendRequest("query_object_events", "", args, callback_success, callback_failed, context);
     },
 
     queryDialogueSentences: function(dialogue_key, callback_success, callback_failed, context) {
         var args = {
-            dialogue: dialogue_key,
+            dialogue: dialogue_key
         };
         this.sendRequest("query_dialogue_sentences", "", args, callback_success, callback_failed, context);
     },
@@ -183,7 +192,7 @@ service = {
     queryEventActionData: function(type, key, callback_success, callback_failed, context) {
         var args = {
             type: type,
-            key: key,
+            key: key
         };
         this.sendRequest("query_event_action_data", "", args, callback_success, callback_failed, context);
     },
@@ -192,15 +201,24 @@ service = {
         var args = {
             values: values,
             table: table_name,
-            record: record_id,
+            record: record_id
         };
         this.sendRequest("save_form", "", args, callback_success, callback_failed, context);
+    },
+
+    saveObjectForm: function(tables, base_typeclass, obj_key, callback_success, callback_failed, context) {
+        var args = {
+            tables: tables,
+            base_typeclass: base_typeclass,
+            object: obj_key
+        };
+        this.sendRequest("save_object_form", "", args, callback_success, callback_failed, context);
     },
 
     deleteRecord: function(table_name, record_id, callback_success, callback_failed, context) {
         var args = {
             table: table_name,
-            record: record_id,
+            record: record_id
         };
         this.sendRequest("delete_record", "", args, callback_success, callback_failed, context);
     },
@@ -219,7 +237,7 @@ service = {
 
     uploadSingleData: function(file_obj, table_name, callback_success, callback_failed, context) {
         var args = {
-            table: table_name,
+            table: table_name
         };
         this.sendFile("upload_single_data", "", file_obj, args, callback_success, callback_failed, context);
     },
@@ -227,7 +245,7 @@ service = {
     uploadImage: function(file_obj, field_name, file_type, callback_success, callback_failed, context) {
         var args = {
             field: field_name,
-            type: file_type,
+            type: file_type
         };
         this.sendFile("upload_image", "", file_obj, args, callback_success, callback_failed, context);
     },
@@ -238,7 +256,7 @@ service = {
 
     downloadDataZip: function(file_type) {
         var args = {
-            type: file_type,
+            type: file_type
         };
         this.downloadFile("download_zip", "", args);
     },
@@ -250,7 +268,7 @@ service = {
     downloadSingleData: function(table_name, file_type) {
         var args = {
             table: table_name,
-            type: file_type,
+            type: file_type
         };
         this.downloadFile("download_single_data", "", args);
     },

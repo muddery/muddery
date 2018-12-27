@@ -39,8 +39,7 @@ CommonEditor.prototype.init = function() {
     $("#form-name").text(this.table_name);
 
     this.bindEvents();
-
-    service.queryForm(this.table_name, this.record_id, this.queryFormSuccess, this.queryFormFailed);
+    this.refresh();
 }
 
 CommonEditor.prototype.bindEvents = function() {
@@ -87,6 +86,7 @@ CommonEditor.prototype.refresh = function() {
 CommonEditor.prototype.queryFormSuccess = function(data) {
     controller.fields = data;
 
+    // If has area fields.
     var query_areas = false;
     for (var i = 0; i < data.length; i++) {
         if (data[i].type == "Location") {
@@ -116,6 +116,7 @@ CommonEditor.prototype.queryAreasFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
 }
 
+// Add form fields to the web page.
 CommonEditor.prototype.setFields = function() {
     var container = $("#fields");
     container.children().remove();

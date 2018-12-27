@@ -15,19 +15,16 @@ utils = {
     },
 
     // Parse records to table rows.
-    parseRows: function(fields, records, max_length) {
+    parseRows: function(fields, records) {
         var rows = [];
         for (var i = 0; i < records.length; i++) {
             var row = {ID: i + 1};
             for (var j = 0; j < fields.length; j++) {
-                var value = records[i][j];
-                if (value.length > max_length) {
-                    value = value.slice(0, max_length + 1) + "...";
-                }
-                row[fields[j]["name"]] = value;
+                var field_name = fields[j]["name"];
+                row[field_name] = records[i][j];
             }
             rows.push(row);
         }
         return rows;
-    },
+    }
 }

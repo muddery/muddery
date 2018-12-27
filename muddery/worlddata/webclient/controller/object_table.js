@@ -11,13 +11,21 @@ ObjectTable.prototype.constructor = ObjectTable;
 
 ObjectTable.prototype.init = function() {
     this.typeclass = utils.getQueryString("typeclass");
-    CommonTable.prototype.init.call(this);
+
+    $("#table-name").text(this.typeclass);
+    this.bindEvents();
+
+    service.queryTypeclassTable(this.typeclass, this.queryTableSuccess, this.queryTableFailed);
+}
+
+ObjectTable.prototype.refresh = function() {
+    service.queryTypeclassTable(this.typeclass, this.refreshTableSuccess);
 }
 
 ObjectTable.prototype.onAddRecord = function(e) {
     var editor = "object";
     var typeclass = controller.typeclass;
-    window.parent.controller.editRecord(editor, typeclass);
+    window.parent.controller.editObject(editor, typeclass, "");
 }
 
 ObjectTable.prototype.onEdit = function(e) {
@@ -29,7 +37,7 @@ ObjectTable.prototype.onEdit = function(e) {
     }
 }
 
-// Set table buttons.
+// Set table buttons, use object's key as the row's key.
 ObjectTable.prototype.operateButton = function(value, row, index) {
     var block = $("<div>");
 

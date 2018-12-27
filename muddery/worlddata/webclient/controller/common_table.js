@@ -77,7 +77,7 @@ CommonTable.prototype.queryTableSuccess = function(data) {
         pageSize: 20,
         sidePagination: "client",
         columns: controller.parseFields(data.fields),
-        data: utils.parseRows(data.fields, data.records, controller.field_length),
+        data: utils.parseRows(data.fields, data.records),
         sortName: "id",
         sortOrder: "asc",
         clickToSelect: true,
@@ -131,12 +131,12 @@ CommonTable.prototype.operateButton = function(value, row, index) {
     return block.html();
 }
 
-CommonTable.prototype.queryTableFailed = function() {
+CommonTable.prototype.queryTableFailed = function(code, message) {
     window.parent.controller.notify("ERROR", code + ": " + message);
 }
 
 CommonTable.prototype.refreshTableSuccess = function(data) {
-    $("#data-table").bootstrapTable("load", utils.parseRows(data.fields, data.records, controller.field_length));
+    $("#data-table").bootstrapTable("load", utils.parseRows(data.fields, data.records));
 
     window.parent.controller.setFrameSize();
 }

@@ -223,10 +223,7 @@ controller = {
     editRecord: function(editor_type, table_name, record_id, args) {
         var name = "";
         var url = "";
-        if (editor_type == "object") {
-            url = "object_editor.html?table=" + table_name;
-        }
-        else if (editor_type == "event") {
+        if (editor_type == "event") {
             url = "event_editor.html?table=" + table_name;
         }
         else if (editor_type == "event_action") {
@@ -254,6 +251,20 @@ controller = {
             for (key in args) {
                 url += "&" + key + "=" + args[key];
             }
+        }
+
+        controller.pushPage(name, url);
+    },
+
+    editObject: function(editor_type, typeclass, object_key) {
+        url = "object_editor.html?typeclass=" + typeclass;
+
+        if (object_key) {
+            name = "Edit " + typeclass;
+            url += "&object=" + object_key;
+        }
+        else {
+            name = "Add " + typeclass;
         }
 
         controller.pushPage(name, url);

@@ -57,6 +57,27 @@ class QueryTable(BaseRequestProcesser):
         return success_response(data)
 
 
+class QueryTypeclassTable(BaseRequestProcesser):
+    """
+    Query a table of objects of the same typeclass.
+
+    Args:
+        typeclass: (string) typeclass's key.
+    """
+    path = "query_typeclass_table"
+    name = ""
+
+    def func(self, args, request):
+        if 'typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing argument: "typeclass".')
+
+        typeclass_key = args["typeclass"]
+
+        # Query data.
+        data = data_query.query_typeclass_table(typeclass_key)
+        return success_response(data)
+
+
 class QueryRecord(BaseRequestProcesser):
     """
     Query a record of a table.
@@ -214,7 +235,8 @@ class QueryObjectForm(BaseRequestProcesser):
     Query a record of an object which may include several tables.
 
     Args:
-        typeclass: (string) object's base typeclass
+        base_typeclass: (string) candidate typeclass name
+        obj_typeclass: (string, optional) object's typeclass name
         object: (string, optional) object's key. If it is empty, get a new object.
     """
     path = "query_object_form"
@@ -224,13 +246,14 @@ class QueryObjectForm(BaseRequestProcesser):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "typeclass".')
+        if 'base_typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing argument: "base_typeclass".')
 
-        typeclass_name = args["typeclass"]
-        object_key = args.get('object', None)
+        base_typeclass = args["base_typeclass"]
+        obj_typeclass = args.get('obj_typeclass', None)
+        obj_key = args.get('object', None)
 
-        data = data_edit.query_object_form(typeclass_name, object_key)
+        data = data_edit.query_object_form(base_typeclass, obj_typeclass, obj_key)
         return success_response(data)
 
 
@@ -239,9 +262,13 @@ class SaveObjectForm(BaseRequestProcesser):
     Save a form.
 
     Args:
-        values: (dict) values to save.
-        table: (string) table's name.
-        record: (string, optional) record's id. If it is empty, add a new record.
+        tables: (list) a list of table data.
+               [{
+                 "table": (string) table's name.
+                 "values": (string, optional) record's value.
+                }]
+        base_typeclass: (string) candidate typeclass name
+        object: (string, optional) object's key. If it is empty, add a new object.
     """
     path = "save_object_form"
     name = ""
@@ -250,18 +277,18 @@ class SaveObjectForm(BaseRequestProcesser):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        if 'values' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "values".')
+        if 'tables' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing argument: "tables".')
 
-        if 'table' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
+        if 'base_typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing argument: "base_typeclass".')
 
-        values = args["values"]
-        table_name = args["table"]
-        record_id = args.get('record', None)
+        tables = args["tables"]
+        base_typeclass = args["base_typeclass"]
+        obj_key = args.get('object', None)
 
-        record_id = data_edit.save_form(values, table_name, record_id)
-        data = general_query.query_record(table_name, record_id)
+        obj_key = data_edit.save_object_form(tables, obj_key)
+        data = data_edit.query_object_form(base_typeclass, "", obj_key)
         return success_response(data)
 
 
@@ -285,21 +312,6 @@ class DeleteRecord(BaseRequestProcesser):
 
         data_edit.delete_record(table_name, record_id)
         data = {"record": record_id}
-        return success_response(data)
-
-
-class QueryTables(BaseRequestProcesser):
-    """
-    Query all tables' names.
-
-    Args:
-        None
-    """
-    path = "query_tables"
-    name = ""
-
-    def func(self, args, request):
-        data = general_query.query_tables()
         return success_response(data)
 
 

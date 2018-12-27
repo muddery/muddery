@@ -51,21 +51,6 @@ def generate_key(form_obj):
     return form_obj.instance.__class__.__name__ + "_" + str(index)
 
 
-class ObjectsForm(forms.ModelForm):
-    """
-    Objects base form.
-    """
-    def clean(self):
-        cleaned_data = super(ObjectsForm, self).clean()
-
-        # check object's key
-        key = cleaned_data["key"]
-        if not key:
-            cleaned_data["key"] = generate_key(self)
-
-        return cleaned_data
-
-
 class GameSettingsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(GameSettingsForm, self).__init__(*args, **kwargs)
@@ -108,6 +93,29 @@ class EquipmentPositionsForm(forms.ModelForm):
 
     class Meta:
         model = CM.EQUIPMENT_POSITIONS.model
+        fields = '__all__'
+
+
+class ObjectsForm(forms.ModelForm):
+    """
+    Objects base form.
+    """
+    def __init__(self, *args, **kwargs):
+        super(ObjectsForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    def clean(self):
+        cleaned_data = super(ObjectsForm, self).clean()
+
+        # check object's key
+        key = cleaned_data["key"]
+        if not key:
+            cleaned_data["key"] = generate_key(self)
+
+        return cleaned_data
+
+    class Meta:
+        model = CM.OBJECTS.model
         fields = '__all__'
 
 

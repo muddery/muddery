@@ -5,13 +5,31 @@
 ObjectEditor = function() {
 	CommonEditor.call(this);
 
+    this.base_typeclass = "";
+    this.object_typeclass = "";
     this.object_key = "";
+    this.table_fields = [];
     this.event_fields = [];
 }
 
 ObjectEditor.prototype = prototype(CommonEditor.prototype);
 ObjectEditor.prototype.constructor = ObjectEditor;
 
+ObjectEditor.prototype.init = function() {
+    this.base_typeclass = utils.getQueryString("typeclass");
+    this.object_key = utils.getQueryString("object");
+
+    $("#exit-button").removeClass("hidden");
+    $("#save-record").removeClass("hidden");
+    if (this.record_id) {
+        $("#delete-record").removeClass("hidden");
+    }
+
+    $("#form-name").text(this.base_typeclass);
+
+    this.bindEvents();
+    this.refresh();
+}
 
 ObjectEditor.prototype.bindEvents = function() {
     CommonEditor.prototype.bindEvents.call(this);
@@ -26,7 +44,7 @@ ObjectEditor.prototype.onImageLoad = function() {
 }
 
 ObjectEditor.prototype.onSave = function() {
-    // upload images
+    // Upload images before submit the form.
     var upload_images = false;
     controller.file_fields = [];
 
@@ -83,8 +101,17 @@ ObjectEditor.prototype.deleteEventSuccess = function(data) {
     });
 }
 
+ObjectEditor.prototype.refresh = function() {
+    service.queryObjectForm(this.base_typeclass,
+                            this.object_typeclass,
+                            this.object_key,
+                            this.queryFormSuccess,
+                            this.queryFormFailed);
+}
+
 ObjectEditor.prototype.uploadSuccess = function(field_name) {
     var callback = function(data) {
+        // Show images when upload images success.
         for (var i = 0; i < controller.file_fields.length; i++) {
             if (controller.file_fields[i] == field_name) {
                 controller.file_fields.splice(i, 1);
@@ -97,6 +124,7 @@ ObjectEditor.prototype.uploadSuccess = function(field_name) {
             }
         }
 
+        // Submit the form.
         if (controller.file_fields.length == 0) {
             controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed);
         }
@@ -110,20 +138,55 @@ ObjectEditor.prototype.uploadFailed = function(code, message, data) {
 }
 
 ObjectEditor.prototype.queryFormSuccess = function(data) {
-    for (var i = 0; i < data.length; i++) {
-        if (data[i].name == "key") {
-            var value = data[i].value;
-            if (value) {
-                controller.object_key = value;
+    controller.table_fields = data;
+    controller.object_typeclass = "";
+    controller.object_key = "";
+
+    // get object's typeclass
+    for (var t = 0; t < data.length && !controller.object_typeclass; t++) {
+        var fields = data[t].fields;
+        for (var f = 0; f < fields.length; f++) {
+            if (fields[f].name == "typeclass") {
+                var value = fields[f].value;
+                if (value) {
+                    controller.object_typeclass = value;
+                }
+                break;
             }
-            else {
-                controller.object_key = "";
-            }
-            break;
         }
     }
 
-    CommonEditor.prototype.queryFormSuccess.call(this, data);
+    // get object's key
+    for (var t = 0; t < data.length && !controller.object_key; t++) {
+        var fields = data[t].fields;
+        for (var f = 0; f < fields.length; f++) {
+            if (fields[f].name == "key") {
+                var value = fields[f].value;
+                if (value) {
+                    controller.object_key = value;
+                }
+                break;
+            }
+        }
+    }
+
+    // If has area fields.
+    var query_areas = false;
+    for (var t = 0; t < data.length && !query_areas; t++) {
+        for (var f = 0; f < data[t].fields.length; f++) {
+            if (data[t].fields[f].type == "Location") {
+                query_areas = true;
+                break;
+            }
+        }
+    }
+
+    if (query_areas) {
+        service.queryAreas(controller.queryAreasSuccess, controller.queryAreasFailed);
+    }
+    else {
+        controller.queryAreasSuccess({});
+    }
 }
 
 ObjectEditor.prototype.queryAreasSuccess = function(data) {
@@ -143,7 +206,7 @@ ObjectEditor.prototype.queryEventTableSuccess = function(data) {
         pageList: [20, 50, 100],
         pageSize: 20,
         sidePagination: "client",
-        columns: this.parseFields(data.fields),
+        columns: controller.parseFields(data.fields),
         data: utils.parseRows(data.fields, data.records),
         sortName: "id",
         sortOrder: "asc",
@@ -156,6 +219,71 @@ ObjectEditor.prototype.queryEventTableSuccess = function(data) {
 
 ObjectEditor.prototype.queryEventTableFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
+}
+
+// Add form fields to the web page.
+ObjectEditor.prototype.setFields = function() {
+    var container = $("#fields");
+    container.children().remove();
+
+    for (var t = 0; t < this.table_fields.length; t++) {
+        var fields = this.table_fields[t].fields;
+        for (var f = 0; f < fields.length; f++) {
+            if (t == 0 || fields[f].name != "key") {
+                // If it is a key field, only add first table's key.
+                var controller = this.createFieldController(fields[f]);
+                if (controller) {
+                    controller.appendTo(container);
+                }
+            }
+        }
+    }
+
+    $("#control-typeclass select").on("change", this.onTypeclassChange);
+}
+
+ObjectEditor.prototype.onTypeclassChange = function(e) {
+    var typeclass = this.value;
+
+    if (controller.object_typeclass != typeclass) {
+        controller.object_typeclass = typeclass;
+        controller.refresh();
+    }
+}
+
+ObjectEditor.prototype.saveFields = function(callback_success, callback_failed, context) {
+    var tables = [];
+    for (var t = 0; t < this.table_fields.length; t++) {
+        var fields = this.table_fields[t].fields;
+        var values = {};
+        for (var f = 0; f < fields.length; f++) {
+            var name = fields[f].name;
+            var control = $("#control-" + name + " .editor-control");
+            if (control.length > 0) {
+                if (control.attr("type") == "checkbox") {
+                    values[name] = control.prop("checked");
+                }
+                else {
+                    // Leave the value blank if it is an empty string.
+                    var value = control.val();
+                    if (value.length > 0) {
+                        values[name] = value;
+                    }
+                }
+            }
+        }
+        tables.push({
+            table: this.table_fields[t].table,
+            values: values
+        });
+    }
+
+    service.saveObjectForm(tables,
+                           this.base_typeclass,
+                           this.object_key,
+                           callback_success,
+                           callback_failed,
+                           context);
 }
 
 ObjectEditor.prototype.addEvent = function(e) {
