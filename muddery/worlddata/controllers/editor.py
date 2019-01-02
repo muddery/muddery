@@ -237,7 +237,7 @@ class QueryObjectForm(BaseRequestProcesser):
     Args:
         base_typeclass: (string) candidate typeclass name
         obj_typeclass: (string, optional) object's typeclass name
-        object: (string, optional) object's key. If it is empty, get a new object.
+        obj_key: (string, optional) object's key. If it is empty, get a new object.
     """
     path = "query_object_form"
     name = ""
@@ -251,7 +251,7 @@ class QueryObjectForm(BaseRequestProcesser):
 
         base_typeclass = args["base_typeclass"]
         obj_typeclass = args.get('obj_typeclass', None)
-        obj_key = args.get('object', None)
+        obj_key = args.get('obj_key', None)
 
         data = data_edit.query_object_form(base_typeclass, obj_typeclass, obj_key)
         return success_response(data)
@@ -268,7 +268,8 @@ class SaveObjectForm(BaseRequestProcesser):
                  "values": (string, optional) record's value.
                 }]
         base_typeclass: (string) candidate typeclass name
-        object: (string, optional) object's key. If it is empty, add a new object.
+        obj_typeclass: (string) object's typeclass name
+        obj_key: (string) object's key. If it is empty or different from the current object's key, get a new object.
     """
     path = "save_object_form"
     name = ""
@@ -283,12 +284,19 @@ class SaveObjectForm(BaseRequestProcesser):
         if 'base_typeclass' not in args:
             raise MudderyError(ERR.missing_args, 'Missing argument: "base_typeclass".')
 
+        if 'obj_typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing argument: "obj_typeclass".')
+
+        if 'obj_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing argument: "obj_key".')
+
         tables = args["tables"]
         base_typeclass = args["base_typeclass"]
-        obj_key = args.get('object', None)
+        obj_typeclass = args["obj_typeclass"]
+        obj_key = args["obj_key"]
 
-        obj_key = data_edit.save_object_form(tables, obj_key)
-        data = data_edit.query_object_form(base_typeclass, "", obj_key)
+        obj_key = data_edit.save_object_form(tables, obj_typeclass, obj_key)
+        data = data_edit.query_object_form(base_typeclass, obj_typeclass, obj_key)
         return success_response(data)
 
 

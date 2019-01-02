@@ -161,7 +161,7 @@ service = {
         var args = {
             base_typeclass: base_typeclass,
             obj_typeclass: obj_typeclass,
-            object: obj_key
+            obj_key: obj_key
         };
         this.sendRequest("query_object_form", "", args, callback_success, callback_failed, context);
     },
@@ -206,11 +206,12 @@ service = {
         this.sendRequest("save_form", "", args, callback_success, callback_failed, context);
     },
 
-    saveObjectForm: function(tables, base_typeclass, obj_key, callback_success, callback_failed, context) {
+    saveObjectForm: function(tables, base_typeclass, obj_typeclass, obj_key, callback_success, callback_failed, context) {
         var args = {
             tables: tables,
             base_typeclass: base_typeclass,
-            object: obj_key
+            obj_typeclass: obj_typeclass,
+            obj_key: obj_key
         };
         this.sendRequest("save_object_form", "", args, callback_success, callback_failed, context);
     },

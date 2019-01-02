@@ -6,8 +6,8 @@ ObjectEditor = function() {
 	CommonEditor.call(this);
 
     this.base_typeclass = "";
-    this.object_typeclass = "";
-    this.object_key = "";
+    this.obj_typeclass = "";
+    this.obj_key = "";
     this.table_fields = [];
     this.event_fields = [];
 }
@@ -17,7 +17,7 @@ ObjectEditor.prototype.constructor = ObjectEditor;
 
 ObjectEditor.prototype.init = function() {
     this.base_typeclass = utils.getQueryString("typeclass");
-    this.object_key = utils.getQueryString("object");
+    this.obj_key = utils.getQueryString("object");
 
     $("#exit-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");
@@ -71,7 +71,7 @@ ObjectEditor.prototype.onEditEvent = function(e) {
         var editor = "event";
         var table = "event_data";
         var args = {
-            trigger: controller.object_key,
+            trigger: controller.obj_key,
         }
         window.parent.controller.editRecord(editor, table, record_id, args);
     }
@@ -103,8 +103,8 @@ ObjectEditor.prototype.deleteEventSuccess = function(data) {
 
 ObjectEditor.prototype.refresh = function() {
     service.queryObjectForm(this.base_typeclass,
-                            this.object_typeclass,
-                            this.object_key,
+                            this.obj_typeclass,
+                            this.obj_key,
                             this.queryFormSuccess,
                             this.queryFormFailed);
 }
@@ -139,17 +139,17 @@ ObjectEditor.prototype.uploadFailed = function(code, message, data) {
 
 ObjectEditor.prototype.queryFormSuccess = function(data) {
     controller.table_fields = data;
-    controller.object_typeclass = "";
-    controller.object_key = "";
+    controller.obj_typeclass = "";
+    controller.obj_key = "";
 
     // get object's typeclass
-    for (var t = 0; t < data.length && !controller.object_typeclass; t++) {
+    for (var t = 0; t < data.length && !controller.obj_typeclass; t++) {
         var fields = data[t].fields;
         for (var f = 0; f < fields.length; f++) {
             if (fields[f].name == "typeclass") {
                 var value = fields[f].value;
                 if (value) {
-                    controller.object_typeclass = value;
+                    controller.obj_typeclass = value;
                 }
                 break;
             }
@@ -157,13 +157,13 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
     }
 
     // get object's key
-    for (var t = 0; t < data.length && !controller.object_key; t++) {
+    for (var t = 0; t < data.length && !controller.obj_key; t++) {
         var fields = data[t].fields;
         for (var f = 0; f < fields.length; f++) {
             if (fields[f].name == "key") {
                 var value = fields[f].value;
                 if (value) {
-                    controller.object_key = value;
+                    controller.obj_key = value;
                 }
                 break;
             }
@@ -192,7 +192,7 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
 ObjectEditor.prototype.queryAreasSuccess = function(data) {
     controller.areas = data;
     controller.setFields();
-    service.queryObjectEvents(controller.object_key, controller.queryEventTableSuccess, controller.queryEventTableFailed);
+    service.queryObjectEvents(controller.obj_key, controller.queryEventTableSuccess, controller.queryEventTableFailed);
 }
 
 ObjectEditor.prototype.queryEventTableSuccess = function(data) {
@@ -245,8 +245,8 @@ ObjectEditor.prototype.setFields = function() {
 ObjectEditor.prototype.onTypeclassChange = function(e) {
     var typeclass = this.value;
 
-    if (controller.object_typeclass != typeclass) {
-        controller.object_typeclass = typeclass;
+    if (controller.obj_typeclass != typeclass) {
+        controller.obj_typeclass = typeclass;
         controller.refresh();
     }
 }
@@ -280,14 +280,15 @@ ObjectEditor.prototype.saveFields = function(callback_success, callback_failed, 
 
     service.saveObjectForm(tables,
                            this.base_typeclass,
-                           this.object_key,
+                           this.obj_typeclass,
+                           this.obj_key,
                            callback_success,
                            callback_failed,
                            context);
 }
 
 ObjectEditor.prototype.addEvent = function(e) {
-    if (!controller.object_key) {
+    if (!controller.obj_key) {
         window.parent.controller.notify("You should save this object first.");
         return;
     }
@@ -296,7 +297,7 @@ ObjectEditor.prototype.addEvent = function(e) {
     var table = "event_data";
     var record = "";
     var args = {
-        trigger: controller.object_key,
+        trigger: controller.obj_key,
     }
     window.parent.controller.editRecord(editor, table, record, args);
 }

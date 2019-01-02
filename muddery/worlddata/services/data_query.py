@@ -106,12 +106,18 @@ def query_typeclass_table(typeclass_key):
 
     # get all tables' name
     tables = typeclass_cls.get_models()
+    if not tables:
+        raise MudderyError(ERR.no_table, "Can not get tables of %s" % typeclass_key)
 
     # get all tables' fields
-    fields = []
-    for table in tables:
+    # add the first table
+    table_fields = query_fields(tables[0])
+    fields = [field for field in table_fields if field["name"] != "id"]
+
+    # add other tables
+    for table in tables[1:]:
         table_fields = query_fields(table)
-        fields.extend(table_fields)
+        fields.extend([field for field in table_fields if field["name"] != "id" and field["name"] != "key"])
 
     # get all tables' data
     records = general_query_mapper.get_all_from_tables(tables)

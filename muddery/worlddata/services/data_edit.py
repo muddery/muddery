@@ -6,6 +6,7 @@ from __future__ import print_function
 
 from django.conf import settings
 from django.db import transaction
+from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from muddery.utils import defines
@@ -132,7 +133,7 @@ def query_object_form(base_typeclass, obj_typeclass, obj_key):
         base_typeclass: (string) candidate typeclass group.
         obj_typeclass: (string, optional) object's typeclass. If it is empty, use the typeclass of the object
                         or use base typeclass as object's typeclass.
-        obj_key: (string, optional) object's key. If it is empty, query an empty form.
+        obj_key: (string) object's key. If it is empty, query an empty form.
     """
     candidate_typeclasses = TYPECLASS_SET.get_group(base_typeclass)
     if not candidate_typeclasses:
@@ -176,7 +177,7 @@ def query_object_form(base_typeclass, obj_typeclass, obj_key):
     return forms
 
 
-def save_object_form(tables, object_key):
+def save_object_form(tables, obj_typeclass, obj_key):
     """
     Save all data of an object.
 
@@ -186,8 +187,43 @@ def save_object_form(tables, object_key):
                  "table": (string) table's name.
                  "record": (string, optional) record's id. If it is empty, add a new record.
                 }]
-        object_key: (string, optional) object's key. If it is empty, query an empty form.
+        obj_typeclass: (string) object's typeclass.
+        obj_key: (string) current object's key. If it is empty or changed, query an empty form.
     """
+    if not tables:
+        raise MudderyError(ERR.invalid_form, "Invalid form.", data="Empty form.")
+
+    try:
+        typeclass = TYPECLASS(obj_typeclass)
+    except:
+        raise MudderyError(ERR.invalid_form, "Invalid form.", data="No typeclass: %s" % obj_typeclass)
+
+    # Get object's new key from the first form.
+    new_obj = not (obj_key and obj_key == tables[0]["values"]["key"])
+    if new_obj:
+        try:
+            obj_key = tables[0]["values"]["key"]
+        except KeyError:
+            pass
+
+        if not obj_key:
+            # Generate a new key.
+            try:
+                # Get object table's last id.
+                model_obj = apps.get_model(settings.WORLD_DATA_APP, typeclass.model_name)
+                query = model_obj.objects.last()
+                if query:
+                    index = int(query.id) + 1
+                else:
+                    index = 1
+            except Exception, e:
+                raise MudderyError(ERR.invalid_form, "Invalid form.", data="No typeclass model: %s" % obj_typeclass)
+
+            obj_key = obj_typeclass + "_" + str(index)
+
+            for table in tables:
+                table["values"]["key"] = obj_key
+
     forms = []
     for table in tables:
         table_name = table["table"]
@@ -195,10 +231,10 @@ def save_object_form(tables, object_key):
 
         form_class = FORM_SET.get(table_name)
         form = None
-        if object_key:
+        if not new_obj:
             try:
                 # Query record's data.
-                record = general_query_mapper.get_record_by_key(table_name, object_key)
+                record = general_query_mapper.get_record_by_key(table_name, obj_key)
                 form = form_class(form_values, instance=record)
             except ObjectDoesNotExist:
                 form = None

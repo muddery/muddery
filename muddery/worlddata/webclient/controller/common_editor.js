@@ -232,17 +232,22 @@ CommonEditor.prototype.saveFormFailed = function(code, message, data) {
 
     if (code == 10006) {
         // Invalid form
-        for (var name in data) {
-            // Set return messages.
-            var field = $("#control-" + name + " .message-block");
-            if (field.length > 0) {
-                field
-                    .text(data[name])
-                    .show();
+        if (typeof(data) == "object") {
+            for (var name in data) {
+                // Set return messages.
+                var field = $("#control-" + name + " .message-block");
+                if (field.length > 0) {
+                    field
+                        .text(data[name])
+                        .show();
+                }
+                else {
+                    text += " " + data[name];
+                }
             }
-            else {
-                text += " " + data[name];
-            }
+        }
+        else {
+            text += " " + data;
         }
     }
 
