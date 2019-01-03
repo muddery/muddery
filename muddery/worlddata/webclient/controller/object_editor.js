@@ -21,7 +21,7 @@ ObjectEditor.prototype.init = function() {
 
     $("#exit-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");
-    if (this.record_id) {
+    if (this.obj_key) {
         $("#delete-record").removeClass("hidden");
     }
 
@@ -63,6 +63,14 @@ ObjectEditor.prototype.onSave = function() {
     if (!upload_images) {
         controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed);
     }
+}
+
+ObjectEditor.prototype.confirmDelete = function(e) {
+    window.parent.controller.hideWaiting();
+
+    service.deleteObject(controller.base_typeclass,
+                         controller.obj_key,
+                         controller.deleteSuccess);
 }
 
 ObjectEditor.prototype.onEditEvent = function(e) {

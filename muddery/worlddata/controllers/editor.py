@@ -29,7 +29,7 @@ class QueryFields(BaseRequestProcesser):
 
     def func(self, args, request):
         if 'table' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
 
         table_name = args["table"]
 
@@ -49,7 +49,7 @@ class QueryTable(BaseRequestProcesser):
 
     def func(self, args, request):
         if 'table' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
 
         table_name = args["table"]
 
@@ -69,7 +69,7 @@ class QueryTypeclassTable(BaseRequestProcesser):
 
     def func(self, args, request):
         if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "typeclass".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
 
         typeclass_key = args["typeclass"]
 
@@ -190,7 +190,7 @@ class QueryForm(BaseRequestProcesser):
 
     def func(self, args, request):
         if 'table' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
 
         table_name = args["table"]
         record = args.get('record', None)
@@ -216,10 +216,10 @@ class SaveForm(BaseRequestProcesser):
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
         if 'values' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "values".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "values".')
 
         if 'table' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "table".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
 
         values = args["values"]
         table_name = args["table"]
@@ -247,7 +247,7 @@ class QueryObjectForm(BaseRequestProcesser):
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
         if 'base_typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "base_typeclass".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_typeclass".')
 
         base_typeclass = args["base_typeclass"]
         obj_typeclass = args.get('obj_typeclass', None)
@@ -279,16 +279,16 @@ class SaveObjectForm(BaseRequestProcesser):
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
         if 'tables' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "tables".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "tables".')
 
         if 'base_typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "base_typeclass".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_typeclass".')
 
         if 'obj_typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "obj_typeclass".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_typeclass".')
 
         if 'obj_key' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing argument: "obj_key".')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
 
         tables = args["tables"]
         base_typeclass = args["base_typeclass"]
@@ -312,14 +312,43 @@ class DeleteRecord(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        if ('table' not in args) or ('record' not in args):
-            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+        if 'table' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
+
+        if 'record' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "record".')
 
         table_name = args["table"]
         record_id = args["record"]
 
         data_edit.delete_record(table_name, record_id)
         data = {"record": record_id}
+        return success_response(data)
+
+
+class DeleteObject(BaseRequestProcesser):
+    """
+    Delete an object.
+
+    Args:
+        base_typeclass: (string) object's base typeclass. Delete all records in all tables under this typeclass.
+        obj_key: (string) object's key.
+    """
+    path = "delete_object"
+    name = ""
+
+    def func(self, args, request):
+        if 'base_typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_typeclass".')
+
+        if 'obj_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+
+        base_typeclass = args["base_typeclass"]
+        obj_key = args["obj_key"]
+
+        data_edit.delete_object(base_typeclass, obj_key)
+        data = {"obj_key": obj_key}
         return success_response(data)
 
 

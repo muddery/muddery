@@ -161,6 +161,6 @@ CommonTable.prototype.deleteSuccess = function(data) {
     var record_id = data.record;
     $("#data-table").bootstrapTable("remove", {
         field: "id",
-        values: [record_id],
+        values: [record_id]
     });
 }

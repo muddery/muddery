@@ -224,6 +224,14 @@ service = {
         this.sendRequest("delete_record", "", args, callback_success, callback_failed, context);
     },
 
+    deleteObject: function(base_typeclass, obj_key, callback_success, callback_failed, context) {
+        var args = {
+            base_typeclass: base_typeclass,
+            obj_key: obj_key
+        };
+        this.sendRequest("delete_object", "", args, callback_success, callback_failed, context);
+    },
+
     queryTables: function(callback_success, callback_failed, context) {
         this.sendRequest("query_tables", "", {}, callback_success, callback_failed, context);
     },

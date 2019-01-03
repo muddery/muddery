@@ -37,6 +37,34 @@ ObjectTable.prototype.onEdit = function(e) {
     }
 }
 
+ObjectTable.prototype.onDelete = function(e) {
+    var object_key = $(this).attr("data-object-key");
+    window.parent.controller.confirm("",
+                                     "Delete this record?",
+                                     controller.confirmDelete,
+                                     {object_key: object_key});
+}
+
+ObjectTable.prototype.confirmDelete = function(e) {
+    window.parent.controller.hideWaiting();
+
+    var typeclass = controller.typeclass;
+    var object_key = e.data.object_key;
+    controller.deleteObject(typeclass, object_key);
+}
+
+ObjectTable.prototype.deleteObject = function(typeclass, object_key) {
+    service.deleteObject(typeclass, object_key, this.deleteSuccess);
+}
+
+ObjectTable.prototype.deleteSuccess = function(data) {
+    var object_key = data.obj_key;
+    $("#data-table").bootstrapTable("remove", {
+        field: "key",
+        values: [object_key]
+    });
+}
+
 // Set table buttons, use object's key as the row's key.
 ObjectTable.prototype.operateButton = function(value, row, index) {
     var block = $("<div>");

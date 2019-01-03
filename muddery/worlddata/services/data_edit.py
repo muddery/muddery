@@ -254,3 +254,16 @@ def save_object_form(tables, obj_typeclass, obj_key):
     with transaction.atomic():
         for form in forms:
             form.save()
+
+
+def delete_object(base_typeclass, obj_key):
+    """
+    Delete an object from all tables under the base typeclass.
+    """
+    typeclasses = TYPECLASS_SET.get_group(base_typeclass)
+    tables = set()
+    for key, value in typeclasses.items():
+        tables.update(value.get_models())
+
+    for table in tables:
+        general_query_mapper.delete_record_by_key(table, obj_key)

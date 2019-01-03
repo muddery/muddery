@@ -59,8 +59,7 @@ CommonEditor.prototype.onSave = function() {
 CommonEditor.prototype.onDelete = function() {
     window.parent.controller.confirm("",
                                      "Delete this record?",
-                                     controller.confirmDelete,
-                                     {record: this.record_id});
+                                     controller.confirmDelete);
 }
 
 CommonEditor.prototype.onAreaChange = function(e) {

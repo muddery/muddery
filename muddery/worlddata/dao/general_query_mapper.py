@@ -86,7 +86,7 @@ def get_record(table_name, **kwargs):
 
 def delete_record_by_id(table_name, record_id):
     """
-    Get a table's all records.
+    Delete a record from a table by its id.
 
     Args:
         table_name: (string) db table's name.
@@ -95,6 +95,20 @@ def delete_record_by_id(table_name, record_id):
     # get model
     model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
     record = model_obj.objects.get(id=record_id)
+    record.delete()
+
+
+def delete_record_by_key(table_name, object_key):
+    """
+    Delete a record from a table by its key.
+
+    Args:
+        table_name: (string) db table's name.
+        object_key: (string) object's key.
+    """
+    # get model
+    model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
+    record = model_obj.objects.get(key=object_key)
     record.delete()
 
 
