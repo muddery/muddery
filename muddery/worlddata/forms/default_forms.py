@@ -209,15 +209,6 @@ class WorldNPCsForm(ObjectsForm):
         rooms = CM.WORLD_ROOMS.all_base()
         choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
         self.fields['location'] = LocationField(choices=choices)
-        
-        # NPC's model
-        choices = [("", "---------")]
-        objects = CM.CHARACTER_MODELS.objects.all().values("key", "name").distinct()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
-        self.fields['model'] = forms.ChoiceField(choices=choices, required=False)
-        
-        # NPC's icon
-        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
 

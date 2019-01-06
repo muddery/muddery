@@ -266,4 +266,7 @@ def delete_object(base_typeclass, obj_key):
         tables.update(value.get_models())
 
     for table in tables:
-        general_query_mapper.delete_record_by_key(table, obj_key)
+        try:
+            general_query_mapper.delete_record_by_key(table, obj_key)
+        except ObjectDoesNotExist:
+            pass

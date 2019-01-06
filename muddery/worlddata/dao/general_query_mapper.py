@@ -131,9 +131,10 @@ def get_all_from_tables(tables):
     # join tables
     from_tables = ", ".join(tables)
     conditions = [tables[0] + ".key=" + t + ".key" for t in tables[1:]]
-    conditions = "and ".join(conditions)
+    conditions = " and ".join(conditions)
+    query = "select * from %s where %s" % (from_tables, conditions)
     cursor = connections[settings.WORLD_DATA_APP].cursor()
-    cursor.execute("select * from %s where %s" % (from_tables, conditions))
+    cursor.execute(query)
     columns = [col[0] for col in cursor.description]
 
     # return records
