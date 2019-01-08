@@ -210,8 +210,7 @@ def save_object_form(tables, obj_typeclass, obj_key):
             # Generate a new key.
             try:
                 # Get object table's last id.
-                model_obj = apps.get_model(settings.WORLD_DATA_APP, typeclass.model_name)
-                query = model_obj.objects.last()
+                query = general_query_mapper.get_the_last_record(typeclass.model_name)
                 if query:
                     index = int(query.id) + 1
                 else:

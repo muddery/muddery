@@ -152,9 +152,16 @@ service = {
     queryForm: function(table_name, record_id, callback_success, callback_failed, context) {
         var args = {
             table: table_name,
-            record: record_id,
+            record: record_id
         };
         this.sendRequest("query_form", "", args, callback_success, callback_failed, context);
+    },
+
+    queryFormFirstRecord: function(table_name, callback_success, callback_failed, context) {
+        var args = {
+            table: table_name
+        };
+        this.sendRequest("query_form_first_record", "", args, callback_success, callback_failed, context);
     },
 
     queryObjectForm: function(base_typeclass, obj_typeclass, obj_key, callback_success, callback_failed, context) {

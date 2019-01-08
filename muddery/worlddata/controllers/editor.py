@@ -14,6 +14,7 @@ from muddery.worlddata.utils.response import success_response
 from muddery.utils.builder import build_all
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
+from muddery.worlddata.dao import general_query_mapper
 from muddery.mappings.typeclass_set import TYPECLASS
 
 
@@ -179,7 +180,7 @@ class QueryDialogueSentences(BaseRequestProcesser):
 
 class QueryForm(BaseRequestProcesser):
     """
-    Query a record of a table.
+    Query a form of a record of a table.
 
     Args:
         table: (string) table's name
@@ -196,6 +197,35 @@ class QueryForm(BaseRequestProcesser):
         record = args.get('record', None)
 
         data = data_edit.query_form(table_name, id=record)
+        return success_response(data)
+
+
+class QueryFormFirstRecord(BaseRequestProcesser):
+    """
+    Query a form of the first record of a table.
+
+    Args:
+        table: (string) table's name
+    """
+    path = "query_form_first_record"
+    name = ""
+
+    def func(self, args, request):
+        if 'table' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "table".')
+
+        table_name = args["table"]
+
+        try:
+            record = general_query_mapper.get_the_first_record(table_name)
+            if record:
+                record_id = record.id
+            else:
+                record_id = None
+        except Exception, e:
+            raise MudderyError(ERR.invalid_form, "Wrong table: %s." % table_name)
+
+        data = data_edit.query_form(table_name, id=record_id)
         return success_response(data)
 
 
