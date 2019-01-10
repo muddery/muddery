@@ -1,4 +1,4 @@
-game_name,connection_screen,solo_mode,global_cd,auto_cast_skill_cd,can_give_up_quests,can_close_dialogue,single_dialogue_sentence,auto_resume_dialogues,default_home_key,start_location_key,default_player_home_key,default_player_character_key
+game_name,connection_screen,solo_mode,global_cd,auto_cast_skill_cd,can_give_up_quests,can_close_dialogue,single_dialogue_sentence,auto_resume_dialogues,default_home_key,start_location_key,default_player_home_key,default_player_character_key,map_scale,map_room_size
 "Muddery","{b=============================================================={n
      Welcome!
- {b=============================================================={n",False,1.0,1.5,True,False,False,True,,,,player
+ {b=============================================================={n",False,1.0,1.5,True,False,False,True,,,,player,,
