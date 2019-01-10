@@ -162,23 +162,6 @@ def create_game_directory(gamedir, template, setting_dict=None):
     # pre-build settings file in the new GAME_DIR
     create_settings_file(setting_dict)
 
-    # copy full webclient
-    muddery_web = os.path.join(configs.MUDDERY_LIB, "web", "webclient")
-    default_web = os.path.join(default_template, "web", "webclient_overrides")
-    dest_web = os.path.join(GAME_DIR, "web", "webclient_full")
-
-    if not os.path.exists(dest_web):
-        # If does not exist, create one.
-        os.mkdir(dest_web)
-
-    copy_tree(os.path.join(muddery_web, "webclient"), os.path.join(dest_web, "webclient"))
-    shutil.copy2(os.path.join(muddery_web, "package.json"), os.path.join(dest_web, "package.json"))
-    shutil.copy2(os.path.join(muddery_web, "webpack.config.js"), os.path.join(dest_web, "webpack.config.js"))
-    copy_tree(os.path.join(default_web, "webclient"), os.path.join(dest_web, "webclient"))
-    if template_dir:
-        template_web = os.path.join(template_dir, "web", "webclient_overrides")
-        copy_tree(os.path.join(template_web, "webclient"), os.path.join(dest_web, "webclient"))
-
 
 def show_version_info(about=False):
     """

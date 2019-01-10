@@ -22,8 +22,8 @@ class Upgrader(BaseUpgrader):
     # from min version 0.0.0 (include this version)
     from_min_version = (0, 2, 10)
 
-    # from max version 0.3.1 (not include this version)
-    from_max_version = (0, 3, 1)
+    # from max version 0.3.3 (not include this version)
+    from_max_version = (0, 3, 3)
 
     target_version = None
     

@@ -207,13 +207,11 @@ WORLDEDITOR_ROOT = os.path.join(GAME_DIR, "web", "static", "editor")
 
 # Directories from which static files will be gathered from.
 STATICFILES_DIRS = (
-    os.path.join(GAME_DIR, "worlddata", "editor", "static"),
-    os.path.join(MUDDERY_DIR, "worlddata", "editor", "static"),
     os.path.join(GAME_DIR, "web", "static_overrides"),
     os.path.join(MUDDERY_DIR, "web", "website", "static"),
     ("webclient", os.path.join(GAME_DIR, "web", "webclient_overrides", "webclient")),
     ("webclient", os.path.join(MUDDERY_DIR, "web", "webclient", "webclient")),
-    ("dist", os.path.join(GAME_DIR, "web", "webclient_overrides", "dist")),
+    ("editor", os.path.join(GAME_DIR, "worlddata", "webclient")),
     ("editor", os.path.join(MUDDERY_DIR, "worlddata", "webclient")),
 )
 
@@ -221,8 +219,6 @@ STATICFILES_DIRS = (
 TEMPLATES = [{
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(GAME_DIR, "worlddata", "editor", "templates"),
-            os.path.join(MUDDERY_DIR, "worlddata", "editor", "templates"),
             os.path.join(GAME_DIR, "web", "template_overrides", WEBSITE_TEMPLATE),
             os.path.join(GAME_DIR, "web", "template_overrides"),
             os.path.join(MUDDERY_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
