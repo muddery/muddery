@@ -131,14 +131,16 @@ controller = {
         frame.height(0);
             
         var frame_body = frame[0].contentWindow.document.body;
-        var frame_height = frame_body.scrollHeight + 1;
-        
-        if (frame_height > win_height) {
-		    frame.height(frame_height);
-	    }
-	    else {
-		    frame.height(win_height);
-	    }
+        if (frame_body) {
+            var frame_height = frame_body.scrollHeight + 1;
+
+            if (frame_height > win_height) {
+                frame.height(frame_height);
+            }
+            else {
+                frame.height(win_height);
+            }
+        }
     },
 
     setPage: function(name, url, level) {

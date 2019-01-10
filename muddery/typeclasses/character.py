@@ -71,7 +71,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         # set default values
         if not self.attributes.has("level"):
-            self.db.level = 1
+            self.db.level = 0
         if not self.attributes.has("exp"):
             self.db.exp = 0
         if not self.attributes.has("hp"):
@@ -150,7 +150,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         super(MudderyCharacter, self).after_data_loaded()
 
         # get level
-        self.db.level = getattr(self.dfield, "level", 1)
+        if not self.db.level:
+            self.db.level = getattr(self.dfield, "level", 1)
 
         # friendly
         self.friendly = getattr(self.dfield, "friendly", 0)

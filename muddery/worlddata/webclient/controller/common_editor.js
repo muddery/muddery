@@ -172,11 +172,11 @@ CommonEditor.prototype.createFieldController = function(field) {
 }
 
 CommonEditor.prototype.exit = function() {
-    window.parent.controller.popPage(true);
+    setInterval(function() {window.parent.controller.popPage(true);}, 0);
 }
 
 CommonEditor.prototype.exitNoChange = function() {
-    window.parent.controller.popPage(false);
+    setInterval(function() {window.parent.controller.popPage(false);}, 0);
 }
 
 CommonEditor.prototype.saveFields = function(callback_success, callback_failed, context) {
