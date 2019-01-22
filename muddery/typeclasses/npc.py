@@ -103,15 +103,15 @@ class MudderyNPC(TYPECLASS("CHARACTER")):
                 # If the character have something to talk, add talk command.
                 commands.append({"name": _("Talk"), "cmd": "talk", "args": self.dbref})
 
-                # Add shops.
-                for shop_obj in self.db.shops.values():
-                    if not shop_obj.is_visible(caller):
-                        continue
+            # Add shops.
+            for shop_obj in self.db.shops.values():
+                if not shop_obj.is_visible(caller):
+                    continue
 
-                    verb = shop_obj.verb
-                    if not verb:
-                        verb = shop_obj.get_name()
-                    commands.append({"name": verb, "cmd": "shopping", "args": shop_obj.dbref})
+                verb = shop_obj.verb
+                if not verb:
+                    verb = shop_obj.get_name()
+                commands.append({"name": verb, "cmd": "shopping", "args": shop_obj.dbref})
 
             if self.friendly <= 0:
                 commands.append({"name": _("Attack"), "cmd": "attack", "args": self.dbref})
