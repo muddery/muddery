@@ -7,7 +7,6 @@ from builtins import object
 
 import time
 
-
 #------------------------------------------------------------
 # Server Session
 #------------------------------------------------------------
@@ -47,8 +46,8 @@ class Session(object):
         a new session is established.
 
         Args:
-            protocol_key (str): By default, one of 'telnet', 'ssh',
-                'ssl' or 'web'.
+            protocol_key (str): By default, one of 'telnet', 'telnet/ssl', 'ssh',
+                'webclient/websocket' or 'webclient/ajax'.
             address (str): Client address.
             sessionhandler (SessionHandler): Reference to the
                 main sessionhandler instance.
@@ -133,7 +132,8 @@ class Session(object):
         on uid etc).
 
         """
-        self.protocol_flags.update(self.account.attributs.get("_saved_protocol_flags"), {})
+        if self.account:
+            self.protocol_flags.update(self.account.attributes.get("_saved_protocol_flags", {}))
 
     # access hooks
 

@@ -8,6 +8,7 @@ sessions etc.
 """
 
 import re
+from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
 from twisted.conch.telnet import Telnet, StatefulTelnetProtocol
 from twisted.conch.telnet import IAC, NOP, LINEMODE, GA, WILL, WONT, ECHO, NULL
@@ -26,6 +27,14 @@ _RE_SCREENREADER_REGEX = re.compile(r"%s" % settings.SCREENREADER_REGEX_STRIP, r
 _IDLE_COMMAND = settings.IDLE_COMMAND + "\n"
 
 
+class TelnetServerFactory(protocol.ServerFactory):
+    "This is only to name this better in logs"
+    noisy = False
+
+    def logPrefix(self):
+        return "Telnet"
+
+
 class TelnetProtocol(Telnet, StatefulTelnetProtocol, Session):
     """
     Each player connecting over telnet (ie using most traditional mud
@@ -34,8 +43,8 @@ class TelnetProtocol(Telnet, StatefulTelnetProtocol, Session):
     """
 
     def __init__(self, *args, **kwargs):
-        self.protocol_name = "telnet"
         super(TelnetProtocol, self).__init__(*args, **kwargs)
+        self.protocol_key = "telnet"
 
     def connectionMade(self):
         """
@@ -49,10 +58,13 @@ class TelnetProtocol(Telnet, StatefulTelnetProtocol, Session):
         # this number is counted down for every handshake that completes.
         # when it reaches 0 the portal/server syncs their data
         self.handshakes = 8  # suppress-go-ahead, naws, ttype, mccp, mssp, msdp, gmcp, mxp
-        self.init_session(self.protocol_name, client_address, self.factory.sessionhandler)
+
+        self.init_session(self.protocol_key, client_address, self.factory.sessionhandler)
+        self.protocol_flags["ENCODING"] = settings.ENCODINGS[0] if settings.ENCODINGS else 'utf-8'
         # add this new connection to sessionhandler so
         # the Server becomes aware of it.
         self.sessionhandler.connect(self)
+        # change encoding to ENCODINGS[0] which reflects Telnet default encoding
 
         # suppress go-ahead
         self.sga = suppress_ga.SuppressGA(self)
@@ -231,9 +243,11 @@ class TelnetProtocol(Telnet, StatefulTelnetProtocol, Session):
             line (str): Line to send.
 
         """
-        # escape IAC in line mode, and correctly add \r\n
-        line += self.delimiter
-        line = line.replace(IAC, IAC + IAC).replace('\n', '\r\n')
+        # escape IAC in line mode, and correctly add \r\n (the TELNET end-of-line)
+        line = line.replace(IAC, IAC + IAC)
+        line = line.replace('\n', '\r\n')
+        if not line.endswith("\r\n") and self.protocol_flags.get("FORCEDENDLINE", True):
+            line += "\r\n"
         if not self.protocol_flags.get("NOGOAHEAD", True):
             line += IAC + GA
         return self.transport.write(mccp_compress(self, line))
