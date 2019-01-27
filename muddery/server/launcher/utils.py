@@ -66,15 +66,16 @@ def create_secret_key():
     return secret_key
 
 
-def create_settings_file(setting_dict=None):
+def create_settings_file(gamedir, setting_dict=None):
     """
     Uses the template settings file to build a working
     settings file.
 
     Args:
+        gamedir: (string) game root's path
         setting_dict: (dict)preset settings.
     """
-    settings_path = os.path.join(GAME_DIR, "server", "conf", "settings.py")
+    settings_path = os.path.join(gamedir, "server", "conf", "settings.py")
     with open(settings_path, 'r') as f:
         settings_string = f.read()
 
@@ -130,9 +131,7 @@ def create_game_directory(gamedir, template, setting_dict=None):
     at the current path. This means copying the
     template directory from muddery's root.
     """
-    global GAME_DIR
-    GAME_DIR = gamedir
-    if os.path.exists(GAME_DIR):
+    if os.path.exists(gamedir):
         print("Cannot create new Muddery game dir: '%s' already exists." % gamedir)
         sys.exit()
 
@@ -151,16 +150,16 @@ def create_game_directory(gamedir, template, setting_dict=None):
 
     # copy default template directory
     default_template = os.path.join(configs.MUDDERY_LIB, configs.TEMPLATE_DIR)
-    shutil.copytree(default_template, GAME_DIR)
+    shutil.copytree(default_template, gamedir)
 
     # write config file
     create_config_file(gamedir, template)
 
     if template_dir:
-        copy_tree(template_dir, GAME_DIR)
+        copy_tree(template_dir, gamedir)
 
-    # pre-build settings file in the new GAME_DIR
-    create_settings_file(setting_dict)
+    # pre-build settings file in the new gamedir
+    create_settings_file(gamedir, setting_dict)
 
 
 def show_version_info(about=False):

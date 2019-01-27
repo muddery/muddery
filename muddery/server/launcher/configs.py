@@ -110,3 +110,20 @@ NEED_UPGRADE = \
 
     to upgrade your game.
     """
+
+ARG_OPTIONS = \
+    """Actions on installed server. One of:
+ start   - launch server+portal if not running
+ reload  - restart server in 'reload' mode
+ stop    - shutdown server+portal
+ reboot  - shutdown server+portal, then start again
+ reset   - restart server in 'shutdown' mode
+ istart  - start server in foreground (until reload)
+ ipstart - start portal in foreground
+ sstop   - stop only server
+ kill    - send kill signal to portal+server (force)
+ skill   - send kill signal only to server
+ status  - show server and portal run state
+ info    - show server and portal port info
+ menu    - show a menu of options
+Others, like migrate, test and shell is passed on to Django."""

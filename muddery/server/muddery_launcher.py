@@ -16,6 +16,7 @@ from __future__ import print_function
 
 import os, sys, glob
 import django.core.management
+import argparse
 from argparse import ArgumentParser
 from muddery.server.launcher import configs
 
@@ -71,38 +72,58 @@ def main():
 
     # set up argument parser
 
-    parser = ArgumentParser(description=configs.CMDLINE_HELP)
-    parser.add_argument('-v', '--version', action='store_true',
-                        dest='show_version', default=False,
-                        help="Show version info.")
-    # parser.add_argument('-i', '--interactive', action='store_true',
-    #                     dest='interactive', default=False,
-    #                     help="Start given processes in interactive mode.")
-    parser.add_argument('--init', nargs='+', action='store', dest="init", metavar="game_name [template]",
-                        help="Creates a new game directory 'game_name' at the current location (from optional template).")
-    parser.add_argument('-l', nargs='+', action='store', dest='listsetting', metavar="key",
-                        help="List values for server settings. Use 'all' to list all available keys.")
-    parser.add_argument('--profiler', action='store_true', dest='profiler', default=False,
-                        help="Start given server component under the Python profiler.")
-    parser.add_argument('--dummyrunner', nargs=1, action='store', dest='dummyrunner', metavar="N",
-                        help="Tests a running server by connecting N dummy players to it.")
-    parser.add_argument('--settings', nargs=1, action='store', dest='altsettings', default=None, metavar="filename.py",
-                        help="Start evennia with alternative settings file in gamedir/server/conf/.")
-    parser.add_argument('--upgrade', nargs='?', const='', dest='upgrade', metavar="[template]",
-                        help="Upgrade a game directory 'game_name' to the latest version.")
-    parser.add_argument('--loaddata', action='store_true', dest='loaddata', default=False,
-                        help="Load local data from the worlddata folder.")
-    parser.add_argument("option", nargs='?', default="noop",
-                        help="Operational mode: 'start', 'stop' or 'restart'.")
-    parser.add_argument("service", metavar="component", nargs='?', default="all",
-                        help="Server component to operate on: 'server', 'portal' or 'all' (default).")
-    parser.epilog = "Example django-admin commands: 'migrate', 'flush', 'shell' and 'dbshell'. " \
-                    "See the django documentation for more django-admin commands."
+    parser = ArgumentParser(description=configs.CMDLINE_HELP, formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument(
+        '--gamedir', nargs=1, action='store', dest='altgamedir',
+        metavar="<path>",
+        help="location of gamedir (default: current location)")
+    parser.add_argument(
+        '--init', nargs='+', action='store', dest="init", metavar="<gamename> [template name]",
+        help="creates a new gamedir 'name' at current location (from optional template).")
+    parser.add_argument(
+        '--log', '-l', action='store_true', dest='tail_log', default=False,
+        help="tail the portal and server logfiles and print to stdout")
+    parser.add_argument(
+        '--list', nargs='+', action='store', dest='listsetting', metavar="all|<key>",
+        help=("list settings, use 'all' to list all available keys"))
+    parser.add_argument(
+        '--settings', nargs=1, action='store', dest='altsettings',
+        default=None, metavar="<path>",
+        help=("start evennia with alternative settings file from\n"
+              " gamedir/server/conf/. (default is settings.py)"))
+    parser.add_argument(
+        '--initsettings', action='store_true', dest="initsettings",
+        default=False,
+        help="create a new, empty settings file as\n gamedir/server/conf/settings.py")
+    parser.add_argument(
+        '--profiler', action='store_true', dest='profiler', default=False,
+        help="start given server component under the Python profiler")
+    parser.add_argument(
+        '--dummyrunner', nargs=1, action='store', dest='dummyrunner',
+        metavar="<N>",
+        help="test a server by connecting <N> dummy accounts to it")
+    parser.add_argument(
+        '-v', '--version', action='store_true',
+        dest='show_version', default=False,
+        help="show version info")
+    parser.add_argument(
+        '--upgrade', nargs='?', const='', dest='upgrade', metavar="[template]",
+        help="Upgrade a game directory 'game_name' to the latest version.")
+    parser.add_argument(
+        '--loaddata', action='store_true', dest='loaddata', default=False,
+        help="Load local data from the worlddata folder.")
+
+    parser.add_argument(
+        "operation", nargs='?', default="noop",
+        help=configs.ARG_OPTIONS)
+    parser.epilog = (
+        "Common Django-admin commands are shell, dbshell, test and migrate.\n"
+        "See the Django documentation for more management commands.")
 
     args, unknown_args = parser.parse_known_args()
 
     # handle arguments
-    option, service = args.option, args.service
+    option = args.operation
 
     # make sure we have everything
     evennia_launcher.check_main_evennia_dependencies()
@@ -122,6 +143,7 @@ def main():
         utils.create_game_directory(gamedir, template)
 
         os.chdir(gamedir)
+        evennia_launcher.GAMEDIR = gamedir
         evennia_launcher.init_game_directory(gamedir, check_db=False)
 
         # make migrations
