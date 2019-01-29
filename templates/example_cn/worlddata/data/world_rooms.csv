@@ -1,5 +1,5 @@
 key,peaceful,location,position,icon,background
-room_intro,,1,area_intro,"(0,0)",,
+room_intro,1,area_intro,"(0,0)",,
 room_colorfulworld_hole,1,area_hole,"(0,0)",,
 room_colorfulworld_alley,0,area_park,"(0,7)",image/icon/room.png,
 room_colorfulworld_street,0,area_park,"(0,8)",,image/background/street.jpg
