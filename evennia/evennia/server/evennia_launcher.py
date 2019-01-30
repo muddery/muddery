@@ -1748,18 +1748,6 @@ def init_game_directory(path, check_db=True):
 
             print(INFO_WINDOWS_BATFILE.format(twistd_path=twistd_path))
 
-            # Check the __init__.py in the zope's directory.
-            zope_interface = importlib.import_module("zope.interface")
-            zope_interface_dir = os.path.dirname(zope_interface.__file__)
-            zope_path = os.path.abspath(
-                os.path.join(zope_interface_dir, os.pardir, '__init__.py'))
-
-            if not os.path.exists(zope_path):
-                # Add the missing __init__.py file.
-                with open(zope_path, 'w') as zope_file:
-                    # build __init__.py
-                    zope_file.write("")
-
 
 def run_dummyrunner(number_of_dummies):
     """
