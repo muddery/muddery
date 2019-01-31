@@ -1,0 +1,109 @@
+
+#editor-window {
+}
+
+#window-left {
+    float: left;
+    width: 100%;
+}
+
+#window-right {
+    float: right;
+    width: 210px;
+    margin-left: -210px;
+    font-size: 12px;
+    padding: 5px;
+}
+
+#window-map {
+    margin-right: 220px;
+    overflow: auto;
+    moz-user-select: -moz-none;
+    -moz-user-select: none;
+    -o-user-select:none;
+    -khtml-user-select:none;
+    -webkit-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+}
+
+#container {
+    position: relative;
+}
+
+#element-selector {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 65px;
+    height: 75px;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+}
+
+#selector-title {
+    padding: 2px 5px;
+}
+
+#map-image {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 400px;
+    height: 400px;
+    z-index: -2;
+}
+
+#map-svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 400px;
+    height: 400px;
+    z-index: -1;
+}
+
+.image-input-control {
+    padding: 0;
+    margin: 5px 0;
+    width: 200px;
+}
+
+.button-control {
+    margin: 5px 0;
+}
+
+.text-input-control {
+    width: 80px;
+    height: 20px;
+}
+
+.block {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+.block-title {
+    padding: 5px;
+    margin: 0;
+    font-size: 14px;
+}
+
+.element-room {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #555;
+    background: #fff;
+}
+
+#element-room {
+    left: 10px;
+    top: 25px;
+}
+
+.element-room.element-selected {
+    border: 5px solid #e60;
+}

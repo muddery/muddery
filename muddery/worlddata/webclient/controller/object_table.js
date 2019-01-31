@@ -23,17 +23,15 @@ ObjectTable.prototype.refresh = function() {
 }
 
 ObjectTable.prototype.onAddRecord = function(e) {
-    var editor = "object";
     var typeclass = controller.typeclass;
-    window.parent.controller.editObject(editor, typeclass, "");
+    window.parent.controller.editObject(typeclass, "");
 }
 
 ObjectTable.prototype.onEdit = function(e) {
     var object_key = $(this).attr("data-object-key");
     if (object_key) {
-        var editor = "object";
         var typeclass = controller.typeclass;
-        window.parent.controller.editObject(editor, typeclass, object_key);
+        window.parent.controller.editObject(typeclass, object_key);
     }
 }
 

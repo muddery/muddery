@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+        <meta name="HandheldFriendly" content="True" />
+        <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="../css/bootstrap-table.min.css" rel="stylesheet" type="text/css" >
+        <link href="../css/common_editor.css" rel="stylesheet" type="text/css" />
+        <link href="../css/map_editor.css" rel="stylesheet" type="text/css" />
+    </head>
+
+    <body>
+        <form class="form-horizontal">
+            <fieldset>
+                <legend id="legend">
+                    <div id="form-name" class="pull-left">
+                    </div>
+                    <div class="pull-right">
+                        <button id="exit-button" type="button" class="btn btn-default right hidden">Back</button>
+                        <button id="save-record" type="button" class="btn btn-success right hidden">Save</button>
+                        <button id="delete-record" type="button" class="btn btn-danger right hidden">Delete</button>
+                    </div>
+                </legend>
+            </fieldset>
+        </form>
+        <div id="editor-window">
+            <div id="window-left">
+                <div id="window-map">
+                    <div id="container">
+                        <div id="element-selector" class="block">
+                            <p id="selector-title">添加房间</p>
+                            <div id="element-room" class="new-element element-room"></div>
+                        </div>
+                        <svg id="map-svg" version="1.1"  xmlns="http://www.w3.org/2000/svg">
+                        </svg>
+                        <img id="map-image" src="../images/blank_map.png">
+                    </div>
+                </div>
+            </div>
+            <div id="window-right">
+                <div class="block">
+                    <p class="block-title">上传地图</p>
+                    <input class="image-input-control" type="file">
+                    <input class="editor-control" type="hidden">
+                    <input class="button-control" type="button" value="Upload">
+                    <input class="button-control" type="button" value="Delete">
+                </div>
+                <div class="block">
+                    <p class="block-title">设置地图大小</p>
+                    <p>
+                        <span>宽度</span>
+                        <input id="image-width" class="editor-control text-input-control" type="text">
+                    </p>
+                    <p>
+                        <span>高度</span>
+                        <input id="image-height" class="editor-control text-input-control" type="text">
+                    </p>
+                    <input class="button-control" type="button" value="Set">
+                    <input class="button-control" type="button" value="Restore">
+                </div>
+            </div>
+        </div>
+        <script src="../libs/jquery-3.2.1.min.js" type="text/javascript"></script>
+        <script src="../libs/bootstrap.min.js" type="text/javascript"></script>
+        <script src="../libs/bootstrap-table.min.js" type="text/javascript"></script>
+        <script src="../libs/jquery-ui.min.js" type="text/javascript"></script>
+        <script src="../config.js" type="text/javascript"></script>
+        <script src="../service/service.js" type="text/javascript"></script>
+        <script src="../utils/utils.js" type="text/javascript"></script>
+        <script src="../utils/fields.js" type="text/javascript"></script>
+        <script src="../controller/common_editor.js" type="text/javascript"></script>
+        <script src="../controller/map_editor.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            var controller = new MapEditor();
+            $(document).ready(function() {controller.init()});
+        </script>
+    </body>
+
+</html>

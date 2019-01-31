@@ -258,7 +258,7 @@ controller = {
         controller.pushPage(name, url);
     },
 
-    editObject: function(editor_type, typeclass, object_key) {
+    editObject: function(typeclass, object_key) {
         url = "object_editor.html?typeclass=" + typeclass;
 
         if (object_key) {
@@ -267,6 +267,20 @@ controller = {
         }
         else {
             name = "Add " + typeclass;
+        }
+
+        controller.pushPage(name, url);
+    },
+
+    editMap: function(map_key) {
+        url = "map_editor.html";
+
+        if (map_key) {
+            name = "Edit " + map_key;
+            url += "?map=" + map_key;
+        }
+        else {
+            name = "Add " + map_key;
         }
 
         controller.pushPage(name, url);
