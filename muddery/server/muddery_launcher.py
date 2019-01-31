@@ -235,10 +235,6 @@ def main():
     if args.altsettings:
         evennia_launcher.main()
 
-    if option == "reload":
-        print(configs.ABOUT_INFO)
-        sys.exit()
-
     if option != "noop":
         # check current game's version
         try:
