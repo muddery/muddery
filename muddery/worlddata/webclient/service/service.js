@@ -204,6 +204,17 @@ service = {
         this.sendRequest("query_event_action_data", "", args, callback_success, callback_failed, context);
     },
 
+    /*  Query a map.
+     *  Args:
+     *      area_key: (string) map area'e key.
+     */
+    queryMap: function(area_key, callback_success, callback_failed, context) {
+        var args = {
+            area: area_key
+        };
+        this.sendRequest("query_map", "", args, callback_success, callback_failed, context);
+    },
+
     saveForm: function(values, table_name, record_id, callback_success, callback_failed, context) {
         var args = {
             values: values,
