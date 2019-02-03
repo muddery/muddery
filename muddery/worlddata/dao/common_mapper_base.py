@@ -21,11 +21,11 @@ class CommonMapper(object):
     def all(self):
         return self.objects.all()
 
-    def get(self, **kwargs):
-        return self.objects.get(**kwargs)
+    def get(self, *args, **kwargs):
+        return self.objects.get(*args, **kwargs)
 
-    def filter(self, **kwargs):
-        return self.objects.filter(**kwargs)
+    def filter(self, *args, **kwargs):
+        return self.objects.filter(*args, **kwargs)
 
 
 class ObjectsMapper(CommonMapper):
@@ -35,7 +35,7 @@ class ObjectsMapper(CommonMapper):
     def __init__(self, model_name):
         super(ObjectsMapper, self).__init__(model_name)
 
-    def all_base(self):
+    def all_with_base(self):
         """
         Get all records with its base data.
         """

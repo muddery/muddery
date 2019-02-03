@@ -57,4 +57,8 @@ class ERR(object):
 
     upload_image_exist = 10012
 
+    no_data = 10013
+
+    invalid_input = 10014
+
 

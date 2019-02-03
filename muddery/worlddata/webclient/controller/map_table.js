@@ -24,8 +24,7 @@ MapTable.prototype.refresh = function() {
 MapTable.prototype.onEdit = function(e) {
     var map_key = $(this).attr("data-map-key");
     if (map_key) {
-        var editor = "map";
-        window.parent.controller.editMap(editor, map_key);
+        window.parent.controller.editMap(map_key);
     }
 }
 

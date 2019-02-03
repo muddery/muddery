@@ -287,6 +287,33 @@ class QueryObjectForm(BaseRequestProcesser):
         return success_response(data)
 
 
+class QueryMap(BaseRequestProcesser):
+    """
+    Query the map of an area
+
+    Args:
+        area: (string) area's key
+    """
+    path = "query_map"
+    name = ""
+
+    def func(self, args, request):
+        if not args:
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        if 'area' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "area".')
+
+        area_key = args["area"]
+
+        # Check the area key.
+        if ";" in area_key or "'" in area_key or '"' in area_key:
+            raise MudderyError(ERR.invalid_input, "Invalid input: %s" % area_key)
+
+        data = data_query.query_map(area_key)
+        return success_response(data)
+
+
 class SaveObjectForm(BaseRequestProcesser):
     """
     Save a form.

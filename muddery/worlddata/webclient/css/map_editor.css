@@ -40,6 +40,7 @@
     padding: 0;
     margin: 0;
     font-size: 12px;
+    background-color: rgba(192, 192, 192, 0.75);
 }
 
 #selector-title {
@@ -97,6 +98,8 @@
     height: 40px;
     border: 1px solid #555;
     background: #fff;
+    font-size: 12px;
+    line-height: 14px;
 }
 
 #element-room {
@@ -106,4 +109,11 @@
 
 .element-room.element-selected {
     border: 5px solid #e60;
+}
+
+.element-room-name {
+    position: absolute;
+    width: 80px;
+    height: 20px;
+    text-align: center;
 }

@@ -4,9 +4,13 @@ Battle commands. They only can be used when a character is in a combat.
 
 from __future__ import print_function
 
-from django.conf import settings
-from evennia.utils import logger
+import ast
+from django.core.exceptions import ObjectDoesNotExist
+from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.dao import common_mappers as CM
+from muddery.worlddata.dao.common_mappers import WORLD_AREAS
+from muddery.worlddata.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
+from muddery.worlddata.dao.world_exits_mapper import WORLD_EXITS_MAPPER
 from muddery.worlddata.dao import general_query_mapper, model_mapper
 from muddery.worlddata.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
 from muddery.worlddata.dao.event_mapper import get_object_event
@@ -14,17 +18,16 @@ from muddery.worlddata.services.general_query import query_fields
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.utils.exception import MudderyError, ERR
-from muddery.utils.localized_strings_handler import _
 
 
 def query_areas():
     """
     Query all areas and rooms.
     """
-    records = CM.WORLD_AREAS.all_base()
+    records = CM.WORLD_AREAS.all_with_base()
     areas = {r["key"]: {"name": r["name"] + "(" + r["key"] + ")", "rooms": []} for r in records}
 
-    rooms = CM.WORLD_ROOMS.all_base()
+    rooms = CM.WORLD_ROOMS.all_with_base()
     for record in rooms:
         key = record["location"]
         choice = (record["key"], record["name"] + " (" + record["key"] + ")")
@@ -132,3 +135,59 @@ def query_typeclass_table(typeclass_key):
         "records": rows,
     }
     return table
+
+
+def query_map(area_key):
+    """
+    Query the map of an area.
+
+    Args:
+        area_key: (string) area's key.
+    """
+    try:
+        area_record = WORLD_AREAS.get(key=area_key)
+    except ObjectDoesNotExist:
+        raise MudderyError(ERR.no_data, "Can not find map: %s" % area_key)
+
+    area_info = {
+        "key": area_record.key,
+        "background": area_record.background,
+        "map_scale": GAME_SETTINGS.get("map_scale"),
+        "map_room_size": GAME_SETTINGS.get("map_room_size"),
+        "background_point": ast.literal_eval(area_record.background_point),
+        "corresp_map_pos": ast.literal_eval(area_record.corresp_map_pos)
+    }
+
+    room_records = WORLD_ROOMS_MAPPER.rooms_in_area(area_key)
+    room_info = []
+    room_keys = []
+    for record in room_records:
+        room_keys.append(record["key"])
+        info = {
+            "key": record["key"],
+            "typeclass": record["typeclass"],
+            "name": record["name"],
+            "location": record["location"],
+            "position": ast.literal_eval(record["position"]),
+            "icon": record["icon"]
+        }
+        room_info.append(info)
+
+    exit_records = WORLD_EXITS_MAPPER.exits_of_rooms(room_keys)
+    exit_info = []
+    for record in exit_records:
+        info = {
+            "key": record["key"],
+            "typeclass": record["typeclass"],
+            "location": record["location"],
+            "destination": record["destination"]
+        }
+        exit_info.append(info)
+
+    data = {
+        "area": area_info,
+        "room": room_info,
+        "exit": exit_info
+    }
+
+    return data

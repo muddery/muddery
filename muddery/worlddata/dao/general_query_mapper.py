@@ -4,12 +4,9 @@ Query and deal common tables.
 
 from __future__ import print_function
 
-from evennia.utils import logger
-from django.db import transaction
 from django.apps import apps
 from django.conf import settings
 from django.db import connections
-from muddery.utils.utils import is_child
 
 
 def get_all_fields(table_name):

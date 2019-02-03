@@ -3,22 +3,24 @@
  * Derive from the base class.
  */
 MapEditor = function() {
-	CommonEditor.call(this);
-
     this.room_index = 0;
     this.path_index = 0;
-    this.current_room_id = "";
-    this.current_x = 0;
-    this.current_y = 0;
+
+    this.current_room = null;
+    this.current_path = null;
+    this.mode = "";
+
+    this.map_data = {};
 
     // All rooms and paths.
+    this.background = "";
     this.rooms = {};
     this.paths = {};
     this.room_paths = {};
 }
 
 MapEditor.prototype.init = function() {
-    this.area_key = utils.getQueryString("area");
+    this.area_key = utils.getQueryString("map");
 
     $("#exit-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");
@@ -34,41 +36,61 @@ MapEditor.prototype.init = function() {
 }
 
 MapEditor.prototype.bindEvents = function() {
-    CommonEditor.prototype.bindEvents.call(this);
+    $("#exit-button").on("click", this.onExit);
+    $("#save-record").on("click", this.onSave);
+    $("#delete-record").on("click", this.onDelete);
 
     $("#map-image").on("load", this.onImageLoad);
 
-    // drag and drop to place new elements.
-    $("#element-selector>.new-element").draggable ({
-        helper: "clone",
-        scope: "plant",
-        containment: "#container"
-    });
-    $("#container").droppable({
-        accept: ".new-element",
-        scope: "plant",
-        drop: controller.onDropRoom
-    });
+    // Mouse down on a room.
+    $("#container").on("mousedown", ".element-room", this.onRoomMouseDown);
 
-    // Click on a room to select it.
-    $("#container").on("click", ".element-room", this.onClickRoom);
+    // Mouse move on the container.
+    $("#container").on("mousemove", this.onMouseMove);
 
-    // Click the background to unselect all rooms.
-    $("#container").on("click", this.onClickContainer);
+    // Mouse up on a room.
+    $("#container").on("mouseup", ".element-room", this.onRoomMouseUp);
 
-    // Drag from a selected room.
-    $("#container").on("mousedown", ".element-selected", this.onMouseDownRoom);
+    // Mouse up on the container.
+    $("#container").on("mouseup", this.onContainerMouseUp);
 }
 
+MapEditor.prototype.onExit = function() {
+    controller.exitNoChange();
+}
+
+MapEditor.prototype.onSave = function() {
+    controller.saveMap(controller.saveMapSuccess, controller.saveMapFailed);
+}
+
+MapEditor.prototype.onDelete = function() {
+    window.parent.controller.confirm("",
+                                     "Delete this map?",
+                                     controller.confirmDelete);
+}
+
+
+/*
+ * On the map's background loaded.
+ */
 MapEditor.prototype.onImageLoad = function() {
-    var width = $("#map-image").width();
-    var height = $("#map-image").height();
+    if (!controller.background) {
+        return;
+    }
+
+    // Get the image's original size.
+    var image = document.getElementById("map-image");
+    var width = image.naturalWidth;
+    var height = image.naturalHeight;
 
     $("#container").width(width);
     $("#container").height(height);
 
     $("#map-svg").width(width);
     $("#map-svg").height(height);
+
+    $("#map-image").width(width);
+    $("#map-image").height(height);
 
     $("#image-width").val(width);
     $("#image-height").val(height);
@@ -140,46 +162,225 @@ MapEditor.prototype.deleteEventSuccess = function(data) {
     });
 }
 
-/*
- * Drag and drop a new room.
- */
-MapEditor.prototype.onDropRoom = function(event, ui) {
-    controller.room_index++;
-    var room_id = "room-" + controller.room_index;
 
-    var x = ui.offset.left - $(this).offset().left;
-    var y = ui.offset.top - $(this).offset().top;
-    controller.createRoom(room_id, x, y);
-    controller.saveRoom(room_id);
-}
+/***********************************
+ *
+ * Draw map.
+ *
+ ***********************************/
 
 /*
- * Create a new element.
+ * Create a new room.
  */
-MapEditor.prototype.createRoom = function(room_id, x, y) {
-    $("<div>")
+MapEditor.prototype.createRoom = function(room_id, room_name, x, y) {
+    this.rooms[room_id] = {
+        paths: {}
+    }
+
+    var room = $("<div>")
         .attr("id", room_id)
         .addClass("element-room")
-        .css({"left": x, "top": y, "position": "absolute"})
-        .draggable ({
-            scope: "plant",
-            cancel: ".element-selected",
-            containment: "#container",
-            drag: controller.onDragRoom
-        })
         .appendTo($("#container"));
+
+    room.css({
+        "left": x - room.outerWidth() / 2,
+        "top": y - room.outerHeight() / 2,
+        "position": "absolute"
+    });
+
+    var name = $("<div>")
+        .attr("id", room_id + "-name")
+        .addClass("element-room-name")
+        .text(room_name)
+        .appendTo($("#container"));
+
+    var width = name.width();
+
+    name.css({
+        "left": x - name.width() / 2,
+        "top": room.position().top + room.outerHeight(),
+        "position": "absolute"});
+
 }
+
+
+/***********************************
+ *
+ * Mouse down event.
+ *
+ ***********************************/
+
+/*
+ * On mouse down on a room.
+ */
+MapEditor.prototype.onRoomMouseDown = function(event) {
+    if ($(this).hasClass("new-element")) {
+        // On a new room.
+        controller.newRoomMouseDown(event);
+    }
+    else if ($(this).hasClass("element-selected")) {
+        // On a selected room.
+        controller.selectedRoomMouseDown(event);
+    }
+    else {
+        // On an unselected room.
+        controller.unselectedRoomMouseDown(event);
+    }
+}
+
+
+/*
+ * Mouse down on a new room.
+ */
+MapEditor.prototype.newRoomMouseDown = function(event) {
+    // Drag the room.
+    this.mode = "NEW_ROOM";
+    this.current_room = $(event.currentTarget).clone();
+    this.current_room.appendTo($("#container"));
+
+    this.newRoomMouseMove(event);
+}
+
+
+/*
+ * Mouse down on a selected room.
+ */
+MapEditor.prototype.selectedRoomMouseDown = function(event) {
+    // Drag the room.
+    this.mode = "SELECTED_ROOM";
+    this.current_room = $(event.currentTarget);
+}
+
+
+/*
+ * Mouse down on an unselected room.
+ */
+MapEditor.prototype.unselectedRoomMouseDown = function(event) {
+    // Drag the room.
+    this.mode = "UNSELECTED_ROOM";
+    this.current_room = $(event.currentTarget);
+}
+
+
+/***********************************
+ *
+ * Mouse move event.
+ *
+ ***********************************/
+
+/*
+ * Mouse move on the container.
+ */
+MapEditor.prototype.onMouseMove = function(event) {
+    if (controller.mode == "") {
+        return;
+    }
+    else if (controller.mode == "NEW_ROOM") {
+        // Move a new room.
+        controller.newRoomMouseMove(event);
+    }
+    else if (controller.mode == "SELECTED_ROOM") {
+        // Move on a selected room.
+        controller.selectedRoomMouseMove(event);
+    }
+    else if (controller.mode == "UNSELECTED_ROOM") {
+        // Move on an unselected room.
+        controller.unselectedRoomMouseMove(event);
+    }
+    else if (controller.mode == "DRAG_PATH") {
+        // Drag a new path.
+        controller.dragPath(event);
+    }
+    else if (controller.mode == "DRAG_ROOM") {
+        // Drag a room.
+        controller.dragRoom(event);
+    }
+}
+
+
+/*
+ * Move a new room.
+ */
+MapEditor.prototype.newRoomMouseMove = function(event) {
+    var container = $("#container");
+    var x = event.clientX - container.offset().left;
+    var y = event.clientY - container.offset().top;
+
+    // Move the room.
+    controller.current_room.css({
+        "left": x - controller.current_room.outerWidth() / 2,
+        "top": y - controller.current_room.outerHeight() / 2,
+        "position": "absolute"});
+}
+
+
+/*
+ * Move a selected room.
+ */
+MapEditor.prototype.selectedRoomMouseMove = function(event) {
+    this.mode = "DRAG_PATH";
+
+    // Create a new path.
+    var svg = document.getElementById("map-svg");
+    var namespace = "http://www.w3.org/2000/svg";
+    var path = document.createElementNS(namespace, "path");
+    path.setAttribute("id", "map-path");
+    path.setAttribute("stroke", "#555");
+    svg.appendChild(path);
+    this.current_path = path;
+
+    this.dragPath(event);
+}
+
+
+/*
+ * Move an unselected room.
+ */
+MapEditor.prototype.unselectedRoomMouseMove = function(event) {
+    this.mode = "DRAG_ROOM";
+    this.dragRoom(event);
+}
+
+
+/*
+ * Drag a new path.
+ */
+MapEditor.prototype.dragPath = function(event) {
+    var container = $("#container");
+    var x = event.clientX - container.offset().left;
+    var y = event.clientY - container.offset().top;
+
+    var x1 = controller.current_room.position().left + controller.current_room.outerWidth() / 2;
+    var y1 = controller.current_room.position().top + controller.current_room.outerHeight() / 2;
+    var x2 = x;
+    var y2 = y;
+
+    this.current_path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
+}
+
 
 /*
  * Drag a room.
  */
-MapEditor.prototype.onDragRoom = function(event, ui) {
-    var room_id = $(this).attr("id");
-    var position = $(this).position();
-    var width = $(this).outerWidth();
-    var height = $(this).outerHeight();
-    var x = position.left + width / 2;
-    var y = position.top + height / 2;
+MapEditor.prototype.dragRoom = function(event) {
+    var container = $("#container");
+    var x = event.clientX - container.offset().left;
+    var y = event.clientY - container.offset().top;
+
+    // Move the room.
+    controller.current_room.css({
+        "left": x - controller.current_room.outerWidth() / 2,
+        "top": y - controller.current_room.outerHeight() / 2,
+        "position": "absolute"});
+
+    // Move the room's name.
+    var room_id = controller.current_room.attr("id");
+    var height = controller.current_room.outerHeight();
+    var name = $("#" + room_id + "-name");
+    name.css({
+        "left": x - name.width() / 2,
+        "top": y + height / 2,
+        "position": "absolute"});
 
     // Move linked paths.
     for (var path_id in controller.rooms[room_id].paths) {
@@ -210,96 +411,44 @@ MapEditor.prototype.onDragRoom = function(event, ui) {
     }
 }
 
-/*
- * Click to select a room.
- */
-MapEditor.prototype.onClickRoom = function(event) {
-    if ($(this).hasClass("new-element")) {
-        return;
-    }
-    controller.current_room_id = $(this).attr("id");
-    $(".element-room").removeClass("element-selected");
-    $(this).addClass("element-selected");
-    event.stopPropagation();
-}
+
+/***********************************
+ *
+ * Mouse up event.
+ *
+ ***********************************/
 
 /*
- * Click the background to unselect all room.
- */
-MapEditor.prototype.onClickContainer = function(event) {
-    $(".element-room").removeClass("element-selected");
-}
-
-/*
- * Drag from a selected room
- */
-MapEditor.prototype.onMouseDownRoom = function(event) {
-    var position = $(this).position();
-    var width = $(this).outerWidth();
-    var height = $(this).outerHeight();
-    var x = position.left + width / 2;
-    var y = position.top + height / 2;
-    controller.current_x = x;
-    controller.current_y = y;
-
-    // Drag a line.
-    var svg = document.getElementById("map-svg");
-    var namespace = "http://www.w3.org/2000/svg";
-    var path = document.createElementNS(namespace, "path");
-    path.setAttribute("id", "map-path");
-    path.setAttribute("d", "M " + x + " " + y + " L " + x + " " + y);
-    path.setAttribute("stroke", "#555");
-    svg.appendChild(path);
-
-    // Add mouse events.
-    $("#container").on("mousemove", controller.onMouseMove);
-    $("#container").on("mouseup", controller.onContainerMouseUp);
-    $(".element-room").on("mouseup", controller.onRoomMouseUp);
-}
-
-/*
- * On drag.
- */
-MapEditor.prototype.onMouseMove = function(event) {
-    var x1 = controller.current_x;
-    var y1 = controller.current_y;
-    var x2 = event.clientX - $(this).offset().left;
-    var y2 = event.clientY - $(this).offset().top;
-
-    var path = document.getElementById("map-path");
-    path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
-}
-
-
-/*
- * On drag finished.
+ * On mouse up on a room.
  */
 MapEditor.prototype.onRoomMouseUp = function(event) {
-    event.stopPropagation();
-
-    // Remove events.
-    $("#container").off("mousemove", controller.onMouseMove);
-    $("#container").off("mouseup", controller.onContainerMouseUp);
-    $(".element-room").off("mouseup", controller.onRoomMouseUp);
-
-    var path = document.getElementById("map-path");
-    if (!path) {
-        return;
+    if (controller.mode == "DRAG_PATH") {
+        // Drop the new path.
+        controller.dropPathOnRoom(event);
     }
+}
 
-    var current_room = $(controller.current_room_id);
-    if (!current_room) {
+
+/*
+ * Drop the new path on a room.
+ */
+MapEditor.prototype.dropPathOnRoom = function(event) {
+    var path = this.current_path;
+    var target = $(event.currentTarget);
+    var source_id = this.current_room.attr("id");
+    var target_id = target.attr("id");
+    if (source_id == target_id) {
+        // Remove the path.
         path.parentNode.removeChild(path);
-        return;
     }
 
     // Link to the target room.
-    var x1 = controller.current_x;
-    var y1 = controller.current_y;
+    var x1 = controller.current_room.position().left + controller.current_room.outerWidth() / 2;
+    var y1 = controller.current_room.position().top + controller.current_room.outerHeight() / 2;
 
-    var position = $(this).position();
-    var width = $(this).outerWidth();
-    var height = $(this).outerHeight();
+    var position = target.position();
+    var width = target.outerWidth();
+    var height = target.outerHeight();
     var x2 = position.left + width / 2;
     var y2 = position.top + height / 2;
     path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
@@ -312,36 +461,130 @@ MapEditor.prototype.onRoomMouseUp = function(event) {
     // Save this path.
     var source_id = controller.current_room_id;
     var target_id = $(this).attr("id");
-    controller.savePath(path_id, source_id, x1, y1, target_id, x2, y2);
+    controller.addPath(path_id, source_id, x1, y1, target_id, x2, y2);
+
+    event.stopPropagation();
 }
 
+
 /*
- * On drag finished.
+ * On mouse up on the container.
  */
 MapEditor.prototype.onContainerMouseUp = function(event) {
-    // Remove events.
-    $("#container").off("mousemove", controller.onMouseMove);
-    $("#container").off("mouseup", controller.onContainerMouseUp);
-    $(".element-room").off("mouseup", controller.onRoomMouseUp);
-
-    // Remove the path.
-    var path = document.getElementById("map-path");
-    path.parentNode.removeChild(path);
-}
-
-/*
- * Save a room
- */
-MapEditor.prototype.saveRoom = function(room_id) {
-    this.rooms[room_id] = {
-        paths: {}
+    if (controller.mode == "NEW_ROOM") {
+        // Drop a new room.
+        controller.newRoomMouseUp(event);
+    }
+    else if (controller.mode == "SELECTED_ROOM") {
+        // Unselect the room.
+        controller.selectedRoomMouseUp(event);
+    }
+    else if (controller.mode == "UNSELECTED_ROOM") {
+        // Select the room.
+        controller.unselectedRoomMouseUp(event);
+    }
+    else if (controller.mode == "DRAG_PATH") {
+        // Drop a new path.
+        controller.dropPath(event);
+    }
+    else if (controller.mode == "DRAG_ROOM") {
+        // Drop a room.
+        controller.dropRoom(event);
+    }
+    else {
+        controller.containerMouseUp(event);
     }
 }
 
+
 /*
- * Save a path
+ * Drop a new room.
  */
-MapEditor.prototype.savePath = function(path_id, source_id, source_x, source_y, target_id, target_x, target_y) {
+MapEditor.prototype.newRoomMouseUp = function(event) {
+    controller.room_index++;
+    var room_id = "room-" + controller.room_index;
+
+    var container = $("#container");
+    var x = event.clientX - container.offset().left;
+    var y = event.clientY - container.offset().top;
+
+    controller.createRoom(room_id, "", x, y);
+
+    this.current_room.remove()
+    this.current_room = null;
+    this.mode = "";
+}
+
+
+/*
+ * Unselect the room.
+ */
+MapEditor.prototype.selectedRoomMouseUp = function(event) {
+    controller.current_room.removeClass("element-selected");
+
+    this.current_room = null;
+    this.mode = "";
+}
+
+
+/*
+ * Select the room.
+ */
+MapEditor.prototype.unselectedRoomMouseUp = function(event) {
+    // Unselect other rooms.
+    $(".element-room").removeClass("element-selected");
+
+    // Select this room.
+    this.current_room.addClass("element-selected");
+
+    this.mode = "";
+
+    // Prevent the container's event.
+    event.stopPropagation();
+}
+
+
+/*
+ * Drop a new path.
+ */
+MapEditor.prototype.dropPath = function(event) {
+    var path = this.current_path;
+    path.parentNode.removeChild(path);
+
+    this.current_path = null;
+    this.mode = "";
+
+    // Prevent the container's event.
+    event.stopPropagation();
+}
+
+
+/*
+ * Drop a room.
+ */
+MapEditor.prototype.dropRoom = function(event) {
+    this.current_room = null;
+    this.mode = "";
+
+    // Prevent the container's event.
+    event.stopPropagation();
+}
+
+
+
+/*
+ * Click the background to unselect all room.
+ */
+MapEditor.prototype.containerMouseUp = function(event) {
+    // Unselect all rooms.
+    $(".element-room").removeClass("element-selected");
+}
+
+
+/*
+ * Add a path
+ */
+MapEditor.prototype.addPath = function(path_id, source_id, source_x, source_y, target_id, target_x, target_y) {
     this.paths[path_id] = {
         source: source_id,
         source_x: source_x,
@@ -391,50 +634,65 @@ MapEditor.prototype.uploadFailed = function(code, message, data) {
 }
 
 MapEditor.prototype.queryMapSuccess = function(data) {
-    controller.table_fields = data;
-    controller.obj_typeclass = "";
-    controller.obj_key = "";
+    controller.map_data = data;
 
-    // get object's typeclass
-    for (var t = 0; t < data.length && !controller.obj_typeclass; t++) {
-        var fields = data[t].fields;
-        for (var f = 0; f < fields.length; f++) {
-            if (fields[f].name == "typeclass") {
-                var value = fields[f].value;
-                if (value) {
-                    controller.obj_typeclass = value;
-                }
-                break;
-            }
+    // Draw the background.
+    var map_scale = 1;
+    var map_room_size = 40;
+    var original_point_x = 0;
+    var original_point_y = 0;
+
+    if ("area" in data) {
+        controller.background = data.area.background;
+        if (controller.background) {
+            $("#map-image")
+                .attr("src", CONFIG.resource_url + controller.background);
         }
+
+        map_scale = data.area.map_scale | 1;
+        map_room_size = data.area.map_room_size | 40;
+
+        var background_point_x = 0;
+        var background_point_y = 0;
+        var corresp_pos_x = 0;
+        var corresp_pos_y = 0;
+
+        if (data.area.background_point) {
+            background_point_x = data.area.background_point[0];
+            background_point_y = data.area.background_point[1];
+        }
+
+        if (data.area.corresp_map_pos) {
+            corresp_pos_x = data.area.corresp_map_pos[0];
+            corresp_pos_y = data.area.corresp_map_pos[1];
+        }
+
+        original_point_x = background_point_x - corresp_pos_x * map_scale;
+        original_point_y = background_point_y + corresp_pos_y * map_scale;
     }
 
-    // get object's key
-    for (var t = 0; t < data.length && !controller.obj_key; t++) {
-        var fields = data[t].fields;
-        for (var f = 0; f < fields.length; f++) {
-            if (fields[f].name == "key") {
-                var value = fields[f].value;
-                if (value) {
-                    controller.obj_key = value;
-                }
-                break;
+    if ("room" in data) {
+        for (var i = 0; i < data.room.length; i++) {
+            var room_info = data.room[i];
+            var x = 0;
+            var y = 0;
+            if (room_info.position) {
+                x = original_point_x + room_info.position[0] * map_scale;
+                y = original_point_y - room_info.position[1] * map_scale;
             }
-        }
-    }
-
-    // If has area fields.
-    var query_areas = false;
-    for (var t = 0; t < data.length && !query_areas; t++) {
-        for (var f = 0; f < data[t].fields.length; f++) {
-            if (data[t].fields[f].type == "Location") {
-                query_areas = true;
-                break;
-            }
+            controller.createRoom(room_info.key, room_info.name, x, y);
         }
     }
 }
 
-MapEditor.prototype.queryAreaFailed = function(code, message, data) {
+MapEditor.prototype.queryMapFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
+}
+
+MapEditor.prototype.exit = function() {
+    setInterval(function() {window.parent.controller.popPage(true);}, 0);
+}
+
+MapEditor.prototype.exitNoChange = function() {
+    setInterval(function() {window.parent.controller.popPage(false);}, 0);
 }

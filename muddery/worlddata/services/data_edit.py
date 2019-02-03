@@ -6,14 +6,9 @@ from __future__ import print_function
 
 from django.conf import settings
 from django.db import transaction
-from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils import logger
-from muddery.utils import defines
 from muddery.utils.exception import MudderyError, ERR
-from muddery.utils.localized_strings_handler import _
 from muddery.worlddata.dao import general_query_mapper
-from muddery.worlddata.dao.common_mappers import OBJECTS
 from muddery.mappings.form_set import FORM_SET
 from muddery.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
 from muddery.worlddata.forms.default_forms import ObjectsForm

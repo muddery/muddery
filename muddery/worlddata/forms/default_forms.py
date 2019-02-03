@@ -25,7 +25,7 @@ def get_all_pocketable_objects():
     """
     Get all objects that can be put in player's pockets.
     """
-    records = CM.COMMON_OBJECTS.all_base()
+    records = CM.COMMON_OBJECTS.all_with_base()
     return [(r["key"], r["name"] + " (" + r["key"] + ")") for r in records]
 
 
@@ -56,14 +56,14 @@ class GameSettingsForm(forms.ModelForm):
         super(GameSettingsForm, self).__init__(*args, **kwargs)
         
         choices = [("", "---------")]
-        objects = CM.WORLD_ROOMS.all_base()
+        objects = CM.WORLD_ROOMS.all_with_base()
         choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
         self.fields['default_home_key'] = forms.ChoiceField(choices=choices, required=False)
         self.fields['start_location_key'] = forms.ChoiceField(choices=choices, required=False)
         self.fields['default_player_home_key'] = forms.ChoiceField(choices=choices, required=False)
 
         choices = [("", "---------")]
-        objects = CM.CHARACTERS.all_base()
+        objects = CM.CHARACTERS.all_with_base()
         choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects
                             if obj["typeclass"]=="PLAYER_CHARACTER"])
         self.fields['default_player_character_key'] = forms.ChoiceField(choices=choices, required=False)
@@ -138,7 +138,7 @@ class WorldRoomsForm(ObjectsForm):
         super(WorldRoomsForm, self).__init__(*args, **kwargs)
 
         choices = [("", "---------")]
-        objects = CM.WORLD_AREAS.all_base()
+        objects = CM.WORLD_AREAS.all_with_base()
         choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
         self.fields['location'] = forms.ChoiceField(choices=choices)
 
@@ -157,7 +157,7 @@ class WorldExitsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldExitsForm, self).__init__(*args, **kwargs)
 
-        rooms = CM.WORLD_ROOMS.all_base()
+        rooms = CM.WORLD_ROOMS.all_with_base()
         choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
         self.fields['location'] = LocationField(choices=choices)
         self.fields['destination'] = LocationField(choices=choices)
@@ -188,7 +188,7 @@ class WorldObjectsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(WorldObjectsForm, self).__init__(*args, **kwargs)
 
-        rooms = CM.WORLD_ROOMS.all_base()
+        rooms = CM.WORLD_ROOMS.all_with_base()
         choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
         self.fields['location'] = LocationField(choices=choices)
 
@@ -206,7 +206,7 @@ class WorldNPCsForm(ObjectsForm):
         super(WorldNPCsForm, self).__init__(*args, **kwargs)
         
         # NPC's location
-        rooms = CM.WORLD_ROOMS.all_base()
+        rooms = CM.WORLD_ROOMS.all_with_base()
         choices = [(r["key"], r["name"] + " (" + r["key"] + ")") for r in rooms]
         self.fields['location'] = LocationField(choices=choices)
 
@@ -237,7 +237,7 @@ class CreatorLootListForm(forms.ModelForm):
         super(CreatorLootListForm, self).__init__(*args, **kwargs)
 
         # providers must be object_creators
-        objects = CM.OBJECT_CREATORS.all_base()
+        objects = CM.OBJECT_CREATORS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['provider'] = forms.ChoiceField(choices=choices)
 
@@ -247,7 +247,7 @@ class CreatorLootListForm(forms.ModelForm):
         
         # depends on quest
         choices = [("", "---------")]
-        objects = CM.QUESTS.all_base()
+        objects = CM.QUESTS.all_with_base()
         choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
         self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
 
@@ -263,10 +263,10 @@ class CharacterLootListForm(forms.ModelForm):
         super(CharacterLootListForm, self).__init__(*args, **kwargs)
 
         # providers can be world_npc or common_character
-        npcs = CM.WORLD_NPCS.all_base()
+        npcs = CM.WORLD_NPCS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in npcs]
 
-        characters = CM.CHARACTERS.all_base()
+        characters = CM.CHARACTERS.all_with_base()
         choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in characters])
 
         self.fields['provider'] = forms.ChoiceField(choices=choices)
@@ -277,7 +277,7 @@ class CharacterLootListForm(forms.ModelForm):
 
         # depends on quest
         choices = [("", "---------")]
-        objects = CM.QUESTS.all_base()
+        objects = CM.QUESTS.all_with_base()
         choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
         self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
 
@@ -293,7 +293,7 @@ class QuestRewardListForm(forms.ModelForm):
         super(QuestRewardListForm, self).__init__(*args, **kwargs)
 
         # providers must be object_creators
-        objects = CM.QUESTS.all_base()
+        objects = CM.QUESTS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['provider'] = forms.ChoiceField(choices=choices)
 
@@ -303,7 +303,7 @@ class QuestRewardListForm(forms.ModelForm):
         
         # depends on quest
         choices = [("", "---------")]
-        objects = CM.QUESTS.all_base()
+        objects = CM.QUESTS.all_with_base()
         choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
         self.fields['quest'] = forms.ChoiceField(choices=choices, required=False)
 
@@ -346,7 +346,7 @@ class SkillBooksForm(ObjectsForm):
         super(SkillBooksForm, self).__init__(*args, **kwargs)
         
         # skills
-        objects = CM.SKILLS.all_base()
+        objects = CM.SKILLS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['skill'] = forms.ChoiceField(choices=choices)
         
@@ -485,7 +485,7 @@ class ShopGoodsForm(ObjectsForm):
         super(ShopGoodsForm, self).__init__(*args, **kwargs)
 
         # all shops
-        objects = CM.SHOPS.all_base()
+        objects = CM.SHOPS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['shop'] = forms.ChoiceField(choices=choices)
 
@@ -494,7 +494,7 @@ class ShopGoodsForm(ObjectsForm):
         self.fields['goods'] = forms.ChoiceField(choices=choices)
 
         # available units are common objects
-        objects = CM.COMMON_OBJECTS.all_base()
+        objects = CM.COMMON_OBJECTS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['unit'] = forms.ChoiceField(choices=choices)
 
@@ -510,12 +510,12 @@ class NPCShopsForm(forms.ModelForm):
         super(NPCShopsForm, self).__init__(*args, **kwargs)
 
         # All NPCs.
-        objects = CM.WORLD_NPCS.all_base()
+        objects = CM.WORLD_NPCS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['npc'] = forms.ChoiceField(choices=choices)
         
         # All shops.
-        objects = CM.SHOPS.all_base()
+        objects = CM.SHOPS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['shop'] = forms.ChoiceField(choices=choices)
 
@@ -564,7 +564,7 @@ class DefaultSkillsForm(forms.ModelForm):
         choices = [(key, key) for key in character_models]
         self.fields['character'] = forms.ChoiceField(choices=choices)
 
-        objects = CM.SKILLS.all_base()
+        objects = CM.SKILLS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['skill'] = forms.ChoiceField(choices=choices)
 
@@ -580,7 +580,7 @@ class NPCDialoguesForm(forms.ModelForm):
         super(NPCDialoguesForm, self).__init__(*args, **kwargs)
 
         # All NPCs.
-        objects = CM.WORLD_NPCS.all_base()
+        objects = CM.WORLD_NPCS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['npc'] = forms.ChoiceField(choices=choices)
         
@@ -610,7 +610,7 @@ class QuestObjectivesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(QuestObjectivesForm, self).__init__(*args, **kwargs)
 
-        objects = CM.QUESTS.all_base()
+        objects = CM.QUESTS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['quest'] = forms.ChoiceField(choices=choices)
 
@@ -629,7 +629,7 @@ class QuestDependenciesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(QuestDependenciesForm, self).__init__(*args, **kwargs)
 
-        objects = CM.QUESTS.all_base()
+        objects = CM.QUESTS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['quest'] = forms.ChoiceField(choices=choices)
         self.fields['dependency'] = forms.ChoiceField(choices=choices)
@@ -653,7 +653,7 @@ class DialogueQuestDependenciesForm(forms.ModelForm):
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['dialogue'] = forms.ChoiceField(choices=choices)
         
-        objects = CM.QUESTS.all_base()
+        objects = CM.QUESTS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['dependency'] = forms.ChoiceField(choices=choices)
         
@@ -725,7 +725,7 @@ class ActionAttackForm(forms.ModelForm):
         choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
         self.fields['event_key'] = forms.ChoiceField(choices=choices)
         
-        objects = CM.CHARACTERS.all_base()
+        objects = CM.CHARACTERS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['mob'] = forms.ChoiceField(choices=choices)
 
@@ -750,7 +750,7 @@ class ActionDialogueForm(forms.ModelForm):
 
         # NPCs
         choices = [("", "---------")]
-        objects = CM.WORLD_NPCS.all_base()
+        objects = CM.WORLD_NPCS.all_with_base()
         choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
         self.fields['npc'] = forms.ChoiceField(choices=choices, required=False)
 
@@ -769,7 +769,7 @@ class ActionLearnSkillForm(forms.ModelForm):
         choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
         self.fields['event_key'] = forms.ChoiceField(choices=choices)
 
-        objects = CM.SKILLS.all_base()
+        objects = CM.SKILLS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['skill'] = forms.ChoiceField(choices=choices)
 
@@ -788,7 +788,7 @@ class ActionAcceptQuestForm(forms.ModelForm):
         choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
         self.fields['event_key'] = forms.ChoiceField(choices=choices)
 
-        objects = CM.QUESTS.all_base()
+        objects = CM.QUESTS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['quest'] = forms.ChoiceField(choices=choices)
 
@@ -807,7 +807,7 @@ class ActionTurnInQuestForm(forms.ModelForm):
         choices = [(obj.key, obj.key + " (" + obj.key + ")") for obj in objects]
         self.fields['event_key'] = forms.ChoiceField(choices=choices)
 
-        objects = CM.QUESTS.all_base()
+        objects = CM.QUESTS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['quest'] = forms.ChoiceField(choices=choices)
 
