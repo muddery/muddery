@@ -7,6 +7,8 @@ MapEditor = function() {
     this.path_index = 0;
 
     this.current_room = null;
+    this.room_offset_x = 0;
+    this.room_offset_y = 0;
     this.current_path = null;
     this.mode = "";
 
@@ -204,6 +206,44 @@ MapEditor.prototype.createRoom = function(room_id, room_name, x, y) {
 }
 
 
+
+/*
+ * Create a path.
+ */
+MapEditor.prototype.createPath = function(path_id, source_id, target_id) {
+    // Draw a line from the source room  to the target room.
+    var source_room = $("#" + source_id);
+    var x1 = source_room.position().left + source_room.outerWidth() / 2;
+    var y1 = source_room.position().top + source_room.outerHeight() / 2;
+
+    var target_room = $("#" + target_id);
+    var x2 = target_room.position().left + target_room.outerWidth() / 2;
+    var y2 = target_room.position().top + target_room.outerHeight() / 2;
+
+    var svg = document.getElementById("map-svg");
+    var namespace = "http://www.w3.org/2000/svg";
+    var path = document.createElementNS(namespace, "path");
+    path.setAttribute("id", path_id);
+    path.setAttribute("stroke", "#555");
+    path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
+    svg.appendChild(path);
+
+    // Add records.
+    this.paths[path_id] = {
+        source: source_id,
+        source_x: x1,
+        source_y: y1,
+        target: target_id,
+        target_x: x2,
+        target_y: y2
+    }
+
+    this.rooms[source_id].paths[path_id] = "";
+    this.rooms[target_id].paths[path_id] = "";
+}
+
+
+
 /***********************************
  *
  * Mouse down event.
@@ -234,9 +274,15 @@ MapEditor.prototype.onRoomMouseDown = function(event) {
  */
 MapEditor.prototype.newRoomMouseDown = function(event) {
     // Drag the room.
+    var container = $("#container");
     this.mode = "NEW_ROOM";
-    this.current_room = $(event.currentTarget).clone();
-    this.current_room.appendTo($("#container"));
+
+    var target = $(event.currentTarget);
+
+    this.room_offset_x = event.clientX - target.offset().left;
+    this.room_offset_y = event.clientY - target.offset().top;
+    this.current_room = target.clone();
+    this.current_room.appendTo(container);
 
     this.newRoomMouseMove(event);
 }
@@ -249,6 +295,8 @@ MapEditor.prototype.selectedRoomMouseDown = function(event) {
     // Drag the room.
     this.mode = "SELECTED_ROOM";
     this.current_room = $(event.currentTarget);
+    this.room_offset_x = event.clientX - this.current_room.offset().left;
+    this.room_offset_y = event.clientY - this.current_room.offset().top;
 }
 
 
@@ -259,6 +307,8 @@ MapEditor.prototype.unselectedRoomMouseDown = function(event) {
     // Drag the room.
     this.mode = "UNSELECTED_ROOM";
     this.current_room = $(event.currentTarget);
+    this.room_offset_x = event.clientX - this.current_room.offset().left;
+    this.room_offset_y = event.clientY - this.current_room.offset().top;
 }
 
 
@@ -308,8 +358,8 @@ MapEditor.prototype.newRoomMouseMove = function(event) {
 
     // Move the room.
     controller.current_room.css({
-        "left": x - controller.current_room.outerWidth() / 2,
-        "top": y - controller.current_room.outerHeight() / 2,
+        "left": x - this.room_offset_x,
+        "top": y - this.room_offset_y,
         "position": "absolute"});
 }
 
@@ -369,17 +419,18 @@ MapEditor.prototype.dragRoom = function(event) {
 
     // Move the room.
     controller.current_room.css({
-        "left": x - controller.current_room.outerWidth() / 2,
-        "top": y - controller.current_room.outerHeight() / 2,
+        "left": x - this.room_offset_x,
+        "top": y - this.room_offset_y,
         "position": "absolute"});
 
     // Move the room's name.
     var room_id = controller.current_room.attr("id");
+    var width = controller.current_room.outerWidth();
     var height = controller.current_room.outerHeight();
     var name = $("#" + room_id + "-name");
     name.css({
-        "left": x - name.width() / 2,
-        "top": y + height / 2,
+        "left": x - this.room_offset_x + width / 2 - name.width() / 2,
+        "top": y - this.room_offset_y + height,
         "position": "absolute"});
 
     // Move linked paths.
@@ -434,35 +485,23 @@ MapEditor.prototype.onRoomMouseUp = function(event) {
  */
 MapEditor.prototype.dropPathOnRoom = function(event) {
     var path = this.current_path;
-    var target = $(event.currentTarget);
     var source_id = this.current_room.attr("id");
-    var target_id = target.attr("id");
+    var target_id = $(event.currentTarget).attr("id");
+
+    // Remove the dragging path.
+    path.parentNode.removeChild(path);
+
     if (source_id == target_id) {
-        // Remove the path.
-        path.parentNode.removeChild(path);
+        // Can not draw a path to itself.
+        return;
     }
 
-    // Link to the target room.
-    var x1 = controller.current_room.position().left + controller.current_room.outerWidth() / 2;
-    var y1 = controller.current_room.position().top + controller.current_room.outerHeight() / 2;
-
-    var position = target.position();
-    var width = target.outerWidth();
-    var height = target.outerHeight();
-    var x2 = position.left + width / 2;
-    var y2 = position.top + height / 2;
-    path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
-
-    // Rename the path.
+    // Create a new path.
     controller.path_index++;
     var path_id = "path-" + controller.path_index;
-    path.setAttribute("id", path_id);
+    controller.createPath(path_id, source_id, target_id);
 
-    // Save this path.
-    var source_id = controller.current_room_id;
-    var target_id = $(this).attr("id");
-    controller.addPath(path_id, source_id, x1, y1, target_id, x2, y2);
-
+    this.mode = "";
     event.stopPropagation();
 }
 
@@ -505,8 +544,8 @@ MapEditor.prototype.newRoomMouseUp = function(event) {
     var room_id = "room-" + controller.room_index;
 
     var container = $("#container");
-    var x = event.clientX - container.offset().left;
-    var y = event.clientY - container.offset().top;
+    var x = this.current_room.position().left + this.current_room.outerWidth() / 2;
+    var y = this.current_room.position().top + this.current_room.outerHeight() / 2;
 
     controller.createRoom(room_id, "", x, y);
 
@@ -578,24 +617,6 @@ MapEditor.prototype.dropRoom = function(event) {
 MapEditor.prototype.containerMouseUp = function(event) {
     // Unselect all rooms.
     $(".element-room").removeClass("element-selected");
-}
-
-
-/*
- * Add a path
- */
-MapEditor.prototype.addPath = function(path_id, source_id, source_x, source_y, target_id, target_x, target_y) {
-    this.paths[path_id] = {
-        source: source_id,
-        source_x: source_x,
-        source_y: source_y,
-        target: target_id,
-        target_x: target_x,
-        target_y: target_y
-    }
-
-    this.rooms[source_id].paths[path_id] = "";
-    this.rooms[target_id].paths[path_id] = "";
 }
 
 
@@ -681,6 +702,20 @@ MapEditor.prototype.queryMapSuccess = function(data) {
                 y = original_point_y - room_info.position[1] * map_scale;
             }
             controller.createRoom(room_info.key, room_info.name, x, y);
+        }
+    }
+
+    if ("exit" in data) {
+        for (var i = 0; i < data.exit.length; i++) {
+            var exit_info = data.exit[i];
+
+            if (!(exit_info.location in controller.rooms)) {
+            }
+            else if (!(exit_info.destination in controller.rooms)) {
+            }
+            else {
+                controller.createPath(exit_info.key, exit_info.location, exit_info.destination);
+            }
         }
     }
 }
