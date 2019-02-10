@@ -210,7 +210,15 @@ MapEditor.prototype.createRoom = function(room_id, room_name, x, y) {
 /*
  * Create a path.
  */
-MapEditor.prototype.createPath = function(path_id, source_id, target_id) {
+MapEditor.prototype.createPath = function(exit_id, source_id, target_id) {
+    var path_id = "";
+    if (source_id <= target_id) {
+        path_id = source_id + ":" + target_id;
+    }
+    else {
+        path_id = target_id + ":" + source_id;
+    }
+
     // Draw a line from the source room  to the target room.
     var source_room = $("#" + source_id);
     var x1 = source_room.position().left + source_room.outerWidth() / 2;
@@ -230,12 +238,19 @@ MapEditor.prototype.createPath = function(path_id, source_id, target_id) {
 
     // Add records.
     this.paths[path_id] = {
-        source: source_id,
-        source_x: x1,
-        source_y: y1,
-        target: target_id,
-        target_x: x2,
-        target_y: y2
+        room1: source_id,
+        room2: target_id,
+        x1: x1,
+        y1: y1,
+        x2: x2,
+        y2: y2,
+        exits: [
+            {
+                exit_id:
+                source: source_id,
+                target: target_id
+            }
+        ]
     }
 
     this.rooms[source_id].paths[path_id] = "";
@@ -610,7 +625,6 @@ MapEditor.prototype.dropRoom = function(event) {
 }
 
 
-
 /*
  * Click the background to unselect all room.
  */
@@ -625,6 +639,7 @@ MapEditor.prototype.refresh = function() {
                      this.queryMapSuccess,
                      this.queryMapFailed);
 }
+
 
 MapEditor.prototype.uploadSuccess = function(field_name) {
     var callback = function(data) {
@@ -650,9 +665,11 @@ MapEditor.prototype.uploadSuccess = function(field_name) {
     return callback;
 }
 
+
 MapEditor.prototype.uploadFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
 }
+
 
 MapEditor.prototype.queryMapSuccess = function(data) {
     controller.map_data = data;
