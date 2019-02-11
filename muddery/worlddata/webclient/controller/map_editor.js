@@ -219,6 +219,17 @@ MapEditor.prototype.createPath = function(exit_id, source_id, target_id) {
         path_id = target_id + ":" + source_id;
     }
 
+    if (path_id in this.paths) {
+        // Add an exit.
+        this.paths[path_id].exits.push({
+            exit_id: exit_id,
+            source: source_id,
+            target: target_id
+        });
+        return;
+    }
+
+    // Add a new path.
     // Draw a line from the source room  to the target room.
     var source_room = $("#" + source_id);
     var x1 = source_room.position().left + source_room.outerWidth() / 2;
@@ -232,8 +243,10 @@ MapEditor.prototype.createPath = function(exit_id, source_id, target_id) {
     var namespace = "http://www.w3.org/2000/svg";
     var path = document.createElementNS(namespace, "path");
     path.setAttribute("id", path_id);
-    path.setAttribute("stroke", "#555");
+    path.setAttribute("stroke", "#777");
+    path.setAttribute("stroke-width", "3");
     path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
+    path.addEventListener("click", this.onPathClick);
     svg.appendChild(path);
 
     // Add records.
@@ -246,7 +259,7 @@ MapEditor.prototype.createPath = function(exit_id, source_id, target_id) {
         y2: y2,
         exits: [
             {
-                exit_id:
+                exit_id: exit_id,
                 source: source_id,
                 target: target_id
             }
@@ -631,6 +644,43 @@ MapEditor.prototype.dropRoom = function(event) {
 MapEditor.prototype.containerMouseUp = function(event) {
     // Unselect all rooms.
     $(".element-room").removeClass("element-selected");
+}
+
+
+/*
+ * Click a path.
+ */
+MapEditor.prototype.onPathClick = function(event) {
+    var path_id = event.target.getAttribute("id");
+    controller.showPathMenu(path_id);
+}
+
+
+/*
+ * Display a path's menu.
+ */
+MapEditor.prototype.showPathMenu = function(path_id) {
+    var path_info = controller.paths[path_id];
+
+    var x = (path_info.x1 + path_info.x2) / 2;
+    var y = (path_info.y1 + path_info.y2) / 2;
+
+    var menu = $("<div>")
+        .addClass("path-menu")
+        .css({
+            "left": x,
+            "top": y,
+            "position": "absolute"
+        });
+
+    for (var i = 0; i < path_info.exits.length; i++) {
+        $("<div>")
+            .addClass("path-menu-exit")
+            .text(path_info.exits[i].exit_id)
+            .appendTo(menu);
+    }
+
+    menu.appendTo($("#container"));
 }
 
 

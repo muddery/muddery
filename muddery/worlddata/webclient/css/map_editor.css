@@ -41,6 +41,7 @@
     margin: 0;
     font-size: 12px;
     background-color: rgba(192, 192, 192, 0.75);
+    z-index: 1;
 }
 
 #selector-title {
@@ -53,7 +54,6 @@
     top: 0;
     width: 400px;
     height: 400px;
-    z-index: -2;
 }
 
 #map-svg {
@@ -62,7 +62,7 @@
     top: 0;
     width: 400px;
     height: 400px;
-    z-index: -1;
+    z-index: 1;
 }
 
 .image-input-control {
@@ -100,6 +100,7 @@
     background: #fff;
     font-size: 12px;
     line-height: 14px;
+    z-index: 2;
 }
 
 #element-room {
@@ -116,4 +117,20 @@
     width: 80px;
     height: 20px;
     text-align: center;
+    z-index: 2;
+}
+
+.path-menu {
+    border: 1px solid #555;
+    background: #fff;
+    z-index: 100;
+}
+
+.path-menu-exit {
+    padding: 5px;
+    border-bottom: 1px solid #555;
+}
+
+.path-menu-exit:last-child {
+    border-bottom: 0;
 }
