@@ -118,19 +118,20 @@
     height: 20px;
     text-align: center;
     z-index: 2;
+    pointer-events: none;
 }
 
-.path-menu {
+.element-menu {
     border: 1px solid #555;
     background: #fff;
     z-index: 100;
 }
 
-.path-menu-exit {
+.menu-item {
     padding: 5px;
     border-bottom: 1px solid #555;
 }
 
-.path-menu-exit:last-child {
+.menu-item:last-child {
     border-bottom: 0;
 }

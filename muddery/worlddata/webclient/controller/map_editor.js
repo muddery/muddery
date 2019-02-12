@@ -176,6 +176,9 @@ MapEditor.prototype.deleteEventSuccess = function(data) {
  */
 MapEditor.prototype.createRoom = function(room_id, room_name, x, y) {
     this.rooms[room_id] = {
+        name: room_name,
+        x: x,
+        y: y,
         paths: {}
     }
 
@@ -244,7 +247,7 @@ MapEditor.prototype.createPath = function(exit_id, source_id, target_id) {
     var path = document.createElementNS(namespace, "path");
     path.setAttribute("id", path_id);
     path.setAttribute("stroke", "#777");
-    path.setAttribute("stroke-width", "3");
+    path.setAttribute("stroke-width", "5");
     path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
     path.addEventListener("click", this.onPathClick);
     svg.appendChild(path);
@@ -461,27 +464,30 @@ MapEditor.prototype.dragRoom = function(event) {
         "top": y - this.room_offset_y + height,
         "position": "absolute"});
 
+    controller.rooms[room_id].x = x;
+    controller.rooms[room_id].y = y;
+
     // Move linked paths.
     for (var path_id in controller.rooms[room_id].paths) {
         var path_info = controller.paths[path_id];
-        var x1 = path_info.source_x;
-        var y1 = path_info.source_y;
-        var x2 = path_info.target_x;
-        var y2 = path_info.target_y;
+        var x1 = path_info.x1;
+        var y1 = path_info.y1;
+        var x2 = path_info.x2;
+        var y2 = path_info.y2;
 
-        if (room_id == path_info.source) {
+        if (room_id == path_info.room1) {
             x1 = x;
             y1 = y;
 
-            controller.paths[path_id]["source_x"] = x;
-            controller.paths[path_id]["source_y"] = y;
+            controller.paths[path_id]["x1"] = x;
+            controller.paths[path_id]["y1"] = y;
         }
-        else if (room_id == path_info.target) {
+        else if (room_id == path_info.room2) {
             x2 = x;
             y2 = y;
 
-            controller.paths[path_id]["target_x"] = x;
-            controller.paths[path_id]["target_y"] = y;
+            controller.paths[path_id]["x2"] = x;
+            controller.paths[path_id]["y2"] = y;
         }
 
         // Move path.
@@ -589,6 +595,9 @@ MapEditor.prototype.newRoomMouseUp = function(event) {
 MapEditor.prototype.selectedRoomMouseUp = function(event) {
     controller.current_room.removeClass("element-selected");
 
+    // Remove other pop up menus.
+    $(".element-menu").remove();
+
     this.current_room = null;
     this.mode = "";
 }
@@ -603,6 +612,13 @@ MapEditor.prototype.unselectedRoomMouseUp = function(event) {
 
     // Select this room.
     this.current_room.addClass("element-selected");
+
+    // Remove other pop up menus.
+    $(".element-menu").remove();
+
+    // Show this room's menu.
+    var room_id = this.current_room.attr("id");
+    this.showRoomMenu(room_id);
 
     this.mode = "";
 
@@ -644,6 +660,9 @@ MapEditor.prototype.dropRoom = function(event) {
 MapEditor.prototype.containerMouseUp = function(event) {
     // Unselect all rooms.
     $(".element-room").removeClass("element-selected");
+
+    // Remove pop up menus.
+    $(".element-menu").remove();
 }
 
 
@@ -653,6 +672,43 @@ MapEditor.prototype.containerMouseUp = function(event) {
 MapEditor.prototype.onPathClick = function(event) {
     var path_id = event.target.getAttribute("id");
     controller.showPathMenu(path_id);
+}
+
+
+/***********************************
+ *
+ * Menus.
+ *
+ ***********************************/
+
+/*
+ * Display a room's menu.
+ */
+MapEditor.prototype.showRoomMenu = function(room_id) {
+    var room_info = controller.rooms[room_id];
+
+    var x = room_info.x - 20;
+    var y = room_info.y + 40;
+
+    var menu = $("<div>")
+        .addClass("element-menu")
+        .css({
+            "left": x,
+            "top": y,
+            "position": "absolute"
+        });
+
+    $("<div>")
+        .addClass("menu-item")
+        .text("Edit")
+        .appendTo(menu);
+
+    $("<div>")
+        .addClass("menu-item")
+        .text("Delete")
+        .appendTo(menu);
+
+    menu.appendTo($("#container"));
 }
 
 
@@ -666,7 +722,7 @@ MapEditor.prototype.showPathMenu = function(path_id) {
     var y = (path_info.y1 + path_info.y2) / 2;
 
     var menu = $("<div>")
-        .addClass("path-menu")
+        .addClass("element-menu")
         .css({
             "left": x,
             "top": y,
@@ -675,7 +731,7 @@ MapEditor.prototype.showPathMenu = function(path_id) {
 
     for (var i = 0; i < path_info.exits.length; i++) {
         $("<div>")
-            .addClass("path-menu-exit")
+            .addClass("menu-item")
             .text(path_info.exits[i].exit_id)
             .appendTo(menu);
     }
