@@ -4,6 +4,7 @@
  */
 MapEditor = function() {
     this.room_typeclass = "ROOM";
+    this.exit_typeclass = "EXIT";
 
     this.room_index = 0;
     this.path_index = 0;
@@ -20,7 +21,6 @@ MapEditor = function() {
     this.background = "";
     this.rooms = {};
     this.paths = {};
-    this.room_paths = {};
 }
 
 MapEditor.prototype.init = function() {
@@ -216,32 +216,32 @@ MapEditor.prototype.createRoom = function(room_key, room_name, x, y) {
 /*
  * Create a path.
  */
-MapEditor.prototype.createPath = function(exit_key, source_id, target_id) {
+MapEditor.prototype.createPath = function(exit_key, source_key, target_key) {
     var path_id = "";
-    if (source_id <= target_id) {
-        path_id = source_id + "-" + target_id;
+    if (source_key <= target_key) {
+        path_id = source_key + "-" + target_key;
     }
     else {
-        path_id = target_id + "-" + source_id;
+        path_id = target_key + "-" + source_key;
     }
 
     if (path_id in this.paths) {
         // Add an exit.
         this.paths[path_id].exits.push({
             exit_key: exit_key,
-            source: source_id,
-            target: target_id
+            source: source_key,
+            target: target_key
         });
         return;
     }
 
     // Add a new path.
     // Draw a line from the source room  to the target room.
-    var source_room = $("#room-" + source_id);
+    var source_room = $("#room-" + source_key);
     var x1 = source_room.position().left + source_room.outerWidth() / 2;
     var y1 = source_room.position().top + source_room.outerHeight() / 2;
 
-    var target_room = $("#room-" + target_id);
+    var target_room = $("#room-" + target_key);
     var x2 = target_room.position().left + target_room.outerWidth() / 2;
     var y2 = target_room.position().top + target_room.outerHeight() / 2;
 
@@ -257,8 +257,8 @@ MapEditor.prototype.createPath = function(exit_key, source_id, target_id) {
 
     // Add records.
     this.paths[path_id] = {
-        room1: source_id,
-        room2: target_id,
+        room1: source_key,
+        room2: target_key,
         x1: x1,
         y1: y1,
         x2: x2,
@@ -266,14 +266,14 @@ MapEditor.prototype.createPath = function(exit_key, source_id, target_id) {
         exits: [
             {
                 exit_key: exit_key,
-                source: source_id,
-                target: target_id
+                source: source_key,
+                target: target_key
             }
         ]
     }
 
-    this.rooms[source_id].paths[path_id] = "";
-    this.rooms[target_id].paths[path_id] = "";
+    this.rooms[source_key].paths[path_id] = "";
+    this.rooms[target_key].paths[path_id] = "";
 }
 
 
@@ -527,21 +527,23 @@ MapEditor.prototype.onRoomMouseUp = function(event) {
  */
 MapEditor.prototype.dropPathOnRoom = function(event) {
     var path = this.current_path;
-    var source_id = this.current_room.attr("id");
-    var target_id = $(event.currentTarget).attr("id");
+    var source_key = this.current_room.data("key");
+    var target_key = $(event.currentTarget).data("key");
 
     // Remove the dragging path.
     path.parentNode.removeChild(path);
 
-    if (source_id == target_id) {
+    if (source_key == target_key) {
         // Can not draw a path to itself.
         return;
     }
 
     // Create a new path.
-    controller.path_index++;
-    var path_id = "path-" + controller.path_index;
-    controller.createPath(path_id, source_id, target_id);
+    var exit1 = source_key + "-" + target_key;
+    controller.createPath(exit1, source_key, target_key);
+
+    var exit2 = target_key + "-" + source_key;
+    controller.createPath(exit2, target_key, source_key);
 
     this.mode = "";
     event.stopPropagation();
@@ -715,7 +717,9 @@ MapEditor.prototype.showRoomMenu = function(room_key) {
 
     $("<div>")
         .addClass("menu-item delete-room")
+        .data("key", room_key)
         .text("Delete")
+        .on("mouseup", this.onDeleteRoom)
         .appendTo(menu);
 
     menu.appendTo($("#container"));
@@ -761,6 +765,56 @@ MapEditor.prototype.onEditRoom = function(event) {
     event.stopPropagation();
 }
 
+
+/*
+ * On click the button of delete room.
+ */
+MapEditor.prototype.onDeleteRoom = function(event) {
+    var room_key = $(this).data("key");
+    window.parent.controller.confirm("",
+                                     "Delete this room?",
+                                     controller.confirmDeleteRoom,
+                                     {object_key: room_key});
+
+    // Prevent the container's event.
+    event.stopPropagation();
+}
+
+
+/*
+ * Delete the room.
+ */
+MapEditor.prototype.confirmDeleteRoom = function(e) {
+    window.parent.controller.hideWaiting();
+
+    // Remove pop up menus.
+    $(".element-menu").remove();
+
+    var room_key = e.data.object_key;
+
+    // Remove relative paths.
+    for (var path_id in controller.rooms[room_key].paths) {
+        var path = document.getElementById(path_id);
+        path.parentNode.removeChild(path);
+
+        var room1 = controller.paths[path_id].room1;
+        var room2 = controller.paths[path_id].room2;
+
+        if (room1 != room_key) {
+            delete controller.rooms[room1].paths[path_id];
+        }
+        else {
+            delete controller.rooms[room2].paths[path_id];
+        }
+
+        delete controller.paths[path_id];
+    }
+
+    // Remove the room.
+    $("#room-" + room_key).remove();
+    $("#roomname-" + room_key).remove();
+    delete controller.rooms[room_key];
+}
 
 
 MapEditor.prototype.refresh = function() {
