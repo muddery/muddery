@@ -137,23 +137,55 @@
     border-bottom: 0;
 }
 
+.room-menu {
+    width: 200px;
+}
+
 .menu-room-name {
     text-align: center;
     font-size: 16px;
     font-weight: bold;
-    padding: 10px 10px 10px 2px;
+    padding: 10px 10px 2px 10px;
 }
 
 .menu-room-key, .menu-room-typeclass {
     text-align: center;
     font-size: 14px;
     padding: 2px 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .menu-button-bar {
     text-align: center;
 }
 
-.menu-button {
+.room-menu-button {
     margin: 10px;
+}
+
+.drag-button {
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    font-size: 10px;
+    border-radius: 2px;
+}
+
+.exit-menu-item {
+    overflow: hidden;
+}
+
+.exit-label {
+    padding: 0 10px 0 5px;
+    float: left;
+}
+
+.exit-button-bar {
+    float: right;
+}
+
+.exit-menu-button {
+    margin: 2px;
 }
