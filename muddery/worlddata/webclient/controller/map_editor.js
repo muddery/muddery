@@ -44,6 +44,9 @@ MapEditor.prototype.bindEvents = function() {
     $("#save-record").on("click", this.onSave);
     $("#delete-record").on("click", this.onDelete);
 
+    $("#upload-background").on("click", this.onUploadBackground);
+    $("#delete-background").on("click", this.onDeleteBackground);
+
     $("#map-image").on("load", this.onImageLoad);
 
     // Mouse down on a room.
@@ -72,7 +75,6 @@ MapEditor.prototype.onDelete = function() {
                                      "Delete this map?",
                                      controller.confirmDelete);
 }
-
 
 /*
  * On the map's background loaded.
@@ -130,40 +132,29 @@ MapEditor.prototype.confirmDelete = function(e) {
                          controller.deleteSuccess);
 }
 
-MapEditor.prototype.onUpload = function(e) {
-    var record_id = $(this).attr("data-record-id");
-    if (record_id) {
-        var editor = "event";
-        var table = "event_data";
-        var args = {
-            trigger: controller.obj_key,
-        }
-        window.parent.controller.editRecord(editor, table, record_id, args);
-    }
+/*
+ * On upload the map's background.
+ */
+MapEditor.prototype.onUploadBackground = function() {
 }
 
-MapEditor.prototype.onDeleteEvent = function(e) {
-    var record_id = $(this).attr("data-record-id");
+/*
+ * On delete the map's background.
+ */
+MapEditor.prototype.onDeleteBackground = function() {
     window.parent.controller.confirm("",
-                                     "Delete this record?",
-                                     controller.confirmDeleteEvent,
-                                     {record: record_id});
+                                     "Delete this background?",
+                                     controller.confirmDeleteBackground);
 }
 
-MapEditor.prototype.confirmDeleteEvent = function(e) {
-    window.parent.controller.hideWaiting();
+/*
+ * On delete the map's background.
+ */
+MapEditor.prototype.confirmDeleteBackground = function() {
+     window.parent.controller.hideWaiting();
 
-    var table = controller.table_name;
-    var record_id = e.data.record;
-    service.deleteRecord(table, record, this.deleteEventSuccess);
-}
-
-MapEditor.prototype.deleteEventSuccess = function(data) {
-    var record_id = data.record;
-    $("#event-table").bootstrapTable("remove", {
-        field: "id",
-        values: [record_id],
-    });
+    controller.background = "";
+    $("#map-image").attr("src", "../images/blank_map.png");
 }
 
 
@@ -227,7 +218,7 @@ MapEditor.prototype.createPath = function(info) {
 
     if (path_id in this.paths) {
         // Add an exit.
-        this.paths[path_id].exits.push(info);
+        this.paths[path_id].exits[info.key] = info;
         return;
     }
 
@@ -259,8 +250,9 @@ MapEditor.prototype.createPath = function(info) {
         y1: y1,
         x2: x2,
         y2: y2,
-        exits: [info]
+        exits: {}
     }
+    this.paths[path_id].exits[info.key] = info;
 
     this.rooms[info.location].paths[path_id] = "";
     this.rooms[info.destination].paths[path_id] = "";
@@ -794,7 +786,7 @@ MapEditor.prototype.showRoomMenu = function(room_key) {
         .appendTo(menu);
 
     var button_bar = $("<div>")
-        .addClass("menu-button-bar")
+        .addClass("room-button-bar")
         .appendTo(menu);
 
     // delete button
@@ -862,32 +854,23 @@ MapEditor.prototype.showPathMenu = function(path_id) {
     var y = (path_info.y1 + path_info.y2) / 2;
 
     var menu = $("<div>")
-        .addClass("element-menu")
-        .css({
-            "left": x,
-            "top": y,
-            "position": "absolute"
-        });
+        .addClass("element-menu exit-menu");
 
-    for (var i = 0; i < path_info.exits.length; i++) {
-        var exit = path_info.exits[i];
+    for (var key in path_info.exits) {
+        var exit = path_info.exits[key];
 
         var menu_item = $("<div>")
             .addClass("menu-item exit-menu-item");
 
-        var label = $("<div>")
-            .addClass("exit-label")
-            .appendTo(menu_item);
-
         var name = $("<div>")
             .addClass("menu-exit-key")
             .text(exit.key)
-            .appendTo(label);
+            .appendTo(menu_item);
 
         var name = $("<div>")
             .addClass("menu-exit-typeclass")
             .text("(" + exit.typeclass + ")")
-            .appendTo(label);
+            .appendTo(menu_item);
 
         var button_bar = $("<div>")
             .addClass("exit-button-bar")
@@ -895,9 +878,10 @@ MapEditor.prototype.showPathMenu = function(path_id) {
 
         // delete button
         var button = $("<button>")
-            .addClass("btn btn-default exit-menu-button")
+            .addClass("btn btn-default btn-sm exit-menu-button")
             .attr("type", "button")
-            .data("key", exit.key)
+            .data("path", path_id)
+            .data("exit", exit.key)
             .on("mouseup", this.onDeleteExit)
             .appendTo(button_bar);
 
@@ -907,9 +891,10 @@ MapEditor.prototype.showPathMenu = function(path_id) {
 
         // edit button
         var button = $("<button>")
-            .addClass("btn btn-default exit-menu-button")
+            .addClass("btn btn-default btn-sm exit-menu-button")
             .attr("type", "button")
-            .data("key", exit.key)
+            .data("path", path_id)
+            .data("exit", exit.key)
             .on("mouseup", this.onEditExit)
             .appendTo(button_bar);
 
@@ -921,6 +906,13 @@ MapEditor.prototype.showPathMenu = function(path_id) {
     }
 
     menu.appendTo($("#container"));
+
+    var width = menu.width();
+    menu.css({
+        "left": x - width / 2,
+        "top": y,
+        "position": "absolute"
+    });
 }
 
 
@@ -991,7 +983,7 @@ MapEditor.prototype.confirmDeleteRoom = function(e) {
  * On click the button to edit an exit.
  */
 MapEditor.prototype.onEditExit = function(event) {
-    var exit_key = $(this).data("key");
+    var exit_key = $(this).data("exit");
     window.parent.controller.editObject(controller.exit_typeclass, exit_key);
 
     // Prevent the container's event.
@@ -1003,11 +995,13 @@ MapEditor.prototype.onEditExit = function(event) {
  * On click the button to delete an exit.
  */
 MapEditor.prototype.onDeleteExit = function(event) {
-    var exit_key = $(this).data("key");
+    var path_id = $(this).data("path");
+    var exit_key = $(this).data("exit");
     window.parent.controller.confirm("",
                                      "Delete this exit?",
                                      controller.confirmDeleteExit,
-                                     {object_key: exit_key});
+                                     {path: path_id,
+                                      exit: exit_key});
 
     // Prevent the container's event.
     event.stopPropagation();
@@ -1023,7 +1017,16 @@ MapEditor.prototype.confirmDeleteExit = function(e) {
     // Remove popup menus.
     $(".element-menu").remove();
 
-    var exit_key = e.data.key;
+    var path_id = e.data.path;
+    var exit_key = e.data.exit;
+    delete controller.paths[path_id].exits[exit_key];
+
+    // If all exits have been removed.
+    if (Object.keys(controller.paths[path_id].exits).length == 0) {
+        // Remove the path.
+        delete controller.paths[path_id];
+        $("#" + path_id).remove();
+    }
 }
 
 

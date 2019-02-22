@@ -130,7 +130,7 @@
 
 .menu-item {
     padding: 5px;
-    border-bottom: 1px solid #555;
+    border-bottom: 1px solid #aaa;
 }
 
 .menu-item:last-child {
@@ -156,7 +156,7 @@
     text-overflow: ellipsis;
 }
 
-.menu-button-bar {
+.room-button-bar {
     text-align: center;
 }
 
@@ -173,19 +173,26 @@
     border-radius: 2px;
 }
 
+.exit-menu {
+    width: 200px;
+}
+
 .exit-menu-item {
     overflow: hidden;
 }
 
-.exit-label {
-    padding: 0 10px 0 5px;
-    float: left;
+.menu-exit-key, .menu-exit-typeclass {
+    text-align: center;
+    font-size: 12px;
+    padding: 2px 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .exit-button-bar {
-    float: right;
+    text-align: center;
 }
 
 .exit-menu-button {
-    margin: 2px;
+    margin: 2px 10px;
 }
