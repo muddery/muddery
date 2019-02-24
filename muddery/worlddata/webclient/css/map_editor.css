@@ -41,7 +41,7 @@
     margin: 0;
     font-size: 12px;
     background-color: rgba(192, 192, 192, 0.75);
-    z-index: 1;
+    z-index: 2;
 }
 
 #selector-title {

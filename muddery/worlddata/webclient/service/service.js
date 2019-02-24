@@ -215,6 +215,37 @@ service = {
         this.sendRequest("query_map", "", args, callback_success, callback_failed, context);
     },
 
+    /*  Save a map.
+     *  Args:
+     *      area: (dict) map area's data.
+     *      rooms: (list) rooms in this area.
+     *      exits: (list) exits in this area.
+     */
+    saveMap: function(area, background, rooms, exits, callback_success, callback_failed, context) {
+        var args = {
+            area: area,
+            background: background,
+            rooms: rooms,
+            exits: exits
+        };
+        this.sendRequest("save_map", "", args, callback_success, callback_failed, context);
+    },
+
+    /*  Create a new room.
+     *  Args:
+     *      area: (string) an area's key.
+     *      position: (list) a list of position data.
+     */
+    newRoom: function(area, position, callback_success, callback_failed, context) {
+        var args = {
+            area: area,
+            position: position
+        };
+        this.sendRequest("save_room", "", args, callback_success, callback_failed, context);
+    },
+
+
+
     saveForm: function(values, table_name, record_id, callback_success, callback_failed, context) {
         var args = {
             values: values,
@@ -306,7 +337,7 @@ service = {
 
     checkStatus: function(callback_success, callback_failed, context) {
         this.sendRequest("status", "", {}, callback_success, callback_failed, context);
-    },
+    }
 }
 
 

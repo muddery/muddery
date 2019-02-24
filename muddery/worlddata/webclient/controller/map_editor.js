@@ -3,6 +3,7 @@
  * Derive from the base class.
  */
 MapEditor = function() {
+    this.area_typeclass = "AREA";
     this.room_typeclass = "ROOM";
     this.exit_typeclass = "EXIT";
 
@@ -28,7 +29,7 @@ MapEditor.prototype.init = function() {
 
     $("#exit-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");
-    if (this.obj_key) {
+    if (this.area_key) {
         $("#delete-record").removeClass("hidden");
     }
 
@@ -46,6 +47,9 @@ MapEditor.prototype.bindEvents = function() {
 
     $("#upload-background").on("click", this.onUploadBackground);
     $("#delete-background").on("click", this.onDeleteBackground);
+    $("#set-background-size").on("click", this.onSetBackgroundSize);
+    $("#restore-background-size").on("click", this.onRestoreBackgroundSize);
+    $("#edit-area").on("click", this.onEditArea);
 
     $("#map-image").on("load", this.onImageLoad);
 
@@ -67,14 +71,41 @@ MapEditor.prototype.onExit = function() {
 }
 
 MapEditor.prototype.onSave = function() {
-    controller.saveMap(controller.saveMapSuccess, controller.saveMapFailed);
+    var exits = {};
+    for (var key in controller.paths) {
+        $.extend(exits, controller.paths[key].exits)
+    }
+
+    service.saveMap(controller.area_key, controller.background, controller.rooms, exits);
 }
+
 
 MapEditor.prototype.onDelete = function() {
     window.parent.controller.confirm("",
                                      "Delete this map?",
                                      controller.confirmDelete);
 }
+
+
+MapEditor.prototype.confirmDelete = function(e) {
+    window.parent.controller.hideWaiting();
+}
+
+
+/*
+ * On the map's background loaded.
+ */
+
+MapEditor.prototype.onEditArea = function() {
+    window.parent.controller.editObject(controller.area_typeclass, controller.area_key);
+}
+
+
+/***********************************
+ *
+ * Background.
+ *
+ ***********************************/
 
 /*
  * On the map's background loaded.
@@ -89,6 +120,13 @@ MapEditor.prototype.onImageLoad = function() {
     var width = image.naturalWidth;
     var height = image.naturalHeight;
 
+    controller.setBackgroundSize(width, height);
+}
+
+/*
+ * Set the background's size.
+ */
+MapEditor.prototype.setBackgroundSize = function(width, height) {
     $("#container").width(width);
     $("#container").height(height);
 
@@ -102,41 +140,35 @@ MapEditor.prototype.onImageLoad = function() {
     $("#image-height").val(height);
 }
 
-MapEditor.prototype.onSave = function() {
-    // Upload images before submit the form.
-    var upload_images = false;
-    controller.file_fields = [];
-
-    var image_fields = $(".image-input-control");
-    for (var i = 0; i < image_fields.length; i++) {
-        var file_obj = image_fields[i].files[0];
-        if (file_obj && file_obj.size > 0) {
-            upload_images = true;
-            var image_type = $(image_fields[i]).data("image_type");
-            var name = $(image_fields[i]).data("field_name");
-            controller.file_fields.push(name);
-            service.uploadImage(file_obj, name, image_type, controller.uploadSuccess(name), controller.uploadFailed);
-        }
-    }
-
-    if (!upload_images) {
-        controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed);
-    }
-}
-
-MapEditor.prototype.confirmDelete = function(e) {
-    window.parent.controller.hideWaiting();
-
-    service.deleteObject(controller.base_typeclass,
-                         controller.obj_key,
-                         controller.deleteSuccess);
-}
-
 /*
  * On upload the map's background.
  */
 MapEditor.prototype.onUploadBackground = function() {
+    // Upload images before submit the form.
+    var upload_images = false;
+    controller.file_fields = [];
+
+    var image_field = document.getElementById("image-input");
+    var file_obj = image_field.files[0];
+    if (file_obj && file_obj.size > 0) {
+        service.uploadImage(file_obj, name, "background", controller.uploadSuccessCallback, controller.uploadFailedCallback);
+    }
 }
+
+
+MapEditor.prototype.uploadSuccessCallback = function(data) {
+    // Show images when upload images success.
+    controller.background = data.resource;
+    $("#map-image")
+        .attr("src", CONFIG.resource_url + data.resource)
+        .on("load", controller.onImageLoad);
+}
+
+
+MapEditor.prototype.uploadFailedCallback = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
+}
+
 
 /*
  * On delete the map's background.
@@ -157,6 +189,28 @@ MapEditor.prototype.confirmDeleteBackground = function() {
     $("#map-image").attr("src", "../images/blank_map.png");
 }
 
+/*
+ * On click the set background size button.
+ */
+MapEditor.prototype.onSetBackgroundSize = function() {
+    var width = parseInt($("#image-width").val());
+    var height = parseInt($("#image-height").val());
+    if (!width || !height || width < 0 || height < 0) {
+        return;
+    }
+    controller.setBackgroundSize(width, height);
+}
+
+/*
+ * On click the restore background size button.
+ */
+MapEditor.prototype.onRestoreBackgroundSize = function() {
+    // Get the image's original size.
+    var image = document.getElementById("map-image");
+    var width = image.naturalWidth;
+    var height = image.naturalHeight;
+    controller.setBackgroundSize(width, height);
+}
 
 /***********************************
  *
@@ -1034,36 +1088,6 @@ MapEditor.prototype.refresh = function() {
     service.queryMap(this.area_key,
                      this.queryMapSuccess,
                      this.queryMapFailed);
-}
-
-
-MapEditor.prototype.uploadSuccess = function(field_name) {
-    var callback = function(data) {
-        // Show images when upload images success.
-        for (var i = 0; i < controller.file_fields.length; i++) {
-            if (controller.file_fields[i] == field_name) {
-                controller.file_fields.splice(i, 1);
-                var field = $("#control-" + field_name);
-                field.find(".editor-control").val(data.resource);
-                field.find("img")
-                    .attr("src", CONFIG.resource_url + data.resource)
-                    .on("load", controller.onImageLoad);
-                break;
-            }
-        }
-
-        // Submit the form.
-        if (controller.file_fields.length == 0) {
-            controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed);
-        }
-    }
-
-    return callback;
-}
-
-
-MapEditor.prototype.uploadFailed = function(code, message, data) {
-    window.parent.controller.notify("ERROR", code + ": " + message);
 }
 
 

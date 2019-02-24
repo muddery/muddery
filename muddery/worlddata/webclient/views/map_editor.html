@@ -44,7 +44,7 @@
             <div id="window-right">
                 <div class="block">
                     <p class="block-title">上传地图</p>
-                    <input class="image-input-control" type="file">
+                    <input id="image-input" class="image-input-control" type="file">
                     <input class="editor-control" type="hidden">
                     <input id="upload-background" class="button-control" type="button" value="Upload">
                     <input id="delete-background" class="button-control" type="button" value="Delete">
@@ -59,8 +59,11 @@
                         <span>高度</span>
                         <input id="image-height" class="editor-control text-input-control" type="text">
                     </p>
-                    <input class="button-control" type="button" value="Set">
-                    <input class="button-control" type="button" value="Restore">
+                    <input id="set-background-size" class="button-control" type="button" value="Set">
+                    <input id="restore-background-size" class="button-control" type="button" value="Restore">
+                </div>
+                <div class="block">
+                    <input id="edit-area" class="button-control" type="button" value="编辑区域属性">
                 </div>
             </div>
         </div>
