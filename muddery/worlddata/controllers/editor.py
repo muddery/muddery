@@ -357,6 +357,53 @@ class SaveObjectForm(BaseRequestProcesser):
         return success_response(data)
 
 
+class SaveNewRoom(BaseRequestProcesser):
+    """
+    Save a new room.
+
+    Args:
+        typeclass: (string) room's typeclass.
+        area: (string) room's area.
+        position: (string) room's position string.
+    """
+    path = "save_new_room"
+    name = ""
+
+    def func(self, args, request):
+        if not args:
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        if 'typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+
+        if 'location' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "location".')
+
+        typeclass = args["typeclass"]
+        location = args["location"]
+        position = args.get('position', None)
+        if position:
+            position = json.dumps(position)
+
+        forms = data_edit.query_object_form(typeclass, typeclass, None)
+        new_room = []
+        for form in forms:
+            values = {field["name"]: (field["value"] if "value" in field else "") for field in form["fields"]}
+            if "location" in values:
+                values["location"] = location
+            if "position" in values:
+                values["position"] = position
+
+            new_room.append({
+                "table": form["table"],
+                "values": values
+            })
+
+        obj_key = data_edit.save_object_form(new_room, typeclass, "")
+        data = {"key": obj_key}
+        return success_response(data)
+
+
 class DeleteRecord(BaseRequestProcesser):
     """
     Delete a record.

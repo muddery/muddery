@@ -249,6 +249,8 @@ def save_object_form(tables, obj_typeclass, obj_key):
         for form in forms:
             form.save()
 
+    return obj_key
+
 
 def delete_object(base_typeclass, obj_key):
     """

@@ -231,20 +231,20 @@ service = {
         this.sendRequest("save_map", "", args, callback_success, callback_failed, context);
     },
 
-    /*  Create a new room.
+    /*  Save a new room.
      *  Args:
+     *      typeclass: (string) the room's typeclass.
      *      area: (string) an area's key.
      *      position: (list) a list of position data.
      */
-    newRoom: function(area, position, callback_success, callback_failed, context) {
+    saveNewRoom: function(typeclass, area, position, callback_success, callback_failed, context) {
         var args = {
-            area: area,
+            typeclass: typeclass,
+            location: area,
             position: position
         };
-        this.sendRequest("save_room", "", args, callback_success, callback_failed, context);
+        this.sendRequest("save_new_room", "", args, callback_success, callback_failed, context);
     },
-
-
 
     saveForm: function(values, table_name, record_id, callback_success, callback_failed, context) {
         var args = {

@@ -6,8 +6,8 @@ MapEditor = function() {
     this.area_typeclass = "AREA";
     this.room_typeclass = "ROOM";
     this.exit_typeclass = "EXIT";
+    this.blank_map = "../images/blank_map.png";
 
-    this.room_index = 0;
     this.path_index = 0;
 
     this.current_room = null;
@@ -186,7 +186,7 @@ MapEditor.prototype.confirmDeleteBackground = function() {
      window.parent.controller.hideWaiting();
 
     controller.background = "";
-    $("#map-image").attr("src", "../images/blank_map.png");
+    $("#map-image").attr("src", controller.blank_map);
 }
 
 /*
@@ -676,20 +676,35 @@ MapEditor.prototype.onContainerMouseUp = function(event) {
  * Drop a new room.
  */
 MapEditor.prototype.newRoomMouseUp = function(event) {
-    controller.room_index++;
-    var room_key = "roomnew-" + controller.room_index;
-
-    var container = $("#container");
     var x = this.current_room.position().left + this.current_room.outerWidth() / 2;
     var y = this.current_room.position().top + this.current_room.outerHeight() / 2;
+
+    service.saveNewRoom(this.room_typeclass, this.area_key, [x, y], this.saveNewRoomSuccess, this.saveNewRoomFailed);
+}
+
+
+MapEditor.prototype.saveNewRoomSuccess = function(data) {
+    var room_key = data.key;
+
+    var x = controller.current_room.position().left + controller.current_room.outerWidth() / 2;
+    var y = controller.current_room.position().top + controller.current_room.outerHeight() / 2;
 
     var room_info = {
         key: room_key,
         name: "",
-        typeclass: this.room_typeclass,
+        typeclass: controller.room_typeclass,
         position: [x, y]
     }
     controller.createRoom(room_info, x, y);
+
+    controller.current_room.remove()
+    controller.current_room = null;
+    controller.mode = "";
+}
+
+
+MapEditor.prototype.saveNewRoomFailed = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
 
     this.current_room.remove()
     this.current_room = null;
@@ -977,6 +992,12 @@ MapEditor.prototype.onEditRoom = function(event) {
     var room_key = $(this).data("key");
     window.parent.controller.editObject(controller.room_typeclass, room_key);
 
+    // Unselect all rooms.
+    $(".element-room").removeClass("element-selected");
+
+    // Remove popup menus.
+    $(".element-menu").remove();
+
     // Prevent the container's event.
     event.stopPropagation();
 }
@@ -1040,6 +1061,9 @@ MapEditor.prototype.onEditExit = function(event) {
     var exit_key = $(this).data("exit");
     window.parent.controller.editObject(controller.exit_typeclass, exit_key);
 
+    // Remove popup menus.
+    $(".element-menu").remove();
+
     // Prevent the container's event.
     event.stopPropagation();
 }
@@ -1092,21 +1116,29 @@ MapEditor.prototype.refresh = function() {
 
 
 MapEditor.prototype.queryMapSuccess = function(data) {
+    // Clear map.
+    $("#container>.element-room").remove();
+    $("#container>.element-room-name").remove();
+    var svg = document.getElementById("map-svg");
+
     controller.map_data = data;
+    controller.background = "";
+    controller.rooms = {};
+    controller.paths = {};
 
     // Draw the background.
+
+    /*
     var map_scale = 1;
     var map_room_size = 40;
     var original_point_x = 0;
     var original_point_y = 0;
+    */
 
     if ("area" in data) {
         controller.background = data.area.background;
-        if (controller.background) {
-            $("#map-image")
-                .attr("src", CONFIG.resource_url + controller.background);
-        }
 
+        /*
         map_scale = data.area.map_scale | 1;
         map_room_size = data.area.map_room_size | 40;
 
@@ -1127,6 +1159,17 @@ MapEditor.prototype.queryMapSuccess = function(data) {
 
         original_point_x = background_point_x - corresp_pos_x * map_scale;
         original_point_y = background_point_y + corresp_pos_y * map_scale;
+        */
+    }
+
+    if (controller.background) {
+        $("#map-image")
+            .attr("src", CONFIG.resource_url + controller.background);
+    }
+    else {
+        $("#map-image")
+            .attr("src", controller.blank_map);
+
     }
 
     if ("room" in data) {
@@ -1135,8 +1178,10 @@ MapEditor.prototype.queryMapSuccess = function(data) {
             var x = 0;
             var y = 0;
             if (room_info.position) {
-                x = original_point_x + room_info.position[0] * map_scale;
-                y = original_point_y - room_info.position[1] * map_scale;
+                x = room_info.position[0];
+                y = room_info.position[1];
+                //x = original_point_x + room_info.position[0] * map_scale;
+                //y = original_point_y - room_info.position[1] * map_scale;
             }
             controller.createRoom(room_info, x, y);
         }
