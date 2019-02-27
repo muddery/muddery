@@ -215,20 +215,17 @@ service = {
         this.sendRequest("query_map", "", args, callback_success, callback_failed, context);
     },
 
-    /*  Save a map.
+    /*  Save room's positions in the map.
      *  Args:
      *      area: (dict) map area's data.
      *      rooms: (list) rooms in this area.
-     *      exits: (list) exits in this area.
      */
-    saveMap: function(area, background, rooms, exits, callback_success, callback_failed, context) {
+    saveMapPositions: function(area, rooms, callback_success, callback_failed, context) {
         var args = {
             area: area,
-            background: background,
             rooms: rooms,
-            exits: exits
         };
-        this.sendRequest("save_map", "", args, callback_success, callback_failed, context);
+        this.sendRequest("save_map_positions", "", args, callback_success, callback_failed, context);
     },
 
     /*  Save a new room.

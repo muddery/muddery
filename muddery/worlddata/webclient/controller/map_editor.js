@@ -6,7 +6,11 @@ MapEditor = function() {
     this.area_typeclass = "AREA";
     this.room_typeclass = "ROOM";
     this.exit_typeclass = "EXIT";
+
     this.blank_map = "../images/blank_map.png";
+    this.default_map_width = 400;
+    this.default_map_height = 400;
+    this.room_size = 40;
 
     this.path_index = 0;
 
@@ -20,6 +24,8 @@ MapEditor = function() {
 
     // All rooms and paths.
     this.background = "";
+    this.area_width = 0;
+    this.area_height = 0;
     this.rooms = {};
     this.paths = {};
 }
@@ -67,16 +73,16 @@ MapEditor.prototype.bindEvents = function() {
 }
 
 MapEditor.prototype.onExit = function() {
-    controller.exitNoChange();
+    controller.exit();
 }
 
 MapEditor.prototype.onSave = function() {
-    var exits = {};
-    for (var key in controller.paths) {
-        $.extend(exits, controller.paths[key].exits)
-    }
+    controller.saveMapPositions(controller.saveForExit);
+}
 
-    service.saveMap(controller.area_key, controller.background, controller.rooms, exits);
+
+MapEditor.prototype.saveForExit = function(data) {
+    controller.exit();
 }
 
 
@@ -97,6 +103,10 @@ MapEditor.prototype.confirmDelete = function(e) {
  */
 
 MapEditor.prototype.onEditArea = function() {
+    controller.saveMapPositions(controller.saveForEditArea);
+}
+
+MapEditor.prototype.saveForEditArea = function(data) {
     window.parent.controller.editObject(controller.area_typeclass, controller.area_key);
 }
 
@@ -111,22 +121,23 @@ MapEditor.prototype.onEditArea = function() {
  * On the map's background loaded.
  */
 MapEditor.prototype.onImageLoad = function() {
-    if (!controller.background) {
-        return;
+    if (controller.background && (controller.area_width == 0 || controller.area_height == 0)) {
+        // Get the image's original size.
+        var image = document.getElementById("map-image");
+        controller.area_width = image.naturalWidth;
+        controller.area_height = image.naturalHeight;
     }
 
-    // Get the image's original size.
-    var image = document.getElementById("map-image");
-    var width = image.naturalWidth;
-    var height = image.naturalHeight;
-
-    controller.setBackgroundSize(width, height);
+    controller.setBackgroundSize(controller.area_width, controller.area_height);
 }
 
 /*
  * Set the background's size.
  */
 MapEditor.prototype.setBackgroundSize = function(width, height) {
+    this.area_width = width;
+    this.area_height = height;
+
     $("#container").width(width);
     $("#container").height(height);
 
@@ -151,6 +162,8 @@ MapEditor.prototype.onUploadBackground = function() {
     var image_field = document.getElementById("image-input");
     var file_obj = image_field.files[0];
     if (file_obj && file_obj.size > 0) {
+        controller.area_width = 0;
+        controller.area_height = 0;
         service.uploadImage(file_obj, name, "background", controller.uploadSuccessCallback, controller.uploadFailedCallback);
     }
 }
@@ -632,7 +645,7 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
     var width = menu.width();
     menu.css({
         "left": room.x - width / 2,
-        "top": room.y + 40,
+        "top": room.y + controller.room_size,
         "position": "absolute"
     });
     menu.show();
@@ -768,7 +781,7 @@ MapEditor.prototype.dropPath = function(event) {
     var width = menu.width();
     menu.css({
         "left": room.x - width / 2,
-        "top": room.y + 40,
+        "top": room.y + controller.room_size,
         "position": "absolute"
     });
     menu.show();
@@ -792,7 +805,7 @@ MapEditor.prototype.dropRoom = function(event) {
     var width = menu.width();
     menu.css({
         "left": room.x - width / 2,
-        "top": room.y + 40,
+        "top": room.y + controller.room_size,
         "position": "absolute"
     });
     menu.show();
@@ -887,7 +900,7 @@ MapEditor.prototype.showRoomMenu = function(room_key) {
     var width = menu.width();
     menu.css({
         "left": room.x - width / 2,
-        "top": room.y + 40,
+        "top": room.y + controller.room_size,
         "position": "absolute"
     });
 
@@ -989,7 +1002,18 @@ MapEditor.prototype.showPathMenu = function(path_id) {
  * On click the button to edit a room.
  */
 MapEditor.prototype.onEditRoom = function(event) {
-    var room_key = $(this).data("key");
+    var context = {
+        key: $(this).data("key")
+    }
+    controller.saveMapPositions(controller.saveForEditRoom, context);
+
+    // Prevent the container's event.
+    event.stopPropagation();
+}
+
+
+MapEditor.prototype.saveForEditRoom = function(data, context) {
+    var room_key = context.key;
     window.parent.controller.editObject(controller.room_typeclass, room_key);
 
     // Unselect all rooms.
@@ -997,11 +1021,7 @@ MapEditor.prototype.onEditRoom = function(event) {
 
     // Remove popup menus.
     $(".element-menu").remove();
-
-    // Prevent the container's event.
-    event.stopPropagation();
 }
-
 
 /*
  * On click the button to delete a room.
@@ -1058,14 +1078,22 @@ MapEditor.prototype.confirmDeleteRoom = function(e) {
  * On click the button to edit an exit.
  */
 MapEditor.prototype.onEditExit = function(event) {
-    var exit_key = $(this).data("exit");
+    var context = {
+        key: $(this).data("exit")
+    }
+    controller.saveMapPositions(controller.saveForEditExit, context);
+
+    // Prevent the container's event.
+    event.stopPropagation();
+}
+
+
+MapEditor.prototype.saveForEditExit = function(data, context) {
+    var exit_key = context.key;
     window.parent.controller.editObject(controller.exit_typeclass, exit_key);
 
     // Remove popup menus.
     $(".element-menu").remove();
-
-    // Prevent the container's event.
-    event.stopPropagation();
 }
 
 
@@ -1120,6 +1148,7 @@ MapEditor.prototype.queryMapSuccess = function(data) {
     $("#container>.element-room").remove();
     $("#container>.element-room-name").remove();
     var svg = document.getElementById("map-svg");
+    svg.innerHTML = "";
 
     controller.map_data = data;
     controller.background = "";
@@ -1135,69 +1164,74 @@ MapEditor.prototype.queryMapSuccess = function(data) {
     var original_point_y = 0;
     */
 
-    if ("area" in data) {
-        controller.background = data.area.background;
+    // area
+    controller.background = data.area.background;
 
-        /*
-        map_scale = data.area.map_scale | 1;
-        map_room_size = data.area.map_room_size | 40;
+    /*
+    map_scale = data.area.map_scale | 1;
+    map_room_size = data.area.map_room_size | 40;
 
-        var background_point_x = 0;
-        var background_point_y = 0;
-        var corresp_pos_x = 0;
-        var corresp_pos_y = 0;
+    var background_point_x = 0;
+    var background_point_y = 0;
+    var corresp_pos_x = 0;
+    var corresp_pos_y = 0;
 
-        if (data.area.background_point) {
-            background_point_x = data.area.background_point[0];
-            background_point_y = data.area.background_point[1];
-        }
-
-        if (data.area.corresp_map_pos) {
-            corresp_pos_x = data.area.corresp_map_pos[0];
-            corresp_pos_y = data.area.corresp_map_pos[1];
-        }
-
-        original_point_x = background_point_x - corresp_pos_x * map_scale;
-        original_point_y = background_point_y + corresp_pos_y * map_scale;
-        */
+    if (data.area.background_point) {
+        background_point_x = data.area.background_point[0];
+        background_point_y = data.area.background_point[1];
     }
 
+    if (data.area.corresp_map_pos) {
+        corresp_pos_x = data.area.corresp_map_pos[0];
+        corresp_pos_y = data.area.corresp_map_pos[1];
+    }
+
+    original_point_x = background_point_x - corresp_pos_x * map_scale;
+    original_point_y = background_point_y + corresp_pos_y * map_scale;
+    */
+
     if (controller.background) {
+        controller.area_width = data.area.width || 0;
+        controller.area_height = data.area.height || 0;
         $("#map-image")
             .attr("src", CONFIG.resource_url + controller.background);
     }
     else {
+        controller.area_width = data.area.width || controller.default_map_width;
+        controller.area_height = data.area.height || controller.default_map_height;
         $("#map-image")
             .attr("src", controller.blank_map);
 
     }
 
-    if ("room" in data) {
-        for (var i = 0; i < data.room.length; i++) {
-            var room_info = data.room[i];
-            var x = 0;
-            var y = 0;
-            if (room_info.position) {
-                x = room_info.position[0];
-                y = room_info.position[1];
-                //x = original_point_x + room_info.position[0] * map_scale;
-                //y = original_point_y - room_info.position[1] * map_scale;
-            }
-            controller.createRoom(room_info, x, y);
+    // rooms
+    for (var i = 0; i < data.rooms.length; i++) {
+        var room_info = data.rooms[i];
+        var x = 0;
+        var y = 0;
+        if (room_info.position) {
+            x = room_info.position[0];
+            y = room_info.position[1];
+            //x = original_point_x + room_info.position[0] * map_scale;
+            //y = original_point_y - room_info.position[1] * map_scale;
         }
+        else {
+            x = controller.area_width / 2;
+            y = controller.area_height / 2;
+        }
+        controller.createRoom(room_info, x, y);
     }
 
-    if ("exit" in data) {
-        for (var i = 0; i < data.exit.length; i++) {
-            var exit_info = data.exit[i];
+    // exits
+    for (var i = 0; i < data.exits.length; i++) {
+        var exit_info = data.exits[i];
 
-            if (!(exit_info.location in controller.rooms)) {
-            }
-            else if (!(exit_info.destination in controller.rooms)) {
-            }
-            else {
-                controller.createPath(exit_info);
-            }
+        if (!(exit_info.location in controller.rooms)) {
+        }
+        else if (!(exit_info.destination in controller.rooms)) {
+        }
+        else {
+            controller.createPath(exit_info);
         }
     }
 }
@@ -1205,6 +1239,67 @@ MapEditor.prototype.queryMapSuccess = function(data) {
 MapEditor.prototype.queryMapFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
 }
+
+
+/*
+ * Save the map.
+ */
+MapEditor.prototype.saveMapPositions = function(successCallback, context) {
+    var area = {
+        key: this.area_key,
+        background: this.background,
+        width: this.area_width,
+        height: this.area_height
+    }
+
+    var rooms = [];
+    for (var key in controller.rooms) {
+        var room_info = controller.rooms[key];
+        rooms.push({
+            key: key,
+            position: [room_info.x, room_info.y]
+        });
+    }
+
+    service.saveMapPositions(area, rooms, successCallback, this.saveMapPositionsFailed, context);
+}
+
+
+/*
+ * Discard all changes failed.
+ */
+MapEditor.prototype.saveMapPositionsFailed = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
+}
+
+
+/*
+ * Discard all changes.
+ */
+MapEditor.prototype.discardMap = function(e) {
+    service.saveMap(this.map_data.area,
+                    this.map_data.rooms,
+                    this.map_data.exits,
+                    this.discardMapSuccess,
+                    this.discardMapFailed);
+}
+
+
+/*
+ * Discard all changes success.
+ */
+MapEditor.prototype.discardMapSuccess = function(data) {
+    controller.exitNoChange();
+}
+
+
+/*
+ * Discard all changes failed.
+ */
+MapEditor.prototype.discardMapFailed = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
+}
+
 
 MapEditor.prototype.exit = function() {
     setInterval(function() {window.parent.controller.popPage(true);}, 0);

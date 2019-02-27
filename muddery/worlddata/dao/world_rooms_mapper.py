@@ -16,9 +16,10 @@ class WorldRoomsMapper(object):
     Dialogue relations.
     """
     def __init__(self):
-        self.model_name = "world_rooms"
+        self.model_name = TYPECLASS("ROOM").model_name
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
+        self.object_model_name = TYPECLASS("OBJECT").model_name
 
     def rooms_in_area(self, area_key):
         """
@@ -28,14 +29,14 @@ class WorldRoomsMapper(object):
             area_key: (string) an area's key.
         """
         # Get table's full name
-        object_table = settings.WORLD_DATA_APP + "_" + TYPECLASS("OBJECT").model_name
-        room_table = settings.WORLD_DATA_APP + "_" + TYPECLASS("ROOM").model_name
+        object_table = settings.WORLD_DATA_APP + "_" + self.object_model_name
+        room_table = settings.WORLD_DATA_APP + "_" + self.model_name
 
         # query
-        query = "select * from %(object)s, %(room)s where %(object)s.key=%(room)s.key and %(room)s.location='%(key)s'"\
-                    % {"object": object_table, "room": room_table, "key": area_key}
+        query = "select * from %(object)s, %(room)s where %(object)s.key=%(room)s.key and %(room)s.location=%%s"\
+                    % {"object": object_table, "room": room_table}
         cursor = connections[settings.WORLD_DATA_APP].cursor()
-        cursor.execute(query)
+        cursor.execute(query, [area_key])
         columns = [col[0] for col in cursor.description]
 
         # return records

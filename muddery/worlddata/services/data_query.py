@@ -151,11 +151,7 @@ def query_map(area_key):
 
     area_info = {
         "key": area_record.key,
-        "background": area_record.background,
-        "map_scale": GAME_SETTINGS.get("map_scale"),
-        "map_room_size": GAME_SETTINGS.get("map_room_size"),
-        "background_point": ast.literal_eval(area_record.background_point),
-        "corresp_map_pos": ast.literal_eval(area_record.corresp_map_pos)
+        "background": area_record.background
     }
 
     room_records = WORLD_ROOMS_MAPPER.rooms_in_area(area_key)
@@ -186,8 +182,8 @@ def query_map(area_key):
 
     data = {
         "area": area_info,
-        "room": room_info,
-        "exit": exit_info
+        "rooms": room_info,
+        "exits": exit_info
     }
 
     return data

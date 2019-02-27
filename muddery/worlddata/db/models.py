@@ -148,7 +148,13 @@ class world_areas(BaseObjects):
 
     # area's map background image resource
     background = models.CharField(max_length=KEY_LENGTH, blank=True)
-    
+
+    # area's width
+    width = models.PositiveIntegerField(blank=True, default=0)
+
+    # area's height
+    height = models.PositiveIntegerField(blank=True, default=0)
+
     # Corresponding data are used to define the background image's position.
     # The corresponding map position will be shown on this point.
     background_point = models.CharField(max_length=POSITION_LENGTH, blank=True)

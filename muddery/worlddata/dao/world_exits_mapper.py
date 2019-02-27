@@ -16,9 +16,10 @@ class WorldExitsMapper(object):
     Dialogue relations.
     """
     def __init__(self):
-        self.model_name = "world_exits"
+        self.model_name = TYPECLASS("EXIT").model_name
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
+        self.object_model_name = TYPECLASS("OBJECT").model_name
 
     def exits_of_rooms(self, rooms):
         """
@@ -30,14 +31,13 @@ class WorldExitsMapper(object):
         query_rooms = ",".join(["'%s'" % room for room in rooms])
 
         # Get table's full name
-        object_table = settings.WORLD_DATA_APP + "_" + TYPECLASS("OBJECT").model_name
-        exit_table = settings.WORLD_DATA_APP + "_" + TYPECLASS("EXIT").model_name
+        object_table = settings.WORLD_DATA_APP + "_" + self.object_model_name
+        exit_table = settings.WORLD_DATA_APP + "_" + self.model_name
 
         # query
         query = "select * from %(object)s, %(exit)s where %(object)s.key=%(exit)s.key and\
                     (%(exit)s.location in (%(rooms)s) or %(exit)s.destination in (%(rooms)s))"\
                     % {"object": object_table, "exit": exit_table, "rooms": query_rooms}
-        print(query)
         cursor = connections[settings.WORLD_DATA_APP].cursor()
         cursor.execute(query)
         columns = [col[0] for col in cursor.description]

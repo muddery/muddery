@@ -306,10 +306,6 @@ class QueryMap(BaseRequestProcesser):
 
         area_key = args["area"]
 
-        # Check the area key.
-        if ";" in area_key or "'" in area_key or '"' in area_key:
-            raise MudderyError(ERR.invalid_input, "Invalid input: %s" % area_key)
-
         data = data_query.query_map(area_key)
         return success_response(data)
 
@@ -401,6 +397,44 @@ class SaveNewRoom(BaseRequestProcesser):
 
         obj_key = data_edit.save_object_form(new_room, typeclass, "")
         data = {"key": obj_key}
+        return success_response(data)
+
+
+class SaveMap(BaseRequestProcesser):
+    """
+    Save a map.
+
+    Args:
+        area: (dict) area's data
+              {
+                   "key": (string) area's key
+                   "background": (string) area's background
+                   "width": (number) area's width
+                   "height": (number) area's height
+              }
+        rooms: (dict) rooms positions.
+                {
+                    "key": (string) room's key
+                    "position": (list) room's position
+                }
+    """
+    path = "save_map_positions"
+    name = ""
+
+    def func(self, args, request):
+        if not args:
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        if 'area' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "area".')
+
+        if 'rooms' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "rooms".')
+
+        area = args["area"]
+        rooms = args["rooms"]
+
+        data = data_edit.save_map_positions(area, rooms)
         return success_response(data)
 
 

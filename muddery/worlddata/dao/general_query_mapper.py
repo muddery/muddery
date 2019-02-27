@@ -135,7 +135,7 @@ def delete_record_by_key(table_name, object_key):
 
 def get_all_from_tables(tables):
     """
-    Query all object's base data.
+    Query all object's data from tables.
 
     Args:
         tables: (string) table's list.

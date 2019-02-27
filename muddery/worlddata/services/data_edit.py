@@ -9,6 +9,7 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from muddery.utils.exception import MudderyError, ERR
 from muddery.worlddata.dao import general_query_mapper
+from muddery.worlddata.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS, WORLD_EXITS
 from muddery.mappings.form_set import FORM_SET
 from muddery.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
 from muddery.worlddata.forms.default_forms import ObjectsForm
@@ -250,6 +251,37 @@ def save_object_form(tables, obj_typeclass, obj_key):
             form.save()
 
     return obj_key
+
+
+def save_map_positions(area, rooms):
+    """
+    Save all data of an object.
+
+    Args:
+        area: (dict) area's data.
+        rooms: (dict) rooms' data.
+    """
+    with transaction.atomic():
+
+        # area data
+        record = WORLD_AREAS.get(key=area["key"])
+        record.background = area["background"]
+        record.width = area["width"]
+        record.height = area["height"]
+
+        record.full_clean()
+        record.save()
+
+        # rooms
+        for room in rooms:
+            position = ""
+            if len(room["position"]) > 1:
+                position = "(%s,%s)" % (room["position"][0], room["position"][1])
+            record = WORLD_ROOMS.get(key=room["key"])
+            record.position = position
+
+            record.full_clean()
+            record.save()
 
 
 def delete_object(base_typeclass, obj_key):
