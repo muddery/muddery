@@ -20,6 +20,27 @@ re_attribute_key = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 
 # ------------------------------------------------------------
 #
+# The game world system's data.
+# Users should not modify it manually.
+#
+# ------------------------------------------------------------
+class system_data(models.Model):
+    """
+    The game world system's data.
+    """
+    # The automatic index of objects.
+    object_index = models.PositiveIntegerField(blank=True, default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "System Data"
+        verbose_name_plural = "System Data"
+
+
+# ------------------------------------------------------------
+#
 # Game's basic settings.
 #
 # ------------------------------------------------------------

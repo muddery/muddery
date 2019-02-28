@@ -80,18 +80,6 @@ def get_the_first_record(table_name):
     return model_obj.objects.first()
 
 
-def get_the_last_record(table_name):
-    """
-    Get a record by object's key.
-
-    Args:
-        table_name: (string) db table's name.
-    """
-    # get model
-    model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
-    return model_obj.objects.last()
-
-
 def get_record(table_name, **kwargs):
     """
     Get a record by conditions.

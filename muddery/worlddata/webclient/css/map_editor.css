@@ -109,7 +109,7 @@
 }
 
 .element-room.element-selected {
-    border: 5px solid #e60;
+    border: 5px solid #e30;
 }
 
 .element-room-name {
@@ -164,15 +164,6 @@
     margin: 10px;
 }
 
-.drag-button {
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
-    text-align: center;
-    font-size: 10px;
-    border-radius: 2px;
-}
-
 .exit-menu {
     width: 200px;
 }
@@ -181,7 +172,7 @@
     overflow: hidden;
 }
 
-.menu-exit-key, .menu-exit-typeclass {
+.menu-exit-key, .menu-exit-direction {
     text-align: center;
     font-size: 12px;
     padding: 2px 10px;

@@ -4,6 +4,18 @@ from muddery.worlddata.db import models as model_base
 
 # ------------------------------------------------------------
 #
+# The game world system's data.
+#
+# ------------------------------------------------------------
+class system_data(model_base.system_data):
+    """
+    The game world system's data.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
 # game's basic settings
 #
 # ------------------------------------------------------------

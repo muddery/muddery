@@ -311,8 +311,14 @@ controller = {
     },
 
     //////////////// Confirm Model ////////////////
-
     confirm: function(title, content, callback, data) {
+        if ($(".modal-backdrop").length > 0) {
+            setTimeout(function() {
+                controller.confirm(title, content, callback, data);
+            }, 100);
+            return;
+        }
+
         $("#confirm-title").text(title);
         $("#confirm-content").text(content);
         
@@ -327,10 +333,19 @@ controller = {
             $("#confirm-button").one("click", this.hideWaiting);
         }
 
-        $("#confirm-dialog").modal();
+        $("#confirm-dialog")
+            .addClass("fade")
+            .modal();
     },
 
     notify: function(title, content, callback, data) {
+        if ($(".modal-backdrop").length > 0) {
+            setTimeout(function() {
+                controller.notify(title, content, callback, data);
+            }, 100);
+            return;
+        }
+
         $("#confirm-title").text(title);
         $("#confirm-content").text(content);
         
@@ -345,10 +360,19 @@ controller = {
             $("#confirm-button").one("click", this.hideWaiting);
         }
 
-        $("#confirm-dialog").modal();
+        $("#confirm-dialog")
+            .addClass("fade")
+            .modal();
     },
 
     showWaiting: function(title, content) {
+        if ($(".modal-backdrop").length > 0) {
+            setTimeout(function() {
+                controller.showWaiting(title, content);
+            }, 100);
+            return;
+        }
+
         $("#confirm-title").text(title);
         $("#confirm-content").text(content);
         
@@ -356,7 +380,9 @@ controller = {
         $("#cancel-button").hide();
         $("#confirm-button").hide();
 
-        $("#confirm-dialog").modal();
+        $("#confirm-dialog")
+            .addClass("fade")
+            .modal();
     },
 
     hideWaiting: function() {

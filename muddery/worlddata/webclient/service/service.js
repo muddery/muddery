@@ -243,6 +243,21 @@ service = {
         this.sendRequest("save_new_room", "", args, callback_success, callback_failed, context);
     },
 
+    /*  Save a new exit.
+     *  Args:
+     *      typeclass: (string) the exit's typeclass.
+     *      location: (string) exit's location
+     *      destination: (string) exit's destination
+     */
+    saveNewExit: function(typeclass, location, destination, callback_success, callback_failed, context) {
+        var args = {
+            typeclass: typeclass,
+            location: location,
+            destination: destination
+        };
+        this.sendRequest("save_new_exit", "", args, callback_success, callback_failed, context);
+    },
+
     saveForm: function(values, table_name, record_id, callback_success, callback_failed, context) {
         var args = {
             values: values,
@@ -276,6 +291,14 @@ service = {
             obj_key: obj_key
         };
         this.sendRequest("delete_object", "", args, callback_success, callback_failed, context);
+    },
+
+    deleteRoomExits: function(room, exits, callback_success, callback_failed, context) {
+        var args = {
+            room: room,
+            exits: exits
+        };
+        this.sendRequest("delete_room_exits", "", args, callback_success, callback_failed, context);
     },
 
     queryTables: function(callback_success, callback_failed, context) {

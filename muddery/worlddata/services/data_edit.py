@@ -10,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from muddery.utils.exception import MudderyError, ERR
 from muddery.worlddata.dao import general_query_mapper
 from muddery.worlddata.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS, WORLD_EXITS
+from muddery.worlddata.dao.system_data_mapper import SYSTEM_DATA
 from muddery.mappings.form_set import FORM_SET
 from muddery.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
 from muddery.worlddata.forms.default_forms import ObjectsForm
@@ -204,17 +205,8 @@ def save_object_form(tables, obj_typeclass, obj_key):
 
         if not obj_key:
             # Generate a new key.
-            try:
-                # Get object table's last id.
-                query = general_query_mapper.get_the_last_record(typeclass.model_name)
-                if query:
-                    index = int(query.id) + 1
-                else:
-                    index = 1
-            except Exception, e:
-                raise MudderyError(ERR.invalid_form, "Invalid form.", data="No typeclass model: %s" % obj_typeclass)
-
-            obj_key = obj_typeclass + "_" + str(index)
+            index = SYSTEM_DATA.get_object_index()
+            obj_key = "%s_auto_%s" % (obj_typeclass, index)
 
             for table in tables:
                 table["values"]["key"] = obj_key

@@ -377,7 +377,7 @@ class SaveNewRoom(BaseRequestProcesser):
 
         typeclass = args["typeclass"]
         location = args["location"]
-        position = args.get('position', None)
+        position = args.get("position", None)
         if position:
             position = json.dumps(position)
 
@@ -396,6 +396,87 @@ class SaveNewRoom(BaseRequestProcesser):
             })
 
         obj_key = data_edit.save_object_form(new_room, typeclass, "")
+        data = {"key": obj_key}
+        return success_response(data)
+
+
+class DeleteRoom(BaseRequestProcesser):
+    """
+    Delete a room and its exits.
+
+    Args:
+        room: (string) room's key.
+        exits: (list) a list of exit keys.
+    """
+    path = "delete_room_exits"
+    name = ""
+
+    def func(self, args, request):
+        if not args:
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        if "room" not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "room".')
+
+        if "exits" not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "exits".')
+
+        room = args["room"]
+        exits = args["exits"]
+
+        data_edit.delete_object("ROOM", room)
+        for exit in exits:
+            data_edit.delete_object("EXIT", exit)
+
+        data = {"room": room}
+        return success_response(data)
+
+
+class SaveNewExit(BaseRequestProcesser):
+    """
+    Save a new exit.
+
+    Args:
+        typeclass: (string) the exit's typeclass.
+        location: (string) exit's location.
+        destination: (string) exit's destination.
+    """
+    path = "save_new_exit"
+    name = ""
+
+    def func(self, args, request):
+        if not args:
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        if 'typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+
+        if 'location' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "location".')
+
+        if 'destination' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "destination".')
+
+        typeclass = args["typeclass"]
+        location = args["location"]
+        destination = args["destination"]
+
+        forms = data_edit.query_object_form(typeclass, typeclass, None)
+        new_exit = []
+        for form in forms:
+            values = {field["name"]: (field["value"] if "value" in field else "") for field in form["fields"]}
+            if "location" in values:
+                values["location"] = location
+            if "destination" in values:
+                values["destination"] = destination
+
+            new_exit.append({
+                "table": form["table"],
+                "values": values
+            })
+
+        print(new_exit)
+        obj_key = data_edit.save_object_form(new_exit, typeclass, "")
         data = {"key": obj_key}
         return success_response(data)
 
