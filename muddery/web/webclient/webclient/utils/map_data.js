@@ -111,15 +111,15 @@ $$.map_data = {
         var dy = to[1] - from[1];
         var degree = null;
         if (dx == 0) {
-            if (dy > 0) {
+            if (dy < 0) {
                 degree = 90;
             }
-            else if (dy < 0) {
+            else if (dy > 0) {
                 degree = 270;
             }
         }
         else {
-            degree = Math.atan(dy / dx) / Math.PI * 180;
+            degree = Math.atan(-dy / dx) / Math.PI * 180;
 
             if (dx < 0) {
                 degree += 180;

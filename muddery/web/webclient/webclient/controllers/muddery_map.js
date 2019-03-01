@@ -12,7 +12,7 @@ MudderyMap = function(el) {
 	BasePopupController.call(this, el);
 	
     // the scale of the map
-    this.scale = 75;
+    // this.scale = 75;
 
     // the size of a room
     this.room_size = 40;
@@ -97,9 +97,15 @@ MudderyMap.prototype.showMap = function(location) {
 	var w_width = $(this.el).width();
 	var w_height = $(this.el).height();
 
+    var header = $(this.el).find("div.modal-header");
 	var map_width = w_width;
-	var map_height = w_height - $("div.modal-header").outerHeight();
-	var scale = this.scale;
+	var map_height = w_height - header.outerHeight();
+
+	var map_body = $(this.el).find("div.modal-body");
+	map_body.width(map_width);
+	map_body.height(map_height);
+
+	// var scale = this.scale;
 	var room_size = this.room_size;
 	var origin_x = map_width / 2;
 	var origin_y = map_height / 2;
@@ -107,8 +113,10 @@ MudderyMap.prototype.showMap = function(location) {
 	
 	if (current_room["pos"]) {
 		// set origin point
-		origin_x -= current_room["pos"][0] * scale;
-		origin_y -= -current_room["pos"][1] * scale;
+		//origin_x -= current_room["pos"][0] * scale;
+		//origin_y -= -current_room["pos"][1] * scale;
+		origin_x -= current_room["pos"][0];
+		origin_y -= current_room["pos"][1];
 
 		current_area_key = current_room["area"];
 	}
@@ -120,25 +128,27 @@ MudderyMap.prototype.showMap = function(location) {
 	
 	// background
 	if (location["area"] && location["area"]["background"]) {
-		 var x = 0;
-		 var y = 0;
-		 
-		 if (location["area"]["background_point"]) {
-			x -= location["area"]["background_point"][0];
-			y -= location["area"]["background_point"][1];
-		 }
-		 
-		 if (location["area"]["corresp_map_pos"]) {
-			x += location["area"]["corresp_map_pos"][0] * scale + origin_x;
-			y += -location["area"]["corresp_map_pos"][1] * scale + origin_y;
-		 }
+        var x = origin_x;
+        var y = origin_y;
 
-		 svg.append("image")
-			.attr("x", x)
-			.attr("y", y)
-			.attr("width", location["area"]["background"]["width"] + "px")
-			.attr("height", location["area"]["background"]["height"] + "px")
-			.attr("xlink:href", settings.resource_url + location["area"]["background"]["resource"]);
+        /*
+        if (location["area"]["background_point"]) {
+            x -= location["area"]["background_point"][0];
+            y -= location["area"]["background_point"][1];
+        }
+
+        if (location["area"]["corresp_map_pos"]) {
+            x += location["area"]["corresp_map_pos"][0] * scale + origin_x;
+            y += -location["area"]["corresp_map_pos"][1] * scale + origin_y;
+        }
+        */
+
+        svg.append("image")
+            .attr("x", x)
+            .attr("y", y)
+            .attr("width", location["area"]["background"]["width"] + "px")
+            .attr("height", location["area"]["background"]["height"] + "px")
+            .attr("xlink:href", settings.resource_url + location["area"]["background"]["resource"]);
 	}
 
 	if (current_room["pos"] &&
@@ -178,16 +188,20 @@ MudderyMap.prototype.showMap = function(location) {
 			.enter()
 			.append("line")
 			.attr("x1",  function(d, i) {
-					return d["from"][0] * scale + origin_x;
+					// return d["from"][0] * scale + origin_x;
+					return d["from"][0] + origin_x;
 					})
 			.attr("y1",  function(d, i) {
-					return -d["from"][1] * scale + origin_y;
+					// return -d["from"][1] * scale + origin_y;
+					return d["from"][1] + origin_y;
 					})
 			.attr("x2",  function(d, i) {
-					return d["to"][0] * scale + origin_x;
+					// return d["to"][0] * scale + origin_x;
+					return d["to"][0] + origin_x;
 					})
 			.attr("y2",  function(d, i) {
-					return -d["to"][1] * scale + origin_y;
+					// return -d["to"][1] * scale + origin_y;
+					return d["to"][1] + origin_y;
 					})
 			.attr("stroke", "grey")
 			.attr("stroke-width", 2);
@@ -237,10 +251,12 @@ MudderyMap.prototype.showMap = function(location) {
 			.enter()
 			.append("image")
 			.attr("x", function(d) {
-					return d["pos"][0] * scale - room_size / 2 + origin_x;
+					// return d["pos"][0] * scale - room_size / 2 + origin_x;
+					return d["pos"][0] - room_size / 2 + origin_x;
 				  })
 			.attr("y", function(d) {
-					return -d["pos"][1] * scale - room_size / 2 + origin_y;
+					// return -d["pos"][1] * scale - room_size / 2 + origin_y;
+					return d["pos"][1] - room_size / 2 + origin_y;
 				  })
 			.attr("width", room_size)
 			.attr("height", room_size)
@@ -257,10 +273,12 @@ MudderyMap.prototype.showMap = function(location) {
                 .enter()
                 .append("rect")
                 .attr("x", function(d) {
-                        return d["pos"][0] * scale - room_size / 2 + origin_x;
+                        // return d["pos"][0] * scale - room_size / 2 + origin_x;
+                        return d["pos"][0] - room_size / 2 + origin_x;
                       })
                 .attr("y", function(d) {
-                        return -d["pos"][1] * scale - room_size / 2 + origin_y;
+                        // return -d["pos"][1] * scale - room_size / 2 + origin_y;
+                        return d["pos"][1] - room_size / 2 + origin_y;
                       })
                 .attr("width", room_size)
                 .attr("height", room_size)
@@ -273,11 +291,13 @@ MudderyMap.prototype.showMap = function(location) {
 			.enter()
 			.append("text")
 			.attr("x", function(d) {
-					return d["pos"][0] * scale + origin_x;
+					// return d["pos"][0] * scale + origin_x;
+					return d["pos"][0] + origin_x;
 				  })
 			.attr("y", function(d) {
 					// Under the room's icon.
-					return -d["pos"][1] * scale + origin_y;
+					// return -d["pos"][1] * scale + origin_y;
+					return d["pos"][1] + origin_y;
 				  })
 			.attr("dy", function(d) {
 					return d["icon"] ? room_size / 2 + 16 : 8;
