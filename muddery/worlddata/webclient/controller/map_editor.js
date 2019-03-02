@@ -11,7 +11,6 @@ MapEditor = function() {
     this.default_map_width = 400;
     this.default_map_height = 400;
     this.room_size = 40;
-    this.room_border = 5;
 
     this.path_index = 0;
 
@@ -21,7 +20,7 @@ MapEditor = function() {
     this.current_path = null;
     this.mode = "";
 
-    this.map_data = {};
+    this.origin_map = null;
 
     // All rooms and paths.
     this.background = "";
@@ -34,11 +33,9 @@ MapEditor = function() {
 MapEditor.prototype.init = function() {
     this.area_key = utils.getQueryString("map");
 
-    $("#exit-button").removeClass("hidden");
+    $("#discard-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");
-    if (this.area_key) {
-        $("#delete-record").removeClass("hidden");
-    }
+    $("#delete-record").removeClass("hidden");
 
     $("#form-name").text(this.area_key);
 
@@ -48,7 +45,7 @@ MapEditor.prototype.init = function() {
 }
 
 MapEditor.prototype.bindEvents = function() {
-    $("#exit-button").on("click", this.onExit);
+    $("#discard-button").on("click", this.onDiscard);
     $("#save-record").on("click", this.onSave);
     $("#delete-record").on("click", this.onDelete);
 
@@ -73,8 +70,10 @@ MapEditor.prototype.bindEvents = function() {
     $("#container").on("mouseup", this.onContainerMouseUp);
 }
 
-MapEditor.prototype.onExit = function() {
-    controller.exit();
+MapEditor.prototype.onDiscard = function() {
+    window.parent.controller.confirm("",
+                                     "Discard changes? (Deleted objects and saved attributes can not be restored.)",
+                                     controller.confirmDiscard);
 }
 
 MapEditor.prototype.onSave = function() {
@@ -89,13 +88,36 @@ MapEditor.prototype.saveForExit = function(data) {
 
 MapEditor.prototype.onDelete = function() {
     window.parent.controller.confirm("",
-                                     "Delete this map?",
+                                     "Delete this map and all rooms and exits in it?",
                                      controller.confirmDelete);
 }
 
 
+/*
+ * Delete the whole area.
+ */
 MapEditor.prototype.confirmDelete = function(e) {
     window.parent.controller.hideWaiting();
+
+    var objects = [controller.area_key];
+
+    // Get all rooms.
+    objects = objects.concat(Object.keys(controller.rooms));
+
+    // Get all exits.
+    for (var key in controller.paths) {
+        objects = objects.concat(Object.keys(controller.paths[key].exits));
+    }
+
+    service.deleteObjects(objects, controller.deleteAreaSuccess, controller.failedCallback);
+}
+
+
+/*
+ * Delete the whole area success.
+ */
+MapEditor.prototype.deleteAreaSuccess = function(data) {
+    controller.exit();
 }
 
 
@@ -305,7 +327,7 @@ MapEditor.prototype.createPath = function(info) {
     var namespace = "http://www.w3.org/2000/svg";
     var path = document.createElementNS(namespace, "path");
     path.setAttribute("id", path_id);
-    path.setAttribute("stroke", "#777");
+    path.setAttribute("stroke", "#666");
     path.setAttribute("stroke-width", "5");
     path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
     path.addEventListener("click", this.onPathClick);
@@ -391,6 +413,8 @@ MapEditor.prototype.selectedRoomMouseDown = function(event) {
 MapEditor.prototype.unselectedRoomMouseDown = function(event) {
     this.mode = "UNSELECTED_ROOM";
     this.current_room = $(event.currentTarget);
+    this.room_offset_x = event.clientX - this.current_room.offset().left;
+    this.room_offset_y = event.clientY - this.current_room.offset().top;
 }
 
 
@@ -414,10 +438,11 @@ MapEditor.prototype.onMouseMove = function(event) {
     }
     else if (controller.mode == "SELECTED_ROOM") {
         // Move on a selected room.
-        controller.selectedRoomMouseMove(event);
+        // controller.selectedRoomMouseMove(event);
     }
     else if (controller.mode == "UNSELECTED_ROOM") {
         // Move on an unselected room.
+        controller.unselectedRoomMouseMove(event);
     }
     else if (controller.mode == "DRAG_PATH") {
         // Drag a new path.
@@ -447,12 +472,9 @@ MapEditor.prototype.newRoomMouseMove = function(event) {
 
 
 /*
- * Move a selected room.
+ * Move an unselected room.
  */
-MapEditor.prototype.selectedRoomMouseMove = function(event) {
-    // Hide room menu.
-    $(".room-menu").hide();
-
+MapEditor.prototype.unselectedRoomMouseMove = function(event) {
     // Drag the room or drag a new path.
     var width = controller.current_room.innerWidth();
     var height = controller.current_room.innerHeight();
@@ -478,22 +500,6 @@ MapEditor.prototype.selectedRoomMouseMove = function(event) {
 
         this.dragPath(event);
     }
-}
-
-
-/*
- * Move an unselected room.
- */
-MapEditor.prototype.dragRoomMouseMove = function(event) {
-    this.mode = "DRAG_ROOM";
-
-    // Unselect all rooms.
-    $(".element-room").removeClass("element-selected");
-
-    // Remove popup menus.
-    $(".room-menu").remove();
-
-    this.dragRoom(event);
 }
 
 
@@ -599,6 +605,12 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
     this.mode = "";
     event.stopPropagation();
 
+    if ($(event.currentTarget).hasClass("new-element")) {
+        // Can not draw a path to new element buttons.
+        controller.finishDraggingPath();
+        return;
+    }
+
     var source_key = this.current_room.data("key");
     var target_key = $(event.currentTarget).data("key");
 
@@ -623,30 +635,31 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
         location: source_key,
         destination: target_key
     };
-    service.saveNewExit(this.exit_typeclass,
+    service.addExit(this.exit_typeclass,
                         source_key,
                         target_key,
-                        this.saveNewExitSuccess,
-                        this.saveNewExitFailed,
+                        this.addExitSuccess,
+                        this.addExitFailed,
                         exit_info);
 
     if (new_path) {
+        // Add a reverse exit.
         var exit_info = {
             typeclass: this.exit_typeclass,
             location: target_key,
             destination: source_key
         };
-        service.saveNewExit(this.exit_typeclass,
+        service.addExit(this.exit_typeclass,
                             target_key,
                             source_key,
-                            this.saveNewExitSuccess,
-                            this.saveNewExitFailed,
+                            this.addExitSuccess,
+                            this.addExitFailed,
                             exit_info);
     }
 }
 
 
-MapEditor.prototype.saveNewExitSuccess = function(data, context) {
+MapEditor.prototype.addExitSuccess = function(data, context) {
     var exit_info = context;
     exit_info["key"] = data.key;
 
@@ -655,7 +668,7 @@ MapEditor.prototype.saveNewExitSuccess = function(data, context) {
 }
 
 
-MapEditor.prototype.saveNewExitFailed = function(code, message, data) {
+MapEditor.prototype.addExitFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
 
     controller.finishDraggingPath();
@@ -716,11 +729,11 @@ MapEditor.prototype.newRoomMouseUp = function(event) {
     var x = this.current_room.position().left + this.current_room.outerWidth() / 2;
     var y = this.current_room.position().top + this.current_room.outerHeight() / 2;
 
-    service.saveNewRoom(this.room_typeclass, this.area_key, [x, y], this.saveNewRoomSuccess, this.saveNewRoomFailed);
+    service.addRoom(this.room_typeclass, this.area_key, [x, y], this.addRoomSuccess, this.addRoomFailed);
 }
 
 
-MapEditor.prototype.saveNewRoomSuccess = function(data) {
+MapEditor.prototype.addRoomSuccess = function(data) {
     var room_key = data.key;
 
     var x = controller.current_room.position().left + controller.current_room.outerWidth() / 2;
@@ -740,7 +753,7 @@ MapEditor.prototype.saveNewRoomSuccess = function(data) {
 }
 
 
-MapEditor.prototype.saveNewRoomFailed = function(code, message, data) {
+MapEditor.prototype.addRoomFailed = function(code, message, data) {
     window.parent.controller.notify("ERROR", code + ": " + message);
 
     this.current_room.remove()
@@ -777,7 +790,7 @@ MapEditor.prototype.unselectedRoomMouseUp = function(event) {
     $(".room-menu").remove();
     $(".exit-menu").remove();
     if (this.current_path) {
-        this.current_path.setAttribute("stroke", "#777");
+        this.current_path.setAttribute("stroke", "#666");
         this.current_path = null;
     }
 
@@ -840,7 +853,7 @@ MapEditor.prototype.containerMouseUp = function(event) {
     $(".room-menu").remove();
     $(".exit-menu").remove();
     if (this.current_path) {
-        this.current_path.setAttribute("stroke", "#777");
+        this.current_path.setAttribute("stroke", "#666");
         this.current_path = null;
     }
 }
@@ -1053,21 +1066,20 @@ MapEditor.prototype.confirmDeleteRoom = function(e) {
     window.parent.controller.hideWaiting();
 
     var room_key = e.data.key;
+    var objects = [room_key];
 
     // Get all relative exits.
     var exits = [];
     for (var path_id in controller.rooms[room_key].paths) {
-        var path = controller.paths[path_id];
-        for (var exit in path.exits) {
-            exits.push(exit);
-        }
+        exits = exits.concat(Object.keys(controller.paths[path_id].exits));
     }
+    objects = objects.concat(exits);
 
     var context = {
         room: room_key,
         exits: exits
     }
-    service.deleteRoomExits(room_key, exits, controller.deleteRoomSuccess, controller.failedCallback, context);
+    service.deleteObjects(objects, controller.deleteRoomSuccess, controller.failedCallback, context);
 }
 
 
@@ -1128,7 +1140,7 @@ MapEditor.prototype.saveForEditExit = function(data, context) {
     $(".exit-menu").remove();
 
     var path = document.getElementById(path_id);
-    path.setAttribute("stroke", "#777");
+    path.setAttribute("stroke", "#666");
 }
 
 
@@ -1156,8 +1168,8 @@ MapEditor.prototype.confirmDeleteExit = function(e) {
     window.parent.controller.hideWaiting();
 
     var context = e.data;
-    service.deleteObject(controller.exit_typeclass,
-                         e.data.exit,
+    service.deleteObject(e.data.exit,
+                         controller.exit_typeclass,
                          controller.deleteExitSuccess,
                          controller.failedCallback,
                          context);
@@ -1190,10 +1202,22 @@ MapEditor.prototype.deleteExitSuccess = function(data, context) {
 
 
 MapEditor.prototype.refresh = function() {
-    service.queryMap(this.area_key, this.queryMapSuccess, this.failedCallback);
+    if (this.area_key) {
+        service.queryMap(this.area_key, this.queryMapSuccess, this.failedCallback);
+    }
+    else {
+        service.addArea(this.area_typeclass,
+                        this.default_map_width,
+                        this.default_map_height,
+                        this.addAreaSuccess,
+                        this.addAreaFailed);
+    }
 }
 
 
+/*
+ * Query the map's data success.
+ */
 MapEditor.prototype.queryMapSuccess = function(data) {
     // Clear map.
     $("#container>.element-room").remove();
@@ -1201,7 +1225,10 @@ MapEditor.prototype.queryMapSuccess = function(data) {
     var svg = document.getElementById("map-svg");
     svg.innerHTML = "";
 
-    controller.map_data = data;
+    if (!controller.origin_map) {
+        controller.origin_map = data;
+    }
+
     controller.background = "";
     controller.rooms = {};
     controller.paths = {};
@@ -1258,6 +1285,7 @@ MapEditor.prototype.queryMapSuccess = function(data) {
     // rooms
     for (var i = 0; i < data.rooms.length; i++) {
         var room_info = data.rooms[i];
+
         var x = 0;
         var y = 0;
         if (room_info.position) {
@@ -1289,6 +1317,32 @@ MapEditor.prototype.queryMapSuccess = function(data) {
 
 
 /*
+ * Save the new area success
+ */
+MapEditor.prototype.addAreaSuccess = function(data) {
+    controller.area_key = data.key;
+    var width = data.width || 0;
+    var height = data.height || 0;
+
+    controller.setBackgroundSize(width, height);
+}
+
+
+/*
+ * Save the new area failed.
+ */
+MapEditor.prototype.addAreaFailed = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message, newMapFailedNotified);
+}
+
+
+MapEditor.prototype.newMapFailedNotified = function(code, message, data) {
+    window.parent.controller.hideWaiting();
+    controller.exitNoChange();
+}
+
+
+/*
  * Save the map.
  */
 MapEditor.prototype.saveMapPositions = function(successCallback, context) {
@@ -1315,12 +1369,79 @@ MapEditor.prototype.saveMapPositions = function(successCallback, context) {
 /*
  * Discard all changes.
  */
-MapEditor.prototype.discardMap = function(e) {
-    service.saveMap(this.map_data.area,
-                    this.map_data.rooms,
-                    this.map_data.exits,
-                    this.discardMapSuccess,
-                    this.failedCallback);
+MapEditor.prototype.confirmDiscard = function(e) {
+    window.parent.controller.hideWaiting();
+
+    // Remove added objects.
+    // rooms
+    var origin_rooms = [];
+    for (var i = 0; i < controller.origin_map.rooms.length; i++) {
+        var room_info = controller.origin_map.rooms[i];
+        origin_rooms[room_info.key] = null;
+    }
+
+    var objects = []
+    for (var room_key in controller.rooms) {
+        if (!(room_key in origin_rooms)) {
+            objects.push(room_key);
+        }
+    }
+
+    // exits
+    var origin_exits = [];
+    for (var i = 0; i < controller.origin_map.exits.length; i++) {
+        var exit_info = controller.origin_map.exits[i];
+        origin_exits[exit_info.key] = null;
+    }
+
+    for (var path_id in controller.paths) {
+        for (var exit_key in controller.paths[path_id].exits) {
+            if (!(exit_key in origin_exits)) {
+                objects.push(exit_key);
+            }
+        }
+    }
+    service.deleteObjects(objects, controller.removeAddedObjectsSuccess, controller.failedCallback);
+}
+
+
+/*
+ * Remove added objects success. Restore positions.
+ */
+MapEditor.prototype.removeAddedObjectsSuccess = function(data) {
+    var map = controller.origin_map;
+
+    var area = {
+        key: map.area.key,
+        background: map.area.background,
+        width: map.area.width,
+        height: map.area.height
+    }
+
+    var rooms = [];
+    for (var i = 0; i < map.rooms.length; i++) {
+        var room_info = map.rooms[i];
+        if (!(room_info.key in controller.rooms)) {
+            // Could not restore deleted objects.
+            continue;
+        }
+
+        rooms.push({
+            key: room_info.key,
+            position: room_info.position
+        });
+    }
+
+    // Save the original map.
+    service.saveMapPositions(area, rooms, controller.discardMapSuccess, controller.failedCallback);
+}
+
+
+/*
+ * Remove added objects success.
+ */
+MapEditor.prototype.discardMapSuccess = function(data) {
+    controller.exit();
 }
 
 
@@ -1328,7 +1449,7 @@ MapEditor.prototype.discardMap = function(e) {
  * Discard all changes success.
  */
 MapEditor.prototype.discardMapSuccess = function(data) {
-    controller.exitNoChange();
+    controller.exit();
 }
 
 

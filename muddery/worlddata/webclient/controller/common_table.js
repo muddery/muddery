@@ -34,12 +34,12 @@ CommonTable.prototype.init = function() {
 }
 
 CommonTable.prototype.bindEvents = function() {
-    $("#add-record").on("click", this.onAddRecord);
+    $("#add-record").on("click", this.onAdd);
     $("#data-table").on("click", ".edit-row", this.onEdit);
     $("#data-table").on("click", ".delete-row", this.onDelete);
 }
 
-CommonTable.prototype.onAddRecord = function(e) {
+CommonTable.prototype.onAdd = function(e) {
     var editor = controller.editor_type;
     var table = controller.table_name;
     window.parent.controller.editRecord(editor, table);

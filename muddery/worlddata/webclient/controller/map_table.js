@@ -21,6 +21,10 @@ MapTable.prototype.refresh = function() {
     service.queryTypeclassTable(this.typeclass, this.refreshTableSuccess);
 }
 
+MapTable.prototype.onAdd = function(e) {
+    window.parent.controller.editMap();
+}
+
 MapTable.prototype.onEdit = function(e) {
     var map_key = $(this).attr("data-map-key");
     if (map_key) {

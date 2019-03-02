@@ -151,7 +151,9 @@ def query_map(area_key):
 
     area_info = {
         "key": area_record.key,
-        "background": area_record.background
+        "background": area_record.background,
+        "width": area_record.width,
+        "height": area_record.height
     }
 
     room_records = WORLD_ROOMS_MAPPER.rooms_in_area(area_key)

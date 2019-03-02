@@ -190,11 +190,6 @@ def save_object_form(tables, obj_typeclass, obj_key):
     if not tables:
         raise MudderyError(ERR.invalid_form, "Invalid form.", data="Empty form.")
 
-    try:
-        typeclass = TYPECLASS(obj_typeclass)
-    except:
-        raise MudderyError(ERR.invalid_form, "Invalid form.", data="No typeclass: %s" % obj_typeclass)
-
     # Get object's new key from the first form.
     new_obj = not (obj_key and obj_key == tables[0]["values"]["key"])
     if new_obj:
@@ -254,7 +249,6 @@ def save_map_positions(area, rooms):
         rooms: (dict) rooms' data.
     """
     with transaction.atomic():
-
         # area data
         record = WORLD_AREAS.get(key=area["key"])
         record.background = area["background"]
@@ -276,17 +270,23 @@ def save_map_positions(area, rooms):
             record.save()
 
 
-def delete_object(base_typeclass, obj_key):
+def delete_object(obj_key, base_typeclass=None):
     """
     Delete an object from all tables under the base typeclass.
     """
+    if not base_typeclass:
+        table_name = TYPECLASS("OBJECT").model_name
+        record = general_query_mapper.get_record_by_key(table_name, obj_key)
+        base_typeclass = record.typeclass
+
     typeclasses = TYPECLASS_SET.get_group(base_typeclass)
     tables = set()
     for key, value in typeclasses.items():
         tables.update(value.get_models())
 
-    for table in tables:
-        try:
-            general_query_mapper.delete_record_by_key(table, obj_key)
-        except ObjectDoesNotExist:
-            pass
+    with transaction.atomic():
+        for table in tables:
+            try:
+                general_query_mapper.delete_record_by_key(table, obj_key)
+            except ObjectDoesNotExist:
+                pass

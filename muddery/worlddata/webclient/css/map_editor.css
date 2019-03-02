@@ -96,14 +96,14 @@
     position: absolute;
     width: 40px;
     height: 40px;
-    border: 1px solid #555;
+    border: 5px solid #999;
     background: #fff;
     font-size: 12px;
     line-height: 14px;
     z-index: 2;
 }
 
-#element-room {
+#new-element-room {
     left: 10px;
     top: 25px;
 }

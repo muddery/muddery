@@ -68,8 +68,8 @@ ObjectEditor.prototype.onSave = function() {
 ObjectEditor.prototype.confirmDelete = function(e) {
     window.parent.controller.hideWaiting();
 
-    service.deleteObject(controller.base_typeclass,
-                         controller.obj_key,
+    service.deleteObject(controller.obj_key,
+                         controller.base_typeclass,
                          controller.deleteSuccess);
 }
 

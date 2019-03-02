@@ -228,34 +228,47 @@ service = {
         this.sendRequest("save_map_positions", "", args, callback_success, callback_failed, context);
     },
 
-    /*  Save a new room.
+    /*  Add a new area.
+     *  Args:
+     *      typeclass: (string) the area's typeclass.
+     */
+    addArea: function(typeclass, width, height, callback_success, callback_failed, context) {
+        var args = {
+            typeclass: typeclass,
+            width: width,
+            height: height
+        };
+        this.sendRequest("add_area", "", args, callback_success, callback_failed, context);
+    },
+
+    /*  Add a new room.
      *  Args:
      *      typeclass: (string) the room's typeclass.
      *      area: (string) an area's key.
      *      position: (list) a list of position data.
      */
-    saveNewRoom: function(typeclass, area, position, callback_success, callback_failed, context) {
+    addRoom: function(typeclass, area, position, callback_success, callback_failed, context) {
         var args = {
             typeclass: typeclass,
             location: area,
             position: position
         };
-        this.sendRequest("save_new_room", "", args, callback_success, callback_failed, context);
+        this.sendRequest("add_room", "", args, callback_success, callback_failed, context);
     },
 
-    /*  Save a new exit.
+    /*  Add a new exit.
      *  Args:
      *      typeclass: (string) the exit's typeclass.
      *      location: (string) exit's location
      *      destination: (string) exit's destination
      */
-    saveNewExit: function(typeclass, location, destination, callback_success, callback_failed, context) {
+    addExit: function(typeclass, location, destination, callback_success, callback_failed, context) {
         var args = {
             typeclass: typeclass,
             location: location,
             destination: destination
         };
-        this.sendRequest("save_new_exit", "", args, callback_success, callback_failed, context);
+        this.sendRequest("add_exit", "", args, callback_success, callback_failed, context);
     },
 
     saveForm: function(values, table_name, record_id, callback_success, callback_failed, context) {
@@ -285,20 +298,19 @@ service = {
         this.sendRequest("delete_record", "", args, callback_success, callback_failed, context);
     },
 
-    deleteObject: function(base_typeclass, obj_key, callback_success, callback_failed, context) {
+    deleteObject: function(obj_key, base_typeclass, callback_success, callback_failed, context) {
         var args = {
-            base_typeclass: base_typeclass,
-            obj_key: obj_key
+            obj_key: obj_key,
+            base_typeclass: base_typeclass
         };
         this.sendRequest("delete_object", "", args, callback_success, callback_failed, context);
     },
 
-    deleteRoomExits: function(room, exits, callback_success, callback_failed, context) {
+    deleteObjects: function(objects, callback_success, callback_failed, context) {
         var args = {
-            room: room,
-            exits: exits
+            objects: objects
         };
-        this.sendRequest("delete_room_exits", "", args, callback_success, callback_failed, context);
+        this.sendRequest("delete_objects", "", args, callback_success, callback_failed, context);
     },
 
     queryTables: function(callback_success, callback_failed, context) {

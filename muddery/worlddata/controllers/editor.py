@@ -353,7 +353,49 @@ class SaveObjectForm(BaseRequestProcesser):
         return success_response(data)
 
 
-class SaveNewRoom(BaseRequestProcesser):
+class AddArea(BaseRequestProcesser):
+    """
+    Save a new area.
+
+    Args:
+        typeclass: (string) the area's typeclass.
+        width: (number, optional) the area's width.
+        height: (number, optional) the area's height.
+    """
+    path = "add_area"
+    name = ""
+
+    def func(self, args, request):
+        if not args:
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        if 'typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+
+        typeclass = args["typeclass"]
+        width = args.get("width", 0)
+        height = args.get("height", 0)
+
+        forms = data_edit.query_object_form(typeclass, typeclass, None)
+        new_area = []
+        for form in forms:
+            values = {field["name"]: field["value"] for field in form["fields"] if "value" in field}
+            values["width"] = width
+            values["height"] = height
+
+            new_area.append({
+                "table": form["table"],
+                "values": values
+            })
+
+        obj_key = data_edit.save_object_form(new_area, typeclass, "")
+        data = {"key": obj_key,
+                "width": width,
+                "height": height}
+        return success_response(data)
+
+
+class AddRoom(BaseRequestProcesser):
     """
     Save a new room.
 
@@ -362,7 +404,7 @@ class SaveNewRoom(BaseRequestProcesser):
         area: (string) room's area.
         position: (string) room's position string.
     """
-    path = "save_new_room"
+    path = "add_room"
     name = ""
 
     def func(self, args, request):
@@ -384,11 +426,9 @@ class SaveNewRoom(BaseRequestProcesser):
         forms = data_edit.query_object_form(typeclass, typeclass, None)
         new_room = []
         for form in forms:
-            values = {field["name"]: (field["value"] if "value" in field else "") for field in form["fields"]}
-            if "location" in values:
-                values["location"] = location
-            if "position" in values:
-                values["position"] = position
+            values = {field["name"]: field["value"] for field in form["fields"] if "value" in field}
+            values["location"] = location
+            values["position"] = position
 
             new_room.append({
                 "table": form["table"],
@@ -400,39 +440,32 @@ class SaveNewRoom(BaseRequestProcesser):
         return success_response(data)
 
 
-class DeleteRoom(BaseRequestProcesser):
+class DeleteObjects(BaseRequestProcesser):
     """
-    Delete a room and its exits.
+    Delete a list of objects
 
     Args:
-        room: (string) room's key.
-        exits: (list) a list of exit keys.
+        objects: (list) a list of exit keys.
     """
-    path = "delete_room_exits"
+    path = "delete_objects"
     name = ""
 
     def func(self, args, request):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        if "room" not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "room".')
+        if "objects" not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "objects".')
 
-        if "exits" not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "exits".')
+        objects = args["objects"]
 
-        room = args["room"]
-        exits = args["exits"]
+        for object_key in objects:
+            data_edit.delete_object(object_key)
 
-        data_edit.delete_object("ROOM", room)
-        for exit in exits:
-            data_edit.delete_object("EXIT", exit)
-
-        data = {"room": room}
-        return success_response(data)
+        return success_response("success")
 
 
-class SaveNewExit(BaseRequestProcesser):
+class AddExit(BaseRequestProcesser):
     """
     Save a new exit.
 
@@ -441,7 +474,7 @@ class SaveNewExit(BaseRequestProcesser):
         location: (string) exit's location.
         destination: (string) exit's destination.
     """
-    path = "save_new_exit"
+    path = "add_exit"
     name = ""
 
     def func(self, args, request):
@@ -464,18 +497,15 @@ class SaveNewExit(BaseRequestProcesser):
         forms = data_edit.query_object_form(typeclass, typeclass, None)
         new_exit = []
         for form in forms:
-            values = {field["name"]: (field["value"] if "value" in field else "") for field in form["fields"]}
-            if "location" in values:
-                values["location"] = location
-            if "destination" in values:
-                values["destination"] = destination
+            values = {field["name"]: field["value"] for field in form["fields"] if "value" in field}
+            values["location"] = location
+            values["destination"] = destination
 
             new_exit.append({
                 "table": form["table"],
                 "values": values
             })
 
-        print(new_exit)
         obj_key = data_edit.save_object_form(new_exit, typeclass, "")
         data = {"key": obj_key}
         return success_response(data)
@@ -550,23 +580,24 @@ class DeleteObject(BaseRequestProcesser):
     Delete an object.
 
     Args:
-        base_typeclass: (string) object's base typeclass. Delete all records in all tables under this typeclass.
         obj_key: (string) object's key.
+        base_typeclass: (string, optional) object's base typeclass. Delete all records in all tables under this typeclass.
+                        If its empty, get the typeclass of the object.
     """
     path = "delete_object"
     name = ""
 
     def func(self, args, request):
-        if 'base_typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_typeclass".')
-
         if 'obj_key' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
 
-        base_typeclass = args["base_typeclass"]
-        obj_key = args["obj_key"]
+        if 'base_typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_typeclass".')
 
-        data_edit.delete_object(base_typeclass, obj_key)
+        obj_key = args["obj_key"]
+        base_typeclass = args.get("base_typeclass", None)
+
+        data_edit.delete_object(obj_key, base_typeclass)
         data = {"obj_key": obj_key}
         return success_response(data)
 

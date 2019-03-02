@@ -22,7 +22,7 @@ ObjectTable.prototype.refresh = function() {
     service.queryTypeclassTable(this.typeclass, this.refreshTableSuccess);
 }
 
-ObjectTable.prototype.onAddRecord = function(e) {
+ObjectTable.prototype.onAdd = function(e) {
     var typeclass = controller.typeclass;
     window.parent.controller.editObject(typeclass, "");
 }
@@ -46,13 +46,13 @@ ObjectTable.prototype.onDelete = function(e) {
 ObjectTable.prototype.confirmDelete = function(e) {
     window.parent.controller.hideWaiting();
 
-    var typeclass = controller.typeclass;
     var object_key = e.data.object_key;
-    controller.deleteObject(typeclass, object_key);
+    var typeclass = controller.typeclass;
+    controller.deleteObject(object_key, typeclass);
 }
 
-ObjectTable.prototype.deleteObject = function(typeclass, object_key) {
-    service.deleteObject(typeclass, object_key, this.deleteSuccess);
+ObjectTable.prototype.deleteObject = function(object_key, typeclass) {
+    service.deleteObject(object_key, typeclass, this.deleteSuccess);
 }
 
 ObjectTable.prototype.deleteSuccess = function(data) {
