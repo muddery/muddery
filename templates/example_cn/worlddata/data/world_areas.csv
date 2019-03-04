@@ -1,4 +1,4 @@
-key,background,background_point,corresp_map_pos
+key,background,width,height
 area_intro,,,
 area_hole,,,
-area_park,image/background/park_map.png,"(450,270)","(0,8)"
+area_park,image/background/park_map.png,800,600

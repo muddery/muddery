@@ -13,7 +13,12 @@ from django.db import transaction
 
 def load_object_index():
     model = apps.get_model(settings.WORLD_DATA_APP, "system_data")
-    record = model.objects.select_for_update().first()
+    if model.objects.count() == 0:
+        data = model()
+        data.full_clean()
+        data.save()
+
+    record = model.objects.first()
     return record.object_index
 
 

@@ -314,7 +314,7 @@ MapEditor.prototype.createPath = function(info) {
     }
 
     // Add a new path.
-    // Draw a line from the source room  to the target room.
+    // Draw a line from the source room to the target room.
     var source_room = controller.rooms[info.location];
     var x1 = source_room.x;
     var y1 = source_room.y;
@@ -349,6 +349,79 @@ MapEditor.prototype.createPath = function(info) {
     this.rooms[info.destination].paths[path_id] = "";
 }
 
+
+/*
+ * Create a path to a room in another area.
+ */
+MapEditor.prototype.createOuterPath = function(info) {
+    var path_id = "";
+    var source_id = "";
+    if (info.location in this.rooms) {
+        path_id = info.location + "-";
+        source_id = info.location;
+    }
+    else if (info.destination in this.rooms) {
+        path_id = info.destination + "-";
+        source_id = info.destination;
+    }
+
+    if (path_id in this.paths) {
+        // Add an exit.
+        this.paths[path_id].exits[info.key] = info;
+        return;
+    }
+
+    // Add a new path.
+    // Draw a line from the source room.
+    var source_room = controller.rooms[source_id];
+    var x1 = source_room.x;
+    var y1 = source_room.y;
+
+    var x2 = source_room.x;
+    var y2 = source_room.y;
+
+    var to_left = source_room.x;
+    var to_right = this.area_width - source_room.x;
+    var to_top = source_room.y;
+    var to_bottom = this.area_height - source_room.y;
+    if (to_left < to_right && to_left < to_top && to_left < to_bottom) {
+        x2 -= 60;
+    }
+    else if (to_right < to_top && to_right < to_bottom) {
+        x2 += 60;
+    }
+    else if (to_top < to_bottom) {
+        y2 -= 60;
+    }
+    else {
+        y2 += 60;
+    }
+
+    var svg = document.getElementById("map-svg");
+    var namespace = "http://www.w3.org/2000/svg";
+    var path = document.createElementNS(namespace, "path");
+    path.setAttribute("id", path_id);
+    path.setAttribute("stroke", "#666");
+    path.setAttribute("stroke-dasharray", "5,5");
+    path.setAttribute("stroke-width", "5");
+    path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
+    path.addEventListener("click", this.onPathClick);
+    svg.appendChild(path);
+
+    // Add records.
+    this.paths[path_id] = {
+        room1: source_id,
+        room2: "",
+        x1: x1,
+        y1: y1,
+        x2: x2,
+        y2: y2,
+        exits: {}
+    }
+    this.paths[path_id].exits[info.key] = info;
+
+    this.rooms[source_id].paths[path_id] = "";
+}
 
 
 /***********************************
@@ -1306,8 +1379,10 @@ MapEditor.prototype.queryMapSuccess = function(data) {
         var exit_info = data.exits[i];
 
         if (!(exit_info.location in controller.rooms)) {
+            controller.createOuterPath(exit_info);
         }
         else if (!(exit_info.destination in controller.rooms)) {
+            controller.createOuterPath(exit_info);
         }
         else {
             controller.createPath(exit_info);
