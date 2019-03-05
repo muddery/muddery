@@ -259,8 +259,9 @@ controller = {
     },
 
     editObject: function(typeclass, object_key) {
-        url = "object_editor.html?typeclass=" + typeclass;
+        var url = "object_editor.html?typeclass=" + typeclass;
 
+        var name = "";
         if (object_key) {
             name = "Edit " + typeclass;
             url += "&object=" + object_key;
@@ -268,6 +269,15 @@ controller = {
         else {
             name = "Add " + typeclass;
         }
+
+        sessionStorage.pageParam = {};
+        controller.pushPage(name, url);
+    },
+
+    createObject: function(typeclass, values) {
+        var url = "object_editor.html?typeclass=" + typeclass;
+        var name = "Add " + typeclass;
+        sessionStorage.page_param = JSON.stringify(values);
 
         controller.pushPage(name, url);
     },
@@ -326,6 +336,7 @@ controller = {
         $("#cancel-button").show();
         $("#confirm-button").show();
 
+        $("#confirm-button").off("click");
         if (callback) {
             $("#confirm-button").one("click", data, callback);
         }
@@ -353,6 +364,7 @@ controller = {
         $("#cancel-button").hide();
         $("#confirm-button").show();
 
+        $("#confirm-button").off("click");
         if (callback) {
             $("#confirm-button").one("click", data, callback);
         }

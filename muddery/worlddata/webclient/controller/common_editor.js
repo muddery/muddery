@@ -24,11 +24,18 @@ CommonEditor = function() {
     this.fields = [];
     this.areas = {};
     this.file_fields = [];
+    this.field_values = {};
 }
 
 CommonEditor.prototype.init = function() {
     this.table_name = utils.getQueryString("table");
     this.record_id = utils.getQueryString("record");
+    if (sessionStorage.page_param) {
+        this.field_values = JSON.parse(sessionStorage.page_param);
+    }
+    else {
+        this.field_values = {};
+    }
 
     $("#exit-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");
@@ -135,7 +142,13 @@ CommonEditor.prototype.createFieldController = function(field) {
     var label = field.label;
     var name = field.name;
     var help_text = field.help_text;
-    var value = field.value;
+    var value = null;
+    if (name in this.field_values) {
+        value = this.field_values[name];
+    }
+    else {
+        value = field.value;
+    }
 
     var controller = null;
     if (type == "Location") {

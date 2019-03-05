@@ -34,11 +34,6 @@ class SystemDataMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-        if self.objects.count() == 0:
-            data = self.model()
-            data.full_clean()
-            data.save()
-
     def get_object_index(self):
         """
         Increase the object index and get the new value.

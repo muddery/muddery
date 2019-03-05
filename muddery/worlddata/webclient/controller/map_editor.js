@@ -11,6 +11,7 @@ MapEditor = function() {
     this.default_map_width = 400;
     this.default_map_height = 400;
     this.room_size = 40;
+    this.path_color = "#666";
 
     this.path_index = 0;
 
@@ -327,7 +328,7 @@ MapEditor.prototype.createPath = function(info) {
     var namespace = "http://www.w3.org/2000/svg";
     var path = document.createElementNS(namespace, "path");
     path.setAttribute("id", path_id);
-    path.setAttribute("stroke", "#666");
+    path.setAttribute("stroke", this.path_color);
     path.setAttribute("stroke-width", "5");
     path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
     path.addEventListener("click", this.onPathClick);
@@ -335,6 +336,7 @@ MapEditor.prototype.createPath = function(info) {
 
     // Add records.
     this.paths[path_id] = {
+        outer: false,
         room1: info.location,
         room2: info.destination,
         x1: x1,
@@ -349,6 +351,33 @@ MapEditor.prototype.createPath = function(info) {
     this.rooms[info.destination].paths[path_id] = "";
 }
 
+
+/*
+ * Calculate the exit position of a room outside the area.
+ */
+MapEditor.prototype.calcOutExit = function(x, y) {
+    var x2 = x;
+    var y2 = y;
+    var path_length = 45;
+    var to_left = x;
+    var to_right = this.area_width - x;
+    var to_top = y;
+    var to_bottom = this.area_height - y;
+    if (to_left < to_right && to_left < to_top && to_left < to_bottom) {
+        x2 -= path_length;
+    }
+    else if (to_right < to_top && to_right < to_bottom) {
+        x2 += path_length;
+    }
+    else if (to_top < to_bottom) {
+        y2 -= path_length;
+    }
+    else {
+        y2 += path_length;
+    }
+
+    return [x2, y2];
+}
 
 /*
  * Create a path to a room in another area.
@@ -377,32 +406,16 @@ MapEditor.prototype.createOuterPath = function(info) {
     var x1 = source_room.x;
     var y1 = source_room.y;
 
-    var x2 = source_room.x;
-    var y2 = source_room.y;
-
-    var to_left = source_room.x;
-    var to_right = this.area_width - source_room.x;
-    var to_top = source_room.y;
-    var to_bottom = this.area_height - source_room.y;
-    if (to_left < to_right && to_left < to_top && to_left < to_bottom) {
-        x2 -= 60;
-    }
-    else if (to_right < to_top && to_right < to_bottom) {
-        x2 += 60;
-    }
-    else if (to_top < to_bottom) {
-        y2 -= 60;
-    }
-    else {
-        y2 += 60;
-    }
+    var pos = this.calcOutExit(x1, y1);
+    var x2 = pos[0];
+    var y2 = pos[1];
 
     var svg = document.getElementById("map-svg");
     var namespace = "http://www.w3.org/2000/svg";
     var path = document.createElementNS(namespace, "path");
     path.setAttribute("id", path_id);
-    path.setAttribute("stroke", "#666");
-    path.setAttribute("stroke-dasharray", "5,5");
+    path.setAttribute("stroke", this.path_color);
+    path.setAttribute("stroke-dasharray", "7,2");
     path.setAttribute("stroke-width", "5");
     path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
     path.addEventListener("click", this.onPathClick);
@@ -410,6 +423,7 @@ MapEditor.prototype.createOuterPath = function(info) {
 
     // Add records.
     this.paths[path_id] = {
+        outer: true,
         room1: source_id,
         room2: "",
         x1: x1,
@@ -548,6 +562,11 @@ MapEditor.prototype.newRoomMouseMove = function(event) {
  * Move an unselected room.
  */
 MapEditor.prototype.unselectedRoomMouseMove = function(event) {
+    if (event.originalEvent.movementX == 0 && event.originalEvent.movementY == 0) {
+        // No movement.
+        return;
+    }
+
     // Drag the room or drag a new path.
     var width = controller.current_room.innerWidth();
     var height = controller.current_room.innerHeight();
@@ -632,7 +651,15 @@ MapEditor.prototype.dragRoom = function(event) {
         var x2 = path_info.x2;
         var y2 = path_info.y2;
 
-        if (room_key == path_info.room1) {
+        if (path_info.outer) {
+            x1 = room_x;
+            y1 = room_y;
+
+            var pos = this.calcOutExit(x1, y1);
+            x2 = pos[0];
+            y2 = pos[1];
+        }
+        else if (room_key == path_info.room1) {
             x1 = room_x;
             y1 = room_y;
 
@@ -863,7 +890,7 @@ MapEditor.prototype.unselectedRoomMouseUp = function(event) {
     $(".room-menu").remove();
     $(".exit-menu").remove();
     if (this.current_path) {
-        this.current_path.setAttribute("stroke", "#666");
+        this.current_path.setAttribute("stroke", this.path_color);
         this.current_path = null;
     }
 
@@ -926,7 +953,7 @@ MapEditor.prototype.containerMouseUp = function(event) {
     $(".room-menu").remove();
     $(".exit-menu").remove();
     if (this.current_path) {
-        this.current_path.setAttribute("stroke", "#666");
+        this.current_path.setAttribute("stroke", this.path_color);
         this.current_path = null;
     }
 }
@@ -988,6 +1015,18 @@ MapEditor.prototype.showRoomMenu = function(room_key) {
         .addClass("glyphicon glyphicon-trash")
         .appendTo(button);
 
+    // add exit button
+    var button = $("<button>")
+        .addClass("btn btn-default room-menu-button")
+        .attr("type", "button")
+        .data("key", room.info.key)
+        .on("mouseup", this.onCreateExit)
+        .appendTo(button_bar);
+
+    var icon = $("<span>")
+        .addClass("glyphicon glyphicon-transfer")
+        .appendTo(button);
+
     // edit button
     var button = $("<button>")
         .addClass("btn btn-default room-menu-button")
@@ -1038,10 +1077,22 @@ MapEditor.prototype.showPathMenu = function(path_id) {
             .text(exit.key + " (" + exit.typeclass + ")")
             .appendTo(menu_item);
 
-        var source_room = this.rooms[exit.location];
-        var target_room = this.rooms[exit.destination];
-        var source_name = source_room.info.name? source_room.info.name: source_room.info.key;
-        var target_name = target_room.info.name? target_room.info.name: target_room.info.key;
+        var source_name = "";
+        if (exit.location in this.rooms && this.rooms[exit.location].info.name) {
+            source_name = this.rooms[exit.location].info.name;
+        }
+        else {
+            source_name = exit.location;
+        }
+
+        var target_name = "";
+        if (exit.destination in this.rooms && this.rooms[exit.destination].info.name) {
+            target_name = this.rooms[exit.destination].info.name;
+        }
+        else {
+            target_name = exit.destination;
+        }
+
         var direction = source_name + " > " + target_name;
         var name = $("<div>")
             .addClass("menu-exit-direction")
@@ -1107,14 +1158,14 @@ MapEditor.prototype.onEditRoom = function(event) {
 
 
 MapEditor.prototype.saveForEditRoom = function(data, context) {
-    var room_key = context.key;
-    window.parent.controller.editObject(controller.room_typeclass, room_key);
-
     // Unselect all rooms.
     $(".element-room").removeClass("element-selected");
 
     // Remove popup menus.
     $(".room-menu").remove();
+
+    var room_key = context.key;
+    window.parent.controller.editObject(controller.room_typeclass, room_key);
 }
 
 /*
@@ -1191,6 +1242,45 @@ MapEditor.prototype.deleteRoomSuccess = function(data, context) {
 
 
 /*
+ * On click the button to add an exit.
+ */
+MapEditor.prototype.onCreateExit = function(event) {
+    var room_key = $(this).data("key");
+    window.parent.controller.confirm("",
+                                     "Add a new exit?",
+                                     controller.confirmCreateExit,
+                                     {key: room_key});
+
+    // Prevent the container's event.
+    event.stopPropagation();
+}
+
+
+/*
+ * Confirm to add a new exit.
+ */
+MapEditor.prototype.confirmCreateExit = function(e) {
+    window.parent.controller.hideWaiting();
+    var context = e.data;
+    controller.saveMapPositions(controller.saveForCreateExit, context);
+}
+
+
+MapEditor.prototype.saveForCreateExit = function(data, context) {
+    // Unselect all rooms.
+    $(".element-room").removeClass("element-selected");
+
+    // Remove popup menus.
+    $(".room-menu").remove();
+
+    var values = {
+        location: context.key
+    }
+    window.parent.controller.createObject(controller.exit_typeclass, values);
+}
+
+
+/*
  * On click the button to edit an exit.
  */
 MapEditor.prototype.onEditExit = function(event) {
@@ -1212,8 +1302,11 @@ MapEditor.prototype.saveForEditExit = function(data, context) {
     // Remove popup menus.
     $(".exit-menu").remove();
 
-    var path = document.getElementById(path_id);
-    path.setAttribute("stroke", "#666");
+    // Unselect the path.
+    if (controller.current_path) {
+        controller.current_path.setAttribute("stroke", controller.path_color);
+        controller.current_path = null;
+    }
 }
 
 
