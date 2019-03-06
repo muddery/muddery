@@ -19,8 +19,6 @@ controller = {
         $("#content-frame").on("load", this.onContentLoad);
 
         $(".panel-heading").on("click", this.onMenuPanel);
-
-        $("#apply-button").on("click", this.onApply);
     },
 
     onResize: function(e) {
@@ -86,10 +84,6 @@ controller = {
             $(this).find("span").toggleClass("glyphicon-chevron-down");
             $(this).find("span").toggleClass("glyphicon-chevron-up");
         }
-    },
-
-    onApply: function(e) {
-        controller.confirm("", "Apply changes?", controller.confirmApply);
     },
 
     onContentLoad: function(e) {
@@ -294,30 +288,6 @@ controller = {
         }
 
         controller.pushPage(name, url);
-    },
-
-    confirmApply: function() {
-        service.applyChanges(controller.applySuccess, controller.applyFailed);
-        controller.showWaiting("", "Applying changes. Please wait.");
-    },
-
-    applySuccess: function(data) {
-        controller.showWaiting("", "Changes Applied. Please wait the server to restart.");
-        controller.checkStatus();
-        controller.status_interval_id = window.setInterval("controller.checkStatus()", 3000);
-    },
-
-    applyFailed: function(code, message, data) {
-        controller.notify("", "Apply failed: " + code + ": " + message);
-    },
-
-    checkStatus: function() {
-        service.checkStatus(controller.checkStatusSuccess);
-    },
-
-    checkStatusSuccess: function(data) {
-        window.clearInterval(controller.status_interval_id);
-        controller.notify("", "The server restarted.");
     },
 
     //////////////// Confirm Model ////////////////

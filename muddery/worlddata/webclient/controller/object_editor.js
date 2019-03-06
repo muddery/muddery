@@ -18,7 +18,6 @@ ObjectEditor.prototype.constructor = ObjectEditor;
 ObjectEditor.prototype.init = function() {
     this.base_typeclass = utils.getQueryString("typeclass");
     this.obj_key = utils.getQueryString("object");
-    var page_param = JSON.parse(sessionStorage.page_param);
     if (sessionStorage.page_param) {
         this.field_values = JSON.parse(sessionStorage.page_param);
     }

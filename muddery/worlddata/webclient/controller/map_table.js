@@ -74,12 +74,14 @@ MapTable.prototype.operateButton = function(value, row, index) {
         .text("Edit")
         .appendTo(block);
 
+    /*
     var edit = $("<button>")
         .addClass("btn-xs btn-danger delete-row")
         .attr("type", "button")
         .attr("data-map-key", row["key"])
         .text("Delete")
         .appendTo(block);
+    */
 
     return block.html();
 }

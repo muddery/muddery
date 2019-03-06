@@ -702,8 +702,9 @@ MapEditor.prototype.onRoomMouseUp = function(event) {
  * Drop the new path on a room.
  */
 MapEditor.prototype.dropPathOnRoom = function(event) {
-    this.mode = "";
     event.stopPropagation();
+
+    this.mode = "";
 
     if ($(event.currentTarget).hasClass("new-element")) {
         // Can not draw a path to new element buttons.
@@ -880,6 +881,9 @@ MapEditor.prototype.selectedRoomMouseUp = function(event) {
  * Select the room.
  */
 MapEditor.prototype.unselectedRoomMouseUp = function(event) {
+    // Prevent the container's event.
+    event.stopPropagation();
+
     // Unselect other rooms.
     $(".element-room").removeClass("element-selected");
 
@@ -899,9 +903,6 @@ MapEditor.prototype.unselectedRoomMouseUp = function(event) {
     this.showRoomMenu(room_key);
 
     this.mode = "";
-
-    // Prevent the container's event.
-    event.stopPropagation();
 }
 
 
@@ -909,12 +910,11 @@ MapEditor.prototype.unselectedRoomMouseUp = function(event) {
  * Drop a new path.
  */
 MapEditor.prototype.dropPath = function(event) {
-    this.mode = "";
-
-    this.finishDraggingPath();
-
     // Prevent the container's event.
     event.stopPropagation();
+
+    this.mode = "";
+    this.finishDraggingPath();
 }
 
 
@@ -922,6 +922,9 @@ MapEditor.prototype.dropPath = function(event) {
  * Drop a room.
  */
 MapEditor.prototype.dropRoom = function(event) {
+    // Prevent the container's event.
+    event.stopPropagation();
+
     this.mode = "";
 
     // Show room menu.
@@ -936,9 +939,6 @@ MapEditor.prototype.dropRoom = function(event) {
         "position": "absolute"
     });
     menu.show();
-
-    // Prevent the container's event.
-    event.stopPropagation();
 }
 
 
@@ -946,12 +946,20 @@ MapEditor.prototype.dropRoom = function(event) {
  * Click the background to unselect all room.
  */
 MapEditor.prototype.containerMouseUp = function(event) {
-    // Unselect all rooms.
-    $(".element-room").removeClass("element-selected");
+    if ($(".room-exits").length > 0) {
+        // Remove room exits menu and show room's menu.
+        $(".room-exits").remove();
+        $(".room-menu").show();
+    }
+    else {
+        // Unselect all rooms.
+        $(".element-room").removeClass("element-selected");
 
-    // Remove popup menus.
-    $(".room-menu").remove();
-    $(".exit-menu").remove();
+        // Remove popup menus.
+        $(".room-menu").remove();
+        $(".exit-menu").remove();
+    }
+
     if (this.current_path) {
         this.current_path.setAttribute("stroke", this.path_color);
         this.current_path = null;
@@ -1020,7 +1028,7 @@ MapEditor.prototype.showRoomMenu = function(room_key) {
         .addClass("btn btn-default room-menu-button")
         .attr("type", "button")
         .data("key", room.info.key)
-        .on("mouseup", this.onCreateExit)
+        .on("mouseup", this.onRoomExits)
         .appendTo(button_bar);
 
     var icon = $("<span>")
@@ -1147,13 +1155,13 @@ MapEditor.prototype.showPathMenu = function(path_id) {
  * On click the button to edit a room.
  */
 MapEditor.prototype.onEditRoom = function(event) {
+    // Prevent the container's event.
+    event.stopPropagation();
+
     var context = {
         key: $(this).data("key")
     }
     controller.saveMapPositions(controller.saveForEditRoom, context);
-
-    // Prevent the container's event.
-    event.stopPropagation();
 }
 
 
@@ -1172,14 +1180,14 @@ MapEditor.prototype.saveForEditRoom = function(data, context) {
  * On click the button to delete a room.
  */
 MapEditor.prototype.onDeleteRoom = function(event) {
+    // Prevent the container's event.
+    event.stopPropagation();
+
     var room_key = $(this).data("key");
     window.parent.controller.confirm("",
                                      "Delete this room?",
                                      controller.confirmDeleteRoom,
                                      {key: room_key});
-
-    // Prevent the container's event.
-    event.stopPropagation();
 }
 
 
@@ -1242,26 +1250,133 @@ MapEditor.prototype.deleteRoomSuccess = function(data, context) {
 
 
 /*
- * On click the button to add an exit.
+ * Show a room's exits.
  */
-MapEditor.prototype.onCreateExit = function(event) {
-    var room_key = $(this).data("key");
-    window.parent.controller.confirm("",
-                                     "Add a new exit?",
-                                     controller.confirmCreateExit,
-                                     {key: room_key});
-
+MapEditor.prototype.onRoomExits = function(event) {
     // Prevent the container's event.
     event.stopPropagation();
+
+    var room_key = $(this).data("key");
+
+    // Hide room's menu
+    $(".room-menu").hide();
+
+    // Show exits menu.
+    var menu = $("<div>")
+        .addClass("element-menu exit-menu room-exits");
+
+    // Add a header and create exit button.
+    var menu_item = $("<div>")
+        .addClass("menu-item exit-menu-item")
+        .appendTo(menu);
+
+    var title = $("<span>")
+        .addClass("menu-exit-title")
+        .text("Add a new exit.")
+        .appendTo(menu_item);
+
+    // add button
+    var button = $("<button>")
+        .addClass("btn btn-default btn-sm exit-menu-button button-right")
+        .attr("type", "button")
+        .data("room", room_key)
+        .on("mouseup", controller.onCreateExit)
+        .appendTo(menu_item);
+
+    var icon = $("<span>")
+        .addClass("glyphicon glyphicon-plus")
+        .appendTo(button);
+
+    for (var path_id in controller.paths) {
+        var path_info = controller.paths[path_id];
+        if (path_info.room1 == room_key || path_info.room2 == room_key) {
+            for (var key in path_info.exits) {
+                var exit = path_info.exits[key];
+
+                var menu_item = $("<div>")
+                    .addClass("menu-item exit-menu-item");
+
+                var name = $("<div>")
+                    .addClass("menu-exit-key")
+                    .text(exit.key + " (" + exit.typeclass + ")")
+                    .appendTo(menu_item);
+
+                var source_name = "";
+                if (exit.location in controller.rooms && controller.rooms[exit.location].info.name) {
+                    source_name = controller.rooms[exit.location].info.name;
+                }
+                else {
+                    source_name = exit.location;
+                }
+
+                var target_name = "";
+                if (exit.destination in controller.rooms && controller.rooms[exit.destination].info.name) {
+                    target_name = controller.rooms[exit.destination].info.name;
+                }
+                else {
+                    target_name = exit.destination;
+                }
+
+                var direction = source_name + " > " + target_name;
+                var name = $("<div>")
+                    .addClass("menu-exit-direction")
+                    .text(direction)
+                    .appendTo(menu_item);
+
+                var button_bar = $("<div>")
+                    .addClass("exit-button-bar")
+                    .appendTo(menu_item);
+
+                // delete button
+                var button = $("<button>")
+                    .addClass("btn btn-default btn-sm exit-menu-button")
+                    .attr("type", "button")
+                    .data("path", path_id)
+                    .data("exit", exit.key)
+                    .on("mouseup", controller.onDeleteExit)
+                    .appendTo(button_bar);
+
+                var icon = $("<span>")
+                    .addClass("glyphicon glyphicon-trash")
+                    .appendTo(button);
+
+                // edit button
+                var button = $("<button>")
+                    .addClass("btn btn-default btn-sm exit-menu-button")
+                    .attr("type", "button")
+                    .data("path", path_id)
+                    .data("exit", exit.key)
+                    .on("mouseup", controller.onEditExit)
+                    .appendTo(button_bar);
+
+                var icon = $("<span>")
+                    .addClass("glyphicon glyphicon-edit")
+                    .appendTo(button);
+
+                menu_item.appendTo(menu);
+            }
+        }
+    }
+
+    menu.appendTo($("#container"));
+
+    var room = controller.rooms[room_key];
+    var width = menu.width();
+    menu.css({
+        "left": room.x - width / 2,
+        "top": room.y + controller.room_size,
+        "position": "absolute"
+    });
 }
 
 
 /*
- * Confirm to add a new exit.
+ * Create a new exit.
  */
-MapEditor.prototype.confirmCreateExit = function(e) {
-    window.parent.controller.hideWaiting();
-    var context = e.data;
+MapEditor.prototype.onCreateExit = function(event) {
+    var context = {
+        location: $(this).data("key")
+    }
     controller.saveMapPositions(controller.saveForCreateExit, context);
 }
 
@@ -1284,14 +1399,14 @@ MapEditor.prototype.saveForCreateExit = function(data, context) {
  * On click the button to edit an exit.
  */
 MapEditor.prototype.onEditExit = function(event) {
+    // Prevent the container's event.
+    event.stopPropagation();
+
     var context = {
         path: $(this).data("path"),
         key: $(this).data("exit")
     }
     controller.saveMapPositions(controller.saveForEditExit, context);
-
-    // Prevent the container's event.
-    event.stopPropagation();
 }
 
 
@@ -1314,6 +1429,9 @@ MapEditor.prototype.saveForEditExit = function(data, context) {
  * On click the button to delete an exit.
  */
 MapEditor.prototype.onDeleteExit = function(event) {
+    // Prevent the container's event.
+    event.stopPropagation();
+
     var path_id = $(this).data("path");
     var exit_key = $(this).data("exit");
     window.parent.controller.confirm("",
@@ -1321,9 +1439,6 @@ MapEditor.prototype.onDeleteExit = function(event) {
                                      controller.confirmDeleteExit,
                                      {path: path_id,
                                       exit: exit_key});
-
-    // Prevent the container's event.
-    event.stopPropagation();
 }
 
 
@@ -1541,14 +1656,17 @@ MapEditor.prototype.confirmDiscard = function(e) {
     window.parent.controller.hideWaiting();
 
     // Remove added objects.
+    var objects = []
+
     // rooms
     var origin_rooms = [];
-    for (var i = 0; i < controller.origin_map.rooms.length; i++) {
-        var room_info = controller.origin_map.rooms[i];
-        origin_rooms[room_info.key] = null;
+    if (controller.origin_map) {
+        for (var i = 0; i < controller.origin_map.rooms.length; i++) {
+            var room_info = controller.origin_map.rooms[i];
+            origin_rooms[room_info.key] = null;
+        }
     }
 
-    var objects = []
     for (var room_key in controller.rooms) {
         if (!(room_key in origin_rooms)) {
             objects.push(room_key);
@@ -1557,9 +1675,11 @@ MapEditor.prototype.confirmDiscard = function(e) {
 
     // exits
     var origin_exits = [];
-    for (var i = 0; i < controller.origin_map.exits.length; i++) {
-        var exit_info = controller.origin_map.exits[i];
-        origin_exits[exit_info.key] = null;
+    if (controller.origin_map) {
+        for (var i = 0; i < controller.origin_map.exits.length; i++) {
+            var exit_info = controller.origin_map.exits[i];
+            origin_exits[exit_info.key] = null;
+        }
     }
 
     for (var path_id in controller.paths) {
@@ -1569,6 +1689,13 @@ MapEditor.prototype.confirmDiscard = function(e) {
             }
         }
     }
+
+    // area
+    if (!controller.origin_map) {
+        // It's a new map. Delete the area.
+        objects.push(controller.area_key);
+    }
+
     service.deleteObjects(objects, controller.removeAddedObjectsSuccess, controller.failedCallback);
 }
 
@@ -1577,31 +1704,36 @@ MapEditor.prototype.confirmDiscard = function(e) {
  * Remove added objects success. Restore positions.
  */
 MapEditor.prototype.removeAddedObjectsSuccess = function(data) {
-    var map = controller.origin_map;
-
-    var area = {
-        key: map.area.key,
-        background: map.area.background,
-        width: map.area.width,
-        height: map.area.height
+    if (!controller.origin_map) {
+        controller.exit();
     }
+    else {
+        var map = controller.origin_map;
 
-    var rooms = [];
-    for (var i = 0; i < map.rooms.length; i++) {
-        var room_info = map.rooms[i];
-        if (!(room_info.key in controller.rooms)) {
-            // Could not restore deleted objects.
-            continue;
+        var area = {
+            key: map.area.key,
+            background: map.area.background,
+            width: map.area.width,
+            height: map.area.height
         }
 
-        rooms.push({
-            key: room_info.key,
-            position: room_info.position
-        });
-    }
+        var rooms = [];
+        for (var i = 0; i < map.rooms.length; i++) {
+            var room_info = map.rooms[i];
+            if (!(room_info.key in controller.rooms)) {
+                // Could not restore deleted objects.
+                continue;
+            }
 
-    // Save the original map.
-    service.saveMapPositions(area, rooms, controller.discardMapSuccess, controller.failedCallback);
+            rooms.push({
+                key: room_info.key,
+                position: room_info.position
+            });
+        }
+
+        // Save the original map.
+        service.saveMapPositions(area, rooms, controller.discardMapSuccess, controller.failedCallback);
+    }
 }
 
 

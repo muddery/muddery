@@ -602,6 +602,21 @@ class DeleteObject(BaseRequestProcesser):
         return success_response(data)
 
 
+class QueryTables(BaseRequestProcesser):
+    """
+    Query all tables' names.
+
+    Args:
+        None
+    """
+    path = "query_tables"
+    name = ""
+
+    def func(self, args, request):
+        data = general_query.query_tables()
+        return success_response(data)
+
+
 class ApplyChanges(BaseRequestProcesser):
     """
     Query all tables' names.
@@ -630,7 +645,7 @@ class ApplyChanges(BaseRequestProcesser):
 
             # restart the server
             SESSIONS.announce_all("Server restarting ...")
-            SESSIONS.server.shutdown(mode='reload')
+            SESSIONS.portal_restart_server()
         except Exception, e:
             message = "Can not build the world: %s" % e
             logger.log_tracemsg(message)

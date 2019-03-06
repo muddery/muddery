@@ -187,3 +187,15 @@
 .exit-menu-button {
     margin: 2px 10px;
 }
+
+.menu-exit-title {
+    text-align: center;
+    font-size: 14px;
+    padding: 2px 10px;
+    overflow: hidden;
+    line-height: 34px;
+}
+
+.button-right {
+    float: right;
+}
