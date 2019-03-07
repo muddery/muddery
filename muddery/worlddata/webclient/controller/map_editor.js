@@ -29,12 +29,15 @@ MapEditor = function() {
     this.area_height = 0;
     this.rooms = {};
     this.paths = {};
+
+    // Map changed.
+    this.changed = false;
 }
 
 MapEditor.prototype.init = function() {
     this.area_key = utils.getQueryString("map");
 
-    $("#discard-button").removeClass("hidden");
+    $("#exit-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");
     $("#delete-record").removeClass("hidden");
 
@@ -46,7 +49,7 @@ MapEditor.prototype.init = function() {
 }
 
 MapEditor.prototype.bindEvents = function() {
-    $("#discard-button").on("click", this.onDiscard);
+    $("#exit-button").on("click", this.onExit);
     $("#save-record").on("click", this.onSave);
     $("#delete-record").on("click", this.onDelete);
 
@@ -71,10 +74,15 @@ MapEditor.prototype.bindEvents = function() {
     $("#container").on("mouseup", this.onContainerMouseUp);
 }
 
-MapEditor.prototype.onDiscard = function() {
-    window.parent.controller.confirm("",
-                                     "Discard changes? (Deleted objects and saved attributes can not be restored.)",
-                                     controller.confirmDiscard);
+MapEditor.prototype.onExit = function() {
+    if (!controller.changed) {
+        controller.exitNoChange();
+    }
+    else {
+        window.parent.controller.confirm("",
+                                         "Discard changes? (Deleted objects and saved attributes can not be restored.)",
+                                         controller.confirmDiscard);
+    }
 }
 
 MapEditor.prototype.onSave = function() {
@@ -130,6 +138,7 @@ MapEditor.prototype.onEditArea = function() {
 }
 
 MapEditor.prototype.saveForEditArea = function(data) {
+    controller.changed = true;
     window.parent.controller.editObject(controller.area_typeclass, controller.area_key);
 }
 
@@ -179,6 +188,8 @@ MapEditor.prototype.setBackgroundSize = function(width, height) {
 
     $("#image-width").val(width);
     $("#image-height").val(height);
+
+    window.parent.controller.setFrameSize();
 }
 
 /*
@@ -201,6 +212,7 @@ MapEditor.prototype.onUploadBackground = function() {
 
 MapEditor.prototype.uploadSuccessCallback = function(data) {
     // Show images when upload images success.
+    controller.changed = true;
     controller.background = data.resource;
     $("#map-image")
         .attr("src", CONFIG.resource_url + data.resource)
@@ -223,6 +235,7 @@ MapEditor.prototype.onDeleteBackground = function() {
 MapEditor.prototype.confirmDeleteBackground = function() {
      window.parent.controller.hideWaiting();
 
+    controller.changed = true;
     controller.background = "";
     $("#map-image").attr("src", controller.blank_map);
 }
@@ -236,6 +249,8 @@ MapEditor.prototype.onSetBackgroundSize = function() {
     if (!width || !height || width < 0 || height < 0) {
         return;
     }
+
+    controller.changed = true;
     controller.setBackgroundSize(width, height);
 }
 
@@ -244,6 +259,8 @@ MapEditor.prototype.onSetBackgroundSize = function() {
  */
 MapEditor.prototype.onRestoreBackgroundSize = function() {
     // Get the image's original size.
+    controller.changed = true;
+
     var image = document.getElementById("map-image");
     var width = image.naturalWidth;
     var height = image.naturalHeight;
@@ -576,6 +593,7 @@ MapEditor.prototype.unselectedRoomMouseMove = function(event) {
     if (Math.abs(relative_x) - width / 2　< 0 &&
         Math.abs(relative_y) - height / 2　< 0) {
         this.mode = "DRAG_ROOM";
+        controller.changed = true;
     }
     else {
         this.mode = "DRAG_PATH";
@@ -761,6 +779,8 @@ MapEditor.prototype.dropPathOnRoom = function(event) {
 
 
 MapEditor.prototype.addExitSuccess = function(data, context) {
+    controller.changed = true;
+
     var exit_info = context;
     exit_info["key"] = data.key;
 
@@ -835,6 +855,8 @@ MapEditor.prototype.newRoomMouseUp = function(event) {
 
 
 MapEditor.prototype.addRoomSuccess = function(data) {
+    controller.changed = true;
+
     var room_key = data.key;
 
     var x = controller.current_room.position().left + controller.current_room.outerWidth() / 2;
@@ -869,8 +891,9 @@ MapEditor.prototype.addRoomFailed = function(code, message, data) {
 MapEditor.prototype.selectedRoomMouseUp = function(event) {
     controller.current_room.removeClass("element-selected");
 
-    // Remove other popup menus.
+    // Remove popup menus.
     $(".room-menu").remove();
+    $(".room-exits").remove();
 
     this.current_room = null;
     this.mode = "";
@@ -924,6 +947,8 @@ MapEditor.prototype.dropPath = function(event) {
 MapEditor.prototype.dropRoom = function(event) {
     // Prevent the container's event.
     event.stopPropagation();
+
+    controller.changed = true;
 
     this.mode = "";
 
@@ -1166,6 +1191,8 @@ MapEditor.prototype.onEditRoom = function(event) {
 
 
 MapEditor.prototype.saveForEditRoom = function(data, context) {
+    controller.changed = true;
+
     // Unselect all rooms.
     $(".element-room").removeClass("element-selected");
 
@@ -1219,6 +1246,8 @@ MapEditor.prototype.confirmDeleteRoom = function(e) {
  * Delete the room success..
  */
 MapEditor.prototype.deleteRoomSuccess = function(data, context) {
+    controller.changed = true;
+
     // Remove popup menus.
     $(".room-menu").remove();
 
@@ -1267,13 +1296,8 @@ MapEditor.prototype.onRoomExits = function(event) {
 
     // Add a header and create exit button.
     var menu_item = $("<div>")
-        .addClass("menu-item exit-menu-item")
+        .addClass("menu-item exit-menu-item exit-menu-header")
         .appendTo(menu);
-
-    var title = $("<span>")
-        .addClass("menu-exit-title")
-        .text("Add a new exit.")
-        .appendTo(menu_item);
 
     // add button
     var button = $("<button>")
@@ -1375,13 +1399,15 @@ MapEditor.prototype.onRoomExits = function(event) {
  */
 MapEditor.prototype.onCreateExit = function(event) {
     var context = {
-        location: $(this).data("key")
+        room: $(this).data("room")
     }
     controller.saveMapPositions(controller.saveForCreateExit, context);
 }
 
 
 MapEditor.prototype.saveForCreateExit = function(data, context) {
+    controller.changed = true;
+
     // Unselect all rooms.
     $(".element-room").removeClass("element-selected");
 
@@ -1389,7 +1415,7 @@ MapEditor.prototype.saveForCreateExit = function(data, context) {
     $(".room-menu").remove();
 
     var values = {
-        location: context.key
+        location: context.room
     }
     window.parent.controller.createObject(controller.exit_typeclass, values);
 }
@@ -1411,6 +1437,8 @@ MapEditor.prototype.onEditExit = function(event) {
 
 
 MapEditor.prototype.saveForEditExit = function(data, context) {
+    controller.changed = true;
+
     var exit_key = context.key;
     window.parent.controller.editObject(controller.exit_typeclass, exit_key);
 
@@ -1461,6 +1489,8 @@ MapEditor.prototype.confirmDeleteExit = function(e) {
  * Delete the exit success..
  */
 MapEditor.prototype.deleteExitSuccess = function(data, context) {
+    controller.changed = true;
+
     var path_id = context.path;
     var exit_key = context.exit;
     delete controller.paths[path_id].exits[exit_key];
@@ -1596,6 +1626,8 @@ MapEditor.prototype.queryMapSuccess = function(data) {
             controller.createPath(exit_info);
         }
     }
+
+    window.parent.controller.setFrameSize();
 }
 
 
@@ -1603,6 +1635,8 @@ MapEditor.prototype.queryMapSuccess = function(data) {
  * Save the new area success
  */
 MapEditor.prototype.addAreaSuccess = function(data) {
+    controller.changed = true;
+
     controller.area_key = data.key;
     var width = data.width || 0;
     var height = data.height || 0;

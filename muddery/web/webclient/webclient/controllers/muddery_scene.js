@@ -315,7 +315,13 @@ MudderyScene.prototype.addExits = function(line_id, container_id, data) {
     if (data) {
         for (var i in data) {
             var obj = data[i];
-            var name = $$.text2html.parseHtml(obj["name"]);
+            var name = "";
+            if (obj["name"]) {
+                name = $$.text2html.parseHtml(obj["name"]);
+            }
+            else {
+                name = "Room";
+            }
 
             var item = this.cloneTemplate(template);
             item.attr("id", "scene_obj_" + obj["dbref"].slice(1))
