@@ -151,6 +151,10 @@ def main():
             django_args = ["makemigrations"]
             django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
+
+            django_args = ["makemigrations"]
+            django_kwargs = {"database": "worlddata"}
+            django.core.management.call_command(*django_args, **django_kwargs)
         except django.core.management.base.CommandError, exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
