@@ -925,6 +925,7 @@ MapEditor.prototype.unselectedRoomMouseUp = function(event) {
     var room_key = this.current_room.data("key");
     this.showRoomMenu(room_key);
 
+    this.current_room = null;
     this.mode = "";
 }
 
@@ -1442,7 +1443,11 @@ MapEditor.prototype.saveForEditExit = function(data, context) {
     var exit_key = context.key;
     window.parent.controller.editObject(controller.exit_typeclass, exit_key);
 
+    // Unselect all rooms.
+    $(".element-room").removeClass("element-selected");
+
     // Remove popup menus.
+    $(".room-menu").remove();
     $(".exit-menu").remove();
 
     // Unselect the path.
@@ -1495,7 +1500,11 @@ MapEditor.prototype.deleteExitSuccess = function(data, context) {
     var exit_key = context.exit;
     delete controller.paths[path_id].exits[exit_key];
 
+    // Unselect all rooms.
+    $(".element-room").removeClass("element-selected");
+
     // Remove the old menu.
+    $(".room-menu").remove();
     $(".exit-menu").remove();
 
     // If all exits have been removed.
@@ -1507,7 +1516,7 @@ MapEditor.prototype.deleteExitSuccess = function(data, context) {
     }
     else {
         // Refresh the path menu.
-        controller.showPathMenu(path_id);
+        // controller.showPathMenu(path_id);
     }
 }
 

@@ -4,8 +4,7 @@ Upgrade custom's game dir to the latest version.
 
 from __future__ import print_function
 
-import os
-import shutil
+import os, traceback
 import muddery
 from muddery.server.upgrader import utils
 from muddery.server.upgrader import upgrader_0_3_3
@@ -60,6 +59,7 @@ class UpgradeHandler(object):
             launcher_utils.create_config_file(game_dir, template)
 
         except Exception, e:
+            traceback.print_exc()
             print("\nUpgrade failed: %s\n" % e)
 
         return
