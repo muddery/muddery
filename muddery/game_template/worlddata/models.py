@@ -1,5 +1,5 @@
 from django.db import models
-from muddery.worlddata.db import models as model_base
+from muddery.worlddata.db import models as BaseModels
 
 
 # ------------------------------------------------------------
@@ -7,7 +7,7 @@ from muddery.worlddata.db import models as model_base
 # The game world system's data.
 #
 # ------------------------------------------------------------
-class system_data(model_base.system_data):
+class system_data(BaseModels.system_data):
     """
     The game world system's data.
     """
@@ -19,7 +19,7 @@ class system_data(model_base.system_data):
 # game's basic settings
 #
 # ------------------------------------------------------------
-class game_settings(model_base.game_settings):
+class game_settings(BaseModels.game_settings):
     """
     Game's basic settings.
     """
@@ -31,7 +31,7 @@ class game_settings(model_base.game_settings):
 # all objects
 #
 # ------------------------------------------------------------
-class objects(model_base.objects):
+class objects(BaseModels.objects):
     "All objects in the game."
     pass
 
@@ -41,7 +41,7 @@ class objects(model_base.objects):
 # world areas
 #
 # ------------------------------------------------------------
-class world_areas(model_base.world_areas):
+class world_areas(BaseModels.world_areas):
     "Rooms belongs to areas."
     pass
     
@@ -51,7 +51,7 @@ class world_areas(model_base.world_areas):
 # store all rooms
 #
 #------------------------------------------------------------
-class world_rooms(model_base.world_rooms):
+class world_rooms(BaseModels.world_rooms):
     "Store all unique rooms."
     pass
 
@@ -61,7 +61,7 @@ class world_rooms(model_base.world_rooms):
 # store all exits
 #
 #------------------------------------------------------------
-class world_exits(model_base.world_exits):
+class world_exits(BaseModels.world_exits):
     "Store all unique exits."
     pass
 
@@ -71,7 +71,7 @@ class world_exits(model_base.world_exits):
 # store exit locks
 #
 #------------------------------------------------------------
-class exit_locks(model_base.exit_locks):
+class exit_locks(BaseModels.exit_locks):
     "Store all exit locks."
     pass
 
@@ -81,7 +81,7 @@ class exit_locks(model_base.exit_locks):
 # store all objects
 #
 #------------------------------------------------------------
-class world_objects(model_base.world_objects):
+class world_objects(BaseModels.world_objects):
     "Store all unique objects."
     pass
 
@@ -91,7 +91,7 @@ class world_objects(model_base.world_objects):
 # store all object creators
 #
 #------------------------------------------------------------
-class object_creators(model_base.object_creators):
+class object_creators(BaseModels.object_creators):
     "Store all object creators."
     pass
 
@@ -101,7 +101,7 @@ class object_creators(model_base.object_creators):
 # object creator's loot list
 #
 #------------------------------------------------------------
-class creator_loot_list(model_base.creator_loot_list):
+class creator_loot_list(BaseModels.creator_loot_list):
     "Object creator's loot list"
     pass
 
@@ -111,7 +111,7 @@ class creator_loot_list(model_base.creator_loot_list):
 # store all common objects
 #
 #------------------------------------------------------------
-class common_objects(model_base.common_objects):
+class common_objects(BaseModels.common_objects):
     "Store all common objects."
     pass
 
@@ -121,7 +121,7 @@ class common_objects(model_base.common_objects):
 # store all foods
 #
 # ------------------------------------------------------------
-class foods(model_base.foods):
+class foods(BaseModels.foods):
     "Foods inherit from common objects."
     pass
 
@@ -131,7 +131,7 @@ class foods(model_base.foods):
 # store all skill books
 #
 # ------------------------------------------------------------
-class skill_books(model_base.skill_books):
+class skill_books(BaseModels.skill_books):
     "Skill books inherit from common objects."
     pass
     
@@ -141,7 +141,7 @@ class skill_books(model_base.skill_books):
 # store all equip_types
 #
 #------------------------------------------------------------
-class equipment_types(model_base.equipment_types):
+class equipment_types(BaseModels.equipment_types):
     "Store all equip types."
     pass
 
@@ -151,7 +151,7 @@ class equipment_types(model_base.equipment_types):
 # store all equip_positions
 #
 #------------------------------------------------------------
-class equipment_positions(model_base.equipment_positions):
+class equipment_positions(BaseModels.equipment_positions):
     "Store all equip types."
     pass
 
@@ -161,7 +161,7 @@ class equipment_positions(model_base.equipment_positions):
 # store all equipments
 #
 #------------------------------------------------------------
-class equipments(model_base.equipments):
+class equipments(BaseModels.equipments):
     "Store all equipments."
     pass
 
@@ -171,7 +171,7 @@ class equipments(model_base.equipments):
 # character attributes
 #
 # ------------------------------------------------------------
-class character_attributes_info(model_base.character_attributes_info):
+class character_attributes_info(BaseModels.character_attributes_info):
     "character attributes"
     pass
 
@@ -181,7 +181,7 @@ class character_attributes_info(model_base.character_attributes_info):
 # Equipment attribute's information.
 #
 # ------------------------------------------------------------
-class equipment_attributes_info(model_base.equipment_attributes_info):
+class equipment_attributes_info(BaseModels.equipment_attributes_info):
     "Equipment's all available attributes"
     pass
 
@@ -191,7 +191,7 @@ class equipment_attributes_info(model_base.equipment_attributes_info):
 # Food attribute's information.
 #
 # ------------------------------------------------------------
-class food_attributes_info(model_base.food_attributes_info):
+class food_attributes_info(BaseModels.food_attributes_info):
     "Food attribute's information."
     pass
 
@@ -201,7 +201,7 @@ class food_attributes_info(model_base.food_attributes_info):
 # character levels
 #
 #------------------------------------------------------------
-class character_models(model_base.character_models):
+class character_models(BaseModels.character_models):
     "Store all character level informations."
     pass
 
@@ -211,7 +211,7 @@ class character_models(model_base.character_models):
 # store all npcs
 #
 #------------------------------------------------------------
-class world_npcs(model_base.world_npcs):
+class world_npcs(BaseModels.world_npcs):
     "Store all unique objects."
     pass
 
@@ -221,7 +221,7 @@ class world_npcs(model_base.world_npcs):
 # store common characters
 #
 #------------------------------------------------------------
-class characters(model_base.characters):
+class characters(BaseModels.characters):
     "Store all common characters."
     pass
 
@@ -231,7 +231,7 @@ class characters(model_base.characters):
 # character's loot list
 #
 #------------------------------------------------------------
-class character_loot_list(model_base.character_loot_list):
+class character_loot_list(BaseModels.character_loot_list):
     "Character's loot list"
     pass
 
@@ -241,7 +241,7 @@ class character_loot_list(model_base.character_loot_list):
 # character's default objects
 #
 #------------------------------------------------------------
-class default_objects(model_base.default_objects):
+class default_objects(BaseModels.default_objects):
     "Store character's default objects information."
     pass
     
@@ -251,7 +251,7 @@ class default_objects(model_base.default_objects):
 # shops
 #
 # ------------------------------------------------------------
-class shops(model_base.shops):
+class shops(BaseModels.shops):
     "Store all shops."
     pass
         
@@ -261,7 +261,7 @@ class shops(model_base.shops):
 # shop goods
 #
 # ------------------------------------------------------------
-class shop_goods(model_base.shop_goods):
+class shop_goods(BaseModels.shop_goods):
     "All goods that sold in shops."
     pass
 
@@ -271,7 +271,7 @@ class shop_goods(model_base.shop_goods):
 # npc shops
 #
 # ------------------------------------------------------------
-class npc_shops(model_base.npc_shops):
+class npc_shops(BaseModels.npc_shops):
     "Store npc's shops."
     pass
     
@@ -281,7 +281,7 @@ class npc_shops(model_base.npc_shops):
 # store all skills
 #
 #------------------------------------------------------------
-class skills(model_base.skills):
+class skills(BaseModels.skills):
     "Store all skills."
     pass
 
@@ -291,7 +291,7 @@ class skills(model_base.skills):
 # skill types
 #
 # ------------------------------------------------------------
-class skill_types(model_base.skill_types):
+class skill_types(BaseModels.skill_types):
     "Skill's types."
     pass
 
@@ -301,7 +301,7 @@ class skill_types(model_base.skill_types):
 # character skills
 #
 #------------------------------------------------------------
-class default_skills(model_base.default_skills):
+class default_skills(BaseModels.default_skills):
     "Store all character skill informations."
     pass
 
@@ -311,7 +311,7 @@ class default_skills(model_base.default_skills):
 # store all quests
 #
 #------------------------------------------------------------
-class quests(model_base.quests):
+class quests(BaseModels.quests):
     "Store all dramas."
     pass
 
@@ -321,7 +321,7 @@ class quests(model_base.quests):
 # quest's reward list
 #
 #------------------------------------------------------------
-class quest_reward_list(model_base.quest_reward_list):
+class quest_reward_list(BaseModels.quest_reward_list):
     "Quest's reward list"
     pass
 
@@ -331,7 +331,7 @@ class quest_reward_list(model_base.quest_reward_list):
 # store quest objectives
 #
 #------------------------------------------------------------
-class quest_objectives(model_base.quest_objectives):
+class quest_objectives(BaseModels.quest_objectives):
     "Store all quest objectives."
     pass
 
@@ -341,7 +341,7 @@ class quest_objectives(model_base.quest_objectives):
 # store quest dependencies
 #
 #------------------------------------------------------------
-class quest_dependencies(model_base.quest_dependencies):
+class quest_dependencies(BaseModels.quest_dependencies):
     "Store quest dependency."
     pass
 
@@ -351,7 +351,7 @@ class quest_dependencies(model_base.quest_dependencies):
 # store event data
 #
 #------------------------------------------------------------
-class event_data(model_base.event_data):
+class event_data(BaseModels.event_data):
     "Store event data."
     pass
 
@@ -361,7 +361,7 @@ class event_data(model_base.event_data):
 # store all dialogues
 #
 #------------------------------------------------------------
-class dialogues(model_base.dialogues):
+class dialogues(BaseModels.dialogues):
     "Store all dialogues."
     pass
 
@@ -371,7 +371,7 @@ class dialogues(model_base.dialogues):
 # store dialogue quest dependencies
 #
 #------------------------------------------------------------
-class dialogue_quest_dependencies(model_base.dialogue_quest_dependencies):
+class dialogue_quest_dependencies(BaseModels.dialogue_quest_dependencies):
     "Store dialogue quest dependencies."
     pass
 
@@ -381,7 +381,7 @@ class dialogue_quest_dependencies(model_base.dialogue_quest_dependencies):
 # store dialogue relations
 #
 #------------------------------------------------------------
-class dialogue_relations(model_base.dialogue_relations):
+class dialogue_relations(BaseModels.dialogue_relations):
     "Store dialogue relations."
     pass
 
@@ -391,7 +391,7 @@ class dialogue_relations(model_base.dialogue_relations):
 # store dialogue sentences
 #
 #------------------------------------------------------------
-class dialogue_sentences(model_base.dialogue_sentences):
+class dialogue_sentences(BaseModels.dialogue_sentences):
     "Store dialogue sentences."
     pass
 
@@ -401,7 +401,7 @@ class dialogue_sentences(model_base.dialogue_sentences):
 # store npc's dialogue
 #
 #------------------------------------------------------------
-class npc_dialogues(model_base.npc_dialogues):
+class npc_dialogues(BaseModels.npc_dialogues):
     "Store all dialogues."
     pass
 
@@ -411,7 +411,7 @@ class npc_dialogues(model_base.npc_dialogues):
 # event attack's data
 #
 # ------------------------------------------------------------
-class action_attack(model_base.action_attack):
+class action_attack(BaseModels.action_attack):
     "event attack's data"
     pass
 
@@ -421,7 +421,7 @@ class action_attack(model_base.action_attack):
 # event dialogues
 #
 #------------------------------------------------------------
-class action_dialogue(model_base.action_dialogue):
+class action_dialogue(BaseModels.action_dialogue):
     "Store all event dialogues."
     pass
 
@@ -431,7 +431,7 @@ class action_dialogue(model_base.action_dialogue):
 # event closes
 #
 #------------------------------------------------------------
-class action_learn_skill(model_base.action_learn_skill):
+class action_learn_skill(BaseModels.action_learn_skill):
     pass
 
     
@@ -440,7 +440,7 @@ class action_learn_skill(model_base.action_learn_skill):
 # action to accept a quest
 #
 #------------------------------------------------------------
-class action_accept_quest(model_base.action_accept_quest):
+class action_accept_quest(BaseModels.action_accept_quest):
     pass
 
 
@@ -449,7 +449,7 @@ class action_accept_quest(model_base.action_accept_quest):
 # action to turn in a quest
 #
 #------------------------------------------------------------
-class action_turn_in_quest(model_base.action_turn_in_quest):
+class action_turn_in_quest(BaseModels.action_turn_in_quest):
     pass
 
     
@@ -458,7 +458,7 @@ class action_turn_in_quest(model_base.action_turn_in_quest):
 # action to close an event
 #
 # ------------------------------------------------------------
-class action_close_event(model_base.action_close_event):
+class action_close_event(BaseModels.action_close_event):
     pass
     
 
@@ -467,7 +467,7 @@ class action_close_event(model_base.action_close_event):
 # condition descriptions
 #
 # ------------------------------------------------------------
-class condition_desc(model_base.condition_desc):
+class condition_desc(BaseModels.condition_desc):
     "Object descriptions in different conditions."
     pass
 
@@ -477,7 +477,7 @@ class condition_desc(model_base.condition_desc):
 # localized strings
 #
 #------------------------------------------------------------
-class localized_strings(model_base.localized_strings):
+class localized_strings(BaseModels.localized_strings):
     "Store all system localized strings."
     pass
 
@@ -487,6 +487,6 @@ class localized_strings(model_base.localized_strings):
 # image resources
 #
 #------------------------------------------------------------
-class image_resources(model_base.image_resources):
+class image_resources(BaseModels.image_resources):
     "Store all image resource's information."
     pass

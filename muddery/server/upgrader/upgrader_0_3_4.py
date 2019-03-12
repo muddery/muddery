@@ -7,6 +7,7 @@ from __future__ import print_function
 import os, ast, json
 import django.core.management
 from evennia.server.evennia_launcher import init_game_directory
+from muddery.server.upgrader import utils
 from muddery.server.upgrader.base_upgrader import BaseUpgrader
 from django.apps import apps
 
@@ -36,9 +37,16 @@ class Upgrader(BaseUpgrader):
         os.chdir(game_dir)
         init_game_directory(game_dir, check_db=False)
 
+        # add system data to models
+        file_path = os.path.join(game_dir, "worlddata", "models.py")
+        utils.file_append(file_path, ["\n",
+                                      "class system_data(BaseModels.system_data):\n",
+                                      "    pass\n",
+                                      "\n"])
+
         # make new migrations
         django_args = ["makemigrations"]
-        django_kwargs = {"database": "worlddata"}
+        django_kwargs = {}
         django.core.management.call_command(*django_args, **django_kwargs)
 
         django_args = ["migrate"]
