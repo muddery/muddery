@@ -13,6 +13,9 @@ MapEditor = function() {
     this.room_size = 40;
     this.path_color = "#666";
 
+    this.use_grid = true;
+    this.grid_size = 10;
+
     this.path_index = 0;
 
     this.current_room = null;
@@ -43,6 +46,9 @@ MapEditor.prototype.init = function() {
 
     $("#form-name").text(this.area_key);
 
+    $("#use-grid").attr("checked", this.use_grid);
+    $("#grid-size").val(this.grid_size);
+
     this.onImageLoad();
     this.bindEvents();
     this.refresh();
@@ -53,6 +59,7 @@ MapEditor.prototype.bindEvents = function() {
     $("#save-record").on("click", this.onSave);
     $("#delete-record").on("click", this.onDelete);
 
+    // Set the background.
     $("#upload-background").on("click", this.onUploadBackground);
     $("#delete-background").on("click", this.onDeleteBackground);
     $("#set-background-size").on("click", this.onSetBackgroundSize);
@@ -60,6 +67,10 @@ MapEditor.prototype.bindEvents = function() {
     $("#edit-area").on("click", this.onEditArea);
 
     $("#map-image").on("load", this.onImageLoad);
+
+    // Set girds.
+    $("#use-grid").on("change", this.onUseGridChange);
+    $("#grid-size").on("blur", this.onGridSizeUnselect);
 
     // Mouse down on a room.
     $("#container").on("mousedown", ".element-room", this.onRoomMouseDown);
@@ -267,6 +278,31 @@ MapEditor.prototype.onRestoreBackgroundSize = function() {
     controller.setBackgroundSize(width, height);
 }
 
+
+/***********************************
+ *
+ * Grids.
+ *
+ ***********************************/
+
+/*
+ * On click use-grid check box.
+ */
+MapEditor.prototype.onUseGridChange = function(event) {
+    controller.use_grid = this.checked;
+}
+
+/*
+ * On grid's size changed.
+ */
+MapEditor.prototype.onGridSizeUnselect = function(event) {
+    var value = parseInt($(this).val());
+    if (value > 0) {
+        controller.grid_size = value;
+    }
+}
+
+
 /***********************************
  *
  * Draw map.
@@ -306,7 +342,7 @@ MapEditor.prototype.createRoom = function(info, x, y) {
 
     name.css({
         "left": x - name.width() / 2,
-        "top": room.position().top + room.outerHeight(),
+        "top": y - name.height() / 2,
         "position": "absolute"});
 
 }
@@ -638,11 +674,17 @@ MapEditor.prototype.dragRoom = function(event) {
     var x = event.clientX - container.offset().left;
     var y = event.clientY - container.offset().top;
 
-    var width = controller.current_room.outerWidth();
-    var height = controller.current_room.outerHeight();
+    var width = this.current_room.outerWidth();
+    var height = this.current_room.outerHeight();
 
     var room_x = x - this.room_offset_x + width / 2;
     var room_y = y - this.room_offset_y + height / 2;
+
+    // Set to grids.
+    if (this.use_grid) {
+        room_x = Math.round(room_x / this.grid_size) * this.grid_size;
+        room_y = Math.round(room_y / this.grid_size) * this.grid_size;
+    }
 
     // Move the room.
     controller.current_room.css({
@@ -651,19 +693,19 @@ MapEditor.prototype.dragRoom = function(event) {
         "position": "absolute"});
 
     // Move the room's name.
-    var room_key = controller.current_room.data("key");
+    var room_key = this.current_room.data("key");
     var name = $("#roomname-" + room_key);
     name.css({
         "left": room_x - name.width() / 2,
-        "top": room_y + height / 2,
+        "top": room_y - name.height() / 2,
         "position": "absolute"});
 
-    controller.rooms[room_key].x = room_x;
-    controller.rooms[room_key].y = room_y;
+    this.rooms[room_key].x = room_x;
+    this.rooms[room_key].y = room_y;
 
     // Move linked paths.
-    for (var path_id in controller.rooms[room_key].paths) {
-        var path_info = controller.paths[path_id];
+    for (var path_id in this.rooms[room_key].paths) {
+        var path_info = this.paths[path_id];
         var x1 = path_info.x1;
         var y1 = path_info.y1;
         var x2 = path_info.x2;
@@ -681,15 +723,15 @@ MapEditor.prototype.dragRoom = function(event) {
             x1 = room_x;
             y1 = room_y;
 
-            controller.paths[path_id]["x1"] = room_x;
-            controller.paths[path_id]["y1"] = room_y;
+            this.paths[path_id]["x1"] = room_x;
+            this.paths[path_id]["y1"] = room_y;
         }
         else if (room_key == path_info.room2) {
             x2 = room_x;
             y2 = room_y;
 
-            controller.paths[path_id]["x2"] = room_x;
-            controller.paths[path_id]["y2"] = room_y;
+            this.paths[path_id]["x2"] = room_x;
+            this.paths[path_id]["y2"] = room_y;
         }
 
         // Move path.
@@ -850,6 +892,11 @@ MapEditor.prototype.newRoomMouseUp = function(event) {
     var x = this.current_room.position().left + this.current_room.outerWidth() / 2;
     var y = this.current_room.position().top + this.current_room.outerHeight() / 2;
 
+    // Set to grids.
+    if (this.use_grid) {
+        x = Math.round(x / this.grid_size) * this.grid_size;
+        y = Math.round(y / this.grid_size) * this.grid_size;
+    }
     service.addRoom(this.room_typeclass, this.area_key, [x, y], this.addRoomSuccess, this.addRoomFailed);
 }
 
