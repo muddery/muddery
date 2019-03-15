@@ -93,6 +93,11 @@
     font-size: 14px;
 }
 
+#use-grid {
+    vertical-align: middle;
+    margin: 0 0;
+}
+
 .element-room {
     position: absolute;
     width: 40px;
@@ -120,6 +125,7 @@
     text-align: center;
     z-index: 2;
     pointer-events: none;
+    text-shadow: 1px 1px 1px #FFF;
 }
 
 .element-menu {
