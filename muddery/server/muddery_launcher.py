@@ -203,21 +203,24 @@ def main():
         evennia_launcher.init_game_directory(gamedir, check_db=False)
             
         # make migrations
+        django_args = ["makemigrations"]
+        django_kwargs = {}
         try:
-            django_args = ["makemigrations"]
-            django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
         except django.core.management.base.CommandError, exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
         # migrate the database
+        django_args = ["migrate"]
+        django_kwargs = {}
         try:
-            django_args = ["migrate"]
-            django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
-            
-            django_args = ["migrate"]
-            django_kwargs = {"database": "worlddata"}
+        except django.core.management.base.CommandError, exc:
+            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+        django_args = ["migrate"]
+        django_kwargs = {"database": "worlddata"}
+        try:
             django.core.management.call_command(*django_args, **django_kwargs)
         except django.core.management.base.CommandError, exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
@@ -257,6 +260,17 @@ def main():
 
         # pass-through to evennia
         evennia_launcher.main()
+
+        if option == "start":
+            # Collect static files.
+            django_args = ["collectstatic"]
+            django_kwargs = {"verbosity": 0,
+                             "interactive": False}
+            try:
+                django.core.management.call_command(*django_args, **django_kwargs)
+                print("Static file collected.")
+            except django.core.management.base.CommandError, exc:
+                print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
     else:
         # no input; print muddery info
         print(configs.ABOUT_INFO)
