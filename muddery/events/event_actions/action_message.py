@@ -1,0 +1,37 @@
+"""
+Event action.
+"""
+
+from __future__ import print_function
+
+import random
+from django.apps import apps
+from django.conf import settings
+from muddery.events.base_event_action import BaseEventAction
+from muddery.utils.localized_strings_handler import _
+
+
+class ActionMessage(BaseEventAction):
+    """
+    Attack a target.
+    """
+    key = "ACTION_MESSAGE"
+    name = _("Message")
+    model_name = "action_message"
+
+    def func(self, event_key, character, obj):
+        """
+        Send a message to the character.
+
+        Args:
+            event_key: (string) event's key.
+            character: (object) relative character.
+            obj: (object) the event object.
+        """
+        # get action data
+        model_obj = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
+        records = model_obj.objects.filter(event_key=event_key)
+
+        # send messages
+        for record in records:
+            character.msg(record.message)
