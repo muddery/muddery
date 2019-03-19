@@ -2,6 +2,8 @@
 Event action's base class.
 """
 
+from django.apps import apps
+from django.conf import settings
 from muddery.worlddata.services.general_query import query_fields
 from muddery.worlddata.dao import general_query_mapper
 
@@ -19,13 +21,28 @@ class BaseEventAction(object):
     # action's additional data table
     model_name = ""
 
-    def func(self, event_key, character):
+    # action's data model
+    __model__ = None
+
+    @classmethod
+    def model(cls):
+        """
+        Get the action's data model.
+        """
+        if cls.__model__:
+            return cls.__model__
+
+        cls.__model__ = apps.get_model(settings.WORLD_DATA_APP, cls.model_name)
+        return cls.__model__
+
+    def func(self, event_key, character, obj):
         """
         Event action's function.
 
         Args:
             event_key: (string) event's key.
-            character: (obj) relative character.
+            character: (object) relative character.
+            obj: (object) the event object.
         """
         pass
 

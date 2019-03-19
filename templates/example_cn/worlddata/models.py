@@ -468,6 +468,15 @@ class action_close_event(BaseModels.action_close_event):
 
 # ------------------------------------------------------------
 #
+# action to send a message to the character
+#
+# ------------------------------------------------------------
+class action_message(BaseModels.action_message):
+    pass
+
+
+# ------------------------------------------------------------
+#
 # condition descriptions
 #
 # ------------------------------------------------------------

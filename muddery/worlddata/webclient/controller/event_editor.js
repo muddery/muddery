@@ -59,7 +59,10 @@ EventEditor.prototype.queryFormSuccess = function(data) {
 EventEditor.prototype.queryAreasSuccess = function(data) {
     controller.areas = data;
     controller.setFields();
-    service.queryEventActionData(controller.action_type, controller.event_key, controller.queryActionSuccess, controller.queryActionFailed);
+    service.queryEventActionData(controller.action_type,
+                                 controller.event_key,
+                                 controller.queryActionSuccess,
+                                 controller.queryActionFailed);
 }
 
 EventEditor.prototype.queryAreasFailed = function(code, message, data) {
@@ -105,7 +108,10 @@ EventEditor.prototype.setFields = function() {
 
 EventEditor.prototype.onActionChanged = function(e) {
     controller.action_type = $(this).val();
-    service.queryEventActionData(controller.action_type, controller.event_key, controller.queryActionSuccess, controller.queryActionFailed);
+    service.queryEventActionData(controller.action_type,
+                                 controller.event_key,
+                                 controller.queryActionSuccess,
+                                 controller.queryActionFailed);
 }
 
 EventEditor.prototype.setActionData = function(data) {
@@ -141,10 +147,15 @@ EventEditor.prototype.onAddAction = function(e) {
     controller.saveFields(controller.addAction, controller.saveFormFailed);
 }
 
-EventEditor.prototype.addAction = function() {
+EventEditor.prototype.addAction = function(data, context) {
     if (!controller.event_key) {
-        window.parent.controller.notify("You should save this object first.");
-        return;
+        // get event's key
+        for (var f = 0; f < fields.length; f++) {
+            if (fields[f].name == "key") {
+                controller.event_key = fields[f].value;
+                break;
+            }
+        }
     }
 
     var editor = "event_action";

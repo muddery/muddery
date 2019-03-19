@@ -29,6 +29,7 @@ EVENT_TRIGGER_DIE = "EVENT_TRIGGER_DIE"             # caller die. object: killer
 EVENT_TRIGGER_TRAVERSE = "EVENT_TRIGGER_TRAVERSE"   # before traverse an exit. object: exit_id
 EVENT_TRIGGER_ACTION = "EVENT_TRIGGER_ACTION"       # called when a character act to an object
 EVENT_TRIGGER_SENTENCE = "EVENT_TRIGGER_SENTENCE"   # called when a character finishes a dialogue sentence.
+EVENT_TRIGGER_ROOM_INTERVAL = "EVENT_TRIGGER_ROOM_INTERVAL"   # trigger an event in a room at interval
 
 # event types
 EVENT_NONE = ""

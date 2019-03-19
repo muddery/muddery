@@ -20,7 +20,7 @@ PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_
 
 class EventTrigger(object):
     """
-    Trigger an event.
+    Every object has an event trigger. The event trigger works when this object acts with another object.
     """
 
     # available trigger types
@@ -31,6 +31,7 @@ class EventTrigger(object):
         defines.EVENT_TRIGGER_TRAVERSE, # before traverse an exit. trigger_obj: exit_id
         defines.EVENT_TRIGGER_ACTION,   # when a character act to an object. trigger_obj: object_id
         defines.EVENT_TRIGGER_SENTENCE,   # when a character finishes a dialogue sentence. trigger_obj: sentence_id
+        defines.EVENT_TRIGGER_ROOM_INTERVAL    # trigger an event in a room at interval
     ]
 
     def __init__(self, owner, object_key=None):
@@ -116,7 +117,7 @@ class EventTrigger(object):
             if rand < event["odds"]:
                 func = EVENT_ACTION_SET.func(event["action"])
                 if func:
-                    func(event["key"], character)
+                    func(event["key"], character, obj)
                 return True
             rand -= event["odds"]
 

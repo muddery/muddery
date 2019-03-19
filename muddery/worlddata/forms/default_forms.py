@@ -836,7 +836,27 @@ class ActionCloseEventForm(forms.ModelForm):
         model = CM.ACTION_CLOSE_EVENT.model
         fields = '__all__'
         
-        
+
+class ActionMessageForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ActionMessageForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    class Meta:
+        model = EVENT_ACTION_SET.get("ACTION_MESSAGE").model()
+        fields = '__all__'
+
+
+class ActionRoomIntervalForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ActionRoomIntervalForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    class Meta:
+        model = EVENT_ACTION_SET.get("ACTION_ROOM_INTERVAL").model()
+        fields = '__all__'
+
+
 class DialoguesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DialoguesForm, self).__init__(*args, **kwargs)

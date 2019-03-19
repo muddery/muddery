@@ -256,7 +256,7 @@ class SaveForm(BaseRequestProcesser):
         record_id = args.get('record', None)
 
         record_id = data_edit.save_form(values, table_name, record_id)
-        data = general_query.query_record(table_name, record_id)
+        data = data_edit.query_form(table_name, id=record_id)
         return success_response(data)
 
 

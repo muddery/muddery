@@ -86,8 +86,17 @@ CommonEditor.prototype.onAreaChange = function(e) {
 }
 
 CommonEditor.prototype.refresh = function() {
-    service.queryForm(this.table_name, this.record_id, this.queryFormSuccess, this.queryFormFailed);
+    service.queryForm(this.table_name, this.record_id, this.queryFormSuccess, this.failedCallback);
 }
+
+
+/*
+ * Common failed callback.
+ */
+CommonEditor.prototype.failedCallback = function(code, message, data) {
+    window.parent.controller.notify("ERROR", code + ": " + message);
+}
+
 
 CommonEditor.prototype.queryFormSuccess = function(data) {
     controller.fields = data;
@@ -102,25 +111,19 @@ CommonEditor.prototype.queryFormSuccess = function(data) {
     }
 
     if (query_areas) {
-        service.queryAreas(controller.queryAreasSuccess, controller.queryAreasFailed);
+        service.queryAreas(controller.queryAreasSuccess, controller.failedCallback);
     }
     else {
         controller.queryAreasSuccess({});
     }
 }
 
-CommonEditor.prototype.queryFormFailed = function(code, message, data) {
-    window.parent.controller.notify("ERROR", code + ": " + message);
-}
 
 CommonEditor.prototype.queryAreasSuccess = function(data) {
     controller.areas = data;
     controller.setFields();
 }
 
-CommonEditor.prototype.queryAreasFailed = function(code, message, data) {
-    window.parent.controller.notify("ERROR", code + ": " + message);
-}
 
 // Add form fields to the web page.
 CommonEditor.prototype.setFields = function() {
@@ -276,7 +279,8 @@ CommonEditor.prototype.confirmDelete = function(e) {
 
     service.deleteRecord(controller.table_name,
                          controller.record_id,
-                         controller.deleteSuccess);
+                         controller.deleteSuccess,
+                         controller.failedCallback);
 }
 
 CommonEditor.prototype.deleteSuccess = function(data) {

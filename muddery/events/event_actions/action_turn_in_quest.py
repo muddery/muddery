@@ -20,13 +20,14 @@ class ActionTurnInQuest(BaseEventAction):
     name = _("Turn in a Quest")
     model_name = "action_turn_in_quest"
 
-    def func(self, event_key, character):
+    def func(self, event_key, character, obj):
         """
         Turn in a quest.
 
         Args:
             event_key: (string) event's key.
-            character: (obj) relative character.
+            character: (object) relative character.
+            obj: (object) the event object.
         """
         # get action data
         model_obj = apps.get_model(settings.WORLD_DATA_APP, self.model_name)

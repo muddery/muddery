@@ -10,6 +10,8 @@ ObjectEditor = function() {
     this.obj_key = "";
     this.table_fields = [];
     this.event_fields = [];
+
+    this.event_table = "event_data";
 }
 
 ObjectEditor.prototype = prototype(CommonEditor.prototype);
@@ -62,7 +64,7 @@ ObjectEditor.prototype.onSave = function() {
             var image_type = $(image_fields[i]).data("image_type");
             var name = $(image_fields[i]).data("field_name");
             controller.file_fields.push(name);
-            service.uploadImage(file_obj, name, image_type, controller.uploadSuccess(name), controller.uploadFailed);
+            service.uploadImage(file_obj, name, image_type, controller.uploadSuccess(name), controller.failedCallback);
         }
     }
 
@@ -76,18 +78,18 @@ ObjectEditor.prototype.confirmDelete = function(e) {
 
     service.deleteObject(controller.obj_key,
                          controller.base_typeclass,
-                         controller.deleteSuccess);
+                         controller.deleteSuccess,
+                         controller.failedCallback);
 }
 
 ObjectEditor.prototype.onEditEvent = function(e) {
     var record_id = $(this).attr("data-record-id");
     if (record_id) {
         var editor = "event";
-        var table = "event_data";
         var args = {
             trigger: controller.obj_key,
         }
-        window.parent.controller.editRecord(editor, table, record_id, args);
+        window.parent.controller.editRecord(editor, controller.event_table, record_id, args);
     }
 }
 
@@ -102,9 +104,8 @@ ObjectEditor.prototype.onDeleteEvent = function(e) {
 ObjectEditor.prototype.confirmDeleteEvent = function(e) {
     window.parent.controller.hideWaiting();
 
-    var table = controller.table_name;
     var record_id = e.data.record;
-    service.deleteRecord(table, record, this.deleteEventSuccess);
+    service.deleteRecord(controller.event_table, record_id, controller.deleteEventSuccess, controller.failedCallback);
 }
 
 ObjectEditor.prototype.deleteEventSuccess = function(data) {
@@ -120,7 +121,7 @@ ObjectEditor.prototype.refresh = function() {
                             this.obj_typeclass,
                             this.obj_key,
                             this.queryFormSuccess,
-                            this.queryFormFailed);
+                            this.failedCallback);
 }
 
 ObjectEditor.prototype.uploadSuccess = function(field_name) {
@@ -147,9 +148,6 @@ ObjectEditor.prototype.uploadSuccess = function(field_name) {
     return callback;
 }
 
-ObjectEditor.prototype.uploadFailed = function(code, message, data) {
-    window.parent.controller.notify("ERROR", code + ": " + message);
-}
 
 ObjectEditor.prototype.queryFormSuccess = function(data) {
     controller.table_fields = data;
@@ -206,7 +204,7 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
 ObjectEditor.prototype.queryAreasSuccess = function(data) {
     controller.areas = data;
     controller.setFields();
-    service.queryObjectEvents(controller.obj_key, controller.queryEventTableSuccess, controller.queryEventTableFailed);
+    service.queryObjectEvents(controller.obj_key, controller.queryEventTableSuccess, controller.failedCallback);
 }
 
 ObjectEditor.prototype.queryEventTableSuccess = function(data) {
@@ -231,9 +229,6 @@ ObjectEditor.prototype.queryEventTableSuccess = function(data) {
     window.parent.controller.setFrameSize();
 }
 
-ObjectEditor.prototype.queryEventTableFailed = function(code, message, data) {
-    window.parent.controller.notify("ERROR", code + ": " + message);
-}
 
 // Add form fields to the web page.
 ObjectEditor.prototype.setFields = function() {
@@ -308,10 +303,9 @@ ObjectEditor.prototype.addEvent = function(e) {
     }
 
     var editor = "event";
-    var table = "event_data";
     var record = "";
     var args = {
         trigger: controller.obj_key,
     }
-    window.parent.controller.editRecord(editor, table, record, args);
+    window.parent.controller.editRecord(editor, controller.event_table, record, args);
 }

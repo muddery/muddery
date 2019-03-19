@@ -19,13 +19,14 @@ class ActionAttack(BaseEventAction):
     name = _("Attack")
     model_name = "action_attack"
 
-    def func(self, event_key, character):
+    def func(self, event_key, character, obj):
         """
         Start a combat.
 
         Args:
             event_key: (string) event's key.
-            character: (obj) relative character.
+            character: (object) relative character.
+            obj: (object) the event object.
         """
         # get action data
         model_obj = apps.get_model(settings.WORLD_DATA_APP, self.model_name)

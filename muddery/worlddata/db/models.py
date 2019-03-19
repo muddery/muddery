@@ -1364,6 +1364,49 @@ class action_close_event(BaseEventActionData):
 
 # ------------------------------------------------------------
 #
+# action to send a message to the character
+#
+# ------------------------------------------------------------
+class action_message(BaseEventActionData):
+    """
+    The Action to send a message to the character.
+    """
+    # Messages.
+    message = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Event Message"
+        verbose_name_plural = "Event Messages"
+
+
+# ------------------------------------------------------------
+#
+# action to send a message to the character
+#
+# ------------------------------------------------------------
+class action_room_interval(BaseEventActionData):
+    """
+    The action to trigger an event at interval.
+    """
+    # The key of the action to trigger.
+    action = models.CharField(max_length=KEY_LENGTH)
+
+    # Repeat interval in seconds.
+    interval = models.PositiveIntegerField(blank=True, default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Event Room Interval"
+        verbose_name_plural = "Event Room Intervals"
+
+
+# ------------------------------------------------------------
+#
 # condition descriptions
 #
 # ------------------------------------------------------------

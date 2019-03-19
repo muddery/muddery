@@ -20,13 +20,14 @@ class ActionLearnSkill(BaseEventAction):
     name = _("Learn a Skill")
     model_name = "action_learn_skill"
 
-    def func(self, event_key, character):
+    def func(self, event_key, character, obj):
         """
         Learn a skill.
 
         Args:
             event_key: (string) event's key.
-            character: (obj) relative character.
+            character: (object) relative character.
+            obj: (object) the event object.
         """
         # get action data
         model_obj = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
