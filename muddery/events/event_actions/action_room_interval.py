@@ -35,6 +35,6 @@ class ActionRoomInterval(BaseEventAction):
         records = model_obj.objects.filter(event_key=event_key)
 
         # Add a trigger script.
-        for record in records:
-            script = ScriptRoomInterval(obj, character, record.action, record.interval)
-            character.scripts.add(script)
+        actions = [record.action for record in records]
+        script = ScriptRoomInterval(obj, event_key, actions)
+        character.scripts.add(script)

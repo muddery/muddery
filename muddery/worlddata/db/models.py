@@ -1389,11 +1389,8 @@ class action_message(BaseEventActionData):
 # ------------------------------------------------------------
 class action_room_interval(BaseEventActionData):
     """
-    The action to trigger an event at interval.
+    The action to trigger other actions at interval.
     """
-    # The key of the action to trigger.
-    action = models.CharField(max_length=KEY_LENGTH)
-
     # Repeat interval in seconds.
     interval = models.PositiveIntegerField(blank=True, default=0)
 
