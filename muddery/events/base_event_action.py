@@ -46,7 +46,19 @@ class BaseEventAction(object):
         """
         pass
 
-    def query_event_data_table(self, event_key):
+    def get_event_data(self, event_key):
+        """
+        Query all actions of an event.
+
+        Args:
+            event_key: (string)event's key.
+        """
+        if not self.model_name:
+            return
+
+        return general_query_mapper.get_record(self.model_name, event_key=event_key)
+
+    def get_event_data_table(self, event_key):
         """
         Query all actions of an event.
 
@@ -57,11 +69,11 @@ class BaseEventAction(object):
             return
 
         fields = query_fields(self.model_name)
-        records = general_query_mapper.filter_records(self.model_name, event_key=event_key)
         rows = []
-        for record in records:
-            line = [str(record.serializable_value(field["name"])) for field in fields]
-            rows.append(line)
+
+        record = general_query_mapper.get_record(self.model_name, event_key=event_key)
+        line = [str(record.serializable_value(field["name"])) for field in fields]
+        rows.append(line)
 
         table = {
             "table": self.model_name,

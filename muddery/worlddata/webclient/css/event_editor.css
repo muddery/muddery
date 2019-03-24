@@ -2,3 +2,9 @@
 .action-title {
     display: inline-block;
 }
+
+.block {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 5px 0;
+}

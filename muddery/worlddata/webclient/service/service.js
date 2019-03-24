@@ -191,17 +191,17 @@ service = {
         this.sendRequest("query_dialogue_sentences", "", args, callback_success, callback_failed, context);
     },
 
-    /*  Query an event action's data.
+    /*  Query the form of the event action.
      *  Args:
-     *      type: (string) action's type.
-     *      key: （string) action's key.
+     *      action: (string) action's type.
+     *      event: （string) event's key.
      */
-    queryEventActionData: function(type, key, callback_success, callback_failed, context) {
+    queryEventActionForm: function(action, event, callback_success, callback_failed, context) {
         var args = {
-            type: type,
-            key: key
+            action: action,
+            event: event
         };
-        this.sendRequest("query_event_action_data", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_event_action_form", "", args, callback_success, callback_failed, context);
     },
 
     /*  Query a map.
@@ -288,6 +288,15 @@ service = {
             obj_key: obj_key
         };
         this.sendRequest("save_object_form", "", args, callback_success, callback_failed, context);
+    },
+
+    saveActionForm: function(values, action_type, event_key, callback_success, callback_failed, context) {
+        var args = {
+            values: values,
+            action: action_type,
+            event: event_key
+        };
+        this.sendRequest("save_event_action_form", "", args, callback_success, callback_failed, context);
     },
 
     deleteRecord: function(table_name, record_id, callback_success, callback_failed, context) {

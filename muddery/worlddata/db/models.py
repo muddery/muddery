@@ -1394,6 +1394,9 @@ class action_room_interval(BaseEventActionData):
     # Repeat interval in seconds.
     interval = models.PositiveIntegerField(blank=True, default=0)
 
+    # The event action.
+    action = models.CharField(max_length=KEY_LENGTH)
+
     class Meta:
         "Define Django meta options"
         abstract = True

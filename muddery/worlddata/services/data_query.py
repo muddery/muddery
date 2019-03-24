@@ -72,7 +72,13 @@ def query_event_action_data(action_type, event_key):
     if not action:
         raise MudderyError(ERR.no_table, "Can not find action: %s" % action_type)
 
-    return action.query_event_data_table(event_key)
+    record = None
+    try:
+        record = action.get_event_data_table(event_key)
+    except ObjectDoesNotExist:
+        pass
+
+    return record
 
 
 def query_dialogue_sentences(dialogue_key):

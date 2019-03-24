@@ -7,10 +7,10 @@ EventEditor = function() {
 
     this.event_key = "";
     this.trigger_obj = "";
-    this.action_type = "";
-    this.action_table = "";
 
-    this.action_data_fields = [];
+    // Action's data.
+    this.action_type = "";
+    this.action_fields = [];
 }
 
 EventEditor.prototype = prototype(CommonEditor.prototype);
@@ -29,6 +29,61 @@ EventEditor.prototype.bindEvents = function() {
     $("#action-table").on("click", ".delete-row", this.onDeleteAction);
 }
 
+// The event form has been saved.
+EventEditor.prototype.saveFormSuccess = function(data) {
+    controller.event_key = "";
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].name == "key") {
+            controller.event_key = data[i].value;
+            if (!controller.event_key) {
+                // Set the event's key.
+                controller.event_key = "";
+            }
+            break;
+        }
+    }
+    controller.saveActionFields();
+}
+
+// Save the action form.
+EventEditor.prototype.saveActionFields = function() {
+    var values = {};
+    for (var i = 0; i < this.action_fields.length; i++) {
+        var name = this.action_fields[i].name;
+
+        if (name == "event_key") {
+            // Set the event key.
+            values[name] = this.event_key;
+            continue;
+        }
+
+        var control = $("#control-" + name + " .editor-control");
+        if (control.length > 0) {
+            if (control.attr("type") == "checkbox") {
+                values[name] = control.prop("checked");
+            }
+            else {
+                // Leave the value blank if it is an empty string.
+                var value = control.val();
+                if (value.length > 0) {
+                    values[name] = value;
+                }
+            }
+        }
+    }
+
+    service.saveActionForm(values,
+                           this.action_type,
+                           this.event_key,
+                           this.saveActionFormSuccess,
+                           this.saveFormFailed);
+}
+
+// The action form has been saved.
+EventEditor.prototype.saveActionFormSuccess = function(data) {
+    controller.exit();
+}
+
 EventEditor.prototype.queryFormSuccess = function(data) {
     controller.event_key = "";
     controller.action_type = "";
@@ -36,6 +91,7 @@ EventEditor.prototype.queryFormSuccess = function(data) {
         if (data[i].name == "key") {
             controller.event_key = data[i].value;
             if (!controller.event_key) {
+                // Set the event's key.
                 controller.event_key = "";
             }
         }
@@ -59,7 +115,7 @@ EventEditor.prototype.queryFormSuccess = function(data) {
 EventEditor.prototype.queryAreasSuccess = function(data) {
     controller.areas = data;
     controller.setFields();
-    service.queryEventActionData(controller.action_type,
+    service.queryEventActionForm(controller.action_type,
                                  controller.event_key,
                                  controller.queryActionSuccess,
                                  controller.queryActionFailed);
@@ -70,7 +126,7 @@ EventEditor.prototype.queryAreasFailed = function(code, message, data) {
 }
 
 EventEditor.prototype.queryActionSuccess = function(data) {
-    controller.setActionData(data);
+    controller.setActionForm(data);
 }
 
 EventEditor.prototype.queryActionFailed = function(code, message, data) {
@@ -106,107 +162,33 @@ EventEditor.prototype.setFields = function() {
     window.parent.controller.setFrameSize();
 }
 
+// On the user selected another action.
 EventEditor.prototype.onActionChanged = function(e) {
     controller.action_type = $(this).val();
-    service.queryEventActionData(controller.action_type,
+    service.queryEventActionForm(controller.action_type,
                                  controller.event_key,
                                  controller.queryActionSuccess,
                                  controller.queryActionFailed);
 }
 
-EventEditor.prototype.setActionData = function(data) {
-    if (!data) {
-        // No action data, hide the action table.
-        $("#action-table").hide();
+// Add the action's form to the web page.
+EventEditor.prototype.setActionForm = function(data) {
+    this.action_fields = data;
+
+    var container = $("#action-fields");
+    container.children().remove();
+
+    for (var i = 0; i < this.action_fields.length; i++) {
+        if (this.action_fields[i].name == "event_key") {
+            // Hide the event key field.
+            this.action_fields[i].type = "Hidden";
+        }
+
+        var controller = this.createFieldController(this.action_fields[i]);
+        if (controller) {
+            controller.appendTo(container);
+        }
     }
-
-    this.action_table = data.table;
-    this.action_data_fields = data.fields;
-
-    $("#action-table").bootstrapTable("destroy");
-    $("#action-table").bootstrapTable({
-        cache: false,
-        striped: true,
-        pagination: true,
-        pageList: [20, 50, 100],
-        pageSize: 20,
-        sidePagination: "client",
-        columns: this.parseFields(data.fields),
-        data: utils.parseRows(data.fields, data.records),
-        sortName: "id",
-        sortOrder: "asc",
-        clickToSelect: true,
-        singleSelect: true,
-    });
-    $("#action-table").show();
 
     window.parent.controller.setFrameSize();
-}
-
-EventEditor.prototype.onAddAction = function(e) {
-    controller.saveFields(controller.addAction, controller.saveFormFailed);
-}
-
-EventEditor.prototype.addAction = function(data, context) {
-    if (!controller.event_key) {
-        // get event's key
-        for (var f = 0; f < fields.length; f++) {
-            if (fields[f].name == "key") {
-                controller.event_key = fields[f].value;
-                break;
-            }
-        }
-    }
-
-    var editor = "event_action";
-    var table = controller.action_table;
-    var record = "";
-    var args = {
-        event: controller.event_key,
-    }
-    window.parent.controller.editRecord(editor, controller.action_table, record, args);
-}
-
-EventEditor.prototype.onEditAction = function(e) {
-    var context = {
-        record_id: $(this).attr("data-record-id"),
-    }
-    
-    controller.saveFields(controller.editActionSuccess, controller.saveFormFailed, context);
-}
-
-EventEditor.prototype.editActionSuccess = function(data, context) {
-    var record_id = context.record_id;
-    if (record_id) {
-        var editor = "event_action";
-        var table = controller.action_table;
-        var args = {
-            event: controller.event_key,
-        }
-        window.parent.controller.editRecord(editor, controller.action_table, record_id, args);
-    }
-}
-
-EventEditor.prototype.onDeleteAction = function(e) {
-    var record_id = $(this).attr("data-record-id");
-    window.parent.controller.confirm("",
-                                     "Delete this record?",
-                                     controller.confirmDeleteAction,
-                                     {record: record_id});
-}
-
-EventEditor.prototype.confirmDeleteAction = function(e) {
-    window.parent.controller.hideWaiting();
-
-    var table = controller.action_table;
-    var record_id = e.data.record;
-    service.deleteRecord(table, record, this.deleteActionSuccess);
-}
-
-EventEditor.prototype.deleteActionSuccess = function(data) {
-    var record_id = data.record;
-    $("#action-table").bootstrapTable("remove", {
-        field: "id",
-        values: [record_id],
-    });
 }

@@ -17,7 +17,6 @@ class EventActionSet(object):
     """
     def __init__(self):
         self.dict = {}
-        self.load()
 
     def load(self):
         """
@@ -54,3 +53,4 @@ class EventActionSet(object):
 
 
 EVENT_ACTION_SET = EventActionSet()
+EVENT_ACTION_SET.load()

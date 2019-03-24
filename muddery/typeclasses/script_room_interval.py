@@ -21,12 +21,12 @@ class ScriptRoomInterval(DefaultScript):
     """
     This script triggers an event in a room at intervals.
     """
-    def __init__(self, room, interval, event, actions):
+    def __init__(self, room, interval, event_key, actions):
         """
         Args:
             room: (obj) the room that the character is in.
             interval: (number) the interval
-            event: (string) the key of the event.
+            event_key: (string) the key of the event.
             actions: (list) a list of actions
         """
         super(ScriptRoomInterval, self).__init__()
@@ -35,7 +35,7 @@ class ScriptRoomInterval(DefaultScript):
         self.delay_start = True
 
         self.room = room
-        self.event = event
+        self.event_key = event_key
         self.actions = actions
 
     def at_repeat(self):
@@ -55,4 +55,4 @@ class ScriptRoomInterval(DefaultScript):
         for action in self.actions:
             func = EVENT_ACTION_SET.func(action)
             if func:
-                func(self.event, self.obj, self.room)
+                func(self.event_key, self.obj, self.room)

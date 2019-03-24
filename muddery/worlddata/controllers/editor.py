@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import json
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from evennia.server.sessionhandler import SESSIONS
 from muddery.worlddata.services import data_query, data_edit, general_query
@@ -16,6 +17,7 @@ from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worlddata.dao import general_query_mapper
 from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.mappings.event_action_set import EVENT_ACTION_SET
 
 
 class QueryFields(BaseRequestProcesser):
@@ -141,20 +143,42 @@ class QueryEventActionData(BaseRequestProcesser):
     Query an event action's data.
 
     Args:
-        type: (string) action's type
-        key: (string) event's key
+        action: (string) action's type
+        event: (string) event's key
     """
     path = "query_event_action_data"
     name = ""
 
     def func(self, args, request):
-        if 'type' not in args or 'key' not in args:
+        if 'action' not in args or 'event' not in args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        action_type = args["type"]
-        event_key = args["key"]
+        action_type = args["action"]
+        event_key = args["event"]
 
         data = data_query.query_event_action_data(action_type, event_key)
+        return success_response(data)
+
+
+class QueryEventActionForm(BaseRequestProcesser):
+    """
+    Query the form of the event action.
+
+    Args:
+        action: (string) action's type
+        event: (string) event's key
+    """
+    path = "query_event_action_form"
+    name = ""
+
+    def func(self, args, request):
+        if 'action' not in args or 'event' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        action_type = args["action"]
+        event_key = args["event"]
+
+        data = data_edit.query_event_action_form(action_type, event_key)
         return success_response(data)
 
 
@@ -254,6 +278,53 @@ class SaveForm(BaseRequestProcesser):
         values = args["values"]
         table_name = args["table"]
         record_id = args.get('record', None)
+
+        record_id = data_edit.save_form(values, table_name, record_id)
+        data = data_edit.query_form(table_name, id=record_id)
+        return success_response(data)
+
+
+class SaveEventActionForm(BaseRequestProcesser):
+    """
+    Save an action's form.
+
+    Args:
+        values: (dict) values to save.
+        action: (string) action's type.
+        event: (string) event's key.
+    """
+    path = "save_event_action_form"
+    name = ""
+
+    def func(self, args, request):
+        if not args:
+            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+
+        if 'values' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "values".')
+
+        if 'action' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "action".')
+
+        if 'event' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "event".')
+
+        values = args["values"]
+        action_type = args["action"]
+        event_key = args["event"]
+
+        # Get action's data.
+        action = EVENT_ACTION_SET.get(action_type)
+        if not action:
+            raise MudderyError(ERR.no_table, "Can not find action: %s" % action_type)
+
+        table_name = action.model_name
+        record_id = None
+        try:
+            record = action.get_event_data(event_key)
+            record_id = record.id
+        except ObjectDoesNotExist:
+            pass
 
         record_id = data_edit.save_form(values, table_name, record_id)
         data = data_edit.query_form(table_name, id=record_id)

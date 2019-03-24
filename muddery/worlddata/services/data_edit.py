@@ -17,6 +17,7 @@ from muddery.worlddata.forms.default_forms import ObjectsForm
 from muddery.worlddata.forms.location_field import LocationField
 from muddery.worlddata.forms.image_field import ImageField
 from muddery.worlddata.services.general_query import query_fields
+from muddery.mappings.event_action_set import EVENT_ACTION_SET
 
 
 def query_form(table_name, **kwargs):
@@ -290,3 +291,20 @@ def delete_object(obj_key, base_typeclass=None):
                 general_query_mapper.delete_record_by_key(table, obj_key)
             except ObjectDoesNotExist:
                 pass
+
+
+def query_event_action_form(action_type, event_key):
+    """
+    Query the form of the event action.
+
+    Args:
+        action_type: (string) action's type
+        event_key: (string) event's key
+    """
+    # Get action's data.
+    action = EVENT_ACTION_SET.get(action_type)
+    if not action:
+        raise MudderyError(ERR.no_table, "Can not find action: %s" % action_type)
+
+    table_name = action.model_name
+    return query_form(table_name, event_key=event_key)

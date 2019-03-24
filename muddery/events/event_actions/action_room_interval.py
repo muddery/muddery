@@ -4,10 +4,8 @@ Event action.
 
 from __future__ import print_function
 
-import random
 from django.apps import apps
 from django.conf import settings
-from muddery.utils import utils
 from muddery.events.base_event_action import BaseEventAction
 from muddery.utils.localized_strings_handler import _
 from muddery.typeclasses.script_room_interval import ScriptRoomInterval
@@ -34,7 +32,7 @@ class ActionRoomInterval(BaseEventAction):
         model_obj = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         records = model_obj.objects.filter(event_key=event_key)
 
-        # Add a trigger script.
-        actions = [record.action for record in records]
-        script = ScriptRoomInterval(obj, event_key, actions)
-        character.scripts.add(script)
+        # Add actions.
+        for record in records:
+            script = ScriptRoomInterval(obj, record.interval, event_key, record.action)
+            character.scripts.add(script)

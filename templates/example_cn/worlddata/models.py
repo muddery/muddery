@@ -477,6 +477,15 @@ class action_message(BaseModels.action_message):
 
 # ------------------------------------------------------------
 #
+# action to send a message to the character
+#
+# ------------------------------------------------------------
+class action_room_interval(BaseModels.action_room_interval):
+    pass
+
+
+# ------------------------------------------------------------
+#
 # condition descriptions
 #
 # ------------------------------------------------------------
