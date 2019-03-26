@@ -130,6 +130,10 @@ $$.map_data = {
     },
 
     getDirectionName: function(degree) {
+        if (degree == null) {
+            return "";
+        }
+
         var direction = "";
         degree = degree - Math.floor(degree / 360) * 360;
         if (degree < 22.5) {
@@ -169,8 +173,11 @@ $$.map_data = {
         // 3  4  5
         // 6  7  8
         // default direction index is 4
+        if (degree == null) {
+            return 4;
+        }
 
-        var direction = 4;
+        var direction = 5;
         degree = degree - Math.floor(degree / 360) * 360;
         if (degree < 22.5) {
             direction = 5;
