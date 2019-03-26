@@ -168,7 +168,7 @@ $$.map_data = {
         // 0  1  2
         // 3  4  5
         // 6  7  8
-        // default direction index is 5
+        // default direction index is 4
 
         var direction = 4;
         degree = degree - Math.floor(degree / 360) * 360;
@@ -197,7 +197,7 @@ $$.map_data = {
             direction = 8;
         }
         else {
-            direction = 4;
+            direction = 5;
         }
 
         return direction;
