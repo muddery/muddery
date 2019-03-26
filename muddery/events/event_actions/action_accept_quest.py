@@ -19,6 +19,7 @@ class ActionLearnSkill(BaseEventAction):
     key = "ACTION_ACCEPT_QUEST"
     name = _("Accept a Quest")
     model_name = "action_accept_quest"
+    repeatedly = False
 
     def func(self, event_key, character, obj):
         """

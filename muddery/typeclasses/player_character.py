@@ -205,12 +205,21 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         self.resume_combat()
 
+        # Resume all scripts.
+        scripts = self.scripts.all()
+        for script in scripts:
+            script.unpause()
+
     def at_pre_unpuppet(self):
         """
         Called just before beginning to un-connect a puppeting from
         this Player.
-        
         """
+        # Pause all scripts.
+        scripts = self.scripts.all()
+        for script in scripts:
+            script.pause()
+
         if not self.solo_mode:
             # notify its location
             if self.location:

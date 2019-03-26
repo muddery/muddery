@@ -51,6 +51,12 @@ class EventActionSet(object):
         """
         return self.dict.keys()
 
+    def repeatedly(self):
+        """
+        Get all repeatedly event types.
+        """
+        keys = [key for key, value in self.dict.items() if value.repeatedly]
+        return keys
 
 EVENT_ACTION_SET = EventActionSet()
 EVENT_ACTION_SET.load()

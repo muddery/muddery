@@ -19,6 +19,7 @@ class ActionDialogue(BaseEventAction):
     key = "ACTION_DIALOGUE"
     name = _("Dialogue")
     model_name = "action_dialogue"
+    repeatedly = False
 
     def func(self, event_key, character, obj):
         """

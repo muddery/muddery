@@ -6,6 +6,7 @@ from __future__ import print_function
 
 from django.apps import apps
 from django.conf import settings
+from evennia import create_script
 from muddery.events.base_event_action import BaseEventAction
 from muddery.utils.localized_strings_handler import _
 from muddery.typeclasses.script_room_interval import ScriptRoomInterval
@@ -18,6 +19,7 @@ class ActionRoomInterval(BaseEventAction):
     key = "ACTION_ROOM_INTERVAL"
     name = _("Triggers an event in a room at interval.")
     model_name = "action_room_interval"
+    repeatedly = False
 
     def func(self, event_key, character, obj):
         """
@@ -34,5 +36,11 @@ class ActionRoomInterval(BaseEventAction):
 
         # Add actions.
         for record in records:
-            script = ScriptRoomInterval(obj, record.interval, event_key, record.action)
-            character.scripts.add(script)
+            script = create_script(ScriptRoomInterval,
+                                   key=event_key,
+                                   interval=record.interval,
+                                   autostart=False,
+                                   start_delay=True,
+                                   obj=character)
+            script.set_action(obj, event_key, record.action, record.begin_message, record.end_message)
+            script.start()

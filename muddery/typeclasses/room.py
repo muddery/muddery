@@ -72,7 +72,7 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
             except Exception, e:
                 logger.log_tracemsg("Load background %s error: %s" % (resource, e))
 
-    def at_object_receive(self, moved_obj, source_location):
+    def at_object_receive(self, moved_obj, source_location, **kwargs):
         """
         Called after an object has been moved into this object.
         
@@ -81,7 +81,7 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
         source_location (Object): Where `moved_object` came from.
         
         """
-        super(MudderyRoom, self).at_object_receive(moved_obj, source_location)
+        super(MudderyRoom, self).at_object_receive(moved_obj, source_location, **kwargs)
 
         if not GAME_SETTINGS.get("solo_mode"):
             # send surrounding changes to player
@@ -113,6 +113,10 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
                 change = {type: [{"dbref": moved_obj.dbref,
                                   "name": moved_obj.get_name()}]}
                 self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
+
+        # trigger event
+        if moved_obj.has_account:
+            self.event.at_character_move_out(moved_obj)
 
     def get_appearance(self, caller):
         """

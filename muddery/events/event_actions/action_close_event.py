@@ -18,6 +18,7 @@ class ActionCloseEvent(BaseEventAction):
     key = "ACTION_CLOSE_EVENT"
     name = _("Close an Event")
     model_name = "action_close_event"
+    repeatedly = False
 
     def func(self, event_key, character, obj):
         """

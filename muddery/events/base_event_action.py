@@ -24,6 +24,9 @@ class BaseEventAction(object):
     # action's data model
     __model__ = None
 
+    # this action can be called repeatedly in an event
+    repeatedly = False
+
     @classmethod
     def model(cls):
         """

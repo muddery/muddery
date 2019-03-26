@@ -13,6 +13,7 @@ from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
+from muddery.typeclasses.script_room_interval import ScriptRoomInterval
 
 
 PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_EVENTS}
@@ -31,7 +32,6 @@ class EventTrigger(object):
         defines.EVENT_TRIGGER_TRAVERSE, # before traverse an exit. trigger_obj: exit_id
         defines.EVENT_TRIGGER_ACTION,   # when a character act to an object. trigger_obj: object_id
         defines.EVENT_TRIGGER_SENTENCE,   # when a character finishes a dialogue sentence. trigger_obj: sentence_id
-        defines.EVENT_TRIGGER_ROOM_INTERVAL    # trigger an event in a room at interval
     ]
 
     def __init__(self, owner, object_key=None):
@@ -136,7 +136,11 @@ class EventTrigger(object):
         """
         Called when a character moves out of a room.
         """
-        pass
+        # Remove room interval actions.
+        scripts = character.scripts.all()
+        for script in scripts:
+            if script.is_typeclass(ScriptRoomInterval, exact=False):
+                script.stop()
 
     def at_character_die(self):
         """

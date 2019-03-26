@@ -18,6 +18,7 @@ class ActionAttack(BaseEventAction):
     key = "ACTION_ATTACK"
     name = _("Attack")
     model_name = "action_attack"
+    repeatedly = False
 
     def func(self, event_key, character, obj):
         """

@@ -18,6 +18,7 @@ class ActionMessage(BaseEventAction):
     key = "ACTION_MESSAGE"
     name = _("Message")
     model_name = "action_message"
+    repeatedly = True
 
     def func(self, event_key, character, obj):
         """

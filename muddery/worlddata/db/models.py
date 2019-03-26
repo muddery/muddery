@@ -1397,6 +1397,12 @@ class action_room_interval(BaseEventActionData):
     # The event action.
     action = models.CharField(max_length=KEY_LENGTH)
 
+    # This message will be sent to the character when the interval begins.
+    begin_message = models.TextField(blank=True)
+
+    # This message will be sent to the character when the interval ends.
+    end_message = models.TextField(blank=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True

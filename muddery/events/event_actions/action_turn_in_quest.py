@@ -19,6 +19,7 @@ class ActionTurnInQuest(BaseEventAction):
     key = "ACTION_TURN_IN_QUEST"
     name = _("Turn in a Quest")
     model_name = "action_turn_in_quest"
+    repeatedly = False
 
     def func(self, event_key, character, obj):
         """

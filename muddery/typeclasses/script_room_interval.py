@@ -21,22 +21,41 @@ class ScriptRoomInterval(DefaultScript):
     """
     This script triggers an event in a room at intervals.
     """
-    def __init__(self, room, interval, event_key, actions):
+    def __init__(self, *args, **kwargs):
+        super(ScriptRoomInterval, self).__init__(*args, **kwargs)
+
+        # Set default values.
+        self.room = None
+        self.event_key = ""
+        self.action = ""
+        self.begin_message = ""
+        self.end_message = ""
+
+    def at_script_creation(self):
+        self.key = "room_interval_script"
+        self.persistent = True
+
+    def set_action(self, room, event_key, action, begin_message, end_message):
         """
+        Set action data.
+
         Args:
-            room: (obj) the room that the character is in.
-            interval: (number) the interval
-            event_key: (string) the key of the event.
-            actions: (list) a list of actions
+            event: (string) event's key.
+            action: (string) action's key.
         """
-        super(ScriptRoomInterval, self).__init__()
-
-        self.interval = interval
-        self.delay_start = True
-
         self.room = room
         self.event_key = event_key
-        self.actions = actions
+        self.action = action
+        self.begin_message = begin_message
+        self.end_message = end_message
+
+    def at_start(self):
+        """
+        Called every time the script is started.
+        """
+        if self.begin_message:
+            if self.obj:
+                self.obj.msg(self.begin_message)
 
     def at_repeat(self):
         """
@@ -46,13 +65,25 @@ class ScriptRoomInterval(DefaultScript):
             self.stop()
             return
 
+        if not self.room:
+            # The room does not exist.
+            self.obj.scripts.delete(self)
+            return
+
         if self.obj.location != self.room:
             # The character has left the room.
             self.obj.scripts.delete(self)
             return
 
         # Do actions.
-        for action in self.actions:
-            func = EVENT_ACTION_SET.func(action)
-            if func:
-                func(self.event_key, self.obj, self.room)
+        func = EVENT_ACTION_SET.func(self.action)
+        if func:
+            func(self.event_key, self.obj, self.room)
+
+    def at_stop(self):
+        """
+        Called every time the script is started.
+        """
+        if self.end_message:
+            if self.obj:
+                self.obj.msg(self.end_message)
