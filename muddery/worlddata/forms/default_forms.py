@@ -330,8 +330,6 @@ class CommonObjectsForm(ObjectsForm):
 class FoodsForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(FoodsForm, self).__init__(*args, **kwargs)
-        
-        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
         FOOD_ATTRIBUTES_INFO.set_form_fields(self)
@@ -349,9 +347,6 @@ class SkillBooksForm(ObjectsForm):
         objects = CM.SKILLS.all_with_base()
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['skill'] = forms.ChoiceField(choices=choices)
-        
-        # icons
-        self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
 
@@ -679,8 +674,6 @@ class EquipmentsForm(ObjectsForm):
         objects = CM.EQUIPMENT_TYPES.objects.all()
         choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
         self.fields['type'] = forms.ChoiceField(choices=choices)
-
-        self.fields['icon'] = ImageField(image_type="icon", required=False)
         
         localize_form_fields(self)
         EQUIPMENT_ATTRIBUTES_INFO.set_form_fields(self)
