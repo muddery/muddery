@@ -88,6 +88,7 @@ ObjectEditor.prototype.onEditEvent = function(e) {
         var editor = "event";
         var args = {
             trigger: controller.obj_key,
+             typeclass: controller.obj_typeclass,
         }
         window.parent.controller.editRecord(editor, controller.event_table, record_id, args);
     }
@@ -204,7 +205,21 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
 ObjectEditor.prototype.queryAreasSuccess = function(data) {
     controller.areas = data;
     controller.setFields();
+
+    // Query events data.
+    service.queryEventTriggers(controller.obj_typeclass, controller.queryEventTriggersSuccess, controller.failedCallback);
     service.queryObjectEvents(controller.obj_key, controller.queryEventTableSuccess, controller.failedCallback);
+}
+
+ObjectEditor.prototype.queryEventTriggersSuccess = function(data) {
+    // If has events, show the events block.
+    if (data) {
+        $("#events").show();
+    }
+    else {
+        $("#events").hide();
+    }
+    window.parent.controller.setFrameSize();
 }
 
 ObjectEditor.prototype.queryEventTableSuccess = function(data) {
@@ -306,6 +321,7 @@ ObjectEditor.prototype.addEvent = function(e) {
     var record = "";
     var args = {
         trigger: controller.obj_key,
+        typeclass: controller.obj_typeclass,
     }
     window.parent.controller.editRecord(editor, controller.event_table, record, args);
 }

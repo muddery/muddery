@@ -177,6 +177,21 @@ service = {
         this.sendRequest("query_areas", "", {}, callback_success, callback_failed, context);
     },
 
+    /*  Query all events of the object.
+     *  Args:
+     *      object_key: (string) the object's key.
+     */
+    queryEventTriggers: function(typeclass_key, callback_success, callback_failed, context) {
+        var args = {
+            typeclass: typeclass_key
+        };
+        this.sendRequest("query_event_triggers", "", args, callback_success, callback_failed, context);
+    },
+
+    /*  Query all events of the object.
+     *  Args:
+     *      object_key: (string) the object's key.
+     */
     queryObjectEvents: function(object_key, callback_success, callback_failed, context) {
         var args = {
             object: object_key

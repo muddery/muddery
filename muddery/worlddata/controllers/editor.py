@@ -118,19 +118,39 @@ class QueryAreas(BaseRequestProcesser):
         return success_response(data)
 
 
+class QueryEventTriggers(BaseRequestProcesser):
+    """
+    Query all event triggers of the given typeclass.
+
+    Args:
+        typeclass: (string) the object's typeclass.
+    """
+    path = "query_event_triggers"
+    name = ""
+
+    def func(self, args, request):
+        if 'typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+
+        typeclass = args["typeclass"]
+
+        data = data_query.query_event_triggers(typeclass)
+        return success_response(data)
+
+
 class QueryObjectEvents(BaseRequestProcesser):
     """
     Query all events of the given object.
 
     Args:
-        object: (string) object's key
+        object: (string) object's key.
     """
     path = "query_object_events"
     name = ""
 
     def func(self, args, request):
         if 'object' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing arguments.')
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "object".')
 
         object_key = args["object"]
 

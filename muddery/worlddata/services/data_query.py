@@ -15,7 +15,7 @@ from muddery.worlddata.dao import general_query_mapper, model_mapper
 from muddery.worlddata.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
 from muddery.worlddata.dao.event_mapper import get_object_event
 from muddery.worlddata.services.general_query import query_fields
-from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.mappings.typeclass_set import TYPECLASS_SET, TYPECLASS
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.utils.exception import MudderyError, ERR
 
@@ -38,6 +38,16 @@ def query_areas():
     return areas
 
 
+def query_event_triggers(typeclass_key):
+    """
+    Query all event triggers of the given typeclass.
+
+    Args:
+        typeclass_key: (string) the object's typeclass_key.
+    """
+    return TYPECLASS_SET.get_trigger_types(typeclass_key)
+
+
 def query_object_events(object_key):
     """
     Query all events of the given object.
@@ -56,6 +66,7 @@ def query_object_events(object_key):
         "fields": fields,
         "records": rows,
     }
+
     return table
 
 
