@@ -4,7 +4,7 @@ Battle commands. They only can be used when a character is in a combat.
 
 from __future__ import print_function
 
-import os, tempfile, time, shutil, filecmp
+import os, tempfile, time
 from PIL import Image
 from django.conf import settings
 from django.contrib import auth
@@ -263,20 +263,23 @@ class upload_image(BaseRequestProcesser):
                 raise MudderyError(ERR.upload_error, e.message)
         else:
             # Compare the uploaded file with the local file.
-            with tempfile.NamedTemporaryFile() as fp:
-                try:
-                    for chunk in file_obj.chunks():
-                        fp.write(chunk)
-                    fp.flush()
-
-                    same = filecmp.cmp(filepath, fp.name)
+            same = True
+            fp = None
+            try:
+                fp = open(filepath, "rb")
+                for chunk in file_obj.chunks():
+                    data = fp.read(len(chunk))
+                    compare = [0 for item in zip(chunk, data) if item[0] != item[1]]
+                    same = (len(compare) == 0)
                     if not same:
-                        raise MudderyError(ERR.upload_image_exist, 'File %s already exists.' % filename)
+                        break
+            except Exception, e:
+                same = False
 
-                    exist = True
-                except Exception, e:
-                    logger.log_tracemsg("Upload error: %s" % e.message)
-                    raise MudderyError(ERR.upload_error, e.message)
+            if not same:
+                raise MudderyError(ERR.upload_image_exist, 'File %s already exists.' % filename)
+
+            exist = True
 
         icon_location = settings.IMAGE_PATH + "/" + file_type + "/" + filename
         if not exist:

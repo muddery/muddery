@@ -99,6 +99,8 @@ EventEditor.prototype.saveActionFormSuccess = function(data) {
  * Save the action's action form.
  */
 EventEditor.prototype.saveActionActionFields = function() {
+    var container = $(".action-action-fields");
+
     var values = {};
     for (var i = 0; i < this.action_action_fields.length; i++) {
         var name = this.action_action_fields[i].name;
@@ -201,7 +203,26 @@ EventEditor.prototype.queryEventTriggersSuccess = function(data) {
 }
 
 EventEditor.prototype.queryActionSuccess = function(data) {
-    controller.setActionFields(data);
+    this.action_fields = data;
+
+    // Clear old data.
+    this.action_action_type = "";
+    this.action_action_fields = [];
+
+    // Clear data fields.
+    $(".action-block").remove();
+
+    if (data.length > 0) {
+        if (Array.isArray(data[0])) {
+            // Has more than one action's data.
+            for (var i = 0; i < data.length; i++) {
+                controller.setActionFields(data[i]);
+            }
+        }
+        else {
+            controller.setActionFields(data);
+        }
+    }
 }
 
 /*
@@ -231,7 +252,7 @@ EventEditor.prototype.setFields = function() {
     }
 
     // Bind the event of the action change.
-    $("#fields #control-action select").on("change", controller.onEventActionChanged);
+    $("#fields .control-item-action select").on("change", controller.onEventActionChanged);
 
     window.parent.controller.setFrameSize();
 }
@@ -251,37 +272,37 @@ EventEditor.prototype.onEventActionChanged = function(e) {
  * Set fields of the event's action.
  */
 EventEditor.prototype.setActionFields = function(data) {
-    this.action_fields = data;
+    var block = $("<div>")
+        .addClass("block action-block")
 
-    // Clear old data.
-    this.action_action_type = "";
-    this.action_action_fields = [];
+    var title = $("<h4>")
+        .addClass("action-title")
+        .text("Action Data")
+        .appendTo(block);
 
-    // Clear data fields.
-    var container = $("#action-fields");
-    container.children().remove();
+    var fields = $("<div>")
+        .addClass(".action-fields")
 
-    $("#action-action-fields").children().remove();
-
-    var action_action = "";
-    for (var i = 0; i < this.action_fields.length; i++) {
-        if (this.action_fields[i].name == "event_key") {
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].name == "event_key") {
             // Hide the event key field.
-            this.action_fields[i].type = "Hidden";
+            data[i].type = "Hidden";
         }
 
-        var field_controller = this.createFieldController(this.action_fields[i]);
+        var field_controller = this.createFieldController(data[i]);
         if (field_controller) {
-            field_controller.appendTo(container);
+            field_controller.appendTo(block);
         }
     }
+
+    block.appendTo($(".all-fields"));
 
     window.parent.controller.setFrameSize();
 
     // If this action has actions.
     if (this.action_type == "ACTION_ROOM_INTERVAL") {
         // Bind the event of the action's action change.
-        $("#action-fields #control-action select").on("change", controller.onActionActionChanged);
+        $(".action-fields #control-action select").on("change", controller.onActionActionChanged);
 
         // Query action's action data.
         for (var i = 0; i < this.action_fields.length; i++) {

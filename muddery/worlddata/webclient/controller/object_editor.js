@@ -69,7 +69,7 @@ ObjectEditor.prototype.onSave = function() {
     }
 
     if (!upload_images) {
-        controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed);
+        controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed, {container: "#fields"});
     }
 }
 
@@ -127,11 +127,12 @@ ObjectEditor.prototype.refresh = function() {
 
 ObjectEditor.prototype.uploadSuccess = function(field_name) {
     var callback = function(data) {
+        var container = $("#fields");
         // Show images when upload images success.
         for (var i = 0; i < controller.file_fields.length; i++) {
             if (controller.file_fields[i] == field_name) {
                 controller.file_fields.splice(i, 1);
-                var field = $("#control-" + field_name);
+                var field = container.find(".control-item-" + field_name);
                 field.find(".editor-control").val(data.resource);
                 field.find("img")
                     .attr("src", CONFIG.resource_url + data.resource)
@@ -142,7 +143,7 @@ ObjectEditor.prototype.uploadSuccess = function(field_name) {
 
         // Submit the form.
         if (controller.file_fields.length == 0) {
-            controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed);
+            controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed, {container: "#fields"});
         }
     }
 
@@ -263,7 +264,7 @@ ObjectEditor.prototype.setFields = function() {
         }
     }
 
-    $("#control-typeclass select").on("change", this.onTypeclassChange);
+    container.find(".control-item-typeclass select").on("change", this.onTypeclassChange);
 }
 
 ObjectEditor.prototype.onTypeclassChange = function(e) {
@@ -276,13 +277,14 @@ ObjectEditor.prototype.onTypeclassChange = function(e) {
 }
 
 ObjectEditor.prototype.saveFields = function(callback_success, callback_failed, context) {
+    var container = $(context.container);
     var tables = [];
     for (var t = 0; t < this.table_fields.length; t++) {
         var fields = this.table_fields[t].fields;
         var values = {};
         for (var f = 0; f < fields.length; f++) {
             var name = fields[f].name;
-            var control = $("#control-" + name + " .editor-control");
+            var control = container.find(".control-item-" + name + " .editor-control");
             if (control.length > 0) {
                 if (control.attr("type") == "checkbox") {
                     values[name] = control.prop("checked");

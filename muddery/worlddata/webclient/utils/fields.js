@@ -3,7 +3,7 @@ field_creator = {
     createControlGroup: function(name, ctrl, label, help_text) {
         var group = $("<div>")
             .addClass("control-group")
-            .attr("id", "control-" + name);
+            .addClass("control-item-" + name);
 
         // label
         var label_div = $("<label>")
@@ -34,7 +34,7 @@ field_creator = {
     createHiddenInput: function(name, label, value, help_text) {
         var group = $("<div>")
             .addClass("control-group hidden")
-            .attr("id", "control-" + name);
+            .addClass("control-item-" + name);
 
         var controller = $("<input>")
             .addClass("editor-control")
@@ -94,7 +94,7 @@ field_creator = {
     createCheckBox: function(name, label, value, help_text, check) {
         var group = $("<div>")
             .addClass("control-group")
-            .attr("id", "control-" + name);
+            .addClass("control-item-" + name);
 
         // controller
         var ctrl_div = $("<div>")
@@ -194,7 +194,7 @@ field_creator = {
 
         var image = $("<img>")
             .addClass("editor-image image-" + image_type)
-            .attr("id", "image-" + name)
+            .addClass("image-item-" + name)
             .attr("src", "../images/empty.png")
             .appendTo(ctrl);
             

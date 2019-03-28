@@ -60,7 +60,7 @@ CommonEditor.prototype.onExit = function() {
 }
 
 CommonEditor.prototype.onSave = function() {
-    controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed);
+    controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed, {container: "#fields"});
 }
 
 CommonEditor.prototype.onDelete = function() {
@@ -196,10 +196,11 @@ CommonEditor.prototype.exitNoChange = function() {
 }
 
 CommonEditor.prototype.saveFields = function(callback_success, callback_failed, context) {
+    var container = $(context.container);
     var values = {};
     for (var i = 0; i < this.fields.length; i++) {
         var name = this.fields[i].name;
-        var control = $("#control-" + name + " .editor-control");
+        var control = container.find(".control-item-" + name + " .editor-control");
         if (control.length > 0) {
             if (control.attr("type") == "checkbox") {
                 values[name] = control.prop("checked");
@@ -238,7 +239,7 @@ CommonEditor.prototype.saveFormSuccess = function(data) {
     controller.exit();
 }
 
-CommonEditor.prototype.saveFormFailed = function(code, message, data) {
+CommonEditor.prototype.saveFormFailed = function(code, message, data, context) {
     // Hide current messages.
     $(".message-block")
         .hide();
@@ -247,10 +248,11 @@ CommonEditor.prototype.saveFormFailed = function(code, message, data) {
 
     if (code == 10006) {
         // Invalid form
+        var container = context.container;
         if (typeof(data) == "object") {
             for (var name in data) {
                 // Set return messages.
-                var field = $("#control-" + name + " .message-block");
+                var field = container.find(".control-item-" + name + " .message-block");
                 if (field.length > 0) {
                     field
                         .text(data[name])
