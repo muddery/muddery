@@ -64,7 +64,7 @@ category,origin,local
 ,"Can not discard this object.","无法丢弃这件物品。"
 ,"DISCARD","丢弃"
 ,"Discard","丢弃"
-,"Moving to %s ...","移动到%s。。。"
+,"Moved to %s ...","移动到%s。。。"
 ,"You died.","你死了。"
 ,"You are reborn at {c%s{n.","你在{c%s{n重生了。"
 ,"You will be reborn at {c%(p)s{n in {c%(s)s{n seconds.","你将在{c%(s)s{n秒后在{c%(p)s{n重生。"

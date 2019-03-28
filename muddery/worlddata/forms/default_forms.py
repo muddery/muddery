@@ -855,6 +855,21 @@ class ActionRoomIntervalForm(forms.ModelForm):
         fields = '__all__'
 
 
+class ActionGetObjectsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ActionGetObjectsForm, self).__init__(*args, **kwargs)
+
+        # available objects
+        choices = get_all_pocketable_objects()
+        self.fields['object'] = forms.ChoiceField(choices=choices)
+
+        localize_form_fields(self)
+
+    class Meta:
+        model = EVENT_ACTION_SET.get("ACTION_GET_OBJECTS").model()
+        fields = '__all__'
+
+
 class DialoguesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DialoguesForm, self).__init__(*args, **kwargs)

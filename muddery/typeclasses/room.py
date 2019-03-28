@@ -91,10 +91,6 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
                                   "name": moved_obj.get_name()}]}
                 self.msg_contents({"obj_moved_in": change}, exclude=moved_obj)
 
-        # trigger event
-        if moved_obj.has_account:
-            self.event.at_character_move_in(moved_obj)
-
     def at_object_leave(self, moved_obj, target_location, **kwargs):
         """
         Called when an object leaves this object in any fashion.
@@ -113,10 +109,6 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
                 change = {type: [{"dbref": moved_obj.dbref,
                                   "name": moved_obj.get_name()}]}
                 self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
-
-        # trigger event
-        if moved_obj.has_account:
-            self.event.at_character_move_out(moved_obj)
 
     def get_appearance(self, caller):
         """

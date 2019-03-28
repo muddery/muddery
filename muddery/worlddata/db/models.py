@@ -1242,7 +1242,7 @@ class action_attack(BaseEventActionData):
     # Set the level of the mob. If it is 0, use the default level of the mob.
     level = models.IntegerField(blank=True, default=0)
 
-    # event's odds
+    # event's odds ([0.0, 1.0])
     odds = models.FloatField(blank=True, default=0)
 
     # combat's description
@@ -1384,7 +1384,7 @@ class action_message(BaseEventActionData):
 
 # ------------------------------------------------------------
 #
-# action to send a message to the character
+# action to trigger other actions at interval.
 #
 # ------------------------------------------------------------
 class action_room_interval(BaseEventActionData):
@@ -1409,6 +1409,32 @@ class action_room_interval(BaseEventActionData):
         app_label = "worlddata"
         verbose_name = "Event Room Interval"
         verbose_name_plural = "Event Room Intervals"
+
+
+# ------------------------------------------------------------
+#
+# action to add objects to characters
+#
+# ------------------------------------------------------------
+class action_get_objects(BaseEventActionData):
+    """
+    The Action to add objects to characters
+    """
+    # The object's key.
+    object = models.CharField(max_length=KEY_LENGTH)
+
+    # The object's number.
+    number = models.PositiveIntegerField(blank=True, default=0)
+
+    # The odds to get these objects. ([0.0, 1.0])
+    odds = models.FloatField(blank=True, default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Event Get Object"
+        verbose_name_plural = "Event Get Objects"
 
 
 # ------------------------------------------------------------

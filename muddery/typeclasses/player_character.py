@@ -161,13 +161,28 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # send latest inventory data to player
         self.msg({"inventory": self.return_inventory()})
 
+    def at_before_move(self, destination, **kwargs):
+        """
+        Called just before starting to move this object to
+        destination.
+        """
+        # trigger event
+        if self.has_account:
+            self.location.event.at_character_move_out(self)
+
+        return True
+
     def at_after_move(self, source_location):
         """
         We make sure to look around after a move.
 
         """
-        self.msg({"msg": _("Moving to %s ...") % self.location.name})
+        self.msg({"msg": _("Moved to %s ...") % self.location.name})
         self.show_location()
+
+        # trigger event
+        if self.has_account:
+            self.location.event.at_character_move_in(self)
 
     def at_post_puppet(self):
         """
@@ -573,7 +588,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             for key in accepted_keys:
                 self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, key, accepted_keys[key])
 
-        return rejected_keys
+        return {
+            "accepted_keys": accepted_keys,
+            "accepted_names": accepted_names,
+            "rejected_keys": rejected_keys,
+            "reject_reason": reject_reason
+        }
 
     def get_object_number(self, obj_key):
         """
