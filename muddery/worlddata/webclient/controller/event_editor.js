@@ -11,11 +11,11 @@ EventEditor = function() {
 
     // Action's data.
     this.action_type = "";
-    this.action_fields = [];
+    this.actions = [];
 
     // Action's action data.
     this.action_action_type = "";
-    this.action_action_fields = [];
+    this.action_actions = [];
 }
 
 EventEditor.prototype = prototype(CommonEditor.prototype);
@@ -53,32 +53,40 @@ EventEditor.prototype.saveFormSuccess = function(data) {
 
 // Save the action form.
 EventEditor.prototype.saveActionFields = function() {
-    var values = {};
-    for (var i = 0; i < this.action_fields.length; i++) {
-        var name = this.action_fields[i].name;
+    var action_value_list = []
+    var control_list = $(".action-fields");
 
-        if (name == "event_key") {
-            // Set the event key.
-            values[name] = this.event_key;
-            continue;
-        }
+    for (var i = 0; i < this.actions.length; i++) {
+        var action_fields = this.actions[i];
+        var values = {};
 
-        var control = $("#action-fields #control-" + name + " .editor-control");
-        if (control.length > 0) {
-            if (control.attr("type") == "checkbox") {
-                values[name] = control.prop("checked");
+        for (var j = 0; j < action_fields.length; j++) {
+            var name = action_fields[j].name;
+
+            if (name == "event_key") {
+                // Set the event key.
+                values[name] = this.event_key;
+                continue;
             }
-            else {
-                // Leave the value blank if it is an empty string.
-                var value = control.val();
-                if (value.length > 0) {
-                    values[name] = value;
+
+            var control = $(control_list[i]).find(".control-item-" + name + " .editor-control");
+            if (control.length > 0) {
+                if (control.attr("type") == "checkbox") {
+                    values[name] = control.prop("checked");
+                }
+                else {
+                    // Leave the value blank if it is an empty string.
+                    var value = control.val();
+                    if (value.length > 0) {
+                        values[name] = value;
+                    }
                 }
             }
         }
+        action_value_list.push(values);
     }
 
-    service.saveActionForm(values,
+    service.saveActionForm(action_value_list,
                            this.action_type,
                            this.event_key,
                            this.saveActionFormSuccess,
@@ -203,26 +211,29 @@ EventEditor.prototype.queryEventTriggersSuccess = function(data) {
 }
 
 EventEditor.prototype.queryActionSuccess = function(data) {
-    this.action_fields = data;
+    if (data.length > 0) {
+        if (!Array.isArray(data[0])) {
+            data = [data];
+        }
+    }
+    this.actions = data;
 
     // Clear old data.
     this.action_action_type = "";
-    this.action_action_fields = [];
+    this.action_actions = [];
 
     // Clear data fields.
     $(".action-block").remove();
 
-    if (data.length > 0) {
-        if (Array.isArray(data[0])) {
-            // Has more than one action's data.
-            for (var i = 0; i < data.length; i++) {
-                controller.setActionFields(data[i]);
-            }
-        }
-        else {
-            controller.setActionFields(data);
-        }
+    var block = $("<div>")
+        .addClass("block action-block")
+        .appendTo($(".all-fields"));
+
+    for (var i = 0; i < data.length; i++) {
+        controller.setActionFields(data[i], block);
     }
+
+    window.parent.controller.setFrameSize();
 }
 
 /*
@@ -255,6 +266,31 @@ EventEditor.prototype.setFields = function() {
     $("#fields .control-item-action select").on("change", controller.onEventActionChanged);
 
     window.parent.controller.setFrameSize();
+
+    // If this action has actions.
+    if (this.action_type == "ACTION_ROOM_INTERVAL") {
+        // Bind the event of the action's action change.
+        $(".action-block .control-item-action select").on("change", controller.onActionActionChanged);
+
+        // Query action's action data.
+        for (var i = 0; i < this.actions[0].length; i++) {
+            if (this.actions[0][i].name == "action") {
+                this.action_action_type = this.actions[0][i].value;
+                if (!this.action_action_type) {
+                    // Set default event action.
+                    if (this.actions[0][i].choices.length > 0) {
+                        this.action_action_type = this.actions[0][i].choices[0][0];
+                    }
+                }
+
+                service.queryEventActionForm(this.action_action_type,
+                                             this.event_key,
+                                             this.queryActionActionSuccess,
+                                             this.failedCallback);
+                break;
+            }
+        }
+    }
 }
 
 /*
@@ -271,10 +307,7 @@ EventEditor.prototype.onEventActionChanged = function(e) {
 /*
  * Set fields of the event's action.
  */
-EventEditor.prototype.setActionFields = function(data) {
-    var block = $("<div>")
-        .addClass("block action-block")
-
+EventEditor.prototype.setActionFields = function(data, container) {
     var title = $("<h4>")
         .addClass("action-title")
         .text("Action Data")
@@ -291,36 +324,7 @@ EventEditor.prototype.setActionFields = function(data) {
 
         var field_controller = this.createFieldController(data[i]);
         if (field_controller) {
-            field_controller.appendTo(block);
-        }
-    }
-
-    block.appendTo($(".all-fields"));
-
-    window.parent.controller.setFrameSize();
-
-    // If this action has actions.
-    if (this.action_type == "ACTION_ROOM_INTERVAL") {
-        // Bind the event of the action's action change.
-        $(".action-fields #control-action select").on("change", controller.onActionActionChanged);
-
-        // Query action's action data.
-        for (var i = 0; i < this.action_fields.length; i++) {
-            if (this.action_fields[i].name == "action") {
-                this.action_action_type = this.action_fields[i].value;
-                if (!this.action_action_type) {
-                    // Set default event action.
-                    if (this.action_fields[i].choices.length > 0) {
-                        this.action_action_type = this.action_fields[i].choices[0][0];
-                    }
-                }
-
-                service.queryEventActionForm(this.action_action_type,
-                                             this.event_key,
-                                             this.queryActionActionSuccess,
-                                             this.failedCallback);
-                break;
-            }
+            field_controller.appendTo(container);
         }
     }
 }
@@ -349,20 +353,18 @@ EventEditor.prototype.queryActionActionSuccess = function(data) {
 EventEditor.prototype.setActionActionFields = function(data) {
     this.action_action_fields = data;
 
-    var container = $("#action-action-fields");
+    var container = $(".action-action-block");
     container.children().remove();
 
-    for (var i = 0; i < this.action_action_fields.length; i++) {
-        if (this.action_action_fields[i].name == "event_key") {
-            // Hide the event key field.
-            this.action_action_fields[i].type = "Hidden";
+    if (data.length > 0) {
+        if (Array.isArray(data[0])) {
+            // Has more than one action's data.
+            for (var i = 0; i < data.length; i++) {
+                controller.setActionFields(data[i], ".all-fields");
+            }
         }
-
-        var field_controller = this.createFieldController(this.action_action_fields[i]);
-        if (field_controller) {
-            field_controller.appendTo(container);
+        else {
+            controller.setActionFields(data, ".all-fields");
         }
     }
-
-    window.parent.controller.setFrameSize();
 }
