@@ -188,7 +188,7 @@ class QueryEventActionForm(BaseRequestProcesser):
         action: (string) action's type
         event: (string) event's key
     """
-    path = "query_event_action_form"
+    path = "query_event_action_forms"
     name = ""
 
     def func(self, args, request):
@@ -198,7 +198,7 @@ class QueryEventActionForm(BaseRequestProcesser):
         action_type = args["action"]
         event_key = args["event"]
 
-        data = data_edit.query_event_action_form(action_type, event_key)
+        data = data_edit.query_event_action_forms(action_type, event_key)
         return success_response(data)
 
 

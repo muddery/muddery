@@ -293,9 +293,9 @@ def delete_object(obj_key, base_typeclass=None):
                 pass
 
 
-def query_event_action_form(action_type, event_key):
+def query_event_action_forms(action_type, event_key):
     """
-    Query the form of the event action.
+    Query forms of the event action.
 
     Args:
         action_type: (string) action's type
@@ -306,5 +306,17 @@ def query_event_action_form(action_type, event_key):
     if not action:
         raise MudderyError(ERR.no_table, "Can not find action: %s" % action_type)
 
+    # Get all forms.
+    forms = []
     table_name = action.model_name
-    return query_form(table_name, event_key=event_key)
+    records = general_query_mapper.filter_records(table_name, event_key=event_key)
+    if records:
+        for record in records:
+            forms.append(query_form(table_name, id=record.id))
+    else:
+        forms.append(query_form(table_name))
+
+    return {
+        "forms": forms,
+        "repeatedly": action.repeatedly
+    }

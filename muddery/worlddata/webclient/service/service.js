@@ -206,17 +206,17 @@ service = {
         this.sendRequest("query_dialogue_sentences", "", args, callback_success, callback_failed, context);
     },
 
-    /*  Query the form of the event action.
+    /*  Query all forms of the event action.
      *  Args:
      *      action: (string) action's type.
      *      event: （string) event's key.
      */
-    queryEventActionForm: function(action, event, callback_success, callback_failed, context) {
+    queryEventActionForms: function(action, event, callback_success, callback_failed, context) {
         var args = {
             action: action,
             event: event
         };
-        this.sendRequest("query_event_action_form", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_event_action_forms", "", args, callback_success, callback_failed, context);
     },
 
     /*  Query a map.

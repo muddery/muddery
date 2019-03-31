@@ -1,5 +1,15 @@
 
 /*
+ * The event editor.
+ * The query sequence:
+ * 1. queryForm -> set the event_key and the action_type
+ * 2. if need query_areas, queryAreas
+ * 3. queryEventTriggers
+ * 4. queryEventActionForms
+ * 5. if the action_type is "ACTION_ROOM_INTERVAL", use queryEventActionForms to query interval actions.
+ */
+
+/*
  * Derive from the base class.
  */
 EventEditor = function() {
@@ -204,36 +214,45 @@ EventEditor.prototype.queryEventTriggersSuccess = function(data) {
     controller.setFields();
 
     // Query actions.
-    service.queryEventActionForm(controller.action_type,
-                                 controller.event_key,
-                                 controller.queryActionSuccess,
-                                 controller.failedCallback);
+    service.queryEventActionForms(controller.action_type,
+                                  controller.event_key,
+                                  controller.queryActionSuccess,
+                                  controller.failedCallback);
 }
 
 EventEditor.prototype.queryActionSuccess = function(data) {
-    if (data.length > 0) {
-        if (!Array.isArray(data[0])) {
-            data = [data];
-        }
-    }
-    this.actions = data;
-
     // Clear old data.
-    this.action_action_type = "";
-    this.action_actions = [];
+    controller.action_action_type = "";
+    controller.action_actions = [];
 
     // Clear data fields.
-    $(".action-block").remove();
+    var container = $("#action-forms");
+    container.children().remove();
 
-    var block = $("<div>")
-        .addClass("block action-block")
-        .appendTo($(".all-fields"));
+    // Set new forms.
+    var forms = data.forms;
+    for (var i = 0; i < forms.length; i++) {
+        controller.addActionForm(forms[i], container);
+    }
 
-    for (var i = 0; i < data.length; i++) {
-        controller.setActionFields(data[i], block);
+    if (forms.length == 1) {
+        // If there is only one action left, hide the delete button.
+        $(".action-block .btn-delete").hide();
+    }
+    if (data.repeatedly) {
+        // Repeatable actions, add an add button.
+        var button = $("<button>")
+            .attr("type", "button")
+            .addClass("btn btn-default btn-add-action")
+            .text("Add")
+            .on("click", onAddAction)
+            .appendTo(container);
     }
 
     window.parent.controller.setFrameSize();
+
+    // Show action's action fields.
+    controller.showActionAction();
 }
 
 /*
@@ -266,6 +285,14 @@ EventEditor.prototype.setFields = function() {
     $("#fields .control-item-action select").on("change", controller.onEventActionChanged);
 
     window.parent.controller.setFrameSize();
+}
+
+
+/*
+ * Show action's action.
+ */
+EventEditor.prototype.showActionAction = function() {
+    return;
 
     // If this action has actions.
     if (this.action_type == "ACTION_ROOM_INTERVAL") {
@@ -283,10 +310,10 @@ EventEditor.prototype.setFields = function() {
                     }
                 }
 
-                service.queryEventActionForm(this.action_action_type,
-                                             this.event_key,
-                                             this.queryActionActionSuccess,
-                                             this.failedCallback);
+                service.queryEventActionForms(this.action_action_type,
+                                              this.event_key,
+                                              this.queryActionActionSuccess,
+                                              this.failedCallback);
                 break;
             }
         }
@@ -298,19 +325,30 @@ EventEditor.prototype.setFields = function() {
  */
 EventEditor.prototype.onEventActionChanged = function(e) {
     controller.action_type = $(this).val();
-    service.queryEventActionForm(controller.action_type,
-                                 controller.event_key,
-                                 controller.queryActionSuccess,
-                                 controller.failedCallback);
+    service.queryEventActionForms(controller.action_type,
+                                  controller.event_key,
+                                  controller.queryActionSuccess,
+                                  controller.failedCallback);
 }
 
 /*
- * Set fields of the event's action.
+ * Set a form of the event's action.
  */
-EventEditor.prototype.setActionFields = function(data, container) {
+EventEditor.prototype.addActionForm = function(data, container) {
+    var block = $("<div>")
+        .addClass("block action-block")
+        .appendTo(container);
+
     var title = $("<h4>")
         .addClass("action-title")
         .text("Action Data")
+        .appendTo(block);
+
+    var button = $("<button>")
+        .attr("type", "button")
+        .addClass("btn btn-sm btn-default btn-delete")
+        .text("Delete")
+        .on("click", this.onDeleteAction)
         .appendTo(block);
 
     var fields = $("<div>")
@@ -334,37 +372,41 @@ EventEditor.prototype.setActionFields = function(data, container) {
  */
 EventEditor.prototype.onActionActionChanged = function(e) {
     controller.action_action_type = $(this).val();
-    service.queryEventActionForm(controller.action_action_type,
-                                 controller.event_key,
-                                 controller.queryActionActionSuccess,
-                                 controller.failedCallback);
+    service.queryEventActionForms(controller.action_action_type,
+                                  controller.event_key,
+                                  controller.queryActionActionSuccess,
+                                  controller.failedCallback);
 }
 
 /*
  * On query action's action data success.
  */
 EventEditor.prototype.queryActionActionSuccess = function(data) {
-    controller.setActionActionFields(data);
+    controller.action_actions = data;
+
+    // Clear data fields.
+    $(".action-action-title").remove();
+    $(".action-action-block").remove();
+
+    var title = $("<h4>")
+        .addClass("action-title action-action-title")
+        .text("Data")
+        .appendTo($(".action-block"));
+
+    var block = $("<div>")
+        .addClass("block action-action-block")
+        .appendTo($(".action-block"));
+
+    for (var i = 0; i < data.length; i++) {
+        controller.setActionFields(data[i], block);
+    }
+
+    window.parent.controller.setFrameSize();
 }
 
 /*
- * Set fields of the action's action.
+ * On users click the delete action button.
  */
-EventEditor.prototype.setActionActionFields = function(data) {
-    this.action_action_fields = data;
+EventEditor.prototype.onDeleteAction = function(e) {
 
-    var container = $(".action-action-block");
-    container.children().remove();
-
-    if (data.length > 0) {
-        if (Array.isArray(data[0])) {
-            // Has more than one action's data.
-            for (var i = 0; i < data.length; i++) {
-                controller.setActionFields(data[i], ".all-fields");
-            }
-        }
-        else {
-            controller.setActionFields(data, ".all-fields");
-        }
-    }
 }
