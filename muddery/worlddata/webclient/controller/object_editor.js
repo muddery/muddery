@@ -69,7 +69,7 @@ ObjectEditor.prototype.onSave = function() {
     }
 
     if (!upload_images) {
-        controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed, {container: "#fields"});
+        controller.saveForm(controller.saveFormSuccess, controller.saveFormFailed, {container: "#fields"});
     }
 }
 
@@ -143,7 +143,7 @@ ObjectEditor.prototype.uploadSuccess = function(field_name) {
 
         // Submit the form.
         if (controller.file_fields.length == 0) {
-            controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed, {container: "#fields"});
+            controller.saveForm(controller.saveFormSuccess, controller.saveFormFailed, {container: "#fields"});
         }
     }
 
@@ -253,13 +253,22 @@ ObjectEditor.prototype.setFields = function() {
 
     for (var t = 0; t < this.table_fields.length; t++) {
         var fields = this.table_fields[t].fields;
+        var block = $("<div>")
+            .addClass("table-block")
+            .data("table-name", this.table_fields[t].table)
+            .appendTo(container);
+
         for (var f = 0; f < fields.length; f++) {
-            if (t == 0 || fields[f].name != "key") {
-                // If it is a key field, only add first table's key.
-                var controller = this.createFieldController(fields[f]);
-                if (controller) {
-                    controller.appendTo(container);
-                }
+            var field = fields[f];
+
+            if (t != 0 && field.name == "key") {
+                // If it is a key field, only add the first table's key.
+                field.type = "Hidden";
+            }
+
+            var controller = this.createFieldController(field);
+            if (controller) {
+                controller.appendTo(block);
             }
         }
     }
@@ -276,15 +285,16 @@ ObjectEditor.prototype.onTypeclassChange = function(e) {
     }
 }
 
-ObjectEditor.prototype.saveFields = function(callback_success, callback_failed, context) {
-    var container = $(context.container);
+ObjectEditor.prototype.saveForm = function(callback_success, callback_failed, context) {
+    var table_blocks = $("#fields .table-block");
     var tables = [];
-    for (var t = 0; t < this.table_fields.length; t++) {
-        var fields = this.table_fields[t].fields;
+    for (var t = 0; t < table_blocks.length; t++) {
+        var table_name = $(table_blocks[t]).data("table-name");
+        var fields = $(table_blocks[t]).find(".field-controller");
         var values = {};
         for (var f = 0; f < fields.length; f++) {
-            var name = fields[f].name;
-            var control = container.find(".control-item-" + name + " .editor-control");
+            var name = $(fields[f]).data("field-name");
+            var control = $(fields[f]).find(".editor-control");
             if (control.length > 0) {
                 if (control.attr("type") == "checkbox") {
                     values[name] = control.prop("checked");
@@ -299,7 +309,7 @@ ObjectEditor.prototype.saveFields = function(callback_success, callback_failed, 
             }
         }
         tables.push({
-            table: this.table_fields[t].table,
+            table: table_name,
             values: values
         });
     }

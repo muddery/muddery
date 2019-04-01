@@ -60,7 +60,7 @@ CommonEditor.prototype.onExit = function() {
 }
 
 CommonEditor.prototype.onSave = function() {
-    controller.saveFields(controller.saveFormSuccess, controller.saveFormFailed, {container: "#fields"});
+    controller.saveForm(controller.saveFormSuccess, controller.saveFormFailed, {container: "#fields"});
 }
 
 CommonEditor.prototype.onDelete = function() {
@@ -146,6 +146,8 @@ CommonEditor.prototype.createFieldController = function(field) {
     var name = field.name;
     var help_text = field.help_text;
     var value = null;
+
+    // Set preset values.
     if (name in this.field_values) {
         value = this.field_values[name];
     }
@@ -184,6 +186,10 @@ CommonEditor.prototype.createFieldController = function(field) {
         controller = field_creator.createSelect(name, label, value, help_text, field.choices);
     }
 
+    // Add controller name.
+    controller.addClass("field-controller");
+    controller.data("field-name", name);
+
     return controller;
 }
 
@@ -195,12 +201,12 @@ CommonEditor.prototype.exitNoChange = function() {
     setInterval(function() {window.parent.controller.popPage(false);}, 0);
 }
 
-CommonEditor.prototype.saveFields = function(callback_success, callback_failed, context) {
-    var container = $(context.container);
+CommonEditor.prototype.saveForm = function(callback_success, callback_failed, context) {
     var values = {};
-    for (var i = 0; i < this.fields.length; i++) {
-        var name = this.fields[i].name;
-        var control = container.find(".control-item-" + name + " .editor-control");
+    var fields = $("#fields .field-controller");
+    for (var f = 0; f < fields.length; f++) {
+        var name = $(fields[f]).data("field-name");
+        var control = $(fields[f]).find(".editor-control");
         if (control.length > 0) {
             if (control.attr("type") == "checkbox") {
                 values[name] = control.prop("checked");
@@ -248,7 +254,7 @@ CommonEditor.prototype.saveFormFailed = function(code, message, data, context) {
 
     if (code == 10006) {
         // Invalid form
-        var container = context.container;
+        var container = $(context.container);
         if (typeof(data) == "object") {
             for (var name in data) {
                 // Set return messages.
@@ -274,6 +280,8 @@ CommonEditor.prototype.saveFormFailed = function(code, message, data, context) {
         .removeClass("message-success")
         .removeClass("hidden")
         .show();
+
+    window.parent.controller.setFrameSize();
 }
 
 CommonEditor.prototype.confirmDelete = function(e) {

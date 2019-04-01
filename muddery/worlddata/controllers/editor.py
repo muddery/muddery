@@ -309,19 +309,16 @@ class SaveEventActionForm(BaseRequestProcesser):
     Save an action's form.
 
     Args:
-        values: (dict) values to save.
         action: (string) action's type.
         event: (string) event's key.
+        values: (list) a list of action's values.
     """
-    path = "save_event_action_form"
+    path = "save_event_action_forms"
     name = ""
 
     def func(self, args, request):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
-
-        if 'values' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "values".')
 
         if 'action' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "action".')
@@ -329,9 +326,12 @@ class SaveEventActionForm(BaseRequestProcesser):
         if 'event' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "event".')
 
-        values = args["values"]
+        if 'values' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "values".')
+
         action_type = args["action"]
         event_key = args["event"]
+        values = args["values"]
 
         # Get action's data.
         action = EVENT_ACTION_SET.get(action_type)

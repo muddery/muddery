@@ -305,13 +305,13 @@ service = {
         this.sendRequest("save_object_form", "", args, callback_success, callback_failed, context);
     },
 
-    saveActionForm: function(values, action_type, event_key, callback_success, callback_failed, context) {
+    saveEventActionForms: function(values, action_type, event_key, callback_success, callback_failed, context) {
         var args = {
             values: values,
             action: action_type,
             event: event_key
         };
-        this.sendRequest("save_event_action_form", "", args, callback_success, callback_failed, context);
+        this.sendRequest("save_event_action_forms", "", args, callback_success, callback_failed, context);
     },
 
     deleteRecord: function(table_name, record_id, callback_success, callback_failed, context) {

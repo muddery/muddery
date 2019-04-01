@@ -58,20 +58,19 @@ EventEditor.prototype.saveFormSuccess = function(data) {
             break;
         }
     }
-    controller.saveActionFields();
+    controller.saveActionForms();
 }
 
-// Save the action form.
-EventEditor.prototype.saveActionFields = function() {
+// Save the action forms.
+EventEditor.prototype.saveActionForms = function() {
     var action_value_list = []
-    var control_list = $(".action-fields");
+    var action_blocks = $(".action-block");
 
-    for (var i = 0; i < this.actions.length; i++) {
-        var action_fields = this.actions[i];
+    for (var b = 0; b < action_blocks.length; b++) {
         var values = {};
-
-        for (var j = 0; j < action_fields.length; j++) {
-            var name = action_fields[j].name;
+        var action_fields = $(action_blocks[b]).find(".field-controller");
+        for (var f = 0; f < action_fields.length; f++) {
+            var name = $(action_fields[f]).data("field-name");
 
             if (name == "event_key") {
                 // Set the event key.
@@ -79,7 +78,7 @@ EventEditor.prototype.saveActionFields = function() {
                 continue;
             }
 
-            var control = $(control_list[i]).find(".control-item-" + name + " .editor-control");
+            var control = $(action_fields[f]).find(".editor-control");
             if (control.length > 0) {
                 if (control.attr("type") == "checkbox") {
                     values[name] = control.prop("checked");
@@ -96,15 +95,15 @@ EventEditor.prototype.saveActionFields = function() {
         action_value_list.push(values);
     }
 
-    service.saveActionForm(action_value_list,
-                           this.action_type,
-                           this.event_key,
-                           this.saveActionFormSuccess,
-                           this.failedCallback);
+    service.saveEventActionForms(action_value_list,
+                                this.action_type,
+                                this.event_key,
+                                this.saveActionFormsSuccess,
+                                this.failedCallback);
 }
 
 // The action form has been saved.
-EventEditor.prototype.saveActionFormSuccess = function(data) {
+EventEditor.prototype.saveActionFormsSuccess = function(data) {
     if (controller.action_action_type) {
         controller.saveActionActionFields();
     }
@@ -144,11 +143,11 @@ EventEditor.prototype.saveActionActionFields = function() {
         }
     }
 
-    service.saveActionForm(values,
-                           this.action_action_type,
-                           this.event_key,
-                           this.saveActionActionFormSuccess,
-                           this.failedCallback);
+    service.saveEventActionForms(values,
+                                this.action_action_type,
+                                this.event_key,
+                                this.saveActionActionFormSuccess,
+                                this.failedCallback);
 }
 
 /*
@@ -244,8 +243,8 @@ EventEditor.prototype.queryActionSuccess = function(data) {
         var button = $("<button>")
             .attr("type", "button")
             .addClass("btn btn-default btn-add-action")
-            .text("Add")
-            .on("click", onAddAction)
+            .text("Add Action")
+            .on("click", this.onAddAction)
             .appendTo(container);
     }
 
@@ -351,9 +350,6 @@ EventEditor.prototype.addActionForm = function(data, container) {
         .on("click", this.onDeleteAction)
         .appendTo(block);
 
-    var fields = $("<div>")
-        .addClass(".action-fields")
-
     for (var i = 0; i < data.length; i++) {
         if (data[i].name == "event_key") {
             // Hide the event key field.
@@ -362,7 +358,7 @@ EventEditor.prototype.addActionForm = function(data, container) {
 
         var field_controller = this.createFieldController(data[i]);
         if (field_controller) {
-            field_controller.appendTo(container);
+            field_controller.appendTo(block);
         }
     }
 }
