@@ -123,6 +123,13 @@ def delete_record(table_name, record_id):
     general_query_mapper.delete_record_by_id(table_name, record_id)
 
 
+def delete_records(table_name, **kwargs):
+    """
+    Delete records by conditions.
+    """
+    general_query_mapper.delete_records(table_name, **kwargs)
+
+
 def query_object_form(base_typeclass, obj_typeclass, obj_key):
     """
     Query all data of an object.

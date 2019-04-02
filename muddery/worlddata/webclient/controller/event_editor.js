@@ -64,7 +64,7 @@ EventEditor.prototype.saveFormSuccess = function(data) {
 // Save the action forms.
 EventEditor.prototype.saveActionForms = function() {
     var action_value_list = []
-    var action_blocks = $(".action-block");
+    var action_blocks = $("#action-forms .action-block");
 
     for (var b = 0; b < action_blocks.length; b++) {
         var values = {};
@@ -105,7 +105,7 @@ EventEditor.prototype.saveActionForms = function() {
 // The action form has been saved.
 EventEditor.prototype.saveActionFormsSuccess = function(data) {
     if (controller.action_action_type) {
-        controller.saveActionActionFields();
+        controller.saveActionActionForms();
     }
     else {
         controller.exit();
@@ -115,45 +115,50 @@ EventEditor.prototype.saveActionFormsSuccess = function(data) {
 /*
  * Save the action's action form.
  */
-EventEditor.prototype.saveActionActionFields = function() {
-    var container = $(".action-action-fields");
+EventEditor.prototype.saveActionActionForms = function() {
+    var action_value_list = []
+    var action_blocks = $("#action-action-forms .action-action-block");
 
-    var values = {};
-    for (var i = 0; i < this.action_action_fields.length; i++) {
-        var name = this.action_action_fields[i].name;
+    for (var b = 0; b < action_blocks.length; b++) {
+        var values = {};
+        var action_fields = $(action_blocks[b]).find(".field-controller");
+        for (var f = 0; f < action_fields.length; f++) {
+            var name = $(action_fields[f]).data("field-name");
 
-        if (name == "event_key") {
-            // Set the event key.
-            values[name] = this.event_key;
-            continue;
-        }
-
-        var control = $("#action-action-fields #control-" + name + " .editor-control");
-        if (control.length > 0) {
-            if (control.attr("type") == "checkbox") {
-                values[name] = control.prop("checked");
+            if (name == "event_key") {
+                // Set the event key.
+                values[name] = this.event_key;
+                continue;
             }
-            else {
-                // Leave the value blank if it is an empty string.
-                var value = control.val();
-                if (value.length > 0) {
-                    values[name] = value;
+
+            var control = $(action_fields[f]).find(".editor-control");
+            if (control.length > 0) {
+                if (control.attr("type") == "checkbox") {
+                    values[name] = control.prop("checked");
+                }
+                else {
+                    // Leave the value blank if it is an empty string.
+                    var value = control.val();
+                    if (value.length > 0) {
+                        values[name] = value;
+                    }
                 }
             }
         }
+        action_value_list.push(values);
     }
 
-    service.saveEventActionForms(values,
+    service.saveEventActionForms(action_value_list,
                                 this.action_action_type,
                                 this.event_key,
-                                this.saveActionActionFormSuccess,
+                                this.saveActionActionFormsSuccess,
                                 this.failedCallback);
 }
 
 /*
  * The action's action form has been saved.
  */
-EventEditor.prototype.saveActionActionFormSuccess = function(data) {
+EventEditor.prototype.saveActionActionFormsSuccess = function(data) {
     controller.exit();
 }
 
@@ -219,41 +224,6 @@ EventEditor.prototype.queryEventTriggersSuccess = function(data) {
                                   controller.failedCallback);
 }
 
-EventEditor.prototype.queryActionSuccess = function(data) {
-    // Clear old data.
-    controller.action_action_type = "";
-    controller.action_actions = [];
-
-    // Clear data fields.
-    var container = $("#action-forms");
-    container.children().remove();
-
-    // Set new forms.
-    var forms = data.forms;
-    for (var i = 0; i < forms.length; i++) {
-        controller.addActionForm(forms[i], container);
-    }
-
-    if (forms.length == 1) {
-        // If there is only one action left, hide the delete button.
-        $(".action-block .btn-delete").hide();
-    }
-    if (data.repeatedly) {
-        // Repeatable actions, add an add button.
-        var button = $("<button>")
-            .attr("type", "button")
-            .addClass("btn btn-default btn-add-action")
-            .text("Add Action")
-            .on("click", this.onAddAction)
-            .appendTo(container);
-    }
-
-    window.parent.controller.setFrameSize();
-
-    // Show action's action fields.
-    controller.showActionAction();
-}
-
 /*
  * Set fields of the event.
  */
@@ -286,26 +256,56 @@ EventEditor.prototype.setFields = function() {
     window.parent.controller.setFrameSize();
 }
 
+EventEditor.prototype.queryActionSuccess = function(data) {
+    controller.actions = data;
+
+    // Clear data fields.
+    var container = $("#action-forms");
+    container.children().remove();
+
+    // Set new forms.
+    var forms = data.forms;
+    for (var i = 0; i < forms.length; i++) {
+        controller.addActionForm(forms[i], container);
+    }
+
+    if (forms.length == 1) {
+        // If there is only one action left, hide the delete button.
+        $(".action-block .btn-delete").hide();
+    }
+
+    // Repeatable actions, show the add action button.
+    if (data.repeatedly) {
+        $("#add-action").removeClass("hidden");
+    }
+    else {
+        $("#add-action").addClass("hidden");
+    }
+
+    window.parent.controller.setFrameSize();
+
+    // Show action's action fields.
+    controller.showActionAction();
+}
 
 /*
  * Show action's action.
  */
 EventEditor.prototype.showActionAction = function() {
-    return;
-
     // If this action has actions.
     if (this.action_type == "ACTION_ROOM_INTERVAL") {
         // Bind the event of the action's action change.
         $(".action-block .control-item-action select").on("change", controller.onActionActionChanged);
 
         // Query action's action data.
-        for (var i = 0; i < this.actions[0].length; i++) {
-            if (this.actions[0][i].name == "action") {
-                this.action_action_type = this.actions[0][i].value;
+        for (var i = 0; i < this.actions.forms[0].length; i++) {
+            var field = this.actions.forms[0][i];
+            if (field.name == "action") {
+                this.action_action_type = field.value;
                 if (!this.action_action_type) {
                     // Set default event action.
-                    if (this.actions[0][i].choices.length > 0) {
-                        this.action_action_type = this.actions[0][i].choices[0][0];
+                    if (field.choices.length > 0) {
+                        this.action_action_type = field.choices[0][0];
                     }
                 }
 
@@ -381,21 +381,91 @@ EventEditor.prototype.queryActionActionSuccess = function(data) {
     controller.action_actions = data;
 
     // Clear data fields.
-    $(".action-action-title").remove();
-    $(".action-action-block").remove();
+    $("#action-action-forms").remove();
+    var container = $("<div>")
+        .attr("id", "action-action-forms")
+        .appendTo(".action-block");
 
-    var title = $("<h4>")
-        .addClass("action-title action-action-title")
-        .text("Data")
-        .appendTo($(".action-block"));
+    // Set new forms.
+    var forms = data.forms;
+    for (var i = 0; i < forms.length; i++) {
+        controller.addActionActionForm(forms[i], container);
+    }
 
+    if (forms.length == 1) {
+        // If there is only one action left, hide the delete button.
+        $(".action-action-block .btn-delete").hide();
+    }
+
+    // Repeatable actions, show the add action button.
+    if (data.repeatedly) {
+        var button = $("<button>")
+            .attr("id", "add-action-action")
+            .attr("type", "button")
+            .addClass("btn btn-default")
+            .text("Add Action")
+            .on("click", controller.onAddActionAction)
+            .appendTo($(".action-block"));
+    }
+
+    window.parent.controller.setFrameSize();
+}
+
+/*
+ * Set a form of the action's action.
+ */
+EventEditor.prototype.addActionActionForm = function(data, container) {
     var block = $("<div>")
         .addClass("block action-action-block")
-        .appendTo($(".action-block"));
+        .appendTo(container);
+
+    var title = $("<h4>")
+        .addClass("action-title")
+        .text("Data")
+        .appendTo(block);
+
+    var button = $("<button>")
+        .attr("type", "button")
+        .addClass("btn btn-sm btn-default btn-delete")
+        .text("Delete")
+        .on("click", this.onDeleteAction)
+        .appendTo(block);
 
     for (var i = 0; i < data.length; i++) {
-        controller.setActionFields(data[i], block);
+        if (data[i].name == "event_key") {
+            // Hide the event key field.
+            data[i].type = "Hidden";
+        }
+
+        var field_controller = this.createFieldController(data[i]);
+        if (field_controller) {
+            field_controller.appendTo(block);
+        }
     }
+}
+
+/*
+ * On users click the add action button.
+ */
+EventEditor.prototype.onAddAction = function(e) {
+    // Query a new action.
+    service.queryEventActionForms(controller.action_type,
+                                  "",
+                                  controller.queryNewActionSuccess,
+                                  controller.failedCallback);
+}
+
+EventEditor.prototype.queryNewActionSuccess = function(data) {
+    // Clear data fields.
+    var container = $("#action-forms");
+
+    // Set new forms.
+    var forms = data.forms;
+    for (var i = 0; i < forms.length; i++) {
+        controller.addActionForm(forms[i], container);
+    }
+
+    $(".action-block .btn-delete").show();
 
     window.parent.controller.setFrameSize();
 }
@@ -404,5 +474,37 @@ EventEditor.prototype.queryActionActionSuccess = function(data) {
  * On users click the delete action button.
  */
 EventEditor.prototype.onDeleteAction = function(e) {
+    var to_delete = $(this).parent();
+    window.parent.controller.confirm("",
+                                     "Delete this action?",
+                                     function() {
+                                         window.parent.controller.hideWaiting();
+                                         to_delete.remove();
+                                     });
+}
 
+/*
+ * On users click the add action action button.
+ */
+EventEditor.prototype.onAddActionAction = function(e) {
+    // Query a new action.
+    service.queryEventActionForms(controller.action_action_type,
+                                  "",
+                                  controller.queryNewActionActionSuccess,
+                                  controller.failedCallback);
+}
+
+EventEditor.prototype.queryNewActionActionSuccess = function(data) {
+    // Clear data fields.
+    var container = $("#action-action-forms");
+
+    // Set new forms.
+    var forms = data.forms;
+    for (var i = 0; i < forms.length; i++) {
+        controller.addActionActionForm(forms[i], container);
+    }
+
+    $(".action-action-block .btn-delete").show();
+
+    window.parent.controller.setFrameSize();
 }

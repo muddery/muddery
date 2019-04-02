@@ -339,16 +339,15 @@ class SaveEventActionForm(BaseRequestProcesser):
             raise MudderyError(ERR.no_table, "Can not find action: %s" % action_type)
 
         table_name = action.model_name
-        record_id = None
-        try:
-            record = action.get_event_data(event_key)
-            record_id = record.id
-        except ObjectDoesNotExist:
-            pass
 
-        record_id = data_edit.save_form(values, table_name, record_id)
-        data = data_edit.query_form(table_name, id=record_id)
-        return success_response(data)
+        # Remove old records.
+        data_edit.delete_records(table_name, event_key=event_key)
+
+        # Add new data.
+        for value in values:
+            data_edit.save_form(value, table_name)
+
+        return success_response("success")
 
 
 class QueryObjectForm(BaseRequestProcesser):

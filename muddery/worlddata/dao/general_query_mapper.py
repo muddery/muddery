@@ -121,6 +121,19 @@ def delete_record_by_key(table_name, object_key):
     record.delete()
 
 
+def delete_records(table_name, **kwargs):
+    """
+    Delete records by conditions.
+
+    Args:
+        table_name: (string) db table's name.
+        kwargs: (dict) conditions.
+    """
+    # get model
+    model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
+    return model_obj.objects.filter(**kwargs).delete()
+
+
 def get_all_from_tables(tables):
     """
     Query all object's data from tables.
