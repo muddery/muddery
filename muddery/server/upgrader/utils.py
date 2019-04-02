@@ -218,3 +218,4 @@ def file_append(file_path, lines):
     """
     with open(file_path, "a") as f:
         f.writelines(lines)
+        f.flush()

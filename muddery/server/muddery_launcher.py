@@ -148,12 +148,8 @@ def main():
 
         # make migrations
         try:
-            django_args = ["makemigrations"]
+            django_args = ["makemigrations", "worlddata"]
             django_kwargs = {}
-            django.core.management.call_command(*django_args, **django_kwargs)
-
-            django_args = ["makemigrations"]
-            django_kwargs = {"database": "worlddata"}
             django.core.management.call_command(*django_args, **django_kwargs)
         except django.core.management.base.CommandError, exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
@@ -164,7 +160,7 @@ def main():
             django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
             
-            django_args = ["migrate"]
+            django_args = ["migrate", "worlddata"]
             django_kwargs = {"database": "worlddata"}
             django.core.management.call_command(*django_args, **django_kwargs)
         except django.core.management.base.CommandError, exc:
@@ -203,7 +199,7 @@ def main():
         evennia_launcher.init_game_directory(gamedir, check_db=False)
             
         # make migrations
-        django_args = ["makemigrations"]
+        django_args = ["makemigrations", "worlddata"]
         django_kwargs = {}
         try:
             django.core.management.call_command(*django_args, **django_kwargs)
@@ -218,7 +214,7 @@ def main():
         except django.core.management.base.CommandError, exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
-        django_args = ["migrate"]
+        django_args = ["migrate", "worlddata"]
         django_kwargs = {"database": "worlddata"}
         try:
             django.core.management.call_command(*django_args, **django_kwargs)
