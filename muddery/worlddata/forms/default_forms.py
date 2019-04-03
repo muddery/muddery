@@ -687,8 +687,7 @@ class EventDataForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EventDataForm, self).__init__(*args, **kwargs)
 
-        objects = EVENT_ACTION_SET.all()
-        choices = [(obj, obj) for obj in objects]
+        choices = EVENT_ACTION_SET.choice_all()
         self.fields['action'] = forms.ChoiceField(choices=choices)
 
         objects = EVENT_TRIGGER_SET.all()
@@ -844,8 +843,7 @@ class ActionRoomIntervalForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ActionRoomIntervalForm, self).__init__(*args, **kwargs)
 
-        objects = EVENT_ACTION_SET.repeatedly()
-        choices = [(obj, obj) for obj in objects if obj != "ACTION_ROOM_INTERVAL"]
+        choices = EVENT_ACTION_SET.choice_repeatedly()
         self.fields['action'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)

@@ -17,7 +17,7 @@ class ActionDialogue(BaseEventAction):
     Begin a dialogue.
     """
     key = "ACTION_DIALOGUE"
-    name = _("Dialogue")
+    name = _("Dialogue", category="actions")
     model_name = "action_dialogue"
     repeatedly = False
 

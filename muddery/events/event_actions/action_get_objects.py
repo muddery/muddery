@@ -16,7 +16,7 @@ class ActionGetObjects(BaseEventAction):
     Attack a target.
     """
     key = "ACTION_GET_OBJECTS"
-    name = _("Message")
+    name = _("Get Objects", category="actions")
     model_name = "action_get_objects"
     repeatedly = True
 

@@ -51,12 +51,23 @@ class EventActionSet(object):
         """
         return self.dict.keys()
 
+    def choice_all(self):
+        """
+        Get all event types.
+        """
+        return [(key, "%s (%s)" % (value.name, key)) for key, value in self.dict.items()]
+
     def repeatedly(self):
         """
         Get all repeatedly event types.
         """
-        keys = [key for key, value in self.dict.items() if value.repeatedly]
-        return keys
+        return [key for key, value in self.dict.items() if value.repeatedly]
+
+    def choice_repeatedly(self):
+        """
+        Get all repeatedly event types.
+        """
+        return [(key, "%s (%s)" % (value.name, key)) for key, value in self.dict.items() if value.repeatedly]
 
 
 EVENT_ACTION_SET = EventActionSet()

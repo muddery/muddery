@@ -17,7 +17,7 @@ class ActionTurnInQuest(BaseEventAction):
     Turn in a quest.
     """
     key = "ACTION_TURN_IN_QUEST"
-    name = _("Turn in a Quest")
+    name = _("Turn in a Quest", category="actions")
     model_name = "action_turn_in_quest"
     repeatedly = False
 

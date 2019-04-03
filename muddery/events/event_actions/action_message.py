@@ -16,7 +16,7 @@ class ActionMessage(BaseEventAction):
     Attack a target.
     """
     key = "ACTION_MESSAGE"
-    name = _("Message")
+    name = _("Message", category="actions")
     model_name = "action_message"
     repeatedly = True
 

@@ -17,7 +17,7 @@ class ActionLearnSkill(BaseEventAction):
     Learn a skill.
     """
     key = "ACTION_LEARN_SKILL"
-    name = _("Learn a Skill")
+    name = _("Learn a Skill", category="actions")
     model_name = "action_learn_skill"
     repeatedly = False
 

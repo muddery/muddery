@@ -16,7 +16,7 @@ class ActionCloseEvent(BaseEventAction):
     Close an event.
     """
     key = "ACTION_CLOSE_EVENT"
-    name = _("Close an Event")
+    name = _("Close an Event", category="actions")
     model_name = "action_close_event"
     repeatedly = False
 
