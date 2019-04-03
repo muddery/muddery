@@ -41,6 +41,7 @@ class ActionRoomInterval(BaseEventAction):
                                    interval=record.interval,
                                    autostart=False,
                                    start_delay=True,
+                                   persistent = True,
                                    obj=character)
             script.set_action(obj, event_key, record.action, record.begin_message, record.end_message)
             script.start()

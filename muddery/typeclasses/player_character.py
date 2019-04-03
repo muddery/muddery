@@ -582,11 +582,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                              "rejected": reject_reason,
                              "combat": combat}}
             self.msg(message)
-            self.show_inventory()
 
-            # call quest handler
-            for key in accepted_keys:
-                self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, key, accepted_keys[key])
+        self.show_inventory()
+
+        # call quest handler
+        for key in accepted_keys:
+            self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, key, accepted_keys[key])
 
         return {
             "accepted_keys": accepted_keys,
