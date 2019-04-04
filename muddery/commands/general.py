@@ -1041,49 +1041,6 @@ class CmdBuy(Command):
 
 
 #------------------------------------------------------------
-# common action
-#------------------------------------------------------------
-class CmdAction(Command):
-    """
-    Object's common action.
-
-    Usage:
-        {"cmd":"action",
-         "args":<object's dbref>
-        }
-      
-    Show everything in your inventory.
-    """
-    key = "action"
-    locks = "cmd:all()"
-
-    def func(self):
-        "do action"
-        caller = self.caller
-        args = self.args
-        
-        if not caller.is_alive():
-            caller.msg({"alert":_("You are died.")})
-            return
-
-        if not args:
-            caller.msg({"alert":_("You should act to something.")})
-            return
-
-        # Use search to handle duplicate/nonexistant results.
-        obj = caller.search_dbref(args, location=caller.location)
-        if not obj:
-            caller.msg({"alert":_("Can not find it.")})
-            return
-
-        try:
-            obj.do_action(caller)
-        except Exception, e:
-            logger.log_err("Can not act to %s %s." % (caller.get_data_key(), e))
-            return
-        
-        
-#------------------------------------------------------------
 # connect
 #------------------------------------------------------------
 class CmdConnect(Command):

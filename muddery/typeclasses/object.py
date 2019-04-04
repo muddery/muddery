@@ -566,11 +566,6 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         Get an object's available event triggers.
         """
         return []
-        
-    def do_action(self, caller):
-        # called when caller act to self.
-        # call action event by default
-        self.event.at_action(caller, self)
 
     def msg(self, text=None, from_obj=None, session=None, options=None, **kwargs):
         """

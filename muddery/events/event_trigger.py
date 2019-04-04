@@ -14,6 +14,7 @@ from django.conf import settings
 from django.apps import apps
 from evennia.utils import logger
 from muddery.typeclasses.script_room_interval import ScriptRoomInterval
+from muddery.utils.localized_strings_handler import _
 
 
 PERMISSION_BYPASS_EVENTS = {perm.lower() for perm in settings.PERMISSION_BYPASS_EVENTS}
@@ -25,14 +26,28 @@ class EventTrigger(object):
     """
 
     # available trigger types
-    triggers = [
-        defines.EVENT_TRIGGER_ARRIVE,   # at attriving a room. trigger_obj: room_id
-        defines.EVENT_TRIGGER_KILL,     # caller kills one. trigger_obj: dead_one_id
-        defines.EVENT_TRIGGER_DIE,      # caller die. trigger_obj: killer_id
-        defines.EVENT_TRIGGER_TRAVERSE, # before traverse an exit. trigger_obj: exit_id
-        defines.EVENT_TRIGGER_ACTION,   # when a character act to an object. trigger_obj: object_id
-        defines.EVENT_TRIGGER_SENTENCE,   # when a character finishes a dialogue sentence. trigger_obj: sentence_id
-    ]
+    triggers = {
+        # at attriving a room. trigger_obj: room_id
+        defines.EVENT_TRIGGER_ARRIVE: {
+            "name": _("On Arrive", category="event_triggers")
+        },
+        # caller kills one. trigger_obj: dead_one_id
+        defines.EVENT_TRIGGER_KILL: {
+            "name": _("On kill the Target", category="event_triggers")
+        },
+        # caller die. trigger_obj: killer_id
+        defines.EVENT_TRIGGER_DIE: {
+            "name": _("On Die", category="event_triggers")
+        },
+        # before traverse an exit. trigger_obj: exit_id
+        defines.EVENT_TRIGGER_TRAVERSE: {
+            "name": _("On Traverse An Exit", category="event_triggers")
+        },
+        # when a character finishes a dialogue sentence. trigger_obj: sentence_id
+        defines.EVENT_TRIGGER_SENTENCE: {
+            "name": _("On Finish a Sentence", category="event_triggers")
+        }
+    }
 
     def __init__(self, owner, object_key=None):
         """
@@ -61,6 +76,23 @@ class EventTrigger(object):
             if not trigger_type in self.events:
                 self.events[trigger_type] = []
             self.events[trigger_type].append(event)
+
+    @classmethod
+    def all_triggers(cls):
+        """
+        Get all event triggers.
+
+        Returns:
+            (list) all trigger's key.
+        """
+        return cls.triggers.keys()
+
+    @classmethod
+    def choice_all(cls):
+        """
+        Get all event triggers' types and names.
+        """
+        return [(key, "%s (%s)" % (value["name"], key)) for key, value in cls.triggers.items()]
 
     def get_events(self):
         """
@@ -165,12 +197,6 @@ class EventTrigger(object):
         """
         triggered = self.trigger(defines.EVENT_TRIGGER_TRAVERSE, character, self.owner)
         return not triggered
-        
-    def at_action(self, character, obj):
-        """
-        Called when a character act to an object.
-        """
-        triggered = self.trigger(defines.EVENT_TRIGGER_ACTION, character, self.owner)
 
     def at_sentence(self, character, obj):
         """

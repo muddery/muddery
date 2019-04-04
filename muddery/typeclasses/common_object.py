@@ -114,13 +114,6 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         """
         return _("No effect."), 0
 
-    @classmethod
-    def get_event_trigger_types(cls):
-        """
-        Get an object's available event triggers.
-        """
-        return [defines.EVENT_TRIGGER_ACTION]
-
 
 class MudderyFood(TYPECLASS("COMMON_OBJECT")):
     """

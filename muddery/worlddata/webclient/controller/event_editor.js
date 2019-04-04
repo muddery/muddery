@@ -382,6 +382,8 @@ EventEditor.prototype.queryActionActionSuccess = function(data) {
 
     // Clear data fields.
     $("#action-action-forms").remove();
+    $("#add-action-action").remove();
+
     var container = $("<div>")
         .attr("id", "action-action-forms")
         .appendTo(".action-block");

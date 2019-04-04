@@ -690,8 +690,7 @@ class EventDataForm(forms.ModelForm):
         choices = EVENT_ACTION_SET.choice_all()
         self.fields['action'] = forms.ChoiceField(choices=choices)
 
-        objects = EVENT_TRIGGER_SET.all()
-        choices = [(obj, obj) for obj in objects]
+        choices = EVENT_TRIGGER_SET.choice_all()
         self.fields['trigger_type'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)

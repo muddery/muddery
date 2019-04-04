@@ -14,11 +14,11 @@ class EventTriggerSet(object):
     """
     All available event triggers.
     """
-    def all(self):
+    def choice_all(self):
         """
         Get the processer responds to the request.
         """
-        return EventTrigger.triggers
+        return EventTrigger.choice_all()
 
 
 EVENT_TRIGGER_SET = EventTriggerSet()
