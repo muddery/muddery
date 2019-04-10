@@ -176,13 +176,6 @@ class world_areas(BaseObjects):
     # area's height
     height = models.PositiveIntegerField(blank=True, default=0)
 
-    # Corresponding data are used to define the background image's position.
-    # The corresponding map position will be shown on this point.
-    background_point = models.CharField(max_length=POSITION_LENGTH, blank=True)
-    
-    # corresponding map position which matches the area background position
-    corresp_map_pos = models.CharField(max_length=POSITION_LENGTH, blank=True)
-    
     class Meta:
         "Define Django meta options"
         abstract = True

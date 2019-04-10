@@ -603,10 +603,22 @@ MapEditor.prototype.newRoomMouseMove = function(event) {
     var x = event.clientX - container.offset().left;
     var y = event.clientY - container.offset().top;
 
+    // Set to grids.
+    var room_x = 0;
+    var room_y = 0;
+    if (this.use_grid) {
+        room_x = Math.round((x - this.room_offset_x) / this.grid_size) * this.grid_size;
+        room_y = Math.round((y - this.room_offset_y) / this.grid_size) * this.grid_size;
+    }
+    else {
+        room_x = x - this.room_offset_x;
+        room_y = y - this.room_offset_y;
+    }
+
     // Move the room.
     controller.current_room.css({
-        "left": x - this.room_offset_x,
-        "top": y - this.room_offset_y,
+        "left": room_x,
+        "top": room_y,
         "position": "absolute"});
 }
 

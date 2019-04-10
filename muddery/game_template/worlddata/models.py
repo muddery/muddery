@@ -464,6 +464,33 @@ class action_close_event(BaseModels.action_close_event):
 
 # ------------------------------------------------------------
 #
+# action to send a message to the character
+#
+# ------------------------------------------------------------
+class action_message(BaseModels.action_message):
+    pass
+
+
+# ------------------------------------------------------------
+#
+# action to trigger other actions at interval.
+#
+# ------------------------------------------------------------
+class action_room_interval(BaseModels.action_room_interval):
+    pass
+
+
+# ------------------------------------------------------------
+#
+# action to add objects to characters
+#
+# ------------------------------------------------------------
+class action_get_objects(BaseModels.action_get_objects):
+    pass
+
+
+# ------------------------------------------------------------
+#
 # condition descriptions
 #
 # ------------------------------------------------------------
