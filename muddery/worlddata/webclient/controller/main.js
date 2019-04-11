@@ -252,19 +252,22 @@ controller = {
         controller.pushPage(name, url);
     },
 
-    editObject: function(typeclass, object_key) {
+    editObject: function(typeclass, object_key, no_delete) {
         var url = "object_editor.html?typeclass=" + typeclass;
 
         var name = "";
         if (object_key) {
             name = "Edit " + typeclass;
             url += "&object=" + object_key;
+            if (no_delete) {
+                url += "&no_delete=1";
+            }
         }
         else {
             name = "Add " + typeclass;
         }
 
-        sessionStorage.pageParam = {};
+        sessionStorage.page_param = {};
         controller.pushPage(name, url);
     },
 

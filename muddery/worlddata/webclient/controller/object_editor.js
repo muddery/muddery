@@ -20,6 +20,8 @@ ObjectEditor.prototype.constructor = ObjectEditor;
 ObjectEditor.prototype.init = function() {
     this.base_typeclass = utils.getQueryString("typeclass");
     this.obj_key = utils.getQueryString("object");
+    this.no_delete = utils.getQueryString("no_delete");
+
     if (sessionStorage.page_param) {
         this.field_values = JSON.parse(sessionStorage.page_param);
     }
@@ -29,7 +31,7 @@ ObjectEditor.prototype.init = function() {
 
     $("#exit-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");
-    if (this.obj_key) {
+    if (this.obj_key && !this.no_delete) {
         $("#delete-record").removeClass("hidden");
     }
 

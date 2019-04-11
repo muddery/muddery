@@ -150,7 +150,7 @@ MapEditor.prototype.onEditArea = function() {
 
 MapEditor.prototype.saveForEditArea = function(data) {
     controller.changed = true;
-    window.parent.controller.editObject(controller.area_typeclass, controller.area_key);
+    window.parent.controller.editObject(controller.area_typeclass, controller.area_key, true);
 }
 
 
