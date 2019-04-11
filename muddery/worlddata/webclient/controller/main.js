@@ -167,7 +167,14 @@ controller = {
         this.setFrameSize();
     },
 
-    pushPage: function(name, url) {
+    pushPage: function(name, url, page_param) {
+        if (page_param) {
+            sessionStorage.page_param = JSON.stringify(page_param);
+        }
+        else {
+            sessionStorage.page_param = "";
+        }
+
         // Set navigate bar.
         $("#navigate-bar>").removeClass("active");
 
@@ -249,7 +256,7 @@ controller = {
             }
         }
 
-        controller.pushPage(name, url);
+        controller.pushPage(name, url, null);
     },
 
     editObject: function(typeclass, object_key, no_delete) {
@@ -267,16 +274,14 @@ controller = {
             name = "Add " + typeclass;
         }
 
-        sessionStorage.page_param = {};
-        controller.pushPage(name, url);
+        controller.pushPage(name, url, null);
     },
 
-    createObject: function(typeclass, values) {
+    createObject: function(typeclass, field_values) {
         var url = "object_editor.html?typeclass=" + typeclass;
         var name = "Add " + typeclass;
-        sessionStorage.page_param = JSON.stringify(values);
 
-        controller.pushPage(name, url);
+        controller.pushPage(name, url, field_values);
     },
 
     editMap: function(map_key) {
@@ -290,7 +295,7 @@ controller = {
             name = "Add " + map_key;
         }
 
-        controller.pushPage(name, url);
+        controller.pushPage(name, url, null);
     },
 
     //////////////// Confirm Model ////////////////

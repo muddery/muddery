@@ -215,8 +215,8 @@ ObjectEditor.prototype.queryAreasSuccess = function(data) {
 }
 
 ObjectEditor.prototype.queryEventTriggersSuccess = function(data) {
-    // If has events, show the events block.
-    if (data) {
+    // If can have events, show the events block.
+    if (data && data.length > 0) {
         $("#events").show();
     }
     else {
