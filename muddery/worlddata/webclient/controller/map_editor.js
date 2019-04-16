@@ -1550,7 +1550,8 @@ MapEditor.prototype.confirmDeleteExit = function(e) {
 
 
 /*
- * Delete the exit success..
+ * Delete the exit success.
+ * Used by both room menu's delete exit and exit menu's delete exit.
  */
 MapEditor.prototype.deleteExitSuccess = function(data, context) {
     controller.changed = true;
@@ -1576,11 +1577,27 @@ MapEditor.prototype.deleteExitSuccess = function(data, context) {
     else {
         // Refresh the path menu.
         // controller.showPathMenu(path_id);
+
+        // Unselect the path.
+        if (controller.current_path) {
+            controller.current_path.setAttribute("stroke", controller.path_color);
+            controller.current_path = null;
+        }
     }
 }
 
 
-MapEditor.prototype.refresh = function() {
+MapEditor.prototype.refresh = function(param) {
+    if (param && "typeclass" in param) {
+        if (param.typeclass == this.area_typeclass) {
+            if ("key" in param) {
+                this.area_key = param.key;
+            }
+        }
+    }
+
+    $("#form-name").text(this.area_key);
+
     if (this.area_key) {
         service.queryMap(this.area_key, this.queryMapSuccess, this.failedCallback);
     }

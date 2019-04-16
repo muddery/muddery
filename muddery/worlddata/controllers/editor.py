@@ -438,9 +438,11 @@ class SaveObjectForm(BaseRequestProcesser):
         obj_typeclass = args["obj_typeclass"]
         obj_key = args["obj_key"]
 
-        obj_key = data_edit.save_object_form(tables, obj_typeclass, obj_key)
-        data = data_edit.query_object_form(base_typeclass, obj_typeclass, obj_key)
-        return success_response(data)
+        new_key = data_edit.save_object_form(tables, obj_typeclass, obj_key)
+        if obj_key != new_key:
+            data_edit.update_object_key(obj_typeclass, obj_key, new_key)
+
+        return success_response(new_key)
 
 
 class AddArea(BaseRequestProcesser):

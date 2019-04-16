@@ -105,16 +105,6 @@ class ObjectsForm(forms.ModelForm):
         super(ObjectsForm, self).__init__(*args, **kwargs)
         localize_form_fields(self)
 
-    def clean(self):
-        cleaned_data = super(ObjectsForm, self).clean()
-
-        # check object's key
-        key = cleaned_data["key"]
-        if not key:
-            cleaned_data["key"] = generate_key(self)
-
-        return cleaned_data
-
     class Meta:
         model = CM.OBJECTS.model
         fields = '__all__'

@@ -46,17 +46,9 @@ EventEditor.prototype.bindEvents = function() {
 }
 
 // The event form has been saved.
-EventEditor.prototype.saveFormSuccess = function(data) {
-    controller.event_key = "";
-    for (var i = 0; i < data.length; i++) {
-        if (data[i].name == "key") {
-            controller.event_key = data[i].value;
-            if (!controller.event_key) {
-                // Set the event's key.
-                controller.event_key = "";
-            }
-            break;
-        }
+EventEditor.prototype.saveFormSuccess = function(data, context) {
+    if (context && "key" in context) {
+        controller.event_key = context["key"];
     }
     controller.saveActionForms();
 }

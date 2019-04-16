@@ -199,20 +199,17 @@ def save_object_form(tables, obj_typeclass, obj_key):
         raise MudderyError(ERR.invalid_form, "Invalid form.", data="Empty form.")
 
     # Get object's new key from the first form.
-    new_obj = not (obj_key and obj_key == tables[0]["values"]["key"])
-    if new_obj:
-        try:
-            obj_key = tables[0]["values"]["key"]
-        except KeyError:
-            pass
+    try:
+        new_key = tables[0]["values"]["key"]
+    except KeyError:
+        new_key = obj_key
 
-        if not obj_key:
-            # Generate a new key.
-            index = SYSTEM_DATA.get_object_index()
-            obj_key = "%s_auto_%s" % (obj_typeclass, index)
-
-            for table in tables:
-                table["values"]["key"] = obj_key
+    if not new_key:
+        # Does not has a new key, generate a new key.
+        index = SYSTEM_DATA.get_object_index()
+        new_key = "%s_auto_%s" % (obj_typeclass, index)
+        for table in tables:
+            table["values"]["key"] = new_key
 
     forms = []
     for table in tables:
@@ -221,9 +218,9 @@ def save_object_form(tables, obj_typeclass, obj_key):
 
         form_class = FORM_SET.get(table_name)
         form = None
-        if not new_obj:
+        if obj_key:
             try:
-                # Query record's data.
+                # Query the current object's data.
                 record = general_query_mapper.get_record_by_key(table_name, obj_key)
                 form = form_class(form_values, instance=record)
             except ObjectDoesNotExist:
@@ -245,7 +242,7 @@ def save_object_form(tables, obj_typeclass, obj_key):
         for form in forms:
             form.save()
 
-    return obj_key
+    return new_key
 
 
 def save_map_positions(area, rooms):
@@ -327,3 +324,37 @@ def query_event_action_forms(action_type, event_key):
         "forms": forms,
         "repeatedly": action.repeatedly
     }
+
+
+def update_object_key(typeclass_key, old_key, new_key):
+    """
+    Update an object's key in other tables.
+
+    Args:
+        typeclass: (string) object's typeclass.
+        old_key: (string) object's old key.
+        new_key: (string) object's new key
+    """
+    # The object's key has changed.
+    typeclass = TYPECLASS(typeclass_key)
+    if issubclass(typeclass, TYPECLASS("AREA")):
+        # Update relative room's location.
+        model_name = TYPECLASS("ROOM").model_name
+        if model_name:
+            general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)
+    elif issubclass(typeclass, TYPECLASS("ROOM")):
+        # Update relative exit's location.
+        model_name = TYPECLASS("EXIT").model_name
+        if model_name:
+            general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)
+            general_query_mapper.filter_records(model_name, destination=old_key).update(destination=new_key)
+
+        # Update relative world object's location.
+        model_name = TYPECLASS("WORLD_OBJECT").model_name
+        if model_name:
+            general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)
+
+        # Update relative world NPC's location.
+        model_name = TYPECLASS("WORLD_NPC").model_name
+        if model_name:
+            general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)

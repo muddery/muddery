@@ -193,12 +193,12 @@ CommonEditor.prototype.createFieldController = function(field) {
     return controller;
 }
 
-CommonEditor.prototype.exit = function() {
-    setInterval(function() {window.parent.controller.popPage(true);}, 0);
+CommonEditor.prototype.exit = function(params) {
+    setInterval(function() {window.parent.controller.popPage(true, params);}, 0);
 }
 
-CommonEditor.prototype.exitNoChange = function() {
-    setInterval(function() {window.parent.controller.popPage(false);}, 0);
+CommonEditor.prototype.exitNoChange = function(params) {
+    setInterval(function() {window.parent.controller.popPage(false, params);}, 0);
 }
 
 CommonEditor.prototype.saveForm = function(callback_success, callback_failed, context) {
@@ -229,7 +229,7 @@ CommonEditor.prototype.saveForm = function(callback_success, callback_failed, co
                      context);
 }
 
-CommonEditor.prototype.saveFormSuccess = function(data) {
+CommonEditor.prototype.saveFormSuccess = function(data, context) {
     /*
     $("#form-message")
         .text("Save success.")
@@ -241,8 +241,16 @@ CommonEditor.prototype.saveFormSuccess = function(data) {
     $(".message-block")
         .hide();
     */
-
-    controller.exit();
+    var param = {};
+    if (context) {
+        if ("typeclass" in context) {
+            param["typeclass"] = context["typeclass"]
+        }
+        if ("key" in context) {
+            param["key"] = context["key"]
+        }
+    }
+    controller.exit(param);
 }
 
 CommonEditor.prototype.saveFormFailed = function(code, message, data, context) {

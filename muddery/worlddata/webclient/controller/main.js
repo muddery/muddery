@@ -199,7 +199,7 @@ controller = {
     },
 
     // Pop last page.
-    popPage: function(refresh) {
+    popPage: function(refresh, params) {
         $("#navigate-bar>:last").remove();
         $("#contents>:last").remove();
 
@@ -211,7 +211,7 @@ controller = {
                 var c = $("#contents>:last")[0];
                 var w = c.contentWindow;
                 var t = w.controller;
-                $("#contents>:last")[0].contentWindow.controller.refresh();
+                $("#contents>:last")[0].contentWindow.controller.refresh(params);
             }
             catch(e) {
             }

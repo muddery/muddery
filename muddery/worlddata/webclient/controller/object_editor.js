@@ -289,6 +289,7 @@ ObjectEditor.prototype.onTypeclassChange = function(e) {
 
 ObjectEditor.prototype.saveForm = function(callback_success, callback_failed, context) {
     var table_blocks = $("#fields .table-block");
+    var key = "";
     var tables = [];
     for (var t = 0; t < table_blocks.length; t++) {
         var table_name = $(table_blocks[t]).data("table-name");
@@ -306,6 +307,11 @@ ObjectEditor.prototype.saveForm = function(callback_success, callback_failed, co
                     var value = control.val();
                     if (value.length > 0) {
                         values[name] = value;
+
+                        // Get the object's key.
+                        if (!key && name == "key") {
+                            key = value;
+                        }
                     }
                 }
             }
@@ -315,6 +321,14 @@ ObjectEditor.prototype.saveForm = function(callback_success, callback_failed, co
             values: values
         });
     }
+
+    // Set the key to all tables.
+    for (var t = 0; t < tables.length; t++) {
+        tables[t].values["key"] = key;
+    }
+
+    context["typeclass"] = this.base_typeclass;
+    context["key"] = key;
 
     service.saveObjectForm(tables,
                            this.base_typeclass,

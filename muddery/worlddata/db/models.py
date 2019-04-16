@@ -192,7 +192,7 @@ class world_rooms(BaseObjects):
 
     # The key of a world area.
     # The room's location, it must be a area.
-    location = models.CharField(max_length=KEY_LENGTH, blank=True)
+    location = models.CharField(max_length=KEY_LENGTH, blank=True, db_index=True)
 
     # room's position which is used in maps
     position = models.CharField(max_length=POSITION_LENGTH, blank=True)
@@ -220,11 +220,11 @@ class world_exits(BaseObjects):
     # The key of a world room.
     # The exit's location, it must be a room.
     # Players can see and enter an exit from this room.
-    location = models.CharField(max_length=KEY_LENGTH)
+    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # The key of a world room.
     # The exits's destination.
-    destination = models.CharField(max_length=KEY_LENGTH)
+    destination = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # the condition to show the exit
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
@@ -242,7 +242,7 @@ class world_objects(BaseObjects):
 
     # The key of a world room.
     # object's location, it must be a room
-    location = models.CharField(max_length=KEY_LENGTH)
+    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
     
     # Action's name
     action = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -378,7 +378,7 @@ class world_npcs(BaseObjects):
 
     # The key of a world room.
     # NPC's location, it must be a room.
-    location = models.CharField(max_length=KEY_LENGTH)
+    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # the condition for showing the NPC
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
