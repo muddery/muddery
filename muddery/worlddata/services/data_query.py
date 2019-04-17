@@ -162,16 +162,10 @@ def query_map(area_key):
         area_key: (string) area's key.
     """
     try:
-        area_record = WORLD_AREAS.get(key=area_key)
+        area_record = WORLD_AREAS.get_by_key_with_base(area_key)
     except ObjectDoesNotExist:
         raise MudderyError(ERR.no_data, "Can not find map: %s" % area_key)
-
-    area_info = {
-        "key": area_record.key,
-        "background": area_record.background,
-        "width": area_record.width,
-        "height": area_record.height
-    }
+    area_info = area_record
 
     room_records = WORLD_ROOMS_MAPPER.rooms_in_area(area_key)
     room_info = []

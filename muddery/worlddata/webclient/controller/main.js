@@ -288,11 +288,11 @@ controller = {
         url = "map_editor.html";
 
         if (map_key) {
-            name = "Edit " + map_key;
+            name = "Edit MAP";
             url += "?map=" + map_key;
         }
         else {
-            name = "Add " + map_key;
+            name = "Add MAP";
         }
 
         controller.pushPage(name, url, null);

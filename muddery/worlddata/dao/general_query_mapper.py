@@ -7,6 +7,7 @@ from __future__ import print_function
 from django.apps import apps
 from django.conf import settings
 from django.db import connections
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def get_all_fields(table_name):
@@ -164,3 +165,40 @@ def get_all_from_tables(tables):
     while record is not None:
         yield dict(zip(columns, record))
         record = cursor.fetchone()
+
+
+def get_tables_record_by_key(tables, key):
+    """
+    Filter object's data from tables.
+
+    Args:
+        tables: (string) table's list.
+        key: (string) object's key.
+
+    Return:
+        a dict of values.
+    """
+    if not tables or len(tables) <= 1:
+        return
+
+    # Get table's full name
+    tables = [settings.WORLD_DATA_APP + "_" + table for table in tables]
+
+    # join tables
+    from_tables = ", ".join(tables)
+    conditions = [tables[0] + ".key=" + t + ".key" for t in tables[1:]]
+    conditions = " and ".join(conditions)
+    query = "select * from %(tables)s where %(first_table)s.key=%%s and %(join)s" %\
+                {"tables": from_tables,
+                 "first_table": tables[0],
+                 "join": conditions}
+    cursor = connections[settings.WORLD_DATA_APP].cursor()
+    cursor.execute(query, [key])
+    columns = [col[0] for col in cursor.description]
+
+    # return records
+    record = cursor.fetchone()
+    if record:
+        return dict(zip(columns, record))
+    else:
+        raise ObjectDoesNotExist

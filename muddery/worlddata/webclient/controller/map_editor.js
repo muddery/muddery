@@ -44,8 +44,6 @@ MapEditor.prototype.init = function() {
     $("#save-record").removeClass("hidden");
     $("#delete-record").removeClass("hidden");
 
-    $("#form-name").text(this.area_key);
-
     $("#use-grid").attr("checked", this.use_grid);
     $("#grid-size").val(this.grid_size);
 
@@ -1596,8 +1594,6 @@ MapEditor.prototype.refresh = function(param) {
         }
     }
 
-    $("#form-name").text(this.area_key);
-
     if (this.area_key) {
         service.queryMap(this.area_key, this.queryMapSuccess, this.failedCallback);
     }
@@ -1624,6 +1620,11 @@ MapEditor.prototype.queryMapSuccess = function(data) {
     if (!controller.origin_map) {
         controller.origin_map = data;
     }
+
+    // Show the map's name.
+    var name = data.area.name? data.area.name: "";
+    var key = data.area.key? data.area.key: "";
+    $("#form-name").text(name + "(" + key + ")");
 
     controller.background = "";
     controller.rooms = {};
@@ -1723,6 +1724,12 @@ MapEditor.prototype.addAreaSuccess = function(data) {
     controller.changed = true;
 
     controller.area_key = data.key;
+
+    // Show the map's name.
+    var name = data.name? data.name: "";
+    var key = data.key? data.key: "";
+    $("#form-name").text(name + "(" + key + ")");
+
     var width = data.width || 0;
     var height = data.height || 0;
 
