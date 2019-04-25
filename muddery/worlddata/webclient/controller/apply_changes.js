@@ -15,15 +15,12 @@ controller = {
 
     confirmApply: function() {
         window.parent.controller.hideWaiting();
-        window.parent.controller.showWaiting("", "Applying changes. Please wait.");
+        window.parent.controller.showWaiting("", "Applying changes. Please wait the server to restart.");
 
         service.applyChanges(controller.applySuccess, controller.applyFailed);
     },
 
     applySuccess: function(data) {
-        window.parent.controller.hideWaiting();
-        window.parent.controller.showWaiting("", "Changes Applied. Please wait the server to restart.");
-
         controller.checkStatus();
         controller.status_interval_id = window.setInterval("controller.checkStatus()", 3000);
     },
