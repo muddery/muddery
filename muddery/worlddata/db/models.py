@@ -1387,6 +1387,9 @@ class action_room_interval(BaseEventActionData):
     # Repeat interval in seconds.
     interval = models.PositiveIntegerField(blank=True, default=0)
 
+    # Can trigger events when the character is offline.
+    offline = models.BooleanField(blank=True, default=False)
+
     # The event action.
     action = models.CharField(max_length=KEY_LENGTH)
 

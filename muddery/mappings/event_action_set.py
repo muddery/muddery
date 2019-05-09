@@ -25,11 +25,10 @@ class EventActionSet(object):
         # load classes
         for cls in classes_in_path(settings.PATH_EVENT_ACTION_BASE, BaseEventAction):
             key = cls.key
-
-            if self.dict.has_key(key):
-                logger.log_infomsg("Event action %s is replaced by %s." % (key, cls))
-
-            self.dict[key] = cls()
+            if key:
+                if self.dict.has_key(key):
+                    logger.log_infomsg("Event action %s is replaced by %s." % (key, cls))
+                self.dict[key] = cls()
 
     def get(self, key):
         """

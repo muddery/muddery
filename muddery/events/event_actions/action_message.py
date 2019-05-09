@@ -7,11 +7,11 @@ from __future__ import print_function
 import random
 from django.apps import apps
 from django.conf import settings
-from muddery.events.base_event_action import BaseEventAction
+from muddery.events.base_interval_action import BaseIntervalAction
 from muddery.utils.localized_strings_handler import _
 
 
-class ActionMessage(BaseEventAction):
+class ActionMessage(BaseIntervalAction):
     """
     Attack a target.
     """
