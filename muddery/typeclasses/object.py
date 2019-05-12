@@ -27,6 +27,7 @@ from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.desc_handler import DESC_HANDLER
 from muddery.typeclasses.base_typeclass import BaseTypeclass
 from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.worlddata.dao.object_properties_mapper import OBJECT_PROPERTIES
 
 
 class MudderyBaseObject(BaseTypeclass, DefaultObject):
@@ -74,11 +75,11 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
     dfield = property(__dfield_get, __dfield_set, __dfield_del)
 
     @lazy_property
-    def custom_attributes_handler(self):
+    def custom_properties_handler(self):
         return DataFieldHandler(self)
 
-    #@property cattr
-    def __cattr_get(self):
+    #@property prop
+    def __prop_get(self):
         """
         A non-attr_obj store (ndb: NonDataBase). Everything stored
         to this is guaranteed to be cleared when a server is shutdown.
@@ -86,23 +87,23 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         property, e.g. obj.ndb.attr = value etc.
         """
         try:
-            return self._cattr_holder
+            return self._prop_holder
         except AttributeError:
-            self._cattr_holder = DbHolder(self, "custom_attributes", manager_name='custom_attributes_handler')
-            return self._cattr_holder
+            self._prop_holder = DbHolder(self, "custom_properties", manager_name='custom_properties_handler')
+            return self._prop_holder
 
-    #@cattr.setter
-    def __cattr_set(self, value):
+    #@prop.setter
+    def __prop_set(self, value):
         "Stop accidentally replacing the ndb object"
         string = "Cannot assign directly to ndb object! "
         string += "Use self.attr.name=value instead."
         raise Exception(string)
 
-    #@cattr.deleter
-    def __cattr_del(self):
+    #@prop.deleter
+    def __prop_del(self):
         "Stop accidental deletion."
         raise Exception("Cannot delete the attr object!")
-    cattr = property(__cattr_get, __cattr_set, __cattr_del)
+    prop = property(__prop_get, __prop_set, __prop_del)
 
     def at_object_creation(self):
         """
@@ -262,6 +263,9 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             else:
                 logger.log_errmsg("%s does not have a typeclass." % key)
 
+            # Load custom properties.
+            self.load_properties()
+
         self.after_data_loaded()
 
         if not self.location and set_location:
@@ -270,27 +274,22 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded().
 
-    def load_custom_attributes(self, attributes_info):
+    def load_properties(self):
         """
-        Load custom attributes.
-
-        Args:
-            attributes_info: relative attributes info
+        Load custom properties.
         """
-        for key in self.data_fields_handler.all():
-            attribute_info = attributes_info.for_field(key)
-            if attribute_info:
-                # get value
-                serializable_value = getattr(self.dfield, key)
-                if serializable_value == "":
-                    value = None
-                else:
-                    try:
-                        value = ast.literal_eval(serializable_value)
-                    except (SyntaxError, ValueError), e:
-                        # treat as a raw string
-                        value = serializable_value
-                setattr(self.cattr, attribute_info["key"], value)
+        properties = OBJECT_PROPERTIES.get_properties(self.get_data_key())
+        for key, serializable_value in properties.items():
+            serializable_value = properties[key]
+            if serializable_value == "":
+                value = None
+            else:
+                try:
+                    value = ast.literal_eval(serializable_value)
+                except (SyntaxError, ValueError), e:
+                    # treat as a raw string
+                    value = serializable_value
+            setattr(self.prop, key, value)
 
     def after_data_key_changed(self):
         """

@@ -395,7 +395,7 @@ class characters(BaseObjects):
     "Store common characters."
 
     # Character's model. If it is empty, character's key will be used as its model.
-    model = models.CharField(max_length=KEY_LENGTH)
+    model = models.CharField(max_length=KEY_LENGTH, blank=True, default="")
 
     # Character's level.
     level = models.PositiveIntegerField(blank=True, default=1)
@@ -850,6 +850,89 @@ class character_models(models.Model):
 
     def __unicode__(self):
         return self.name + " (Lv" + str(self.level) + ")"
+
+
+# ------------------------------------------------------------
+#
+# Object's custom properties.
+#
+# ------------------------------------------------------------
+class properties_dict(models.Model):
+    """
+    Object's custom properties.
+    """
+    # The key of a typeclass.
+    typeclass = models.CharField(max_length=KEY_LENGTH)
+
+    # The key of the property.
+    key = models.CharField(max_length=KEY_LENGTH)
+
+    # The name of the property.
+    name = models.CharField(max_length=NAME_LENGTH)
+
+    # The description of the property.
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Properties Dict"
+        verbose_name_plural = "Properties Dict"
+        unique_together = ("typeclass", "key")
+
+
+# ------------------------------------------------------------
+#
+# Object's custom properties
+#
+# ------------------------------------------------------------
+class object_properties(models.Model):
+    "Store object's custom properties."
+    # The key of an object.
+    object = models.CharField(max_length=KEY_LENGTH)
+
+    # The key of the property.
+    property = models.CharField(max_length=KEY_LENGTH)
+
+    # The value of the property.
+    value = models.IntegerField(blank=True, default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Object's Property"
+        verbose_name_plural = "Object's Properties"
+        unique_together = ("object", "property")
+
+
+# ------------------------------------------------------------
+#
+# character's custom properties
+#
+# ------------------------------------------------------------
+class character_properties(models.Model):
+    "Store all character level property."
+    # The key of a character.
+    character = models.CharField(max_length=KEY_LENGTH)
+
+    # The level of a character.
+    level = models.PositiveIntegerField(blank=True, default=0)
+
+    # The key of the property.
+    property = models.CharField(max_length=KEY_LENGTH)
+
+    # The value of the property.
+    value = models.IntegerField(blank=True, default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Character's Level Property"
+        verbose_name_plural = "Character's Level Properties"
+        unique_together = ("character", "level", "property")
 
 
 # ------------------------------------------------------------

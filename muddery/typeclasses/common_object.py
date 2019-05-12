@@ -124,15 +124,6 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
     typeclass_name = _("Food", "typeclasses")
     model_name = "foods"
 
-    def after_data_loaded(self):
-        """
-        Init the character.
-        """
-        super(MudderyFood, self).after_data_loaded()
-
-        # Load custom attributes.
-        self.load_custom_attributes(FOOD_ATTRIBUTES_INFO)
-
     def take_effect(self, user, number):
         """
         Use this object.
@@ -157,8 +148,8 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
             used = self.db.number
 
         increments = {}
-        for key in self.custom_attributes_handler.all():
-            value = getattr(self.cattr, key)
+        for key in self.custom_properities_handler.all():
+            value = getattr(self.prop, key)
             if value:
                 increments[key] = value * used
 
@@ -208,9 +199,6 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
         """
         super(MudderyEquipment, self).after_data_loaded()
 
-        # Load custom attributes.
-        self.load_custom_attributes(EQUIPMENT_ATTRIBUTES_INFO)
-
         self.type = getattr(self.dfield, "type", "")
         self.position = getattr(self.dfield, "position", "")
 
@@ -237,9 +225,9 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
             if hasattr(user, key):
                 # try to add to user's attribute
                 target = user
-            elif user.custom_attributes_handler.has(key):
-                # try to add to user's cattr
-                target = user.cattr
+            elif user.custom_properties_handler.has(key):
+                # try to add to user's prop
+                target = user.prop
             elif user.attributes.has(key):
                 # try to add to user's db
                 target = user.db
@@ -248,7 +236,7 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
                 logger.log_errmsg("Can not apply custom attribute: %s to %s" % (key, user.get_data_key()))
                 continue
 
-            value = getattr(self.cattr, key)
+            value = getattr(self.prop, key)
             if value is None:
                 value = 0
             value += getattr(target, key)

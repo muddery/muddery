@@ -31,8 +31,14 @@ class Character(MudderyCharacter):
         # Set default values.
         if not self.attributes.has("mp"):
             self.db.mp = 0
-        if not self.attributes.has("sp"):
-            self.db.sp = 0
+
+    def load_properties(self):
+        """
+        Load custom properties.
+        """
+        super(Character, self).load_properties()
+
+        self.max_mp = getattr(self.prop, "max_mp", 0)
 
     def after_data_key_changed(self):
         """
@@ -42,16 +48,6 @@ class Character(MudderyCharacter):
 
         # Reset values.
         self.db.mp = self.max_mp
-        self.db.sp = self.max_sp
-
-    def load_model_data(self):
-        """
-        Load character's level data.
-        """
-        super(Character, self).load_model_data()
-
-        self.max_mp = getattr(self.dfield, "max_mp", 0)
-        self.max_sp = getattr(self.dfield, "max_sp", 0)
 
     def reborn(self):
         """
@@ -61,7 +57,6 @@ class Character(MudderyCharacter):
         
         # Recover mp and sp.
         self.db.mp = self.max_mp
-        self.db.sp = self.max_sp
         
     def level_up(self):
         """
@@ -74,7 +69,6 @@ class Character(MudderyCharacter):
 
         # Recover mp and sp.
         self.db.mp = self.max_mp
-        self.db.sp = self.max_sp
 
     def get_appearance(self, caller):
         """

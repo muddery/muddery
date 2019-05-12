@@ -1,0 +1,7 @@
+typeclass,key,name,desc
+CHARACTER,max_hp,最大生命,
+CHARACTER,max_mp,最大法力,
+CHARACTER,max_exp,升级经验,
+CHARACTER,give_exp,提供经验,
+CHARACTER,attack,攻击,攻击值。
+CHARACTER,defence,防御,防御值。

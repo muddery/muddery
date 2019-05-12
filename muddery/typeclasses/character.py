@@ -10,7 +10,7 @@ creation commands.
 
 from __future__ import print_function
 
-import time, traceback
+import time, ast, traceback
 from twisted.internet import reactor, task
 from twisted.internet.task import deferLater
 from django.conf import settings
@@ -31,6 +31,7 @@ from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
 from muddery.utils.utils import search_obj_data_key
 from muddery.utils.localized_strings_handler import _
+from muddery.worlddata.dao.character_properties_mapper import CHARACTER_PROPERTIES
 
 
 class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
@@ -142,7 +143,33 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             content.delete()
         
         return True
-                            
+
+    def load_properties(self):
+        """
+        Load custom properties.
+        """
+        if self.db.level:
+            level = self.db.level
+        else:
+            level = getattr(self.dfield, "level", 1)
+
+        properties = CHARACTER_PROPERTIES.get_properties(self.get_data_key(), level)
+        for key, serializable_value in properties.items():
+            serializable_value = properties[key]
+            if serializable_value == "":
+                value = None
+            else:
+                try:
+                    value = ast.literal_eval(serializable_value)
+                except (SyntaxError, ValueError), e:
+                    # treat as a raw string
+                    value = serializable_value
+            setattr(self.prop, key, value)
+
+        self.max_exp = getattr(self.prop, "max_exp", 0)
+        self.max_hp = getattr(self.prop, "max_hp", 1)
+        self.give_exp = getattr(self.prop, "give_exp", 0)
+
     def after_data_loaded(self):
         """
         Init the character.
@@ -250,10 +277,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Refresh character's data, calculate character's attributes.
         """
-        # load level data
-        self.load_model_data()
-        self.load_custom_attributes(CHARACTER_ATTRIBUTES_INFO)
-        
         # load equips
         self.ues_equipments()
 
@@ -318,9 +341,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             elif hasattr(self, key):
                 # try to add to self's attribute
                 target = self
-            elif self.custom_attributes_handler.has(key):
-                # try to add to self's cattr
-                target = self.cattr
+            elif self.custom_properties_handler.has(key):
+                # try to add to self's prop
+                target = self.prop
             else:
                 # no target
                 continue
@@ -337,9 +360,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             elif hasattr(self, max_key):
                 # try to add to self's attribute
                 max_source = self
-            elif self.custom_attributes_handler.has(max_key):
-                # try to add to self's cattr
-                max_source = self.cattr
+            elif self.custom_properties_handler.has(max_key):
+                # try to add to self's prop
+                max_source = self.prop
 
             if max_source is not None:
                 max_value = getattr(max_source, max_key)
@@ -355,9 +378,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             elif hasattr(self, min_key):
                 # try to add to self's attribute
                 min_source = self
-            elif self.custom_attributes_handler.has(min_key):
-                # try to add to self's cattr
-                min_source = self.cattr
+            elif self.custom_properties_handler.has(min_key):
+                # try to add to self's prop
+                min_source = self.prop
 
             if min_source is not None:
                 min_value = getattr(min_source, min_key)
@@ -378,27 +401,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         return {"max_hp": self.max_hp,
                 "hp": self.db.hp}
-
-    def load_model_data(self):
-        """
-        Load character's level data.
-        """
-        model_name = getattr(self.dfield, "model", None)
-        if not model_name:
-            model_name = self.get_data_key()
-
-        try:
-            # get data from db
-            model_data = CHARACTER_MODELS.get_data(model_name, self.db.level)
-            for key, value in model_data.items():
-                setattr(self.dfield, key, value)
-        except Exception, e:
-            logger.log_errmsg("Can't load character %s's level info (%s, %s): %s" %
-                              (self.get_data_key(), model_name, self.db.level, e))
-
-        self.max_exp = getattr(self.dfield, "max_exp", 0)
-        self.max_hp = getattr(self.dfield, "max_hp", 1)
-        self.give_exp = getattr(self.dfield, "give_exp", 0)
 
     def search_inventory(self, obj_key):
         """

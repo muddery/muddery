@@ -26,7 +26,7 @@ from muddery.utils.honours_handler import HONOURS_HANDLER
 from muddery.utils.match_queue_handler import MATCH_QUEUE_HANDLER
 from muddery.dao.honours_mapper import HONOURS_MAPPER
 from muddery.worlddata.dao.default_objects_mapper import DEFAULT_OBJECTS
-from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
+from muddery.worlddata.dao.properties_dict_mapper import PROPERTIES_DICT
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia.comms.models import ChannelDB
@@ -821,10 +821,10 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                          "order": 4}}
 
         order = 5
-        for value in CHARACTER_ATTRIBUTES_INFO.all_values():
-            status[value["key"]] = {"key": value["key"],
-                                    "name": value["name"],
-                                    "value": getattr(self.cattr, value["key"]),
+        for info in self.get_properties_info():
+            status[info["key"]] = {"key": info["key"],
+                                    "name": info["name"],
+                                    "value": getattr(self.prop, info["key"]),
                                     "order": order}
             order += 1
 

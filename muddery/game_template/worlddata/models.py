@@ -206,6 +206,38 @@ class character_models(BaseModels.character_models):
     pass
 
 
+# ------------------------------------------------------------
+#
+# Object's custom properties.
+#
+# ------------------------------------------------------------
+class properties_dict(BaseModels.properties_dict):
+    """
+    Object's custom properties.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# Object's custom properties
+#
+# ------------------------------------------------------------
+class object_properties(BaseModels.object_properties):
+    "Store object's custom properties."
+    pass
+
+
+# ------------------------------------------------------------
+#
+# character's custom properties
+#
+# ------------------------------------------------------------
+class character_properties(BaseModels.character_properties):
+    "Store all character level property."
+    pass
+
+
 #------------------------------------------------------------
 #
 # store all npcs
