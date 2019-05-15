@@ -865,7 +865,7 @@ class properties_dict(models.Model):
     typeclass = models.CharField(max_length=KEY_LENGTH)
 
     # The key of the property.
-    key = models.CharField(max_length=KEY_LENGTH)
+    property = models.CharField(max_length=KEY_LENGTH)
 
     # The name of the property.
     name = models.CharField(max_length=NAME_LENGTH)
@@ -879,7 +879,7 @@ class properties_dict(models.Model):
         app_label = "worlddata"
         verbose_name = "Properties Dict"
         verbose_name_plural = "Properties Dict"
-        unique_together = ("typeclass", "key")
+        unique_together = ("typeclass", "property")
 
 
 # ------------------------------------------------------------
@@ -892,11 +892,14 @@ class object_properties(models.Model):
     # The key of an object.
     object = models.CharField(max_length=KEY_LENGTH)
 
+    # The level of the object.
+    level = models.PositiveIntegerField(blank=True, default=0)
+
     # The key of the property.
     property = models.CharField(max_length=KEY_LENGTH)
 
     # The value of the property.
-    value = models.IntegerField(blank=True, default=0)
+    value = models.CharField(max_length=VALUE_LENGTH)
 
     class Meta:
         "Define Django meta options"
@@ -904,35 +907,7 @@ class object_properties(models.Model):
         app_label = "worlddata"
         verbose_name = "Object's Property"
         verbose_name_plural = "Object's Properties"
-        unique_together = ("object", "property")
-
-
-# ------------------------------------------------------------
-#
-# character's custom properties
-#
-# ------------------------------------------------------------
-class character_properties(models.Model):
-    "Store all character level property."
-    # The key of a character.
-    character = models.CharField(max_length=KEY_LENGTH)
-
-    # The level of a character.
-    level = models.PositiveIntegerField(blank=True, default=0)
-
-    # The key of the property.
-    property = models.CharField(max_length=KEY_LENGTH)
-
-    # The value of the property.
-    value = models.IntegerField(blank=True, default=0)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Character's Level Property"
-        verbose_name_plural = "Character's Level Properties"
-        unique_together = ("character", "level", "property")
+        unique_together = ("object", "level", "property")
 
 
 # ------------------------------------------------------------

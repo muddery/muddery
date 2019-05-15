@@ -232,16 +232,6 @@ class object_properties(BaseModels.object_properties):
     pass
 
 
-# ------------------------------------------------------------
-#
-# character's custom properties
-#
-# ------------------------------------------------------------
-class character_properties(BaseModels.character_properties):
-    "Store all character level property."
-    pass
-
-
 #------------------------------------------------------------
 #
 # store all npcs

@@ -34,7 +34,7 @@ class FuncHit(StatementFunction):
             return
 
         # calculate the damage
-        damage = float(self.caller.cattr.attack) / (self.caller.cattr.attack + self.obj.cattr.defence) * self.caller.cattr.attack
+        damage = float(self.caller.prop.attack) / (self.caller.prop.attack + self.obj.prop.defence) * self.caller.prop.attack
         damage = round(damage * effect)
 
         # hurt target

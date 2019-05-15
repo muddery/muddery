@@ -73,7 +73,7 @@ class PlayerCharacter(MudderyPlayerCharacter):
         for value in CHARACTER_ATTRIBUTES_INFO.all_values():
             status[value["key"]] = {"key": value["key"],
                                     "name": value["name"],
-                                    "value": getattr(self.cattr, value["key"]),
+                                    "value": getattr(self.custom, value["key"]),
                                     "order": order}
             order += 1
 

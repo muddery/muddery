@@ -84,13 +84,13 @@ class MudderySkill(TYPECLASS("OBJECT")):
         super(MudderySkill, self).after_data_loaded()
 
         # set data
-        self.function = getattr(self.dfield, "function", "")
-        self.cd = getattr(self.dfield, "cd", 0)
-        self.passive = getattr(self.dfield, "passive", False)
-        self.main_type = getattr(self.dfield, "main_type", "")
-        self.sub_type = getattr(self.dfield, "sub_type", "")
+        self.function = getattr(self.system, "function", "")
+        self.cd = getattr(self.system, "cd", 0)
+        self.passive = getattr(self.system, "passive", False)
+        self.main_type = getattr(self.system, "main_type", "")
+        self.sub_type = getattr(self.system, "sub_type", "")
         
-        message_model = getattr(self.dfield, "message", "")
+        message_model = getattr(self.system, "message", "")
         self.message_model = self.msg_escape.sub(self.escape_fun, message_model)
 
     def get_available_commands(self, caller):

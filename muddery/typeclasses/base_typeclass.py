@@ -39,10 +39,10 @@ class BaseTypeclass(object):
         Get this typeclass's models.
         """
         if "_all_properties_" not in cls.__dict__:
-            cls._all_properties_ = []
+            cls._all_properties_ = {}
             for c in cls.__bases__:
                 if hasattr(c, "get_properties_info"):
-                    cls._all_properties_.extend(c.get_properties_info())
+                    cls._all_properties_.update(c.get_properties_info())
 
             from muddery.worlddata.dao.properties_dict_mapper import PROPERTIES_DICT
             records = PROPERTIES_DICT.get_properties(cls.typeclass_key)
@@ -56,8 +56,8 @@ class BaseTypeclass(object):
                     continue
 
                 if not record.key in cls._all_properties_:
-                    cls._all_properties_.append({"key": record.key,
-                                                 "name": record.name,
-                                                 "desc": record.desc})
+                    cls._all_properties_[record.key] = {"name": record.name,
+                                                        "desc": record.desc,
+                                                        "mutable": record.mutable}
 
         return cls._all_properties_

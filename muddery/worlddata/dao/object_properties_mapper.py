@@ -20,15 +20,16 @@ class ObjectPropertiesMapper(object):
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
-    def get_properties(self, object):
+    def get_properties(self, object, level):
         """
         Get object's properties.
 
         Args:
             object: (string) object's key.
+            level: (number) object's level.
         """
         properties = {}
-        records = self.objects.filter(object=object)
+        records = self.objects.filter(object=object, level=level)
         for record in records:
             properties[record.attribute] = record.value
         return properties

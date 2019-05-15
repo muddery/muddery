@@ -22,16 +22,14 @@ from evennia.utils.utils import lazy_property, class_from_module
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.worlddata.dao import common_mappers as CM
 from muddery.worlddata.dao.loot_list_mapper import CHARACTER_LOOT_LIST
-from muddery.worlddata.dao.character_models_mapper import CHARACTER_MODELS
 from muddery.worlddata.dao.default_skills_mapper import DEFAULT_SKILLS
 from muddery.utils.builder import build_object
 from muddery.utils.loot_handler import LootHandler
 from muddery.utils import defines
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
 from muddery.utils.utils import search_obj_data_key
+from muddery.utils.data_field_handler import DataFieldHandler
 from muddery.utils.localized_strings_handler import _
-from muddery.worlddata.dao.character_properties_mapper import CHARACTER_PROPERTIES
 
 
 class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
@@ -62,6 +60,37 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
     def loot_handler(self):
         return LootHandler(self, CHARACTER_LOOT_LIST.filter(self.get_data_key()))
 
+    @lazy_property
+    def final_properties_handler(self):
+        return DataFieldHandler(self)
+
+    # @property prop stores character's final properties after using equipments and skills.
+    def __prop_get(self):
+        """
+        A non-attr_obj store (ndb: NonDataBase). Everything stored
+        to this is guaranteed to be cleared when a server is shutdown.
+        Syntax is same as for the _get_db_holder() method and
+        property, e.g. obj.ndb.attr = value etc.
+        """
+        try:
+            return self._prop_holder
+        except AttributeError:
+            self._prop_holder = DbHolder(self, "properties", manager_name='final_properties_handler')
+            return self._prop_holder
+
+    # @prop.setter
+    def __prop_set(self, value):
+        "Stop accidentally replacing the ndb object"
+        string = "Cannot assign directly to ndb object! "
+        string += "Use self.prop.name=value instead."
+        raise Exception(string)
+
+    # @prop.deleter
+    def __prop_del(self):
+        "Stop accidental deletion."
+        raise Exception("Cannot delete the prop object!")
+    prop = property(__prop_get, __prop_set, __prop_del)
+
     def at_object_creation(self):
         """
         Called once, when this object is first created. This is the
@@ -73,10 +102,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # set default values
         if not self.attributes.has("level"):
             self.db.level = 0
-        if not self.attributes.has("exp"):
-            self.db.exp = 0
-        if not self.attributes.has("hp"):
-            self.db.hp = 1
         if not self.attributes.has("team"):
             self.db.team = 0
 
@@ -114,7 +139,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # A temporary character will be deleted after the combat finished.
         self.is_temp = False
 
-
     def at_object_delete(self):
         """
         Called just before the database object is permanently
@@ -144,32 +168,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         
         return True
 
-    def load_properties(self):
-        """
-        Load custom properties.
-        """
-        if self.db.level:
-            level = self.db.level
-        else:
-            level = getattr(self.dfield, "level", 1)
-
-        properties = CHARACTER_PROPERTIES.get_properties(self.get_data_key(), level)
-        for key, serializable_value in properties.items():
-            serializable_value = properties[key]
-            if serializable_value == "":
-                value = None
-            else:
-                try:
-                    value = ast.literal_eval(serializable_value)
-                except (SyntaxError, ValueError), e:
-                    # treat as a raw string
-                    value = serializable_value
-            setattr(self.prop, key, value)
-
-        self.max_exp = getattr(self.prop, "max_exp", 0)
-        self.max_hp = getattr(self.prop, "max_hp", 1)
-        self.give_exp = getattr(self.prop, "give_exp", 0)
-
     def after_data_loaded(self):
         """
         Init the character.
@@ -178,10 +176,10 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         # get level
         if not self.db.level:
-            self.db.level = getattr(self.dfield, "level", 1)
+            self.db.level = getattr(self.system, "level", 1)
 
         # friendly
-        self.friendly = getattr(self.dfield, "friendly", 0)
+        self.friendly = getattr(self.system, "friendly", 0)
         
         # skill's ai
         ai_choose_skill_class = class_from_module(settings.AI_CHOOSE_SKILL)
@@ -199,7 +197,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         self.target = None
 
         # set reborn time
-        self.reborn_time = getattr(self.dfield, "reborn_time", 0)
+        self.reborn_time = getattr(self.system, "reborn_time", 0)
 
         # A temporary character will be deleted after the combat finished.
         self.is_temp = False
@@ -213,17 +211,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # load default objects
         self.load_default_objects()
 
-        # refresh data
-        self.refresh_data()
-        
-    def after_data_key_changed(self):
-        """
-        Called at data_key changed.
-        """
-        super(MudderyCharacter, self).after_data_key_changed()
-
-        # reset hp
-        self.db.hp = self.max_hp
+        # refresh the character's properties.
+        self.refresh_properties()
 
     def reset_equip_positions(self):
         """
@@ -271,29 +260,21 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             return
 
         self.db.level = level
-        self.refresh_data()
+        self.refresh_properties()
 
-    def refresh_data(self):
+    def refresh_properties(self):
         """
-        Refresh character's data, calculate character's attributes.
+        Refresh character's final properties.
         """
+        # Load all custom properties.
+        for key, value in self.custom_properties_handler.all(True):
+            self.prop.add(key, value)
+
         # load equips
         self.ues_equipments()
 
         # load passive skills
         self.cast_passive_skills()
-
-    def get_appearance(self, caller):
-        """
-        This is a convenient hook for a 'look'
-        command to call.
-        """
-        # get name, description and available commands.
-        info = super(MudderyCharacter, self).get_appearance(caller)
-        info["max_hp"] = self.max_hp
-        info["hp"] = self.db.hp
-
-        return info
 
     @classmethod
     def get_event_trigger_types(cls):
@@ -321,86 +302,105 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         return event_key in self.db.closed_events
 
-    def change_status(self, increments):
+    def change_properties(self, increments):
         """
-        Change the value of specified status.
+        Change values of specified properties.
         
         Args:
             increments: (dict) values to change.
             
         Return:
-            (dict) values that actrually changed.
+            (dict) values that actually changed.
         """
         changes = {}
-        for key in increments:
+        properties_info = self.get_properties_info()
+
+        for key, increment in increments.items():
             changes[key] = 0
 
-            if self.attributes.has(key):
-                # try to add to self's db
-                target = self.db
-            elif hasattr(self, key):
-                # try to add to self's attribute
-                target = self
-            elif self.custom_properties_handler.has(key):
-                # try to add to self's prop
-                target = self.prop
-            else:
-                # no target
+            if not self.final_properties_handler.has(key):
                 continue
 
-            origin_value = getattr(target, key)
-            increment = increments[key]
+            origin_value = getattr(self.prop, key)
             
             # check limits
             max_key = "max_" + key
-            max_source = None
-            if self.attributes.has(max_key):
-                # try to add to self's db
-                max_source = self.db
-            elif hasattr(self, max_key):
-                # try to add to self's attribute
-                max_source = self
-            elif self.custom_properties_handler.has(max_key):
-                # try to add to self's prop
-                max_source = self.prop
-
-            if max_source is not None:
-                max_value = getattr(max_source, max_key)
+            if self.final_properties_handler.has(max_key):
+                max_value = getattr(self.prop, max_key)
                 if origin_value + increment > max_value:
                     increment = max_value - origin_value
-            
+
+            # Default minimum value is 0.
             min_value = 0
             min_key = "min_" + key
-            min_source = None
-            if self.attributes.has(min_key):
-                # try to add to self's db
-                min_source = self.db
-            elif hasattr(self, min_key):
-                # try to add to self's attribute
-                min_source = self
-            elif self.custom_properties_handler.has(min_key):
-                # try to add to self's prop
-                min_source = self.prop
-
-            if min_source is not None:
-                min_value = getattr(min_source, min_key)
+            if self.final_properties_handler.has(min_key):
+                min_value = getattr(self.prop, min_key)
 
             if origin_value + increment < min_value:
                 increment = min_value - origin_value
 
-            # set value
+            # Set the value.
             if increment != 0:
-                setattr(target, key, origin_value + increment)
+                value = origin_value + increment
+                setattr(self.prop, key, value)
                 changes[key] = increment
-            
+
+                # Save the value to db.
+                if key in properties_info:
+                    if properties_info[key]["persistent"]:
+                        setattr(self.attr, key, value)
+
         return changes
-        
+
+    def set_properties(self, values):
+        """
+        Set values of specified properties.
+
+        Args:
+            values: (dict) values to set.
+
+        Return:
+            (dict) values that actually set.
+        """
+        actual = {}
+        properties_info = self.get_properties_info()
+
+        for key, value in values:
+            actual[key] = 0
+
+            if not self.final_properties_handler.has(key):
+                continue
+
+            # check limits
+            max_key = "max_" + key
+            if self.final_properties_handler.has(max_key):
+                max_value = getattr(self.prop, max_key)
+                if value > max_value:
+                    value = max_value
+
+            # Default minimum value is 0.
+            min_key = "min_" + key
+            if self.final_properties_handler.has(min_key):
+                min_value = getattr(self.prop, min_key)
+                if value < min_value:
+                    value = min_value
+
+            # Set the value.
+            setattr(self.prop, key, value)
+            actual[key] = value
+
+            # Save the value to db.
+            if key in properties_info:
+                if properties_info[key]["persistent"]:
+                    setattr(self.attr, key, value)
+
+        return actual
+
     def get_combat_status(self):
         """
         Get character status used in combats.
         """
-        return {"max_hp": self.max_hp,
-                "hp": self.db.hp}
+        pass
 
     def search_inventory(self, obj_key):
         """
@@ -425,7 +425,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
                 content.equipped = True
 
         # set character's attributes
-        self.refresh_data()
+        self.refresh_properties()
 
     def ues_equipments(self):
         """
@@ -444,7 +444,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Load character's default skills.
         """
         # get character's model name
-        model_name = getattr(self.dfield, "model", None)
+        model_name = getattr(self.system, "model", None)
         if not model_name:
             model_name = self.get_data_key()
 
@@ -522,7 +522,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         # If it is a passive skill, player's status may change.
         if skill_obj.passive:
-            self.refresh_data()
+            self.refresh_properties()
 
         # Notify the player
         if not silent and self.has_account:
@@ -784,7 +784,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             (boolean) the character is alive or not
         """
-        return round(self.db.hp) > 0
+        return True
 
     def die(self, killers):
         """
@@ -808,9 +808,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Reborn after being killed.
         """
-        # Recover all hp.
-        self.db.hp = self.max_hp
-
         # Reborn at its home.
         if self.home:
             self.move_to(self.home, quiet=True)
@@ -878,9 +875,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             None
         """
         self.set_level(self.db.level + 1)
-
-        # recover hp
-        self.db.hp = self.max_hp
 
     def show_status(self):
         """

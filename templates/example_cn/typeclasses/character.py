@@ -20,43 +20,18 @@ class Character(MudderyCharacter):
     """
     typeclass_key = "CHARACTER"
 
-    def at_object_creation(self):
-        """
-        Called once, when this object is first created. This is the
-        normal hook to overload for most object types.
-            
-        """
-        super(Character, self).at_object_creation()
-
-        # Set default values.
-        if not self.attributes.has("mp"):
-            self.db.mp = 0
-
-    def load_properties(self):
-        """
-        Load custom properties.
-        """
-        super(Character, self).load_properties()
-
-        self.max_mp = getattr(self.prop, "max_mp", 0)
-
-    def after_data_key_changed(self):
-        """
-        Called at data_key changed.
-        """
-        super(Character, self).after_data_key_changed()
-
-        # Reset values.
-        self.db.mp = self.max_mp
-
     def reborn(self):
         """
         Reborn after being killed.
         """
         super(Character, self).reborn()
         
-        # Recover mp and sp.
-        self.db.mp = self.max_mp
+        # Recover hp and mp.
+        values = {
+            "hp": self.prop.max_hp,
+            "mp": self.prop.max_mp
+        }
+        self.set_properties(values)
         
     def level_up(self):
         """
@@ -67,8 +42,12 @@ class Character(MudderyCharacter):
         """
         super(Character, self).level_up()
 
-        # Recover mp and sp.
-        self.db.mp = self.max_mp
+        # Recover hp and mp.
+        values = {
+            "hp": self.prop.max_hp,
+            "mp": self.prop.max_mp
+        }
+        self.set_properties(values)
 
     def get_appearance(self, caller):
         """
@@ -77,8 +56,11 @@ class Character(MudderyCharacter):
         """
         # get name, description and available commands.
         info = super(Character, self).get_appearance(caller)
-        info["max_mp"] = self.max_mp
-        info["mp"] = self.db.mp
+
+        info["max_hp"] = self.prop.max_hp
+        info["hp"] = self.prop.hp
+        info["max_mp"] = self.prop.max_mp
+        info["mp"] = self.prop.mp
 
         return info
 
@@ -88,7 +70,18 @@ class Character(MudderyCharacter):
         """
         status = super(Character, self).get_combat_status()
 
-        status["max_mp"] = self.max_mp
-        status["mp"] = self.db.mp
+        status["max_hp"] = self.prop.max_hp
+        status["hp"] = self.prop.hp
+        status["max_mp"] = self.prop.max_mp
+        status["mp"] = self.prop.mp
 
         return status
+
+    def is_alive(self):
+        """
+        Check if the character is alive.
+
+        Returns:
+            (boolean) the character is alive or not
+        """
+        return round(self.prop.hp) > 0

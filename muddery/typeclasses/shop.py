@@ -37,7 +37,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
         # load shop goods
         self.load_goods()
         
-        self.verb = getattr(self.dfield, "verb", None)
+        self.verb = getattr(self.system, "verb", None)
 
     def load_goods(self):
         """

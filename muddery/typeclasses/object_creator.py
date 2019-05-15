@@ -38,10 +38,10 @@ class MudderyObjectCreator(TYPECLASS("WORLD_OBJECT")):
         super(MudderyObjectCreator, self).after_data_loaded()
 
         # Load creator info.
-        self.loot_verb = getattr(self.dfield, "loot_verb", None)
+        self.loot_verb = getattr(self.system, "loot_verb", None)
         if not self.loot_verb:
             self.loot_verb = _("Loot")
-        self.loot_condition = getattr(self.dfield, "loot_condition", None)
+        self.loot_condition = getattr(self.system, "loot_condition", None)
 
     def get_available_commands(self, caller):
         """

@@ -191,7 +191,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
             owner.receive_objects(obj_list)
 
         # do quest's action
-        action = getattr(self.dfield, "action", None)
+        action = getattr(self.system, "action", None)
         if action:
             STATEMENT_HANDLER.do_action(action, owner, None)
 

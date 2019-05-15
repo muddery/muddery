@@ -57,10 +57,10 @@ class MudderyExit(TYPECLASS("OBJECT"), DefaultExit):
         super(MudderyExit, self).after_data_loaded()
 
         # set exit's destination
-        self.set_obj_destination(getattr(self.dfield, "destination", None))
+        self.set_obj_destination(getattr(self.system, "destination", None))
 
         # set action verb
-        self.verb = getattr(self.dfield, "verb", _("GOTO"))
+        self.verb = getattr(self.system, "verb", _("GOTO"))
 
     def at_before_traverse(self, traversing_object):
         """

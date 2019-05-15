@@ -49,12 +49,12 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
         """
         super(MudderyRoom, self).after_data_loaded()
         
-        self.peaceful = getattr(self.dfield, "peaceful", False)
+        self.peaceful = getattr(self.system, "peaceful", False)
 
         self.position = None
         try:
             # set position
-            position = getattr(self.dfield, "position", None)
+            position = getattr(self.system, "position", None)
             if position:
                 self.position = ast.literal_eval(position)
         except Exception, e:
@@ -62,7 +62,7 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
 
         # get background
         self.background = None
-        resource = getattr(self.dfield, "background", None)
+        resource = getattr(self.system, "background", None)
         if resource:
             try:
                 resource_info = IMAGE_RESOURCES.get(resource)

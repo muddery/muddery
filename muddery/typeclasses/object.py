@@ -19,6 +19,7 @@ from evennia.typeclasses.models import DbHolder
 from muddery.statements.statement_handler import STATEMENT_HANDLER
 from muddery.events.event_trigger import EventTrigger
 from muddery.utils.data_field_handler import DataFieldHandler
+from muddery.utils.properties_handler import PropertiesHandler
 from muddery.utils import utils
 from muddery.utils import defines
 from muddery.utils.exception import MudderyError
@@ -44,11 +45,11 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         return EventTrigger(self)
 
     @lazy_property
-    def data_fields_handler(self):
+    def system_data_handler(self):
         return DataFieldHandler(self)
 
-    #@property dfield
-    def __dfield_get(self):
+    # @property system stores object's system data.
+    def __system_get(self):
         """
         A non-attr_obj store (ndb: NonDataBase). Everything stored
         to this is guaranteed to be cleared when a server is shutdown.
@@ -56,29 +57,29 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         property, e.g. obj.ndb.attr = value etc.
         """
         try:
-            return self._dfield_holder
+            return self._system_holder
         except AttributeError:
-            self._dfield_holder = DbHolder(self, "data_fields", manager_name='data_fields_handler')
-            return self._dfield_holder
+            self._system_holder = DbHolder(self, "system_data", manager_name='system_data_handler')
+            return self._system_holder
 
-    #@dfield.setter
-    def __dfield_set(self, value):
+    # @system.setter
+    def __system_set(self, value):
         "Stop accidentally replacing the ndb object"
         string = "Cannot assign directly to ndb object! "
-        string += "Use self.dfield.name=value instead."
+        string += "Use self.system.name=value instead."
         raise Exception(string)
 
-    #@dfield.deleter
-    def __dfield_del(self):
+    # @system.deleter
+    def __system_del(self):
         "Stop accidental deletion."
-        raise Exception("Cannot delete the dfield object!")
-    dfield = property(__dfield_get, __dfield_set, __dfield_del)
+        raise Exception("Cannot delete the system data object!")
+    system = property(__system_get, __system_set, __system_del)
 
     @lazy_property
     def custom_properties_handler(self):
-        return DataFieldHandler(self)
+        return PropertiesHandler(self)
 
-    #@property prop
+    # @property custom stores object's custom data.
     def __prop_get(self):
         """
         A non-attr_obj store (ndb: NonDataBase). Everything stored
@@ -87,22 +88,22 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         property, e.g. obj.ndb.attr = value etc.
         """
         try:
-            return self._prop_holder
+            return self._custom_holder
         except AttributeError:
-            self._prop_holder = DbHolder(self, "custom_properties", manager_name='custom_properties_handler')
-            return self._prop_holder
+            self._custom_holder = DbHolder(self, "custom_properties", manager_name='custom_properties_handler')
+            return self._custom_holder
 
-    #@prop.setter
+    # @prop.setter
     def __prop_set(self, value):
         "Stop accidentally replacing the ndb object"
         string = "Cannot assign directly to ndb object! "
-        string += "Use self.attr.name=value instead."
+        string += "Use self.custom.name=value instead."
         raise Exception(string)
 
-    #@prop.deleter
+    # @prop.deleter
     def __prop_del(self):
         "Stop accidental deletion."
-        raise Exception("Cannot delete the attr object!")
+        raise Exception("Cannot delete the custom properties object!")
     prop = property(__prop_get, __prop_set, __prop_del)
 
     def at_object_creation(self):
@@ -214,9 +215,9 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         # call data_key hook
         self.after_data_key_changed()
 
-    def load_data_fields(self, key):
+    def load_system_data(self, key):
         """
-        Get object's data record from database.
+        Get object's system data from database.
 
         Args:
             key: (String) object's data key.
@@ -246,7 +247,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
 
             # Set data.
             for field in data._meta.fields:
-                setattr(self.dfield, field.name, data.serializable_value(field.name))
+                setattr(self.system, field.name, data.serializable_value(field.name))
 
     def load_data(self, set_location=True):
         """
@@ -254,31 +255,38 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         key = self.get_data_key()
         if key:
-            self.load_data_fields(key)
+            self.load_system_data(key)
 
             # reset typeclass
-            typeclass = getattr(self.dfield, "typeclass", "")
+            typeclass = getattr(self.system, "typeclass", "")
             if typeclass:
                 self.set_typeclass(typeclass)
             else:
                 logger.log_errmsg("%s does not have a typeclass." % key)
 
             # Load custom properties.
-            self.load_properties()
+            self.load_custom_properties()
 
         self.after_data_loaded()
 
         if not self.location and set_location:
-            self.set_location(getattr(self.dfield, "location", ""))
+            self.set_location(getattr(self.system, "location", ""))
 
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded().
 
-    def load_properties(self):
+    def load_custom_properties(self):
         """
         Load custom properties.
         """
-        properties = OBJECT_PROPERTIES.get_properties(self.get_data_key())
+        if self.attributes.has("level"):
+            level = self.db.level
+        else:
+            level = 0
+
+        # Load values from db.
+        properties = OBJECT_PROPERTIES.get_properties(self.get_data_key(), level)
+        values = {}
         for key, serializable_value in properties.items():
             serializable_value = properties[key]
             if serializable_value == "":
@@ -289,7 +297,17 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
                 except (SyntaxError, ValueError), e:
                     # treat as a raw string
                     value = serializable_value
-            setattr(self.prop, key, value)
+            values[key] = value
+
+        # Set values.
+        for key, info in self.get_properties_info().items():
+            value = values.get(key, "")
+            if info["mutable"]:
+                # If it is a mutable property, set default property,
+                if not self.attributes.has(key):
+                    self.attributes.add(key, value, category="prop")
+            else:
+                self.custom_properties_handler.add(key, value)
 
     def after_data_key_changed(self):
         """
@@ -301,16 +319,16 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         Called after self.data_loaded().
         """        
-        self.set_name(getattr(self.dfield, "name", ""))
+        self.set_name(getattr(self.system, "name", ""))
 
-        self.set_desc(getattr(self.dfield, "desc", ""))
+        self.set_desc(getattr(self.system, "desc", ""))
 
-        self.condition = getattr(self.dfield, "condition", "")
+        self.condition = getattr(self.system, "condition", "")
         
-        self.action = getattr(self.dfield, "action", "")
+        self.action = getattr(self.system, "action", "")
 
         # set icon
-        self.set_icon(getattr(self.dfield, "icon", ""))
+        self.set_icon(getattr(self.system, "icon", ""))
 
     def reset_location(self):
         """
@@ -319,8 +337,8 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         Returns:
             None
         """
-        if hasattr(self.dfield, "location"):
-            self.set_location(self.dfield.location)
+        if hasattr(self.system, "location"):
+            self.set_location(self.system.location)
 
     def set_typeclass(self, typeclass_key):
         """
@@ -492,7 +510,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         Returns:
             None
         """
-        self.icon = getattr(self.dfield, "icon", None)
+        self.icon = getattr(self.system, "icon", None)
 
     def get_data_key(self, default=""):
         """

@@ -44,8 +44,8 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
         """
         self.available = False
 
-        self.shop_key = getattr(self.dfield, "shop", "")
-        self.goods_key = getattr(self.dfield, "goods", "")
+        self.shop_key = getattr(self.system, "shop", "")
+        self.goods_key = getattr(self.system, "goods", "")
 
         if not self.shop_key or not self.goods_key:
             if self.db.goods:
@@ -54,10 +54,10 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
             return
 
         # set goods information
-        self.price = getattr(self.dfield, "price", 0)
-        self.unit_key = getattr(self.dfield, "unit", "")
-        self.number = getattr(self.dfield, "number", 0)
-        self.condition = getattr(self.dfield, "condition", "")
+        self.price = getattr(self.system, "price", 0)
+        self.unit_key = getattr(self.system, "unit", "")
+        self.number = getattr(self.system, "number", 0)
+        self.condition = getattr(self.system, "condition", "")
 
         # get price unit information
         unit_record = get_object_record(self.unit_key)

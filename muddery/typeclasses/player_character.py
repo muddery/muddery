@@ -115,7 +115,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.available_channels = {}
 
         # refresh data
-        self.refresh_data()
+        self.refresh_properties()
 
     def move_to(self, destination, quiet=False,
                 emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True, **kwargs):
@@ -409,7 +409,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Load character's default objects.
         """
         # get character's model name
-        model_name = getattr(self.dfield, "model", None)
+        model_name = getattr(self.system, "model", None)
         if not model_name:
             model_name = self.get_data_key()
         
@@ -799,34 +799,13 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         Get character's status.
         """
-        status = {"level": {"key": "level",
-                            "name": _("LEVEL"),
-                            "value": self.db.level,
-                            "order": 0},
-                  "max_exp": {"key": "max_exp",
-                              "name": _("MAX EXP"),
-                              "value": self.max_exp,
-                              "order": 1},
-                  "exp": {"key": "exp",
-                          "name": _("EXP"),
-                          "value": self.db.exp,
-                          "order": 2},
-                  "max_hp": {"key": "max_hp",
-                             "name": _("MAX HP"),
-                             "value": self.max_hp,
-                             "order": 3},
-                  "hp": {"key": "hp",
-                         "name": _("HP"),
-                         "value": self.db.hp,
-                         "order": 4}}
+        status = {}
+        status["level"] = {"name": _("LEVEL"),
+                            "value": self.db.level}
 
-        order = 5
-        for info in self.get_properties_info():
-            status[info["key"]] = {"key": info["key"],
-                                    "name": info["name"],
-                                    "value": getattr(self.prop, info["key"]),
-                                    "order": order}
-            order += 1
+        for key, info in self.get_properties_info().items():
+            status[key] = {"name": info["name"],
+                           "value": getattr(self.prop, key)}
 
         return status
 
@@ -888,7 +867,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         obj.equipped = True
 
         # reset character's attributes
-        self.refresh_data()
+        self.refresh_properties()
 
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),
@@ -918,7 +897,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.db.equipments[position] = None
 
         # reset character's attributes
-        self.refresh_data()
+        self.refresh_properties()
 
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),
@@ -940,7 +919,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         equipment.equipped = False
 
         # reset character's attributes
-        self.refresh_data()
+        self.refresh_properties()
 
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),

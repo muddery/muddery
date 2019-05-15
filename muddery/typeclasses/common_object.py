@@ -42,10 +42,10 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         super(MudderyCommonObject, self).after_data_loaded()
 
         # set object stack info
-        self.max_stack = getattr(self.dfield, "max_stack", 1)
-        self.unique = getattr(self.dfield, "unique", False)
-        self.can_remove = getattr(self.dfield, "can_remove", True)
-        self.can_discard = getattr(self.dfield, "can_discard", True)
+        self.max_stack = getattr(self.system, "max_stack", 1)
+        self.unique = getattr(self.system, "unique", False)
+        self.can_remove = getattr(self.system, "can_remove", True)
+        self.can_discard = getattr(self.system, "can_discard", True)
 
     def get_number(self):
         """
@@ -149,7 +149,7 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
 
         increments = {}
         for key in self.custom_properities_handler.all():
-            value = getattr(self.prop, key)
+            value = getattr(self.custom, key)
             if value:
                 increments[key] = value * used
 
@@ -199,8 +199,8 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
         """
         super(MudderyEquipment, self).after_data_loaded()
 
-        self.type = getattr(self.dfield, "type", "")
-        self.position = getattr(self.dfield, "position", "")
+        self.type = getattr(self.system, "type", "")
+        self.position = getattr(self.system, "position", "")
 
     def equip_to(self, user):
         """
@@ -221,26 +221,14 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
         if not user:
             return
 
-        for key in self.custom_attributes_handler.all():
-            if hasattr(user, key):
-                # try to add to user's attribute
-                target = user
-            elif user.custom_properties_handler.has(key):
-                # try to add to user's prop
-                target = user.prop
-            elif user.attributes.has(key):
-                # try to add to user's db
-                target = user.db
-            else:
-                # no target
-                logger.log_errmsg("Can not apply custom attribute: %s to %s" % (key, user.get_data_key()))
+        for key, value in self.custom_attributes_handler.all(True):
+            if not value:
                 continue
 
-            value = getattr(self.prop, key)
-            if value is None:
-                value = 0
-            value += getattr(target, key)
-            setattr(target, key, value)
+            # Add values to the user's final properties.
+            if user.final_properties_handler.has(key):
+                value += getattr(user.prop, key)
+                setattr(user.prop, key, value)
 
     def get_available_commands(self, caller):
         """
@@ -297,7 +285,7 @@ class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
         if not user:
             raise ValueError("User should not be None.")
 
-        skill_key = getattr(self.dfield, "skill", None)
+        skill_key = getattr(self.system, "skill", None)
         if not skill_key:
             return _("No effect."), 0
 

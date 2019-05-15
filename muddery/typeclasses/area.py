@@ -28,10 +28,7 @@ class MudderyArea(TYPECLASS("OBJECT")):
         normal hook to overload for most object types.
         """
         super(MudderyArea, self).at_object_creation()
-
         self.background = None
-        self.background_point = None
-        self.corresp_map_pos = None
 
     def after_data_loaded(self):
         """
@@ -41,7 +38,7 @@ class MudderyArea(TYPECLASS("OBJECT")):
 
         # get background
         self.background = None
-        resource = getattr(self.dfield, "background", None)
+        resource = getattr(self.system, "background", None)
         if resource:
             try:
                 resource_info = IMAGE_RESOURCES.get(resource)
@@ -50,24 +47,6 @@ class MudderyArea(TYPECLASS("OBJECT")):
                                    "height": resource_info.image_height}
             except Exception, e:
                 logger.log_tracemsg("Load background %s error: %s" % (resource, e))
-
-        self.background_point = None
-        background_point = getattr(self.dfield, "background_point", None)
-        try:
-            # set background point
-            if background_point:
-                self.background_point = ast.literal_eval(background_point)
-        except Exception, e:
-            logger.log_tracemsg("load background point '%s' error: %s" % (background_point, e))
-            
-        self.corresp_map_pos = None
-        corresp_map_pos = getattr(self.dfield, "corresp_map_pos", None)
-        try:
-            # set corresponding map position
-            if corresp_map_pos:
-                self.corresp_map_pos = ast.literal_eval(corresp_map_pos)
-        except Exception, e:
-            logger.log_tracemsg("load corresponding map position '%s' error: %s" % (corresp_map_pos, e))
 
     def get_appearance(self, caller):
         """
@@ -78,8 +57,6 @@ class MudderyArea(TYPECLASS("OBJECT")):
 
         # add background
         info["background"] = getattr(self, "background", None)
-        info["background_point"] = getattr(self, "background_point", None)
-        info["corresp_map_pos"] = getattr(self, "corresp_map_pos", None)
         
         return info
 
