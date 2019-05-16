@@ -48,7 +48,7 @@ $$.commands = {
         }
 
         if (password != password_verify) {
-            $$.main.showAlert($$("Password does not match."));
+            $$.main.showAlert($$.trans("Password does not match."));
             return;
         }
 
@@ -68,7 +68,7 @@ $$.commands = {
         }
 
         if (password != password_verify) {
-            $$.main.showAlert($$("Password does not match."));
+            $$.main.showAlert($$.trans("Password does not match."));
             return;
         }
 

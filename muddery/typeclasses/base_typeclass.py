@@ -47,17 +47,7 @@ class BaseTypeclass(object):
             from muddery.worlddata.dao.properties_dict_mapper import PROPERTIES_DICT
             records = PROPERTIES_DICT.get_properties(cls.typeclass_key)
             for record in records:
-                added = False
-                for info in cls._all_properties_:
-                    if info["key"] == record.key:
-                        added = True
-                        break
-                if added:
-                    continue
-
-                if not record.key in cls._all_properties_:
-                    cls._all_properties_[record.key] = {"name": record.name,
-                                                        "desc": record.desc,
-                                                        "mutable": record.mutable}
-
+                cls._all_properties_[record.property] = {"name": record.name,
+                                                         "desc": record.desc,
+                                                         "mutable": record.mutable}
         return cls._all_properties_

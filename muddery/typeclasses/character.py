@@ -22,6 +22,7 @@ from evennia.utils.utils import lazy_property, class_from_module
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.worlddata.dao import common_mappers as CM
 from muddery.worlddata.dao.loot_list_mapper import CHARACTER_LOOT_LIST
+from muddery.worlddata.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.worlddata.dao.default_skills_mapper import DEFAULT_SKILLS
 from muddery.utils.builder import build_object
 from muddery.utils.loot_handler import LootHandler
@@ -61,11 +62,11 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         return LootHandler(self, CHARACTER_LOOT_LIST.filter(self.get_data_key()))
 
     @lazy_property
-    def final_properties_handler(self):
+    def body_properties_handler(self):
         return DataFieldHandler(self)
 
-    # @property prop stores character's final properties after using equipments and skills.
-    def __prop_get(self):
+    # @property body stores character's body properties before using equipments and skills.
+    def __body_get(self):
         """
         A non-attr_obj store (ndb: NonDataBase). Everything stored
         to this is guaranteed to be cleared when a server is shutdown.
@@ -73,23 +74,23 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         property, e.g. obj.ndb.attr = value etc.
         """
         try:
-            return self._prop_holder
+            return self._body_holder
         except AttributeError:
-            self._prop_holder = DbHolder(self, "properties", manager_name='final_properties_handler')
-            return self._prop_holder
+            self._body_holder = DbHolder(self, "body_properties", manager_name='body_properties_handler')
+            return self._body_holder
 
-    # @prop.setter
-    def __prop_set(self, value):
+    # @body.setter
+    def __body_set(self, value):
         "Stop accidentally replacing the ndb object"
         string = "Cannot assign directly to ndb object! "
-        string += "Use self.prop.name=value instead."
+        string += "Use self.body.name=value instead."
         raise Exception(string)
 
-    # @prop.deleter
-    def __prop_del(self):
+    # @body.deleter
+    def __body_del(self):
         "Stop accidental deletion."
-        raise Exception("Cannot delete the prop object!")
-    prop = property(__prop_get, __prop_set, __prop_del)
+        raise Exception("Cannot delete the body object!")
+    body = property(__body_get, __body_set, __body_del)
 
     def at_object_creation(self):
         """
@@ -167,6 +168,42 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             content.delete()
         
         return True
+
+    def load_custom_properties(self):
+        """
+        Load body properties from db. Body properties do no include mutable properties.
+        """
+        if self.attributes.has("level"):
+            level = self.db.level
+        else:
+            level = 0
+
+        # Load values from db.
+        values = {}
+        for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), level):
+            key = record.property
+            serializable_value = record.value
+            if serializable_value == "":
+                value = None
+            else:
+                try:
+                    value = ast.literal_eval(serializable_value)
+                except (SyntaxError, ValueError), e:
+                    # treat as a raw string
+                    value = serializable_value
+            values[key] = value
+
+        # Set values.
+        for key, info in self.get_properties_info().items():
+            print("key: %s" % key)
+            if info["mutable"]:
+                print(1)
+                # Set default mutable properties to prop.
+                if not self.custom_properties_handler.has(key):
+                    self.custom_properties_handler.add(key, values.get(key, ""))
+            else:
+                print(2)
+                self.body_properties_handler.add(key, values.get(key, ""))
 
     def after_data_loaded(self):
         """
@@ -266,12 +303,12 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Refresh character's final properties.
         """
-        # Load all custom properties.
-        for key, value in self.custom_properties_handler.all(True):
-            self.prop.add(key, value)
+        # Load body properties.
+        for key, value in self.body_properties_handler.all(True):
+            self.custom_properties_handler.add(key, value)
 
         # load equips
-        self.ues_equipments()
+        self.wear_equipments()
 
         # load passive skills
         self.cast_passive_skills()
@@ -427,7 +464,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # set character's attributes
         self.refresh_properties()
 
-    def ues_equipments(self):
+    def wear_equipments(self):
         """
         Add equipment's attributes to the character
         """
@@ -881,5 +918,3 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Show character's status.
         """
         pass
-
-        

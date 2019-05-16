@@ -870,6 +870,9 @@ class properties_dict(models.Model):
     # The name of the property.
     name = models.CharField(max_length=NAME_LENGTH)
 
+    # Whether this property will be changed or not.
+    mutable = models.BooleanField(blank=True, default=False)
+
     # The description of the property.
     desc = models.TextField(blank=True)
 

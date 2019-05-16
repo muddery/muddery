@@ -97,7 +97,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
     def __prop_set(self, value):
         "Stop accidentally replacing the ndb object"
         string = "Cannot assign directly to ndb object! "
-        string += "Use self.custom.name=value instead."
+        string += "Use self.prop.name=value instead."
         raise Exception(string)
 
     # @prop.deleter
@@ -285,10 +285,10 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             level = 0
 
         # Load values from db.
-        properties = OBJECT_PROPERTIES.get_properties(self.get_data_key(), level)
         values = {}
-        for key, serializable_value in properties.items():
-            serializable_value = properties[key]
+        for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), level):
+            key = record.property
+            serializable_value = record.value
             if serializable_value == "":
                 value = None
             else:
@@ -301,13 +301,12 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
 
         # Set values.
         for key, info in self.get_properties_info().items():
-            value = values.get(key, "")
             if info["mutable"]:
-                # If it is a mutable property, set default property,
-                if not self.attributes.has(key):
-                    self.attributes.add(key, value, category="prop")
+                # Set default mutable properties to prop.
+                if not self.custom_properties_handler.has(key):
+                    self.custom_properties_handler.add(key, values.get(key, ""))
             else:
-                self.custom_properties_handler.add(key, value)
+                self.custom_properties_handler.add(key, values.get(key, ""))
 
     def after_data_key_changed(self):
         """

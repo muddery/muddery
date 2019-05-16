@@ -28,11 +28,7 @@ class ObjectPropertiesMapper(object):
             object: (string) object's key.
             level: (number) object's level.
         """
-        properties = {}
-        records = self.objects.filter(object=object, level=level)
-        for record in records:
-            properties[record.attribute] = record.value
-        return properties
+        return self.objects.filter(object=object, level=level)
 
 
 OBJECT_PROPERTIES = ObjectPropertiesMapper()

@@ -250,7 +250,7 @@ $$.client = {
         );
 
         if (Evennia.state() == WebSocket.CLOSED) {
-            $$.main.showAlert("Can not connect to the server.");
+            $$.main.showAlert($$.trans("Can not connect to the server."));
             return;
         }
     },

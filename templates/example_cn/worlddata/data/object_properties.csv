@@ -1,4 +1,4 @@
-character,level,property,value
+object,level,property,value
 player,1,max_hp,50
 player,1,max_mp,100
 player,1,max_exp,50

@@ -21,8 +21,8 @@ class PropertiesHandler(object):
         # Load mutable properties from db.
         for key, info in self.info.items():
             if info["mutable"]:
-                if obj.attributes.has(key):
-                    self._store[key] = obj.attributes.get(key)
+                if obj.attributes.has(key, category="prop"):
+                    self._store[key] = obj.attributes.get(key, category="prop")
 
     def has(self, key):
         """
@@ -58,11 +58,10 @@ class PropertiesHandler(object):
         Args:
             key (str): The name of Nattribute to add.
             value (any): The value to store.
-
         """
         self._store[key] = value
         if self.info[key]["mutable"]:
-            self.obj.attributes.add(key, value)
+            self.obj.attributes.add(key, value, category="prop")
 
     def clear(self):
         """
