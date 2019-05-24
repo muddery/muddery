@@ -16,25 +16,13 @@ class Skill(MudderySkill):
     """
     typeclass_key = "SKILL"
 
-    def after_data_loaded(self):
-        """
-        Set data_info to the object.
-
-        Returns:
-            None
-        """
-        super(Skill, self).after_data_loaded()
-
-        # set data
-        self.mp = getattr(self.dfield, "mp", "")
-
     def do_skill(self, target):
         """
         Do this skill.
         """
         if not self.passive:
             # set mp
-            self.db.owner.db.mp -= self.mp
+            self.owner.prop.mp -= self.mp
 
         return super(Skill, self).do_skill(target)
 
@@ -53,7 +41,7 @@ class Skill(MudderySkill):
         if message:
             return message
             
-        if self.db.owner.db.mp < self.mp:
+        if self.owner.prop.mp < self.prop.mp:
             return _("Not enough mana to cast {c%s{n!") % self.get_name()
 
         return ""
@@ -72,7 +60,7 @@ class Skill(MudderySkill):
         if not result:
             return result
             
-        if self.db.owner.db.mp < self.mp:
+        if self.owner.prop.mp < self.prop.mp:
             return False
 
         return True
@@ -84,6 +72,6 @@ class Skill(MudderySkill):
         """
         info = super(Skill, self).get_appearance(caller)
         
-        info["mp"] = self.mp
+        info["mp"] = self.prop.mp
 
         return info

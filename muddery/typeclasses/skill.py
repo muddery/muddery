@@ -45,14 +45,28 @@ class MudderySkill(TYPECLASS("OBJECT")):
             None
         """
         super(MudderySkill, self).at_object_creation()
-        
+
+        self.owner = None
+        self.owner_dbref = None
+
         # set status
         if not self.attributes.has("owner"):
-            self.db.owner = None
+            self.db.owner_dbref = None
         if not self.attributes.has("cd_finish_time"):
             self.db.cd_finish_time = 0
         if not self.attributes.has("is_default"):
             self.db.is_default = False
+
+    def at_init(self):
+        """
+        Load the skill's data.
+        """
+        super(MudderySkill, self).at_init()
+
+        self.owner = None
+        self.owner_dbref = self.db.owner_dbref
+        if self.owner_dbref:
+            self.owner = self.search_dbref(self.owner_dbref)
 
     def set_default(self, is_default):
         """
@@ -119,7 +133,8 @@ class MudderySkill(TYPECLASS("OBJECT")):
         Returns:
             None
         """
-        self.db.owner = owner
+        self.owner = owner
+        self.db.owner_dbref = owner.dbref
     
         if not self.passive:
             # Set skill cd. Add gcd to new the skill.
@@ -140,8 +155,6 @@ class MudderySkill(TYPECLASS("OBJECT")):
                 result: (dict) skill's result
                 cd: (dict) skill's cd
         """
-        owner = self.db.owner
-
         message = {}
         not_available = self.check_available(passive)
         if not_available:
@@ -151,7 +164,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
 
             if not passive:
                 # set message
-                message = {"caller": owner.dbref,
+                message = {"caller": self.owner_dbref,
                            "skill": self.get_data_key(),
                            "cast": self.cast_message(target)}
 
@@ -163,19 +176,19 @@ class MudderySkill(TYPECLASS("OBJECT")):
 
                 # set status
                 status = {}
-                if owner.is_in_combat():
-                    for char in owner.ndb.combat_handler.get_all_characters():
+                if self.owner.is_in_combat():
+                    for char in self.owner.ndb.combat_handler.get_all_characters():
                         status[char.dbref] = char.get_combat_status()
-                elif owner.location:
-                    status[owner.dbref] = owner.get_combat_status()
+                elif self.owner.location:
+                    status[self.owner.dbref] = self.owner.get_combat_status()
                 message["status"] = status
 
         if not passive and message:
             # send message
-            if owner.is_in_combat():
-                owner.ndb.combat_handler.msg_all({"skill_cast": message})
-            elif owner.location:
-                owner.location.msg_contents({"skill_cast": message})
+            if self.owner.is_in_combat():
+                self.owner.ndb.combat_handler.msg_all({"skill_cast": message})
+            elif self.owner.location:
+                self.owner.location.msg_contents({"skill_cast": message})
 
         return True
         
@@ -191,7 +204,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
                 self.db.cd_finish_time = time_now + self.cd
 
         # call skill function
-        return STATEMENT_HANDLER.do_skill(self.function, self.db.owner, target)
+        return STATEMENT_HANDLER.do_skill(self.function, self.owner, target)
 
     def check_available(self, passive):
         """
@@ -260,8 +273,8 @@ class MudderySkill(TYPECLASS("OBJECT")):
         target_name = ""
         message = ""
 
-        if self.db.owner:
-            caller_name = self.db.owner.get_name()
+        if self.owner:
+            caller_name = self.owner.get_name()
 
         if target:
             target_name = target.get_name()

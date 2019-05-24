@@ -17,6 +17,12 @@ player,3,max_exp,0
 player,3,give_exp,0
 player,3,attack,15
 player,3,defence,15
+npc_stranger,1,max_hp,25
+npc_stranger,1,max_mp,100
+npc_stranger,1,max_exp,0
+npc_stranger,1,give_exp,5
+npc_stranger,1,attack,5
+npc_stranger,1,defence,5
 npc_doll,1,max_hp,10
 npc_doll,1,max_mp,100
 npc_doll,1,max_exp,0
@@ -41,3 +47,8 @@ robot_mob_C,4,max_exp,0
 robot_mob_C,4,give_exp,20
 robot_mob_C,4,attack,15
 robot_mob_C,4,defence,15
+skill_normal_hit,0,mp,0
+skill_normal_heal,0,mp,10
+skill_normal_hp,0,mp,0
+skill_dunt,0,mp,10
+skill_escape,0,mp,0

@@ -64,8 +64,7 @@ def at_initial_setup():
                 superuser.move_to(start_location, quiet=True)
 
             # set superuser's data
-            superuser.set_data_key(GAME_SETTINGS.get("default_player_character_key"))
-            superuser.set_level(1)
+            superuser.set_data_key(GAME_SETTINGS.get("default_player_character_key"), 1)
             superuser.set_nickname("superuser")
 
             # set superuser's honour to -1

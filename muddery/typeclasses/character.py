@@ -101,8 +101,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         super(MudderyCharacter, self).at_object_creation()
 
         # set default values
-        if not self.attributes.has("level"):
-            self.db.level = 0
         if not self.attributes.has("team"):
             self.db.team = 0
 
@@ -173,14 +171,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Load body properties from db. Body properties do no include mutable properties.
         """
-        if self.attributes.has("level"):
-            level = self.db.level
-        else:
-            level = 0
-
         # Load values from db.
         values = {}
-        for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), level):
+        for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), self.db.level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":
@@ -193,17 +186,24 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
                     value = serializable_value
             values[key] = value
 
-        # Set values.
+        # Set body values.
         for key, info in self.get_properties_info().items():
-            print("key: %s" % key)
+            if not info["mutable"]:
+                self.custom_properties_handler.add(key, values.get(key, ""))
+                self.body_properties_handler.add(key, values.get(key, ""))
+
+        # Set default mutable custom properties.
+        self.set_default_custom_properties()
+
+    def set_default_custom_properties(self):
+        """
+        Set default mutable custom properties.
+        """
+        for key, info in self.get_properties_info().items():
             if info["mutable"]:
-                print(1)
                 # Set default mutable properties to prop.
                 if not self.custom_properties_handler.has(key):
-                    self.custom_properties_handler.add(key, values.get(key, ""))
-            else:
-                print(2)
-                self.body_properties_handler.add(key, values.get(key, ""))
+                    self.custom_properties_handler.add(key, "")
 
     def after_data_loaded(self):
         """
@@ -251,6 +251,18 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # refresh the character's properties.
         self.refresh_properties()
 
+    def set_level(self, level):
+        """
+        Set object's level.
+        Args:
+            level: object's new level
+
+        Returns:
+            None
+        """
+        super(MudderyCharacter, self).set_level(level)
+        self.refresh_properties()
+
     def reset_equip_positions(self):
         """
         Reset equipment's position data.
@@ -283,21 +295,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         for content in self.contents:
             if content.dbref in equipped:
                 content.equipped = True
-
-    def set_level(self, level):
-        """
-        Set character's level.
-        Args:
-            level: character's new level
-
-        Returns:
-            None
-        """
-        if self.db.level == level:
-            return
-
-        self.db.level = level
-        self.refresh_properties()
 
     def refresh_properties(self):
         """
@@ -426,11 +423,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             setattr(self.prop, key, value)
             actual[key] = value
 
-            # Save the value to db.
-            if key in properties_info:
-                if properties_info[key]["persistent"]:
-                    setattr(self.attr, key, value)
-
         return actual
 
     def get_combat_status(self):
@@ -480,13 +472,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Load character's default skills.
         """
-        # get character's model name
-        model_name = getattr(self.system, "model", None)
-        if not model_name:
-            model_name = self.get_data_key()
-
         # default skills
-        skill_records = DEFAULT_SKILLS.filter(model_name)
+        skill_records = DEFAULT_SKILLS.filter(self.get_data_key())
         default_skill_ids = set([record.skill for record in skill_records])
 
         # remove old default skills

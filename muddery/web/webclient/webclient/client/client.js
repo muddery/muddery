@@ -6,8 +6,8 @@ if (typeof(require) != "undefined") {
 
 $$.client = {
  	onText: function(args, kwargs) {
- 	    for (index in args) {
- 		    $$.client.doShow("out", args[index]);
+ 	    for (var i = 0; i < args.length; i++) {
+ 		    $$.client.doShow("out", args[i]);
  		}
  	},
  	
@@ -60,6 +60,8 @@ $$.client = {
     displayData : function(data) {
         for (var key in data) {
             try {
+                log(key, data[key]);
+
                 if (key == "settings") {
                     $$.main.setClient(data[key]);
                 }

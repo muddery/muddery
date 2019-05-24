@@ -309,8 +309,7 @@ class npc_shops(BaseModels.npc_shops):
 #------------------------------------------------------------
 class skills(BaseModels.skills):
     "Store all skills."
-    # skill's mp costs
-    mp = models.IntegerField(blank=True, default=0)
+    pass
 
 
 # ------------------------------------------------------------

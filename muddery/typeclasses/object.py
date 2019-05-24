@@ -116,6 +116,10 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         super(MudderyBaseObject, self).at_object_creation()
 
+        # set default values
+        if not self.attributes.has("level"):
+            self.db.level = 0
+
         self.action = None
         self.condition = None
         self.icon = None
@@ -134,6 +138,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             # Load db data.
             self.load_data()
         except Exception, e:
+            traceback.print_exc()
             logger.log_errmsg("%s(%s) can not load data:%s" % (self.get_data_key(), self.dbref, e))
             
         # This object's class may be changed after load_data(), so do not add
@@ -188,28 +193,25 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         pass
 
-    def set_data_key(self, key, set_location=True):
+    def set_data_key(self, key, level, set_location=True):
         """
         Set data_info's model and key. It puts info into attributes.
             
         Args:
             key: (string) Key of the data info.
+            level: (number) object's level.
         """
-        current_key = self.get_data_key(default=None)
-        if current_key is not None:
-            # Has data key
-            if key == current_key:
-                # Key has not changed.
-                return
-        
         # Save data info's key and model
         utils.set_obj_data_key(self, key)
+
+        self.db.level = level
         
         # Load data.
         try:
             # Load db data.
             self.load_data(set_location=set_location)
         except Exception, e:
+            traceback.print_exc()
             logger.log_errmsg("%s(%s) can not load data:%s" % (key, self.dbref, e))
 
         # call data_key hook
@@ -279,14 +281,9 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         Load custom properties.
         """
-        if self.attributes.has("level"):
-            level = self.db.level
-        else:
-            level = 0
-
         # Load values from db.
         values = {}
-        for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), level):
+        for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), self.db.level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":
@@ -301,12 +298,21 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
 
         # Set values.
         for key, info in self.get_properties_info().items():
+            if not info["mutable"]:
+                self.custom_properties_handler.add(key, values.get(key, ""))
+
+        # Set default mutable custom properties.
+        self.set_default_custom_properties()
+
+    def set_default_custom_properties(self):
+        """
+        Set default mutable custom properties.
+        """
+        for key, info in self.get_properties_info().items():
             if info["mutable"]:
                 # Set default mutable properties to prop.
                 if not self.custom_properties_handler.has(key):
-                    self.custom_properties_handler.add(key, values.get(key, ""))
-            else:
-                self.custom_properties_handler.add(key, values.get(key, ""))
+                    self.custom_properties_handler.add(key, "")
 
     def after_data_key_changed(self):
         """
@@ -338,6 +344,21 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         if hasattr(self.system, "location"):
             self.set_location(self.system.location)
+
+    def set_level(self, level):
+        """
+        Set object's level.
+        Args:
+            level: object's new level
+
+        Returns:
+            None
+        """
+        if self.db.level == level:
+            return
+
+        self.db.level = level
+        self.load_custom_properties()
 
     def set_typeclass(self, typeclass_key):
         """

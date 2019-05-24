@@ -10,6 +10,7 @@ creation commands.
 
 from __future__ import print_function
 
+import traceback
 from muddery.typeclasses.character import MudderyCharacter
 
 
@@ -19,6 +20,19 @@ class Character(MudderyCharacter):
 
     """
     typeclass_key = "CHARACTER"
+
+    def set_default_custom_properties(self):
+        """
+        Set default mutable custom properties.
+        """
+        if not self.custom_properties_handler.has("exp"):
+            self.prop.exp = 0
+
+        if not self.custom_properties_handler.has("hp"):
+            self.prop.hp = self.prop.max_hp
+
+        if not self.custom_properties_handler.has("mp"):
+            self.prop.mp = self.prop.max_mp
 
     def reborn(self):
         """

@@ -44,12 +44,13 @@ def get_object_record(obj_key):
     return record
 
 
-def build_object(obj_key, caller=None, set_location=True):
+def build_object(obj_key, level=0, caller=None, set_location=True):
     """
     Build objects of a model.
 
     Args:
         obj_key: (string) The key of the object.
+        level: (number) The object's level.
         caller: (command caller) If provide, running messages will send to the caller.
     """
 
@@ -89,7 +90,7 @@ def build_object(obj_key, caller=None, set_location=True):
 
     try:
         # Set data info.
-        obj.set_data_key(record.key, set_location=set_location)
+        obj.set_data_key(record.key, level, set_location=set_location)
     except Exception, e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
         print(ostring)
@@ -191,7 +192,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
                 continue
 
             try:
-                obj.set_data_key(record.key)
+                obj.set_data_key(record.key, getattr(record, "level", 0))
                 utils.set_obj_unique_type(obj, type_name)
             except Exception, e:
                 ostring = "Can not set data info to obj %s: %s" % (record.key, e)
@@ -356,8 +357,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
                                          home=home, permissions=permissions)
 
     # set character info
-    new_character.set_data_key(character_key)
-    new_character.set_level(level)
+    new_character.set_data_key(character_key, level)
 
     # set playable character list
     new_player.db._playable_characters.append(new_character)

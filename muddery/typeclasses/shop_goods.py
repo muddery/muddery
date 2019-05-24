@@ -46,6 +46,7 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
 
         self.shop_key = getattr(self.system, "shop", "")
         self.goods_key = getattr(self.system, "goods", "")
+        self.goods_level = getattr(self.system, "level", 0)
 
         if not self.shop_key or not self.goods_key:
             if self.db.goods:
@@ -77,7 +78,7 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
                 except Exception, e:
                     logger.log_errmsg("%s(%s) can not load data:%s" % (self.goods_key, self.dbref, e))
             else:
-                goods.set_data_key(self.goods_key)
+                goods.set_data_key(self.goods_key, self.goods_level)
         else:
             goods = build_object(self.goods_key)
             if goods:

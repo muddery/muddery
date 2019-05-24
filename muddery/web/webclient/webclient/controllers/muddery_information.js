@@ -64,11 +64,11 @@ MudderyInformation.prototype.setStatus = function(status) {
 
     var attributes = [];
     for (var key in status) {
+        status[key]["key"] = key;
         attributes.push(status[key]);
     }
-    attributes.sort(function(a, b){return a["order"] - b["order"]});
 
-    for (var i in attributes) {
+    for (var i = 0; i < attributes.length; i++) {
         var key = attributes[i]["key"];
         if (key.substring(0, 4) == "max_") {
             var relative_key = key.substring(4);

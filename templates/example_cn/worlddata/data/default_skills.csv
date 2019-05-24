@@ -1,6 +1,8 @@
 character,skill
-MODEL_PLAYER,skill_normal_hp
-MODEL_PLAYER,skill_normal_hit
-MODEL_PLAYER,skill_escape
-MODEL_NPC_COMMON,skill_normal_hit
-MODEL_MOB_ROBOT_A,skill_normal_hit
+player,skill_normal_hp
+player,skill_normal_hit
+player,skill_escape
+npc_stranger,skill_normal_hit
+npc_doll,skill_normal_hit
+robot_mob_A,skill_normal_hit
+robot_mob_B,skill_normal_hit
