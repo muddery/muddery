@@ -39,7 +39,7 @@ class FuncHit(StatementFunction):
 
         # hurt target
         increments = {"hp": -damage}
-        changes = self.obj.change_status(increments)
+        changes = self.obj.change_properties(increments)
 
         # send skill result
         return _("Hit %s by %d points.") % (self.obj.get_name(), int(-changes["hp"]))

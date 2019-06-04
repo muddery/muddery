@@ -376,7 +376,9 @@ class equipments(BaseObjects):
 class world_npcs(BaseObjects):
     "Store all NPCs."
 
-    # The key of a world room.
+    # Character's level.
+    level = models.PositiveIntegerField(blank=True, default=1)
+
     # NPC's location, it must be a room.
     location = models.CharField(max_length=KEY_LENGTH, db_index=True)
 

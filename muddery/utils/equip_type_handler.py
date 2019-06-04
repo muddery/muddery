@@ -51,7 +51,7 @@ class EquipTypeHandler(object):
         Check if the equipment's type matchs career.
         """
         if not self.career_equip:
-		    return True
+            return True
         if career not in self.career_equip:
             return False
         if not self.career_equip[career]:

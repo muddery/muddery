@@ -171,6 +171,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Load body properties from db. Body properties do no include mutable properties.
         """
+        print("load_custom_properties: %s" % self.get_data_key())
         # Load values from db.
         values = {}
         for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), self.db.level):
@@ -352,14 +353,14 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         for key, increment in increments.items():
             changes[key] = 0
 
-            if not self.final_properties_handler.has(key):
+            if not self.custom_properties_handler.has(key):
                 continue
 
             origin_value = getattr(self.prop, key)
             
             # check limits
             max_key = "max_" + key
-            if self.final_properties_handler.has(max_key):
+            if self.custom_properties_handler.has(max_key):
                 max_value = getattr(self.prop, max_key)
                 if origin_value + increment > max_value:
                     increment = max_value - origin_value
@@ -367,7 +368,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             # Default minimum value is 0.
             min_value = 0
             min_key = "min_" + key
-            if self.final_properties_handler.has(min_key):
+            if self.custom_properties_handler.has(min_key):
                 min_value = getattr(self.prop, min_key)
 
             if origin_value + increment < min_value:
@@ -376,13 +377,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             # Set the value.
             if increment != 0:
                 value = origin_value + increment
-                setattr(self.prop, key, value)
+                self.custom_properties_handler.add(key, value)
                 changes[key] = increment
-
-                # Save the value to db.
-                if key in properties_info:
-                    if properties_info[key]["persistent"]:
-                        setattr(self.attr, key, value)
 
         return changes
 
@@ -402,19 +398,19 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         for key, value in values:
             actual[key] = 0
 
-            if not self.final_properties_handler.has(key):
+            if not self.custom_properties_handler.has(key):
                 continue
 
             # check limits
             max_key = "max_" + key
-            if self.final_properties_handler.has(max_key):
+            if self.custom_properties_handler.has(max_key):
                 max_value = getattr(self.prop, max_key)
                 if value > max_value:
                     value = max_value
 
             # Default minimum value is 0.
             min_key = "min_" + key
-            if self.final_properties_handler.has(min_key):
+            if self.custom_properties_handler.has(min_key):
                 min_value = getattr(self.prop, min_key)
                 if value < min_value:
                     value = min_value
@@ -429,7 +425,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Get character status used in combats.
         """
-        pass
+        return {}
 
     def search_inventory(self, obj_key):
         """
@@ -759,14 +755,10 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
                 target_level = obj.db.level
 
         # Create a target.
-        target = build_object(target_key, set_location=False)
+        target = build_object(target_key, target_level, set_location=False)
         if not target:
             logger.log_errmsg("Can not create the target %s." % target_key)
             return False
-
-        # If has target level, set level.
-        if target_level:
-            target.set_level(target_level)
 
         target.is_temp = True
         return self.attack_target(target, desc)
@@ -866,9 +858,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             (int) experience give to the killer
         """
-        if killer:
-            return self.give_exp
-
         return 0
 
     def add_exp(self, exp, combat=False):
@@ -880,16 +869,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        self.db.exp += exp
-        while self.db.exp >= self.max_exp:
-            if self.max_exp > 0:
-                # can upgrade
-                self.db.exp -= self.max_exp
-                self.level_up()
-            else:
-                # can not upgrade
-                self.db.exp = 0
-                break
+        pass
 
     def level_up(self):
         """

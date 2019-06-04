@@ -148,12 +148,11 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
             used = self.db.number
 
         increments = {}
-        for key in self.custom_properities_handler.all():
-            value = getattr(self.custom, key)
+        for key, value in self.custom_properties_handler.all(True):
             if value:
                 increments[key] = value * used
 
-        changes = user.change_status(increments)
+        changes = user.change_properties(increments)
         user.show_status()
         
         result = ""
@@ -221,12 +220,12 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
         if not user:
             return
 
-        for key, value in self.custom_attributes_handler.all(True):
+        for key, value in self.custom_properties_handler.all(True):
             if not value:
                 continue
 
             # Add values to the user's final properties.
-            if user.final_properties_handler.has(key):
+            if user.custom_properties_handler.has(key):
                 value += getattr(user.prop, key)
                 setattr(user.prop, key, value)
 

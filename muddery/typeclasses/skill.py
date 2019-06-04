@@ -134,6 +134,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
             None
         """
         self.owner = owner
+        self.owner_dbref = owner.dbref
         self.db.owner_dbref = owner.dbref
     
         if not self.passive:

@@ -11,6 +11,7 @@ creation commands.
 from __future__ import print_function
 
 import traceback
+from evennia.utils import logger
 from muddery.typeclasses.character import MudderyCharacter
 
 
@@ -30,9 +31,13 @@ class Character(MudderyCharacter):
 
         if not self.custom_properties_handler.has("hp"):
             self.prop.hp = self.prop.max_hp
+            if type(self.prop.hp) != int:
+                logger.log_err("%s's hp is empty." % self.get_data_key())
 
         if not self.custom_properties_handler.has("mp"):
             self.prop.mp = self.prop.max_mp
+            if type(self.prop.mp) != int:
+                logger.log_err("%s's mp is empty." % self.get_data_key())
 
     def reborn(self):
         """
@@ -99,3 +104,36 @@ class Character(MudderyCharacter):
             (boolean) the character is alive or not
         """
         return round(self.prop.hp) > 0
+
+    def provide_exp(self, killer):
+        """
+        Calculate the exp provide to the killer.
+        Args:
+            killer: (object) the character who kills it.
+
+        Returns:
+            (int) experience give to the killer
+        """
+        return self.prop.give_exp
+
+    def add_exp(self, exp, combat=False):
+        """
+        Add character's exp.
+        Args:
+            exp: the exp value to add.
+
+        Returns:
+            None
+        """
+        super(Character, self).add_exp(exp, combat)
+
+        self.prop.exp += exp
+        while self.prop.exp >= self.prop.max_exp:
+            if self.prop.max_exp > 0:
+                # can upgrade
+                self.prop.exp -= self.prop.max_exp
+                self.level_up()
+            else:
+                # can not upgrade
+                self.prop.exp = 0
+                break

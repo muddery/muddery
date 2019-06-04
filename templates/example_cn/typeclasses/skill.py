@@ -22,7 +22,7 @@ class Skill(MudderySkill):
         """
         if not self.passive:
             # set mp
-            self.owner.prop.mp -= self.mp
+            self.owner.prop.mp -= self.prop.mp
 
         return super(Skill, self).do_skill(target)
 

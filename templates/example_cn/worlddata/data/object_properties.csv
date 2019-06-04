@@ -17,6 +17,12 @@ player,3,max_exp,0
 player,3,give_exp,0
 player,3,attack,15
 player,3,defence,15
+npc_wu,1,max_hp,25
+npc_wu,1,max_mp,100
+npc_wu,1,max_exp,0
+npc_wu,1,give_exp,5
+npc_wu,1,attack,5
+npc_wu,1,defence,5
 npc_stranger,1,max_hp,25
 npc_stranger,1,max_mp,100
 npc_stranger,1,max_exp,0
@@ -52,3 +58,6 @@ skill_normal_heal,0,mp,10
 skill_normal_hp,0,mp,0
 skill_dunt,0,mp,10
 skill_escape,0,mp,0
+weapon_wood_stick,0,attack,10
+food_bread,0,hp,10
+food_apple,0,mp,10
