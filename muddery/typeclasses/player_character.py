@@ -285,6 +285,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     if perm in settings.PERMISSION_COMMANDS:
                         commands = True
                         break
+
+        # Django's superuser even it is quelled.
+        if not commands:
+            commands = self.db_account and self.db_account.is_superuser
+
         if commands:
             channels["cmd"] = _("Cmd")
 
