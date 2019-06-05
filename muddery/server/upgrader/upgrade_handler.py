@@ -7,11 +7,9 @@ from __future__ import print_function
 import os, traceback
 import muddery
 from muddery.server.upgrader import utils
-from muddery.server.upgrader import upgrader_0_3_3
-from muddery.server.upgrader import upgrader_0_3_4
-from muddery.server.upgrader import upgrader_0_3_5
-from muddery.server.upgrader import upgrader_0_3_6
+from muddery.server.upgrader import upgrader_0_3_7
 from muddery.server.launcher import utils as launcher_utils
+from muddery.utils.exception import MudderyError, ERR
 
 class UpgradeHandler(object):
     """
@@ -22,10 +20,7 @@ class UpgradeHandler(object):
         Add upgraders.
         """
         self.upgrader_list = []
-        self.upgrader_list.append(upgrader_0_3_3.Upgrader())
-        self.upgrader_list.append(upgrader_0_3_4.Upgrader())
-        self.upgrader_list.append(upgrader_0_3_5.Upgrader())
-        self.upgrader_list.append(upgrader_0_3_6.Upgrader())
+        self.upgrader_list.append(upgrader_0_3_7.Upgrader())
 
     def upgrade_game(self, game_dir, template, muddery_lib):
         # Get first two version numbers.
@@ -62,6 +57,10 @@ class UpgradeHandler(object):
             # create config file
             launcher_utils.create_config_file(game_dir, template)
 
+        except MudderyError, e:
+            if e.code != ERR.can_not_upgrade:
+                traceback.print_exc()
+                print("\nUpgrade failed: %s\n" % e)
         except Exception, e:
             traceback.print_exc()
             print("\nUpgrade failed: %s\n" % e)

@@ -61,4 +61,6 @@ class ERR(object):
 
     invalid_input = 10014
 
+    can_not_upgrade = 10015
+
 
