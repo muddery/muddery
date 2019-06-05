@@ -31,12 +31,12 @@ class Character(MudderyCharacter):
 
         if not self.custom_properties_handler.has("hp"):
             self.prop.hp = self.prop.max_hp
-            if type(self.prop.hp) != int:
+            if self.prop.hp is None:
                 logger.log_err("%s's hp is empty." % self.get_data_key())
 
         if not self.custom_properties_handler.has("mp"):
             self.prop.mp = self.prop.max_mp
-            if type(self.prop.mp) != int:
+            if self.prop.mp is None:
                 logger.log_err("%s's mp is empty." % self.get_data_key())
 
     def reborn(self):

@@ -171,7 +171,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Load body properties from db. Body properties do no include mutable properties.
         """
-        print("load_custom_properties: %s" % self.get_data_key())
         # Load values from db.
         values = {}
         for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), self.db.level):
@@ -190,8 +189,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # Set body values.
         for key, info in self.get_properties_info().items():
             if not info["mutable"]:
-                self.custom_properties_handler.add(key, values.get(key, ""))
-                self.body_properties_handler.add(key, values.get(key, ""))
+                self.custom_properties_handler.add(key, values.get(key, None))
+                self.body_properties_handler.add(key, values.get(key, None))
 
         # Set default mutable custom properties.
         self.set_default_custom_properties()
