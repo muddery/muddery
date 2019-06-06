@@ -144,3 +144,7 @@ body {
     border-top: 0 none;
 }
 
+.select-control {
+    width: 300px;
+    height: 35px;
+}

@@ -20,6 +20,21 @@ from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
 
 
+class QueryAllTypeclasses(BaseRequestProcesser):
+    """
+    Query all typeclasses.
+
+    Args:
+        None.
+    """
+    path = "query_all_typeclasses"
+    name = ""
+
+    def func(self, args, request):
+        data = data_query.query_all_typeclasses()
+        return success_response(data)
+
+
 class QueryFields(BaseRequestProcesser):
     """
     Query all fields of a table.
@@ -115,6 +130,26 @@ class QueryAreas(BaseRequestProcesser):
 
     def func(self, args, request):
         data = data_query.query_areas()
+        return success_response(data)
+
+
+class QueryTypeclassProperties(BaseRequestProcesser):
+    """
+    Query a typeclass's properties.
+
+    Args:
+        typeclass: (string) typeclass's key.
+    """
+    path = "query_typeclass_properties"
+    name = ""
+
+    def func(self, args, request):
+        if 'typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+
+        typeclass = args["typeclass"]
+
+        data = data_query.query_typeclass_properties(typeclass)
         return success_response(data)
 
 

@@ -392,6 +392,17 @@ class CharacterModelsForm(forms.ModelForm):
         fields = '__all__'
 
 
+class PropertiesDictForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(PropertiesDictForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+        CHARACTER_ATTRIBUTES_INFO.set_form_fields(self)
+
+    class Meta:
+        model = CM.PROPERTIES_DICT.model
+        fields = '__all__'
+
+
 class CharacterForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(CharacterForm, self).__init__(*args, **kwargs)

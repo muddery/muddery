@@ -74,6 +74,8 @@ FOOD_ATTRIBUTES_INFO = CommonMapper("food_attributes_info")
 
 CHARACTER_MODELS = CommonMapper("character_models")
 
+PROPERTIES_DICT = CommonMapper("properties_dict")
+
 DEFAULT_OBJECTS = CommonMapper("default_objects")
 
 NPC_SHOPS = CommonMapper("npc_shops")

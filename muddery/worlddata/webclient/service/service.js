@@ -368,6 +368,17 @@ service = {
         this.sendRequest("query_data_file_types", "", {}, callback_success, callback_failed, context);
     },
 
+    queryAllTypeclasses: function(callback_success, callback_failed, context) {
+        this.sendRequest("query_all_typeclasses", "", {}, callback_success, callback_failed, context);
+    },
+
+    queryTypeclassProperties: function(typeclass, callback_success, callback_failed, context) {
+        var args = {
+            typeclass: typeclass
+        };
+        this.sendRequest("query_typeclass_properties", "", args, callback_success, callback_failed, context);
+    },
+
     downloadDataZip: function(file_type) {
         var args = {
             type: file_type

@@ -48,11 +48,6 @@ input[type=checkbox].check-box-control {
     height: auto;
 }
 
-.select-control {
-    width: 300px;
-    height: 35px;
-}
-
 .request.status {
     color: #ff0000;
 }

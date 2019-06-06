@@ -20,6 +20,13 @@ from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.utils.exception import MudderyError, ERR
 
 
+def query_all_typeclasses():
+    """
+    Query all typeclasses.
+    """
+    return TYPECLASS_SET.get_all_info()
+
+
 def query_areas():
     """
     Query all areas and rooms.
@@ -36,6 +43,24 @@ def query_areas():
         elif key:
             areas[key] = {"name": key, "rooms": [choice]}
     return areas
+
+
+def query_typeclass_properties(typeclass_key):
+    """
+    Query a typeclass's properties.
+    """
+    fields = query_fields("properties_dict")
+    records = CM.PROPERTIES_DICT.filter(typeclass=typeclass_key)
+    rows = []
+    for record in records:
+        line = [str(record.serializable_value(field["name"])) for field in fields]
+        rows.append(line)
+
+    table = {
+        "fields": fields,
+        "records": rows,
+    }
+    return table
 
 
 def query_event_triggers(typeclass_key):
