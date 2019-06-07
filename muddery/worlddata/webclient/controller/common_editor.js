@@ -140,7 +140,7 @@ CommonEditor.prototype.setFields = function() {
     window.parent.controller.setFrameSize();
 }
 
-CommonEditor.prototype.createFieldController = function(field) {
+CommonEditor.prototype.createFieldController = function(field, readonly) {
     var type = field.type;
     var label = field.label;
     var name = field.name;
@@ -157,22 +157,22 @@ CommonEditor.prototype.createFieldController = function(field) {
 
     var controller = null;
     if (type == "Location") {
-        controller = field_creator.createAreaSelect(name, label, value, help_text, this.areas);
+        controller = field_creator.createAreaSelect(name, label, value, help_text, this.areas, readonly);
     }
     else if (type == "Image") {
-        controller = field_creator.createImageInput(field.image_type, name, label, value, help_text);
+        controller = field_creator.createImageInput(field.image_type, name, label, value, help_text, readonly);
     }
     else if (type == "Hidden") {
-        controller = field_creator.createHiddenInput(name, label, value, help_text);
+        controller = field_creator.createHiddenInput(name, label, value, help_text, readonly);
     }
     else if (type == "TextInput") {
-        controller = field_creator.createTextInput(name, label, value, help_text);
+        controller = field_creator.createTextInput(name, label, value, help_text, readonly);
     }
     else if (type == "NumberInput") {
-        controller = field_creator.createNumberInput(name, label, value, help_text);
+        controller = field_creator.createNumberInput(name, label, value, help_text, readonly);
     }
     else if (type == "Textarea") {
-        controller = field_creator.createTextArea(name, label, value, help_text);
+        controller = field_creator.createTextArea(name, label, value, help_text, readonly);
     }
     else if (type == "CheckboxInput") {
         if (value) {
@@ -180,10 +180,10 @@ CommonEditor.prototype.createFieldController = function(field) {
                 value = false;
             }
         }
-        controller = field_creator.createCheckBox(name, label, value, help_text);
+        controller = field_creator.createCheckBox(name, label, value, help_text, readonly);
     }
     else if (type == "Select") {
-        controller = field_creator.createSelect(name, label, value, help_text, field.choices);
+        controller = field_creator.createSelect(name, label, value, help_text, field.choices, readonly);
     }
 
     // Add controller name.

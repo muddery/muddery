@@ -31,7 +31,7 @@ field_creator = {
         return group;
     },
 
-    createHiddenInput: function(name, label, value, help_text) {
+    createHiddenInput: function(name, label, value, help_text, readonly) {
         var group = $("<div>")
             .addClass("control-group hidden")
             .addClass("control-item-" + name);
@@ -42,40 +42,60 @@ field_creator = {
             .val(value)
             .appendTo(group);
 
+        if (readonly) {
+            controller.attr("readonly", "readonly");
+        }
+
         return group;
     },
 
-    createTextInput: function(name, label, value, help_text) {
+    createTextInput: function(name, label, value, help_text, readonly) {
         var controller = $("<input>")
             .addClass("form-control editor-control text-input-control")
             .attr("type", "text")
             .val(value);
-        
+
+        if (readonly) {
+            controller.attr("readonly", "readonly");
+        }
+
         return this.createControlGroup(name, controller, label, help_text);
     },
 
-    createNumberInput: function(name, label, value, help_text) {
+    createNumberInput: function(name, label, value, help_text, readonly) {
         var controller = $("<input>")
             .addClass("form-control editor-control text-input-control")
             .attr("type", "number")
             .val(value);
 
+        if (readonly) {
+            controller.attr("readonly", "readonly");
+        }
+
         return this.createControlGroup(name, controller, label, help_text);
     },
 
-    createTextArea: function(name, label, value, help_text) {
+    createTextArea: function(name, label, value, help_text, readonly) {
         var controller = $("<textarea>")
             .addClass("form-control editor-control text-area-control")
             .attr("rows", "5")
             .val(value);
-        
+
+        if (readonly) {
+            controller.attr("readonly", "readonly");
+        }
+
         return this.createControlGroup(name, controller, label, help_text);
     },
 
-    createSelect: function(name, label, value, help_text, options) {
+    createSelect: function(name, label, value, help_text, options, readonly) {
         var controller = $("<select>")
             .addClass("form-control editor-control select-control")
             .val(value);
+
+        if (readonly) {
+            controller.attr("disabled", "disabled");
+        }
 
         for (var i = 0; i < options.length; i++) {
             var option = $("<option>")
@@ -91,7 +111,7 @@ field_creator = {
         return this.createControlGroup(name, controller, label, help_text);
     },
 
-    createCheckBox: function(name, label, value, help_text, check) {
+    createCheckBox: function(name, label, value, help_text, check, readonly) {
         var group = $("<div>")
             .addClass("control-group")
             .addClass("control-item-" + name);
@@ -105,6 +125,10 @@ field_creator = {
             .addClass("form-control editor-control check-box-control")
             .attr("type", "checkbox")
             .appendTo(ctrl_div);
+
+        if (readonly) {
+            controller.attr("readonly", "readonly");
+        }
 
         if (value) {
             controller.attr("checked", "checked");
@@ -130,12 +154,16 @@ field_creator = {
         return group;
     },
 
-    createAreaSelect: function(name, label, value, help_text, areas) {
+    createAreaSelect: function(name, label, value, help_text, areas, readonly) {
         var ctrl = $("<div>");
 
         // Add area.
         var select_area = $("<select>")
             .addClass("select-area form-control select-control");
+
+        if (readonly) {
+            select_area.attr("disabled", "disabled");
+        }
 
         var selected_area = "";
         var first_area = "";
@@ -171,6 +199,10 @@ field_creator = {
         var select_room = $("<select>")
             .addClass("select-room form-control editor-control select-control");
 
+        if (readonly) {
+            select_room.attr("disabled", "disabled");
+        }
+
         var room_area = areas[selected_area];
         for (var i = 0; i < room_area.rooms.length; i++) {
             var room = room_area.rooms[i];
@@ -189,7 +221,7 @@ field_creator = {
         return this.createControlGroup(name, ctrl, label, help_text);
     },
 
-    createImageInput: function(image_type, name, label, value, help_text) {
+    createImageInput: function(image_type, name, label, value, help_text, readonly) {
         var ctrl = $("<div>");
 
         var image = $("<img>")
@@ -201,7 +233,11 @@ field_creator = {
         var buttons = $("<div>")
             .addClass("form-control control-buttons")
             .appendTo(ctrl);
-            
+
+        if (readonly) {
+            buttons.attr("readonly", "readonly");
+        }
+
         var del = $("<input>")
             .attr("type", "button")
             .attr("value", "Delete")
@@ -213,6 +249,10 @@ field_creator = {
             .data("image_type", image_type)
             .data("field_name", name)
             .appendTo(buttons);
+
+        if (readonly) {
+            input.attr("readonly", "readonly");
+        }
 
         var resource = $("<input>")
             .addClass("editor-control")

@@ -298,6 +298,21 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
+    editPropertiesDict: function(typeclass, record_id) {
+        var url = "properties_dict_editor.html?typeclass=" + typeclass;
+
+        var name = "";
+        if (record_id) {
+            name = "编辑自定义属性";
+            url += "&record=" + record_id;
+        }
+        else {
+            name = "添加自定义属性";
+        }
+
+        controller.pushPage(name, url, null);
+    },
+
     //////////////// Confirm Model ////////////////
     confirm: function(title, content, callback, data) {
         if ($(".modal-backdrop").length > 0) {
