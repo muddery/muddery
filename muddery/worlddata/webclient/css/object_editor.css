@@ -1,14 +1,23 @@
 
-.event-title {
+#events, #properties {
+    padding: 10px 0;
+}
+
+.event-title,
+.properties-title {
     display: inline-block;
 }
 
-#event-table {
+#event-table,
+#properties-table {
     border: 1px solid #000;
     max-width: 100%;
 }
 
-#event-table td, #event-table th {
+#event-table td,
+#event-table th,
+#properties-table td,
+#properties-table th {
     font-weight: normal;
     word-wrap: break-word;
     padding: 2px 5px;

@@ -153,6 +153,27 @@ class QueryTypeclassProperties(BaseRequestProcesser):
         return success_response(data)
 
 
+
+class QueryObjectProperties(BaseRequestProcesser):
+    """
+    Query a typeclass's properties.
+
+    Args:
+        typeclass: (string) typeclass's key.
+    """
+    path = "query_object_properties"
+    name = ""
+
+    def func(self, args, request):
+        if 'obj_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+
+        obj_key = args["obj_key"]
+
+        data = data_query.query_object_properties(obj_key)
+        return success_response(data)
+
+
 class QueryEventTriggers(BaseRequestProcesser):
     """
     Query all event triggers of the given typeclass.

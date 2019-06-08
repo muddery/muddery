@@ -9,9 +9,12 @@ ObjectEditor = function() {
     this.obj_typeclass = "";
     this.obj_key = "";
     this.table_fields = [];
-    this.event_fields = [];
 
+    this.event_fields = [];
     this.event_table = "event_data";
+
+    this.properties_fields = [];
+    this.properties_table = "object_properties"
 }
 
 ObjectEditor.prototype = prototype(CommonEditor.prototype);
@@ -41,12 +44,22 @@ ObjectEditor.prototype.init = function() {
     this.refresh();
 }
 
+
+/***********************************
+ *
+ * Events
+ *
+ ***********************************/
 ObjectEditor.prototype.bindEvents = function() {
     CommonEditor.prototype.bindEvents.call(this);
 
-    $("#add-event").on("click", this.addEvent);
+    $("#add-event").on("click", this.onAddEvent);
     $("#event-table").on("click", ".edit-row", this.onEditEvent);
     $("#event-table").on("click", ".delete-row", this.onDeleteEvent);
+
+    $("#add-properties").on("click", this.onAddProperties);
+    $("#properties-table").on("click", ".edit-row", this.onEditProperties);
+    $("#properties-table").on("click", ".delete-row", this.onDeleteProperties);
 }
 
 ObjectEditor.prototype.onImageLoad = function() {
@@ -84,6 +97,22 @@ ObjectEditor.prototype.confirmDelete = function(e) {
                          controller.failedCallback);
 }
 
+
+ObjectEditor.prototype.addEvent = function(e) {
+    if (!controller.obj_key) {
+        window.parent.controller.notify("You should save this object first.");
+        return;
+    }
+
+    var editor = "event";
+    var record = "";
+    var args = {
+        trigger: controller.obj_key,
+        typeclass: controller.obj_typeclass,
+    }
+    window.parent.controller.editRecord(editor, controller.event_table, record, args);
+}
+
 ObjectEditor.prototype.onEditEvent = function(e) {
     var record_id = $(this).attr("data-record-id");
     if (record_id) {
@@ -119,7 +148,23 @@ ObjectEditor.prototype.deleteEventSuccess = function(data) {
     });
 }
 
+ObjectEditor.prototype.onAddProperties = function(e) {
+}
+
+ObjectEditor.prototype.onEditProperties = function(e) {
+}
+
+ObjectEditor.prototype.onDeleteProperties = function(e) {
+}
+
+
+/***********************************
+ *
+ * Queries.
+ *
+ ***********************************/
 ObjectEditor.prototype.refresh = function() {
+    // Query object form.
     service.queryObjectForm(this.base_typeclass,
                             this.obj_typeclass,
                             this.obj_key,
@@ -152,13 +197,12 @@ ObjectEditor.prototype.uploadSuccess = function(field_name) {
     return callback;
 }
 
-
 ObjectEditor.prototype.queryFormSuccess = function(data) {
     controller.table_fields = data;
     controller.obj_typeclass = "";
     controller.obj_key = "";
 
-    // get object's typeclass
+    // Get object's typeclass.
     for (var t = 0; t < data.length && !controller.obj_typeclass; t++) {
         var fields = data[t].fields;
         for (var f = 0; f < fields.length; f++) {
@@ -172,7 +216,7 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
         }
     }
 
-    // get object's key
+    // Get object's key.
     for (var t = 0; t < data.length && !controller.obj_key; t++) {
         var fields = data[t].fields;
         for (var f = 0; f < fields.length; f++) {
@@ -203,15 +247,20 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
     else {
         controller.queryAreasSuccess({});
     }
-}
 
-ObjectEditor.prototype.queryAreasSuccess = function(data) {
-    controller.areas = data;
-    controller.setFields();
+    // Query events.
+    service.queryEventTriggers(controller.obj_typeclass,
+                               controller.queryEventTriggersSuccess,
+                               controller.failedCallback);
 
-    // Query events data.
-    service.queryEventTriggers(controller.obj_typeclass, controller.queryEventTriggersSuccess, controller.failedCallback);
-    service.queryObjectEvents(controller.obj_key, controller.queryEventTableSuccess, controller.failedCallback);
+    service.queryObjectEvents(controller.obj_key,
+                              controller.queryEventTableSuccess,
+                              controller.failedCallback);
+
+    // Query custom properties.
+    service.queryObjectProperties(controller.obj_key,
+                                  controller.queryObjectPropertiesSuccess,
+                                  controller.failedCallback);
 }
 
 ObjectEditor.prototype.queryEventTriggersSuccess = function(data) {
@@ -247,6 +296,27 @@ ObjectEditor.prototype.queryEventTableSuccess = function(data) {
     window.parent.controller.setFrameSize();
 }
 
+ObjectEditor.prototype.queryObjectPropertiesSuccess = function(data) {
+    controller.properties_fields = data.fields;
+
+    $("#properties-table").bootstrapTable("destroy");
+    $("#properties-table").bootstrapTable({
+        cache: false,
+        striped: true,
+        pagination: true,
+        pageList: [20, 50, 100],
+        pageSize: 20,
+        sidePagination: "client",
+        columns: controller.parseFields(data.fields),
+        data: utils.parseRows(data.fields, data.records),
+        sortName: "id",
+        sortOrder: "asc",
+        clickToSelect: true,
+        singleSelect: true,
+    });
+
+    window.parent.controller.setFrameSize();
+}
 
 // Add form fields to the web page.
 ObjectEditor.prototype.setFields = function() {
@@ -276,6 +346,8 @@ ObjectEditor.prototype.setFields = function() {
     }
 
     container.find(".control-item-typeclass select").on("change", this.onTypeclassChange);
+
+    window.parent.controller.setFrameSize();
 }
 
 ObjectEditor.prototype.onTypeclassChange = function(e) {
@@ -339,17 +411,3 @@ ObjectEditor.prototype.saveForm = function(callback_success, callback_failed, co
                            context);
 }
 
-ObjectEditor.prototype.addEvent = function(e) {
-    if (!controller.obj_key) {
-        window.parent.controller.notify("You should save this object first.");
-        return;
-    }
-
-    var editor = "event";
-    var record = "";
-    var args = {
-        trigger: controller.obj_key,
-        typeclass: controller.obj_typeclass,
-    }
-    window.parent.controller.editRecord(editor, controller.event_table, record, args);
-}

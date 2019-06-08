@@ -30,5 +30,14 @@ class ObjectPropertiesMapper(object):
         """
         return self.objects.filter(object=object, level=level)
 
+    def get_properties_all_levels(self, object):
+        """
+        Get object's properties.
+
+        Args:
+            object: (string) object's key.
+        """
+        return self.objects.filter(object=object).order_by("level")
+
 
 OBJECT_PROPERTIES = ObjectPropertiesMapper()

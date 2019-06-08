@@ -147,9 +147,29 @@ class TypeclassSet(object):
 
         info = {}
         for key, cls in self.class_dict.items():
+            # Get the class's parent which has another typeclass name.
+            bases = cls.__bases__
+            parent_key = ""
+            while not parent_key:
+                has_typeclass_key = False
+                for base in bases:
+                    if hasattr(base, "typeclass_key") and base.typeclass_key:
+                        has_typeclass_key = True
+
+                        if base.typeclass_key != cls.typeclass_key:
+                            parent_key = base.typeclass_key
+                        else:
+                            bases = base.__bases__
+                        break
+
+                if not has_typeclass_key:
+                    break
+
             info[key] = {
-                "name": cls.typeclass_name
+                "name": cls.typeclass_name,
+                "parent": parent_key
             }
+
         return info
 
 

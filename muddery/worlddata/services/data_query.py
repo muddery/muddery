@@ -13,11 +13,13 @@ from muddery.worlddata.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
 from muddery.worlddata.dao.world_exits_mapper import WORLD_EXITS_MAPPER
 from muddery.worlddata.dao import general_query_mapper, model_mapper
 from muddery.worlddata.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
+from muddery.worlddata.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.worlddata.dao.event_mapper import get_object_event
 from muddery.worlddata.services.general_query import query_fields
 from muddery.mappings.typeclass_set import TYPECLASS_SET, TYPECLASS
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.utils.exception import MudderyError, ERR
+from muddery.utils.localized_strings_handler import _
 
 
 def query_all_typeclasses():
@@ -60,6 +62,54 @@ def query_typeclass_properties(typeclass_key):
         "fields": fields,
         "records": rows,
     }
+    return table
+
+
+def query_object_properties(object_key):
+    """
+    Query all properties of the given object.
+
+    Args:
+        object_key: (string) object' key.
+    """
+    fields = []
+    fields.append({"name": "level",
+                   "label": _("Level"),
+                   "help_text": _("Properties's level.")})
+
+    # Get typeclass from the object's record
+    table_name = TYPECLASS("OBJECT").model_name
+    record = general_query_mapper.get_record_by_key(table_name, object_key)
+    obj_typeclass = record.typeclass
+
+    properties_info = TYPECLASS(obj_typeclass).get_properties_info()
+    for key, info in properties_info.items():
+        if info["mutable"]:
+            continue
+
+        fields.append({"name": key,
+                       "label": info["name"],
+                       "help_text": info["desc"]})
+
+    levels = []
+    data = {}
+    records = OBJECT_PROPERTIES.get_properties_all_levels(object_key)
+    for record in records:
+        if record.level not in levels:
+            levels.append(record.level)
+            data[record.level] = {"level": record.level}
+        data[record.level][record.property] = record.value
+
+    rows = []
+    for level in levels:
+        line = [data[level].get(field["name"], "") for field in fields]
+        rows.append(line)
+
+    table = {
+        "fields": fields,
+        "records": rows,
+    }
+
     return table
 
 
