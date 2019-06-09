@@ -313,6 +313,21 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
+    editObjectProperties: function(obj_key, level) {
+        var url = "object_properties_editor.html?obj_key=" + obj_key;
+
+        var name = "";
+        if (level) {
+            name = "编辑对象属性";
+            url += "&level=" + level;
+        }
+        else {
+            name = "添加对象属性";
+        }
+
+        controller.pushPage(name, url, null);
+    },
+
     //////////////// Confirm Model ////////////////
     confirm: function(title, content, callback, data) {
         if ($(".modal-backdrop").length > 0) {

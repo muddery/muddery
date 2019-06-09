@@ -72,6 +72,7 @@ def query_object_properties(object_key):
     Args:
         object_key: (string) object' key.
     """
+    # Get fields.
     fields = []
     fields.append({"name": "level",
                    "label": _("Level"),
@@ -91,6 +92,7 @@ def query_object_properties(object_key):
                        "label": info["name"],
                        "help_text": info["desc"]})
 
+    # Get rows.
     levels = []
     data = {}
     records = OBJECT_PROPERTIES.get_properties_all_levels(object_key)
@@ -111,6 +113,66 @@ def query_object_properties(object_key):
     }
 
     return table
+
+
+def query_object_level_properties(object_key, level):
+    """
+    Query properties of a level of the given object.
+
+    Args:
+        object_key: (string) object' key.
+        level: (number) object's level.
+    """
+    # Get fields.
+    fields = []
+
+    # Object's key.
+    fields.append({
+        "name": "key",
+        "label": _("Key"),
+        "disabled": True,
+        "help_text": "",
+        "type": "TextInput",
+        "value": object_key
+    })
+
+    # Object's level.
+    fields.append({
+        "name": "level",
+        "label": _("Level"),
+        "disabled": False,
+        "help_text": "",
+        "type": "NumberInput",
+        "value": level
+    })
+
+    # Get typeclass from the object's record
+    table_name = TYPECLASS("OBJECT").model_name
+    record = general_query_mapper.get_record_by_key(table_name, object_key)
+    obj_typeclass = record.typeclass
+
+    properties_info = TYPECLASS(obj_typeclass).get_properties_info()
+
+    # Get properties.
+    data = {}
+    records = OBJECT_PROPERTIES.get_properties(object_key, level)
+    for record in records:
+        data[record.property] = record.value
+
+    # Set fields.
+    for key, info in properties_info.items():
+        field = {
+            "name": key,
+            "label": info["name"],
+            "disabled": False,
+            "help_text": info["desc"],
+            "type": "TextInput",
+            "value": data.get(key, "")
+        }
+
+        fields.append(field)
+
+    return fields
 
 
 def query_event_triggers(typeclass_key):

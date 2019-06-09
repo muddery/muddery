@@ -386,6 +386,14 @@ service = {
         this.sendRequest("query_object_properties", "", args, callback_success, callback_failed, context);
     },
 
+    queryObjectLevelProperties: function(obj_key, level, callback_success, callback_failed, context) {
+        var args = {
+            obj_key: obj_key,
+            level: level
+        };
+        this.sendRequest("query_object_level_properties", "", args, callback_success, callback_failed, context);
+    },
+
     downloadDataZip: function(file_type) {
         var args = {
             type: file_type

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title></title>
+        <meta name="HandheldFriendly" content="True" />
+        <link href="../css/bootstrap.min.css?hash=08df9a96" rel="stylesheet" type="text/css" />
+        <link href="../css/bootstrap-table.min.css?hash=d819dada" rel="stylesheet" type="text/css" />
+        <link href="../css/main.css?hash=58d3930d" rel="stylesheet" type="text/css" />
+        <link href="../css/common_editor.css?hash=f3c318b2" rel="stylesheet" type="text/css" />
+    </head>
+
+    <body>
+        <form class="form-horizontal">
+            <fieldset>
+                <legend id="legend">
+                    <div id="form-name" class="pull-left">
+                    </div>
+                    <div class="pull-right">
+                        <button id="exit-button" type="button" class="btn btn-default right hidden">Back</button>
+                        <button id="save-record" type="button" class="btn btn-success right hidden">Save</button>
+                        <button id="delete-record" type="button" class="btn btn-danger right hidden">Delete</button>
+                    </div>
+                </legend>
+                <div id="form-message" class="hidden">
+                </div>
+                <div id="fields">
+                </div>
+            </fieldset>
+        </form>
+        <script src="../libs/jquery-3.2.1.min.js?hash=1055018c" type="text/javascript"></script>
+        <script src="../libs/bootstrap.min.js?hash=b07a5be9" type="text/javascript"></script>
+        <script src="../config.js?hash=b0778795" type="text/javascript"></script>
+        <script src="../service/service.js?hash=8e296bee" type="text/javascript"></script>
+        <script src="../utils/utils.js?hash=b5e16be9" type="text/javascript"></script>
+        <script src="../utils/fields.js?hash=1a44cb0c" type="text/javascript"></script>
+        <script src="../controller/common_editor.js?hash=d1ef6f3d" type="text/javascript"></script>
+        <script src="../controller/object_properties_editor.js?hash=d1ef6f3d" type="text/javascript"></script>
+        <script type="text/javascript">
+            var controller = new ObjectPropertiesEditor();
+            $(document).ready(function() {controller.init()});
+        </script>
+    </body>
+
+</html>

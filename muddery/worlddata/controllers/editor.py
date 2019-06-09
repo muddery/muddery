@@ -153,13 +153,12 @@ class QueryTypeclassProperties(BaseRequestProcesser):
         return success_response(data)
 
 
-
 class QueryObjectProperties(BaseRequestProcesser):
     """
     Query a typeclass's properties.
 
     Args:
-        typeclass: (string) typeclass's key.
+        obj_key: (string) object's key.
     """
     path = "query_object_properties"
     name = ""
@@ -171,6 +170,28 @@ class QueryObjectProperties(BaseRequestProcesser):
         obj_key = args["obj_key"]
 
         data = data_query.query_object_properties(obj_key)
+        return success_response(data)
+
+
+class QueryObjectLevelProperties(BaseRequestProcesser):
+    """
+    Query a level of an object's properties.
+
+    Args:
+        obj_key: (string) object's key.
+        level: (number) level's number
+    """
+    path = "query_object_level_properties"
+    name = ""
+
+    def func(self, args, request):
+        if 'obj_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+
+        obj_key = args["obj_key"]
+        level = args.get('level', 0)
+
+        data = data_query.query_object_level_properties(obj_key, level)
         return success_response(data)
 
 

@@ -2,21 +2,28 @@
 /*
  * Derive from the base class.
  */
-PropertiesDictEditor = function() {
+ObjectPropertiesEditor = function() {
 	CommonEditor.call(this);
 
-    this.table_name = "properties_dict";
-    this.record_id = "";
-    this.typeclass = "";
+    this.table_name = "object_properties";
+    this.obj_key = "";
+    this.level = 0;
 }
 
-PropertiesDictEditor.prototype = prototype(CommonEditor.prototype);
-PropertiesDictEditor.prototype.constructor = PropertiesDictEditor;
+ObjectPropertiesEditor.prototype = prototype(CommonEditor.prototype);
+ObjectPropertiesEditor.prototype.constructor = ObjectPropertiesEditor;
 
 
-PropertiesDictEditor.prototype.init = function() {
-    this.typeclass = utils.getQueryString("typeclass");
-    this.record_id = utils.getQueryString("record");
+ObjectPropertiesEditor.prototype.init = function() {
+    this.obj_key = utils.getQueryString("obj_key");
+    this.level = utils.getQueryString("level");
+    if (this.level) {
+        this.level = parseInt(this.level);
+    }
+    else {
+        this.level = null;
+    }
+
     if (sessionStorage.page_param) {
         this.field_values = JSON.parse(sessionStorage.page_param);
     }
@@ -26,7 +33,7 @@ PropertiesDictEditor.prototype.init = function() {
 
     $("#exit-button").removeClass("hidden");
     $("#save-record").removeClass("hidden");
-    if (this.record_id) {
+    if (this.level === null) {
         $("#delete-record").removeClass("hidden");
     }
 
@@ -34,16 +41,21 @@ PropertiesDictEditor.prototype.init = function() {
     this.refresh();
 }
 
+ObjectPropertiesEditor.prototype.refresh = function() {
+    var level = self.level || 0;
+    service.queryObjectLevelProperties(this.obj_key, level, this.queryFormSuccess, this.failedCallback);
+}
+
 // Add form fields to the web page.
-PropertiesDictEditor.prototype.setFields = function() {
+ObjectPropertiesEditor.prototype.setFields = function() {
     var container = $("#fields");
     container.children().remove();
 
     for (var i = 0; i < this.fields.length; i++) {
         var field = this.fields[i];
 
-        if (field.name == "typeclass") {
-            field.value = this.typeclass;
+        if (field.name == "object") {
+            field.value = this.obj_key;
             var controller = this.createFieldController(field, true);
         }
         else {

@@ -149,6 +149,12 @@ ObjectEditor.prototype.deleteEventSuccess = function(data) {
 }
 
 ObjectEditor.prototype.onAddProperties = function(e) {
+    if (!controller.obj_key) {
+        window.parent.controller.notify("You should save this object first.");
+        return;
+    }
+
+    window.parent.controller.editObjectProperties(controller.obj_key, null);
 }
 
 ObjectEditor.prototype.onEditProperties = function(e) {
