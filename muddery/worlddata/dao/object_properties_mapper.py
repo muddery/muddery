@@ -39,5 +39,15 @@ class ObjectPropertiesMapper(object):
         """
         return self.objects.filter(object=object).order_by("level")
 
+    def delete_properties(self, object, level):
+        """
+        Delete object's properties.
+
+        Args:
+            object: (string) object's key.
+            level: (number) object's level.
+        """
+        return self.objects.filter(object=object, level=level).delete()
+
 
 OBJECT_PROPERTIES = ObjectPropertiesMapper()

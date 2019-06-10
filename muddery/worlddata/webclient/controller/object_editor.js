@@ -158,9 +158,33 @@ ObjectEditor.prototype.onAddProperties = function(e) {
 }
 
 ObjectEditor.prototype.onEditProperties = function(e) {
+    var level = $(this).attr("data-level");
+    if (level) {
+        window.parent.controller.editObjectProperties(controller.obj_key, level);
+    }
 }
 
 ObjectEditor.prototype.onDeleteProperties = function(e) {
+    var level = $(this).attr("data-level");
+    window.parent.controller.confirm("",
+                                     "Delete this level?",
+                                     controller.confirmDeleteProperties,
+                                     {level: level});
+}
+
+ObjectEditor.prototype.confirmDeleteProperties = function(e) {
+    window.parent.controller.hideWaiting();
+
+    var level = e.data.level;
+    service.deleteObjectLevelProperties(controller.obj_key, level, controller.deletePropertiesSuccess, controller.failedCallback);
+}
+
+ObjectEditor.prototype.deletePropertiesSuccess = function(data) {
+    var level = parseInt(data.level);
+    $("#properties-table").bootstrapTable("remove", {
+        field: "level",
+        values: [level],
+    });
 }
 
 
@@ -313,7 +337,7 @@ ObjectEditor.prototype.queryObjectPropertiesSuccess = function(data) {
         pageList: [20, 50, 100],
         pageSize: 20,
         sidePagination: "client",
-        columns: controller.parseFields(data.fields),
+        columns: controller.propertiesFields(data.fields),
         data: utils.parseRows(data.fields, data.records),
         sortName: "id",
         sortOrder: "asc",
@@ -417,3 +441,46 @@ ObjectEditor.prototype.saveForm = function(callback_success, callback_failed, co
                            context);
 }
 
+// Parse fields data to table headers.
+ObjectEditor.prototype.propertiesFields = function(fields) {
+    var cols = [{
+        field: "operate",
+        title: "Operate",
+        formatter: this.propertiesButton,
+    }];
+
+    for (var i = 0; i < fields.length; i++) {
+        cols.push({
+            field: fields[i].name,
+            title: fields[i].label,
+            sortable: true,
+        });
+    }
+
+    return cols;
+}
+
+// Set table buttons.
+ObjectEditor.prototype.propertiesButton = function(value, row, index) {
+    var block = $("<div>");
+
+    var content = $("<div>")
+        .addClass("btn-group")
+        .appendTo(block);
+
+    var edit = $("<button>")
+        .addClass("btn-xs edit-row")
+        .attr("type", "button")
+        .attr("data-level", row["level"])
+        .text("Edit")
+        .appendTo(block);
+
+    var edit = $("<button>")
+        .addClass("btn-xs btn-danger delete-row")
+        .attr("type", "button")
+        .attr("data-level", row["level"])
+        .text("Delete")
+        .appendTo(block);
+
+    return block.html();
+}

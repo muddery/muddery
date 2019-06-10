@@ -161,6 +161,9 @@ def query_object_level_properties(object_key, level):
 
     # Set fields.
     for key, info in properties_info.items():
+        if info["mutable"]:
+            continue
+
         field = {
             "name": key,
             "label": info["name"],

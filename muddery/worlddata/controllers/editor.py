@@ -195,6 +195,32 @@ class QueryObjectLevelProperties(BaseRequestProcesser):
         return success_response(data)
 
 
+class DeleteObjectLevelProperties(BaseRequestProcesser):
+    """
+    Query a level of an object's properties.
+
+    Args:
+        obj_key: (string) object's key.
+        level: (number) level's number
+    """
+    path = "delete_object_level_properties"
+    name = ""
+
+    def func(self, args, request):
+        if 'obj_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+
+        if 'level' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "level".')
+
+        obj_key = args["obj_key"]
+        level = args["level"]
+
+        data_edit.delete_object_level_properties(obj_key, level)
+        data = {"level": level}
+        return success_response(data)
+
+
 class QueryEventTriggers(BaseRequestProcesser):
     """
     Query all event triggers of the given typeclass.

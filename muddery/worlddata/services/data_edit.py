@@ -11,6 +11,7 @@ from muddery.utils.exception import MudderyError, ERR
 from muddery.worlddata.dao import general_query_mapper
 from muddery.worlddata.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS, WORLD_EXITS
 from muddery.worlddata.dao.system_data_mapper import SYSTEM_DATA
+from muddery.worlddata.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.mappings.form_set import FORM_SET
 from muddery.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
 from muddery.worlddata.forms.default_forms import ObjectsForm
@@ -180,6 +181,17 @@ def query_object_form(base_typeclass, obj_typeclass, obj_key):
                 break
 
     return forms
+
+
+def delete_object_level_properties(object_key, level):
+    """
+    Delete properties of a level of the given object.
+
+    Args:
+        object_key: (string) object' key.
+        level: (number) object's level.
+    """
+    OBJECT_PROPERTIES.delete_properties(object_key, level)
 
 
 def save_object_form(tables, obj_typeclass, obj_key):

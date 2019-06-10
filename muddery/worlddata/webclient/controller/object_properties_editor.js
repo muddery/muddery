@@ -42,7 +42,7 @@ ObjectPropertiesEditor.prototype.init = function() {
 }
 
 ObjectPropertiesEditor.prototype.refresh = function() {
-    var level = self.level || 0;
+    var level = this.level || 0;
     service.queryObjectLevelProperties(this.obj_key, level, this.queryFormSuccess, this.failedCallback);
 }
 
