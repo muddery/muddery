@@ -54,7 +54,7 @@ ObjectPropertiesEditor.prototype.setFields = function() {
     for (var i = 0; i < this.fields.length; i++) {
         var field = this.fields[i];
 
-        if (field.name == "object") {
+        if (field.name == "key") {
             field.value = this.obj_key;
             var controller = this.createFieldController(field, true);
         }
@@ -68,4 +68,37 @@ ObjectPropertiesEditor.prototype.setFields = function() {
     }
 
     window.parent.controller.setFrameSize();
+}
+
+ObjectPropertiesEditor.prototype.saveForm = function(callback_success, callback_failed, context) {
+    var level = 0;
+    var values = {};
+    var fields = $("#fields .field-controller");
+    for (var f = 0; f < fields.length; f++) {
+        var name = $(fields[f]).data("field-name");
+        var control = $(fields[f]).find(".editor-control");
+        if (control.length > 0) {
+            if (control.attr("type") == "checkbox") {
+                values[name] = control.prop("checked");
+            }
+            else {
+                // Leave the value blank if it is an empty string.
+                var value = control.val();
+                if (value.length > 0) {
+                    values[name] = value;
+
+                    if (name == "level") {
+                        level = parseInt(value);
+                    }
+                }
+            }
+        }
+    }
+
+    service.saveObjectLevelProperties(this.obj_key,
+                                      level,
+                                      values,
+                                      callback_success,
+                                      callback_failed,
+                                      context);
 }

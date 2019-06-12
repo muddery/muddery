@@ -188,11 +188,44 @@ class QueryObjectLevelProperties(BaseRequestProcesser):
         if 'obj_key' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
 
+        if 'level' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "level".')
+
         obj_key = args["obj_key"]
-        level = args.get('level', 0)
+        level = args["level"]
 
         data = data_query.query_object_level_properties(obj_key, level)
         return success_response(data)
+
+
+class SaveObjectLevelProperties(BaseRequestProcesser):
+    """
+    Save properties of an object.
+
+    Args:
+        obj_key: (string) object's key.
+        level: (number) level's number.
+        values: (dict) values to save.
+    """
+    path = "save_object_level_properties"
+    name = ""
+
+    def func(self, args, request):
+        if 'obj_key' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
+
+        if 'level' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "level".')
+
+        if 'values' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "values".')
+
+        obj_key = args["obj_key"]
+        level = args["level"]
+        values = args["values"]
+
+        data_edit.save_object_level_properties(obj_key, level, values)
+        return success_response("success")
 
 
 class DeleteObjectLevelProperties(BaseRequestProcesser):

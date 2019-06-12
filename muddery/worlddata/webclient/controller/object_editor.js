@@ -14,6 +14,7 @@ ObjectEditor = function() {
     this.event_table = "event_data";
 
     this.properties_fields = [];
+    this.properties_records = [];
     this.properties_table = "object_properties"
 }
 
@@ -180,7 +181,7 @@ ObjectEditor.prototype.confirmDeleteProperties = function(e) {
 }
 
 ObjectEditor.prototype.deletePropertiesSuccess = function(data) {
-    var level = parseInt(data.level);
+    var level = data.level;
     $("#properties-table").bootstrapTable("remove", {
         field: "level",
         values: [level],
@@ -328,7 +329,42 @@ ObjectEditor.prototype.queryEventTableSuccess = function(data) {
 
 ObjectEditor.prototype.queryObjectPropertiesSuccess = function(data) {
     controller.properties_fields = data.fields;
+    controller.properties_records = data.records;
 
+    /*
+    if (data.records.length > 1) {
+        $("#show-properties-list")
+            .attr("disabled", true)
+            .attr("checked", true);
+    }
+    else {
+        $("#show-properties-list")
+            .attr("disabled", false)
+            .attr("checked", false);
+    }
+
+    if （data.records.length <= 1) {
+        // Show properties.
+
+        if ($("#show-properties-levels").attr("checked")) {
+            $("#properties-list").hide();
+            $("#properties-levels").show();
+        }
+        else {
+            $("#properties-levels").hide();
+            $("#properties-list").show();
+        }
+    }
+    else {
+        $("#properties-list").hide();
+        $("#properties-levels").show();
+    }
+    */
+
+    $("#properties-list").hide();
+    $("#properties-levels").show();
+
+    // Set properties level table.
     $("#properties-table").bootstrapTable("destroy");
     $("#properties-table").bootstrapTable({
         cache: false,

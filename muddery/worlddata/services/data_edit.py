@@ -183,6 +183,18 @@ def query_object_form(base_typeclass, obj_typeclass, obj_key):
     return forms
 
 
+def save_object_level_properties(object_key, level, values):
+    """
+    Save properties of an object.
+
+    Args:
+        object_key: (string) object' key.
+        level: (number) object's level.
+        values: (dict) values to save.
+    """
+    OBJECT_PROPERTIES.add_properties(object_key, level, values)
+
+
 def delete_object_level_properties(object_key, level):
     """
     Delete properties of a level of the given object.

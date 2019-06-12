@@ -571,18 +571,22 @@ MudderyMain.prototype.setStatus = function(status) {
 	$$.data_handler.character_level = status["level"]["value"];
 	$("#prompt_level").text($$.trans("LEVEL: ") + status["level"]["value"]);
 
-	var exp_str = "";
-	if (status["max_exp"]["value"] > 0) {
-		exp_str = status["exp"]["value"] + "/" + status["max_exp"]["value"];
-	}
-	else {
-		exp_str = "--/--";
-	}
-	$("#prompt_exp").text($$.trans("EXP: ") + exp_str);
+    if ("exp" in status && "max_exp" in status) {
+        var exp_str = "";
+        if (status["max_exp"]["value"] > 0) {
+            exp_str = status["exp"]["value"] + "/" + status["max_exp"]["value"];
+        }
+        else {
+            exp_str = "--/--";
+        }
+        $("#prompt_exp").text($$.trans("EXP: ") + exp_str);
+    }
 
-	var hp_str = status["hp"]["value"] + "/" + status["max_hp"]["value"];
-	$("#prompt_hp").text($$.trans("HP: ") + hp_str);
-
+    if ("hp" in status && "max_hp" in status) {
+        var hp_str = status["hp"]["value"] + "/" + status["max_hp"]["value"];
+        $("#prompt_hp").text($$.trans("HP: ") + hp_str);
+    }
+    
 	$$.component.information.setStatus(status);
 }
 

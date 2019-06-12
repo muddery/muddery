@@ -7,8 +7,8 @@ from __future__ import print_function
 from evennia.utils import logger
 from django.apps import apps
 from django.conf import settings
-from muddery.utils import defines
-from muddery.worlddata.dao.common_mapper_base import ObjectsMapper
+from django.core.exceptions import ValidationError
+from muddery.utils.exception import MudderyError, ERR
 
 
 class ObjectPropertiesMapper(object):
@@ -38,6 +38,32 @@ class ObjectPropertiesMapper(object):
             object: (string) object's key.
         """
         return self.objects.filter(object=object).order_by("level")
+
+    def add_properties(self, object, level, values):
+        """
+        Add object's properties.
+
+        Args:
+            object: (string) object's key.
+            level: (number) object's level.
+            values: (dict) values to save.
+        """
+        # import values
+        for prop, value in values.items():
+            records = self.objects.filter(object=object, level=level, property=prop)
+            if records:
+                # Update.
+                records.update(value=value)
+            else:
+                # Create.
+                record = {
+                    "object": object,
+                    "level": level,
+                    "property": prop,
+                    "value": value
+                }
+                data = self.model(**record)
+                data.save()
 
     def delete_properties(self, object, level):
         """
