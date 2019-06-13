@@ -50,6 +50,9 @@ def query_areas():
 def query_typeclass_properties(typeclass_key):
     """
     Query a typeclass's properties.
+
+    Args:
+        typeclass_key: (string) typeclass' key.
     """
     fields = query_fields("properties_dict")
     records = CM.PROPERTIES_DICT.filter(typeclass=typeclass_key)
@@ -65,11 +68,12 @@ def query_typeclass_properties(typeclass_key):
     return table
 
 
-def query_object_properties(object_key):
+def query_object_properties(typeclass_key, object_key):
     """
     Query all properties of the given object.
 
     Args:
+        typeclass_key: (string) typeclass' key.
         object_key: (string) object' key.
     """
     # Get fields.
@@ -78,12 +82,7 @@ def query_object_properties(object_key):
                    "label": _("Level"),
                    "help_text": _("Properties's level.")})
 
-    # Get typeclass from the object's record
-    table_name = TYPECLASS("OBJECT").model_name
-    record = general_query_mapper.get_record_by_key(table_name, object_key)
-    obj_typeclass = record.typeclass
-
-    properties_info = TYPECLASS(obj_typeclass).get_properties_info()
+    properties_info = TYPECLASS(typeclass_key).get_properties_info()
     for key, info in properties_info.items():
         if info["mutable"]:
             continue
@@ -91,6 +90,14 @@ def query_object_properties(object_key):
         fields.append({"name": key,
                        "label": info["name"],
                        "help_text": info["desc"]})
+
+    if len(fields) == 1:
+        # No custom properties.
+        table = {
+            "fields": [],
+            "records": [],
+        }
+        return table
 
     # Get rows.
     levels = []

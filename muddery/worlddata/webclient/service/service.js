@@ -379,8 +379,9 @@ service = {
         this.sendRequest("query_typeclass_properties", "", args, callback_success, callback_failed, context);
     },
 
-    queryObjectProperties: function(obj_key, callback_success, callback_failed, context) {
+    queryObjectProperties: function(typeclass, obj_key, callback_success, callback_failed, context) {
         var args = {
+            typeclass: typeclass,
             obj_key: obj_key
         };
         this.sendRequest("query_object_properties", "", args, callback_success, callback_failed, context);
