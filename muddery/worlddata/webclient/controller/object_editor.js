@@ -288,7 +288,8 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
                               controller.failedCallback);
 
     // Query custom properties.
-    service.queryObjectProperties(controller.obj_key,
+    service.queryObjectProperties(controller.obj_typeclass,
+                                  controller.obj_key,
                                   controller.queryObjectPropertiesSuccess,
                                   controller.failedCallback);
 }

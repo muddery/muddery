@@ -158,18 +158,23 @@ class QueryObjectProperties(BaseRequestProcesser):
     Query a typeclass's properties.
 
     Args:
+        typeclass: (string) object's typeclass
         obj_key: (string) object's key.
     """
     path = "query_object_properties"
     name = ""
 
     def func(self, args, request):
+        if 'typeclass' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+
         if 'obj_key' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
 
+        typeclass_key = args["typeclass"]
         obj_key = args["obj_key"]
 
-        data = data_query.query_object_properties(obj_key)
+        data = data_query.query_object_properties(typeclass_key, obj_key)
         return success_response(data)
 
 
