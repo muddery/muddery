@@ -64,7 +64,7 @@ ObjectEditor.prototype.bindEvents = function() {
 }
 
 ObjectEditor.prototype.onImageLoad = function() {
-    parent.controller.setFrameSize();
+    window.parent.controller.setFrameSize();
 }
 
 ObjectEditor.prototype.onSave = function() {
@@ -334,58 +334,58 @@ ObjectEditor.prototype.queryObjectPropertiesSuccess = function(data) {
     if (!controller.properties_fields || controller.properties_fields.length == 0) {
         // If does not have custom properties.
         $("#properties").hide();
-        return;
-    }
-
-    /*
-    if (data.records.length > 1) {
-        $("#show-properties-list")
-            .attr("disabled", true)
-            .attr("checked", true);
     }
     else {
-        $("#show-properties-list")
-            .attr("disabled", false)
-            .attr("checked", false);
-    }
+        /*
+        if (data.records.length > 1) {
+            $("#show-properties-list")
+                .attr("disabled", true)
+                .attr("checked", true);
+        }
+        else {
+            $("#show-properties-list")
+                .attr("disabled", false)
+                .attr("checked", false);
+        }
 
-    if （data.records.length <= 1) {
-        // Show properties.
+        if （data.records.length <= 1) {
+            // Show properties.
 
-        if ($("#show-properties-levels").attr("checked")) {
+            if ($("#show-properties-levels").attr("checked")) {
+                $("#properties-list").hide();
+                $("#properties-levels").show();
+            }
+            else {
+                $("#properties-levels").hide();
+                $("#properties-list").show();
+            }
+        }
+        else {
             $("#properties-list").hide();
             $("#properties-levels").show();
         }
-        else {
-            $("#properties-levels").hide();
-            $("#properties-list").show();
-        }
-    }
-    else {
+        */
+
         $("#properties-list").hide();
         $("#properties-levels").show();
+
+        // Set properties level table.
+        $("#properties-table").bootstrapTable("destroy");
+        $("#properties-table").bootstrapTable({
+            cache: false,
+            striped: true,
+            pagination: true,
+            pageList: [20, 50, 100],
+            pageSize: 20,
+            sidePagination: "client",
+            columns: controller.propertiesFields(data.fields),
+            data: utils.parseRows(data.fields, data.records),
+            sortName: "id",
+            sortOrder: "asc",
+            clickToSelect: true,
+            singleSelect: true,
+        });
     }
-    */
-
-    $("#properties-list").hide();
-    $("#properties-levels").show();
-
-    // Set properties level table.
-    $("#properties-table").bootstrapTable("destroy");
-    $("#properties-table").bootstrapTable({
-        cache: false,
-        striped: true,
-        pagination: true,
-        pageList: [20, 50, 100],
-        pageSize: 20,
-        sidePagination: "client",
-        columns: controller.propertiesFields(data.fields),
-        data: utils.parseRows(data.fields, data.records),
-        sortName: "id",
-        sortOrder: "asc",
-        clickToSelect: true,
-        singleSelect: true,
-    });
 
     window.parent.controller.setFrameSize();
 }
