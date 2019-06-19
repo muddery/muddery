@@ -98,8 +98,7 @@ ObjectEditor.prototype.confirmDelete = function(e) {
                          controller.failedCallback);
 }
 
-
-ObjectEditor.prototype.addEvent = function(e) {
+ObjectEditor.prototype.onAddEvent = function(e) {
     if (!controller.obj_key) {
         window.parent.controller.notify("You should save this object first.");
         return;
@@ -331,6 +330,12 @@ ObjectEditor.prototype.queryEventTableSuccess = function(data) {
 ObjectEditor.prototype.queryObjectPropertiesSuccess = function(data) {
     controller.properties_fields = data.fields;
     controller.properties_records = data.records;
+
+    if (!controller.properties_fields || controller.properties_fields.length == 0) {
+        // If does not have custom properties.
+        $("#properties").hide();
+        return;
+    }
 
     /*
     if (data.records.length > 1) {
