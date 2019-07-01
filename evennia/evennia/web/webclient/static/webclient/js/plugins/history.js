@@ -3,29 +3,29 @@
  * Evennia Webclient Command History plugin
  *
  */
-let history_plugin = (function () {
+let history = (function () {
 
     // Manage history for input line
-    var history_max = 21;
+    var historyMax = 21;
     var history = new Array();
-    var history_pos = 0;
+    var historyPos = 0;
 
-    history[0] = ''; // the very latest input is empty for new entry.
+    history[0] = ""; // the very latest input is empty for new entry.
 
     //
     // move back in the history
     var back = function () {
         // step backwards in history stack
-        history_pos = Math.min(++history_pos, history.length - 1);
-        return history[history.length - 1 - history_pos];
+        historyPos = Math.min(++historyPos, history.length - 1);
+        return history[history.length - 1 - historyPos];
     }
 
     //
     // move forward in the history
     var fwd = function () {
         // step forwards in history stack
-        history_pos = Math.max(--history_pos, 0);
-        return history[history.length - 1 - history_pos];
+        historyPos = Math.max(--historyPos, 0);
+        return history[history.length - 1 - historyPos];
     }
 
     //
@@ -33,31 +33,13 @@ let history_plugin = (function () {
     var add = function (input) {
         // add a new entry to history, don't repeat latest
         if (input && input != history[history.length-2]) {
-            if (history.length >= history_max) {
+            if (history.length >= historyMax) {
                 history.shift(); // kill oldest entry
             }
             history[history.length-1] = input;
-            history[history.length] = '';
+            history[history.length] = "";
         }
-        // reset the position to the last history entry
-        history_pos = 0;
-    }
-
-    //
-    // Go to the last history line
-    var end = function () {
-        // move to the end of the history stack
-        history_pos = 0;
-        return history[history.length -1];
-    }
-
-    //
-    // Add input to the scratch line
-    var scratch = function (input) {
-        // Put the input into the last history entry (which is normally empty)
-        // without making the array larger as with add.
-        // Allows for in-progress editing to be saved.
-        history[history.length-1] = input;
+        historyPos = 0;
     }
 
     // Public
@@ -66,30 +48,28 @@ let history_plugin = (function () {
     // Handle up arrow and down arrow events.
     var onKeydown = function(event) {
         var code = event.which;
-        var history_entry = null;
-        var inputfield = $("#inputfield");
+        var historyEntry = null;
 
-        if (inputfield[0].selectionStart == inputfield.val().length) {
-            // Only process up/down arrow if cursor is at the end of the line.
-            if (code === 38) { // Arrow up
-                history_entry = back();
-            }
-            else if (code === 40) { // Arrow down
-                history_entry = fwd();
-            }
+        // Only process up/down arrow if cursor is at the end of the line.
+        if (code === 38 && event.shiftKey) { // Shift + Arrow up
+            historyEntry = back();
+        }
+        else if (code === 40 && event.shiftKey) { // Shift + Arrow down
+            historyEntry = fwd();
         }
 
-        if (history_entry !== null) {
-            // Doing a history navigation; replace the text in the input.
-            inputfield.val(history_entry);
-        }
-        else {
-            // Save the current contents of the input to the history scratch area.
-            setTimeout(function () {
-                // Need to wait until after the key-up to capture the value.
-                scratch(inputfield.val());
-                end();
-            }, 0);
+        // are we processing an up or down history event?
+        if (historyEntry !== null) {
+            // Doing a history navigation; replace the text in the input and
+            // move the cursor to the end of the new value
+            var inputfield = $(".inputfield:focus");
+            if( inputfield.length < 1 ) { // pre-goldenlayout backwards compatibility
+                inputfield = $("#inputfield");
+            }
+            inputfield.val("");
+            inputfield.blur().focus().val(historyEntry);
+            event.preventDefault();
+            return true;
         }
 
         return false;
@@ -99,18 +79,13 @@ let history_plugin = (function () {
     // Listen for onSend lines to add to history
     var onSend = function (line) {
         add(line);
+        return null;
     }
 
-    //
-    // Init function
-    var init = function () {
-        console.log('History Plugin Initialized.');
-    } 
-
     return {
-        init: init,
+        init: function () {},
         onKeydown: onKeydown,
         onSend: onSend,
     }
-})()
-plugin_handler.add('history', history_plugin);
+}());
+window.plugin_handler.add("history", history);

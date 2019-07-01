@@ -8,8 +8,6 @@ creation commands.
 
 """
 
-from __future__ import print_function
-
 import time, ast, traceback
 from twisted.internet import reactor, task
 from twisted.internet.task import deferLater
@@ -181,7 +179,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             else:
                 try:
                     value = ast.literal_eval(serializable_value)
-                except (SyntaxError, ValueError), e:
+                except (SyntaxError, ValueError) as e:
                     # treat as a raw string
                     value = serializable_value
             values[key] = value

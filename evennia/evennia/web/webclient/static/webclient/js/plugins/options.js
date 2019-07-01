@@ -10,13 +10,11 @@ let options_plugin = (function () {
     // addOptionsUI
     var addOptionsUI = function () {
         var content = [ // TODO  dynamically create this based on the options{} hash
-            '<h3>Output display</h3>',
             '<label><input type="checkbox" data-setting="gagprompt" value="value">Don\'t echo prompts to the main text area</label>',
             '<br />',
             '<label><input type="checkbox" data-setting="helppopup" value="value">Open help in popup window</label>',
             '<br />',
             '<hr />',
-            '<h3>Notifications</h3>',
             '<label><input type="checkbox" data-setting="notification_popup" value="value">Popup notification</label>',
             '<br />',
             '<label><input type="checkbox" data-setting="notification_sound" value="value">Play a sound</label>',
@@ -79,10 +77,12 @@ let options_plugin = (function () {
         if (code === 27) { // Escape key
             if ($('#helpdialog').is(':visible')) {
                 plugins['popups'].closePopup("#helpdialog");
-            } else {
-                plugins['popups'].closePopup("#optionsdialog");
+                return true;
             }
-            return true;
+            if ($('#optionsdialog').is(':visible')) {
+                plugins['popups'].closePopup("#optionsdialog");
+                return true;
+            }
         }
         return false;
     }
@@ -132,6 +132,21 @@ let options_plugin = (function () {
     }
 
     //
+    // Make sure to close any dialogs on connection lost
+    var onText = function (args, kwargs) {
+        // is helppopup set? and if so, does this Text have type 'help'?
+        if ('helppopup' in options && options['helppopup'] ) {
+            if (kwargs && ('type' in kwargs) && (kwargs['type'] == 'help') ) {
+                $('#helpdialogcontent').append('<div>'+ args + '</div>');
+                plugins['popups'].togglePopup("#helpdialog");
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    //
     // Register and init plugin
     var init = function () {
         // Add GUI components
@@ -157,6 +172,7 @@ let options_plugin = (function () {
         onGotOptions: onGotOptions,
         onPrompt: onPrompt,
         onConnectionClose: onConnectionClose,
+        onText: onText,
     }
 })()
 plugin_handler.add('options', options_plugin);

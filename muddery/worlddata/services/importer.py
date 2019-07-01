@@ -2,8 +2,6 @@
 This module imports data from files to db.
 """
 
-from __future__ import print_function
-
 import os, glob, tempfile, zipfile, shutil
 from django.conf import settings
 from evennia.utils import logger
@@ -61,7 +59,7 @@ def unzip_data_all(fp):
             print("Importing %s" % file_names[0])
             try:
                 import_file(file_names[0], table_name=settings.LOCALIZED_STRINGS_MODEL, clear=False)
-            except Exception, e:
+            except Exception as e:
                 print("Import error: %s" % e)
 
     finally:
@@ -114,7 +112,7 @@ def import_data_path(path, clear=True):
             print("Importing %s" % file_names[0])
             try:
                 import_file(file_names[0], table_name=table_name, clear=clear)
-            except Exception, e:
+            except Exception as e:
                 print("Import error: %s" % e)
 
 
@@ -150,5 +148,5 @@ def import_table_path(path, table_name, clear=True):
         print("Importing %s" % file_name)
         try:
             import_file(file_name, table_name=table_name, clear=False)
-        except Exception, e:
+        except Exception as e:
             print("Import error: %s" % e)

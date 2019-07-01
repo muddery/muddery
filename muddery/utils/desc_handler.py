@@ -2,8 +2,6 @@
 This model translates default strings into localized strings.
 """
 
-from __future__ import print_function
-
 from evennia.utils import logger
 from muddery.worlddata.dao import common_mappers as CM
 
@@ -34,12 +32,12 @@ class DescHandler(object):
         try:
             for record in CM.CONDITION_DESC.all():
                 # Add db fields to dict.
-                if not self.dict.has_key(record.key):
+                if record.key not in self.dict:
                     self.dict[record.key] = []
                 self.dict[record.key].append({"key": record.key,
                                               "condition": record.condition,
                                               "desc": record.desc})
-        except Exception, e:
+        except Exception as e:
             print("Can not load description: %s" % e)
 
     def get(self, key):

@@ -2,10 +2,8 @@
 This model translates default strings into localized strings.
 """
 
-from __future__ import print_function
-
 from evennia.utils import logger
-from database.models import honours
+from muddery.database.models import honours
 from django.db import transaction
 from django.apps import apps
 from django.conf import settings
@@ -62,7 +60,7 @@ class HonoursMapper(object):
         Return:
             boolean: has or not.
         """
-        return self.honours.has_key(character.id)
+        return character.id in self.honours
 
     def get_info(self, character):
         """

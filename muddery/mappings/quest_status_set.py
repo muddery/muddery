@@ -2,8 +2,6 @@
 All available event actions.
 """
 
-from __future__ import print_function
-
 from django.conf import settings
 from muddery.utils.utils import classes_in_path
 from muddery.quests.base_quest_status import BaseQuestStatus
@@ -26,7 +24,7 @@ class QuestStatusSet(object):
         for cls in classes_in_path(settings.PATH_QUEST_STATUS_BASE, BaseQuestStatus):
             key = cls.key
 
-            if self.dict.has_key(key):
+            if key in self.dict:
                 logger.log_infomsg("Quest status %s is replaced by %s." % (key, cls))
 
             self.dict[key] = cls()

@@ -2,8 +2,6 @@
 Upgrade custom's game dir to the latest version.
 """
 
-from __future__ import print_function
-
 import os
 import shutil
 import django.core.management
@@ -80,7 +78,7 @@ class Upgrader(BaseUpgrader):
         for data_handlers in DATA_SETS.system_data:
             try:
                 data_handlers.import_from_path(system_data_path, system_data=True)
-            except Exception, e:
+            except Exception as e:
                 err_message = "Cannot import system game data. %s" % e
                 print(err_message)
 

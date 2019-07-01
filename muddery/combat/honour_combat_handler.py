@@ -2,8 +2,6 @@
 Combat handler.
 """
 
-from __future__ import print_function
-
 from muddery.combat.base_combat_handler import BaseCombatHandler
 from muddery.utils.honours_handler import HONOURS_HANDLER
 

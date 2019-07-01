@@ -2,8 +2,6 @@
 Upgrade custom's game dir to the latest version.
 """
 
-from __future__ import print_function
-
 import os, ast, json
 import django.core.management
 from evennia.server.evennia_launcher import init_game_directory

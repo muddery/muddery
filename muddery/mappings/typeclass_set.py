@@ -2,8 +2,6 @@
 All available requests.
 """
 
-from __future__ import print_function
-
 import os, re, inspect
 from importlib import import_module
 from pkgutil import iter_modules
@@ -82,7 +80,7 @@ class TypeclassSet(object):
             return
 
         for key in self.module_dict:
-            if self.class_dict.has_key(key):
+            if key in self.class_dict:
                 continue
             cls = class_from_module(self.module_dict[key])
             self.class_dict[key] = cls
@@ -98,7 +96,7 @@ class TypeclassSet(object):
             return self.class_dict[key]
         elif key in self.module_dict:
             cls = class_from_module(self.module_dict[key])
-            if self.class_dict.has_key(key):
+            if key in self.class_dict:
                 if self.class_dict[key] != cls:
                     logger.log_infomsg("Typeclass %s is replaced by %s." % (key, cls))
 

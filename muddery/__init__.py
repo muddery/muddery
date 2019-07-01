@@ -12,8 +12,6 @@ See www.muddery.org for full documentation.
 
 """
 
-from __future__ import print_function
-
 def _create_version():
     """
     Helper function for building the version string

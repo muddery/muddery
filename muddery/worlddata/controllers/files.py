@@ -2,8 +2,6 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from __future__ import print_function
-
 import os, tempfile, time
 from PIL import Image
 from django.conf import settings
@@ -38,7 +36,7 @@ class upload_zip(BaseRequestProcesser):
                 for chunk in file_obj.chunks():
                     fp.write(chunk)
                 importer.unzip_data_all(fp)
-            except Exception, e:
+            except Exception as e:
                 logger.log_tracemsg("Upload error: %s" % e.message)
                 raise MudderyError(ERR.upload_error, e.message)
 
@@ -66,7 +64,7 @@ class upload_resources(BaseRequestProcesser):
                 for chunk in file_obj.chunks():
                     fp.write(chunk)
                 importer.unzip_resources_all(fp)
-            except Exception, e:
+            except Exception as e:
                 logger.log_tracemsg("Upload error: %s" % e.message)
                 raise MudderyError(ERR.upload_error, e.message)
 
@@ -106,7 +104,7 @@ class upload_single_data(BaseRequestProcesser):
                 for chunk in file_obj.chunks():
                     fp.write(chunk)
                 importer.import_data_file(fp, table_name=table_name, file_type=file_type)
-            except Exception, e:
+            except Exception as e:
                 logger.log_tracemsg("Upload error: %s" % e.message)
                 raise MudderyError(ERR.upload_error, e.message)
 
@@ -135,7 +133,7 @@ class download_zip(BaseRequestProcesser):
 
             filename = time.strftime("worlddata_%Y%m%d_%H%M%S.zip", time.localtime())
             return file_response(fp, filename)
-        except Exception, e:
+        except Exception as e:
             if fp:
                 fp.close()
             logger.log_tracemsg("Download error: %s" % e.message)
@@ -161,7 +159,7 @@ class download_resources(BaseRequestProcesser):
 
             filename = time.strftime("resources_%Y%m%d_%H%M%S.zip", time.localtime())
             return file_response(fp, filename)
-        except Exception, e:
+        except Exception as e:
             if fp:
                 fp.close()
             logger.log_tracemsg("Download error: %s" % e.message)
@@ -198,7 +196,7 @@ class download_single_data(BaseRequestProcesser):
         try:
             filename = table_name + "." + writer_class.file_ext
             return file_response(fp, filename)
-        except Exception, e:
+        except Exception as e:
             if fp:
                 fp.close()
             logger.log_tracemsg("Download error: %s" % e.message)
@@ -256,7 +254,7 @@ class upload_image(BaseRequestProcesser):
                 for chunk in file_obj.chunks():
                     fp.write(chunk)
                 fp.flush()
-            except Exception, e:
+            except Exception as e:
                 if fp:
                     fp.close()
                 logger.log_tracemsg("Upload error: %s" % e.message)
@@ -273,7 +271,7 @@ class upload_image(BaseRequestProcesser):
                     same = (len(compare) == 0)
                     if not same:
                         break
-            except Exception, e:
+            except Exception as e:
                 same = False
 
             if not same:
@@ -288,7 +286,7 @@ class upload_image(BaseRequestProcesser):
                 size = image.size
 
                 IMAGE_RESOURCES.add(icon_location, file_type, size[0], size[1])
-            except Exception, e:
+            except Exception as e:
                 if fp:
                     fp.close()
                 logger.log_tracemsg("Upload error: %s" % e.message)

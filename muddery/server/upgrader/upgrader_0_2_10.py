@@ -2,8 +2,6 @@
 Upgrade custom's game dir to the latest version.
 """
 
-from __future__ import print_function
-
 import os
 import shutil
 import django.core.management

@@ -2,8 +2,6 @@
 Make HTTP response.
 """
 
-from __future__ import print_function
-
 import json
 from django.http import HttpResponse, StreamingHttpResponse
 from evennia.utils import logger

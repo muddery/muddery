@@ -2,8 +2,6 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from __future__ import print_function
-
 import ast
 from django.core.exceptions import ObjectDoesNotExist
 from muddery.utils.game_settings import GAME_SETTINGS

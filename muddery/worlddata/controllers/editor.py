@@ -2,8 +2,6 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from __future__ import print_function
-
 import json
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -407,7 +405,7 @@ class QueryFormFirstRecord(BaseRequestProcesser):
                 record_id = record.id
             else:
                 record_id = None
-        except Exception, e:
+        except Exception as e:
             raise MudderyError(ERR.invalid_form, "Wrong table: %s." % table_name)
 
         data = data_edit.query_form(table_name, id=record_id)
@@ -879,7 +877,7 @@ class ApplyChanges(BaseRequestProcesser):
             # restart the server
             SESSIONS.announce_all("Server restarting ...")
             SESSIONS.portal_restart_server()
-        except Exception, e:
+        except Exception as e:
             message = "Can not build the world: %s" % e
             logger.log_tracemsg(message)
             raise MudderyError(ERR.build_world_error, message)

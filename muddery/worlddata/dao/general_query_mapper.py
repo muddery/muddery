@@ -2,8 +2,6 @@
 Query and deal common tables.
 """
 
-from __future__ import print_function
-
 from django.apps import apps
 from django.conf import settings
 from django.db import connections

@@ -8,8 +8,6 @@ creation commands.
 
 """
 
-from __future__ import print_function
-
 import random
 from django.conf import settings
 from django.apps import apps
@@ -481,7 +479,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     common_model_name = TYPECLASS("COMMON_OBJECT").model_name
                     common_model_obj = apps.get_model(settings.WORLD_DATA_APP, common_model_name)
                     object_record = common_model_obj.objects.get(key=key)
-                except Exception, e:
+                except Exception as e:
                     pass
 
                 if not object_record:
@@ -673,7 +671,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 # remove used object
                 self.remove_object(obj.get_data_key(), used)
             return result
-        except Exception, e:
+        except Exception as e:
             ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
             logger.log_tracemsg(ostring)
 
@@ -745,7 +743,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
                 if to_remove <= 0:
                     break
-        except Exception, e:
+        except Exception as e:
             logger.log_tracemsg("Can not remove object %s: %s" % (obj_key, e))
             return False
 
@@ -1161,7 +1159,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         try:
             # Finish current sentence
             DIALOGUE_HANDLER.finish_sentence(self, npc, dialogue, sentence)
-        except Exception, e:
+        except Exception as e:
             ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
             logger.log_tracemsg(ostring)
 

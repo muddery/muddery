@@ -2,8 +2,6 @@
 This model translates default strings into localized strings.
 """
 
-from __future__ import print_function
-
 from evennia.utils import logger
 from django.apps import apps
 from django.conf import settings

@@ -6,8 +6,6 @@ be of use when designing your own game.
 
 """
 
-from __future__ import print_function
-
 import os, re, inspect
 from django.conf import settings
 from evennia.utils import search, logger
@@ -159,7 +157,7 @@ def get_unlocalized_py_strings(filename, filter):
                         try:
                             LOCALIZED_STRINGS.get(str, cate)
                             continue
-                        except Exception, e:
+                        except Exception as e:
                             pass
 
                     strings.add((str, cate,))

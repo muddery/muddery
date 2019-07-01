@@ -2,8 +2,6 @@
 Upgrade custom's game dir to the latest version.
 """
 
-from __future__ import print_function
-
 from muddery.server.upgrader.base_upgrader import BaseUpgrader
 from muddery.utils.exception import MudderyError, ERR
 

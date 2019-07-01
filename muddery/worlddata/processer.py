@@ -4,8 +4,6 @@ Decorators of web service controllers.
 This decorator can add controllers to the controller dict for future usage.
 """
 
-from __future__ import print_function
-
 import json
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -61,7 +59,7 @@ class Processer(object):
                 data = json.loads(request.body)
                 func = data.get("func", "")
                 args = data.get("args", {})
-            except Exception, e:
+            except Exception as e:
                 logger.log_errmsg("Parse request body error: %s" % e)
                 pass
 
@@ -84,10 +82,10 @@ class Processer(object):
         # call function
         try:
             response = processor.func(args, request)
-        except MudderyError, e:
+        except MudderyError as e:
             logger.log_errmsg("Error: %s, %s" % (e.code, e.message))
             response = error_response(e.code, msg=e.message, data=e.data)
-        except Exception, e:
+        except Exception as e:
             logger.log_tracemsg("Error: %s" % e.message)
             response = error_response(ERR.internal, msg=e.message)
 

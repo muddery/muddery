@@ -2,8 +2,6 @@
 This model translates default strings into localized strings.
 """
 
-from __future__ import print_function
-
 from collections import deque
 import time
 import math

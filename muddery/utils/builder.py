@@ -2,8 +2,6 @@
 This module handles importing data from csv files and creating the whole game world from these data.
 """
 
-from __future__ import print_function
-
 from muddery.utils import utils
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
@@ -31,7 +29,7 @@ def get_object_record(obj_key):
         # Get record.
         model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
         record = model_obj.objects.get(key=obj_key)
-    except Exception, e:
+    except Exception as e:
         ostring = "Can not get record %s: %s." % (obj_key, e)
         print(ostring)
         print(traceback.print_exc())
@@ -62,7 +60,7 @@ def build_object(obj_key, level=0, caller=None, set_location=True):
 
         # get typeclass model
         typeclass_path = TYPECLASS_SET.get_module(record.typeclass)
-    except Exception, e:
+    except Exception as e:
         ostring = "Can not get typeclass of %s: %s." % (obj_key, e)
         print(ostring)
         print(traceback.print_exc())
@@ -80,7 +78,7 @@ def build_object(obj_key, level=0, caller=None, set_location=True):
     try:
         name = getattr(record, "name", "")
         obj = create.create_object(typeclass_path, name)
-    except Exception, e:
+    except Exception as e:
         ostring = "Can not create obj %s: %s" % (obj_key, e)
         print(ostring)
         print(traceback.print_exc())
@@ -91,7 +89,7 @@ def build_object(obj_key, level=0, caller=None, set_location=True):
     try:
         # Set data info.
         obj.set_data_key(record.key, level, set_location=set_location)
-    except Exception, e:
+    except Exception as e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
         print(ostring)
         print(traceback.print_exc())
@@ -158,7 +156,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
             obj.load_data()
             # put obj to its default location
             obj.reset_location()
-        except Exception, e:
+        except Exception as e:
             ostring = "%s can not load data:%s" % (obj.dbref, e)
             print(ostring)
             print(traceback.print_exc())
@@ -183,7 +181,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
                 typeclass_path = TYPECLASS_SET.get_module(object_record.typeclass)
                 obj = create.create_object(typeclass_path, object_record.name)
                 count_create += 1
-            except Exception, e:
+            except Exception as e:
                 ostring = "Can not create obj %s: %s" % (record.key, e)
                 print(ostring)
                 print(traceback.print_exc())
@@ -194,7 +192,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
             try:
                 obj.set_data_key(record.key, getattr(record, "level", 0))
                 utils.set_obj_unique_type(obj, type_name)
-            except Exception, e:
+            except Exception as e:
                 ostring = "Can not set data info to obj %s: %s" % (record.key, e)
                 print(ostring)
                 print(traceback.print_exc())
@@ -247,7 +245,7 @@ def reset_default_locations():
             rooms = CM.WORLD_ROOMS.all()
             if rooms:
                 default_home_key = rooms[0].key
-        except Exception, e:
+        except Exception as e:
             ostring = "Can not find default_home_key: %s" % e
             print(ostring)
             print(traceback.print_exc())
@@ -268,7 +266,7 @@ def reset_default_locations():
             rooms = CM.WORLD_ROOMS.all()
             if rooms:
                 start_location_key = rooms[0].key
-        except Exception, e:
+        except Exception as e:
             ostring = "Can not find start_location_key: %s" % e
             print(ostring)
             print(traceback.print_exc())

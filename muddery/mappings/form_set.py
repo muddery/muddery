@@ -2,8 +2,6 @@
 This model translates default strings into localized strings.
 """
 
-from __future__ import print_function
-
 from django.conf import settings
 from django.contrib.admin.forms import forms
 from evennia.utils import logger
@@ -29,7 +27,7 @@ class FormSet(object):
                 model = cls.Meta.model
                 model_name = model.__name__
 
-                if self.dict.has_key(model_name):
+                if model_name in self.dict:
                     logger.log_infomsg("Form %s is replaced by %s." % (model_name, cls))
 
                 self.dict[model_name] = cls

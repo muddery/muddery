@@ -4,7 +4,6 @@ This contains a simple view for rendering the webclient
 page and serve it eventual static content.
 
 """
-from __future__ import print_function
 
 import tempfile, time
 from django import http
@@ -57,7 +56,7 @@ def export_py_localized_strings(request):
         response = http.StreamingHttpResponse(utils.file_iterator(file))
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
-    except Exception, e:
+    except Exception as e:
         message = "Can't export game data: %s" % e
         logger.log_tracemsg(message)
 
@@ -89,7 +88,7 @@ def export_js_localized_strings(request):
         response = http.StreamingHttpResponse(utils.file_iterator(file))
         response['Content-Type'] = 'application/octet-stream'
         response['Content-Disposition'] = 'attachment;filename="%s"' % filename
-    except Exception, e:
+    except Exception as e:
         message = "Can't export game data: %s" % e
         logger.log_tracemsg(message)
 

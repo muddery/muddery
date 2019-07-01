@@ -2,8 +2,6 @@
 Query and deal common tables.
 """
 
-from __future__ import print_function
-
 from multiprocessing import Lock
 from evennia.utils import logger
 from django.apps import apps

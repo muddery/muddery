@@ -1,8 +1,9 @@
 """
 Typeclasses for the in-game Python system.
 
-To use thm, one should inherit from these classes (EventObject,
-EventRoom, EventCharacter and EventExit).
+To use them, change your base typeclasses to inherit from the classes in this
+module (EventObject, EventRoom, EventCharacter and EventExit) instead of the
+default ones in evennia core.
 
 """
 
@@ -179,6 +180,11 @@ class EventCharacter(DefaultCharacter):
         "unpuppeted": (["character"], CHARACTER_UNPUPPETED),
     }
 
+    @lazy_property
+    def callbacks(self):
+        """Return the CallbackHandler."""
+        return CallbackHandler(self)
+
     def announce_move_from(self, destination, msg=None, mapping=None):
         """
         Called if the move is to be announced. This is
@@ -223,7 +229,7 @@ class EventCharacter(DefaultCharacter):
         if not string:
             return
 
-        super(EventCharacter, self).announce_move_from(destination, msg=string, mapping=mapping)
+        super().announce_move_from(destination, msg=string, mapping=mapping)
 
     def announce_move_to(self, source_location, msg=None, mapping=None):
         """
@@ -278,7 +284,7 @@ class EventCharacter(DefaultCharacter):
         if not string:
             return
 
-        super(EventCharacter, self).announce_move_to(source_location, msg=string, mapping=mapping)
+        super().announce_move_to(source_location, msg=string, mapping=mapping)
 
     def at_before_move(self, destination):
         """
@@ -328,7 +334,7 @@ class EventCharacter(DefaultCharacter):
             source_location (Object): Wwhere we came from. This may be `None`.
 
         """
-        super(EventCharacter, self).at_after_move(source_location)
+        super().at_after_move(source_location)
 
         origin = source_location
         destination = self.location
@@ -367,7 +373,7 @@ class EventCharacter(DefaultCharacter):
             puppeting this Object.
 
         """
-        super(EventCharacter, self).at_post_puppet()
+        super().at_post_puppet()
 
         self.callbacks.call("puppeted", self)
 
@@ -395,7 +401,7 @@ class EventCharacter(DefaultCharacter):
         if location and isinstance(location, DefaultRoom):
             location.callbacks.call("unpuppeted_in", self, location)
 
-        super(EventCharacter, self).at_pre_unpuppet()
+        super().at_pre_unpuppet()
 
     def at_before_say(self, message, **kwargs):
         """
@@ -482,7 +488,7 @@ class EventCharacter(DefaultCharacter):
 
         """
 
-        super(EventCharacter, self).at_say(message, **kwargs)
+        super().at_say(message, **kwargs)
         location = getattr(self, "location", None)
         location = location if location and inherits_from(location, "evennia.objects.objects.DefaultRoom") else None
 
@@ -602,6 +608,11 @@ class EventExit(DefaultExit):
         "traverse": (["character", "exit", "origin", "destination"], EXIT_TRAVERSE),
     }
 
+    @lazy_property
+    def callbacks(self):
+        """Return the CallbackHandler."""
+        return CallbackHandler(self)
+
     def at_traverse(self, traversing_object, target_location):
         """
         This hook is responsible for handling the actual traversal,
@@ -624,7 +635,7 @@ class EventExit(DefaultExit):
             if not allow:
                 return
 
-        super(EventExit, self).at_traverse(traversing_object, target_location)
+        super().at_traverse(traversing_object, target_location)
 
         # After traversing
         if is_character:
@@ -703,7 +714,7 @@ class EventObject(DefaultObject):
             permissions for that.
 
         """
-        super(EventObject, self).at_get(getter)
+        super().at_get(getter)
         self.callbacks.call("get", getter, self)
 
     def at_drop(self, dropper):
@@ -719,7 +730,7 @@ class EventObject(DefaultObject):
             permissions from that.
 
         """
-        super(EventObject, self).at_drop(dropper)
+        super().at_drop(dropper)
         self.callbacks.call("drop", dropper, self)
 
 
@@ -861,6 +872,11 @@ class EventRoom(DefaultRoom):
         "time": (["room"], ROOM_TIME, None, time_event),
         "unpuppeted_in": (["character", "room"], ROOM_UNPUPPETED_IN),
     }
+
+    @lazy_property
+    def callbacks(self):
+        """Return the CallbackHandler."""
+        return CallbackHandler(self)
 
     def at_object_delete(self):
         """

@@ -7,8 +7,6 @@ for allowing Characters to traverse the exit to its destination.
 
 """
 
-from __future__ import print_function
-
 import traceback
 from muddery.utils import utils
 from muddery.statements.statement_handler import STATEMENT_HANDLER

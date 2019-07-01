@@ -37,11 +37,14 @@ prototype key (this value must be possible to serialize in an Attribute).
 
 from ast import literal_eval
 from random import randint as base_randint, random as base_random, choice as base_choice
+import re
 
 from evennia.utils import search
 from evennia.utils.utils import justify as base_justify, is_iter, to_str
 
 _PROTLIB = None
+
+_RE_DBREF = re.compile(r"\#[0-9]+")
 
 
 # default protfuncs
@@ -256,7 +259,7 @@ def eval(*args, **kwargs):
     string = ",".join(args)
     struct = literal_eval(string)
 
-    if isinstance(struct, basestring):
+    if isinstance(struct, str):
         # we must shield the string, otherwise it will be merged as a string and future
         # literal_evas will pick up e.g. '2' as something that should be converted to a number
         struct = '"{}"'.format(struct)
@@ -325,3 +328,14 @@ def objlist(*args, **kwargs):
 
     """
     return ["#{}".format(obj.id) for obj in _obj_search(return_list=True, *args, **kwargs)]
+
+
+def dbref(*args, **kwargs):
+    """
+    Usage $dbref(<#dbref>)
+    Validate that a #dbref input is valid.
+    """
+    if not args or len(args) < 1 or _RE_DBREF.match(args[0]) is None:
+        raise ValueError('$dbref requires a valid #dbref argument.')
+
+    return obj(args[0])

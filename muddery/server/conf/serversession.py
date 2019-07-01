@@ -21,8 +21,6 @@ settings file:
 
 """
 
-from __future__ import print_function
-
 import json
 from evennia.server.serversession import ServerSession as BaseServerSession
 from evennia.utils import logger
@@ -43,7 +41,7 @@ class ServerSession(BaseServerSession):
         Convert to JSON.
         """
         options = None
-        if kwargs.has_key("options"):
+        if "options" in kwargs:
             options = kwargs.get("options", None)
 
         if options is None:
@@ -55,7 +53,7 @@ class ServerSession(BaseServerSession):
             try:
                 if text:
                     text = json.dumps(text)
-            except Exception, e:
+            except Exception as e:
                 text = json.dumps({"err": "There is an error occurred while outputing messages."})
                 logger.log_tracemsg("json.dumps failed: %s" % e)
 

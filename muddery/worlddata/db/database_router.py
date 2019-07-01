@@ -1,6 +1,4 @@
 
-from __future__ import print_function
-
 from django.conf import settings
 
 DATABASE_MAPPING = settings.DATABASE_APPS_MAPPING

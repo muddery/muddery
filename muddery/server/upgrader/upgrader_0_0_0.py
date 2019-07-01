@@ -2,8 +2,6 @@
 Upgrade custom's game dir to the latest version.
 """
 
-from __future__ import print_function
-
 import os
 import shutil
 import ast
@@ -96,13 +94,13 @@ class Upgrader(BaseUpgrader):
                 data_handler.clear_model_data(system_data=False)
                 try:
                     data_handler.import_from_path(custom_data_path, system_data=False)
-                except Exception, e:
+                except Exception as e:
                     print("Cannot import game data. %s" % e)
 
                 data_handler.clear_model_data(system_data=True)
                 try:
                     data_handler.import_from_path(system_data_path, system_data=True)
-                except Exception, e:
+                except Exception as e:
                     print("Cannot import game data. %s" % e)
 
             # set shop goods' key

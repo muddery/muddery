@@ -2,8 +2,6 @@
 Event action.
 """
 
-from __future__ import print_function
-
 import random
 from django.apps import apps
 from django.conf import settings

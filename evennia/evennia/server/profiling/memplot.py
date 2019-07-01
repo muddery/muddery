@@ -6,21 +6,21 @@ the script will append to this file if it already exists.
 
 Call this module directly to plot the log (requires matplotlib and numpy).
 """
-from __future__ import division
+
 import os
 import sys
 import time
 # TODO!
 #sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 #os.environ['DJANGO_SETTINGS_MODULE'] = 'game.settings'
-import ev
-from evennia.utils.idmapper import base as _idmapper
+import evennia
+from evennia.utils.idmapper import models as _idmapper
 
 LOGFILE = "logs/memoryusage.log"
 INTERVAL = 30  # log every 30 seconds
 
 
-class Memplot(ev.Script):
+class Memplot(evennia.DefaultScript):
     """
     Describes a memory plotting action.
 

@@ -6,8 +6,6 @@ MudderyObject is an object which can load it's data automatically.
 
 """
 
-from __future__ import print_function
-
 class BaseTypeclass(object):
     """
     This base typeclass.

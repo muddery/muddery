@@ -2,8 +2,6 @@
 All available event triggers.
 """
 
-from __future__ import print_function
-
 from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError

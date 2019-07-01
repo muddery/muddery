@@ -2,8 +2,6 @@
 All available requests.
 """
 
-from __future__ import print_function
-
 from django.conf import settings
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
@@ -38,7 +36,7 @@ class RequestSet(object):
             if name is None:
                 name = ""
 
-            if self.dict.has_key((path, name,)):
+            if (path, name,) in self.dict:
                 logger.log_infomsg("Request %s-%s is replaced by %s." % (path, name, cls))
 
             self.dict[(path, name,)] = cls()

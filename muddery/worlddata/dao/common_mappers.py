@@ -2,8 +2,6 @@
 This model translates default strings into localized strings.
 """
 
-from __future__ import print_function
-
 from muddery.worlddata.dao.common_mapper_base import CommonMapper, ObjectsMapper
 
 

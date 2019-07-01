@@ -2,8 +2,6 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from __future__ import print_function
-
 from django.conf import settings
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
@@ -40,7 +38,7 @@ def query_form(table_name, **kwargs):
             # Query record's data.
             record = general_query_mapper.get_record(table_name, **kwargs)
             form = form_class(instance=record)
-        except Exception, e:
+        except Exception as e:
             form = None
 
     if not form:
@@ -102,7 +100,7 @@ def save_form(values, table_name, record_id=None):
             # Query record's data.
             record = general_query_mapper.get_record_by_id(table_name, record_id)
             form = form_class(values, instance=record)
-        except Exception, e:
+        except Exception as e:
             form = None
 
     if not form:

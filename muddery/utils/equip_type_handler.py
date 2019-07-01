@@ -2,8 +2,6 @@
 This handles the relations of equipment types and character careers.
 """
 
-from __future__ import print_function
-
 from evennia.utils import logger
 from muddery.worlddata.dao import common_mappers as CM
 

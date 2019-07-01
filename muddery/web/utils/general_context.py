@@ -6,8 +6,6 @@
 # tuple.
 #
 
-from __future__ import print_function
-
 from django.conf import settings
 from muddery.utils import utils
 from muddery.utils.game_settings import GAME_SETTINGS

@@ -2,8 +2,6 @@
 Combat handler.
 """
 
-from __future__ import print_function
-
 from django.conf import settings
 from muddery.utils import defines
 from muddery.utils.builder import delete_object

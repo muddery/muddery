@@ -4,8 +4,6 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 
 """
 
-from __future__ import print_function
-
 import time
 import re
 from django.conf import settings
@@ -261,7 +259,7 @@ class CmdCharCreate(Command):
 
         try:
             create_character(player, name)
-        except Exception, e:
+        except Exception as e:
             # We are in the middle between logged in and -not, so we have
             # to handle tracebacks ourselves at this point. If we don't,
             # we won't see any errors at all.

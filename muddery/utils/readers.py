@@ -2,8 +2,6 @@
 This module parse data files to lines.
 """
 
-from __future__ import print_function
-
 import csv
 import codecs
 

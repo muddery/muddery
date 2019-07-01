@@ -2,8 +2,6 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from __future__ import print_function
-
 from django.conf import settings
 from django.contrib import auth
 from evennia.utils import logger

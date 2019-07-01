@@ -8,8 +8,6 @@ creation commands.
 
 """
 
-from __future__ import print_function
-
 from evennia.utils import logger
 from muddery.utils.builder import build_object, delete_object
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER

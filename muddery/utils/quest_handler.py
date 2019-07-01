@@ -2,8 +2,6 @@
 QuestHandler handles a character's quests.
 """
 
-from __future__ import print_function
-
 from django.conf import settings
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
@@ -246,7 +244,7 @@ class QuestHandler(object):
         try:
             record = model_quest.objects.get(key=quest_key)
             return STATEMENT_HANDLER.match_condition(record.condition, self.owner, None)
-        except Exception, e:
+        except Exception as e:
             logger.log_errmsg("Can't get quest %s's condition: %s" % (quest_key, e))
         return False
 

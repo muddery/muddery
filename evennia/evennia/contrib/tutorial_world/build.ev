@@ -177,7 +177,7 @@ start
 #
 # This room inherits from a Typeclass called WeatherRoom. It regularly
 # and randomly shows some weather effects. Note how we can spread the
-# command's arguments over more than one line for easy reading.  we
+# command's arguments over more than one line for easy reading.  We
 # also make sure to create plenty of aliases for the room and
 # exits. Note the alias tut#02: this unique identifier can be used
 # later in the script to always find the way back to this room (for
@@ -420,10 +420,6 @@ north
 
  (to get a weapon from the barrel, use |wget weapon|n)
 #
-@desc barrel =
- This barrel has the air of leftovers - it contains an assorted
- mess of random weaponry in various states and qualities.
-#
 @detail barkeep;man;landlord =
  The landlord is a cheerful fellow, always ready to supply you with
  more beer. He mentions doing some sort of arcane magic known as
@@ -439,7 +435,16 @@ north
 #
 @create/drop barrel: tutorial_world.objects.WeaponRack
 #
+@desc barrel =
+ This barrel has the air of leftovers - it contains an assorted
+ mess of random weaponry in various states and qualities.
+#
 @lock barrel = get:false()
+#
+# Players trying to pickup barrel will receive hint to 'get weapon' instead
+#
+@set barrel/get_err_msg =
+ The barkeep shakes his head. He says: 'Get weapon, not the barrel.'
 #
 # This id makes sure that we cannot pick more than one weapon from this rack
 #
@@ -744,7 +749,7 @@ hole
  the remains of the castle.  There is also a standing archway
  offering passage to a path along the old |wsouth|nern inner wall.
 #
-@detail portoculis;fall;fallen;grating =
+@detail portcullis;fall;fallen;grating =
  This heavy iron grating used to block off the inner part of the gate house, now it has fallen
  to the ground together with the stone archway that once help it up.
 #
@@ -786,7 +791,7 @@ archway
  The buildings make a half-circle along the main wall, here and there
  broken by falling stone and rubble. At one end (the |wnorth|nern) of
  this half-circle is the entrance to the castle, the ruined
- gatehoue. |wEast|nwards from here is some sort of open courtyard.
+ gatehouse. |wEast|nwards from here is some sort of open courtyard.
 
 #------------------------------------------------------------
 #
@@ -808,7 +813,7 @@ archway
  Previously one could probably continue past the obelisk and eastward
  into the castle keep itself, but that way is now completely blocked
  by fallen rubble. To the |wwest|n is the gatehouse and entrance to
- the castle, whereas |wsouth|nwards the collumns make way for a wide
+ the castle, whereas |wsouth|nwards the columns make way for a wide
  open courtyard.
 #
 @set here/tutorial_info =
@@ -836,7 +841,7 @@ archway
 #
 # Set its home to this location
 #
-@home ghost = tut#11
+@sethome ghost = tut#11
 #
 @lock ghost = get:false()
 #

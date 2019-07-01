@@ -5,8 +5,6 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
-from __future__ import print_function
-
 import re
 from muddery.utils import defines
 from muddery.statements.statement_handler import STATEMENT_HANDLER
@@ -65,7 +63,7 @@ class DialogueHandler(object):
         # Get db model
         try:
             dialogue_record = DIALOGUES.get(dialogue)
-        except Exception, e:
+        except Exception as e:
             return
 
         sentences = DIALOGUE_SENTENCES.filter(dialogue)
@@ -154,7 +152,7 @@ class DialogueHandler(object):
 
         try:
             return dlg["sentences"][sentence]
-        except Exception, e:
+        except Exception as e:
             pass
 
         return
@@ -343,7 +341,7 @@ class DialogueHandler(object):
         try:
             # If has next sentence, use next sentence.
             sentences.append(dlg["sentences"][current_sentence + 1])
-        except Exception, e:
+        except Exception as e:
             # Else get next dialogues.
             for dlg_key in dlg["nexts"]:
                 # Get next dialogue.

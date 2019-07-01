@@ -23,7 +23,7 @@ prot = {
  "attrs": [("weapon", "sword")]
 }
 
-prot = prototypes.create_prototype(**prot)
+prot = prototypes.create_prototype(prot)
 
 ```
 
@@ -128,7 +128,7 @@ prototype, override its name with an empty dict.
 
 
 """
-from __future__ import print_function
+
 
 import copy
 import hashlib
@@ -165,7 +165,23 @@ def _get_prototype(inprot, protparents, uninherited=None, _workprot=None):
         uninherited (dict): Parts of prototype to not inherit.
         _workprot (dict, optional): Work dict for the recursive algorithm.
 
+    Returns:
+        merged (dict): A prototype where parent's have been merged as needed (the
+            `prototype_parent` key is removed).
+
     """
+    def _inherit_tags(old_tags, new_tags):
+        old = {(tup[0], tup[1]): tup for tup in old_tags}
+        new = {(tup[0], tup[1]): tup for tup in new_tags}
+        old.update(new)
+        return list(old.values())
+
+    def _inherit_attrs(old_attrs, new_attrs):
+        old = {(tup[0], tup[2]): tup for tup in old_attrs}
+        new = {(tup[0], tup[2]): tup for tup in new_attrs}
+        old.update(new)
+        return list(old.values())
+
     _workprot = {} if _workprot is None else _workprot
     if "prototype_parent" in inprot:
         # move backwards through the inheritance
@@ -173,8 +189,20 @@ def _get_prototype(inprot, protparents, uninherited=None, _workprot=None):
             # Build the prot dictionary in reverse order, overloading
             new_prot = _get_prototype(protparents.get(prototype.lower(), {}),
                                       protparents, _workprot=_workprot)
+
+            # attrs, tags have internal structure that should be inherited separately
+            new_prot['attrs'] = _inherit_attrs(
+                _workprot.get("attrs", {}), new_prot.get("attrs", {}))
+            new_prot['tags'] = _inherit_tags(
+                _workprot.get("tags", {}), new_prot.get("tags", {}))
+
             _workprot.update(new_prot)
     # the inprot represents a higher level (a child prot), which should override parents
+
+    inprot['attrs'] = _inherit_attrs(
+        _workprot.get("attrs", {}), inprot.get("attrs", {}))
+    inprot['tags'] = _inherit_tags(
+        _workprot.get("tags", {}), inprot.get("tags", {}))
     _workprot.update(inprot)
     if uninherited:
         # put back the parts that should not be inherited
@@ -230,14 +258,14 @@ def prototype_from_object(obj):
         # no unambiguous prototype found - build new prototype
         prot = {}
         prot['prototype_key'] = "From-Object-{}-{}".format(
-                obj.key, hashlib.md5(str(time.time())).hexdigest()[:7])
+                obj.key, hashlib.md5(bytes(str(time.time()), 'utf-8')).hexdigest()[:7])
         prot['prototype_desc'] = "Built from {}".format(str(obj))
         prot['prototype_locks'] = "spawn:all();edit:all()"
         prot['prototype_tags'] = []
     else:
         prot = prot[0]
 
-    prot['key'] = obj.db_key or hashlib.md5(str(time.time())).hexdigest()[:6]
+    prot['key'] = obj.db_key or hashlib.md5(bytes(str(time.time()), 'utf-8')).hexdigest()[:6]
     prot['typeclass'] = obj.db_typeclass_path
 
     location = obj.db_location
@@ -258,12 +286,12 @@ def prototype_from_object(obj):
     aliases = obj.aliases.get(return_list=True)
     if aliases:
         prot['aliases'] = aliases
-    tags = [(tag.db_key, tag.db_category, tag.db_data)
-            for tag in obj.tags.get(return_tagobj=True, return_list=True) if tag]
+    tags = sorted([(tag.db_key, tag.db_category, tag.db_data)
+                  for tag in obj.tags.all(return_objs=True)])
     if tags:
         prot['tags'] = tags
-    attrs = [(attr.key, attr.value, attr.category, ';'.join(attr.locks.all()))
-             for attr in obj.attributes.get(return_obj=True, return_list=True) if attr]
+    attrs = sorted([(attr.key, attr.value, attr.category, ';'.join(attr.locks.all()))
+                    for attr in obj.attributes.all()])
     if attrs:
         prot['attrs'] = attrs
 
@@ -315,13 +343,13 @@ def prototype_diff(prototype1, prototype2, maxdepth=2):
                 # this condition should not occur in a standard diff
                 return (old, new, "UPDATE")
         elif depth < maxdepth and new_type == dict:
-            all_keys = set(old.keys() + new.keys())
+            all_keys = set(list(old.keys()) + list(new.keys()))
             return {key: _recursive_diff(old.get(key), new.get(key), depth=depth + 1)
                     for key in all_keys}
         elif depth < maxdepth and is_iter(new):
             old_map = {part[0] if is_iter(part) else part: part for part in old}
             new_map = {part[0] if is_iter(part) else part: part for part in new}
-            all_keys = set(old_map.keys() + new_map.keys())
+            all_keys = set(list(old_map.keys()) + list(new_map.keys()))
             return {key: _recursive_diff(old_map.get(key), new_map.get(key), depth=depth + 1)
                     for key in all_keys}
         elif old != new:
@@ -447,7 +475,7 @@ def batch_update_objects_with_prototype(prototype, diff=None, objects=None):
     """
     prototype = protlib.homogenize_prototype(prototype)
 
-    if isinstance(prototype, basestring):
+    if isinstance(prototype, str):
         new_prototype = protlib.search_prototype(prototype)
     else:
         new_prototype = prototype
@@ -605,11 +633,11 @@ def batch_create_object(*objparams):
     # it out for now:
     #  dbobjs = _ObjectDB.objects.bulk_create(dbobjs)
 
-    dbobjs = [ObjectDB(**objparam[0]) for objparam in objparams]
     objs = []
-    for iobj, obj in enumerate(dbobjs):
-        # call all setup hooks on each object
-        objparam = objparams[iobj]
+    for objparam in objparams:
+
+        obj = ObjectDB(**objparam[0])
+
         # setup
         obj._createdict = {"permissions": make_iter(objparam[1]),
                            "locks": objparam[2],
@@ -634,8 +662,9 @@ def spawn(*prototypes, **kwargs):
     Spawn a number of prototyped objects.
 
     Args:
-        prototypes (dict): Each argument should be a prototype
-            dictionary.
+        prototypes (str or dict): Each argument should either be a
+            prototype_key (will be used to find the prototype) or a full prototype
+            dictionary. These will be batched-spawned as one object each. 
     Kwargs:
         prototype_modules (str or list): A python-path to a prototype
             module, or a list of such paths. These will be used to build
@@ -645,8 +674,10 @@ def spawn(*prototypes, **kwargs):
         prototype_parents (dict): A dictionary holding a custom
             prototype-parent dictionary. Will overload same-named
             prototypes from prototype_modules.
-        return_parents (bool): Only return a dict of the
-            prototype-parents (no object creation happens)
+        return_parents (bool): Return a dict of the entire prototype-parent tree
+            available to this prototype (no object creation happens). This is a
+            merged result between the globally found protparents and whatever
+            custom `prototype_parents` are given to this function.
         only_validate (bool): Only run validation of prototype/parents
             (no object creation) and return the create-kwargs.
 
@@ -656,8 +687,17 @@ def spawn(*prototypes, **kwargs):
             `return_parents` is set, instead return dict of prototype parents.
 
     """
+    # search string (=prototype_key) from input
+    prototypes = [protlib.search_prototype(prot, require_single=True)[0] 
+                  if isinstance(prot, str) else prot 
+                  for prot in prototypes]
+
     # get available protparents
     protparents = {prot['prototype_key'].lower(): prot for prot in protlib.search_prototype()}
+
+    if not kwargs.get("only_validate"):
+        # homogenization to be more lenient about prototype format when entering the prototype manually
+        prototypes = [protlib.homogenize_prototype(prot) for prot in prototypes]
 
     # overload module's protparents with specifically given protparents
     # we allow prototype_key to be the key of the protparent dict, to allow for module-level
@@ -686,7 +726,7 @@ def spawn(*prototypes, **kwargs):
         # we must always add a key, so if not given we use a shortened md5 hash. There is a (small)
         # chance this is not unique but it should usually not be a problem.
         val = prot.pop("key", "Spawned-{}".format(
-            hashlib.md5(str(time.time())).hexdigest()[:6]))
+            hashlib.md5(bytes(str(time.time()), 'utf-8')).hexdigest()[:6]))
         create_kwargs["db_key"] = init_spawn_value(val, str)
 
         val = prot.pop("location", None)
@@ -711,8 +751,8 @@ def spawn(*prototypes, **kwargs):
 
         val = prot.pop("tags", [])
         tags = []
-        for (tag, category, data) in tags:
-            tags.append((init_spawn_value(val, str), category, data))
+        for (tag, category, data) in val:
+            tags.append((init_spawn_value(tag, str), category, data))
 
         prototype_key = prototype.get('prototype_key', None)
         if prototype_key:
@@ -730,7 +770,7 @@ def spawn(*prototypes, **kwargs):
         val = make_iter(prot.pop("attrs", []))
         attributes = []
         for (attrname, value, category, locks) in val:
-            attributes.append((attrname, init_spawn_value(val), category, locks))
+            attributes.append((attrname, init_spawn_value(value), category, locks))
 
         simple_attributes = []
         for key, value in ((key, value) for key, value in prot.items()

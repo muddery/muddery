@@ -2,8 +2,6 @@
 This model translates default strings into localized strings.
 """
 
-from __future__ import print_function
-
 from evennia.utils import logger
 from muddery.dao.honours_mapper import HONOURS_MAPPER
 

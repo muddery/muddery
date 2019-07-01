@@ -12,8 +12,6 @@ and portal through the evennia_runner. Run without arguments to get a
 menu. Run the script with the -h flag to see usage information.
 """
 
-from __future__ import print_function
-
 import os, sys, glob
 import django.core.management
 import argparse
@@ -61,7 +59,7 @@ def import_local_data():
         print("Importing %s" % file_names[0])
         try:
             import_file(file_names[0], table_name=settings.LOCALIZED_STRINGS_MODEL, clear=False)
-        except Exception, e:
+        except Exception as e:
             print("Import error: %s" % e)
 
 
@@ -151,7 +149,7 @@ def main():
             django_args = ["makemigrations", "worlddata"]
             django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError, exc:
+        except django.core.management.base.CommandError as exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
         # migrate the database
@@ -163,14 +161,14 @@ def main():
             django_args = ["migrate", "worlddata"]
             django_kwargs = {"database": "worlddata"}
             django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError, exc:
+        except django.core.management.base.CommandError as exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
             
         # import worlddata
         try:
             print("Importing local data.")
             import_local_data()
-        except Exception, e:
+        except Exception as e:
             print("Import local data error: %s" % e)
         
         print(configs.CREATED_NEW_GAMEDIR.format(gamedir=args.init[0],
@@ -187,7 +185,7 @@ def main():
 
             gamedir = os.path.abspath(configs.CURRENT_DIR)
             UPGRADE_HANDLER.upgrade_game(gamedir, template, configs.MUDDERY_LIB)
-        except Exception, e:
+        except Exception as e:
             print("Upgrade failed: %s" % e)
 
         sys.exit()
@@ -203,7 +201,7 @@ def main():
         django_kwargs = {}
         try:
             django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError, exc:
+        except django.core.management.base.CommandError as exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
         # migrate the database
@@ -211,21 +209,21 @@ def main():
         django_kwargs = {}
         try:
             django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError, exc:
+        except django.core.management.base.CommandError as exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
         django_args = ["migrate", "worlddata"]
         django_kwargs = {"database": "worlddata"}
         try:
             django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError, exc:
+        except django.core.management.base.CommandError as exc:
             print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
             
         # load local data
         try:
             import_local_data()
             print("Import local data success.")
-        except Exception, e:
+        except Exception as e:
             print("Import local data error: %s" % e)
 
         sys.exit()
@@ -250,7 +248,7 @@ def main():
                 ver_str = ".".join([str(v) for v in game_ver])
                 print(configs.NEED_UPGRADE.format(version=ver_str))
                 return
-        except Exception, e:
+        except Exception as e:
             print("Check upgrade error: %s" % e)
             return
 
@@ -265,7 +263,7 @@ def main():
             try:
                 django.core.management.call_command(*django_args, **django_kwargs)
                 print("Static file collected.")
-            except django.core.management.base.CommandError, exc:
+            except django.core.management.base.CommandError as exc:
                 print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
     else:
         # no input; print muddery info

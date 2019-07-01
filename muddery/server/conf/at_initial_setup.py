@@ -14,8 +14,6 @@ does what you expect it to.
 
 """
 
-from __future__ import print_function
-
 import os
 from django.conf import settings
 from evennia.utils import search, logger
@@ -72,7 +70,7 @@ def at_initial_setup():
 
             print("Set superuser.")
 
-    except Exception, e:
+    except Exception as e:
         ostring = "Can't set initial data: %s" % e
         print(ostring)
         print(traceback.format_exc())

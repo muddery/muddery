@@ -5,8 +5,6 @@ The DialogueHandler maintains a pool of dialogues.
 
 """
 
-from __future__ import print_function
-
 from evennia.utils import logger, create
 from django.conf import settings
 from django.apps import apps

@@ -2,8 +2,6 @@
 All available event actions.
 """
 
-from __future__ import print_function
-
 from muddery.utils import defines
 
 

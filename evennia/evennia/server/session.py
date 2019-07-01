@@ -4,12 +4,14 @@ This module defines a generic session class. All connection instances
 
 """
 from builtins import object
+from django.conf import settings
 
 import time
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 # Server Session
-#------------------------------------------------------------
+# ------------------------------------------------------------
+
 
 class Session(object):
     """
@@ -133,7 +135,7 @@ class Session(object):
 
         """
         if self.account:
-            self.protocol_flags.update(self.account.attributes.get("_saved_protocol_flags", {}))
+            self.protocol_flags.update(self.account.attributes.get("_saved_protocol_flags", None) or {})
 
     # access hooks
 

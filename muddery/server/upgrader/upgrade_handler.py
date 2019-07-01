@@ -2,8 +2,6 @@
 Upgrade custom's game dir to the latest version.
 """
 
-from __future__ import print_function
-
 import os, traceback
 import muddery
 from muddery.server.upgrader import utils
@@ -57,11 +55,11 @@ class UpgradeHandler(object):
             # create config file
             launcher_utils.create_config_file(game_dir, template)
 
-        except MudderyError, e:
+        except MudderyError as e:
             if e.code != ERR.can_not_upgrade:
                 traceback.print_exc()
                 print("\nUpgrade failed: %s\n" % e)
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
             print("\nUpgrade failed: %s\n" % e)
 
@@ -95,7 +93,7 @@ class UpgradeHandler(object):
             upgrader.upgrade_data(data_path, template, muddery_lib)
             print("\nYour game data have been upgraded to muddery version %s.\n" % muddery.__version__)
 
-        except Exception, e:
+        except Exception as e:
             print("\nUpgrade failed: %s\n" % e)
 
     def is_running(self, game_dir):

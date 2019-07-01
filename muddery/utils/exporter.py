@@ -2,8 +2,6 @@
 This module imports data from files to db.
 """
 
-from __future__ import print_function
-
 import os
 import tempfile
 import zipfile

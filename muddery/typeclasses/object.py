@@ -6,8 +6,6 @@ BaseObject is an object which can load it's data automatically.
 
 """
 
-from __future__ import print_function
-
 import json, ast, traceback
 from django.conf import settings
 from django.apps import apps
@@ -137,7 +135,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         try:
             # Load db data.
             self.load_data()
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
             logger.log_errmsg("%s(%s) can not load data:%s" % (self.get_data_key(), self.dbref, e))
             
@@ -210,7 +208,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         try:
             # Load db data.
             self.load_data(set_location=set_location)
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
             logger.log_errmsg("%s(%s) can not load data:%s" % (key, self.dbref, e))
 
@@ -243,7 +241,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             # Get data record.
             try:
                 data = model_obj.objects.get(key=key)
-            except Exception, e:
+            except Exception as e:
                 logger.log_errmsg("%s can not find key %s" % (key, key))
                 continue
 
@@ -291,7 +289,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             else:
                 try:
                     value = ast.literal_eval(serializable_value)
-                except (SyntaxError, ValueError), e:
+                except (SyntaxError, ValueError) as e:
                     # treat as a raw string
                     value = serializable_value
             values[key] = value
@@ -656,7 +654,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         if not raw:
             try:
                 text = json.dumps(text)
-            except Exception, e:
+            except Exception as e:
                 text = json.dumps({"err": "There is an error occurred while outputing messages."})
                 logger.log_errmsg("json.dumps failed: %s" % e)
 

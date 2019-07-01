@@ -8,8 +8,6 @@ creation commands.
 
 """
 
-from __future__ import print_function
-
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.utils.localized_strings_handler import _
 

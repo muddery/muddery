@@ -3,8 +3,6 @@
 
 """
 
-from __future__ import print_function
-
 import os
 import sys
 import shutil
@@ -121,7 +119,7 @@ def copy_tree(source, destination):
             else:
                 # Copy file.
                 shutil.copy2(srcname, dstname)
-        except Exception, e:
+        except Exception as e:
             print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
                 
 

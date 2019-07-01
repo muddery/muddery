@@ -3,8 +3,6 @@ CommonObject is the object that players can put into their inventory.
 
 """
 
-from __future__ import print_function
-
 import random
 from django.conf import settings
 from django.apps import apps

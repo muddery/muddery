@@ -2,8 +2,6 @@
 Import table data.
 """
 
-from __future__ import print_function
-
 import os, traceback
 from django.apps import apps
 from django.conf import settings
@@ -56,7 +54,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
                     field_type = 5
                 else:
                     field_type = 0
-            except Exception, e:
+            except Exception as e:
                 field_type = -1
                 logger.log_errmsg("Field %s error: %s" % (field_name, e))
 
@@ -103,7 +101,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
                     # float value
                     if value:
                         record[field_name] = float(value)
-            except Exception, e:
+            except Exception as e:
                 raise ValidationError({field_name: "value error: '%s'" % value})
 
         return record
@@ -147,10 +145,10 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
         except StopIteration:
             # reach the end of file, pass this exception
             pass
-        except ValidationError, e:
+        except ValidationError as e:
             traceback.print_stack()
             raise MudderyError(ERR.import_data_error, parse_error(e, model_obj.__name__, line))
-        except Exception, e:
+        except Exception as e:
             traceback.print_stack()
             raise MudderyError(ERR.import_data_error, "%s (model: %s, line: %s)" % (e, model_obj.__name__, line))
 

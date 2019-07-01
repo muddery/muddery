@@ -2,8 +2,6 @@
 EventHandler handles all events. The handler sets on every object.
 """
 
-from __future__ import print_function
-
 import random
 from muddery.utils import defines
 from muddery.statements.statement_handler import STATEMENT_HANDLER

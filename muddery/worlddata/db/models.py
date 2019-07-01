@@ -1,6 +1,4 @@
 
-from __future__ import print_function
-
 import re
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator

@@ -40,7 +40,7 @@ class AMPClientFactory(protocol.ReconnectingClientFactory):
 
     def startedConnecting(self, connector):
         """
-        Called when starting to try to connect to the MUD server.
+        Called when starting to try to connect to the Portal AMP server.
 
         Args:
             connector (Connector): Twisted Connector instance representing
@@ -102,6 +102,7 @@ class AMPServerClientProtocol(amp.AMPMultiConnectionProtocol):
         Called when a new connection is established.
 
         """
+        # print("AMPClient new connection {}".format(self))
         info_dict = self.factory.server.get_info_dict()
         super(AMPServerClientProtocol, self).connectionMade()
         # first thing we do is to request the Portal to sync all sessions
@@ -128,6 +129,7 @@ class AMPServerClientProtocol(amp.AMPMultiConnectionProtocol):
             (sessid, kwargs).
 
         """
+        # print("server data_to_portal: {}, {}, {}".format(command, sessid, kwargs))
         return self.callRemote(command, packed_data=amp.dumps((sessid, kwargs))).addErrback(
                 self.errback, command.key)
 
@@ -221,6 +223,7 @@ class AMPServerClientProtocol(amp.AMPMultiConnectionProtocol):
             server_restart_mode = kwargs.get("server_restart_mode", "shutdown")
             self.factory.server.run_init_hooks(server_restart_mode)
             server_sessionhandler.portal_sessions_sync(kwargs.get("sessiondata"))
+            server_sessionhandler.portal_start_time = kwargs.get("portal_start_time")
 
         elif operation == amp.SRELOAD:  # server reload
             # shut down in reload mode
@@ -238,4 +241,5 @@ class AMPServerClientProtocol(amp.AMPMultiConnectionProtocol):
 
         else:
             raise Exception("operation %(op)s not recognized." % {'op': operation})
+
         return {}

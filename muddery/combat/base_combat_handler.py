@@ -2,8 +2,6 @@
 Combat handler.
 """
 
-from __future__ import print_function
-
 import random
 import traceback
 from twisted.internet import reactor
