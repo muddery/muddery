@@ -10,6 +10,7 @@ from django.conf import settings
 # character's honour
 #
 #------------------------------------------------------------
+"""
 class honours(models.Model):
     "All character's honours."
    
@@ -24,3 +25,4 @@ class honours(models.Model):
         abstract = True
         verbose_name = "Honour"
         verbose_name_plural = "Honours"
+"""

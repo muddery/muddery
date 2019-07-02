@@ -45,7 +45,7 @@ class MudderyArea(TYPECLASS("OBJECT")):
                 self.background = {"resource": resource_info.resource,
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}
-            except Exception, e:
+            except Exception as e:
                 logger.log_tracemsg("Load background %s error: %s" % (resource, e))
 
     def get_appearance(self, caller):

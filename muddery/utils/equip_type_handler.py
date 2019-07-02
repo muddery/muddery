@@ -38,7 +38,7 @@ class EquipTypeHandler(object):
                 if career not in self.career_equip:
                     self.career_equip[career] = set()
                 self.career_equip[career].add(equipment)
-        except Exception, e:
+        except Exception as e:
             logger.log_errmsg("Can not load career equipment types: %s" % e)
             pass
         """

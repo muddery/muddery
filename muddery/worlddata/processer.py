@@ -83,11 +83,11 @@ class Processer(object):
         try:
             response = processor.func(args, request)
         except MudderyError as e:
-            logger.log_errmsg("Error: %s, %s" % (e.code, e.message))
-            response = error_response(e.code, msg=e.message, data=e.data)
+            logger.log_errmsg("Error: %s, %s" % (e.code, e))
+            response = error_response(e.code, msg=str(e), data=e.data)
         except Exception as e:
-            logger.log_tracemsg("Error: %s" % e.message)
-            response = error_response(ERR.internal, msg=e.message)
+            logger.log_tracemsg("Error: %s" % e)
+            response = error_response(ERR.internal, msg=str(e))
 
         return response
 

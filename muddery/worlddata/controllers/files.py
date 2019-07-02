@@ -37,8 +37,8 @@ class upload_zip(BaseRequestProcesser):
                     fp.write(chunk)
                 importer.unzip_data_all(fp)
             except Exception as e:
-                logger.log_tracemsg("Upload error: %s" % e.message)
-                raise MudderyError(ERR.upload_error, e.message)
+                logger.log_tracemsg("Upload error: %s" % e)
+                raise MudderyError(ERR.upload_error, str(e))
 
         return success_response("success")
 
@@ -65,8 +65,8 @@ class upload_resources(BaseRequestProcesser):
                     fp.write(chunk)
                 importer.unzip_resources_all(fp)
             except Exception as e:
-                logger.log_tracemsg("Upload error: %s" % e.message)
-                raise MudderyError(ERR.upload_error, e.message)
+                logger.log_tracemsg("Upload error: %s" % e)
+                raise MudderyError(ERR.upload_error, str(e))
 
         return success_response("success")
 
@@ -105,8 +105,8 @@ class upload_single_data(BaseRequestProcesser):
                     fp.write(chunk)
                 importer.import_data_file(fp, table_name=table_name, file_type=file_type)
             except Exception as e:
-                logger.log_tracemsg("Upload error: %s" % e.message)
-                raise MudderyError(ERR.upload_error, e.message)
+                logger.log_tracemsg("Upload error: %s" % e)
+                raise MudderyError(ERR.upload_error, str(e))
 
         return success_response("success")
 
@@ -136,7 +136,7 @@ class download_zip(BaseRequestProcesser):
         except Exception as e:
             if fp:
                 fp.close()
-            logger.log_tracemsg("Download error: %s" % e.message)
+            logger.log_tracemsg("Download error: %s" % e)
             raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
@@ -162,7 +162,7 @@ class download_resources(BaseRequestProcesser):
         except Exception as e:
             if fp:
                 fp.close()
-            logger.log_tracemsg("Download error: %s" % e.message)
+            logger.log_tracemsg("Download error: %s" % e)
             raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
@@ -199,7 +199,7 @@ class download_single_data(BaseRequestProcesser):
         except Exception as e:
             if fp:
                 fp.close()
-            logger.log_tracemsg("Download error: %s" % e.message)
+            logger.log_tracemsg("Download error: %s" % e)
             raise MudderyError(ERR.download_error, "Download file error: %s" % e)
 
 
@@ -257,8 +257,8 @@ class upload_image(BaseRequestProcesser):
             except Exception as e:
                 if fp:
                     fp.close()
-                logger.log_tracemsg("Upload error: %s" % e.message)
-                raise MudderyError(ERR.upload_error, e.message)
+                logger.log_tracemsg("Upload error: %s" % e)
+                raise MudderyError(ERR.upload_error, str(e))
         else:
             # Compare the uploaded file with the local file.
             same = True
@@ -289,7 +289,7 @@ class upload_image(BaseRequestProcesser):
             except Exception as e:
                 if fp:
                     fp.close()
-                logger.log_tracemsg("Upload error: %s" % e.message)
-                raise MudderyError(ERR.upload_error, e.message)
+                logger.log_tracemsg("Upload error: %s" % e)
+                raise MudderyError(ERR.upload_error, str(e))
 
         return success_response({"resource": icon_location})

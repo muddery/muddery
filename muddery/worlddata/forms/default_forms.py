@@ -45,7 +45,7 @@ def generate_key(form_obj):
             query = form_obj.Meta.model.objects.last()
             index = int(query.id)
             index += 1
-        except Exception, e:
+        except Exception as e:
             pass
 
     return form_obj.instance.__class__.__name__ + "_" + str(index)
@@ -432,7 +432,7 @@ class CharacterForm(ObjectsForm):
 
         try:
             CHARACTER_MODELS.get(key=data_model, level=data_level)
-        except Exception, e:
+        except Exception as e:
             message = "Can not get the level data."
             levels = CHARACTER_MODELS.filter(key=data_model)
             available = [str(level.level) for level in levels]

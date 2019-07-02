@@ -132,7 +132,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                         record = model.objects.get(key=object_key)
                         name = record.name
                         break
-                    except Exception, e:
+                    except Exception as e:
                         pass
         
                     objectives.append({"target": target,
@@ -154,7 +154,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                         record = model.objects.get(key=object_key)
                         name = record.name
                         break
-                    except Exception, e:
+                    except Exception as e:
                         pass
 
                     objectives.append({"target": target,

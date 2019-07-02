@@ -57,7 +57,7 @@ def get_condition_func(func_set, caller, obj, **kwargs):
                 return "True"
             else:
                 return "False"
-        except Exception, e:
+        except Exception as e:
             logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
             traceback.print_exc()
             return "None"
@@ -138,7 +138,7 @@ class StatementHandler(object):
         for function in functions:
             try:
                 exec_function(self.action_func_set, function, caller, obj, **kwargs)
-            except Exception, e:
+            except Exception as e:
                 logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
                 traceback.print_exc()
 
@@ -167,7 +167,7 @@ class StatementHandler(object):
                 result = exec_function(self.skill_func_set, function, caller, obj, **kwargs)
                 if result:
                     results.append(result)
-            except Exception, e:
+            except Exception as e:
                 logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
                 traceback.print_exc()
 
@@ -194,7 +194,7 @@ class StatementHandler(object):
         try:
             # do condition
             result = eval(exec_string)
-        except Exception, e:
+        except Exception as e:
             logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
             traceback.print_exc()
             return False

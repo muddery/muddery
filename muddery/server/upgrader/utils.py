@@ -50,7 +50,7 @@ def make_backup(game_dir):
     # copy game dir to backup dir
     try:
         copy_tree(game_dir, backup_dir)
-    except Exception, e:
+    except Exception as e:
         print("Can not create backup dir: %s" % e)
         raise(Exception)
 
@@ -126,7 +126,7 @@ def copy_tree(source, destination):
             else:
                 # Copy file.
                 shutil.copy2(srcname, dstname)
-        except Exception, e:
+        except Exception as e:
             print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
             raise(Exception)
 

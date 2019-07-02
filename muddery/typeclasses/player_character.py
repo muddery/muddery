@@ -20,9 +20,9 @@ from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
-from muddery.utils.honours_handler import HONOURS_HANDLER
-from muddery.utils.match_queue_handler import MATCH_QUEUE_HANDLER
-from muddery.dao.honours_mapper import HONOURS_MAPPER
+#from muddery.utils.honours_handler import HONOURS_HANDLER
+#from muddery.utils.match_queue_handler import MATCH_QUEUE_HANDLER
+#from muddery.dao.honours_mapper import HONOURS_MAPPER
 from muddery.worlddata.dao.default_objects_mapper import DEFAULT_OBJECTS
 from muddery.worlddata.dao.properties_dict_mapper import PROPERTIES_DICT
 from evennia.utils.utils import lazy_property
@@ -73,11 +73,13 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         super(MudderyPlayerCharacter, self).at_object_creation()
         
         # honour
+        """
         if not HONOURS_MAPPER.has_info(self):
             if self.db.level >= settings.MIN_HONOUR_LEVEL:
                 HONOURS_MAPPER.set_honour(self, 0)
             else:
                 HONOURS_MAPPER.set_honour(self, -1)
+        """
 
         # Set default data.
         if not self.attributes.has("nickname"):
@@ -100,7 +102,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 if careers:
                     career = random.choice(careers)
                     self.db.career = career.key
-            except Exception, e:
+            except Exception as e:
                 pass
         """
         
@@ -240,7 +242,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                           "name": self.get_name()}
                 self.location.msg_contents({"player_offline":change}, exclude=self)
 
-        MATCH_QUEUE_HANDLER.remove(self)
+        #MATCH_QUEUE_HANDLER.remove(self)
 
     def set_nickname(self, nickname):
         """
@@ -1201,10 +1203,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         super(MudderyPlayerCharacter, self).level_up()
         
         # set honour
+        """
         if self.db.level >= settings.MIN_HONOUR_LEVEL:
             if not HONOURS_MAPPER.has_info(self):
                 HONOURS_MAPPER.set_honour(self, 0)
                 self.msg({"msg": _("{rThe honour hall is now opened.{n")})
+        """
 
         # notify the player
         self.msg({"msg": _("{c%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})
@@ -1265,6 +1269,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         Show character's rankings.
         """
+        """
         top_rankings = HONOURS_MAPPER.get_top_rankings(settings.TOP_RANKINGS_NUMBER)
         nearest_rankings = HONOURS_MAPPER.get_nearest_rankings(self, settings.NEAREST_RANKINGS_NUMBER)
         
@@ -1277,4 +1282,4 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                  "ranking": HONOURS_MAPPER.get_ranking(char),
                  "honour": HONOURS_MAPPER.get_honour(char)} for char in characters]
         self.msg({"rankings": data})
-
+        """

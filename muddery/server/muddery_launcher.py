@@ -12,7 +12,7 @@ and portal through the evennia_runner. Run without arguments to get a
 menu. Run the script with the -h flag to see usage information.
 """
 
-import os, sys, glob
+import os, sys, glob, traceback
 import django.core.management
 import argparse
 from argparse import ArgumentParser
@@ -249,6 +249,7 @@ def main():
                 print(configs.NEED_UPGRADE.format(version=ver_str))
                 return
         except Exception as e:
+            traceback.print_exc()
             print("Check upgrade error: %s" % e)
             return
 

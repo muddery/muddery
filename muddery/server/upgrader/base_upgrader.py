@@ -2,7 +2,7 @@
 Upgrade custom's game dir to the latest version.
 """
 
-from utils import compare_version
+from muddery.server.upgrader.utils import compare_version
 
 
 class BaseUpgrader(object):

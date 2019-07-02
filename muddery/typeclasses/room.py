@@ -57,7 +57,7 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
             position = getattr(self.system, "position", None)
             if position:
                 self.position = ast.literal_eval(position)
-        except Exception, e:
+        except Exception as e:
             logger.log_tracemsg("load position error: %s" % e)
 
         # get background
@@ -69,7 +69,7 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
                 self.background = {"resource": resource_info.resource,
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}
-            except Exception, e:
+            except Exception as e:
                 logger.log_tracemsg("Load background %s error: %s" % (resource, e))
 
     def at_object_receive(self, moved_obj, source_location, **kwargs):

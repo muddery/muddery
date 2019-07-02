@@ -32,7 +32,10 @@ class DatabaseAppsRouter(object):
         """
         Allow any relation between apps that use the same database.
         """
-        return obj1._meta.app_label == obj2._meta.app_label
+        if obj1._meta.app_label == "worlddata" or obj2._meta.app_label == "worlddata":
+            return obj1._meta.app_label == obj2._meta.app_label
+        else:
+            return True
 
     def allow_migrate(self, db, app_label, model=None, **hints):
         """

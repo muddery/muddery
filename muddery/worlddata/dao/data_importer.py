@@ -120,7 +120,7 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
         line = 1
         try:
             # read title
-            titles = data_iterator.next()
+            titles = next(data_iterator)
             field_types = get_field_types(model_obj, titles)            
             line += 1
 
@@ -146,10 +146,10 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
             # reach the end of file, pass this exception
             pass
         except ValidationError as e:
-            traceback.print_stack()
+            traceback.print_exc()
             raise MudderyError(ERR.import_data_error, parse_error(e, model_obj.__name__, line))
         except Exception as e:
-            traceback.print_stack()
+            traceback.print_exc()
             raise MudderyError(ERR.import_data_error, "%s (model: %s, line: %s)" % (e, model_obj.__name__, line))
 
     def clear_model_data(model_obj, **kwargs):

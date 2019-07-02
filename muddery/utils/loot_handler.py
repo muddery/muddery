@@ -36,7 +36,7 @@ class LootHandler(object):
                                "quest": loot_record.serializable_value("quest"),
                                "condition": loot_record.condition}
                 loot_list.append(loot_object)
-        except Exception, e:
+        except Exception as e:
             logger.log_errmsg("Can't load loot info %s: %s" % (self.owner.get_data_key(), e))
 
         self.loot_list = loot_list

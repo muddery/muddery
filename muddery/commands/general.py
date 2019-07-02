@@ -293,7 +293,7 @@ class CmdDialogue(Command):
             dialogue = self.args["dialogue"]
             sentence = int(self.args["sentence"])
             have_current_dlg = True
-        except Exception, e:
+        except Exception as e:
             pass
 
         if not have_current_dlg:
@@ -339,7 +339,7 @@ class CmdLoot(Command):
         try:
             # do loot
             obj.loot(caller)
-        except Exception, e:
+        except Exception as e:
             ostring = "Can not loot %s: %s" % (obj.get_data_key(), e)
             logger.log_tracemsg(ostring)
             
@@ -388,7 +388,7 @@ class CmdUse(Command):
         try:
             # Use the object and get the result.
             result = caller.use_object(obj)
-        except Exception, e:
+        except Exception as e:
             ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
             logger.log_tracemsg(ostring)
 
@@ -438,7 +438,7 @@ class CmdDiscard(Command):
         # remove used object
         try:
             caller.remove_object(obj.get_data_key(), 1)
-        except Exception, e:
+        except Exception as e:
             caller.msg({"alert": _("Can not discard this object.")})
             logger.log_tracemsg("Can not discard object %s: %s" % (obj.get_data_key(), e))
             return
@@ -479,10 +479,10 @@ class CmdEquip(Command):
         try:
             # equip
             caller.equip_object(obj)
-        except MudderyError, e:
+        except MudderyError as e:
             caller.msg({"alert": str(e)})
             return
-        except Exception, e:
+        except Exception as e:
             caller.msg({"alert": _("Can not use this equipment.")})
             logger.log_tracemsg("Can not use equipment %s: %s" % (obj.get_data_key(), e))
             return
@@ -527,10 +527,10 @@ class CmdTakeOff(Command):
         try:
             # Take off the equipment.
             caller.take_off_equipment(obj)
-        except MudderyError, e:
+        except MudderyError as e:
             caller.msg({"alert": str(e)})
             return
-        except Exception, e:
+        except Exception as e:
             caller.msg({"alert": _("Can not take off this equipment.")})
             logger.log_tracemsg("Can not take off %s: %s" % (obj.get_data_key(), e))
             return
@@ -583,7 +583,7 @@ class CmdCastSkill(Command):
         skill_key = None
         target = None
 
-        if isinstance(args, basestring):
+        if isinstance(args, str):
             # If the args is a skill's key.
             skill_key = args
         else:
@@ -609,7 +609,7 @@ class CmdCastSkill(Command):
                 caller.ndb.combat_handler.prepare_skill(skill_key, caller, target)
             else:
                 caller.cast_skill(skill_key, target)
-        except Exception, e:
+        except Exception as e:
             caller.msg({"alert":_("Can not cast this skill.")})
             logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
             return
@@ -733,7 +733,7 @@ class CmdMakeMatch(Command):
                 chandler.set_combat({1:[match], 2:[caller]}, _("Fight of Honour"), settings.AUTO_COMBAT_TIMEOUT)
             else:
                 caller.msg({"alert":_("Can not make match.")})
-        except Exception, e:
+        except Exception as e:
             logger.log_err("Find match error: %s" % e)
             caller.msg({"alert":_("Can not make match.")})
 
@@ -911,10 +911,10 @@ class CmdGiveUpQuest(Command):
         try:
             # Give up the quest.
             caller.quest_handler.give_up(quest_key)
-        except MudderyError, e:
+        except MudderyError as e:
             caller.msg({"alert": str(e)})
             return
-        except Exception, e:
+        except Exception as e:
             caller.msg({"alert": _("Can not give up this quest.")})
             logger.log_tracemsg("Can not give up quest %s: %s" % (quest_key, e))
             return
@@ -959,7 +959,7 @@ class CmdUnlockExit(Command):
             if not caller.unlock_exit(obj):
                 caller.msg({"alert":_("Can not open this exit.") % obj.name})
                 return
-        except Exception, e:
+        except Exception as e:
             caller.msg({"alert": _("Can not open this exit.")})
             logger.log_tracemsg("Can not open exit %s: %s" % (obj.name, e))
             return
@@ -1034,7 +1034,7 @@ class CmdBuy(Command):
         # buy goods
         try:
             goods.sell_to(caller)
-        except Exception, e:
+        except Exception as e:
             caller.msg({"alert":_("Can not buy this goods.")})
             logger.log_err("Can not buy %s: %s" % (goods.get_data_key(), e))
             return

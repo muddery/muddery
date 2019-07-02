@@ -6,7 +6,7 @@
 import os
 import sys
 import shutil
-import ConfigParser
+import configparser
 from subprocess import check_output, CalledProcessError, STDOUT
 from evennia.server import evennia_launcher
 from muddery.server.launcher import configs
@@ -56,9 +56,9 @@ def create_secret_key():
     """
     import random
     import string
-    secret_key = list((string.letters +
-                       string.digits +
-                       string.punctuation).replace("\\", "").replace("'", '"'))
+    secret_key = list((string.ascii_letters +
+                       string.digits + string.punctuation).replace("\\", "")
+                      .replace("'", '"').replace("{", "_").replace("}", "-"))
     random.shuffle(secret_key)
     secret_key = "".join(secret_key[:40])
     return secret_key
@@ -201,7 +201,7 @@ def create_config_file(game_dir, template):
         None
     """
     config_file = open(os.path.join(game_dir, configs.CONFIG_FILE), "w")
-    config_parser = ConfigParser.SafeConfigParser()
+    config_parser = configparser.ConfigParser()
     config_parser.add_section(configs.VERSION_SECTION)
     config_parser.set(configs.VERSION_SECTION, configs.VERSION_ITEM, SHORT_VERSION)
     if template:
@@ -225,7 +225,7 @@ def get_game_config(path):
 
     # read game config file
     try:
-        config_parser = ConfigParser.SafeConfigParser()
+        config_parser = configparser.ConfigParser()
         config_parser.read(os.path.join(path, configs.CONFIG_FILE))
         game_ver = config_parser.get(configs.VERSION_SECTION, configs.VERSION_ITEM)
         game_template = config_parser.get(configs.VERSION_SECTION, configs.TEMPLATE_ITEM)

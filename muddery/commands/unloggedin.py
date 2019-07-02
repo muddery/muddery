@@ -120,7 +120,7 @@ def create_guest_player(session):
         if new_player:
             create_character(new_player, playername, permissions=permissions)
 
-    except Exception, e:
+    except Exception as e:
         # We are in the middle between logged in and -not, so we have
         # to handle tracebacks ourselves at this point. If we don't,
         # we won't see any errors at all.
@@ -177,7 +177,7 @@ def create_normal_player(session, playername, password):
     new_player = None
     try:
         new_player = create_player(playername, password)
-    except Exception, e:
+    except Exception as e:
         # We are in the middle between logged in and -not, so we have
         # to handle tracebacks ourselves at this point. If we don't,
         # we won't see any errors at all.

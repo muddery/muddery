@@ -75,7 +75,7 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
                 try:
                     # Load db data.
                     goods.load_data()
-                except Exception, e:
+                except Exception as e:
                     logger.log_errmsg("%s(%s) can not load data:%s" % (self.goods_key, self.dbref, e))
             else:
                 goods.set_data_key(self.goods_key, self.goods_level)

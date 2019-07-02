@@ -30,7 +30,7 @@ class DataReader(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         return self.readln()
 
     def readln(self):
@@ -82,8 +82,7 @@ class CSVReader(DataReader):
             raise StopIteration
 
         # Read line.
-        values = self.reader.next()
-        return [unicode(v, "utf-8") for v in values]
+        return next(self.reader)
 
 
 class XLSReader(DataReader):

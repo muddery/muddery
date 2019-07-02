@@ -36,7 +36,7 @@ class GameSettings(object):
                 # Add db fields to dict.
                 for field in record._meta.fields:
                     self.values[field.name] = record.serializable_value(field.name)
-        except Exception, e:
+        except Exception as e:
             print("Can not load settings: %s" % e)
             pass
 

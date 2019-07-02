@@ -45,7 +45,7 @@ class AttributesInfoHandler(object):
                           "desc": record.desc}
                 self.fields[record.field] = values
                 self.keys[record.key] = values
-        except Exception, e:
+        except Exception as e:
             print("Can not load attribute: %s" % e)
 
         # self.set_model_fields()
