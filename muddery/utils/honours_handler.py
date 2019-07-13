@@ -3,7 +3,7 @@ This model translates default strings into localized strings.
 """
 
 from evennia.utils import logger
-from muddery.dao.honours_mapper import HONOURS_MAPPER
+# from muddery.dao.honours_mapper import HONOURS_MAPPER
 
 
 class HonoursHandler(object):
@@ -69,4 +69,4 @@ class HonoursHandler(object):
 
                 
 # main honours handler
-HONOURS_HANDLER = HonoursHandler()
+# HONOURS_HANDLER = HonoursHandler()

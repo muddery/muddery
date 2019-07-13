@@ -34,7 +34,7 @@ if settings.EVENNIA_ADMIN:
         url('^admin/$', website_views.evennia_admin, name="evennia_admin"),
 
         # Makes sure that other admin pages get loaded.
-        url(r'^admin/', include(admin.site.urls))]
+        url(r'^admin/', admin.site.urls)]
 else:
     # Just include the normal Django admin.
     urlpatterns += [url(r'^admin/', include(admin.site.urls))]

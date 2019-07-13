@@ -34,7 +34,7 @@ def _shared_login(request):
         # this is necessary to build the sessid key
         csession.save()
 
-    if account.is_authenticated():
+    if account.is_authenticated:
         # Logged into website
         if not website_uid:
             # fresh website login (just from login page)

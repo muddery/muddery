@@ -3,7 +3,7 @@ This model translates default strings into localized strings.
 """
 
 from evennia.utils import logger
-from muddery.database.models import honours
+#from muddery.database.models import honours
 from django.db import transaction
 from django.apps import apps
 from django.conf import settings
@@ -185,12 +185,12 @@ class HonoursMapper(object):
         """
         success = False
         with transaction.atomic():
-            for key, value in new_honours.iteritems():
+            for key, value in new_honours.items():
                 self.objects.filter(character=key).update(honour=value)
             success = True
         
         if success:
-            for key, value in new_honours.iteritems():
+            for key, value in new_honours.items():
                 self.honours[key]["honour"] = value
             self.make_rankings()
         else:
@@ -229,4 +229,4 @@ class HonoursMapper(object):
         
 
 # main honour handler
-HONOURS_MAPPER = HonoursMapper()
+# HONOURS_MAPPER = HonoursMapper()

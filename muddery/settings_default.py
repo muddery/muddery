@@ -254,6 +254,9 @@ TYPECLASS_PATHS = ["muddery.typeclasses"]
 # Typeclass for account objects (linked to a character) (fallback)
 BASE_ACCOUNT_TYPECLASS = "muddery.typeclasses.accounts.MudderyAccount"
 
+# Typeclass for guest account objects (linked to a character)
+BASE_GUEST_TYPECLASS = "muddery.typeclasses.accounts.Guest"
+
 # Typeclass and base for all objects (fallback)
 BASE_OBJECT_TYPECLASS = "muddery.typeclasses.object.MudderyBaseObject"
 

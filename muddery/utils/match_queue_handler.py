@@ -11,7 +11,7 @@ from twisted.internet import task
 from evennia.utils import logger
 from evennia import create_script
 from evennia.utils.search import search_object
-from muddery.dao.honours_mapper import HONOURS_MAPPER
+# from muddery.dao.honours_mapper import HONOURS_MAPPER
 from muddery.utils.localized_strings_handler import _
 
 
@@ -244,4 +244,4 @@ class MatchQueueHandler(object):
             self.remove_by_id(opponents[1])
 
 # main handler
-MATCH_QUEUE_HANDLER = MatchQueueHandler()
+# MATCH_QUEUE_HANDLER = MatchQueueHandler()

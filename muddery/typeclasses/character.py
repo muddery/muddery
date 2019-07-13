@@ -470,7 +470,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         default_skill_ids = set([record.skill for record in skill_records])
 
         # remove old default skills
-        for key, skill in self.db.skills.iteritems():
+        for key, skill in self.db.skills.items():
             if not skill:
                 del self.db.skills[key]
             elif skill.is_default() and key not in default_skill_ids:
@@ -833,7 +833,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             (list) available commands for combat
         """
         commands = []
-        for key, skill in self.db.skills.iteritems():
+        for key, skill in self.db.skills.items():
             if skill.passive:
                 # exclude passive skills
                 continue

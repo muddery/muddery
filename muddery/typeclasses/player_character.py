@@ -965,7 +965,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         skills = []
 
-        for key, skill in self.db.skills.iteritems():
+        for key, skill in self.db.skills.items():
             skills.append(skill.get_appearance(self))
 
         return skills

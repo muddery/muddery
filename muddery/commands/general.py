@@ -13,9 +13,9 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.exception import MudderyError
-from muddery.utils.honours_handler import HONOURS_HANDLER
-from muddery.utils.match_queue_handler import MATCH_QUEUE_HANDLER
-from muddery.dao.honours_mapper import HONOURS_MAPPER
+# from muddery.utils.honours_handler import HONOURS_HANDLER
+# from muddery.utils.match_queue_handler import MATCH_QUEUE_HANDLER
+# from muddery.dao.honours_mapper import HONOURS_MAPPER
 import traceback
 import random
 
