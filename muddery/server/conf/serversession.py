@@ -58,6 +58,6 @@ class ServerSession(BaseServerSession):
                 logger.log_tracemsg("json.dumps failed: %s" % e)
 
         # set raw=True
-        kwargs["options"].update({"raw": True})
+        kwargs["options"].update({"raw": True, "client_raw": True})
 
         return super(ServerSession, self).data_out(text=text, **kwargs)
