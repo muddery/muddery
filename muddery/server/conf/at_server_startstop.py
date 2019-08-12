@@ -64,10 +64,6 @@ def at_server_start():
     # load condition descriptions
     from muddery.utils.desc_handler import DESC_HANDLER
     DESC_HANDLER.reload()
-    
-    # load honours
-    # from muddery.dao.honours_mapper import HONOURS_MAPPER
-    # HONOURS_MAPPER.reload()
 
 
 def at_server_stop():

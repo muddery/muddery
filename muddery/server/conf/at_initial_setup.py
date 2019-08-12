@@ -19,7 +19,6 @@ from django.conf import settings
 from evennia.utils import search, logger
 from muddery.utils import builder
 from muddery.utils.game_settings import GAME_SETTINGS
-# from muddery.dao.honours_mapper import HONOURS_MAPPER
 import traceback
 
 LIMBO_DESC = "Welcome to your new {wMuddery{n-based game! " +\
@@ -64,9 +63,6 @@ def at_initial_setup():
             # set superuser's data
             superuser.set_data_key(GAME_SETTINGS.get("default_player_character_key"), 1)
             superuser.set_nickname("superuser")
-
-            # set superuser's honour to -1
-            # HONOURS_MAPPER.set_honour(superuser, -1)
 
             print("Set superuser.")
 

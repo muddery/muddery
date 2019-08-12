@@ -66,6 +66,14 @@ DATABASES = {
         'HOST': '',
         'PORT': ''
         },
+    'gamedata': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(GAME_DIR, "server", "gamedata.db3"),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': ''
+        },
     'worlddata': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(GAME_DIR, "server", "worlddata.db3"),
@@ -80,6 +88,7 @@ DATABASES = {
 DATABASE_ROUTERS = ['muddery.worlddata.db.database_router.DatabaseAppsRouter']
 
 DATABASE_APPS_MAPPING = {
+    'gamedata': 'gamedata',
     'worlddata': 'worlddata',
 }
 
@@ -365,7 +374,7 @@ CMDSET_COMBAT = "muddery.commands.default_cmdsets.CombatCmdSet"
 # Muddery additional data features
 ######################################################################
 # data app name
-ADDITIONAL_DATA_APP = "database"
+ADDITIONAL_DATA_APP = "gamedata"
 
 # add data app
 INSTALLED_APPS = INSTALLED_APPS + (ADDITIONAL_DATA_APP,)
@@ -424,21 +433,7 @@ DEFUALT_FORM_TEMPLATE = "common_form.html"
 # Handler of the combat
 NORMAL_COMBAT_HANDLER = "muddery.combat.normal_combat_handler.NormalCombatHandler"
 
-HONOUR_COMBAT_HANDLER = "muddery.combat.honour_auto_combat_handler.HonourAutoCombatHandler"
-
 AUTO_COMBAT_TIMEOUT = 60
-
-
-###################################
-# honour settings
-###################################
-MIN_HONOUR_LEVEL = 2
-
-TOP_RANKINGS_NUMBER = 10
-
-NEAREST_RANKINGS_NUMBER = 10
-
-HONOUR_OPPONENTS_NUMBER = 100
 
 
 ###################################

@@ -76,8 +76,7 @@ class GameSettings(object):
                            "solo_mode": self.get("solo_mode"),
                            "map_scale": self.get("map_scale"),
                            "map_room_size": self.get("map_room_size"),
-                           "map_room_box": self.get("map_room_box"),
-                           "min_honour_level": settings.MIN_HONOUR_LEVEL,}
+                           "map_room_box": self.get("map_room_box"),}
         return client_settings
 
 

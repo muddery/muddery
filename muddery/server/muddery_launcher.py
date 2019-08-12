@@ -146,6 +146,13 @@ def main():
 
         # make migrations
         try:
+            django_args = ["makemigrations", "gamedata"]
+            django_kwargs = {}
+            django.core.management.call_command(*django_args, **django_kwargs)
+        except django.core.management.base.CommandError as exc:
+            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+        try:
             django_args = ["makemigrations", "worlddata"]
             django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
@@ -157,7 +164,11 @@ def main():
             django_args = ["migrate"]
             django_kwargs = {}
             django.core.management.call_command(*django_args, **django_kwargs)
-            
+
+            django_args = ["migrate", "gamedata"]
+            django_kwargs = {"database": "gamedata"}
+            django.core.management.call_command(*django_args, **django_kwargs)
+
             django_args = ["migrate", "worlddata"]
             django_kwargs = {"database": "worlddata"}
             django.core.management.call_command(*django_args, **django_kwargs)
