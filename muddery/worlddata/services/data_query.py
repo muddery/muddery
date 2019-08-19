@@ -4,6 +4,7 @@ Battle commands. They only can be used when a character is in a combat.
 
 import ast
 from django.core.exceptions import ObjectDoesNotExist
+from evennia.utils import logger
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.dao import common_mappers as CM
 from muddery.worlddata.dao.common_mappers import WORLD_AREAS
@@ -317,12 +318,19 @@ def query_map(area_key):
     room_keys = []
     for record in room_records:
         room_keys.append(record["key"])
+
+        try:
+            position = ast.literal_eval(record["position"])
+        except SyntaxError as e:
+            logger.log_errmsg("Parse map %s's position error: %s" % (record["key"], e))
+            position = ()
+
         info = {
             "key": record["key"],
             "typeclass": record["typeclass"],
             "name": record["name"],
             "location": record["location"],
-            "position": ast.literal_eval(record["position"]),
+            "position": position,
             "icon": record["icon"]
         }
         room_info.append(info)

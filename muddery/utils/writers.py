@@ -133,7 +133,6 @@ class CSVWindowsWriter(DataWriter):
         self.writer = None
         if filename:
             self.data_file = open(filename, 'w')
-            self.data_file.write(codecs.BOM_UTF8)
             self.writer = csv.writer(self.data_file, dialect='excel')
 
     def writeln(self, line):
