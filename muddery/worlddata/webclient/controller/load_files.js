@@ -69,10 +69,12 @@ controller = {
     },
 
     uploadSuccess: function(data) {
+        window.parent.controller.hideWaiting();
         window.parent.controller.notify("", "Upload success.");
     },
 
     uploadFailed: function(code, message, data) {
+        window.parent.controller.hideWaiting();
         window.parent.controller.notify("ERROR", code + ": " + message);
     },
 

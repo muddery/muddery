@@ -5,12 +5,11 @@ Battle commands. They only can be used when a character is in a combat.
 import os, tempfile, time
 from PIL import Image
 from django.conf import settings
-from django.contrib import auth
 from evennia.utils import logger
-from muddery.worlddata.services import data_query, exporter, importer
+from muddery.worlddata.services import exporter, importer
 from muddery.worlddata.utils.response import success_response, file_response
 from muddery.utils.exception import MudderyError, ERR
-from muddery.utils import writers
+from muddery.worlddata.utils import writers
 from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worlddata.dao.image_resources_mapper import IMAGE_RESOURCES
 
@@ -99,14 +98,23 @@ class upload_single_data(BaseRequestProcesser):
         if ext_name:
             file_type = ext_name[1:].lower()
 
-        with tempfile.NamedTemporaryFile() as fp:
-            try:
+        temp_filename = tempfile.mktemp()
+        try:
+            # Write data to a template file.
+            with open(temp_filename, 'wb') as fp:
                 for chunk in file_obj.chunks():
                     fp.write(chunk)
-                importer.import_data_file(fp, table_name=table_name, file_type=file_type)
-            except Exception as e:
-                logger.log_tracemsg("Upload error: %s" % e)
-                raise MudderyError(ERR.upload_error, str(e))
+
+            # Import the template file.
+            importer.import_file(temp_filename, table_name=table_name, file_type=file_type, clear=True)
+        except Exception as e:
+            logger.log_tracemsg("Upload error: %s" % e)
+            raise MudderyError(ERR.upload_error, str(e))
+        finally:
+            try:
+                os.remove(temp_filename)
+            except IOError:
+                pass
 
         return success_response("success")
 

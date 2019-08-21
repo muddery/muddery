@@ -4,13 +4,10 @@ This module imports data from files to db.
 
 import os, glob, tempfile, zipfile, shutil
 from django.conf import settings
-from evennia.utils import logger
 from muddery.server.upgrader.upgrade_handler import UPGRADE_HANDLER
 from muddery.server.launcher import configs
 from muddery.server.launcher.utils import copy_tree
-from muddery.utils import readers
-from muddery.utils.exception import MudderyError, ERR
-from muddery.worlddata.dao.data_importer import import_file
+from muddery.worlddata.services.data_importer import import_file
 from muddery.worlddata.dao import model_mapper
 
 
@@ -114,14 +111,6 @@ def import_data_path(path, clear=True):
                 import_file(file_names[0], table_name=table_name, clear=clear)
             except Exception as e:
                 print("Import error: %s" % e)
-
-
-def import_data_file(fp, table_name=None, file_type=None, clear=True):
-    """
-    Import a single data file.
-    """
-    fp.flush()
-    import_file(fp.name, table_name=table_name, file_type=file_type, clear=clear)
 
 
 def import_table_path(path, table_name, clear=True):

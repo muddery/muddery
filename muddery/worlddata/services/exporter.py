@@ -6,11 +6,10 @@ import os
 import tempfile
 import zipfile
 from django.conf import settings
-from evennia.utils import logger
 from evennia.settings_default import GAME_DIR
 from muddery.server.launcher import configs
 from muddery.utils.exception import MudderyError, ERR
-from muddery.utils import writers
+from muddery.worlddata.utils import writers
 from muddery.worlddata.dao import general_query_mapper, model_mapper
 
 
@@ -57,7 +56,7 @@ def export_zip_all(file_obj, file_type=None):
         raise(MudderyError(ERR.export_data_error, "Unsupport file type %s" % file_type))
 
     # Get tempfile's name.
-    temp = tempfile.mktemp()
+    temp_filename = tempfile.mktemp()
     file_ext = writer_class.file_ext
 
     try:
@@ -67,15 +66,18 @@ def export_zip_all(file_obj, file_type=None):
         models = model_mapper.get_all_models()
         for model in models:
             model_name = model._meta.object_name
-            export_file(temp, model_name, file_type)
+            export_file(temp_filename, model_name, file_type)
             filename = model_name + "." + file_ext
-            archive.write(temp, filename)
+            archive.write(temp_filename, filename)
 
         # add version file
         version_file = os.path.join(GAME_DIR, configs.CONFIG_FILE)
         archive.write(version_file, configs.CONFIG_FILE)
     finally:
-        os.remove(temp)
+        try:
+            os.remove(temp_filename)
+        except PermissionError:
+            pass
 
 
 def export_resources(file_obj):

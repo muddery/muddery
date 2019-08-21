@@ -7,11 +7,9 @@ import tempfile
 import zipfile
 from django.apps import apps
 from django.conf import settings
-from evennia.utils import logger
 from evennia.settings_default import GAME_DIR
 from muddery.server.launcher import configs
-from muddery.utils.exception import MudderyError
-from muddery.utils import writers
+from muddery.worlddata.utils import writers
 
 
 def get_header(model_name):

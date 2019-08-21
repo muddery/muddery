@@ -30,7 +30,7 @@ def import_local_data():
     """
     from django.conf import settings
     from muddery.worlddata.services import importer
-    from muddery.worlddata.dao.data_importer import import_file
+    from muddery.worlddata.services.data_importer import import_file
 
     # load custom data
     # custom data file's path

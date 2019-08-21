@@ -78,7 +78,7 @@ class CSVWriter(DataWriter):
         self.data_file = None
         self.writer = None
         if filename:
-            self.data_file = open(filename, 'w')
+            self.data_file = open(filename, 'w', encoding="utf-8", newline='')
             self.writer = csv.writer(self.data_file, dialect='excel')
 
     def writeln(self, line):
@@ -132,7 +132,10 @@ class CSVWindowsWriter(DataWriter):
         self.data_file = None
         self.writer = None
         if filename:
-            self.data_file = open(filename, 'w')
+            # Add BOM.
+            with open(filename, 'wb') as fp:
+                fp.write(codecs.BOM_UTF8)
+            self.data_file = open(filename, 'a', encoding="utf-8", newline='')
             self.writer = csv.writer(self.data_file, dialect='excel')
 
     def writeln(self, line):
