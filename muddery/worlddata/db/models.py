@@ -371,6 +371,26 @@ class equipments(BaseObjects):
         verbose_name_plural = "Equipments"
 
 
+class base_npcs(BaseObjects):
+    "The base of all NPCs."
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Base NPC"
+        verbose_name_plural = "Base NPCs"
+
+
+class common_npcs(BaseObjects):
+    "Common NPCs."
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Common NPC"
+        verbose_name_plural = "Common NPCs"
+
+
 class world_npcs(BaseObjects):
     "Store all NPCs."
 
@@ -415,6 +435,15 @@ class characters(BaseObjects):
         app_label = "worlddata"
         verbose_name = "Common Character List"
         verbose_name_plural = "Common Character List"
+
+
+class player_characters(BaseObjects):
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Player Character"
+        verbose_name_plural = "Player Characters"
 
 
 class shops(BaseObjects):

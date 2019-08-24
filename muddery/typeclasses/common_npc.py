@@ -12,9 +12,10 @@ from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.utils.localized_strings_handler import _
 
 
-class MudderyCommonNPC(TYPECLASS("NPC")):
+class MudderyCommonNPC(TYPECLASS("BASE_NPC")):
     """
     The character not controlled by players.
     """
     typeclass_key = "COMMON_NPC"
     typeclass_name = _("Common NPC", "typeclasses")
+    model_name = "common_npcs"

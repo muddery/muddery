@@ -242,6 +242,18 @@ class world_npcs(BaseModels.world_npcs):
     pass
 
 
+class base_npcs(BaseModels.base_npcs):
+    pass
+
+
+class common_npcs(BaseModels.common_npcs):
+    pass
+
+
+class player_characters(BaseModels.player_characters):
+    pass
+
+
 #------------------------------------------------------------
 #
 # store common characters

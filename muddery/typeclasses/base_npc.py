@@ -17,12 +17,13 @@ from muddery.worlddata.dao.npc_shops_mapper import NPC_SHOPS
 from muddery.utils.localized_strings_handler import _
 
 
-class MudderyNPC(TYPECLASS("CHARACTER")):
+class MudderyBaseNPC(TYPECLASS("CHARACTER")):
     """
     The character not controlled by players.
     """
-    typeclass_key = "NPC"
-    typeclass_name = _("None Player Character", "typeclasses")
+    typeclass_key = "BASE_NPC"
+    typeclass_name = _("Base None Player Character", "typeclasses")
+    model_name = "base_npcs"
 
     def at_object_creation(self):
         """
@@ -30,7 +31,7 @@ class MudderyNPC(TYPECLASS("CHARACTER")):
         normal hook to overload for most object types.
 
         """
-        super(MudderyNPC, self).at_object_creation()
+        super(MudderyBaseNPC, self).at_object_creation()
 
         # NPC's shop
         if not self.attributes.has("shops"):
@@ -40,7 +41,7 @@ class MudderyNPC(TYPECLASS("CHARACTER")):
         """
         Init the character.
         """
-        super(MudderyNPC, self).after_data_loaded()
+        super(MudderyBaseNPC, self).after_data_loaded()
 
         # Character can auto fight.
         self.auto_fight = True

@@ -12,7 +12,7 @@ from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.utils.localized_strings_handler import _
 
 
-class MudderyWorldNPC(TYPECLASS("NPC")):
+class MudderyWorldNPC(TYPECLASS("BASE_NPC")):
     """
     The character not controlled by players.
     """

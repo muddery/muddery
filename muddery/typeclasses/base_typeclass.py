@@ -22,12 +22,17 @@ class BaseTypeclass(object):
         """
         if "_all_models_" not in cls.__dict__:
             cls._all_models_ = []
-            for c in cls.__bases__:
-                if hasattr(c, "get_models"):
-                    cls._all_models_.extend(c.get_models())
 
-            if cls.model_name and not cls.model_name in cls._all_models_:
-                cls._all_models_.append(cls.model_name)
+            if cls.typeclass_key:
+                if not cls.model_name:
+                    raise ValueError("%s's model name is empty." % cls.typeclass_key)
+
+                for c in cls.__bases__:
+                    if hasattr(c, "get_models"):
+                        cls._all_models_.extend(c.get_models())
+
+                if cls.model_name not in cls._all_models_:
+                    cls._all_models_.append(cls.model_name)
 
         return cls._all_models_
 
