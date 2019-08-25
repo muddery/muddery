@@ -5,7 +5,6 @@ CommonObject is the object that players can put into their inventory.
 
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError
-from muddery.utils.attributes_info_handler import FOOD_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.utils import defines
 from muddery.utils.localized_strings_handler import _
@@ -154,21 +153,8 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
 
         changes = user.change_properties(increments)
         user.show_status()
-        
-        result = ""
-        for key in changes:
-            # set result
-            attribute_info = FOOD_ATTRIBUTES_INFO.for_key(key)
-                
-            if result:
-                result += ", "
 
-            if changes[key] >= 0:
-                result += "%s +%s" % (attribute_info["name"], changes[key])
-            else:
-                result += "%s %s" % (attribute_info["name"], changes[key])
-
-        return result, used
+        return changes, used
 
     def get_available_commands(self, caller):
         """

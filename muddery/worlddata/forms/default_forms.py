@@ -1,7 +1,6 @@
 
 from django.contrib.admin.forms import forms
 from muddery.utils.localiztion_handler import localize_form_fields
-from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO, EQUIPMENT_ATTRIBUTES_INFO, FOOD_ATTRIBUTES_INFO
 from muddery.mappings.quest_objective_set import QUEST_OBJECTIVE_SET
 from muddery.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
@@ -322,7 +321,6 @@ class FoodsForm(ObjectsForm):
         super(FoodsForm, self).__init__(*args, **kwargs)
 
         localize_form_fields(self)
-        FOOD_ATTRIBUTES_INFO.set_form_fields(self)
 
     class Meta:
         model = CM.FOODS.model
@@ -345,47 +343,10 @@ class SkillBooksForm(ObjectsForm):
         fields = '__all__'
 
 
-class CharacterAttributesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(CharacterAttributesForm, self).__init__(*args, **kwargs)
-        self.fields['field'].disabled = True
-        
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.CHARACTER_ATTRIBUTES_INFO.model
-        fields = '__all__'
-
-
-class EquipmentAttributesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(EquipmentAttributesForm, self).__init__(*args, **kwargs)
-        self.fields['field'].disabled = True
-        
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.EQUIPMENT_ATTRIBUTES_INFO.model
-        fields = '__all__'
-
-
-class FoodAttributesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(FoodAttributesForm, self).__init__(*args, **kwargs)
-        self.fields['field'].disabled = True
-        
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.FOOD_ATTRIBUTES_INFO.model
-        fields = '__all__'
-
-
 class PropertiesDictForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(PropertiesDictForm, self).__init__(*args, **kwargs)
         localize_form_fields(self)
-        CHARACTER_ATTRIBUTES_INFO.set_form_fields(self)
 
     class Meta:
         model = CM.PROPERTIES_DICT.model
@@ -669,7 +630,6 @@ class EquipmentsForm(ObjectsForm):
         self.fields['type'] = forms.ChoiceField(choices=choices)
         
         localize_form_fields(self)
-        EQUIPMENT_ATTRIBUTES_INFO.set_form_fields(self)
 
     class Meta:
         model = CM.EQUIPMENTS.model

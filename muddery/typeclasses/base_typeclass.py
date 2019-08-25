@@ -43,14 +43,17 @@ class BaseTypeclass(object):
         """
         if "_all_properties_" not in cls.__dict__:
             cls._all_properties_ = {}
-            for c in cls.__bases__:
-                if hasattr(c, "get_properties_info"):
-                    cls._all_properties_.update(c.get_properties_info())
 
-            from muddery.worlddata.dao.properties_dict_mapper import PROPERTIES_DICT
-            records = PROPERTIES_DICT.get_properties(cls.typeclass_key)
-            for record in records:
-                cls._all_properties_[record.property] = {"name": record.name,
-                                                         "desc": record.desc,
-                                                         "mutable": record.mutable}
+            if cls.typeclass_key:
+                for c in cls.__bases__:
+                    if hasattr(c, "get_properties_info"):
+                        cls._all_properties_.update(c.get_properties_info())
+
+                from muddery.worlddata.dao.properties_dict_mapper import PROPERTIES_DICT
+                records = PROPERTIES_DICT.get_properties(cls.typeclass_key)
+                for record in records:
+                    cls._all_properties_[record.property] = {"name": record.name,
+                                                             "desc": record.desc,
+                                                             "mutable": record.mutable}
+
         return cls._all_properties_

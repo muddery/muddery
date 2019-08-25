@@ -100,19 +100,6 @@ class game_settings(models.Model):
     # Default character of players.
     default_player_character_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
-    # Map's scale
-    map_scale = models.FloatField(blank=True,
-                                  default=75.0,
-                                  validators=[MinValueValidator(0.0)])
-
-    # Room's pixel size on the map.
-    map_room_size = models.FloatField(blank=True,
-                                      default=40.0,
-                                      validators=[MinValueValidator(0.0)])
-
-    # Show room's box if it does not have an icon.
-    map_room_box = models.BooleanField(blank=True, default=False)
-
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -329,52 +316,12 @@ class equipments(BaseObjects):
         verbose_name_plural = "Equipments"
 
 
-class base_npcs(BaseObjects):
-    "The base of all NPCs."
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Base NPC"
-        verbose_name_plural = "Base NPCs"
-
-
-class common_npcs(BaseObjects):
-    "Common NPCs."
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Common NPC"
-        verbose_name_plural = "Common NPCs"
-
-
-class world_npcs(BaseObjects):
-    "Store all NPCs."
-
-    # Character's level.
-    level = models.PositiveIntegerField(blank=True, default=1)
-
-    # NPC's location, it must be a room.
-    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # the condition for showing the NPC
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "World NPC"
-        verbose_name_plural = "World NPCs"
-
-
 class characters(BaseObjects):
     "Store common characters."
 
     # Character's level.
     level = models.PositiveIntegerField(blank=True, default=1)
-    
+
     # Reborn time. The time of reborn after this character was killed. 0 means never reborn.
     reborn_time = models.PositiveIntegerField(blank=True, default=0)
 
@@ -392,7 +339,48 @@ class characters(BaseObjects):
         verbose_name_plural = "Common Character List"
 
 
+class base_npcs(BaseObjects):
+    "The base of all NPCs."
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Base NPC"
+        verbose_name_plural = "Base NPCs"
+
+
+class common_npcs(BaseObjects):
+    "Common NPCs."
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Common NPC"
+        verbose_name_plural = "Common NPCs"
+
+
+class world_npcs(BaseObjects):
+    "Store all NPCs."
+
+    # NPC's location, it must be a room.
+    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # the condition for showing the NPC
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "World NPC"
+        verbose_name_plural = "World NPCs"
+
+
 class player_characters(BaseObjects):
+    "Player's character."
+
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -692,88 +680,6 @@ class equipment_positions(models.Model):
 
     def __unicode__(self):
         return self.name
-
-        
-# ------------------------------------------------------------
-#
-# attribute's information
-#
-# ------------------------------------------------------------
-class attributes_info(models.Model):
-    "attributes's information"
-    
-    # attribute db field's name. It must be a attribute field name in character models.
-    field = models.CharField(max_length=KEY_LENGTH, unique=True)
-    
-    # attribute's key, chars and numbers only.
-    key = models.CharField(max_length=KEY_LENGTH, blank=True)
-    
-    # attribute's readable name.
-    name = models.CharField(max_length=KEY_LENGTH, blank=True)
-    
-    # attribute's desc
-    desc = models.TextField(blank=True)
-    
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Attrubute Information"
-        verbose_name_plural = "Attribute Information"
-        
-    def clean(self):
-        if self.key:
-            if not re.match(re_attribute_key, self.key):
-                error = ValidationError("Keys can only contain letters, numbers and underscores and must begin with a letter or an underscore.")
-                raise ValidationError({"key": error})
-        
-
-# ------------------------------------------------------------
-#
-# Character attribute's information.
-#
-# ------------------------------------------------------------
-class character_attributes_info(attributes_info):
-    "Character's all available attributes"
-    
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Character Attrubute Information"
-        verbose_name_plural = "Character Attribute Information"
-        
-        
-# ------------------------------------------------------------
-#
-# Equipment attribute's information.
-#
-# ------------------------------------------------------------
-class equipment_attributes_info(attributes_info):
-    "Equipment's all available attributes"
-    
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Equipment Attrubute Information"
-        verbose_name_plural = "Equipment Attribute Information"
-        
-        
-# ------------------------------------------------------------
-#
-# Food attribute's information.
-#
-# ------------------------------------------------------------
-class food_attributes_info(attributes_info):
-    "Food's all available attributes"
-    
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Food Attrubute Information"
-        verbose_name_plural = "Food Attribute Information"
 
 
 # ------------------------------------------------------------

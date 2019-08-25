@@ -30,16 +30,6 @@ def at_server_start():
     from muddery.utils.localized_strings_handler import LOCALIZED_STRINGS_HANDLER
     LOCALIZED_STRINGS_HANDLER.reload()
 
-    # reload attributes
-    from muddery.utils.attributes_info_handler import CHARACTER_ATTRIBUTES_INFO
-    CHARACTER_ATTRIBUTES_INFO.reload()
-
-    from muddery.utils.attributes_info_handler import EQUIPMENT_ATTRIBUTES_INFO
-    EQUIPMENT_ATTRIBUTES_INFO.reload()
-
-    from muddery.utils.attributes_info_handler import FOOD_ATTRIBUTES_INFO
-    FOOD_ATTRIBUTES_INFO.reload()
-
     # reset default locations
     from muddery.utils import builder
     builder.reset_default_locations()
@@ -55,11 +45,6 @@ def at_server_start():
     # localize model fields
     from muddery.utils.localiztion_handler import localize_model_fields
     localize_model_fields()
-
-    # set character attribute field names
-    CHARACTER_ATTRIBUTES_INFO.set_model_fields()
-    EQUIPMENT_ATTRIBUTES_INFO.set_model_fields()
-    FOOD_ATTRIBUTES_INFO.set_model_fields()
     
     # load condition descriptions
     from muddery.utils.desc_handler import DESC_HANDLER

@@ -73,10 +73,7 @@ class GameSettings(object):
         """
         client_settings = {"language": settings.LANGUAGE_CODE,
                            "game_name": self.get("game_name"),
-                           "solo_mode": self.get("solo_mode"),
-                           "map_scale": self.get("map_scale"),
-                           "map_room_size": self.get("map_room_size"),
-                           "map_room_box": self.get("map_room_box"),}
+                           "solo_mode": self.get("solo_mode"),}
         return client_settings
 
 
@@ -93,7 +90,4 @@ GAME_SETTINGS = GameSettings({"game_name": "Muddery",
                               "start_location_key": True,
                               "default_player_home_key": True,
                               "default_player_character_key": "",
-                              "map_scale": 75.0,
-                              "map_room_size": 40.0,
-                              "map_room_box": False,
                               })

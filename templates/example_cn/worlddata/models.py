@@ -168,36 +168,6 @@ class equipments(BaseModels.equipments):
 
 # ------------------------------------------------------------
 #
-# character attributes
-#
-# ------------------------------------------------------------
-class character_attributes_info(BaseModels.character_attributes_info):
-    "character attributes"
-    pass
-
-
-# ------------------------------------------------------------
-#
-# Equipment attribute's information.
-#
-# ------------------------------------------------------------
-class equipment_attributes_info(BaseModels.equipment_attributes_info):
-    "Equipment's all available attributes"
-    pass
-
-
-# ------------------------------------------------------------
-#
-# Food attribute's information.
-#
-# ------------------------------------------------------------
-class food_attributes_info(BaseModels.food_attributes_info):
-    "Food attribute's information."
-    pass
-
-
-# ------------------------------------------------------------
-#
 # Object's custom properties.
 #
 # ------------------------------------------------------------

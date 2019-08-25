@@ -70,12 +70,6 @@ CHARACTER_LOOT_LIST = CommonMapper("character_loot_list")
 
 QUEST_REWARD_LIST = CommonMapper("quest_reward_list")
 
-CHARACTER_ATTRIBUTES_INFO = CommonMapper("character_attributes_info")
-
-EQUIPMENT_ATTRIBUTES_INFO = CommonMapper("equipment_attributes_info")
-
-FOOD_ATTRIBUTES_INFO = CommonMapper("food_attributes_info")
-
 PROPERTIES_DICT = CommonMapper("properties_dict")
 
 DEFAULT_OBJECTS = CommonMapper("default_objects")

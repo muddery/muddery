@@ -1,4 +1,4 @@
-key,level,location,condition
-npc_wu,1,room_colorfulworld_storeroom,is_quest_finished("quest_find_survivor")
-npc_stranger,1,room_colorfulworld_storeroom,not is_quest_finished("quest_find_survivor")
-npc_doll,1,room_colorfulworld_photo_studio,
+key,location,condition
+npc_wu,room_colorfulworld_storeroom,is_quest_finished("quest_find_survivor")
+npc_stranger,room_colorfulworld_storeroom,not is_quest_finished("quest_find_survivor")
+npc_doll,room_colorfulworld_photo_studio,
