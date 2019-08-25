@@ -33,6 +33,12 @@ EQUIPMENTS = ObjectsMapper("equipments")
 
 CHARACTERS = ObjectsMapper("characters")
 
+BASE_NPCS = ObjectsMapper("base_npcs")
+
+COMMON_NPCS = ObjectsMapper("common_npcs")
+
+PLAYER_CHARACTERS = ObjectsMapper("player_characters")
+
 SHOPS = ObjectsMapper("shops")
 
 SHOP_GOODS = ObjectsMapper("shop_goods")
@@ -69,8 +75,6 @@ CHARACTER_ATTRIBUTES_INFO = CommonMapper("character_attributes_info")
 EQUIPMENT_ATTRIBUTES_INFO = CommonMapper("equipment_attributes_info")
 
 FOOD_ATTRIBUTES_INFO = CommonMapper("food_attributes_info")
-
-CHARACTER_MODELS = CommonMapper("character_models")
 
 PROPERTIES_DICT = CommonMapper("properties_dict")
 

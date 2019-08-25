@@ -196,16 +196,6 @@ class food_attributes_info(BaseModels.food_attributes_info):
     pass
 
 
-#------------------------------------------------------------
-#
-# character levels
-#
-#------------------------------------------------------------
-class character_models(BaseModels.character_models):
-    "Store all character level informations."
-    pass
-
-
 # ------------------------------------------------------------
 #
 # Object's custom properties.

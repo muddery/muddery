@@ -196,20 +196,6 @@ class food_attributes_info(BaseModels.food_attributes_info):
     pass
 
 
-#------------------------------------------------------------
-#
-# character levels
-#
-#------------------------------------------------------------
-class character_models(BaseModels.character_models):
-    "Store all character level informations."
-    # max mp of the character
-    max_mp = models.PositiveIntegerField(blank=True, default=0)
-    
-    # max sp of the character
-    max_sp = models.PositiveIntegerField(blank=True, default=0)
-
-
 # ------------------------------------------------------------
 #
 # Object's custom properties.

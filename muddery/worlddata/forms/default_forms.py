@@ -381,17 +381,6 @@ class FoodAttributesForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CharacterModelsForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(CharacterModelsForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-        CHARACTER_ATTRIBUTES_INFO.set_form_fields(self)
-
-    class Meta:
-        model = CM.CHARACTER_MODELS.model
-        fields = '__all__'
-
-
 class PropertiesDictForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(PropertiesDictForm, self).__init__(*args, **kwargs)
@@ -407,13 +396,6 @@ class CharacterForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(CharacterForm, self).__init__(*args, **kwargs)
 
-        # models
-        choices = [("", "---------")]
-        objects = CM.CHARACTER_MODELS.objects.all()
-        model_keys = set([obj.key for obj in objects])
-        choices.extend([(model_key, model_key) for model_key in model_keys])
-        self.fields['model'] = forms.ChoiceField(choices=choices, required=False)
-        
         self.fields['icon'] = ImageField(image_type="icon", required=False)
 
         localize_form_fields(self)
@@ -422,34 +404,44 @@ class CharacterForm(ObjectsForm):
         model = CM.CHARACTERS.model
         fields = '__all__'
 
-    def clean(self):
-        cleaned_data = super(CharacterForm, self).clean()
-        data_model = cleaned_data["model"]
-        data_level = cleaned_data["level"]
 
-        # check model and level
-        from muddery.worlddata.dao.common_mappers import CHARACTER_MODELS
+class BaseNPCsForm(ObjectsForm):
+    def __init__(self, *args, **kwargs):
+        super(BaseNPCsForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
 
-        try:
-            CHARACTER_MODELS.get(key=data_model, level=data_level)
-        except Exception as e:
-            message = "Can not get the level data."
-            levels = CHARACTER_MODELS.filter(key=data_model)
-            available = [str(level.level) for level in levels]
-            if len(available) == 1:
-                message += " Available level: " + available[0]
-            elif len(available) > 1:
-                message += " Available levels: " + ", ".join(available)
-            raise forms.ValidationError({"level": message})
+    class Meta:
+        model = CM.BASE_NPCS.model
+        fields = '__all__'
+
+
+class CommonNPCsForm(ObjectsForm):
+    def __init__(self, *args, **kwargs):
+        super(CommonNPCsForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    class Meta:
+        model = CM.COMMON_NPCS.model
+        fields = '__all__'
+
+
+class PlayerCharactersForm(ObjectsForm):
+    def __init__(self, *args, **kwargs):
+        super(PlayerCharactersForm, self).__init__(*args, **kwargs)
+        localize_form_fields(self)
+
+    class Meta:
+        model = CM.PLAYER_CHARACTERS.model
+        fields = '__all__'
 
 
 class DefaultObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DefaultObjectsForm, self).__init__(*args, **kwargs)
 
-        # all character's models
-        character_models = set([record.key for record in CM.CHARACTER_MODELS.objects.all()])
-        choices = [(key, key) for key in character_models]
+        # all character's
+        characters = set([record.key for record in CM.CHARACTERS.objects.all()])
+        choices = [(key, key) for key in characters]
         self.fields['character'] = forms.ChoiceField(choices=choices)
 
         # available objects
@@ -556,8 +548,8 @@ class DefaultSkillsForm(forms.ModelForm):
         super(DefaultSkillsForm, self).__init__(*args, **kwargs)
 
         # all character's models
-        character_models = set([record.key for record in CM.CHARACTER_MODELS.objects.all()])
-        choices = [(key, key) for key in character_models]
+        characters = set([record.key for record in CM.CHARACTERS.objects.all()])
+        choices = [(key, key) for key in characters]
         self.fields['character'] = forms.ChoiceField(choices=choices)
 
         objects = CM.SKILLS.all_with_base()

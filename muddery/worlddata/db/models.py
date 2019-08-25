@@ -288,27 +288,6 @@ class common_objects(BaseObjects):
 class foods(BaseObjects):
     "Foods inherit from common objects."
 
-    # Attributes. Value's type must be a python default value type.
-    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -341,27 +320,6 @@ class equipments(BaseObjects):
     # The key of an equipment type.
     # equipment's type
     type = models.CharField(max_length=KEY_LENGTH)
-
-    # Attributes. Value's type must be a python default value type.
-    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -413,9 +371,6 @@ class world_npcs(BaseObjects):
 
 class characters(BaseObjects):
     "Store common characters."
-
-    # Character's model. If it is empty, character's key will be used as its model.
-    model = models.CharField(max_length=KEY_LENGTH, blank=True, default="")
 
     # Character's level.
     level = models.PositiveIntegerField(blank=True, default=1)
@@ -823,66 +778,6 @@ class food_attributes_info(attributes_info):
 
 # ------------------------------------------------------------
 #
-# character models
-#
-# ------------------------------------------------------------
-class character_models(models.Model):
-    "Store all character level informations."
-
-    # model's key
-    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # model's name
-    name = models.CharField(max_length=NAME_LENGTH)
-
-    # model's level
-    level = models.PositiveIntegerField(blank=True, default=1)
-
-    # max hp of the character
-    max_hp = models.PositiveIntegerField(blank=True, default=1)
-    
-    # If a character's exp is larger than max_exp, the character can upgrade.
-    # If max_exp is 0, the character can not upgrade any more.
-    max_exp = models.PositiveIntegerField(blank=True, default=0)
-
-    # exp provided to the character who killed this character
-    give_exp = models.IntegerField(blank=True, default=0)
-
-    # Attributes. Value's type must be a python default value type.
-    attr_1 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_2 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_3 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_4 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_5 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_6 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_7 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_8 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_9 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    attr_10 = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Character Model"
-        verbose_name_plural = "Character Models"
-        unique_together = ("key", "level")
-
-    def __unicode__(self):
-        return self.name + " (Lv" + str(self.level) + ")"
-
-
-# ------------------------------------------------------------
-#
 # Object's custom properties.
 #
 # ------------------------------------------------------------
@@ -950,7 +845,7 @@ class object_properties(models.Model):
 class default_objects(models.Model):
     "character's default objects"
 
-    # Character's model.
+    # Character's key.
     character = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # The key of an object.
@@ -1032,7 +927,7 @@ class skill_types(models.Model):
 class default_skills(models.Model):
     "character's default skills"
 
-    # character's model
+    # character's key
     character = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # The key of a skill.
