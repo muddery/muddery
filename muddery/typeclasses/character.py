@@ -165,13 +165,17 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         
         return True
 
-    def load_custom_properties(self):
+    def load_custom_properties(self, level):
         """
         Load body properties from db. Body properties do no include mutable properties.
         """
+        # Get object level.
+        if level is None:
+            level = self.db.level
+
         # Load values from db.
         values = {}
-        for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), self.db.level):
+        for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":
@@ -752,7 +756,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
                 target_level = obj.db.level
 
         # Create a target.
-        target = build_object(target_key, target_level, set_location=False)
+        target = build_object(target_key, target_level, reset_location=False)
         if not target:
             logger.log_errmsg("Can not create the target %s." % target_key)
             return False

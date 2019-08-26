@@ -42,7 +42,7 @@ def get_object_record(obj_key):
     return record
 
 
-def build_object(obj_key, level=0, caller=None, set_location=True):
+def build_object(obj_key, level=None, caller=None, reset_location=True):
     """
     Build objects of a model.
 
@@ -88,7 +88,7 @@ def build_object(obj_key, level=0, caller=None, set_location=True):
 
     try:
         # Set data info.
-        obj.set_data_key(record.key, level, set_location=set_location)
+        obj.set_data_key(record.key, level, reset_location=reset_location)
     except Exception as e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
         print(ostring)
@@ -190,7 +190,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
                 continue
 
             try:
-                obj.set_data_key(record.key, getattr(record, "level", 0))
+                obj.set_data_key(record.key)
                 utils.set_obj_unique_type(obj, type_name)
             except Exception as e:
                 ostring = "Can not set data info to obj %s: %s" % (record.key, e)

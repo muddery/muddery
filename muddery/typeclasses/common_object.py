@@ -154,7 +154,16 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
         changes = user.change_properties(increments)
         user.show_status()
 
-        return changes, used
+        results = []
+        properties_info = self.get_properties_info()
+        for key in changes:
+            if key in properties_info:
+                # set result
+                attribute_info = properties_info.get(key)
+                signal = '+' if changes[key] >= 0 else ''
+                results.append("%s %s%s" % (attribute_info["name"], signal, changes[key]))
+
+        return ", ".join(results), used
 
     def get_available_commands(self, caller):
         """
