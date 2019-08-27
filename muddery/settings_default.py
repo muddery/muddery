@@ -18,17 +18,12 @@ from evennia.settings_default import EVENNIA_DIR, GAME_DIR
 from evennia.settings_default import WEBSITE_TEMPLATE
 from evennia.settings_default import INSTALLED_APPS
 
-
-######################################################################
-# Evennia base server config
-######################################################################
-
-# This is the name of your server.
-SERVERNAME = "Muddery"
-
 ######################################################################
 # Muddery base server config
 ######################################################################
+
+# This is the name of your server.
+GAME_SERVERNAME = "Muddery"
 
 MUDDERY_DIR = os.path.dirname(os.path.abspath(__file__))
 

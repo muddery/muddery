@@ -63,6 +63,42 @@ def import_local_data():
             print("Import error: %s" % e)
 
 
+def print_info():
+    """
+    Format info dicts from the Portal/Server for display
+
+    """
+    from django.conf import settings
+
+    ind = " " * 8
+    info = {
+        "servername": settings.GAME_SERVERNAME,
+        "version": utils.muddery_version(),
+        "status": ""
+    }
+
+    def _prepare_dict(dct):
+        out = {}
+        for key, value in dct.items():
+            if isinstance(value, list):
+                value = "\n{}".format(ind).join(str(val) for val in value)
+            out[key] = value
+        return out
+
+    def _strip_empty_lines(string):
+        return "\n".join(line for line in string.split("\n") if line.strip())
+
+    # Print server info.
+    sdict = _prepare_dict(info)
+    info = _strip_empty_lines(configs.SERVER_INFO.format(**sdict))
+
+    maxwidth = max(len(line) for line in info.split("\n"))
+    top_border = "-" * (maxwidth - 11) + " Muddery " + "---"
+    border = "-" * (maxwidth + 1)
+    print(top_border + "\n" + info + '\n' + border)
+
+
+
 def main():
     """
     Run the muddery main program.
@@ -277,6 +313,8 @@ def main():
                 print("Static file collected.")
             except django.core.management.base.CommandError as exc:
                 print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+            print_info()
     else:
         # no input; print muddery info
         print(configs.ABOUT_INFO)

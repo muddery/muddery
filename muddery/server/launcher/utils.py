@@ -29,7 +29,7 @@ def muddery_version():
         pass
     try:
         rev = check_output("git rev-parse --short HEAD", shell=True, cwd=configs.MUDDERY_ROOT, stderr=STDOUT).strip()
-        version = "%s (rev %s)" % (version, rev)
+        version = "%s (rev %s)" % (version, rev.decode())
     except (IOError, CalledProcessError):
         pass
     return version

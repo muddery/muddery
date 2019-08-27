@@ -27,6 +27,6 @@ Muddery is still under construction. It will have following features.
 1. `cd mygame`
 1. `muddery start`
 
-Muddery should now be running and you can connect to it by pointing a web browser to http://localhost:8000 or a MUD telnet client to localhost:4000.
+Muddery should now be running and you can connect to it by pointing your web browser to http://localhost:8000.
 
 If you want to stop the server, you can use `muddery stop`.

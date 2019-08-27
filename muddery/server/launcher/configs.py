@@ -49,10 +49,8 @@ CREATED_NEW_GAMEDIR = \
 
     This starts the server for the first time. Make sure to create
     a superuser when asked for it. You should now be able to (by
-    default) connect to your server on server 'localhost', port 4000
-    using a telnet/mud client or http://localhost:8000 using your web
-    browser. If things don't work, check so those ports are open.
-
+    default) connect to your server by pointing your web browser to
+    http://localhost:8000.
     """
 
 CMDLINE_HELP = \
@@ -107,6 +105,11 @@ NEED_UPGRADE = \
         muddery --upgrade
 
     to upgrade your game.
+    """
+
+SERVER_INFO = \
+    """{servername} Server {version}
+    {status}
     """
 
 ARG_OPTIONS = \
