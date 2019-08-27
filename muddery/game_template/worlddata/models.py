@@ -198,6 +198,18 @@ class world_npcs(BaseModels.world_npcs):
     pass
 
 
+class base_npcs(BaseModels.base_npcs):
+    pass
+
+
+class common_npcs(BaseModels.common_npcs):
+    pass
+
+
+class player_characters(BaseModels.player_characters):
+    pass
+
+
 #------------------------------------------------------------
 #
 # store common characters
@@ -390,7 +402,7 @@ class npc_dialogues(BaseModels.npc_dialogues):
 
 # ------------------------------------------------------------
 #
-# event attack's data
+# action to attack a target
 #
 # ------------------------------------------------------------
 class action_attack(BaseModels.action_attack):
@@ -400,23 +412,22 @@ class action_attack(BaseModels.action_attack):
 
 #------------------------------------------------------------
 #
-# event dialogues
+# action to begin a dialogue
 #
 #------------------------------------------------------------
 class action_dialogue(BaseModels.action_dialogue):
-    "Store all event dialogues."
     pass
 
 
 #------------------------------------------------------------
 #
-# event closes
+# action to learn a skill
 #
 #------------------------------------------------------------
 class action_learn_skill(BaseModels.action_learn_skill):
     pass
 
-    
+
 #------------------------------------------------------------
 #
 # action to accept a quest
@@ -434,7 +445,7 @@ class action_accept_quest(BaseModels.action_accept_quest):
 class action_turn_in_quest(BaseModels.action_turn_in_quest):
     pass
 
-    
+
 # ------------------------------------------------------------
 #
 # action to close an event
@@ -442,7 +453,7 @@ class action_turn_in_quest(BaseModels.action_turn_in_quest):
 # ------------------------------------------------------------
 class action_close_event(BaseModels.action_close_event):
     pass
-    
+
 
 # ------------------------------------------------------------
 #
