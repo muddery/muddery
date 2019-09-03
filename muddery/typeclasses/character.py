@@ -396,7 +396,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         actual = {}
         properties_info = self.get_properties_info()
 
-        for key, value in values:
+        for key, value in values.items():
             actual[key] = 0
 
             if not self.custom_properties_handler.has(key):
