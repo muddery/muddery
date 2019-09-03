@@ -1,9 +1,5 @@
 
-if (typeof(require) != "undefined") {
-    require("../../client/defines.js");
-}
-
-$$.local_string_zh_tw = {
+MudderyLocalStringZhTw = {
     "Muddery Webclient": "Muddery 網頁客戶端",
     "Please login.": "請登錄。",
     "username": "用戶名",

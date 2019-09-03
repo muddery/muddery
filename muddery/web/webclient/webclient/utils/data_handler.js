@@ -1,9 +1,8 @@
 
-if (typeof(require) != "undefined") {
-    require("../client/defines.js");
+MudderyDataHandler = function() {
 }
 
-$$.data_handler = {
+MudderyDataHandler.prototype = {
     character_dbref: "",
     character_name: "",
     character_level: 0,

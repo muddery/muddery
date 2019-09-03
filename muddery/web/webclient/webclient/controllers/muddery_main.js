@@ -1,21 +1,4 @@
 
-if (typeof(require) != "undefined") {
-    require("../css/webclient.css");
-    require("../css/webpack.css");
-
-    require("../lang/local_string.js");
-
-    require("../client/client.js");
-    require("../client/commands.js");
-    require("../utils/map_data.js");
-    require("../utils/text2html.js");
-    require("../utils/data_handler.js");
-    require("../utils/text_escape.js");
-    require("../utils/utils.js");
-    require("../utils/paginator.js");
-
-    require("../controllers/base_controller.js");
-}
 
 /*
  * Derive from the base class.
@@ -27,12 +10,6 @@ MudderyMain = function(el) {
     this.solo_mode = false;
 	this.message_type = null;
 	this.waiting_begin = 0;
-
-	this.resetLanguage();
-    this.bindEvents();
-	this.doSetWindowSize();
-	this.doSetVisiblePopupSize();
-	this.el.removeClass("template");
 }
 
 MudderyMain.prototype = prototype(BaseController.prototype);
@@ -41,40 +18,10 @@ MudderyMain.prototype.constructor = MudderyMain;
 /*
  * Document ready event.
  */
-MudderyMain.prototype.onReady = function() {
-	this.showUnlogin();
-    this.showContent("login");
-    this.onResize();
+MudderyMain.prototype.init = function() {
+    this.bindEvents();
 }
-	
-/*
- * Reset the view's language.
- */
-MudderyMain.prototype.resetLanguage = function() {
-	$("#tab_view_char").text($$.trans("Char"));
-	$("#tab_view_social").text($$.trans("Social"));
-	$("#tab_view_system").text($$.trans("Sys"));
-	$("#tab_view_system_char").text($$.trans("System"));
 
-	$("#tab_button_connect").text($$.trans("Connect"));
-	$("#tab_button_login").text($$.trans("Login"));
-	$("#tab_button_register").text($$.trans("Register"));
-	$("#tab_button_select_char").text($$.trans("Select Char"));
-	$("#tab_button_scene").text($$.trans("Scene"));
-	$("#tab_button_status").text($$.trans("Status"));
-	$("#tab_button_inventory").text($$.trans("Inventory"));
-	$("#tab_button_skills").text($$.trans("Skills"));
-	$("#tab_button_quests").text($$.trans("Quests"));
-	$("#tab_button_honours").text($$.trans("Honours"));
-	$("#tab_button_map").text($$.trans("Map"));
-	$("#tab_button_logout").text($$.trans("Logout"));
-	$("#tab_button_password").text($$.trans("Password"));
-	$("#tab_button_logout_puppet").text($$.trans("Logout"));
-	$("#tab_button_unpuppet").text($$.trans("Unpuppet"));
-	$("#tab_button_password_puppet").text($$.trans("Password"));
-
-	$("#bar_msg_send").text($$.trans("Send"));
-}
 	
 /*
  * Bind events.
@@ -84,27 +31,6 @@ MudderyMain.prototype.bindEvents = function() {
     // Event when client window changes
     $(window).bind("resize", this.onResize);
 
-	this.onClick("#tab_button_connect", function(){Evennia.connect()});
-    this.onClick("#tab_button_login", function(){$$.main.showContent('login')});
-    this.onClick("#tab_button_register", function(){$$.main.showContent('register')});
-    this.onClick("#tab_button_select_char", function(){$$.main.showContent('select_char')});
-    this.onClick("#tab_button_scene", function(){$$.main.showContent('scene')});
-    this.onClick("#tab_button_status", function(){$$.main.showContent('information')});
-    this.onClick("#tab_button_inventory", function(){$$.main.showContent('inventory')});
-    this.onClick("#tab_button_skills", function(){$$.main.showContent('skills')});
-    this.onClick("#tab_button_quests", function(){$$.main.showContent('quests')});
-    this.onClick("#tab_button_honours", function(){$$.main.showHonours()});
-    this.onClick("#tab_button_map", function(){$$.main.showMap()});
-    this.onClick("#tab_button_logout", function(){$$.commands.doLogout()});
-    this.onClick("#tab_button_password", function(){$$.main.showContent('password')});
-    this.onClick("#tab_button_logout_puppet", function(){$$.commands.doLogout()});
-    this.onClick("#tab_button_unpuppet", function(){$$.commands.unpuppetCharacter()});
-    this.onClick("#tab_button_password_puppet", function(){$$.main.showContent('password')});
-    
-    this.onClick("#bar_msg_select", function(){$$.main.showMsgTypes()});
-    this.onClick("#bar_msg_send", function(){$$.main.sendMessage()});
-    
-    this.onClick("#bar_msg_type_menu", "a", function(el){$$.main.selectMsgType(el)});
 }
 
 
@@ -152,7 +78,7 @@ MudderyMain.prototype.displayMsg = function(msg, type) {
 	
 	// scroll message window to bottom
 	// $("#msg_wnd").scrollTop($("#msg_wnd")[0].scrollHeight);
-	msg_wnd.animate({scrollTop: msg_wnd[0].scrollHeight});
+	// msg_wnd.animate({scrollTop: msg_wnd[0].scrollHeight});
 }
     
 //////////////////////////////////////////
@@ -165,7 +91,7 @@ MudderyMain.prototype.displayMsg = function(msg, type) {
  * Popup an alert message.
  */
 MudderyMain.prototype.showAlert = function(message) {
-    this.showMessage($$.trans("Message"), message);
+    this.showMessage(mudcore.trans("Message"), message);
 }
 
 /*
@@ -174,9 +100,8 @@ MudderyMain.prototype.showAlert = function(message) {
 MudderyMain.prototype.showMessage = function(header, content, commands) {
 	this.doClosePopupBox();
 
-	var component = $$.component.message;
-	component.setMessage(header, content, commands);
-    component.show();
+	message_window.setMessage(header, content, commands);
+    message_window.show();
 }
 
 /*
@@ -263,7 +188,7 @@ MudderyMain.prototype.showGetObjects = function(accepted, rejected, combat) {
 		var first = true;
 		for (var key in accepted) {
 			if (first) {
-				this.displayMsg($$.trans("You got:"));
+				this.displayMsg(mudcore.trans("You got:"));
 				first = false;
 			}
 			this.displayMsg(key + ": " + accepted[key]);
@@ -278,7 +203,7 @@ MudderyMain.prototype.showGetObjects = function(accepted, rejected, combat) {
 		var first = true;
 		for (var key in rejected) {
 			if (first) {
-				this.displayMsg($$.trans("You can not get:"));
+				this.displayMsg(mudcore.trans("You can not get:"));
 				first = false;
 			}
 			this.displayMsg(key + ": " + rejected[key]);
@@ -340,8 +265,6 @@ MudderyMain.prototype.closeCombat = function(data) {
  */
 MudderyMain.prototype.setCombatInfo = function(info) {
 	$$.component.combat.setInfo(info["desc"], info["timeout"], info["characters"], $$.data_handler.character_dbref);
-
-	this.doSetVisiblePopupSize();
 }
     
 /*
@@ -365,10 +288,10 @@ MudderyMain.prototype.setSkillCast = function(result) {
 	if (component.isCombatFinished()) {
 	    var message = "";
 		if ("cast" in result && result["cast"]) {
-			message += $$.text2html.parseHtml(result["cast"]) + " ";
+			message += mudcore.text2html.parseHtml(result["cast"]) + " ";
 		}
 		if ("result" in result && result["result"]) {
-			message += $$.text2html.parseHtml(result["result"]);
+			message += mudcore.text2html.parseHtml(result["result"]);
 		}
 		if (message) {
 			this.displayMsg(message);
@@ -399,25 +322,11 @@ MudderyMain.prototype.setRankings = function(rankings) {
  * Player in honour combat queue.
  */
 MudderyMain.prototype.inCombatQueue = function(ave_time) {
-	$("#prompt_queue").text($$.trans("QUEUE: ") + $$.utils.time_to_string(0));
-	this.displayMsg($$.trans("You are in queue now. Average waiting time is ") + $$.utils.time_to_string(ave_time) + $$.trans("."));
+	$("#prompt_queue").text(mudcore.trans("QUEUE: ") + $$.utils.time_to_string(0));
+	this.displayMsg(mudcore.trans("You are in queue now. Average waiting time is ") + $$.utils.time_to_string(ave_time) + mudcore.trans("."));
 
 	this.waiting_begin = new Date().getTime();
 	this.interval_id = window.setInterval("refreshWaitingTime()", 1000);
-}
-
-/*
- * Player left the honour combat queue.
- */
-MudderyMain.prototype.leftCombatQueue = function(ave_time) {
-	if (this.interval_id != null) {
-		this.interval_id = window.clearInterval(this.interval_id);
-	}
-
-	$("#prompt_queue").empty();
-
-	$$.component.honours.quitCombatQueue();
-	$$.component.confirm_combat.closeBox();
 }
 
 /*
@@ -427,9 +336,6 @@ MudderyMain.prototype.prepareMatch = function(data) {
 	var component = $$.component.confirm_combat;
 	component.init(data);
 	component.show();
-
-	var popup_dialog = $("#popup_confirm_combat .modal-dialog:visible:first");
-	this.setPopupSize(popup_dialog);
 }
 
 /*
@@ -439,10 +345,10 @@ MudderyMain.prototype.matchRejected = function(character_id) {
 	$$.component.confirm_combat.closeBox();
 
 	if ("#" + character_id == $$.data_handler.character_dbref) {
-		this.displayMsg($$.trans("You have rejected the combat."));
+		this.displayMsg(mudcore.trans("You have rejected the combat."));
 	}
 	else {
-		this.displayMsg($$.trans("Your opponent has rejected the combat."));
+		this.displayMsg(mudcore.trans("Your opponent has rejected the combat."));
 	}
 }
 
@@ -468,7 +374,7 @@ MudderyMain.prototype.finishCombat = function(result) {
  * Set the combat's result.
  */
 MudderyMain.prototype.showCombatResult = function() {
-	$$.main.doClosePopupBox();
+	window_main.doClosePopupBox();
 	$$.component.combat_result.show();
 }
 
@@ -477,7 +383,7 @@ MudderyMain.prototype.showCombatResult = function() {
  */
 MudderyMain.prototype.showGetExp = function(exp, combat) {
 	// show exp
-	this.displayMsg($$.trans("You got exp: ") + exp);
+	this.displayMsg(mudcore.trans("You got exp: ") + exp);
 
 	if (combat) {
 	    $$.component.combat_result.setGetExp(exp);
@@ -569,7 +475,7 @@ MudderyMain.prototype.setInfo = function(name, icon) {
  */
 MudderyMain.prototype.setStatus = function(status) {
 	$$.data_handler.character_level = status["level"]["value"];
-	$("#prompt_level").text($$.trans("LEVEL: ") + status["level"]["value"]);
+	$("#prompt_level").text(mudcore.trans("LEVEL: ") + status["level"]["value"]);
 
     if ("exp" in status && "max_exp" in status) {
         var exp_str = "";
@@ -579,12 +485,12 @@ MudderyMain.prototype.setStatus = function(status) {
         else {
             exp_str = "--/--";
         }
-        $("#prompt_exp").text($$.trans("EXP: ") + exp_str);
+        $("#prompt_exp").text(mudcore.trans("EXP: ") + exp_str);
     }
 
     if ("hp" in status && "max_hp" in status) {
         var hp_str = status["hp"]["value"] + "/" + status["max_hp"]["value"];
-        $("#prompt_hp").text($$.trans("HP: ") + hp_str);
+        $("#prompt_hp").text(mudcore.trans("HP: ") + hp_str);
     }
     
 	$$.component.information.setStatus(status);
@@ -595,7 +501,7 @@ MudderyMain.prototype.setStatus = function(status) {
  */
 MudderyMain.prototype.setCombatStatus = function(status) {
 	var hp_str = status["hp"] + "/" + status["max_hp"];
-	$("#prompt_hp").text($$.trans("HP: ") + hp_str);
+	$("#prompt_hp").text(mudcore.trans("HP: ") + hp_str);
 
 	$$.component.information.setCombatStatus(status);
 }
@@ -701,31 +607,36 @@ MudderyMain.prototype.showObjMovedOut = function(objects) {
  * Event when the connection opens.
  */
 MudderyMain.prototype.onConnectionOpen = function() {
-	this.puppet = false;
-	
-	$$.main.showUnlogin();
-	$$.main.doAutoLoginCheck();
+    var self = main_window;
+    
+	self.puppet = false;
+
+	self.showLoginWindow();
+	login_window.checkAutoLogin();
 }
 
 /*
  * Event when the connection closes.
  */
 MudderyMain.prototype.onConnectionClose = function() {
-	this.puppet = false;
+    var self = main_window;
+    
+	self.puppet = false;
 	
-	$$.main.showConnect();
+	self.showLoginWindow();
 
 	// close popup windows
-	$$.main.doClosePopupBox();
+	self.doClosePopupBox();
 	
 	// show message
-	$$.main.showMessage($$.trans("Message"), $$.trans("The client connection was closed cleanly."));
+	self.showMessage(mudcore.trans("Message"), mudcore.trans("The client connection was closed cleanly."));
 }
     
 /*
  * Event when the player logins.
  */
 MudderyMain.prototype.onLogin = function(data) {
+    login_window.onLogin();
 	this.showSelectChar();
 }
     
@@ -736,7 +647,7 @@ MudderyMain.prototype.onLogout = function(data) {
 	this.puppet = false;
 	
 	// show unlogin UI
-	this.showUnlogin();
+	this.showLoginWindow();
 	
 	//reconnect, show the connection screen
 	Evennia.connect();
@@ -747,7 +658,7 @@ MudderyMain.prototype.onLogout = function(data) {
  */
 MudderyMain.prototype.onCharacterCreated = function(data) {
 	// close popup windows
-	$$.main.doClosePopupBox();
+	window_main.doClosePopupBox();
 }
 
 /*
@@ -755,7 +666,7 @@ MudderyMain.prototype.onCharacterCreated = function(data) {
  */
 MudderyMain.prototype.onCharacterDeleted = function(data) {
 	// close popup windows
-	$$.main.doClosePopupBox();
+	window_main.doClosePopupBox();
 }
 
 /*
@@ -777,7 +688,6 @@ MudderyMain.prototype.onPuppet = function(data) {
 MudderyMain.prototype.onUnpuppet = function(data) {
 	this.puppet = false;
 	this.showSelectChar();
-	this.leftCombatQueue();
 }
     
 //////////////////////////////////////////
@@ -787,95 +697,10 @@ MudderyMain.prototype.onUnpuppet = function(data) {
 //////////////////////////////////////////
 
 /*
+/*
  * Reset all sizes.
  */
 MudderyMain.prototype.onResize = function() {
-	$$.main.doSetWindowSize();
-	$$.main.doSetVisiblePopupSize();
-
-	for (var key in $$.component) {
-        $$.component[key].resetSize();
-	}
-}
-
-/*
- * Reset the sizes of the main window.
- */
-MudderyMain.prototype.doSetWindowSize = function() {
-	// Sets the size of the message window
-	var win_h = $(window).innerHeight();
-	var win_w = $(window).innerWidth();
-
-	//var head_h = $('header').outerHeight(true);
-	var head_h = 20;
-	$('#header').height(head_h);
-
-	var wrapper_h = win_h - head_h - 20;
-	$('#wrapper').height(wrapper_h);
-
-	var margin_h = 55
-	var prompt_h = 18;
-	var tab_bar_h = 32;
-	var input_bar_h = 32;
-	var tab_content_h = (wrapper_h - prompt_h - tab_bar_h - margin_h - input_bar_h) * 0.7;
-	$('#prompt_bar').height(prompt_h);
-	$('#tab_bar').height(tab_bar_h);
-	$('#tab_content').height(tab_content_h);
-
-	tab_content_h = $('#tab_content').height();
-	var msg_wnd_h = wrapper_h - prompt_h - tab_bar_h - margin_h - tab_content_h - input_bar_h;
-	$('#msg_wnd').height(msg_wnd_h);
-
-	if (win_w >= 960) {
-		$('#middlewindow').width(960 - 20);
-	}
-	else {
-		$('#middlewindow').width(win_w - 20);
-	}
-
-	$("#bar_msg_input").outerWidth($('#middlewindow').width() - 116);
-}
-
-/*
- * Reset the size of a visible popup box.
- */
-MudderyMain.prototype.doSetVisiblePopupSize = function() {
-	var popup_dialog = $("#popup_container .modal-dialog:visible:first");
-	this.setPopupSize(popup_dialog);
-}
-
-/*
- * Reset the size of a popup box.
- */
-MudderyMain.prototype.setPopupSize = function(dialog) {
-	var content = dialog.find(".modal-content");
-	if (content.length == 0) {
-		return;
-	}
-	var frame = content.find(">div");
-	if (frame.length == 0) {
-		return;
-	}
-
-	var height = 0;
-	var win_h = $(window).innerHeight();
-		
-	frame.innerWidth(content.width());
-	if (frame.attr("id") == "frame_shop") {
-		height = win_h * 0.95;
-	}
-	else {
-		frame.height(0);
-
-		height = frame.find(">div")[0].scrollHeight + 4;   // scroll height + border width
-		var max_height = win_h * 0.95;
-		if (height > max_height) {
-			height = max_height;
-		}
-	}
-	
-	frame.height(height);	
-	dialog.css("top", (win_h - dialog.height()) / 2);
 }
 
 //////////////////////////////////////////
@@ -883,6 +708,11 @@ MudderyMain.prototype.setPopupSize = function(dialog) {
 // Layouts
 //
 //////////////////////////////////////////
+
+MudderyMain.prototype.hideAllWindows = function() {
+    $(".popup-window").hide();
+    $(".main-window").hide();
+}
 
 /*
  * Hide all tabs.
@@ -933,7 +763,7 @@ MudderyMain.prototype.showContent = function(frame_name) {
  */
 MudderyMain.prototype.showHonours = function() {
 	this.showContent("honours");
-	$$.commands.getRankings();
+	mudcore.service.getRankings();
 }
 
 /*
@@ -964,20 +794,14 @@ MudderyMain.prototype.showPuppet = function() {
 /*
  * Show the layout when players unlogin.
  */
-MudderyMain.prototype.showUnlogin = function() {
+MudderyMain.prototype.showLoginWindow = function() {
 	// show unlogin UI
 	this.clearMsgWindow();
 	this.clearPromptBar();
 
-	this.leftCombatQueue();
-
 	// show unlogin tabs
-	this.hideTabs();
-
-	$("#tab_register").show();
-	$("#tab_login").show();
-
-	this.showContent("login");
+	this.hideAllWindows();
+	$("#login-window").show();
 
 	this.clearChannels();
 }
@@ -986,18 +810,11 @@ MudderyMain.prototype.showUnlogin = function() {
  * Show the layout when players logged in and going to select a character.
  */
 MudderyMain.prototype.showSelectChar = function() {
-	//this.clearMsgWindow();
+	this.clearMsgWindow();
 	this.clearPromptBar();
 
-	this.leftCombatQueue();
-
-	// show select character tabs
-	this.hideTabs();
-
-	$("#tab_select_char").show();
-	$("#tab_system_char").show();
-
-	this.showContent("select_char");
+    this.hideAllWindows();
+	$("#select-char-window").show();
 
 	this.clearChannels();
 }
@@ -1010,44 +827,11 @@ MudderyMain.prototype.showConnect = function() {
 	
 	$("#tab_connect").show();
 	
-	$$.main.showContent("connect");
+	window_main.showContent("connect");
 	
 	this.clearChannels();
 }
 
-/*
- * Check the auto login setting.
- */
-MudderyMain.prototype.doAutoLoginCheck = function() {
-
-    var playername = "";
-    var password = "";
-    var save_password = false;
-    var auto_login = false;
-
-    if (localStorage.is_save_password) {
-        save_password = true;
-        playername = localStorage.login_name;
-        password = localStorage.login_password;
-
-        if (localStorage.is_auto_login) {
-            auto_login = true;
-        }
-    }
-
-    $$.component.login.setValues(playername, password, save_password, auto_login);
-
-	setTimeout(function(){
-		if (localStorage.is_save_password && localStorage.is_auto_login) {
-		    var playername = localStorage.login_name;
-            var playerpassword = localStorage.login_password;
-
-			$("#cb_auto_login").attr("checked", "true");
-			$$.commands.doLogin(playername, playerpassword);
-		}
-	}, 2000);
-}
-    
 //////////////////////////////////////////
 //
 // Commands
@@ -1070,10 +854,10 @@ MudderyMain.prototype.sendMessage = function() {
 	}
 
 	if (this.message_type == "cmd") {
-		$$.commands.sendRawCommand(message);
+		mudcore.service.sendRawCommand(message);
 	}
 	else {
-		$$.commands.say(this.message_type, message);
+		mudcore.service.say(this.message_type, message);
 	}
 }
 
@@ -1087,9 +871,6 @@ MudderyMain.prototype.sendMessage = function() {
  * Set the client.
  */
 MudderyMain.prototype.setClient = function(settings) {
-	// language
-	this.setLanguage(settings["language"]);
-
 	// game's name
 	$("#game_title").text(settings["game_name"]);
 
@@ -1105,32 +886,17 @@ MudderyMain.prototype.setClient = function(settings) {
 	}
 
 	// honour settings
-	$$.component.honours.setMinHonourLevel(settings["min_honour_level"]);
+	//$$.component.honours.setMinHonourLevel(settings["min_honour_level"]);
 
 	// map settings
-	$$.component.map.setMap(settings["map_scale"], settings["map_room_size"], settings["map_room_box"]);
-}
-
-/*
- * Set the language.
- */
-MudderyMain.prototype.setLanguage = function(language) {
-	if (!$$.local_string.setLanguage(language)) {
-		return;
-	}
-	
-	this.resetLanguage();
-	
-	for (var key in $$.component) {
-        $$.component[key].resetLanguage();
-	}
+	//$$.component.map.setMap(settings["map_scale"], settings["map_room_size"], settings["map_room_box"]);
 }
 
 /*
  *  Set the player's all playable characters.
  */
 MudderyMain.prototype.setAllCharacters = function(data) {
-	$$.component.select_char.setCharacters(data);
+	select_char_window.setCharacters(data);
 }
 	
 /* 
@@ -1171,7 +937,7 @@ MudderyMain.prototype.setChannels = function(channels) {
 				.removeClass("dropdown-item")
 				.addClass("first-dropdown-item");
 
-			$$.main.message_type = key;
+			window_main.message_type = key;
 			$("#bar_msg_select").text(text);
 			
 			first = false;
@@ -1209,7 +975,7 @@ MudderyMain.prototype.showMsgTypes = function() {
  * Event when select a message type.
  */
 MudderyMain.prototype.selectMsgType = function(caller) {
-	$$.main.message_type = $(caller).data("key");
+	window_main.message_type = $(caller).data("key");
 	var text = $(caller).text();
 	$("#bar_msg_select").text($(caller).text());
 
@@ -1217,8 +983,318 @@ MudderyMain.prototype.selectMsgType = function(caller) {
 }
 
 
-function refreshWaitingTime() {
-    var current_time = new Date().getTime();
-    var total_time = Math.floor((current_time - $$.main.waiting_begin) / 1000);
-    $("#prompt_queue").text($$.trans("QUEUE: ") + $$.utils.time_to_string(total_time));
+/******************************************
+ *
+ * Popup message window.
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyMessage = function(el) {
+	BasePopupController.call(this, el);
+}
+
+MudderyMessage.prototype = prototype(BasePopupController.prototype);
+MudderyMessage.prototype.constructor = MudderyMessage;
+
+/*
+ * Bind events.
+ */
+MudderyMessage.prototype.bindEvents = function() {
+    this.onClick(".button-close", this.onClose);
+	this.onClick(".msg-footer", "button", this.onCommand);
+}
+
+/*
+ * Event when clicks the close button.
+ */
+MudderyMessage.prototype.onClose = function(element) {
+    this.el.hide();
+    this.select(".msg-header-text").empty();
+	this.select(".msg-body").empty();
+	this.select(".msg-footer").empty();
+}
+
+/*
+ * Event when clicks a command button.
+ */
+MudderyMessage.prototype.onCommand = function(element) {
+	this.onClose();
+
+	var cmd = this.select(element).data("cmd_name");
+	var args = this.select(element).data("cmd_args");
+	if (cmd) {
+		mudcore.service.sendCommandLink(cmd, args);
+	}
+}
+
+/*
+ * Set message's data.
+ */
+MudderyMessage.prototype.setMessage = function(header, content, commands) {
+    var header = mudcore.text2html.parseHtml(header) || "&nbsp;";
+	this.select(".msg-header-text").html(header);
+	this.select(".msg-body").html(mudcore.text2html.parseHtml(content));
+
+	if (!commands) {
+		commands = [{"name": mudcore.trans("OK"),
+					 "cmd": "",
+					 "args": ""}];
+	}
+	this.addButtons(commands);
+}
+
+/*
+ * Set command buttons.
+ */
+MudderyMessage.prototype.addButtons = function(commands) {
+    var container = this.select(".msg-footer");
+	for (var i in commands) {
+		var button = commands[i];
+		var name = mudcore.text2html.parseHtml(button["name"]);
+
+		$("<button>").attr("type", "button")
+		    .addClass("msg-button")
+		    .data("cmd_name", button["cmd"])
+			.data("cmd_args", button["args"])
+			.html(name)
+			.appendTo(container);
+	}
+}
+
+
+/******************************************
+ *
+ * Login Window
+ *
+ ******************************************/
+ 
+/*
+ * Derive from the base class.
+ */
+MudderyLogin = function(el) {
+	BaseController.call(this, el);
+}
+
+MudderyLogin.prototype = prototype(BaseController.prototype);
+MudderyLogin.prototype.constructor = MudderyLogin;
+
+/*
+ * Bind events.
+ */
+MudderyLogin.prototype.bindEvents = function() {
+    this.onClick(".button-tab-login", this.onTabLogin);
+    this.onClick(".button-tab-register", this.onTabRegister);
+    this.onClick(".button-login", this.onClickLogin);
+	this.onClick(".button-register", this.onClickRegister);
+    this.on(".checkbox-auto-login", "change", this.onAutoLogin);
+}
+
+/*
+ * Event when clicks the login tab.
+ */
+MudderyLogin.prototype.onTabLogin = function(element) {
+    if (this.select(".button-tab-login").hasClass("tab-activate")) {
+        return;
+    }
+    
+    this.select(".button-tab-login").removeClass("tab-inactivate");
+    this.select(".button-tab-login").addClass("tab-activate");
+    
+    this.select(".button-tab-register").removeClass("tab-activate");
+    this.select(".button-tab-register").addClass("tab-inactivate");
+    
+    this.select(".login-form").show();
+    this.select(".register-form").hide();
+}
+
+/*
+ * Event when clicks the register tab.
+ */
+MudderyLogin.prototype.onTabRegister = function(element) {
+    if (this.select(".button-tab-register").hasClass("tab-activate")) {
+        return;
+    }
+    
+    this.select(".button-tab-login").removeClass("tab-activate");
+    this.select(".button-tab-login").addClass("tab-inactivate");
+    
+    this.select(".button-tab-register").removeClass("tab-inactivate");
+    this.select(".button-tab-register").addClass("tab-activate");
+    
+    this.select(".login-form").hide();
+    this.select(".register-form").show();
+}
+
+/*
+ * Event when clicks the register button.
+ */
+MudderyLogin.prototype.onClickRegister = function(element) {
+    var playername = this.select(".reg-name").val();
+    var password = this.select(".reg-password").val();
+    var password_verify = this.select(".reg-password-verify").val();
+
+    mudcore.service.register(playername, password, password_verify, true);
+    this.clearValues();
+}
+
+/*
+ * Event on click the login button.
+ */
+MudderyLogin.prototype.onClickLogin = function(element) {
+    var name = this.select(".login-name").val();
+    var password = this.select(".login-password").val();
+    mudcore.service.login(name, password);
+}
+
+/*
+ * Event on click the auto login checkbox.
+ */
+MudderyLogin.prototype.onAutoLogin = function(element) {
+    var auto_login = this.select(".checkbox-auto-login").prop("checked");
+
+    if (!auto_login) {
+        mudcore.service.doRemoveAutoLogin();
+    }
+}
+
+/*
+ * Clear user inputted values.
+ */
+MudderyLogin.prototype.clearValues = function() {
+    this.select(".login-name").val("");
+    this.select(".login-password").val("");
+    this.select(".reg-name").val("");
+    this.select(".reg-password").val("");
+    this.select(".reg-password-verify").val("");
+    this.select(".checkbox-auto-login").prop("checked", false);
+}
+
+/*
+ * Set values.
+ */
+MudderyLogin.prototype.setValues = function(playername, password, auto_login) {
+    this.select(".login-name").val(playername);
+    this.select(".login-password").val(password);
+    this.select(".checkbox-auto-login").prop("checked", auto_login);
+}
+
+/*
+ * Remove auto login.
+ */
+MudderyLogin.prototype.removeAutoLogin = function() {
+    localStorage.login_name = "";
+    localStorage.login_password = "";
+    localStorage.is_auto_login = "";
+}
+
+/*
+ * Check the auto login setting and do auto login.
+ */
+MudderyLogin.prototype.checkAutoLogin = function() {
+    if (localStorage.is_auto_login) {
+        var playername = localStorage.login_name;
+        var password = localStorage.login_password;
+
+        login_window.setValues(playername, password, true);
+	    mudcore.service.login(playername, playerpassword);
+    }
+}
+
+/*
+ * On user login.
+ */
+MudderyLogin.prototype.onLogin = function() {
+    var auto_login = this.select(".checkbox-auto-login").prop("checked");
+
+    if (auto_login) {
+        var name = this.select(".login-name").val();
+        var password = this.select(".login-password").val();
+
+        // Save the name and password.
+        localStorage.login_name = playername;
+        localStorage.login_password = password;
+        localStorage.is_auto_login = "1";
+    }
+}
+
+
+/******************************************
+ *
+ * Select Character Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderySelectChar = function(el) {
+	BaseTabController.call(this, el);
+}
+
+MudderySelectChar.prototype = prototype(BaseTabController.prototype);
+MudderySelectChar.prototype.constructor = MudderySelectChar;
+
+/*
+ * Bind events.
+ */
+MudderySelectChar.prototype.bindEvents = function() {
+    this.onClick(".button-back", this.onClickBack);
+    this.onClick("#char_button_new_char", this.onNewCharacter);
+    this.onClick("#character_items", ".char_name", this.onSelectCharacter);
+    this.onClick("#character_items", ".button_delete", this.onDeleteCharacter);
+}
+
+/*
+ * Event when clicks the back button.
+ */
+MudderySelectChar.prototype.onClickBack = function(element) {
+    mudcore.service.logout();
+}
+
+/*
+ * Event when clicks the new character button.
+ */
+MudderySelectChar.prototype.onNewCharacter = function(element) {
+    $$.main.showNewCharacter();
+}
+
+/*
+ * On select a character.
+ */
+MudderySelectChar.prototype.onSelectCharacter = function(element) {
+    var dbref = this.select(element).data("dbref");
+    $$.commands.puppetCharacter(dbref);
+}
+
+/*
+ * On delete a character.
+ */
+MudderySelectChar.prototype.onDeleteCharacter = function(element) {
+	var name = this.select(element).data("name");
+	var dbref = this.select(element).data("dbref");
+	$$.main.showDeleteCharacter(name, dbref);
+}
+
+/*
+ * Set playable characters.
+ */
+MudderySelectChar.prototype.setCharacters = function(characters) {
+    this.clearElements("#character_items");
+	var template = this.select("#character_items>.template");
+
+	for (var i in characters) {
+		var obj = characters[i];
+		var item = this.cloneTemplate(template);
+
+		item.find(".char_name")
+			.data("dbref", obj["dbref"])
+			.text(obj["name"]);
+
+		item.find(".button_delete")
+			.data("name", obj["name"])
+			.data("dbref", obj["dbref"]);
+	}
 }

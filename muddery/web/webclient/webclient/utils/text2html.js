@@ -1,9 +1,10 @@
+/***************************************
+ *
+ * Parse text marks to html marks.
+ *
+ ***************************************/
 
-if (typeof(require) != "undefined") {
-    require("../client/defines.js");
-}
-
-Text2HTML = function() {
+MudderyText2HTML = function() {
 	// Compile RegExps.
 	this.regexp_html.compile(this.regexp_html);
 
@@ -18,7 +19,7 @@ Text2HTML = function() {
 	this.regexp_mark.compile(mark_pattern);
 }
 
-Text2HTML.prototype = {
+MudderyText2HTML.prototype = {
     mark_map : {
         '{{' : '{',                  // "{"
         '{n' : '',                   // reset            Close the span.
@@ -77,8 +78,6 @@ Text2HTML.prototype = {
     regexp_html : /"|&|'|<|>|  |\x0A/g,
 
     regexp_mark : /\w*/,
-
-    last_convert : "",
     
     convertHtml: function(match) {
         if (match == "  ") {
@@ -98,48 +97,44 @@ Text2HTML.prototype = {
         }
     },
 
-    convertMark: function(match) {
-        var replacement = "";
-        
-        // <span> can contain <string>
-        if ($$.text2html.last_convert.substring(0, 5) == "<span" && match != "{h") {
-            // close span
-            replacement = "</span>";
-        }
-        else if ($$.text2html.last_convert.substring(0, 8) == "<strong>" && match != "{H") {
-            // close strong
-            replacement = "</strong>";
-        }
-        
-        if (match in $$.text2html.mark_map) {
-            $$.text2html.last_convert = $$.text2html.mark_map[match];
-            replacement += $$.text2html.last_convert;
-        }
-        
-        return replacement;
-    },
-
     parseHtml: function(string) {
         // Parses a string, replace markup with html
         var org_string = string;
         try {
 			// Convert html codes.
-			string = string.replace($$.text2html.regexp_html, $$.text2html.convertHtml);
+			string = string.replace(this.regexp_html, this.convertHtml);
 
 			// Convert marks
-			string = string.replace($$.text2html.regexp_mark, $$.text2html.convertMark);
+			var last_convert = "";
+			string = string.replace(this.regexp_mark, function(match) {
+                var replacement = "";
 
-			if ($$.text2html.last_convert.substring(0, 5) == "<span") {
+                // <span> can contain <string>
+                if (last_convert.substring(0, 5) == "<span" && match != "{h") {
+                    // close span
+                    replacement = "</span>";
+                }
+                else if (last_convert.substring(0, 8) == "<strong>" && match != "{H") {
+                    // close strong
+                    replacement = "</strong>";
+                }
+
+                if (match in mudcore.text2html.mark_map) {
+                    last_convert = mudcore.text2html.mark_map[match];
+                    replacement += last_convert;
+                }
+
+                return replacement;}
+            );
+
+			if (last_convert.substring(0, 5) == "<span") {
 				// close span
 				string += "</span>";
 			}
-			else if ($$.text2html.last_convert.substring(0, 8) == "<strong>") {
+			else if (last_convert.substring(0, 8) == "<strong>") {
 				// close strong
 				string += "</strong>";
 			}
-
-			// Clear last convert.
-			$$.text2html.last_convert = "";
 		}
 		catch(error) {
             console.error(error.message);
@@ -152,7 +147,7 @@ Text2HTML.prototype = {
     clearTag: function(match) {
         var replacement = "";
 
-        if (match in $$.text2html.mark_map) {
+        if (match in this.mark_map) {
             if (match == "{{") {
                 // "{"
                 replacement = "{";
@@ -181,7 +176,7 @@ Text2HTML.prototype = {
     },
 
     clearTags: function(string) {
-        string = string.replace($$.text2html.regexp_mark, $$.text2html.clearTag);
+        string = string.replace(this.regexp_mark, this.clearTag);
         return string;
     }
 }

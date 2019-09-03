@@ -12,8 +12,6 @@ if (typeof(require) != "undefined") {
 
 !function() {
     $$.local_string.setLanguage(settings.default_language);
-    $$.text2html = new Text2HTML();
-    $$.text_escape = new TextEscape();
 
     // get main controller
     var constructor = eval($$.frameworks.main.ctrler_name);

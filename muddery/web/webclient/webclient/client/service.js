@@ -1,9 +1,9 @@
 
-if (typeof(require) != "undefined") {
-    require("../client/defines.js");
+MudderyService = function() {
 }
 
-$$.commands = {
+MudderyService.prototype = {
+
     // commands
     cmdString : function(command, args) {
         return JSON.stringify({"cmd" : command, "args" : args});
@@ -15,7 +15,7 @@ $$.commands = {
     
     // functions when user click a command link
     //
-    doCommandLink: function(cmd, args) {
+    sendCommandLink: function(cmd, args) {
         Evennia.msg("text", this.cmdString(cmd, args));
     },
     
@@ -33,7 +33,7 @@ $$.commands = {
     },
 
     // login
-    doLogin: function(playername, password) {
+    login: function(playername, password) {
         var args = {"playername" : playername,
                     "password" : password};
         
@@ -41,14 +41,9 @@ $$.commands = {
     },
 
     // register
-    doRegister: function(playername, password, password_verify, connect) {
-        
-        if (!Evennia.isConnected()) {
-            Evennia.connect();
-        }
-
+    register: function(playername, password, password_verify, connect) {
         if (password != password_verify) {
-            $$.main.showAlert($$.trans("Password does not match."));
+            window_main.showAlert(trans("Password does not match."));
             return;
         }
 
@@ -56,17 +51,10 @@ $$.commands = {
                     "password": password,
                     "connect": connect};
         Evennia.msg("text", this.cmdString("create", args));
-
-        $$.component.login.setPlayerName(playername);
     },
 
     // change password
     doChangePassword: function(current, password, password_verify) {
-
-        if (!Evennia.isConnected()) {
-            Evennia.connect();
-        }
-
         if (password != password_verify) {
             $$.main.showAlert($$.trans("Password does not match."));
             return;
@@ -138,8 +126,7 @@ $$.commands = {
     },
     
     // logout
-    doLogout : function() {
-        localStorage.is_auto_login = "";
+    logout : function() {
         Evennia.msg("text", this.cmdString("quit", ""));
     },
     
@@ -196,34 +183,5 @@ $$.commands = {
     // do test
     doTest: function() {
         // test codes
-    },
-
-    doAutoLoginConfig: function(playername, password, save_password, auto_login) {
-        if (save_password) {
-            localStorage.login_name = playername;
-            localStorage.login_password = password;
-
-            if (auto_login) {
-                localStorage.is_auto_login = "1";
-            } else {
-                localStorage.is_auto_login = "";
-            }
-        }
-    },
-
-    doSavePassword: function(save_password) {
-        if (save_password) {
-            localStorage.is_save_password = "1";
-        }
-        else {
-            localStorage.login_name = "";
-            localStorage.login_password = "";
-            localStorage.is_save_password = "";
-            localStorage.is_auto_login = "";
-        }
-    },
-
-    doRemoveAutoLogin: function() {
-        localStorage.is_auto_login = "";
     },
 }

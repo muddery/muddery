@@ -32,15 +32,8 @@ BaseController.prototype.select = function(selector) {
 /*
  * Document ready event.
  */
-BaseController.prototype.onReady = function() {
-    this.resetLanguage();
+BaseController.prototype.init = function() {
     this.bindEvents();
-}
-
-/*
- * Reset the view's language.
- */
-BaseController.prototype.resetLanguage = function() {
 }
 
 /*
@@ -164,7 +157,6 @@ BasePopupController.prototype.constructor = BasePopupController;
  * Set element's size.
  */
 BasePopupController.prototype.resetSize = function() {
-	$$.main.doSetVisiblePopupSize();
 }
 
 
