@@ -95,7 +95,7 @@ DialogueEditor.prototype.querySentenceTableSuccess = function(data) {
         pageList: [20, 50, 100],
         pageSize: 20,
         sidePagination: "client",
-        columns: this.parseFields(data.fields),
+        columns: controller.parseFields(data.fields),
         data: utils.parseRows(data.fields, data.records),
         sortName: "ordinal",
         sortOrder: "asc",
