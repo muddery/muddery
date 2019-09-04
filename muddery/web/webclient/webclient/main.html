@@ -35,6 +35,7 @@
     
         <!-- Window's body. -->
         <div id="wrapper">
+
             <!-- login window -->
             <div id="login-window" class="main-window hidden">
                 <div class="login-box">
@@ -47,10 +48,10 @@
                     <table class="login-form">
                         <tbody>
                             <tr><td>
-                                <input class="login-name form-control editbox" type="text" placeholder="用户名" aria-describedby="basic-addon2" autocomplete="off" />
+                                <input class="login-name form-control editbox" type="text" placeholder="用户名" autocomplete="off" />
                             </td></tr>
                             <tr><td>
-                                <input class="login-password form-control editbox" type="password" placeholder="密码" aria-describedby="basic-addon2" autocomplete="off" />
+                                <input class="login-password form-control editbox" type="password" placeholder="密码" autocomplete="off" />
                             </td></tr>
                             <tr><td>
                                 <div>
@@ -66,13 +67,13 @@
                     <table class="register-form hidden">
                         <tbody>
                             <tr><td>
-                                <input class="reg-name form-control editbox" type="text" placeholder="用户名" aria-describedby="basic-addon2" autocomplete="off" />
+                                <input class="reg-name form-control editbox" type="text" placeholder="用户名" autocomplete="off" />
                             </td></tr>
                             <tr><td>
-                                <input class="reg-password form-control editbox" type="password" placeholder="密码" aria-describedby="basic-addon2" autocomplete="off" />
+                                <input class="reg-password form-control editbox" type="password" placeholder="密码" autocomplete="off" />
                             </td></tr>
                             <tr><td>
-                                <input class="reg-password-verify form-control editbox" type="password" placeholder="确认密码" aria-describedby="basic-addon2" autocomplete="off" />
+                                <input class="reg-password-verify form-control editbox" type="password" placeholder="确认密码"  autocomplete="off" />
                             </td></tr>
                             <tr><td>
                                 <button class="button-register btn btn-default" type="button">注册</button>
@@ -81,11 +82,12 @@
                     </table>
                 </div>
             </div>
+
             <!-- select character window -->
             <div id="select-char-window" class="main-window hidden">
-                <div class="sc-title-bar">
+                <div class="title-bar">
                     <button type="button" class="button-back" ></button>
-                    <span class="sc-header-text">Characters</span>
+                    <span class="header-text">Characters</span>
                 </div>
                 <div id="character_items">
                     <div class="character_item template">
@@ -93,8 +95,25 @@
                         <button type="button" class="button_delete">×</button>
                     </div>
                 </div>
-                <button id="char_button_new_char" type="button" class="btn btn-default">New Character</button>
+                <button type="button" class="button-new-char btn btn-default">New Character</button>
             </div>
+
+            <!-- new character window -->
+            <div id="new-char-window" class="main-window hidden">
+                <div class="title-bar">
+                    <button type="button" class="button-back" ></button>
+                    <span class="header-text">New Character</span>
+                </div>
+                <div class="char-attributes">
+                    <p>Name</p>
+                    <input class="new-char-name form-control editbox" type="text" placeholder="name" autocomplete="off" />
+                </div>
+                <div class="button-bar">
+                    <button type="button" class="button-create btn btn-default">Create</button>
+                </div>
+            </div>
+
+
             <div id="game-window" class="main-window hidden">
                 <div id="main-contents">
                     <div id="prompt-bar">
@@ -120,6 +139,7 @@
                     </tr>
                 </table>
             </div>
+
         </div>
 
         <!-- libs -->

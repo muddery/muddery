@@ -29,6 +29,11 @@ body {
     -webkit-box-sizing: border-box;
 }
 
+.title-bar {
+    position: relative;
+    text-align: center;
+}
+
 .background-window {
     position: absolute;
     left: 0;
@@ -219,8 +224,16 @@ body {
 /************* Login Window end *************/
 
 /************* Select Character Window begin *************/
-#select-char-window .sc-title-bar {
-    position: relative;
+
+/************* Select Character Window end *************/
+
+/************* Select Character Window begin *************/
+#new-char-window .char-attributes p {
+    margin: 10px 0 0 0;
+}
+
+#new-char-window .button-bar {
+    margin: 20px 0 10px 0;
     text-align: center;
 }
 /************* Select Character Window end *************/

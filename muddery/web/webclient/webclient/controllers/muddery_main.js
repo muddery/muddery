@@ -10,6 +10,7 @@ MudderyMain = function(el) {
     this.solo_mode = false;
 	this.message_type = null;
 	this.waiting_begin = 0;
+	this.windows_stack = [];
 }
 
 MudderyMain.prototype = prototype(BaseController.prototype);
@@ -402,14 +403,6 @@ MudderyMain.prototype.showMap = function() {
 }
 
 /*
- *  Set new character's information.
- */
-MudderyMain.prototype.showNewCharacter = function() {
-	this.doClosePopupBox();
-	$$.component.new_char.show();
-}
-
-/*
  *  Delete a character.
  */
 MudderyMain.prototype.showDeleteCharacter = function(name, dbref) {
@@ -620,9 +613,9 @@ MudderyMain.prototype.onConnectionOpen = function() {
  */
 MudderyMain.prototype.onConnectionClose = function() {
     var self = main_window;
-    
+
 	self.puppet = false;
-	
+
 	self.showLoginWindow();
 
 	// close popup windows
@@ -791,33 +784,77 @@ MudderyMain.prototype.showPuppet = function() {
 	this.showContent("scene");
 }
 
+
 /*
- * Show the layout when players unlogin.
+ * Set the windows stack to a new window.
  */
-MudderyMain.prototype.showLoginWindow = function() {
-	// show unlogin UI
+MudderyMain.prototype.gotoWindow = function(win_controller) {
 	this.clearMsgWindow();
 	this.clearPromptBar();
 
 	// show unlogin tabs
 	this.hideAllWindows();
-	$("#login-window").show();
+	win_controller.reset();
+	win_controller.show();
+	this.windows_stack = [win_controller];
 
 	this.clearChannels();
+}
+
+
+/*
+ * Push a new window to the windows stack.
+ */
+MudderyMain.prototype.pushWindow = function(win_controller) {
+	this.clearMsgWindow();
+	this.clearPromptBar();
+
+	// show unlogin tabs
+	this.hideAllWindows();
+	win_controller.reset();
+	win_controller.show();
+	this.windows_stack.push(win_controller);
+
+	this.clearChannels();
+}
+
+
+/*
+ * Pop a window from the windows stack.
+ */
+MudderyMain.prototype.popWindow = function() {
+    if (this.windows_stack.length == 0) {
+        return;
+    }
+
+	this.clearMsgWindow();
+	this.clearPromptBar();
+
+	// show unlogin tabs
+	this.hideAllWindows();
+	this.windows_stack.pop();
+	var win_controller = this.windows_stack[this.windows_stack.length - 1];
+	win_controller.show();
+
+	this.clearChannels();
+}
+
+
+/*
+ * Show the layout when players unlogin.
+ */
+MudderyMain.prototype.showLoginWindow = function() {
+	// show unlogin UI
+	this.gotoWindow(login_window);
 }
     
 /*
  * Show the layout when players logged in and going to select a character.
  */
 MudderyMain.prototype.showSelectChar = function() {
-	this.clearMsgWindow();
-	this.clearPromptBar();
-
-    this.hideAllWindows();
-	$("#select-char-window").show();
-
-	this.clearChannels();
+	this.gotoWindow(select_char_window);
 }
+
 
 /*
  * Show the layout when players has not connected.
@@ -1242,7 +1279,7 @@ MudderySelectChar.prototype.constructor = MudderySelectChar;
  */
 MudderySelectChar.prototype.bindEvents = function() {
     this.onClick(".button-back", this.onClickBack);
-    this.onClick("#char_button_new_char", this.onNewCharacter);
+    this.onClick(".button-new-char", this.onNewCharacter);
     this.onClick("#character_items", ".char_name", this.onSelectCharacter);
     this.onClick("#character_items", ".button_delete", this.onDeleteCharacter);
 }
@@ -1252,13 +1289,15 @@ MudderySelectChar.prototype.bindEvents = function() {
  */
 MudderySelectChar.prototype.onClickBack = function(element) {
     mudcore.service.logout();
+    Evennia.reconnect();
+    main_window.showLoginWindow();
 }
 
 /*
  * Event when clicks the new character button.
  */
 MudderySelectChar.prototype.onNewCharacter = function(element) {
-    $$.main.showNewCharacter();
+    main_window.pushWindow(new_char_window);
 }
 
 /*
@@ -1297,4 +1336,52 @@ MudderySelectChar.prototype.setCharacters = function(characters) {
 			.data("name", obj["name"])
 			.data("dbref", obj["dbref"]);
 	}
+}
+
+
+/******************************************
+ *
+ * New Character Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyNewChar = function(el) {
+	BaseTabController.call(this, el);
+}
+
+MudderyNewChar.prototype = prototype(BaseTabController.prototype);
+MudderyNewChar.prototype.constructor = MudderyNewChar;
+
+/*
+ * Bind events.
+ */
+MudderyNewChar.prototype.bindEvents = function() {
+    this.onClick(".button-back", this.onClickBack);
+    this.onClick(".button-create", this.onCreate);
+}
+
+/*
+ * Event when clicks the back button.
+ */
+MudderyNewChar.prototype.onClickBack = function(element) {
+    main_window.popWindow();
+}
+
+/*
+ * Event when clicks the create button.
+ */
+MudderyNewChar.prototype.onCreate = function(element) {
+	var char_name = this.select(".new-char-name").val();
+	mudcore.service.createCharacter(char_name);
+	this.reset();
+}
+
+/*
+ * Reset the element.
+ */
+MudderyNewChar.prototype.reset = function() {
+    this.select(".new-char-name").val("");
 }

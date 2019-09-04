@@ -52,6 +52,12 @@ BaseController.prototype.show = function() {
 }
 
 /*
+ * Reset the element.
+ */
+BaseController.prototype.reset = function() {
+}
+
+/*
  * Is visible.
  */
 BaseController.prototype.visible = function() {
