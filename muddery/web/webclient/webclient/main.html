@@ -21,7 +21,7 @@
         	</div>
         </div>
         <div id="popup">
-            <div id="message-window" class="popup-window hidden">
+            <div id="popup-message" class="popup-window hidden">
                 <div class="message-box">
                     <div class="msg-header">
                         <button type="button" class="button-close"></button>
@@ -89,11 +89,7 @@
                     <button type="button" class="button-back" ></button>
                     <span class="header-text">Characters</span>
                 </div>
-                <div id="character_items">
-                    <div class="character_item template">
-                        <a class="char_name"></a>
-                        <button type="button" class="button_delete">×</button>
-                    </div>
+                <div class="character-list">
                 </div>
                 <button type="button" class="button-new-char btn btn-default">New Character</button>
             </div>
@@ -113,13 +109,56 @@
                 </div>
             </div>
 
-
             <div id="game-window" class="main-window hidden">
                 <div id="main-contents">
                     <div id="prompt-bar">
+                        <img class="icon hidden" src="" />
+                        <span class="name"></span>
+                        <span class="level value"></span>
+                        <span class="exp value"></span>
+                        <span class="hp value"></span>
+                    </div>
+                    <div id="message-window">
+                        <div class="message-list">
+                        </div>
+                    </div>
+                </div>
+                <div id="char-data-window">
+                    <div class="equipments">
+                        <div class="position_head position">
+                            <img class="icon" src=""/>
+                            <div class="name"></div>
+                        </div>
+                        <div class="position_hand position">
+                            <img class="icon" src=""/>
+                            <div class="name"></div>
+                        </div>
+                        <div class="position_chest position">
+                            <img class="icon" src=""/>
+                            <div class="name"></div>
+                        </div>
+                        <div class="position_leg position">
+                            <img class="icon" src=""/>
+                            <div class="name"></div>
+                        </div>
+                    </div>
+                    <div class="char-data">
+                        <table class="data-table" >
+                            <tbody class="data-list">
+                                <tr class="row-name">
+                                    <td>
+                                        <div>
+                                            <img class="icon"/>
+                                            <span class="name"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+
             <div class="background-window">
                 <table class="background-table" frame="void" rules="none">
                     <tr>
@@ -140,6 +179,16 @@
                 </table>
             </div>
 
+        </div>
+
+        <!-- waiting -->
+        <div id="indicator-layer" class="hidden">
+            <div class="indicator-box">
+                <div class="waiting-indicator image-rotate">
+                </div>
+            </div>
+            <div class="indicator-overlay">
+            </div>
         </div>
 
         <!-- libs -->

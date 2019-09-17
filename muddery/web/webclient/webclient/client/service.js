@@ -72,13 +72,8 @@ MudderyService.prototype = {
     },
 
     // delete a character
-    deleteCharacter: function(dbref, password) {
-        if (!password) {
-            return;
-        }
-
-        var args = {"dbref": dbref,
-                    "password": password};
+    deleteCharacter: function(dbref) {
+        var args = {"dbref": dbref};
 		Evennia.msg("text", this.cmdString("char_delete", args));
     },
     

@@ -34,6 +34,8 @@ body {
     text-align: center;
 }
 
+
+/************* backgrounds begin *************/
 .background-window {
     position: absolute;
     left: 0;
@@ -108,6 +110,51 @@ body {
     background: url(../img/login_background.png) no-repeat center center;
 }
 
+/************* backgrounds end *************/
+
+
+/************* animations begin *************/
+@-webkit-keyframes rotation {
+    from {-webkit-transform: rotate(0deg);}
+    to {-webkit-transform: rotate(360deg);}
+}
+
+.image-rotate {
+    -webkit-transform: rotate(360deg);
+    animation: rotation 1.0s linear infinite;
+    -moz-animation: rotation 1.0s linear infinite;
+    -webkit-animation: rotation 1.0s linear infinite;
+    -o-animation: rotation 1.0s linear infinite;
+}
+/************* animations end *************/
+
+/************* indicators begin *************/
+#indicator-layer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 10000;
+	width: 100%;
+	height: 100%;
+}
+
+.indicator-box {
+	position: absolute;
+	top: 50%;
+	width: 100%;
+	margin-top: -20px;
+}
+
+.waiting-indicator {
+	width: 40px;
+	height: 40px;
+	margin: 0 auto;
+	background: url(../img/waiting.png) no-repeat center;
+	background-size: 40px 40px;
+}
+/************* indicators end *************/
+
+
 /************* buttons begin *************/
 .button-back {
     position: absolute;
@@ -129,9 +176,17 @@ body {
     background: url(../img/icon_close.png) no-repeat center center;
 }
 
+.button-delete {
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: url(../img/icon_delete.png) no-repeat center center;
+}
+
 /************* buttons end *************/
 
-/************* Popup Window begin *************/
+
+/************* popup window begin *************/
 #popup {
 }
 
@@ -173,6 +228,10 @@ body {
     transform: translate(-50%, 0);
 }
 
+.msg-button {
+    margin: 5px;
+}
+
 .popup-overlay {
     position: absolute;
     top: 0;
@@ -183,9 +242,10 @@ body {
     background: rgba(0, 0, 0, .5);
 }
 
-/************* Popup Window end *************/
+/************* popup window end *************/
 
-/************* Login Window begin *************/
+
+/************* login window begin *************/
 #login-window .login-box {
     position: absolute;
     left: 50%;
@@ -221,13 +281,26 @@ body {
     width: 100%;
 }
 
-/************* Login Window end *************/
+/************* login window end *************/
 
-/************* Select Character Window begin *************/
 
-/************* Select Character Window end *************/
+/************* select character window begin *************/
+#select-char-window .character-item {
+    margin: 10px;
+}
 
-/************* Select Character Window begin *************/
+#select-char-window .button-delete {
+    margin: 0 10px 0 0;
+    vertical-align: middle;
+}
+
+#select-char-window .char-name {
+    vertical-align: middle;
+}
+/************* select character window end *************/
+
+
+/************* new character window begin *************/
 #new-char-window .char-attributes p {
     margin: 10px 0 0 0;
 }
@@ -236,4 +309,118 @@ body {
     margin: 20px 0 10px 0;
     text-align: center;
 }
-/************* Select Character Window end *************/
+/************* new character window end *************/
+
+
+/************* main game window begin *************/
+#game-window .main-contents {
+    height: 100%;
+}
+/************* main game window end *************/
+
+
+/************* prompt bar begin *************/
+#prompt-bar {
+    font-size: 12px;
+    height: 20px;
+}
+
+#prompt-bar .icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: bottom;
+}
+
+#prompt-bar .name {
+    padding: 0 2px;
+    vertical-align: bottom;
+}
+
+#prompt-bar .title {
+    padding: 0 0 0 2px;
+    vertical-align: bottom;
+}
+
+#prompt-bar .value {
+    padding: 0 2px 0 0;
+    vertical-align: bottom;
+}
+/************* prompt bar end *************/
+
+
+/************* message window begin *************/
+#message-window {
+    height: 50%;
+}
+
+#message-window .message-list {
+    height: 100%;
+    font-size: 14px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+/************* message window end *************/
+
+
+/************* character data window begin *************/
+#char-data-window {
+    position: relative;
+    height: 100%;
+    text-align: center;
+}
+
+#char-data-window .equipments {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+#char-data-window .equipments .position {
+    position: absolute;
+}
+
+#char-data-window .equipments .icon {
+    width: 30px;
+    height: 30px;
+}
+
+#char-data-window .equipments .position_head {
+    top: 0;
+    left: 50%;
+    transform: translate(-15px, 0);
+}
+
+#char-data-window .equipments .position_hand {
+    top: 40px;
+    right: 10px;
+}
+
+#char-data-window .equipments .position_chest {
+    top: 40px;
+    left: 50%;
+    transform: translate(-15px, 0);
+}
+
+#char-data-window .equipments .position_leg {
+    top: 80px;
+    right: 50%;
+    transform: translate(15px, 0);
+}
+
+#char-data-window .char-data {
+    position: absolute;
+    bottom: 0;
+    text-align: left;
+}
+
+#char-data-window .data-table {
+    width: 100%;
+    font-size: 12px;
+}
+
+#char-data-window .row-name .icon {
+    width: 40px;
+    height: 40px;
+}
+/************* character data window end *************/

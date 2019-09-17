@@ -276,6 +276,58 @@ class CmdCharDelete(Command):
 
     Usage:
         {"cmd":"char_delete",
+         "args":{"dbref": <character's dbref>}
+        }
+
+    Permanently deletes one of your characters.
+    """
+    key = "char_delete"
+    locks = "cmd:all()"
+
+    def func(self):
+        "delete the character"
+        player = self.account
+        session = self.session
+        args = self.args
+
+        if not args:
+            self.msg({"alert":_("Please select a character")})
+            return
+
+        dbref = args["dbref"]
+
+        # use the playable_characters list to search
+        match = [char for char in make_iter(player.db._playable_characters) if char.dbref == dbref]
+        if not match:
+            session.msg({"alert":_("You have no such character to delete.")})
+            return
+        elif len(match) > 1:
+            session.msg({"alert":_("Aborting - there are two characters with the same name. Ask an admin to delete the right one.")})
+            return
+        else: # one match
+            delobj = match[0]
+
+            # get new playable characters
+            new_characters = [char for char in player.db._playable_characters if char != delobj]
+
+            # remove object
+            deleted = delobj.delete()
+
+            if not deleted:
+                session.msg({"alert":_("Can not delete this character.")})
+                return
+
+            player.db._playable_characters = new_characters
+            session.msg({"char_deleted": True,
+                         "char_all": player.get_all_characters()})
+
+
+class CmdCharDeleteWithPW(Command):
+    """
+    Delete a character - this cannot be undone!
+
+    Usage:
+        {"cmd":"char_delete",
          "args":{"dbref": <character's dbref>,
                  "password": <player's password>}
         }

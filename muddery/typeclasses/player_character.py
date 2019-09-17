@@ -795,7 +795,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         status = {}
         status["level"] = {"name": _("LEVEL"),
-                            "value": self.db.level}
+                           "value": self.db.level}
 
         for key, info in self.get_properties_info().items():
             status[key] = {"name": info["name"],

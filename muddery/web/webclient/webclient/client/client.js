@@ -104,25 +104,25 @@ MudderyClient.prototype = {
                 }
                 else if (key == "msg") {
                 	var msg = mudcore.text2html.parseHtml(data[key]);
-                    main_window.displayMsg(msg);
+                    message_window.displayMessage(msg);
                 }
                 else if (key == "alert") {
               		main_window.showAlert(data[key]);
                 }
                 else if (key == "out") {
-                    main_window.displayMsg(data[key], "out");
+                    message_window.displayMessage(data[key], "out");
                 }
                 else if (key == "err") {
-                    main_window.displayMsg(data[key]);
+                    message_window.displayMessage(data[key]);
                 }
                 else if (key == "sys") {
-                    main_window.displayMsg(data[key], "sys");
+                    message_window.displayMessage(data[key], "sys");
                 }
                 else if (key == "debug") {
-                	main_window.displayMsg(data[key], "debug");
+                	message_window.displayMessage(data[key], "debug");
                 }
                 else if (key == "prompt") {
-                	main_window.displayMsg(data[key], "prompt");
+                	message_window.displayMessage(data[key], "prompt");
                 }
                 else if (key == "look_around") {
                     main_window.setScene(data[key]);
@@ -155,7 +155,7 @@ MudderyClient.prototype = {
                     main_window.setStatus(status);
                 }
                 else if (key == "equipments") {
-			        main_window.setEquipments(data[key]);
+			        char_data_window.setEquipments(data[key]);
                 }
                 else if (key == "inventory") {
                     main_window.setInventory(data[key]);
@@ -206,13 +206,12 @@ MudderyClient.prototype = {
 	                main_window.onUnpuppet(data[key]);
                 }
                 else if (key == "char_all") {
-                    main_window.setAllCharacters(data[key]);
+                    select_char_window.setCharacters(data[key]);
                 }
                 else if (key == "char_created") {
-                    main_window.onCharacterCreated(data[key]);
+                    new_char_window.onCharacterCreated(data[key]);
                 }
                 else if (key == "char_deleted") {
-                    main_window.onCharacterDeleted(data[key]);
                 }
                 else if (key == "puppet") {
                     main_window.onPuppet(data[key]);
@@ -252,7 +251,7 @@ MudderyClient.prototype = {
                     mudcore.map_data.setData(data[key]);
                 }
                 else {
-                    main_window.displayMsg(data[key]);
+                    message_window.displayMessage(data[key]);
                 }
             }
             catch(error) {

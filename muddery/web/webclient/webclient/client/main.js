@@ -18,7 +18,12 @@ window.main_window = new MudderyMain($("#main-window"));
 window.login_window = new MudderyLogin($("#login-window"));
 window.select_char_window = new MudderySelectChar($("#select-char-window"));
 window.new_char_window = new MudderyNewChar($("#new-char-window"));
+window.main_game_window = new MudderyMainGame($("#game-window"));
+window.prompt_bar = new MudderyPromptBar($("#prompt-bar"));
 window.message_window = new MudderyMessage($("#message-window"));
+window.char_data_window = new MudderyCharData($("#char-data-window"));
+
+window.popup_message = new MudderyPopupMessage($("#popup-message"));
 
 $(document).ready(function() {
     main_window.init();
