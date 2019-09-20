@@ -125,7 +125,7 @@ MudderyClient.prototype = {
                 	message_window.displayMessage(data[key], "prompt");
                 }
                 else if (key == "look_around") {
-                    main_window.setScene(data[key]);
+                    scene_window.setScene(data[key]);
                 }
                 else if (key == "obj_moved_in") {
                     main_window.showObjMovedIn(data[key]);
@@ -140,12 +140,8 @@ MudderyClient.prototype = {
                     main_window.showPlayerOffline(data[key]);
                 }
                 else if (key == "look_obj") {
-                    var obj = data[key];
-        			main_window.showObject(obj["dbref"],
-        								  obj["name"],
-        								  obj["icon"],
-        								  obj["desc"],
-        								  obj["cmds"]);
+        			popup_object.setObject(data[key]);
+        			popup_object.show();
                 }
                 else if (key == "dialogues_list") {
                     main_window.setDialogueList(data[key]);
@@ -158,13 +154,14 @@ MudderyClient.prototype = {
 			        char_data_window.setEquipments(data[key]);
                 }
                 else if (key == "inventory") {
-                    main_window.setInventory(data[key]);
+                    inventory_window.setInventory(data[key]);
                 }
                 else if (key == "skills") {
-                    main_window.setSkills(data[key]);
+                    mudcore.data_handler.setSkills(data[key]);
+                    skills_window.setSkills(data[key]);
                 }
                 else if (key == "quests") {
-                	main_window.setQuests(data[key]);
+                	quests_window.setQuests(data[key]);
                 }
                 else if (key == "get_objects") {
                 	var get_objects = data[key];

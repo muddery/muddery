@@ -21,20 +21,53 @@
         	</div>
         </div>
         <div id="popup">
+            <!-- popup message window -->
             <div id="popup-message" class="popup-window hidden">
-                <div class="message-box">
-                    <div class="msg-header">
+                <div class="popup-box">
+                    <div class="popup-header">
                         <button type="button" class="button-close"></button>
-                        <span class="msg-header-text"></span>
+                        <span class="header-text"></span>
                     </div>
-                    <div class="msg-body"></div>
-                    <div class="msg-footer"></div>
+                    <div class="popup-body"></div>
+                    <div class="popup-footer"></div>
+                </div>
+            </div>
+
+            <!-- popup object window -->
+            <div id="popup-object" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text"></span>
+                    </div>
+                    <div class="popup-body">
+                        <div>
+                            <img class="icon" src=""/>
+                        </div>
+                        <p class="desc"></p>
+                    </div>
+                    <div class="popup-footer"></div>
+                </div>
+            </div>
+
+            <!-- popup get objects window -->
+            <div id="popup-get-objects" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text">Get Objects</span>
+                    </div>
+                    <div class="popup-body">
+                    </div>
+                    <div class="popup-footer">
+                        <button type="button" class="button-ok">OK</button>
+                    </div>
                 </div>
             </div>
         </div>
     
         <!-- Window's body. -->
-        <div id="wrapper">
+        <div id="windows-wrapper">
 
             <!-- login window -->
             <div id="login-window" class="main-window hidden">
@@ -105,57 +138,168 @@
                     <input class="new-char-name form-control editbox" type="text" placeholder="name" autocomplete="off" />
                 </div>
                 <div class="button-bar">
-                    <button type="button" class="button-create btn btn-default">Create</button>
+                    <button type="button" class="button-create">Create</button>
                 </div>
             </div>
 
             <div id="game-window" class="main-window hidden">
-                <div id="main-contents">
-                    <div id="prompt-bar">
-                        <img class="icon hidden" src="" />
-                        <span class="name"></span>
-                        <span class="level value"></span>
-                        <span class="exp value"></span>
-                        <span class="hp value"></span>
+                <div id="contents">
+                    <div id="main-contents">
+                        <div id="prompt-bar">
+                            <img class="icon hidden" src="" />
+                            <span class="name"></span>
+                            <span class="level value"></span>
+                            <span class="exp value"></span>
+                            <span class="hp value"></span>
+                        </div>
+                        <div id="scene-window">
+                            <div class="scene-name">
+                            </div>
+                            <div class="scene-desc">
+                            </div>
+                            <div class="scene-commands">
+                            </div>
+                            <div class="scene-objects">
+                            </div>
+                            <div class="scene-npcs">
+                            </div>
+                            <div class="scene-players">
+                            </div>
+                            <div class="scene-exits">
+                                <table class="exits-table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="direction-0 cell-left cell-top"></td>
+                                            <td class="direction-1 cell-center cell-top"></td>
+                                            <td class="direction-2 cell-right cell-top"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="direction-3 cell-left cell-middle"></td>
+                                            <td class="direction-4 cell-center cell-middle"></td>
+                                            <td class="direction-5 cell-right cell-middle"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="direction-6 cell-left cell-bottom"></td>
+                                            <td class="direction-7 cell-center cell-bottom"></td>
+                                            <td class="direction-8 cell-right cell-bottom"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <svg id="exits-svg" version="1.1"  xmlns="http://www.w3.org/2000/svg">
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="message-window">
+                            <div class="message-list">
+                            </div>
+                        </div>
                     </div>
-                    <div id="message-window">
-                        <div class="message-list">
+
+                    <div id="char-data-window" class="hidden">
+                        <div class="title-bar">
+                            <button type="button" class="button-back" ></button>
+                            <span class="header-text">&nbsp;</span>
+                        </div>
+                        <div>
+                            <div class="equipments">
+                                <div class="position_head position">
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                                <div class="position_hand position">
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                                <div class="position_chest position">
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                                <div class="position_leg position">
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                            </div>
+                            <div class="char-data">
+                                <table class="data-table" >
+                                    <tbody class="data-list">
+                                        <tr class="row-name">
+                                            <td>
+                                                <div>
+                                                    <img class="icon" src=""/>
+                                                    <span class="name"></span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="inventory-window" class="hidden">
+                        <div class="title-bar">
+                            <button type="button" class="button-back" ></button>
+                            <span class="header-text">&nbsp;</span>
+                        </div>
+                        <div>
+                            <table class="inventory-table" frame="border" rules="all">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Num</th>
+                                        <th>Desc</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="inventory-list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="skills-window" class="hidden">
+                        <div class="title-bar">
+                            <button type="button" class="button-back" ></button>
+                            <span class="header-text">&nbsp;</span>
+                        </div>
+                        <div>
+                            <table class="skills-table" frame="border" rules="all">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Desc</th>
+                                </tr>
+                                </thead>
+                                <tbody class="skill-list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="quests-window" class="hidden">
+                        <div class="title-bar">
+                            <button type="button" class="button-back" ></button>
+                            <span class="header-text">&nbsp;</span>
+                        </div>
+                        <div>
+                            <table class="quests-table" frame="border" rules="all">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Desc</th>
+                                    <th>Objective</th>
+                                </tr>
+                                </thead>
+                                <tbody class="quest-list">
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-                <div id="char-data-window">
-                    <div class="equipments">
-                        <div class="position_head position">
-                            <img class="icon" src=""/>
-                            <div class="name"></div>
-                        </div>
-                        <div class="position_hand position">
-                            <img class="icon" src=""/>
-                            <div class="name"></div>
-                        </div>
-                        <div class="position_chest position">
-                            <img class="icon" src=""/>
-                            <div class="name"></div>
-                        </div>
-                        <div class="position_leg position">
-                            <img class="icon" src=""/>
-                            <div class="name"></div>
-                        </div>
-                    </div>
-                    <div class="char-data">
-                        <table class="data-table" >
-                            <tbody class="data-list">
-                                <tr class="row-name">
-                                    <td>
-                                        <div>
-                                            <img class="icon"/>
-                                            <span class="name"></span>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div id="tab-bar">
+                    <button type="button" class="button-main">场景</button>
+                    <button type="button" class="button-character">角色</button>
+                    <button type="button" class="button-map">地图</button>
+                    <button type="button" class="button-system">系统</button>
                 </div>
             </div>
 

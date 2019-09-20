@@ -15,18 +15,18 @@ body {
     display: none;
 }
 
-#wrapper {
-    width: 100%;
-    height: 100%;
-}
-
-.main-window {
+#windows-wrapper {
     width: 100%;
     height: 100%;
     padding: 50px;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
+}
+
+.main-window {
+    width: 100%;
+    height: 100%;
 }
 
 .title-bar {
@@ -190,7 +190,7 @@ body {
 #popup {
 }
 
-.message-window {
+.popup-window {
     position: absolute;
     left: 0;
     top: 0;
@@ -199,7 +199,7 @@ body {
     background: rgba(0, 0, 0, .4);
 }
 
-.message-box {
+.popup-box {
     position: absolute;
     left: 50%;
     top: 50%;
@@ -213,22 +213,22 @@ body {
     border-radius: 5px;
 }
 
-.msg-header {
+.popup-header {
     text-align: center;
 }
 
-.msg-body {
+.popup-body {
     padding: 5px;
 }
 
-.msg-footer {
+.popup-footer {
     position: absolute;
     left: 50%;
     bottom: 10px;
     transform: translate(-50%, 0);
 }
 
-.msg-button {
+.popup-button {
     margin: 5px;
 }
 
@@ -313,6 +313,10 @@ body {
 
 
 /************* main game window begin *************/
+#game-window {
+    position: relative;
+}
+
 #game-window .main-contents {
     height: 100%;
 }
@@ -347,15 +351,65 @@ body {
 }
 /************* prompt bar end *************/
 
+/************* scene window begin *************/
+#scene-window {
+    height: 70%;
+    font-size: 12px;
+}
+
+#scene-window .scene-exits {
+    position: relative;
+}
+
+#scene-window .exits-table {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+#scene-window .exits-table p {
+    margin: 0;
+    padding: 5px 5px;
+}
+
+#scene-window .cell-left {
+    text-align: right;
+}
+
+#scene-window .cell-center {
+    text-align: center;
+}
+
+#scene-window .cell-right {
+    text-align: left;
+}
+
+#scene-window .cell-top {
+    vertical-align: bottom;
+}
+
+#scene-window .cell-middle {
+    vertical-align: middle;
+}
+
+#scene-window .cell-bottom {
+    vertical-align: top;
+}
+
+#exits-svg {
+    position: absolute;
+}
+/************* scene window end *************/
+
 
 /************* message window begin *************/
 #message-window {
-    height: 50%;
 }
 
 #message-window .message-list {
     height: 100%;
-    font-size: 14px;
+    font-size: 12px;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -424,3 +478,39 @@ body {
     height: 40px;
 }
 /************* character data window end *************/
+
+
+/************* inventory window begin *************/
+#inventory-window .inventory-table {
+    width: 100%;
+    font-size: 12px;
+}
+
+/************* inventory window end *************/
+
+
+/************* skills window begin *************/
+#skills-window .skills-table {
+    width: 100%;
+    font-size: 12px;
+}
+
+/************* skills window end *************/
+
+
+/************* quests window begin *************/
+#quests-window .quests-table {
+    width: 100%;
+    font-size: 12px;
+}
+
+/************* quests window end *************/
+
+
+/************* tab bar begin *************/
+#tab-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
+/************* tab bar end *************/

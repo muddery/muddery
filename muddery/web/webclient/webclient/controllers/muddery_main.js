@@ -142,10 +142,10 @@ MudderyMain.prototype.showGetObjects = function(accepted, rejected, combat) {
 		var first = true;
 		for (var key in accepted) {
 			if (first) {
-				this.displayMsg(mudcore.trans("You got:"));
+				message_window.displayMessage(mudcore.trans("You got:"));
 				first = false;
 			}
-			this.displayMsg(key + ": " + accepted[key]);
+			message_window.displayMessage(key + ": " + accepted[key]);
 		}
 	}
 	catch(error) {
@@ -157,10 +157,10 @@ MudderyMain.prototype.showGetObjects = function(accepted, rejected, combat) {
 		var first = true;
 		for (var key in rejected) {
 			if (first) {
-				this.displayMsg(mudcore.trans("You can not get:"));
+				message_window.displayMessage(mudcore.trans("You can not get:"));
 				first = false;
 			}
-			this.displayMsg(key + ": " + rejected[key]);
+			message_window.displayMessage(key + ": " + rejected[key]);
 		}
 	}
 	catch(error) {
@@ -172,23 +172,9 @@ MudderyMain.prototype.showGetObjects = function(accepted, rejected, combat) {
 	}
 	else {
 		// If not in combat.
-		var popup_box = $('#popup_box');
-		if (popup_box.length == 0) {
-			// If there is no other boxes, show getting object box.
-			this.popupGetObjects(accepted, rejected);
-		}
+		popup_get_objects.setObjects(accepted, rejected);
+        popup_get_objects.show();
 	}
-}
-  
-/*  
- * popup a getting objects message box
- */
-MudderyMain.prototype.popupGetObjects = function(accepted, rejected) {
-	this.doClosePopupBox();
-
-	var component = $$.component.get_objects;
-	component.setObjects(accepted, rejected);
-	component.show();
 }
    
 /*
@@ -377,37 +363,7 @@ MudderyMain.prototype.setCombatStatus = function(status) {
 // Functional Windows
 //
 //////////////////////////////////////////
-    
-/*
- * Set the player's inventory.
- */
-MudderyMain.prototype.setInventory = function(inventory) {
-	$$.component.inventory.setInventory(inventory);
-}
 
-/*
- * Set the player's skills.
- */
-MudderyMain.prototype.setSkills = function(skills) {
-	$$.data_handler.setSkills(skills);
-
-	$$.component.skills.setSkills(skills);
-}
-
-/* 
- * Set the player's quests.
- */
-MudderyMain.prototype.setQuests = function(quests) {
-	$$.component.quests.setQuests(quests);
-}
-
-/*
- * Set the player's current scene.
- */
-MudderyMain.prototype.setScene = function(scene) {
-	$$.component.scene.setScene(scene);
-}
-    
 /*
  * Notify a player has been online.
  */
@@ -776,6 +732,7 @@ MudderyMain.prototype.clearChannels = function() {
  * Set available channels.
  */
 MudderyMain.prototype.setChannels = function(channels) {
+    /*
 	$("#bar_msg_type_menu>:not(.template)").remove();
 	
 	var container = $("#bar_msg_type_menu");
@@ -814,6 +771,7 @@ MudderyMain.prototype.setChannels = function(channels) {
 	else {
 		$("#input_bar").css("visibility", "visible");
 	}
+	*/
 }
 
 /*
@@ -848,7 +806,7 @@ MudderyMain.prototype.selectMsgType = function(caller) {
 
 /******************************************
  *
- * Popup message window.
+ * Popup Message Window.
  *
  ******************************************/
 
@@ -869,24 +827,25 @@ MudderyPopupMessage.prototype.constructor = MudderyPopupMessage;
  */
 MudderyPopupMessage.prototype.bindEvents = function() {
     this.onClick(".button-close", this.onClose);
-	this.onClick(".msg-footer", "button", this.onCommand);
+	this.onClick(".popup-footer", "button", this.onCommand);
 }
 
 /*
  * Event when clicks the close button.
  */
 MudderyPopupMessage.prototype.onClose = function(element) {
+    this.buttons = [];
     this.el.hide();
-    this.select(".msg-header-text").empty();
-	this.select(".msg-body").empty();
-	this.select(".msg-footer").empty();
+    this.select(".header-text").empty();
+	this.select(".popup-body").empty();
+	this.select(".popup-footer").empty();
 }
 
 /*
  * Event when clicks a command button.
  */
 MudderyPopupMessage.prototype.onCommand = function(element) {
-	var index = $(element).data("button-index");
+	var index = $(element).data("index");
 
 	if ("callback" in this.buttons[index]) {
         var callback = this.buttons[index]["callback"];
@@ -914,19 +873,225 @@ MudderyPopupMessage.prototype.setMessage = function(header, content, buttons) {
 	this.buttons = buttons;
 
     var header = mudcore.text2html.parseHtml(header) || "&nbsp;";
-	this.select(".msg-header-text").html(header);
-	this.select(".msg-body").html(mudcore.text2html.parseHtml(content));
+	this.select(".header-text").html(header);
+	this.select(".popup-body").html(mudcore.text2html.parseHtml(content));
 
-    var container = this.select(".msg-footer");
+    var container = this.select(".popup-footer");
 	for (var i = 0; i < buttons.length; i++) {
 		var name = mudcore.text2html.parseHtml(buttons[i]["name"]);
 
 		$("<button>").attr("type", "button")
-		    .addClass("msg-button")
-		    .data("button-index", i)
+		    .addClass("popup-button")
+		    .data("index", i)
 			.html(name)
 			.appendTo(container);
 	}
+}
+
+
+/******************************************
+ *
+ * Popup Object Window.
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyPopupObject = function(el) {
+	BasePopupController.call(this, el);
+
+	this.obj = null;
+	this.buttons = [];
+}
+
+MudderyPopupObject.prototype = prototype(BasePopupController.prototype);
+MudderyPopupObject.prototype.constructor = MudderyPopupObject;
+
+/*
+ * Bind events.
+ */
+MudderyPopupObject.prototype.bindEvents = function() {
+    this.onClick(".button-close", this.onClose);
+	this.onClick(".popup-footer", "button", this.onCommand);
+}
+
+/*
+ * Event when clicks the close button.
+ */
+MudderyPopupObject.prototype.onClose = function(element) {
+    this.object = null;
+	this.buttons = [];
+    this.el.hide();
+    this.select(".header-text").empty();
+	this.select(".icon").attr("src", "");
+	this.select(".desc").empty();
+	this.select(".popup-footer").empty();
+}
+
+/*
+ * Event when clicks a command button.
+ */
+MudderyPopupObject.prototype.onCommand = function(element) {
+	var index = $(element).data("index");
+	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
+		mudcore.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+	}
+
+	this.onClose();
+}
+
+/*
+ * Event when an object moved out from the current place.
+ */
+MudderyPopupObject.prototype.onObjMovedOut = function(dbref) {
+    if (!this.object) {
+        return;
+    }
+
+    if (dbref == this.object["dbref"]) {
+		this.onClose();
+	}
+}
+
+/*
+ * Event when objects moved out from the current place.
+ */
+MudderyPopupObject.prototype.onObjsMovedOut = function(objects) {
+    if (!this.object) {
+        return;
+    }
+
+    for (var key in objects) {
+        for (var i = 0; i < objects[key].length; i++) {
+            if (objects[key][i]["dbref"] == this.object["dbref"]) {
+                this.onClose();
+                return;
+            }
+        }
+    }
+}
+
+/*
+ * Set object's data.
+ */
+MudderyPopupObject.prototype.setObject = function(obj) {
+	this.obj = obj;
+    var buttons = obj["cmds"]
+	if (!buttons) {
+		buttons = [{"name": mudcore.trans("OK")}];
+	}
+	this.buttons = buttons;
+
+	// add name
+	this.select("#object_popup_header").html(mudcore.text2html.parseHtml(obj["name"]));
+
+	// add icon
+	if (obj["icon"]) {
+		var url = settings.resource_url + obj["icon"];
+		this.select(".icon").attr("src", url);
+		this.select(".icon").show();
+    }
+    else {
+        this.select(".icon").hide();
+    }
+
+	// add desc
+	desc = mudcore.text2html.parseHtml(obj["desc"]);
+	this.select(".desc").html(desc);
+
+    // add buttons
+    var container = this.select(".popup-footer");
+	for (var i = 0; i < buttons.length; i++) {
+		var name = mudcore.text2html.parseHtml(buttons[i]["name"]);
+
+		$("<button>").attr("type", "button")
+		    .addClass("popup-button")
+		    .data("index", i)
+			.html(name)
+			.appendTo(container);
+	}
+}
+
+
+/******************************************
+ *
+ * Popup Get Objects Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyPopupGetObjects = function(el) {
+	BaseController.call(this, el);
+}
+
+MudderyPopupGetObjects.prototype = prototype(BaseController.prototype);
+MudderyPopupGetObjects.prototype.constructor = MudderyPopupGetObjects;
+
+/*
+ * Bind events.
+ */
+MudderyPopupGetObjects.prototype.bindEvents = function() {
+    this.onClick(".button-close", this.onClose);
+    this.onClick(".button-ok", this.onClose);
+}
+
+/*
+ * Event when clicks the close button.
+ */
+MudderyPopupGetObjects.prototype.onClose = function(element) {
+    this.el.hide();
+    this.select(".popup-body").empty();
+}
+
+/*
+ * Set objects that the user get.
+ */
+MudderyPopupGetObjects.prototype.setObjects = function(accepted, rejected) {
+	// set new objects
+	var container = this.select(".popup-body");
+
+	for (var name in accepted) {
+	    var div = $("<div>")
+	        .appendTo(container);
+
+        /*
+	    if ("icon" in accepted[name]) {
+	        var url = settings.resource_url + accepted[name]["icon"];
+	        $("<img>")
+	            .addClass("icon")
+	            .attr("src", url)
+	            .appendTo(div);
+	    }
+	    */
+
+	    $("<span>")
+	        .addClass("item")
+	        .html(mudcore.text2html.parseHtml(name + ": " + accepted[name]))
+            .appendTo(div);
+	}
+
+	for (var name in rejected) {
+        var div = $("<div>")
+	        .appendTo(container);
+
+        /*
+        if ("icon" in rejected[name]) {
+            var url = settings.resource_url + rejected[name]["icon"];
+            $("<img>")
+                .addClass("icon")
+                .attr("src", url)
+                .appendTo(div);
+        }
+        */
+
+        $("<span>")
+            .addClass("item")
+            .html(mudcore.text2html.parseHtml(name + ": " + rejected[name]))
+            .appendTo(div);
+    }
 }
 
 
@@ -1174,7 +1339,7 @@ MudderySelectChar.prototype.setCharacters = function(characters) {
     this.characters = characters;
 
 	var container = this.select(".character-list");
-	container.html("");
+	container.empty();
 
 	for (var i = 0; i < characters.length; i++) {
 		var item = $("<div>")
@@ -1364,7 +1529,7 @@ MudderyMessage.prototype.constructor = MudderyMessage;
  * Clear messages in message window.
  */
 MudderyMessage.prototype.clear = function() {
-    this.select(".message-list").html("");
+    this.select(".message-list").empty();
 }
 
 
@@ -1558,5 +1723,597 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
 
         this.select(".equipments ." + pos.toLowerCase() + " .icon").attr("src", url);
         this.select(".equipments ." + pos.toLowerCase() + " .name").html(name);
+    }
+}
+
+
+/******************************************
+ *
+ * Inventory Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyInventory = function(el) {
+	BaseTabController.call(this, el);
+
+	this.inventory = [];
+}
+
+MudderyInventory.prototype = prototype(BaseTabController.prototype);
+MudderyInventory.prototype.constructor = MudderyInventory;
+
+/*
+ * Bind events.
+ */
+MudderyInventory.prototype.bindEvents = function() {
+	this.onClick("#inv_inventory_items", ".obj_name", this.onLook);
+}
+
+/*
+ * Event when clicks the object link.
+ */
+MudderyInventory.prototype.onLook = function(element) {
+    var dbref = this.select(element).data("dbref");
+    $$.commands.doLook(dbref);
+}
+
+/*
+ * Set inventory's data.
+ */
+MudderyInventory.prototype.setInventory = function(inventory) {
+    this.inventory = inventory;
+
+    var container = this.select(".inventory-list");
+    container.empty();
+
+    for (var i = 0; i < inventory.length; i++) {
+        var obj = inventory[i];
+        var row = $("<tr>")
+            .data("index", i);
+
+        var cell = $("<td>");
+
+        // icon
+        if (obj["icon"]) {
+            var div = $("<div>")
+                .addClass("icon-div")
+                .appendTo(cell);
+
+            var image = $("<img>")
+                .addClass("icon-image")
+                .attr("src", settings.resource_url + obj["icon"])
+                .appendTo(div);
+        }
+
+        // name
+        $("<div>")
+            .html(mudcore.text2html.parseHtml(obj["name"]))
+            .appendTo(cell);
+        cell.appendTo(row);
+
+        // number
+        var number = obj["number"];
+        if ("equipped" in obj && obj["equipped"]) {
+            number += " (equipped)";
+        }
+        $("<td>")
+            .text(number)
+            .appendTo(row);
+
+        // desc
+        $("<td>")
+            .html(mudcore.text2html.parseHtml(obj["desc"]))
+            .appendTo(row);
+
+        row.appendTo(container);
+    }
+}
+
+
+/******************************************
+ *
+ * Skills Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderySkills = function(el) {
+	BaseTabController.call(this, el);
+
+	this.skills = [];
+}
+
+MudderySkills.prototype = prototype(BaseTabController.prototype);
+MudderySkills.prototype.constructor = MudderySkills;
+
+
+/*
+ * Bind events.
+ */
+MudderySkills.prototype.bindEvents = function() {
+	this.onClick("#skill_list", ".skill_name", this.onLook);
+}
+
+/*
+ * Event when clicks the skill link.
+ */
+MudderySkills.prototype.onLook = function(element) {
+    var dbref = this.select(element).data("dbref");
+    $$.commands.doLook(dbref);
+}
+
+/*
+ * Set skills' data.
+ */
+MudderySkills.prototype.setSkills = function(skills) {
+    this.skills = skills;
+
+    var container = this.select(".skill-list");
+    container.empty();
+
+    for (var i = 0; i < skills.length; i++) {
+        var obj = skills[i];
+        var row = $("<tr>")
+            .data("index", i);
+
+        var cell = $("<td>");
+
+        // icon
+        if (obj["icon"]) {
+            var div = $("<div>")
+                .addClass("icon-div")
+                .appendTo(cell);
+
+            var image = $("<img>")
+                .addClass("icon-image")
+                .attr("src", settings.resource_url + obj["icon"])
+                .appendTo(div);
+        }
+
+        // name
+        $("<div>")
+            .html(mudcore.text2html.parseHtml(obj["name"]))
+            .appendTo(cell);
+        cell.appendTo(row);
+
+        // desc
+        $("<td>")
+            .html(mudcore.text2html.parseHtml(obj["desc"]))
+            .appendTo(row);
+
+        row.appendTo(container);
+    }
+}
+
+
+/******************************************
+ *
+ * Quests Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyQuests = function(el) {
+	BaseTabController.call(this, el);
+
+	this.quests = [];
+}
+
+MudderyQuests.prototype = prototype(BaseTabController.prototype);
+MudderyQuests.prototype.constructor = MudderyQuests;
+
+/*
+ * Bind events.
+ */
+MudderyQuests.prototype.bindEvents = function() {
+	this.onClick("#quest_list", ".quest_name", this.onLook);
+}
+
+/*
+ * Event when clicks the quest link.
+ */
+MudderyQuests.prototype.onLook = function(element) {
+    var dbref = this.select(element).data("dbref");
+    $$.commands.doLook(dbref);
+}
+
+/*
+ * Set the player's quests.
+ */
+MudderyQuests.prototype.setQuests = function(quests) {
+    this.quests = quests;
+
+    var container = this.select(".quest-list");
+    container.empty();
+
+    for (var i = 0; i < quests.length; i++) {
+        var obj = quests[i];
+        var row = $("<tr>")
+            .data("index", i);
+
+        var cell = $("<td>");
+
+        // icon
+        if (obj["icon"]) {
+            var div = $("<div>")
+                .addClass("icon-div")
+                .appendTo(cell);
+
+            var image = $("<img>")
+                .addClass("icon-image")
+                .attr("src", settings.resource_url + obj["icon"])
+                .appendTo(div);
+        }
+
+        // name
+        $("<div>")
+            .html(mudcore.text2html.parseHtml(obj["name"]))
+            .appendTo(cell);
+        cell.appendTo(row);
+
+        // desc
+        $("<td>")
+            .html(mudcore.text2html.parseHtml(obj["desc"]))
+            .appendTo(row);
+
+        // objectives
+        var td = $("<td>");
+        for (var j = 0; j < obj["objectives"].length; j++) {
+            var objective = obj["objectives"][j];
+            var item = $("<p>");
+            if ("desc" in objective) {
+                item.text(objective["desc"]);
+            }
+            else {
+                item.text(objective["target"] + " " +
+                          objective["object"] + " " +
+                          objective["accomplished"] + "/" +
+                          objective["total"]);
+            }
+            item.appendTo(td);
+        }
+        td.appendTo(row);
+
+        row.appendTo(container);
+	}
+}
+
+/*
+ * Add quest's objectives.
+ */
+MudderyQuests.prototype.addObjectives = function(container, objectives) {
+	var template = container.find(".quest_objective>p.template");
+	for (var i in objectives) {
+		var item = this.cloneTemplate(template);
+
+		if ("desc" in objectives[i]) {
+			item.text(objectives[i]["desc"]);
+		}
+		else {
+			item.text(objectives[i]["target"] + " " +
+					  objectives[i]["object"] + " " +
+					  objectives[i]["accomplished"] + "/" +
+					  objectives[i]["total"]);
+		}
+	}
+}
+
+
+/******************************************
+ *
+ * Scene Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyScene = function(el) {
+	BaseTabController.call(this, el);
+
+    this.max_player = 10;
+    this.path_color = "#666";
+    this.path_width = "3";
+
+	this.scene = null;
+}
+
+MudderyScene.prototype = prototype(BaseTabController.prototype);
+MudderyScene.prototype.constructor = MudderyScene;
+
+/*
+ * Bind events.
+ */
+MudderyScene.prototype.bindEvents = function() {
+	this.onClick(".scene-commands", "button", this.onCommand);
+	this.onClick(".scene-objects", "button", this.onObject);
+	this.onClick(".scene-npcs", "button", this.onNPC);
+	this.onClick(".scene-players", "button", this.onPlayer);
+	this.onClick(".scene-exits", "button", this.onExit);
+}
+
+/*
+ * On click a command.
+ */
+MudderyScene.prototype.onCommand = function(element) {
+    var index = $(element).data("index");
+    var cmd = this.scene["cmds"][index]["cmd_name"];
+    var args = this.scene["cmds"][index]["cmd_args"];
+    mudcore.service.doCommandLink(cmd, args);
+}
+
+/*
+ * On look at an object.
+ */
+MudderyScene.prototype.onObject = function(element) {
+    var index = $(element).data("index");
+    var dbref = this.scene["things"][index]["dbref"];
+    dbref = dbref.slice(1);
+    mudcore.service.doLook(dbref);
+}
+
+/*
+ * On look at an NPC.
+ */
+MudderyScene.prototype.onNPC = function(element) {
+    var index = $(element).data("index");
+    var dbref = this.scene["npcs"][index]["dbref"];
+    dbref = dbref.slice(1);
+    mudcore.service.doLook(dbref);
+}
+
+/*
+ * On look at an player.
+ */
+MudderyScene.prototype.onNPC = function(element) {
+    var index = $(element).data("index");
+    var dbref = this.scene["players"][index]["dbref"];
+    dbref = dbref.slice(1);
+    mudcore.service.doLook(dbref);
+}
+
+/*
+ * On go to an exit.
+ */
+MudderyScene.prototype.onExit = function(element) {
+    var index = $(element).data("index");
+    var dbref = this.scene["exits"][index]["dbref"];
+    dbref = dbref.slice(1);
+    mudcore.service.doGoto(dbref);
+}
+
+/*
+ * Clear the view.
+ */
+MudderyScene.prototype.clearScene = function() {
+    this.select(".scene-name").empty();
+    this.select(".scene-desc").empty();
+    this.select(".scene-commands").empty();
+    this.select(".scene-objects").empty();
+    this.select(".scene-npcs").empty();
+    this.select(".scene-players").empty();
+    this.select(".scene-exits td").empty();
+    var svg = document.getElementById("exits-svg");
+    svg.innerHTML = "";
+}
+
+/*
+ * Set the scene's data.
+ */
+MudderyScene.prototype.setScene = function(scene) {
+    this.scene = scene;
+
+    this.clearScene();
+
+    // add room's name
+    var room_name = mudcore.text2html.parseHtml(scene["name"]);
+    this.select(".scene-name").html(">>>>> " + room_name + " <<<<<");
+
+    // add room's desc
+    this.select(".scene-desc").html(mudcore.text2html.parseHtml(scene["desc"]));
+
+    // set commands
+    var commands = this.select(".scene-commands");
+    if ("cmds" in scene && scene["cmds"].length > 0) {
+        for (var i = 0; i < scene["cmds"].length; i++) {
+            $("<button>")
+                .attr("type", "button")
+                .data("index", i)
+                .text(scene["cmds"][i]["name"])
+                .appendTo(commands);
+        }
+        commands.show();
+    }
+    else {
+        commands.hide();
+    }
+
+    // set objects
+    var objects = this.select(".scene-objects");
+    if ("things" in scene && scene["things"].length > 0) {
+        for (var i = 0; i < scene["things"].length; i++) {
+            $("<button>")
+                .attr("type", "button")
+                .data("index", i)
+                .text(scene["things"][i]["name"])
+                .appendTo(objects);
+        }
+        objects.show();
+    }
+    else {
+        objects.hide();
+    }
+
+    // set npcs
+    var npcs = this.select(".scene-npcs");
+    if ("npcs" in scene && scene["npcs"].length > 0) {
+        for (var i = 0; i < scene["npcs"].length; i++) {
+            $("<button>")
+                .attr("type", "button")
+                .data("index", i)
+                .text(scene["npcs"][i]["name"])
+                .appendTo(npcs);
+        }
+        npcs.show();
+    }
+    else {
+        npcs.hide();
+    }
+
+    // set players
+    var players = this.select(".scene-players");
+    if ("players" in scene && scene["players"].length > 0) {
+        // Only show 10 players.
+        var count = 0;
+        for (var i = 0; i < scene["players"].length; i++) {
+            $("<button>")
+                .attr("type", "button")
+                .data("index", i)
+                .text(scene["players"][i]["name"])
+                .appendTo(players);
+
+            count++
+            if (count == this.max_player) {
+                break;
+            }
+        }
+        players.show();
+    }
+    else {
+        players.hide();
+    }
+
+    // add exits
+    if ("exits" in scene && scene["exits"].length > 0) {
+        this.setExitsMap(scene["exits"], room_name);
+    }
+
+    // set background
+    var backview = this.select("#scene-window");
+    if ("background" in scene && scene["background"]) {
+        var url = settings.resource_url + scene["background"]["resource"];
+        backview.css("background", "url(" + url + ") no-repeat center center");
+    }
+    else {
+        backview.css("background", "");
+    }
+}
+
+/*
+ * Add a new player to this scene.
+ */
+MudderyScene.prototype.addPlayer = function(player) {
+    this.addLinks("#scene_players", "#scene_players_container", [player]);
+}
+
+/*
+ * Remove a player from this scene.
+ */
+MudderyScene.prototype.removePlayer = function(player) {
+    this.select("#scene_obj_" + player["dbref"].slice(1)).remove();
+
+	if (this.select("#scene_players_container>:not(.template)").length == 0) {
+	    // No other players.
+		this.select("#scene_players").hide();
+	}
+}
+
+/*
+ * Set a mini map of exits.
+ */
+MudderyScene.prototype.setExitsMap = function(exits, room_name) {
+    // sort exits by direction
+    // index of direction:
+    // 0  1  2
+    // 3  4  5
+    // 6  7  8
+    var room_exits = [];
+    if (exits) {
+        for (var i = 0;i < exits.length; i++) {
+            var direction = mudcore.map_data.getExitDirection(exits[i].key);
+            // sort from north (67.5)
+            if (direction < 67.5) {
+                direction += 360;
+            }
+            room_exits.push({"data": exits[i],
+                             "direction": direction,
+                             "index": i
+                             });
+        }
+
+        room_exits.sort(function(a, b) {return a.direction - b.direction;});
+    }
+
+    var exit_grids = [[], [], [] ,[] ,[], [], [], [], []];
+    for (var i in room_exits) {
+        var index = mudcore.map_data.getDirectionIndex(room_exits[i]["direction"]);
+        exit_grids[index].push(room_exits[i]);
+    }
+
+    // reverse the upper circle elements
+    for (var i = 0; i < 4; ++i) {
+        exit_grids[i].reverse();
+    }
+
+    // add exits to table
+    for (var i = 0; i < exit_grids.length; i++) {
+        var position = ".direction-" + i;
+        var container = this.select(position);
+
+        if (exit_grids[i].length == 0) {
+            var p = $("<p>")
+                .appendTo(container);
+            p.html("&nbsp;");
+            continue;
+        }
+
+        for (var j = 0; j < exit_grids[i].length; j++) {
+            var exit = exit_grids[i][j];
+
+            var name = "";
+            if (exit["data"]["name"]) {
+                name = mudcore.text2html.parseHtml(exit["data"]["name"]);
+            }
+
+            var p = $("<p>")
+                .appendTo(container);
+
+            var button = $("<button>")
+                .addClass("exit-" + exit["index"])
+                .attr("type", "button")
+                .data("index", exit["index"])
+                .text(name)
+                .appendTo(p);
+        }
+    }
+
+    // If the center grid is empty, show room's name in the center grid.
+    if (exit_grids[4].length == 0) {
+        var container = this.select(".direction-4");
+        container.text(room_name);
+    }
+
+    // draw exit lines
+    var svg = document.getElementById("exits-svg");
+    var namespace = "http://www.w3.org/2000/svg";
+    var center_dom = this.select(".direction-4");
+    var x1 = center_dom.position().left + center_dom.outerWidth() / 2;
+    var y1 = center_dom.position().top + center_dom.outerHeight() / 2;
+    for (var i = 0; i < exits.length; i++) {
+        var exit_dom = this.select(".exit-" + i);
+        var x2 = exit_dom.position().left + exit_dom.outerWidth() / 2;
+        var y2 = exit_dom.position().top + exit_dom.outerHeight() / 2;
+        var path = document.createElementNS(namespace, "path");
+        path.setAttribute("stroke", this.path_color);
+        path.setAttribute("stroke-width", this.path_width);
+        path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
+        svg.appendChild(path);
     }
 }
