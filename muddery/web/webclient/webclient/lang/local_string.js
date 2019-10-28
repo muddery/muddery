@@ -7,7 +7,6 @@ MudderyLocalString.prototype = {
 	language_list: {
     	"en-us": MudderyLocalStringEnUs,
     	"zh-cn": MudderyLocalStringZhCn,
-    	"zh-tw": MudderyLocalStringZhTw,
 	},
 
 	language_code: "",

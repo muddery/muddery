@@ -64,6 +64,26 @@
                     </div>
                 </div>
             </div>
+
+            <!-- popup dialogue window -->
+            <div id="popup-dialogue" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text"></span>
+                    </div>
+                    <div class="popup-body">
+                        <div class="div-icon">
+                            <img class="img-icon" src=""/>
+                        </div>
+                        <div class="div-dialogue">
+                        </div>
+                    </div>
+                    <div class="popup-footer">
+                    </div>
+                </div>
+            </div>
+
         </div>
     
         <!-- Window's body. -->
@@ -145,14 +165,14 @@
             <div id="game-window" class="main-window hidden">
                 <div id="contents">
                     <div id="main-contents">
-                        <div id="prompt-bar">
+                        <div class="prompt-bar">
                             <img class="icon hidden" src="" />
                             <span class="name"></span>
                             <span class="level value"></span>
                             <span class="exp value"></span>
                             <span class="hp value"></span>
                         </div>
-                        <div id="scene-window">
+                        <div class="scene-window">
                             <div class="scene-name">
                             </div>
                             <div class="scene-desc">
@@ -189,7 +209,7 @@
                                 </svg>
                             </div>
                         </div>
-                        <div id="message-window">
+                        <div class="message-window">
                             <div class="message-list">
                             </div>
                         </div>
@@ -294,13 +314,75 @@
                             </table>
                         </div>
                     </div>
+
+                    <div id="map-window" class="hidden">
+                        <div class="title-bar">
+                            <span class="header-text">Map</span>
+                        </div>
+                        <div class="map-body">
+                            <svg id="map-svg"></svg>
+                        </div>
+                    </div>
+
                 </div>
                 <div id="tab-bar">
-                    <button type="button" class="button-main">场景</button>
+                    <button type="button" class="button-scene">场景</button>
                     <button type="button" class="button-character">角色</button>
                     <button type="button" class="button-map">地图</button>
                     <button type="button" class="button-system">系统</button>
                 </div>
+            </div>
+
+            <div id="combat-window" class="main-window hidden">
+                <div class="prompt-bar">
+                    <img class="icon hidden" src="" />
+                    <span class="name"></span>
+                    <span class="level value"></span>
+                    <span class="exp value"></span>
+                    <span class="hp value"></span>
+                </div>
+                <div class="combat-desc">
+                </div>
+                <div class="combat-timeout-div">
+                    <span class="combat-timeout"></span>
+                </div>
+                <div class="combat-characters">
+                </div>
+                <div class="combat-messages">
+                </div>
+                <div class="combat-buttons">
+                </div>
+
+                <!--div>
+                    <div id="combat_result_header" class="modal-header">
+                    </div>
+                    <div id="combat_result_result" class="modal-body">
+                        <div id="combat_result_desc"></div>
+                        <div id="combat_result_div_exp">
+                            <span id="combat_result_view_get_exp">Get Exp: </span><span id="combat_result_exp"></span>
+                        </div>
+                        <div id="combat_result_accepted">
+                            <div id="combat_result_view_get_objects">Get Objects: </div>
+                            <div id="combat_result_accepted_list">
+                                <p class="template">
+                                    <span class="name"></span>: <span class="info"></span>
+                                </p>
+                            </div>
+                        </div>
+                        <div id="combat_result_rejected">
+                            <div id="combat_result_view_rejected">Rejected: </div>
+                            <div id="combat_result_rejected_list">
+                                <p class="template">
+                                    <span class="name"></span>: <span class="info"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div-->
+                <div id="combat_result_buttons" class="modal-footer">
+                    <button id="combat_result_button_ok" class="btn btn-default btn-primary" type="button">OK</button>
+                </div>
+
             </div>
 
             <div class="background-window">
@@ -337,14 +419,12 @@
 
         <!-- libs -->
         <script src="./libs/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./libs/d3-selection.v1.min.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- settings -->
         <script src="./settings.js" type="text/javascript" charset="utf-8"></script>
 
         <script src="./lang/en-us/strings.js" type="text/javascript" charset="utf-8"></script>
         <script src="./lang/zh-cn/strings.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./lang/zh-tw/strings.js" type="text/javascript" charset="utf-8"></script>
         <script src="./lang/local_string.js" type="text/javascript" charset="utf-8"></script>
 
         <script src="./client/evennia.js" type="text/javascript" charset="utf-8"></script>
@@ -356,7 +436,6 @@
         <script src="./utils/data_handler.js" type="text/javascript" charset="utf-8"></script>
         <script src="./utils/text_escape.js" type="text/javascript" charset="utf-8"></script>
         <script src="./utils/utils.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./utils/paginator.js" type="text/javascript" charset="utf-8"></script>
 		
         <script src="./controllers/base_controller.js" type="text/javascript" charset="utf-8"></script>
         <script src="./controllers/muddery_main.js" type="text/javascript" charset="utf-8"></script>

@@ -20,17 +20,21 @@ window.select_char_window = new MudderySelectChar($("#select-char-window"));
 window.new_char_window = new MudderyNewChar($("#new-char-window"));
 
 window.main_game_window = new MudderyMainGame($("#game-window"));
-window.prompt_bar = new MudderyPromptBar($("#prompt-bar"));
-window.scene_window = new MudderyScene($("#scene-window"));
-window.message_window = new MudderyMessage($("#message-window"));
+window.prompt_bar = new MudderyPromptBar($("#main-contents .prompt-bar"));
+window.scene_window = new MudderyScene($("#main-contents .scene-window"));
+window.message_window = new MudderyMessage($("#main-contents .message-window"));
 window.char_data_window = new MudderyCharData($("#char-data-window"));
 window.inventory_window = new MudderyInventory($("#inventory-window"));
 window.skills_window = new MudderySkills($("#skills-window"));
 window.quests_window = new MudderyQuests($("#quests-window"));
+window.map_window = new MudderyMap($("#map-window"));
+
+window.combat_window = new MudderyCombat($("#combat-window"));
 
 window.popup_message = new MudderyPopupMessage($("#popup-message"));
 window.popup_object = new MudderyPopupObject($("#popup-object"));
 window.popup_get_objects = new MudderyPopupGetObjects($("#popup-get-objects"));
+window.popup_dialogue = new MudderyPopupDialogue($("#popup-dialogue"));
 
 $(document).ready(function() {
     main_window.init();
@@ -46,10 +50,14 @@ $(document).ready(function() {
     inventory_window.init();
     skills_window.init();
     quests_window.init();
+    map_window.init();
+
+    combat_window.init();
 
     popup_message.init();
     popup_object.init();
     popup_get_objects.init();
+    popup_dialogue.init();
 
     mudcore.client.init();
 });

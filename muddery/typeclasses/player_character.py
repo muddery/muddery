@@ -997,12 +997,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.show_status()
         self.msg({"msg": _("You are reborn at {c%s{n.") % self.home.get_name()})
 
-    def save_current_dialogue(self, sentences_list, npc):
+    def save_current_dialogue(self, dialogue, npc):
         """
         Save player's current dialogues.
 
         Args:
-            sentences_list: the list of current dialogues
+            dialogue: the current dialogue
             npc: NPC whom the player is talking to.
 
         Returns:
@@ -1012,13 +1012,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             # Can not auto resume dialogues.
             return
 
-        if not sentences_list:
+        if not dialogue:
             self.clear_current_dialogue()
             return
 
         # Save dialogue's id and sentence's ordinal.
-        sentences_begin = [(s["dialogue"], s["sentence"]) for s in sentences_list[0]]
-        sentences_all = [(s["dialogue"], s["sentence"]) for s_list in sentences_list for s in s_list]
+        sentences = [(d["dialogue"], d["sentence"]) for d in dialogue]
 
         npc_key = None
         if npc:
@@ -1028,8 +1027,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         if self.location:
             location_key = self.location.get_data_key()
 
-        self.db.current_dialogue = {"sentences_begin": sentences_begin,
-                                    "sentences_all": sentences_all,
+        self.db.current_dialogue = {"sentences": sentences,
                                     "npc": npc_key,
                                     "location": location_key}
 
@@ -1061,7 +1059,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         current = self.db.current_dialogue
         
-        if not current["sentences_begin"]:
+        if not current["sentences"]:
             return
 
         # Check dialogue's location
@@ -1079,9 +1077,9 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 return
             npc_talking = npc_in_location[0]
 
-        sentences_list = [DIALOGUE_HANDLER.get_sentence(s[0], s[1]) for s in current["sentences_begin"]]
-        output = DIALOGUE_HANDLER.create_output_sentences(sentences_list, self, npc_talking)
-        self.msg({"dialogues_list": [output]})
+        sentences = [DIALOGUE_HANDLER.get_sentence(s[0], s[1]) for s in current["sentence"]]
+        dialogue = DIALOGUE_HANDLER.create_output_sentences(sentences, self, npc_talking)
+        self.msg({"dialogue": dialogue})
         return
 
     def talk_to_npc(self, npc):
@@ -1098,33 +1096,30 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.set_target(npc)
 
         # Get NPC's sentences_list.
-        sentences_list = DIALOGUE_HANDLER.get_npc_sentences_list(self, npc)
+        sentences = DIALOGUE_HANDLER.get_npc_sentences(self, npc)
         
-        self.save_current_dialogue(sentences_list, npc)
-        self.msg({"dialogues_list": sentences_list})
+        self.save_current_dialogue(sentences, npc)
+        self.msg({"dialogue": sentences})
 
-    def show_dialogue(self, npc, dialogue, sentence):
+    def show_dialogue(self, npc, dialogue):
         """
         Show a dialogue.
 
         Args:
             npc: (optional) NPC's object.
             dialogue: dialogue's key.
-            sentence: sentence's ordinal.
 
         Returns:
             None
         """
         # Get next sentences_list.
-        sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(self,
-                                                                  npc,
-                                                                  dialogue,
-                                                                  sentence,
-                                                                  True)
+        sentences = DIALOGUE_HANDLER.get_dialogue_sentences(self,
+                                                            npc,
+                                                            dialogue)
 
-        # Send dialogues_list to the player.
-        self.save_current_dialogue(sentences_list, npc)
-        self.msg({"dialogues_list": sentences_list})
+        # Send the dialogue to the player.
+        self.save_current_dialogue(sentences, npc)
+        self.msg({"dialogue": sentences})
 
     def continue_dialogue(self, npc, dialogue, sentence):
         """
@@ -1154,17 +1149,16 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
             logger.log_tracemsg(ostring)
 
-        # Get next sentences_list.
-        sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(self,
-                                                                  npc,
-                                                                  dialogue,
-                                                                  sentence,
-                                                                  False)
+        # Get next sentences.
+        sentences = DIALOGUE_HANDLER.get_next_sentences(self,
+                                                        npc,
+                                                        dialogue,
+                                                        sentence)
 
         # Send dialogues_list to the player.
-        self.save_current_dialogue(sentences_list, npc)
-        self.msg({"dialogues_list": sentences_list})
-        if not sentences_list:
+        self.save_current_dialogue(sentences, npc)
+        self.msg({"dialogue": sentences})
+        if not sentences:
             # dialogue finished, refresh surroundings
             self.show_location()            
 

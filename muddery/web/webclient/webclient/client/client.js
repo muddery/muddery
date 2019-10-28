@@ -143,8 +143,11 @@ MudderyClient.prototype = {
         			popup_object.setObject(data[key]);
         			popup_object.show();
                 }
-                else if (key == "dialogues_list") {
-                    main_window.setDialogueList(data[key]);
+                else if (key == "dialogue") {
+                    popup_dialogue.setDialogue(data[key]);
+                    if (data[key] && data[key].length > 0) {
+                        popup_dialogue.show();
+                    }
                 }
                 else if (key == "status") {
                     var status = data[key];
@@ -177,10 +180,11 @@ MudderyClient.prototype = {
                     main_window.finishCombat(data[key]);
                 }
                 else if (key == "combat_info") {
-                    main_window.setCombatInfo(data[key]);
+                    var info = data[key];
+                    combat_window.setInfo(info["desc"], info["timeout"], info["characters"], mudcore.data_handler.character_dbref);
                 }
                 else if (key == "combat_commands") {
-                    main_window.setCombatCommands(data[key]);
+	                combat_window.setCommands(data[key]);
                 }
                 else if (key == "skill_cd") {
                 	var skill_cd = data[key];

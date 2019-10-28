@@ -57,51 +57,6 @@ MudderyMain.prototype.popupMessage = function(header, content, buttons) {
 	popup_message.setMessage(header, content, buttons);
     popup_message.show();
 }
-
-/*
- * Popup an object view.
- */
-MudderyMain.prototype.showObject = function(dbref, name, icon, desc, commands) {
-	this.doClosePopupBox();
-
-	var component = $$.component.object;
-	component.setObject(dbref, name, icon, desc, commands);
-	component.show();
-}
-
-/*
- * Popup dialogues.
- */
-MudderyMain.prototype.setDialogueList = function(data) {
-	if (data.length == 0) {
-		if ($$.component.dialogue.visible()) {
-			// close dialogue box
-			this.doClosePopupBox();
-		}
-	}
-	else {
-		if ($$.component.combat.visible()) {
-			// show dialogue after a combat
-			$$.component.combat_result.setDialogue(data);
-		}
-		else {
-			$$.data_handler.dialogues_list = data;
-			dialogues = $$.data_handler.dialogues_list.shift();
-			this.showDialogue(dialogues);
-		}
-	}
-}
-
-/*
- * Popup a single dialogue window.
- */
-MudderyMain.prototype.showDialogue = function(dialogues) {
-	this.doClosePopupBox();
-
-    var component = $$.component.dialogue;
-	component.setDialogues(dialogues, $$.data_handler.getEscapes());
-	component.show();
-}
   
 /*  
  * Popup a shop.
@@ -181,13 +136,10 @@ MudderyMain.prototype.showGetObjects = function(accepted, rejected, combat) {
  * Show the combat window. 
  */
 MudderyMain.prototype.showCombat = function(combat) {     
-	this.doClosePopupBox();
+	main_window.doClosePopupBox();
 	
-	$$.component.combat_result.clear();
-	
-	var component = $$.component.combat;
-	component.reset($$.data_handler.skill_cd_time);
-	component.show();
+	combat_window.reset(mudcore.data_handler.skill_cd_time);
+	this.pushWindow(combat_window);
 }
 
 /*
@@ -201,31 +153,14 @@ MudderyMain.prototype.closeCombat = function(data) {
 }
     
 /*
- * Set combat data.
- */
-MudderyMain.prototype.setCombatInfo = function(info) {
-	$$.component.combat.setInfo(info["desc"], info["timeout"], info["characters"], $$.data_handler.character_dbref);
-}
-    
-/*
- * Set commands used in the combat.
- */
-MudderyMain.prototype.setCombatCommands = function(commands) {
-	var component = $$.component.combat;
-	component.setCommands(commands);
-	component.show();
-}
-    
-/*
  * Cast a combat skill.
  */
 MudderyMain.prototype.setSkillCast = function(result) {
-    if ("status" in result && $$.data_handler.character_dbref in result["status"]) {
-        this.setCombatStatus(result["status"][$$.data_handler.character_dbref])
+    if ("status" in result && mudcore.data_handler.character_dbref in result["status"]) {
+        this.setCombatStatus(result["status"][mudcore.data_handler.character_dbref])
     }
-    
-    var component = $$.component.combat;
-	if (component.isCombatFinished()) {
+
+	if (combat_window.isCombatFinished()) {
 	    var message = "";
 		if ("cast" in result && result["cast"]) {
 			message += mudcore.text2html.parseHtml(result["cast"]) + " ";
@@ -238,7 +173,7 @@ MudderyMain.prototype.setSkillCast = function(result) {
 		}
 	}
 	else {
-		component.setSkillCast(result);
+		combat_window.setSkillCast(result);
 	}
 }
 
@@ -293,18 +228,8 @@ MudderyMain.prototype.closePrepareMatchBox = function() {
  * The combat has finished.
  */
 MudderyMain.prototype.finishCombat = function(result) {
-	$$.component.combat.finishCombat();
-	$$.component.combat_result.setResult(result);
-
-	setTimeout(this.showCombatResult, 750);
-}
-    
-/*
- * Set the combat's result.
- */
-MudderyMain.prototype.showCombatResult = function() {
-	window_main.doClosePopupBox();
-	$$.component.combat_result.show();
+	combat_window.finishCombat();
+	combat_window.setResult(result);
 }
 
 /*
@@ -317,17 +242,6 @@ MudderyMain.prototype.showGetExp = function(exp, combat) {
 	if (combat) {
 	    $$.component.combat_result.setGetExp(exp);
 	}
-}
-    
-/*
- * Display the map.
- */
-MudderyMain.prototype.showMap = function() {
-	this.doClosePopupBox();
-	
-	var component = $$.component.map;
-    component.show();
-	component.showMap($$.map_data._current_location);
 }
 
 /*
@@ -352,10 +266,8 @@ MudderyMain.prototype.setStatus = function(status) {
  *  Set the player's status in combat.
  */
 MudderyMain.prototype.setCombatStatus = function(status) {
-	var hp_str = status["hp"] + "/" + status["max_hp"];
-	$("#prompt_hp").text(mudcore.trans("HP: ") + hp_str);
-
-	$$.component.information.setCombatStatus(status);
+	prompt_bar.setStatus(status);
+    char_data_window.setCombatStatus(status);
 }
 
 //////////////////////////////////////////
@@ -814,12 +726,12 @@ MudderyMain.prototype.selectMsgType = function(caller) {
  * Derive from the base class.
  */
 MudderyPopupMessage = function(el) {
-	BasePopupController.call(this, el);
+	BaseController.call(this, el);
 
 	this.buttons = [];
 }
 
-MudderyPopupMessage.prototype = prototype(BasePopupController.prototype);
+MudderyPopupMessage.prototype = prototype(BaseController.prototype);
 MudderyPopupMessage.prototype.constructor = MudderyPopupMessage;
 
 /*
@@ -899,13 +811,13 @@ MudderyPopupMessage.prototype.setMessage = function(header, content, buttons) {
  * Derive from the base class.
  */
 MudderyPopupObject = function(el) {
-	BasePopupController.call(this, el);
+	BaseController.call(this, el);
 
 	this.obj = null;
 	this.buttons = [];
 }
 
-MudderyPopupObject.prototype = prototype(BasePopupController.prototype);
+MudderyPopupObject.prototype = prototype(BaseController.prototype);
 MudderyPopupObject.prototype.constructor = MudderyPopupObject;
 
 /*
@@ -1097,6 +1009,143 @@ MudderyPopupGetObjects.prototype.setObjects = function(accepted, rejected) {
 
 /******************************************
  *
+ * Popup Dialogue Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyPopupDialogue = function(el) {
+	BaseController.call(this, el);
+
+    this.sentences = [];
+	this.target = null;
+}
+
+MudderyPopupDialogue.prototype = prototype(BaseController.prototype);
+MudderyPopupDialogue.prototype.constructor = MudderyPopupDialogue;
+
+/*
+ * Bind events.
+ */
+MudderyPopupDialogue.prototype.bindEvents = function() {
+    this.onClick(".button-close", this.onClose);
+    this.onClick(".popup-footer", ".button-next", this.onNext);
+}
+
+/*
+ * Event when clicks the close button.
+ */
+MudderyPopupDialogue.prototype.onClose = function(element) {
+    this.el.hide();
+    this.select(".img-icon").attr("src", "");
+    this.select(".div-dialogue").empty();
+}
+
+/*
+ * Event when clicks the next button.
+ */
+MudderyPopupDialogue.prototype.onNext = function(element) {
+	var dialogue = this.sentences[0]["dialogue"];
+	var sentence = this.sentences[0]["sentence"];
+	var npc = this.sentences[0]["npc"];
+	if (dialogue) {
+		mudcore.service.doDialogue(dialogue, sentence, npc);
+	}
+}
+
+/*
+ * Event when objects moved out from the current place.
+ */
+MudderyPopupDialogue.prototype.onObjsMovedOut = function(objects) {
+    for (var key in objects) {
+        for (var i in objects[key]) {
+            if (objects[key][i]["dbref"] == this.target) {
+                this.onClose();
+                return;
+            }
+        }
+    }
+}
+
+/*
+ * Set dialogue's data.
+ */
+MudderyPopupDialogue.prototype.setDialogue = function(sentences, escapes) {
+    this.sentences = sentences;
+    if (!sentences || sentences.length == 0) {
+        this.onClose();
+        return;
+    }
+
+	this.target = sentences[0]["npc"];
+
+	if (sentences[0]["can_close"]) {
+		this.select(".button-close").show();
+	}
+	else {
+		this.select(".button-close").hide();
+	}
+
+	// speaker
+	var speaker = mudcore.text2html.parseHtml(sentences[0]["speaker"]);
+	if (!speaker) {
+		// placeholder
+		speaker = "&nbsp;";
+	}
+	this.select(".header-text").html(speaker);
+
+	// add icon
+	if (sentences["icon"]) {
+		this.select(".img-icon").attr("src", settings.resource_url + sentences[0]["icon"]);
+		this.select(".div-icon").show();
+	}
+	else {
+		this.select(".div-icon").hide();
+	}
+
+	// set contents and buttons
+    var container = this.select(".div-dialogue");
+    container.empty();
+    var footer = this.select(".popup-footer");
+    footer.empty();
+
+    if (sentences.length == 1) {
+        // Only one sentence.
+        var dlg = sentences[0];
+
+        var content = mudcore.text2html.parseHtml(dlg["content"]);
+        content = mudcore.text_escape.parse(content, escapes);
+        container.html(content);
+
+        $("<button>").attr("type", "button")
+            .addClass("popup-button button-next")
+            .html(mudcore.trans("Next"))
+            .appendTo(footer);
+    }
+    else {
+        for (var i = 0; i < sentences.length; i++) {
+            var dlg = sentences[i];
+
+            var content = mudcore.text2html.parseHtml(dlg["content"]);
+            content = mudcore.text_escape.parse(content, escapes);
+
+            $("<p>")
+                .html(content)
+                .appendTo(container);
+        }
+
+        $("<button>").attr("type", "button")
+            .addClass("popup-button")
+            .html(mudcore.trans("Select One"))
+            .appendTo(footer);
+    }
+}
+
+
+/******************************************
+ *
  * Login Window
  *
  ******************************************/
@@ -1261,12 +1310,12 @@ MudderyLogin.prototype.onLogin = function() {
  * Derive from the base class.
  */
 MudderySelectChar = function(el) {
-	BaseTabController.call(this, el);
+	BaseController.call(this, el);
 
     this.characters = [];
 }
 
-MudderySelectChar.prototype = prototype(BaseTabController.prototype);
+MudderySelectChar.prototype = prototype(BaseController.prototype);
 MudderySelectChar.prototype.constructor = MudderySelectChar;
 
 /*
@@ -1371,10 +1420,10 @@ MudderySelectChar.prototype.setCharacters = function(characters) {
  * Derive from the base class.
  */
 MudderyNewChar = function(el) {
-	BaseTabController.call(this, el);
+	BaseController.call(this, el);
 }
 
-MudderyNewChar.prototype = prototype(BaseTabController.prototype);
+MudderyNewChar.prototype = prototype(BaseController.prototype);
 MudderyNewChar.prototype.constructor = MudderyNewChar;
 
 /*
@@ -1427,12 +1476,43 @@ MudderyNewChar.prototype.onCharacterCreated = function(data) {
  * Derive from the base class.
  */
 MudderyMainGame = function(el) {
-	BaseTabController.call(this, el);
+	BaseController.call(this, el);
 }
 
-MudderyMainGame.prototype = prototype(BaseTabController.prototype);
+MudderyMainGame.prototype = prototype(BaseController.prototype);
 MudderyMainGame.prototype.constructor = MudderyMainGame;
 
+/*
+ * Bind events.
+ */
+MudderyMainGame.prototype.bindEvents = function() {
+    this.onClick(".button-scene", this.onScene);
+	this.onClick(".button-map", this.onMap);
+}
+
+/*
+ * Show a window.
+ */
+MudderyMainGame.prototype.showWindow = function(win_controller) {
+    this.select("#contents>div").hide();
+    win_controller.show();
+}
+
+/*
+ * Event when clicks the scene button.
+ */
+MudderyMainGame.prototype.onScene = function(element) {
+    this.showWindow(scene_window);
+}
+
+
+/*
+ * Event when clicks the map button.
+ */
+MudderyMainGame.prototype.onMap = function(element) {
+    this.showWindow(map_window);
+    map_window.showMap(mudcore.map_data._current_location);
+}
 
 /******************************************
  *
@@ -1444,10 +1524,10 @@ MudderyMainGame.prototype.constructor = MudderyMainGame;
  * Derive from the base class.
  */
 MudderyPromptBar = function(el) {
-	BaseTabController.call(this, el);
+	BaseController.call(this, el);
 }
 
-MudderyPromptBar.prototype = prototype(BaseTabController.prototype);
+MudderyPromptBar.prototype = prototype(BaseController.prototype);
 MudderyPromptBar.prototype.constructor = MudderyPromptBar;
 
 
@@ -1518,10 +1598,10 @@ MudderyPromptBar.prototype.setStatus = function(status) {
  * Derive from the base class.
  */
 MudderyMessage = function(el) {
-	BaseTabController.call(this, el);
+	BaseController.call(this, el);
 }
 
-MudderyMessage.prototype = prototype(BaseTabController.prototype);
+MudderyMessage.prototype = prototype(BaseController.prototype);
 MudderyMessage.prototype.constructor = MudderyMessage;
 
 
@@ -1571,10 +1651,10 @@ MudderyMessage.prototype.displayMessage = function(msg, type) {
  * Derive from the base class.
  */
 MudderyCharData = function(el) {
-	BaseTabController.call(this, el);
+	BaseController.call(this, el);
 }
 
-MudderyCharData.prototype = prototype(BaseTabController.prototype);
+MudderyCharData.prototype = prototype(BaseController.prototype);
 MudderyCharData.prototype.constructor = MudderyCharData;
 
 
@@ -1737,12 +1817,12 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
  * Derive from the base class.
  */
 MudderyInventory = function(el) {
-	BaseTabController.call(this, el);
+	BaseController.call(this, el);
 
 	this.inventory = [];
 }
 
-MudderyInventory.prototype = prototype(BaseTabController.prototype);
+MudderyInventory.prototype = prototype(BaseController.prototype);
 MudderyInventory.prototype.constructor = MudderyInventory;
 
 /*
@@ -1823,12 +1903,12 @@ MudderyInventory.prototype.setInventory = function(inventory) {
  * Derive from the base class.
  */
 MudderySkills = function(el) {
-	BaseTabController.call(this, el);
+	BaseController.call(this, el);
 
 	this.skills = [];
 }
 
-MudderySkills.prototype = prototype(BaseTabController.prototype);
+MudderySkills.prototype = prototype(BaseController.prototype);
 MudderySkills.prototype.constructor = MudderySkills;
 
 
@@ -1901,12 +1981,12 @@ MudderySkills.prototype.setSkills = function(skills) {
  * Derive from the base class.
  */
 MudderyQuests = function(el) {
-	BaseTabController.call(this, el);
+	BaseController.call(this, el);
 
 	this.quests = [];
 }
 
-MudderyQuests.prototype = prototype(BaseTabController.prototype);
+MudderyQuests.prototype = prototype(BaseController.prototype);
 MudderyQuests.prototype.constructor = MudderyQuests;
 
 /*
@@ -2016,7 +2096,7 @@ MudderyQuests.prototype.addObjectives = function(container, objectives) {
  * Derive from the base class.
  */
 MudderyScene = function(el) {
-	BaseTabController.call(this, el);
+	BaseController.call(this, el);
 
     this.max_player = 10;
     this.path_color = "#666";
@@ -2025,7 +2105,7 @@ MudderyScene = function(el) {
 	this.scene = null;
 }
 
-MudderyScene.prototype = prototype(BaseTabController.prototype);
+MudderyScene.prototype = prototype(BaseController.prototype);
 MudderyScene.prototype.constructor = MudderyScene;
 
 /*
@@ -2037,6 +2117,12 @@ MudderyScene.prototype.bindEvents = function() {
 	this.onClick(".scene-npcs", "button", this.onNPC);
 	this.onClick(".scene-players", "button", this.onPlayer);
 	this.onClick(".scene-exits", "button", this.onExit);
+
+    !function(caller, method) {
+		$(window).on("resize", undefined, caller, function(event) {
+    		method.call(event.data, event.currentTarget, event);
+    	});
+    }(this, this.onResize);
 }
 
 /*
@@ -2072,7 +2158,7 @@ MudderyScene.prototype.onNPC = function(element) {
 /*
  * On look at an player.
  */
-MudderyScene.prototype.onNPC = function(element) {
+MudderyScene.prototype.onPlayer = function(element) {
     var index = $(element).data("index");
     var dbref = this.scene["players"][index]["dbref"];
     dbref = dbref.slice(1);
@@ -2087,6 +2173,25 @@ MudderyScene.prototype.onExit = function(element) {
     var dbref = this.scene["exits"][index]["dbref"];
     dbref = dbref.slice(1);
     mudcore.service.doGoto(dbref);
+}
+
+/*
+ * On the window resize.
+ */
+MudderyScene.prototype.onResize = function() {
+    this.resetSize();
+}
+
+/*
+ * Set element's size.
+ */
+MudderyScene.prototype.resetSize = function() {
+    var svg = document.getElementById("exits-svg");
+    svg.innerHTML = "";
+
+    if (this.scene && "exits" in this.scene) {
+        this.drawExitPaths(this.scene["exits"]);
+    }
 }
 
 /*
@@ -2300,6 +2405,13 @@ MudderyScene.prototype.setExitsMap = function(exits, room_name) {
         container.text(room_name);
     }
 
+    this.drawExitPaths(exits);
+}
+
+/*
+ * Draw exit paths.
+ */
+MudderyScene.prototype.drawExitPaths = function(exits) {
     // draw exit lines
     var svg = document.getElementById("exits-svg");
     var namespace = "http://www.w3.org/2000/svg";
@@ -2317,3 +2429,688 @@ MudderyScene.prototype.setExitsMap = function(exits, room_name) {
         svg.appendChild(path);
     }
 }
+
+
+/******************************************
+ *
+ * Map Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyMap = function(el) {
+	BaseController.call(this, el);
+
+    // the size of a room
+    this.room_size = 40;
+}
+
+MudderyMap.prototype = prototype(BaseController.prototype);
+MudderyMap.prototype.constructor = MudderyMap;
+
+/*
+ * Bind events.
+ */
+MudderyMap.prototype.bindEvents = function() {
+    this.onClick(".button-close", this.onClose);
+}
+
+/*
+ * Set element's size.
+ */
+MudderyMap.prototype.resetSize = function() {
+
+}
+
+/*
+ * Event when clicks the close button.
+ */
+MudderyMap.prototype.onClose = function(element) {
+    this.el.hide();
+}
+
+/*
+ * Clear the map.
+ */
+MudderyMap.prototype.clear = function() {
+    this.select(".header-text").html(mudcore.trans("Map"));
+    var svg = document.getElementById("map-svg");
+    svg.innerHTML = "";
+}
+
+/*
+ * Show current location's map.
+ */
+MudderyMap.prototype.showMap = function(location) {
+	this.clear();
+
+	if (!(location && location.key in mudcore.map_data._map_rooms)){
+		// does not have current location, can not show map.
+		return;
+	}
+
+	if (location["area"]) {
+		var area_name = mudcore.text2html.parseHtml(location["area"]["name"]);
+		if (area_name) {
+			this.select(".header-text").html(area_name);
+		}
+	}
+
+	var current_room = mudcore.map_data._map_rooms[location.key];
+
+	var map_width = this.select(".map-body").width();
+	var map_height = this.select(".map-body").height();
+
+	// var scale = this.scale;
+	var room_size = this.room_size;
+	var origin_x = map_width / 2;
+	var origin_y = map_height / 2;
+	var current_area_key = "";		// Only show rooms and exits in the same area.
+
+	var svg = document.getElementById("map-svg");
+	var namespace = "http://www.w3.org/2000/svg";
+
+	if (current_room["pos"]) {
+		// set origin point
+		//origin_x -= current_room["pos"][0] * scale;
+		//origin_y -= -current_room["pos"][1] * scale;
+		origin_x -= current_room["pos"][0];
+		origin_y -= current_room["pos"][1];
+
+		current_area_key = current_room["area"];
+	}
+
+	// background
+	if (location["area"] && location["area"]["background"]) {
+        var x = origin_x;
+        var y = origin_y;
+
+        /*
+        if (location["area"]["background_point"]) {
+            x -= location["area"]["background_point"][0];
+            y -= location["area"]["background_point"][1];
+        }
+
+        if (location["area"]["corresp_map_pos"]) {
+            x += location["area"]["corresp_map_pos"][0] * scale + origin_x;
+            y += -location["area"]["corresp_map_pos"][1] * scale + origin_y;
+        }
+        */
+
+        var map_back = settings.resource_url + location["area"]["background"]["resource"];
+        var background = document.createElementNS(namespace, "image");
+        background.setAttribute("x", x);
+        background.setAttribute("y", y);
+        background.setAttribute("width", location["area"]["background"]["width"]);
+        background.setAttribute("height", location["area"]["background"]["height"]);
+        background.href.baseVal = settings.resource_url + location["area"]["background"]["resource"];
+        svg.appendChild(background);
+	}
+
+	if (current_room["pos"] && mudcore.map_data._map_paths) {
+		// get path positions
+		var path_data = [];
+		for (var begin in mudcore.map_data._map_paths) {
+			if (!(begin in mudcore.map_data._map_rooms)) {
+			    continue;
+			}
+
+            var from_room = mudcore.map_data._map_rooms[begin];
+            var from_area_key = from_room["area"];
+            if (from_area_key != current_area_key) {
+                continue;
+            }
+
+            var from = from_room["pos"];
+            if (!from) {
+                continue;
+            }
+
+            for (var end in mudcore.map_data._map_paths[begin]) {
+                if (!(mudcore.map_data._map_paths[begin][end] in mudcore.map_data._map_rooms)) {
+                    continue;
+                }
+
+                var to_room = mudcore.map_data._map_rooms[mudcore.map_data._map_paths[begin][end]];
+                var to_area_key = to_room["area"];
+                if (to_area_key != current_area_key) {
+                    continue;
+                }
+
+                var to = to_room["pos"];
+                if (!to) {
+                    continue;
+                }
+
+                path_data.push({"from": from, "to": to});  // path posision
+            }
+        }
+
+        // draw path
+        for (var i = 0; i < path_data.length; i++) {
+            var from = path_data[i]["from"];
+            var to = path_data[i]["to"];
+
+            var path = document.createElementNS(namespace, "line");
+            path.setAttribute("x1", from[0] + origin_x);
+            path.setAttribute("y1", from[1] + origin_y);
+            path.setAttribute("x2", to[0] + origin_x);
+            path.setAttribute("y2", to[1] + origin_y);
+            path.setAttribute("stroke", "grey");
+            path.setAttribute("stroke-width", "2");
+            svg.appendChild(path);
+		}
+	}
+
+	if (mudcore.map_data._map_rooms) {
+		// get room positions
+		var room_data = [];
+		var current_room_index = -1;
+
+		if (current_room["pos"]) {
+			var count = 0;
+			for (var key in mudcore.map_data._map_rooms) {
+				var room = mudcore.map_data._map_rooms[key];
+				if (room["pos"]) {
+					var area_key = room["area"];
+					if (area_key != current_area_key) {
+						continue;
+					}
+
+					room_data.push({"name": mudcore.utils.truncate_string(room["name"], 10, true),
+									"icon": room["icon"]? settings.resource_url + room["icon"]: null,
+									"area": room["area"],
+									"pos": room["pos"]});
+					if (key == location.key) {
+						current_room_index = count;
+					}
+					count++;
+				}
+			}
+		}
+		else {
+			// does not have current position, only show current room at center.
+			room_data.push({"name": mudcore.utils.truncate_string(current_room["name"], 10, true),
+							"icon": current_room["icon"]? settings.resource_url + current_room["icon"]: null,
+							"area": current_room["area"],
+							"pos": [0, 0]});
+			current_room_index = 0;
+		}
+
+        // draw room
+        for (var i = 0; i < room_data.length; i++) {
+            var room = room_data[i];
+
+            // draw icon
+            if (room["icon"]) {
+                var icon = document.createElementNS(namespace, "image");
+                icon.setAttribute("x", room["pos"][0] - room_size / 2 + origin_x);
+                icon.setAttribute("y", room["pos"][1] - room_size / 2 + origin_y);
+                icon.setAttribute("width", room_size);
+                icon.setAttribute("height", room_size);
+                icon.href.baseVal = room["icon"];
+                svg.appendChild(icon);
+            }
+
+            // draw room's name
+            if (room["name"]) {
+                var name = document.createElementNS(namespace, "text");
+                name.setAttribute("x", room["pos"][0] + origin_x);
+                name.setAttribute("y", room["pos"][1] + origin_y);
+                name.setAttribute("dy", room["icon"] ? room_size / 2 + 16 : 8);
+                name.setAttribute("text-anchor", "middle");
+                name.setAttribute("font-family", "sans-serif");
+                name.setAttribute("font-size", (i == current_room_index)? "14px": "12px");
+                name.setAttribute("fill", (i == current_room_index)? "white": "#eee");
+                name.setAttribute("style", "text-shadow: .1em .1em .5em #000000;");
+                name.textContent = mudcore.text2html.clearTags(room["name"]);
+                svg.appendChild(name);
+            }
+        }
+	}
+}
+
+
+/******************************************
+ *
+ * Combat Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyCombat = function(el) {
+	BaseController.call(this, el);
+
+	this.self_dbref = "";
+	this.target = "";
+	this.interval_id = null;
+	this.timeout = 0;
+	this.timeline = 0;
+	this.combat_finished = true;
+	this.skill_cd_time = {};
+}
+
+MudderyCombat.prototype = prototype(BaseController.prototype);
+MudderyCombat.prototype.constructor = MudderyCombat;
+
+/*
+ * Bind events.
+ */
+MudderyCombat.prototype.bindEvents = function() {
+	this.onClick(".combat-buttons", "button", this.onCombatSkill);
+}
+
+/*
+ * Event when clicks a skill button.
+ */
+MudderyCombat.prototype.onCombatSkill = function(element) {
+	if (this.combat_finished) {
+		return;
+	}
+
+	var key = $(element).data("key");
+
+	// Check CD.
+	if (key in this.skill_cd_time) {
+		var cd_time = this.skill_cd_time[key];
+		var current_time = new Date().getTime();
+		if (cd_time > current_time) {
+			return;
+		}
+	}
+
+	mudcore.service.doCastSkill(key, this.target, true);
+}
+
+/*
+ * Reset the combat box.
+ */
+MudderyCombat.prototype.reset = function(skill_cd_time) {
+	this.select(".combat-desc").empty();
+
+	// Remove characters that are not template.
+	this.select(".combat-characters").empty();
+
+	// Remove combat messages.
+	this.select(".combat-messages").empty();
+
+	// Remove skill buttons that are not template.
+	this.select(".combat-buttons").empty();;
+
+	this.self_dbref = "";
+	this.target = "";
+	this.combat_finished = false;
+	this.skill_cd_time = skill_cd_time;
+	if (this.interval_id != null) {
+		this.interval_id = window.clearInterval(this.interval_id);
+	}
+}
+
+/*
+ * Set combat data.
+ */
+MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref) {
+	if (this.combat_finished) {
+		return;
+	}
+
+	this.self_dbref = self_dbref;
+
+	var self_team = "";
+	for (var i in characters) {
+		if (characters[i]["dbref"] == self_dbref) {
+			self_team = characters[i]["team"];
+		}
+	}
+
+	// add desc
+	this.select(".combat-desc").html(mudcore.text2html.parseHtml(desc));
+
+	// add timeout
+	if (timeout > 0) {
+		var current_time = new Date().getTime();
+		this.timeout = timeout;
+		this.timeline = current_time + timeout * 1000;
+
+		this.select(".combat-timeout").text(timeout);
+		this.select(".combat-time-div").show();
+		this.interval_id = window.setInterval("refreshTimeout()", 1000);
+	}
+	else {
+		this.select(".combat-timeout").empty();
+		this.select(".combat-time-div").hide();
+	}
+
+	// add characters
+	var teammate_number = 0;
+	var enemy_number = 0;
+	var top = 10;
+	var line_height = 30;
+
+	var status = {};
+	for (var i in characters) {
+		var character = characters[i];
+		var dbref = character["dbref"];
+		status[dbref] = character;
+
+		var item = $("<div>")
+            .attr("id", "combat_char_" + dbref.slice(1))
+        	.data("dbref", character["dbref"]);
+
+        $("<div>")
+            .addClass("status")
+            .appendTo(item);
+
+		if (character["icon"]) {
+		    var div_icon = $("<div>")
+		        .addClass("div-icon")
+		        .appendTo(item);
+
+		    $("img")
+		        .addClass("img-icon")
+			    .attr("src", settings.resource_url + character["icon"])
+			    .appendTo(div_icon);
+		}
+
+        $("<div>")
+            .addClass("name")
+		    .text(character["name"]);
+
+		if (this.self_dbref == dbref) {
+		    this.select(".prompt-bar>.name").text(character["name"]);
+		}
+
+		if (character["team"] == self_team) {
+			item.addClass("teammate")
+			   .css('top', top + teammate_number * line_height);
+			teammate_number++;
+		}
+		else {
+			item.addClass("enemy")
+			   .css('top', top + enemy_number * line_height);
+			enemy_number++;
+
+			if (!this.target) {
+				// Set default target.
+				this.target = character["dbref"];
+			}
+		}
+
+		item.appendTo(this.select(".combat-characters"));
+	}
+
+	this.updateStatus(status);
+}
+
+/*
+ * Set combat commands.
+ */
+MudderyCombat.prototype.setCommands = function(commands) {
+	var left = 10;
+	var msg_box = this.select(".combat-messages");
+	var top = msg_box.position().top + msg_box.height() + 10;
+	var line = 4;
+	var width = 70;
+	var line_height = 80;
+
+	if (commands) {
+		for (var i in commands) {
+			var command = commands[i];
+
+			var item = $("<button>")
+			    .addClass("btn-combat")
+			    .attr("type", "button")
+                .attr("id", "cmd_" + command["key"])
+				.data("key", command["key"])
+				.data("cd", 0)
+				.css({"left": left + i % line * width,
+					  "top": top + parseInt(i / line) * line_height});
+
+			if (command["icon"]) {
+			    var div_icon = $("<div>")
+			        .appendTo(item);
+
+                $("<img>")
+                    .addClass("command-icon")
+				    .attr("src", settings.resource_url + command["icon"])
+				    .appendTo(item);
+			}
+
+            $("<div>")
+                .addClass("command_name")
+                .html(mudcore.text2html.parseHtml(command["name"]))
+                .appendTo(item);
+
+            $("<div>")
+                .addClass("cooldown")
+                .appendTo(item);
+
+            item.appendTo(this.select(".combat-buttons"));
+		}
+
+		this.select(".combat_buttons").height(5 + parseInt((commands.length - 1) / line + 1) * line_height)
+	}
+}
+
+/*
+ * Cast a skill in the combat.
+ */
+MudderyCombat.prototype.setSkillCast = function(data) {
+	if (this.combat_finished) {
+		return;
+	}
+
+	var message = "";
+	if ("cast" in data && data["cast"]) {
+	    message += mudcore.text2html.parseHtml(data["cast"]) + " ";
+	}
+	if ("result" in data && data["result"]) {
+		message += mudcore.text2html.parseHtml(data["result"]);
+	}
+	if (message) {
+		this.displayMsg(message);
+	}
+
+	if ("skill" in data) {
+		if (data["skill"] == "skill_normal_hit" ||
+			data["skill"] == "skill_dunt") {
+
+			var caller = $('#combat_char_' + data["caller"].slice(1));
+			if (caller.hasClass("teammate")) {
+				caller.animate({left: '50%'}, 100);
+				caller.animate({left: '12%'}, 100);
+			}
+			else {
+				caller.animate({right: '50%'}, 100);
+				caller.animate({right: '12%'}, 100);
+			}
+		}
+		else if (data["skill"] == "skill_normal_heal" ||
+				 data["skill"] == "skill_powerful_heal") {
+		}
+		else if (data["skill"] == "skill_escape") {
+			if (data["data"] == 1) {
+				var item_id = "#combat_char_" + data["target"].slice(1) + ".status";
+				$(item_id).text(mudcore.trans("Escaped"));
+			}
+		}
+	}
+
+	// Update status.
+	if ("status" in data) {
+		this.updateStatus(data["status"]);
+	}
+}
+
+/*
+ * Display a message in message window.
+ */
+MudderyCombat.prototype.displayMsg = function(msg) {
+	var msg_wnd = this.select(".combat-messages");
+	if (msg_wnd.length > 0) {
+		msg_wnd.stop(true);
+		msg_wnd.scrollTop(msg_wnd[0].scrollHeight);
+	}
+
+	var item = $("<div>")
+	    .addClass("msg")
+	    .addClass("msg-normal")
+		.html(msg)
+		.appendTo(msg_wnd);
+
+	// remove old messages
+	var divs = msg_wnd.find("div");
+	var max = 10;
+	var length = divs.length;
+	if (length > max) {
+		divs.slice(0, length - max).remove();
+	}
+
+	// scroll message window to bottom
+	msg_wnd.animate({scrollTop: msg_wnd[0].scrollHeight});
+}
+
+/*
+ * Update character's status.
+ */
+MudderyCombat.prototype.updateStatus = function(status) {
+	for (var key in status) {
+		var item_id = "#combat_char_" + key.slice(1) + ">div.status";
+		$(item_id).text(status[key]["hp"] + "/" + status[key]["max_hp"]);
+
+		if (this.self_dbref == key) {
+		    $("#combat_status").text("HP:" + status[key]["hp"] + "/" + status[key]["max_hp"]);
+		}
+	}
+}
+
+/*
+ * Set skill's CD.
+ */
+MudderyCombat.prototype.setSkillCD = function(skill, cd, gcd) {
+	if (this.combat_finished) {
+		return;
+	}
+
+	// update skill's cd
+	var current_time = new Date().getTime();
+
+	// cd_time in milliseconds
+	var cd_time = current_time + cd * 1000;
+	if (skill in this.skill_cd_time) {
+		if (this.skill_cd_time[skill] < cd_time) {
+			this.skill_cd_time[skill] = cd_time;
+		}
+	}
+	else {
+		this.skill_cd_time[skill] = cd_time;
+	}
+
+	var gcd_time = current_time + gcd * 1000;
+	for (var key in this.skill_cd_time) {
+		if (this.skill_cd_time[key] < gcd_time) {
+			this.skill_cd_time[key] = gcd_time;
+		}
+	}
+
+	// refresh button's CD
+	$("#combat_buttons>button").each(function() {
+        combat_window.showButtonCD(this);
+    });
+}
+
+/*
+ * Show skill's CD.
+ */
+MudderyCombat.prototype.showButtonCD = function(button_id) {
+	var button = $(button_id);
+	var cooldown = button.find(">.cooldown");
+
+	var key = button.data("key");
+
+	var cd_time = 0;
+	if (key in this.skill_cd_time) {
+		cd_time = this.skill_cd_time[key];
+	}
+
+	var current_cd = button.data("cd");
+	if (current_cd >= cd_time) {
+		return;
+	}
+
+	var current_time = new Date().getTime();
+
+	cooldown.stop(true, true);
+	if (current_cd < current_time) {
+		// set a new cd
+		cooldown.css("height", "100%")
+			.css("top", 0);
+	}
+
+	cooldown.animate({height: "0%", top: "100%"}, cd_time - current_time, "linear");
+	button.data("cd", cd_time);
+}
+
+/*
+ * Finish a combat.
+ */
+MudderyCombat.prototype.finishCombat = function(result) {
+	this.combat_finished = true;
+	if (this.interval_id != null) {
+		this.interval_id = window.clearInterval(this.interval_id);
+	}
+}
+
+/*
+ * Finish a combat.
+ */
+MudderyCombat.prototype.isCombatFinished = function() {
+    return this.combat_finished;
+}
+
+
+/*
+ * Set result data.
+ */
+MudderyCombat.prototype.setResult = function(result) {
+	// result
+	if (!result) {
+		return;
+	}
+
+	var header = "";
+	if ("escaped" in result) {
+	   header = mudcore.trans("Escaped !");
+	}
+	else if ("win" in result) {
+		header = mudcore.trans("You win !");
+	}
+	else if ("lose" in result) {
+		header = mudcore.trans("You lost !");
+	}
+	else if ("draw" in result) {
+		header = mudcore.trans("Draw !");
+	}
+
+	$("#combat_result_header").text(header);
+}
+
+
+function refreshTimeout() {
+	var controller = $$.component.combat;
+    var current_time = new Date().getTime();
+
+    var remain = Math.ceil((controller.timeline - current_time) / 1000);
+    if (remain > controller.timeout) {
+        remain = controller.timeout;
+    }
+    if (remain < 0) {
+        remain = 0;
+    }
+
+    $("#combat_timeout").text(remain);
+};

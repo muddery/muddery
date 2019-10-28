@@ -43,7 +43,6 @@ class DialogueHandler(object):
         Initialize the handler.
         """
         self.can_close_dialogue = GAME_SETTINGS.get("can_close_dialogue")
-        self.single_sentence_mode = GAME_SETTINGS.get("single_dialogue_sentence")
         self.dialogue_storage = {}
     
     def load_cache(self, dialogue):
@@ -157,109 +156,6 @@ class DialogueHandler(object):
 
         return
 
-    def check_need_get_next(self, sentences):
-        """
-        Check if the next sentence can be added to the sentence list.
-        If a sentence will effect the character's status, it should not be
-        added to the sentence list.
-        """
-        if self.single_sentence_mode:
-            return False
-
-        if len(sentences) != 1:
-            return False
-
-        sentence = sentences[0]
-        if sentence['is_last'] or sentence['event']:
-            return False
-
-        return True
-
-    def get_npc_sentences_list(self, caller, npc):
-        """
-        Get a sentences list to send to the caller at one time.
-        
-        Args:
-            caller: (object) the character who want to start a talk.
-            npc: (object) the NPC that the character want to talk to.
-        
-        Returns:
-            sentences_list: (list) a list of sentences that can be show in order.
-        """
-        if not caller:
-            return []
-
-        if not npc:
-            return []
-
-        sentences_list = []
-
-        # Get the first sentences.
-        sentences = self.get_npc_sentences(caller, npc)
-        output = self.create_output_sentences(sentences, caller, npc)
-        if output:
-            sentences_list.append(output)
-        else:
-            return sentences_list
-
-        # Get next sentences.
-        while self.check_need_get_next(sentences):
-            sentences = self.get_next_sentences(caller,
-                                                npc.dbref,
-                                                sentences[0]['dialogue'],
-                                                sentences[0]['sentence'])
-            output = self.create_output_sentences(sentences, caller, npc)
-            if output:
-                sentences_list.append(output)
-            else:
-                break
-
-        return sentences_list
-
-    def get_next_sentences_list(self, caller, npc, dialogue, sentence, include_current):
-        """
-        Get a sentences list from the current sentence.
-        
-        Args:
-            caller: (object) the character who want to start a talk.
-            npc: (object) the NPC that the character want to talk to.
-            dialogue: (string) the key of the currrent dialogue.
-            sentence: (int) the number of current sentence.
-            include_current: (boolean) if the sentence list includes current sentence.
-
-        Returns:
-            sentences_list: (list) a list of sentences that can be show in order.
-        """
-        sentences_list = []
-
-        # current sentence
-        sentences = []
-        if include_current:
-            data = self.get_sentence(dialogue, sentence)
-            if data:
-                sentences = [data]
-        else:
-            sentences = self.get_next_sentences(caller,
-                                                npc,
-                                                dialogue,
-                                                sentence)
-        output = self.create_output_sentences(sentences, caller, npc)
-        if output:
-            sentences_list.append(output)
-
-        while self.check_need_get_next(sentences):
-            sentences = self.get_next_sentences(caller,
-                                                npc,
-                                                sentences[0]['dialogue'],
-                                                sentences[0]['sentence'])
-            output = self.create_output_sentences(sentences, caller, npc)
-            if output:
-                sentences_list.append(output)
-            else:
-                break
-
-        return sentences_list
-
     def get_npc_sentences(self, caller, npc):
         """
         Get NPC's sentences that can show to the caller.
@@ -313,7 +209,30 @@ class DialogueHandler(object):
                 if npc_dlg:
                     sentences.append(npc_dlg["sentences"][0])
             
-        return sentences
+        return self.create_output_sentences(sentences, caller, npc)
+
+    def get_dialogue_sentences(self, caller, npc, dialogue):
+        """
+        Get current sentence's next sentences.
+
+        Args:
+            caller: (object) the character who want to start a talk.
+            npc: (object) the NPC that the character want to talk to.
+            dialogue: (string) the key of the currrent dialogue.
+
+        Returns:
+            sentences: (list) a list of available sentences.
+        """
+        if not caller:
+            return
+
+        # Get current dialogue.
+        dlg = self.get_dialogue(dialogue)
+        if not dlg:
+            return
+
+        sentences = [dlg["sentences"][0]]
+        return self.create_output_sentences(sentences, caller, npc)
 
     def get_next_sentences(self, caller, npc, current_dialogue, current_sentence):
         """
@@ -362,7 +281,7 @@ class DialogueHandler(object):
 
                 sentences.append(next_dlg["sentences"][0])
 
-        return sentences
+        return self.create_output_sentences(sentences, caller, npc)
 
     def get_dialogue_speaker_name(self, caller, npc, speaker_model):
         """

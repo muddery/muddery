@@ -74,9 +74,6 @@ class game_settings(models.Model):
     # can close dialogue box or not.
     can_close_dialogue = models.BooleanField(blank=True, default=False)
 
-    # Send one dialogue to the client a time.
-    single_dialogue_sentence = models.BooleanField(blank=True, default=True)
-
     # Can resume unfinished dialogues automatically.
     auto_resume_dialogues = models.BooleanField(blank=True, default=True)
 

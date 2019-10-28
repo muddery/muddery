@@ -109,15 +109,10 @@ MudderyService.prototype = {
     
     // dialogue
     doDialogue: function(dialogue, sentence, npc) {
-        if ($$.data_handler.dialogues_list.length > 0) {
-            $$.main.showDialogue($$.data_handler.dialogues_list.shift());
-        }
-        else {
-            var args = {"dialogue": dialogue,
-                        "sentence": sentence,
-                        "npc": npc};
-            Evennia.msg("text", this.cmdString("dialogue", args));
-        }
+        var args = {"dialogue": dialogue,
+                    "sentence": sentence,
+                    "npc": npc};
+        Evennia.msg("text", this.cmdString("dialogue", args));
     },
     
     // logout

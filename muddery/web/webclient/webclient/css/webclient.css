@@ -324,76 +324,76 @@ body {
 
 
 /************* prompt bar begin *************/
-#prompt-bar {
+.prompt-bar {
     font-size: 12px;
     height: 20px;
 }
 
-#prompt-bar .icon {
+.prompt-bar .icon {
     width: 20px;
     height: 20px;
     vertical-align: bottom;
 }
 
-#prompt-bar .name {
+.prompt-bar .name {
     padding: 0 2px;
     vertical-align: bottom;
 }
 
-#prompt-bar .title {
+.prompt-bar .title {
     padding: 0 0 0 2px;
     vertical-align: bottom;
 }
 
-#prompt-bar .value {
+.prompt-bar .value {
     padding: 0 2px 0 0;
     vertical-align: bottom;
 }
 /************* prompt bar end *************/
 
 /************* scene window begin *************/
-#scene-window {
+#main-contents .scene-window {
     height: 70%;
     font-size: 12px;
 }
 
-#scene-window .scene-exits {
+#main-contents .scene-window .scene-exits {
     position: relative;
 }
 
-#scene-window .exits-table {
+#main-contents .scene-window .exits-table {
     position: absolute;
     width: 100%;
     height: 100%;
     z-index: 1;
 }
 
-#scene-window .exits-table p {
+#main-contents .scene-window .exits-table p {
     margin: 0;
     padding: 5px 5px;
 }
 
-#scene-window .cell-left {
+#main-contents .scene-window .cell-left {
     text-align: right;
 }
 
-#scene-window .cell-center {
+#main-contents .scene-window .cell-center {
     text-align: center;
 }
 
-#scene-window .cell-right {
+#main-contents .scene-window .cell-right {
     text-align: left;
 }
 
-#scene-window .cell-top {
+#main-contents .scene-window .cell-top {
     vertical-align: bottom;
 }
 
-#scene-window .cell-middle {
+#main-contents .scene-window .cell-middle {
     vertical-align: middle;
 }
 
-#scene-window .cell-bottom {
+#main-contents .scene-window .cell-bottom {
     vertical-align: top;
 }
 
@@ -505,6 +505,12 @@ body {
 }
 
 /************* quests window end *************/
+
+
+/************* map window begin *************/
+#map-window {
+}
+/************* map window end *************/
 
 
 /************* tab bar begin *************/
