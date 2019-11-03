@@ -18,7 +18,7 @@ body {
 #windows-wrapper {
     width: 100%;
     height: 100%;
-    padding: 50px;
+    padding: 5px;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -59,24 +59,24 @@ body {
 }
 
 .background-left-top {
-    width: 50px;
-    height: 50px;
+    width: 5px;
+    height: 5px;
     background: url(../img/main_corner_left_top.png) no-repeat center center;
 }
 
 .background-center-top {
-    height: 50px;
+    height: 5px;
     background: url(../img/main_border_top.png) no-repeat center center;
 }
 
 .background-right-top {
-    width: 50px;
-    height: 50px;
+    width: 5px;
+    height: 5px;
     background: url(../img/main_corner_right_top.png) no-repeat center center;
 }
 
 .background-left-center {
-    width: 50px;
+    width: 5px;
     background: url(../img/main_border_left.png) no-repeat center center;
 }
 
@@ -85,24 +85,24 @@ body {
 }
 
 .background-right-center {
-    width: 50px;
+    width: 5px;
     background: url(../img/main_border_right.png) no-repeat center center;
 }
 
 .background-left-bottom {
-    width: 50px;
-    height: 50px;
+    width: 5px;
+    height: 5px;
     background: url(../img/main_corner_left_bottom.png) no-repeat center center;
 }
 
 .background-center-bottom {
-    height: 50px;
+    height: 5px;
     background: url(../img/main_border_bottom.png) no-repeat center center;
 }
 
 .background-right-bottom {
-    width: 50px;
-    height: 50px;
+    width: 5px;
+    height: 5px;
     background: url(../img/main_corner_right_bottom.png) no-repeat center center;
 }
 
@@ -520,3 +520,79 @@ body {
     bottom: 0;
 }
 /************* tab bar end *************/
+
+
+/************* combat window begin *************/
+#combat-window .character-icon,
+#combat-window .command-icon {
+	width: 30px;
+	height: 30px;
+}
+
+#combat-window .combat-characters {
+    position: relative;
+	min-height: 100px;
+}
+
+#combat-window .teammate {
+    padding: 0px;
+    position: absolute;
+    left: 12%;
+    text-align: left;
+    line-height: 1.2em;
+}
+
+#combat-window .enemy {
+    padding: 0px;
+    position: absolute;
+    right: 12%;
+    text-align: right;
+    line-height: 1.2em;
+}
+
+#combat-window .combat-messages {
+    overflow-x: hidden;
+    overflow-y: auto;
+	height: 100px;
+}
+
+
+/* combat button */
+#combat-window .combat-buttons {
+    position: relative;
+    height: 90px;
+}
+
+#combat-window .btn-combat,
+#combat-window .btn-combat:focus,
+#combat-window .btn-combat:hover,
+#combat-window .btn-combat:active {
+    position: absolute;
+    width: 60px;
+    height: 72px;
+    font-size: 11px;
+    padding: 2px 2px 0px 2px;
+    margin: 0px;
+    background-color: rgba(0, 0, 0, 0);
+    border-style: none;
+    outline: none;
+    color: #333;
+}
+
+#combat-window .btn-combat div.cooldown {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    background-color: #600;
+    opacity: 0.5;
+}
+
+#combat-window .command-name {
+    border: 1px solid;
+    border-color: #ccc;
+    border-radius: 4px;
+    background-color: #ddd;
+    margin: 2px 0px 0px 0px;
+}
+/************* combat window end *************/

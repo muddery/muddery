@@ -135,10 +135,7 @@ MudderyMain.prototype.showGetObjects = function(accepted, rejected, combat) {
 /*
  * Show the combat window. 
  */
-MudderyMain.prototype.showCombat = function(combat) {     
-	main_window.doClosePopupBox();
-	
-	combat_window.reset(mudcore.data_handler.skill_cd_time);
+MudderyMain.prototype.showCombat = function(combat) {
 	this.pushWindow(combat_window);
 }
 
@@ -146,9 +143,8 @@ MudderyMain.prototype.showCombat = function(combat) {
  * Close the combat window.
  */
 MudderyMain.prototype.closeCombat = function(data) {
-	var component = $$.component.combat;
-	if (!component.isCombatFinished()) {
-		component.finishCombat();
+	if (!combat_window.isCombatFinished()) {
+		combat_window.finishCombat();
 	}
 }
     
@@ -169,7 +165,7 @@ MudderyMain.prototype.setSkillCast = function(result) {
 			message += mudcore.text2html.parseHtml(result["result"]);
 		}
 		if (message) {
-			this.displayMsg(message);
+			message_window.displayMessage(message);
 		}
 	}
 	else {
@@ -181,9 +177,8 @@ MudderyMain.prototype.setSkillCast = function(result) {
  * Set skill's cd.
  */
 MudderyMain.prototype.setSkillCD = function(skill, cd, gcd) {
-	$$.data_handler.setSkillCD(skill, cd, gcd);
-	
-	$$.component.combat.setSkillCD(skill, cd, gcd);
+	mudcore.data_handler.setSkillCD(skill, cd, gcd);
+	combat_window.setSkillCD(skill, cd, gcd);
 }
     
 /*
@@ -200,20 +195,6 @@ MudderyMain.prototype.prepareMatch = function(data) {
 	var component = $$.component.confirm_combat;
 	component.init(data);
 	component.show();
-}
-
-/*
- * The player has rejected the honour match.
- */
-MudderyMain.prototype.matchRejected = function(character_id) {
-	$$.component.confirm_combat.closeBox();
-
-	if ("#" + character_id == $$.data_handler.character_dbref) {
-		this.displayMsg(mudcore.trans("You have rejected the combat."));
-	}
-	else {
-		this.displayMsg(mudcore.trans("Your opponent has rejected the combat."));
-	}
 }
 
 /*
@@ -237,10 +218,10 @@ MudderyMain.prototype.finishCombat = function(result) {
  */
 MudderyMain.prototype.showGetExp = function(exp, combat) {
 	// show exp
-	this.displayMsg(mudcore.trans("You got exp: ") + exp);
+	message_window.displayMessage(mudcore.trans("You got exp: ") + exp);
 
 	if (combat) {
-	    $$.component.combat_result.setGetExp(exp);
+	    combat_window.setGetExp(exp);
 	}
 }
 
@@ -2744,7 +2725,7 @@ MudderyCombat.prototype.reset = function(skill_cd_time) {
 	this.self_dbref = "";
 	this.target = "";
 	this.combat_finished = false;
-	this.skill_cd_time = skill_cd_time;
+	this.skill_cd_time = mudcore.data_handler.skill_cd_time;
 	if (this.interval_id != null) {
 		this.interval_id = window.clearInterval(this.interval_id);
 	}
@@ -2798,7 +2779,7 @@ MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref
 		status[dbref] = character;
 
 		var item = $("<div>")
-            .attr("id", "combat_char_" + dbref.slice(1))
+            .attr("id", "combat-char-" + dbref.slice(1))
         	.data("dbref", character["dbref"]);
 
         $("<div>")
@@ -2810,8 +2791,8 @@ MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref
 		        .addClass("div-icon")
 		        .appendTo(item);
 
-		    $("img")
-		        .addClass("img-icon")
+		    $("<img>")
+		        .addClass("character-icon")
 			    .attr("src", settings.resource_url + character["icon"])
 			    .appendTo(div_icon);
 		}
@@ -2851,8 +2832,7 @@ MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref
  */
 MudderyCombat.prototype.setCommands = function(commands) {
 	var left = 10;
-	var msg_box = this.select(".combat-messages");
-	var top = msg_box.position().top + msg_box.height() + 10;
+	var top = 10;
 	var line = 4;
 	var width = 70;
 	var line_height = 80;
@@ -2864,7 +2844,7 @@ MudderyCombat.prototype.setCommands = function(commands) {
 			var item = $("<button>")
 			    .addClass("btn-combat")
 			    .attr("type", "button")
-                .attr("id", "cmd_" + command["key"])
+                .attr("id", "cmd-" + command["key"])
 				.data("key", command["key"])
 				.data("cd", 0)
 				.css({"left": left + i % line * width,
@@ -2881,7 +2861,7 @@ MudderyCombat.prototype.setCommands = function(commands) {
 			}
 
             $("<div>")
-                .addClass("command_name")
+                .addClass("command-name")
                 .html(mudcore.text2html.parseHtml(command["name"]))
                 .appendTo(item);
 
@@ -2892,7 +2872,7 @@ MudderyCombat.prototype.setCommands = function(commands) {
             item.appendTo(this.select(".combat-buttons"));
 		}
 
-		this.select(".combat_buttons").height(5 + parseInt((commands.length - 1) / line + 1) * line_height)
+		this.select(".combat-buttons").height(5 + parseInt((commands.length - 1) / line + 1) * line_height)
 	}
 }
 
@@ -2919,7 +2899,7 @@ MudderyCombat.prototype.setSkillCast = function(data) {
 		if (data["skill"] == "skill_normal_hit" ||
 			data["skill"] == "skill_dunt") {
 
-			var caller = $('#combat_char_' + data["caller"].slice(1));
+			var caller = $('#combat-char-' + data["caller"].slice(1));
 			if (caller.hasClass("teammate")) {
 				caller.animate({left: '50%'}, 100);
 				caller.animate({left: '12%'}, 100);
@@ -2934,7 +2914,7 @@ MudderyCombat.prototype.setSkillCast = function(data) {
 		}
 		else if (data["skill"] == "skill_escape") {
 			if (data["data"] == 1) {
-				var item_id = "#combat_char_" + data["target"].slice(1) + ".status";
+				var item_id = "#combat-char-" + data["target"].slice(1) + ".status";
 				$(item_id).text(mudcore.trans("Escaped"));
 			}
 		}
@@ -2979,7 +2959,7 @@ MudderyCombat.prototype.displayMsg = function(msg) {
  */
 MudderyCombat.prototype.updateStatus = function(status) {
 	for (var key in status) {
-		var item_id = "#combat_char_" + key.slice(1) + ">div.status";
+		var item_id = "#combat-char-" + key.slice(1) + ">div.status";
 		$(item_id).text(status[key]["hp"] + "/" + status[key]["max_hp"]);
 
 		if (this.self_dbref == key) {
@@ -3018,7 +2998,7 @@ MudderyCombat.prototype.setSkillCD = function(skill, cd, gcd) {
 	}
 
 	// refresh button's CD
-	$("#combat_buttons>button").each(function() {
+	this.select(".combat-buttons>button").each(function() {
         combat_window.showButtonCD(this);
     });
 }
@@ -3112,5 +3092,5 @@ function refreshTimeout() {
         remain = 0;
     }
 
-    $("#combat_timeout").text(remain);
+    $("#combat-window .combat-timeout").text(remain);
 };
