@@ -16,14 +16,7 @@ MudderyMain = function(el) {
 MudderyMain.prototype = prototype(BaseController.prototype);
 MudderyMain.prototype.constructor = MudderyMain;
 
-/*
- * Document ready event.
- */
-MudderyMain.prototype.init = function() {
-    this.bindEvents();
-}
 
-	
 /*
  * Bind events.
  */
@@ -31,9 +24,7 @@ MudderyMain.prototype.bindEvents = function() {
 
     // Event when client window changes
     $(window).bind("resize", this.onResize);
-
 }
-
 
 //////////////////////////////////////////
 //
@@ -91,7 +82,7 @@ MudderyMain.prototype.showGoods = function(dbref, name, number, icon, desc, pric
 /*  
  * Show get objects messages.
  */
-MudderyMain.prototype.showGetObjects = function(accepted, rejected, combat) {
+MudderyMain.prototype.showGetObjects = function(accepted, rejected) {
 	// show accepted objects
 	try {
 		var first = true;
@@ -122,14 +113,8 @@ MudderyMain.prototype.showGetObjects = function(accepted, rejected, combat) {
 		console.error(error.message);
 	}
 
-	if (combat) {
-		$$.component.combat_result.setGetObjects(accepted, rejected);
-	}
-	else {
-		// If not in combat.
-		popup_get_objects.setObjects(accepted, rejected);
-        popup_get_objects.show();
-	}
+    popup_get_objects.setObjects(accepted, rejected);
+    popup_get_objects.show();
 }
    
 /*
@@ -143,11 +128,19 @@ MudderyMain.prototype.showCombat = function(combat) {
  * Close the combat window.
  */
 MudderyMain.prototype.closeCombat = function(data) {
-	if (!combat_window.isCombatFinished()) {
-		combat_window.finishCombat();
-	}
+	combat_window.finishCombat();
 }
-    
+
+
+/*
+ * The combat has finished.
+ */
+MudderyMain.prototype.finishCombat = function(result) {
+	combat_window.finishCombat();
+	combat_window.setResult(result);
+}
+
+
 /*
  * Cast a combat skill.
  */
@@ -180,38 +173,7 @@ MudderyMain.prototype.setSkillCD = function(skill, cd, gcd) {
 	mudcore.data_handler.setSkillCD(skill, cd, gcd);
 	combat_window.setSkillCD(skill, cd, gcd);
 }
-    
-/*
- * Set the rankings of player honours.
- */
-MudderyMain.prototype.setRankings = function(rankings) {
-	$$.component.honours.setRankings(rankings);
-}
 
-/*
- * The player has prepared the honour match.
- */
-MudderyMain.prototype.prepareMatch = function(data) {
-	var component = $$.component.confirm_combat;
-	component.init(data);
-	component.show();
-}
-
-/*
- * Close the prepare match box.
- */
-MudderyMain.prototype.closePrepareMatchBox = function() {
-	$("#popup_confirm_combat").hide();
-	$("#frame_confirm_combat").hide();
-}
-
-/*
- * The combat has finished.
- */
-MudderyMain.prototype.finishCombat = function(result) {
-	combat_window.finishCombat();
-	combat_window.setResult(result);
-}
 
 /*
  * Set the exp the player get.
@@ -219,10 +181,6 @@ MudderyMain.prototype.finishCombat = function(result) {
 MudderyMain.prototype.showGetExp = function(exp, combat) {
 	// show exp
 	message_window.displayMessage(mudcore.trans("You got exp: ") + exp);
-
-	if (combat) {
-	    combat_window.setGetExp(exp);
-	}
 }
 
 /*
@@ -408,57 +366,6 @@ MudderyMain.prototype.hideAllWindows = function() {
     $(".main-window").hide();
 }
 
-/*
- * Hide all tabs.
- */
-MudderyMain.prototype.hideTabs = function() {
-    $("#tab_pills").children().hide();
-}
-
-/*
- * Unselect all tabs.
- */
-MudderyMain.prototype.unselectAllTabs = function() {
-	$("#tab_bar li")
-		.removeClass("active")
-		.removeClass("pill_active");
-	$("#tab_content").children().hide();
-}
-
-/* 
- * Hide all tab contents.    
- */
-MudderyMain.prototype.hideAllContents = function() {
-	$("#tab_bar li")
-		.removeClass("active")
-		.removeClass("pill_active");
-
-	$("#tab_content").children().hide();
-}
-
-/*
- * Show a tab's content.
- */
-MudderyMain.prototype.showContent = function(frame_name) {
-	this.hideAllContents();
-	
-	$("#tab_" + frame_name)
-		.addClass("active")
-		.addClass("pill_active");
-
-    var controller = $$.component[frame_name];
-    if (controller) {
-        controller.show();
-    }
-}
-
-/*
- * Show honour tab's content.
- */
-MudderyMain.prototype.showHonours = function() {
-	this.showContent("honours");
-	mudcore.service.getRankings();
-}
 
 /*
  * Show the layout when players puppet.
@@ -519,6 +426,22 @@ MudderyMain.prototype.popWindow = function(win_controller) {
 	last_controller.show();
 
 	this.clearChannels();
+}
+
+
+/*
+ * If the windows is shown.
+ */
+MudderyMain.prototype.isWindowShow = function(win_controller) {
+    if (this.windows_stack.length == 0) {
+        return false;
+    }
+
+	if (win_controller && win_controller != this.windows_stack[this.windows_stack.length - 1]) {
+	    return false;
+	}
+
+	return true;
 }
 
 
@@ -1125,6 +1048,11 @@ MudderyPopupDialogue.prototype.setDialogue = function(sentences, escapes) {
 }
 
 
+MudderyPopupDialogue.prototype.hasDialogue = function() {
+    return (this.sentences && this.sentences.length > 0);
+}
+
+
 /******************************************
  *
  * Login Window
@@ -1467,8 +1395,15 @@ MudderyMainGame.prototype.constructor = MudderyMainGame;
  * Bind events.
  */
 MudderyMainGame.prototype.bindEvents = function() {
+    $(window).bind("resize", this.onResize);
+
     this.onClick(".button-scene", this.onScene);
 	this.onClick(".button-map", this.onMap);
+    this.onClick(".button-character", this.onCharacter);
+    this.onClick(".button-status", this.onStatus);
+    this.onClick(".button-inventory", this.onInventory);
+    this.onClick(".button-skills", this.onSkills);
+    this.onClick(".button-quests", this.onQuests);
 }
 
 /*
@@ -1480,12 +1415,18 @@ MudderyMainGame.prototype.showWindow = function(win_controller) {
 }
 
 /*
+ * Event when the window size changed.
+ */
+MudderyMainGame.prototype.onResize = function(element) {
+    main_game_window.resetSize();
+}
+
+/*
  * Event when clicks the scene button.
  */
 MudderyMainGame.prototype.onScene = function(element) {
     this.showWindow(scene_window);
 }
-
 
 /*
  * Event when clicks the map button.
@@ -1493,6 +1434,62 @@ MudderyMainGame.prototype.onScene = function(element) {
 MudderyMainGame.prototype.onMap = function(element) {
     this.showWindow(map_window);
     map_window.showMap(mudcore.map_data._current_location);
+}
+
+
+/*
+ * Event when clicks the character button.
+ */
+MudderyMainGame.prototype.onCharacter = function(element) {
+    // Show the character menu.
+    this.select(".menu-character").toggleClass("hidden");
+}
+
+/*
+ * Event when clicks the status button.
+ */
+MudderyMainGame.prototype.onStatus = function(element) {
+    this.select(".menu-character").addClass("hidden");
+    this.showWindow(char_data_window);
+}
+
+/*
+ * Event when clicks the inventory button.
+ */
+MudderyMainGame.prototype.onInventory = function(element) {
+    this.select(".menu-character").addClass("hidden");
+    this.showWindow(inventory_window);
+}
+
+/*
+ * Event when clicks the skills button.
+ */
+MudderyMainGame.prototype.onSkills = function(element) {
+    this.select(".menu-character").addClass("hidden");
+    this.showWindow(skills_window);
+}
+
+/*
+ * Event when clicks the character button.
+ */
+MudderyMainGame.prototype.onQuests = function(element) {
+    this.select(".menu-character").addClass("hidden");
+    this.showWindow(quests_window);
+}
+
+/*
+ * Set popup menus position.
+ */
+MudderyMainGame.prototype.resetSize = function(element) {
+    var button = this.select(".button-character");
+    var menu = this.select(".menu-character");
+
+    var position = {
+        left: button.position().left,
+        top: button.position().top - menu.height() - 5
+    }
+
+    menu.css(position);
 }
 
 /******************************************
@@ -2683,6 +2680,7 @@ MudderyCombat.prototype.constructor = MudderyCombat;
  */
 MudderyCombat.prototype.bindEvents = function() {
 	this.onClick(".combat-buttons", "button", this.onCombatSkill);
+	this.onClick(".result-button-ok", this.onClose);
 }
 
 /*
@@ -2707,6 +2705,20 @@ MudderyCombat.prototype.onCombatSkill = function(element) {
 	mudcore.service.doCastSkill(key, this.target, true);
 }
 
+
+/*
+ * Event when clicks the close button.
+ */
+MudderyCombat.prototype.onClose = function(element) {
+	// close popup box
+    main_window.popWindow(combat_window);
+
+    if (popup_dialogue.hasDialogue()) {
+        popup_dialogue.show();
+    }
+}
+
+
 /*
  * Reset the combat box.
  */
@@ -2724,20 +2736,33 @@ MudderyCombat.prototype.reset = function(skill_cd_time) {
 
 	this.self_dbref = "";
 	this.target = "";
-	this.combat_finished = false;
+	this.combat_finished = true;
 	this.skill_cd_time = mudcore.data_handler.skill_cd_time;
 	if (this.interval_id != null) {
 		this.interval_id = window.clearInterval(this.interval_id);
 	}
+
+	// Clear combat results.
+	this.select(".combat-result").hide();
+
+    this.select(".result-header").empty();
+
+    this.select(".result-exp-block").hide();
+    this.select(".result-exp").empty();
+    this.select(".result-accepted").hide();
+    this.select(".result-accepted-list").empty();
+    this.select(".result-rejected").hide();
+    this.select(".result-rejected-list").empty();
 }
 
 /*
  * Set combat data.
  */
-MudderyCombat.prototype.setInfo = function(desc, timeout, characters, self_dbref) {
-	if (this.combat_finished) {
+MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbref) {
+	if (!this.combat_finished) {
 		return;
 	}
+	this.combat_finished = false;
 
 	this.self_dbref = self_dbref;
 
@@ -3057,7 +3082,8 @@ MudderyCombat.prototype.isCombatFinished = function() {
  * Set result data.
  */
 MudderyCombat.prototype.setResult = function(result) {
-	// result
+	this.select(".combat-result").show();
+
 	if (!result) {
 		return;
 	}
@@ -3076,7 +3102,60 @@ MudderyCombat.prototype.setResult = function(result) {
 		header = mudcore.trans("Draw !");
 	}
 
-	$("#combat_result_header").text(header);
+	this.select(".result-header").text(header);
+
+    if ("exp" in result) {
+        this.setGetExp(result["exp"]);
+    }
+
+    if ("get_objects" in result) {
+    	this.setGetObjects(result["get_objects"]);
+    }
+}
+
+
+/*
+ * Set the experiences that the player get.
+ */
+MudderyCombat.prototype.setGetExp = function(exp) {
+	this.select(".result-exp").text(exp);
+}
+
+
+/*
+ * Set the objects that the player get.
+ */
+MudderyCombat.prototype.setGetObjects = function(get_objects) {
+    if (get_objects["accepted_names"] && Object.keys(get_objects["accepted_names"]).length > 0) {
+	    this.setItems(".result-accepted-list", get_objects["accepted_names"]);
+	    this.select(".result-accepted").show();
+	}
+
+	if (get_objects["reject_reason"] && Object.keys(get_objects["reject_reason"]).length > 0) {
+	    this.setItems(".result-rejected-list", get_objects["reject_reason"]);
+	    this.select(".result-rejected").show();
+	}
+}
+
+/*
+ * Set object items.
+ */
+MudderyCombat.prototype.setItems = function(container_id, objects) {
+    var container = this.select(container_id);
+    for (var name in objects) {
+        var item = $("<p>")
+            .appendTo(container);
+
+        $("<span>")
+            .addClass("name")
+            .text(name)
+            .appendTo(item);
+
+        $("<span>")
+            .addClass("info")
+            .text(objects[name])
+            .appendTo(item);
+    }
 }
 
 

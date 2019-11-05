@@ -328,6 +328,20 @@
                 <div id="tab-bar">
                     <button type="button" class="button-scene">场景</button>
                     <button type="button" class="button-character">角色</button>
+                    <ul class="menu-character hidden">
+                        <li>
+                            <button type="button" class="button-status">属性</button>
+                        </li>
+                        <li>
+                            <button type="button" class="button-inventory">背包</button>
+                        </li>
+                        <li>
+                            <button type="button" class="button-skills">技能</button>
+                        </li>
+                        <li>
+                            <button type="button" class="button-quests">任务</button>
+                        </li>
+                    </ul>
                     <button type="button" class="button-map">地图</button>
                     <button type="button" class="button-system">系统</button>
                 </div>
@@ -352,55 +366,47 @@
                 </div>
                 <div class="combat-buttons">
                 </div>
-
-                <!--div>
-                    <div id="combat_result_header" class="modal-header">
+                <div class="combat-result hidden">
+                    <div class="result-header">
                     </div>
-                    <div id="combat_result_result" class="modal-body">
-                        <div id="combat_result_desc"></div>
-                        <div id="combat_result_div_exp">
-                            <span id="combat_result_view_get_exp">Get Exp: </span><span id="combat_result_exp"></span>
+                    <div class="result-content">
+                        <div class="result-desc"></div>
+                        <div class="result-exp-block">
+                            <span>Get Exp: </span><span class="result-exp"></span>
                         </div>
-                        <div id="combat_result_accepted">
-                            <div id="combat_result_view_get_objects">Get Objects: </div>
-                            <div id="combat_result_accepted_list">
+                        <div class="result-accepted">
+                            <div>Get Objects: </div>
+                            <div class="result-accepted-list">
                                 <p class="template">
                                     <span class="name"></span>: <span class="info"></span>
                                 </p>
                             </div>
                         </div>
-                        <div id="combat_result_rejected">
-                            <div id="combat_result_view_rejected">Rejected: </div>
-                            <div id="combat_result_rejected_list">
+                        <div class="result-rejected">
+                            <div>Rejected: </div>
+                            <div class="result-rejected-list">
                                 <p class="template">
                                     <span class="name"></span>: <span class="info"></span>
                                 </p>
                             </div>
                         </div>
+                    </div>
+                    <div class="result-buttons">
+                        <button class="result-button-ok" type="button">OK</button>
                     </div>
                 </div>
-                <div id="combat_result_buttons" class="modal-footer">
-                    <button id="combat_result_button_ok" class="btn btn-default btn-primary" type="button">OK</button>
-                </div-->
-
             </div>
 
             <div class="background-window">
                 <table class="background-table" frame="void" rules="none">
                     <tr>
-                        <td class="background-left-top"></td>
-                        <td class="background-center-top"></td>
-                        <td class="background-right-top"></td>
+                        <td class="background-top"></td>
                     </tr>
                     <tr>
-                        <td class="background-left-center"></td>
-                        <td class="background-center-center"></td>
-                        <td class="background-right-center"></td>
+                        <td class="background-center"></td>
                     </tr>
                     <tr>
-                        <td class="background-left-bottom"></td>
-                        <td class="background-center-bottom"></td>
-                        <td class="background-right-bottom"></td>
+                        <td class="background-bottom"></td>
                     </tr>
                 </table>
             </div>

@@ -418,7 +418,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 obj_list = [{"object": object_record.object, "number": object_record.number}]
                 self.receive_objects(obj_list, mute=True)
 
-    def receive_objects(self, obj_list, mute=False, combat=False):
+    def receive_objects(self, obj_list, mute=False):
         """
         Add objects to the inventory.
 
@@ -427,7 +427,6 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                              list item: {"object": object's key
                                          "number": object's number}
             mute: (boolean) do not send messages to the owner
-            combat: (boolean) get objects in combat.
 
         Returns:
             (dict) a list of objects that not have been received and their reasons.
@@ -573,8 +572,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             # Send results to the player.
             message = {"get_objects":
                             {"accepted": accepted_names,
-                             "rejected": reject_reason,
-                             "combat": combat}}
+                             "rejected": reject_reason}}
             self.msg(message)
 
         self.show_inventory()
@@ -1162,7 +1160,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             # dialogue finished, refresh surroundings
             self.show_location()            
 
-    def add_exp(self, exp, combat=False):
+    def add_exp(self, exp):
         """
         Add character's exp.
         Args:
@@ -1173,8 +1171,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         super(MudderyPlayerCharacter, self).add_exp(exp)
 
-        self.msg({"get_exp": {"exp": exp,
-                              "combat": combat}})
+        self.msg({"get_exp": {"exp": exp}})
 
     def level_up(self):
         """

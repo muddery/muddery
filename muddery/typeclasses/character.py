@@ -861,7 +861,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         return 0
 
-    def add_exp(self, exp, combat=False):
+    def add_exp(self, exp):
         """
         Add character's exp.
         Args:

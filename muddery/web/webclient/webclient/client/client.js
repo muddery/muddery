@@ -144,8 +144,8 @@ MudderyClient.prototype = {
         			popup_object.show();
                 }
                 else if (key == "dialogue") {
-                    popup_dialogue.setDialogue(data[key]);
-                    if (data[key] && data[key].length > 0) {
+                    popup_dialogue.setDialogue(data[key], mudcore.data_handler.getEscapes());
+                    if (popup_dialogue.hasDialogue() && !main_window.isWindowShow(combat_window)) {
                         popup_dialogue.show();
                     }
                 }
@@ -168,7 +168,7 @@ MudderyClient.prototype = {
                 }
                 else if (key == "get_objects") {
                 	var get_objects = data[key];
-                    main_window.showGetObjects(get_objects["accepted"], get_objects["rejected"], get_objects["combat"]);
+                    main_window.showGetObjects(get_objects["accepted"], get_objects["rejected"]);
                 }
                 else if (key == "joined_combat") {
                     main_window.showCombat(data[key]);
@@ -181,7 +181,10 @@ MudderyClient.prototype = {
                 }
                 else if (key == "combat_info") {
                     var info = data[key];
-                    combat_window.setInfo(info["desc"], info["timeout"], info["characters"], mudcore.data_handler.character_dbref);
+                    combat_window.setCombat(info["desc"],
+                                            info["timeout"],
+                                            info["characters"],
+                                            mudcore.data_handler.character_dbref);
                 }
                 else if (key == "combat_commands") {
 	                combat_window.setCommands(data[key]);

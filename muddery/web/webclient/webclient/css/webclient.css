@@ -1,4 +1,10 @@
 
+:root {
+    --background-top: 20px;
+    --background-bottom: 10px;
+}
+
+
 html, body {
     width: 100%;
     height: 100%;
@@ -18,7 +24,7 @@ body {
 #windows-wrapper {
     width: 100%;
     height: 100%;
-    padding: 5px;
+    padding: var(--background-top) 0 var(--background-bottom) 0;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -58,52 +64,18 @@ body {
     padding: 0;
 }
 
-.background-left-top {
-    width: 5px;
-    height: 5px;
-    background: url(../img/main_corner_left_top.png) no-repeat center center;
-}
-
-.background-center-top {
-    height: 5px;
+.background-top {
+    height: var(--background-top);
     background: url(../img/main_border_top.png) no-repeat center center;
 }
 
-.background-right-top {
-    width: 5px;
-    height: 5px;
-    background: url(../img/main_corner_right_top.png) no-repeat center center;
-}
-
-.background-left-center {
-    width: 5px;
-    background: url(../img/main_border_left.png) no-repeat center center;
-}
-
-.background-center-center {
+.background-center {
     background: url(../img/main_background.png) no-repeat center center;
 }
 
-.background-right-center {
-    width: 5px;
-    background: url(../img/main_border_right.png) no-repeat center center;
-}
-
-.background-left-bottom {
-    width: 5px;
-    height: 5px;
-    background: url(../img/main_corner_left_bottom.png) no-repeat center center;
-}
-
-.background-center-bottom {
-    height: 5px;
+.background-bottom {
+    height: var(--background-bottom);
     background: url(../img/main_border_bottom.png) no-repeat center center;
-}
-
-.background-right-bottom {
-    width: 5px;
-    height: 5px;
-    background: url(../img/main_corner_right_bottom.png) no-repeat center center;
 }
 
 .background-login {
@@ -519,6 +491,14 @@ body {
     left: 0;
     bottom: 0;
 }
+
+#tab-bar .menu-character {
+    position: absolute;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
 /************* tab bar end *************/
 
 
@@ -595,4 +575,19 @@ body {
     background-color: #ddd;
     margin: 2px 0px 0px 0px;
 }
+
+#combat-window .combat-result {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+    padding: 20px 20px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    background-color: #333;
+}
+
 /************* combat window end *************/
