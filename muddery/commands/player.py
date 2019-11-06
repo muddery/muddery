@@ -107,7 +107,8 @@ class CmdChangePassword(Command):
 
         player.set_password(new_password)
         player.save()
-        session.msg({"alert":_("Password changed.")},
+        session.msg({"alert":_("Password changed."),
+                     "pw_changed": True},
                     session=session)
 
 

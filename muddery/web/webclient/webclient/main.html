@@ -139,28 +139,58 @@
             <!-- select character window -->
             <div id="select-char-window" class="main-window hidden">
                 <div class="title-bar">
-                    <button type="button" class="button-back" ></button>
                     <span class="header-text">Characters</span>
                 </div>
                 <div class="character-list">
                 </div>
-                <button type="button" class="button-new-char btn btn-default">New Character</button>
+                <div class="tab-bar">
+                    <button type="button" class="button-new-char">新角色</button>
+                    <button type="button" class="button-password">修改密码</button>
+                    <button type="button" class="button-logout">退出</button>
+                </div>
             </div>
 
             <!-- new character window -->
             <div id="new-char-window" class="main-window hidden">
                 <div class="title-bar">
-                    <button type="button" class="button-back" ></button>
                     <span class="header-text">New Character</span>
                 </div>
                 <div class="char-attributes">
                     <p>Name</p>
                     <input class="new-char-name form-control editbox" type="text" placeholder="name" autocomplete="off" />
                 </div>
-                <div class="button-bar">
-                    <button type="button" class="button-create">Create</button>
+                <div class="tab-bar">
+                    <button type="button" class="button-create">创建</button>
+                    <button type="button" class="button-cancel">放弃</button>
                 </div>
             </div>
+
+            <!-- set password window -->
+            <div id="password-window" class="main-window hidden">
+                <div class="title-bar">
+                    <span class="header-text">Password</span>
+                </div>
+                <table>
+                    <tbody>
+                    <tr><td>
+                        <input class="current-password form-control editbox" type="password" placeholder="当前密码" autocomplete="off" />
+                    </td></tr>
+                    <tr><td>
+                        <input class="new-password form-control editbox" type="password" placeholder="新密码" autocomplete="off" />
+                    </td></tr>
+                    <tr><td>
+                        <input class="new-password-verify form-control editbox" type="password" placeholder="确认新密码"  autocomplete="off" />
+                    </td></tr>
+                    <tr>
+                        <td>
+                            <button class="button-confirm btn btn-default" type="button">确认</button>
+                            <button class="button-cancel btn btn-default" type="button">取消</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
 
             <div id="game-window" class="main-window hidden">
                 <div id="contents">
@@ -217,8 +247,7 @@
 
                     <div id="char-data-window" class="hidden">
                         <div class="title-bar">
-                            <button type="button" class="button-back" ></button>
-                            <span class="header-text">&nbsp;</span>
+                            <span class="header-text">Status</span>
                         </div>
                         <div>
                             <div class="equipments">
@@ -258,8 +287,7 @@
 
                     <div id="inventory-window" class="hidden">
                         <div class="title-bar">
-                            <button type="button" class="button-back" ></button>
-                            <span class="header-text">&nbsp;</span>
+                            <span class="header-text">Inventory</span>
                         </div>
                         <div>
                             <table class="inventory-table" frame="border" rules="all">
@@ -278,8 +306,7 @@
 
                     <div id="skills-window" class="hidden">
                         <div class="title-bar">
-                            <button type="button" class="button-back" ></button>
-                            <span class="header-text">&nbsp;</span>
+                            <span class="header-text">Skills</span>
                         </div>
                         <div>
                             <table class="skills-table" frame="border" rules="all">
@@ -297,8 +324,7 @@
 
                     <div id="quests-window" class="hidden">
                         <div class="title-bar">
-                            <button type="button" class="button-back" ></button>
-                            <span class="header-text">&nbsp;</span>
+                            <span class="header-text">Quests</span>
                         </div>
                         <div>
                             <table class="quests-table" frame="border" rules="all">
@@ -315,6 +341,30 @@
                         </div>
                     </div>
 
+                    <div id="shop-window" class="hidden">
+                        <div class="title-bar">
+                            <span class="header-text">Shop</span>
+                        </div>
+                        <div class="shop-icon">
+                            <img id="shop-icon-img"/>
+                        </div>
+                        <div class="shop-desc">
+                        </div>
+                        <div>
+                            <table class="shop-table" frame="border" rules="all">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Desc</th>
+                                </tr>
+                                </thead>
+                                <tbody class="goods-list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <div id="map-window" class="hidden">
                         <div class="title-bar">
                             <span class="header-text">Map</span>
@@ -325,10 +375,10 @@
                     </div>
 
                 </div>
-                <div id="tab-bar">
+                <div class="tab-bar">
                     <button type="button" class="button-scene">场景</button>
                     <button type="button" class="button-character">角色</button>
-                    <ul class="menu-character hidden">
+                    <ul class="menu-character popup-menu hidden">
                         <li>
                             <button type="button" class="button-status">属性</button>
                         </li>
@@ -344,6 +394,14 @@
                     </ul>
                     <button type="button" class="button-map">地图</button>
                     <button type="button" class="button-system">系统</button>
+                    <ul class="menu-system popup-menu hidden">
+                        <li>
+                            <button type="button" class="button-logout">退出</button>
+                        </li>
+                        <li>
+                            <button type="button" class="button-unpuppet">初始页面</button>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
@@ -431,16 +489,12 @@
 
         <script src="./lang/en-us/strings.js" type="text/javascript" charset="utf-8"></script>
         <script src="./lang/zh-cn/strings.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./lang/local_string.js" type="text/javascript" charset="utf-8"></script>
 
         <script src="./client/evennia.js" type="text/javascript" charset="utf-8"></script>
         <script src="./client/client.js" type="text/javascript" charset="utf-8"></script>
         <script src="./client/service.js" type="text/javascript" charset="utf-8"></script>
 
         <script src="./utils/map_data.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./utils/text2html.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./utils/data_handler.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./utils/text_escape.js" type="text/javascript" charset="utf-8"></script>
         <script src="./utils/utils.js" type="text/javascript" charset="utf-8"></script>
 		
         <script src="./controllers/base_controller.js" type="text/javascript" charset="utf-8"></script>

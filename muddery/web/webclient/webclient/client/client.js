@@ -206,6 +206,9 @@ MudderyClient.prototype = {
                 else if (key == "logout") {
                     main_window.onLogout(data[key]);
                 }
+                else if (key == "pw_changed") {
+                    main_window.popWindow(password_window);
+                }
                 else if (key == "unpuppet") {
 	                main_window.onUnpuppet(data[key]);
                 }
@@ -224,11 +227,7 @@ MudderyClient.prototype = {
                     main_window.setChannels(data[key])
                 }
                 else if (key == "shop") {
-                	var shop = data[key];
-                    main_window.showShop(shop["name"],
-                    		 			shop["icon"],
-                    		 			shop["desc"],
-                    		 			shop["goods"]);
+                    main_window.showShop(data[key]);
                 }
                 else if (key == "rankings") {
                 	main_window.setRankings(data[key]);

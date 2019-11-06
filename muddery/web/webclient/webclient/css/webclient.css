@@ -33,6 +33,7 @@ body {
 .main-window {
     width: 100%;
     height: 100%;
+    position: relative;
 }
 
 .title-bar {
@@ -284,11 +285,18 @@ body {
 /************* new character window end *************/
 
 
-/************* main game window begin *************/
-#game-window {
-    position: relative;
+/************* password window begin *************/
+#password-window .button-confirm {
+    float: left;
 }
 
+#password-window .button-cancel {
+    float: right;
+}
+/************* passwprd window end *************/
+
+
+/************* main game window begin *************/
 #game-window .main-contents {
     height: 100%;
 }
@@ -485,14 +493,14 @@ body {
 /************* map window end *************/
 
 
-/************* tab bar begin *************/
-#tab-bar {
+/************* bar begin *************/
+.tab-bar {
     position: absolute;
     left: 0;
     bottom: 0;
 }
 
-#tab-bar .menu-character {
+.tab-bar .popup-menu {
     position: absolute;
     z-index: 1;
     margin: 0;

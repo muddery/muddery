@@ -18,6 +18,7 @@ window.main_window = new MudderyMain($("#main-window"));
 window.login_window = new MudderyLogin($("#login-window"));
 window.select_char_window = new MudderySelectChar($("#select-char-window"));
 window.new_char_window = new MudderyNewChar($("#new-char-window"));
+window.password_window = new MudderyPassword($("#password-window"));
 
 window.main_game_window = new MudderyMainGame($("#game-window"));
 window.prompt_bar = new MudderyPromptBar($("#main-contents .prompt-bar"));
@@ -28,6 +29,7 @@ window.inventory_window = new MudderyInventory($("#inventory-window"));
 window.skills_window = new MudderySkills($("#skills-window"));
 window.quests_window = new MudderyQuests($("#quests-window"));
 window.map_window = new MudderyMap($("#map-window"));
+window.shop_window = new MudderyShop($("#shop-window"));
 
 window.combat_window = new MudderyCombat($("#combat-window"));
 
@@ -41,6 +43,7 @@ $(document).ready(function() {
     login_window.init();
     select_char_window.init();
     new_char_window.init();
+    password_window.init();
 
     main_game_window.init();
     prompt_bar.init();
@@ -51,6 +54,7 @@ $(document).ready(function() {
     skills_window.init();
     quests_window.init();
     map_window.init();
+    shop_window.init();
 
     combat_window.init();
 

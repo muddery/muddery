@@ -52,11 +52,8 @@ MudderyMain.prototype.popupMessage = function(header, content, buttons) {
 /*  
  * Popup a shop.
  */
-MudderyMain.prototype.showShop = function(name, icon, desc, goods) {
-	this.doClosePopupBox();
-
-	var component = $$.component.shop;
-	component.setShop(name, icon, desc, goods);
+MudderyMain.prototype.showShop = function(data) {
+	show_window.setShop(data);
 	component.show();
 }
   
@@ -65,7 +62,7 @@ MudderyMain.prototype.showShop = function(name, icon, desc, goods) {
  */
 MudderyMain.prototype.openShop = function() {
 	this.doClosePopupBox();
-	$$.component.shop.show();
+	this.pushWindow(shop_window);
 }
   
 /*  
@@ -338,6 +335,9 @@ MudderyMain.prototype.onPuppet = function(data) {
  * Event when the player unpuppets a character.
  */
 MudderyMain.prototype.onUnpuppet = function() {
+    if (!this.puppet) {
+        return;
+    }
 	this.puppet = false;
 	this.showSelectChar();
 }
@@ -1231,19 +1231,19 @@ MudderySelectChar.prototype.constructor = MudderySelectChar;
  * Bind events.
  */
 MudderySelectChar.prototype.bindEvents = function() {
-    this.onClick(".button-back", this.onClickBack);
-    this.onClick(".button-new-char", this.onNewCharacter);
     this.onClick(".character-list", ".char-name", this.onSelectCharacter);
     this.onClick(".character-list", ".button-delete", this.onDeleteCharacter);
+
+    this.onClick(".button-new-char", this.onNewCharacter);
+    this.onClick(".button-password", this.onPassword);
+    this.onClick(".button-logout", this.onLogout);
 }
 
 /*
- * Event when clicks the back button.
+ * Event when clicks the password button.
  */
-MudderySelectChar.prototype.onClickBack = function(element) {
-    mudcore.service.logout();
-    Evennia.reconnect();
-    main_window.showLoginWindow();
+MudderySelectChar.prototype.onPassword = function(element) {
+    main_window.pushWindow(password_window);
 }
 
 /*
@@ -1251,6 +1251,15 @@ MudderySelectChar.prototype.onClickBack = function(element) {
  */
 MudderySelectChar.prototype.onNewCharacter = function(element) {
     main_window.pushWindow(new_char_window);
+}
+
+/*
+ * Event when clicks the logout button.
+ */
+MudderySelectChar.prototype.onLogout = function(element) {
+    mudcore.service.logout();
+    Evennia.reconnect();
+    main_window.showLoginWindow();
 }
 
 /*
@@ -1339,7 +1348,7 @@ MudderyNewChar.prototype.constructor = MudderyNewChar;
  * Bind events.
  */
 MudderyNewChar.prototype.bindEvents = function() {
-    this.onClick(".button-back", this.onClickBack);
+    this.onClick(".button-cancel", this.onClickBack);
     this.onClick(".button-create", this.onCreate);
 }
 
@@ -1377,6 +1386,61 @@ MudderyNewChar.prototype.onCharacterCreated = function(data) {
 
 /******************************************
  *
+ * Change Password Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyPassword = function(el) {
+    BaseController.call(this, el);
+}
+
+MudderyPassword.prototype = prototype(BaseController.prototype);
+MudderyPassword.prototype.constructor = MudderyPassword;
+
+/*
+ * Bind events.
+ */
+MudderyPassword.prototype.bindEvents = function() {
+    this.onClick(".button-cancel", this.onCancel);
+    this.onClick(".button-confirm", this.onConfirm);
+}
+
+/*
+ * Event when clicks the cancel button.
+ */
+MudderyPassword.prototype.onCancel = function(element) {
+    main_window.popWindow(password_window);
+}
+
+
+/*
+ * Event when clicks the register button.
+ */
+MudderyPassword.prototype.onConfirm = function(element) {
+    var current = this.select(".current-password").val();
+    var password = this.select(".new-password").val();
+    var password_verify = this.select(".new-password-verify").val();
+
+    mudcore.service.doChangePassword(current, password, password_verify);
+    this.clearValues();
+}
+
+/*
+ * Clear user inputted values.
+ */
+MudderyPassword.prototype.clearValues = function() {
+    this.select(".current-password").val("");
+    this.select(".new-password").val("");
+    this.select(".new-password-verify").val("");
+}
+
+
+
+/******************************************
+ *
  * Main Game Window
  *
  ******************************************/
@@ -1399,11 +1463,16 @@ MudderyMainGame.prototype.bindEvents = function() {
 
     this.onClick(".button-scene", this.onScene);
 	this.onClick(".button-map", this.onMap);
+
     this.onClick(".button-character", this.onCharacter);
     this.onClick(".button-status", this.onStatus);
     this.onClick(".button-inventory", this.onInventory);
     this.onClick(".button-skills", this.onSkills);
     this.onClick(".button-quests", this.onQuests);
+
+    this.onClick(".button-system", this.onSystem);
+    this.onClick(".button-logout", this.onLogout);
+    this.onClick(".button-unpuppet", this.onUnpuppet);
 }
 
 /*
@@ -1477,19 +1546,57 @@ MudderyMainGame.prototype.onQuests = function(element) {
     this.showWindow(quests_window);
 }
 
+
+/*
+ * Event when clicks the system button.
+ */
+MudderyMainGame.prototype.onSystem = function(element) {
+    // Show the character menu.
+    this.select(".menu-system").toggleClass("hidden");
+}
+
+/*
+ * Event when clicks the logout button.
+ */
+MudderyMainGame.prototype.onLogout = function(element) {
+    this.select(".menu-system").addClass("hidden");
+
+    mudcore.service.logout();
+    Evennia.reconnect();
+    main_window.showLoginWindow();
+}
+
+/*
+ * Event when clicks the unpuppet button.
+ */
+MudderyMainGame.prototype.onUnpuppet = function(element) {
+    this.select(".menu-system").addClass("hidden");
+
+	mudcore.service.unpuppetCharacter();
+	main_window.onUnpuppet();
+}
+
 /*
  * Set popup menus position.
  */
 MudderyMainGame.prototype.resetSize = function(element) {
-    var button = this.select(".button-character");
-    var menu = this.select(".menu-character");
-
-    var position = {
-        left: button.position().left,
-        top: button.position().top - menu.height() - 5
+    // Character menu.
+    var button_char = this.select(".button-character");
+    var menu_char = this.select(".menu-character");
+    var pos_char = {
+        left: button_char.position().left,
+        top: button_char.position().top - menu_char.height() - 5
     }
+    menu_char.css(pos_char);
 
-    menu.css(position);
+    // System menu.
+    var button_sys = this.select(".button-system");
+    var menu_sys = this.select(".menu-system");
+    var pos_sys = {
+        left: button_sys.position().left,
+        top: button_sys.position().top - menu_sys.height() - 5
+    }
+    menu_sys.css(pos_sys);
 }
 
 /******************************************
@@ -1807,15 +1914,17 @@ MudderyInventory.prototype.constructor = MudderyInventory;
  * Bind events.
  */
 MudderyInventory.prototype.bindEvents = function() {
-	this.onClick("#inv_inventory_items", ".obj_name", this.onLook);
 }
 
 /*
  * Event when clicks the object link.
  */
 MudderyInventory.prototype.onLook = function(element) {
-    var dbref = this.select(element).data("dbref");
-    $$.commands.doLook(dbref);
+    var index = this.select(element).data("index");
+    if (index < inventory_window.inventory.length) {
+        var dbref = inventory_window.inventory[index].dbref;
+        mudcore.service.doLook(dbref);
+    }
 }
 
 /*
@@ -1830,6 +1939,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
     for (var i = 0; i < inventory.length; i++) {
         var obj = inventory[i];
         var row = $("<tr>")
+            .addClass("object-row")
             .data("index", i);
 
         var cell = $("<td>");
@@ -1868,6 +1978,8 @@ MudderyInventory.prototype.setInventory = function(inventory) {
 
         row.appendTo(container);
     }
+
+    this.onClick(".object-row", this.onLook);
 }
 
 
@@ -1894,15 +2006,17 @@ MudderySkills.prototype.constructor = MudderySkills;
  * Bind events.
  */
 MudderySkills.prototype.bindEvents = function() {
-	this.onClick("#skill_list", ".skill_name", this.onLook);
 }
 
 /*
  * Event when clicks the skill link.
  */
 MudderySkills.prototype.onLook = function(element) {
-    var dbref = this.select(element).data("dbref");
-    $$.commands.doLook(dbref);
+    var index = this.select(element).data("index");
+    if (index < skills_window.skills.length) {
+        var dbref = skills_window.skills[index].dbref;
+        mudcore.service.doLook(dbref);
+    }
 }
 
 /*
@@ -1917,6 +2031,7 @@ MudderySkills.prototype.setSkills = function(skills) {
     for (var i = 0; i < skills.length; i++) {
         var obj = skills[i];
         var row = $("<tr>")
+            .addClass("object-row")
             .data("index", i);
 
         var cell = $("<td>");
@@ -1946,6 +2061,8 @@ MudderySkills.prototype.setSkills = function(skills) {
 
         row.appendTo(container);
     }
+
+	this.onClick(".object-row", this.onLook);
 }
 
 
@@ -1971,15 +2088,17 @@ MudderyQuests.prototype.constructor = MudderyQuests;
  * Bind events.
  */
 MudderyQuests.prototype.bindEvents = function() {
-	this.onClick("#quest_list", ".quest_name", this.onLook);
 }
 
 /*
  * Event when clicks the quest link.
  */
 MudderyQuests.prototype.onLook = function(element) {
-    var dbref = this.select(element).data("dbref");
-    $$.commands.doLook(dbref);
+    var index = this.select(element).data("index");
+    if (index < quests_window.quests.length) {
+        var dbref = quests_window.quests[index].dbref;
+        mudcore.service.doLook(dbref);
+    }
 }
 
 /*
@@ -1994,6 +2113,7 @@ MudderyQuests.prototype.setQuests = function(quests) {
     for (var i = 0; i < quests.length; i++) {
         var obj = quests[i];
         var row = $("<tr>")
+            .addClass("object-row")
             .data("index", i);
 
         var cell = $("<td>");
@@ -2041,6 +2161,8 @@ MudderyQuests.prototype.setQuests = function(quests) {
 
         row.appendTo(container);
 	}
+
+	this.onClick(".object-row", this.onLook);
 }
 
 /*
@@ -2784,7 +2906,7 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbr
 
 		this.select(".combat-timeout").text(timeout);
 		this.select(".combat-time-div").show();
-		this.interval_id = window.setInterval("refreshTimeout()", 1000);
+		this.interval_id = window.setInterval("combat_window.refreshTimeout()", 1000);
 	}
 	else {
 		this.select(".combat-timeout").empty();
@@ -3158,14 +3280,15 @@ MudderyCombat.prototype.setItems = function(container_id, objects) {
     }
 }
 
-
-function refreshTimeout() {
-	var controller = $$.component.combat;
+/*
+ * Calculate the remain time of the combat.
+ */
+MudderyCombat.prototype.refreshTimeout = function() {
     var current_time = new Date().getTime();
 
-    var remain = Math.ceil((controller.timeline - current_time) / 1000);
-    if (remain > controller.timeout) {
-        remain = controller.timeout;
+    var remain = Math.ceil((combat_window.timeline - current_time) / 1000);
+    if (remain > combat_window.timeout) {
+        remain = combat_window.timeout;
     }
     if (remain < 0) {
         remain = 0;
@@ -3173,3 +3296,139 @@ function refreshTimeout() {
 
     $("#combat-window .combat-timeout").text(remain);
 };
+
+
+/******************************************
+ *
+ * Shop Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyShop = function(el) {
+	BaseController.call(this, el);
+
+	this.goods = [];
+}
+
+MudderyShop.prototype = prototype(BaseController.prototype);
+MudderyShop.prototype.constructor = MudderyShop;
+
+/*
+ * Bind events.
+ */
+MudderyShop.prototype.bindEvents = function() {
+	this.onClick(".obj_name", this.onLook);
+}
+
+/*
+ * Reset the shop
+ */
+MudderyShop.prototype.reset = function() {
+	this.select(".header-text").html("Shop");
+    this.select(".shop-icon-img")
+        .attr("src", "")
+        .hide();
+    this.select(".shop-desc").html("");
+    this.select(".goods-list").empty();
+}
+
+
+/*
+ * Event when clicks the object link.
+ */
+MudderyShop.prototype.onLook = function(element) {
+    var index = this.select(element).data("index");
+    if (index < shop_window.goods.length) {
+        var goods = shop_window.goods[index];
+        showGoods(goods["dbref"],
+                   goods["name"],
+                   goods["number"],
+                   goods["icon"],
+                   goods["desc"],
+                   goods["price"],
+                   goods["unit"]);
+    }
+}
+
+
+/*
+ * Set shop's goods.
+ */
+MudderyShop.prototype.setShop = function(data) {
+    var name = data["name"];
+    var icon = data["icon"];
+    var desc = data["desc"];
+	this.goods = data["goods"] || [];
+
+	// add name
+	this.select(".header-text").html(mudcore.text2html.parseHtml(name));
+
+	// add icon
+    if (icon) {
+        var url = settings.resource_url + icon;
+        this.select(".shop-icon-img")
+            .attr("src", url)
+            .show();
+    }
+    else {
+        this.select(".shop-icon-img").hide();
+    }
+
+	// add desc
+	this.select(".shop-desc").html(mudcore.text2html.parseHtml(desc));
+
+	// set goods
+	var container = this.select(".goods-list");
+	for (var i in this.goods) {
+		var obj = this.goods[i];
+        var row = $("<tr>")
+            .data("index", i);
+
+        var cell = $("<td>");
+
+        // icon
+        if (obj["icon"]) {
+            var div = $("<div>")
+                .addClass("icon-div")
+                .appendTo(cell);
+
+            var image = $("<img>")
+                .addClass("icon-image")
+                .attr("src", settings.resource_url + obj["icon"])
+                .appendTo(div);
+        }
+
+        // name
+        var goods_name = obj["name"];
+        if (obj["number"] > 1) {
+            goods_name += "×" + obj["number"];
+        }
+
+        $("<div>")
+            .html(mudcore.text2html.parseHtml(goods_name))
+            .appendTo(cell);
+        cell.appendTo(row);
+
+        // price
+        var price = obj["price"];
+        $("<td>")
+            .text(price)
+            .appendTo(row);
+
+        // unit
+        var unit = obj["unit"];
+        $("<td>")
+            .text(unit)
+            .appendTo(row);
+
+        // desc
+        $("<td>")
+            .html(mudcore.text2html.parseHtml(obj["desc"]))
+            .appendTo(row);
+
+        row.appendTo(container);
+	}
+}
