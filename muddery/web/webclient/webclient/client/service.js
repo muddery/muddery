@@ -43,7 +43,7 @@ MudderyService.prototype = {
     // register
     register: function(playername, password, password_verify, connect) {
         if (password != password_verify) {
-            main_window.showAlert(mudcore.trans("Password does not match."));
+            mud.main_frame.showAlert("Password does not match.");
             return;
         }
 
@@ -56,7 +56,7 @@ MudderyService.prototype = {
     // change password
     doChangePassword: function(current, password, password_verify) {
         if (password != password_verify) {
-            main_window.showAlert(mudcore.trans("Password does not match."));
+            mud.main_frame.showAlert("Password does not match.");
             return;
         }
 

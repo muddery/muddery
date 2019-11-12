@@ -4,6 +4,9 @@
     --background-bottom: 10px;
 }
 
+html {
+    font-size: 100px;
+}
 
 html, body {
     width: 100%;
@@ -13,8 +16,16 @@ html, body {
 
 body {
     background-color: #222;
+    font-size: 0.14rem;
     color: #ccc;
     margin: 0;
+	-webkit-touch-callout:none;
+	-webkit-user-select:none;
+	user-select:none;
+}
+
+:focus {
+    outline: none;
 }
 
 .hidden {
@@ -24,10 +35,6 @@ body {
 #windows-wrapper {
     width: 100%;
     height: 100%;
-    padding: var(--background-top) 0 var(--background-bottom) 0;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
 }
 
 .main-window {
@@ -77,10 +84,6 @@ body {
 .background-bottom {
     height: var(--background-bottom);
     background: url(../img/main_border_bottom.png) no-repeat center center;
-}
-
-.background-login {
-    background: url(../img/login_background.png) no-repeat center center;
 }
 
 /************* backgrounds end *************/
@@ -219,11 +222,20 @@ body {
 
 
 /************* login window begin *************/
+#login-window {
+    background: url(../img/login_background.png) no-repeat center;
+    background-size: 100% 100%;
+}
+
 #login-window .login-box {
     position: absolute;
     left: 50%;
     top: 50%;
+    width: 2.8rem;
+    height: 2.4rem;
     transform: translate(-50%, -50%);
+    background: url(../img/login_form.png) no-repeat bottom;
+    background-size: 2.8rem 2.1rem;
 }
 
 #login-window .login-header {
@@ -231,27 +243,72 @@ body {
     text-align: center;
 }
 
-#login-window .login-header-buttons {
-    width: 120px;
-    margin: 0 auto;
+#login-window .login-form,
+#login-window .register-form {
+    width: 2.8rem;
+    height: 2.1rem;
+    bottom: 0;
+    padding: 0.1rem;
 }
 
-#login-window .tab-inactivate {
-    color: #777;
+#login-window .login-header {
+    padding: 0;
+    float: left;
+}
+
+#login-window button.tab {
+    width: 0.6rem;
+    height: 0.33rem;
+    color: #888;
+    font-weight: 700;
+    border: none;
+    background: url(../img/login_tab_inactivate.png) no-repeat bottom;
+    background-size: 0.6rem 0.33rem;
+}
+
+#login-window button.tab.activate {
+    color: #000;
+    background-image: url(../img/login_tab_activate.png);
 }
 
 #login-window .login-box td {
-    height: 44px;
-    padding: 5px;
+    height: 0.3rem;
+    padding: 0;
+    text-align: center;
+}
+
+#login-window .input-text {
+    border: none;
+    padding: 0;
+    margin: 0 auto;
+    width: 2.2rem;
+    height: 0.3rem;
+    padding: 0 0.1rem;
+    background: url(../img/login_input_box.png) no-repeat center;
+    background-size: 2.4rem 0.3rem;
+}
+
+#login-window .login-auto-login {
+    float: left;
+    padding-left: 0.1rem;
+}
+
+#login-window .text-auto-login {
+    color: #000;
 }
 
 #login-window .checkbox-auto-login {
-    padding: 20px 0;
+    padding: 0.2rem 0;
 }
 
 #login-window .button-login,
 #login-window .button-register {
-    width: 100%;
+    width: 1.6rem;
+    height: 0.25rem;
+    padding: 0;
+    border: none;
+    background: url(../img/login_button.png) no-repeat center;
+    background-size: 1.6rem 0.25rem;
 }
 
 /************* login window end *************/

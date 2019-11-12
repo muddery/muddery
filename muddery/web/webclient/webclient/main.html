@@ -6,20 +6,8 @@
         <title>Muddery Webclient</title>
         <link href="./css/webclient.css" rel="stylesheet" type="text/css" />
     </head>
-    <body id="frame_main" class="template">
+    <body id="main-frame" class="template">
         <!-- Show popup windows in this div. -->
-		<div id="popup_confirm_combat" class="container">
-            <div role="dialog" class="modal in popup_modal">
-                <div class="modal-dialog modal-sm vertical-center">
-                    <div class="modal-content">
-                    	<div id="frame_confirm_combat" class="popup_frame">
-                            <div class="require">
-                            </div>
-                        </div>
-        			</div>
-        		</div>
-        	</div>
-        </div>
         <div id="popup">
             <!-- popup message window -->
             <div id="popup-message" class="popup-window hidden">
@@ -93,40 +81,38 @@
             <div id="login-window" class="main-window hidden">
                 <div class="login-box">
                     <div class="login-header">
-                        <div class="login-header-buttons">
-                            <button class="button-tab-login tab-activate btn btn-link">登录</button>
-                            <button class="button-tab-register tab-inactivate btn btn-link">注册</button>
-                        </div>
+                        <button class="button-tab-login tab activate">登录</button>
+                        <button class="button-tab-register tab">注册</button>
                     </div>
                     <table class="login-form">
                         <tbody>
                             <tr><td>
-                                <input class="login-name form-control editbox" type="text" placeholder="用户名" autocomplete="off" />
+                                <input class="login-name input-text" type="text" placeholder="用户名" autocomplete="off" />
                             </td></tr>
                             <tr><td>
-                                <input class="login-password form-control editbox" type="password" placeholder="密码" autocomplete="off" />
+                                <input class="login-password input-text" type="password" placeholder="密码" autocomplete="off" />
                             </td></tr>
                             <tr><td>
-                                <div>
+                                <div class="login-auto-login">
                                     <input class="checkbox-auto-login" type="checkbox">
-                                    <span>自动登录</span>
+                                    <span class="text-auto-login">自动登录</span>
                                 </div>
                             </td></tr>
                             <tr><td>
-                                <button class="button-login btn btn-default">登录</button>
+                                <button class="button-login">登录</button>
                             </td></tr>
                         </tbody>
                     </table>
                     <table class="register-form hidden">
                         <tbody>
                             <tr><td>
-                                <input class="reg-name form-control editbox" type="text" placeholder="用户名" autocomplete="off" />
+                                <input class="reg-name input-text" type="text" placeholder="用户名" autocomplete="off" />
                             </td></tr>
                             <tr><td>
-                                <input class="reg-password form-control editbox" type="password" placeholder="密码" autocomplete="off" />
+                                <input class="reg-password input-text" type="password" placeholder="密码" autocomplete="off" />
                             </td></tr>
                             <tr><td>
-                                <input class="reg-password-verify form-control editbox" type="password" placeholder="确认密码"  autocomplete="off" />
+                                <input class="reg-password-verify input-text" type="password" placeholder="确认密码"  autocomplete="off" />
                             </td></tr>
                             <tr><td>
                                 <button class="button-register btn btn-default" type="button">注册</button>
@@ -189,8 +175,9 @@
                     </tr>
                     </tbody>
                 </table>
+                <div class="tab-bar">
+                </div>
             </div>
-
 
             <div id="game-window" class="main-window hidden">
                 <div class="contents">
@@ -520,6 +507,7 @@
         <script src="./lang/en-us/strings.js" type="text/javascript" charset="utf-8"></script>
         <script src="./lang/zh-cn/strings.js" type="text/javascript" charset="utf-8"></script>
 
+        <script src="./client/main.js" type="text/javascript" charset="utf-8"></script>
         <script src="./client/evennia.js" type="text/javascript" charset="utf-8"></script>
         <script src="./client/client.js" type="text/javascript" charset="utf-8"></script>
         <script src="./client/service.js" type="text/javascript" charset="utf-8"></script>
@@ -528,8 +516,6 @@
         <script src="./utils/utils.js" type="text/javascript" charset="utf-8"></script>
 		
         <script src="./controllers/base_controller.js" type="text/javascript" charset="utf-8"></script>
-        <script src="./controllers/muddery_main.js" type="text/javascript" charset="utf-8"></script>
-        
-        <script src="./client/main.js" type="text/javascript" charset="utf-8"></script>
+        <script src="./controllers/main_frame.js" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>

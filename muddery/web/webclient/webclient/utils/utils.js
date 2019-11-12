@@ -278,8 +278,8 @@ MudderyText2HTML.prototype = {
                     replacement = "</strong>";
                 }
 
-                if (match in mudcore.text2html.mark_map) {
-                    last_convert = mudcore.text2html.mark_map[match];
+                if (match in core.text2html.mark_map) {
+                    last_convert = core.text2html.mark_map[match];
                     replacement += last_convert;
                 }
 

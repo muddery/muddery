@@ -17,12 +17,12 @@ MudderyClient.prototype = {
         Evennia.init();
 
         // register listeners
-        Evennia.emitter.on("text", mudcore.client.onText);
+        Evennia.emitter.on("text", this.onText);
         //Evennia.emitter.on("prompt", onPrompt);
         //Evennia.emitter.on("default", onDefault);
-        Evennia.emitter.on("connection_close", main_window.onConnectionClose);
+        Evennia.emitter.on("connection_close", this.onConnectionClose);
         // silence currently unused events
-        Evennia.emitter.on("connection_open", main_window.onConnectionOpen);
+        Evennia.emitter.on("connection_open", this.onConnectionOpen);
         //Evennia.emitter.on("connection_error", onSilence);
 
         // set an idle timer to send idle every 3 minutes,
@@ -37,17 +37,29 @@ MudderyClient.prototype = {
         );
 
         if (Evennia.state() == WebSocket.CLOSED) {
-            main_window.showAlert(mudcore.trans("Can not connect to the server."));
+            this.showAlert("Can not connect to the server.");
             return;
         }
     },
 
  	onText: function(args, kwargs) {
  	    for (var i = 0; i < args.length; i++) {
- 		    mudcore.client.doShow("out", args[i]);
+ 		    core.client.doShow("out", args[i]);
  		}
  	},
- 	
+
+ 	onConnectionClose: function() {
+ 	    mud.main_frame.onConnectionClose();
+ 	},
+
+ 	onConnectionOpen: function() {
+        mud.main_frame.onConnectionOpen();
+    },
+
+    showAlert: function(msg) {
+        mud.main_frame.showAlert(msg);
+    },
+
     doShow: function(type, msg) {
         var data = null;
         
@@ -100,120 +112,120 @@ MudderyClient.prototype = {
                 log(key, data[key]);
 
                 if (key == "settings") {
-                    main_window.setClient(data[key]);
+                    mud.main_frame.setClient(data[key]);
                 }
                 else if (key == "msg") {
-                	var msg = mudcore.text2html.parseHtml(data[key]);
-                    message_window.displayMessage(msg);
+                	var msg = core.text2html.parseHtml(data[key]);
+                    mud.message_window.displayMessage(msg);
                 }
                 else if (key == "alert") {
-              		main_window.showAlert(data[key]);
+              		mud.main_frame.showAlert(data[key]);
                 }
                 else if (key == "out") {
-                    message_window.displayMessage(data[key], "out");
+                    mud.message_window.displayMessage(data[key], "out");
                 }
                 else if (key == "err") {
-                    message_window.displayMessage(data[key]);
+                    mud.message_window.displayMessage(data[key]);
                 }
                 else if (key == "sys") {
-                    message_window.displayMessage(data[key], "sys");
+                    mud.message_window.displayMessage(data[key], "sys");
                 }
                 else if (key == "debug") {
-                	message_window.displayMessage(data[key], "debug");
+                	mud.message_window.displayMessage(data[key], "debug");
                 }
                 else if (key == "prompt") {
-                	message_window.displayMessage(data[key], "prompt");
+                	mud.message_window.displayMessage(data[key], "prompt");
                 }
                 else if (key == "look_around") {
-                    scene_window.setScene(data[key]);
+                    mud.scene_window.setScene(data[key]);
                 }
                 else if (key == "obj_moved_in") {
-                    main_window.showObjMovedIn(data[key]);
+                    mud.main_frame.showObjMovedIn(data[key]);
                 }
                 else if (key == "obj_moved_out") {
-                    main_window.showObjMovedOut(data[key]);
+                    mud.main_frame.showObjMovedOut(data[key]);
                 }
                 else if (key == "player_online") {
-                    main_window.showPlayerOnline(data[key]);
+                    mud.main_frame.showPlayerOnline(data[key]);
                 }
                 else if (key == "player_offline") {
-                    main_window.showPlayerOffline(data[key]);
+                    mud.main_frame.showPlayerOffline(data[key]);
                 }
                 else if (key == "look_obj") {
-        			popup_object.setObject(data[key]);
-        			popup_object.show();
+        			mud.popup_object.setObject(data[key]);
+        			mud.popup_object.show();
                 }
                 else if (key == "dialogue") {
-                    popup_dialogue.setDialogue(data[key], mudcore.data_handler.getEscapes());
-                    if (popup_dialogue.hasDialogue() && !main_window.isWindowShow(combat_window)) {
-                        popup_dialogue.show();
+                    mud.popup_dialogue.setDialogue(data[key], core.data_handler.getEscapes());
+                    if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(combat_window)) {
+                        mud.popup_dialogue.show();
                     }
                 }
                 else if (key == "status") {
                     var status = data[key];
-                    main_window.setStatus(status);
+                    mud.main_frame.setStatus(status);
                 }
                 else if (key == "equipments") {
-			        char_data_window.setEquipments(data[key]);
+			        mud.char_data_window.setEquipments(data[key]);
                 }
                 else if (key == "inventory") {
-                    inventory_window.setInventory(data[key]);
+                    mud.inventory_window.setInventory(data[key]);
                 }
                 else if (key == "skills") {
-                    mudcore.data_handler.setSkills(data[key]);
-                    skills_window.setSkills(data[key]);
+                    core.data_handler.setSkills(data[key]);
+                    mud.skills_window.setSkills(data[key]);
                 }
                 else if (key == "quests") {
-                	quests_window.setQuests(data[key]);
+                	mud.quests_window.setQuests(data[key]);
                 }
                 else if (key == "get_objects") {
                 	var get_objects = data[key];
-                    main_window.showGetObjects(get_objects["accepted"], get_objects["rejected"]);
+                    mud.main_frame.showGetObjects(get_objects["accepted"], get_objects["rejected"]);
                 }
                 else if (key == "joined_combat") {
-                    main_window.showCombat(data[key]);
+                    mud.main_frame.showCombat(data[key]);
                 }
                 else if (key == "left_combat") {
-                    main_window.closeCombat(data[key]);
+                    mud.main_frame.closeCombat(data[key]);
                 }
                 else if (key == "combat_finish") {
-                    main_window.finishCombat(data[key]);
+                    mud.main_frame.finishCombat(data[key]);
                 }
                 else if (key == "combat_info") {
                     var info = data[key];
-                    combat_window.setCombat(info["desc"],
-                                            info["timeout"],
-                                            info["characters"],
-                                            mudcore.data_handler.character_dbref);
-                }
+                    mud.combat_window.setCombat(info["desc"],
+                                                info["timeout"],
+                                                info["characters"],
+                                                core.data_handler.character_dbref);
+                    }
                 else if (key == "combat_commands") {
-	                combat_window.setCommands(data[key]);
+	                mud.combat_window.setCommands(data[key]);
                 }
                 else if (key == "skill_cd") {
                 	var skill_cd = data[key];
-                    main_window.setSkillCD(skill_cd["skill"], skill_cd["cd"], skill_cd["gcd"]);
+                    mud.main_frame.setSkillCD(skill_cd["skill"], skill_cd["cd"], skill_cd["gcd"]);
                 }
                 else if (key == "skill_cast") {
-                    main_window.setSkillCast(data[key]);
+                    mud.main_frame.setSkillCast(data[key]);
                 }
                 else if (key == "get_exp") {
                 	var get_exp = data[key];
-                    main_window.showGetExp(get_exp["exp"], get_exp["combat"]);
+                    mud.main_frame.showGetExp(get_exp["exp"], get_exp["combat"]);
                 }
                 else if (key == "login") {
-                    main_window.onLogin(data[key]);
+                    mud.main_frame.onLogin(data[key]);
                 }
                 else if (key == "logout") {
-                    main_window.onLogout(data[key]);
+                    mud.main_frame.onLogout(data[key]);
                 }
                 else if (key == "pw_changed") {
-                    main_window.popWindow(password_window);
+                    mud.main_frame.popWindow(password_window);
                 }
                 else if (key == "unpuppet") {
-	                main_window.onUnpuppet(data[key]);
+	                mud.main_frame.onUnpuppet(data[key]);
                 }
                 else if (key == "char_all") {
-                    select_char_window.setCharacters(data[key]);
+                    mud.select_char_window.setCharacters(data[key]);
                 }
                 else if (key == "char_created") {
                     new_char_window.onCharacterCreated(data[key]);
@@ -221,40 +233,40 @@ MudderyClient.prototype = {
                 else if (key == "char_deleted") {
                 }
                 else if (key == "puppet") {
-                    main_window.onPuppet(data[key]);
+                    mud.main_frame.onPuppet(data[key]);
                 }
                 else if (key == "channels") {
-                    main_window.setChannels(data[key])
+                    mud.main_frame.setChannels(data[key])
                 }
                 else if (key == "shop") {
-                    main_window.showShop(data[key]);
+                    mud.main_frame.showShop(data[key]);
                 }
                 else if (key == "rankings") {
-                	main_window.setRankings(data[key]);
+                	mud.main_frame.setRankings(data[key]);
                 }
                 else if (key == "in_combat_queue") {
-                    main_window.inCombatQueue(data[key]);
+                    mud.main_frame.inCombatQueue(data[key]);
                 }
                 else if (key == "left_combat_queue") {
-                    main_window.leftCombatQueue(data[key]);
+                    mud.main_frame.leftCombatQueue(data[key]);
                 }
                 else if (key == "prepare_match") {
-                	main_window.prepareMatch(data[key]);
+                	mud.main_frame.prepareMatch(data[key]);
                 }
                 else if (key == "match_rejected") {
-                	main_window.matchRejected(data[key]);
+                	mud.main_frame.matchRejected(data[key]);
                 }
                 else if (key == "current_location") {
-                    mudcore.map_data.setCurrentLocation(data[key]);
+                    core.map_data.setCurrentLocation(data[key]);
                 }
                 else if (key == "reveal_map") {
-                    mudcore.map_data.revealMap(data[key]);
+                    core.map_data.revealMap(data[key]);
                 }
                 else if (key == "revealed_map") {
-                    mudcore.map_data.setData(data[key]);
+                    core.map_data.setData(data[key]);
                 }
                 else {
-                    message_window.displayMessage(data[key]);
+                    mud.message_window.displayMessage(data[key]);
                 }
             }
             catch(error) {

@@ -1,69 +1,103 @@
 
-window.mudcore = {
-};
+/***************************************
+ *
+ * Create the main framework.
+ *
+ ***************************************/
 
-mudcore.client = new MudderyClient();
-mudcore.service = new MudderyService();
-mudcore.text2html = new MudderyText2HTML();
-mudcore.text_escape = new MudderyTextEscape();
-mudcore.map_data = new MudderyMapData();
-mudcore.data_handler = new MudderyDataHandler();
-mudcore.utils = new MudderyUtils();
-mudcore.local_string = new MudderyLocalString();
-mudcore.trans = function(str) {
-	return mudcore.local_string.translate(str);
+MudderyMain = function() {
 }
 
-window.main_window = new MudderyMain($("#main-window"));
-window.login_window = new MudderyLogin($("#login-window"));
-window.select_char_window = new MudderySelectChar($("#select-char-window"));
-window.new_char_window = new MudderyNewChar($("#new-char-window"));
-window.password_window = new MudderyPassword($("#password-window"));
+MudderyMain.prototype = {
+    // Init the main frame.
+    init: function() {
+        var core = {};
+        window.core = core;
+        core.client = new MudderyClient();
+        core.service = new MudderyService();
+        core.text2html = new MudderyText2HTML();
+        core.text_escape = new MudderyTextEscape();
+        core.map_data = new MudderyMapData();
+        core.data_handler = new MudderyDataHandler();
+        core.utils = new MudderyUtils();
+        core.local_string = new MudderyLocalString();
+        core.trans = function(str) {
+            return core.local_string.translate(str);
+        }
 
-window.main_game_window = new MudderyMainGame($("#game-window"));
-window.prompt_bar = new MudderyPromptBar($("#main-contents .prompt-bar"));
-window.scene_window = new MudderyScene($("#main-contents .scene-window"));
-window.message_window = new MudderyMessage($("#main-contents .message-window"));
-window.char_data_window = new MudderyCharData($("#char-data-window"));
-window.inventory_window = new MudderyInventory($("#inventory-window"));
-window.skills_window = new MudderySkills($("#skills-window"));
-window.quests_window = new MudderyQuests($("#quests-window"));
-window.map_window = new MudderyMap($("#map-window"));
-window.shop_window = new MudderyShop($("#shop-window"));
-window.goods_window = new MudderyGoods($("#goods-window"));
+        var mud = {};
+        window.mud = mud;
 
-window.combat_window = new MudderyCombat($("#combat-window"));
+        mud.main_frame = new MudderyMainFrame($("#main-frame"));
+        mud.main_frame.init();
 
-window.popup_message = new MudderyPopupMessage($("#popup-message"));
-window.popup_object = new MudderyPopupObject($("#popup-object"));
-window.popup_get_objects = new MudderyPopupGetObjects($("#popup-get-objects"));
-window.popup_dialogue = new MudderyPopupDialogue($("#popup-dialogue"));
+        mud.login_window = new MudderyLogin($("#login-window"));
+        mud.login_window.init();
+
+        mud.select_char_window = new MudderySelectChar($("#select-char-window"));
+        mud.select_char_window.init();
+
+        mud.new_char_window = new MudderyNewChar($("#new-char-window"));
+        mud.new_char_window.init();
+
+        mud.password_window = new MudderyPassword($("#password-window"));
+        mud.password_window.init();
+
+        mud.main_game_window = new MudderyMainGame($("#game-window"));
+        mud.main_game_window.init();
+
+        mud.prompt_bar = new MudderyPromptBar($("#main-contents .prompt-bar"));
+        mud.prompt_bar.init();
+
+        mud.scene_window = new MudderyScene($("#main-contents .scene-window"));
+        mud.scene_window.init();
+
+        mud.message_window = new MudderyMessage($("#main-contents .message-window"));
+        mud.message_window.init();
+
+        mud.char_data_window = new MudderyCharData($("#char-data-window"));
+        mud.char_data_window.init();
+
+        mud.inventory_window = new MudderyInventory($("#inventory-window"));
+        mud.inventory_window.init();
+
+        mud.skills_window = new MudderySkills($("#skills-window"));
+        mud.skills_window.init();
+
+        mud.quests_window = new MudderyQuests($("#quests-window"));
+        mud.quests_window.init();
+
+        mud.map_window = new MudderyMap($("#map-window"));
+        mud.map_window.init();
+
+        mud.shop_window = new MudderyShop($("#shop-window"));
+        mud.shop_window.init();
+
+        mud.goods_window = new MudderyGoods($("#goods-window"));
+        mud.goods_window.init();
+
+        mud.combat_window = new MudderyCombat($("#combat-window"));
+        mud.combat_window.init();
+
+        mud.popup_message = new MudderyPopupMessage($("#popup-message"));
+        mud.popup_message.init();
+
+        mud.popup_object = new MudderyPopupObject($("#popup-object"));
+        mud.popup_object.init();
+
+        mud.popup_get_objects = new MudderyPopupGetObjects($("#popup-get-objects"));
+        mud.popup_get_objects.init();
+
+        mud.popup_dialogue = new MudderyPopupDialogue($("#popup-dialogue"));
+        mud.popup_dialogue.init();
+
+        // Connect to the server.
+        core.client.init();
+    }
+}
 
 $(document).ready(function() {
-    main_window.init();
-    login_window.init();
-    select_char_window.init();
-    new_char_window.init();
-    password_window.init();
-
-    main_game_window.init();
-    prompt_bar.init();
-    scene_window.init();
-    message_window.init();
-    char_data_window.init();
-    inventory_window.init();
-    skills_window.init();
-    quests_window.init();
-    map_window.init();
-    shop_window.init();
-    goods_window.init();
-
-    combat_window.init();
-
-    popup_message.init();
-    popup_object.init();
-    popup_get_objects.init();
-    popup_dialogue.init();
-
-    mudcore.client.init();
+    // Init the client, connect to the server.
+    var main = new MudderyMain();
+    main.init();
 });
