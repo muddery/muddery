@@ -193,8 +193,8 @@
 
 
             <div id="game-window" class="main-window hidden">
-                <div id="contents">
-                    <div id="main-contents">
+                <div class="contents">
+                    <div id="main-contents" class="game-content-window">
                         <div class="prompt-bar">
                             <img class="icon hidden" src="" />
                             <span class="name"></span>
@@ -245,7 +245,7 @@
                         </div>
                     </div>
 
-                    <div id="char-data-window" class="hidden">
+                    <div id="char-data-window" class="game-content-window hidden">
                         <div class="title-bar">
                             <span class="header-text">Status</span>
                         </div>
@@ -285,7 +285,7 @@
                         </div>
                     </div>
 
-                    <div id="inventory-window" class="hidden">
+                    <div id="inventory-window" class="game-content-window hidden">
                         <div class="title-bar">
                             <span class="header-text">Inventory</span>
                         </div>
@@ -304,7 +304,7 @@
                         </div>
                     </div>
 
-                    <div id="skills-window" class="hidden">
+                    <div id="skills-window" class="game-content-window hidden">
                         <div class="title-bar">
                             <span class="header-text">Skills</span>
                         </div>
@@ -322,7 +322,7 @@
                         </div>
                     </div>
 
-                    <div id="quests-window" class="hidden">
+                    <div id="quests-window" class="game-content-window hidden">
                         <div class="title-bar">
                             <span class="header-text">Quests</span>
                         </div>
@@ -341,8 +341,9 @@
                         </div>
                     </div>
 
-                    <div id="shop-window" class="hidden">
+                    <div id="shop-window" class="game-content-window hidden">
                         <div class="title-bar">
+                            <button type="button" class="button-close"></button>
                             <span class="header-text">Shop</span>
                         </div>
                         <div class="shop-icon">
@@ -365,7 +366,36 @@
                         </div>
                     </div>
 
-                    <div id="map-window" class="hidden">
+                    <div id="goods-window" class="game-content-window hidden">
+                        <div class="goods-box">
+                            <div class="goods-content">
+                                <div class="title-bar">
+                                    <button type="button" class="button-close"></button>
+                                    <h4 class="goods-header">
+                                        <span class="goods-name"></span>
+                                        <span class="goods-number_mark">×</span>
+                                        <span class="goods-number"></span>
+                                    </h4>
+                                </div>
+                                <div class="goods-body">
+                                    <div class="goods-div-icon">
+                                        <img class="goods-img-icon"/>
+                                    </div>
+                                    <p class="goods-div-price">
+                                        <span class="goods-price"></span>
+                                        <span class="goods-unit"></span>
+                                    </p>
+                                    <p class="goods-desc"></p>
+                                </div>
+                                <div class="goods-footer">
+                                    <button class="button-buy btn btn-default" type="button">购买</button>
+                                    <button class="button-cancel btn btn-default" type="button">放弃</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="map-window" class="game-content-window hidden">
                         <div class="title-bar">
                             <span class="header-text">Map</span>
                         </div>

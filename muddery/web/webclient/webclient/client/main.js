@@ -30,6 +30,7 @@ window.skills_window = new MudderySkills($("#skills-window"));
 window.quests_window = new MudderyQuests($("#quests-window"));
 window.map_window = new MudderyMap($("#map-window"));
 window.shop_window = new MudderyShop($("#shop-window"));
+window.goods_window = new MudderyGoods($("#goods-window"));
 
 window.combat_window = new MudderyCombat($("#combat-window"));
 
@@ -55,6 +56,7 @@ $(document).ready(function() {
     quests_window.init();
     map_window.init();
     shop_window.init();
+    goods_window.init();
 
     combat_window.init();
 

@@ -300,7 +300,45 @@ body {
 #game-window .main-contents {
     height: 100%;
 }
+
+#game-window .contents {
+    width: 100%;
+    height: 100%;
+    padding: 0 0 25px 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#game-window .game-content-window {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0 0 25px 0;
+    box-sizing: inherit;
+    -moz-box-sizing: inherit;
+    -webkit-box-sizing: inherit;
+}
 /************* main game window end *************/
+
+/************* bar begin *************/
+.tab-bar {
+    position: absolute;
+    height: 25px;
+    left: 0;
+    bottom: 0;
+}
+
+.tab-bar .popup-menu {
+    position: absolute;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+/************* tab bar end *************/
 
 
 /************* prompt bar begin *************/
@@ -493,23 +531,6 @@ body {
 /************* map window end *************/
 
 
-/************* bar begin *************/
-.tab-bar {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-}
-
-.tab-bar .popup-menu {
-    position: absolute;
-    z-index: 1;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-/************* tab bar end *************/
-
-
 /************* combat window begin *************/
 #combat-window .character-icon,
 #combat-window .command-icon {
@@ -599,3 +620,40 @@ body {
 }
 
 /************* combat window end *************/
+
+
+/************* shop window begin *************/
+#shop-window {
+    background: #000;
+    z-index: 1;
+}
+/************* shop window end *************/
+
+
+/************* goods window begin *************/
+#goods-window {
+    z-index: 2;
+}
+
+#goods-window .goods-box {
+    width: 100%;
+    height: 100%;
+    padding: 20px 20px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+#goods-window .goods-content {
+    width: 100%;
+    height; 100%;
+    background: #333;
+}
+
+#goods-window .goods-div-icon,
+#goods-window .goods-div-price,
+#goods-window .goods-footer {
+    text-align: center;
+}
+/************* goods window end *************/

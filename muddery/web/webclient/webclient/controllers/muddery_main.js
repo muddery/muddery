@@ -50,20 +50,14 @@ MudderyMain.prototype.popupMessage = function(header, content, buttons) {
 }
   
 /*  
- * Popup a shop.
- */
-MudderyMain.prototype.showShop = function(data) {
-	show_window.setShop(data);
-	component.show();
-}
-  
-/*  
  * Show shop window.
  */
-MudderyMain.prototype.openShop = function() {
+MudderyMain.prototype.showShop = function(data) {
 	this.doClosePopupBox();
-	this.pushWindow(shop_window);
+	main_game_window.pushWindow(shop_window);
+	shop_window.setShop(data);
 }
+
   
 /*  
  * Popup shop goods.
@@ -1479,8 +1473,23 @@ MudderyMainGame.prototype.bindEvents = function() {
  * Show a window.
  */
 MudderyMainGame.prototype.showWindow = function(win_controller) {
-    this.select("#contents>div").hide();
+    this.select(".contents>div").hide();
     win_controller.show();
+}
+
+/*
+ * Push a window.
+ */
+MudderyMainGame.prototype.pushWindow = function(win_controller) {
+    win_controller.reset();
+    win_controller.show();
+}
+
+/*
+ * Pop a window.
+ */
+MudderyMainGame.prototype.popWindow = function(win_controller) {
+    win_controller.el.hide();
 }
 
 /*
@@ -3320,7 +3329,16 @@ MudderyShop.prototype.constructor = MudderyShop;
  * Bind events.
  */
 MudderyShop.prototype.bindEvents = function() {
-	this.onClick(".obj_name", this.onLook);
+	// close popup box
+    this.onClick(".button-close", this.onClose);
+}
+
+ /*
+ * Event when clicks the close button.
+ */
+MudderyShop.prototype.onClose = function(element) {
+	// close popup box
+    main_game_window.popWindow(shop_window);
 }
 
 /*
@@ -3343,13 +3361,8 @@ MudderyShop.prototype.onLook = function(element) {
     var index = this.select(element).data("index");
     if (index < shop_window.goods.length) {
         var goods = shop_window.goods[index];
-        showGoods(goods["dbref"],
-                   goods["name"],
-                   goods["number"],
-                   goods["icon"],
-                   goods["desc"],
-                   goods["price"],
-                   goods["unit"]);
+        main_game_window.pushWindow(goods_window);
+        goods_window.setGoods(goods);
     }
 }
 
@@ -3385,6 +3398,7 @@ MudderyShop.prototype.setShop = function(data) {
 	for (var i in this.goods) {
 		var obj = this.goods[i];
         var row = $("<tr>")
+            .addClass("goods-row")
             .data("index", i);
 
         var cell = $("<td>");
@@ -3413,15 +3427,9 @@ MudderyShop.prototype.setShop = function(data) {
         cell.appendTo(row);
 
         // price
-        var price = obj["price"];
+        var price = obj["price"] + obj["unit"];
         $("<td>")
             .text(price)
-            .appendTo(row);
-
-        // unit
-        var unit = obj["unit"];
-        $("<td>")
-            .text(unit)
             .appendTo(row);
 
         // desc
@@ -3431,4 +3439,100 @@ MudderyShop.prototype.setShop = function(data) {
 
         row.appendTo(container);
 	}
+
+	this.onClick(".goods-row", this.onLook);
+}
+
+
+/******************************************
+ *
+ * Goods Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyGoods = function(el) {
+	BaseController.call(this, el);
+
+	this.goods = null;
+}
+
+MudderyGoods.prototype = prototype(BaseController.prototype);
+MudderyGoods.prototype.constructor = MudderyGoods;
+
+/*
+ * Bind events.
+ */
+MudderyGoods.prototype.bindEvents = function() {
+	this.onClick(".button-buy", this.onBuy);
+	this.onClick(".button-close", this.onClose);
+	this.onClick(".button-cancel", this.onClose);
+}
+
+ /*
+ * Event when clicks the close button.
+ */
+MudderyGoods.prototype.onClose = function(element) {
+	// close this window
+    main_game_window.popWindow(goods_window);
+}
+
+/*
+ * Event when clicks the buy button.
+ */
+MudderyGoods.prototype.onBuy = function(element) {
+    if (goods_window.goods) {
+        mudcore.service.buyGoods(this.goods["dbref"]);
+    }
+
+    // close this window
+    main_game_window.popWindow(goods_window);
+}
+
+/*
+ * Reset the goods
+ */
+MudderyGoods.prototype.reset = function() {
+    this.select(".goods-name").empty();
+    this.select(".goods-number_mark").hide();
+    this.select(".goods-number").empty().hide();
+
+    this.select(".goods-div-icon").hide();
+    this.select(".goods_price").empty();
+    this.select(".goods_unit").empty();
+
+    // set desc
+    this.select(".goods_desc").html(mudcore.text2html.parseHtml(desc));
+}
+
+/*
+ * Show goods to the player.
+ */
+MudderyGoods.prototype.setGoods = function(goods) {
+    this.goods = goods;
+
+    // add name
+    this.select(".goods-name").html(mudcore.text2html.parseHtml(goods["name"]));
+
+    // set number
+    if (goods["number"] > 1) {
+        this.select(".goods-number-mark").show();
+        this.select(".goods-number").text(goods["number"]);
+    }
+
+    // add icon
+    if (goods["icon"]) {
+        var url = settings.resource_url + goods["icon"];
+        this.select(".goods-img-icon").attr("src", url);
+        this.select(".goods-div-icon").show();
+    }
+
+    // set price
+    this.select(".goods-price").text(goods["price"]);
+    this.select(".goods-unit").text(goods["unit"]);
+
+    // set desc
+    this.select(".goods-desc").html(mudcore.text2html.parseHtml(goods["desc"]));
 }
