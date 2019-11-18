@@ -433,31 +433,6 @@ class CmdUnconnectedQuit(Command):
         session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
 
 
-class CmdUnconnectedLook(Command):
-    """
-    look when in unlogged-in state
-
-    Usage:
-        {"cmd":"look",
-         "args":""
-        }
-
-    This is an unconnected version of the look command for simplicity.
-
-    This is called by the server and kicks everything in gear.
-    All it does is display the connect screen.
-    """
-    key = "look"
-    locks = "cmd:all()"
-
-    def func(self):
-        "Show the connect screen."
-        connection_screen = GAME_SETTINGS.get("connection_screen")
-        if not connection_screen:
-            connection_screen = "No connection screen found. Please contact an admin."
-        self.caller.msg({"msg":connection_screen})
-
-
 class CmdUnconnectedLoginStart(Command):
     """
     login started unlogged-in state
@@ -474,12 +449,10 @@ class CmdUnconnectedLoginStart(Command):
     locks = "cmd:all()"
 
     def func(self):
-        "Send settings to the client."
-        client_settings = GAME_SETTINGS.get_client_settings()
-        self.caller.msg({"settings": client_settings})
-
         "Show the connect screen."
+        game_name = GAME_SETTINGS.get("game_name")
         connection_screen = GAME_SETTINGS.get("connection_screen")
-        if not connection_screen:
-            connection_screen = "No connection screen found. Please contact an admin."
-        self.caller.msg({"msg": connection_screen})
+        self.caller.msg({
+            "game_name": game_name,
+            "conn_screen": connection_screen}
+        )

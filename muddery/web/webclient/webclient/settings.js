@@ -9,7 +9,4 @@ var settings = {
         
     // resource's url
     resource_url: window.location.protocol + "//" + window.location.host + "/media/",
-
-    // default language
-    default_language: "en-us",
 };

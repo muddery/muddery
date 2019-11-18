@@ -64,18 +64,6 @@ class GameSettings(object):
         """
         return self.values
 
-    def get_client_settings(self):
-        """
-        Get settings for the webclient.
-
-        Returns:
-            (dict) settings
-        """
-        client_settings = {"language": settings.LANGUAGE_CODE,
-                           "game_name": self.get("game_name"),
-                           "solo_mode": self.get("solo_mode"),}
-        return client_settings
-
 
 GAME_SETTINGS = GameSettings({"game_name": "Muddery",
                               "connection_screen": "",

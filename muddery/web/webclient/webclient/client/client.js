@@ -136,6 +136,12 @@ MudderyClient.prototype = {
                 else if (key == "prompt") {
                 	mud.message_window.displayMessage(data[key], "prompt");
                 }
+                else if (key == "game_name") {
+                    mud.login_window.setGameName(data[key]);
+                }
+                else if (key == "conn_screen") {
+                    mud.login_window.setConnScreen(data[key]);
+                }
                 else if (key == "look_around") {
                     mud.scene_window.setScene(data[key]);
                 }

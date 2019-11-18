@@ -482,31 +482,6 @@ MudderyMainFrame.prototype.sendMessage = function() {
 		core.service.say(this.message_type, message);
 	}
 }
-
-/*
- * Set the client.
- */
-MudderyMainFrame.prototype.setClient = function(settings) {
-	// game's name
-	$("#game_title").text(settings["game_name"]);
-
-	// social tab
-	this.solo_mode = settings["solo_mode"];
-	if (this.puppet) {
-		if (this.solo_mode) {
-			$("#tab_social").hide();
-		}
-		else {
-			$("#tab_social").show();
-		}
-	}
-
-	// honour settings
-	//$$.component.honours.setMinHonourLevel(settings["min_honour_level"]);
-
-	// map settings
-	//$$.component.map.setMap(settings["map_scale"], settings["map_room_size"], settings["map_room_box"]);
-}
 	
 /* 
  * Clear all channels' messages.
@@ -1126,6 +1101,20 @@ MudderyLogin.prototype.clearValues = function() {
     this.select(".reg-password").val("");
     this.select(".reg-password-verify").val("");
     this.select(".checkbox-auto-login").prop("checked", false);
+}
+
+/*
+ * Set the game's name.
+ */
+MudderyLogin.prototype.setGameName = function(name) {
+    this.select(".title-text").html(core.text2html.parseHtml(name));
+}
+
+/*
+ * Set welcome messages.
+ */
+MudderyLogin.prototype.setConnScreen = function(conn_screen) {
+    this.select(".login-welcome").html(core.text2html.parseHtml(conn_screen));
 }
 
 /*

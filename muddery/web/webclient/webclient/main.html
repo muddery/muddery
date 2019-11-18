@@ -79,6 +79,11 @@
 
             <!-- login window -->
             <div id="login-window" class="main-window hidden">
+                <div class="upper">
+                    <div class="game-title">
+                        <span class="title-text"></span>
+                    </div>
+                </div>
                 <div class="login-box">
                     <div class="login-header">
                         <button class="button-tab-login tab activate">登录</button>
@@ -120,12 +125,16 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="lower">
+                    <div class="login-welcome">
+                    </div>
+                </div>
             </div>
 
             <!-- select character window -->
             <div id="select-char-window" class="main-window hidden">
                 <div class="title-bar">
-                    <span class="header-text">Characters</span>
+                    <span class="header-text">选择角色</span>
                 </div>
                 <div class="character-list">
                 </div>
@@ -472,7 +481,7 @@
                 </div>
             </div>
 
-            <div class="background-window">
+            <div class="background-window hidden">
                 <table class="background-table" frame="void" rules="none">
                     <tr>
                         <td class="background-top"></td>
@@ -504,7 +513,6 @@
         <!-- settings -->
         <script src="./settings.js" type="text/javascript" charset="utf-8"></script>
 
-        <script src="./lang/en-us/strings.js" type="text/javascript" charset="utf-8"></script>
         <script src="./lang/zh-cn/strings.js" type="text/javascript" charset="utf-8"></script>
 
         <script src="./client/main.js" type="text/javascript" charset="utf-8"></script>
