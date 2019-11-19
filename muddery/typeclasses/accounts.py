@@ -23,6 +23,7 @@ several more options for customizing the Guest account system.
 """
 
 from evennia import DefaultAccount, DefaultGuest
+from django.conf import settings
 
 
 class MudderyAccount(DefaultAccount):
@@ -118,7 +119,8 @@ class MudderyAccount(DefaultAccount):
             session.msg(logged_in={})
 
             char_all = [{"name": char.get_name(), "dbref": char.dbref} for char in self.db._playable_characters]
-            session.msg({"char_all": char_all})
+            session.msg({"char_all": char_all,
+                         "max_char": settings.MAX_NR_CHARACTERS})
 
     def get_all_characters(self):
         """

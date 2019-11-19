@@ -8,10 +8,13 @@
     --login-tab-activate: url(../img/login_tab_activate.png);
     --login-tab-inactivate: url(../img/login_tab_inactivate.png);
     --login-input-box: url(../img/login_input_box.png);
-    --login-button: url(../img/login_button.png);
+    --login-button: url(../img/long_button.png);
 
-    --new-char-title: url(../img/title-bar.png);
-    --new-char-tab-bar: url(../img/bottom-bar.png);
+    --select-char-background: url(../img/login_background.png);
+    --select-char-title: url(../img/func_title_bar.png);
+    --select-char-item: url(../img/select_char_item.png);
+    --select-char-new: url(../img/long_button.png);
+    --select-char-del: url(../img/icon_delete.png);
 }
 
 html {
@@ -162,14 +165,6 @@ body {
     border: none;
     background: url(../img/icon_close.png) no-repeat center center;
 }
-
-.button-delete {
-    width: 18px;
-    height: 18px;
-    border: none;
-    background: url(../img/icon_delete.png) no-repeat center center;
-}
-
 /************* buttons end *************/
 
 
@@ -376,26 +371,67 @@ body {
 
 
 /************* select character window begin *************/
-#select-char-window .title-bar {
-    width: 100%;
-    height: 0.6rem;
+#select-char-window {
     background: no-repeat center;
-    background-image: var(--new-char-title);
+    background-image: var(--select-char-background);
     background-size: 100% 100%;
 }
 
+#select-char-window .title-bar {
+    width: 100%;
+    height: 0.6rem;
+    line-height: 0.6rem;
+    font-size: 0.24rem;
+    font-weight: 700;
+    vertical-align: middle;
+    background: no-repeat center;
+    background-image: var(--select-char-title);
+    background-size: 100% 100%;
+}
+
+#select-char-window .character-list {
+    margin: 0.4rem 0;
+    text-align: center;
+}
+
 #select-char-window .character-item {
-    margin: 10px;
+    width: 2.5rem;
+    height: 0.6rem;
+    margin: 0.2rem auto;
+    padding-left: 0.3rem;
+    text-align: left;
+    vertical-align: middle;
+    line-height: 0.6rem;
+    color: #333;
+    font-size: 0.24rem;
+    background: no-repeat center;
+    background-image: var(--select-char-item);
+    background-size: 100% 100%;
+}
+
+#select-char-window .button-new {
+    width: 1.6rem;
+    height: 0.25rem;
+    padding: 0;
+    color: #333;
+    font-size: 0.14rem;
+    border: none;
+    background: no-repeat center;
+    background-image: var(--login-button);
+    background-size: 1.6rem 0.25rem;
 }
 
 #select-char-window .button-delete {
-    margin: 0 10px 0 0;
-    vertical-align: middle;
+    width: 0.2rem;
+    height: 0.4rem;
+    margin: 0.1rem;
+    float: right;
+    border: none;
+    background: no-repeat center center;
+    background-image: var(--select-char-del);
+    background-size: 0.2rem 0.2rem;
 }
 
-#select-char-window .char-name {
-    vertical-align: middle;
-}
 /************* select character window end *************/
 
 

@@ -233,8 +233,11 @@ MudderyClient.prototype = {
                 else if (key == "char_all") {
                     mud.select_char_window.setCharacters(data[key]);
                 }
+                else if (key == "max_char") {
+                    mud.select_char_window.setMaxNumber(data[key]);
+                }
                 else if (key == "char_created") {
-                    new_char_window.onCharacterCreated(data[key]);
+                    mud.new_char_window.onCharacterCreated(data[key]);
                 }
                 else if (key == "char_deleted") {
                 }

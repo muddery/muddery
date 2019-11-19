@@ -1178,6 +1178,7 @@ MudderyLogin.prototype.onLogin = function() {
 MudderySelectChar = function(el) {
 	BaseController.call(this, el);
 
+    this.max_number = 0;
     this.characters = [];
 }
 
@@ -1191,10 +1192,18 @@ MudderySelectChar.prototype.bindEvents = function() {
     this.onClick(".character-list", ".char-name", this.onSelectCharacter);
     this.onClick(".character-list", ".button-delete", this.onDeleteCharacter);
 
-    this.onClick(".button-new-char", this.onNewCharacter);
     this.onClick(".button-password", this.onPassword);
     this.onClick(".button-logout", this.onLogout);
 }
+
+
+/*
+ * Reset the controller.
+ */
+MudderySelectChar.prototype.reset = function() {
+	this.select(".character-list").empty();
+}
+
 
 /*
  * Event when clicks the password button.
@@ -1265,25 +1274,55 @@ MudderySelectChar.prototype.setCharacters = function(characters) {
 	var container = this.select(".character-list");
 	container.empty();
 
-	for (var i = 0; i < characters.length; i++) {
+	for (var i = characters.length - 1; i >= 0; i--) {
 		var item = $("<div>")
 		    .addClass("character-item")
-		    .appendTo(container);
-
-		$("<button>")
-		    .attr("type", "button")
-		    .addClass("button-delete")
-			.data("index", i)
-			.appendTo(item);
+		    .prependTo(container);
 
 		$("<span>")
 		    .addClass("char-name")
 			.data("index", i)
 			.text(characters[i]["name"])
 			.appendTo(item);
+
+		$("<button>")
+		    .attr("type", "button")
+		    .addClass("button-delete")
+			.data("index", i)
+			.appendTo(item);
 	}
+
+	this.addNewCharButton();
 }
 
+
+/*
+ * Set max character number.
+ * If the character number is less than the max number, the player
+ * can create new characters.
+ */
+MudderySelectChar.prototype.setMaxNumber = function(max_number) {
+    this.max_number = max_number;
+    this.addNewCharButton();
+}
+
+
+/*
+ * Add a new character button if needs.
+ */
+MudderySelectChar.prototype.addNewCharButton = function() {
+    if (this.characters.length < this.max_number) {
+    	var container = this.select(".character-list");
+
+    	var item = $("<button>")
+            .addClass("button-new")
+            .attr("type", "button")
+            .text(core.trans("New Character"))
+            .appendTo(container);
+
+        this.onClick(".button-new", this.onNewCharacter);
+    }
+}
 
 /******************************************
  *
