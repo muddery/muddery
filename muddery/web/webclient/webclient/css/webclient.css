@@ -3,6 +3,10 @@
     --title-bar-height: 0.6rem;
     --bottom-bar-height: 0.8rem;
 
+    --icon-close: url(../img/icon_close.png);
+
+    --popup-box-back: url(../img/popup_box_back.png);
+
     --long-input-box: url(../img/long_input_box.png);
     --login-button: url(../img/long_button.png);
 
@@ -158,12 +162,14 @@ body {
 
 .button-close {
     position: absolute;
-    right: 5px;
-    top: 5px;
-    width: 18px;
-    height: 18px;
+    right: 0.1rem;
+    top: 0.1rem;
+    width: 0.24rem;
+    height: 0.24rem;
     border: none;
-    background: url(../img/icon_close.png) no-repeat center center;
+    background: no-repeat center;
+    background-image: var(--icon-close);
+    background-size: 100% 100%;
 }
 
 .long-button {
@@ -208,18 +214,24 @@ body {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 75%;
-    min-height: 50%;
-    transform: translate(-50%, -50%);
+    width: 2.6rem;
+    height: 2.0rem;
+    margin-left: -1.2rem;
+    margin-top: -1.0rem;
     z-index: 10010;
-    padding: 5px;
-    background: #000;
-    border: solid 1px #fff;
-    border-radius: 5px;
+    background: no-repeat center;
+    background-image: var(--popup-box-back);
+    background-size: 100% 100%;
 }
 
 .popup-header {
+    height: 0.3rem;
     text-align: center;
+    font-size: 0.16rem;
+    font-weight: 700;
+    line-height: 0.3rem;
+    vertical-align: middle;
+    color: #333;
 }
 
 .popup-body {
@@ -288,10 +300,11 @@ body {
     top: 40%;
     width: 2.8rem;
     height: 2.4rem;
-    transform: translate(-50%, -50%);
-    background: no-repeat bottom;
+    margin-left: -1.4rem;
+    margin-top: -1.2rem;
+    background: no-repeat center;
     background-image: var(--login-form);
-    background-size: 2.8rem 2.1rem;
+    background-size: 100% 100%;
 }
 
 #login-window .login-header {

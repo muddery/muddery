@@ -147,6 +147,10 @@ CommonEditor.prototype.createFieldController = function(field, readonly) {
     var help_text = field.help_text;
     var value = null;
 
+    if (typeof(readonly) == "undefined") {
+        readonly = field.disabled;
+    }
+
     // Set preset values.
     if (name in this.field_values) {
         value = this.field_values[name];
