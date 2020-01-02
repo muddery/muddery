@@ -167,6 +167,18 @@ body {
     height: 0.24rem;
     border: none;
     background: no-repeat center;
+    background-image: var(--icon-close);
+    background-size: 100% 100%;
+}
+
+.button-long {
+    width: 1.6rem;
+    height: 0.4rem;
+    padding: 0;
+    color: #fec;
+    font-size: 0.14rem;
+    border: none;
+    background: no-repeat center;
     background-image: var(--long-button);
     background-size: 100% 100%;
 }
