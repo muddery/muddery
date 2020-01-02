@@ -2,13 +2,12 @@
 :root {
     --title-bar-height: 0.6rem;
     --bottom-bar-height: 0.8rem;
+    --button-bar-height: 0.6rem;
 
-    --icon-close: url(../img/icon_close.png);
-
-    --popup-box-back: url(../img/popup_box_back.png);
-
+    --button-bar: url(../img/button_bar.png);
+    --long-button: url(../img/long_button.png);
+    --short-button: url(../img/short_button.png);
     --long-input-box: url(../img/long_input_box.png);
-    --login-button: url(../img/long_button.png);
 
     --login-background: url(../img/login_background.png);
     --login-form: url(../img/login_form.png);
@@ -18,6 +17,7 @@
     --select-char-background: url(../img/login_background.png);
     --select-char-title: url(../img/func_title_bar.png);
     --select-char-item: url(../img/select_char_item.png);
+    --select-char-new: url(../img/long_button.png);
     --select-char-del: url(../img/icon_delete.png);
 }
 
@@ -148,8 +148,7 @@ body {
 }
 /************* indicators end *************/
 
-
-/************* buttons begin *************/
+/************* common elements begin *************/
 .button-back {
     position: absolute;
     left: 0;
@@ -168,20 +167,19 @@ body {
     height: 0.24rem;
     border: none;
     background: no-repeat center;
-    background-image: var(--icon-close);
+    background-image: var(--long-button);
     background-size: 100% 100%;
 }
 
-.long-button {
-    width: 1.8rem;
+.button-short {
+    width: 0.8rem;
     height: 0.4rem;
     padding: 0;
+    color: #fec;
+    font-size: 0.14rem;
     border: none;
-    font-size: 0.16rem;
-    font-weight: 700;
-    color: #444;
     background: no-repeat center;
-    background-image: var(--login-button);
+    background-image: var(--short-button);
     background-size: 100% 100%;
 }
 
@@ -194,7 +192,7 @@ body {
     background-image: var(--long-input-box);
     background-size: 100% 100%;
 }
-/************* buttons end *************/
+/************* common elements end *************/
 
 
 /************* popup window begin *************/
@@ -348,7 +346,8 @@ body {
     text-align: center;
 }
 
-#login-window .input-text {
+#login-window .long-input-box,
+#register-window .long-input-box {
     margin: 0 auto;
 }
 
@@ -384,30 +383,50 @@ body {
     -webkit-box-sizing: border-box;
     color: #333;
 }
-
 /************* login window end *************/
 
 
-/************* select character window begin *************/
-#select-char-window {
+/************* function window begin *************/
+#select-char-window,
+#new-char-window {
     background: no-repeat center;
     background-image: var(--select-char-background);
     background-size: 100% 100%;
 }
 
-#select-char-window .title-bar {
+#select-char-window .title-bar,
+#new-char-window .title-bar {
     width: 100%;
     height: 0.6rem;
     line-height: 0.6rem;
+    color: #fec;
     font-size: 0.24rem;
     font-weight: 700;
-    color: #fff;
     vertical-align: middle;
     background: no-repeat center;
     background-image: var(--select-char-title);
     background-size: 100% 100%;
 }
 
+#select-char-window .button-bar,
+#new-char-window .button-bar {
+    position: absolute;
+    width: 100%;
+    height: 0.6rem;
+    left: 0;
+    bottom: 0;
+    line-height: 0.5rem;
+    padding: 0.07rem 0.1rem 0.05rem 0.1rem;
+    background: no-repeat center;
+    background-image: var(--button-bar);
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+/************* function window end *************/
+
+/************* select character window begin *************/
 #select-char-window .character-list {
     margin: 0.4rem 0;
     text-align: center;
@@ -428,18 +447,6 @@ body {
     background-size: 100% 100%;
 }
 
-#select-char-window .button-new {
-    width: 1.6rem;
-    height: 0.25rem;
-    padding: 0;
-    color: #333;
-    font-size: 0.14rem;
-    border: none;
-    background: no-repeat center;
-    background-image: var(--login-button);
-    background-size: 1.6rem 0.25rem;
-}
-
 #select-char-window .button-delete {
     width: 0.2rem;
     height: 0.4rem;
@@ -450,7 +457,6 @@ body {
     background-image: var(--select-char-del);
     background-size: 0.2rem 0.2rem;
 }
-
 /************* select character window end *************/
 
 
@@ -459,10 +465,6 @@ body {
     margin: 10px 0 0 0;
 }
 
-#new-char-window .button-bar {
-    margin: 20px 0 10px 0;
-    text-align: center;
-}
 /************* new character window end *************/
 
 

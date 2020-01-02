@@ -1,5 +1,5 @@
 
-MudderyLocalString = {
+MudderyLocalDict = {
     "Muddery Webclient": "Muddery 网页客户端",
     "Please login.": "请登录。",
     "username": "用户名",

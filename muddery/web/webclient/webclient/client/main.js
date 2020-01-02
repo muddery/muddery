@@ -21,6 +21,7 @@ MudderyMain.prototype = {
         core.data_handler = new MudderyDataHandler();
         core.utils = new MudderyUtils();
         core.local_string = new MudderyLocalString();
+        core.local_string.set_dict(MudderyLocalDict);
         core.trans = function(str) {
             return core.local_string.translate(str);
         }

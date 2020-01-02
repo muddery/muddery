@@ -1315,7 +1315,7 @@ MudderySelectChar.prototype.addNewCharButton = function() {
     	var container = this.select(".character-list");
 
     	var item = $("<button>")
-            .addClass("button-new long-button")
+            .addClass("button-new button-long")
             .attr("type", "button")
             .text(core.trans("New Character"))
             .appendTo(container);

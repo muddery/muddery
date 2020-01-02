@@ -383,11 +383,15 @@ MudderyLocalString = function() {
 }
 
 MudderyLocalString.prototype = {
-	string_dict: MudderyLocalString,
+	local_dict: {},
+
+	set_dict: function(local_dict) {
+        this.local_dict = local_dict;
+	},
 
 	translate: function(str) {
-		if (str in this.string_dict) {
-        	return this.string_dict[str];
+		if (str in this.local_dict) {
+        	return this.local_dict[str];
     	}
 
     	return str;

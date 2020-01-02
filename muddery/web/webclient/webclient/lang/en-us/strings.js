@@ -1,3 +1,3 @@
 
-MudderyLocalString = {
+MudderyLocalDict = {
 };
