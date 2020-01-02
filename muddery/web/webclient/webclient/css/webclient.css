@@ -9,6 +9,9 @@
     --short-button: url(../img/short_button.png);
     --long-input-box: url(../img/long_input_box.png);
 
+    --icon-close: url(../img/icon_close.png);
+    --popup-box-back: url(../img/popup_box_back.png);
+
     --login-background: url(../img/login_background.png);
     --login-form: url(../img/login_form.png);
     --login-tab-activate: url(../img/login_tab_activate.png);
@@ -17,7 +20,6 @@
     --select-char-background: url(../img/login_background.png);
     --select-char-title: url(../img/func_title_bar.png);
     --select-char-item: url(../img/select_char_item.png);
-    --select-char-new: url(../img/long_button.png);
     --select-char-del: url(../img/icon_delete.png);
 }
 
