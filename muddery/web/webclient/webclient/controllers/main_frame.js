@@ -304,6 +304,8 @@ MudderyMainFrame.prototype.onLogout = function(data) {
 	
 	// show unlogin UI
 	this.showLoginWindow();
+
+	mud.select_char_window.clear();
 	
 	//reconnect, show the connection screen
 	Evennia.connect();
@@ -592,7 +594,7 @@ MudderyPopupMessage.prototype.constructor = MudderyPopupMessage;
  */
 MudderyPopupMessage.prototype.bindEvents = function() {
     this.onClick(".button-close", this.onClose);
-	this.onClick(".popup-footer", "button", this.onCommand);
+	this.onClick(".popup-buttons", "button", this.onCommand);
 }
 
 /*
@@ -603,7 +605,7 @@ MudderyPopupMessage.prototype.onClose = function(element) {
     this.el.hide();
     this.select(".header-text").empty();
 	this.select(".popup-body").empty();
-	this.select(".popup-footer").empty();
+	this.select(".popup-buttons").empty();
 }
 
 /*
@@ -641,12 +643,12 @@ MudderyPopupMessage.prototype.setMessage = function(header, content, buttons) {
 	this.select(".header-text").html(header);
 	this.select(".popup-body").html(core.text2html.parseHtml(content));
 
-    var container = this.select(".popup-footer");
+    var container = this.select(".popup-buttons");
 	for (var i = 0; i < buttons.length; i++) {
 		var name = core.text2html.parseHtml(buttons[i]["name"]);
 
 		$("<button>").attr("type", "button")
-		    .addClass("popup-button")
+		    .addClass("popup-button button-short")
 		    .data("index", i)
 			.html(name)
 			.appendTo(container);
@@ -1201,9 +1203,16 @@ MudderySelectChar.prototype.bindEvents = function() {
  * Reset the controller.
  */
 MudderySelectChar.prototype.reset = function() {
-	this.select(".character-list").empty();
 }
 
+
+/*
+ * Clear the character list.
+ */
+MudderySelectChar.prototype.clear = function() {
+    this.characters = [];
+ 	this.select(".character-list").empty();
+}
 
 /*
  * Event when clicks the password button.
@@ -1287,8 +1296,9 @@ MudderySelectChar.prototype.setCharacters = function(characters) {
 
 		$("<button>")
 		    .attr("type", "button")
-		    .addClass("button-delete")
+		    .addClass("button-delete button-tiny-red")
 			.data("index", i)
+			.text(core.trans("Del"))
 			.appendTo(item);
 	}
 
@@ -1311,6 +1321,8 @@ MudderySelectChar.prototype.setMaxNumber = function(max_number) {
  * Add a new character button if needs.
  */
 MudderySelectChar.prototype.addNewCharButton = function() {
+    this.select(".character-list .button-new").remove();
+
     if (this.characters.length < this.max_number) {
     	var container = this.select(".character-list");
 

@@ -5,8 +5,12 @@
     --button-bar-height: 0.6rem;
 
     --button-bar: url(../img/button_bar.png);
+
     --long-button: url(../img/long_button.png);
     --short-button: url(../img/short_button.png);
+    --short-button: url(../img/short_button.png);
+    --tiny-red-button: url(../img/tiny_red_button.png);
+
     --long-input-box: url(../img/long_input_box.png);
 
     --icon-close: url(../img/icon_close.png);
@@ -20,7 +24,6 @@
     --select-char-background: url(../img/login_background.png);
     --select-char-title: url(../img/func_title_bar.png);
     --select-char-item: url(../img/select_char_item.png);
-    --select-char-del: url(../img/icon_delete.png);
 }
 
 html {
@@ -163,8 +166,8 @@ body {
 
 .button-close {
     position: absolute;
-    right: 0.1rem;
-    top: 0.1rem;
+    right: 0.08rem;
+    top: 0.08rem;
     width: 0.24rem;
     height: 0.24rem;
     border: none;
@@ -197,6 +200,18 @@ body {
     background-size: 100% 100%;
 }
 
+.button-tiny-red {
+    width: 0.4rem;
+    height: 0.4rem;
+    padding: 0;
+    color: #fee;
+    font-size: 0.14rem;
+    border: none;
+    background: no-repeat center;
+    background-image: var(--tiny-red-button);
+    background-size: 100% 100%;
+}
+
 .long-input-box {
     border: none;
     width: 2.2rem;
@@ -220,16 +235,15 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, .4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .popup-box {
-    position: absolute;
-    left: 50%;
-    top: 50%;
+    position: relative;
     width: 2.6rem;
     height: 2.0rem;
-    margin-left: -1.2rem;
-    margin-top: -1.0rem;
     z-index: 10010;
     background: no-repeat center;
     background-image: var(--popup-box-back);
@@ -237,28 +251,34 @@ body {
 }
 
 .popup-header {
-    height: 0.3rem;
+    height: 0.4rem;
     text-align: center;
-    font-size: 0.16rem;
+    font-size: 0.2rem;
     font-weight: 700;
-    line-height: 0.3rem;
+    line-height: 0.4rem;
     vertical-align: middle;
     color: #333;
 }
 
 .popup-body {
-    padding: 5px;
+    padding: 0.1rem 0.2rem;
+    color: #333;
 }
 
 .popup-footer {
     position: absolute;
-    left: 50%;
-    bottom: 10px;
-    transform: translate(-50%, 0);
+    bottom: 0.05rem;
+    width: 100%;
+    text-align: center;
+}
+
+.popup-buttons {
+   margin: 0 auto;
 }
 
 .popup-button {
-    margin: 5px;
+    margin: 0.05rem;
+    vertical-align: bottom;
 }
 
 .popup-overlay {
@@ -402,14 +422,16 @@ body {
 
 /************* function window begin *************/
 #select-char-window,
-#new-char-window {
+#new-char-window,
+#password-window {
     background: no-repeat center;
     background-image: var(--select-char-background);
     background-size: 100% 100%;
 }
 
 #select-char-window .title-bar,
-#new-char-window .title-bar {
+#new-char-window .title-bar,
+#password-window .title-bar {
     width: 100%;
     height: 0.6rem;
     line-height: 0.6rem;
@@ -423,7 +445,8 @@ body {
 }
 
 #select-char-window .button-bar,
-#new-char-window .button-bar {
+#new-char-window .button-bar,
+#password-window .button-bar {
     position: absolute;
     width: 100%;
     height: 0.6rem;
@@ -450,11 +473,11 @@ body {
     width: 2.5rem;
     height: 0.6rem;
     margin: 0.2rem auto;
-    padding-left: 0.3rem;
+    padding-left: 0.2rem;
     text-align: left;
     vertical-align: middle;
     line-height: 0.6rem;
-    color: #333;
+    color: #444;
     font-size: 0.24rem;
     background: no-repeat center;
     background-image: var(--select-char-item);
@@ -462,33 +485,30 @@ body {
 }
 
 #select-char-window .button-delete {
-    width: 0.2rem;
-    height: 0.4rem;
-    margin: 0.1rem;
     float: right;
-    border: none;
-    background: no-repeat center center;
-    background-image: var(--select-char-del);
-    background-size: 0.2rem 0.2rem;
+    margin: 0.1rem 0.05rem;
 }
 /************* select character window end *************/
 
 
 /************* new character window begin *************/
+#new-char-window .char-attributes {
+    padding: 0.1rem 0.2rem;
+}
+
 #new-char-window .char-attributes p {
-    margin: 10px 0 0 0;
+    margin: 0.05rem;
+    color: #333;
+    font-weight: 700;
 }
 
 /************* new character window end *************/
 
 
 /************* password window begin *************/
-#password-window .button-confirm {
-    float: left;
-}
-
-#password-window .button-cancel {
-    float: right;
+#password-window .reset-password {
+    padding: 0.2rem;
+    text-align: center;
 }
 /************* passwprd window end *************/
 

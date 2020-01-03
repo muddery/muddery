@@ -157,4 +157,8 @@ MudderyLocalDict = {
     "You need to reach level ": "你需要达到等级",
     " seconds to confirm.": "秒后结束确认。",
     " seconds to start the combat.": "秒后开始战斗。",
+    "Warning": "警告",
+    "Delete this character?": "删除这个角色吗？",
+    "Cancel": "取消",
+    "Del": "删",
 };

@@ -8,7 +8,7 @@
     </head>
     <body id="main-frame" class="template">
         <!-- Show popup windows in this div. -->
-        <div id="popup">
+        <div id="popup" class="hidden">
             <!-- popup message window -->
             <div id="popup-message" class="popup-window hidden">
                 <div class="popup-box">
@@ -17,7 +17,9 @@
                         <span class="header-text"></span>
                     </div>
                     <div class="popup-body"></div>
-                    <div class="popup-footer"></div>
+                    <div class="popup-footer">
+                        <div class="popup-buttons"></div>
+                    </div>
                 </div>
             </div>
 
@@ -150,8 +152,8 @@
                     <span class="header-text">创建角色</span>
                 </div>
                 <div class="char-attributes">
-                    <p>Name</p>
-                    <input class="new-char-name form-control editbox" type="text" placeholder="name" autocomplete="off" />
+                    <p>角色名字</p>
+                    <input class="new-char-name long-input-box" type="text" placeholder="请输入角色名字" autocomplete="off" />
                 </div>
                 <div class="button-bar">
                     <button type="button" class="button-create button-short">创建</button>
@@ -162,28 +164,22 @@
             <!-- set password window -->
             <div id="password-window" class="main-window hidden">
                 <div class="title-bar">
-                    <span class="header-text">Password</span>
+                    <span class="header-text">修改密码</span>
                 </div>
-                <table>
-                    <tbody>
-                    <tr><td>
-                        <input class="current-password form-control editbox" type="password" placeholder="当前密码" autocomplete="off" />
-                    </td></tr>
-                    <tr><td>
-                        <input class="new-password form-control editbox" type="password" placeholder="新密码" autocomplete="off" />
-                    </td></tr>
-                    <tr><td>
-                        <input class="new-password-verify form-control editbox" type="password" placeholder="确认新密码"  autocomplete="off" />
-                    </td></tr>
-                    <tr>
-                        <td>
-                            <button class="button-confirm btn btn-default" type="button">确认</button>
-                            <button class="button-cancel btn btn-default" type="button">取消</button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div class="tab-bar">
+                <div class="reset-password">
+                    <p>
+                        <input class="current-password long-input-box" type="password" placeholder="当前密码" autocomplete="off" />
+                    </p>
+                    <p>
+                        <input class="new-password long-input-box" type="password" placeholder="新密码" autocomplete="off" />
+                    </p>
+                    <p>
+                        <input class="new-password-verify long-input-box" type="password" placeholder="确认新密码"  autocomplete="off" />
+                    </p>
+                </div>
+                <div class="button-bar">
+                    <button class="button-confirm button-short" type="button">确认</button>
+                    <button class="button-cancel button-short" type="button">取消</button>
                 </div>
             </div>
 
