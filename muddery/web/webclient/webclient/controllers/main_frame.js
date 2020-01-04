@@ -1191,7 +1191,7 @@ MudderySelectChar.prototype.constructor = MudderySelectChar;
  * Bind events.
  */
 MudderySelectChar.prototype.bindEvents = function() {
-    this.onClick(".character-list", ".char-name", this.onSelectCharacter);
+    this.onClick(".character-list", ".character-item", this.onSelectCharacter);
     this.onClick(".character-list", ".button-delete", this.onDeleteCharacter);
 
     this.onClick(".button-password", this.onPassword);
@@ -1248,7 +1248,9 @@ MudderySelectChar.prototype.onSelectCharacter = function(element) {
 /*
  * On delete a character.
  */
-MudderySelectChar.prototype.onDeleteCharacter = function(element) {
+MudderySelectChar.prototype.onDeleteCharacter = function(element, event) {
+    event.stopPropagation();
+
 	var index = this.select(element).data("index");
 
 	var buttons = [
@@ -1286,11 +1288,11 @@ MudderySelectChar.prototype.setCharacters = function(characters) {
 	for (var i = characters.length - 1; i >= 0; i--) {
 		var item = $("<div>")
 		    .addClass("character-item")
+			.data("index", i)
 		    .prependTo(container);
 
 		$("<span>")
 		    .addClass("char-name")
-			.data("index", i)
 			.text(characters[i]["name"])
 			.appendTo(item);
 
@@ -1662,7 +1664,7 @@ MudderyPromptBar.prototype.setInfo = function(name, icon) {
 MudderyPromptBar.prototype.setStatus = function(status) {
     if ("level" in status) {
 	    this.select(".level")
-	        .text("Lv: " + status["level"]["value"])
+	        .text("Lv " + status["level"]["value"])
 	        .show();
 	}
 	else {
@@ -1678,7 +1680,7 @@ MudderyPromptBar.prototype.setStatus = function(status) {
             exp_str = "--/--";
         }
         this.select(".exp")
-            .text("Exp: " + exp_str)
+            .text("Exp " + exp_str)
             .show();
     }
     else {
@@ -1688,7 +1690,7 @@ MudderyPromptBar.prototype.setStatus = function(status) {
     if ("hp" in status && "max_hp" in status) {
         var hp_str = status["hp"]["value"] + "/" + status["max_hp"]["value"];
         this.select(".hp")
-            .text("HP: " + hp_str)
+            .text("HP " + hp_str)
             .show();
     }
     else {

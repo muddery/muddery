@@ -187,11 +187,15 @@
                 <div class="contents">
                     <div id="main-contents" class="game-content-window">
                         <div class="prompt-bar">
-                            <img class="icon hidden" src="" />
+                            <div class="icon-back">
+                                <img class="icon hidden" src="" />
+                            </div>
                             <span class="name"></span>
-                            <span class="level value"></span>
-                            <span class="exp value"></span>
-                            <span class="hp value"></span>
+                            <span class="value">
+                                <span class="level"></span>
+                                <span class="exp"></span>
+                                <span class="hp"></span>
+                            </span>
                         </div>
                         <div class="scene-window">
                             <div class="scene-name">
@@ -397,8 +401,8 @@
 
                 </div>
                 <div class="tab-bar">
-                    <button type="button" class="button-scene">场景</button>
-                    <button type="button" class="button-character">角色</button>
+                    <div class="button-scene tab-bar-button">场景</div>
+                    <div class="button-character tab-bar-button">角色</div>
                     <ul class="menu-character popup-menu hidden">
                         <li>
                             <button type="button" class="button-status">属性</button>
@@ -413,8 +417,8 @@
                             <button type="button" class="button-quests">任务</button>
                         </li>
                     </ul>
-                    <button type="button" class="button-map">地图</button>
-                    <button type="button" class="button-system">系统</button>
+                    <div class="button-map tab-bar-button">地图</div>
+                    <div class="button-system tab-bar-button">系统</div>
                     <ul class="menu-system popup-menu hidden">
                         <li>
                             <button type="button" class="button-logout">退出</button>
