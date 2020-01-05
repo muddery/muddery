@@ -29,6 +29,9 @@
     --main-title-icon-back: url(../img/title_icon_back.png);
     --main-bottom-bar: url(../img/main_bottom_bar.png);
     --main-bar-button: url(../img/main_bar_button.png);
+    --main-scene-name: url(../img/main_scene_name.png);
+    --main-object-button: url(../img/main_object_button.png);
+    --main-scene-exits: url(../img/main_scene_exits.png);
 }
 
 html {
@@ -526,19 +529,15 @@ body {
 #game-window .contents {
     width: 100%;
     height: 100%;
-    padding: 0 0 25px 0;
+    padding: 0 0 0.6rem 0;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
 }
 
 #game-window .game-content-window {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    padding: 0 0 25px 0;
     box-sizing: inherit;
     -moz-box-sizing: inherit;
     -webkit-box-sizing: inherit;
@@ -586,7 +585,7 @@ body {
 .prompt-bar {
     position: relative;
     width: 100%;
-    height: 0.4rem;
+    height: 0.6rem;
     line-height: 0.4rem;
     vertical-align: bottom;
     background: no-repeat center;
@@ -618,12 +617,14 @@ body {
 
 .prompt-bar .value {
     float: right;
+    padding: 0 0.1rem;
 }
 
 .prompt-bar .value>span {
     padding: 0 0.02rem;
     font-size: 0.13rem;
-    color: #ccc;
+    color: #ddd;
+    font-weight: 700;
 }
 /************* prompt bar end *************/
 
@@ -635,12 +636,70 @@ body {
 }
 
 #main-contents .scene-window {
-    height: 70%;
-    font-size: 12px;
+    height: 100%;
+    padding-bottom: 0.6rem;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#main-contents .scene-window .scene-view {
+    width: 100%;
+    height: 2.0rem;
+}
+
+#main-contents .scene-window .scene-name {
+    width: 100%;
+    height: 0.25rem;
+    line-height: 0.25rem;
+    color: #eeb;
+    font-size: 0.13rem;
+    font-weight: 700;
+    text-align: center;
+    background: no-repeat center;
+    background-image: var(--main-scene-name);
+    background-size: 100% 100%;
+}
+
+#main-contents .scene-window .scene-desc {
+    width: 100%;
+    padding: 0.05rem 0.2rem;
+    color: #333;
+    font-size: 0.13rem;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#main-contents .scene-window .scene-commands,
+#main-contents .scene-window .scene-objects,
+#main-contents .scene-window .scene-objects,
+#main-contents .scene-window .scene-players {
+    padding: 0 0.2rem;
+}
+
+#main-contents .scene-window .object-button {
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.25rem;
+    margin: 0.05rem 0.05rem;
+    line-height: 0.25rem;
+    color: #eed;
+    text-align: center;
+    font-size: 0.12rem;
+    font-weight: 700;
+    background: no-repeat center;
+    background-image: var(--main-object-button);
+    background-size: 100% 100%;
 }
 
 #main-contents .scene-window .scene-exits {
     position: relative;
+    width: 100%;
+    height: 1.2rem;
+    background: no-repeat center;
+    background-image: var(--main-scene-exits);
+    background-size: 100% 100%;
 }
 
 #main-contents .scene-window .exits-table {
@@ -680,7 +739,8 @@ body {
 }
 
 #exits-svg {
-    position: absolute;
+    width: 100%;
+    height: 100%;
 }
 /************* scene window end *************/
 

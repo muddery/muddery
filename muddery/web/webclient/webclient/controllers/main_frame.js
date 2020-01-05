@@ -2238,9 +2238,9 @@ MudderyScene.prototype.constructor = MudderyScene;
  */
 MudderyScene.prototype.bindEvents = function() {
 	this.onClick(".scene-commands", "button", this.onCommand);
-	this.onClick(".scene-objects", "button", this.onObject);
-	this.onClick(".scene-npcs", "button", this.onNPC);
-	this.onClick(".scene-players", "button", this.onPlayer);
+	this.onClick(".scene-objects", ".object-button", this.onObject);
+	this.onClick(".scene-npcs", ".object-button", this.onNPC);
+	this.onClick(".scene-players", ".object-button", this.onPlayer);
 	this.onClick(".scene-exits", "button", this.onExit);
 
     !function(caller, method) {
@@ -2344,7 +2344,7 @@ MudderyScene.prototype.setScene = function(scene) {
 
     // add room's name
     var room_name = core.text2html.parseHtml(scene["name"]);
-    this.select(".scene-name").html(">>>>> " + room_name + " <<<<<");
+    this.select(".scene-name").html(room_name);
 
     // add room's desc
     this.select(".scene-desc").html(core.text2html.parseHtml(scene["desc"]));
@@ -2353,8 +2353,8 @@ MudderyScene.prototype.setScene = function(scene) {
     var commands = this.select(".scene-commands");
     if ("cmds" in scene && scene["cmds"].length > 0) {
         for (var i = 0; i < scene["cmds"].length; i++) {
-            $("<button>")
-                .attr("type", "button")
+            $("<div>")
+                .addClass("object-button")
                 .data("index", i)
                 .text(scene["cmds"][i]["name"])
                 .appendTo(commands);
@@ -2369,8 +2369,8 @@ MudderyScene.prototype.setScene = function(scene) {
     var objects = this.select(".scene-objects");
     if ("things" in scene && scene["things"].length > 0) {
         for (var i = 0; i < scene["things"].length; i++) {
-            $("<button>")
-                .attr("type", "button")
+            $("<div>")
+                .addClass("object-button")
                 .data("index", i)
                 .text(scene["things"][i]["name"])
                 .appendTo(objects);
@@ -2385,8 +2385,8 @@ MudderyScene.prototype.setScene = function(scene) {
     var npcs = this.select(".scene-npcs");
     if ("npcs" in scene && scene["npcs"].length > 0) {
         for (var i = 0; i < scene["npcs"].length; i++) {
-            $("<button>")
-                .attr("type", "button")
+            $("<div>")
+                .addClass("object-button")
                 .data("index", i)
                 .text(scene["npcs"][i]["name"])
                 .appendTo(npcs);
@@ -2403,8 +2403,8 @@ MudderyScene.prototype.setScene = function(scene) {
         // Only show 10 players.
         var count = 0;
         for (var i = 0; i < scene["players"].length; i++) {
-            $("<button>")
-                .attr("type", "button")
+            $("<div>")
+                .addClass("object-button")
                 .data("index", i)
                 .text(scene["players"][i]["name"])
                 .appendTo(players);
