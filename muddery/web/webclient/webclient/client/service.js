@@ -54,7 +54,7 @@ MudderyService.prototype = {
     },
 
     // change password
-    doChangePassword: function(current, password, password_verify) {
+    changePassword: function(current, password, password_verify) {
         if (password != password_verify) {
             mud.main_frame.showAlert("Password does not match.");
             return;

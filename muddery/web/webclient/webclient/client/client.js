@@ -163,7 +163,7 @@ MudderyClient.prototype = {
                 }
                 else if (key == "dialogue") {
                     mud.popup_dialogue.setDialogue(data[key], core.data_handler.getEscapes());
-                    if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(combat_window)) {
+                    if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(mud.combat_window)) {
                         mud.popup_dialogue.show();
                     }
                 }

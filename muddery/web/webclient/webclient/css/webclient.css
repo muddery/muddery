@@ -6,14 +6,17 @@
 
     --button-bar: url(../img/button_bar.png);
 
-    --long-button: url(../img/long_button.png);
-    --short-button: url(../img/short_button.png);
-    --tiny-red-button: url(../img/tiny_red_button.png);
+    --button-long: url(../img/button_long.png);
+    --button-short: url(../img/button_short.png);
+    --button-tiny-red: url(../img/button_tiny_red.png);
+    --checkbox-checked: url(../img/checkbox_checked.png);
+    --checkbox-unchecked: url(../img/checkbox_unchecked.png);
 
     --long-input-box: url(../img/long_input_box.png);
 
     --icon-close: url(../img/icon_close.png);
     --popup-box-back: url(../img/popup_box_back.png);
+    --popup-object-back: url(../img/popup_object_back.png);
 
     --login-background: url(../img/login_background.png);
     --login-form: url(../img/login_form.png);
@@ -32,6 +35,8 @@
     --main-scene-name: url(../img/main_scene_name.png);
     --main-object-button: url(../img/main_object_button.png);
     --main-scene-exits: url(../img/main_scene_exits.png);
+    --main-exit-button: url(../img/main_exit_button.png);
+    --main-exit-center: url(../img/main_exit_center.png);
 }
 
 html {
@@ -192,7 +197,7 @@ body {
     font-size: 0.14rem;
     border: none;
     background: no-repeat center;
-    background-image: var(--long-button);
+    background-image: var(--button-long);
     background-size: 100% 100%;
 }
 
@@ -204,7 +209,7 @@ body {
     font-size: 0.14rem;
     border: none;
     background: no-repeat center;
-    background-image: var(--short-button);
+    background-image: var(--button-short);
     background-size: 100% 100%;
 }
 
@@ -216,7 +221,7 @@ body {
     font-size: 0.14rem;
     border: none;
     background: no-repeat center;
-    background-image: var(--tiny-red-button);
+    background-image: var(--button-tiny-red);
     background-size: 100% 100%;
 }
 
@@ -228,6 +233,21 @@ body {
     background: no-repeat center;
     background-image: var(--long-input-box);
     background-size: 100% 100%;
+}
+
+.checkbox {
+    width: 0.15rem;
+    height: 0.15rem;
+    padding: 0;
+    vertical-align: middle;
+    border: none;
+    background: no-repeat center;
+    background-image: var(--checkbox-unchecked);
+    background-size: 100% 100%;
+}
+
+.checked {
+    background-image: var(--checkbox-checked);
 }
 /************* common elements end *************/
 
@@ -297,6 +317,10 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, .5);
+}
+
+#popup-object .popup-box {
+    background-image: var(--popup-object-back);
 }
 
 /************* popup window end *************/
@@ -395,15 +419,14 @@ body {
 
 #login-window .login-auto-login {
     float: left;
+    height: 0.2rem;
+    line-height: 0.2rem;
     padding-left: 0.1rem;
 }
 
 #login-window .text-auto-login {
     color: #333;
-}
-
-#login-window .checkbox-auto-login {
-    padding: 0.2rem 0;
+    vertical-align: middle;
 }
 
 #login-window .lower {
@@ -529,13 +552,13 @@ body {
 #game-window .contents {
     width: 100%;
     height: 100%;
-    padding: 0 0 0.6rem 0;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
 }
 
 #game-window .game-content-window {
+    position: relative;
     width: 100%;
     height: 100%;
     box-sizing: inherit;
@@ -577,6 +600,10 @@ body {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+.tab-bar .popup-menu button {
+   margin: 0.01rem 0.02rem;
 }
 /************* tab bar end *************/
 
@@ -636,8 +663,8 @@ body {
 }
 
 #main-contents .scene-window {
-    height: 100%;
-    padding-bottom: 0.6rem;
+    width: 100%;
+    height: 3.0rem;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -645,7 +672,7 @@ body {
 
 #main-contents .scene-window .scene-view {
     width: 100%;
-    height: 2.0rem;
+    height: 1.5rem;
 }
 
 #main-contents .scene-window .scene-name {
@@ -678,27 +705,62 @@ body {
     padding: 0 0.2rem;
 }
 
-#main-contents .scene-window .object-button {
+#main-contents .scene-window .scene-button {
     display: inline-block;
-    width: 0.55rem;
+    min-width: 0.55rem;
     height: 0.25rem;
+    padding: 0 0.04rem;
     margin: 0.05rem 0.05rem;
     line-height: 0.25rem;
-    color: #eed;
     text-align: center;
     font-size: 0.12rem;
     font-weight: 700;
     background: no-repeat center;
-    background-image: var(--main-object-button);
     background-size: 100% 100%;
+}
+
+#main-contents .scene-window .object-button {
+    color: #eee;
+    background-image: var(--main-object-button);
 }
 
 #main-contents .scene-window .scene-exits {
     position: relative;
     width: 100%;
-    height: 1.2rem;
+    height: 1.5rem;
     background: no-repeat center;
     background-image: var(--main-scene-exits);
+    background-size: 100% 100%;
+}
+
+#main-contents .scene-window .exit-button {
+    display: inline-block;
+    min-width: 0.55rem;
+    height: 0.25rem;
+    padding: 0 0.04rem;
+    margin: 0.05rem 0.05rem;
+    line-height: 0.25rem;
+    text-align: center;
+    color: #333;
+    font-size: 0.12rem;
+    background: no-repeat center;
+    background-image: var(--main-exit-button);
+    background-size: 100% 100%;
+}
+
+#main-contents .scene-window .exit-center {
+    display: inline-block;
+    min-width: 0.55rem;
+    height: 0.25rem;
+    padding: 0 0.04rem;
+    margin: 0.05rem 0.05rem;
+    line-height: 0.25rem;
+    text-align: center;
+    color: #fff;
+    font-size: 0.12rem;
+    font-weight: 700;
+    background: no-repeat center;
+    background-image: var(--main-exit-center);
     background-size: 100% 100%;
 }
 
@@ -746,10 +808,16 @@ body {
 
 
 /************* message window begin *************/
-#message-window {
+#main-contents .message-window {
+    position: absolute;
+    width: 100%;
+    top: 3.6rem;
+    bottom: 0.6rem;;
+    padding: 0.1rem 0.2rem;
+    color: #333;
 }
 
-#message-window .message-list {
+#main-contents .message-window .message-list {
     height: 100%;
     font-size: 12px;
     overflow-x: hidden;

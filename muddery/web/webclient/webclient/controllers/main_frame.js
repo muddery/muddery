@@ -4,7 +4,8 @@
  */
 MudderyMainFrame = function(el) {
 	BaseController.call(this, el);
-	
+
+	this.first_connection = true;
 	this.puppet = false;
     this.solo_mode = false;
 	this.message_type = null;
@@ -35,7 +36,7 @@ MudderyMainFrame.prototype.bindEvents = function() {
  * Popup an alert message.
  */
 MudderyMainFrame.prototype.showAlert = function(message) {
-    this.popupMessage(core.trans("Message"), message);
+    this.popupMessage(core.trans("Alert"), message);
 }
 
 /*
@@ -268,7 +269,10 @@ MudderyMainFrame.prototype.onConnectionOpen = function() {
 	self.puppet = false;
 
 	self.showLoginWindow();
-	mud.login_window.checkAutoLogin();
+	if (self.first_connection) {
+	    self.first_connection = false;
+	    mud.login_window.checkAutoLogin();
+	}
 }
 
 /*
@@ -285,7 +289,7 @@ MudderyMainFrame.prototype.onConnectionClose = function() {
 	self.doClosePopupBox();
 	
 	// show message
-	self.popupMessage(core.trans("Message"), core.trans("The client connection was closed cleanly."));
+	self.popupMessage(core.trans("Error"), core.trans("The client connection was closed cleanly."));
 }
     
 /*
@@ -751,7 +755,7 @@ MudderyPopupObject.prototype.setObject = function(obj) {
 	this.buttons = buttons;
 
 	// add name
-	this.select("#object_popup_header").html(core.text2html.parseHtml(obj["name"]));
+	this.select(".header-text").html(core.text2html.parseHtml(obj["name"]));
 
 	// add icon
 	if (obj["icon"]) {
@@ -773,7 +777,7 @@ MudderyPopupObject.prototype.setObject = function(obj) {
 		var name = core.text2html.parseHtml(buttons[i]["name"]);
 
 		$("<button>").attr("type", "button")
-		    .addClass("popup-button")
+		    .addClass("popup-button button-short")
 		    .data("index", i)
 			.html(name)
 			.appendTo(container);
@@ -1028,7 +1032,7 @@ MudderyLogin.prototype.bindEvents = function() {
     this.onClick(".button-tab-register", this.onTabRegister);
     this.onClick(".button-login", this.onClickLogin);
 	this.onClick(".button-register", this.onClickRegister);
-    this.on(".checkbox-auto-login", "change", this.onAutoLogin);
+    this.onClick(".login-auto-login", this.onClickAutoLogin);
 }
 
 /*
@@ -1085,11 +1089,12 @@ MudderyLogin.prototype.onClickLogin = function(element) {
 /*
  * Event on click the auto login checkbox.
  */
-MudderyLogin.prototype.onAutoLogin = function(element) {
-    var auto_login = this.select(".checkbox-auto-login").prop("checked");
+MudderyLogin.prototype.onClickAutoLogin = function(element) {
+    this.select(".checkbox-auto-login").toggleClass("checked");
+    var auto_login = this.select(".checkbox-auto-login").hasClass("checked");
 
     if (!auto_login) {
-        core.service.doRemoveAutoLogin();
+        this.removeAutoLogin();
     }
 }
 
@@ -1102,7 +1107,7 @@ MudderyLogin.prototype.clearValues = function() {
     this.select(".reg-name").val("");
     this.select(".reg-password").val("");
     this.select(".reg-password-verify").val("");
-    this.select(".checkbox-auto-login").prop("checked", false);
+    this.select(".checkbox-auto-login").removeClass("checked");
 }
 
 /*
@@ -1125,7 +1130,12 @@ MudderyLogin.prototype.setConnScreen = function(conn_screen) {
 MudderyLogin.prototype.setValues = function(playername, password, auto_login) {
     this.select(".login-name").val(playername);
     this.select(".login-password").val(password);
-    this.select(".checkbox-auto-login").prop("checked", auto_login);
+    if (auto_login) {
+        this.select(".checkbox-auto-login").addClass("checked");
+    }
+    else {
+        this.select(".checkbox-auto-login").removeClass("checked");
+    }
 }
 
 /*
@@ -1142,11 +1152,11 @@ MudderyLogin.prototype.removeAutoLogin = function() {
  */
 MudderyLogin.prototype.checkAutoLogin = function() {
     if (localStorage.is_auto_login) {
-        var playername = localStorage.login_name;
+        var name = localStorage.login_name;
         var password = localStorage.login_password;
 
-        this.login_window.setValues(playername, password, true);
-	    core.service.login(playername, playerpassword);
+        this.setValues(name, password, true);
+	    core.service.login(name, password);
     }
 }
 
@@ -1154,14 +1164,14 @@ MudderyLogin.prototype.checkAutoLogin = function() {
  * On user login.
  */
 MudderyLogin.prototype.onLogin = function() {
-    var auto_login = this.select(".checkbox-auto-login").prop("checked");
+    var auto_login = this.select(".checkbox-auto-login").hasClass("checked");
 
     if (auto_login) {
         var name = this.select(".login-name").val();
         var password = this.select(".login-password").val();
 
         // Save the name and password.
-        localStorage.login_name = playername;
+        localStorage.login_name = name;
         localStorage.login_password = password;
         localStorage.is_auto_login = "1";
     }
@@ -1434,7 +1444,7 @@ MudderyPassword.prototype.onConfirm = function(element) {
     var password = this.select(".new-password").val();
     var password_verify = this.select(".new-password-verify").val();
 
-    core.service.doChangePassword(current, password, password_verify);
+    core.service.changePassword(current, password, password_verify);
     this.clearValues();
 }
 
@@ -1470,6 +1480,8 @@ MudderyMainGame.prototype.constructor = MudderyMainGame;
  */
 MudderyMainGame.prototype.bindEvents = function() {
     $(window).bind("resize", this.onResize);
+
+    this.onClick(this.onClickWindow);
 
     this.onClick(".button-scene", this.onScene);
 	this.onClick(".button-map", this.onMap);
@@ -1516,6 +1528,13 @@ MudderyMainGame.prototype.onResize = function(element) {
 }
 
 /*
+ * Event when clicks this window.
+ */
+MudderyMainGame.prototype.onClickWindow = function(element) {
+    this.hidePopupMenus();
+}
+
+/*
  * Event when clicks the scene button.
  */
 MudderyMainGame.prototype.onScene = function(element) {
@@ -1534,16 +1553,21 @@ MudderyMainGame.prototype.onMap = function(element) {
 /*
  * Event when clicks the character button.
  */
-MudderyMainGame.prototype.onCharacter = function(element) {
+MudderyMainGame.prototype.onCharacter = function(element, event) {
     // Show the character menu.
-    this.select(".menu-character").toggleClass("hidden");
+    var hidden = this.select(".menu-character").hasClass("hidden");
+    this.hidePopupMenus();
+    if (hidden) {
+        this.select(".menu-character").removeClass("hidden");
+    }
+
+    event.stopPropagation();
 }
 
 /*
  * Event when clicks the status button.
  */
 MudderyMainGame.prototype.onStatus = function(element) {
-    this.select(".menu-character").addClass("hidden");
     this.showWindow(mud.char_data_window);
 }
 
@@ -1551,7 +1575,6 @@ MudderyMainGame.prototype.onStatus = function(element) {
  * Event when clicks the inventory button.
  */
 MudderyMainGame.prototype.onInventory = function(element) {
-    this.select(".menu-character").addClass("hidden");
     this.showWindow(mud.inventory_window);
 }
 
@@ -1559,7 +1582,6 @@ MudderyMainGame.prototype.onInventory = function(element) {
  * Event when clicks the skills button.
  */
 MudderyMainGame.prototype.onSkills = function(element) {
-    this.select(".menu-character").addClass("hidden");
     this.showWindow(mud.skills_window);
 }
 
@@ -1567,7 +1589,6 @@ MudderyMainGame.prototype.onSkills = function(element) {
  * Event when clicks the character button.
  */
 MudderyMainGame.prototype.onQuests = function(element) {
-    this.select(".menu-character").addClass("hidden");
     this.showWindow(mud.quests_window);
 }
 
@@ -1577,15 +1598,19 @@ MudderyMainGame.prototype.onQuests = function(element) {
  */
 MudderyMainGame.prototype.onSystem = function(element) {
     // Show the character menu.
-    this.select(".menu-system").toggleClass("hidden");
+    var hidden = this.select(".menu-system").hasClass("hidden");
+    this.hidePopupMenus();
+    if (hidden) {
+        this.select(".menu-system").removeClass("hidden");
+    }
+
+    event.stopPropagation();
 }
 
 /*
  * Event when clicks the logout button.
  */
 MudderyMainGame.prototype.onLogout = function(element) {
-    this.select(".menu-system").addClass("hidden");
-
     core.service.logout();
     Evennia.reconnect();
     mud.main_frame.showLoginWindow();
@@ -1595,8 +1620,6 @@ MudderyMainGame.prototype.onLogout = function(element) {
  * Event when clicks the unpuppet button.
  */
 MudderyMainGame.prototype.onUnpuppet = function(element) {
-    this.select(".menu-system").addClass("hidden");
-
 	core.service.unpuppetCharacter();
 	mud.main_frame.onUnpuppet();
 }
@@ -1609,8 +1632,8 @@ MudderyMainGame.prototype.resetSize = function(element) {
     var button_char = this.select(".button-character");
     var menu_char = this.select(".menu-character");
     var pos_char = {
-        left: button_char.position().left,
-        top: button_char.position().top - menu_char.height() - 5
+        left: button_char.position().left + button_char.outerWidth(true) / 2 - menu_char.outerWidth(true) / 2,
+        top: button_char.position().top - menu_char.outerHeight() + 5,
     }
     menu_char.css(pos_char);
 
@@ -1618,10 +1641,17 @@ MudderyMainGame.prototype.resetSize = function(element) {
     var button_sys = this.select(".button-system");
     var menu_sys = this.select(".menu-system");
     var pos_sys = {
-        left: button_sys.position().left,
-        top: button_sys.position().top - menu_sys.height() - 5
+        left: button_sys.position().left + button_sys.outerWidth(true) / 2 - menu_sys.outerWidth(true) / 2,
+        top: button_sys.position().top - menu_sys.outerHeight() + 5,
     }
     menu_sys.css(pos_sys);
+}
+
+/*
+ * Hide all popup menus.
+ */
+MudderyMainGame.prototype.hidePopupMenus = function(element) {
+    this.select(".tab-bar .popup-menu").addClass("hidden");
 }
 
 /******************************************
@@ -2237,11 +2267,11 @@ MudderyScene.prototype.constructor = MudderyScene;
  * Bind events.
  */
 MudderyScene.prototype.bindEvents = function() {
-	this.onClick(".scene-commands", "button", this.onCommand);
+	this.onClick(".scene-commands", ".object-button", this.onCommand);
 	this.onClick(".scene-objects", ".object-button", this.onObject);
 	this.onClick(".scene-npcs", ".object-button", this.onNPC);
 	this.onClick(".scene-players", ".object-button", this.onPlayer);
-	this.onClick(".scene-exits", "button", this.onExit);
+	this.onClick(".scene-exits", ".exit-button", this.onExit);
 
     !function(caller, method) {
 		$(window).on("resize", undefined, caller, function(event) {
@@ -2370,7 +2400,7 @@ MudderyScene.prototype.setScene = function(scene) {
     if ("things" in scene && scene["things"].length > 0) {
         for (var i = 0; i < scene["things"].length; i++) {
             $("<div>")
-                .addClass("object-button")
+                .addClass("scene-button object-button")
                 .data("index", i)
                 .text(scene["things"][i]["name"])
                 .appendTo(objects);
@@ -2386,7 +2416,7 @@ MudderyScene.prototype.setScene = function(scene) {
     if ("npcs" in scene && scene["npcs"].length > 0) {
         for (var i = 0; i < scene["npcs"].length; i++) {
             $("<div>")
-                .addClass("object-button")
+                .addClass("scene-button object-button")
                 .data("index", i)
                 .text(scene["npcs"][i]["name"])
                 .appendTo(npcs);
@@ -2404,7 +2434,7 @@ MudderyScene.prototype.setScene = function(scene) {
         var count = 0;
         for (var i = 0; i < scene["players"].length; i++) {
             $("<div>")
-                .addClass("object-button")
+                .addClass("scene-button object-button")
                 .data("index", i)
                 .text(scene["players"][i]["name"])
                 .appendTo(players);
@@ -2500,7 +2530,22 @@ MudderyScene.prototype.setExitsMap = function(exits, room_name) {
         if (exit_grids[i].length == 0) {
             var p = $("<p>")
                 .appendTo(container);
-            p.html("&nbsp;");
+
+            // If the center grid is empty, show room's name in the center grid.
+            if (i == 4) {
+                var name = "";
+                if (room_name) {
+                    name = core.text2html.parseHtml(room_name);
+                }
+
+                var button = $("<div>")
+                    .addClass("exit-center")
+                    .text(name)
+                    .appendTo(p);
+            }
+            else {
+                p.html("&nbsp;");
+            }
             continue;
         }
 
@@ -2515,19 +2560,12 @@ MudderyScene.prototype.setExitsMap = function(exits, room_name) {
             var p = $("<p>")
                 .appendTo(container);
 
-            var button = $("<button>")
-                .addClass("exit-" + exit["index"])
-                .attr("type", "button")
+            var button = $("<div>")
+                .addClass("exit-button exit-" + exit["index"])
                 .data("index", exit["index"])
                 .text(name)
                 .appendTo(p);
         }
-    }
-
-    // If the center grid is empty, show room's name in the center grid.
-    if (exit_grids[4].length == 0) {
-        var container = this.select(".direction-4");
-        container.text(room_name);
     }
 
     this.drawExitPaths(exits);
@@ -2541,12 +2579,12 @@ MudderyScene.prototype.drawExitPaths = function(exits) {
     var svg = document.getElementById("exits-svg");
     var namespace = "http://www.w3.org/2000/svg";
     var center_dom = this.select(".direction-4");
-    var x1 = center_dom.position().left + center_dom.outerWidth() / 2;
-    var y1 = center_dom.position().top + center_dom.outerHeight() / 2;
+    var x1 = center_dom.position().left + center_dom.outerWidth(true) / 2;
+    var y1 = center_dom.position().top + center_dom.outerHeight(true) / 2;
     for (var i = 0; i < exits.length; i++) {
         var exit_dom = this.select(".exit-" + i);
-        var x2 = exit_dom.position().left + exit_dom.outerWidth() / 2;
-        var y2 = exit_dom.position().top + exit_dom.outerHeight() / 2;
+        var x2 = exit_dom.position().left + exit_dom.outerWidth(true) / 2;
+        var y2 = exit_dom.position().top + exit_dom.outerHeight(true) / 2;
         var path = document.createElementNS(namespace, "path");
         path.setAttribute("stroke", this.path_color);
         path.setAttribute("stroke-width", this.path_width);
