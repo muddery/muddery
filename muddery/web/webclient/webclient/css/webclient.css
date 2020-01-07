@@ -27,7 +27,7 @@
     --select-char-title: url(../img/func_title_bar.png);
     --select-char-item: url(../img/select_char_item.png);
 
-    --main-background: url(../img/login_background.png);
+    --main-background: url(../img/main_background.png);
     --main-title-bar: url(../img/main_title_bar.png);
     --main-title-icon-back: url(../img/title_icon_back.png);
     --main-bottom-bar: url(../img/main_bottom_bar.png);
@@ -37,6 +37,12 @@
     --main-scene-exits: url(../img/main_scene_exits.png);
     --main-exit-button: url(../img/main_exit_button.png);
     --main-exit-center: url(../img/main_exit_center.png);
+
+    --character-background: url(../img/main_background.png);
+    --character-title-bar: url(../img/main_title_bar.png);
+    --character-title-icon-back: url(../img/title_icon_back.png);
+    --character-equipments-body: url(../img/equipments_body.png);
+    --character-equipment-icon-back: url(../img/equipment_icon_back.png);
 }
 
 html {
@@ -77,13 +83,6 @@ body {
     height: 100%;
     position: relative;
 }
-
-.title-bar {
-    position: relative;
-    height: var(--title-bar-height);
-    text-align: center;
-}
-
 
 /************* backgrounds begin *************/
 .background-window {
@@ -350,9 +349,12 @@ body {
 
 #login-window .title-text {
     position: absolute;
-    left: 50%;
+    width: 100%;
+    height: 0.4rem;
     top: 50%;
-    transform: translate(-50%, -50%);
+    line-height: 0.4rem;
+    margin-top: -0.2rem;
+    text-align: center;
     color: #333;
     font-size: 0.32rem;
     font-weight: 700;
@@ -469,6 +471,7 @@ body {
     color: #fec;
     font-size: 0.24rem;
     font-weight: 700;
+    text-align: center;
     vertical-align: middle;
     background: no-repeat center;
     background-image: var(--select-char-title);
@@ -614,7 +617,6 @@ body {
     width: 100%;
     height: 0.6rem;
     line-height: 0.4rem;
-    vertical-align: bottom;
     background: no-repeat center;
     background-image: var(--main-title-bar);
     background-size: 100% 100%;
@@ -633,18 +635,25 @@ body {
     position: absolute;
     width: 0.5rem;
     height: 0.5rem;
+    left: 0;
+    top: 0;
     padding: 0.03rem;
 }
 
 .prompt-bar .name {
-    padding: 0 0.02rem 0 0.6rem;
+    position: absolute;
+    left: 0.6rem;
+    height: 0.4rem;
     font-size: 0.18rem;
     color: #fec;
+    vertical-align: text-bottom;
 }
 
 .prompt-bar .value {
     float: right;
+    height: 0.4rem;
     padding: 0 0.1rem;
+    vertical-align: text-bottom;
 }
 
 .prompt-bar .value>span {
@@ -652,6 +661,7 @@ body {
     font-size: 0.13rem;
     color: #ddd;
     font-weight: 700;
+    vertical-align: text-bottom;
 }
 /************* prompt bar end *************/
 
@@ -819,7 +829,7 @@ body {
 
 #main-contents .message-window .message-list {
     height: 100%;
-    font-size: 12px;
+    font-size: 0.12rem;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -829,63 +839,115 @@ body {
 /************* character data window begin *************/
 #char-data-window {
     position: relative;
+    width: 100%;
     height: 100%;
     text-align: center;
+    background: no-repeat center;
+    background-image: var(--character-background);
+    background-size: 100% 100%;
+}
+
+#char-data-window .title-bar {
+    position: relative;
+    width: 100%;
+    height: 0.6rem;
+    line-height: 0.4rem;
+    color: #fec;
+    font-size: 0.2rem;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: text-bottom;
+    background: no-repeat center;
+    background-image: var(--character-title-bar);
+    background-size: 100% 100%;
+}
+
+#char-data-window .title-bar .icon-back {
+    position: absolute;
+    width: 0.56rem;
+    height: 0.56rem;
+    background: no-repeat center;
+    background-image: var(--character-title-icon-back);
+    background-size: 100% 100%;
+}
+
+#char-data-window .title-bar img.icon {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    left: 0;
+    top: 0;
+    padding: 0.03rem;
+}
+
+#char-data-window .title-bar .name {
+    position: absolute;
+    left: 0.6rem;
+    font-size: 0.18rem;
+    font-weight: 400;
+    color: #fec;
+    vertical-align: text-bottom;
 }
 
 #char-data-window .equipments {
     position: relative;
-    width: 200px;
-    height: 200px;
-    margin: 0 auto;
+    width: 100%;
+    height: 2.4rem;
+    background: no-repeat center;
+    background-image: var(--character-equipments-body);
+    background-size: 1.6rem 2.4rem;
 }
 
-#char-data-window .equipments .position {
-    position: absolute;
+#char-data-window .equipments .equipment-block {
+    width: 0.44rem;
+    height: 0.44rem;
+    margin: 0.02rem 0.1rem;
+    line-height: 0.44rem;
+    vertical-align: middle;
+    background: no-repeat center;
+    background-image: var(--character-equipment-icon-back);
+    background-size: 100% 100%;
+}
+
+#char-data-window .equipments .equipments-row {
+    width: 100%;
+    height: 0.48rem;
+}
+
+#char-data-window .equipments .position-left {
+    float: left
+}
+
+#char-data-window .equipments .position-right {
+    float: right;
+}
+
+#char-data-window .equipments .position-name {
+    font-size: 0.18rem;
+    color: #777;
 }
 
 #char-data-window .equipments .icon {
-    width: 30px;
-    height: 30px;
+    width: 0.4rem;
+    height: 0.4rem;
+    margin: 0.02rem;
 }
 
-#char-data-window .equipments .position_head {
-    top: 0;
-    left: 50%;
-    transform: translate(-15px, 0);
-}
-
-#char-data-window .equipments .position_hand {
-    top: 40px;
-    right: 10px;
-}
-
-#char-data-window .equipments .position_chest {
-    top: 40px;
-    left: 50%;
-    transform: translate(-15px, 0);
-}
-
-#char-data-window .equipments .position_leg {
-    top: 80px;
-    right: 50%;
-    transform: translate(15px, 0);
+#char-data-window .equipments .name {
+    color: #ccc;
 }
 
 #char-data-window .char-data {
     position: absolute;
-    bottom: 0;
+    width: 100%;
+    top: 3.0rem;
+    bottom: 0.6rem;
     text-align: left;
 }
 
 #char-data-window .data-table {
     width: 100%;
     font-size: 12px;
-}
-
-#char-data-window .row-name .icon {
-    width: 40px;
-    height: 40px;
 }
 /************* character data window end *************/
 

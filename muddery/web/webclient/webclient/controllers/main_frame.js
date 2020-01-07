@@ -1791,6 +1791,8 @@ MudderyMessage.prototype.displayMessage = function(msg, type) {
  * Derive from the base class.
  */
 MudderyCharData = function(el) {
+    this.equipment_pos = {};
+
 	BaseController.call(this, el);
 }
 
@@ -1817,15 +1819,15 @@ MudderyCharData.prototype.onLook = function(element) {
  * Set player's basic data.
  */
 MudderyCharData.prototype.setInfo = function(name, icon) {
-    this.select(".row-name .name").text(name);
+    this.select(".name").text(name);
     if (icon) {
         var url = settings.resource_url + icon;
-        this.select(".row-name .icon")
+        this.select(".icon")
             .attr("src", url)
             .show();
     }
     else {
-        this.select(".row-name .icon").hide();
+        this.select(".icon").hide();
     }
 }
 
@@ -1833,7 +1835,7 @@ MudderyCharData.prototype.setInfo = function(name, icon) {
  * Set player character's information.
  */
 MudderyCharData.prototype.setStatus = function(status) {
-    this.select(".data-list>tr:not(.row-name)").remove();
+    this.select(".data-list>tr").remove();
     var container = this.select(".data-list");
 
     var row = $("<tr>");
@@ -1926,23 +1928,63 @@ MudderyCharData.prototype.setCombatStatus = function(status) {
 }
 
 /*
+ * Set available equipment positions.
+ */
+MudderyCharData.prototype.setEquipmentPos = function(equipment_pos) {
+    this.equipment_pos = {};
+    for (var i = 0; i < equipment_pos.length; i++) {
+        this.equipment_pos[equipment_pos[i]["key"]] = equipment_pos[i];
+    }
+
+    for (var pos in this.equipment_pos) {
+        var block = this.select(".equipments .equipment-" + pos.toLowerCase());
+        block.find(".position-name")
+            .text(this.equipment_pos[pos].name)
+            .show();
+        block.find(".icon").hide();
+        block.find(".name").hide();
+        block.show();
+    }
+}
+
+/*
  * Set player's equipments.
  */
 MudderyCharData.prototype.setEquipments = function(equipments) {
-    for (var pos in equipments) {
+    for (var pos in this.equipment_pos) {
         var equip = equipments[pos];
-
-        var url = "./img/icon_equipment_block.png";
+        var icon_url = "";
         var name = "";
-        if (equip) {
-            if (equip["icon"]) {
-                url = settings.resource_url + icon;
-            }
-            name = core.text2html.parseHtml(equip["name"]);
-        }
 
-        this.select(".equipments ." + pos.toLowerCase() + " .icon").attr("src", url);
-        this.select(".equipments ." + pos.toLowerCase() + " .name").html(name);
+        var block = this.select(".equipments .equipment-" + pos.toLowerCase());
+        if (equip) {
+            block.find(".position-name").hide();
+
+            if (equip["icon"]) {
+                icon_url = settings.resource_url + icon;
+            }
+            if (equip["name"]) {
+                name = core.text2html.parseHtml(equip["name"]);
+            }
+
+            if (icon_url) {
+                block.find(".icon")
+                    .attr("src", icon_url)
+                    .show();
+            }
+            else {
+                block.find(".icon").hide();
+            }
+
+            block.find(".name")
+                .html(name)
+                .show();
+        }
+        else {
+            block.find(".icon").hide();
+            block.find(".name").hide();
+            block.find(".position-name").show();
+        }
     }
 }
 

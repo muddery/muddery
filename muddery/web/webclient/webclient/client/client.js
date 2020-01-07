@@ -171,6 +171,9 @@ MudderyClient.prototype = {
                     var status = data[key];
                     mud.main_frame.setStatus(status);
                 }
+                else if (key == "equipment_pos") {
+                    mud.char_data_window.setEquipmentPos(data[key]);
+                }
                 else if (key == "equipments") {
 			        mud.char_data_window.setEquipments(data[key]);
                 }

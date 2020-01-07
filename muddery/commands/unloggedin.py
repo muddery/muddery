@@ -20,6 +20,7 @@ from muddery.utils.builder import create_player, create_character
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.utils import search_obj_data_key
+from muddery.worlddata.dao.common_mappers import EQUIPMENT_POSITIONS
 
 
 # limit symbol import for API
@@ -452,7 +453,15 @@ class CmdUnconnectedLoginStart(Command):
         "Show the connect screen."
         game_name = GAME_SETTINGS.get("game_name")
         connection_screen = GAME_SETTINGS.get("connection_screen")
+        records = EQUIPMENT_POSITIONS.all()
+        equipment_pos = [{
+            "key": r.key,
+            "name": r.name,
+            "desc": r.desc
+        } for r in records]
+
         self.caller.msg({
             "game_name": game_name,
-            "conn_screen": connection_screen}
+            "conn_screen": connection_screen,
+            "equipment_pos": equipment_pos,}
         )

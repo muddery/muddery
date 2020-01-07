@@ -822,7 +822,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     if obj.dbref == dbref:
                         info = {"dbref": obj.dbref,
                                 "name": obj.name,
-                                "desc": obj.db.desc}
+                                "desc": obj.db.desc,
+                                "icon": obj.icon,}
             equipments[position] = info
 
         return equipments
