@@ -255,7 +255,7 @@ class CmdGoto(Command):
             if target in {"n", "s", "w", "e", "ne", "nw", "sw", "se"}:
                 # get exits in directions
                 exits = caller.location.get_exits()
-                exit_dict = {}
+                candidate_exits = []
 
                 from_room = caller.location
                 for e in exits:
@@ -267,10 +267,15 @@ class CmdGoto(Command):
                     to_room = exit_obj.destination
                     degree = self.get_degree(from_room, to_room)
                     direction = self.get_direction(degree)
-                    if direction:
-                        exit_dict[direction] = exit_obj
+                    if direction == target:
+                        candidate_exits.append(exit_obj)
 
-                obj = exit_dict.get(target)
+                if len(candidate_exits) == 1:
+                    obj = candidate_exits[0]
+                elif len(candidate_exits) > 1:
+                    # There is more than one exit in that direction.
+                    caller.msg({"alert": _("There is more than one exit in that direction.")})
+                    return
 
         if obj:
             # goto this exit
@@ -289,7 +294,7 @@ class CmdGoto(Command):
                     obj.at_failed_traverse(caller)
         else:
             # Can not find exit.
-            caller.msg({"alert": _("Can not goto there.")})
+            caller.msg({"alert": _("Can not go there.")})
         return
 
 

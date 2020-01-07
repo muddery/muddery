@@ -154,3 +154,5 @@ category,origin,local
 ,"Healed %s by %d points.","恢复%s %d点生命。"
 ,"Hit %s by %d points.","伤害%s %d点生命。"
 ,"Raised %s's max HP by %d points.","提升%s的最大生命值%d点。"
+,"Can not go there.","无法去那里。"
+,"There is more than one exit in that direction.","那个方向上有多个出口。"
