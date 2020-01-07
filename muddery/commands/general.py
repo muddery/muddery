@@ -5,6 +5,7 @@ This is adapt from evennia/evennia/commands/default/general.py.
 The licence of Evennia can be found in evennia/LICENSE.txt.
 """
 
+import math
 from django.conf import settings
 from evennia.utils import utils, logger
 from evennia.commands.command import Command
@@ -13,6 +14,7 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.exception import MudderyError
+from muddery.utils.utils import search_obj_data_key
 import traceback
 import random
 
@@ -164,7 +166,7 @@ class CmdGoto(Command):
 
     Usage:
         {"cmd":"goto",
-         "args":<exit's dbref>
+         "args": <exit's dbref> or <direction (n, s, w, e, ne, nw, sw, se)>
         }
 
     Tranvese an exit, go to the destination of the exit.
@@ -172,6 +174,65 @@ class CmdGoto(Command):
     key = "goto"
     locks = "cmd:all()"
     help_cateogory = "General"
+
+
+    def get_degree(self, from_room, to_room):
+        # get the direction's degree of the exit
+        # from 0 to 360
+
+        from_area = from_room.location
+        to_area = to_room.location
+
+        if from_area.dbref != to_area.dbref:
+            return
+
+        from_pos = from_room.position
+        to_pos = to_room.position
+
+        if not from_pos or not to_pos:
+            return
+
+        dx = to_pos[0] - from_pos[0]
+        dy = to_pos[1] - from_pos[1]
+        degree = 0
+        if dx == 0:
+            if dy < 0:
+                degree = 90
+            elif dy > 0:
+                degree = 270
+        else:
+            degree = math.atan(-dy / dx) / math.pi * 180
+            if dx < 0:
+                degree += 180
+
+        return degree
+
+    def get_direction(self, degree):
+        if degree is None:
+            return
+
+        direction = ""
+        degree = degree - math.floor(degree / 360) * 360
+        if degree < 22.5:
+            direction = "e"
+        elif degree < 67.5:
+            direction = "ne"
+        elif degree < 112.5:
+            direction = "n"
+        elif degree < 157.5:
+            direction = "nw"
+        elif degree < 202.5:
+            direction = "w"
+        elif degree < 247.5:
+            direction = "sw"
+        elif degree < 292.5:
+            direction = "s"
+        elif degree < 337.5:
+            direction = "se"
+        elif degree < 360:
+            direction = "e"
+
+        return direction
 
     def func(self):
         "Move caller to the exit."
@@ -186,24 +247,50 @@ class CmdGoto(Command):
             return
 
         obj = caller.search_dbref(self.args, location=caller.location)
+
         if not obj:
-            # Can not find exit.
-            caller.msg({"alert":_("Can not find exit.")})
-            return
-            
-        if obj.access(self.caller, 'traverse'):
-            # we may traverse the exit.
-            # MudderyLockedExit handles locks in at_before_traverse().
-            if obj.at_before_traverse(self.caller):
-                obj.at_traverse(caller, obj.destination)
-        else:
-            # exit is locked
-            if obj.db.err_traverse:
-                # if exit has a better error message, let's use it.
-                caller.msg({"alert": self.obj.db.err_traverse})
+            # try to goto direction
+            target = self.args.strip().lower()
+
+            if target in {"n", "s", "w", "e", "ne", "nw", "sw", "se"}:
+                # get exits in directions
+                exits = caller.location.get_exits()
+                exit_dict = {}
+
+                from_room = caller.location
+                for e in exits:
+                    exit_obj = search_obj_data_key(e)
+                    if not exit_obj:
+                        continue
+
+                    exit_obj = exit_obj[0]
+                    to_room = exit_obj.destination
+                    degree = self.get_degree(from_room, to_room)
+                    direction = self.get_direction(degree)
+                    if direction:
+                        exit_dict[direction] = exit_obj
+
+                obj = exit_dict.get(target)
+
+        if obj:
+            # goto this exit
+            if obj.access(self.caller, 'traverse'):
+                # we may traverse the exit.
+                # MudderyLockedExit handles locks in at_before_traverse().
+                if obj.at_before_traverse(self.caller):
+                    obj.at_traverse(caller, obj.destination)
             else:
-                # No shorthand error message. Call hook.
-                obj.at_failed_traverse(caller)
+                # exit is locked
+                if obj.db.err_traverse:
+                    # if exit has a better error message, let's use it.
+                    caller.msg({"alert": self.obj.db.err_traverse})
+                else:
+                    # No shorthand error message. Call hook.
+                    obj.at_failed_traverse(caller)
+        else:
+            # Can not find exit.
+            caller.msg({"alert": _("Can not goto there.")})
+        return
 
 
 #------------------------------------------------------------
