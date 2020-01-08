@@ -1204,6 +1204,7 @@ MudderySelectChar.prototype.bindEvents = function() {
     this.onClick(".character-list", ".character-item", this.onSelectCharacter);
     this.onClick(".character-list", ".button-delete", this.onDeleteCharacter);
 
+    this.onClick(".button-new", this.onNewCharacter);
     this.onClick(".button-password", this.onPassword);
     this.onClick(".button-logout", this.onLogout);
 }
@@ -1314,7 +1315,7 @@ MudderySelectChar.prototype.setCharacters = function(characters) {
 			.appendTo(item);
 	}
 
-	this.addNewCharButton();
+	this.setNewCharButton();
 }
 
 
@@ -1325,26 +1326,19 @@ MudderySelectChar.prototype.setCharacters = function(characters) {
  */
 MudderySelectChar.prototype.setMaxNumber = function(max_number) {
     this.max_number = max_number;
-    this.addNewCharButton();
+    this.setNewCharButton();
 }
 
 
 /*
  * Add a new character button if needs.
  */
-MudderySelectChar.prototype.addNewCharButton = function() {
-    this.select(".character-list .button-new").remove();
-
-    if (this.characters.length < this.max_number) {
-    	var container = this.select(".character-list");
-
-    	var item = $("<button>")
-            .addClass("button-new button-long")
-            .attr("type", "button")
-            .text(core.trans("New Character"))
-            .appendTo(container);
-
-        this.onClick(".button-new", this.onNewCharacter);
+MudderySelectChar.prototype.setNewCharButton = function() {
+    if (this.characters.length >= this.max_number) {
+        this.select(".character-list .button-new").hide();
+    }
+    else {
+    	this.select(".character-list .button-new").show();
     }
 }
 
@@ -1961,7 +1955,7 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
             block.find(".position-name").hide();
 
             if (equip["icon"]) {
-                icon_url = settings.resource_url + icon;
+                icon_url = settings.resource_url + equip["icon"];
             }
             if (equip["name"]) {
                 name = core.text2html.parseHtml(equip["name"]);
@@ -2011,6 +2005,29 @@ MudderyInventory.prototype.constructor = MudderyInventory;
  * Bind events.
  */
 MudderyInventory.prototype.bindEvents = function() {
+    $(window).bind("resize", this.onResize);
+}
+
+/*
+ * Event when the window size changed.
+ */
+MudderyInventory.prototype.onResize = function(element) {
+    mud.inventory_window.resetSize();
+}
+
+/*
+ * Set inventory list's width.
+ */
+MudderyInventory.prototype.resetSize = function() {
+    var items = this.select(".inventory-list").children();
+    if (items.length == 0) {
+        return;
+    }
+
+    var block_width = this.select(".inventory-block").width();
+    var item_width = $(items).outerWidth(true);
+    var list_width = Math.floor(block_width / item_width) * item_width + 1;
+    this.select(".inventory-list").width(list_width);
 }
 
 /*
@@ -2035,45 +2052,38 @@ MudderyInventory.prototype.setInventory = function(inventory) {
 
     for (var i = 0; i < inventory.length; i++) {
         var obj = inventory[i];
-        var row = $("<tr>")
-            .addClass("object-row")
-            .data("index", i);
+        var item = $("<div>")
+            .addClass("inventory-item")
+            .appendTo(container);
 
-        var cell = $("<td>");
-
-        // icon
         if (obj["icon"]) {
-            var div = $("<div>")
-                .addClass("icon-div")
-                .appendTo(cell);
-
-            var image = $("<img>")
+            // Add icon.
+            $("<img>")
                 .addClass("icon-image")
                 .attr("src", settings.resource_url + obj["icon"])
-                .appendTo(div);
+                .appendTo(item);
+        }
+        else {
+            // Use name.
+            name = core.text2html.parseHtml(obj["name"]);
+            item.html(name);
         }
 
-        // name
-        $("<div>")
-            .html(core.text2html.parseHtml(obj["name"]))
-            .appendTo(cell);
-        cell.appendTo(row);
+        // Equipped
+        if ("equipped" in obj && obj["equipped"]) {
+            $("<div>")
+                .addClass("equipped")
+                .text(core.trans("EQ"))
+                .appendTo(item);
+        }
 
         // number
-        var number = obj["number"];
-        if ("equipped" in obj && obj["equipped"]) {
-            number += " (equipped)";
+        if (obj["number"] != 1 || obj["can_remove"]) {
+            $("<div>")
+                .addClass("number")
+                .text(obj["number"])
+                .appendTo(item);
         }
-        $("<td>")
-            .text(number)
-            .appendTo(row);
-
-        // desc
-        $("<td>")
-            .html(core.text2html.parseHtml(obj["desc"]))
-            .appendTo(row);
-
-        row.appendTo(container);
     }
 
     this.onClick(".object-row", this.onLook);

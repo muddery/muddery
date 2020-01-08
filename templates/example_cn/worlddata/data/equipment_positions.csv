@@ -1,5 +1,7 @@
 key,name,desc
-POSITION_HEAD,头,头
-POSITION_CHEST,身,身体
-POSITION_HAND,手,手
-POSITION_LEG,腿,腿
+HEAD,头,头
+CHEST,身,身体
+HAND,手,手
+LEG,腿,腿
+FOOT,脚,脚
+WEAPON,武器,武器

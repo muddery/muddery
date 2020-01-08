@@ -769,6 +769,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     "name": item.name,          # item's name
                     "number": item.db.number,   # item's number
                     "desc": item.db.desc,       # item's desc
+                    "can_remove": item.can_remove,
                     "icon": getattr(item, "icon", None)}  # item's icon
             
             if getattr(item, "equipped", False):

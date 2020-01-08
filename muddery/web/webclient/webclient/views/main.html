@@ -141,8 +141,9 @@
                 <div class="character-list">
                 </div>
                 <div class="button-bar">
-                    <button type="button" class="button-password button-short">修改密码</button>
-                    <button type="button" class="button-logout button-short">退出</button>
+                    <button type="button" class="button-new button-short left">添加角色</button>
+                    <button type="button" class="button-logout button-short right">退出</button>
+                    <button type="button" class="button-password button-short right">修改密码</button>
                 </div>
             </div>
 
@@ -156,8 +157,8 @@
                     <input class="new-char-name long-input-box" type="text" placeholder="请输入角色名字" autocomplete="off" />
                 </div>
                 <div class="button-bar">
-                    <button type="button" class="button-create button-short">创建</button>
-                    <button type="button" class="button-cancel button-short">放弃</button>
+                    <button type="button" class="button-create button-short left">创建</button>
+                    <button type="button" class="button-cancel button-short right">放弃</button>
                 </div>
             </div>
 
@@ -251,6 +252,7 @@
                             <span class="header-text">状态</span>
                         </div>
                         <div class="equipments">
+                            <div class="equipments-body"></div>
                             <div class="equipments-row">
                                 <div class="equipment-block position-left hidden">
                                     <div class="position-name"></div>
@@ -321,20 +323,11 @@
 
                     <div id="inventory-window" class="game-content-window hidden">
                         <div class="title-bar">
-                            <span class="header-text">Inventory</span>
+                            <span class="header-text">物品</span>
                         </div>
-                        <div>
-                            <table class="inventory-table" frame="border" rules="all">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Num</th>
-                                        <th>Desc</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="inventory-list">
-                                </tbody>
-                            </table>
+                        <div class="inventory-block">
+                            <div class="inventory-list">
+                            </div>
                         </div>
                     </div>
 

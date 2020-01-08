@@ -146,6 +146,15 @@ INPUT_FUNC_MODULES = ["evennia.server.inputfuncs", "muddery.server.conf.inputfun
 # Modules that contain prototypes for use with the spawner mechanism.
 PROTOTYPE_MODULES = ["muddery.world.prototypes"]
 
+# Delay to use before sending the evennia.syscmdkeys.CMD_LOGINSTART Command
+# when a new session connects (this defaults the unloggedin-look for showing
+# the connection screen). The delay is useful mainly for telnet, to allow
+# client/server to establish client capabilities like color/mxp etc before
+# sending any text. A value of 0.3 should be enough. While a good idea, it may
+# cause issues with menu-logins and autoconnects since the menu will not have
+# started when the autoconnects starts sending menu commands.
+# Set this to 0 to send initial data to the client when its first login.
+DELAY_CMD_LOGINSTART = 0
 
 ######################################################################
 # Inlinefunc
