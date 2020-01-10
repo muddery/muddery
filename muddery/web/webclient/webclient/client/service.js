@@ -5,8 +5,12 @@ MudderyService = function() {
 MudderyService.prototype = {
 
     // commands
-    cmdString : function(command, args) {
-        return JSON.stringify({"cmd" : command, "args" : args});
+    cmdString : function(command, args, context) {
+        return JSON.stringify({
+            "cmd" : command,
+            "args" : args,
+            "context": context
+        });
     },
     
     sendRawCommand: function(cmd) {
@@ -15,8 +19,8 @@ MudderyService.prototype = {
     
     // functions when user click a command link
     //
-    sendCommandLink: function(cmd, args) {
-        Evennia.msg("text", this.cmdString(cmd, args));
+    sendCommandLink: function(cmd, args, context) {
+        Evennia.msg("text", this.cmdString(cmd, args, context));
     },
     
     doCastSkill : function(skill, target, combat) {
@@ -88,8 +92,8 @@ MudderyService.prototype = {
     },
     
     // look
-    doLook : function(dbref) {
-        Evennia.msg("text", this.cmdString("look", dbref));
+    look: function(dbref, context) {
+        Evennia.msg("text", this.cmdString("look", dbref, context));
     },
 
     // go to

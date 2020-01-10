@@ -8,9 +8,9 @@ import time
 import re
 from django.conf import settings
 from evennia.server.sessionhandler import SESSIONS
-from evennia.commands.command import Command
 from evennia.utils import create, search, logger
 from evennia.utils.utils import make_iter
+from muddery.commands.base_command import BaseCommand
 from muddery.utils import utils
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.builder import create_player, create_character
@@ -33,7 +33,7 @@ PERMISSION_HIERARCHY_LOWER = [perm.lower() for perm in PERMISSION_HIERARCHY]
 # is used to make sure returns go to the right session
 
 
-class CmdQuit(Command):
+class CmdQuit(BaseCommand):
     """
     Quit the game.
 
@@ -70,7 +70,7 @@ class CmdQuit(Command):
         player.disconnect_session_from_account(session)
 
 
-class CmdChangePassword(Command):
+class CmdChangePassword(BaseCommand):
     """
     Quit the game.
 
@@ -112,7 +112,7 @@ class CmdChangePassword(Command):
                     session=session)
 
 
-class CmdPuppet(Command):
+class CmdPuppet(BaseCommand):
     """
     Control an object you have permission to puppet
 
@@ -165,7 +165,7 @@ class CmdPuppet(Command):
             session.msg({"alert":_("{rYou cannot become {C%s{n: %s") % (new_character.name, exc)})
 
 
-class CmdUnpuppet(Command):
+class CmdUnpuppet(BaseCommand):
     """
     stop puppeting
 
@@ -205,7 +205,7 @@ class CmdUnpuppet(Command):
             session.msg({"alert":_("{rCould not unpuppet from {c%s{n: %s" % (old_char, exc))})
             
 
-class CmdCharCreate(Command):
+class CmdCharCreate(BaseCommand):
     """
     Create a new character
 
@@ -271,7 +271,7 @@ class CmdCharCreate(Command):
                      "char_all": player.get_all_characters()})
 
 
-class CmdCharDelete(Command):
+class CmdCharDelete(BaseCommand):
     """
     Delete a character - this cannot be undone!
 
@@ -323,7 +323,7 @@ class CmdCharDelete(Command):
                          "char_all": player.get_all_characters()})
 
 
-class CmdCharDeleteWithPW(Command):
+class CmdCharDeleteWithPW(BaseCommand):
     """
     Delete a character - this cannot be undone!
 
@@ -383,7 +383,7 @@ class CmdCharDeleteWithPW(Command):
                          "char_all": player.get_all_characters()})
 
 
-class CmdCharAll(Command):
+class CmdCharAll(BaseCommand):
     """
     Get all playable characters of the player.
 

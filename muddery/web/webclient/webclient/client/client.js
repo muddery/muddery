@@ -62,6 +62,7 @@ MudderyClient.prototype = {
 
     doShow: function(type, msg) {
         var data = null;
+        var context = null;
         
         if (type == "out") {
             try {
@@ -70,7 +71,8 @@ MudderyClient.prototype = {
                 
                 if (type == "[object Object]") {
                     // Json object.
-                    data = decode;
+                    data = decode["data"];
+                    context = decode["context"];
                 }
                 else if (type == "[object String]") {
                     // String
@@ -102,11 +104,11 @@ MudderyClient.prototype = {
             data = {"msg": msg};
         }
                     
-        this.displayData(data);
+        this.displayData(data, context);
     },
 
     // display all kinds of data
-    displayData : function(data) {
+    displayData : function(data, context) {
         for (var key in data) {
             try {
                 log(key, data[key]);

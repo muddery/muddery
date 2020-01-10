@@ -14,8 +14,8 @@ from evennia.accounts.models import AccountDB
 from evennia.objects.models import ObjectDB
 from evennia.server.models import ServerConfig
 from evennia.utils import logger, utils
-from evennia.commands.command import Command
 from evennia.commands.cmdhandler import CMD_LOGINSTART
+from muddery.commands.base_command import BaseCommand
 from muddery.utils.builder import create_player, create_character
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
@@ -237,7 +237,7 @@ def connect_normal_player(session, name, password):
     return player
 
 
-class CmdUnconnectedConnect(Command):
+class CmdUnconnectedConnect(BaseCommand):
     """
     connect to the game
 
@@ -304,7 +304,7 @@ class CmdUnconnectedConnect(Command):
             session.sessionhandler.login(session, player)
 
 
-class CmdUnconnectedCreate(Command):
+class CmdUnconnectedCreate(BaseCommand):
     """
     create a new player account and login
 
@@ -355,7 +355,7 @@ class CmdUnconnectedCreate(Command):
                 session.msg({"created":{"name": playername, "dbref": new_player.dbref}})
 
 
-class CmdQuickLogin(Command):
+class CmdQuickLogin(BaseCommand):
     """
     Login only with player's name.
 
@@ -411,7 +411,7 @@ class CmdQuickLogin(Command):
                 session.msg({"alert":_("{rYou cannot become {C%s{n: %s") % (character.name, exc)})
 
 
-class CmdUnconnectedQuit(Command):
+class CmdUnconnectedQuit(BaseCommand):
     """
     quit when in unlogged-in state
 
@@ -434,7 +434,7 @@ class CmdUnconnectedQuit(Command):
         session.sessionhandler.disconnect(session, "Good bye! Disconnecting.")
 
 
-class CmdUnconnectedLoginStart(Command):
+class CmdUnconnectedLoginStart(BaseCommand):
     """
     login started unlogged-in state
 

@@ -2006,6 +2006,8 @@ MudderyInventory.prototype.constructor = MudderyInventory;
  */
 MudderyInventory.prototype.bindEvents = function() {
     $(window).bind("resize", this.onResize);
+
+    this.onClick(".inventory-list", ".inventory-item", this.onSelect);
 }
 
 /*
@@ -2033,11 +2035,11 @@ MudderyInventory.prototype.resetSize = function() {
 /*
  * Event when clicks the object link.
  */
-MudderyInventory.prototype.onLook = function(element) {
+MudderyInventory.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.inventory.length) {
         var dbref = this.inventory[index].dbref;
-        core.service.doLook(dbref);
+        core.service.look(dbref, "inventory");
     }
 }
 
@@ -2054,6 +2056,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
         var obj = inventory[i];
         var item = $("<div>")
             .addClass("inventory-item")
+            .data("index", i)
             .appendTo(container);
 
         if (obj["icon"]) {
@@ -2085,8 +2088,6 @@ MudderyInventory.prototype.setInventory = function(inventory) {
                 .appendTo(item);
         }
     }
-
-    this.onClick(".object-row", this.onLook);
 }
 
 

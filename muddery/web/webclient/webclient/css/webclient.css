@@ -48,6 +48,7 @@
     --inventory-background: url(../img/main_background.png);
     --inventory-title-bar: url(../img/status_title_bar.png);
     --inventory-item-back: url(../img/inventory_item_back.png);
+    --inventory-item-info-back: url(../img/inventory_item_info_back.png);
 }
 
 html {
@@ -1031,11 +1032,15 @@ body {
 }
 
 #inventory-window .inventory-block {
-    padding: 0.1rem 0.1rem;
+    width: 100%;
+    height: 100%;
+    padding: 0.1rem 0.1rem 1.7rem 0.1rem;
     text-align: center;
 }
 
 #inventory-window .inventory-list {
+    width: 100%;
+    height: 1.2rem;
     margin: 0 auto;
     text-align: left;
 }
@@ -1080,6 +1085,33 @@ body {
     font-weight: 700;
 }
 
+#inventory-window .item-info-block {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 1.8rem;
+    background: no-repeat center;
+    background-image: var(--inventory-item-info-back);
+    background-size: 100% 100%;
+}
+
+#inventory-window .item-info {
+    width: 100%;
+    height: 100%;
+}
+
+#inventory-window .item-info-left {
+    width: 1.0rem;
+    height: 100%;
+    float: left;
+}
+
+#inventory-window .item-desc {
+    width: 100%;
+    height: 100%;
+    padding-left: 1.0rem;
+    float: right;
+}
 /************* inventory window end *************/
 
 
