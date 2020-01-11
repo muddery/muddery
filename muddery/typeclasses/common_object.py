@@ -87,6 +87,18 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         self.db.number -= number
         return
 
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        # Get name, description and available commands.
+        info = super(MudderyCommonObject, self).get_appearance(caller)
+
+        info["number"] = self.db.number
+        info["can_remove"] = self.can_remove
+        return info
+
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.

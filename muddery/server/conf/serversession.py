@@ -49,7 +49,7 @@ class ServerSession(BaseServerSession):
             kwargs["options"] = {}
 
         raw = options.get("raw", False)
-        context = options.get("context", "")
+        context = kwargs.get("context", "")
 
         if raw:
             out_text = text

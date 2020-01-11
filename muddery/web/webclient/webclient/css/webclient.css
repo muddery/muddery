@@ -41,7 +41,7 @@
     --character-background: url(../img/main_background.png);
     --character-title-bar: url(../img/main_title_bar.png);
     --character-title-icon-back: url(../img/title_icon_back.png);
-    --character-equipments-body: url(../img/equipments_body.png);
+    --character-equipments-body: url(../img/equipments_body_female.png);
     --character-equipment-icon-back: url(../img/equipment_icon_back.png);
     --character-data-back: url(../img/character_data_back.png);
 
@@ -49,6 +49,8 @@
     --inventory-title-bar: url(../img/status_title_bar.png);
     --inventory-item-back: url(../img/inventory_item_back.png);
     --inventory-item-info-back: url(../img/inventory_item_info_back.png);
+    --inventory-item-info-left-back: url(../img/inventory_item_info_left_back.png);
+    --inventory-item-info-icon-back: url(../img/inventory_item_info_icon_back.png);
 }
 
 html {
@@ -1048,9 +1050,9 @@ body {
 #inventory-window .inventory-item {
     position: relative;
     display: inline-block;
-    width: 0.54rem;
-    height: 0.54rem;
-    margin: 0.02rem;
+    width: 0.44rem;
+    height: 0.44rem;
+    margin: 0.04rem;
     line-height: 0.54rem;
     text-align: center;
     font-size: 0.14rem;
@@ -1060,8 +1062,8 @@ body {
 }
 
 #inventory-window .inventory-item .icon-image {
-    width: 0.5rem;
-    height: 0.5rem;
+    width: 0.4rem;
+    height: 0.4rem;
     margin: 0.02rem;
 }
 
@@ -1098,20 +1100,65 @@ body {
 #inventory-window .item-info {
     width: 100%;
     height: 100%;
+    text-align: left;
 }
 
 #inventory-window .item-info-left {
-    width: 1.0rem;
+    width: 0.8rem;
     height: 100%;
-    float: left;
+    padding: 0.1rem;
+    text-align: center;
+    background: no-repeat center;
+    background-image: var(--inventory-item-info-left-back);
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
 
-#inventory-window .item-desc {
+#inventory-window .item-info-left .icon {
+    position: relative;
+    width: 0.34rem;
+    height: 0.34rem;
+    margin: 0 auto 0.05rem auto;
+    background: no-repeat center;
+    background-image: var(--inventory-item-info-icon-back);
+    background-size: 100% 100%;
+}
+
+#inventory-window .item-info-left .icon-image {
+    width: 0.3rem;
+    height: 0.3rem;
+    margin: 0.02rem;
+}
+
+#inventory-window .item-info-left .number {
+    position: absolute;
+    bottom: 0.01rem;
+    right: 0.035rem;
+    color: #fff;
+    line-height: 0.14rem;
+    font-size: 0.12rem;
+    font-weight: 700;
+}
+
+#inventory-window .name {
+    font-size: 0.12rem;
+    font-weight: 700;
+    color: #333;
+}
+
+#inventory-window .desc {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    padding-left: 1.0rem;
-    float: right;
+    padding: 0.1rem 0.1rem 0.1rem 0.9rem;
+    font-size: 0.13rem;
+    color: #333;
 }
+
 /************* inventory window end *************/
 
 

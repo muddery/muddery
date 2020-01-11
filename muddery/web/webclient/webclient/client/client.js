@@ -67,14 +67,17 @@ MudderyClient.prototype = {
         if (type == "out") {
             try {
                 var decode = JSON.parse(msg);
-                var type = Object.prototype.toString.call(decode);
                 
-                if (type == "[object Object]") {
+                if (typeof(decode) == "object") {
                     // Json object.
                     data = decode["data"];
                     context = decode["context"];
+
+                    if (typeof(data) == "string") {
+                        data = {"msg": data};
+                    }
                 }
-                else if (type == "[object String]") {
+                else if (typeof(decode) == "string") {
                     // String
                     data = {"msg": decode};
                 }
@@ -160,8 +163,13 @@ MudderyClient.prototype = {
                     mud.main_frame.showPlayerOffline(data[key]);
                 }
                 else if (key == "look_obj") {
-        			mud.popup_object.setObject(data[key]);
-        			mud.popup_object.show();
+                    if (context == "inventory") {
+                        mud.inventory_window.showObject(data[key]);
+                    }
+                    else {
+        			    mud.popup_object.setObject(data[key]);
+        			    mud.popup_object.show();
+        			}
                 }
                 else if (key == "dialogue") {
                     mud.popup_dialogue.setDialogue(data[key], core.data_handler.getEscapes());

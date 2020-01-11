@@ -2081,13 +2081,33 @@ MudderyInventory.prototype.setInventory = function(inventory) {
         }
 
         // number
-        if (obj["number"] != 1 || obj["can_remove"]) {
+        if (obj["number"] != 1 || !obj["can_remove"]) {
             $("<div>")
                 .addClass("number")
                 .text(obj["number"])
                 .appendTo(item);
         }
     }
+}
+
+/*
+ * Show the object's information.
+ */
+MudderyInventory.prototype.showObject = function(obj) {
+    this.select(".item-info .icon-image").attr("src", settings.resource_url + obj["icon"]);
+
+    // number
+    if (obj["number"] != 1 || !obj["can_remove"]) {
+        this.select(".item-info .number").text(obj["number"]);
+    }
+    else {
+        this.select(".item-info .number").text("");
+    }
+
+    this.select(".item-info .name").html(core.text2html.parseHtml(obj["name"]));
+    this.select(".item-info .desc").html(core.text2html.parseHtml(obj["desc"]));
+
+    this.select(".item-info").show();
 }
 
 
