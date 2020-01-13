@@ -1996,6 +1996,8 @@ MudderyInventory = function(el) {
 	BaseController.call(this, el);
 
 	this.inventory = [];
+	this.item_selected = null;
+	this.buttons = [];
 }
 
 MudderyInventory.prototype = prototype(BaseController.prototype);
@@ -2008,6 +2010,53 @@ MudderyInventory.prototype.bindEvents = function() {
     $(window).bind("resize", this.onResize);
 
     this.onClick(".inventory-list", ".inventory-item", this.onSelect);
+    this.onClick(".item-info", ".button", this.onCommand);
+}
+
+/*
+ * Reset the item info window.
+ */
+MudderyInventory.prototype.reset = function() {
+    this.select(".item-info").hide();
+    this.item_selected = null;
+}
+
+/*
+ * Event when clicks a command button.
+ */
+MudderyInventory.prototype.onCommand = function(element) {
+	var index = $(element).data("index");
+	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
+	    if (!this.buttons[index]["confirm"]) {
+		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		}
+		else {
+		    var self = this;
+			var buttons = [
+            {
+                "name": core.trans("Cancel")
+            },
+            {
+                "name": core.trans("Confirm"),
+                "callback": function(data) {
+                    self.confirmCommand(data);
+                },
+                "data": index,
+            }
+        ];
+        mud.main_frame.popupMessage(core.trans("Warning"),
+                                    this.buttons[index]["confirm"],
+                                    buttons);
+		}
+	}
+}
+
+/*
+ * Confirm the command.
+ */
+MudderyInventory.prototype.confirmCommand = function(data) {
+	var index = data;
+    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 }
 
 /*
@@ -2038,8 +2087,8 @@ MudderyInventory.prototype.resetSize = function() {
 MudderyInventory.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.inventory.length) {
-        var dbref = this.inventory[index].dbref;
-        core.service.look(dbref, "inventory");
+        this.item_selected = this.inventory[index].dbref;
+        core.service.look(this.item_selected, "inventory");
     }
 }
 
@@ -2052,6 +2101,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
     var container = this.select(".inventory-list");
     container.empty();
 
+    var has_selected_item = false;
     for (var i = 0; i < inventory.length; i++) {
         var obj = inventory[i];
         var item = $("<div>")
@@ -2087,6 +2137,18 @@ MudderyInventory.prototype.setInventory = function(inventory) {
                 .text(obj["number"])
                 .appendTo(item);
         }
+
+        if (obj["dbref"] == this.item_selected) {
+            has_selected_item = true;
+        }
+    }
+
+    if (has_selected_item) {
+        core.service.look(this.item_selected, "inventory");
+    }
+    else {
+        this.item_selected = null;
+        this.select(".item-info").hide();
     }
 }
 
@@ -2095,6 +2157,14 @@ MudderyInventory.prototype.setInventory = function(inventory) {
  */
 MudderyInventory.prototype.showObject = function(obj) {
     this.select(".item-info .icon-image").attr("src", settings.resource_url + obj["icon"]);
+
+    // Equipped
+    if ("equipped" in obj && obj["equipped"]) {
+        this.select(".item-info .equipped").text(core.trans("EQ"));
+    }
+    else {
+        this.select(".item-info .equipped").text("");
+    }
 
     // number
     if (obj["number"] != 1 || !obj["can_remove"]) {
@@ -2106,6 +2176,18 @@ MudderyInventory.prototype.showObject = function(obj) {
 
     this.select(".item-info .name").html(core.text2html.parseHtml(obj["name"]));
     this.select(".item-info .desc").html(core.text2html.parseHtml(obj["desc"]));
+
+    // buttons
+    this.buttons = obj["cmds"];
+    var container = this.select(".item-info-left .buttons");
+    container.children().remove();
+    for (var i = 0; i < obj.cmds.length; i++) {
+        $("<div>")
+            .addClass("button")
+            .data("index", i)
+            .text(obj.cmds[i].name)
+            .appendTo(container);
+    }
 
     this.select(".item-info").show();
 }
@@ -2370,7 +2452,7 @@ MudderyScene.prototype.onObject = function(element) {
     var index = $(element).data("index");
     var dbref = this.scene["things"][index]["dbref"];
     dbref = dbref.slice(1);
-    core.service.doLook(dbref);
+    core.service.look(dbref, "scene");
 }
 
 /*

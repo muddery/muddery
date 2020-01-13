@@ -166,7 +166,7 @@ MudderyClient.prototype = {
                     if (context == "inventory") {
                         mud.inventory_window.showObject(data[key]);
                     }
-                    else {
+                    else if (context == "scene") {
         			    mud.popup_object.setObject(data[key]);
         			    mud.popup_object.show();
         			}

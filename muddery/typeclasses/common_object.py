@@ -107,7 +107,12 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         commands = []
         if self.db.number > 0:
             if self.location and self.can_discard:
-                commands.append({"name":_("Discard"), "cmd":"discard", "args":self.dbref})
+                commands.append({
+                    "name": _("Discard"),
+                    "cmd": "discard",
+                    "args": self.dbref,
+                    "confirm": _("Discard this object?"),
+                })
         return commands
 
     def take_effect(self, user, number):
@@ -183,10 +188,12 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         commands = []
+
         if self.db.number > 0:
             commands.append({"name": _("Use"), "cmd": "use", "args": self.dbref})
-            if self.location and self.can_discard:
-                commands.append({"name": _("Discard"), "cmd": "discard", "args": self.dbref})
+
+        commands.extend(super(MudderyFood, self).get_available_commands(caller))
+
         return commands
 
 
@@ -242,6 +249,7 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         commands = []
+
         if self.db.number > 0:
             if getattr(self, "equipped", False):
                 commands.append({"name":_("Take Off"), "cmd":"takeoff", "args":self.dbref})
@@ -250,7 +258,12 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
 
                 # Can not discard when equipped
                 if self.location and self.can_discard:
-                    commands.append({"name":_("Discard"), "cmd":"discard", "args":self.dbref})
+                    commands.append({
+                        "name": _("Discard"),
+                        "cmd": "discard",
+                        "args": self.dbref,
+                        "confirm": _("Discard this object?"),
+                    })
 
         return commands
 
@@ -271,8 +284,9 @@ class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
         commands = []
         if self.db.number > 0:
             commands.append({"name": _("Use"), "cmd": "use", "args": self.dbref})
-            if self.location and self.can_discard:
-                commands.append({"name": _("Discard"), "cmd": "discard", "args": self.dbref})
+
+        commands.extend(super(MudderySkillBook, self).get_available_commands(caller))
+
         return commands
 
     def take_effect(self, user, number):
