@@ -464,13 +464,13 @@ class CmdEquip(BaseCommand):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":_("You should equip something.")})
+            caller.msg({"alert": _("You should equip something.")})
             return
 
         obj = caller.search_dbref(self.args, location=caller)
         if not obj:
             # If the caller does not have this equipment.
-            caller.msg({"alert":_("You don't have this equipment.")})
+            caller.msg({"alert": _("You don't have this equipment.")})
             return
 
         try:

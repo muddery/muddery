@@ -48,7 +48,7 @@ MudderyMainFrame.prototype.popupMessage = function(header, content, buttons) {
 	mud.popup_message.setMessage(header, content, buttons);
     mud.popup_message.show();
 }
-  
+
 /*  
  * Show shop window.
  */

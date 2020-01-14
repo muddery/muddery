@@ -23,6 +23,20 @@
                 </div>
             </div>
 
+            <!-- popup alert window -->
+            <div id="popup-alert" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text"></span>
+                    </div>
+                    <div class="popup-body"></div>
+                    <div class="popup-footer">
+                        <div class="popup-buttons"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- popup object window -->
             <div id="popup-object" class="popup-window hidden">
                 <div class="popup-box">
@@ -349,19 +363,25 @@
 
                     <div id="skills-window" class="game-content-window hidden">
                         <div class="title-bar">
-                            <span class="header-text">Skills</span>
+                            <span class="header-text">技能</span>
                         </div>
-                        <div>
-                            <table class="skills-table" frame="border" rules="all">
-                                <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Desc</th>
-                                </tr>
-                                </thead>
-                                <tbody class="skill-list">
-                                </tbody>
-                            </table>
+                        <div class="skills-block">
+                            <div class="skills-list">
+                            </div>
+                        </div>
+                        <div class="skill-info-block">
+                            <div class="skill-info hidden">
+                                <div class="skill-info-left">
+                                    <div class="icon" >
+                                        <img class="icon-image" src=""/>
+                                    </div>
+                                    <div class="buttons"></div>
+                                </div>
+                                <div class="skill-info-right">
+                                    <div class="name"></div>
+                                    <div class="desc"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

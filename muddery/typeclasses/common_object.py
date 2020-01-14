@@ -243,6 +243,17 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
                 value += getattr(user.prop, key)
                 setattr(user.prop, key, value)
 
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        # Get name, description and available commands.
+        info = super(MudderyEquipment, self).get_appearance(caller)
+
+        info["equipped"] = getattr(self, "equipped", False)
+        return info
+
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -252,9 +263,17 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
 
         if self.db.number > 0:
             if getattr(self, "equipped", False):
-                commands.append({"name":_("Take Off"), "cmd":"takeoff", "args":self.dbref})
+                commands.append({
+                    "name": _("Take Off"),
+                    "cmd": "takeoff",
+                    "args": self.dbref,
+                })
             else:
-                commands.append({"name":_("Equip"), "cmd":"equip", "args":self.dbref})
+                commands.append({
+                    "name": _("Equip"),
+                    "cmd": "equip",
+                    "args": self.dbref
+                })
 
                 # Can not discard when equipped
                 if self.location and self.can_discard:

@@ -1012,7 +1012,8 @@ body {
 
 
 /************* inventory window begin *************/
-#inventory-window {
+#inventory-window,
+#skills-window {
     position: relative;
     width: 100%;
     height: 100%;
@@ -1022,7 +1023,8 @@ body {
     background-size: 100% 100%;
 }
 
-#inventory-window .title-bar {
+#inventory-window .title-bar,
+#skills-window .title-bar {
     position: relative;
     width: 100%;
     height: 0.4rem;
@@ -1037,7 +1039,8 @@ body {
     background-size: 100% 100%;
 }
 
-#inventory-window .inventory-block {
+#inventory-window .inventory-block,
+#skills-window .skills-block {
     width: 100%;
     height: 100%;
     padding: 0.1rem 0.1rem 2.9rem 0.1rem;
@@ -1047,7 +1050,8 @@ body {
     -webkit-box-sizing: border-box;
 }
 
-#inventory-window .inventory-list {
+#inventory-window .inventory-list,
+#skills-window .skills-list {
     width: 100%;
     height: 100%;
     margin: 0 auto;
@@ -1055,7 +1059,8 @@ body {
 }
 
 #inventory-window .inventory-item,
-#inventory-window .item-info-left .icon {
+#inventory-window .item-info-left .icon,
+#skills-window .skill-info-left .icon, {
     position: relative;
     width: 0.44rem;
     height: 0.44rem;
@@ -1070,19 +1075,22 @@ body {
     background-image: var(--inventory-item-back);
 }
 
-#inventory-window .item-info-left .icon {
+#inventory-window .item-info-left .icon,
+#skills-window .skill-info-left .icon{
     margin: 0 auto 0.1rem auto;
     background-image: var(--inventory-item-info-icon-back);
 }
 
 #inventory-window .inventory-item .icon-image,
-#inventory-window .item-info-left .icon-image {
+#inventory-window .item-info-left .icon-image,
+#skills-window .skill-info-left .icon-image{
     width: 0.4rem;
     height: 0.4rem;
     margin: 0.02rem;
 }
 
-#inventory-window .inventory-item .equipped {
+#inventory-window .inventory-item .equipped,
+#inventory-window .item-info-left .equipped {
     position: absolute;
     top: 0.02rem;
     right: 0.04rem;
@@ -1103,7 +1111,8 @@ body {
     font-weight: 700;
 }
 
-#inventory-window .item-info-block {
+#inventory-window .item-info-block,
+#skills-window .skill-info-block {
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -1113,13 +1122,15 @@ body {
     background-size: 100% 100%;
 }
 
-#inventory-window .item-info {
+#inventory-window .item-info,
+#skills-window .skill-info {
     width: 100%;
     height: 100%;
     text-align: left;
 }
 
-#inventory-window .item-info-left {
+#inventory-window .item-info-left,
+#skills-window .skill-info-left {
     float: left;
     width: 0.8rem;
     height: 100%;
@@ -1133,14 +1144,16 @@ body {
     -webkit-box-sizing: border-box;
 }
 
-#inventory-window .item-info-right {
+#inventory-window .item-info-right,
+#skills-window .skill-info-right {
     width: 100%;
     height: 100%;
     padding: 0.1rem;
     margin-left: 0.8rem;
 }
 
-#inventory-window .item-info-left .button {
+#inventory-window .item-info .button,
+#skills-window .skill-info .button {
     width: 0.6rem;
     height: 0.3rem;
     line-height: 0.3rem;
@@ -1152,7 +1165,8 @@ body {
     background-size: 100% 100%;
 }
 
-#inventory-window .name {
+#inventory-window .item-info .name,
+#skills-window .skill-info .name {
     width: 100%;
     font-size: 0.13rem;
     font-weight: 700;
@@ -1160,7 +1174,8 @@ body {
     margin-bottom: 0.05rem;
 }
 
-#inventory-window .desc {
+#inventory-window .item-info .desc,
+#skills-window .skill-info .desc {
     width: 100%;
     font-size: 0.13rem;
     color: #333;
@@ -1169,10 +1184,7 @@ body {
 
 
 /************* skills window begin *************/
-#skills-window .skills-table {
-    width: 100%;
-    font-size: 12px;
-}
+
 
 /************* skills window end *************/
 
