@@ -2216,17 +2216,31 @@ MudderySkills.prototype.constructor = MudderySkills;
  * Bind events.
  */
 MudderySkills.prototype.bindEvents = function() {
+    this.onClick(".skills-list", ".skill-item", this.onSelect);
+    this.onClick(".skill-info", ".button", this.onCommand);
 }
 
 /*
  * Event when clicks the skill link.
  */
-MudderySkills.prototype.onLook = function(element) {
+MudderySkills.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.skills.length) {
         var dbref = this.skills[index].dbref;
-        core.service.doLook(dbref);
+        core.service.look(dbref, "skills");
     }
+}
+
+/*
+ * Event when clicks a command button.
+ */
+MudderySkills.prototype.onCommand = function(element) {
+	var index = $(element).data("index");
+	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
+	    if (!this.buttons[index]["confirm"]) {
+		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		}
+	}
 }
 
 /*
@@ -2235,44 +2249,89 @@ MudderySkills.prototype.onLook = function(element) {
 MudderySkills.prototype.setSkills = function(skills) {
     this.skills = skills;
 
-    var container = this.select(".skill-list");
+    var container = this.select(".skills-list");
     container.empty();
 
+    var has_selected_item = false;
     for (var i = 0; i < skills.length; i++) {
         var obj = skills[i];
-        var row = $("<tr>")
-            .addClass("object-row")
-            .data("index", i);
+        var item = $("<div>")
+            .addClass("skill-item")
+            .data("index", i)
+            .appendTo(container);
 
-        var cell = $("<td>");
+        var icon = $("<div>")
+            .addClass("icon")
+            .appendTo(item);
 
-        // icon
         if (obj["icon"]) {
-            var div = $("<div>")
-                .addClass("icon-div")
-                .appendTo(cell);
-
-            var image = $("<img>")
+            // Add icon.
+            $("<img>")
                 .addClass("icon-image")
                 .attr("src", settings.resource_url + obj["icon"])
-                .appendTo(div);
+                .appendTo(icon);
         }
 
-        // name
+        var info = $("<div>")
+            .addClass("info")
+            .appendTo(item);
+
+        // Name
         $("<div>")
+            .addClass("name")
             .html(core.text2html.parseHtml(obj["name"]))
-            .appendTo(cell);
-        cell.appendTo(row);
+            .appendTo(info);
 
-        // desc
-        $("<td>")
-            .html(core.text2html.parseHtml(obj["desc"]))
-            .appendTo(row);
+        // passive
+        if ("passive" in obj && obj["passive"]) {
+            $("<div>")
+                .addClass("passive")
+                .text(core.trans("Passive"))
+                .appendTo(info);
+        }
 
-        row.appendTo(container);
+        if (obj["dbref"] == this.item_selected) {
+            has_selected_item = true;
+        }
     }
 
-	this.onClick(".object-row", this.onLook);
+    if (has_selected_item) {
+        core.service.look(this.item_selected, "skills");
+    }
+    else {
+        this.item_selected = null;
+        this.select(".skill-info").hide();
+    }
+}
+
+/*
+ * Show the skill's information.
+ */
+MudderySkills.prototype.showSkill = function(skill) {
+    this.select(".skill-info .icon-image").attr("src", settings.resource_url + skill["icon"]);
+    this.select(".skill-info .name").html(core.text2html.parseHtml(skill["name"]));
+    this.select(".skill-info .desc").html(core.text2html.parseHtml(skill["desc"]));
+
+    if ("passive" in skill && skill["passive"]) {
+        this.select(".skill-info .passive").text(core.trans("Passive"));
+    }
+    else {
+        this.select(".skill-info .passive").text("");
+    }
+
+    // buttons
+    this.buttons = skill["cmds"];
+    var container = this.select(".skill-info-left .buttons");
+    container.children().remove();
+    for (var i = 0; i < skill["cmds"].length; i++) {
+        $("<div>")
+            .addClass("button")
+            .data("index", i)
+            .text(skill["cmds"][i].name)
+            .appendTo(container);
+    }
+
+    this.select(".skill-info").show();
 }
 
 
@@ -2298,17 +2357,49 @@ MudderyQuests.prototype.constructor = MudderyQuests;
  * Bind events.
  */
 MudderyQuests.prototype.bindEvents = function() {
+    this.onClick(".quests-list", ".quest-item", this.onSelect);
+    this.onClick(".quest-info", ".button", this.onCommand);
 }
 
 /*
  * Event when clicks the quest link.
  */
-MudderyQuests.prototype.onLook = function(element) {
+MudderyQuests.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.quests.length) {
         var dbref = this.quests[index].dbref;
-        core.service.doLook(dbref);
+        core.service.look(dbref, "quests");
     }
+}
+
+/*
+ * Event when clicks a command button.
+ */
+MudderyQuests.prototype.onCommand = function(element) {
+	var index = $(element).data("index");
+	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
+	    if (!this.buttons[index]["confirm"]) {
+		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		}
+		else {
+		    var self = this;
+			var buttons = [
+            {
+                "name": core.trans("Cancel")
+            },
+            {
+                "name": core.trans("Confirm"),
+                "callback": function(data) {
+                    self.confirmCommand(data);
+                },
+                "data": index,
+            }
+        ];
+        mud.main_frame.popupMessage(core.trans("Warning"),
+                                    this.buttons[index]["confirm"],
+                                    buttons);
+		}
+	}
 }
 
 /*
@@ -2317,84 +2408,120 @@ MudderyQuests.prototype.onLook = function(element) {
 MudderyQuests.prototype.setQuests = function(quests) {
     this.quests = quests;
 
-    var container = this.select(".quest-list");
+    var container = this.select(".quests-list");
     container.empty();
 
+    var has_selected_item = false;
     for (var i = 0; i < quests.length; i++) {
         var obj = quests[i];
-        var row = $("<tr>")
-            .addClass("object-row")
-            .data("index", i);
+        var item = $("<div>")
+            .addClass("quest-item")
+            .data("index", i)
+            .appendTo(container);
 
-        var cell = $("<td>");
-
-        // icon
-        if (obj["icon"]) {
-            var div = $("<div>")
-                .addClass("icon-div")
-                .appendTo(cell);
-
-            var image = $("<img>")
-                .addClass("icon-image")
-                .attr("src", settings.resource_url + obj["icon"])
-                .appendTo(div);
-        }
-
-        // name
+        // Name
         $("<div>")
+            .addClass("name")
             .html(core.text2html.parseHtml(obj["name"]))
-            .appendTo(cell);
-        cell.appendTo(row);
-
-        // desc
-        $("<td>")
-            .html(core.text2html.parseHtml(obj["desc"]))
-            .appendTo(row);
+            .appendTo(item);
 
         // objectives
-        var td = $("<td>");
-        for (var j = 0; j < obj["objectives"].length; j++) {
-            var objective = obj["objectives"][j];
-            var item = $("<p>");
-            if ("desc" in objective) {
-                item.text(objective["desc"]);
+        if (obj["objectives"].length > 0) {
+            $("<div>")
+                .addClass("objective-title")
+                .text(core.trans("Tasks:"))
+                .appendTo(item);
+
+            var obj_list = $("<div>")
+                .addClass("objective-list")
+                .appendTo(item);
+
+            for (var j = 0; j < obj["objectives"].length; j++) {
+                var objective = obj["objectives"][j];
+                var row = $("<p>")
+                    .addClass("objective");
+
+                if ("desc" in objective) {
+                    row.text(objective["desc"]);
+                }
+                else {
+                    row.text(objective["target"] + " " +
+                             objective["object"] + " " +
+                             objective["accomplished"] + "/" +
+                             objective["total"]);
+                }
+                row.appendTo(obj_list);
             }
-            else {
-                item.text(objective["target"] + " " +
-                          objective["object"] + " " +
-                          objective["accomplished"] + "/" +
-                          objective["total"]);
-            }
-            item.appendTo(td);
         }
-        td.appendTo(row);
 
-        row.appendTo(container);
-	}
+        if (obj["dbref"] == this.item_selected) {
+            has_selected_item = true;
+        }
+    }
 
-	this.onClick(".object-row", this.onLook);
+    if (has_selected_item) {
+        core.service.look(this.item_selected, "quests");
+    }
+    else {
+        this.item_selected = null;
+        this.select(".quest-info").hide();
+    }
 }
+
 
 /*
- * Add quest's objectives.
+ * Show the quest's information.
  */
-MudderyQuests.prototype.addObjectives = function(container, objectives) {
-	var template = container.find(".quest_objective>p.template");
-	for (var i in objectives) {
-		var item = this.cloneTemplate(template);
+MudderyQuests.prototype.showQuest = function(quest) {
+    this.select(".quest-info .name").html(core.text2html.parseHtml(quest["name"]));
+    this.select(".quest-info .desc").html(core.text2html.parseHtml(quest["desc"]));
 
-		if ("desc" in objectives[i]) {
-			item.text(objectives[i]["desc"]);
-		}
-		else {
-			item.text(objectives[i]["target"] + " " +
-					  objectives[i]["object"] + " " +
-					  objectives[i]["accomplished"] + "/" +
-					  objectives[i]["total"]);
-		}
-	}
+    // objectives
+    var obj_block = this.select(".quest-info .objective-block");
+    obj_block.children().remove();
+
+    if (quest["objectives"].length > 0) {
+        $("<div>")
+            .addClass("objective-title")
+            .text(core.trans("Tasks:"))
+            .appendTo(obj_block);
+
+        var obj_list = $("<div>")
+            .addClass("objective-list")
+            .appendTo(obj_block);
+
+        for (var j = 0; j < quest["objectives"].length; j++) {
+            var objective = quest["objectives"][j];
+            var row = $("<p>")
+                .addClass("objective");
+
+            if ("desc" in objective) {
+                row.text(objective["desc"]);
+            }
+            else {
+                row.text(objective["target"] + " " +
+                         objective["object"] + " " +
+                         objective["accomplished"] + "/" +
+                         objective["total"]);
+            }
+            row.appendTo(obj_list);
+        }
+    }
+
+    // buttons
+    this.buttons = quest["cmds"];
+    var container = this.select(".quest-info .buttons");
+    container.children().remove();
+    for (var i = 0; i < quest["cmds"].length; i++) {
+        $("<div>")
+            .addClass("button")
+            .data("index", i)
+            .text(quest["cmds"][i].name)
+            .appendTo(container);
+    }
+
+    this.select(".quest-info").show();
 }
-
 
 /******************************************
  *

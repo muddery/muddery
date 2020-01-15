@@ -164,4 +164,6 @@ MudderyLocalDict = {
     "Cancel": "取消",
     "Del": "删",
     "EQ": "装",
+    "Passive": "被动",
+    "Tasks:": "目标：",
 };

@@ -83,6 +83,17 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                 else:
                     self.not_accomplished[objective_type].append(obj_record.ordinal)
 
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        # Get name, description and available commands.
+        info = super(MudderyQuest, self).get_appearance(caller)
+
+        info["objectives"] = self.return_objectives()
+        return info
+
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.

@@ -118,7 +118,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
             commands: (list) a list of available commands
         """
         if self.passive:
-            return
+            return []
 
         commands = [{"name": _("Cast"), "cmd": "castskill", "args": self.get_data_key()}]
         return commands
