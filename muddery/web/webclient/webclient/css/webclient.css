@@ -66,6 +66,12 @@
     --quest-item-back: url(../img/quest_item_back.png);
     --quest-info-back: url(../img/info_back.png);
     --quest-item-button: url(../img/button_small.png);
+
+    --map-background: url(../img/main_background.png);
+    --map-title-bar: url(../img/status_title_bar.png);
+
+    --combat-hp-back: url(../img/hp_back.png);
+    --combat-hp-bar: url(../img/hp_bar.png);
 }
 
 html {
@@ -114,46 +120,6 @@ body {
     height: 100%;
     position: relative;
 }
-
-/************* backgrounds begin *************/
-.background-window {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    z-index: -1;
-}
-
-.background-table {
-    height: 100%;
-    width: 100%;
-    background: #555;
-    border: none;
-    padding: 0;
-}
-
-.background-table td {
-    border: none;
-    padding: 0;
-}
-
-.background-top {
-    height: var(--background-top);
-    background: url(../img/main_border_top.png) no-repeat center center;
-}
-
-.background-center {
-    background: url(../img/main_background.png) no-repeat center center;
-}
-
-.background-bottom {
-    height: var(--background-bottom);
-    background: url(../img/main_border_bottom.png) no-repeat center center;
-}
-
-/************* backgrounds end *************/
-
 
 /************* animations begin *************/
 @-webkit-keyframes rotation {
@@ -1028,7 +994,8 @@ body {
 /************* accessibility windows begin *************/
 #inventory-window,
 #skills-window,
-#quests-window {
+#quests-window,
+#map-window {
     position: relative;
     width: 100%;
     height: 100%;
@@ -1039,7 +1006,8 @@ body {
 
 #inventory-window .title-bar,
 #skills-window .title-bar,
-#quests-window .title-bar {
+#quests-window .title-bar,
+#map-window .title-bar {
     position: relative;
     width: 100%;
     height: 0.4rem;
@@ -1387,11 +1355,117 @@ body {
 
 /************* map window begin *************/
 #map-window {
+    background-image: var(--map-background);
+}
+
+#map-window .title-bar {
+    background-image: var(--map-title-bar);
+}
+
+#map-window .map-body {
+    width: 100%;
+    height: 100%;
+    padding: 0.05rem 0.05rem 1.05rem 0.05rem;
+    background-color: #a76;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#map-window #map-svg {
+    width: 100%;
+    height: 100%;
 }
 /************* map window end *************/
 
 
 /************* combat window begin *************/
+#combat-window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background: no-repeat center;
+    background-image: var(--character-background);
+    background-size: 100% 100%;
+}
+
+#combat-window .title-bar {
+    position: relative;
+    width: 100%;
+    height: 0.6rem;
+    line-height: 0.4rem;
+    color: #fec;
+    font-size: 0.2rem;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: text-bottom;
+    background: no-repeat center;
+    background-image: var(--character-title-bar);
+    background-size: 100% 100%;
+}
+
+#combat-window .title-bar .icon-back {
+    position: absolute;
+    width: 0.56rem;
+    height: 0.56rem;
+    background: no-repeat center;
+    background-image: var(--character-title-icon-back);
+    background-size: 100% 100%;
+}
+
+#combat-window .title-bar img.icon {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    left: 0;
+    top: 0;
+    padding: 0.03rem;
+}
+
+#combat-window .title-bar .name {
+    position: absolute;
+    left: 0.6rem;
+    font-size: 0.18rem;
+    font-weight: 400;
+    color: #fec;
+    vertical-align: text-bottom;
+}
+
+#combat-window .title-bar .hp {
+    position: absolute;
+    width: 1.02rem;
+    height: 0.08rem;
+    left: 0.56rem;
+    top: 0.4rem;
+    background: no-repeat center;
+    background-image: var(--combat-hp-back);
+    background-size: 100% 100%;
+}
+
+#combat-window .title-bar .hp-number {
+    position: absolute;
+    width: 1.0rem;
+    height: 0.08rem;
+    left: 0;
+    top: -0.01rem;
+    text-align: center;
+    line-height: 0.08rem;
+    font-size: 0.08rem;
+    color: #fff;
+}
+
+#combat-window .title-bar .hp-bar {
+    position: absolute;
+    width: 1.0rem;
+    height: 0.06rem;
+    left: 0;
+    top: 0;
+    background: no-repeat left;
+    background-image: var(--combat-hp-bar);
+    background-size: 1.0rem 0.06rem;
+}
+
 #combat-window .character-icon,
 #combat-window .command-icon {
 	width: 30px;

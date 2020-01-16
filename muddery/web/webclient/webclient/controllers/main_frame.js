@@ -324,6 +324,7 @@ MudderyMainFrame.prototype.onPuppet = function(data) {
 
     mud.prompt_bar.setInfo(data["name"], data["icon"]);
     mud.char_data_window.setInfo(data["name"], data["icon"]);
+    mud.combat_window.setInfo(data["name"], data["icon"]);
     mud.message_window.clear();
 
     this.puppet = true;
@@ -2945,8 +2946,8 @@ MudderyMap.prototype.showMap = function(location) {
 
 	var current_room = core.map_data._map_rooms[location.key];
 
-	var map_width = this.select(".map-body").width();
-	var map_height = this.select(".map-body").height();
+	var map_width = this.select("#map-svg").width();
+	var map_height = this.select("#map-svg").height();
 
 	// var scale = this.scale;
 	var room_size = this.room_size;
@@ -2969,6 +2970,21 @@ MudderyMap.prototype.showMap = function(location) {
 
 	// background
 	if (location["area"] && location["area"]["background"]) {
+	    /*
+	    if (origin_x < map_width - location["area"]["background"]["width"]) {
+	        origin_x = map_width - location["area"]["background"]["width"];
+	    }
+	    if (origin_y < map_height - location["area"]["background"]["height"]) {
+	        origin_y = map_height - location["area"]["background"]["height"];
+	    }
+	    if (origin_x > 0) {
+	        origin_x = 0;
+	    }
+	    if (origin_y > 0) {
+	        origin_y = 0;
+	    }
+	    */
+
         var x = origin_x;
         var y = origin_y;
 
@@ -3137,6 +3153,8 @@ MudderyCombat = function(el) {
 	this.timeline = 0;
 	this.combat_finished = true;
 	this.skill_cd_time = {};
+
+	this.full_hp_width = this.select(".hp-bar").width();
 }
 
 MudderyCombat.prototype = prototype(BaseController.prototype);
@@ -3220,6 +3238,22 @@ MudderyCombat.prototype.reset = function(skill_cd_time) {
     this.select(".result-accepted-list").empty();
     this.select(".result-rejected").hide();
     this.select(".result-rejected-list").empty();
+}
+
+/*
+ * Set character's basic information.
+ */
+MudderyCombat.prototype.setInfo = function(name, icon) {
+    this.select(".name").text(name);
+    if (icon) {
+        var url = settings.resource_url + icon;
+        this.select(".icon")
+            .attr("src", url)
+            .show();
+    }
+    else {
+        this.select(".icon").hide();
+    }
 }
 
 /*
@@ -3455,7 +3489,8 @@ MudderyCombat.prototype.updateStatus = function(status) {
 		$(item_id).text(status[key]["hp"] + "/" + status[key]["max_hp"]);
 
 		if (this.self_dbref == key) {
-		    $("#combat_status").text("HP:" + status[key]["hp"] + "/" + status[key]["max_hp"]);
+		    this.select(".hp-bar").width(this.full_hp_width * status[key]["hp"] / status[key]["max_hp"]);
+		    this.select(".hp-number").text(status[key]["hp"] + "/" + status[key]["max_hp"]);
 		}
 	}
 }
