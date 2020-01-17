@@ -3155,6 +3155,7 @@ MudderyCombat = function(el) {
 	this.skill_cd_time = {};
 
 	this.full_hp_width = this.select(".hp-bar").width();
+	this.character_hp_width = 0;
 }
 
 MudderyCombat.prototype = prototype(BaseController.prototype);
@@ -3208,16 +3209,17 @@ MudderyCombat.prototype.onClose = function(element) {
  * Reset the combat box.
  */
 MudderyCombat.prototype.reset = function(skill_cd_time) {
-	this.select(".combat-desc").empty();
+	this.select(".desc").empty();
+	this.select(".game-time").empty();
 
 	// Remove characters that are not template.
-	this.select(".combat-characters").empty();
+	this.select(".characters").empty();
 
 	// Remove combat messages.
-	this.select(".combat-messages").empty();
+	this.select(".message-list").empty();
 
 	// Remove skill buttons that are not template.
-	this.select(".combat-buttons").empty();;
+	this.select(".buttons").empty();
 
 	this.self_dbref = "";
 	this.target = "";
@@ -3275,7 +3277,7 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbr
 	}
 
 	// add desc
-	this.select(".combat-desc").html(core.text2html.parseHtml(desc));
+	this.select(".desc").html(core.text2html.parseHtml(desc));
 
 	// add timeout
 	if (timeout > 0) {
@@ -3283,13 +3285,13 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbr
 		this.timeout = timeout;
 		this.timeline = current_time + timeout * 1000;
 
-		this.select(".combat-timeout").text(timeout);
-		this.select(".combat-time-div").show();
+		this.select(".game-time").text(timeout);
+		this.select(".timeout").show();
 		this.interval_id = window.setInterval("mud.combat_window.refreshTimeout()", 1000);
 	}
 	else {
-		this.select(".combat-timeout").empty();
-		this.select(".combat-time-div").hide();
+		this.select(".game-time").empty();
+		this.select(".timeout").hide();
 	}
 
 	// add characters
@@ -3308,36 +3310,41 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbr
             .attr("id", "combat-char-" + dbref.slice(1))
         	.data("dbref", character["dbref"]);
 
-        $("<div>")
-            .addClass("status")
+        var hp = $("<div>")
+            .addClass("character-hp")
             .appendTo(item);
+
+        $("<div>")
+            .addClass("character-hp-bar")
+            .appendTo(hp);
 
 		if (character["icon"]) {
 		    var div_icon = $("<div>")
-		        .addClass("div-icon")
+		        .addClass("character-icon")
 		        .appendTo(item);
 
 		    $("<img>")
-		        .addClass("character-icon")
+		        .addClass("icon-img")
 			    .attr("src", settings.resource_url + character["icon"])
 			    .appendTo(div_icon);
 		}
 
         $("<div>")
-            .addClass("name")
-		    .text(character["name"]);
+            .addClass("character-name")
+		    .text(character["name"])
+		    .appendTo(item);
 
 		if (this.self_dbref == dbref) {
 		    this.select(".prompt-bar>.name").text(character["name"]);
 		}
 
 		if (character["team"] == self_team) {
-			item.addClass("teammate")
+			item.addClass("character teammate")
 			   .css('top', top + teammate_number * line_height);
 			teammate_number++;
 		}
 		else {
-			item.addClass("enemy")
+			item.addClass("character enemy")
 			   .css('top', top + enemy_number * line_height);
 			enemy_number++;
 
@@ -3347,9 +3354,10 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbr
 			}
 		}
 
-		item.appendTo(this.select(".combat-characters"));
+		item.appendTo(this.select(".characters"));
 	}
 
+    this.character_hp_width = $(".character-hp").width();
 	this.updateStatus(status);
 }
 
@@ -3395,10 +3403,10 @@ MudderyCombat.prototype.setCommands = function(commands) {
                 .addClass("cooldown")
                 .appendTo(item);
 
-            item.appendTo(this.select(".combat-buttons"));
+            item.appendTo(this.select(".buttons"));
 		}
 
-		this.select(".combat-buttons").height(5 + parseInt((commands.length - 1) / line + 1) * line_height)
+		this.select(".buttons").height(5 + parseInt((commands.length - 1) / line + 1) * line_height)
 	}
 }
 
@@ -3456,7 +3464,7 @@ MudderyCombat.prototype.setSkillCast = function(data) {
  * Display a message in message window.
  */
 MudderyCombat.prototype.displayMsg = function(msg) {
-	var msg_wnd = this.select(".combat-messages");
+	var msg_wnd = this.select(".message-list");
 	if (msg_wnd.length > 0) {
 		msg_wnd.stop(true);
 		msg_wnd.scrollTop(msg_wnd[0].scrollHeight);
@@ -3485,8 +3493,8 @@ MudderyCombat.prototype.displayMsg = function(msg) {
  */
 MudderyCombat.prototype.updateStatus = function(status) {
 	for (var key in status) {
-		var item_id = "#combat-char-" + key.slice(1) + ">div.status";
-		$(item_id).text(status[key]["hp"] + "/" + status[key]["max_hp"]);
+		var hp_bar = "#combat-char-" + key.slice(1) + " .character-hp-bar";
+		$(hp_bar).width(this.character_hp_width * status[key]["hp"] / status[key]["max_hp"]);
 
 		if (this.self_dbref == key) {
 		    this.select(".hp-bar").width(this.full_hp_width * status[key]["hp"] / status[key]["max_hp"]);
@@ -3525,7 +3533,7 @@ MudderyCombat.prototype.setSkillCD = function(skill, cd, gcd) {
 	}
 
 	// refresh button's CD
-	this.select(".combat-buttons>button").each(function() {
+	this.select(".buttons>button").each(function() {
         this.showButtonCD(this);
     });
 }
