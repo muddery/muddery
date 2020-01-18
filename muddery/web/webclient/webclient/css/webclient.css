@@ -77,6 +77,8 @@
     --combat-hp-bar: url(../img/combat_hp_bar.png);
     --combat-character-icon: url(../img/icon_back_small.png);
     --combat-messages: url(../img/combat_messages.png);
+    --combat-bottom-bar: url(../img/main_bottom_bar.png);
+    --combat-skill-icon-back: url(../img/icon_back_middle.png);
 }
 
 html {
@@ -590,7 +592,7 @@ body {
 /************* main game window end *************/
 
 /************* bar begin *************/
-.tab-bar {
+#game-window .tab-bar {
     position: absolute;
     left: 0;
     bottom: 0;
@@ -602,7 +604,7 @@ body {
     text-align: center;
 }
 
-.tab-bar .tab-bar-button {
+#game-window .tab-bar .tab-bar-button {
     display: inline-block;
     width: 0.49rem;
     height: 0.56rem;
@@ -616,7 +618,7 @@ body {
     background-size: 100% 100%;
 }
 
-.tab-bar .popup-menu {
+#game-window .tab-bar .popup-menu {
     position: absolute;
     z-index: 1;
     margin: 0;
@@ -624,7 +626,7 @@ body {
     list-style: none;
 }
 
-.tab-bar .popup-menu button {
+#game-window .tab-bar .popup-menu button {
    margin: 0.01rem 0.02rem;
 }
 /************* tab bar end *************/
@@ -1551,8 +1553,7 @@ body {
     background-size: 100% 100%;
 }
 
-#combat-window .icon-img,
-#combat-window .command-icon {
+#combat-window .icon-img {
 	width: 0.3rem;
 	height: 0.3rem;
 	margin: 0.02rem;
@@ -1598,31 +1599,45 @@ body {
     text-align: left;
 }
 
-/* combat button */
-#combat-window .buttons {
+#combat-window .tab-bar {
     position: absolute;
     left: 0;
     bottom: 0;
-    height: 0.9rem;
+    width: 100%;
+    height: 0.6rem;
+    background: no-repeat center bottom;
+    background-image: var(--combat-bottom-bar);
+    background-size: 100% 100%;
+    text-align: center;
 }
 
-#combat-window .btn-combat,
-#combat-window .btn-combat:focus,
-#combat-window .btn-combat:hover,
-#combat-window .btn-combat:active {
-    position: absolute;
-    width: 0.6rem;
-    height: 0.72rem;
-    font-size: 0.11rem;
-    padding: 0.02rem 0.02rem 0 0.02rem;
-    margin: 0;
-    background-color: rgba(0, 0, 0, 0);
-    border-style: none;
-    outline: none;
-    color: #333;
+#combat-window .skill-list {
+    margin: 0.05rem auto;
 }
 
-#combat-window .btn-combat div.cooldown {
+#combat-window .tab-bar .skill-button {
+    display: inline-block;
+    position: relative;
+    float: left;
+    width: 0.44rem;
+    height: 0.44rem;
+    margin: 0.02rem;
+    font-weight: 700;
+    font-size: 0.1rem;
+    color: #fea;
+    white-space:nowrap;
+    background: no-repeat center;
+    background-image: var(--combat-skill-icon-back);
+    background-size: 100% 100%;
+}
+
+#combat-window .skill-icon {
+	width: 0.4rem;
+	height: 0.4rem;
+	margin: 0.02rem;
+}
+
+#combat-window .skill-button div.cooldown {
     position: absolute;
     top: 0;
     left: 0;
@@ -1631,12 +1646,11 @@ body {
     opacity: 0.5;
 }
 
-#combat-window .command-name {
-    border: 0.01rem solid;
-    border-color: #ccc;
-    border-radius: 0.04rem;
-    background-color: #ddd;
-    margin: 0.02rem 0 0 0;
+#combat-window .skill-name {
+    position: absolute;
+    width: 100%;
+    bottom: 0.02rem;
+    text-align: center;
 }
 
 #combat-window .combat-result {

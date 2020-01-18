@@ -3165,8 +3165,32 @@ MudderyCombat.prototype.constructor = MudderyCombat;
  * Bind events.
  */
 MudderyCombat.prototype.bindEvents = function() {
-	this.onClick(".combat-buttons", "button", this.onCombatSkill);
+    $(window).bind("resize", this.onResize);
+
+	this.onClick(".skill-list", ".skill-button", this.onCombatSkill);
 	this.onClick(".result-button-ok", this.onClose);
+}
+
+/*
+ * Event when the window size changed.
+ */
+MudderyCombat.prototype.onResize = function(element) {
+    mud.combat_window.resetSize();
+}
+
+/*
+ * Set inventory list's width.
+ */
+MudderyCombat.prototype.resetSize = function() {
+    var items = this.select(".skill-list").children();
+    if (items.length == 0) {
+        return;
+    }
+
+    var block_width = this.select(".tab-bar").width();
+    var item_width = $(items).outerWidth(true);
+    var list_width = Math.floor(block_width / item_width) * item_width + 1;
+    this.select(".skill-list").width(list_width);
 }
 
 /*
@@ -3365,49 +3389,39 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbr
  * Set combat commands.
  */
 MudderyCombat.prototype.setCommands = function(commands) {
-	var left = 10;
-	var top = 10;
-	var line = 4;
-	var width = 70;
-	var line_height = 80;
+	var container = this.select(".skill-list");
+	container.empty();
 
-	if (commands) {
-		for (var i in commands) {
-			var command = commands[i];
+    for (var i in commands) {
+        var command = commands[i];
 
-			var item = $("<button>")
-			    .addClass("btn-combat")
-			    .attr("type", "button")
-                .attr("id", "cmd-" + command["key"])
-				.data("key", command["key"])
-				.data("cd", 0)
-				.css({"left": left + i % line * width,
-					  "top": top + parseInt(i / line) * line_height});
+        var item = $("<div>")
+            .addClass("skill-button")
+            .attr("id", "cmd-" + command["key"])
+            .data("key", command["key"])
+            .data("cd", 0);
 
-			if (command["icon"]) {
-			    var div_icon = $("<div>")
-			        .appendTo(item);
-
-                $("<img>")
-                    .addClass("command-icon")
-				    .attr("src", settings.resource_url + command["icon"])
-				    .appendTo(item);
-			}
-
-            $("<div>")
-                .addClass("command-name")
-                .html(core.text2html.parseHtml(command["name"]))
+        if (command["icon"]) {
+            var div_icon = $("<div>")
                 .appendTo(item);
 
-            $("<div>")
-                .addClass("cooldown")
+            $("<img>")
+                .addClass("skill-icon")
+                .attr("src", settings.resource_url + command["icon"])
                 .appendTo(item);
+        }
 
-            item.appendTo(this.select(".buttons"));
-		}
+        $("<div>")
+            .addClass("skill-name")
+            .html(core.text2html.parseHtml(command["name"]))
+            .appendTo(item);
 
-		this.select(".buttons").height(5 + parseInt((commands.length - 1) / line + 1) * line_height)
-	}
+        $("<div>")
+            .addClass("cooldown")
+            .appendTo(item);
+
+        item.appendTo(container);
+    }
 }
 
 /*
@@ -3533,8 +3547,9 @@ MudderyCombat.prototype.setSkillCD = function(skill, cd, gcd) {
 	}
 
 	// refresh button's CD
-	this.select(".buttons>button").each(function() {
-        this.showButtonCD(this);
+	var self = this;
+	this.select(".skill-list>.skill-button").each(function() {
+        self.showButtonCD(this);
     });
 }
 
