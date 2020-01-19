@@ -116,23 +116,6 @@ MudderyMainFrame.prototype.showCombat = function(combat) {
 }
 
 /*
- * Close the combat window.
- */
-MudderyMainFrame.prototype.closeCombat = function(data) {
-	mud.combat_window.finishCombat();
-}
-
-
-/*
- * The combat has finished.
- */
-MudderyMainFrame.prototype.finishCombat = function(result) {
-	mud.combat_window.finishCombat();
-	mud.combat_window.setResult(result);
-}
-
-
-/*
  * Cast a combat skill.
  */
 MudderyMainFrame.prototype.setSkillCast = function(result) {
@@ -3168,7 +3151,6 @@ MudderyCombat.prototype.bindEvents = function() {
     $(window).bind("resize", this.onResize);
 
 	this.onClick(".skill-list", ".skill-button", this.onCombatSkill);
-	this.onClick(".result-button-ok", this.onClose);
 }
 
 /*
@@ -3215,20 +3197,6 @@ MudderyCombat.prototype.onCombatSkill = function(element) {
 	core.service.doCastSkill(key, this.target, true);
 }
 
-
-/*
- * Event when clicks the close button.
- */
-MudderyCombat.prototype.onClose = function(element) {
-	// close popup box
-    mud.main_frame.popWindow(this);
-
-    if (mud.popup_dialogue.hasDialogue()) {
-        mud.popup_dialogue.show();
-    }
-}
-
-
 /*
  * Reset the combat box.
  */
@@ -3254,16 +3222,7 @@ MudderyCombat.prototype.reset = function(skill_cd_time) {
 	}
 
 	// Clear combat results.
-	this.select(".combat-result").hide();
-
-    this.select(".result-header").empty();
-
-    this.select(".result-exp-block").hide();
-    this.select(".result-exp").empty();
-    this.select(".result-accepted").hide();
-    this.select(".result-accepted-list").empty();
-    this.select(".result-rejected").hide();
-    this.select(".result-rejected-list").empty();
+	mud.combat_result_window.hide();
 }
 
 /*
@@ -3586,13 +3545,23 @@ MudderyCombat.prototype.showButtonCD = function(button_id) {
 }
 
 /*
- * Finish a combat.
+ * Close the combat window.
  */
-MudderyCombat.prototype.finishCombat = function(result) {
+MudderyCombat.prototype.closeCombat = function(data) {
 	this.combat_finished = true;
 	if (this.interval_id != null) {
 		this.interval_id = window.clearInterval(this.interval_id);
 	}
+}
+
+/*
+ * The combat has finished.
+ */
+MudderyCombat.prototype.finishCombat = function(result) {
+	mud.combat_window.closeCombat();
+
+	mud.combat_result_window.setResult(result);
+	mud.combat_result_window.show();
 }
 
 /*
@@ -3602,13 +3571,72 @@ MudderyCombat.prototype.isCombatFinished = function() {
     return this.combat_finished;
 }
 
+/*
+ * Calculate the remain time of the combat.
+ */
+MudderyCombat.prototype.refreshTimeout = function() {
+    var current_time = new Date().getTime();
+
+    var remain = Math.ceil((this.timeline - current_time) / 1000);
+    if (remain > this.timeout) {
+        remain = this.timeout;
+    }
+    if (remain < 0) {
+        remain = 0;
+    }
+
+    $("#combat-window .combat-timeout").text(remain);
+};
+
+/******************************************
+ *
+ * Combat Result Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyCombatResult = function(el) {
+	BaseController.call(this, el);
+}
+
+MudderyCombatResult.prototype = prototype(BaseController.prototype);
+MudderyCombatResult.prototype.constructor = MudderyCombatResult;
+
+/*
+ * Reset the combat result box.
+ */
+MudderyCombatResult.prototype.reset = function(skill_cd_time) {
+	// Clear combat results.
+    this.select(".result-header").empty();
+    this.select(".result-exp-block").hide();
+    this.select(".result-exp").empty();
+    this.select(".result-accepted").hide();
+    this.select(".result-accepted-list").empty();
+    this.select(".result-rejected").hide();
+    this.select(".result-rejected-list").empty();
+}
+
+/*
+ * Bind events.
+ */
+MudderyCombatResult.prototype.bindEvents = function() {
+	this.onClick(".button-ok", this.onClose);
+}
+
+/*
+ * Event when clicks the close button.
+ */
+MudderyCombatResult.prototype.onClose = function(element) {
+	// close popup box
+    mud.main_frame.popWindow(this);
+}
 
 /*
  * Set result data.
  */
-MudderyCombat.prototype.setResult = function(result) {
-	this.select(".combat-result").show();
-
+MudderyCombatResult.prototype.setResult = function(result) {
 	if (!result) {
 		return;
 	}
@@ -3642,7 +3670,7 @@ MudderyCombat.prototype.setResult = function(result) {
 /*
  * Set the experiences that the player get.
  */
-MudderyCombat.prototype.setGetExp = function(exp) {
+MudderyCombatResult.prototype.setGetExp = function(exp) {
 	this.select(".result-exp").text(exp);
 }
 
@@ -3650,7 +3678,7 @@ MudderyCombat.prototype.setGetExp = function(exp) {
 /*
  * Set the objects that the player get.
  */
-MudderyCombat.prototype.setGetObjects = function(get_objects) {
+MudderyCombatResult.prototype.setGetObjects = function(get_objects) {
     if (get_objects["accepted_names"] && Object.keys(get_objects["accepted_names"]).length > 0) {
 	    this.setItems(".result-accepted-list", get_objects["accepted_names"]);
 	    this.select(".result-accepted").show();
@@ -3665,7 +3693,7 @@ MudderyCombat.prototype.setGetObjects = function(get_objects) {
 /*
  * Set object items.
  */
-MudderyCombat.prototype.setItems = function(container_id, objects) {
+MudderyCombatResult.prototype.setItems = function(container_id, objects) {
     var container = this.select(container_id);
     for (var name in objects) {
         var item = $("<p>")
@@ -3682,23 +3710,6 @@ MudderyCombat.prototype.setItems = function(container_id, objects) {
             .appendTo(item);
     }
 }
-
-/*
- * Calculate the remain time of the combat.
- */
-MudderyCombat.prototype.refreshTimeout = function() {
-    var current_time = new Date().getTime();
-
-    var remain = Math.ceil((this.timeline - current_time) / 1000);
-    if (remain > this.timeout) {
-        remain = this.timeout;
-    }
-    if (remain < 0) {
-        remain = 0;
-    }
-
-    $("#combat-window .combat-timeout").text(remain);
-};
 
 
 /******************************************

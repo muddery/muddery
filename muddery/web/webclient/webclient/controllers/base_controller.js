@@ -52,6 +52,13 @@ BaseController.prototype.show = function() {
 }
 
 /*
+ * Hide the element.
+ */
+BaseController.prototype.hide = function() {
+    this.el.hide();
+}
+
+/*
  * Reset the element.
  */
 BaseController.prototype.reset = function() {

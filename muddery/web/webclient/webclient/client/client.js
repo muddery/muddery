@@ -211,10 +211,10 @@ MudderyClient.prototype = {
                     mud.main_frame.showCombat(data[key]);
                 }
                 else if (key == "left_combat") {
-                    mud.main_frame.closeCombat(data[key]);
+                    mud.combat_window.closeCombat(data[key]);
                 }
                 else if (key == "combat_finish") {
-                    mud.main_frame.finishCombat(data[key]);
+                    mud.combat_window.finishCombat(data[key]);
                 }
                 else if (key == "combat_info") {
                     var info = data[key];
