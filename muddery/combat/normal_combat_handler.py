@@ -91,7 +91,7 @@ class NormalCombatHandler(BaseCombatHandler):
                             loots.extend(obj_list)
 
                 # give objects to winner
-                get_objects = {}
+                get_objects = []
                 if loots:
                     get_objects = character.receive_objects(loots, mute=True)
 

@@ -204,14 +204,13 @@ MudderyClient.prototype = {
                 	mud.quests_window.setQuests(data[key]);
                 }
                 else if (key == "get_objects") {
-                	var get_objects = data[key];
-                    mud.main_frame.showGetObjects(get_objects["accepted"], get_objects["rejected"]);
+                    mud.main_frame.showGetObjects(data[key]);
                 }
                 else if (key == "joined_combat") {
                     mud.main_frame.showCombat(data[key]);
                 }
                 else if (key == "left_combat") {
-                    mud.combat_window.closeCombat(data[key]);
+                    mud.combat_window.leftCombat(data[key]);
                 }
                 else if (key == "combat_finish") {
                     mud.combat_window.finishCombat(data[key]);

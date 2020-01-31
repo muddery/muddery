@@ -64,8 +64,14 @@ class FuncGiveObject(StatementFunction):
         obj_list = [{"object": obj_key,
                      "number": number}]
 
-        result = self.caller.receive_objects(obj_list)
-        return not result["rejected_keys"]
+        objects = self.caller.receive_objects(obj_list)
+        success = True
+        for item in objects:
+            if item["reject"]:
+                success = False
+                break
+
+        return success
 
 
 class FuncRemoveObjects(StatementFunction):

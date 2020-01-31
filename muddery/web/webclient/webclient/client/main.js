@@ -77,11 +77,8 @@ MudderyMain.prototype = {
         mud.goods_window = new MudderyGoods($("#goods-window"));
         mud.goods_window.init();
 
-        mud.combat_window = new MudderyCombat($("#combat-window .combat-scene"));
+        mud.combat_window = new MudderyCombat($("#combat-window"));
         mud.combat_window.init();
-
-        mud.combat_result_window = new MudderyCombatResult($("#combat-window .combat-result"));
-        mud.combat_result_window.init();
 
         mud.popup_message = new MudderyPopupMessage($("#popup-message"));
         mud.popup_message.init();

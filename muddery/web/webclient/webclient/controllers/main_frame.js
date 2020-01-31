@@ -73,16 +73,18 @@ MudderyMainFrame.prototype.showGoods = function(dbref, name, number, icon, desc,
 /*  
  * Show get objects messages.
  */
-MudderyMainFrame.prototype.showGetObjects = function(accepted, rejected) {
+MudderyMainFrame.prototype.showGetObjects = function(objects) {
 	// show accepted objects
 	try {
 		var first = true;
-		for (var key in accepted) {
-			if (first) {
-				mud.message_window.displayMessage(core.trans("You got:"));
-				first = false;
-			}
-			mud.message_window.displayMessage(key + ": " + accepted[key]);
+		for (var i = 0; i < objects.length; i++) {
+		    if (!objects[i].reject) {
+                if (first) {
+                    mud.message_window.displayMessage(core.trans("You got:"));
+                    first = false;
+                }
+                mud.message_window.displayMessage(objects[i]["name"] + ": " + objects[i]["name"]["number"]);
+            }
 		}
 	}
 	catch(error) {
@@ -92,12 +94,14 @@ MudderyMainFrame.prototype.showGetObjects = function(accepted, rejected) {
 	// show rejected objects
 	try {
 		var first = true;
-		for (var key in rejected) {
-			if (first) {
-				mud.message_window.displayMessage(core.trans("You can not get:"));
-				first = false;
-			}
-			mud.message_window.displayMessage(key + ": " + rejected[key]);
+		for (var i = 0; i < objects.length; i++) {
+		    if (objects[i].reject) {
+                if (first) {
+                    mud.message_window.displayMessage(core.trans("You can not get:"));
+                    first = false;
+                }
+                mud.message_window.displayMessage(objects[i]["name"] + ": " + objects[i]["name"]["reject"]);
+            }
 		}
 	}
 	catch(error) {
@@ -3129,6 +3133,9 @@ MudderyMap.prototype.showMap = function(location) {
 MudderyCombat = function(el) {
 	BaseController.call(this, el);
 
+    this.combat_result = new MudderyCombatResult($("#combat-window .combat-result"));
+    this.combat_result.init();
+
 	this.self_dbref = "";
 	this.target = "";
 	this.interval_id = null;
@@ -3222,7 +3229,7 @@ MudderyCombat.prototype.reset = function(skill_cd_time) {
 	}
 
 	// Clear combat results.
-	mud.combat_result_window.hide();
+	this.select(".combat-result").hide();
 }
 
 /*
@@ -3547,10 +3554,11 @@ MudderyCombat.prototype.showButtonCD = function(button_id) {
 /*
  * Close the combat window.
  */
-MudderyCombat.prototype.closeCombat = function(data) {
+MudderyCombat.prototype.leftCombat = function(data) {
 	this.combat_finished = true;
 	if (this.interval_id != null) {
-		this.interval_id = window.clearInterval(this.interval_id);
+		window.clearInterval(this.interval_id);
+		this.interval_id = null;
 	}
 }
 
@@ -3558,10 +3566,15 @@ MudderyCombat.prototype.closeCombat = function(data) {
  * The combat has finished.
  */
 MudderyCombat.prototype.finishCombat = function(result) {
-	mud.combat_window.closeCombat();
+	this.combat_finished = true;
+	if (this.interval_id != null) {
+		window.clearInterval(this.interval_id);
+		this.interval_id = null;
+	}
 
-	mud.combat_result_window.setResult(result);
-	mud.combat_result_window.show();
+    this.combat_result.reset();
+	this.combat_result.setResult(result);
+	this.combat_result.show();
 }
 
 /*
@@ -3630,7 +3643,8 @@ MudderyCombatResult.prototype.bindEvents = function() {
  */
 MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
-    mud.main_frame.popWindow(this);
+    this.hide();
+    mud.main_frame.popWindow(mud.combat_window);
 }
 
 /*
@@ -3655,7 +3669,7 @@ MudderyCombatResult.prototype.setResult = function(result) {
 		header = core.trans("Draw !");
 	}
 
-	this.select(".result-header").text(header);
+	this.select(".header-text").text(header);
 
     if ("exp" in result) {
         this.setGetExp(result["exp"]);
@@ -3666,51 +3680,57 @@ MudderyCombatResult.prototype.setResult = function(result) {
     }
 }
 
-
 /*
  * Set the experiences that the player get.
  */
 MudderyCombatResult.prototype.setGetExp = function(exp) {
 	this.select(".result-exp").text(exp);
+	this.select(".result-exp-block").show();
 }
-
 
 /*
  * Set the objects that the player get.
  */
-MudderyCombatResult.prototype.setGetObjects = function(get_objects) {
-    if (get_objects["accepted_names"] && Object.keys(get_objects["accepted_names"]).length > 0) {
-	    this.setItems(".result-accepted-list", get_objects["accepted_names"]);
-	    this.select(".result-accepted").show();
-	}
+MudderyCombatResult.prototype.setGetObjects = function(objects) {
+    var accepted_block = this.select(".result-accepted");
+    var accepted_list = this.select(".result-accepted-list");
+    var rejected_block = this.select(".result-rejected");
+    var rejected_list = this.select(".result-rejected-list");
 
-	if (get_objects["reject_reason"] && Object.keys(get_objects["reject_reason"]).length > 0) {
-	    this.setItems(".result-rejected-list", get_objects["reject_reason"]);
-	    this.select(".result-rejected").show();
-	}
-}
+    for (var i = 0; i < objects.length; i++) {
+        var obj = objects[i];
 
-/*
- * Set object items.
- */
-MudderyCombatResult.prototype.setItems = function(container_id, objects) {
-    var container = this.select(container_id);
-    for (var name in objects) {
         var item = $("<p>")
-            .appendTo(container);
+
+        if (obj["icon"]) {
+            $("<img>")
+                .addClass("obj-icon")
+                .attr("src", settings.resource_url + obj["icon"])
+                .appendTo(item);
+        }
 
         $("<span>")
             .addClass("name")
-            .text(name)
+            .text(obj["name"])
             .appendTo(item);
 
-        $("<span>")
-            .addClass("info")
-            .text(objects[name])
-            .appendTo(item);
+        if (obj["number"] != 1) {
+            $("<span>")
+                .addClass("number")
+                .html("&times;" + obj["number"])
+                .appendTo(item);
+        }
+
+        if (!obj.reject) {
+            accepted_list.append(item);
+            accepted_block.show();
+        }
+        else {
+            rejected_list.append(item);
+            rejected_block.show();
+        }
     }
 }
-
 
 /******************************************
  *

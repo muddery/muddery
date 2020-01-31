@@ -429,12 +429,16 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             mute: (boolean) do not send messages to the owner
 
         Returns:
-            (dict) a list of objects that not have been received and their reasons.
+            (list) a list of objects that not have been received and their reasons.
+            [{
+                "key": key,
+                "name": name,
+                "number": number,
+                "icon": icon,
+                "reject": reason,
+            }]
         """
-        accepted_keys = {}      # the keys of objects that have been accepted
-        accepted_names = {}     # the names of objects that have been accepted
-        rejected_keys = {}      # the keys of objects that have been rejected
-        reject_reason = {}      # the reasons of why objects have been rejected
+        objects = []           # objects that have been accepted
 
         # check what the character has now
         inventory = {}
@@ -451,17 +455,17 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         for obj in obj_list:
             key = obj["object"]
             available = obj["number"]
+            name = ""
+            icon = ""
             number = available
             accepted = 0
-            name = ""
+            reject = False
             unique = False
 
             if number == 0:
                 # it is an empty object
                 if key in inventory:
                     # already has this object
-                    accepted_keys[key] = 0
-                    accepted_names[name] = 0
                     continue
 
                 object_record = None
@@ -474,45 +478,31 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
                 if not object_record:
                     # can not find object's data record
-                    reason = _("Can not get %s.") % name
-                    rejected_keys[key] = 0
-                    reject_reason[name] = reason
                     continue
 
                 if object_record.can_remove:
                     # remove this empty object
-                    accepted_keys[key] = 0
-                    accepted_names[name] = 0
                     continue
 
                 # create a new content
                 new_obj = build_object(key)
                 if not new_obj:
-                    reason = _("Can not get %s.") % name
-                    rejected_keys[key] = 0
-                    reject_reason[name] = reason
-                    continue
-
-                name = new_obj.get_name()
+                    reject = _("Can not get %s.") % key
+                else:
+                    name = new_obj.get_name()
+                    icon = new_obj.icon
 
                 # move the new object to the character
                 if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
                     new_obj.delete()
-                    reason = _("Can not get %s.") % name
-                    rejected_keys[key] = 0
-                    reject_reason[name] = reason
-                    break
-
-                # accept this object
-                accepted_keys[key] = 0
-                accepted_names[name] = 0
-
+                    reject = _("Can not get %s.") % name
             else:
                 # common number
                 # if already has this kind of object
                 if key in inventory:
                     # add to current object
                     name = inventory[key].name
+                    icon = inventory[key].icon
                     unique = inventory[key].unique
 
                     add = number
@@ -526,26 +516,26 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                         accepted += add
 
                 # if does not have this kind of object, or stack is full
-                reason = ""
                 while number > 0:
                     if unique:
                         # can not have more than one unique objects
-                        reason = _("Can not get more %s.") % name
+                        reject = _("Can not get more %s.") % name
                         break
 
                     # create a new content
                     new_obj = build_object(key)
                     if not new_obj:
-                        reason = _("Can not get %s.") % name
+                        reject = _("Can not get %s.") % name
                         break
 
                     name = new_obj.get_name()
+                    icon = new_obj.icon
                     unique = new_obj.unique
 
                     # move the new object to the character
                     if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
                         new_obj.delete()
-                        reason = _("Can not get %s.") % name
+                        reject = _("Can not get %s.") % name
                         break
 
                     # Get the number that actually added.
@@ -560,33 +550,27 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     number -= add
                     accepted += add
 
-                if accepted > 0:
-                    accepted_keys[key] = accepted
-                    accepted_names[name] = accepted
-
-                if accepted < available:
-                    rejected_keys[key] = available - accepted
-                    reject_reason[name] = reason
+            objects.append({
+                "key": key,
+                "name": name,
+                "icon": icon,
+                "number": accepted,
+                "reject": reject,
+            })
 
         if not mute:
             # Send results to the player.
-            message = {"get_objects":
-                            {"accepted": accepted_names,
-                             "rejected": reject_reason}}
+            message = {"get_objects": objects}
             self.msg(message)
 
         self.show_inventory()
 
         # call quest handler
-        for key in accepted_keys:
-            self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, key, accepted_keys[key])
+        for item in objects:
+            if not item["reject"]:
+                self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, item["key"], item["number"])
 
-        return {
-            "accepted_keys": accepted_keys,
-            "accepted_names": accepted_names,
-            "rejected_keys": rejected_keys,
-            "reject_reason": reject_reason
-        }
+        return objects
 
     def get_object_number(self, obj_key):
         """
