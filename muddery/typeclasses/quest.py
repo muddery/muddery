@@ -108,73 +108,84 @@ class MudderyQuest(TYPECLASS("OBJECT")):
         Get the information of all objectives.
         Set desc to an objective can hide the details of the objective.
         """
-        objectives = []
-        for ordinal in self.objectives:
-            desc = self.objectives[ordinal]["desc"]
+        output = []
+
+        for ordinal, objective in self.objectives.items():
+            desc = objective["desc"]
             if desc:
                 # If an objective has desc, use its desc.
-                objectives.append({"desc": self.objectives[ordinal]["desc"]})
+                output.append({
+                    "ordinal": ordinal,
+                    "desc": objective["desc"]
+                })
             else:
                 # Or make a desc by other data.
-                obj_num = self.objectives[ordinal]["number"]
+                obj_num = objective["number"]
                 accomplished = self.db.accomplished.get(ordinal, 0)
                 
-                if self.objectives[ordinal]["type"] == defines.OBJECTIVE_TALK:
+                if objective["type"] == defines.OBJECTIVE_TALK:
                     # talking
                     target = _("Talk to")
-                    name = DIALOGUE_HANDLER.get_npc_name(self.objectives[ordinal]["object"])
+                    name = DIALOGUE_HANDLER.get_npc_name(objective["object"])
         
-                    objectives.append({"target": target,
-                                       "object": name,
-                                       "accomplished": accomplished,
-                                       "total": obj_num,
-                                       })
-                elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_OBJECT:
+                    output.append({
+                        "ordinal": ordinal,
+                        "target": target,
+                        "object": name,
+                        "accomplished": accomplished,
+                        "total": obj_num,
+                    })
+
+                elif objective["type"] == defines.OBJECTIVE_OBJECT:
                     # getting
                     target = _("Get")
-                    name = ""
                     
                     # Get the name of the objective object.
-                    object_key = self.objectives[ordinal]["object"]
+                    object_key = objective["object"]
                     model_name = TYPECLASS("OBJECT").model_name
                     model = apps.get_model(settings.WORLD_DATA_APP, model_name)
                     # Get record.
                     try:
                         record = model.objects.get(key=object_key)
                         name = record.name
-                        break
                     except Exception as e:
-                        pass
+                        logger.log_err("Can not find the quest object: %s" % object_key)
+                        continue
         
-                    objectives.append({"target": target,
-                                       "object": name,
-                                       "accomplished": accomplished,
-                                       "total": obj_num,
-                                       })
+                    output.append({
+                        "ordinal": ordinal,
+                        "target": target,
+                        "object": name,
+                        "accomplished": accomplished,
+                        "total": obj_num,
+                    })
+
                 elif self.objectives[ordinal]["type"] == defines.OBJECTIVE_KILL:
                     # getting
                     target = _("Kill")
-                    name = ""
 
                     # Get the name of the objective character.
                     object_key = self.objectives[ordinal]["object"]
                     model_name = TYPECLASS("OBJECT").model_name
                     model = apps.get_model(settings.WORLD_DATA_APP, model_name)
+
                     # Get record.
                     try:
                         record = model.objects.get(key=object_key)
                         name = record.name
-                        break
                     except Exception as e:
-                        pass
+                        logger.log_err("Can not find the quest object: %s" % object_key)
+                        continue
 
-                    objectives.append({"target": target,
-                                       "object": name,
-                                       "accomplished": accomplished,
-                                       "total": obj_num,
-                                       })
+                    output.append({
+                        "ordinal": ordinal,
+                        "target": target,
+                        "object": name,
+                        "accomplished": accomplished,
+                        "total": obj_num,
+                    })
 
-        return objectives
+        return output
 
     def is_accomplished(self):
         """

@@ -265,9 +265,6 @@ MudderyClient.prototype = {
                 else if (key == "channels") {
                     mud.main_frame.setChannels(data[key])
                 }
-                else if (key == "shop") {
-                    mud.main_frame.showShop(data[key]);
-                }
                 else if (key == "rankings") {
                 	mud.main_frame.setRankings(data[key]);
                 }
@@ -291,6 +288,9 @@ MudderyClient.prototype = {
                 }
                 else if (key == "revealed_map") {
                     core.map_data.setData(data[key]);
+                }
+                else if (key == "shop") {
+                    mud.main_game_window.showShop(data[key]);
                 }
                 else {
                     mud.message_window.displayMessage(data[key]);

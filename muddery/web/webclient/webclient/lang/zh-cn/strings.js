@@ -166,4 +166,5 @@ MudderyLocalDict = {
     "EQ": "装",
     "Passive": "被动",
     "Tasks:": "目标：",
+    "Lv ": "等级",
 };

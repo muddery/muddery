@@ -50,27 +50,6 @@ MudderyMainFrame.prototype.popupMessage = function(header, content, buttons) {
 }
 
 /*  
- * Show shop window.
- */
-MudderyMainFrame.prototype.showShop = function(data) {
-	this.doClosePopupBox();
-	mud.main_game_window.pushWindow(mud.shop_window);
-	mud.shop_window.setShop(data);
-}
-
-  
-/*  
- * Popup shop goods.
- */
-MudderyMainFrame.prototype.showGoods = function(dbref, name, number, icon, desc, price, unit) {
-	this.doClosePopupBox();
-
-	var component = $$.component.goods;
-	component.setGoods(dbref, name, number, icon, desc, price, unit);
-	component.show()
-}
-  
-/*  
  * Show get objects messages.
  */
 MudderyMainFrame.prototype.showGetObjects = function(objects) {
@@ -83,7 +62,7 @@ MudderyMainFrame.prototype.showGetObjects = function(objects) {
                     mud.message_window.displayMessage(core.trans("You got:"));
                     first = false;
                 }
-                mud.message_window.displayMessage(objects[i]["name"] + ": " + objects[i]["name"]["number"]);
+                mud.message_window.displayMessage(objects[i]["name"] + ": " + objects[i]["number"]);
             }
 		}
 	}
@@ -92,6 +71,7 @@ MudderyMainFrame.prototype.showGetObjects = function(objects) {
 	}
 
 	// show rejected objects
+	/*
 	try {
 		var first = true;
 		for (var i = 0; i < objects.length; i++) {
@@ -100,15 +80,16 @@ MudderyMainFrame.prototype.showGetObjects = function(objects) {
                     mud.message_window.displayMessage(core.trans("You can not get:"));
                     first = false;
                 }
-                mud.message_window.displayMessage(objects[i]["name"] + ": " + objects[i]["name"]["reject"]);
+                mud.message_window.displayMessage(objects[i]["name"] + ": " + objects[i]["reject"]);
             }
 		}
 	}
 	catch(error) {
 		console.error(error.message);
 	}
+	*/
 
-    mud.popup_get_objects.setObjects(accepted, rejected);
+    mud.popup_get_objects.setObjects(objects);
     mud.popup_get_objects.show();
 }
    
@@ -175,7 +156,7 @@ MudderyMainFrame.prototype.doClosePopupBox = function() {
  */
 MudderyMainFrame.prototype.setStatus = function(status) {
 	core.data_handler.character_level = status["level"]["value"];
-	mud.prompt_bar.setStatus(status);
+	mud.main_title_bar.setStatus(status);
 	mud.char_data_window.setStatus(status);
 }
 
@@ -183,7 +164,7 @@ MudderyMainFrame.prototype.setStatus = function(status) {
  *  Set the player's status in combat.
  */
 MudderyMainFrame.prototype.setCombatStatus = function(status) {
-	mud.prompt_bar.setStatus(status);
+	mud.main_title_bar.setStatus(status);
     mud.char_data_window.setCombatStatus(status);
 }
 
@@ -309,7 +290,7 @@ MudderyMainFrame.prototype.onPuppet = function(data) {
     core.data_handler.character_dbref = data["dbref"];
     core.data_handler.character_name = data["name"];
 
-    mud.prompt_bar.setInfo(data["name"], data["icon"]);
+    mud.main_title_bar.setInfo(data["name"], data["icon"]);
     mud.char_data_window.setInfo(data["name"], data["icon"]);
     mud.combat_window.setInfo(data["name"], data["icon"]);
     mud.message_window.clear();
@@ -808,48 +789,37 @@ MudderyPopupGetObjects.prototype.onClose = function(element) {
 /*
  * Set objects that the user get.
  */
-MudderyPopupGetObjects.prototype.setObjects = function(accepted, rejected) {
-	// set new objects
-	var container = this.select(".popup-body");
+MudderyPopupGetObjects.prototype.setObjects = function(objects) {
+    var object_list = this.select(".popup-body");
 
-	for (var name in accepted) {
-	    var div = $("<div>")
-	        .appendTo(container);
+    for (var i = 0; i < objects.length; i++) {
+        var obj = objects[i];
 
-        /*
-	    if ("icon" in accepted[name]) {
-	        var url = settings.resource_url + accepted[name]["icon"];
-	        $("<img>")
-	            .addClass("icon")
-	            .attr("src", url)
-	            .appendTo(div);
-	    }
-	    */
-
-	    $("<span>")
-	        .addClass("item")
-	        .html(core.text2html.parseHtml(name + ": " + accepted[name]))
-            .appendTo(div);
-	}
-
-	for (var name in rejected) {
-        var div = $("<div>")
-	        .appendTo(container);
-
-        /*
-        if ("icon" in rejected[name]) {
-            var url = settings.resource_url + rejected[name]["icon"];
-            $("<img>")
-                .addClass("icon")
-                .attr("src", url)
-                .appendTo(div);
+        if (obj.reject) {
+            continue;
         }
-        */
+
+        var item = $("<p>")
+            .appendTo(object_list);
+
+        if (obj["icon"]) {
+            $("<img>")
+                .addClass("obj-icon")
+                .attr("src", settings.resource_url + obj["icon"])
+                .appendTo(item);
+        }
 
         $("<span>")
-            .addClass("item")
-            .html(core.text2html.parseHtml(name + ": " + rejected[name]))
-            .appendTo(div);
+            .addClass("name")
+            .text(obj["name"])
+            .appendTo(item);
+
+        if (obj["number"] != 1) {
+            $("<span>")
+                .addClass("number")
+                .html("&times;" + obj["number"])
+                .appendTo(item);
+        }
     }
 }
 
@@ -967,7 +937,7 @@ MudderyPopupDialogue.prototype.setDialogue = function(sentences, escapes) {
         container.html(content);
 
         $("<button>").attr("type", "button")
-            .addClass("popup-button button-next")
+            .addClass("popup-button button-next button-short")
             .html(core.trans("Next"))
             .appendTo(footer);
     }
@@ -984,7 +954,7 @@ MudderyPopupDialogue.prototype.setDialogue = function(sentences, escapes) {
         }
 
         $("<button>").attr("type", "button")
-            .addClass("popup-button")
+            .addClass("popup-button button-short")
             .html(core.trans("Select One"))
             .appendTo(footer);
     }
@@ -1488,21 +1458,6 @@ MudderyMainGame.prototype.showWindow = function(win_controller) {
 }
 
 /*
- * Push a window.
- */
-MudderyMainGame.prototype.pushWindow = function(win_controller) {
-    win_controller.reset();
-    win_controller.show();
-}
-
-/*
- * Pop a window.
- */
-MudderyMainGame.prototype.popWindow = function(win_controller) {
-    win_controller.el.hide();
-}
-
-/*
  * Event when the window size changed.
  */
 MudderyMainGame.prototype.onResize = function(element) {
@@ -1636,27 +1591,51 @@ MudderyMainGame.prototype.hidePopupMenus = function(element) {
     this.select(".tab-bar .popup-menu").addClass("hidden");
 }
 
+
+/*
+ * Show shop window.
+ */
+MudderyMainGame.prototype.showShop = function(data) {
+	mud.main_frame.doClosePopupBox();
+	mud.shop_window.setShop(data);
+	this.showWindow(mud.shop_window);
+}
+
+
+/*
+ * Popup shop goods.
+ */
+MudderyMainGame.prototype.showGoods = function(dbref, name, number, icon, desc, price, unit) {
+	this.doClosePopupBox();
+
+	var component = $$.component.goods;
+	component.setGoods(dbref, name, number, icon, desc, price, unit);
+	component.show()
+}
+
 /******************************************
  *
- * Prompt Window
+ * Title Window
  *
  ******************************************/
 
 /*
  * Derive from the base class.
  */
-MudderyPromptBar = function(el) {
+MudderyTitleBar = function(el) {
 	BaseController.call(this, el);
+
+	this.full_hp_width = this.select(".hp-bar").width();
 }
 
-MudderyPromptBar.prototype = prototype(BaseController.prototype);
-MudderyPromptBar.prototype.constructor = MudderyPromptBar;
+MudderyTitleBar.prototype = prototype(BaseController.prototype);
+MudderyTitleBar.prototype.constructor = MudderyTitleBar;
 
 
 /*
  * Set character's basic information.
  */
-MudderyPromptBar.prototype.setInfo = function(name, icon) {
+MudderyTitleBar.prototype.setInfo = function(name, icon) {
     this.select(".name").text(name);
     if (icon) {
         var url = settings.resource_url + icon;
@@ -1673,16 +1652,17 @@ MudderyPromptBar.prototype.setInfo = function(name, icon) {
 /*
  * Set character's status.
  */
-MudderyPromptBar.prototype.setStatus = function(status) {
+MudderyTitleBar.prototype.setStatus = function(status) {
     if ("level" in status) {
 	    this.select(".level")
-	        .text("Lv " + status["level"]["value"])
+	        .text(core.trans("Lv ") + status["level"]["value"])
 	        .show();
 	}
 	else {
 	    this.select(".level").hide();
 	}
 
+    /*
     if ("exp" in status && "max_exp" in status) {
         var exp_str = "";
         if (status["max_exp"]["value"] > 0) {
@@ -1698,12 +1678,12 @@ MudderyPromptBar.prototype.setStatus = function(status) {
     else {
         this.select(".exp").hide();
     }
+    */
 
     if ("hp" in status && "max_hp" in status) {
-        var hp_str = status["hp"]["value"] + "/" + status["max_hp"]["value"];
-        this.select(".hp")
-            .text("HP " + hp_str)
-            .show();
+        this.select(".hp-bar").width(this.full_hp_width * status["hp"]["value"] / status["max_hp"]["value"]);
+		this.select(".hp-number").text(status["hp"]["value"] + "/" + status["max_hp"]["value"]);
+		this.select(".hp").show();
     }
     else {
         this.select(".hp").hide();
@@ -2577,7 +2557,7 @@ MudderyScene.prototype.onNPC = function(element) {
     var index = $(element).data("index");
     var dbref = this.scene["npcs"][index]["dbref"];
     dbref = dbref.slice(1);
-    core.service.doLook(dbref);
+    core.service.look(dbref, "scene");
 }
 
 /*
@@ -2587,7 +2567,7 @@ MudderyScene.prototype.onPlayer = function(element) {
     var index = $(element).data("index");
     var dbref = this.scene["players"][index]["dbref"];
     dbref = dbref.slice(1);
-    core.service.doLook(dbref);
+    core.service.look(dbref, "scene");
 }
 
 /*
@@ -2808,7 +2788,7 @@ MudderyScene.prototype.setExitsMap = function(exits, room_name) {
                     name = core.text2html.parseHtml(room_name);
                 }
 
-                var button = $("<div>")
+                $("<div>")
                     .addClass("exit-center")
                     .text(name)
                     .appendTo(p);
@@ -2830,7 +2810,7 @@ MudderyScene.prototype.setExitsMap = function(exits, room_name) {
             var p = $("<p>")
                 .appendTo(container);
 
-            var button = $("<div>")
+            $("<div>")
                 .addClass("exit-button exit-" + exit["index"])
                 .data("index", exit["index"])
                 .text(name)
@@ -2839,6 +2819,10 @@ MudderyScene.prototype.setExitsMap = function(exits, room_name) {
     }
 
     this.drawExitPaths(exits);
+
+    // set height
+    var height = this.select(".exits-table").height();
+    this.select(".exits-block").height(height);
 }
 
 /*
@@ -3325,7 +3309,7 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbr
 		    .appendTo(item);
 
 		if (this.self_dbref == dbref) {
-		    this.select(".prompt-bar>.name").text(character["name"]);
+		    this.select(".title-bar>.name").text(character["name"]);
 		}
 
 		if (character["team"] == self_team) {
@@ -3645,6 +3629,10 @@ MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
     this.hide();
     mud.main_frame.popWindow(mud.combat_window);
+
+    if (mud.popup_dialogue.hasDialogue()) {
+        mud.popup_dialogue.show();
+    }
 }
 
 /*
@@ -3694,8 +3682,8 @@ MudderyCombatResult.prototype.setGetExp = function(exp) {
 MudderyCombatResult.prototype.setGetObjects = function(objects) {
     var accepted_block = this.select(".result-accepted");
     var accepted_list = this.select(".result-accepted-list");
-    var rejected_block = this.select(".result-rejected");
-    var rejected_list = this.select(".result-rejected-list");
+    //var rejected_block = this.select(".result-rejected");
+    //var rejected_list = this.select(".result-rejected-list");
 
     for (var i = 0; i < objects.length; i++) {
         var obj = objects[i];
@@ -3726,8 +3714,8 @@ MudderyCombatResult.prototype.setGetObjects = function(objects) {
             accepted_block.show();
         }
         else {
-            rejected_list.append(item);
-            rejected_block.show();
+            //rejected_list.append(item);
+            //rejected_block.show();
         }
     }
 }
@@ -3744,6 +3732,9 @@ MudderyCombatResult.prototype.setGetObjects = function(objects) {
 MudderyShop = function(el) {
 	BaseController.call(this, el);
 
+	this.goods_detail = new MudderyGoodsDetail($("#popup-goods"));
+	this.goods_detail.init();
+
 	this.goods = [];
 }
 
@@ -3756,14 +3747,30 @@ MudderyShop.prototype.constructor = MudderyShop;
 MudderyShop.prototype.bindEvents = function() {
 	// close popup box
     this.onClick(".button-close", this.onClose);
+
+    // click goods
+    this.onClick(".goods-list", ".goods", this.onClickGoods);
 }
 
- /*
+/*
  * Event when clicks the close button.
  */
 MudderyShop.prototype.onClose = function(element) {
 	// close popup box
-    mud.main_game_window.popWindow(this);
+    mud.main_game_window.showWindow(mud.scene_window);
+}
+
+/*
+ * Event when clicks goods.
+ */
+MudderyShop.prototype.onClickGoods = function(element) {
+    var index = $(element).data("index");
+    if (index < this.goods.length) {
+        var goods = this.goods[index];
+        this.goods_detail.reset();
+        this.goods_detail.setGoods(goods);
+        this.goods_detail.show();
+    }
 }
 
 /*
@@ -3777,20 +3784,6 @@ MudderyShop.prototype.reset = function() {
     this.select(".shop-desc").html("");
     this.select(".goods-list").empty();
 }
-
-
-/*
- * Event when clicks the object link.
- */
-MudderyShop.prototype.onLook = function(element) {
-    var index = $(element).data("index");
-    if (index < this.goods.length) {
-        var goods = this.goods[index];
-        mud.main_game_window.pushWindow(mud.goods_window);
-        mud.goods_window.setGoods(goods);
-    }
-}
-
 
 /*
  * Set shop's goods.
@@ -3816,56 +3809,49 @@ MudderyShop.prototype.setShop = function(data) {
     }
 
 	// add desc
-	this.select(".shop-desc").html(core.text2html.parseHtml(desc));
+	this.select(".desc-content").html(core.text2html.parseHtml(desc));
 
 	// set goods
 	var container = this.select(".goods-list");
 	for (var i in this.goods) {
 		var obj = this.goods[i];
-        var row = $("<tr>")
-            .addClass("goods-row")
+
+        var item = $("<div>")
+            .addClass("goods")
             .data("index", i);
 
-        var cell = $("<td>");
-
         // icon
-        if (obj["icon"]) {
-            var div = $("<div>")
-                .addClass("icon-div")
-                .appendTo(cell);
+        var icon_div = $("<div>")
+            .addClass("goods-icon")
+            .appendTo(item);
 
-            var image = $("<img>")
+        if (obj["icon"]) {
+            $("<img>")
                 .addClass("icon-image")
                 .attr("src", settings.resource_url + obj["icon"])
-                .appendTo(div);
+                .appendTo(icon_div);
         }
 
         // name
-        var goods_name = obj["name"];
+        var goods_name = core.text2html.parseHtml(obj["name"]);
         if (obj["number"] > 1) {
-            goods_name += "×" + obj["number"];
+            goods_name += "&times;" + obj["number"];
         }
 
         $("<div>")
-            .html(core.text2html.parseHtml(goods_name))
-            .appendTo(cell);
-        cell.appendTo(row);
+            .addClass("goods-name")
+            .html(goods_name)
+            .appendTo(item);
 
         // price
         var price = obj["price"] + obj["unit"];
-        $("<td>")
+        $("<div>")
+            .addClass("goods-price")
             .text(price)
-            .appendTo(row);
+            .appendTo(item);
 
-        // desc
-        $("<td>")
-            .html(core.text2html.parseHtml(obj["desc"]))
-            .appendTo(row);
-
-        row.appendTo(container);
+        item.appendTo(container);
 	}
-
-	this.onClick(".goods-row", this.onLook);
 }
 
 
@@ -3878,19 +3864,19 @@ MudderyShop.prototype.setShop = function(data) {
 /*
  * Derive from the base class.
  */
-MudderyGoods = function(el) {
+MudderyGoodsDetail = function(el) {
 	BaseController.call(this, el);
 
 	this.goods = null;
 }
 
-MudderyGoods.prototype = prototype(BaseController.prototype);
-MudderyGoods.prototype.constructor = MudderyGoods;
+MudderyGoodsDetail.prototype = prototype(BaseController.prototype);
+MudderyGoodsDetail.prototype.constructor = MudderyGoodsDetail;
 
 /*
  * Bind events.
  */
-MudderyGoods.prototype.bindEvents = function() {
+MudderyGoodsDetail.prototype.bindEvents = function() {
 	this.onClick(".button-buy", this.onBuy);
 	this.onClick(".button-close", this.onClose);
 	this.onClick(".button-cancel", this.onClose);
@@ -3899,64 +3885,59 @@ MudderyGoods.prototype.bindEvents = function() {
  /*
  * Event when clicks the close button.
  */
-MudderyGoods.prototype.onClose = function(element) {
+MudderyGoodsDetail.prototype.onClose = function(element) {
 	// close this window
-    mud.main_game_window.popWindow(this);
+    this.el.hide();
 }
 
 /*
  * Event when clicks the buy button.
  */
-MudderyGoods.prototype.onBuy = function(element) {
+MudderyGoodsDetail.prototype.onBuy = function(element) {
     if (this.goods) {
         core.service.buyGoods(this.goods["dbref"]);
     }
 
     // close this window
-    mud.main_game_window.popWindow(this);
+    this.el.hide();
 }
 
 /*
  * Reset the goods
  */
-MudderyGoods.prototype.reset = function() {
-    this.select(".goods-name").empty();
-    this.select(".goods-number_mark").hide();
-    this.select(".goods-number").empty().hide();
-
-    this.select(".goods-div-icon").hide();
+MudderyGoodsDetail.prototype.reset = function() {
+    this.select(".icon-img").hide();
+    this.select(".header-text").empty();
     this.select(".goods_price").empty();
-    this.select(".goods_unit").empty();
-
-    // set desc
-    this.select(".goods_desc").html(core.text2html.parseHtml(desc));
+    this.select(".goods_desc").empty();
 }
 
 /*
  * Show goods to the player.
  */
-MudderyGoods.prototype.setGoods = function(goods) {
+MudderyGoodsDetail.prototype.setGoods = function(goods) {
     this.goods = goods;
 
-    // add name
-    this.select(".goods-name").html(core.text2html.parseHtml(goods["name"]));
-
-    // set number
-    if (goods["number"] > 1) {
-        this.select(".goods-number-mark").show();
-        this.select(".goods-number").text(goods["number"]);
-    }
-
-    // add icon
+    // icon
     if (goods["icon"]) {
         var url = settings.resource_url + goods["icon"];
-        this.select(".goods-img-icon").attr("src", url);
-        this.select(".goods-div-icon").show();
+        this.select(".icon-img")
+            .attr("src", url)
+            .show();
+    }
+    else {
+        this.select(".icon-img").hide();
     }
 
+    // name
+    var goods_name = core.text2html.parseHtml(goods["name"]);
+    if (goods["number"] > 1) {
+        goods_name += "&times;" + goods["number"];
+    }
+    this.select(".header-text").html(goods["name"]);
+
     // set price
-    this.select(".goods-price").text(goods["price"]);
-    this.select(".goods-unit").text(goods["unit"]);
+    this.select(".goods-price").text(goods["price"] + goods["unit"]);
 
     // set desc
     this.select(".goods-desc").html(core.text2html.parseHtml(goods["desc"]));

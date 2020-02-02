@@ -47,8 +47,8 @@ MudderyMain.prototype = {
         mud.main_game_window = new MudderyMainGame($("#game-window"));
         mud.main_game_window.init();
 
-        mud.prompt_bar = new MudderyPromptBar($("#main-contents .prompt-bar"));
-        mud.prompt_bar.init();
+        mud.main_title_bar = new MudderyTitleBar($("#main-contents .title-bar"));
+        mud.main_title_bar.init();
 
         mud.scene_window = new MudderyScene($("#main-contents .scene-window"));
         mud.scene_window.init();
@@ -73,9 +73,6 @@ MudderyMain.prototype = {
 
         mud.shop_window = new MudderyShop($("#shop-window"));
         mud.shop_window.init();
-
-        mud.goods_window = new MudderyGoods($("#goods-window"));
-        mud.goods_window.init();
 
         mud.combat_window = new MudderyCombat($("#combat-window"));
         mud.combat_window.init();

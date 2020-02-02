@@ -45,7 +45,7 @@
                         <span class="header-text"></span>
                     </div>
                     <div class="popup-body">
-                        <div>
+                        <div class="icon-div">
                             <img class="icon" src=""/>
                         </div>
                         <div class="desc"></div>
@@ -59,12 +59,12 @@
                 <div class="popup-box">
                     <div class="popup-header">
                         <button type="button" class="button-close"></button>
-                        <span class="header-text">获取物品</span>
+                        <span class="header-text">获得物品</span>
                     </div>
                     <div class="popup-body">
                     </div>
                     <div class="popup-footer">
-                        <button type="button" class="button-ok button-short">确定</button>
+                        <button type="button" class="popup-button button-ok button-short">确定</button>
                     </div>
                 </div>
             </div>
@@ -84,6 +84,28 @@
                         </div>
                     </div>
                     <div class="popup-footer">
+                    </div>
+                </div>
+            </div>
+
+            <!-- popup goods window -->
+            <div id="popup-goods" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text">购买</span>
+                    </div>
+                    <div class="popup-body">
+                        <div class="goods-icon">
+                            <img class="icon-img" src=""/>
+                        </div>
+                        <div class="goods-price"></div>
+                        <div class="goods-desc">
+                        </div>
+                    </div>
+                    <div class="popup-footer">
+                        <button type="button" class="popup-button button-cancel button-short">取消</button>
+                        <button type="button" class="popup-button button-buy button-short">购买</button>
                     </div>
                 </div>
             </div>
@@ -201,16 +223,18 @@
             <div id="game-window" class="main-window hidden">
                 <div class="contents">
                     <div id="main-contents" class="game-content-window">
-                        <div class="prompt-bar">
+                        <div class="title-bar">
                             <div class="icon-back">
                                 <img class="icon hidden" src="" />
                             </div>
                             <span class="name"></span>
                             <span class="value">
                                 <span class="level"></span>
-                                <span class="exp"></span>
-                                <span class="hp"></span>
                             </span>
+                            <div class="hp">
+                                <div class="hp-bar"></div>
+                                <div class="hp-number"></div>
+                            </div>
                         </div>
                         <div class="scene-window">
                             <div class="scene-view">
@@ -228,27 +252,29 @@
                                 </div>
                             </div>
                             <div class="scene-exits">
-                                <table class="exits-table">
-                                    <tbody>
-                                        <tr>
-                                            <td class="direction-0 cell-left cell-top"></td>
-                                            <td class="direction-1 cell-center cell-top"></td>
-                                            <td class="direction-2 cell-right cell-top"></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="direction-3 cell-left cell-middle"></td>
-                                            <td class="direction-4 cell-center cell-middle"></td>
-                                            <td class="direction-5 cell-right cell-middle"></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="direction-6 cell-left cell-bottom"></td>
-                                            <td class="direction-7 cell-center cell-bottom"></td>
-                                            <td class="direction-8 cell-right cell-bottom"></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <svg id="exits-svg" version="1.1"  xmlns="http://www.w3.org/2000/svg">
-                                </svg>
+                                <div class="exits-block">
+                                    <table class="exits-table">
+                                        <tbody>
+                                            <tr>
+                                                <td class="direction-0 cell-left cell-top"></td>
+                                                <td class="direction-1 cell-center cell-top"></td>
+                                                <td class="direction-2 cell-right cell-top"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="direction-3 cell-left cell-middle"></td>
+                                                <td class="direction-4 cell-center cell-middle"></td>
+                                                <td class="direction-5 cell-right cell-middle"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="direction-6 cell-left cell-bottom"></td>
+                                                <td class="direction-7 cell-center cell-bottom"></td>
+                                                <td class="direction-8 cell-right cell-bottom"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <svg id="exits-svg" version="1.1"  xmlns="http://www.w3.org/2000/svg">
+                                    </svg>
+                                </div>
                             </div>
                         </div>
                         <div class="message-window">
@@ -404,54 +430,46 @@
                     </div>
 
                     <div id="shop-window" class="game-content-window hidden">
-                        <div class="title-bar">
-                            <button type="button" class="button-close"></button>
-                            <span class="header-text">Shop</span>
-                        </div>
-                        <div class="shop-icon">
-                            <img id="shop-icon-img"/>
-                        </div>
-                        <div class="shop-desc">
-                        </div>
-                        <div>
-                            <table class="shop-table" frame="border" rules="all">
-                                <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Price</th>
-                                    <th>Desc</th>
-                                </tr>
-                                </thead>
-                                <tbody class="goods-list">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="goods-window" class="game-content-window hidden">
-                        <div class="goods-box">
-                            <div class="goods-content">
-                                <div class="title-bar">
-                                    <button type="button" class="button-close"></button>
-                                    <h4 class="goods-header">
-                                        <span class="goods-name"></span>
-                                        <span class="goods-number_mark">×</span>
-                                        <span class="goods-number"></span>
-                                    </h4>
+                        <div class="shop">
+                            <div class="title-bar">
+                                <button type="button" class="button-close close-light"></button>
+                                <span class="header-text">商店</span>
+                            </div>
+                            <div class="shop-desc">
+                                <div class="shop-icon">
+                                    <img id="shop-icon-img" class="hidden"/>
                                 </div>
-                                <div class="goods-body">
-                                    <div class="goods-div-icon">
-                                        <img class="goods-img-icon"/>
+                                <div class="desc-content">
+                                </div>
+                            </div>
+                            <div class="goods-list">
+                            </div>
+                        </div>
+                        <div class="goods-detail hidden">
+                            <div class="goods-box">
+                                <div class="goods-content">
+                                    <div class="title-bar">
+                                        <button type="button" class="button-close"></button>
+                                        <h4 class="goods-header">
+                                            <span class="goods-name"></span>
+                                            <span class="goods-number_mark">×</span>
+                                            <span class="goods-number"></span>
+                                        </h4>
                                     </div>
-                                    <p class="goods-div-price">
-                                        <span class="goods-price"></span>
-                                        <span class="goods-unit"></span>
-                                    </p>
-                                    <p class="goods-desc"></p>
-                                </div>
-                                <div class="goods-footer">
-                                    <button class="button-buy btn btn-default" type="button">购买</button>
-                                    <button class="button-cancel btn btn-default" type="button">放弃</button>
+                                    <div class="goods-body">
+                                        <div class="goods-div-icon">
+                                            <img class="goods-img-icon"/>
+                                        </div>
+                                        <p class="goods-div-price">
+                                            <span class="goods-price"></span>
+                                            <span class="goods-unit"></span>
+                                        </p>
+                                        <p class="goods-desc"></p>
+                                    </div>
+                                    <div class="goods-footer">
+                                        <button class="button-buy btn btn-default" type="button">购买</button>
+                                        <button class="button-cancel btn btn-default" type="button">放弃</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -540,10 +558,10 @@
                             <div class="result-title">获得物品</div>
                             <div class="result-accepted-list"></div>
                         </div>
-                        <div class="result-rejected hidden">
+                        <!-- div class="result-rejected hidden">
                             <div class="result-title">无法获得</div>
                             <div class="result-rejected-list"></div>
-                        </div>
+                        </div -->
                     </div>
                     <div class="result-buttons">
                         <div class="button-short button-ok">OK</div>
