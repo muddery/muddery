@@ -4,6 +4,7 @@
 
     --button-long: url(../img/button_long.png);
     --button-short: url(../img/button_short.png);
+    --button-short-red: url(../img/button_short_red.png);
     --button-tiny-red: url(../img/button_tiny_red.png);
     --checkbox-checked: url(../img/checkbox_checked.png);
     --checkbox-unchecked: url(../img/checkbox_unchecked.png);
@@ -36,8 +37,8 @@
     --main-bar-button: url(../img/main_bar_button.png);
     --main-scene-name: url(../img/main_scene_name.png);
     --main-object-button: url(../img/main_object_button.png);
-    --main-npc-button: url(../img/main_object_button.png);
-    --main-player-button: url(../img/main_object_button.png);
+    --main-npc-button: url(../img/main_npc_button.png);
+    --main-player-button: url(../img/main_player_button.png);
     --main-scene-exits: url(../img/main_scene_exits.png);
     --main-exit-button: url(../img/main_exit_button.png);
     --main-exit-center: url(../img/main_exit_center.png);
@@ -51,10 +52,9 @@
 
     --inventory-background: url(../img/main_background.png);
     --inventory-title-bar: url(../img/status_title_bar.png);
-    --inventory-item-back: url(../img/icon_back_middle.png);
+    --inventory-default-icon: url(../img/icon_default_middle.png);
     --inventory-item-info-back: url(../img/info_back.png);
     --inventory-item-info-left-back: url(../img/info_left_back.png);
-    --inventory-item-info-icon-back: url(../img/icon_back_middle.png);
     --inventory-item-button: url(../img/button_small.png);
 
     --skills-background: url(../img/main_background.png);
@@ -231,6 +231,10 @@ body {
     background: no-repeat center;
     background-image: var(--button-short);
     background-size: 100% 100%;
+}
+
+.button-short.red {
+    background-image: var(--button-short-red);
 }
 
 .button-tiny-red {
@@ -596,6 +600,12 @@ body {
     text-align: center;
 }
 
+#select-char-window .create-character {
+    color: #333;
+    font-size: 0.16rem;
+    font-weight: 700;
+}
+
 #select-char-window .character-item {
     width: 2.5rem;
     height: 0.6rem;
@@ -865,17 +875,17 @@ body {
     background-size: 100% 100%;
 }
 
-#main-contents .scene-window .scene-objects .object-button {
+#main-contents .scene-window .object-button.object {
     color: #eee;
     background-image: var(--main-object-button);
 }
 
-#main-contents .scene-window .scene-npcs .object-button {
+#main-contents .scene-window .object-button.npc {
     color: #eee;
     background-image: var(--main-npc-button);
 }
 
-#main-contents .scene-window .scene-players .object-button {
+#main-contents .scene-window .object-button.player {
     color: #eee;
     background-image: var(--main-player-button);
 }
@@ -1195,9 +1205,9 @@ body {
 #inventory-window .item-info-left .icon,
 #skills-window .skill-info-left .icon {
     position: relative;
-    width: 0.44rem;
-    height: 0.44rem;
-    line-height: 0.44rem;
+    width: 0.4rem;
+    height: 0.4rem;
+    line-height: 0.4rem;
     background: no-repeat center;
     background-size: 100% 100%;
 }
@@ -1207,7 +1217,6 @@ body {
 #skills-window .skill-info-left .icon-image {
     width: 0.4rem;
     height: 0.4rem;
-    margin: 0.02rem;
 }
 
 #inventory-window .item-info-block,
@@ -1300,32 +1309,40 @@ body {
 #inventory-window .inventory-item {
     display: inline-block;
     margin: 0.04rem;
-    background-image: var(--inventory-item-back);
+    background-image: var(--inventory-default-icon);
 }
 
-#inventory-window .item-info-left .icon {
-    background-image: var(--inventory-item-info-icon-back);
-}
-
-#inventory-window .inventory-item .equipped,
-#inventory-window .item-info-left .equipped {
+#inventory-window .inventory-item .name {
     position: absolute;
-    top: 0.02rem;
-    right: 0.04rem;
+    width: 100%;
+    bottom: 0.01rem;
+    color: #fff;
+    line-height: 0.12rem;
+    font-size: 0.10rem;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+#inventory-window .inventory-item .equipped {
+    position: absolute;
+    top: 0;
+    right: 0.02rem;
     color: #fec;
-    line-height: 0.16rem;
-    font-size: 0.14rem;
+    line-height: 0.14rem;
+    font-size: 0.12rem;
     font-weight: 700;
 }
 
-#inventory-window .inventory-item .number,
-#inventory-window .item-info-left .number {
+#inventory-window .inventory-item .number {
     position: absolute;
-    bottom: 0.02rem;
-    right: 0.04rem;
+    top: 0;
+    left: 0.02rem;
     color: #fff;
-    line-height: 0.16rem;
-    font-size: 0.14rem;
+    line-height: 0.14rem;
+    font-size: 0.12rem;
     font-weight: 700;
 }
 
@@ -1337,9 +1354,32 @@ body {
     background-image: var(--inventory-item-info-left-back);
 }
 
-#inventory-window .item-info .button {
+#inventory-window .item-info-left .icon {
+    background-image: var(--inventory-default-icon);
+}
+
+#inventory-window .item-info-left .button {
     background-image: var(--inventory-item-button);
 }
+
+#inventory-window .item-info-right .name {
+    font-size: 0.14rem;
+    font-weight: 700;
+}
+
+#inventory-window .item-info-right .number {
+    color: #555;
+    font-size: 0.14rem;
+    font-weight: 700;
+}
+
+#inventory-window .item-info-right .equipped {
+    color: #822;
+    font-size: 0.12rem;
+    font-weight: 700;
+    margin-left: 0.05rem;
+}
+
 /************* inventory window end *************/
 
 
@@ -1412,6 +1452,13 @@ body {
 
 #skills-window .skill-info-left {
     background-image: var(--skill-info-left-back);
+}
+
+#skills-window .skill-info-right .passive {
+    color: #182;
+    font-size: 0.12rem;
+    font-weight: 700;
+    margin-left: 0.05rem;
 }
 /************* skills window end *************/
 
@@ -1864,10 +1911,10 @@ body {
 
 #shop-window .goods {
     width: 2.8rem;
-    height: 0.5rem;
+    height: 0.6rem;
     line-height: 0.4rem;
     margin: 0.05rem auto;
-    padding: 0.05rem 0.1rem;
+    padding: 0.1rem 0.1rem;
     background: no-repeat center;
     background-image: var(--shop-goods);
     background-size: 100% 100%;
@@ -1907,32 +1954,3 @@ body {
 }
 
 /************* shop window end *************/
-
-
-/************* goods window begin *************/
-#goods-window {
-    z-index: 2;
-}
-
-#goods-window .goods-box {
-    width: 100%;
-    height: 100%;
-    padding: 20px 20px;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    background: rgba(0, 0, 0, 0.5);
-}
-
-#goods-window .goods-content {
-    width: 100%;
-    height; 100%;
-    background: #333;
-}
-
-#goods-window .goods-div-icon,
-#goods-window .goods-div-price,
-#goods-window .goods-footer {
-    text-align: center;
-}
-/************* goods window end *************/

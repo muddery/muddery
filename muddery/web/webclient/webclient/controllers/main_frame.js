@@ -1254,24 +1254,32 @@ MudderySelectChar.prototype.setCharacters = function(characters) {
 	var container = this.select(".character-list");
 	container.empty();
 
-	for (var i = characters.length - 1; i >= 0; i--) {
-		var item = $("<div>")
-		    .addClass("character-item")
-			.data("index", i)
-		    .prependTo(container);
+    if (characters.length > 0) {
+        for (var i = characters.length - 1; i >= 0; i--) {
+            var item = $("<div>")
+                .addClass("character-item")
+                .data("index", i)
+                .prependTo(container);
 
-		$("<span>")
-		    .addClass("char-name")
-			.text(characters[i]["name"])
-			.appendTo(item);
+            $("<span>")
+                .addClass("char-name")
+                .text(characters[i]["name"])
+                .appendTo(item);
 
-		$("<button>")
-		    .attr("type", "button")
-		    .addClass("button-delete button-tiny-red")
-			.data("index", i)
-			.text(core.trans("Del"))
-			.appendTo(item);
-	}
+            $("<button>")
+                .attr("type", "button")
+                .addClass("button-delete button-tiny-red")
+                .data("index", i)
+                .text(core.trans("Del"))
+                .appendTo(item);
+        }
+    }
+    else {
+        $("<div>")
+            .addClass("create-character")
+            .text(core.trans("Please create a character."))
+            .appendTo(container);
+    }
 
 	this.setNewCharButton();
 }
@@ -2084,11 +2092,13 @@ MudderyInventory.prototype.setInventory = function(inventory) {
                 .attr("src", settings.resource_url + obj["icon"])
                 .appendTo(item);
         }
-        else {
-            // Use name.
-            name = core.text2html.parseHtml(obj["name"]);
-            item.html(name);
-        }
+
+        // name
+        var name = core.text2html.parseHtml(obj["name"]);
+        $("<div>")
+            .addClass("name")
+            .html(name)
+            .appendTo(item);
 
         // Equipped
         if ("equipped" in obj && obj["equipped"]) {
@@ -2126,23 +2136,26 @@ MudderyInventory.prototype.setInventory = function(inventory) {
 MudderyInventory.prototype.showObject = function(obj) {
     this.select(".item-info .icon-image").attr("src", settings.resource_url + obj["icon"]);
 
-    // Equipped
-    if ("equipped" in obj && obj["equipped"]) {
-        this.select(".item-info .equipped").text(core.trans("EQ"));
-    }
-    else {
-        this.select(".item-info .equipped").text("");
-    }
+    this.select(".item-info .name").html(core.text2html.parseHtml(obj["name"]));
 
     // number
     if (obj["number"] != 1 || !obj["can_remove"]) {
-        this.select(".item-info .number").text(obj["number"]);
+        this.select(".item-info .number")
+            .html("&times;" + obj["number"])
+            .show();
     }
     else {
-        this.select(".item-info .number").text("");
+        this.select(".item-info .number").hide();
     }
 
-    this.select(".item-info .name").html(core.text2html.parseHtml(obj["name"]));
+    // Equipped
+    if ("equipped" in obj && obj["equipped"]) {
+        this.select(".item-info .equipped").show();
+    }
+    else {
+        this.select(".item-info .equipped").hide();
+    }
+
     this.select(".item-info .desc").html(core.text2html.parseHtml(obj["desc"]));
 
     // buttons
@@ -2518,9 +2531,9 @@ MudderyScene.prototype.constructor = MudderyScene;
  */
 MudderyScene.prototype.bindEvents = function() {
 	this.onClick(".scene-commands", ".object-button", this.onCommand);
-	this.onClick(".scene-objects", ".object-button", this.onObject);
-	this.onClick(".scene-npcs", ".object-button", this.onNPC);
-	this.onClick(".scene-players", ".object-button", this.onPlayer);
+	this.onClick(".scene-objects", ".object-button.object", this.onObject);
+	this.onClick(".scene-objects", ".object-button.npc", this.onNPC);
+	this.onClick(".scene-players", ".object-button.player", this.onPlayer);
 	this.onClick(".scene-exits", ".exit-button", this.onExit);
 
     !function(caller, method) {
@@ -2607,7 +2620,6 @@ MudderyScene.prototype.clearScene = function() {
     this.select(".scene-desc").empty();
     this.select(".scene-commands").empty();
     this.select(".scene-objects").empty();
-    this.select(".scene-npcs").empty();
     this.select(".scene-players").empty();
     this.select(".scene-exits td").empty();
     var svg = document.getElementById("exits-svg");
@@ -2650,7 +2662,7 @@ MudderyScene.prototype.setScene = function(scene) {
     if ("things" in scene && scene["things"].length > 0) {
         for (var i = 0; i < scene["things"].length; i++) {
             $("<div>")
-                .addClass("scene-button object-button")
+                .addClass("scene-button object-button object")
                 .data("index", i)
                 .text(scene["things"][i]["name"])
                 .appendTo(objects);
@@ -2662,11 +2674,11 @@ MudderyScene.prototype.setScene = function(scene) {
     }
 
     // set npcs
-    var npcs = this.select(".scene-npcs");
+    var npcs = this.select(".scene-objects");
     if ("npcs" in scene && scene["npcs"].length > 0) {
         for (var i = 0; i < scene["npcs"].length; i++) {
             $("<div>")
-                .addClass("scene-button object-button")
+                .addClass("scene-button object-button npc")
                 .data("index", i)
                 .text(scene["npcs"][i]["name"])
                 .appendTo(npcs);
@@ -2684,7 +2696,7 @@ MudderyScene.prototype.setScene = function(scene) {
         var count = 0;
         for (var i = 0; i < scene["players"].length; i++) {
             $("<div>")
-                .addClass("scene-button object-button")
+                .addClass("scene-button object-button player")
                 .data("index", i)
                 .text(scene["players"][i]["name"])
                 .appendTo(players);

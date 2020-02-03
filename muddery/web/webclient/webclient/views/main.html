@@ -104,7 +104,7 @@
                         </div>
                     </div>
                     <div class="popup-footer">
-                        <button type="button" class="popup-button button-cancel button-short">取消</button>
+                        <button type="button" class="popup-button button-cancel button-short red">取消</button>
                         <button type="button" class="popup-button button-buy button-short">购买</button>
                     </div>
                 </div>
@@ -178,7 +178,7 @@
                 </div>
                 <div class="button-bar">
                     <button type="button" class="button-new button-short left">添加角色</button>
-                    <button type="button" class="button-logout button-short right">退出</button>
+                    <button type="button" class="button-logout button-short red right">退出</button>
                     <button type="button" class="button-password button-short right">修改密码</button>
                 </div>
             </div>
@@ -193,8 +193,8 @@
                     <input class="new-char-name long-input-box" type="text" placeholder="请输入角色名字" autocomplete="off" />
                 </div>
                 <div class="button-bar">
-                    <button type="button" class="button-create button-short left">创建</button>
-                    <button type="button" class="button-cancel button-short right">放弃</button>
+                    <button type="button" class="button-cancel button-short red left">放弃</button>
+                    <button type="button" class="button-create button-short right">创建</button>
                 </div>
             </div>
 
@@ -245,8 +245,6 @@
                                 <div class="scene-commands">
                                 </div>
                                 <div class="scene-objects">
-                                </div>
-                                <div class="scene-npcs">
                                 </div>
                                 <div class="scene-players">
                                 </div>
@@ -374,13 +372,15 @@
                                 <div class="item-info-left">
                                     <div class="icon" >
                                         <img class="icon-image" src=""/>
-                                        <div class="equipped"></div>
-                                        <div class="number"></div>
                                     </div>
                                     <div class="buttons"></div>
                                 </div>
                                 <div class="item-info-right">
-                                    <div class="name"></div>
+                                    <div class="item-info-title">
+                                        <span class="name"></span>
+                                        <span class="number"></span>
+                                        <span class="equipped">已装备</span>
+                                    </div>
                                     <div class="desc"></div>
                                 </div>
                             </div>
@@ -404,7 +404,10 @@
                                     <div class="buttons"></div>
                                 </div>
                                 <div class="skill-info-right">
-                                    <div class="name"></div>
+                                    <div>
+                                        <span class="name"></span>
+                                        <span class="passive"></span>
+                                    </div>
                                     <div class="desc"></div>
                                 </div>
                             </div>

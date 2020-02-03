@@ -167,4 +167,5 @@ MudderyLocalDict = {
     "Passive": "被动",
     "Tasks:": "目标：",
     "Lv ": "等级",
+    "Please create a character.": "请创建一个角色",
 };
