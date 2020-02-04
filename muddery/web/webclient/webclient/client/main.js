@@ -44,17 +44,11 @@ MudderyMain.prototype = {
         mud.password_window = new MudderyPassword($("#password-window"));
         mud.password_window.init();
 
-        mud.main_game_window = new MudderyMainGame($("#game-window"));
-        mud.main_game_window.init();
+        mud.game_window = new MudderyGame($("#game-window"));
+        mud.game_window.init();
 
-        mud.main_title_bar = new MudderyTitleBar($("#main-contents .title-bar"));
-        mud.main_title_bar.init();
-
-        mud.scene_window = new MudderyScene($("#main-contents .scene-window"));
+        mud.scene_window = new MudderyScene($("#scene-window"));
         mud.scene_window.init();
-
-        mud.message_window = new MudderyMessage($("#main-contents .message-window"));
-        mud.message_window.init();
 
         mud.char_data_window = new MudderyCharData($("#char-data-window"));
         mud.char_data_window.init();
@@ -76,6 +70,9 @@ MudderyMain.prototype = {
 
         mud.combat_window = new MudderyCombat($("#combat-window"));
         mud.combat_window.init();
+
+        mud.popup_alert = new MudderyPopupMessage($("#popup-alert"));
+        mud.popup_alert.init();
 
         mud.popup_message = new MudderyPopupMessage($("#popup-message"));
         mud.popup_message.init();

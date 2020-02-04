@@ -37,7 +37,7 @@ MudderyClient.prototype = {
         );
 
         if (Evennia.state() == WebSocket.CLOSED) {
-            this.showAlert("Can not connect to the server.");
+            this.showAlert(core.trans("Error"), core.trans("Can not connect to the server."));
             return;
         }
     },
@@ -57,7 +57,7 @@ MudderyClient.prototype = {
     },
 
     showAlert: function(msg) {
-        mud.main_frame.showAlert(msg);
+        mud.main_frame.popupAlert(msg);
     },
 
     doShow: function(type, msg) {
@@ -121,25 +121,25 @@ MudderyClient.prototype = {
                 }
                 else if (key == "msg") {
                 	var msg = core.text2html.parseHtml(data[key]);
-                    mud.message_window.displayMessage(msg);
+                    mud.scene_window.displayMessage(msg);
                 }
                 else if (key == "alert") {
-              		mud.main_frame.showAlert(data[key]);
+              		mud.main_frame.popupMessage(core.trans("Alert"), data[key]);
                 }
                 else if (key == "out") {
-                    mud.message_window.displayMessage(data[key], "out");
+                    mud.scene_window.displayMessage(data[key], "out");
                 }
                 else if (key == "err") {
-                    mud.message_window.displayMessage(data[key]);
+                    mud.scene_window.displayMessage(data[key]);
                 }
                 else if (key == "sys") {
-                    mud.message_window.displayMessage(data[key], "sys");
+                    mud.scene_window.displayMessage(data[key], "sys");
                 }
                 else if (key == "debug") {
-                	mud.message_window.displayMessage(data[key], "debug");
+                	mud.scene_window.displayMessage(data[key], "debug");
                 }
                 else if (key == "prompt") {
-                	mud.message_window.displayMessage(data[key], "prompt");
+                	mud.scene_window.displayMessage(data[key], "prompt");
                 }
                 else if (key == "game_name") {
                     mud.login_window.setGameName(data[key]);
@@ -290,10 +290,10 @@ MudderyClient.prototype = {
                     core.map_data.setData(data[key]);
                 }
                 else if (key == "shop") {
-                    mud.main_game_window.showShop(data[key]);
+                    mud.game_window.showShop(data[key]);
                 }
                 else {
-                    mud.message_window.displayMessage(data[key]);
+                    mud.scene_window.displayMessage(data[key]);
                 }
             }
             catch(error) {

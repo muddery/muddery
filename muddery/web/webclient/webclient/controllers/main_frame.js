@@ -35,8 +35,11 @@ MudderyMainFrame.prototype.bindEvents = function() {
 /*
  * Popup an alert message.
  */
-MudderyMainFrame.prototype.showAlert = function(message) {
-    this.popupMessage(core.trans("Alert"), message);
+MudderyMainFrame.prototype.popupAlert = function(header, content) {
+	this.doClosePopupBox();
+
+	mud.popup_alert.setMessage(header, content);
+    mud.popup_alert.show();
 }
 
 /*
@@ -59,10 +62,10 @@ MudderyMainFrame.prototype.showGetObjects = function(objects) {
 		for (var i = 0; i < objects.length; i++) {
 		    if (!objects[i].reject) {
                 if (first) {
-                    mud.message_window.displayMessage(core.trans("You got:"));
+                    mud.scene_window.displayMessage(core.trans("You got:"));
                     first = false;
                 }
-                mud.message_window.displayMessage(objects[i]["name"] + ": " + objects[i]["number"]);
+                mud.scene_window.displayMessage(objects[i]["name"] + ": " + objects[i]["number"]);
             }
 		}
 	}
@@ -77,10 +80,10 @@ MudderyMainFrame.prototype.showGetObjects = function(objects) {
 		for (var i = 0; i < objects.length; i++) {
 		    if (objects[i].reject) {
                 if (first) {
-                    mud.message_window.displayMessage(core.trans("You can not get:"));
+                    mud.scene_window.displayMessage(core.trans("You can not get:"));
                     first = false;
                 }
-                mud.message_window.displayMessage(objects[i]["name"] + ": " + objects[i]["reject"]);
+                mud.scene_window.displayMessage(objects[i]["name"] + ": " + objects[i]["reject"]);
             }
 		}
 	}
@@ -117,7 +120,7 @@ MudderyMainFrame.prototype.setSkillCast = function(result) {
 			message += core.text2html.parseHtml(result["result"]);
 		}
 		if (message) {
-			mud.message_window.displayMessage(message);
+			mud.scene_window.displayMessage(message);
 		}
 	}
 	else {
@@ -139,7 +142,7 @@ MudderyMainFrame.prototype.setSkillCD = function(skill, cd, gcd) {
  */
 MudderyMainFrame.prototype.showGetExp = function(exp, combat) {
 	// show exp
-	mud.message_window.displayMessage(core.trans("You got exp: ") + exp);
+	mud.scene_window.displayMessage(core.trans("You got exp: ") + exp);
 }
 
 /*
@@ -156,7 +159,7 @@ MudderyMainFrame.prototype.doClosePopupBox = function() {
  */
 MudderyMainFrame.prototype.setStatus = function(status) {
 	core.data_handler.character_level = status["level"]["value"];
-	mud.main_title_bar.setStatus(status);
+	mud.scene_window.setStatus(status);
 	mud.char_data_window.setStatus(status);
 }
 
@@ -164,7 +167,7 @@ MudderyMainFrame.prototype.setStatus = function(status) {
  *  Set the player's status in combat.
  */
 MudderyMainFrame.prototype.setCombatStatus = function(status) {
-	mud.main_title_bar.setStatus(status);
+	mud.scene_window.setStatus(status);
     mud.char_data_window.setCombatStatus(status);
 }
 
@@ -257,7 +260,7 @@ MudderyMainFrame.prototype.onConnectionClose = function() {
 	self.doClosePopupBox();
 	
 	// show message
-	self.popupMessage(core.trans("Error"), core.trans("The client connection was closed cleanly."));
+	self.popupAlert(core.trans("Error"), core.trans("The client connection was closed cleanly."));
 }
     
 /*
@@ -290,10 +293,10 @@ MudderyMainFrame.prototype.onPuppet = function(data) {
     core.data_handler.character_dbref = data["dbref"];
     core.data_handler.character_name = data["name"];
 
-    mud.main_title_bar.setInfo(data["name"], data["icon"]);
+    mud.scene_window.clear();
+    mud.scene_window.setInfo(data["name"], data["icon"]);
     mud.char_data_window.setInfo(data["name"], data["icon"]);
     mud.combat_window.setInfo(data["name"], data["icon"]);
-    mud.message_window.clear();
 
     this.puppet = true;
 	this.showPuppet();
@@ -333,7 +336,7 @@ MudderyMainFrame.prototype.hideAllWindows = function() {
  */
 MudderyMainFrame.prototype.showPuppet = function() {
 	// show login UI
-	this.gotoWindow(mud.main_game_window);
+	this.gotoWindow(mud.game_window);
 }
 
 
@@ -1428,17 +1431,17 @@ MudderyPassword.prototype.clearValues = function() {
 /*
  * Derive from the base class.
  */
-MudderyMainGame = function(el) {
+MudderyGame = function(el) {
 	BaseController.call(this, el);
 }
 
-MudderyMainGame.prototype = prototype(BaseController.prototype);
-MudderyMainGame.prototype.constructor = MudderyMainGame;
+MudderyGame.prototype = prototype(BaseController.prototype);
+MudderyGame.prototype.constructor = MudderyGame;
 
 /*
  * Bind events.
  */
-MudderyMainGame.prototype.bindEvents = function() {
+MudderyGame.prototype.bindEvents = function() {
     $(window).bind("resize", this.onResize);
 
     this.onClick(this.onClickWindow);
@@ -1460,7 +1463,7 @@ MudderyMainGame.prototype.bindEvents = function() {
 /*
  * Show a window.
  */
-MudderyMainGame.prototype.showWindow = function(win_controller) {
+MudderyGame.prototype.showWindow = function(win_controller) {
     this.select(".contents>div").hide();
     win_controller.show();
 }
@@ -1468,28 +1471,28 @@ MudderyMainGame.prototype.showWindow = function(win_controller) {
 /*
  * Event when the window size changed.
  */
-MudderyMainGame.prototype.onResize = function(element) {
-    mud.main_game_window.resetSize();
+MudderyGame.prototype.onResize = function(element) {
+    mud.game_window.resetSize();
 }
 
 /*
  * Event when clicks this window.
  */
-MudderyMainGame.prototype.onClickWindow = function(element) {
+MudderyGame.prototype.onClickWindow = function(element) {
     this.hidePopupMenus();
 }
 
 /*
  * Event when clicks the scene button.
  */
-MudderyMainGame.prototype.onScene = function(element) {
+MudderyGame.prototype.onScene = function(element) {
     this.showWindow(mud.scene_window);
 }
 
 /*
  * Event when clicks the map button.
  */
-MudderyMainGame.prototype.onMap = function(element) {
+MudderyGame.prototype.onMap = function(element) {
     this.showWindow(mud.map_window);
     mud.map_window.showMap(core.map_data._current_location);
 }
@@ -1498,7 +1501,7 @@ MudderyMainGame.prototype.onMap = function(element) {
 /*
  * Event when clicks the character button.
  */
-MudderyMainGame.prototype.onCharacter = function(element, event) {
+MudderyGame.prototype.onCharacter = function(element, event) {
     // Show the character menu.
     var hidden = this.select(".menu-character").hasClass("hidden");
     this.hidePopupMenus();
@@ -1512,28 +1515,28 @@ MudderyMainGame.prototype.onCharacter = function(element, event) {
 /*
  * Event when clicks the status button.
  */
-MudderyMainGame.prototype.onStatus = function(element) {
+MudderyGame.prototype.onStatus = function(element) {
     this.showWindow(mud.char_data_window);
 }
 
 /*
  * Event when clicks the inventory button.
  */
-MudderyMainGame.prototype.onInventory = function(element) {
+MudderyGame.prototype.onInventory = function(element) {
     this.showWindow(mud.inventory_window);
 }
 
 /*
  * Event when clicks the skills button.
  */
-MudderyMainGame.prototype.onSkills = function(element) {
+MudderyGame.prototype.onSkills = function(element) {
     this.showWindow(mud.skills_window);
 }
 
 /*
  * Event when clicks the character button.
  */
-MudderyMainGame.prototype.onQuests = function(element) {
+MudderyGame.prototype.onQuests = function(element) {
     this.showWindow(mud.quests_window);
 }
 
@@ -1541,7 +1544,7 @@ MudderyMainGame.prototype.onQuests = function(element) {
 /*
  * Event when clicks the system button.
  */
-MudderyMainGame.prototype.onSystem = function(element) {
+MudderyGame.prototype.onSystem = function(element) {
     // Show the character menu.
     var hidden = this.select(".menu-system").hasClass("hidden");
     this.hidePopupMenus();
@@ -1555,7 +1558,7 @@ MudderyMainGame.prototype.onSystem = function(element) {
 /*
  * Event when clicks the logout button.
  */
-MudderyMainGame.prototype.onLogout = function(element) {
+MudderyGame.prototype.onLogout = function(element) {
     core.service.logout();
     Evennia.reconnect();
     mud.main_frame.showLoginWindow();
@@ -1564,7 +1567,7 @@ MudderyMainGame.prototype.onLogout = function(element) {
 /*
  * Event when clicks the unpuppet button.
  */
-MudderyMainGame.prototype.onUnpuppet = function(element) {
+MudderyGame.prototype.onUnpuppet = function(element) {
 	core.service.unpuppetCharacter();
 	mud.main_frame.onUnpuppet();
 }
@@ -1572,7 +1575,7 @@ MudderyMainGame.prototype.onUnpuppet = function(element) {
 /*
  * Set popup menus position.
  */
-MudderyMainGame.prototype.resetSize = function(element) {
+MudderyGame.prototype.resetSize = function(element) {
     // Character menu.
     var button_char = this.select(".button-character");
     var menu_char = this.select(".menu-character");
@@ -1595,7 +1598,7 @@ MudderyMainGame.prototype.resetSize = function(element) {
 /*
  * Hide all popup menus.
  */
-MudderyMainGame.prototype.hidePopupMenus = function(element) {
+MudderyGame.prototype.hidePopupMenus = function(element) {
     this.select(".tab-bar .popup-menu").addClass("hidden");
 }
 
@@ -1603,7 +1606,7 @@ MudderyMainGame.prototype.hidePopupMenus = function(element) {
 /*
  * Show shop window.
  */
-MudderyMainGame.prototype.showShop = function(data) {
+MudderyGame.prototype.showShop = function(data) {
 	mud.main_frame.doClosePopupBox();
 	mud.shop_window.setShop(data);
 	this.showWindow(mud.shop_window);
@@ -1613,13 +1616,433 @@ MudderyMainGame.prototype.showShop = function(data) {
 /*
  * Popup shop goods.
  */
-MudderyMainGame.prototype.showGoods = function(dbref, name, number, icon, desc, price, unit) {
+MudderyGame.prototype.showGoods = function(dbref, name, number, icon, desc, price, unit) {
 	this.doClosePopupBox();
 
 	var component = $$.component.goods;
 	component.setGoods(dbref, name, number, icon, desc, price, unit);
 	component.show()
 }
+
+
+
+/******************************************
+ *
+ * Scene Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyScene = function(el) {
+	BaseController.call(this, el);
+
+    this.title_bar = new MudderyTitleBar(this.select(".title-bar"));
+    this.title_bar.init();
+
+    this.max_player = 10;
+    this.path_color = "#666";
+    this.path_width = "3";
+
+	this.scene = null;
+}
+
+MudderyScene.prototype = prototype(BaseController.prototype);
+MudderyScene.prototype.constructor = MudderyScene;
+
+/*
+ * Bind events.
+ */
+MudderyScene.prototype.bindEvents = function() {
+	this.onClick(".scene-commands", ".object-button", this.onCommand);
+	this.onClick(".scene-objects", ".object-button.object", this.onObject);
+	this.onClick(".scene-objects", ".object-button.npc", this.onNPC);
+	this.onClick(".scene-players", ".object-button.player", this.onPlayer);
+	this.onClick(".scene-exits", ".exit-button", this.onExit);
+
+    !function(caller, method) {
+		$(window).on("resize", undefined, caller, function(event) {
+    		method.call(event.data, event.currentTarget, event);
+    	});
+    }(this, this.onResize);
+}
+
+/*
+ * On click a command.
+ */
+MudderyScene.prototype.onCommand = function(element) {
+    var index = $(element).data("index");
+    var cmd = this.scene["cmds"][index]["cmd_name"];
+    var args = this.scene["cmds"][index]["cmd_args"];
+    core.service.doCommandLink(cmd, args);
+}
+
+/*
+ * On look at an object.
+ */
+MudderyScene.prototype.onObject = function(element) {
+    var index = $(element).data("index");
+    var dbref = this.scene["things"][index]["dbref"];
+    dbref = dbref.slice(1);
+    core.service.look(dbref, "scene");
+}
+
+/*
+ * On look at an NPC.
+ */
+MudderyScene.prototype.onNPC = function(element) {
+    var index = $(element).data("index");
+    var dbref = this.scene["npcs"][index]["dbref"];
+    dbref = dbref.slice(1);
+    core.service.look(dbref, "scene");
+}
+
+/*
+ * On look at an player.
+ */
+MudderyScene.prototype.onPlayer = function(element) {
+    var index = $(element).data("index");
+    var dbref = this.scene["players"][index]["dbref"];
+    dbref = dbref.slice(1);
+    core.service.look(dbref, "scene");
+}
+
+/*
+ * On go to an exit.
+ */
+MudderyScene.prototype.onExit = function(element) {
+    var index = $(element).data("index");
+    var dbref = this.scene["exits"][index]["dbref"];
+    dbref = dbref.slice(1);
+    core.service.doGoto(dbref);
+}
+
+/*
+ * On the window resize.
+ */
+MudderyScene.prototype.onResize = function() {
+    this.resetSize();
+}
+
+/*
+ * Set element's size.
+ */
+MudderyScene.prototype.resetSize = function() {
+    var svg = document.getElementById("exits-svg");
+    svg.innerHTML = "";
+
+    if (this.scene && "exits" in this.scene) {
+        this.drawExitPaths(this.scene["exits"]);
+    }
+}
+
+/*
+ * Clear the scene.
+ */
+MudderyScene.prototype.clear = function() {
+    this.clearScene();
+    this.clearMessages();
+}
+
+/*
+ * Clear the view.
+ */
+MudderyScene.prototype.clearScene = function() {
+    this.select(".scene-name").empty();
+    this.select(".scene-desc").empty();
+    this.select(".scene-commands").empty();
+    this.select(".scene-objects").empty();
+    this.select(".scene-players").empty();
+    this.select(".scene-exits td").empty();
+    var svg = document.getElementById("exits-svg");
+    svg.innerHTML = "";
+}
+
+/*
+ * Clear the message list.
+ */
+MudderyScene.prototype.clearMessages = function() {
+    this.select(".message-list").empty();
+}
+
+/*
+ * Set character's basic information.
+ */
+MudderyScene.prototype.setInfo = function(name, icon) {
+    this.title_bar.setInfo(name, icon);
+}
+
+
+/*
+ * Set character's status.
+ */
+MudderyScene.prototype.setStatus = function(status) {
+    this.title_bar.setStatus(status);
+}
+
+/*
+ * Set the scene's data.
+ */
+MudderyScene.prototype.setScene = function(scene) {
+    this.scene = scene;
+
+    this.clearScene();
+
+    // add room's name
+    var room_name = core.text2html.parseHtml(scene["name"]);
+    this.select(".scene-name").html(room_name);
+
+    // add room's desc
+    this.select(".scene-desc").html(core.text2html.parseHtml(scene["desc"]));
+
+    // set commands
+    var commands = this.select(".scene-commands");
+    if ("cmds" in scene && scene["cmds"].length > 0) {
+        for (var i = 0; i < scene["cmds"].length; i++) {
+            $("<div>")
+                .addClass("object-button")
+                .data("index", i)
+                .text(scene["cmds"][i]["name"])
+                .appendTo(commands);
+        }
+        commands.show();
+    }
+    else {
+        commands.hide();
+    }
+
+    // set objects
+    var objects = this.select(".scene-objects");
+    var has_objects = false;
+    if ("things" in scene && scene["things"].length > 0) {
+        for (var i = 0; i < scene["things"].length; i++) {
+            $("<div>")
+                .addClass("scene-button object-button object")
+                .data("index", i)
+                .text(scene["things"][i]["name"])
+                .appendTo(objects);
+        }
+        has_objects = true;
+    }
+
+    // set npcs
+    var has_npcs = false;
+    if ("npcs" in scene && scene["npcs"].length > 0) {
+        for (var i = 0; i < scene["npcs"].length; i++) {
+            $("<div>")
+                .addClass("scene-button object-button npc")
+                .data("index", i)
+                .text(scene["npcs"][i]["name"])
+                .appendTo(objects);
+        }
+        has_npcs = true;
+    }
+
+    if (has_objects || has_npcs) {
+        objects.show();
+    }
+    else {
+        objects.hide();
+    }
+
+    // set players
+    var players = this.select(".scene-players");
+    if ("players" in scene && scene["players"].length > 0) {
+        // Only show 10 players.
+        var count = 0;
+        for (var i = 0; i < scene["players"].length; i++) {
+            $("<div>")
+                .addClass("scene-button object-button player")
+                .data("index", i)
+                .text(scene["players"][i]["name"])
+                .appendTo(players);
+
+            count++
+            if (count == this.max_player) {
+                break;
+            }
+        }
+        players.show();
+    }
+    else {
+        players.hide();
+    }
+
+    // add exits
+    if ("exits" in scene && scene["exits"].length > 0) {
+        this.setExitsMap(scene["exits"], room_name);
+    }
+
+    // set background
+    var backview = this.select("#scene-contents");
+    if ("background" in scene && scene["background"]) {
+        var url = settings.resource_url + scene["background"]["resource"];
+        backview.css("background", "url(" + url + ") no-repeat center center");
+    }
+    else {
+        backview.css("background", "");
+    }
+}
+
+/*
+ * Add a new player to this scene.
+ */
+MudderyScene.prototype.addPlayer = function(player) {
+    this.addLinks("#scene_players", "#scene_players_container", [player]);
+}
+
+/*
+ * Remove a player from this scene.
+ */
+MudderyScene.prototype.removePlayer = function(player) {
+    this.select("#scene_obj_" + player["dbref"].slice(1)).remove();
+
+	if (this.select("#scene_players_container>:not(.template)").length == 0) {
+	    // No other players.
+		this.select("#scene_players").hide();
+	}
+}
+
+/*
+ * Set a mini map of exits.
+ */
+MudderyScene.prototype.setExitsMap = function(exits, room_name) {
+    // sort exits by direction
+    // index of direction:
+    // 0  1  2
+    // 3  4  5
+    // 6  7  8
+    var room_exits = [];
+    if (exits) {
+        for (var i = 0;i < exits.length; i++) {
+            var direction = core.map_data.getExitDirection(exits[i].key);
+            // sort from north (67.5)
+            if (direction < 67.5) {
+                direction += 360;
+            }
+            room_exits.push({"data": exits[i],
+                             "direction": direction,
+                             "index": i
+                             });
+        }
+
+        room_exits.sort(function(a, b) {return a.direction - b.direction;});
+    }
+
+    var exit_grids = [[], [], [] ,[] ,[], [], [], [], []];
+    for (var i in room_exits) {
+        var index = core.map_data.getDirectionIndex(room_exits[i]["direction"]);
+        exit_grids[index].push(room_exits[i]);
+    }
+
+    // reverse the upper circle elements
+    for (var i = 0; i < 4; ++i) {
+        exit_grids[i].reverse();
+    }
+
+    // add exits to table
+    for (var i = 0; i < exit_grids.length; i++) {
+        var position = ".direction-" + i;
+        var container = this.select(position);
+
+        if (exit_grids[i].length == 0) {
+            var p = $("<p>")
+                .appendTo(container);
+
+            // If the center grid is empty, show room's name in the center grid.
+            if (i == 4) {
+                var name = "";
+                if (room_name) {
+                    name = core.text2html.parseHtml(room_name);
+                }
+
+                $("<div>")
+                    .addClass("exit-center")
+                    .text(name)
+                    .appendTo(p);
+            }
+            else {
+                p.html("&nbsp;");
+            }
+            continue;
+        }
+
+        for (var j = 0; j < exit_grids[i].length; j++) {
+            var exit = exit_grids[i][j];
+
+            var name = "";
+            if (exit["data"]["name"]) {
+                name = core.text2html.parseHtml(exit["data"]["name"]);
+            }
+
+            var p = $("<p>")
+                .appendTo(container);
+
+            $("<div>")
+                .addClass("exit-button exit-" + exit["index"])
+                .data("index", exit["index"])
+                .text(name)
+                .appendTo(p);
+        }
+    }
+
+    this.drawExitPaths(exits);
+
+    // set height
+    var height = this.select(".exits-table").height();
+    this.select(".exits-block").height(height);
+}
+
+/*
+ * Draw exit paths.
+ */
+MudderyScene.prototype.drawExitPaths = function(exits) {
+    // draw exit lines
+    var svg = document.getElementById("exits-svg");
+    var namespace = "http://www.w3.org/2000/svg";
+    var center_dom = this.select(".direction-4");
+    var x1 = center_dom.position().left + center_dom.outerWidth(true) / 2;
+    var y1 = center_dom.position().top + center_dom.outerHeight(true) / 2;
+    for (var i = 0; i < exits.length; i++) {
+        var exit_dom = this.select(".exit-" + i);
+        var x2 = exit_dom.position().left + exit_dom.outerWidth(true) / 2;
+        var y2 = exit_dom.position().top + exit_dom.outerHeight(true) / 2;
+        var path = document.createElementNS(namespace, "path");
+        path.setAttribute("stroke", this.path_color);
+        path.setAttribute("stroke-width", this.path_width);
+        path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
+        svg.appendChild(path);
+    }
+}
+
+/*
+ * Display a message in message window.
+ */
+MudderyScene.prototype.displayMessage = function(msg, type) {
+	var message_list = this.select(".message-list");
+
+	if (!type) {
+		type = "normal";
+	}
+
+	var item = $("<div>")
+		.addClass("msg-" + type)
+		.html(msg)
+		.appendTo(message_list);
+
+	// remove old messages
+	var max = 40;
+	var divs = message_list.find("div");
+	var size = divs.length;
+	if (size > max) {
+		divs.slice(0, size - max).remove();
+	}
+
+    message_list.stop(true);
+    message_list.scrollTop(message_list[0].scrollHeight);
+}
+
 
 /******************************************
  *
@@ -1696,58 +2119,6 @@ MudderyTitleBar.prototype.setStatus = function(status) {
     else {
         this.select(".hp").hide();
     }
-}
-
-/******************************************
- *
- * Message Window
- *
- ******************************************/
-
-/*
- * Derive from the base class.
- */
-MudderyMessage = function(el) {
-	BaseController.call(this, el);
-}
-
-MudderyMessage.prototype = prototype(BaseController.prototype);
-MudderyMessage.prototype.constructor = MudderyMessage;
-
-
-/*
- * Clear messages in message window.
- */
-MudderyMessage.prototype.clear = function() {
-    this.select(".message-list").empty();
-}
-
-
-/*
- * Display a message in message window.
- */
-MudderyMessage.prototype.displayMessage = function(msg, type) {
-	var message_list = this.select(".message-list");
-
-	if (!type) {
-		type = "normal";
-	}
-
-	var item = $("<div>")
-		.addClass("msg-" + type)
-		.html(msg)
-		.appendTo(message_list);
-
-	// remove old messages
-	var max = 40;
-	var divs = message_list.find("div");
-	var size = divs.length;
-	if (size > max) {
-		divs.slice(0, size - max).remove();
-	}
-
-    message_list.stop(true);
-    message_list.scrollTop(message_list[0].scrollHeight);
 }
 
 
@@ -2504,361 +2875,6 @@ MudderyQuests.prototype.showQuest = function(quest) {
     this.select(".quest-info").show();
 }
 
-/******************************************
- *
- * Scene Window
- *
- ******************************************/
-
-/*
- * Derive from the base class.
- */
-MudderyScene = function(el) {
-	BaseController.call(this, el);
-
-    this.max_player = 10;
-    this.path_color = "#666";
-    this.path_width = "3";
-
-	this.scene = null;
-}
-
-MudderyScene.prototype = prototype(BaseController.prototype);
-MudderyScene.prototype.constructor = MudderyScene;
-
-/*
- * Bind events.
- */
-MudderyScene.prototype.bindEvents = function() {
-	this.onClick(".scene-commands", ".object-button", this.onCommand);
-	this.onClick(".scene-objects", ".object-button.object", this.onObject);
-	this.onClick(".scene-objects", ".object-button.npc", this.onNPC);
-	this.onClick(".scene-players", ".object-button.player", this.onPlayer);
-	this.onClick(".scene-exits", ".exit-button", this.onExit);
-
-    !function(caller, method) {
-		$(window).on("resize", undefined, caller, function(event) {
-    		method.call(event.data, event.currentTarget, event);
-    	});
-    }(this, this.onResize);
-}
-
-/*
- * On click a command.
- */
-MudderyScene.prototype.onCommand = function(element) {
-    var index = $(element).data("index");
-    var cmd = this.scene["cmds"][index]["cmd_name"];
-    var args = this.scene["cmds"][index]["cmd_args"];
-    core.service.doCommandLink(cmd, args);
-}
-
-/*
- * On look at an object.
- */
-MudderyScene.prototype.onObject = function(element) {
-    var index = $(element).data("index");
-    var dbref = this.scene["things"][index]["dbref"];
-    dbref = dbref.slice(1);
-    core.service.look(dbref, "scene");
-}
-
-/*
- * On look at an NPC.
- */
-MudderyScene.prototype.onNPC = function(element) {
-    var index = $(element).data("index");
-    var dbref = this.scene["npcs"][index]["dbref"];
-    dbref = dbref.slice(1);
-    core.service.look(dbref, "scene");
-}
-
-/*
- * On look at an player.
- */
-MudderyScene.prototype.onPlayer = function(element) {
-    var index = $(element).data("index");
-    var dbref = this.scene["players"][index]["dbref"];
-    dbref = dbref.slice(1);
-    core.service.look(dbref, "scene");
-}
-
-/*
- * On go to an exit.
- */
-MudderyScene.prototype.onExit = function(element) {
-    var index = $(element).data("index");
-    var dbref = this.scene["exits"][index]["dbref"];
-    dbref = dbref.slice(1);
-    core.service.doGoto(dbref);
-}
-
-/*
- * On the window resize.
- */
-MudderyScene.prototype.onResize = function() {
-    this.resetSize();
-}
-
-/*
- * Set element's size.
- */
-MudderyScene.prototype.resetSize = function() {
-    var svg = document.getElementById("exits-svg");
-    svg.innerHTML = "";
-
-    if (this.scene && "exits" in this.scene) {
-        this.drawExitPaths(this.scene["exits"]);
-    }
-}
-
-/*
- * Clear the view.
- */
-MudderyScene.prototype.clearScene = function() {
-    this.select(".scene-name").empty();
-    this.select(".scene-desc").empty();
-    this.select(".scene-commands").empty();
-    this.select(".scene-objects").empty();
-    this.select(".scene-players").empty();
-    this.select(".scene-exits td").empty();
-    var svg = document.getElementById("exits-svg");
-    svg.innerHTML = "";
-}
-
-/*
- * Set the scene's data.
- */
-MudderyScene.prototype.setScene = function(scene) {
-    this.scene = scene;
-
-    this.clearScene();
-
-    // add room's name
-    var room_name = core.text2html.parseHtml(scene["name"]);
-    this.select(".scene-name").html(room_name);
-
-    // add room's desc
-    this.select(".scene-desc").html(core.text2html.parseHtml(scene["desc"]));
-
-    // set commands
-    var commands = this.select(".scene-commands");
-    if ("cmds" in scene && scene["cmds"].length > 0) {
-        for (var i = 0; i < scene["cmds"].length; i++) {
-            $("<div>")
-                .addClass("object-button")
-                .data("index", i)
-                .text(scene["cmds"][i]["name"])
-                .appendTo(commands);
-        }
-        commands.show();
-    }
-    else {
-        commands.hide();
-    }
-
-    // set objects
-    var objects = this.select(".scene-objects");
-    if ("things" in scene && scene["things"].length > 0) {
-        for (var i = 0; i < scene["things"].length; i++) {
-            $("<div>")
-                .addClass("scene-button object-button object")
-                .data("index", i)
-                .text(scene["things"][i]["name"])
-                .appendTo(objects);
-        }
-        objects.show();
-    }
-    else {
-        objects.hide();
-    }
-
-    // set npcs
-    var npcs = this.select(".scene-objects");
-    if ("npcs" in scene && scene["npcs"].length > 0) {
-        for (var i = 0; i < scene["npcs"].length; i++) {
-            $("<div>")
-                .addClass("scene-button object-button npc")
-                .data("index", i)
-                .text(scene["npcs"][i]["name"])
-                .appendTo(npcs);
-        }
-        npcs.show();
-    }
-    else {
-        npcs.hide();
-    }
-
-    // set players
-    var players = this.select(".scene-players");
-    if ("players" in scene && scene["players"].length > 0) {
-        // Only show 10 players.
-        var count = 0;
-        for (var i = 0; i < scene["players"].length; i++) {
-            $("<div>")
-                .addClass("scene-button object-button player")
-                .data("index", i)
-                .text(scene["players"][i]["name"])
-                .appendTo(players);
-
-            count++
-            if (count == this.max_player) {
-                break;
-            }
-        }
-        players.show();
-    }
-    else {
-        players.hide();
-    }
-
-    // add exits
-    if ("exits" in scene && scene["exits"].length > 0) {
-        this.setExitsMap(scene["exits"], room_name);
-    }
-
-    // set background
-    var backview = this.select("#scene-window");
-    if ("background" in scene && scene["background"]) {
-        var url = settings.resource_url + scene["background"]["resource"];
-        backview.css("background", "url(" + url + ") no-repeat center center");
-    }
-    else {
-        backview.css("background", "");
-    }
-}
-
-/*
- * Add a new player to this scene.
- */
-MudderyScene.prototype.addPlayer = function(player) {
-    this.addLinks("#scene_players", "#scene_players_container", [player]);
-}
-
-/*
- * Remove a player from this scene.
- */
-MudderyScene.prototype.removePlayer = function(player) {
-    this.select("#scene_obj_" + player["dbref"].slice(1)).remove();
-
-	if (this.select("#scene_players_container>:not(.template)").length == 0) {
-	    // No other players.
-		this.select("#scene_players").hide();
-	}
-}
-
-/*
- * Set a mini map of exits.
- */
-MudderyScene.prototype.setExitsMap = function(exits, room_name) {
-    // sort exits by direction
-    // index of direction:
-    // 0  1  2
-    // 3  4  5
-    // 6  7  8
-    var room_exits = [];
-    if (exits) {
-        for (var i = 0;i < exits.length; i++) {
-            var direction = core.map_data.getExitDirection(exits[i].key);
-            // sort from north (67.5)
-            if (direction < 67.5) {
-                direction += 360;
-            }
-            room_exits.push({"data": exits[i],
-                             "direction": direction,
-                             "index": i
-                             });
-        }
-
-        room_exits.sort(function(a, b) {return a.direction - b.direction;});
-    }
-
-    var exit_grids = [[], [], [] ,[] ,[], [], [], [], []];
-    for (var i in room_exits) {
-        var index = core.map_data.getDirectionIndex(room_exits[i]["direction"]);
-        exit_grids[index].push(room_exits[i]);
-    }
-
-    // reverse the upper circle elements
-    for (var i = 0; i < 4; ++i) {
-        exit_grids[i].reverse();
-    }
-
-    // add exits to table
-    for (var i = 0; i < exit_grids.length; i++) {
-        var position = ".direction-" + i;
-        var container = this.select(position);
-
-        if (exit_grids[i].length == 0) {
-            var p = $("<p>")
-                .appendTo(container);
-
-            // If the center grid is empty, show room's name in the center grid.
-            if (i == 4) {
-                var name = "";
-                if (room_name) {
-                    name = core.text2html.parseHtml(room_name);
-                }
-
-                $("<div>")
-                    .addClass("exit-center")
-                    .text(name)
-                    .appendTo(p);
-            }
-            else {
-                p.html("&nbsp;");
-            }
-            continue;
-        }
-
-        for (var j = 0; j < exit_grids[i].length; j++) {
-            var exit = exit_grids[i][j];
-
-            var name = "";
-            if (exit["data"]["name"]) {
-                name = core.text2html.parseHtml(exit["data"]["name"]);
-            }
-
-            var p = $("<p>")
-                .appendTo(container);
-
-            $("<div>")
-                .addClass("exit-button exit-" + exit["index"])
-                .data("index", exit["index"])
-                .text(name)
-                .appendTo(p);
-        }
-    }
-
-    this.drawExitPaths(exits);
-
-    // set height
-    var height = this.select(".exits-table").height();
-    this.select(".exits-block").height(height);
-}
-
-/*
- * Draw exit paths.
- */
-MudderyScene.prototype.drawExitPaths = function(exits) {
-    // draw exit lines
-    var svg = document.getElementById("exits-svg");
-    var namespace = "http://www.w3.org/2000/svg";
-    var center_dom = this.select(".direction-4");
-    var x1 = center_dom.position().left + center_dom.outerWidth(true) / 2;
-    var y1 = center_dom.position().top + center_dom.outerHeight(true) / 2;
-    for (var i = 0; i < exits.length; i++) {
-        var exit_dom = this.select(".exit-" + i);
-        var x2 = exit_dom.position().left + exit_dom.outerWidth(true) / 2;
-        var y2 = exit_dom.position().top + exit_dom.outerHeight(true) / 2;
-        var path = document.createElementNS(namespace, "path");
-        path.setAttribute("stroke", this.path_color);
-        path.setAttribute("stroke-width", this.path_width);
-        path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
-        svg.appendChild(path);
-    }
-}
-
 
 /******************************************
  *
@@ -3129,7 +3145,7 @@ MudderyMap.prototype.showMap = function(location) {
 MudderyCombat = function(el) {
 	BaseController.call(this, el);
 
-    this.combat_result = new MudderyCombatResult($("#combat-window .combat-result"));
+    this.combat_result = new MudderyCombatResult(this.select(".combat-result"));
     this.combat_result.init();
 
 	this.self_dbref = "";
@@ -3769,7 +3785,7 @@ MudderyShop.prototype.bindEvents = function() {
  */
 MudderyShop.prototype.onClose = function(element) {
 	// close popup box
-    mud.main_game_window.showWindow(mud.scene_window);
+    mud.game_window.showWindow(mud.scene_window);
 }
 
 /*

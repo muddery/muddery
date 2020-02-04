@@ -91,6 +91,7 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
                     continue
 
                 self.db.shops[shop_key] = shop_obj
+                shop_obj.set_owner(self)
 
     def get_available_commands(self, caller):
         """

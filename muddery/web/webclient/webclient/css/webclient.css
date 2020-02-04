@@ -76,7 +76,7 @@
 
     --shop-background: url(../img/main_background.png);
     --shop-title-bar: url(../img/status_title_bar.png);
-    --shop-default-icon: ulr(../img/shop_default_icon.png);
+    --shop-default-icon: url(../img/shop_default_icon.png);
     --shop-desc: url(../img/shop_desc.png);
     --shop-goods: url(../img/shop_goods.png);
 
@@ -345,6 +345,19 @@ body {
     background: rgba(0, 0, 0, .5);
 }
 
+/* popup alert */
+#popup-alert .popup-box {
+    background-image: none;
+    background-color: #fff;
+    border-radius: 0.08rem;
+    border: 0.01rem solid #876;
+}
+
+#popup-alert .button-short {
+    background-image: none;
+    background-color: #658;
+    border-radius: 0.04rem;
+}
 
 /* popup object */
 #popup-object .popup-box {
@@ -659,10 +672,6 @@ body {
 
 
 /************* main game window begin *************/
-#game-window .main-contents {
-    height: 100%;
-}
-
 #game-window .contents {
     width: 100%;
     height: 100%;
@@ -812,13 +821,13 @@ body {
 /************* prompt bar end *************/
 
 /************* scene window begin *************/
-#main-contents {
+#scene-window {
     background: no-repeat center;
     background-image: var(--main-background);
     background-size: 100% 100%;
 }
 
-#main-contents .scene-window {
+#scene-window .scene-contents {
     width: 100%;
     height: 3.0rem;
     box-sizing: border-box;
@@ -826,12 +835,12 @@ body {
     -webkit-box-sizing: border-box;
 }
 
-#main-contents .scene-window .scene-view {
+#scene-window .scene-view {
     width: 100%;
     height: 1.5rem;
 }
 
-#main-contents .scene-window .scene-name {
+#scene-window .scene-name {
     width: 100%;
     height: 0.25rem;
     line-height: 0.25rem;
@@ -844,7 +853,7 @@ body {
     background-size: 100% 100%;
 }
 
-#main-contents .scene-window .scene-desc {
+#scene-window .scene-desc {
     width: 100%;
     padding: 0.05rem 0.2rem;
     color: #333;
@@ -854,14 +863,14 @@ body {
     -webkit-box-sizing: border-box;
 }
 
-#main-contents .scene-window .scene-commands,
-#main-contents .scene-window .scene-objects,
-#main-contents .scene-window .scene-npcs,
-#main-contents .scene-window .scene-players {
+#scene-window .scene-commands,
+#scene-window .scene-objects,
+#scene-window .scene-npcs,
+#scene-window .scene-players {
     padding: 0 0.2rem;
 }
 
-#main-contents .scene-window .scene-button {
+#scene-window .scene-button {
     display: inline-block;
     min-width: 0.55rem;
     height: 0.25rem;
@@ -875,22 +884,22 @@ body {
     background-size: 100% 100%;
 }
 
-#main-contents .scene-window .object-button.object {
+#scene-window .object-button.object {
     color: #eee;
     background-image: var(--main-object-button);
 }
 
-#main-contents .scene-window .object-button.npc {
+#scene-window .object-button.npc {
     color: #eee;
     background-image: var(--main-npc-button);
 }
 
-#main-contents .scene-window .object-button.player {
+#scene-window .object-button.player {
     color: #eee;
     background-image: var(--main-player-button);
 }
 
-#main-contents .scene-window .scene-exits {
+#scene-window .scene-exits {
     position: relative;
     width: 100%;
     text-align: center;
@@ -899,7 +908,7 @@ body {
     background-size: 100% 100%;
 }
 
-#main-contents .scene-window .exits-block {
+#scene-window .exits-block {
     position: relative;
     width: 2.7rem;
     height: 1.5rem;
@@ -907,13 +916,13 @@ body {
     margin: 0 auto;
 }
 
-#main-contents .scene-window .exits-table {
+#scene-window .exits-table {
     position: absolute;
     z-index: 1;
     border-spacing: 0;
 }
 
-#main-contents .scene-window .exits-table td {
+#scene-window .exits-table td {
     width: 0.9rem;
     height: 0.5rem;
     box-sizing: border-box;
@@ -921,36 +930,36 @@ body {
     -webkit-box-sizing: border-box;
 }
 
-#main-contents .scene-window .exits-table p {
+#scene-window .exits-table p {
     margin: 0;
     padding: 0 0.05rem;
 }
 
-#main-contents .scene-window .cell-left {
+#scene-window .cell-left {
     text-align: right;
 }
 
-#main-contents .scene-window .cell-center {
+#scene-window .cell-center {
     text-align: center;
 }
 
-#main-contents .scene-window .cell-right {
+#scene-window .cell-right {
     text-align: left;
 }
 
-#main-contents .scene-window .cell-top {
+#scene-window .cell-top {
     vertical-align: bottom;
 }
 
-#main-contents .scene-window .cell-middle {
+#scene-window .cell-middle {
     vertical-align: middle;
 }
 
-#main-contents .scene-window .cell-bottom {
+#scene-window .cell-bottom {
     vertical-align: top;
 }
 
-#main-contents .scene-window .exit-button {
+#scene-window .exit-button {
     display: inline-block;
     min-width: 0.55rem;
     height: 0.25rem;
@@ -965,7 +974,7 @@ body {
     background-size: 100% 100%;
 }
 
-#main-contents .scene-window .exit-center {
+#scene-window .exit-center {
     display: inline-block;
     min-width: 0.55rem;
     height: 0.25rem;
@@ -989,7 +998,7 @@ body {
 
 
 /************* message window begin *************/
-#main-contents .message-window {
+#scene-window .message-window {
     position: absolute;
     width: 100%;
     top: 3.6rem;
@@ -998,7 +1007,7 @@ body {
     color: #333;
 }
 
-#main-contents .message-window .message-list {
+#scene-window .message-list {
     height: 100%;
     font-size: 0.12rem;
     overflow-x: hidden;
@@ -1890,6 +1899,11 @@ body {
     background: no-repeat center;
     background-image: var(--shop-default-icon);
     background-size: 100% 100%;
+}
+
+#shop-window .shop-icon-img {
+    width: 0.4rem;
+    height: 0.4rem;
 }
 
 #shop-window .desc-content {

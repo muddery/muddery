@@ -23,6 +23,19 @@ class MudderyShop(TYPECLASS("OBJECT")):
     typeclass_name = _("Shop", "typeclasses")
     model_name = "shops"
 
+    def at_object_creation(self):
+        """
+        Called once, when this object is first created. This is the
+        normal hook to overload for most object types.
+
+        It will be called when swap its typeclass, so it must keep
+        old values.
+        """
+        super(MudderyShop, self).at_object_creation()
+
+        # set default values
+        self.db.owner = None
+
     def after_data_loaded(self):
         """
         Set data_info to the object.
@@ -68,6 +81,15 @@ class MudderyShop(TYPECLASS("OBJECT")):
 
                 goods_obj.move_to(self, quiet=True)
 
+    def set_owner(self, owner):
+        """
+        Set the owner of the shop.
+
+        :param owner:
+        :return:
+        """
+        self.db.owner = owner
+
     def show_shop(self, caller):
         """
         Send shop data to the caller.
@@ -82,10 +104,16 @@ class MudderyShop(TYPECLASS("OBJECT")):
         """
         Get shop information.
         """
-        info = {"dbref": self.dbref,
-                "name": self.get_name(),
-                "desc": self.db.desc,
-                "icon": getattr(self, "icon", None)}
+        info = {
+            "dbref": self.dbref,
+            "name": self.get_name(),
+            "desc": self.db.desc
+        }
+
+        icon = self.icon
+        if not icon and self.db.owner:
+            icon = self.db.owner.icon
+        info["icon"] = icon
 
         goods_list = self.return_shop_goods()
         info["goods"] = goods_list
