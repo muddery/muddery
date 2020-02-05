@@ -102,6 +102,7 @@ EvForm = None
 EvEditor = None
 EvMore = None
 ANSIString = None
+signals = None
 
 # Handlers
 SESSION_HANDLER = None
@@ -135,14 +136,16 @@ def _create_version():
     version = "Unknown"
     root = os.path.dirname(os.path.abspath(__file__))
     try:
-        with open(os.path.join(root, "VERSION.txt"), 'r') as f:
+        with open(os.path.join(root, "VERSION.txt"), "r") as f:
             version = f.read().strip()
     except IOError as err:
         print(err)
     try:
-        rev = check_output(
-            "git rev-parse --short HEAD",
-            shell=True, cwd=root, stderr=STDOUT).strip().decode()
+        rev = (
+            check_output("git rev-parse --short HEAD", shell=True, cwd=root, stderr=STDOUT)
+            .strip()
+            .decode()
+        )
         version = "%s (rev %s)" % (version, rev)
     except (IOError, CalledProcessError, OSError):
         # ignore if we cannot get to git
@@ -168,6 +171,7 @@ def _init():
     global search_help, search_tag, search_message
     global create_object, create_script, create_account, create_channel
     global create_message, create_help_entry
+    global signals
     global settings, lockfuncs, logger, utils, gametime, ansi, spawn, managers
     global contrib, TICKER_HANDLER, MONITOR_HANDLER, SESSION_HANDLER
     global CHANNEL_HANDLER, TASK_HANDLER
@@ -179,6 +183,7 @@ def _init():
     global BASE_ROOM_TYPECLASS, BASE_EXIT_TYPECLASS, BASE_CHANNEL_TYPECLASS
     global BASE_SCRIPT_TYPECLASS, BASE_GUEST_TYPECLASS
 
+    # Parent typeclasses
     from .accounts.accounts import DefaultAccount
     from .accounts.accounts import DefaultGuest
     from .objects.objects import DefaultObject
@@ -226,9 +231,11 @@ def _init():
     from . import contrib
     from .utils.evmenu import EvMenu
     from .utils.evtable import EvTable
+    from .utils.evmore import EvMore
     from .utils.evform import EvForm
     from .utils.eveditor import EvEditor
     from .utils.ansi import ANSIString
+    from .server import signals
 
     # handlers
     from .scripts.tickerhandler import TICKER_HANDLER
@@ -255,9 +262,10 @@ def _init():
 
         def _help(self):
             "Returns list of contents"
-            names = [name for name in self.__class__.__dict__ if not name.startswith('_')]
-            names += [name for name in self.__dict__ if not name.startswith('_')]
+            names = [name for name in self.__class__.__dict__ if not name.startswith("_")]
+            names += [name for name in self.__dict__ if not name.startswith("_")]
             print(self.__doc__ + "-" * 60 + "\n" + ", ".join(names))
+
         help = property(_help)
 
     class DBmanagers(_EvContainer):
@@ -277,6 +285,7 @@ def _init():
         attributes - Attributes.objects
 
         """
+
         from .help.models import HelpEntry
         from .accounts.models import AccountDB
         from .scripts.models import ScriptDB
@@ -298,7 +307,7 @@ def _init():
         tags = Tag.objects
         # remove these so they are not visible as properties
         del HelpEntry, AccountDB, ScriptDB, Msg, ChannelDB
-        #del ExternalChannelConnection
+        # del ExternalChannelConnection
         del ObjectDB, ServerConfig, Tag, Attribute
 
     managers = DBmanagers()
@@ -321,15 +330,26 @@ def _init():
 
         def __init__(self):
             "populate the object with commands"
+
             def add_cmds(module):
                 "helper method for populating this object with cmds"
                 from evennia.utils import utils
+
                 cmdlist = utils.variable_from_module(module, module.__all__)
                 self.__dict__.update(dict([(c.__name__, c) for c in cmdlist]))
 
-            from .commands.default import (admin, batchprocess,
-                                           building, comms, general,
-                                           account, help, system, unloggedin)
+            from .commands.default import (
+                admin,
+                batchprocess,
+                building,
+                comms,
+                general,
+                account,
+                help,
+                system,
+                unloggedin,
+            )
+
             add_cmds(admin)
             add_cmds(building)
             add_cmds(batchprocess)
@@ -363,19 +383,23 @@ def _init():
         access the properties on the imported syscmdkeys object.
 
         """
+
         from .commands import cmdhandler
+
         CMD_NOINPUT = cmdhandler.CMD_NOINPUT
         CMD_NOMATCH = cmdhandler.CMD_NOMATCH
         CMD_MULTIMATCH = cmdhandler.CMD_MULTIMATCH
         CMD_CHANNEL = cmdhandler.CMD_CHANNEL
         CMD_LOGINSTART = cmdhandler.CMD_LOGINSTART
         del cmdhandler
+
     syscmdkeys = SystemCmds()
     del SystemCmds
     del _EvContainer
 
     # typeclases
     from .utils.utils import class_from_module
+
     BASE_ACCOUNT_TYPECLASS = class_from_module(settings.BASE_ACCOUNT_TYPECLASS)
     BASE_OBJECT_TYPECLASS = class_from_module(settings.BASE_OBJECT_TYPECLASS)
     BASE_CHARACTER_TYPECLASS = class_from_module(settings.BASE_CHARACTER_TYPECLASS)
@@ -385,6 +409,9 @@ def _init():
     BASE_SCRIPT_TYPECLASS = class_from_module(settings.BASE_SCRIPT_TYPECLASS)
     BASE_GUEST_TYPECLASS = class_from_module(settings.BASE_GUEST_TYPECLASS)
     del class_from_module
+
+    # delayed starts
+    GLOBAL_SCRIPTS.start()
 
 
 def set_trace(term_size=(140, 40), debugger="auto"):
@@ -415,20 +442,22 @@ def set_trace(term_size=(140, 40), debugger="auto"):
 
     """
     import sys
+
     dbg = None
 
-    if debugger in ('auto', 'pudb'):
+    if debugger in ("auto", "pudb"):
         try:
             from pudb import debugger
-            dbg = debugger.Debugger(stdout=sys.__stdout__,
-                                    term_size=term_size)
+
+            dbg = debugger.Debugger(stdout=sys.__stdout__, term_size=term_size)
         except ImportError:
-            if debugger == 'pudb':
+            if debugger == "pudb":
                 raise
             pass
 
     if not dbg:
         import pdb
+
         dbg = pdb.Pdb(stdout=sys.__stdout__)
 
     try:

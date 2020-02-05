@@ -14,9 +14,9 @@ log_typemsg(). This is for historical, back-compatible reasons.
 """
 
 
-
 import os
 import time
+import glob
 from datetime import datetime
 from traceback import format_exc
 from twisted.python import log, logfile
@@ -62,48 +62,101 @@ def timeformat(when=None):
         tz_hour = abs(int(tz_offset // 3600))
         tz_mins = abs(int(tz_offset // 60 % 60))
         tz_sign = "-" if tz_offset >= 0 else "+"
-        tz = "%s%02d%s" % (tz_sign, tz_hour,
-                           (":%02d" % tz_mins if tz_mins else ""))
+        tz = "%s%02d%s" % (tz_sign, tz_hour, (":%02d" % tz_mins if tz_mins else ""))
 
-    return '%d-%02d-%02d %02d:%02d:%02d%s' % (
-        when.year - 2000, when.month, when.day,
-        when.hour, when.minute, when.second, tz)
+    return "%d-%02d-%02d %02d:%02d:%02d%s" % (
+        when.year - 2000,
+        when.month,
+        when.day,
+        when.hour,
+        when.minute,
+        when.second,
+        tz,
+    )
 
 
 class WeeklyLogFile(logfile.DailyLogFile):
     """
-    Log file that rotates once per week. Overrides key methods to change format
+    Log file that rotates once per week by default. Overrides key methods to change format.
 
     """
-    day_rotation = 7
+
+    def __init__(self, name, directory, defaultMode=None, day_rotation=7, max_size=1000000):
+        """
+        Args:
+            name (str): Name of log file.
+            directory (str): Directory holding the file.
+            defaultMode (str): Permissions used to create file. Defaults to
+                current permissions of this file if it exists.
+            day_rotation (int): How often to rotate the file.
+            max_size (int): Max size of log file before rotation (regardless of
+                time). Defaults to 1M.
+
+        """
+        self.day_rotation = day_rotation
+        self.max_size = max_size
+        self.size = 0
+        logfile.DailyLogFile.__init__(self, name, directory, defaultMode=defaultMode)
+
+    def _openFile(self):
+        logfile.DailyLogFile._openFile(self)
+        self.size = self._file.tell()
 
     def shouldRotate(self):
         """Rotate when the date has changed since last write"""
         # all dates here are tuples (year, month, day)
         now = self.toDate()
         then = self.lastDate
-        return now[0] > then[0] or now[1] > then[1] or now[2] > (then[2] + self.day_rotation)
+        return (
+            now[0] > then[0]
+            or now[1] > then[1]
+            or now[2] > (then[2] + self.day_rotation)
+            or self.size >= self.max_size
+        )
 
     def suffix(self, tupledate):
         """Return the suffix given a (year, month, day) tuple or unixtime.
-        Format changed to have 03 for march instead of 3 etc (retaining unix file order)  
+        Format changed to have 03 for march instead of 3 etc (retaining unix
+        file order)
+
+        If we get duplicate suffixes in location (due to hitting size limit),
+        we append __1, __2 etc.
+
+        Examples:
+            server.log.2020_01_29
+            server.log.2020_01_29__1
+            server.log.2020_01_29__2
         """
-        try:
-            return '_'.join(["{:02d}".format(part) for part in tupledate])
-        except Exception:
-            # try taking a float unixtime
-            return '_'.join(["{:02d}".format(part) for part in self.toDate(tupledate)])
+        suffix = ""
+        copy_suffix = 0
+        while True:
+            try:
+                suffix = "_".join(["{:02d}".format(part) for part in tupledate])
+            except Exception:
+                # try taking a float unixtime
+                suffix = "_".join(["{:02d}".format(part) for part in self.toDate(tupledate)])
+
+            suffix += f"__{copy_suffix}" if copy_suffix else ""
+
+            if os.path.exists(f"{self.path}.{suffix}"):
+                # Append a higher copy_suffix to try to break the tie (starting from 2)
+                copy_suffix += 1
+            else:
+                break
+        return suffix
 
     def write(self, data):
         "Write data to log file"
         logfile.BaseLogFile.write(self, data)
         self.lastDate = max(self.lastDate, self.toDate())
+        self.size += len(data)
 
 
 class PortalLogObserver(log.FileLogObserver):
     """
     Reformat logging
     """
+
     timeFormat = None
     prefix = "  |Portal| "
 
@@ -118,8 +171,7 @@ class PortalLogObserver(log.FileLogObserver):
 
         # timeStr = self.formatTime(eventDict["time"])
         timeStr = timeformat(eventDict["time"])
-        fmtDict = {
-            "text": text.replace("\n", "\n\t")}
+        fmtDict = {"text": text.replace("\n", "\n\t")}
 
         msgStr = log._safeFormat("%(text)s\n", fmtDict)
 
@@ -161,16 +213,16 @@ def log_trace(errmsg=None):
     try:
         if tracestring:
             for line in tracestring.splitlines():
-                log.msg('[::] %s' % line)
+                log.msg("[::] %s" % line)
         if errmsg:
             try:
                 errmsg = str(errmsg)
             except Exception as e:
                 errmsg = str(e)
             for line in errmsg.splitlines():
-                log_msg('[EE] %s' % line)
+                log_msg("[EE] %s" % line)
     except Exception:
-        log_msg('[EE] %s' % errmsg)
+        log_msg("[EE] %s" % errmsg)
 
 
 log_tracemsg = log_trace
@@ -189,10 +241,11 @@ def log_err(errmsg):
     except Exception as e:
         errmsg = str(e)
     for line in errmsg.splitlines():
-        log_msg('[EE] %s' % line)
-
+        log_msg("[EE] %s" % line)
 
     # log.err('ERROR: %s' % (errmsg,))
+
+
 log_errmsg = log_err
 
 
@@ -207,7 +260,7 @@ def log_server(servermsg):
     except Exception as e:
         servermsg = str(e)
     for line in servermsg.splitlines():
-        log_msg('[Server] %s' % line)
+        log_msg("[Server] %s" % line)
 
 
 def log_warn(warnmsg):
@@ -223,10 +276,11 @@ def log_warn(warnmsg):
     except Exception as e:
         warnmsg = str(e)
     for line in warnmsg.splitlines():
-        log_msg('[WW] %s' % line)
-
+        log_msg("[WW] %s" % line)
 
     # log.msg('WARNING: %s' % (warnmsg,))
+
+
 log_warnmsg = log_warn
 
 
@@ -241,7 +295,7 @@ def log_info(infomsg):
     except Exception as e:
         infomsg = str(e)
     for line in infomsg.splitlines():
-        log_msg('[..] %s' % line)
+        log_msg("[..] %s" % line)
 
 
 log_infomsg = log_info
@@ -259,10 +313,11 @@ def log_dep(depmsg):
     except Exception as e:
         depmsg = str(e)
     for line in depmsg.splitlines():
-        log_msg('[DP] %s' % line)
+        log_msg("[DP] %s" % line)
 
 
 log_depmsg = log_dep
+
 
 def log_sec(secmsg):
     """
@@ -276,13 +331,14 @@ def log_sec(secmsg):
     except Exception as e:
         secmsg = str(e)
     for line in secmsg.splitlines():
-        log_msg('[SS] %s' % line)
+        log_msg("[SS] %s" % line)
 
 
 log_secmsg = log_sec
 
 
 # Arbitrary file logger
+
 
 class EvenniaLogFile(logfile.LogFile):
     """
@@ -291,11 +347,13 @@ class EvenniaLogFile(logfile.LogFile):
     lines of the previous log to the start of the new log, in order
     to preserve a continuous chat history for channel log files.
     """
+
     # we delay import of settings to keep logger module as free
     # from django as possible.
     global _CHANNEL_LOG_NUM_TAIL_LINES
     if _CHANNEL_LOG_NUM_TAIL_LINES is None:
         from django.conf import settings
+
         _CHANNEL_LOG_NUM_TAIL_LINES = settings.CHANNEL_LOG_NUM_TAIL_LINES
     num_lines_to_append = _CHANNEL_LOG_NUM_TAIL_LINES
 
@@ -334,7 +392,7 @@ class EvenniaLogFile(logfile.LogFile):
         Returns:
             lines (list): lines from our _file attribute.
         """
-        return self._file.readlines(*args, **kwargs)
+        return [line.decode("utf-8") for line in self._file.readlines(*args, **kwargs)]
 
 
 _LOG_FILE_HANDLES = {}  # holds open log handles
@@ -358,6 +416,7 @@ def _open_log_file(filename):
     global _LOG_FILE_HANDLES, _LOG_FILE_HANDLE_COUNTS, _LOGDIR, _LOG_ROTATE_SIZE
     if not _LOGDIR:
         from django.conf import settings
+
         _LOGDIR = settings.LOG_DIR
         _LOG_ROTATE_SIZE = settings.CHANNEL_LOG_ROTATE_SIZE
 
@@ -393,6 +452,7 @@ def log_file(msg, filename="game.log"):
             on new lines following datetime info.
 
     """
+
     def callback(filehandle, msg):
         """Writing to file and flushing result"""
         msg = "\n%s [-] %s" % (timeformat(), msg.strip())
@@ -433,6 +493,7 @@ def tail_log_file(filename, offset, nlines, callback=None):
             all if the file is shorter than nlines.
 
     """
+
     def seek_file(filehandle, offset, nlines, callback):
         """step backwards in chunks and stop only when we have enough lines"""
         lines_found = []
@@ -450,7 +511,7 @@ def tail_log_file(filename, offset, nlines, callback=None):
             lines_found = filehandle.readlines()
             block_count -= 1
         # return the right number of lines
-        lines_found = lines_found[-nlines - offset:-offset if offset else None]
+        lines_found = lines_found[-nlines - offset : -offset if offset else None]
         if callback:
             callback(lines_found)
             return None
@@ -464,7 +525,9 @@ def tail_log_file(filename, offset, nlines, callback=None):
     filehandle = _open_log_file(filename)
     if filehandle:
         if callback:
-            return deferToThread(seek_file, filehandle, offset, nlines, callback).addErrback(errback)
+            return deferToThread(seek_file, filehandle, offset, nlines, callback).addErrback(
+                errback
+            )
         else:
             return seek_file(filehandle, offset, nlines, callback)
     else:

@@ -18,7 +18,7 @@ Each prototype should be a dictionary. Use the same name as the
 variable to refer to other prototypes.
 
 Possible keywords are:
-    prototype - string pointing to parent prototype of this structure.
+    prototype_parent - string pointing to parent prototype of this structure.
     key - string, the main object identifier.
     typeclass - string, if not set, will use `settings.BASE_OBJECT_TYPECLASS`.
     location - this should be a valid object or #dbref.
@@ -36,7 +36,7 @@ See the `@spawn` command and `evennia.utils.spawner` for more info.
 
 """
 
-#from random import randint
+# from random import randint
 #
 # GOBLIN = {
 # "key": "goblin grunt",
@@ -47,16 +47,16 @@ See the `@spawn` command and `evennia.utils.spawner` for more info.
 # }
 #
 # GOBLIN_WIZARD = {
-# "prototype": "GOBLIN",
+# "prototype_parent": "GOBLIN",
 # "key": "goblin wizard",
 # "spells": ["fire ball", "lighting bolt"]
 # }
 #
 # GOBLIN_ARCHER = {
-# "prototype": "GOBLIN",
+# "prototype_parent": "GOBLIN",
 # "key": "goblin archer",
 # "attacks": ["short bow"]
-#}
+# }
 #
 # This is an example of a prototype without a prototype
 # (nor key) of its own, so it should normally only be
@@ -65,9 +65,9 @@ See the `@spawn` command and `evennia.utils.spawner` for more info.
 # ARCHWIZARD_MIXIN = {
 # "attacks": ["archwizard staff"],
 # "spells": ["greater fire ball", "greater lighting"]
-#}
+# }
 #
 # GOBLIN_ARCHWIZARD = {
 # "key": "goblin archwizard",
-# "prototype" : ("GOBLIN_WIZARD", "ARCHWIZARD_MIXIN")
-#}
+# "prototype_parent" : ("GOBLIN_WIZARD", "ARCHWIZARD_MIXIN")
+# }

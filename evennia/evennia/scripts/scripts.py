@@ -13,7 +13,6 @@ from evennia.typeclasses.models import TypeclassBase
 from evennia.scripts.models import ScriptDB
 from evennia.scripts.manager import ScriptManager
 from evennia.utils import create, logger
-from future.utils import with_metaclass
 
 __all__ = ["DefaultScript", "DoNothing", "Store"]
 
@@ -35,6 +34,7 @@ class ExtendedLoopingCall(LoopingCall):
     than `self.interval`.
 
     """
+
     start_delay = None
     callcount = 0
 
@@ -69,8 +69,7 @@ class ExtendedLoopingCall(LoopingCall):
             steps if we want.
 
         """
-        assert not self.running, ("Tried to start an already running "
-                                  "ExtendedLoopingCall.")
+        assert not self.running, "Tried to start an already running ExtendedLoopingCall."
         if interval < 0:
             raise ValueError("interval must be >= 0")
         self.running = True
@@ -108,7 +107,8 @@ class ExtendedLoopingCall(LoopingCall):
         if self.start_delay:
             self.start_delay = None
             self.starttime = self.clock.seconds()
-        LoopingCall.__call__(self)
+        if self._deferred:
+            LoopingCall.__call__(self)
 
     def force_repeat(self):
         """
@@ -119,8 +119,7 @@ class ExtendedLoopingCall(LoopingCall):
                 running.
 
         """
-        assert self.running, ("Tried to fire an ExtendedLoopingCall "
-                              "that was not running.")
+        assert self.running, "Tried to fire an ExtendedLoopingCall that was not running."
         self.call.cancel()
         self.call = None
         self.starttime = self.clock.seconds()
@@ -137,33 +136,20 @@ class ExtendedLoopingCall(LoopingCall):
                 the task is not running.
 
         """
-        if self.running:
+        if self.running and self.interval > 0:
             total_runtime = self.clock.seconds() - self.starttime
             interval = self.start_delay or self.interval
             return interval - (total_runtime % self.interval)
-        return None
 
 
-class ScriptBase(with_metaclass(TypeclassBase, ScriptDB)):
+class ScriptBase(ScriptDB, metaclass=TypeclassBase):
     """
     Base class for scripts. Don't inherit from this, inherit from the
     class `DefaultScript` below instead.
 
     """
+
     objects = ScriptManager()
-
-    def __eq__(self, other):
-        """
-        Compares two Scripts. Compares dbids.
-
-        Args:
-            other (Script): A script to compare with.
-
-        """
-        try:
-            return other.dbid == self.dbid
-        except Exception:
-            return False
 
     def __str__(self):
         return "<{cls} {key}>".format(cls=self.__class__.__name__, key=self.key)
@@ -176,22 +162,21 @@ class ScriptBase(with_metaclass(TypeclassBase, ScriptDB)):
         Start task runner.
 
         """
-
-        self.ndb._task = ExtendedLoopingCall(self._step_task)
+        if not self.ndb._task:
+            self.ndb._task = ExtendedLoopingCall(self._step_task)
 
         if self.db._paused_time:
             # the script was paused; restarting
             callcount = self.db._paused_callcount or 0
-            self.ndb._task.start(self.db_interval,
-                                 now=False,
-                                 start_delay=self.db._paused_time,
-                                 count_start=callcount)
+            self.ndb._task.start(
+                self.db_interval, now=False, start_delay=self.db._paused_time, count_start=callcount
+            )
             del self.db._paused_time
             del self.db._paused_repeats
-        else:
+
+        elif not self.ndb._task.running:
             # starting script anew
-            self.ndb._task.start(self.db_interval,
-                                 now=not self.db_start_delay)
+            self.ndb._task.start(self.db_interval, now=not self.db_start_delay)
 
     def _stop_task(self):
         """
@@ -201,6 +186,7 @@ class ScriptBase(with_metaclass(TypeclassBase, ScriptDB)):
         task = self.ndb._task
         if task and task.running:
             task.stop()
+        self.ndb._task = None
 
     def _step_errback(self, e):
         """
@@ -208,9 +194,9 @@ class ScriptBase(with_metaclass(TypeclassBase, ScriptDB)):
 
         """
         cname = self.__class__.__name__
-        estring = _("Script %(key)s(#%(dbid)s) of type '%(cname)s': at_repeat() error '%(err)s'.") % \
-            {"key": self.key, "dbid": self.dbid, "cname": cname,
-             "err": e.getErrorMessage()}
+        estring = _(
+            "Script %(key)s(#%(dbid)s) of type '%(cname)s': at_repeat() error '%(err)s'."
+        ) % {"key": self.key, "dbid": self.dbid, "cname": cname, "err": e.getErrorMessage()}
         try:
             self.db_obj.msg(estring)
         except Exception:
@@ -282,13 +268,13 @@ class ScriptBase(with_metaclass(TypeclassBase, ScriptDB)):
                 self.db_key = cdict["key"]
                 updates.append("db_key")
             if cdict.get("interval") and self.interval != cdict["interval"]:
-                self.db_interval = cdict["interval"]
+                self.db_interval = max(0, cdict["interval"])
                 updates.append("db_interval")
             if cdict.get("start_delay") and self.start_delay != cdict["start_delay"]:
                 self.db_start_delay = cdict["start_delay"]
                 updates.append("db_start_delay")
             if cdict.get("repeats") and self.repeats != cdict["repeats"]:
-                self.db_repeats = cdict["repeats"]
+                self.db_repeats = max(0, cdict["repeats"])
                 updates.append("db_repeats")
             if cdict.get("persistent") and self.persistent != cdict["persistent"]:
                 self.db_persistent = cdict["persistent"]
@@ -346,10 +332,10 @@ class DefaultScript(ScriptBase):
         errors = []
         obj = None
 
-        kwargs['key'] = key
+        kwargs["key"] = key
 
         # If no typeclass supplied, use this class
-        kwargs['typeclass'] = kwargs.pop('typeclass', cls)
+        kwargs["typeclass"] = kwargs.pop("typeclass", cls)
 
         try:
             obj = create.create_script(**kwargs)
@@ -365,7 +351,6 @@ class DefaultScript(ScriptBase):
 
         """
         pass
-
 
     def time_until_next_repeat(self):
         """
@@ -410,6 +395,7 @@ class DefaultScript(ScriptBase):
         if ret and self.ndb._task:
             try:
                 from twisted.internet import reactor
+
                 global FLUSHING_INSTANCES
                 # store the current timers for the _task and stop it to avoid duplicates after cache flush
                 paused_time = self.ndb._task.next_call_time()
@@ -422,6 +408,7 @@ class DefaultScript(ScriptBase):
                     reactor.callLater(2, restart_scripts_after_flush)
             except Exception:
                 import traceback
+
                 traceback.print_exc()
         return ret
 
@@ -442,7 +429,8 @@ class DefaultScript(ScriptBase):
 
         """
         if self.is_active and not force_restart:
-            # The script is already running, but make sure we have a _task if this is after a cache flush
+            # The script is already running, but make sure we have a _task if
+            # this is after a cache flush
             if not self.ndb._task and self.db_interval >= 0:
                 self.ndb._task = ExtendedLoopingCall(self._step_task)
                 try:
@@ -453,7 +441,9 @@ class DefaultScript(ScriptBase):
                     now = not self.db_start_delay
                     start_delay = None
                     callcount = 0
-                self.ndb._task.start(self.db_interval, now=now, start_delay=start_delay, count_start=callcount)
+                self.ndb._task.start(
+                    self.db_interval, now=now, start_delay=start_delay, count_start=callcount
+                )
             return 0
 
         obj = self.obj
@@ -573,11 +563,9 @@ class DefaultScript(ScriptBase):
         Restarts an already existing/running Script from the
         beginning, optionally using different settings. This will
         first call the stop hooks, and then the start hooks again.
-
         Args:
             interval (int, optional): Allows for changing the interval
-                of the Script. Given in seconds.  if `None`, will use the
-                already stored interval.
+                of the Script. Given in seconds.  if `None`, will use the already stored interval.
             repeats (int, optional): The number of repeats. If unset, will
                 use the previous setting.
             start_delay (bool, optional): If we should wait `interval` seconds
@@ -596,6 +584,7 @@ class DefaultScript(ScriptBase):
         del self.db._paused_callcount
         # set new flags and start over
         if interval is not None:
+            interval = max(0, interval)
             self.interval = interval
         if repeats is not None:
             self.repeats = repeats
@@ -693,6 +682,7 @@ class DefaultScript(ScriptBase):
 
 
 # Some useful default Script types used by Evennia.
+
 
 class DoNothing(DefaultScript):
     """

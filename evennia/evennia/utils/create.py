@@ -25,6 +25,7 @@ from django.conf import settings
 from django.db import IntegrityError
 from django.utils import timezone
 from evennia.utils import logger
+from evennia.server import signals
 from evennia.utils.utils import make_iter, class_from_module, dbid_to_obj
 
 # delayed imports
@@ -43,8 +44,14 @@ _channelhandler = None
 
 
 # limit symbol import from API
-__all__ = ("create_object", "create_script", "create_help_entry",
-           "create_message", "create_channel", "create_account")
+__all__ = (
+    "create_object",
+    "create_script",
+    "create_help_entry",
+    "create_message",
+    "create_channel",
+    "create_account",
+)
 
 _GA = object.__getattribute__
 
@@ -52,10 +59,21 @@ _GA = object.__getattribute__
 # Game Object creation
 
 
-def create_object(typeclass=None, key=None, location=None, home=None,
-                  permissions=None, locks=None, aliases=None, tags=None,
-                  destination=None, report_to=None, nohome=False, attributes=None,
-                  nattributes=None):
+def create_object(
+    typeclass=None,
+    key=None,
+    location=None,
+    home=None,
+    permissions=None,
+    locks=None,
+    aliases=None,
+    tags=None,
+    destination=None,
+    report_to=None,
+    nohome=False,
+    attributes=None,
+    nattributes=None,
+):
     """
 
     Create a new in-game object.
@@ -119,22 +137,41 @@ def create_object(typeclass=None, key=None, location=None, home=None,
             home = dbid_to_obj(settings.DEFAULT_HOME, _ObjectDB) if not nohome else None
         except _ObjectDB.DoesNotExist:
             raise _ObjectDB.DoesNotExist(
-                "settings.DEFAULT_HOME (= '%s') does not exist, or the setting is malformed." %
-                settings.DEFAULT_HOME)
+                "settings.DEFAULT_HOME (= '%s') does not exist, or the setting is malformed."
+                % settings.DEFAULT_HOME
+            )
 
     # create new instance
-    new_object = typeclass(db_key=key, db_location=location,
-                           db_destination=destination, db_home=home,
-                           db_typeclass_path=typeclass.path)
+    new_object = typeclass(
+        db_key=key,
+        db_location=location,
+        db_destination=destination,
+        db_home=home,
+        db_typeclass_path=typeclass.path,
+    )
     # store the call signature for the signal
-    new_object._createdict = dict(key=key, location=location, destination=destination, home=home,
-                                  typeclass=typeclass.path, permissions=permissions, locks=locks,
-                                  aliases=aliases, tags=tags, report_to=report_to, nohome=nohome,
-                                  attributes=attributes, nattributes=nattributes)
+    new_object._createdict = dict(
+        key=key,
+        location=location,
+        destination=destination,
+        home=home,
+        typeclass=typeclass.path,
+        permissions=permissions,
+        locks=locks,
+        aliases=aliases,
+        tags=tags,
+        report_to=report_to,
+        nohome=nohome,
+        attributes=attributes,
+        nattributes=nattributes,
+    )
     # this will trigger the save signal which in turn calls the
     # at_first_save hook on the typeclass, where the _createdict can be
     # used.
     new_object.save()
+
+    signals.SIGNAL_OBJECT_POST_CREATE.send(sender=new_object)
+
     return new_object
 
 
@@ -145,10 +182,23 @@ object = create_object
 #
 # Script creation
 
-def create_script(typeclass=None, key=None, obj=None, account=None, locks=None,
-                  interval=None, start_delay=None, repeats=None,
-                  persistent=None, autostart=True, report_to=None, desc=None,
-                  tags=None, attributes=None):
+
+def create_script(
+    typeclass=None,
+    key=None,
+    obj=None,
+    account=None,
+    locks=None,
+    interval=None,
+    start_delay=None,
+    repeats=None,
+    persistent=None,
+    autostart=True,
+    report_to=None,
+    desc=None,
+    tags=None,
+    attributes=None,
+):
     """
     Create a new script. All scripts are a combination of a database
     object that communicates with the database, and an typeclass that
@@ -205,11 +255,11 @@ def create_script(typeclass=None, key=None, obj=None, account=None, locks=None,
     if obj:
         kwarg["db_obj"] = dbid_to_obj(obj, _ObjectDB)
     if interval:
-        kwarg["db_interval"] = interval
+        kwarg["db_interval"] = max(0, interval)
     if start_delay:
         kwarg["db_start_delay"] = start_delay
     if repeats:
-        kwarg["db_repeats"] = repeats
+        kwarg["db_repeats"] = max(0, repeats)
     if persistent:
         kwarg["db_persistent"] = persistent
     if desc:
@@ -221,10 +271,21 @@ def create_script(typeclass=None, key=None, obj=None, account=None, locks=None,
     new_script = typeclass(**kwarg)
 
     # store the call signature for the signal
-    new_script._createdict = dict(key=key, obj=obj, account=account, locks=locks, interval=interval,
-                                  start_delay=start_delay, repeats=repeats, persistent=persistent,
-                                  autostart=autostart, report_to=report_to, desc=desc,
-                                  tags=tags, attributes=attributes)
+    new_script._createdict = dict(
+        key=key,
+        obj=obj,
+        account=account,
+        locks=locks,
+        interval=interval,
+        start_delay=start_delay,
+        repeats=repeats,
+        persistent=persistent,
+        autostart=autostart,
+        report_to=report_to,
+        desc=desc,
+        tags=tags,
+        attributes=attributes,
+    )
     # this will trigger the save signal which in turn calls the
     # at_first_save hook on the typeclass, where the _createdict
     # can be used.
@@ -234,6 +295,8 @@ def create_script(typeclass=None, key=None, obj=None, account=None, locks=None,
         # this happens in the case of having a repeating script with `repeats=1` and
         # `start_delay=False` - the script will run once and immediately stop before save is over.
         return None
+
+    signals.SIGNAL_SCRIPT_POST_CREATE.send(sender=new_script)
 
     return new_script
 
@@ -245,6 +308,7 @@ script = create_script
 #
 # Help entry creation
 #
+
 
 def create_help_entry(key, entrytext, category="General", locks=None, aliases=None):
     """
@@ -288,6 +352,8 @@ def create_help_entry(key, entrytext, category="General", locks=None, aliases=No
         logger.log_trace()
         return None
 
+    signals.SIGNAL_HELPENTRY_POST_CREATE.send(sender=new_help)
+
 
 # alias
 help_entry = create_help_entry
@@ -295,6 +361,7 @@ help_entry = create_help_entry
 
 #
 # Comm system methods
+
 
 def create_message(senderobj, message, channels=None, receivers=None, locks=None, header=None):
     """
@@ -343,11 +410,10 @@ def create_message(senderobj, message, channels=None, receivers=None, locks=None
 
 
 message = create_message
+create_msg = create_message
 
 
-def create_channel(key, aliases=None, desc=None,
-                   locks=None, keep_log=True,
-                   typeclass=None):
+def create_channel(key, aliases=None, desc=None, locks=None, keep_log=True, typeclass=None):
     """
     Create A communication Channel. A Channel serves as a central hub
     for distributing Msgs to groups of people without specifying the
@@ -381,12 +447,17 @@ def create_channel(key, aliases=None, desc=None,
     new_channel = typeclass(db_key=key)
 
     # store call signature for the signal
-    new_channel._createdict = dict(key=key, aliases=aliases, desc=desc, locks=locks, keep_log=keep_log)
+    new_channel._createdict = dict(
+        key=key, aliases=aliases, desc=desc, locks=locks, keep_log=keep_log
+    )
 
     # this will trigger the save signal which in turn calls the
     # at_first_save hook on the typeclass, where the _createdict can be
     # used.
     new_channel.save()
+
+    signals.SIGNAL_CHANNEL_POST_CREATE.send(sender=new_channel)
+
     return new_channel
 
 
@@ -398,12 +469,18 @@ channel = create_channel
 #
 
 
-def create_account(key, email, password,
-                   typeclass=None,
-                   is_superuser=False,
-                   locks=None, permissions=None,
-                   tags=None, attributes=None,
-                   report_to=None):
+def create_account(
+    key,
+    email,
+    password,
+    typeclass=None,
+    is_superuser=False,
+    locks=None,
+    permissions=None,
+    tags=None,
+    attributes=None,
+    report_to=None,
+):
     """
     This creates a new account.
 
@@ -466,9 +543,14 @@ def create_account(key, email, password,
     # base django auth.
     now = timezone.now()
     email = typeclass.objects.normalize_email(email)
-    new_account = typeclass(username=key, email=email,
-                            is_staff=is_superuser, is_superuser=is_superuser,
-                            last_login=now, date_joined=now)
+    new_account = typeclass(
+        username=key,
+        email=email,
+        is_staff=is_superuser,
+        is_superuser=is_superuser,
+        last_login=now,
+        date_joined=now,
+    )
     if password is not None:
         # the password may be None for 'fake' accounts, like bots
         valid, error = new_account.validate_password(password, new_account)
@@ -477,12 +559,17 @@ def create_account(key, email, password,
 
         new_account.set_password(password)
 
-    new_account._createdict = dict(locks=locks, permissions=permissions, report_to=report_to,
-                                   tags=tags, attributes=attributes)
+    new_account._createdict = dict(
+        locks=locks, permissions=permissions, report_to=report_to, tags=tags, attributes=attributes
+    )
     # saving will trigger the signal that calls the
     # at_first_save hook on the typeclass, where the _createdict
     # can be used.
     new_account.save()
+
+    # note that we don't send a signal here, that is sent from the Account.create helper method
+    # instead.
+
     return new_account
 
 

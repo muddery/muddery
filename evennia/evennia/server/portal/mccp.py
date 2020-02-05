@@ -14,11 +14,11 @@ terribly slow connection.
 This protocol is implemented by the telnet protocol importing
 mccp_compress and calling it from its write methods.
 """
-from builtins import object
 import zlib
+from twisted.python.compat import _bytesChr as chr
 
 # negotiations for v1 and v2 of the protocol
-MCCP = b'\x56'
+MCCP = chr(86)  # b"\x56"
 FLUSH = zlib.Z_SYNC_FLUSH
 
 
@@ -33,7 +33,7 @@ def mccp_compress(protocol, data):
         stream (binary): Zlib-compressed data.
 
     """
-    if hasattr(protocol, 'zlib'):
+    if hasattr(protocol, "zlib"):
         return protocol.zlib.compress(data) + protocol.zlib.flush(FLUSH)
     return data
 
@@ -58,7 +58,7 @@ class Mccp(object):
         """
 
         self.protocol = protocol
-        self.protocol.protocol_flags['MCCP'] = False
+        self.protocol.protocol_flags["MCCP"] = False
         # ask if client will mccp, connect callbacks to handle answer
         self.protocol.will(MCCP).addCallbacks(self.do_mccp, self.no_mccp)
 
@@ -70,9 +70,9 @@ class Mccp(object):
             option (Option): Option dict (not used).
 
         """
-        if hasattr(self.protocol, 'zlib'):
+        if hasattr(self.protocol, "zlib"):
             del self.protocol.zlib
-        self.protocol.protocol_flags['MCCP'] = False
+        self.protocol.protocol_flags["MCCP"] = False
         self.protocol.handshake_done()
 
     def do_mccp(self, option):
@@ -84,7 +84,7 @@ class Mccp(object):
             option (Option): Option dict (not used).
 
         """
-        self.protocol.protocol_flags['MCCP'] = True
-        self.protocol.requestNegotiation(MCCP, b'')
+        self.protocol.protocol_flags["MCCP"] = True
+        self.protocol.requestNegotiation(MCCP, b"")
         self.protocol.zlib = zlib.compressobj(9)
         self.protocol.handshake_done()
