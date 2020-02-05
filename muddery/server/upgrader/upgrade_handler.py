@@ -5,8 +5,7 @@ Upgrade custom's game dir to the latest version.
 import os, traceback
 import muddery
 from muddery.server.upgrader import utils
-from muddery.server.upgrader import upgrader_0_3_8
-from muddery.server.upgrader import upgrader_0_4_0
+from muddery.server.upgrader import upgrader_0_4_0, upgrader_0_4_1
 from muddery.server.launcher import utils as launcher_utils
 from muddery.utils.exception import MudderyError, ERR
 
@@ -19,8 +18,8 @@ class UpgradeHandler(object):
         Add upgraders.
         """
         self.upgrader_list = []
-        self.upgrader_list.append(upgrader_0_3_8.Upgrader())
         self.upgrader_list.append(upgrader_0_4_0.Upgrader())
+        self.upgrader_list.append(upgrader_0_4_1.Upgrader())
 
     def upgrade_game(self, game_dir, template, muddery_lib):
         # Get first two version numbers.
