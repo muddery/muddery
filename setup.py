@@ -9,16 +9,14 @@ OS_WINDOWS = os.name == "nt"
 
 def get_requirements():
     """
-    To update the requirements for Muddery, edit the requirements.txt
-    file, or win_requirements.txt for Windows platforms.
+    To update the requirements for Evennia, edit the requirements.txt file.
     """
-    filename = 'win_requirements.txt' if OS_WINDOWS else 'requirements.txt'
-    with open(filename, 'r') as f:
+    with open("requirements.txt", "r") as f:
         req_lines = f.readlines()
     reqs = []
     for line in req_lines:
         # Avoid adding comments.
-        line = line.split('#')[0].strip()
+        line = line.split("#")[0].strip()
         if line:
             reqs.append(line)
     return reqs

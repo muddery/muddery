@@ -381,7 +381,7 @@ CMDSET_COMBAT = "muddery.commands.default_cmdsets.CombatCmdSet"
 ADDITIONAL_DATA_APP = "gamedata"
 
 # add data app
-INSTALLED_APPS = INSTALLED_APPS + (ADDITIONAL_DATA_APP,)
+INSTALLED_APPS = INSTALLED_APPS + [ADDITIONAL_DATA_APP,]
 
 
 ######################################################################
@@ -395,7 +395,7 @@ DATA_KEY_CATEGORY = "data_key"
 WORLD_DATA_APP = "worlddata"
 
 # add data app
-INSTALLED_APPS = INSTALLED_APPS + (WORLD_DATA_APP,)
+INSTALLED_APPS = INSTALLED_APPS + [WORLD_DATA_APP,]
 
 # data file's folder under user's game directory.
 WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
