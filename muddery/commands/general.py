@@ -8,8 +8,8 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 import math
 from django.conf import settings
 from evennia.utils import utils, logger
-from evennia.commands.command import Command
 from evennia import create_script
+from muddery.commands.base_command import BaseCommand
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.localized_strings_handler import _
@@ -19,7 +19,7 @@ import traceback
 import random
 
 
-class CmdLook(Command):
+class CmdLook(BaseCommand):
     """
     look at location or object
 
@@ -41,20 +41,20 @@ class CmdLook(Command):
         args = self.args
 
         if not caller.is_alive():
-            caller.msg({"alert":_("You are died.")})
+            caller.msg({"alert": _("You are died.")})
             return
 
         if args:
             # Use search to handle duplicate/nonexistant results.
             looking_at_obj = caller.search_dbref(args)
             if not looking_at_obj:
-                caller.msg({"alert":_("Can not find it.")})
+                caller.msg({"alert": _("Can not find it.")})
                 return
         else:
             # Observes the caller's location
             looking_at_obj = caller.location
             if not looking_at_obj:
-                caller.msg({"msg":_("You have no location to look at!")})
+                caller.msg({"msg": _("You have no location to look at!")})
                 return
 
         if not hasattr(looking_at_obj, 'return_appearance'):
@@ -63,7 +63,7 @@ class CmdLook(Command):
 
         if not looking_at_obj.access(caller, "view"):
             # The caller does not have the permission to look.
-            caller.msg({"msg":_("Can not find '%s'.") % looking_at_obj.name})
+            caller.msg({"msg": _("Can not find '%s'.") % looking_at_obj.name})
             return
 
         if looking_at_obj == caller.location:
@@ -89,13 +89,13 @@ class CmdLook(Command):
 
             # Get the object's appearance.
             appearance = looking_at_obj.get_appearance(caller)
-            caller.msg({"look_obj": appearance})
+            caller.msg({"look_obj": appearance}, context=self.context)
 
         # the object's at_desc() method.
         looking_at_obj.at_desc(looker=caller)
 
 
-class CmdInventory(Command):
+class CmdInventory(BaseCommand):
     """
     observe inventory
 
@@ -118,7 +118,7 @@ class CmdInventory(Command):
 #------------------------------------------------------------
 # Say something in the room.
 #------------------------------------------------------------
-class CmdSay(Command):
+class CmdSay(BaseCommand):
     """
     speak as your character
 
@@ -160,7 +160,7 @@ class CmdSay(Command):
 # goto exit
 #------------------------------------------------------------
 
-class CmdGoto(Command):
+class CmdGoto(BaseCommand):
     """
     tranvese an exit
 
@@ -302,7 +302,7 @@ class CmdGoto(Command):
 # talk to npc
 #------------------------------------------------------------
 
-class CmdTalk(Command):
+class CmdTalk(BaseCommand):
     """
     Talk to an NPC.
 
@@ -338,7 +338,7 @@ class CmdTalk(Command):
 # talk to npc
 #------------------------------------------------------------
 
-class CmdDialogue(Command):
+class CmdDialogue(BaseCommand):
     """
     Continue a dialogue.
 
@@ -395,7 +395,7 @@ class CmdDialogue(Command):
 # loot objects
 #------------------------------------------------------------
 
-class CmdLoot(Command):
+class CmdLoot(BaseCommand):
     """
     Loot from a specified object.
 
@@ -439,7 +439,7 @@ class CmdLoot(Command):
 # use objects
 #------------------------------------------------------------
 
-class CmdUse(Command):
+class CmdUse(BaseCommand):
     """
     Use an object.
 
@@ -491,7 +491,7 @@ class CmdUse(Command):
 # discard objects
 #------------------------------------------------------------
 
-class CmdDiscard(Command):
+class CmdDiscard(BaseCommand):
     """
     Discard an object.
 
@@ -537,7 +537,7 @@ class CmdDiscard(Command):
 # put on equipment
 #------------------------------------------------------------
 
-class CmdEquip(Command):
+class CmdEquip(BaseCommand):
     """
     Put on an equipment.
 
@@ -556,13 +556,13 @@ class CmdEquip(Command):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":_("You should equip something.")})
+            caller.msg({"alert": _("You should equip something.")})
             return
 
         obj = caller.search_dbref(self.args, location=caller)
         if not obj:
             # If the caller does not have this equipment.
-            caller.msg({"alert":_("You don't have this equipment.")})
+            caller.msg({"alert": _("You don't have this equipment.")})
             return
 
         try:
@@ -585,7 +585,7 @@ class CmdEquip(Command):
 # take off equipment
 #------------------------------------------------------------
 
-class CmdTakeOff(Command):
+class CmdTakeOff(BaseCommand):
     """
     Take off an equipment.
 
@@ -633,7 +633,7 @@ class CmdTakeOff(Command):
 # cast a skill
 #------------------------------------------------------------
 
-class CmdCastSkill(Command):
+class CmdCastSkill(BaseCommand):
     """
     Cast a skill when the caller is not in combat.
 
@@ -707,7 +707,7 @@ class CmdCastSkill(Command):
 #------------------------------------------------------------
 # attack a character
 #------------------------------------------------------------
-class CmdAttack(Command):
+class CmdAttack(BaseCommand):
     """
     initiates combat
 
@@ -785,7 +785,7 @@ class CmdAttack(Command):
 #------------------------------------------------------------
 # give up a quest
 #------------------------------------------------------------
-class CmdGiveUpQuest(Command):
+class CmdGiveUpQuest(BaseCommand):
     """
     Give up a quest.
 
@@ -834,7 +834,7 @@ class CmdGiveUpQuest(Command):
 #------------------------------------------------------------
 # unlock exit
 #------------------------------------------------------------
-class CmdUnlockExit(Command):
+class CmdUnlockExit(BaseCommand):
     """
     Unlock an exit.
 
@@ -880,7 +880,7 @@ class CmdUnlockExit(Command):
 #------------------------------------------------------------
 # open a shop
 #------------------------------------------------------------
-class CmdShopping(Command):
+class CmdShopping(BaseCommand):
     """
     Open a shop.
 
@@ -912,7 +912,7 @@ class CmdShopping(Command):
 #------------------------------------------------------------
 # buy a goods
 #------------------------------------------------------------
-class CmdBuy(Command):
+class CmdBuy(BaseCommand):
     """
     Buy a goods.
 
@@ -950,7 +950,7 @@ class CmdBuy(Command):
 #------------------------------------------------------------
 # connect
 #------------------------------------------------------------
-class CmdConnect(Command):
+class CmdConnect(BaseCommand):
     """
     Connect to the game when the player has already connectd, 
     ignore it to avoid wrong command messages.
@@ -971,7 +971,7 @@ class CmdConnect(Command):
 #------------------------------------------------------------
 # create
 #------------------------------------------------------------
-class CmdCreate(Command):
+class CmdCreate(BaseCommand):
     """
     create an account when the player has already connectd,
     ignore it to avoid wrong command messages.
@@ -993,7 +993,7 @@ class CmdCreate(Command):
 #------------------------------------------------------------
 # create and connect
 #------------------------------------------------------------
-class CmdCreateConnect(Command):
+class CmdCreateConnect(BaseCommand):
     """
     create an account when the player has already connectd,
     ignore it to avoid wrong command messages.
@@ -1014,7 +1014,7 @@ class CmdCreateConnect(Command):
 #------------------------------------------------------------
 # do some tests
 #------------------------------------------------------------
-class CmdTest(Command):
+class CmdTest(BaseCommand):
     """
     Do some tests.
 

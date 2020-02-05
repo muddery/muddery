@@ -95,7 +95,7 @@ def print_info():
     maxwidth = max(len(line) for line in info.split("\n"))
     top_border = "-" * (maxwidth - 11) + " Muddery " + "---"
     border = "-" * (maxwidth + 1)
-    print(top_border + "\n" + info + '\n' + border)
+    print("\n" + top_border + "\n" + info + '\n' + border)
 
 
 
@@ -310,7 +310,7 @@ def main():
                              "interactive": False}
             try:
                 django.core.management.call_command(*django_args, **django_kwargs)
-                print("Static file collected.")
+                print("\nStatic file collected.")
             except django.core.management.base.CommandError as exc:
                 print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 

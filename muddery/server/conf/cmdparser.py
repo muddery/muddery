@@ -23,6 +23,7 @@ your settings file:
 """
 
 import json
+from evennia.utils import logger
 import evennia.commands.cmdparser as evennia_cmdparser
 
 
@@ -49,23 +50,23 @@ def cmdparser(raw_string, cmdset, caller, match_index=None):
             (possibly) separate multiple matches.
 
     """
+    # Parse JSON formated command.
+    logger.log_infomsg("Receive command, %s: %s" % (caller, raw_string))
+
     try:
-        if raw_string == CMD_LOGINSTART:
-            cmd = CMD_LOGINSTART
-            args = ""
-        else:
-            # Parse JSON formated command.
-            data = json.loads(raw_string)
-            cmd = data["cmd"]
-            args = data["args"]
-
-        # Find the matching command in cmdset.
-        for cmdobj in cmdset:
-            if cmdobj.key == cmd:
-                return [(cmd, args, cmdobj, len(cmd), 1, raw_string)]
-
-        # can not find
-        return []
+        data = json.loads(raw_string)
     except Exception:
         # Command is not in JSON, call evennia's cmdparser.
         return evennia_cmdparser.cmdparser(raw_string, cmdset, caller, match_index)
+
+    cmd = data["cmd"]
+    args = data["args"]
+
+    # Find the matching command in cmdset.
+    for cmdobj in cmdset:
+        if cmdobj.key == cmd:
+            return [(cmd, args, cmdobj, len(cmd), 1, raw_string)]
+
+    # can not find
+    return []
+

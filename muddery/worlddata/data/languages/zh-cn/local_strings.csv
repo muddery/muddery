@@ -156,3 +156,4 @@ category,origin,local
 ,"Raised %s's max HP by %d points.","提升%s的最大生命值%d点。"
 ,"Can not go there.","无法去那里。"
 ,"There is more than one exit in that direction.","那个方向上有多个出口。"
+,"Discard this object?","丢弃这件物品？"

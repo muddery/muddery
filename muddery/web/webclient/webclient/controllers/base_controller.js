@@ -32,15 +32,8 @@ BaseController.prototype.select = function(selector) {
 /*
  * Document ready event.
  */
-BaseController.prototype.onReady = function() {
-    this.resetLanguage();
+BaseController.prototype.init = function() {
     this.bindEvents();
-}
-
-/*
- * Reset the view's language.
- */
-BaseController.prototype.resetLanguage = function() {
 }
 
 /*
@@ -56,6 +49,19 @@ BaseController.prototype.show = function() {
     this.el.show();
     this.el.parents().show();
 	this.resetSize();
+}
+
+/*
+ * Hide the element.
+ */
+BaseController.prototype.hide = function() {
+    this.el.hide();
+}
+
+/*
+ * Reset the element.
+ */
+BaseController.prototype.reset = function() {
 }
 
 /*
@@ -76,22 +82,40 @@ BaseController.prototype.resetSize = function() {
  * on(element_name [,selector] , event_name, method)
  */
 BaseController.prototype.on = function(element_name, selector, event_name, method) {
-    if (typeof(event_name) === "function") {
+    if (typeof(selector) === "function") {
+    	method = selector;
+    	event_name = element_name;
+    	element_name = undefined;
+    	selector = undefined;
+    }
+    else if (typeof(event_name) === "function") {
     	method = event_name;
     	event_name = selector;
     	selector = undefined;
     }
 
-	this.select(element_name).on(event_name, selector, this, function(event) {
-		method.call(event.data, event.currentTarget, event);
-	});
+    if (!element_name) {
+        this.el.on(event_name, selector, this, function(event) {
+            method.call(event.data, event.currentTarget, event);
+        });
+    }
+	else {
+	    this.select(element_name).on(event_name, selector, this, function(event) {
+            method.call(event.data, event.currentTarget, event);
+        });
+    }
 }
 
 /*
  * Bind a click event to an element with an object method.
  */
 BaseController.prototype.onClick = function(element_name, selector, method) {
-	if (typeof(selector) === "function") {
+    if (typeof(element_name) === "function") {
+        method = element_name;
+        element_name = undefined;
+    	selector = undefined;
+    }
+	else if (typeof(selector) === "function") {
     	method = selector;
     	selector = undefined;
     }
@@ -112,85 +136,3 @@ BaseController.prototype.off = function(element_name, selector, event_name) {
 	this.select(element_name).off(event_name, selector);
 }
 
-/*
- * Clone a template tag.
- */
-BaseController.prototype.cloneTag = function(tag, root) {
-	if (root) {
-        var template = root.children(tag + ".template");
-    }
-    else {
-    	var template = this.select(tag + ".template");
-    }
-    this.cloneTemplate(tempalte);
-}
-
-/*
- * Clone a template elements.
- */
-BaseController.prototype.cloneTemplate = function(template) {
-	var item = template.clone().removeClass("template");
-	item.appendTo(template.parent());
-	return item;
-}
-
-/*
- * Clear cloned elements.
- */
-BaseController.prototype.clearElements = function(root_tag) {
-    // Remove elements that are not template.
-	this.select(root_tag).children().not(".template").remove();
-}
-
-
-////////////////////////////////////////
-//
-// The base of popup controllers.
-//
-////////////////////////////////////////
- /*
- * Derive from the base class.
- */
-BasePopupController = function(el) {
-	BaseController.call(this, el);
-	
-	this.target = null;
-}
-
-BasePopupController.prototype = prototype(BaseController.prototype);
-BasePopupController.prototype.constructor = BasePopupController;
-
-/*
- * Set element's size.
- */
-BasePopupController.prototype.resetSize = function() {
-	$$.main.doSetVisiblePopupSize();
-}
-
-
-////////////////////////////////////////
-//
-// The base of tab controllers.
-//
-////////////////////////////////////////
- /*
- * Derive from the base class.
- */
-BaseTabController = function(el) {
-	BaseController.call(this, el);
-
-	this.target = null;
-}
-
-BaseTabController.prototype = prototype(BaseController.prototype);
-BaseTabController.prototype.constructor = BaseTabController;
-
-/*
- * Set element's size.
- */
-BaseTabController.prototype.resetSize = function() {
-	var tab_content = $("#tab_content");
-
-	this.el.width(tab_content.width());
-	this.el.height(tab_content.height() - 5);
-}

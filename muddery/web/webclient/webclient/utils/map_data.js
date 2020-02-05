@@ -1,9 +1,8 @@
 
-if (typeof(require) != "undefined") {
-    require("../client/defines.js");
+MudderyMapData = function() {
 }
 
-$$.map_data = {
+MudderyMapData.prototype = {
 
     _map_rooms: {},     // room's key: {"name": room's name,
                         //              "icon": room's icon,

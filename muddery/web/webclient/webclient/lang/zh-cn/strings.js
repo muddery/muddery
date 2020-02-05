@@ -1,9 +1,5 @@
 
-if (typeof(require) != "undefined") {
-    require("../../client/defines.js");
-}
-
-$$.local_string_zh_cn = {
+MudderyLocalDict = {
     "Muddery Webclient": "Muddery 网页客户端",
     "Please login.": "请登录。",
     "username": "用户名",
@@ -161,4 +157,18 @@ $$.local_string_zh_cn = {
     "You need to reach level ": "你需要达到等级",
     " seconds to confirm.": "秒后结束确认。",
     " seconds to start the combat.": "秒后开始战斗。",
+    "Alert": "提示",
+    "Warning": "警告",
+    "Error": "错误",
+    "Delete this character?": "删除这个角色吗？",
+    "Cancel": "取消",
+    "Del": "删",
+    "EQ": "装",
+    "Passive": "被动",
+    "Tasks:": "目标：",
+    "Lv ": "等级",
+    "Please create a character.": "请创建一个角色",
+    "Can not connect to the server.": "无法连接到服务器。",
+    "Password does not match.": "密码输入不符",
+    "Shop": "商店",
 };

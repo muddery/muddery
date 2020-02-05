@@ -49,15 +49,18 @@ class ServerSession(BaseServerSession):
             kwargs["options"] = {}
 
         raw = options.get("raw", False)
-        if not raw:
+        context = kwargs.get("context", "")
+
+        if raw:
+            out_text = text
+        else:
             try:
-                if text:
-                    text = json.dumps(text)
+                out_text = json.dumps({"data": text, "context": context})
             except Exception as e:
-                text = json.dumps({"err": "There is an error occurred while outputing messages."})
+                out_text = json.dumps({"data": {"err": "There is an error occurred while outputing messages."}})
                 logger.log_tracemsg("json.dumps failed: %s" % e)
 
         # set raw=True
         kwargs["options"].update({"raw": True, "client_raw": True})
 
-        return super(ServerSession, self).data_out(text=text, **kwargs)
+        return super(ServerSession, self).data_out(text=out_text, **kwargs)

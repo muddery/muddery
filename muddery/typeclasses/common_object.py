@@ -87,6 +87,18 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         self.db.number -= number
         return
 
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        # Get name, description and available commands.
+        info = super(MudderyCommonObject, self).get_appearance(caller)
+
+        info["number"] = self.db.number
+        info["can_remove"] = self.can_remove
+        return info
+
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -95,7 +107,12 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         commands = []
         if self.db.number > 0:
             if self.location and self.can_discard:
-                commands.append({"name":_("Discard"), "cmd":"discard", "args":self.dbref})
+                commands.append({
+                    "name": _("Discard"),
+                    "cmd": "discard",
+                    "args": self.dbref,
+                    "confirm": _("Discard this object?"),
+                })
         return commands
 
     def take_effect(self, user, number):
@@ -171,10 +188,12 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         commands = []
+
         if self.db.number > 0:
             commands.append({"name": _("Use"), "cmd": "use", "args": self.dbref})
-            if self.location and self.can_discard:
-                commands.append({"name": _("Discard"), "cmd": "discard", "args": self.dbref})
+
+        commands.extend(super(MudderyFood, self).get_available_commands(caller))
+
         return commands
 
 
@@ -224,21 +243,46 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
                 value += getattr(user.prop, key)
                 setattr(user.prop, key, value)
 
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        # Get name, description and available commands.
+        info = super(MudderyEquipment, self).get_appearance(caller)
+
+        info["equipped"] = getattr(self, "equipped", False)
+        return info
+
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         commands = []
+
         if self.db.number > 0:
             if getattr(self, "equipped", False):
-                commands.append({"name":_("Take Off"), "cmd":"takeoff", "args":self.dbref})
+                commands.append({
+                    "name": _("Take Off"),
+                    "cmd": "takeoff",
+                    "args": self.dbref,
+                })
             else:
-                commands.append({"name":_("Equip"), "cmd":"equip", "args":self.dbref})
+                commands.append({
+                    "name": _("Equip"),
+                    "cmd": "equip",
+                    "args": self.dbref
+                })
 
                 # Can not discard when equipped
                 if self.location and self.can_discard:
-                    commands.append({"name":_("Discard"), "cmd":"discard", "args":self.dbref})
+                    commands.append({
+                        "name": _("Discard"),
+                        "cmd": "discard",
+                        "args": self.dbref,
+                        "confirm": _("Discard this object?"),
+                    })
 
         return commands
 
@@ -259,8 +303,9 @@ class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
         commands = []
         if self.db.number > 0:
             commands.append({"name": _("Use"), "cmd": "use", "args": self.dbref})
-            if self.location and self.can_discard:
-                commands.append({"name": _("Discard"), "cmd": "discard", "args": self.dbref})
+
+        commands.extend(super(MudderySkillBook, self).get_available_commands(caller))
+
         return commands
 
     def take_effect(self, user, number):

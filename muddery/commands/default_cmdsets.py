@@ -100,7 +100,6 @@ class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
         Populates the cmdset.
         """
         self.add(unloggedin.CmdUnconnectedLoginStart())
-        self.add(unloggedin.CmdUnconnectedLook())
         self.add(unloggedin.CmdUnconnectedCreate())
         self.add(unloggedin.CmdUnconnectedConnect())
         self.add(unloggedin.CmdUnconnectedQuit())

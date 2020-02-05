@@ -69,20 +69,16 @@ class NormalCombatHandler(BaseCombatHandler):
         Returns:
             None
         """
-        super(NormalCombatHandler, self).set_combat_results(winners, losers)
-
         # add exp to winners
         # get total exp
         exp = 0
         for loser in losers:
             exp += loser.provide_exp(loser)
 
-        if exp:
-            # give experience to the winner
-            for character in winners:
-                character.add_exp(exp, combat=True)
-
         for character in winners:
+            if exp:
+                character.add_exp(exp)
+
             if character.is_typeclass(settings.BASE_PLAYER_CHARACTER_TYPECLASS):
                 # get object list
                 loots = None
@@ -95,8 +91,15 @@ class NormalCombatHandler(BaseCombatHandler):
                             loots.extend(obj_list)
 
                 # give objects to winner
+                get_objects = []
                 if loots:
-                    character.receive_objects(loots, combat=True)
+                    get_objects = character.receive_objects(loots, mute=True)
+
+                if character.has_account:
+                    character.msg({"combat_finish":
+                                        {"win": True,
+                                         "exp": exp,
+                                         "get_objects": get_objects}})
 
                 # call quest handler
                 for loser in losers:
@@ -104,6 +107,7 @@ class NormalCombatHandler(BaseCombatHandler):
 
         # losers are killed.
         for character in losers:
+            character.msg({"combat_finish": {"lose": True}})
             character.die(winners)
 
     def _cleanup_character(self, character):

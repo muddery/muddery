@@ -2,13 +2,13 @@
 Battle commands. They only can be used when a character is in a combat.
 """
 
-from evennia import Command
+from muddery.commands.base_command import BaseCommand
 from muddery.utils.localized_strings_handler import _
 from evennia.utils import logger
 import traceback
 
 
-class CmdCombatInfo(Command):
+class CmdCombatInfo(BaseCommand):
     """
     Get combat info.
 

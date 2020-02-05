@@ -869,11 +869,6 @@ class ApplyChanges(BaseRequestProcesser):
             # rebuild the world
             build_all()
 
-            # send client settings
-            client_settings = GAME_SETTINGS.get_client_settings()
-            text = json.dumps({"settings": client_settings})
-            SESSIONS.announce_all(text)
-
             # restart the server
             SESSIONS.announce_all("Server restarting ...")
             SESSIONS.portal_restart_server()

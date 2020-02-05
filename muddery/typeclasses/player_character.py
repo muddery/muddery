@@ -418,7 +418,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 obj_list = [{"object": object_record.object, "number": object_record.number}]
                 self.receive_objects(obj_list, mute=True)
 
-    def receive_objects(self, obj_list, mute=False, combat=False):
+    def receive_objects(self, obj_list, mute=False):
         """
         Add objects to the inventory.
 
@@ -427,15 +427,18 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                              list item: {"object": object's key
                                          "number": object's number}
             mute: (boolean) do not send messages to the owner
-            combat: (boolean) get objects in combat.
 
         Returns:
-            (dict) a list of objects that not have been received and their reasons.
+            (list) a list of objects that not have been received and their reasons.
+            [{
+                "key": key,
+                "name": name,
+                "number": number,
+                "icon": icon,
+                "reject": reason,
+            }]
         """
-        accepted_keys = {}      # the keys of objects that have been accepted
-        accepted_names = {}     # the names of objects that have been accepted
-        rejected_keys = {}      # the keys of objects that have been rejected
-        reject_reason = {}      # the reasons of why objects have been rejected
+        objects = []           # objects that have been accepted
 
         # check what the character has now
         inventory = {}
@@ -452,17 +455,17 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         for obj in obj_list:
             key = obj["object"]
             available = obj["number"]
+            name = ""
+            icon = ""
             number = available
             accepted = 0
-            name = ""
+            reject = False
             unique = False
 
             if number == 0:
                 # it is an empty object
                 if key in inventory:
                     # already has this object
-                    accepted_keys[key] = 0
-                    accepted_names[name] = 0
                     continue
 
                 object_record = None
@@ -475,45 +478,31 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
                 if not object_record:
                     # can not find object's data record
-                    reason = _("Can not get %s.") % name
-                    rejected_keys[key] = 0
-                    reject_reason[name] = reason
                     continue
 
                 if object_record.can_remove:
                     # remove this empty object
-                    accepted_keys[key] = 0
-                    accepted_names[name] = 0
                     continue
 
                 # create a new content
                 new_obj = build_object(key)
                 if not new_obj:
-                    reason = _("Can not get %s.") % name
-                    rejected_keys[key] = 0
-                    reject_reason[name] = reason
-                    continue
-
-                name = new_obj.get_name()
+                    reject = _("Can not get %s.") % key
+                else:
+                    name = new_obj.get_name()
+                    icon = new_obj.icon
 
                 # move the new object to the character
                 if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
                     new_obj.delete()
-                    reason = _("Can not get %s.") % name
-                    rejected_keys[key] = 0
-                    reject_reason[name] = reason
-                    break
-
-                # accept this object
-                accepted_keys[key] = 0
-                accepted_names[name] = 0
-
+                    reject = _("Can not get %s.") % name
             else:
                 # common number
                 # if already has this kind of object
                 if key in inventory:
                     # add to current object
                     name = inventory[key].name
+                    icon = inventory[key].icon
                     unique = inventory[key].unique
 
                     add = number
@@ -527,26 +516,26 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                         accepted += add
 
                 # if does not have this kind of object, or stack is full
-                reason = ""
                 while number > 0:
                     if unique:
                         # can not have more than one unique objects
-                        reason = _("Can not get more %s.") % name
+                        reject = _("Can not get more %s.") % name
                         break
 
                     # create a new content
                     new_obj = build_object(key)
                     if not new_obj:
-                        reason = _("Can not get %s.") % name
+                        reject = _("Can not get %s.") % name
                         break
 
                     name = new_obj.get_name()
+                    icon = new_obj.icon
                     unique = new_obj.unique
 
                     # move the new object to the character
                     if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
                         new_obj.delete()
-                        reason = _("Can not get %s.") % name
+                        reject = _("Can not get %s.") % name
                         break
 
                     # Get the number that actually added.
@@ -561,34 +550,27 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     number -= add
                     accepted += add
 
-                if accepted > 0:
-                    accepted_keys[key] = accepted
-                    accepted_names[name] = accepted
-
-                if accepted < available:
-                    rejected_keys[key] = available - accepted
-                    reject_reason[name] = reason
+            objects.append({
+                "key": key,
+                "name": name,
+                "icon": icon,
+                "number": accepted,
+                "reject": reject,
+            })
 
         if not mute:
             # Send results to the player.
-            message = {"get_objects":
-                            {"accepted": accepted_names,
-                             "rejected": reject_reason,
-                             "combat": combat}}
+            message = {"get_objects": objects}
             self.msg(message)
 
         self.show_inventory()
 
         # call quest handler
-        for key in accepted_keys:
-            self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, key, accepted_keys[key])
+        for item in objects:
+            if not item["reject"]:
+                self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, item["key"], item["number"])
 
-        return {
-            "accepted_keys": accepted_keys,
-            "accepted_names": accepted_names,
-            "rejected_keys": rejected_keys,
-            "reject_reason": reject_reason
-        }
+        return objects
 
     def get_object_number(self, obj_key):
         """
@@ -771,6 +753,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     "name": item.name,          # item's name
                     "number": item.db.number,   # item's number
                     "desc": item.db.desc,       # item's desc
+                    "can_remove": item.can_remove,
                     "icon": getattr(item, "icon", None)}  # item's icon
             
             if getattr(item, "equipped", False):
@@ -795,7 +778,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         status = {}
         status["level"] = {"name": _("LEVEL"),
-                            "value": self.db.level}
+                           "value": self.db.level}
 
         for key, info in self.get_properties_info().items():
             status[key] = {"name": info["name"],
@@ -824,7 +807,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     if obj.dbref == dbref:
                         info = {"dbref": obj.dbref,
                                 "name": obj.name,
-                                "desc": obj.db.desc}
+                                "desc": obj.db.desc,
+                                "icon": obj.icon,}
             equipments[position] = info
 
         return equipments
@@ -997,12 +981,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.show_status()
         self.msg({"msg": _("You are reborn at {c%s{n.") % self.home.get_name()})
 
-    def save_current_dialogue(self, sentences_list, npc):
+    def save_current_dialogue(self, dialogue, npc):
         """
         Save player's current dialogues.
 
         Args:
-            sentences_list: the list of current dialogues
+            dialogue: the current dialogue
             npc: NPC whom the player is talking to.
 
         Returns:
@@ -1012,13 +996,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             # Can not auto resume dialogues.
             return
 
-        if not sentences_list:
+        if not dialogue:
             self.clear_current_dialogue()
             return
 
         # Save dialogue's id and sentence's ordinal.
-        sentences_begin = [(s["dialogue"], s["sentence"]) for s in sentences_list[0]]
-        sentences_all = [(s["dialogue"], s["sentence"]) for s_list in sentences_list for s in s_list]
+        sentences = [(d["dialogue"], d["sentence"]) for d in dialogue]
 
         npc_key = None
         if npc:
@@ -1028,8 +1011,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         if self.location:
             location_key = self.location.get_data_key()
 
-        self.db.current_dialogue = {"sentences_begin": sentences_begin,
-                                    "sentences_all": sentences_all,
+        self.db.current_dialogue = {"sentences": sentences,
                                     "npc": npc_key,
                                     "location": location_key}
 
@@ -1061,7 +1043,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         current = self.db.current_dialogue
         
-        if not current["sentences_begin"]:
+        if not current["sentences"]:
             return
 
         # Check dialogue's location
@@ -1079,9 +1061,9 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 return
             npc_talking = npc_in_location[0]
 
-        sentences_list = [DIALOGUE_HANDLER.get_sentence(s[0], s[1]) for s in current["sentences_begin"]]
-        output = DIALOGUE_HANDLER.create_output_sentences(sentences_list, self, npc_talking)
-        self.msg({"dialogues_list": [output]})
+        sentences = [DIALOGUE_HANDLER.get_sentence(s[0], s[1]) for s in current["sentence"]]
+        dialogue = DIALOGUE_HANDLER.create_output_sentences(sentences, self, npc_talking)
+        self.msg({"dialogue": dialogue})
         return
 
     def talk_to_npc(self, npc):
@@ -1098,33 +1080,30 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.set_target(npc)
 
         # Get NPC's sentences_list.
-        sentences_list = DIALOGUE_HANDLER.get_npc_sentences_list(self, npc)
+        sentences = DIALOGUE_HANDLER.get_npc_sentences(self, npc)
         
-        self.save_current_dialogue(sentences_list, npc)
-        self.msg({"dialogues_list": sentences_list})
+        self.save_current_dialogue(sentences, npc)
+        self.msg({"dialogue": sentences})
 
-    def show_dialogue(self, npc, dialogue, sentence):
+    def show_dialogue(self, npc, dialogue):
         """
         Show a dialogue.
 
         Args:
             npc: (optional) NPC's object.
             dialogue: dialogue's key.
-            sentence: sentence's ordinal.
 
         Returns:
             None
         """
         # Get next sentences_list.
-        sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(self,
-                                                                  npc,
-                                                                  dialogue,
-                                                                  sentence,
-                                                                  True)
+        sentences = DIALOGUE_HANDLER.get_dialogue_sentences(self,
+                                                            npc,
+                                                            dialogue)
 
-        # Send dialogues_list to the player.
-        self.save_current_dialogue(sentences_list, npc)
-        self.msg({"dialogues_list": sentences_list})
+        # Send the dialogue to the player.
+        self.save_current_dialogue(sentences, npc)
+        self.msg({"dialogue": sentences})
 
     def continue_dialogue(self, npc, dialogue, sentence):
         """
@@ -1154,21 +1133,20 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
             logger.log_tracemsg(ostring)
 
-        # Get next sentences_list.
-        sentences_list = DIALOGUE_HANDLER.get_next_sentences_list(self,
-                                                                  npc,
-                                                                  dialogue,
-                                                                  sentence,
-                                                                  False)
+        # Get next sentences.
+        sentences = DIALOGUE_HANDLER.get_next_sentences(self,
+                                                        npc,
+                                                        dialogue,
+                                                        sentence)
 
         # Send dialogues_list to the player.
-        self.save_current_dialogue(sentences_list, npc)
-        self.msg({"dialogues_list": sentences_list})
-        if not sentences_list:
+        self.save_current_dialogue(sentences, npc)
+        self.msg({"dialogue": sentences})
+        if not sentences:
             # dialogue finished, refresh surroundings
             self.show_location()            
 
-    def add_exp(self, exp, combat=False):
+    def add_exp(self, exp):
         """
         Add character's exp.
         Args:
@@ -1179,8 +1157,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         super(MudderyPlayerCharacter, self).add_exp(exp)
 
-        self.msg({"get_exp": {"exp": exp,
-                              "combat": combat}})
+        self.msg({"get_exp": {"exp": exp}})
 
     def level_up(self):
         """

@@ -103,6 +103,13 @@ An "emitter" object must have a function
             log('Evenna reconnecting.')
         },
 
+        // Close the current connection and
+        // re-establish another connection to the Evennia server.
+        reconnect: function() {
+            this.connection.close();
+            this.connection.connect();
+        },
+
         // Returns true if the connection is open.
         //
         isConnected: function () {
@@ -225,7 +232,7 @@ An "emitter" object must have a function
         var csessid = settings.csessid;
 
         var connect = function() {
-            if (websocket && websocket.readyState != websocket.CLOSED) {
+            if (websocket && !(websocket.readyState == websocket.CLOSED || websocket.readyState == websocket.CLOSING)) {
                 // No-op if a connection is already open.
                 return;
             }
@@ -240,7 +247,7 @@ An "emitter" object must have a function
             };
             // Handle Websocket close event
             websocket.onclose = function (event) {
-                if (ever_open) {
+                if (open) {
                     // only emit if websocket was ever open at all
                     Evennia.emit('connection_close', ["websocket"], event);
                 }
@@ -279,6 +286,7 @@ An "emitter" object must have a function
             // tied to when the client window is closed). This
             // Makes use of a websocket-protocol specific instruction.
             websocket.send(JSON.stringify(["websocket_close", [], {}]));
+            websocket.close();
             open = false;
         }
 

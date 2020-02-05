@@ -62,13 +62,13 @@ class ActionGetObjects(BaseIntervalAction):
                 obj_list.append({"object": record.object,
                                  "number": record.number * times})
 
-        result = character.receive_objects(obj_list, mute=True)
+        objects = character.receive_objects(obj_list, mute=True)
 
         accepted = ""
-        for name in result["accepted_names"]:
+        for item in objects:
             if accepted:
                 accepted += ", "
-            accepted += name + " " + str(result["accepted_names"][name])
+            accepted += item["name"] + " " + str(item["number"])
 
         if accepted:
             message = _("Get") + " " + accepted

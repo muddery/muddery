@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-us">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximun-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+        <title>Muddery Webclient</title>
+        <link href="../css/webclient.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body id="main-frame" class="template">
+        <!-- Show popup windows in this div. -->
+        <div id="popup" class="hidden">
+            <!-- popup message window -->
+            <div id="popup-message" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text"></span>
+                    </div>
+                    <div class="popup-body"></div>
+                    <div class="popup-footer">
+                        <div class="popup-buttons"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- popup alert window -->
+            <div id="popup-alert" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text"></span>
+                    </div>
+                    <div class="popup-body"></div>
+                    <div class="popup-footer">
+                        <div class="popup-buttons"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- popup object window -->
+            <div id="popup-object" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text"></span>
+                    </div>
+                    <div class="popup-body">
+                        <div class="icon-div">
+                            <img class="icon" src=""/>
+                        </div>
+                        <div class="desc"></div>
+                    </div>
+                    <div class="popup-footer"></div>
+                </div>
+            </div>
+
+            <!-- popup get objects window -->
+            <div id="popup-get-objects" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text">获得物品</span>
+                    </div>
+                    <div class="popup-body">
+                    </div>
+                    <div class="popup-footer">
+                        <button type="button" class="popup-button button-ok button-short">确定</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- popup dialogue window -->
+            <div id="popup-dialogue" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text"></span>
+                    </div>
+                    <div class="popup-body">
+                        <div class="div-icon">
+                            <img class="img-icon" src=""/>
+                        </div>
+                        <div class="div-dialogue">
+                        </div>
+                    </div>
+                    <div class="popup-footer">
+                    </div>
+                </div>
+            </div>
+
+            <!-- popup goods window -->
+            <div id="popup-goods" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text">购买</span>
+                    </div>
+                    <div class="popup-body">
+                        <div class="goods-icon">
+                            <img class="icon-img" src=""/>
+                        </div>
+                        <div class="goods-price"></div>
+                        <div class="goods-desc">
+                        </div>
+                    </div>
+                    <div class="popup-footer">
+                        <button type="button" class="popup-button button-cancel button-short red">取消</button>
+                        <button type="button" class="popup-button button-buy button-short">购买</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    
+        <!-- Window's body. -->
+        <div id="windows-wrapper">
+
+            <!-- login window -->
+            <div id="login-window" class="main-window hidden">
+                <div class="upper">
+                    <div class="game-title">
+                        <span class="title-text"></span>
+                    </div>
+                </div>
+                <div class="login-box">
+                    <div class="login-header">
+                        <button class="button-tab-login tab activate">登录</button>
+                        <button class="button-tab-register tab">注册</button>
+                    </div>
+                    <table class="login-form">
+                        <tbody>
+                            <tr><td>
+                                <input class="login-name long-input-box" type="text" placeholder="用户名" autocomplete="off" />
+                            </td></tr>
+                            <tr><td>
+                                <input class="login-password long-input-box" type="password" placeholder="密码" autocomplete="off" />
+                            </td></tr>
+                            <tr><td>
+                                <div class="login-auto-login">
+                                    <button class="checkbox-auto-login checkbox"></button>
+                                    <span class="text-auto-login">自动登录</span>
+                                </div>
+                            </td></tr>
+                            <tr><td>
+                                <button class="button-login button-long">登录</button>
+                            </td></tr>
+                        </tbody>
+                    </table>
+                    <table class="register-form hidden">
+                        <tbody>
+                            <tr><td>
+                                <input class="reg-name long-input-box" type="text" placeholder="用户名" autocomplete="off" />
+                            </td></tr>
+                            <tr><td>
+                                <input class="reg-password long-input-box" type="password" placeholder="密码" autocomplete="off" />
+                            </td></tr>
+                            <tr><td>
+                                <input class="reg-password-verify long-input-box" type="password" placeholder="确认密码"  autocomplete="off" />
+                            </td></tr>
+                            <tr><td>
+                                <button class="button-register button-long" type="button">注册</button>
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="lower">
+                    <div class="login-welcome">
+                    </div>
+                </div>
+            </div>
+
+            <!-- select character window -->
+            <div id="select-char-window" class="main-window hidden">
+                <div class="title-bar">
+                    <span class="header-text">选择角色</span>
+                </div>
+                <div class="character-list">
+                </div>
+                <div class="button-bar">
+                    <button type="button" class="button-new button-short left">添加角色</button>
+                    <button type="button" class="button-logout button-short red right">退出</button>
+                    <button type="button" class="button-password button-short right">修改密码</button>
+                </div>
+            </div>
+
+            <!-- new character window -->
+            <div id="new-char-window" class="main-window hidden">
+                <div class="title-bar">
+                    <span class="header-text">创建角色</span>
+                </div>
+                <div class="char-attributes">
+                    <p>角色名字</p>
+                    <input class="new-char-name long-input-box" type="text" placeholder="请输入角色名字" autocomplete="off" />
+                </div>
+                <div class="button-bar">
+                    <button type="button" class="button-cancel button-short red left">放弃</button>
+                    <button type="button" class="button-create button-short right">创建</button>
+                </div>
+            </div>
+
+            <!-- set password window -->
+            <div id="password-window" class="main-window hidden">
+                <div class="title-bar">
+                    <span class="header-text">修改密码</span>
+                </div>
+                <div class="reset-password">
+                    <p>
+                        <input class="current-password long-input-box" type="password" placeholder="当前密码" autocomplete="off" />
+                    </p>
+                    <p>
+                        <input class="new-password long-input-box" type="password" placeholder="新密码" autocomplete="off" />
+                    </p>
+                    <p>
+                        <input class="new-password-verify long-input-box" type="password" placeholder="确认新密码"  autocomplete="off" />
+                    </p>
+                </div>
+                <div class="button-bar">
+                    <button class="button-confirm button-short" type="button">确认</button>
+                    <button class="button-cancel button-short" type="button">取消</button>
+                </div>
+            </div>
+
+            <div id="game-window" class="main-window hidden">
+                <div class="contents">
+                    <div id="scene-window" class="game-content-window">
+                        <div class="title-bar">
+                            <div class="icon-back">
+                                <img class="icon hidden" src="" />
+                            </div>
+                            <span class="name"></span>
+                            <span class="value">
+                                <span class="level"></span>
+                            </span>
+                            <div class="hp">
+                                <div class="hp-bar"></div>
+                                <div class="hp-number"></div>
+                            </div>
+                        </div>
+                        <div class="scene-contents">
+                            <div class="scene-view">
+                                <div class="scene-name">
+                                </div>
+                                <div class="scene-desc">
+                                </div>
+                                <div class="scene-commands">
+                                </div>
+                                <div class="scene-objects">
+                                </div>
+                                <div class="scene-players">
+                                </div>
+                            </div>
+                            <div class="scene-exits">
+                                <div class="exits-block">
+                                    <table class="exits-table">
+                                        <tbody>
+                                            <tr>
+                                                <td class="direction-0 cell-left cell-top"></td>
+                                                <td class="direction-1 cell-center cell-top"></td>
+                                                <td class="direction-2 cell-right cell-top"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="direction-3 cell-left cell-middle"></td>
+                                                <td class="direction-4 cell-center cell-middle"></td>
+                                                <td class="direction-5 cell-right cell-middle"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="direction-6 cell-left cell-bottom"></td>
+                                                <td class="direction-7 cell-center cell-bottom"></td>
+                                                <td class="direction-8 cell-right cell-bottom"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <svg id="exits-svg" version="1.1"  xmlns="http://www.w3.org/2000/svg">
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message-window">
+                            <div class="message-list">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="char-data-window" class="game-content-window hidden">
+                        <div class="title-bar">
+                            <div class="icon-back">
+                                <img class="icon hidden" src="" />
+                            </div>
+                            <span class="name"></span>
+                            <span class="header-text">状态</span>
+                        </div>
+                        <div class="equipments">
+                            <div class="equipments-body"></div>
+                            <div class="equipments-row">
+                                <div class="equipment-block position-left hidden">
+                                    <div class="position-name"></div>
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                                <div class="equipment-block position-right equipment-head hidden">
+                                    <div class="position-name"></div>
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                            </div>
+                            <div class="equipments-row">
+                                <div class="equipment-block position-left equipment-chest hidden">
+                                    <div class="position-name"></div>
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                                <div class="equipment-block position-right hidden">
+                                    <div class="position-name"></div>
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                            </div>
+                            <div class="equipments-row">
+                                <div class="equipment-block position-left equipment-weapon hidden">
+                                    <div class="position-name"></div>
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                                <div class="equipment-block position-right equipment-hand hidden">
+                                    <div class="position-name"></div>
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                            </div>
+                            <div class="equipments-row">
+                                <div class="equipment-block position-left hidden">
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                                <div class="equipment-block position-right equipment-leg hidden">
+                                    <div class="position-name"></div>
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                            </div>
+                            <div class="equipments-row">
+                                <div class="equipment-block position-left equipment-foot hidden">
+                                    <div class="position-name"></div>
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                                <div class="equipment-block position-right hidden">
+                                    <div class="position-name"></div>
+                                    <img class="icon" src=""/>
+                                    <div class="name"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="char-data">
+                            <table class="data-table" >
+                                <tbody class="data-list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="inventory-window" class="game-content-window hidden">
+                        <div class="title-bar">
+                            <span class="header-text">物品</span>
+                        </div>
+                        <div class="inventory-block">
+                            <div class="inventory-list">
+                            </div>
+                        </div>
+                        <div class="item-info-block">
+                            <div class="item-info hidden">
+                                <div class="item-info-left">
+                                    <div class="icon" >
+                                        <img class="icon-image" src=""/>
+                                    </div>
+                                    <div class="buttons"></div>
+                                </div>
+                                <div class="item-info-right">
+                                    <div class="item-info-title">
+                                        <span class="name"></span>
+                                        <span class="number"></span>
+                                        <span class="equipped">已装备</span>
+                                    </div>
+                                    <div class="desc"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="skills-window" class="game-content-window hidden">
+                        <div class="title-bar">
+                            <span class="header-text">技能</span>
+                        </div>
+                        <div class="skills-block">
+                            <div class="skills-list">
+                            </div>
+                        </div>
+                        <div class="skill-info-block">
+                            <div class="skill-info hidden">
+                                <div class="skill-info-left">
+                                    <div class="icon" >
+                                        <img class="icon-image" src=""/>
+                                    </div>
+                                    <div class="buttons"></div>
+                                </div>
+                                <div class="skill-info-right">
+                                    <div>
+                                        <span class="name"></span>
+                                        <span class="passive"></span>
+                                    </div>
+                                    <div class="desc"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="quests-window" class="game-content-window hidden">
+                        <div class="title-bar">
+                            <span class="header-text">任务</span>
+                        </div>
+                        <div class="quests-block">
+                            <div class="quests-list">
+                            </div>
+                        </div>
+                        <div class="quest-info-block">
+                            <div class="quest-info hidden">
+                                <div class="name"></div>
+                                <div class="desc"></div>
+                                <div class="objective-block"></div>
+                                <div class="buttons"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="shop-window" class="game-content-window hidden">
+                        <div class="shop">
+                            <div class="title-bar">
+                                <button type="button" class="button-close light"></button>
+                                <span class="header-text">商店</span>
+                            </div>
+                            <div class="shop-desc">
+                                <div class="shop-icon">
+                                    <img class="shop-icon-img hidden"/>
+                                </div>
+                                <div class="desc-content">
+                                </div>
+                            </div>
+                            <div class="goods-list">
+                            </div>
+                        </div>
+                        <div class="goods-detail hidden">
+                            <div class="goods-box">
+                                <div class="goods-content">
+                                    <div class="title-bar">
+                                        <button type="button" class="button-close"></button>
+                                        <h4 class="goods-header">
+                                            <span class="goods-name"></span>
+                                            <span class="goods-number_mark">×</span>
+                                            <span class="goods-number"></span>
+                                        </h4>
+                                    </div>
+                                    <div class="goods-body">
+                                        <div class="goods-div-icon">
+                                            <img class="goods-img-icon"/>
+                                        </div>
+                                        <p class="goods-div-price">
+                                            <span class="goods-price"></span>
+                                            <span class="goods-unit"></span>
+                                        </p>
+                                        <p class="goods-desc"></p>
+                                    </div>
+                                    <div class="goods-footer">
+                                        <button class="button-buy btn btn-default" type="button">购买</button>
+                                        <button class="button-cancel btn btn-default" type="button">放弃</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="map-window" class="game-content-window hidden">
+                        <div class="title-bar">
+                            <span class="header-text">地图</span>
+                        </div>
+                        <div class="map-body">
+                            <svg id="map-svg"></svg>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="tab-bar">
+                    <div class="button-scene tab-bar-button">场景</div>
+                    <div class="button-character tab-bar-button">角色</div>
+                    <ul class="menu-character popup-menu hidden">
+                        <li>
+                            <button type="button" class="button-status button-short">属性</button>
+                        </li>
+                        <li>
+                            <button type="button" class="button-inventory button-short">背包</button>
+                        </li>
+                        <li>
+                            <button type="button" class="button-skills button-short">技能</button>
+                        </li>
+                        <li>
+                            <button type="button" class="button-quests button-short">任务</button>
+                        </li>
+                    </ul>
+                    <div class="button-map tab-bar-button">地图</div>
+                    <div class="button-system tab-bar-button">系统</div>
+                    <ul class="menu-system popup-menu hidden">
+                        <li>
+                            <button type="button" class="button-logout button-short">退出</button>
+                        </li>
+                        <li>
+                            <button type="button" class="button-unpuppet button-short">初始页面</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="combat-window" class="main-window hidden">
+                <div class="combat-scene">
+                    <div class="title-bar">
+                        <div class="icon-back">
+                            <img class="icon hidden" src="" />
+                        </div>
+                        <span class="name"></span>
+                        <span class="header-text">战斗</span>
+                        <div class="hp">
+                            <div class="hp-bar"></div>
+                            <div class="hp-number"></div>
+                        </div>
+                    </div>
+                    <div class="desc">
+                    </div>
+                    <div class="timeout">
+                        <span class="combat-time"></span>
+                    </div>
+                    <div class="characters">
+                    </div>
+                    <div class="messages">
+                        <div class="message-list">
+                        </div>
+                    </div>
+                    <div class="tab-bar">
+                        <div class="skill-list">
+                        </div>
+                    </div>
+                </div>
+                <div class="combat-result hidden">
+                    <div class="title-bar">
+                        <span class="header-text"></span>
+                    </div>
+                    <div class="result-content">
+                        <div class="result-desc"></div>
+                        <div class="result-exp-block hidden">
+                            <div class="result-title">获得经验</div>
+                            <div class="result-exp"></div>
+                        </div>
+                        <div class="result-accepted hidden">
+                            <div class="result-title">获得物品</div>
+                            <div class="result-accepted-list"></div>
+                        </div>
+                        <!-- div class="result-rejected hidden">
+                            <div class="result-title">无法获得</div>
+                            <div class="result-rejected-list"></div>
+                        </div -->
+                    </div>
+                    <div class="result-buttons">
+                        <div class="button-short button-ok">OK</div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- waiting -->
+        <div id="indicator-layer" class="hidden">
+            <div class="indicator-box">
+                <div class="waiting-indicator image-rotate">
+                </div>
+            </div>
+            <div class="indicator-overlay">
+            </div>
+        </div>
+
+        <!-- libs -->
+        <script src="../libs/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- settings -->
+        <script src="../settings.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="../lang/zh-cn/strings.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="../client/main.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/evennia.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/client.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../client/service.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="../utils/map_data.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../utils/utils.js" type="text/javascript" charset="utf-8"></script>
+		
+        <script src="../controllers/base_controller.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../controllers/main_frame.js" type="text/javascript" charset="utf-8"></script>
+    </body>
+</html>

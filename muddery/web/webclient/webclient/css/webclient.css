@@ -1,388 +1,1975 @@
 
-/* colors */
-body {
-    background-color: #000;
-    color: #ccc;
+:root {
+    --button-bar: url(../img/button_bar.png);
+
+    --button-long: url(../img/button_long.png);
+    --button-short: url(../img/button_short.png);
+    --button-short-red: url(../img/button_short_red.png);
+    --button-tiny-red: url(../img/button_tiny_red.png);
+    --checkbox-checked: url(../img/checkbox_checked.png);
+    --checkbox-unchecked: url(../img/checkbox_unchecked.png);
+
+    --long-input-box: url(../img/long_input_box.png);
+
+    --icon-close: url(../img/icon_close.png);
+    --icon-close-light: url(../img/icon_close_light.png);
+    --popup-box-back: url(../img/popup_box_back.png);
+    --popup-object-back: url(../img/popup_object_back.png);
+    --popup-dialogue-back: url(../img/popup_object_back.png);
+    --popup-goods-back: url(../img/popup_goods_back.png);
+    --popup-goods-icon: url(../img/icon_default_middle.png);
+
+    --login-background: url(../img/login_background.png);
+    --login-form: url(../img/login_form.png);
+    --login-tab-activate: url(../img/login_tab_activate.png);
+    --login-tab-inactivate: url(../img/login_tab_inactivate.png);
+
+    --select-char-background: url(../img/login_background.png);
+    --select-char-title: url(../img/func_title_bar.png);
+    --select-char-item: url(../img/select_char_item.png);
+
+    --title-bar: url(../img/main_title_bar.png);
+    --title-icon-back: url(../img/icon_back_large.png);
+    --title-hp-back: url(../img/hp_back.png);
+    --title-hp-bar: url(../img/hp_bar.png);
+
+    --main-background: url(../img/main_background.png);
+    --main-bottom-bar: url(../img/main_bottom_bar.png);
+    --main-bar-button: url(../img/main_bar_button.png);
+    --main-scene-name: url(../img/main_scene_name.png);
+    --main-object-button: url(../img/main_object_button.png);
+    --main-npc-button: url(../img/main_npc_button.png);
+    --main-player-button: url(../img/main_player_button.png);
+    --main-scene-exits: url(../img/main_scene_exits.png);
+    --main-exit-button: url(../img/main_exit_button.png);
+    --main-exit-center: url(../img/main_exit_center.png);
+
+    --character-background: url(../img/main_background.png);
+    --character-title-bar: url(../img/main_title_bar.png);
+    --character-title-icon-back: url(../img/icon_back_large.png);
+    --character-equipments-body: url(../img/equipments_body_male.png);
+    --character-equipment-icon-back: url(../img/equipment_icon_back.png);
+    --character-data-back: url(../img/character_data_back.png);
+
+    --inventory-background: url(../img/main_background.png);
+    --inventory-title-bar: url(../img/status_title_bar.png);
+    --inventory-default-icon: url(../img/icon_default_middle.png);
+    --inventory-item-info-back: url(../img/info_back.png);
+    --inventory-item-info-left-back: url(../img/info_left_back.png);
+    --inventory-item-button: url(../img/button_small.png);
+
+    --skills-background: url(../img/main_background.png);
+    --skills-title-bar: url(../img/status_title_bar.png);
+    --skill-info-back: url(../img/info_back.png);
+    --skill-icon-back: url(../img/icon_back_middle.png);
+    --skill-info-left-back: url(../img/info_left_back.png);
+    --skill-info-icon-back: url(../img/icon_back_middle.png);
+    --skill-item-button: url(../img/button_small.png);
+
+    --quests-background: url(../img/main_background.png);
+    --quests-title-bar: url(../img/status_title_bar.png);
+    --quest-item-back: url(../img/quest_item_back.png);
+    --quest-info-back: url(../img/info_back.png);
+    --quest-item-button: url(../img/button_small.png);
+
+    --map-background: url(../img/main_background.png);
+    --map-title-bar: url(../img/status_title_bar.png);
+
+    --shop-background: url(../img/main_background.png);
+    --shop-title-bar: url(../img/status_title_bar.png);
+    --shop-default-icon: url(../img/shop_default_icon.png);
+    --shop-desc: url(../img/shop_desc.png);
+    --shop-goods: url(../img/shop_goods.png);
+
+    --combat-background: url(../img/main_background.png);
+    --combat-title-bar: url(../img/main_title_bar.png);
+    --combat-desc: url(../img/combat_desc.png);
+    --combat-hp-back: url(../img/combat_hp_back.png);
+    --combat-hp-bar: url(../img/combat_hp_bar.png);
+    --combat-character-icon: url(../img/icon_back_small.png);
+    --combat-messages: url(../img/combat_messages.png);
+    --combat-bottom-bar: url(../img/main_bottom_bar.png);
+    --combat-skill-icon-back: url(../img/icon_back_middle.png);
+
+    --combat-result-background: url(../img/main_background.png);
+    --combat-result-title-bar: url(../img/main_title_bar.png);
 }
 
-#middlewindow {
+html {
+    font-size: 100px;
+}
+
+html, body {
+    width: 100%;
     height: 100%;
-    width: auto;
-    margin-left: auto;
-    margin-right: auto;
+    overflow: hidden;
 }
 
-#msg_wnd {
-    min-height: 80px;
-    overflow-x: hidden;
-    overflow-y: auto;
-}
-
-#tab_content {
-    min-height: 185px;
-    max-height: 360px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    padding-top: 10px;
-    padding-bottom: 0px;
-}
-
-.content_frame {
-	border-style: none;
-	overflow: auto;
-}
-
-#popup_container {
-	display: none;
-}
-
-#popup_confirm_combat {
-	display: none;
-}
-
-.popup_modal {
- 	display: block;
-}
-
-.popup_frame {
-	padding: 5px;
-	border-style: none;
-	overflow: auto;
-}
-
-#game_title {
-    margin: 2px 0px;
-}
-
-.panel {
-    background-color: #000;
-    margin-bottom: 5px;
-}
-
-.modal-content {
-    background-color: #000;
-    border-color: #aaa;
-}
-
-.modal-header {
-    border-bottom: 0px;
-    padding: 8px 15px 3px 15px;
-    position: relative;
-}
-
-.modal-body {
-    padding: 3px 15px 8px 15px;
-}
-
-.modal-footer {
-    text-align: left;
-    border-top: 0px;
-}
-
-.editbox {
-    width: 120px;
-    padding: 2px 4px;
-    margin: 2px 2px;
-    color: #111;
-}
-
-.inputbox {
-    width: 240px;
-    padding: 2px 4px;
-    margin: 2px 2px;
-    color: #111;
-}
-
-input[type=checkbox], input[type=radio] {
-    margin: 4px 4px;
-}
-
-.wordbox {
-	width: 100%;
-}
-
-.nav-tabs {
-    border-bottom: 0px;
-}
-
-.nav-tabs>li {
-    min-width: 60px;
-    text-align: center;
-}
-
-.nav-tabs>li>a {
-    border-color: #aaa;
-    color: #ddd;
-    padding: 5px 5px;
-}
-
-.nav-tabs>li>a:hover {
-    background-color: #666;
-}
-
-.nav-tabs>li.active>a {
-    color: #000;
-}
-
-.nav-tabs>li.open>a {
-    color: #000;
-    background-color: #888;
-    border-color: #000;
-}
-
-.nav-tabs>li.open>a:hover {
-    color: #000;
-    background-color: #ccc;
-    border-color: #000;
-}
-
-.nav-tabs .dropdown-menu {
-    border-radius: 4px;
-    margin: 2px 0 0;
-}
-
-.dropdown-menu {
-    min-width: 60px;
-}
-
-.dropdown-menu>li>a {
-    padding: 3px 10px;
-}
-
-.dropdown-menu>li>a:hover {
-    background-color: #bbb;
-}
-
-.first-dropdown-item {
-    border-top: 0px;
-}
-
-.dropdown-item {
-    border-top: 1px solid rgba(0,0,0,.3);
-}
-
-.modal-header .close {
+body {
+    background-color: #222;
+    font-size: 0.14rem;
     color: #ccc;
-    opacity: 1.0;
-    text-shadow: 0 1px 0 #888;
-    padding: 10px 10px;
-    margin-top: -10px;
-    margin-right: -10px;
-    position: absolute;
-    right: 10px;
-    top: 5px;
+    margin: 0;
+	-webkit-touch-callout:none;
+	-webkit-user-select:none;
+	user-select:none;
 }
 
-.modal-header .close:hover {
-    color: #fff;
-    opacity: 1.0;
-    text-shadow: 0 1px 0 #bbb;
-}
-
-.modal-title {
-    color: #0ff;
-    text-align: center;
-}
-
-.btn {
-    color: #333;
-    background-color: #fff;
-}
-
-.btn:hover {
-    color: #000;
-    background-color: #ccc;
-}
-
-a {
-    color: #6bf;
-    cursor: pointer;
-}
-
-a:hover {
-    color: #39d;
-}
-
-a:focus {
-    color: #39d;
-}
-
-.vertical-center {
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
-
-.dialogue-header {
-    color: #0ff;
-    text-align: center;
-}
-
-/* Style specific classes corresponding to formatted, narative text. */
-.red { color: red; }
-.maroon { color: maroon; }
-.lime { color: lime; }
-.green { color: green; }
-.yellow { color: yellow; }
-.olive { color: olive; }
-.blue { color: blue; }
-.navy { color: navy; }
-.magenta { color: #FF00FF; }
-.purple { color: purple; }
-.cyan { color: #00FFFF; }
-.teal { color: teal; }
-.white { color: white; }
-.gray { color: gray; }
-.dimgray {color: #696969;}
-.black {color: black;}
-.underline { text-decoration: underline; }
-
-.bgred { background-color: red;}
-.bgmaroon { background-color: maroon;}
-.bglime { background-color: lime;}
-.bggreen { background-color: green;}
-.bgyellow { background-color: yellow;}
-.bgolive { background-color: olive;}
-.bgblue { background-color: blue;}
-.bgnavy { background-color: navy;}
-.bgmagenta { background-color: #FF00FF;}
-.bgpurple { background-color: purple;}
-.bgcyan { background-color: #00FFFF;}
-.bgteal { background-color: teal;}
-.bgwhite { background-color: white;}
-.bggray { background-color: gray;}
-.bgdimgray { background-color: #696969;}
-.bgblack { background-color: black;}
-
-.tab_quests {
-    border-width: 1px;
-    border-style: solid;
-    border-color: #aaa;
-    border-collapse: collapse;
-    margin: 8px;
-}
-
-.tab_quests th {
-    border-width: 1px;
-    border-style: solid;
-    border-color: #aaa;
-    padding: 4px 8px 4px 8px;
-    font-weight: normal;
-}
-
-.tab_quests td {
-    border-width: 1px;
-    border-style: solid;
-    border-color: #aaa;
-    padding: 4px 8px 4px 8px;
-}
-
-.tab_shop {
-    border-collapse: collapse;
-    border-color: #aaa;
-    border-style: solid;
-    border-width: 1px;
-    margin: 8px;
-}
-
-.tab_shop th {
-    border-width: 1px;
-    border-style: solid;
-    border-color: #aaa;
-    padding: 4px 8px 4px 8px;
-    font-weight: normal;
-}
-
-.tab_shop td {
-    border-width: 1px;
-    border-style: solid;
-    border-color: #aaa;
-    padding: 4px 8px 4px 8px;
-}
-
-.hp {
-    position: absolute;
-    top: -15px;
-}
-
-.prompt_element {
-    color: #fff;
-    margin: 0px 5px;
-}
-
-#prompt_name {
-    color: #0ff;
-}
-
-.obj_icon {
-	width: 40px;
-	height: 40px;
-}
-
-.skill_list_icon {
-	width: 20px;
-	height: 20px;
-}
-
-.dialogue_icon {
-	width: 40px;
-	height: 40px;
-}
-
-.shop_icon {
-	width: 40px;
-	height: 40px;
-}
-
-.command_icon {
-	width: 40px;
-	height: 40px;
-}
-
-.scene_object {
-	margin-left: 10px;
-}
-
-.template {
-    display: none;
-}
-
-.require {
-    display: none;
+:focus {
+    outline: none;
 }
 
 .hidden {
     display: none;
 }
 
-#input_bar {
-    margin: 2px 0px 0px 0px;
-}
-
-#bar_msg_select {
-    width: 56px;
-    height: 32px;
-    margin: 0px 2px 0px 0px;
+.left {
     float: left;
-    display: inline;
 }
 
-#bar_msg_input {
-    width: 56px;
-    height: 32px;
-    margin: auto;
-    padding: 2px 4px;
-    display: inline;
-}
-
-#bar_msg_send {
-    width: 56px;
-    height: 32px;
-    margin: 0px 0px 0px 2px;
+.right {
     float: right;
-    display: inline;
 }
 
-th {
-	white-space: nowrap;
-	text-align: center;
+#windows-wrapper {
+    width: 100%;
+    height: 100%;
 }
+
+.main-window {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/************* animations begin *************/
+@-webkit-keyframes rotation {
+    from {-webkit-transform: rotate(0deg);}
+    to {-webkit-transform: rotate(360deg);}
+}
+
+.image-rotate {
+    -webkit-transform: rotate(360deg);
+    animation: rotation 1.0s linear infinite;
+    -moz-animation: rotation 1.0s linear infinite;
+    -webkit-animation: rotation 1.0s linear infinite;
+    -o-animation: rotation 1.0s linear infinite;
+}
+/************* animations end *************/
+
+/************* indicators begin *************/
+#indicator-layer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 10000;
+	width: 100%;
+	height: 100%;
+}
+
+.indicator-box {
+	position: absolute;
+	top: 50%;
+	width: 100%;
+	margin-top: -20px;
+}
+
+.waiting-indicator {
+	width: 40px;
+	height: 40px;
+	margin: 0 auto;
+	background: url(../img/waiting.png) no-repeat center;
+	background-size: 40px 40px;
+}
+/************* indicators end *************/
+
+/************* common elements begin *************/
+.button-back {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: url(../img/icon_back.png) no-repeat center center;
+}
+
+.button-close {
+    position: absolute;
+    right: 0.08rem;
+    top: 0.08rem;
+    width: 0.24rem;
+    height: 0.24rem;
+    border: none;
+    background: no-repeat center;
+    background-image: var(--icon-close);
+    background-size: 100% 100%;
+}
+
+.button-close.light {
+    background-image: var(--icon-close-light);
+}
+
+.button-long {
+    width: 1.6rem;
+    height: 0.4rem;
+    line-height: 0.4rem;
+    padding: 0;
+    margin: 0 0.05rem;
+    color: #fec;
+    font-size: 0.14rem;
+    border: none;
+    background: no-repeat center;
+    background-image: var(--button-long);
+    background-size: 100% 100%;
+}
+
+.button-short {
+    width: 0.8rem;
+    height: 0.4rem;
+    line-height: 0.4rem;
+    padding: 0;
+    margin: 0 0.02rem;
+    color: #fec;
+    font-size: 0.14rem;
+    border: none;
+    background: no-repeat center;
+    background-image: var(--button-short);
+    background-size: 100% 100%;
+}
+
+.button-short.red {
+    background-image: var(--button-short-red);
+}
+
+.button-tiny-red {
+    width: 0.4rem;
+    height: 0.4rem;
+    line-height: 0.4rem;
+    padding: 0;
+    color: #fee;
+    font-size: 0.14rem;
+    border: none;
+    background: no-repeat center;
+    background-image: var(--button-tiny-red);
+    background-size: 100% 100%;
+}
+
+.long-input-box {
+    border: none;
+    width: 2.2rem;
+    height: 0.4rem;
+    padding: 0 0.1rem;
+    background: no-repeat center;
+    background-image: var(--long-input-box);
+    background-size: 100% 100%;
+}
+
+.checkbox {
+    width: 0.15rem;
+    height: 0.15rem;
+    padding: 0;
+    vertical-align: middle;
+    border: none;
+    background: no-repeat center;
+    background-image: var(--checkbox-unchecked);
+    background-size: 100% 100%;
+}
+
+.checked {
+    background-image: var(--checkbox-checked);
+}
+/************* common elements end *************/
+
+
+/************* popup window begin *************/
+#popup {
+}
+
+.popup-window {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, .4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.popup-box {
+    position: relative;
+    width: 2.6rem;
+    height: 2.0rem;
+    z-index: 10010;
+    background: no-repeat center;
+    background-image: var(--popup-box-back);
+    background-size: 100% 100%;
+}
+
+.popup-header {
+    height: 0.4rem;
+    text-align: center;
+    font-size: 0.2rem;
+    font-weight: 700;
+    line-height: 0.4rem;
+    vertical-align: middle;
+    color: #333;
+}
+
+.popup-body {
+    padding: 0 0.2rem;
+    color: #333;
+}
+
+.popup-footer {
+    position: absolute;
+    bottom: 0.05rem;
+    width: 100%;
+    text-align: center;
+}
+
+.popup-buttons {
+   margin: 0 auto;
+}
+
+.popup-button {
+    margin: 0.05rem;
+    vertical-align: bottom;
+}
+
+.popup-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, .5);
+}
+
+/* popup alert */
+#popup-alert .popup-box {
+    background-image: none;
+    background-color: #fff;
+    border-radius: 0.08rem;
+    border: 0.01rem solid #876;
+}
+
+#popup-alert .button-short {
+    background-image: none;
+    background-color: #658;
+    border-radius: 0.04rem;
+}
+
+/* popup object */
+#popup-object .popup-box {
+    background-image: var(--popup-object-back);
+}
+
+#popup-object .popup-body .icon-div {
+    text-align: center;
+}
+
+#popup-object .popup-body .icon {
+    width: 0.4rem;
+    height: 0.4rem;
+    margin: 0 auto;
+}
+
+/* popup dialogue */
+#popup-dialogue .popup-box {
+    background-image: var(--popup-dialogue-back);
+}
+
+#popup-get-objects .popup-body>p {
+    margin: 0.05rem;
+}
+
+/* popup get object */
+#popup-get-objects .obj-icon {
+    width: 0.3rem;
+    height: 0.3rem;
+    color: #555;
+    vertical-align: middle;
+    margin: 0 0.1rem;
+}
+
+#popup-get-objects .name,
+#popup-get-objects .number {
+    font-size: 0.16rem;
+    vertical-align: middle;
+}
+
+/* popup goods detail */
+#popup-goods .popup-box {
+    width: 2.6rem;
+    height: 3.0rem;
+    background-image: var(--popup-goods-back);
+}
+
+#popup-goods .goods-icon {
+    width: 0.4rem;
+    height: 0.4rem;
+    text-align: center;
+    margin: 0 auto;
+    background: no-repeat center;
+    background-image: var(--popup-goods-icon);
+    background-size: 100% 100%;
+}
+
+#popup-goods .icon-img {
+    width: 0.4rem;
+    height: 0.4rem;
+}
+
+#popup-goods .goods-price {
+    text-align: center;
+}
+
+#popup-goods .goods-desc {
+    padding-top: 0.1rem;
+}
+
+/************* popup window end *************/
+
+
+/************* login window begin *************/
+#login-window {
+    background: no-repeat center;
+    background-image: var(--login-background);
+    background-size: 100% 100%;
+}
+
+#login-window .upper {
+    width: 100%;
+    height: 40%;
+    padding-bottom: 1.2rem;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#login-window .game-title {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#login-window .title-text {
+    position: absolute;
+    width: 100%;
+    height: 0.4rem;
+    top: 50%;
+    line-height: 0.4rem;
+    margin-top: -0.2rem;
+    text-align: center;
+    color: #333;
+    font-size: 0.32rem;
+    font-weight: 700;
+}
+
+#login-window .login-box {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    width: 2.8rem;
+    height: 2.4rem;
+    margin-left: -1.4rem;
+    margin-top: -1.2rem;
+    background: no-repeat center;
+    background-image: var(--login-form);
+    background-size: 100% 100%;
+}
+
+#login-window .login-header {
+    padding: 0 5px;
+    text-align: center;
+}
+
+#login-window .login-form,
+#login-window .register-form {
+    width: 2.8rem;
+    height: 2.1rem;
+    bottom: 0;
+    padding: 0.1rem;
+}
+
+#login-window .login-header {
+    padding: 0;
+    float: left;
+}
+
+#login-window button.tab {
+    width: 0.6rem;
+    height: 0.33rem;
+    color: #988;
+    font-size: 0.16rem;
+    font-weight: 700;
+    border: none;
+    background: no-repeat bottom;
+    background-image: var(--login-tab-inactivate);
+    background-size: 0.6rem 0.33rem;
+}
+
+#login-window button.tab.activate {
+    color: #444;
+    background-image: var(--login-tab-activate);
+}
+
+#login-window .login-box td {
+    height: 0.4rem;
+    padding: 0;
+    text-align: center;
+}
+
+#login-window .long-input-box,
+#register-window .long-input-box {
+    margin: 0 auto;
+}
+
+#login-window .login-auto-login {
+    float: left;
+    height: 0.2rem;
+    line-height: 0.2rem;
+    padding-left: 0.1rem;
+}
+
+#login-window .text-auto-login {
+    color: #333;
+    vertical-align: middle;
+}
+
+#login-window .lower {
+    width: 100%;
+    height: 60%;
+    padding-top: 1.2rem;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#login-window .login-welcome {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0.4rem;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    color: #333;
+}
+/************* login window end *************/
+
+
+/************* account windows begin *************/
+#select-char-window,
+#new-char-window,
+#password-window {
+    background: no-repeat center;
+    background-image: var(--select-char-background);
+    background-size: 100% 100%;
+}
+
+#select-char-window .title-bar,
+#new-char-window .title-bar,
+#password-window .title-bar {
+    width: 100%;
+    height: 0.6rem;
+    line-height: 0.6rem;
+    color: #fec;
+    font-size: 0.24rem;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: middle;
+    background: no-repeat center;
+    background-image: var(--select-char-title);
+    background-size: 100% 100%;
+}
+
+#select-char-window .button-bar,
+#new-char-window .button-bar,
+#password-window .button-bar {
+    position: absolute;
+    width: 100%;
+    height: 0.6rem;
+    left: 0;
+    bottom: 0;
+    line-height: 0.5rem;
+    padding: 0.11rem 0.1rem 0.09rem 0.1rem;
+    background: no-repeat center;
+    background-image: var(--button-bar);
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+/************* account windows end *************/
+
+/************* select character window begin *************/
+#select-char-window {
+    position: relative;
+}
+
+#select-char-window .character-list {
+    margin: 0.4rem 0;
+    text-align: center;
+}
+
+#select-char-window .create-character {
+    color: #333;
+    font-size: 0.16rem;
+    font-weight: 700;
+}
+
+#select-char-window .character-item {
+    width: 2.5rem;
+    height: 0.6rem;
+    margin: 0.2rem auto;
+    padding-left: 0.2rem;
+    text-align: left;
+    vertical-align: middle;
+    line-height: 0.6rem;
+    color: #444;
+    font-size: 0.2rem;
+    background: no-repeat center;
+    background-image: var(--select-char-item);
+    background-size: 100% 100%;
+}
+
+#select-char-window .button-delete {
+    float: right;
+    margin: 0.1rem 0.05rem;
+}
+
+#select-char-window .new-character {
+    position: absolute;
+    width: 100%;
+    bottom: 0.7rem;
+    text-align: center;
+}
+
+/************* select character window end *************/
+
+
+/************* new character window begin *************/
+#new-char-window .char-attributes {
+    padding: 0.1rem 0.2rem;
+}
+
+#new-char-window .char-attributes p {
+    margin: 0.05rem;
+    color: #333;
+    font-weight: 700;
+}
+
+/************* new character window end *************/
+
+
+/************* password window begin *************/
+#password-window .reset-password {
+    padding: 0.2rem;
+    text-align: center;
+}
+/************* passwprd window end *************/
+
+
+/************* main game window begin *************/
+#game-window .contents {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#game-window .game-content-window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    box-sizing: inherit;
+    -moz-box-sizing: inherit;
+    -webkit-box-sizing: inherit;
+}
+/************* main game window end *************/
+
+/************* bar begin *************/
+#game-window .tab-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 0.6rem;
+    background: no-repeat center bottom;
+    background-image: var(--main-bottom-bar);
+    background-size: 100% 100%;
+    text-align: center;
+}
+
+#game-window .tab-bar .tab-bar-button {
+    display: inline-block;
+    width: 0.49rem;
+    height: 0.56rem;
+    line-height: 0.56rem;
+    margin: 0 0.1rem;
+    font-weight: 700;
+    font-size: 0.16rem;
+    color: #fea;
+    background: no-repeat center;
+    background-image: var(--main-bar-button);
+    background-size: 100% 100%;
+}
+
+#game-window .tab-bar .popup-menu {
+    position: absolute;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#game-window .tab-bar .popup-menu button {
+   margin: 0.01rem 0.02rem;
+}
+/************* tab bar end *************/
+
+
+/************* prompt bar begin *************/
+.title-bar {
+    position: relative;
+    width: 100%;
+    height: 0.6rem;
+    line-height: 0.4rem;
+    background: no-repeat center;
+    background-image: var(--title-bar);
+    background-size: 100% 100%;
+}
+
+.title-bar .icon-back {
+    position: absolute;
+    width: 0.56rem;
+    height: 0.56rem;
+    background: no-repeat center;
+    background-image: var(--title-icon-back);
+    background-size: 100% 100%;
+}
+
+.title-bar img.icon {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    left: 0;
+    top: 0;
+    padding: 0.03rem;
+}
+
+.title-bar .name {
+    position: absolute;
+    left: 0.6rem;
+    height: 0.4rem;
+    font-size: 0.18rem;
+    color: #fec;
+    vertical-align: text-bottom;
+}
+
+.title-bar .hp {
+    position: absolute;
+    width: 1.02rem;
+    height: 0.08rem;
+    left: 0.56rem;
+    top: 0.4rem;
+    background: no-repeat center;
+    background-image: var(--title-hp-back);
+    background-size: 100% 100%;
+}
+
+.title-bar .hp-number {
+    position: absolute;
+    width: 1.0rem;
+    height: 0.08rem;
+    left: 0;
+    top: -0.01rem;
+    text-align: center;
+    line-height: 0.08rem;
+    font-size: 0.08rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.title-bar .hp-bar {
+    position: absolute;
+    width: 1.0rem;
+    height: 0.06rem;
+    left: 0;
+    top: 0;
+    background: no-repeat left;
+    background-image: var(--title-hp-bar);
+    background-size: 1.0rem 0.06rem;
+}
+
+.title-bar .value {
+    float: right;
+    height: 0.4rem;
+    padding: 0 0.1rem;
+    vertical-align: text-bottom;
+}
+
+.title-bar .value>span {
+    padding: 0 0.02rem;
+    font-size: 0.13rem;
+    color: #ddd;
+    font-weight: 700;
+    vertical-align: text-bottom;
+}
+/************* prompt bar end *************/
+
+/************* scene window begin *************/
+#scene-window {
+    background: no-repeat center;
+    background-image: var(--main-background);
+    background-size: 100% 100%;
+}
+
+#scene-window .scene-contents {
+    width: 100%;
+    height: 3.0rem;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#scene-window .scene-view {
+    width: 100%;
+    height: 1.5rem;
+}
+
+#scene-window .scene-name {
+    width: 100%;
+    height: 0.25rem;
+    line-height: 0.25rem;
+    color: #eeb;
+    font-size: 0.13rem;
+    font-weight: 700;
+    text-align: center;
+    background: no-repeat center;
+    background-image: var(--main-scene-name);
+    background-size: 100% 100%;
+}
+
+#scene-window .scene-desc {
+    width: 100%;
+    padding: 0.05rem 0.2rem;
+    color: #333;
+    font-size: 0.13rem;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#scene-window .scene-commands,
+#scene-window .scene-objects,
+#scene-window .scene-npcs,
+#scene-window .scene-players {
+    padding: 0 0.2rem;
+}
+
+#scene-window .scene-button {
+    display: inline-block;
+    min-width: 0.55rem;
+    height: 0.25rem;
+    padding: 0 0.04rem;
+    margin: 0.01rem 0.05rem;
+    line-height: 0.25rem;
+    text-align: center;
+    font-size: 0.12rem;
+    font-weight: 700;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#scene-window .object-button.object {
+    color: #eee;
+    background-image: var(--main-object-button);
+}
+
+#scene-window .object-button.npc {
+    color: #eee;
+    background-image: var(--main-npc-button);
+}
+
+#scene-window .object-button.player {
+    color: #eee;
+    background-image: var(--main-player-button);
+}
+
+#scene-window .scene-exits {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    background: no-repeat center;
+    background-image: var(--main-scene-exits);
+    background-size: 100% 100%;
+}
+
+#scene-window .exits-block {
+    position: relative;
+    width: 2.7rem;
+    height: 1.5rem;
+    padding: 0.05rem 0;
+    margin: 0 auto;
+}
+
+#scene-window .exits-table {
+    position: absolute;
+    z-index: 1;
+    border-spacing: 0;
+}
+
+#scene-window .exits-table td {
+    width: 0.9rem;
+    height: 0.5rem;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#scene-window .exits-table p {
+    margin: 0;
+    padding: 0 0.05rem;
+}
+
+#scene-window .cell-left {
+    text-align: right;
+}
+
+#scene-window .cell-center {
+    text-align: center;
+}
+
+#scene-window .cell-right {
+    text-align: left;
+}
+
+#scene-window .cell-top {
+    vertical-align: bottom;
+}
+
+#scene-window .cell-middle {
+    vertical-align: middle;
+}
+
+#scene-window .cell-bottom {
+    vertical-align: top;
+}
+
+#scene-window .exit-button {
+    display: inline-block;
+    min-width: 0.55rem;
+    height: 0.25rem;
+    padding: 0 0.04rem;
+    margin: 0.01rem 0.05rem;
+    line-height: 0.25rem;
+    text-align: center;
+    color: #333;
+    font-size: 0.12rem;
+    background: no-repeat center;
+    background-image: var(--main-exit-button);
+    background-size: 100% 100%;
+}
+
+#scene-window .exit-center {
+    display: inline-block;
+    min-width: 0.55rem;
+    height: 0.25rem;
+    padding: 0 0.04rem;
+    margin: 0.01rem 0.05rem;
+    line-height: 0.25rem;
+    text-align: center;
+    color: #fff;
+    font-size: 0.12rem;
+    font-weight: 700;
+    background: no-repeat center;
+    background-image: var(--main-exit-center);
+    background-size: 100% 100%;
+}
+
+#exits-svg {
+    width: 100%;
+    height: 100%;
+}
+/************* scene window end *************/
+
+
+/************* message window begin *************/
+#scene-window .message-window {
+    position: absolute;
+    width: 100%;
+    top: 3.6rem;
+    bottom: 0.6rem;;
+    padding: 0.1rem 0.2rem;
+    color: #333;
+}
+
+#scene-window .message-list {
+    height: 100%;
+    font-size: 0.12rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+/************* message window end *************/
+
+
+/************* character data window begin *************/
+#char-data-window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background: no-repeat center;
+    background-image: var(--character-background);
+    background-size: 100% 100%;
+}
+
+#char-data-window .title-bar {
+    position: relative;
+    width: 100%;
+    height: 0.6rem;
+    line-height: 0.4rem;
+    color: #fec;
+    font-size: 0.2rem;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: text-bottom;
+    background: no-repeat center;
+    background-image: var(--character-title-bar);
+    background-size: 100% 100%;
+}
+
+#char-data-window .title-bar .icon-back {
+    position: absolute;
+    width: 0.56rem;
+    height: 0.56rem;
+    background: no-repeat center;
+    background-image: var(--character-title-icon-back);
+    background-size: 100% 100%;
+}
+
+#char-data-window .title-bar img.icon {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    left: 0;
+    top: 0;
+    padding: 0.03rem;
+}
+
+#char-data-window .title-bar .name {
+    position: absolute;
+    left: 0.6rem;
+    font-size: 0.18rem;
+    font-weight: 400;
+    color: #fec;
+    vertical-align: text-bottom;
+}
+
+#char-data-window .equipments {
+    position: relative;
+    width: 100%;
+    height: 2.5rem;
+    text-align: center;
+}
+
+#char-data-window .equipments-body {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1.6rem;
+    height: 2.4rem;
+    margin-left: -0.8rem;
+    background: no-repeat center;
+    background-image: var(--character-equipments-body);
+    background-size: 100% 100%;
+}
+
+#char-data-window .equipments .equipments-row {
+    width: 100%;
+    height: 0.48rem;
+}
+
+#char-data-window .equipments .position-left {
+    float: left
+}
+
+#char-data-window .equipments .position-right {
+    float: right;
+}
+
+#char-data-window .equipments .equipment-block {
+    position: relative;
+    width: 0.44rem;
+    height: 0.44rem;
+    margin: 0.02rem 0.1rem;
+    line-height: 0.44rem;
+    vertical-align: middle;
+    background: no-repeat center;
+    background-image: var(--character-equipment-icon-back);
+    background-size: 100% 100%;
+}
+
+#char-data-window .equipments .position-name {
+    font-size: 0.18rem;
+    color: #777;
+}
+
+#char-data-window .equipments .icon {
+    width: 0.4rem;
+    height: 0.4rem;
+    margin: 0.02rem;
+}
+
+#char-data-window .equipments .name {
+    position: absolute;
+    bottom: 0.03rem;
+    width: 100%;
+    height: 0.12rem;
+    line-height: 0.12rem;
+    color: #000;
+    font-size: 0.1rem;
+}
+
+#char-data-window .char-data {
+    position: absolute;
+    width: 100%;
+    top: 3.1rem;
+    bottom: 0rem;
+    padding: 0.1rem 0.2rem;
+    font-size: 0.14rem;
+    text-align: left;
+    color: #434;
+    background: no-repeat center;
+    background-image: var(--character-data-back);
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#char-data-window .data-table {
+    width: 100%;
+}
+/************* character data window end *************/
+
+
+/************* accessibility windows begin *************/
+#inventory-window,
+#skills-window,
+#quests-window,
+#shop-window,
+#map-window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#inventory-window .title-bar,
+#skills-window .title-bar,
+#quests-window .title-bar,
+#shop-window .title-bar,
+#map-window .title-bar {
+    position: relative;
+    width: 100%;
+    height: 0.4rem;
+    line-height: 0.4rem;
+    color: #fec;
+    font-size: 0.2rem;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: text-bottom;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#inventory-window .inventory-block,
+#skills-window .skills-block,
+#quests-window .quests-block {
+    width: 100%;
+    height: 100%;
+    padding: 0.1rem 0.1rem 2.9rem 0.1rem;
+    text-align: center;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#inventory-window .inventory-list,
+#skills-window .skills-list,
+#quests-window .quests-list {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    text-align: left;
+}
+
+#inventory-window .inventory-item,
+#inventory-window .item-info-left .icon,
+#skills-window .skill-info-left .icon {
+    position: relative;
+    width: 0.4rem;
+    height: 0.4rem;
+    line-height: 0.4rem;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#inventory-window .inventory-item .icon-image,
+#inventory-window .item-info-left .icon-image,
+#skills-window .skill-info-left .icon-image {
+    width: 0.4rem;
+    height: 0.4rem;
+}
+
+#inventory-window .item-info-block,
+#skills-window .skill-info-block,
+#quests-window .quest-info-block {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2.4rem;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#inventory-window .item-info,
+#skills-window .skill-info,
+#quests-window .quest-info {
+    width: 100%;
+    height: 100%;
+    text-align: left;
+}
+
+#inventory-window .item-info-left,
+#skills-window .skill-info-left {
+    float: left;
+    width: 0.8rem;
+    height: 100%;
+    padding: 0.1rem;
+    text-align: center;
+    background: no-repeat center;
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#inventory-window .item-info-right,
+#skills-window .skill-info-right {
+    height: 100%;
+    padding: 0.1rem;
+    margin-left: 0.8rem;
+}
+
+#inventory-window .item-info-left .icon,
+#skills-window .skill-info-left .icon {
+    margin: 0 auto 0.1rem auto;
+}
+
+#inventory-window .item-info .button,
+#skills-window .skill-info .button,
+#quests-window .quest-info .button {
+    width: 0.6rem;
+    height: 0.3rem;
+    line-height: 0.3rem;
+    font-size: 0.12rem;
+    margin: 0.05rem auto;
+    color: #fec;
+    background: no-repeat center;
+    background-size: 100% 100%;
+}
+
+#inventory-window .item-info .name,
+#skills-window .skill-info .name,
+#quests-window .quest-info .name {
+    width: 100%;
+    font-size: 0.13rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.05rem;
+}
+
+#inventory-window .item-info .desc,
+#skills-window .skill-info .desc,
+#quests-window .quest-info .desc {
+    width: 100%;
+    font-size: 0.13rem;
+    color: #333;
+}
+/************* accessibility windows end *************/
+
+
+/************* inventory window begin *************/
+#inventory-window {
+    background-image: var(--inventory-background);
+}
+
+#inventory-window .title-bar {
+    background-image: var(--inventory-title-bar);
+}
+
+#inventory-window .inventory-item {
+    display: inline-block;
+    margin: 0.04rem;
+    background-image: var(--inventory-default-icon);
+}
+
+#inventory-window .inventory-item .name {
+    position: absolute;
+    width: 100%;
+    bottom: 0.01rem;
+    color: #fff;
+    line-height: 0.12rem;
+    font-size: 0.10rem;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+#inventory-window .inventory-item .equipped {
+    position: absolute;
+    top: 0;
+    right: 0.02rem;
+    color: #fec;
+    line-height: 0.14rem;
+    font-size: 0.12rem;
+    font-weight: 700;
+}
+
+#inventory-window .inventory-item .number {
+    position: absolute;
+    top: 0;
+    left: 0.02rem;
+    color: #fff;
+    line-height: 0.14rem;
+    font-size: 0.12rem;
+    font-weight: 700;
+}
+
+#inventory-window .item-info-block {
+    background-image: var(--inventory-item-info-back);
+}
+
+#inventory-window .item-info-left {
+    background-image: var(--inventory-item-info-left-back);
+}
+
+#inventory-window .item-info-left .icon {
+    background-image: var(--inventory-default-icon);
+}
+
+#inventory-window .item-info-left .button {
+    background-image: var(--inventory-item-button);
+}
+
+#inventory-window .item-info-right .name {
+    font-size: 0.14rem;
+    font-weight: 700;
+}
+
+#inventory-window .item-info-right .number {
+    color: #555;
+    font-size: 0.14rem;
+    font-weight: 700;
+}
+
+#inventory-window .item-info-right .equipped {
+    color: #822;
+    font-size: 0.12rem;
+    font-weight: 700;
+    margin-left: 0.05rem;
+}
+
+/************* inventory window end *************/
+
+
+/************* skills window begin *************/
+#skills-window {
+    background-image: var(--skills-background);
+}
+
+#skills-window .title-bar {
+    background-image: var(--skills-title-bar);
+}
+
+#skills-window .skill-item {
+    display: inline-block;
+    width: 50%;
+    height: 0.54rem;
+    padding: 0.05rem;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#skills-window .skill-item .icon {
+    position: relative;
+    float: left;
+    width: 0.44rem;
+    height: 0.44rem;
+    line-height: 0.44rem;
+    background: no-repeat center;
+    background-image: var(--skill-icon-back);
+    background-size: 100% 100%;
+}
+
+#skills-window .skill-item .icon-image {
+    width: 0.4rem;
+    height: 0.4rem;
+    margin: 0.02rem;
+}
+
+#skills-window .skill-item .info {
+    height: 100%;
+    padding: 0.01rem 0 0.01rem 0.05rem;
+    margin-left: 0.44rem;
+}
+
+#skills-window .skill-item .name {
+    line-height: 0.14rem;
+    color: #333;
+    font-size: 0.14rem;
+    font-weight: 700;
+}
+
+#skills-window .skill-item .passive {
+    line-height: 0.14rem;
+    color: #2a3;
+    font-size: 0.12rem;
+}
+
+#skills-window .skill-info-left .icon{
+    background-image: var(--skill-info-icon-back);
+}
+
+#skills-window .skill-info .button {
+    background-image: var(--skill-item-button);
+}
+
+#skills-window .skill-info-block {
+    background-image: var(--skill-info-back);
+}
+
+#skills-window .skill-info-left {
+    background-image: var(--skill-info-left-back);
+}
+
+#skills-window .skill-info-right .passive {
+    color: #182;
+    font-size: 0.12rem;
+    font-weight: 700;
+    margin-left: 0.05rem;
+}
+/************* skills window end *************/
+
+
+/************* quests window begin *************/
+#quests-window {
+    background-image: var(--quests-background);
+}
+
+#quests-window .title-bar {
+    background-image: var(--quests-title-bar);
+}
+
+#quests-window .quest-item {
+    width: 100%;
+    padding: 0.05rem;
+    margin-bottom: 0.06rem;
+    background: no-repeat center;
+    background-image: var(--quest-item-back);
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#quests-window .quest-item .name {
+    line-height: 0.14rem;
+    color: #333;
+    font-size: 0.14rem;
+    font-weight: 700;
+    padding: 0.05rem 0;
+}
+
+#quests-window .quest-item .desc {
+    line-height: 0.12rem;
+    color: #048;
+    font-size: 0.12rem;
+    margin-bottom: 0.06rem;
+}
+
+#quests-window .quest-item .objective-title,
+#quests-window .quest-info .objective-title {
+    float: left;
+    line-height: 0.12rem;
+    color: #048;
+    font-size: 0.11rem;
+}
+
+#quests-window .quest-item .objective-list,
+#quests-window .quest-info .objective-list {
+    margin-left: 0.4rem;
+    line-height: 0.12rem;
+    color: #048;
+    font-size: 0.11rem;
+}
+
+#quests-window .quest-item .objective,
+#quests-window .quest-info .objective {
+    margin: 0 0.2rem 0 0;
+}
+
+#quests-window .quest-info .button {
+    background-image: var(--quest-item-button);
+}
+
+#quests-window .quest-info-block {
+    padding: 0.1rem;
+    background-image: var(--quest-info-back);
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#quests-window .quest-info .desc {
+    margin-bottom: 0.06rem;
+}
+
+#quests-window .quest-info .buttons {
+    margin-top: 0.1rem;
+    text-align: center;
+}
+/************* quests window end *************/
+
+
+/************* map window begin *************/
+#map-window {
+    background-image: var(--map-background);
+}
+
+#map-window .title-bar {
+    background-image: var(--map-title-bar);
+}
+
+#map-window .map-body {
+    width: 100%;
+    height: 100%;
+    padding: 0.05rem 0.05rem 1.05rem 0.05rem;
+    background-color: #a76;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#map-window #map-svg {
+    width: 100%;
+    height: 100%;
+}
+/************* map window end *************/
+
+
+/************* combat window begin *************/
+#combat-window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background: no-repeat center;
+    background-image: var(--combat-background);
+    background-size: 100% 100%;
+}
+
+#combat-window .title-bar {
+    position: relative;
+    width: 100%;
+    height: 0.6rem;
+    line-height: 0.4rem;
+    color: #fec;
+    font-size: 0.2rem;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: text-bottom;
+    background: no-repeat center;
+    background-image: var(--combat-title-bar);
+    background-size: 100% 100%;
+}
+
+#combat-window .desc {
+    width: 100%;
+    height: 0.58rem;
+    padding: 0.05rem 0.2rem 0.05rem 0.2rem;
+    font-size: 0.12rem;
+    line-height: 0.16rem;
+    text-align: left;
+    color: #443;
+    background: no-repeat center;
+    background-image: var(--combat-desc);
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#combat-window .characters {
+    position: relative;
+	min-height: 1.0rem;
+}
+
+#combat-window .character {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    padding: 0;
+    text-align: center;
+    line-height: 1.2em;
+}
+
+#combat-window .teammate {
+    left: 12%;
+}
+
+#combat-window .enemy {
+    right: 12%;
+}
+
+#combat-window .character-hp {
+    position: relative;
+    width: 0.42rem;
+    height: 0.05rem;
+    margin: 0 auto;
+    background: no-repeat center;
+    background-image: var(--combat-hp-back);
+    background-size: 100% 100%;
+}
+
+#combat-window .character-hp-number {
+    position: absolute;
+    width: 0.42rem;
+    height: 0.05rem;
+    left: 0rem;
+    top: 0rem;
+    text-align: center;
+    line-height: 0.08rem;
+    font-size: 0.08rem;
+    color: #fff;
+}
+
+#combat-window .character-hp-bar {
+    position: absolute;
+    width: 0.4rem;
+    height: 0.03rem;
+    left: 0.01rem;
+    top: 0.01rem;
+    background: no-repeat left;
+    background-image: var(--combat-hp-bar);
+    background-size: 0.4rem 0.06rem;
+}
+
+#combat-window .character-icon {
+    width: 0.34rem;
+    height: 0.34rem;
+    margin: 0.01rem auto;
+    background: no-repeat center;
+    background-image: var(--combat-character-icon);
+    background-size: 100% 100%;
+}
+
+#combat-window .icon-img {
+	width: 0.3rem;
+	height: 0.3rem;
+	margin: 0.02rem;
+}
+
+#combat-window .character-name {
+	width: 100%;
+	height: 0.14rem;
+	line-height: 0.14rem;
+	font-size: 0.12rem;
+}
+
+#combat-window .teammate .character-name {
+    color: #333;
+}
+
+#combat-window .enemy .character-name {
+    color: #a00;
+}
+
+#combat-window .messages {
+    position: absolute;
+    width: 100%;
+	height: 1.5rem;
+	left: 0;
+	bottom: 0.9rem;
+	padding: 0.05rem 0.2rem;
+	background: no-repeat center;
+    background-image: var(--combat-messages);
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#combat-window .message-list {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+	font-size: 0.12rem;
+	line-height: 0.14rem;
+	color: #433;
+    text-align: left;
+}
+
+#combat-window .tab-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 0.6rem;
+    background: no-repeat center bottom;
+    background-image: var(--combat-bottom-bar);
+    background-size: 100% 100%;
+    text-align: center;
+}
+
+#combat-window .skill-list {
+    margin: 0.1rem auto;
+}
+
+#combat-window .tab-bar .skill-button {
+    display: inline-block;
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin: 0.02rem 0.05rem;
+    font-weight: 700;
+    font-size: 0.1rem;
+    color: #fea;
+    white-space:nowrap;
+}
+
+#combat-window .skill-icon {
+	width: 0.4rem;
+	height: 0.4rem;
+	margin: 0.02rem;
+}
+
+#combat-window .skill-button div.cooldown {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #600;
+    opacity: 0.5;
+}
+
+#combat-window .skill-name {
+    position: absolute;
+    width: 100%;
+    bottom: 0.03rem;
+    text-align: center;
+}
+
+/************* combat window end *************/
+
+
+/************* combat result begin *************/
+#combat-window .combat-result {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    text-align: center;
+    z-index: 1;
+    color: #333;
+    background: no-repeat center;
+    background-image: var(--combat-result-background);
+    background-size: 100% 100%;
+}
+
+#combat-window .combat-result .title-bar {
+    position: relative;
+    width: 100%;
+    height: 0.6rem;
+    line-height: 0.4rem;
+    color: #fec;
+    font-size: 0.2rem;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: text-bottom;
+    background: no-repeat center;
+    background-image: var(--combat-result-title-bar);
+    background-size: 100% 100%;
+}
+
+#combat-window .combat-result .result-content {
+    padding: 0.1rem 0.2rem;
+}
+
+#combat-window .combat-result .result-exp-block,
+#combat-window .combat-result .result-accepted,
+#combat-window .combat-result .result-rejected {
+    margin: 0.2rem 0;
+    color: #333;
+}
+
+#combat-window .combat-result .result-title {
+    font-size: 0.16rem;
+    font-weight: 700;
+}
+
+#combat-window .combat-result .result-accepted-list>p,
+#combat-window .combat-result .result-rejected-list>p {
+    margin: 0.05rem;
+}
+
+#combat-window .combat-result .result-exp {
+    font-weight: 400;
+    color: #555;
+    font-size: 0.16rem;
+}
+
+#combat-window .combat-result .result-accepted-list,
+#combat-window .combat-result .result-rejected-list {
+    color: #555;
+}
+
+#combat-window .combat-result .obj-icon {
+    width: 0.3rem;
+    height: 0.3rem;
+    vertical-align: middle;
+    margin: 0 0.1rem;
+}
+
+#combat-window .combat-result .name,
+#combat-window .combat-result .number {
+    font-size: 0.16rem;
+    vertical-align: middle;
+}
+
+#combat-window .combat-result .button-ok {
+    margin: 0.2rem auto;
+}
+
+/************* combat result window end *************/
+
+
+/************* shop window begin *************/
+#shop-window {
+    background-image: var(--shop-background);
+}
+
+#shop-window .title-bar {
+    background-image: var(--shop-title-bar);
+}
+
+#shop-window .shop-desc {
+    position: relative;
+    width: 100%;
+    height: 0.6rem;
+    color: #333;
+    padding: 0.1rem 0.2rem;
+    font-size: 0.14rem;
+    text-align: left;
+    background: no-repeat center;
+    background-image: var(--shop-desc);
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#shop-window .shop-icon {
+    position: absolute;
+    width: 0.4rem;
+    height: 0.4rem;
+    left: 0.2rem;
+    top: 0.1rem;
+    background: no-repeat center;
+    background-image: var(--shop-default-icon);
+    background-size: 100% 100%;
+}
+
+#shop-window .shop-icon-img {
+    width: 0.4rem;
+    height: 0.4rem;
+}
+
+#shop-window .desc-content {
+    position: absolute;
+    width: 100%;
+    height: 0.4rem;
+    left: 0.7rem;
+    top: 0.1rem;
+    overflow-y: hidden;
+}
+
+#shop-window .goods-list {
+    height: 100%;
+    padding: 0.1rem 0.1rem 1.7rem 0.1rem;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#shop-window .goods {
+    width: 2.8rem;
+    height: 0.6rem;
+    line-height: 0.4rem;
+    margin: 0.05rem auto;
+    padding: 0.1rem 0.1rem;
+    background: no-repeat center;
+    background-image: var(--shop-goods);
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#shop-window .goods-icon,
+#shop-window .goods-name,
+#shop-window .goods-price {
+    display: inline-block;
+    color: #333;
+    font-size: 0.14rem;
+    vertical-align: middle;
+}
+
+#shop-window .goods-icon {
+    width: 0.4rem;
+    height: 0.4rem;
+    float: left;
+}
+
+#shop-window .goods .icon-image {
+    width: 0.4rem;
+    height: 0.4rem;
+}
+
+#shop-window .goods .goods-name {
+    float: left;
+    padding-left: 0.1rem;
+}
+
+#shop-window .goods .goods-price {
+    float: right;
+    padding-right: 0.1rem;
+}
+
+/************* shop window end *************/

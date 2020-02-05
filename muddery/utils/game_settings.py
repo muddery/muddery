@@ -64,18 +64,6 @@ class GameSettings(object):
         """
         return self.values
 
-    def get_client_settings(self):
-        """
-        Get settings for the webclient.
-
-        Returns:
-            (dict) settings
-        """
-        client_settings = {"language": settings.LANGUAGE_CODE,
-                           "game_name": self.get("game_name"),
-                           "solo_mode": self.get("solo_mode"),}
-        return client_settings
-
 
 GAME_SETTINGS = GameSettings({"game_name": "Muddery",
                               "connection_screen": "",
@@ -84,7 +72,6 @@ GAME_SETTINGS = GameSettings({"game_name": "Muddery",
                               "auto_cast_skill_cd": 1.5,
                               "can_give_up_quests": True,
                               "can_close_dialogue": False,
-                              "single_dialogue_sentence": False,
                               "auto_resume_dialogues": True,
                               "default_home_key": True,
                               "start_location_key": True,

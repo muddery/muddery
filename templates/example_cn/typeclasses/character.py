@@ -116,7 +116,7 @@ class Character(MudderyCharacter):
         """
         return self.prop.give_exp
 
-    def add_exp(self, exp, combat=False):
+    def add_exp(self, exp):
         """
         Add character's exp.
         Args:
@@ -125,7 +125,7 @@ class Character(MudderyCharacter):
         Returns:
             None
         """
-        super(Character, self).add_exp(exp, combat)
+        super(Character, self).add_exp(exp)
 
         self.prop.exp += exp
         while self.prop.exp >= self.prop.max_exp:
