@@ -1608,6 +1608,7 @@ MudderyGame.prototype.hidePopupMenus = function(element) {
  */
 MudderyGame.prototype.showShop = function(data) {
 	mud.main_frame.doClosePopupBox();
+	mud.shop_window.reset();
 	mud.shop_window.setShop(data);
 	this.showWindow(mud.shop_window);
 }
@@ -3805,11 +3806,9 @@ MudderyShop.prototype.onClickGoods = function(element) {
  * Reset the shop
  */
 MudderyShop.prototype.reset = function() {
-	this.select(".header-text").html("Shop");
-    this.select(".shop-icon-img")
-        .attr("src", "")
-        .hide();
-    this.select(".shop-desc").html("");
+	this.select(".header-text").html(core.trans("Shop"));
+    this.select(".shop-icon-img").hide();
+    this.select(".desc-content").html("");
     this.select(".goods-list").empty();
 }
 

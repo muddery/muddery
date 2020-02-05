@@ -170,4 +170,5 @@ MudderyLocalDict = {
     "Please create a character.": "请创建一个角色",
     "Can not connect to the server.": "无法连接到服务器。",
     "Password does not match.": "密码输入不符",
+    "Shop": "商店",
 };

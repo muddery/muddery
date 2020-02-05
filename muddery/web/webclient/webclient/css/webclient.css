@@ -12,11 +12,12 @@
     --long-input-box: url(../img/long_input_box.png);
 
     --icon-close: url(../img/icon_close.png);
+    --icon-close-light: url(../img/icon_close_light.png);
     --popup-box-back: url(../img/popup_box_back.png);
     --popup-object-back: url(../img/popup_object_back.png);
     --popup-dialogue-back: url(../img/popup_object_back.png);
     --popup-goods-back: url(../img/popup_goods_back.png);
-    --popup-goods-icon-back: url(../img/popup_goods_icon_back.png);
+    --popup-goods-icon: url(../img/icon_default_middle.png);
 
     --login-background: url(../img/login_background.png);
     --login-form: url(../img/login_form.png);
@@ -203,6 +204,10 @@ body {
     background: no-repeat center;
     background-image: var(--icon-close);
     background-size: 100% 100%;
+}
+
+.button-close.light {
+    background-image: var(--icon-close-light);
 }
 
 .button-long {
@@ -411,7 +416,7 @@ body {
     text-align: center;
     margin: 0 auto;
     background: no-repeat center;
-    background-image: var(--popup-goods-icon-back);
+    background-image: var(--popup-goods-icon);
     background-size: 100% 100%;
 }
 
