@@ -21,7 +21,7 @@ import pickle
 from distutils.version import LooseVersion
 from argparse import ArgumentParser
 import argparse
-from subprocess import Popen, check_output, call, CalledProcessError, STDOUT
+from subprocess import Popen, check_output, call, CalledProcessError, STDOUT, PIPE
 
 from twisted.protocols import amp
 from twisted.internet import reactor, endpoints
@@ -811,6 +811,22 @@ def start_evennia(pprofiler=False, sprofiler=False):
 
     """
     portal_cmd, server_cmd = _get_twistd_cmdline(pprofiler, sprofiler)
+    portal_process = None
+
+    def _portal_error(portal_running, server_running):
+        print("Connection to Evennia timed out. Try again.")
+        _reactor_stop()
+
+        global portal_process
+        if portal_process:
+            if portal_process.poll() is not None:
+                # The process stopped.
+                if portal_process.stdout:
+                    for line in portal_process.stdout.readlines():
+                        print(line.decode(), end="")
+                if portal_process.stderr:
+                    for line in portal_process.stderr.readlines():
+                        print(line.decode(), end="")
 
     def _fail(fail):
         print(fail)
@@ -844,17 +860,20 @@ def start_evennia(pprofiler=False, sprofiler=False):
 
     def _portal_not_running(fail):
         print("Portal starting {}...".format("(under cProfile)" if pprofiler else ""))
+
+        global portal_process
         try:
             if _is_windows():
                 # Windows requires special care
                 create_no_window = 0x08000000
-                Popen(portal_cmd, env=getenv(), bufsize=-1, creationflags=create_no_window)
+                portal_process = Popen(portal_cmd, env=getenv(), bufsize=-1, creationflags=create_no_window, stdout=PIPE)
             else:
-                Popen(portal_cmd, env=getenv(), bufsize=-1)
+                portal_process = Popen(portal_cmd, env=getenv(), bufsize=-1, stdout=PIPE)
+
         except Exception as e:
             print(PROCESS_ERROR.format(component="Portal", traceback=e))
             _reactor_stop()
-        wait_for_status(True, None, _portal_started)
+        wait_for_status(True, None, _portal_started, _portal_error)
 
     collectstatic()
     send_instruction(PSTATUS, None, _portal_running, _portal_not_running)
@@ -1790,53 +1809,6 @@ def init_game_directory(path, check_db=True, need_gamedir=True):
         )
         print(ERROR_LOGDIR_MISSING.format(logfiles=errstr))
         sys.exit()
-
-    if _is_windows():
-        # We need to handle Windows twisted separately. We create a
-        # batchfile in game/server, linking to the actual binary
-
-        global TWISTED_BINARY
-        # Windows requires us to use the absolute path for the bat file.
-        server_path = os.path.dirname(os.path.abspath(__file__))
-        TWISTED_BINARY = os.path.join(server_path, "twistd.bat")
-
-        # add path so system can find the batfile
-        sys.path.insert(1, os.path.join(GAMEDIR, SERVERDIR))
-
-        try:
-            importlib.import_module("win32api")
-        except ImportError:
-            print(ERROR_WINDOWS_WIN32API)
-            sys.exit()
-
-        batpath = os.path.join(EVENNIA_SERVER, TWISTED_BINARY)
-        if not os.path.exists(batpath):
-            # Test for executable twisted batch file. This calls the
-            # twistd.py executable that is usually not found on the
-            # path in Windows.  It's not enough to locate
-            # scripts.twistd, what we want is the executable script
-            # C:\PythonXX/Scripts/twistd.py. Alas we cannot hardcode
-            # this location since we don't know if user has Python in
-            # a non-standard location. So we try to figure it out.
-            twistd = importlib.import_module("twisted.scripts.twistd")
-            twistd_dir = os.path.dirname(twistd.__file__)
-
-            # note that we hope the twistd package won't change here, since we
-            # try to get to the executable by relative path.
-            # Update: In 2016, it seems Twisted 16 has changed the name of
-            # of its executable from 'twistd.py' to 'twistd.exe'.
-            twistd_path = os.path.abspath(
-                os.path.join(
-                    twistd_dir, os.pardir, os.pardir, os.pardir, os.pardir, "scripts", "twistd.exe"
-                )
-            )
-
-            with open(batpath, "w") as bat_file:
-                # build a custom bat file for windows
-                bat_file.write('@"%s" %%*' % twistd_path)
-
-            print(INFO_WINDOWS_BATFILE.format(twistd_path=twistd_path))
-
 
 def run_dummyrunner(number_of_dummies):
     """

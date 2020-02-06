@@ -301,7 +301,10 @@ def main():
             return
 
         # pass-through to evennia
-        evennia_launcher.main()
+        try:
+            evennia_launcher.main()
+        except Exception as e:
+            traceback.print_exc()
 
         if option == "start":
             # Collect static files.
