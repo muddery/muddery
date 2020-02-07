@@ -866,9 +866,18 @@ def start_evennia(pprofiler=False, sprofiler=False):
             if _is_windows():
                 # Windows requires special care
                 create_no_window = 0x08000000
-                portal_process = Popen(portal_cmd, env=getenv(), bufsize=-1, creationflags=create_no_window, stdout=PIPE)
+                portal_process = Popen(portal_cmd,
+                                       env=getenv(),
+                                       bufsize=-1,
+                                       creationflags=create_no_window,
+                                       stdout=PIPE,
+                                       stderr=PIPE)
             else:
-                portal_process = Popen(portal_cmd, env=getenv(), bufsize=-1, stdout=PIPE)
+                portal_process = Popen(portal_cmd,
+                                       env=getenv(),
+                                       bufsize=-1,
+                                       stdout=PIPE,
+                                       stderr=PIPE)
 
         except Exception as e:
             print(PROCESS_ERROR.format(component="Portal", traceback=e))
