@@ -45,7 +45,7 @@ class TypeclassSet(object):
                 if ext != ".py":
                     continue
 
-                with open(os.path.join(root, filename), "r") as fp:
+                with open(os.path.join(root, filename), "r", encoding="utf-8") as fp:
                     class_name = ""
                     for line in fp.readlines():
                         if not class_name:
