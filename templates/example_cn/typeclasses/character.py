@@ -26,6 +26,8 @@ class Character(MudderyCharacter):
         """
         Set default mutable custom properties.
         """
+        super(Character, self).set_default_custom_properties()
+
         if not self.custom_properties_handler.has("exp"):
             self.prop.exp = 0
 

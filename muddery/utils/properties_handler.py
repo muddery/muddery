@@ -48,7 +48,7 @@ class PropertiesHandler(object):
             the value of the Data.
         """
         if key not in self._store:
-            raise AttributeError
+            raise AttributeError('"%s" does not exist. Please add it to the PROPERTIES_DICT。' % key)
         return self._store.get(key)
 
     def add(self, key, value):
