@@ -410,13 +410,18 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # default objects
         object_records = DEFAULT_OBJECTS.filter(model_name)
 
-        default_object_ids = set([record.object for record in object_records])
-
         # add new default objects
+        obj_list = []
         for object_record in object_records:
             if not self.search_inventory(object_record.object):
-                obj_list = [{"object": object_record.object, "number": object_record.number}]
-                self.receive_objects(obj_list, mute=True)
+                obj_list.append({
+                    "object": object_record.object,
+                    "level": object_record.level,
+                    "number": object_record.number,
+                })
+
+        if obj_list:
+            self.receive_objects(obj_list, mute=True)
 
     def receive_objects(self, obj_list, mute=False):
         """
@@ -433,6 +438,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             [{
                 "key": key,
                 "name": name,
+                "level": level,
                 "number": number,
                 "icon": icon,
                 "reject": reason,
@@ -454,6 +460,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         for obj in obj_list:
             key = obj["object"]
+            level = obj.get("level")
             available = obj["number"]
             name = ""
             icon = ""
@@ -485,7 +492,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     continue
 
                 # create a new content
-                new_obj = build_object(key)
+                new_obj = build_object(key, level=level)
                 if not new_obj:
                     reject = _("Can not get %s.") % key
                 else:
@@ -523,7 +530,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                         break
 
                     # create a new content
-                    new_obj = build_object(key)
+                    new_obj = build_object(key, level=level)
                     if not new_obj:
                         reject = _("Can not get %s.") % name
                         break

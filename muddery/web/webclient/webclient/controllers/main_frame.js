@@ -1609,8 +1609,8 @@ MudderyGame.prototype.hidePopupMenus = function(element) {
 MudderyGame.prototype.showShop = function(data) {
 	mud.main_frame.doClosePopupBox();
 	mud.shop_window.reset();
-	mud.shop_window.setShop(data);
 	this.showWindow(mud.shop_window);
+	mud.shop_window.setShop(data);
 }
 
 
@@ -3879,6 +3879,8 @@ MudderyShop.prototype.setShop = function(data) {
 
         item.appendTo(container);
 	}
+
+	container.scrollTop(0);
 }
 
 

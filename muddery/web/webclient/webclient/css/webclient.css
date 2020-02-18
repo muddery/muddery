@@ -1879,6 +1879,10 @@ body {
     background-image: var(--shop-title-bar);
 }
 
+#shop-window .shop {
+    height: 100%;
+}
+
 #shop-window .shop-desc {
     position: relative;
     width: 100%;
@@ -1923,6 +1927,7 @@ body {
 #shop-window .goods-list {
     height: 100%;
     padding: 0.1rem 0.1rem 1.7rem 0.1rem;
+    overflow-y: auto;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;

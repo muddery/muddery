@@ -28,15 +28,15 @@ class Character(MudderyCharacter):
         """
         super(Character, self).set_default_custom_properties()
 
-        if not self.custom_properties_handler.has("exp"):
+        if self.prop.exp == "":
             self.prop.exp = 0
 
-        if not self.custom_properties_handler.has("hp"):
+        if self.prop.hp == "":
             self.prop.hp = self.prop.max_hp
             if self.prop.hp is None:
                 logger.log_err("%s's hp is empty." % self.get_data_key())
 
-        if not self.custom_properties_handler.has("mp"):
+        if self.prop.mp == "":
             self.prop.mp = self.prop.max_mp
             if self.prop.mp is None:
                 logger.log_err("%s's mp is empty." % self.get_data_key())

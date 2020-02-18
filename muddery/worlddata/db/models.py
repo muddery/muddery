@@ -415,6 +415,9 @@ class shop_goods(BaseObjects):
     # the key of objects to sell
     goods = models.CharField(max_length=KEY_LENGTH)
 
+    # goods level
+    level = models.PositiveIntegerField(blank=True, default=0)
+
     # number of shop goods
     number = models.PositiveIntegerField(blank=True, default=1)
 
@@ -754,6 +757,9 @@ class default_objects(models.Model):
     # The key of an object.
     # Object's key.
     object = models.CharField(max_length=KEY_LENGTH)
+
+    # Object's level.
+    level = models.PositiveIntegerField(blank=True, default=0)
 
     # Object's number
     number = models.PositiveIntegerField(blank=True, default=0)
