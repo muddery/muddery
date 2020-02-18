@@ -8,8 +8,6 @@ creation commands.
 
 """
 
-from __future__ import print_function
-
 import traceback
 from evennia.utils import logger
 from muddery.typeclasses.character import MudderyCharacter

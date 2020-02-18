@@ -8,8 +8,6 @@ creation commands.
 
 """
 
-from __future__ import print_function
-
 from muddery.typeclasses.player_character import MudderyPlayerCharacter
 from muddery.utils.localized_strings_handler import _
 

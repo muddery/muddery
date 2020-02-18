@@ -3,8 +3,6 @@ Skill handler handles a character's skills.
 
 """
 
-from __future__ import print_function
-
 import time
 import random
 from django.conf import settings
