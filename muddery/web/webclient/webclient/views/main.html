@@ -603,5 +603,11 @@
 		
         <script src="../controllers/base_controller.js" type="text/javascript" charset="utf-8"></script>
         <script src="../controllers/main_frame.js" type="text/javascript" charset="utf-8"></script>
+
+        <script type="text/javascript">
+            // Load the frame.
+            var controller = new MudderyMain();
+            $(document).ready(function() {controller.init()});
+        </script>
     </body>
 </html>

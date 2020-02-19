@@ -3147,7 +3147,6 @@ MudderyCombat = function(el) {
 	BaseController.call(this, el);
 
     this.combat_result = new MudderyCombatResult(this.select(".combat-result"));
-    this.combat_result.init();
 
 	this.self_dbref = "";
 	this.target = "";
@@ -3163,6 +3162,14 @@ MudderyCombat = function(el) {
 
 MudderyCombat.prototype = prototype(BaseController.prototype);
 MudderyCombat.prototype.constructor = MudderyCombat;
+
+/*
+ * Document ready event.
+ */
+MudderyCombat.prototype.init = function() {
+    this.combat_result.init();
+    this.bindEvents();
+}
 
 /*
  * Bind events.

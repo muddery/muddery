@@ -238,7 +238,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             try:
                 data = model_obj.objects.get(key=key)
             except Exception as e:
-                logger.log_errmsg("%s can not find key %s" % (key, key))
+                logger.log_errmsg("%s can not find key %s in %s" % (key, key, data_model))
                 continue
 
             # Set data.

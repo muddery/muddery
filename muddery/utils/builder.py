@@ -30,12 +30,12 @@ def get_object_record(obj_key):
         model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
         record = model_obj.objects.get(key=obj_key)
     except Exception as e:
-        ostring = "Can not get record %s: %s." % (obj_key, e)
+        ostring = "Can not get record %s in %s: %s." % (obj_key, model_name, e)
         print(ostring)
         print(traceback.print_exc())
 
     if not record:
-        ostring = "Can not get record %s." % obj_key
+        ostring = "Can not get record %s in %s." % (obj_key, model_name)
         print(ostring)
         print(traceback.print_exc())
 
