@@ -828,6 +828,15 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # Reborn at its home.
         if self.home:
             self.move_to(self.home, quiet=True)
+
+        # Recover properties.
+        self.recover()
+
+    def recover(self):
+        """
+        Recover properties.
+        """
+        pass
         
     def get_combat_commands(self):
         """

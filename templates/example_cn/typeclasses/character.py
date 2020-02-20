@@ -39,11 +39,11 @@ class Character(MudderyCharacter):
             if self.prop.mp is None:
                 logger.log_err("%s's mp is empty." % self.get_data_key())
 
-    def reborn(self):
+    def recover(self):
         """
-        Reborn after being killed.
+        Recover properties.
         """
-        super(Character, self).reborn()
+        super(Character, self).recover()
         
         # Recover hp and mp.
         values = {
@@ -62,11 +62,7 @@ class Character(MudderyCharacter):
         super(Character, self).level_up()
 
         # Recover hp and mp.
-        values = {
-            "hp": self.prop.max_hp,
-            "mp": self.prop.max_mp
-        }
-        self.set_properties(values)
+        self.recover()
 
     def get_appearance(self, caller):
         """

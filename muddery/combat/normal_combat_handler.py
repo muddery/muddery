@@ -128,5 +128,5 @@ class NormalCombatHandler(BaseCombatHandler):
                             content.show_location()
             else:
                 if character.is_alive():
-                    # Recover all hp.
-                    character.db.hp = character.max_hp
+                    # Recover.
+                    character.recover()
