@@ -353,11 +353,16 @@ class PropertiesDictForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CharacterForm(ObjectsForm):
+class CharactersForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
-        super(CharacterForm, self).__init__(*args, **kwargs)
+        super(CharactersForm, self).__init__(*args, **kwargs)
 
         self.fields['icon'] = ImageField(image_type="icon", required=False)
+
+        choices = [("", "---------")]
+        characters = CM.CHARACTERS.all_with_base()
+        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in characters])
+        self.fields['clone'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 

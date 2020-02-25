@@ -14,8 +14,8 @@ class ChooseSkill(object):
     """
     Choose a skill and the skill's target.
     """
-    type_attack = "ST_ATTACK"
-    type_heal = "ST_HEAL"
+    type_attack = "ATTACK"
+    type_heal = "HEAL"
 
     def choose(cls, caller):
         """

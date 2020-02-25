@@ -328,6 +328,9 @@ class characters(BaseObjects):
     # Character's icon resource.
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
+    # Clone another character's custom properties if this character's data is empty.
+    clone = models.CharField(max_length=KEY_LENGTH, blank=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True

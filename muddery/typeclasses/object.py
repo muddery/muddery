@@ -309,9 +309,9 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
                 self.custom_properties_handler.add(key, values.get(key, ""))
 
         # Set default mutable custom properties.
-        self.set_default_custom_properties()
+        self.set_mutable_custom_properties()
 
-    def set_default_custom_properties(self):
+    def set_mutable_custom_properties(self):
         """
         Set default mutable custom properties.
         """

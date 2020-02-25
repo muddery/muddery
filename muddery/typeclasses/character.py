@@ -174,8 +174,12 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             level = self.db.level
 
         # Load values from db.
+        data_key = self.get_data_key()
+        if self.system.clone:
+            data_key = self.system.clone
+
         values = {}
-        for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), level):
+        for record in OBJECT_PROPERTIES.get_properties(data_key, level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":
@@ -195,9 +199,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
                 self.body_properties_handler.add(key, values.get(key, None))
 
         # Set default mutable custom properties.
-        self.set_default_custom_properties()
+        self.set_mutable_custom_properties()
 
-    def set_default_custom_properties(self):
+    def set_mutable_custom_properties(self):
         """
         Set default mutable custom properties.
         """

@@ -165,9 +165,13 @@ class MudderySkill(TYPECLASS("OBJECT")):
 
             if not passive:
                 # set message
-                message = {"caller": self.owner_dbref,
-                           "skill": self.get_data_key(),
-                           "cast": self.cast_message(target)}
+                message = {
+                    "caller": self.owner_dbref,
+                    "skill": self.get_data_key(),
+                    "main_type": self.main_type,
+                    "sub_type": self.sub_type,
+                    "cast": self.cast_message(target),
+                }
 
                 if target:
                     message["target"] = target.dbref
