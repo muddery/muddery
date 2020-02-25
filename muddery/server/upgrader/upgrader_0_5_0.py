@@ -6,6 +6,7 @@ import os
 import django.core.management
 from evennia.server.evennia_launcher import init_game_directory
 from muddery.server.upgrader.base_upgrader import BaseUpgrader
+from muddery.server.muddery_launcher import import_local_data
 
 
 class Upgrader(BaseUpgrader):
@@ -17,7 +18,7 @@ class Upgrader(BaseUpgrader):
     from_min_version = (0, 4, 1)
 
     # from max version 0.5.1 (not include this version)
-    from_max_version = (0, 5, 1)
+    from_max_version = (0, 5, 2)
 
     target_version = None
     
@@ -42,6 +43,21 @@ class Upgrader(BaseUpgrader):
         django_args = ["migrate", "worlddata"]
         django_kwargs = {"database": "worlddata"}
         django.core.management.call_command(*django_args, **django_kwargs)
+
+        # load system localized strings
+        from django.conf import settings
+        from muddery.worlddata.services import importer
+
+        # system data file's path
+        system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
+
+        # localized string file's path
+        system_localized_string_path = os.path.join(system_data_path,
+                                                    settings.LOCALIZED_STRINGS_FOLDER,
+                                                    settings.LANGUAGE_CODE)
+
+        # load data
+        importer.import_table_path(system_localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
 
     def upgrade_data(self, data_path, game_template, muddery_lib):
         """
