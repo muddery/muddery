@@ -67,7 +67,7 @@ def unzip_resources_all(fp):
     """
     Import all resource files from a zip file.
     """
-    media_dir = settings.MEDIA_ROOT
+    media_dir = os.path.join(settings.MEDIA_ROOT, settings.IMAGE_PATH)
     if not os.path.exists(media_dir):
         os.makedirs(media_dir)
 
