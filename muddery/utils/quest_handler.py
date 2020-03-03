@@ -50,7 +50,7 @@ class QuestHandler(object):
         new_quest.set_owner(self.owner)
         self.current_quests[quest_key] = new_quest
 
-        self.owner.msg({"msg": _("Accepted quest {c%s{n.") % new_quest.get_name()})
+        self.owner.msg({"msg": _("Accepted quest {C%s{n.") % new_quest.get_name()})
         self.show_quests()
         self.owner.show_location()
         
@@ -117,7 +117,7 @@ class QuestHandler(object):
 
         self.finished_quests.add(quest_key)
 
-        self.owner.msg({"msg": _("Turned in quest {c%s{n.") % name})
+        self.owner.msg({"msg": _("Turned in quest {C%s{n.") % name})
         self.show_quests()
         self.owner.show_location()
 
@@ -289,7 +289,7 @@ class QuestHandler(object):
                 status_changed = True
                 if quest.is_accomplished():
                     self.owner.msg({"msg":
-                        _("Quest {c%s{n's goals are accomplished.") % quest.name})
+                        _("Quest {C%s{n's goals are accomplished.") % quest.name})
 
         if status_changed:
             self.show_quests()

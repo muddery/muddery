@@ -223,10 +223,10 @@ class MudderySkill(TYPECLASS("OBJECT")):
                      If the skill is available, return "".
         """
         if not passive and self.passive:
-            return _("{c%s{n is a passive skill!") % self.get_name()
+            return _("{C%s{n is a passive skill!") % self.get_name()
 
         if self.is_cooling_down():
-            return _("{c%s{n is not ready yet!") % self.get_name()
+            return _("{C%s{n is not ready yet!") % self.get_name()
 
         return ""
 

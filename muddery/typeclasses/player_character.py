@@ -976,7 +976,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.msg({"msg": _("You died.")})
 
         if self.reborn_time > 0:
-            self.msg({"msg": _("You will be reborn at {c%(p)s{n in {c%(s)s{n seconds.") %
+            self.msg({"msg": _("You will be reborn at {C%(p)s{n in {C%(s)s{n seconds.") %
                              {'p': self.home.get_name(), 's': self.reborn_time}})
 
     def reborn(self):
@@ -986,7 +986,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         super(MudderyPlayerCharacter, self).reborn()
 
         self.show_status()
-        self.msg({"msg": _("You are reborn at {c%s{n.") % self.home.get_name()})
+        self.msg({"msg": _("You are reborn at {C%s{n.") % self.home.get_name()})
 
     def save_current_dialogue(self, dialogue, npc):
         """
@@ -1176,7 +1176,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         super(MudderyPlayerCharacter, self).level_up()
 
         # notify the player
-        self.msg({"msg": _("{c%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})
+        self.msg({"msg": _("{C%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})
 
     def say(self, channel, message):
         """

@@ -49,7 +49,7 @@ class FuncEscape(StatementFunction):
                 "skill": self.key,
                 "main_type": "ESCAPE",
                 "sub_type": "",
-                "cast": _("{c%s{n tried to escape.") % self.caller.get_name(),
+                "cast": _("{R%s{n tried to escape.") % self.caller.get_name(),
                 "result": _("Succeeded!"),
             }
         })

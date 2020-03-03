@@ -1,6 +1,6 @@
 key,message,cd,passive,function,icon,main_type,sub_type
-skill_normal_hit,{c%c{n攻击了%t。,1,0,hit(1),image/icon/hit.png,ATTACK,
-skill_normal_heal,{c%c{n治疗了自己。,5,0,heal(20),image/icon/heal.png,HEAL,
+skill_normal_hit,{R%c{n攻击了%t。,1,0,hit(1),image/icon/hit.png,ATTACK,
+skill_normal_heal,{R%c{n治疗了自己。,5,0,heal(20),image/icon/heal.png,HEAL,
 skill_normal_hp,,0,1,max_hp(20),image/icon/strong.png,,
-skill_dunt,{c%c{n狠狠打了%t一下。,1,0,hit(2),image/icon/dunt.png,ATTACK,
-skill_escape,{c%c{n想要逃跑。,5,0,escape(0.5),image/icon/escape.png,,
+skill_dunt,{R%c{n狠狠打了%t一下。,1,0,hit(2),image/icon/dunt.png,ATTACK,
+skill_escape,{R%c{n想要逃跑。,5,0,escape(0.5),image/icon/escape.png,,

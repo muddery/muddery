@@ -408,7 +408,7 @@ class CmdQuickLogin(BaseCommand):
                 player.puppet_object(session, character)
                 player.db._last_puppet = character
             except RuntimeError as exc:
-                session.msg({"alert":_("{rYou cannot become {C%s{n: %s") % (character.name, exc)})
+                session.msg({"alert":_("{RYou cannot become {C%s{n: %s") % (character.name, exc)})
 
 
 class CmdUnconnectedQuit(BaseCommand):

@@ -131,6 +131,42 @@ body {
     float: right;
 }
 
+/* Text colors */
+span.red { color: red; }
+span.maroon { color: maroon; }
+span.lime { color: lime; }
+span.green { color: green; }
+span.yellow { color: yellow; }
+span.olive { color: olive; }
+span.blue { color: blue; }
+span.navy { color: navy; }
+span.magenta { color: #FF00FF; }
+span.purple { color: purple; }
+span.cyan { color: #00FFFF; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.gray { color: gray; }
+span.dimgray {color: #696969;}
+span.black {color: black;}
+span.underline { text-decoration: underline; }
+
+span.bgred { background-color: red;}
+span.bgmaroon { background-color: maroon;}
+span.bglime { background-color: lime;}
+span.bggreen { background-color: green;}
+span.bgyellow { background-color: yellow;}
+span.bgolive { background-color: olive;}
+span.bgblue { background-color: blue;}
+span.bgnavy { background-color: navy;}
+span.bgmagenta { background-color: #FF00FF;}
+span.bgpurple { background-color: purple;}
+span.bgcyan { background-color: #00FFFF;}
+span.bgteal { background-color: teal;}
+span.bgwhite { background-color: white;}
+span.bggray { background-color: gray;}
+span.bgdimgray { background-color: #696969;}
+span.bgblack { background-color: black;}
+
 #windows-wrapper {
     width: 100%;
     height: 100%;
@@ -544,9 +580,10 @@ body {
 }
 
 #login-window .lower {
-    width: 100%;
+    width: 2.8rem;
     height: 60%;
     padding-top: 1.2rem;
+    margin: 0 auto;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -556,7 +593,7 @@ body {
     position: relative;
     width: 100%;
     height: 100%;
-    padding: 0.4rem;
+    padding: 0.2rem 0.1rem;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
