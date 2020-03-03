@@ -254,7 +254,7 @@ class CmdCharCreate(BaseCommand):
 
         if utils.search_db_data_type("nickname", name, settings.BASE_PLAYER_CHARACTER_TYPECLASS):
             # check if this name already exists.
-            session.msg({"alert":_("{RA character named '{w%s{R' already exists.{n") % name})
+            session.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
             return
 
         try:

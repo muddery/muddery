@@ -113,7 +113,7 @@ category,origin,local
 ,"{RCould not unpuppet from {C%s{n: %s","{R无法登出角色 {C%s{n: %s"
 ,"You should select a skill to cast.","你必须选择一个技能来施放。"
 ,"Can not find this shop.","无法找到这个商店。"
-,"{RA character named '{w%s{R' already exists.{n","{R名为'{w%s{R'的角色已经存在了。{n"
+,"{RA character named '{r%s{R' already exists.{n","{R名为'{r%s{R'的角色已经存在了。{n"
 ,"Not enough number.","数量不足。"
 ,"GOTO","前往"
 ,"{RYou cannot become {C%s{n: %s","{R你无法成为 {C%s{n: %s"
