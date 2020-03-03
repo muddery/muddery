@@ -20,29 +20,6 @@ class Character(MudderyCharacter):
     """
     typeclass_key = "CHARACTER"
 
-    def set_mutable_custom_properties(self):
-        """
-        Set default mutable custom properties.
-        """
-        super(Character, self).set_mutable_custom_properties()
-
-        if self.prop.exp == "":
-            self.prop.exp = 0
-
-        if self.prop.hp == "":
-            self.prop.hp = self.prop.max_hp
-            if self.prop.hp is None:
-                logger.log_err("%s's hp is empty." % self.get_data_key())
-                # default value
-                self.prop.hp = 1
-
-        if self.prop.mp == "":
-            self.prop.mp = self.prop.max_mp
-            if self.prop.mp is None:
-                logger.log_err("%s's mp is empty." % self.get_data_key())
-                # default value
-                self.prop.mp = 1
-
     def recover(self):
         """
         Recover properties.

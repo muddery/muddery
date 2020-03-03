@@ -1,1 +1,2 @@
 key,name,typeclass,desc
+player,Player,PLAYER_CHARACTER,This is a player.

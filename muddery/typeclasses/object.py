@@ -306,7 +306,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         # Set values.
         for key, info in self.get_properties_info().items():
             if not info["mutable"]:
-                self.custom_properties_handler.add(key, values.get(key, ""))
+                self.custom_properties_handler.add(key, values.get(key, info["default"]))
 
         # Set default mutable custom properties.
         self.set_mutable_custom_properties()
@@ -319,7 +319,18 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             if info["mutable"]:
                 # Set default mutable properties to prop.
                 if not self.custom_properties_handler.has(key):
-                    self.custom_properties_handler.add(key, "")
+                    default = info["default"]
+                    value = ""
+                    if self.custom_properties_handler.has(default):
+                        # User another property'a value
+                        value = self.custom_properties_handler.get(default)
+                    else:
+                        try:
+                            value = ast.literal_eval(default)
+                        except (SyntaxError, ValueError) as e:
+                            # treat as a raw string
+                            value = default
+                    self.custom_properties_handler.add(key, value)
 
     def after_data_key_changed(self):
         """

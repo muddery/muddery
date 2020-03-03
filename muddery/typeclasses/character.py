@@ -175,7 +175,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         # Load values from db.
         data_key = self.get_data_key()
-        if self.system.clone:
+        clone = getattr(self.system, "clone", None)
+        if clone:
             data_key = self.system.clone
 
         values = {}
@@ -195,21 +196,11 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # Set body values.
         for key, info in self.get_properties_info().items():
             if not info["mutable"]:
-                self.custom_properties_handler.add(key, values.get(key, None))
-                self.body_properties_handler.add(key, values.get(key, None))
+                self.custom_properties_handler.add(key, values.get(key, info["default"]))
+                self.body_properties_handler.add(key, values.get(key, info["default"]))
 
         # Set default mutable custom properties.
         self.set_mutable_custom_properties()
-
-    def set_mutable_custom_properties(self):
-        """
-        Set default mutable custom properties.
-        """
-        for key, info in self.get_properties_info().items():
-            if info["mutable"]:
-                # Set default mutable properties to prop.
-                if not self.custom_properties_handler.has(key):
-                    self.custom_properties_handler.add(key, "")
 
     def after_data_loaded(self):
         """
@@ -553,7 +544,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         if not silent and self.has_account:
             self.show_status()
             self.show_skills()
-            self.msg({"msg": _("You learned skill {c%s{n.") % skill_obj.get_name()})
+            self.msg({"msg": _("You learned skill {C%s{n.") % skill_obj.get_name()})
 
         return True
 

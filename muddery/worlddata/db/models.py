@@ -706,6 +706,9 @@ class properties_dict(models.Model):
     # Whether this property will be changed or not.
     mutable = models.BooleanField(blank=True, default=False)
 
+    # Default value.
+    default = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
     # The description of the property.
     desc = models.TextField(blank=True)
 
@@ -735,7 +738,7 @@ class object_properties(models.Model):
     property = models.CharField(max_length=KEY_LENGTH)
 
     # The value of the property.
-    value = models.CharField(max_length=VALUE_LENGTH)
+    value = models.CharField(max_length=VALUE_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"

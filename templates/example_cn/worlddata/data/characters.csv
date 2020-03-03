@@ -1,4 +1,4 @@
-key,level,reborn_time,friendly,icon
+key,level,reborn_time,friendly,icon,clone
 player,1,10,0,image/icon/player.png
 robot_mob_A,2,0,-100,image/icon/robot.png
 robot_mob_B,3,0,-100,image/icon/robot.png

@@ -54,6 +54,7 @@ class BaseTypeclass(object):
                 for record in records:
                     cls._all_properties_[record.property] = {"name": record.name,
                                                              "desc": record.desc,
-                                                             "mutable": record.mutable}
+                                                             "default": record.default,
+                                                             "mutable": record.mutable,}
 
         return cls._all_properties_
