@@ -23,10 +23,11 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.worlddata.dao.default_objects_mapper import DEFAULT_OBJECTS
 from muddery.worlddata.dao.properties_dict_mapper import PROPERTIES_DICT
 from evennia.utils.utils import lazy_property
-from evennia.utils import logger
+from evennia.utils import logger, search
 from evennia.comms.models import ChannelDB
 from evennia import create_script
 from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.utils import defines
 
 
 class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
@@ -81,19 +82,6 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # set custom attributes
         if not self.attributes.has("attributes"):
             self.db.attributes = {}
-
-        """
-        # Choose a random career.
-        if not self.attributes.has("career"):
-            self.db.career = ""
-            try:
-                careers = DATA_SETS.character_careers.objects.all()
-                if careers:
-                    career = random.choice(careers)
-                    self.db.career = career.key
-            except Exception as e:
-                pass
-        """
         
     def after_data_loaded(self):
         """
@@ -105,6 +93,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         # refresh data
         self.refresh_properties()
+
+        # if it is dead, reborn at init.
+        if not self.is_alive():
+            if not self.is_temp and self.reborn_time > 0:
+                self.reborn()
 
     def move_to(self, destination, quiet=False,
                 emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True, **kwargs):
@@ -962,6 +955,68 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             # show combat infomation
             combat_handler.show_combat(self)
 
+            if combat_handler.is_finished():
+                result = combat_handler.get_combat_result(self)
+                if result:
+                    # result: (result, opponents)
+                    self.combat_result(result[0], result[1])
+
+    def combat_result(self, result, opponents=None):
+        """
+        Set the combat result.
+
+        :param result: defines.COMBAT_WIN, defines.COMBAT_LOSE, or defines.COMBAT_DRAW
+        :param opponents: combat opponents
+        :param exp: get experience
+        :param loots: captured objects
+        """
+        if result == defines.COMBAT_LOSE:
+            self.msg({"combat_finish": {"lose": True}})
+        elif result == defines.COMBAT_DRAW:
+            self.msg({"combat_finish": {"draw": True}})
+        elif result == defines.COMBAT_ESCAPED:
+            self.msg({"combat_finish": {"escaped": True}})
+        elif result == defines.COMBAT_WIN:
+            # get rewards
+            exp = 0
+            loots = []
+            for opponent in opponents:
+                exp += opponent.provide_exp(self)
+                obj_list = opponent.loot_handler.get_obj_list(self)
+                if obj_list:
+                    loots.extend(obj_list)
+
+            if exp:
+                self.add_exp(exp)
+
+            # give objects to winner
+            get_objects = []
+            if loots:
+                get_objects = self.receive_objects(loots, mute=True)
+
+            self.msg({
+                "combat_finish": {
+                    "win": True,
+                    "exp": exp,
+                    "get_objects": get_objects
+                }
+            })
+
+    def after_left_combat(self, result, opponents=None):
+        """
+        Called after the character left the current combat.
+        """
+        self.msg({"left_combat": True})
+
+        super(MudderyPlayerCharacter, self).after_left_combat(result, opponents)
+
+        # call quest handler
+        for opponent in opponents:
+            self.quest_handler.at_objective(defines.OBJECTIVE_KILL, opponent.get_data_key())
+
+        # show status
+        self.show_status()
+
     def die(self, killers):
         """
         This character is killed. Move it to it's home.
@@ -983,7 +1038,25 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         Reborn after being killed.
         """
-        super(MudderyPlayerCharacter, self).reborn()
+        # Reborn at its home.
+        home = None
+        if not home:
+            default_home_key = GAME_SETTINGS.get("default_player_home_key")
+            if default_home_key:
+                rooms = utils.search_obj_data_key(default_home_key)
+                if rooms:
+                    home = rooms[0]
+
+        if not home:
+            rooms = search.search_object(settings.DEFAULT_HOME)
+            if rooms:
+                home = rooms[0]
+
+        if home:
+            self.move_to(home, quiet=True)
+
+        # Recover properties.
+        self.recover()
 
         self.show_status()
         self.msg({"msg": _("You are reborn at {C%s{n.") % self.home.get_name()})

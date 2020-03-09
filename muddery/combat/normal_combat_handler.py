@@ -12,17 +12,6 @@ class NormalCombatHandler(BaseCombatHandler):
     """
     This implements the normal combat handler.
     """
-    def start_combat(self):
-        """
-        Start a combat, make all NPCs to cast skills automatically.
-        """
-        super(NormalCombatHandler, self).start_combat()
-
-        for character in self.characters.values():
-            if not character.account:
-                # Monsters auto cast skills
-                character.start_auto_combat_skill()
-
     def at_server_shutdown(self):
         """
         This hook is called whenever the server is shutting down fully
@@ -33,6 +22,17 @@ class NormalCombatHandler(BaseCombatHandler):
             character.stop_auto_combat_skill()
 
         super(NormalCombatHandler, self).at_server_shutdown()
+
+    def start_combat(self):
+        """
+        Start a combat, make all NPCs to cast skills automatically.
+        """
+        super(NormalCombatHandler, self).start_combat()
+
+        for character in self.characters.values():
+            if not character.account:
+                # Monsters auto cast skills
+                character.start_auto_combat_skill()
 
     def show_combat(self, character):
         """
@@ -57,58 +57,6 @@ class NormalCombatHandler(BaseCombatHandler):
             character.stop_auto_combat_skill()
 
         super(NormalCombatHandler, self).finish()
-
-    def set_combat_results(self, winners, losers):
-        """
-        Called when the character wins the combat.
-
-        Args:
-            winners: (List) all combat winners.
-            losers: (List) all combat losers.
-
-        Returns:
-            None
-        """
-        # add exp to winners
-        # get total exp
-        exp = 0
-        for loser in losers:
-            exp += loser.provide_exp(loser)
-
-        for character in winners:
-            if exp:
-                character.add_exp(exp)
-
-            if character.is_typeclass(settings.BASE_PLAYER_CHARACTER_TYPECLASS):
-                # get object list
-                loots = None
-                for loser in losers:
-                    obj_list = loser.loot_handler.get_obj_list(character)
-                    if obj_list:
-                        if not loots:
-                            loots = obj_list
-                        else:
-                            loots.extend(obj_list)
-
-                # give objects to winner
-                get_objects = []
-                if loots:
-                    get_objects = character.receive_objects(loots, mute=True)
-
-                if character.has_account:
-                    character.msg({"combat_finish":
-                                        {"win": True,
-                                         "exp": exp,
-                                         "get_objects": get_objects}})
-
-                # call quest handler
-                for loser in losers:
-                    character.quest_handler.at_objective(defines.OBJECTIVE_KILL, loser.get_data_key())
-
-        # losers are killed.
-        for character in losers:
-            character.msg({"combat_finish": {"lose": True}})
-            character.die(winners)
 
     def _cleanup_character(self, character):
         """

@@ -332,15 +332,17 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
         permissions = settings.PERMISSION_ACCOUNT_DEFAULT
     
     if not home:
-        home = settings.DEFAULT_HOME
-        try:
-            default_home_key = GAME_SETTINGS.get("default_player_home_key")
-            if default_home_key:
-                rooms = utils.search_obj_data_key(default_home_key)
+        default_home_key = GAME_SETTINGS.get("default_player_home_key")
+        if default_home_key:
+            rooms = utils.search_obj_data_key(default_home_key)
+            if rooms:
                 home = rooms[0]
-        except:
-            pass
-                        
+
+    if not home:
+        rooms = search.search_object(settings.DEFAULT_HOME)
+        if rooms:
+            home = rooms[0]
+
     if not location:
         location = home
         try:

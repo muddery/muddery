@@ -464,36 +464,6 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         # try the teleport
         self.move_to(location_obj, quiet=True, to_none=True)
 
-    def set_home(self, home):
-        """
-        Set object's home.
-        
-        Args:
-        home: (string) Home's name. Must be the key of data info.
-        """
-        home_obj = None
-    
-        if home:
-            # If has home, search home object.
-            home_obj = utils.search_obj_data_key(home)
-        
-            if not home_obj:
-                logger.log_errmsg("%s can't find home %s!" % (self.get_data_key(), home))
-                return
-            
-            home_obj = home_obj[0]
-    
-        if self.home == home_obj:
-            # No change.
-            return
-
-        if self == home_obj:
-            # Can't set home to itself.
-            logger.log_errmsg("%s can't set home to itself!" % self.get_data_key())
-            return
-        
-        self.home = home_obj
-
     def set_desc(self, desc):
         """
         Set object's description.

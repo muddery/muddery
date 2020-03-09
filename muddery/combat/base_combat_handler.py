@@ -1,5 +1,17 @@
 """
 Combat handler.
+
+The life of a combat:
+1. create: create a combat.
+2. set_combat: set teams in the combat and the end time if available, then calls the start_combat.
+3. start_combat: start the combat. Characters in the combat are allowed to use skills.
+4. prepare_skill: characters call the prepare_skill to use skills in the combat. It casts a skill and check if the
+   combat is finished.
+5. can_finish: Check if the combat is finished. A combat finishes when only one or zero team has alive characters, or
+   the combat is timeout. If a combat can finish calls the finish method.
+6. finish: send combat results to all characters.
+7. leave_combat: characters call to leave the combat.
+8. stop: if all characters left, remove the combat.
 """
 
 import random
@@ -8,6 +20,7 @@ from twisted.internet import reactor
 from django.conf import settings
 from evennia import DefaultScript
 from evennia.utils import logger
+from muddery.utils import defines
 
 
 class BaseCombatHandler(DefaultScript):
@@ -27,42 +40,18 @@ class BaseCombatHandler(DefaultScript):
 
         # if battle is finished
         self.finished = False
+        self.winners = {}
+        self.losers = {}
 
         self.timeout = 0
         self.timer = None
 
-    def show_combat(self, character):
+    def at_server_shutdown(self):
         """
-        Show combat information to a character.
-        Args:
-            character: (object) character
-
-        Returns:
-            None
+        This hook is called whenever the server is shutting down fully
+        (i.e. not for a restart).
         """
-        # Show combat information to the player.
-        character.msg({"joined_combat": True})
-
-        # send messages in order
-        character.msg({"combat_info": self.get_appearance()})
-
-    def _cleanup_character(self, character):
-        """
-        Remove character from handler and clean 
-        it of the back-reference and cmdset
-        """
-        # remove the combat handler
-        del character.ndb.combat_handler
-
-        # remove combat commands
-        character.cmdset.delete(settings.CMDSET_COMBAT)
-
-        if character.has_account:
-            # notify combat finished
-            character.msg({"left_combat": True})
-
-            # show status
-            character.show_status()
+        self.stop()
 
     def at_stop(self):
         "Called just before the script is stopped/destroyed."
@@ -73,17 +62,22 @@ class BaseCombatHandler(DefaultScript):
             # note: the list() call above disconnects list from database
             self._cleanup_character(character)
 
-    def at_server_shutdown(self):
+    def at_timeout(self):
         """
-        This hook is called whenever the server is shutting down fully
-        (i.e. not for a restart).
+        Combat timeout.
+
+        Returns:
+            None.
         """
-        self.stop()
+        if self.finished:
+            return
+
+        self.set_combat_draw()
 
     def set_combat(self, teams, desc, timeout):
         """
         Add combatant to handler
-        
+
         Args:
             teams: (dict) {<team id>: [<characters>]}
             desc: (string) combat's description
@@ -112,33 +106,40 @@ class BaseCombatHandler(DefaultScript):
         if self.timeout:
             self.timer = reactor.callLater(self.timeout, self.at_timeout)
 
-    def at_timeout(self):
+    def start_combat(self):
         """
-        Combat timeout.
+        Start a combat, make all NPCs to cast skills automatically.
+        """
+        pass
+
+    def show_combat(self, character):
+        """
+        Show combat information to a character.
+        Args:
+            character: (object) character
 
         Returns:
-            None.
+            None
+        """
+        # Show combat information to the player.
+        character.msg({"joined_combat": True})
+
+        # send messages in order
+        character.msg({"combat_info": self.get_appearance()})
+
+    def prepare_skill(self, skill_key, caller, target):
+        """
+        Cast a skill.
         """
         if self.finished:
             return
 
-        self.set_combat_draw()
-        self.stop()
-
-    def remove_character(self, character):
-        "Remove combatant from handler"
-        if character.dbref in self.characters:
-            self._cleanup_character(character)
-            del self.characters[character.dbref]
+        if caller:
+            caller.cast_skill(skill_key, target)
 
             if self.can_finish():
-                # if we have no more characters in battle, kill this handler
+                # if there is only one team left, kill this handler
                 self.finish()
-
-    def msg_all(self, message):
-        "Send message to all combatants"
-        for character in self.characters.values():
-            character.msg(message)
 
     def can_finish(self):
         """
@@ -162,21 +163,15 @@ class BaseCombatHandler(DefaultScript):
 
         return True
 
-    def start_combat(self):
-        """
-        Start a combat, make all NPCs to cast skills automatically.
-        """
-        pass
-
     def finish(self):
         """
         Finish a combat. Send results to players, and kill all failed characters.
         """
         self.finished = True
-        
+
         if self.timer and self.timer.active():
             self.timer.cancel()
-        
+
         if self.characters:
             # get winners and losers
             winner_team = None
@@ -185,12 +180,46 @@ class BaseCombatHandler(DefaultScript):
                     winner_team = character.get_team()
                     break
 
-            winners = [c for c in self.characters.values() if c.get_team() == winner_team]
-            losers = [c for c in self.characters.values() if c.get_team() != winner_team]
-            
-            self.set_combat_results(winners, losers)
+            self.winners = {dbref: char for dbref, char in self.characters.items() if char.get_team() == winner_team}
+            self.losers = {dbref: char for dbref, char in self.characters.items() if char.get_team() != winner_team}
 
-        self.stop()
+            self.set_combat_results(self.winners, self.losers)
+
+    def leave_combat(self, character):
+        """
+        Remove combatant from handler.
+
+        :param character: character object
+        """
+        if character.dbref in self.characters:
+            self._cleanup_character(character)
+            del self.characters[character.dbref]
+
+        # notify combat finished
+        if character.dbref in self.winners:
+            character.after_left_combat(defines.COMBAT_WIN, self.losers.values())
+        elif character.dbref in self.losers:
+            character.after_left_combat(defines.COMBAT_LOSE, self.winners.values())
+
+        if not self.characters or not len(self.characters):
+            # There is no character in combat.
+            self.stop()
+
+    def _cleanup_character(self, character):
+        """
+        Remove character from handler and clean
+        it of the back-reference and cmdset
+        """
+        # remove the combat handler
+        del character.ndb.combat_handler
+
+        # remove combat commands
+        character.cmdset.delete(settings.CMDSET_COMBAT)
+
+    def msg_all(self, message):
+        "Send message to all combatants"
+        for character in self.characters.values():
+            character.msg(message)
 
     def set_combat_draw(self):
         """
@@ -200,8 +229,7 @@ class BaseCombatHandler(DefaultScript):
             None.
         """
         for character in self.characters.values():
-            if character.has_account:
-                character.msg({"combat_finish": {"draw": True}})
+            character.combat_result(defines.COMBAT_DRAW)
 
     def set_combat_results(self, winners, losers):
         """
@@ -214,13 +242,11 @@ class BaseCombatHandler(DefaultScript):
         Returns:
             None
         """
-        for character in winners:
-            if character.has_account:
-                character.msg({"combat_finish": {"win": True}})
+        for character in winners.values():
+            character.combat_result(defines.COMBAT_WIN, losers.values())
 
-        for character in losers:
-            if character.has_account:
-                character.msg({"combat_finish": {"lose": True}})
+        for character in losers.values():
+            character.combat_result(defines.COMBAT_LOSE, winners.values())
 
     def get_appearance(self):
         """
@@ -247,19 +273,30 @@ class BaseCombatHandler(DefaultScript):
 
         return self.characters.values()
 
-    def prepare_skill(self, skill_key, caller, target):
+    def is_finished(self):
         """
-        Cast a skill.
+        :return: combat finished or not.
         """
-        if self.finished:
+        return self.finished
+
+    def get_combat_result(self, character):
+        """
+        Get a character's combat result.
+
+        :param character: character object
+        :return:
+        """
+        if not self.finished:
             return
 
-        if caller:
-            caller.cast_skill(skill_key, target)
-        
-            if self.can_finish():
-                # if there is only one team left, kill this handler
-                self.finish()
+        if character.dbref not in self.characters:
+            return
+
+        if character.dbref in self.winners:
+            return defines.COMBAT_WIN, self.losers.values()
+
+        if character.dbref in self.losers:
+            return defines.COMBAT_LOSE, self.winners.values()
 
     def skill_escape(self, caller):
         """
@@ -272,8 +309,7 @@ class BaseCombatHandler(DefaultScript):
             None
         """
         if caller:
-            if caller.has_account:
-                caller.msg({"combat_finish": {"escaped": True}})
+            caller.combat_result(defines.COMBAT_ESCAPED)
 
             # Skill function will call finish func later, so should not check finish here.
             if caller.dbref in self.characters:

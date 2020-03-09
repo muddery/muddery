@@ -15,7 +15,7 @@ from django.conf import settings
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.typeclasses.models import DbHolder
-from evennia.utils import logger
+from evennia.utils import logger, search
 from evennia.utils.utils import lazy_property, class_from_module
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.worlddata.dao import common_mappers as CM
@@ -24,7 +24,7 @@ from muddery.worlddata.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.worlddata.dao.default_skills_mapper import DEFAULT_SKILLS
 from muddery.utils.builder import build_object
 from muddery.utils.loot_handler import LootHandler
-from muddery.utils import defines
+from muddery.utils import defines, utils
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.utils import search_obj_data_key
 from muddery.utils.data_field_handler import DataFieldHandler
@@ -150,7 +150,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             
         # leave combat
         if self.ndb.combat_handler:
-            self.ndb.combat_handler.remove_character(self)
+            self.ndb.combat_handler.leave_combat(self)
         
         # stop auto casting
         self.stop_auto_combat_skill()
@@ -768,6 +768,37 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         return bool(self.ndb.combat_handler)
 
+    def combat_result(self, result, opponents=None):
+        """
+        Set the combat result.
+
+        :param result: defines.COMBAT_WIN, defines.COMBAT_LOSE, or defines.COMBAT_DRAW
+        :param opponents: combat opponents
+        :param exp: get experience
+        :param loots: captured objects
+        """
+        pass
+
+    def leave_combat(self):
+        """
+        Leave the current combat.
+        """
+        if self.ndb.combat_handler:
+            self.ndb.combat_handler.leave_combat(self)
+
+    def after_left_combat(self, result, opponents=None):
+        """
+        Called after the character left the current combat.
+        """
+        if result == defines.COMBAT_LOSE:
+            self.die(opponents)
+            # trigger event
+            self.event.at_character_die()
+        elif result == defines.COMBAT_WIN:
+            # trigger event
+            for opponent in opponents:
+                opponent.event.at_character_kill(self)
+
     def set_team(self, team_id):
         """
         Set character's team id in combat.
@@ -808,10 +839,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        # trigger event
-        self.event.at_character_die()
-        self.event.at_character_kill(killers)
-
         if not self.is_temp and self.reborn_time > 0:
             # Set reborn timer.
             self.defer = deferLater(reactor, self.reborn_time, self.reborn)
@@ -821,8 +848,21 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Reborn after being killed.
         """
         # Reborn at its home.
-        if self.home:
-            self.move_to(self.home, quiet=True)
+        home = None
+        if not home:
+            home_key = self.system.location
+            if home_key:
+                rooms = utils.search_obj_data_key(home_key)
+                if rooms:
+                    home = rooms[0]
+
+        if not home:
+            rooms = search.search_object(settings.DEFAULT_HOME)
+            if rooms:
+                home = rooms[0]
+
+        if home:
+            self.move_to(home, quiet=True)
 
         # Recover properties.
         self.recover()

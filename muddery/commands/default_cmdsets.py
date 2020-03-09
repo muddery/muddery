@@ -141,3 +141,4 @@ class CombatCmdSet(CmdSet):
         self.add(general.CmdLook())
         self.add(general.CmdCastSkill())
         self.add(combat.CmdCombatInfo())
+        self.add(combat.CmdLeaveCombat())

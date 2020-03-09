@@ -33,3 +33,9 @@ EVENT_TRIGGER_SENTENCE = "EVENT_TRIGGER_SENTENCE"   # called when a character fi
 EVENT_NONE = ""
 EVENT_ATTACK = "EVENT_ATTACK"               # event to begin a combat
 EVENT_DIALOGUE = "EVENT_DIALOGUE"           # event to begin a dialogue
+
+# combat result
+COMBAT_WIN = "COMBAT_WIN"                   # win the combat
+COMBAT_LOSE = "COMBAT_LOSE"                 # lose the combat
+COMBAT_DRAW = "COMBAT_DRAW"                 # no one wins the combat
+COMBAT_ESCAPED = "COMBAT_ESCAPED"             # escaped from the combat

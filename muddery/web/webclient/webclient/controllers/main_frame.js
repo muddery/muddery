@@ -3168,6 +3168,7 @@ MudderyCombat.prototype.constructor = MudderyCombat;
  */
 MudderyCombat.prototype.init = function() {
     this.combat_result.init();
+    this.combat_result.hide();
     this.bindEvents();
 }
 
@@ -3580,12 +3581,13 @@ MudderyCombat.prototype.leftCombat = function(data) {
 		window.clearInterval(this.interval_id);
 		this.interval_id = null;
 	}
+    mud.main_frame.popWindow(this);
 }
 
 /*
  * The combat has finished.
  */
-MudderyCombat.prototype.finishCombat = function(result) {
+MudderyCombat.prototype.combatFinish = function(result) {
 	this.combat_finished = true;
 	if (this.interval_id != null) {
 		window.clearInterval(this.interval_id);
@@ -3663,12 +3665,7 @@ MudderyCombatResult.prototype.bindEvents = function() {
  */
 MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
-    this.hide();
-    mud.main_frame.popWindow(mud.combat_window);
-
-    if (mud.popup_dialogue.hasDialogue()) {
-        mud.popup_dialogue.show();
-    }
+    core.service.leaveCombat();
 }
 
 /*

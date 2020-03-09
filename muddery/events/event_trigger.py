@@ -178,15 +178,14 @@ class EventTrigger(object):
         """
         self.trigger(defines.EVENT_TRIGGER_DIE, self.owner, None)
 
-    def at_character_kill(self, killers):
+    def at_character_kill(self, killer):
         """
         Called when a character kills others.
         This event is set on the character who is killed, and take effect on the killer!
         """
         if defines.EVENT_TRIGGER_KILL in self.events:
             # If has kill event.
-            for killer in killers:
-                self.trigger(defines.EVENT_TRIGGER_KILL, killer, self.owner)
+            self.trigger(defines.EVENT_TRIGGER_KILL, killer, self.owner)
 
     def at_character_traverse(self, character):
         """

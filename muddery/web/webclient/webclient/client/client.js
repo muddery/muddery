@@ -213,7 +213,7 @@ MudderyClient.prototype = {
                     mud.combat_window.leftCombat(data[key]);
                 }
                 else if (key == "combat_finish") {
-                    mud.combat_window.finishCombat(data[key]);
+                    mud.combat_window.combatFinish(data[key]);
                 }
                 else if (key == "combat_info") {
                     var info = data[key];

@@ -38,3 +38,31 @@ class CmdCombatInfo(BaseCommand):
         message = {"combat_info": appearance,
                    "combat_commands": caller.get_combat_commands()}
         caller.msg(message)
+
+
+class CmdLeaveCombat(BaseCommand):
+    """
+    Get combat info.
+
+    Usage:
+        {"cmd":"leave_combat",
+         "args":""
+        }
+
+    Observes your combat.
+    """
+    key = "leave_combat"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Left the current combat.
+        """
+        caller = self.caller
+
+        if not caller.is_in_combat():
+            # If the caller is not in combat.
+            caller.msg({"msg":_("You are not in combat!")})
+            return
+
+        caller.leave_combat()
