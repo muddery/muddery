@@ -306,7 +306,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         # Set values.
         for key, info in self.get_properties_info().items():
             if not info["mutable"]:
-                self.custom_properties_handler.add(key, values.get(key, info["default"]))
+                self.custom_properties_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
 
         # Set default mutable custom properties.
         self.set_mutable_custom_properties()
@@ -321,9 +321,9 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
                 if not self.custom_properties_handler.has(key):
                     default = info["default"]
                     value = ""
-                    if self.custom_properties_handler.has(default):
+                    if self.custom_properties_handler.has(key):
                         # User another property'a value
-                        value = self.custom_properties_handler.get(default)
+                        value = self.custom_properties_handler.get(key)
                     else:
                         try:
                             value = ast.literal_eval(default)
