@@ -13,7 +13,7 @@ from django.conf import settings
 from evennia.accounts.models import AccountDB
 from evennia.objects.models import ObjectDB
 from evennia.server.models import ServerConfig
-from evennia.utils import logger, utils
+from evennia.utils import logger, utils, class_from_module
 from evennia.commands.cmdhandler import CMD_LOGINSTART
 from muddery.commands.base_command import BaseCommand
 from muddery.utils.builder import create_player, create_character
@@ -25,7 +25,7 @@ from muddery.worlddata.dao.common_mappers import EQUIPMENT_POSITIONS
 
 # limit symbol import for API
 __all__ = ("CmdUnconnectedConnect", "CmdUnconnectedCreate", "CmdUnconnectedCreateConnect",
-           "CmdUnconnectedQuit", "CmdUnconnectedLook")
+           "CmdUnconnectedQuit", "CmdUnconnectedConnectT")
 
 MULTISESSION_MODE = settings.MULTISESSION_MODE
 
@@ -302,6 +302,72 @@ class CmdUnconnectedConnect(BaseCommand):
             #   player.at_post_login(session=session)
             session.msg({"login":{"name": playername, "dbref": player.dbref}})
             session.sessionhandler.login(session, player)
+
+
+class CmdUnconnectedConnectT(BaseCommand):
+    """
+    connect to the game
+
+    Usage (at login screen):
+      connect accountname password
+      connect "account name" "pass word"
+
+    Use the create command to first create an account before logging in.
+
+    If you have spaces in your name, enclose it in double quotes.
+    """
+
+    key = "co"
+    locks = "cmd:all()"  # not really needed
+    arg_regex = r"\s.*?|$"
+
+    def func(self):
+        """
+        Uses the Django admin api. Note that unlogged-in commands
+        have a unique position in that their func() receives
+        a session object instead of a source_object like all
+        other types of logged-in commands (this is because
+        there is no object yet before the account has logged in)
+        """
+        session = self.caller
+        address = session.address
+
+        args = self.args
+        # extract double quote parts
+        parts = [part.strip() for part in re.split(r"\"", args) if part.strip()]
+        if len(parts) == 1:
+            # this was (hopefully) due to no double quotes being found, or a guest login
+            parts = parts[0].split(None, 1)
+
+            # Guest login
+            if len(parts) == 1 and parts[0].lower() == "guest":
+                # Get Guest typeclass
+                Guest = class_from_module(settings.BASE_GUEST_TYPECLASS)
+
+                account, errors = Guest.authenticate(ip=address)
+                if account:
+                    session.sessionhandler.login(session, account)
+                    return
+                else:
+                    session.msg("|R%s|n" % "\n".join(errors))
+                    return
+
+        if len(parts) != 2:
+            session.msg("\n\r Usage (without <>): connect <name> <password>")
+            return
+
+        # Get account class
+        Account = class_from_module(settings.BASE_ACCOUNT_TYPECLASS)
+
+        name, password = parts
+        account, errors = Account.authenticate(
+            username=name, password=password, ip=address, session=session
+        )
+        if account:
+            session.sessionhandler.login(session, account)
+        else:
+            session.msg("|R%s|n" % "\n".join(errors))
+
 
 
 class CmdUnconnectedCreate(BaseCommand):
