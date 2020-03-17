@@ -54,7 +54,7 @@ class FuncEscape(StatementFunction):
             }
         })
 
-        combat_handler.skill_escape(self.caller)
+        combat_handler.escape_combat(self.caller)
 
 
 class FuncHeal(StatementFunction):

@@ -26,7 +26,7 @@ class Skill(MudderySkill):
 
         return super(Skill, self).do_skill(target)
 
-    def check_available(self, passive):
+    def check_available(self):
         """
         Check this skill.
 
@@ -37,7 +37,7 @@ class Skill(MudderySkill):
             message: (string) If the skill is not available, returns a string of reason.
                      If the skill is available, return "".
         """
-        message = super(Skill, self).check_available(passive)
+        message = super(Skill, self).check_available()
         if message:
             return message
             

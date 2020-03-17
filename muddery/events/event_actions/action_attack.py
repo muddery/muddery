@@ -42,4 +42,3 @@ class ActionAttack(BaseEventAction):
                 return
 
             rand -= record.odds
-    

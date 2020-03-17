@@ -29,6 +29,7 @@ from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.utils import search_obj_data_key
 from muddery.utils.data_field_handler import DataFieldHandler
 from muddery.utils.localized_strings_handler import _
+from muddery.utils.builder import delete_object
 
 
 class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
@@ -567,19 +568,38 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             return
 
         skill = self.db.skills[skill_key]
-        if not skill.cast_skill(target, passive=False):
+        cast_result = skill.cast_skill(target)
+        if not cast_result:
             return
 
         if self.skill_gcd > 0:
             # set GCD
             self.gcd_finish_time = time_now + self.skill_gcd
 
-        # send CD to the player
-        cd = {"skill": skill_key,               # skill's key
-              "cd": skill.cd,                   # skill's cd
-              "gcd": self.skill_gcd}
+        skill_cd = {
+            "skill_cd": {
+                "skill": skill_key,  # skill's key
+                "cd": skill.cd,  # skill's cd
+                "gcd": self.skill_gcd
+            }
+        }
 
-        self.msg({"skill_cd": cd})
+        skill_result = {
+            "skill_cast": cast_result
+        }
+
+        self.msg(skill_cd)
+
+        # send skill result to the player's location
+        if self.is_in_combat():
+            self.ndb.combat_handler.msg_all(skill_result)
+        else:
+            if self.location:
+                # send skill result to its location
+                self.location.msg_contents(skill_result)
+            else:
+                self.msg(skill_result)
+
         return
 
     def auto_cast_skill(self):
@@ -606,7 +626,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         for skill in self.db.skills.values():
             if skill.passive:
-                skill.cast_skill(self, passive=True)
+                skill.cast_skill(self)
                 
     def start_auto_combat_skill(self):
         """
@@ -774,8 +794,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         :param result: defines.COMBAT_WIN, defines.COMBAT_LOSE, or defines.COMBAT_DRAW
         :param opponents: combat opponents
-        :param exp: get experience
-        :param loots: captured objects
         """
         pass
 
@@ -783,21 +801,33 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Leave the current combat.
         """
-        if self.ndb.combat_handler:
-            self.ndb.combat_handler.leave_combat(self)
+        # remove combat commands
+        self.cmdset.delete(settings.CMDSET_COMBAT)
 
-    def after_left_combat(self, result, opponents=None):
-        """
-        Called after the character left the current combat.
-        """
-        if result == defines.COMBAT_LOSE:
-            self.die(opponents)
-            # trigger event
-            self.event.at_character_die()
-        elif result == defines.COMBAT_WIN:
-            # trigger event
-            for opponent in opponents:
-                opponent.event.at_character_kill(self)
+        status = None
+        opponents = None
+        if self.ndb.combat_handler:
+            result = self.ndb.combat_handler.get_combat_result(self)
+            if result:
+                status, opponents = result
+
+            self.ndb.combat_handler.leave_combat(self)
+            del self.ndb.combat_handler
+
+        if self.is_temp:
+            # delete template character and notify its location
+            location = self.location
+
+            delete_object(self.dbref)
+            if location:
+                for content in location.contents:
+                    if content.has_account:
+                        content.show_location()
+        else:
+            if status == defines.COMBAT_LOSE:
+                self.die(opponents)
+            else:
+                self.recover()
 
     def set_team(self, team_id):
         """

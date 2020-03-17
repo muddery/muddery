@@ -7,6 +7,7 @@ import time
 import random
 from django.conf import settings
 from evennia.utils import logger
+from muddery.combat.base_combat_handler import CStatus
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 
@@ -33,9 +34,9 @@ class ChooseSkill(object):
             return
 
         team = caller.get_team()
-        characters = combat.get_all_characters()
+        chars = combat.get_combat_characters()
         # teammates = [c for c in characters if c.get_team() == team]
-        opponents = [c for c in characters if c.get_team() != team]
+        opponents = [c["char"] for c in chars if c["status"] == CStatus.ACTIVE and c["char"].get_team() != team]
 
         if caller.prop.hp < caller.prop.max_hp / 2:
             # heal self

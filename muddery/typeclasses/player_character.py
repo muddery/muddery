@@ -967,8 +967,6 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         :param result: defines.COMBAT_WIN, defines.COMBAT_LOSE, or defines.COMBAT_DRAW
         :param opponents: combat opponents
-        :param exp: get experience
-        :param loots: captured objects
         """
         if result == defines.COMBAT_LOSE:
             self.msg({"combat_finish": {"lose": True}})
@@ -1002,17 +1000,29 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 }
             })
 
-    def after_left_combat(self, result, opponents=None):
+    def leave_combat(self):
         """
-        Called after the character left the current combat.
+        Leave the current combat.
         """
-        self.msg({"left_combat": True})
+        result = None
+        if self.ndb.combat_handler:
+            result = self.ndb.combat_handler.get_combat_result(self)
 
-        super(MudderyPlayerCharacter, self).after_left_combat(result, opponents)
+        # set result
+        if result:
+            status, opponents = result
 
-        # call quest handler
-        for opponent in opponents:
-            self.quest_handler.at_objective(defines.OBJECTIVE_KILL, opponent.get_data_key())
+            # trigger events
+            if status == defines.COMBAT_WIN:
+                for opponent in opponents:
+                    opponent.event.at_character_kill(self)
+                    opponent.event.at_character_die()
+
+                # call quest handler
+                for opponent in opponents:
+                    self.quest_handler.at_objective(defines.OBJECTIVE_KILL, opponent.get_data_key())
+
+        super(MudderyPlayerCharacter, self).leave_combat()
 
         # show status
         self.show_status()

@@ -114,7 +114,9 @@ MudderyClient.prototype = {
     displayData : function(data, context) {
         for (var key in data) {
             try {
-                log(key, data[key]);
+                var log_data = {}
+                log_data[key] = data[key];
+                console.log(JSON.stringify(log_data));
 
                 if (key == "settings") {
                     mud.main_frame.setClient(data[key]);
@@ -208,9 +210,6 @@ MudderyClient.prototype = {
                 }
                 else if (key == "joined_combat") {
                     mud.main_frame.showCombat(data[key]);
-                }
-                else if (key == "left_combat") {
-                    mud.combat_window.leftCombat(data[key]);
                 }
                 else if (key == "combat_finish") {
                     mud.combat_window.combatFinish(data[key]);

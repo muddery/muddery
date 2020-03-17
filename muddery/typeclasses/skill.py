@@ -143,59 +143,43 @@ class MudderySkill(TYPECLASS("OBJECT")):
             if gcd > 0:
                 self.db.cd_finish_time = time.time() + gcd
 
-    def cast_skill(self, target, passive):
+    def cast_skill(self, target):
         """
         Cast this skill.
 
         Args:
             target: (object) skill's target.
-            passive: (boolean) cast a passive skill.
 
         Returns:
-            (result, cd):
-                result: (dict) skill's result
-                cd: (dict) skill's cd
+            skill_cast: (dict) skill's result
         """
-        message = {}
-        not_available = self.check_available(passive)
+        skill_cast = {}
+        not_available = self.check_available()
         if not_available:
-            message = {"cast": not_available}
+            skill_cast = {"cast": not_available}
         else:
             results = self.do_skill(target)
 
-            if not passive:
-                # set message
-                message = {
-                    "caller": self.owner_dbref,
-                    "skill": self.get_data_key(),
-                    "main_type": self.main_type,
-                    "sub_type": self.sub_type,
-                    "cast": self.cast_message(target),
+            # set message
+            skill_cast = {
+                "caller": self.owner_dbref,
+                "skill": self.get_data_key(),
+                "main_type": self.main_type,
+                "sub_type": self.sub_type,
+                "cast": self.cast_message(target),
+                "status": {
+                    self.owner.dbref: self.owner.get_combat_status(),
                 }
+            }
 
-                if target:
-                    message["target"] = target.dbref
+            if target:
+                skill_cast["target"] = target.dbref
+                skill_cast["status"][target.dbref] = target.get_combat_status()
 
-                if results:
-                    message["result"] = " ".join(results)
+            if results:
+                skill_cast["result"] = " ".join(results)
 
-                # set status
-                status = {}
-                if self.owner.is_in_combat():
-                    for char in self.owner.ndb.combat_handler.get_all_characters():
-                        status[char.dbref] = char.get_combat_status()
-                elif self.owner.location:
-                    status[self.owner.dbref] = self.owner.get_combat_status()
-                message["status"] = status
-
-        if not passive and message:
-            # send message
-            if self.owner.is_in_combat():
-                self.owner.ndb.combat_handler.msg_all({"skill_cast": message})
-            elif self.owner.location:
-                self.owner.location.msg_contents({"skill_cast": message})
-
-        return True
+        return skill_cast
         
     def do_skill(self, target):
         """
@@ -211,20 +195,14 @@ class MudderySkill(TYPECLASS("OBJECT")):
         # call skill function
         return STATEMENT_HANDLER.do_skill(self.function, self.owner, target)
 
-    def check_available(self, passive):
+    def check_available(self):
         """
         Check this skill.
-        
-        Args:
-            passive: (boolean) cast a passive skill.
 
         Returns:
             message: (string) If the skill is not available, returns a string of reason.
                      If the skill is available, return "".
         """
-        if not passive and self.passive:
-            return _("{C%s{n is a passive skill!") % self.get_name()
-
         if self.is_cooling_down():
             return _("{C%s{n is not ready yet!") % self.get_name()
 
@@ -233,7 +211,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
     def is_available(self, passive):
         """
         If this skill is available.
-        
+
         Args:
             passive: (boolean) cast a passive skill.
 

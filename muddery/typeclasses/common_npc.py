@@ -9,6 +9,7 @@ creation commands.
 """
 
 from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.utils import defines
 from muddery.utils.localized_strings_handler import _
 
 

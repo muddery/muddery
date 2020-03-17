@@ -10,11 +10,11 @@ The life of a combat:
 5. can_finish: Check if the combat is finished. A combat finishes when only one or zero team has alive characters, or
    the combat is timeout. If a combat can finish calls the finish method.
 6. finish: send combat results to all characters.
-7. leave_combat: characters call to leave the combat.
+7. leave_combat: characters notify the combat that it has left.
 8. stop: if all characters left, remove the combat.
 """
 
-import random
+from enum import Enum
 import traceback
 from twisted.internet import reactor
 from django.conf import settings
@@ -23,11 +23,21 @@ from evennia.utils import logger
 from muddery.utils import defines
 
 
+class CStatus(Enum):
+    """
+    Character's combat status.
+    """
+    JOINED = 1
+    ACTIVE = 2
+    FINISHED = 3
+    ESCAPED = 4
+    LEFT = 5
+
+
 class BaseCombatHandler(DefaultScript):
     """
     This implements the combat handler.
     """
-
     # standard Script hooks
     def at_script_creation(self):
         "Called when script is first created"
@@ -35,7 +45,13 @@ class BaseCombatHandler(DefaultScript):
         self.interval = 0  # keep running until the battle ends
         self.persistent = False
 
-        # store all combatants
+        """
+        store all combatants
+        {
+            "status": character's status
+            "char": character's object
+        }
+        """
         self.characters = {}
 
         # if battle is finished
@@ -57,10 +73,6 @@ class BaseCombatHandler(DefaultScript):
         "Called just before the script is stopped/destroyed."
         if self.timer and self.timer.active():
             self.timer.cancel()
-
-        for character in self.characters.values():
-            # note: the list() call above disconnects list from database
-            self._cleanup_character(character)
 
     def at_timeout(self):
         """
@@ -86,12 +98,20 @@ class BaseCombatHandler(DefaultScript):
         self.desc = desc
         self.timeout = timeout
 
+        # Add teams.
         for team in teams:
             for character in teams[team]:
                 character.set_team(team)
-                self.characters[character.dbref] = character
 
-        for character in self.characters.values():
+                self.characters[character.dbref] = {
+                    "char": character,
+                    "status":  CStatus.JOINED,
+                }
+
+        # Set combat to characters.
+        for char in self.characters.values():
+            character = char["char"]
+
             # add the combat handler
             character.ndb.combat_handler = self
 
@@ -110,7 +130,8 @@ class BaseCombatHandler(DefaultScript):
         """
         Start a combat, make all NPCs to cast skills automatically.
         """
-        pass
+        for char in self.characters.values():
+            char["status"] = CStatus.ACTIVE
 
     def show_combat(self, character):
         """
@@ -148,18 +169,18 @@ class BaseCombatHandler(DefaultScript):
 
         Return True or False
         """
-        if not self.characters:
-            return False
-
         if not len(self.characters):
             return False
 
         teams = set()
-        for character in self.characters.values():
-            if character.is_alive():
-                teams.add(character.get_team())
-                if len(teams) > 1:
-                    return False
+        for char in self.characters.values():
+            if char["status"] == CStatus.ACTIVE:
+                character = char["char"]
+                if character.is_alive():
+                    teams.add(character.get_team())
+                    if len(teams) > 1:
+                        # More than one team has alive characters.
+                        return False
 
         return True
 
@@ -172,18 +193,42 @@ class BaseCombatHandler(DefaultScript):
         if self.timer and self.timer.active():
             self.timer.cancel()
 
-        if self.characters:
-            # get winners and losers
-            winner_team = None
-            for character in self.characters.values():
+        # get winners and losers
+        winner_team = None
+        for char in self.characters.values():
+            if char["status"] == CStatus.ACTIVE:
+                character = char["char"]
                 if character.is_alive():
                     winner_team = character.get_team()
                     break
 
-            self.winners = {dbref: char for dbref, char in self.characters.items() if char.get_team() == winner_team}
-            self.losers = {dbref: char for dbref, char in self.characters.items() if char.get_team() != winner_team}
+        self.winners = {dbref: char["char"] for dbref, char in self.characters.items()
+                        if char["status"] == CStatus.ACTIVE and char["char"].get_team() == winner_team}
+        self.losers = {dbref: char["char"] for dbref, char in self.characters.items()
+                       if char["status"] == CStatus.ACTIVE and char["char"].get_team() != winner_team}
 
-            self.set_combat_results(self.winners, self.losers)
+        for char in self.characters.values():
+            char["status"] = CStatus.FINISHED
+
+        self.set_combat_results(self.winners, self.losers)
+
+    def escape_combat(self, caller):
+        """
+        Character escaped.
+
+        Args:
+            caller: (object) the caller of the escape skill.
+
+        Returns:
+            None
+        """
+        if caller and caller.dbref in self.characters:
+            self.characters[caller.dbref]["status"] = CStatus.ESCAPED
+            caller.combat_result(defines.COMBAT_ESCAPED)
+
+            if self.can_finish():
+                # if there is only one team left, kill this handler
+                self.finish()
 
     def leave_combat(self, character):
         """
@@ -192,34 +237,30 @@ class BaseCombatHandler(DefaultScript):
         :param character: character object
         """
         if character.dbref in self.characters:
-            self._cleanup_character(character)
-            del self.characters[character.dbref]
+            if self.characters[character.dbref]["status"] == CStatus.LEFT:
+                return
+            self.characters[character.dbref]["status"] = CStatus.LEFT
 
-        # notify combat finished
-        if character.dbref in self.winners:
-            character.after_left_combat(defines.COMBAT_WIN, self.losers.values())
-        elif character.dbref in self.losers:
-            character.after_left_combat(defines.COMBAT_LOSE, self.winners.values())
+        all_player_left = True
+        for char in self.characters.values():
+            if char["status"] != CStatus.LEFT and\
+               char["char"].is_typeclass(settings.BASE_PLAYER_CHARACTER_TYPECLASS, exact=False):
+                all_player_left = False
+                break
 
-        if not self.characters or not len(self.characters):
-            # There is no character in combat.
+        if all_player_left:
+            # There is no player character in combat.
+            for char in self.characters.values():
+                if char["status"] != CStatus.LEFT:
+                    char["status"] = CStatus.LEFT
+                    char["char"].leave_combat()
+
             self.stop()
-
-    def _cleanup_character(self, character):
-        """
-        Remove character from handler and clean
-        it of the back-reference and cmdset
-        """
-        # remove the combat handler
-        del character.ndb.combat_handler
-
-        # remove combat commands
-        character.cmdset.delete(settings.CMDSET_COMBAT)
 
     def msg_all(self, message):
         "Send message to all combatants"
-        for character in self.characters.values():
-            character.msg(message)
+        for char in self.characters.values():
+            char["char"].msg(message)
 
     def set_combat_draw(self):
         """
@@ -228,8 +269,8 @@ class BaseCombatHandler(DefaultScript):
         Returns:
             None.
         """
-        for character in self.characters.values():
-            character.combat_result(defines.COMBAT_DRAW)
+        for char in self.characters.values():
+            char["char"].combat_result(defines.COMBAT_DRAW)
 
     def set_combat_results(self, winners, losers):
         """
@@ -256,7 +297,8 @@ class BaseCombatHandler(DefaultScript):
                       "timeout": self.timeout,
                       "characters": []}
         
-        for character in self.characters.values():
+        for char in self.characters.values():
+            character = char["char"]
             info = character.get_appearance(self)
             info["team"] = character.get_team()
 
@@ -264,13 +306,10 @@ class BaseCombatHandler(DefaultScript):
 
         return appearance
 
-    def get_all_characters(self):
+    def get_combat_characters(self):
         """
         Get all characters in combat.
         """
-        if not self.characters:
-            return []
-
         return self.characters.values()
 
     def is_finished(self):
@@ -292,26 +331,17 @@ class BaseCombatHandler(DefaultScript):
         if character.dbref not in self.characters:
             return
 
-        if character.dbref in self.winners:
-            return defines.COMBAT_WIN, self.losers.values()
+        if self.characters[character.dbref]:
+            status = self.characters[character.dbref]["status"]
 
-        if character.dbref in self.losers:
-            return defines.COMBAT_LOSE, self.winners.values()
-
-    def skill_escape(self, caller):
-        """
-        Character escaped by a skill.
-
-        Args:
-            caller: (object) the caller of the escape skill.
-
-        Returns:
-            None
-        """
-        if caller:
-            caller.combat_result(defines.COMBAT_ESCAPED)
-
-            # Skill function will call finish func later, so should not check finish here.
-            if caller.dbref in self.characters:
-                self._cleanup_character(caller)
-                del self.characters[caller.dbref]
+            if status == CStatus.ESCAPED:
+                return defines.COMBAT_ESCAPED, None
+            elif status == CStatus.FINISHED or status == CStatus.LEFT:
+                if character.dbref in self.winners:
+                    return defines.COMBAT_WIN, self.losers.values()
+                elif character.dbref in self.losers:
+                    return defines.COMBAT_LOSE, self.winners.values()
+                else:
+                    return defines.COMBAT_DRAW, None
+            else:
+                return defines.COMBAT_DRAW, None

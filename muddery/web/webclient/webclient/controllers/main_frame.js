@@ -3575,7 +3575,7 @@ MudderyCombat.prototype.showButtonCD = function(button_id) {
 /*
  * Close the combat window.
  */
-MudderyCombat.prototype.leftCombat = function(data) {
+MudderyCombat.prototype.leaveCombat = function() {
 	this.combat_finished = true;
 	if (this.interval_id != null) {
 		window.clearInterval(this.interval_id);
@@ -3666,6 +3666,7 @@ MudderyCombatResult.prototype.bindEvents = function() {
 MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
     core.service.leaveCombat();
+    mud.combat_window.leaveCombat();
 }
 
 /*
