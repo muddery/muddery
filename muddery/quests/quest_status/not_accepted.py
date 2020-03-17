@@ -3,13 +3,15 @@ Quest status.
 """
 
 from muddery.quests.base_quest_status import BaseQuestStatus
+from muddery.utils.localized_strings_handler import _
 
 
-class NotAccpeted(BaseQuestStatus):
+class NotAccepted(BaseQuestStatus):
     """
-    The call has not accepted the quest.
+    The quest has not been accepted.
     """
     key = "NOT_ACCEPTED"
+    name = _("Quest Not Accepted", category="quest_status")
 
     def match(self, caller, quest_key):
         """

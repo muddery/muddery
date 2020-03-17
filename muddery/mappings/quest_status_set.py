@@ -41,5 +41,11 @@ class QuestStatusSet(object):
         """
         return self.dict.keys()
 
+    def choice_all(self):
+        """
+        Get all event types and names for form choice.
+        """
+        return [(key, "%s (%s)" % (value.name, key)) for key, value in self.dict.items()]
+
 
 QUEST_STATUS_SET = QuestStatusSet()

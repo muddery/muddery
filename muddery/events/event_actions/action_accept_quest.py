@@ -15,7 +15,7 @@ class ActionLearnSkill(BaseEventAction):
     Learn a skill.
     """
     key = "ACTION_ACCEPT_QUEST"
-    name = _("Accept a Quest", category="actions")
+    name = _("Accept a Quest", category="event_actions")
     model_name = "action_accept_quest"
     repeatedly = False
 

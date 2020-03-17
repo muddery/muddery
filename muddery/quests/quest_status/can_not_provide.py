@@ -3,13 +3,15 @@ Quest status.
 """
 
 from muddery.quests.base_quest_status import BaseQuestStatus
+from muddery.utils.localized_strings_handler import _
 
 
-class NotInProgress(BaseQuestStatus):
+class CanNotProvide(BaseQuestStatus):
     """
-    The call can provide the quest.
+    Can not provide the quest.
     """
-    key = "NOT_IN_PROGRESS"
+    key = "CAN_NOT_PROVIDE"
+    name = _("Can Not Provide Quest", category="quest_status")
 
     def match(self, caller, quest_key):
         """
@@ -19,4 +21,3 @@ class NotInProgress(BaseQuestStatus):
             return False
 
         return not caller.quest_handler.can_provide(quest_key)
-    

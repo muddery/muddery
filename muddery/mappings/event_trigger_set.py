@@ -14,7 +14,7 @@ class EventTriggerSet(object):
     """
     def choice_all(self):
         """
-        Get the processer responds to the request.
+        Get the processor responds to the request for form choice.
         """
         return EventTrigger.choice_all()
 

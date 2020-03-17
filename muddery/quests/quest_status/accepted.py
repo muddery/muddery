@@ -3,13 +3,15 @@ Quest status.
 """
 
 from muddery.quests.base_quest_status import BaseQuestStatus
+from muddery.utils.localized_strings_handler import _
 
 
-class Accpeted(BaseQuestStatus):
+class Accepted(BaseQuestStatus):
     """
-    The call has accepted the quest.
+    The quest has been accepted.
     """
     key = "ACCEPTED"
+    name = _("Quest Accepted", category="quest_status")
 
     def match(self, caller, quest_key):
         """
@@ -20,4 +22,3 @@ class Accpeted(BaseQuestStatus):
 
         return caller.quest_handler.is_finished(quest_key) or \
             caller.quest_handler.is_in_progress(quest_key)
-    

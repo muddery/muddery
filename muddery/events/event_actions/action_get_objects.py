@@ -14,7 +14,7 @@ class ActionGetObjects(BaseIntervalAction):
     Attack a target.
     """
     key = "ACTION_GET_OBJECTS"
-    name = _("Get Objects", category="actions")
+    name = _("Get Objects", category="event_actions")
     model_name = "action_get_objects"
     repeatedly = True
 

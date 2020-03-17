@@ -14,7 +14,7 @@ class ActionMessage(BaseIntervalAction):
     Attack a target.
     """
     key = "ACTION_MESSAGE"
-    name = _("Message", category="actions")
+    name = _("Message", category="event_actions")
     model_name = "action_message"
     repeatedly = True
 

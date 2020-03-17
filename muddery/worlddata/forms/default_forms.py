@@ -588,8 +588,7 @@ class QuestDependenciesForm(forms.ModelForm):
         self.fields['quest'] = forms.ChoiceField(choices=choices)
         self.fields['dependency'] = forms.ChoiceField(choices=choices)
         
-        objects = QUEST_STATUS_SET.all()
-        choices = [(obj, obj) for obj in objects]
+        choices = QUEST_STATUS_SET.choice_all()
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
@@ -611,8 +610,7 @@ class DialogueQuestDependenciesForm(forms.ModelForm):
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['dependency'] = forms.ChoiceField(choices=choices)
         
-        objects = QUEST_STATUS_SET.all()
-        choices = [obj for obj in objects]
+        choices = QUEST_STATUS_SET.choice_all()
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)

@@ -3,13 +3,15 @@ Quest status.
 """
 
 from muddery.quests.base_quest_status import BaseQuestStatus
+from muddery.utils.localized_strings_handler import _
 
 
 class CanProvide(BaseQuestStatus):
     """
-    The call can provide the quest.
+    Can provide the quest.
     """
     key = "CAN_PROVIDE"
+    name = _("Can Provide Quest", category="quest_status")
 
     def match(self, caller, quest_key):
         """
@@ -19,4 +21,3 @@ class CanProvide(BaseQuestStatus):
             return False
 
         return caller.quest_handler.can_provide(quest_key)
-    

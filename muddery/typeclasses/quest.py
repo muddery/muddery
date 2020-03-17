@@ -189,7 +189,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
 
     def is_accomplished(self):
         """
-        If all objectives are accomplished or not.
+        All objectives of this quest are accomplished.
         """
         for ordinal in self.objectives:
             obj_num = self.objectives[ordinal]["number"]

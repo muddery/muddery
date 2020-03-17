@@ -15,7 +15,7 @@ class ActionRoomInterval(BaseEventAction):
     Triggers an event in a room at interval.
     """
     key = "ACTION_ROOM_INTERVAL"
-    name = _("Room Interval Action", category="actions")
+    name = _("Room Interval Action", category="event_actions")
     model_name = "action_room_interval"
     repeatedly = False
 

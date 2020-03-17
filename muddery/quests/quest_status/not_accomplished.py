@@ -3,13 +3,15 @@ Quest status.
 """
 
 from muddery.quests.base_quest_status import BaseQuestStatus
+from muddery.utils.localized_strings_handler import _
 
 
 class NotAccomplished(BaseQuestStatus):
     """
-    The quest has not accomplished.
+    The quest's objectives are not accomplished.
     """
     key = "NOT_ACCOMPLISHED"
+    name = _("Objectives Not Accomplished", category="quest_status")
 
     def match(self, caller, quest_key):
         """

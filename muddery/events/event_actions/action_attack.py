@@ -14,7 +14,7 @@ class ActionAttack(BaseEventAction):
     Attack a target.
     """
     key = "ACTION_ATTACK"
-    name = _("Attack", category="actions")
+    name = _("Attack", category="event_actions")
     model_name = "action_attack"
     repeatedly = False
 

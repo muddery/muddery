@@ -14,6 +14,7 @@ class LocalizedStringsHandler(object):
         """
         Initialize handler
         """
+        self.loaded = False
         self.clear()
 
     def clear(self):
@@ -33,6 +34,8 @@ class LocalizedStringsHandler(object):
             for record in LOCALIZED_STRINGS.all():
                 # Add db fields to dict. Overwrite system localized strings.
                 self.dict[(record.category, record.origin)] = record.local
+
+            self.loaded = True
         except Exception as e:
             print("Can not load custom localized string: %s" % e)
 
@@ -40,6 +43,9 @@ class LocalizedStringsHandler(object):
         """
         Translate origin string to local string.
         """
+        if not self.loaded:
+            self.reload()
+
         try:
             # Get local string.
             local = self.dict[(category, origin)]
