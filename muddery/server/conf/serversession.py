@@ -51,16 +51,19 @@ class ServerSession(BaseServerSession):
         raw = options.get("raw", False)
         context = kwargs.get("context", "")
 
-        if raw:
-            out_text = text
+        if self.protocol_key == 'telnet':
+            out_text = str(text)
         else:
-            try:
-                out_text = json.dumps({"data": text, "context": context})
-            except Exception as e:
-                out_text = json.dumps({"data": {"err": "There is an error occurred while outputing messages."}})
-                logger.log_tracemsg("json.dumps failed: %s" % e)
+            if raw:
+                out_text = text
+            else:
+                try:
+                    out_text = json.dumps({"data": text, "context": context}, ensure_ascii=False)
+                except Exception as e:
+                    out_text = json.dumps({"data": {"err": "There is an error occurred while outputing messages."}})
+                    logger.log_tracemsg("json.dumps failed: %s" % e)
 
-        # set raw=True
-        kwargs["options"].update({"raw": True, "client_raw": True})
+            # set raw=True
+            kwargs["options"].update({"raw": True, "client_raw": True})
 
         return super(ServerSession, self).data_out(text=out_text, **kwargs)
