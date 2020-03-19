@@ -226,6 +226,20 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         #MATCH_QUEUE_HANDLER.remove(self)
 
+    def get_data_key(self, default=""):
+        """
+        Get data's key.
+
+        Args:
+            default: (string) default value if can not find the data key.
+        """
+        key = GAME_SETTINGS.get("default_player_character_key")
+        if not key:
+            key = self.attributes.get(key="key", category=settings.DATA_KEY_CATEGORY, strattr=True)
+            if not key:
+                key = default
+        return key
+
     def set_nickname(self, nickname):
         """
         Set player character's nickname.
