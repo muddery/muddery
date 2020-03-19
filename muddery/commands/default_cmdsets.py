@@ -104,6 +104,7 @@ class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
         self.add(unloggedin.CmdUnconnectedConnect())
         self.add(unloggedin.CmdUnconnectedQuit())
         self.add(unloggedin.CmdQuickLogin())
+        self.add(unloggedin.CmdUnconnectedConnectT())
 
 
 class SessionCmdSet(default_cmds.SessionCmdSet):
