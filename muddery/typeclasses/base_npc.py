@@ -14,6 +14,7 @@ from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.worlddata.dao.npc_dialogues_mapper import NPC_DIALOGUES
 from muddery.worlddata.dao.npc_shops_mapper import NPC_SHOPS
+from muddery.utils import defines
 from muddery.utils.localized_strings_handler import _
 
 
@@ -124,3 +125,24 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
         Returns (can_provide_quest, can_complete_quest).
         """
         return DIALOGUE_HANDLER.have_quest(caller, self)
+
+    def leave_combat(self):
+        """
+        Leave the current combat.
+        """
+        status = None
+        opponents = None
+        if self.ndb.combat_handler:
+            result = self.ndb.combat_handler.get_combat_result(self)
+            if result:
+                status, opponents = result
+
+        if not self.is_temp:
+            if status == defines.COMBAT_LOSE:
+                self.die(opponents)
+
+        super(MudderyBaseNPC, self).leave_combat()
+
+        if not self.is_temp:
+            if status != defines.COMBAT_LOSE:
+                self.recover()

@@ -197,8 +197,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # Set body values.
         for key, info in self.get_properties_info().items():
             if not info["mutable"]:
-                self.custom_properties_handler.add(key, values.get(key, info["default"]))
-                self.body_properties_handler.add(key, values.get(key, info["default"]))
+                self.custom_properties_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
+                self.body_properties_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
 
         # Set default mutable custom properties.
         self.set_mutable_custom_properties()
@@ -804,13 +804,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # remove combat commands
         self.cmdset.delete(settings.CMDSET_COMBAT)
 
-        status = None
-        opponents = None
         if self.ndb.combat_handler:
-            result = self.ndb.combat_handler.get_combat_result(self)
-            if result:
-                status, opponents = result
-
             self.ndb.combat_handler.leave_combat(self)
             del self.ndb.combat_handler
 
@@ -823,11 +817,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
                 for content in location.contents:
                     if content.has_account:
                         content.show_location()
-        else:
-            if status == defines.COMBAT_LOSE:
-                self.die(opponents)
-            else:
-                self.recover()
 
     def set_team(self, team_id):
         """

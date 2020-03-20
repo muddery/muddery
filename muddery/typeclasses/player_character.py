@@ -1018,23 +1018,25 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         Leave the current combat.
         """
-        result = None
+        status = None
+        opponents = None
         if self.ndb.combat_handler:
             result = self.ndb.combat_handler.get_combat_result(self)
+            if result:
+                status, opponents = result
 
-        # set result
-        if result:
-            status, opponents = result
+        # trigger events
+        if status == defines.COMBAT_WIN:
+            for opponent in opponents:
+                opponent.event.at_character_kill(self)
+                opponent.event.at_character_die()
 
-            # trigger events
-            if status == defines.COMBAT_WIN:
-                for opponent in opponents:
-                    opponent.event.at_character_kill(self)
-                    opponent.event.at_character_die()
+            # call quest handler
+            for opponent in opponents:
+                self.quest_handler.at_objective(defines.OBJECTIVE_KILL, opponent.get_data_key())
 
-                # call quest handler
-                for opponent in opponents:
-                    self.quest_handler.at_objective(defines.OBJECTIVE_KILL, opponent.get_data_key())
+        elif status == defines.COMBAT_LOSE:
+            self.die(opponents)
 
         super(MudderyPlayerCharacter, self).leave_combat()
 

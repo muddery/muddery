@@ -406,8 +406,8 @@ class DefaultObjectsForm(forms.ModelForm):
         super(DefaultObjectsForm, self).__init__(*args, **kwargs)
 
         # all character's
-        characters = set([record.key for record in CM.CHARACTERS.objects.all()])
-        choices = [(key, key) for key in characters]
+        objects = CM.CHARACTERS.all_with_base()
+        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['character'] = forms.ChoiceField(choices=choices)
 
         # available objects
@@ -514,8 +514,8 @@ class DefaultSkillsForm(forms.ModelForm):
         super(DefaultSkillsForm, self).__init__(*args, **kwargs)
 
         # all character's models
-        characters = set([record.key for record in CM.CHARACTERS.objects.all()])
-        choices = [(key, key) for key in characters]
+        objects = CM.CHARACTERS.all_with_base()
+        choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['character'] = forms.ChoiceField(choices=choices)
 
         objects = CM.SKILLS.all_with_base()
