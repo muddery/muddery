@@ -20,6 +20,7 @@ from muddery.utils.exception import MudderyError
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.utils.defines import ConversationType
 from muddery.worlddata.dao.default_objects_mapper import DEFAULT_OBJECTS
 from muddery.worlddata.dao.properties_dict_mapper import PROPERTIES_DICT
 from evennia.utils.utils import lazy_property
@@ -173,11 +174,32 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         """
         self.available_channels = self.get_available_channels()
-        
+
+        allow_commands = False
+        if self.account:
+            if self.is_superuser:
+                allow_commands = True
+            else:
+                for perm in self.account.permissions.all():
+                    if perm in settings.PERMISSION_COMMANDS:
+                        allow_commands = True
+                        break
+
+        # Django's superuser even it is quelled.
+        if not allow_commands:
+            allow_commands = self.db_account and self.db_account.is_superuser
+
         # Send puppet info to the client first.
-        self.msg({"puppet": {"dbref": self.dbref,
-                             "name": self.get_name(),
-                             "icon": getattr(self, "icon", None)}})
+        output = {
+            "dbref": self.dbref,
+            "name": self.get_name(),
+            "icon": getattr(self, "icon", None),
+        }
+
+        if allow_commands:
+            output["allow_commands"] = 1
+
+        self.msg({"puppet": output})
 
         # send character's data to player
         message = {"status": self.return_status(),
@@ -269,9 +291,15 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Returns:
             (dict) channels
         """
-        channels = {"": _("Say", category="channels"),
-                    "Public": _("Public", category="channels")}
+        channels = {}
+        channel = ChannelDB.objects.get_channel(settings.DEFAULT_CHANNELS[0]["key"])
+        if channel.has_connection(self):
+            channels[channel.key] = {
+                "type": "CHANNEL",
+                "name": _("Public", category="channels"),
+            }
 
+        """
         commands = False
         if self.account:
             if self.is_superuser:
@@ -287,8 +315,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             commands = self.db_account and self.db_account.is_superuser
 
         if commands:
-            channels["cmd"] = _("Cmd")
-
+            channels["CMD"] = {
+                "type": "CMD",
+                "name": _("Cmd"),
+            }
+        """
         return channels
 
     def get_revealed_map(self):
@@ -1277,42 +1308,22 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # notify the player
         self.msg({"msg": _("{C%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})
 
-    def say(self, channel, message):
+    def get_message(self, caller, message):
         """
-        Say something in the channel.
+        Receive a message from a character.
 
-        Args:
-            channel: (string) channel's key.
-            message: (string) message to say.
-
-        Returns:
-            None
+        :param caller: talker.
+        :param message: content.
         """
-        if not (channel in self.available_channels):
-            self.msg({"alert":_("You can not say here.")})
-            return
-
-        # Build the string to emit to neighbors.
-        emit_string = "%s: %s" % (self.get_name(), message)
-            
-        if not channel:
-            # Say in the room.
-            if self.solo_mode:
-                self.msg(emit_string)
-            else:
-                self.location.msg_contents(emit_string)
-        else:
-            channels = ChannelDB.objects.filter(db_key=channel)
-            if not channels:
-                self.msg(_("You can not talk in this channel."))
-                return
-                
-            channel_obj = channels[0]
-            if not channel_obj.access(self, channel, "send"):
-                self.msg(_("You can not access this channel."))
-                return
-
-            channel_obj.msg(emit_string)
+        output = {
+            "type": ConversationType.PRIVATE.value,
+            "channel": self.get_name(),
+            "from_dbref": caller.dbref,
+            "from_name": caller.get_name(),
+            "msg": message
+        }
+        self.msg({"conversation": output})
+        caller.msg({"conversation": output})
 
     def at_object_delete(self):
         """

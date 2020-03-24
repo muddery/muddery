@@ -51,6 +51,7 @@ MudderyMain.prototype.loadFrame = function() {
     mud.map_window = new MudderyMap($("#map-window"));
     mud.shop_window = new MudderyShop($("#shop-window"));
     mud.combat_window = new MudderyCombat($("#combat-window"));
+    mud.conversation_window = new MudderyConversation($("#conversation-window"));
     mud.popup_alert = new MudderyPopupMessage($("#popup-alert"));
     mud.popup_message = new MudderyPopupMessage($("#popup-message"));
     mud.popup_object = new MudderyPopupObject($("#popup-object"));

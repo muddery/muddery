@@ -171,4 +171,8 @@ MudderyLocalDict = {
     "Can not connect to the server.": "无法连接到服务器。",
     "Password does not match.": "密码输入不符",
     "Shop": "商店",
+    "TO[": "发至[",
+    "FROM[": "来自[",
+    "ME": "我",
+    "LOCAL": "本地",
 };

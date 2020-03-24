@@ -13,6 +13,7 @@ from muddery.utils import defines
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.worlddata.dao.image_resources_mapper import IMAGE_RESOURCES
 from muddery.mappings.typeclass_set import TYPECLASS
+from muddery.utils.defines import ConversationType
 from muddery.utils.localized_strings_handler import _
 from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
@@ -203,3 +204,23 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
         Get an object's available event triggers.
         """
         return [defines.EVENT_TRIGGER_ARRIVE]
+
+    def get_message(self, caller, message):
+        """
+        Receive a message from a character.
+
+        :param caller: talker.
+        :param message: content.
+        """
+        output = {
+            "type": ConversationType.LOCAL.value,
+            "channel": self.get_name(),
+            "from_dbref": caller.dbref,
+            "from_name": caller.get_name(),
+            "msg": message
+        }
+
+        if GAME_SETTINGS.get("solo_mode"):
+            caller.msg({"conversation": output})
+        else:
+            self.msg_contents({"conversation": output})

@@ -142,9 +142,12 @@ MudderyService.prototype = {
     },
     
     // send out a speech
-    say: function(channel, message) {
-        var args = {"channel": channel,
-                    "message": message}
+    say: function(type, target, message) {
+        var args = {
+            "type": type,
+            "target": target,
+            "message": message,
+        }
         Evennia.msg("text", this.cmdString("say", args));
     },
     

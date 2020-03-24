@@ -9,12 +9,14 @@ import math
 from django.conf import settings
 from evennia.utils import utils, logger
 from evennia import create_script
+from evennia.comms.models import ChannelDB
 from muddery.commands.base_command import BaseCommand
 from muddery.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.utils.game_settings import GAME_SETTINGS
 from muddery.utils.localized_strings_handler import _
 from muddery.utils.exception import MudderyError
 from muddery.utils.utils import search_obj_data_key
+from muddery.utils.defines import ConversationType
 import traceback
 import random
 
@@ -124,7 +126,7 @@ class CmdSay(BaseCommand):
 
     Usage:
         {"cmd":"say",
-         "args":{"channel": <channel's key>,
+         "args":{"target": <target's dbref>,
                  "msg": <message>
         }
 
@@ -143,17 +145,36 @@ class CmdSay(BaseCommand):
         if not self.args:
             return
 
-        if not "channel" in self.args:
-            caller.msg({"alert":_("You should choose a channel to say.")})
+        if not "target" in self.args:
+            caller.msg({"alert": _("You should choose a target to say.")})
             return
 
         if not "message" in self.args:
-            caller.msg({"alert":_("You should say something.")})
+            caller.msg({"alert": _("You should say something.")})
             return
 
-        channel = self.args["channel"]
+        target_type = self.args["type"]
+        target = self.args["target"]
         message = self.args["message"]
-        caller.say(channel, message)
+
+        obj = None
+        try:
+            if target_type == ConversationType.CHANNEL.value:
+                obj = ChannelDB.objects.filter(db_key=target)
+            elif target_type == ConversationType.LOCAL.value:
+                obj = search_obj_data_key(target)
+            elif target_type == ConversationType.PRIVATE.value:
+                obj = caller.search_dbref(target)
+            obj = obj[0]
+        except Exception as e:
+            ostring = "Can not find %s %s: %s" % (target_type, target, e)
+            logger.log_tracemsg(ostring)
+
+        if not obj:
+            self.msg({"alert": _("You can not talk to it.")})
+            return
+
+        obj.get_message(caller, message)
 
 
 #------------------------------------------------------------

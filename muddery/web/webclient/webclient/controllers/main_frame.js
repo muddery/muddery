@@ -62,10 +62,10 @@ MudderyMainFrame.prototype.showGetObjects = function(objects) {
 		for (var i = 0; i < objects.length; i++) {
 		    if (!objects[i].reject) {
                 if (first) {
-                    mud.scene_window.displayMessage(core.trans("You got:"));
+                    mud.scene_window.displayMsg(core.trans("You got:"));
                     first = false;
                 }
-                mud.scene_window.displayMessage(objects[i]["name"] + ": " + objects[i]["number"]);
+                mud.scene_window.displayMsg(objects[i]["name"] + ": " + objects[i]["number"]);
             }
 		}
 	}
@@ -80,10 +80,10 @@ MudderyMainFrame.prototype.showGetObjects = function(objects) {
 		for (var i = 0; i < objects.length; i++) {
 		    if (objects[i].reject) {
                 if (first) {
-                    mud.scene_window.displayMessage(core.trans("You can not get:"));
+                    mud.scene_window.displayMsg(core.trans("You can not get:"));
                     first = false;
                 }
-                mud.scene_window.displayMessage(objects[i]["name"] + ": " + objects[i]["reject"]);
+                mud.scene_window.displayMsg(objects[i]["name"] + ": " + objects[i]["reject"]);
             }
 		}
 	}
@@ -120,7 +120,7 @@ MudderyMainFrame.prototype.setSkillCast = function(result) {
 			message += core.text2html.parseHtml(result["result"]);
 		}
 		if (message) {
-			mud.scene_window.displayMessage(message);
+			mud.scene_window.displayMsg(message);
 		}
 	}
 	else {
@@ -142,7 +142,7 @@ MudderyMainFrame.prototype.setSkillCD = function(skill, cd, gcd) {
  */
 MudderyMainFrame.prototype.showGetExp = function(exp, combat) {
 	// show exp
-	mud.scene_window.displayMessage(core.trans("You got exp: ") + exp);
+	mud.scene_window.displayMsg(core.trans("You got exp: ") + exp);
 }
 
 /*
@@ -349,8 +349,6 @@ MudderyMainFrame.prototype.gotoWindow = function(win_controller) {
 	win_controller.reset();
 	win_controller.show();
 	this.windows_stack = [win_controller];
-
-	this.clearChannels();
 }
 
 
@@ -363,8 +361,6 @@ MudderyMainFrame.prototype.pushWindow = function(win_controller) {
 	win_controller.reset();
 	win_controller.show();
 	this.windows_stack.push(win_controller);
-
-	this.clearChannels();
 }
 
 
@@ -388,8 +384,6 @@ MudderyMainFrame.prototype.popWindow = function(win_controller) {
 	this.windows_stack.pop();
 	var last_controller = this.windows_stack[this.windows_stack.length - 1];
 	last_controller.show();
-
-	this.clearChannels();
 }
 
 
@@ -434,87 +428,6 @@ MudderyMainFrame.prototype.showConnect = function() {
 	$("#tab_connect").show();
 	
 	window_main.showContent("connect");
-	
-	this.clearChannels();
-}
-
-/*
- * Command to send out a speech.
- */
-MudderyMainFrame.prototype.sendMessage = function() {
-	if (!this.puppet) {
-		return;
-	}
-	
-	var message = $("#bar_msg_input").val();
-	$("#bar_msg_input").val("");
-
-	if (!message) {
-		return;
-	}
-
-	if (this.message_type == "cmd") {
-		core.service.sendRawCommand(message);
-	}
-	else {
-		core.service.say(this.message_type, message);
-	}
-}
-	
-/* 
- * Clear all channels' messages.
- */
-MudderyMainFrame.prototype.clearChannels = function() {
-	$("#bar_msg_type_menu>:not(.template)").remove();
-	$("#bar_msg_select").empty();
-	$("#bar_msg_type_menu").hide();
-	$("#input_bar").css("visibility", "hidden");
-}
-
-/*
- * Set available channels.
- */
-MudderyMainFrame.prototype.setChannels = function(channels) {
-    /*
-	$("#bar_msg_type_menu>:not(.template)").remove();
-	
-	var container = $("#bar_msg_type_menu");
-	var item_template = container.find("li.template");
-	
-	var first = true;
-	for (var key in channels) {
-		var text = channels[key];
-		
-		var item = item_template.clone()
-			.removeClass("template")
-			.attr("id", "bar_msg_type_" + key);
-
-		item.find("a")
-			.data("key", key)
-			.text(text);
-
-		item.appendTo(container);
-		
-		if (first) {
-			item.find("a")
-				.removeClass("dropdown-item")
-				.addClass("first-dropdown-item");
-
-			window_main.message_type = key;
-			$("#bar_msg_select").text(text);
-			
-			first = false;
-		}
-	}
-	
-	if (first) {
-		// no channel
-		$("#input_bar").css("visibility", "hidden");
-	}
-	else {
-		$("#input_bar").css("visibility", "visible");
-	}
-	*/
 }
 
 /*
@@ -533,17 +446,6 @@ MudderyMainFrame.prototype.showMsgTypes = function() {
 
 	menu.show();
 	menu.offset({top: top, left: left});
-}
-
-/*
- * Event when select a message type.
- */
-MudderyMainFrame.prototype.selectMsgType = function(caller) {
-	window_main.message_type = $(caller).data("key");
-	var text = $(caller).text();
-	$("#bar_msg_select").text($(caller).text());
-
-	$("#bar_msg_type_menu").hide();
 }
 
 
@@ -1645,6 +1547,7 @@ MudderyScene = function(el) {
     this.max_player = 10;
     this.path_color = "#666";
     this.path_width = "3";
+	this.max_messages = 200;
 
 	this.scene = null;
 }
@@ -1661,6 +1564,7 @@ MudderyScene.prototype.bindEvents = function() {
 	this.onClick(".scene-objects", ".object-button.npc", this.onNPC);
 	this.onClick(".scene-players", ".object-button.player", this.onPlayer);
 	this.onClick(".scene-exits", ".exit-button", this.onExit);
+	this.onClick(".conversation-button", this.OnConversation);
 
     !function(caller, method) {
 		$(window).on("resize", undefined, caller, function(event) {
@@ -1717,6 +1621,13 @@ MudderyScene.prototype.onExit = function(element) {
     var dbref = this.scene["exits"][index]["dbref"];
     dbref = dbref.slice(1);
     core.service.doGoto(dbref);
+}
+
+/*
+ * On click the conversation button.
+ */
+MudderyScene.prototype.OnConversation = function() {
+    mud.main_frame.pushWindow(mud.conversation_window);
 }
 
 /*
@@ -2020,23 +1931,34 @@ MudderyScene.prototype.drawExitPaths = function(exits) {
 /*
  * Display a message in message window.
  */
-MudderyScene.prototype.displayMessage = function(msg, type) {
+MudderyScene.prototype.displayMsg = function(msg, type) {
 	var message_list = this.select(".message-list");
 
 	if (!type) {
 		type = "normal";
 	}
 
+	var message_class = "common";
+	if (type == "PRIVATE") {
+	    message_class = "private";
+	}
+	else if (type == "LOCAL") {
+	    message_class = "local";
+	}
+	else if (type == "CHANNEL") {
+	    message_class = "channel";
+	}
+
 	var item = $("<div>")
-		.addClass("msg-" + type)
+		.addClass("message")
+		.addClass(message_class)
 		.html(msg)
 		.appendTo(message_list);
 
 	// remove old messages
-	var max = 40;
 	var divs = message_list.find("div");
 	var size = divs.length;
-	if (size > max) {
+	if (size > this.max_messages) {
 		divs.slice(0, size - max).remove();
 	}
 
@@ -3975,4 +3897,160 @@ MudderyGoodsDetail.prototype.setGoods = function(goods) {
 
     // set desc
     this.select(".goods-desc").html(core.text2html.parseHtml(goods["desc"]));
+}
+
+
+/******************************************
+ *
+ * Conversation Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyConversation = function(el) {
+	BaseController.call(this, el);
+
+	// Default send to local location.
+	this.conversation_type = "LOCAL";
+	this.target = "";
+	this.max_messages = 200;
+}
+
+MudderyConversation.prototype = prototype(BaseController.prototype);
+MudderyConversation.prototype.constructor = MudderyConversation;
+
+/*
+ * Bind events.
+ */
+MudderyConversation.prototype.bindEvents = function() {
+    this.onClick(".button-close", this.onClose);
+    this.onClick(".channel-list", ".button-channel", this.onSelectChannel);
+    this.onClick(".button-send", this.onSend);
+}
+
+/*
+ * On click the close button.
+ */
+MudderyConversation.prototype.onClose = function() {
+    mud.main_frame.popWindow(this);
+}
+
+/*
+ * On click the channel button.
+ */
+MudderyConversation.prototype.onSelectChannel = function(element) {
+	this.conversation_type = $(element).data("type");
+	this.target = $(element).data("target");
+
+	this.select(".channel-list .button-channel").removeClass("active");
+	$(element).addClass("active");
+}
+
+/*
+ * On click the send button.
+ */
+MudderyConversation.prototype.onSend = function() {
+	var message = this.select(".input-box").val();
+	this.select(".input-box").val("");
+
+	if (!message) {
+		return;
+	}
+
+	if (this.conversation_type == "CMD") {
+		core.service.sendRawCommand(message);
+	}
+	else if (this.conversation_type == "LOCAL") {
+	    core.service.say(this.conversation_type, core.map_data._current_location.key, message);
+	}
+	else if (this.conversation_type == "CHANNEL") {
+	    core.service.say(this.conversation_type, this.target, message);
+	}
+	else {
+		core.service.say(this.conversation_type, this.target, message);
+	}
+}
+
+/*
+ * Clear all channels' messages.
+ */
+MudderyConversation.prototype.clearChannels = function() {
+	var container = this.select(".channel-list");
+	container.empty();
+}
+
+/*
+ * Set available channels.
+ */
+MudderyConversation.prototype.setChannels = function(channels) {
+	var container = this.select(".channel-list");
+	container.empty();
+
+	for (var key in channels) {
+		var channel = channels[key];
+
+		$("<div>")
+		    .addClass("button-channel")
+		    .data("type", channel["type"])
+		    .data("target", key)
+		    .text(channel["name"])
+		    .appendTo(container);
+	}
+
+	// Add local room.
+    $("<div>")
+        .addClass("button-channel active")
+        .data("type", "LOCAL")
+        .text(core.trans("LOCAL"))
+        .appendTo(container);
+}
+
+/*
+ * Get a message.
+ */
+MudderyConversation.prototype.getMessage = function(message) {
+	var message_class = "common";
+	if (message["type"] == "PRIVATE") {
+	    message_class = "private";
+	}
+	else if (message["type"] == "LOCAL") {
+	    message_class = "local";
+	}
+	else if (message["type"] == "CHANNEL") {
+	    message_class = "channel";
+	}
+
+	var prefix = "";
+    if (message["type"] == "PRIVATE") {
+	    if (message["from_dbref"] == core.data_handler.character_dbref) {
+	        prefix = core.trans("TO[") + message["channel"] + "]";
+	    }
+	    else {
+	        prefix = core.trans("FROM[") + message["from_name"] + "]";
+	    }
+	}
+	else if (message["type"] == "LOCAL" || message["type"] == "CHANNEL") {
+	    prefix = "[" + message["channel"] + "][" + message["from_name"] + "]";
+	}
+
+    var out_text = prefix + " " + message["msg"];
+    var message_list = this.select(".message-list");
+    var item = $("<div>")
+        .addClass("message")
+        .addClass(message_class)
+        .text(out_text)
+        .appendTo(message_list);
+
+	var divs = message_list.find("div");
+	var size = divs.length;
+	if (size > this.max_messages) {
+		divs.slice(0, size - max).remove();
+	}
+
+    var message_box = this.select(".messages");
+    message_box.scrollTop(message_list[0].scrollHeight);
+
+    mud.scene_window.displayMsg(out_text, message["type"]);
 }

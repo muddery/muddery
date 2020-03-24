@@ -123,7 +123,7 @@ MudderyClient.prototype = {
                 }
                 else if (key == "msg") {
                 	var msg = core.text2html.parseHtml(data[key]);
-                    mud.scene_window.displayMessage(msg);
+                    mud.scene_window.displayMsg(msg);
                 }
                 else if (key == "alert") {
               		mud.main_frame.popupMessage(core.trans("Alert"), data[key]);
@@ -262,7 +262,10 @@ MudderyClient.prototype = {
                     mud.main_frame.onPuppet(data[key]);
                 }
                 else if (key == "channels") {
-                    mud.main_frame.setChannels(data[key])
+                    mud.conversation_window.setChannels(data[key]);
+                }
+                else if (key == "conversation") {
+                    mud.conversation_window.getMessage(data[key]);
                 }
                 else if (key == "rankings") {
                 	mud.main_frame.setRankings(data[key]);

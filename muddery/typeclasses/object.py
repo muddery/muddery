@@ -631,31 +631,28 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         for session in sessions:
             session.msg(text=text, **kwargs)
 
-    def msg_contents(self, text=None, exclude=None, from_obj=None, options=None, **kwargs):
+    def msg_contents(self, text=None, exclude=None, from_obj=None, mapping=None, **kwargs):
         """
         Emits a message to all objects inside this object.
 
         Send text in JSON format.
         """
-        if not options:
-            options = {}
-
-        raw = options.get("raw", False)
-        if not raw:
-            try:
-                text = json.dumps(text)
-            except Exception as e:
-                text = json.dumps({"err": "There is an error occurred while outputing messages."})
-                logger.log_errmsg("json.dumps failed: %s" % e)
-
-        options["raw"] = True
-
         contents = self.contents
         if exclude:
             exclude = make_iter(exclude)
             contents = [obj for obj in contents if obj not in exclude]
+
         for obj in contents:
-            obj.msg(text=text, from_obj=from_obj, options=options, **kwargs)
+            obj.msg(text=text, from_obj=from_obj, **kwargs)
+
+    def got_message(self, caller, message):
+        """
+        Receive a message from an object.
+
+        :param caller: talker.
+        :param message: content.
+        """
+        pass
 
     def search_dbref(self, dbref, location=None):
         """

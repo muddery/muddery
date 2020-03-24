@@ -2,6 +2,9 @@
 This module defines constent constant values.
 """
 
+from enum import Enum
+
+
 # quest dependencies
 DEPENDENCY_NONE = ""
 DEPENDENCY_QUEST_CAN_PROVIDE = "CAN_PROVIDE"
@@ -39,3 +42,9 @@ COMBAT_WIN = "COMBAT_WIN"                   # win the combat
 COMBAT_LOSE = "COMBAT_LOSE"                 # lose the combat
 COMBAT_DRAW = "COMBAT_DRAW"                 # no one wins the combat
 COMBAT_ESCAPED = "COMBAT_ESCAPED"             # escaped from the combat
+
+
+class ConversationType(Enum):
+    PRIVATE = "PRIVATE"
+    LOCAL = "LOCAL"
+    CHANNEL = "CHANNEL"

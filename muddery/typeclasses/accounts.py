@@ -22,8 +22,10 @@ several more options for customizing the Guest account system.
 
 """
 
-from evennia import DefaultAccount, DefaultGuest
 from django.conf import settings
+from evennia.utils import logger
+from evennia import DefaultAccount, DefaultGuest
+from evennia.utils.utils import make_iter
 
 
 class MudderyAccount(DefaultAccount):
@@ -129,6 +131,47 @@ class MudderyAccount(DefaultAccount):
         char_all = [{"name": char.get_name(), "dbref": char.dbref} for char in self.db._playable_characters]
         return char_all
 
+    def msg(self, text=None, from_obj=None, session=None, options=None, **kwargs):
+        """
+        Evennia -> User
+        This is the main route for sending data back to the user from the
+        server.
+
+        Args:
+            text (str, optional): text data to send
+            from_obj (Object or Account or list, optional): Object sending. If given, its
+                at_msg_send() hook will be called. If iterable, call on all entities.
+            session (Session or list, optional): Session object or a list of
+                Sessions to receive this send. If given, overrules the
+                default send behavior for the current
+                MULTISESSION_MODE.
+            options (list): Protocol-specific options. Passed on to the protocol.
+        Kwargs:
+            any (dict): All other keywords are passed on to the protocol.
+
+        """
+        if from_obj:
+            # call hook
+            for obj in make_iter(from_obj):
+                try:
+                    obj.at_msg_send(text=text, to_obj=self, **kwargs)
+                except Exception:
+                    # this may not be assigned.
+                    logger.log_trace()
+        try:
+            if not self.at_msg_receive(text=text, **kwargs):
+                # abort message to this account
+                return
+        except Exception:
+            # this may not be assigned.
+            pass
+
+        kwargs["options"] = options
+
+        # session relay
+        sessions = make_iter(session) if session else self.sessions.all()
+        for session in sessions:
+            session.data_out(text=text, **kwargs)
 
 class Guest(DefaultGuest):
     """
