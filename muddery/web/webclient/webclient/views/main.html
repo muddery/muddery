@@ -110,6 +110,21 @@
                 </div>
             </div>
 
+            <!-- popup input command window -->
+            <div id="popup-input-command" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text">输入命令</span>
+                    </div>
+                    <div class="popup-body">
+                        <textarea class="command-text"></textarea>
+                    </div>
+                    <div class="popup-footer">
+                        <button type="button" class="popup-button button-send button-short">发送</button>
+                    </div>
+                </div>
+            </div>
         </div>
     
         <!-- Window's body. -->
@@ -510,10 +525,13 @@
                     <div class="button-system tab-bar-button">系统</div>
                     <ul class="menu-system popup-menu hidden">
                         <li>
-                            <button type="button" class="button-logout button-short">退出</button>
+                            <button type="button" class="button-logout button-short red">退出</button>
                         </li>
                         <li>
                             <button type="button" class="button-unpuppet button-short">初始页面</button>
+                        </li>
+                        <li class="block-button-command hidden">
+                            <button type="button" class="button-input-command button-short">输入命令</button>
                         </li>
                     </ul>
                 </div>

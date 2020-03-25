@@ -478,6 +478,36 @@ span.bgblack { background-color: black;}
     padding-top: 0.1rem;
 }
 
+/* popup input command */
+#popup-input-command .popup-box {
+    min-height: auto;
+    background-image: none;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 0.08rem;
+    border: 0.01rem solid rgba(136, 119, 102, 0.7);
+    margin-bottom: 1.0rem;
+}
+
+#popup-input-command .popup-body {
+    min-height: 1.0rem;
+    padding: 0;
+    text-align: center;
+}
+
+#popup-input-command .command-text {
+    width: 2.4rem;
+    height: 1.0rem;
+    background-color: rgba(255, 255, 255, 0.3);
+    border: 0.01rem solid rgba(255, 255, 255, 0.5);
+}
+
+#popup-input-command .button-short {
+    background-image: none;
+    background-color: rgba(102, 85, 136, 0.5);
+    border-radius: 0.04rem;
+    border: 0.01rem solid rgba(102, 85, 136, 0.7);
+}
+
 /************* popup window end *************/
 
 
@@ -1056,6 +1086,9 @@ span.bgblack { background-color: black;}
     bottom: 0.6rem;
     padding: 0.1rem 0.2rem;
     color: #333;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
 
 #scene-window .message-list {

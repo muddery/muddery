@@ -57,6 +57,7 @@ MudderyMain.prototype.loadFrame = function() {
     mud.popup_object = new MudderyPopupObject($("#popup-object"));
     mud.popup_get_objects = new MudderyPopupGetObjects($("#popup-get-objects"));
     mud.popup_dialogue = new MudderyPopupDialogue($("#popup-dialogue"));
+    mud.popup_input_command = new MudderyPopupInputCommand($("#popup-input-command"));
 }
 
 MudderyMain.prototype.initFrame = function() {

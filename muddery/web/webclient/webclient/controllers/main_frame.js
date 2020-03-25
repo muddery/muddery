@@ -298,6 +298,14 @@ MudderyMainFrame.prototype.onPuppet = function(data) {
     mud.char_data_window.setInfo(data["name"], data["icon"]);
     mud.combat_window.setInfo(data["name"], data["icon"]);
 
+    if ("allow_commands" in data && data["allow_commands"]) {
+        // show command button
+        this.select(".tab-bar .block-button-command").removeClass("hidden");
+    }
+    else {
+        this.select(".tab-bar .block-button-command").addClass("hidden");
+    }
+
     this.puppet = true;
 	this.showPuppet();
 }
@@ -873,6 +881,48 @@ MudderyPopupDialogue.prototype.hasDialogue = function() {
 
 /******************************************
  *
+ * Popup Input Command Window
+ *
+ ******************************************/
+
+/*
+ * Derive from the base class.
+ */
+MudderyPopupInputCommand = function(el) {
+	BaseController.call(this, el);
+}
+
+MudderyPopupInputCommand.prototype = prototype(BaseController.prototype);
+MudderyPopupInputCommand.prototype.constructor = MudderyPopupInputCommand;
+
+/*
+ * Bind events.
+ */
+MudderyPopupInputCommand.prototype.bindEvents = function() {
+    this.onClick(".button-close", this.onClose);
+    this.onClick(".button-send", this.onSend);
+}
+
+/*
+ * Event when clicks the close button.
+ */
+MudderyPopupInputCommand.prototype.onClose = function(element) {
+    this.el.hide();
+    this.select(".command-text").empty();
+}
+
+/*
+ * Event when clicks the next button.
+ */
+MudderyPopupInputCommand.prototype.onSend = function(element) {
+	var command = this.select(".command-text").val();
+	this.select(".command-text").val("");
+
+	core.service.sendRawCommand(command);
+}
+
+/******************************************
+ *
  * Login Window
  *
  ******************************************/
@@ -1360,6 +1410,7 @@ MudderyGame.prototype.bindEvents = function() {
     this.onClick(".button-system", this.onSystem);
     this.onClick(".button-logout", this.onLogout);
     this.onClick(".button-unpuppet", this.onUnpuppet);
+    this.onClick(".button-input-command", this.onInputCommand);
 }
 
 /*
@@ -1472,6 +1523,15 @@ MudderyGame.prototype.onLogout = function(element) {
 MudderyGame.prototype.onUnpuppet = function(element) {
 	core.service.unpuppetCharacter();
 	mud.main_frame.onUnpuppet();
+}
+
+/*
+ * Event when clicks the input command button.
+ */
+MudderyGame.prototype.onInputCommand = function(element) {
+	mud.main_frame.doClosePopupBox();
+
+    mud.popup_input_command.show();
 }
 
 /*
@@ -3959,10 +4019,7 @@ MudderyConversation.prototype.onSend = function() {
 		return;
 	}
 
-	if (this.conversation_type == "CMD") {
-		core.service.sendRawCommand(message);
-	}
-	else if (this.conversation_type == "LOCAL") {
+    if (this.conversation_type == "LOCAL") {
 	    core.service.say(this.conversation_type, core.map_data._current_location.key, message);
 	}
 	else if (this.conversation_type == "CHANNEL") {
