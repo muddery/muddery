@@ -88,8 +88,11 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
             # send surrounding changes to player
             type = self.get_surrounding_type(moved_obj)
             if type:
-                change = {type: [{"dbref": moved_obj.dbref,
-                                  "name": moved_obj.get_name()}]}
+                change = {
+                    "type": type,
+                    "dbref": moved_obj.dbref,
+                    "name": moved_obj.get_name()
+                }
                 self.msg_contents({"obj_moved_in": change}, exclude=moved_obj)
 
     def at_object_leave(self, moved_obj, target_location, **kwargs):
@@ -107,8 +110,11 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
             # send surrounding changes to player
             type = self.get_surrounding_type(moved_obj)
             if type:
-                change = {type: [{"dbref": moved_obj.dbref,
-                                  "name": moved_obj.get_name()}]}
+                change = {
+                    "type": type,
+                    "dbref": moved_obj.dbref,
+                    "name": moved_obj.get_name()
+                }
                 self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
 
     def get_appearance(self, caller):

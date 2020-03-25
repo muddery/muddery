@@ -180,48 +180,44 @@ MudderyMainFrame.prototype.setCombatStatus = function(status) {
 /*
  * Notify a player has been online.
  */
-MudderyMainFrame.prototype.showPlayerOnline = function(player) {
-	$$.component.scene.addPlayer(player);
+MudderyMainFrame.prototype.playerOnline = function(player) {
+    var obj = player;
+    obj["type"] = "players";
+	this.objMovedIn(obj);
 }
     
 /*
  * Notify a player has been offline.
  */
-MudderyMainFrame.prototype.showPlayerOffline = function(player) {
-	// If the player is looking to it, close the look window.
-	var component = $$.component.object;
-	if (component.visible()) {
-		component.onObjMovedOut(player["dbref"]);
-	}
-
-	$$.component.scene.removePlayer(player);
+MudderyMainFrame.prototype.playerOffline = function(player) {
+    var obj = player;
+    obj["type"] = "players";
+	this.objMovedOut(obj);
 }
 
 /*
  * Notify an object has moved to the player's current place.
  */
-MudderyMainFrame.prototype.showObjMovedIn = function(objects) {
-	$$.component.scene.addObjects(objects);
+MudderyMainFrame.prototype.objMovedIn = function(obj) {
+	mud.scene_window.addObject(obj);
 }
 
 /*
  * Notify an object has moved out the player's current place.
  */
-MudderyMainFrame.prototype.showObjMovedOut = function(objects) {
+MudderyMainFrame.prototype.objMovedOut = function(obj) {
 	// If the player is talking to it, close the dialog window.
-	var dialogue = $$.component.dialogue;
-	if (dialogue.visible()) {
-		dialogue.onObjsMovedOut(objects);
+	if (mud.popup_dialogue.visible()) {
+		mud.popup_dialogue.onObjMovedOut(obj["dbref"]);
 	}
         
 	// If the player is looking to it, close the look window.
-	var object = $$.component.object;
-	if (object.visible()) {
-		object.onObjsMovedOut(objects);
+	if (mud.popup_object.visible()) {
+		mud.popup_object.onObjMovedOut(obj["dbref"]);
 	}
 
 	// remove objects from scene
-	$$.component.scene.removeObjects(objects);
+	mud.scene_window.removeObject(obj);
 }
 
 
@@ -608,24 +604,6 @@ MudderyPopupObject.prototype.onObjMovedOut = function(dbref) {
 }
 
 /*
- * Event when objects moved out from the current place.
- */
-MudderyPopupObject.prototype.onObjsMovedOut = function(objects) {
-    if (!this.object) {
-        return;
-    }
-
-    for (var key in objects) {
-        for (var i = 0; i < objects[key].length; i++) {
-            if (objects[key][i]["dbref"] == this.object["dbref"]) {
-                this.onClose();
-                return;
-            }
-        }
-    }
-}
-
-/*
  * Set object's data.
  */
 MudderyPopupObject.prototype.setObject = function(obj) {
@@ -788,14 +766,10 @@ MudderyPopupDialogue.prototype.onNext = function(element) {
 /*
  * Event when objects moved out from the current place.
  */
-MudderyPopupDialogue.prototype.onObjsMovedOut = function(objects) {
-    for (var key in objects) {
-        for (var i in objects[key]) {
-            if (objects[key][i]["dbref"] == this.target) {
-                this.onClose();
-                return;
-            }
-        }
+MudderyPopupDialogue.prototype.onObjMovedOut = function(dbref) {
+    if (dbref == this.target) {
+        this.onClose();
+        return;
     }
 }
 
@@ -1770,7 +1744,10 @@ MudderyScene.prototype.setScene = function(scene) {
 
     // set commands
     var commands = this.select(".scene-commands");
-    if ("cmds" in scene && scene["cmds"].length > 0) {
+    if (!("cmds" in scene)) {
+        scene["cmds"] = [];
+    }
+    if (scene["cmds"].length > 0) {
         for (var i = 0; i < scene["cmds"].length; i++) {
             $("<div>")
                 .addClass("object-button")
@@ -1787,7 +1764,10 @@ MudderyScene.prototype.setScene = function(scene) {
     // set objects
     var objects = this.select(".scene-objects");
     var has_objects = false;
-    if ("things" in scene && scene["things"].length > 0) {
+    if (!("things" in scene)) {
+        scene["things"] = [];
+    }
+    if (scene["things"].length > 0) {
         for (var i = 0; i < scene["things"].length; i++) {
             $("<div>")
                 .addClass("scene-button object-button object")
@@ -1800,7 +1780,10 @@ MudderyScene.prototype.setScene = function(scene) {
 
     // set npcs
     var has_npcs = false;
-    if ("npcs" in scene && scene["npcs"].length > 0) {
+    if (!("npcs" in scene)) {
+        scene["npcs"] = [];
+    }
+    if (scene["npcs"].length > 0) {
         for (var i = 0; i < scene["npcs"].length; i++) {
             $("<div>")
                 .addClass("scene-button object-button npc")
@@ -1820,7 +1803,10 @@ MudderyScene.prototype.setScene = function(scene) {
 
     // set players
     var players = this.select(".scene-players");
-    if ("players" in scene && scene["players"].length > 0) {
+    if (!("players" in scene)) {
+        scene["players"] = [];
+    }
+    if (scene["players"].length > 0) {
         // Only show 10 players.
         var count = 0;
         for (var i = 0; i < scene["players"].length; i++) {
@@ -1842,7 +1828,10 @@ MudderyScene.prototype.setScene = function(scene) {
     }
 
     // add exits
-    if ("exits" in scene && scene["exits"].length > 0) {
+    if (!("exits" in scene)) {
+        scene["exits"] = [];
+    }
+    if (scene["exits"].length > 0) {
         this.setExitsMap(scene["exits"], room_name);
     }
 
@@ -1854,6 +1843,96 @@ MudderyScene.prototype.setScene = function(scene) {
     }
     else {
         backview.css("background", "");
+    }
+}
+
+/*
+ * Add new objects to this scene.
+ */
+MudderyScene.prototype.addObject = function(obj) {
+    // set object
+    var index = 0;
+    if (obj["type"] in this.scene) {
+        index = this.scene[obj["type"]].length;
+        this.scene[obj["type"]].push(obj)
+    }
+    else {
+        return;
+    }
+
+    if (obj["type"] == "thing") {
+        var objects = this.select(".scene-objects");
+        $("<div>")
+            .addClass("scene-button object-button object")
+            .data("index", index)
+            .text(obj["name"])
+            .appendTo(objects);
+        objects.show();
+    }
+    else if (obj["type"] == "npcs") {
+        // set npcs
+        var objects = this.select(".scene-objects");
+        $("<div>")
+            .addClass("scene-button object-button npc")
+            .data("index", index)
+            .text(obj["name"])
+            .appendTo(objects);
+        objects.show();
+    }
+    else if (obj["type"] == "players") {
+        // set players
+        if (this.scene["players"].length < this.max_player) {
+            var players = this.select(".scene-players");
+            $("<div>")
+                .addClass("scene-button object-button player")
+                .data("index", index)
+                .text(obj["name"])
+                .appendTo(players);
+            players.show();
+        }
+    }
+}
+
+/*
+ * Remove objects from this scene.
+ */
+MudderyScene.prototype.removeObject = function(obj) {
+    // Search this object in the scene.
+    var type = obj["type"];
+    if (!(type in this.scene)) {
+        return;
+    }
+
+    var index = -1;
+    for (var i = 0; i < this.scene[type].length; i++) {
+        if (this.scene[type][i]["dbref"] == obj["dbref"]) {
+            this.scene[type].splice(i, 1);
+            index = i;
+            break;
+        }
+    }
+    if (index < 0) {
+        return;
+    }
+
+    // Remove the object button.
+    var item_list = [];
+    if (obj["type"] == "thing") {
+        item_list = this.select(".scene-objects .object");
+    }
+    else if (obj["type"] == "npcs") {
+        item_list = this.select(".scene-objects .npc");
+    }
+    else if (obj["type"] == "players") {
+        item_list = this.select(".scene-players .player");
+    }
+    $(item_list[i]).remove();
+
+    if (this.select(".scene-objects").children().length == 0) {
+        this.select(".scene-objects").hide();
+    }
+    if (this.select(".scene-players").children().length == 0) {
+        this.select(".scene-players").hide();
     }
 }
 

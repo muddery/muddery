@@ -153,16 +153,16 @@ MudderyClient.prototype = {
                     mud.scene_window.setScene(data[key]);
                 }
                 else if (key == "obj_moved_in") {
-                    mud.main_frame.showObjMovedIn(data[key]);
+                    mud.main_frame.objMovedIn(data[key]);
                 }
                 else if (key == "obj_moved_out") {
-                    mud.main_frame.showObjMovedOut(data[key]);
+                    mud.main_frame.objMovedOut(data[key]);
                 }
                 else if (key == "player_online") {
-                    mud.main_frame.showPlayerOnline(data[key]);
+                    mud.main_frame.playerOnline(data[key]);
                 }
                 else if (key == "player_offline") {
-                    mud.main_frame.showPlayerOffline(data[key]);
+                    mud.main_frame.playerOffline(data[key]);
                 }
                 else if (key == "look_obj") {
                     if (context == "inventory") {
