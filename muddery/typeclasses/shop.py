@@ -36,6 +36,24 @@ class MudderyShop(TYPECLASS("OBJECT")):
         # set default values
         self.db.owner = None
 
+    def at_object_delete(self):
+        """
+        Called just before the database object is permanently
+        delete()d from the database. If this method returns False,
+        deletion is aborted.
+
+        All skills, contents will be removed too.
+        """
+        result = super(MudderyShop, self).at_object_delete()
+        if not result:
+            return result
+
+        # delete all contents
+        for content in self.contents:
+            content.delete()
+
+        return True
+
     def after_data_loaded(self):
         """
         Set data_info to the object.
