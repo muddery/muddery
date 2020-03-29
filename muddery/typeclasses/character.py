@@ -197,8 +197,20 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # Set body values.
         for key, info in self.get_properties_info().items():
             if not info["mutable"]:
-                self.custom_properties_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
-                self.body_properties_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
+                value = None
+                if key in values:
+                    value = values[key]
+                else:
+                    # Get default value.
+                    default = info["default"]
+                    try:
+                        value = ast.literal_eval(default)
+                    except (SyntaxError, ValueError) as e:
+                        # treat as a raw string
+                        value = default
+
+                self.custom_properties_handler.add(key, value)
+                self.body_properties_handler.add(key, value)
 
         # Set default mutable custom properties.
         self.set_mutable_custom_properties()
