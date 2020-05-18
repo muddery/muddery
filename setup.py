@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-VERSION_PATH = os.path.join('muddery', 'VERSION.txt')
+VERSION_PATH = os.path.join('VERSION.txt')
 OS_WINDOWS = os.name == "nt"
 
 def get_requirements():

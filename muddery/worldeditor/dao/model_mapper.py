@@ -1,0 +1,33 @@
+"""
+Query and deal common tables.
+"""
+
+from evennia.utils import logger
+from django.apps import apps
+from django.conf import settings
+from muddery.server.utils.utils import is_child
+from muddery.server.database.worlddata_models import common_objects
+
+
+def get_model(model_name):
+    """
+    Get a model by name.
+    """
+    return apps.get_model(settings.WORLD_DATA_APP, model_name)
+
+
+def get_all_models():
+    """
+    Query all models information.
+    """
+    app_config = apps.get_app_config(settings.WORLD_DATA_APP)
+    return app_config.get_models()
+
+
+def get_pocketable_object_models():
+    """
+    Query all objects' models information.
+    """
+    app_config = apps.get_app_config(settings.WORLD_DATA_APP)
+    models = [model for model in app_config.get_models() if is_child(model, common_objects)]
+    return models

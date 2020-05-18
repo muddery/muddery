@@ -12,6 +12,7 @@ See www.muddery.org for full documentation.
 
 """
 
+
 def _create_version():
     """
     Helper function for building the version string
@@ -20,7 +21,7 @@ def _create_version():
     from subprocess import check_output, CalledProcessError, STDOUT
 
     version = "Unknown"
-    root = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     try:
         with open(os.path.join(root, "VERSION.txt"), 'r') as f:
             version = f.read().strip()

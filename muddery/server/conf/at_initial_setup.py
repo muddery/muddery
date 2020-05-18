@@ -16,9 +16,9 @@ does what you expect it to.
 
 import os
 from django.conf import settings
-from evennia.utils import search, logger
-from muddery.utils import builder
-from muddery.utils.game_settings import GAME_SETTINGS
+from evennia.utils import search
+from muddery.server.utils import builder
+from muddery.server.utils.game_settings import GAME_SETTINGS
 import traceback
 
 LIMBO_DESC = "Welcome to your new {wMuddery{n-based game! " +\
@@ -31,6 +31,10 @@ def at_initial_setup():
     """
 
     try:
+        # load data
+        from muddery.server.dao.worlddata import WorldData
+        WorldData.reload()
+
         # load game settings
         GAME_SETTINGS.reset()
         print("Reset game settings.")

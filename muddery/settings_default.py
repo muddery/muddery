@@ -80,7 +80,7 @@ DATABASES = {
 
 
 # Database's router
-DATABASE_ROUTERS = ['muddery.worlddata.db.database_router.DatabaseAppsRouter']
+DATABASE_ROUTERS = ['muddery.server.database.database_router.DatabaseAppsRouter']
 
 DATABASE_APPS_MAPPING = {
     'gamedata': 'gamedata',
@@ -98,12 +98,6 @@ DATABASE_APPS_MAPPING = {
 # functions it must implement
 COMMAND_PARSER = "muddery.server.conf.cmdparser.cmdparser"
 
-# The handler that outputs errors when using any API-level search
-# (not manager methods). This function should correctly report errors
-# both for command- and object-searches. This allows full control
-# over the error output (it uses SEARCH_MULTIMATCH_TEMPLATE by default).
-# SEARCH_AT_RESULT = "muddery.server.conf.at_search_result"
-
 # An optional module that, if existing, must hold a function
 # named at_initial_setup(). This hook method can be used to customize
 # the server's initial setup sequence (the very first startup of the system).
@@ -119,13 +113,13 @@ AT_SERVER_STARTSTOP_MODULE = "muddery.server.conf.at_server_startstop"
 # plugin_services(application). This module will be called with the main
 # Evennia Server application when the Server is initiated.
 # It will be called last in the startup sequence.
-SERVER_SERVICES_PLUGIN_MODULES = ["muddery.server.conf.server_services_plugins"]
+SERVER_SERVICES_PLUGIN_MODULES = []
 
 # List of one or more module paths to modules containing a function
 # start_plugin_services(application). This module will be called with the
 # main Evennia Portal application when the Portal is initiated.
 # It will be called last in the startup sequence.
-PORTAL_SERVICES_PLUGIN_MODULES = ["muddery.server.conf.portal_services_plugins"]
+PORTAL_SERVICES_PLUGIN_MODULES = []
 
 # Module holding MSSP meta data. This is used by MUD-crawlers to determine
 # what type of game you are running, how many players you have etc.
@@ -136,15 +130,15 @@ WEB_PLUGINS_MODULE = "muddery.server.conf.web_plugins"
 
 # Tuple of modules implementing lock functions. All callable functions
 # inside these modules will be available as lock functions.
-LOCK_FUNC_MODULES = ("evennia.locks.lockfuncs", "muddery.server.conf.lockfuncs",)
+LOCK_FUNC_MODULES = ("evennia.locks.lockfuncs",)
 
 # Module holding handlers for managing incoming data from the client. These
 # will be loaded in order, meaning functions in later modules may overload
 # previous ones if having the same name.
-INPUT_FUNC_MODULES = ["evennia.server.inputfuncs", "muddery.server.conf.inputfuncs"]
+INPUT_FUNC_MODULES = ["evennia.server.inputfuncs"]
 
 # Modules that contain prototypes for use with the spawner mechanism.
-PROTOTYPE_MODULES = ["muddery.world.prototypes"]
+PROTOTYPE_MODULES = []
 
 # Delay to use before sending the evennia.syscmdkeys.CMD_LOGINSTART Command
 # when a new session connects (this defaults the unloggedin-look for showing
@@ -167,8 +161,7 @@ INLINEFUNC_ENABLED = False
 # Only functions defined globally (and not starting with '_') in
 # these modules will be considered valid inlinefuncs. The list
 # is loaded from left-to-right, same-named functions will overload
-INLINEFUNC_MODULES = ["evennia.utils.inlinefuncs",
-                      "muddery.server.conf.inlinefuncs"]
+INLINEFUNC_MODULES = ["evennia.utils.inlinefuncs"]
 
 
 ######################################################################
@@ -296,10 +289,10 @@ BASE_CHANNEL_TYPECLASS = "muddery.typeclasses.channels.MudderyChannel"
 BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
 
 # Path of base world data forms.
-PATH_DATA_FORMS_BASE = "muddery.worlddata.forms"
+PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms"
 
 # Path of base request processers.
-PATH_REQUEST_PROCESSERS_BASE = "muddery.worlddata.controllers"
+PATH_REQUEST_PROCESSERS_BASE = "muddery.worldeditor.controllers"
 
 # Path of base typeclasses.
 PATH_TYPECLASSES_BASE = "muddery.typeclasses"
@@ -378,10 +371,10 @@ CMDSET_COMBAT = "muddery.commands.default_cmdsets.CombatCmdSet"
 # Muddery additional data features
 ######################################################################
 # data app name
-ADDITIONAL_DATA_APP = "gamedata"
+GAME_DATA = "gamedata"
 
 # add data app
-INSTALLED_APPS = INSTALLED_APPS + [ADDITIONAL_DATA_APP,]
+INSTALLED_APPS = INSTALLED_APPS + [GAME_DATA, ]
 
 
 ######################################################################
@@ -395,7 +388,7 @@ DATA_KEY_CATEGORY = "data_key"
 WORLD_DATA_APP = "worlddata"
 
 # add data app
-INSTALLED_APPS = INSTALLED_APPS + [WORLD_DATA_APP,]
+INSTALLED_APPS = INSTALLED_APPS + [WORLD_DATA_APP, ]
 
 # data file's folder under user's game directory.
 WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
