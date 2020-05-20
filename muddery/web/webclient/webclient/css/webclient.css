@@ -176,8 +176,9 @@ span.bgdimgray { background-color: #696969;}
 span.bgblack { background-color: black;}
 
 #windows-wrapper {
-    width: 100%;
+    max-width: 100vh;
     height: 100%;
+    margin: 0 auto;
 }
 
 .main-window {
