@@ -11,7 +11,7 @@ from muddery.utils.localized_strings_handler import _
 
 class ActionMessage(BaseIntervalAction):
     """
-    Attack a target.
+    Show messages to the character.
     """
     key = "ACTION_MESSAGE"
     name = _("Message", category="event_actions")
