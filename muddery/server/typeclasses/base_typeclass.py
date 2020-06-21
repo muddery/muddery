@@ -6,6 +6,9 @@ MudderyObject is an object which can load it's data automatically.
 
 """
 
+from muddery.server.dao.properties_dict import PropertiesDict
+
+
 class BaseTypeclass(object):
     """
     This base typeclass.
@@ -49,8 +52,7 @@ class BaseTypeclass(object):
                     if hasattr(c, "get_properties_info"):
                         cls._all_properties_.update(c.get_properties_info())
 
-                from muddery.worlddata.dao.properties_dict_mapper import PROPERTIES_DICT
-                records = PROPERTIES_DICT.get_properties(cls.typeclass_key)
+                records = PropertiesDict.get_properties(cls.typeclass_key)
                 for record in records:
                     cls._all_properties_[record.property] = {"name": record.name,
                                                              "desc": record.desc,

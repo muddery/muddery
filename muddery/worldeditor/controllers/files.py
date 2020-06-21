@@ -6,12 +6,12 @@ import os, tempfile, time
 from PIL import Image
 from django.conf import settings
 from evennia.utils import logger
-from muddery.worlddata.services import exporter, importer
-from muddery.worlddata.utils.response import success_response, file_response
+from muddery.worldeditor.services import exporter, importer
+from muddery.worldeditor.utils.response import success_response, file_response
 from muddery.utils.exception import MudderyError, ERR
-from muddery.worlddata.utils import writers
-from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
-from muddery.worlddata.dao.image_resources_mapper import IMAGE_RESOURCES
+from muddery.worldeditor.utils import writers
+from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
+from muddery.worldeditor.dao.image_resources_mapper import IMAGE_RESOURCES
 
 
 class upload_zip(BaseRequestProcesser):

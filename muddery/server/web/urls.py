@@ -9,7 +9,7 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.views.static import serve
 from django.views.generic import RedirectView
-from muddery.worlddata.processer import PROCESSER
+from muddery.worldeditor.processer import PROCESSER
 
 # Setup the root url tree from /
 
@@ -22,10 +22,10 @@ urlpatterns = [
     url(r'^webclient/(?P<path>.*)$', serve, {'document_root': settings.WEBCLIENT_ROOT}),
 
     # World Editor Web
-    url(r'^editor/(?P<path>.*)$', serve, {'document_root': settings.WORLDEDITOR_ROOT}),
+    url(r'^editor/(?P<path>.*)$', serve, {'document_root': settings.WORLDDATA_ROOT}),
 
     # World Editor API
-    url(r'^' + settings.WORLD_DATA_API_PATH, PROCESSER.process),
+    url(r'^' + settings.WORLD_EDITOR_API_PATH, PROCESSER.process),
 
     # favicon
     url(r'^favicon\.ico$',  RedirectView.as_view(url='/media/images/favicon.ico', permanent=False))

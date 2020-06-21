@@ -6,16 +6,16 @@ from django.conf import settings
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from muddery.utils.exception import MudderyError, ERR
-from muddery.worlddata.dao import general_query_mapper
-from muddery.worlddata.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS, WORLD_EXITS
-from muddery.worlddata.dao.system_data_mapper import SYSTEM_DATA
-from muddery.worlddata.dao.object_properties_mapper import OBJECT_PROPERTIES
+from muddery.worldeditor.dao import general_query_mapper
+from muddery.worldeditor.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS, WORLD_EXITS
+from muddery.worldeditor.dao.system_data_mapper import SYSTEM_DATA
+from muddery.worldeditor.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.mappings.form_set import FORM_SET
 from muddery.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
-from muddery.worlddata.forms.default_forms import ObjectsForm
-from muddery.worlddata.forms.location_field import LocationField
-from muddery.worlddata.forms.image_field import ImageField
-from muddery.worlddata.services.general_query import query_fields
+from muddery.worldeditor.forms.default_forms import ObjectsForm
+from muddery.worldeditor.forms.location_field import LocationField
+from muddery.worldeditor.forms.image_field import ImageField
+from muddery.worldeditor.services.general_query import query_fields
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
 
 

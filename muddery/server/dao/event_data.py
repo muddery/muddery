@@ -13,4 +13,4 @@ class EventData(object):
         """
         Get object's event.
         """
-        return WorldData.get_table_data(cls.table_name, "trigger_obj", object_key)
+        return WorldData.get_table_data(cls.table_name, trigger_obj=object_key)

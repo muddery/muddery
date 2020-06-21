@@ -23,4 +23,4 @@ class QuestDependencies(object):
         """
         Get a dialogue by its key.
         """
-        return WorldData.get_table_data(cls.table_name, "quest", quest_key)
+        return WorldData.get_table_data(cls.table_name, quest=quest_key)

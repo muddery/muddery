@@ -23,4 +23,4 @@ class LocalizedStrings(object):
         """
         Get all data.
         """
-        return WorldData.get_table_data(cls.table_name, ("category", "origin"), (category, origin))
+        return WorldData.get_table_data(cls.table_name, category=category, origin=origin)

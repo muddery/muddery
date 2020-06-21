@@ -5,11 +5,11 @@ Battle commands. They only can be used when a character is in a combat.
 from django.conf import settings
 from django.contrib import auth
 from evennia.utils import logger
-from muddery.worlddata.services import data_query
-from muddery.worlddata.utils import utils
+from muddery.worldeditor.services import data_query
+from muddery.worldeditor.utils import utils
 from muddery.utils.exception import MudderyError, ERR
-from muddery.worlddata.utils.response import success_response
-from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
+from muddery.worldeditor.utils.response import success_response
+from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 
 
 class login(BaseRequestProcesser):

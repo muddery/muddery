@@ -9,7 +9,7 @@ from django.apps import apps
 from django.conf import settings
 from evennia.settings_default import GAME_DIR
 from muddery.launcher import configs
-from muddery.worlddata.utils import writers
+from muddery.worldeditor.utils import writers
 
 
 def get_header(model_name):

@@ -6,10 +6,10 @@ from muddery.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.mappings.event_trigger_set import EVENT_TRIGGER_SET
 from muddery.mappings.typeclass_set import TYPECLASS_SET
-from muddery.worlddata.dao import model_mapper
-from muddery.worlddata.dao import common_mappers as CM
-from muddery.worlddata.forms.location_field import LocationField
-from muddery.worlddata.forms.image_field import ImageField
+from muddery.worldeditor.dao import model_mapper
+from muddery.worldeditor.dao import common_mappers as CM
+from muddery.worldeditor.forms.location_field import LocationField
+from muddery.worldeditor.forms.image_field import ImageField
 
 
 def get_all_objects():

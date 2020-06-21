@@ -9,7 +9,7 @@ from evennia.utils import logger
 from muddery.server.utils.builder import build_object
 from muddery.server.mappings.typeclass_set import TYPECLASS
 from muddery.server.utils.localized_strings_handler import _
-from muddery.worlddata.dao.shop_goods_mapper import SHOP_GOODS
+from muddery.server.dao.shop_goods import ShopGoods
 
 
 class MudderyShop(TYPECLASS("OBJECT")):
@@ -70,7 +70,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
         Load shop goods.
         """
         # shops records
-        goods_records = SHOP_GOODS.filter(self.get_data_key())
+        goods_records = ShopGoods.get(self.get_data_key())
 
         goods_keys = set([record.key for record in goods_records])
 

@@ -23,4 +23,4 @@ class Dialogues(object):
         """
         Get a dialogue by its key.
         """
-        return WorldData.get_table_data(cls.table_name, "key", dialogue_key)
+        return WorldData.get_table_data(cls.table_name, key=dialogue_key)

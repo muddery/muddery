@@ -11,7 +11,7 @@ from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
 from muddery.server.utils import defines
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.dao.image_resources_mapper import IMAGE_RESOURCES
+from muddery.server.dao.image_resource import ImageResource
 from muddery.server.mappings.typeclass_set import TYPECLASS
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.localized_strings_handler import _
@@ -64,7 +64,7 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
         resource = getattr(self.system, "background", None)
         if resource:
             try:
-                resource_info = IMAGE_RESOURCES.get(resource)
+                resource_info = ImageResource.get(resource)
                 self.background = {"resource": resource_info.resource,
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}

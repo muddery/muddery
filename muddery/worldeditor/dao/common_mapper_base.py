@@ -5,7 +5,7 @@ This model translates default strings into localized strings.
 from evennia.utils import logger
 from django.apps import apps
 from django.conf import settings
-from muddery.worlddata.dao.general_query_mapper import get_all_from_tables, get_tables_record_by_key
+from muddery.worldeditor.dao.general_query_mapper import get_all_from_tables, get_tables_record_by_key
 
 class CommonMapper(object):
     """

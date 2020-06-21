@@ -16,7 +16,7 @@ class BaseLootList(object):
         """
         Get a loot list by its key.
         """
-        return WorldData.get_table_data(cls.table_name, "provider", provider_key)
+        return WorldData.get_table_data(cls.table_name, provider=provider_key)
 
 
 class CharacterLootList(BaseLootList):

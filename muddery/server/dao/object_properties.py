@@ -1,0 +1,23 @@
+"""
+Query and deal common tables.
+"""
+
+from muddery.server.dao.worlddata import WorldData
+
+
+class ObjectProperties(object):
+    """
+    Object's properties.
+    """
+    table_name = "object_properties"
+
+    @classmethod
+    def get_properties(cls, obj_key, level):
+        """
+        Get object's properties.
+
+        Args:
+            obj_key: (string) object's key.
+            level: (number) object's level.
+        """
+        return WorldData.get_table_data(cls.table_name, object=obj_key, level=level)

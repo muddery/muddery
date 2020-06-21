@@ -13,4 +13,4 @@ class ImageResource(object):
         """
         Get image's information by resource's path.
         """
-        return WorldData.get_table_data(cls.table_name, "resource", resource_path)
+        return WorldData.get_table_data(cls.table_name, resource=resource_path)

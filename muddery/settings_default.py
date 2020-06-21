@@ -214,11 +214,11 @@ WORLDEDITOR_ROOT = os.path.join(GAME_DIR, "web", "static", "editor")
 # Directories from which static files will be gathered from.
 STATICFILES_DIRS = (
     os.path.join(GAME_DIR, "web", "static_overrides"),
-    os.path.join(MUDDERY_DIR, "web", "website", "static"),
+    os.path.join(MUDDERY_DIR, "server", "web", "website", "static"),
     ("webclient", os.path.join(GAME_DIR, "web", "webclient_overrides", "webclient")),
-    ("webclient", os.path.join(MUDDERY_DIR, "web", "webclient", "webclient")),
-    ("editor", os.path.join(GAME_DIR, "worlddata", "webclient")),
-    ("editor", os.path.join(MUDDERY_DIR, "worlddata", "webclient")),
+    ("webclient", os.path.join(MUDDERY_DIR, "webclient")),
+    ("editor", os.path.join(GAME_DIR, "worldeditor", "webclient")),
+    ("editor", os.path.join(MUDDERY_DIR, "worldeditor", "webclient")),
 )
 
 # We setup the location of the website template as well as the admin site.
@@ -255,38 +255,38 @@ SERVER_SESSION_CLASS = "muddery.server.conf.serversession.ServerSession"
 # immediately entered path fail to find a typeclass. It allows for
 # shorter input strings. They must either base off the game directory
 # or start from the evennia library.
-TYPECLASS_PATHS = ["muddery.typeclasses"]
+TYPECLASS_PATHS = ["muddery.server.typeclasses"]
 
 # Typeclass for account objects (linked to a character) (fallback)
-BASE_ACCOUNT_TYPECLASS = "muddery.typeclasses.accounts.MudderyAccount"
+BASE_ACCOUNT_TYPECLASS = "muddery.server.typeclasses.accounts.MudderyAccount"
 
 # Typeclass for guest account objects (linked to a character)
-BASE_GUEST_TYPECLASS = "muddery.typeclasses.accounts.Guest"
+BASE_GUEST_TYPECLASS = "muddery.server.typeclasses.accounts.Guest"
 
 # Typeclass and base for all objects (fallback)
-BASE_OBJECT_TYPECLASS = "muddery.typeclasses.object.MudderyBaseObject"
+BASE_OBJECT_TYPECLASS = "muddery.server.typeclasses.object.MudderyBaseObject"
 
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.MudderyPlayerCharacter"
+BASE_CHARACTER_TYPECLASS = "muddery.server.typeclasses.player_character.MudderyPlayerCharacter"
 
 # Typeclass for general characters, include NPCs, mobs and player characters.
-BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.character.MudderyCharacter"
+BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.server.typeclasses.character.MudderyCharacter"
 
 # Typeclass for player characters.
-BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.MudderyPlayerCharacter"
+BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.server.typeclasses.player_character.MudderyPlayerCharacter"
 
 # Typeclass for rooms (fallback)
-BASE_ROOM_TYPECLASS = "muddery.typeclasses.room.MudderyRoom"
+BASE_ROOM_TYPECLASS = "muddery.server.typeclasses.room.MudderyRoom"
 
 # Typeclass for Exit objects (fallback).
-BASE_EXIT_TYPECLASS = "muddery.typeclasses.exit.MudderyExit"
+BASE_EXIT_TYPECLASS = "muddery.server.typeclasses.exit.MudderyExit"
 
 # Typeclass for Channel (fallback).
-BASE_CHANNEL_TYPECLASS = "muddery.typeclasses.channels.MudderyChannel"
+BASE_CHANNEL_TYPECLASS = "muddery.server.typeclasses.channels.MudderyChannel"
 
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.
-BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
+BASE_SCRIPT_TYPECLASS = "muddery.server.typeclasses.scripts.MudderyScript"
 
 # Path of base world data forms.
 PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms"
@@ -295,16 +295,16 @@ PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms"
 PATH_REQUEST_PROCESSERS_BASE = "muddery.worldeditor.controllers"
 
 # Path of base typeclasses.
-PATH_TYPECLASSES_BASE = "muddery.typeclasses"
+PATH_TYPECLASSES_BASE = "muddery.server.typeclasses"
 
 # Path of custom typeclasses.
 PATH_TYPECLASSES_CUSTOM = "typeclasses"
 
 # Path of base event actions.
-PATH_EVENT_ACTION_BASE = "muddery.events.event_actions"
+PATH_EVENT_ACTION_BASE = "muddery.server.events.event_actions"
 
 # Path of base quest status.
-PATH_QUEST_STATUS_BASE = "muddery.quests.quest_status"
+PATH_QUEST_STATUS_BASE = "muddery.server.quests.quest_status"
 
 
 ######################################################################
@@ -338,13 +338,13 @@ MAX_NR_CHARACTERS = 3
 ######################################################################
 
 # Action functions set
-ACTION_FUNC_SET = "muddery.statements.default_statement_func_set.ActionFuncSet"
+ACTION_FUNC_SET = "muddery.server.statements.default_statement_func_set.ActionFuncSet"
 
 # Condition functions set
-CONDITION_FUNC_SET = "muddery.statements.default_statement_func_set.ConditionFuncSet"
+CONDITION_FUNC_SET = "muddery.server.statements.default_statement_func_set.ConditionFuncSet"
 
 # Skill functions set
-SKILL_FUNC_SET = "muddery.statements.default_statement_func_set.SkillFuncSet"
+SKILL_FUNC_SET = "muddery.server.statements.default_statement_func_set.SkillFuncSet"
 
 
 ######################################################################
@@ -352,19 +352,19 @@ SKILL_FUNC_SET = "muddery.statements.default_statement_func_set.SkillFuncSet"
 ######################################################################
 
 # Command set used on session before player has logged in
-CMDSET_UNLOGGEDIN = "muddery.commands.default_cmdsets.UnloggedinCmdSet"
+CMDSET_UNLOGGEDIN = "muddery.server.commands.default_cmdsets.UnloggedinCmdSet"
 
 # Command set used on the logged-in session
-CMDSET_SESSION = "muddery.commands.default_cmdsets.SessionCmdSet"
+CMDSET_SESSION = "muddery.server.commands.default_cmdsets.SessionCmdSet"
 
 # Default set for logged in player with characters (fallback)
-CMDSET_CHARACTER = "muddery.commands.default_cmdsets.CharacterCmdSet"
+CMDSET_CHARACTER = "muddery.server.commands.default_cmdsets.CharacterCmdSet"
 
 # Command set for accounts without a character (ooc)
-CMDSET_ACCOUNT = "muddery.commands.default_cmdsets.AccountCmdSet"
+CMDSET_ACCOUNT = "muddery.server.commands.default_cmdsets.AccountCmdSet"
 
 # Command set for players in combat
-CMDSET_COMBAT = "muddery.commands.default_cmdsets.CombatCmdSet"
+CMDSET_COMBAT = "muddery.server.commands.default_cmdsets.CombatCmdSet"
 
 
 ######################################################################
@@ -373,8 +373,14 @@ CMDSET_COMBAT = "muddery.commands.default_cmdsets.CombatCmdSet"
 # data app name
 GAME_DATA = "gamedata"
 
+# data app name
+WORLD_DATA_APP = "worlddata"
+
 # add data app
-INSTALLED_APPS = INSTALLED_APPS + [GAME_DATA, ]
+INSTALLED_APPS = INSTALLED_APPS + [GAME_DATA, WORLD_DATA_APP]
+
+# data file's folder under user's game directory.
+WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
 
 
 ######################################################################
@@ -385,13 +391,10 @@ INSTALLED_APPS = INSTALLED_APPS + [GAME_DATA, ]
 DATA_KEY_CATEGORY = "data_key"
 
 # data app name
-WORLD_DATA_APP = "worlddata"
+WORLD_EDITOR_APP = "worldeditor"
 
 # add data app
-INSTALLED_APPS = INSTALLED_APPS + [WORLD_DATA_APP, ]
-
-# data file's folder under user's game directory.
-WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
+INSTALLED_APPS = INSTALLED_APPS + [WORLD_EDITOR_APP, ]
 
 # Character's typeclass key.
 GENERAL_CHARACTER_TYPECLASS_KEY = "CHARACTER"
@@ -403,7 +406,7 @@ LOCALIZED_STRINGS_FOLDER = "languages"
 LOCALIZED_STRINGS_MODEL = "localized_strings"
 
 # World data API's url path.
-WORLD_DATA_API_PATH = "worlddata/editor/api"
+WORLD_EDITOR_API_PATH = "worldeditor/editor/api"
 
 
 ###################################
@@ -428,7 +431,7 @@ DEFUALT_FORM_TEMPLATE = "common_form.html"
 # combat settings
 ###################################
 # Handler of the combat
-NORMAL_COMBAT_HANDLER = "muddery.combat.normal_combat_handler.NormalCombatHandler"
+NORMAL_COMBAT_HANDLER = "muddery.server.combat.normal_combat_handler.NormalCombatHandler"
 
 AUTO_COMBAT_TIMEOUT = 60
 
@@ -436,5 +439,5 @@ AUTO_COMBAT_TIMEOUT = 60
 ###################################
 # AI modules
 ###################################
-AI_CHOOSE_SKILL = "muddery.ai.choose_skill.ChooseSkill"
+AI_CHOOSE_SKILL = "muddery.server.ai.choose_skill.ChooseSkill"
 

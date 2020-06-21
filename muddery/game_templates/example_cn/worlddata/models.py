@@ -1,5 +1,5 @@
 from django.db import models
-from muddery.worlddata.db import models as BaseModels
+from muddery.worldeditor.db import models as BaseModels
 
 
 # ------------------------------------------------------------

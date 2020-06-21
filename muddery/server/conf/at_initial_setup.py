@@ -34,6 +34,7 @@ def at_initial_setup():
         # load data
         from muddery.server.dao.worlddata import WorldData
         WorldData.reload()
+        print("Reload world data.")
 
         # load game settings
         GAME_SETTINGS.reset()

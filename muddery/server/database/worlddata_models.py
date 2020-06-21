@@ -133,7 +133,7 @@ class objects(BaseObjects):
 
     # object's name
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
-    
+
     # object's description for display
     desc = models.TextField(blank=True)
 
@@ -168,7 +168,7 @@ class world_areas(BaseObjects):
 
 class world_rooms(BaseObjects):
     "Defines all unique rooms."
-    
+
     # players can not fight in peaceful romms
     peaceful = models.BooleanField(blank=True, default=False)
 
@@ -181,7 +181,7 @@ class world_rooms(BaseObjects):
 
     # room's icon resource
     icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-    
+
     # room's background image resource
     background = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -225,7 +225,7 @@ class world_objects(BaseObjects):
     # The key of a world room.
     # object's location, it must be a room
     location = models.CharField(max_length=KEY_LENGTH, db_index=True)
-    
+
     # Action's name
     action = models.CharField(max_length=NAME_LENGTH, blank=True)
 
@@ -525,7 +525,7 @@ class exit_locks(BaseObjects):
 # ------------------------------------------------------------
 class object_creators(BaseObjects):
     "Players can get new objects from an object_creator."
-    
+
     # related object's key
     relation = models.CharField(max_length=KEY_LENGTH, db_index=True, blank=True)
 
@@ -650,6 +650,7 @@ class equipment_types(models.Model):
     class Meta:
         "Define Django meta options"
         abstract = True
+        app_label = "worlddata"
         verbose_name = "Equipment's Type"
         verbose_name_plural = "Equipment's Types"
 
@@ -819,7 +820,7 @@ class skill_types(models.Model):
 
     # the readable name of the skill type
     name = models.CharField(max_length=NAME_LENGTH, unique=True)
-    
+
     # skill type's description
     desc = models.TextField(blank=True)
 
@@ -1346,7 +1347,7 @@ class condition_desc(models.Model):
 
     # condition
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-    
+
     # exit's description for display
     desc = models.TextField(blank=True)
 
@@ -1369,7 +1370,7 @@ class localized_strings(models.Model):
 
     # is system data or not
     system_data = models.BooleanField(blank=True, default=False)
-    
+
     # word's category
     category = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -1404,10 +1405,10 @@ class image_resources(models.Model):
 
     # resource'e width
     image_width = models.PositiveIntegerField(blank=True, default=0)
-    
+
     # resource'e height
     image_height = models.PositiveIntegerField(blank=True, default=0)
-    
+
     class Meta:
         "Define Django meta options"
         abstract = True

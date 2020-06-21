@@ -16,4 +16,4 @@ class NPCShops(object):
         """
         Get a NPC's shops.
         """
-        return WorldData.get_table_data(cls.table_name, "npc", npc_key)
+        return WorldData.get_table_data(cls.table_name, npc=npc_key)

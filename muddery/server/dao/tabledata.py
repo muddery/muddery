@@ -22,7 +22,9 @@ class RecordData(object):
         return self._records[self._fields(attr_name)]
 
     def __setattr__(self, attr_name, value):
-        raise Exception("Cannot assign directly to record attributes!")
+        if attr_name != "_fields" and attr_name != "_records":
+            raise Exception("Cannot assign directly to record attributes!")
+        super(RecordData, self).__setattr__(attr_name, value)
 
     def __delattr__(self, attr_name):
         raise Exception("Cannot delete record attributes!")
@@ -70,24 +72,25 @@ class TableData(object):
         for field in model_obj._meta.fields:
             if field.db_index:
                 pos = self.fields[field.name]
-                all = {}
+                all_values = {}
                 for i, record in enumerate(self.data):
                     key = record[pos]
-                    if key in all:
-                        all[key].append(i)
+                    if key in all_values:
+                        all_values[key].append(i)
                     else:
-                        all[key] = [i]
-                self.index[field.name] = all
+                        all_values[key] = [i]
+                self.index[field.name] = all_values
 
         # unique together
-        if model_obj._meta.unique_together:
-            unique_fields = model_obj._meta.unique_together
+        for unique_together in model_obj._meta.unique_together:
+            unique_fields = set(unique_together)
             pos = [self.fields[field_name] for field_name in unique_fields]
-            all = {}
+            all_values = {}
             for i, record in enumerate(self.data):
                 keys = (record[p] for p in pos)
-                all[keys] = i
-            self.index[unique_fields] = all
+                all_values[keys] = i
+            index_name = ".".join(unique_fields)
+            self.index[index_name] = all_values
 
     def get_fields(self):
         """
@@ -108,19 +111,30 @@ class TableData(object):
         if 0 <= record < len(self.data):
             return self.data[record]
 
-    def filter_data(self, key_field, value):
+    def filter_data(self, **kwargs):
         """
         Filter data by record's value. Fields must have index. If filter multi fields, put them in a tuple.
 
         Args:
-            key_field: (string, tuple of strings) field to filter
-            value: field's value
+            kwargs: (dict) query conditions
         """
-        if key_field not in self.index:
+        if len(kwargs) == 0:
+            return self.all_data()
+
+        if len(kwargs) == 1:
+            keys = list(kwargs.keys())
+            index_name = keys[0]
+            values = kwargs[index_name]
+        else:
+            unique_fields = set(kwargs.keys())
+            index_name = ".".join(unique_fields)
+            values = [kwargs[field_name] for field_name in unique_fields]
+
+        if index_name not in self.index:
             raise MudderyError("Only indexed fields can be searched.")
 
-        index = self.index[key_field]
-        if value in index:
-            return [self.data[i] for i in index[value]]
+        index = self.index[index_name]
+        if values in index:
+            return [self.data[i] for i in index[values]]
         else:
             return []

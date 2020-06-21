@@ -7,13 +7,13 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from evennia.server.sessionhandler import SESSIONS
-from muddery.worlddata.services import data_query, data_edit, general_query
+from muddery.worldeditor.services import data_query, data_edit, general_query
 from muddery.utils.exception import MudderyError, ERR
-from muddery.worlddata.utils.response import success_response
+from muddery.worldeditor.utils.response import success_response
 from muddery.utils.builder import build_all
 from muddery.utils.game_settings import GAME_SETTINGS
-from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
-from muddery.worlddata.dao import general_query_mapper
+from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
+from muddery.worldeditor.dao import general_query_mapper
 from muddery.mappings.typeclass_set import TYPECLASS
 from muddery.mappings.event_action_set import EVENT_ACTION_SET
 

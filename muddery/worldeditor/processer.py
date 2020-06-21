@@ -11,8 +11,8 @@ from django.http import HttpResponse
 from evennia.utils import logger
 from muddery.utils.exception import MudderyError, ERR
 from muddery.mappings.request_set import REQUEST_SET
-import muddery.worlddata.controllers
-from muddery.worlddata.utils.response import error_response
+import muddery.worldeditor.controllers
+from muddery.worldeditor.utils.response import error_response
 
 
 class Processer(object):
@@ -92,5 +92,5 @@ class Processer(object):
         return response
 
 
-PROCESSER = Processer(settings.WORLD_DATA_API_PATH)
+PROCESSER = Processer(settings.WORLD_EDITOR_API_PATH)
 

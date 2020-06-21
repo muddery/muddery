@@ -19,9 +19,9 @@ from evennia.utils import logger, search
 from evennia.utils.utils import lazy_property, class_from_module
 from muddery.server.mappings.typeclass_set import TYPECLASS
 from muddery.server.dao.equipment_positions import EquipmentPositions
-from muddery.worlddata.dao.loot_list_mapper import CHARACTER_LOOT_LIST
-from muddery.worlddata.dao.object_properties_mapper import OBJECT_PROPERTIES
-from muddery.worlddata.dao.default_skills_mapper import DEFAULT_SKILLS
+from muddery.server.dao.loot_list import CharacterLootList
+from muddery.server.dao.object_properties import ObjectProperties
+from muddery.server.dao.default_skills import DefaultSkills
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils import defines, utils
@@ -58,7 +58,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, CHARACTER_LOOT_LIST.filter(self.get_data_key()))
+        return LootHandler(self, CharacterLootList.get(self.get_data_key()))
 
     @lazy_property
     def body_properties_handler(self):
@@ -181,7 +181,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             data_key = self.system.clone
 
         values = {}
-        for record in OBJECT_PROPERTIES.get_properties(data_key, level):
+        for record in ObjectProperties.get_properties(data_key, level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":
@@ -466,7 +466,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Load character's default skills.
         """
         # default skills
-        skill_records = DEFAULT_SKILLS.filter(self.get_data_key())
+        skill_records = DefaultSkills.get(self.get_data_key())
         default_skill_ids = set([record.skill for record in skill_records])
 
         # remove old default skills

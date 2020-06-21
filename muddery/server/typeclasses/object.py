@@ -25,7 +25,7 @@ from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.desc_handler import DESC_HANDLER
 from muddery.server.typeclasses.base_typeclass import BaseTypeclass
 from muddery.server.mappings.typeclass_set import TYPECLASS
-from muddery.worlddata.dao.object_properties_mapper import OBJECT_PROPERTIES
+from muddery.server.dao.object_properties import ObjectProperties
 
 
 class MudderyBaseObject(BaseTypeclass, DefaultObject):
@@ -289,7 +289,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
 
         # Load values from db.
         values = {}
-        for record in OBJECT_PROPERTIES.get_properties(self.get_data_key(), level):
+        for record in ObjectProperties.get_properties(self.get_data_key(), level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":

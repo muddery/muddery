@@ -5,7 +5,7 @@ All available requests.
 from django.conf import settings
 from evennia.utils import logger
 from muddery.server.utils.utils import classes_in_path
-from muddery.worlddata.controllers.base_request_processer import BaseRequestProcesser
+from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 
 
 class RequestSet(object):

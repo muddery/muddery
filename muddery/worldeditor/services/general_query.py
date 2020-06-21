@@ -4,8 +4,8 @@ Battle commands. They only can be used when a character is in a combat.
 
 from django.conf import settings
 from evennia.utils import logger
-from muddery.worlddata.dao import common_mappers as CM
-from muddery.worlddata.dao import general_query_mapper, model_mapper
+from muddery.worldeditor.dao import common_mappers as CM
+from muddery.worldeditor.dao import general_query_mapper, model_mapper
 from muddery.utils.exception import MudderyError, ERR
 from muddery.utils.localized_strings_handler import _
 

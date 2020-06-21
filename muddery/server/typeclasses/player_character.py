@@ -23,7 +23,7 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.defines import ConversationType
-from muddery.worlddata.dao.default_objects_mapper import DEFAULT_OBJECTS
+from muddery.server.dao.default_objects import DefaultObjects
 from muddery.server.mappings.typeclass_set import TYPECLASS
 from muddery.server.utils import defines
 
@@ -443,7 +443,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             model_name = self.get_data_key()
         
         # default objects
-        object_records = DEFAULT_OBJECTS.filter(model_name)
+        object_records = DefaultObjects.get(model_name)
 
         # add new default objects
         obj_list = []
