@@ -197,7 +197,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         }
 
         if allow_commands:
-            output["allow_commands"] = 1
+            output["allow_commands"] = True
 
         self.msg({"puppet": output})
 
@@ -1288,7 +1288,6 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Add character's exp.
         Args:
             exp: (number) the exp value to add.
-            combat: (boolean) get exp in combat.
         Returns:
             None
         """

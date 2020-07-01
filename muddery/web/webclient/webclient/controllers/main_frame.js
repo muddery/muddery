@@ -140,7 +140,7 @@ MudderyMainFrame.prototype.setSkillCD = function(skill, cd, gcd) {
 /*
  * Set the exp the player get.
  */
-MudderyMainFrame.prototype.showGetExp = function(exp, combat) {
+MudderyMainFrame.prototype.showGetExp = function(exp) {
 	// show exp
 	mud.scene_window.displayMsg(core.trans("You got exp: ") + exp);
 }
@@ -1614,7 +1614,7 @@ MudderyScene.prototype.onCommand = function(element) {
     var index = $(element).data("index");
     var cmd = this.scene["cmds"][index]["cmd_name"];
     var args = this.scene["cmds"][index]["cmd_args"];
-    core.service.doCommandLink(cmd, args);
+    core.service.sendCommandLink(cmd, args);
 }
 
 /*
@@ -2653,6 +2653,24 @@ MudderySkills.prototype.onCommand = function(element) {
 	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
 		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		}
+		else {
+		    var self = this;
+			var buttons = [
+            {
+                "name": core.trans("Cancel")
+            },
+            {
+                "name": core.trans("Confirm"),
+                "callback": function(data) {
+                    self.confirmCommand(data);
+                },
+                "data": index,
+            }
+        ];
+        mud.main_frame.popupMessage(core.trans("Warning"),
+                                    this.buttons[index]["confirm"],
+                                    buttons);
 		}
 	}
 }
@@ -4029,7 +4047,7 @@ MudderyGoodsDetail.prototype.setGoods = function(goods) {
     if (goods["number"] > 1) {
         goods_name += "&times;" + goods["number"];
     }
-    this.select(".header-text").html(goods["name"]);
+    this.select(".header-text").html(goods_name);
 
     // set price
     this.select(".goods-price").text(goods["price"] + goods["unit"]);

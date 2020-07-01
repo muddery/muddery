@@ -118,10 +118,7 @@ MudderyClient.prototype = {
                 log_data[key] = data[key];
                 console.log(JSON.stringify(log_data));
 
-                if (key == "settings") {
-                    mud.main_frame.setClient(data[key]);
-                }
-                else if (key == "msg") {
+                if (key == "msg") {
                 	var msg = core.text2html.parseHtml(data[key]);
                     mud.scene_window.displayMsg(msg);
                 }
@@ -233,7 +230,7 @@ MudderyClient.prototype = {
                 }
                 else if (key == "get_exp") {
                 	var get_exp = data[key];
-                    mud.main_frame.showGetExp(get_exp["exp"], get_exp["combat"]);
+                    mud.main_frame.showGetExp(get_exp["exp"]);
                 }
                 else if (key == "login") {
                     mud.main_frame.onLogin(data[key]);
@@ -266,21 +263,6 @@ MudderyClient.prototype = {
                 }
                 else if (key == "conversation") {
                     mud.conversation_window.getMessage(data[key]);
-                }
-                else if (key == "rankings") {
-                	mud.main_frame.setRankings(data[key]);
-                }
-                else if (key == "in_combat_queue") {
-                    mud.main_frame.inCombatQueue(data[key]);
-                }
-                else if (key == "left_combat_queue") {
-                    mud.main_frame.leftCombatQueue(data[key]);
-                }
-                else if (key == "prepare_match") {
-                	mud.main_frame.prepareMatch(data[key]);
-                }
-                else if (key == "match_rejected") {
-                	mud.main_frame.matchRejected(data[key]);
                 }
                 else if (key == "current_location") {
                     core.map_data.setCurrentLocation(data[key]);
