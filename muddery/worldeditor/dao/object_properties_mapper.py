@@ -6,7 +6,7 @@ from evennia.utils import logger
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from muddery.utils.exception import MudderyError, ERR
+from muddery.server.utils.exception import MudderyError, ERR
 
 
 class ObjectPropertiesMapper(object):

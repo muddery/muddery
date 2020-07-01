@@ -12,6 +12,13 @@ class GameSettings(object):
     table_name = "game_settings"
 
     @classmethod
+    def get_fields(cls):
+        """
+        Get table fields.
+        """
+        return WorldData.get_fields(cls.table_name)
+
+    @classmethod
     def all(cls):
         """
         Get all data.

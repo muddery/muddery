@@ -32,8 +32,8 @@ class GameSettings(object):
             if len(record_values) > 0:
                 record = record_values[0]
                 # Add db fields to dict.
-                for field in record._meta.fields:
-                    self.values[field.name] = record.serializable_value(field.name)
+                for field in GameSettingsData.get_fields():
+                    self.values[field] = getattr(record, field)
         except Exception as e:
             print("Can not load settings: %s" % e)
             pass

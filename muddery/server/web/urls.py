@@ -16,7 +16,7 @@ from muddery.worldeditor.processer import PROCESSER
 urlpatterns = [
     # Front page (note that we shouldn't specify namespace here since we will
     # not be able to load django-auth/admin stuff (will probably work in Django>1.9)
-    url(r'^', include('muddery.web.website.urls')),#, namespace='website', app_name='website')),
+    url(r'^', include('muddery.server.web.website.urls')),#, namespace='website', app_name='website')),
 
     # Webclient
     url(r'^webclient/(?P<path>.*)$', serve, {'document_root': settings.WEBCLIENT_ROOT}),

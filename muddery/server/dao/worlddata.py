@@ -28,7 +28,8 @@ class WorldData(object):
         """
         cls.clear()
 
-        all_models = apps.get_models(settings.WORLD_DATA_APP)
+        config = apps.get_app_config(settings.WORLD_DATA_APP)
+        all_models = config.get_models()
         for model_obj in all_models:
             name = model_obj.__name__
             cls.tables[name] = TableData(name)
@@ -44,6 +45,13 @@ class WorldData(object):
             cls.tables[name] = TableData(name)
         except Exception as e:
             raise MudderyError("Can not load table %s: %s" % (table_name, e))
+
+    @classmethod
+    def get_fields(cls, table_name):
+        if table_name not in cls.tables:
+            cls.load_table(table_name)
+
+        return cls.tables[table_name].get_fields()
 
     @classmethod
     def get_table_all(cls, table_name):

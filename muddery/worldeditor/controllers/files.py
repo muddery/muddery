@@ -8,7 +8,7 @@ from django.conf import settings
 from evennia.utils import logger
 from muddery.worldeditor.services import exporter, importer
 from muddery.worldeditor.utils.response import success_response, file_response
-from muddery.utils.exception import MudderyError, ERR
+from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.utils import writers
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao.image_resources_mapper import IMAGE_RESOURCES

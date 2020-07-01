@@ -15,16 +15,15 @@ class RecordData(object):
     Record object.
     """
     def __init__(self, fields, data):
-        self._fields = fields
-        self._records = data
+        object.__setattr__(self, "_fields", fields)
+        object.__setattr__(self, "_records", data)
 
     def __getattribute__(self, attr_name):
-        return self._records[self._fields(attr_name)]
+        pos = object.__getattribute__(self, "_fields")[attr_name]
+        return object.__getattribute__(self, "_records")[pos]
 
     def __setattr__(self, attr_name, value):
-        if attr_name != "_fields" and attr_name != "_records":
-            raise Exception("Cannot assign directly to record attributes!")
-        super(RecordData, self).__setattr__(attr_name, value)
+        raise Exception("Cannot assign directly to record attributes!")
 
     def __delattr__(self, attr_name):
         raise Exception("Cannot delete record attributes!")
@@ -41,6 +40,7 @@ class TableData(object):
         self.data = []
         self.fields = {}
         self.index = {}
+        # index: {field's value: recode's index}
         self.reload()
 
     def clear(self):
@@ -64,9 +64,8 @@ class TableData(object):
 
         # set unique index
         for field in model_obj._meta.fields:
-            if field.unique:
-                pos = self.fields[field.name]
-                self.index[field.name] = {(record[pos], [i]) for i, record in enumerate(self.data)}
+            if field.name != "id" and field.unique:
+                self.index[field.name] = dict([(getattr(record, field.name), [i]) for i, record in enumerate(self.data)])
 
         # set common index
         for field in model_obj._meta.fields:

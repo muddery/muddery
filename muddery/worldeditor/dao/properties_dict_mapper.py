@@ -5,7 +5,7 @@ Query and deal common tables.
 from evennia.utils import logger
 from django.apps import apps
 from django.conf import settings
-from muddery.utils import defines
+from muddery.server.utils import defines
 from muddery.worldeditor.dao.common_mapper_base import ObjectsMapper
 
 

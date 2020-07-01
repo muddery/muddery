@@ -21,13 +21,13 @@ class DatabaseAppsRouter(object):
         """"
         Point all read operations to the specific database.
         """
-        return DATABASE_MAPPING.get(model._meta.app_label)
+        return DATABASE_MAPPING.get(model._meta.app_label, "default")
 
     def db_for_write(self, model, **hints):
         """
         Point all write operations to the specific database.
         """
-        return DATABASE_MAPPING.get(model._meta.app_label)
+        return DATABASE_MAPPING.get(model._meta.app_label, "default")
 
     def allow_relation(self, obj1, obj2, **hints):
         """

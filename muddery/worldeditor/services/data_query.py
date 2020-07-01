@@ -5,7 +5,7 @@ Battle commands. They only can be used when a character is in a combat.
 import ast
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
-from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.worldeditor.dao import common_mappers as CM
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
 from muddery.worldeditor.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
@@ -15,10 +15,10 @@ from muddery.worldeditor.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
 from muddery.worldeditor.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
-from muddery.mappings.typeclass_set import TYPECLASS_SET, TYPECLASS
-from muddery.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.utils.exception import MudderyError, ERR
-from muddery.utils.localized_strings_handler import _
+from muddery.server.mappings.typeclass_set import TYPECLASS_SET, TYPECLASS
+from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
+from muddery.server.utils.exception import MudderyError, ERR
+from muddery.server.utils.localized_strings_handler import _
 
 
 def query_all_typeclasses():

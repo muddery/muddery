@@ -7,7 +7,7 @@ from django.contrib import auth
 from evennia.utils import logger
 from muddery.worldeditor.services import data_query
 from muddery.worldeditor.utils import utils
-from muddery.utils.exception import MudderyError, ERR
+from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.utils.response import success_response
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 

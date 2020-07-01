@@ -5,7 +5,7 @@ Make HTTP response.
 import json
 from django.http import HttpResponse, StreamingHttpResponse
 from evennia.utils import logger
-from muddery.utils.utils import file_iterator
+from muddery.server.utils.utils import file_iterator
 
 
 def cross_domain(func):

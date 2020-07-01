@@ -4,7 +4,7 @@ This model localize other models.
 
 from muddery.server.utils.localized_strings_handler import _
 from django.db.models import Model
-from worlddata import models
+from worldeditor import models
 
 
 def localize_model_fields():

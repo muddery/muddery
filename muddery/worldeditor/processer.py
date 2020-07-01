@@ -9,8 +9,8 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from evennia.utils import logger
-from muddery.utils.exception import MudderyError, ERR
-from muddery.mappings.request_set import REQUEST_SET
+from muddery.server.utils.exception import MudderyError, ERR
+from muddery.worldeditor.mappings.request_set import REQUEST_SET
 import muddery.worldeditor.controllers
 from muddery.worldeditor.utils.response import error_response
 
