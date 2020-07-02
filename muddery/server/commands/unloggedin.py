@@ -516,11 +516,11 @@ class CmdUnconnectedLoginStart(BaseCommand):
         "Show the connect screen."
         game_name = GAME_SETTINGS.get("game_name")
         connection_screen = GAME_SETTINGS.get("connection_screen")
-        fields, records = EquipmentPositions.all()
+        records = EquipmentPositions.all()
         equipment_pos = [{
-            "key": r[fields["key"]],
-            "name": r[fields["name"]],
-            "desc": r[fields["desc"]],
+            "key": r.key,
+            "name": r.name,
+            "desc": r.desc,
         } for r in records]
 
         self.caller.msg({

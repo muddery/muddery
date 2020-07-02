@@ -2,10 +2,11 @@
 Query and deal common tables.
 """
 
+from muddery.server.dao.base_query import BaseQuery
 from muddery.server.dao.worlddata import WorldData
 
 
-class PropertiesDict(object):
+class PropertiesDict(BaseQuery):
     """
     Object properties dict.
     """

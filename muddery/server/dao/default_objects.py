@@ -2,10 +2,11 @@
 Query and deal common tables.
 """
 
+from muddery.server.dao.base_query import BaseQuery
 from muddery.server.dao.worlddata import WorldData
 
 
-class DefaultObjects(object):
+class DefaultObjects(BaseQuery):
     """
     Character's default objects.
     """
@@ -20,4 +21,3 @@ class DefaultObjects(object):
             character: (string) character's key.
         """
         return WorldData.get_table_data(cls.table_name, character=character)
-

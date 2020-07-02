@@ -6,8 +6,8 @@ actions of a skill.
 
 """
 
-from muddery.typeclasses.skill import MudderySkill
-from muddery.utils.localized_strings_handler import _
+from muddery.server.typeclasses.skill import MudderySkill
+from muddery.server.utils.localized_strings_handler import _
 
 
 class Skill(MudderySkill):

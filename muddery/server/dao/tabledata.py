@@ -65,20 +65,29 @@ class TableData(object):
         # set unique index
         for field in model_obj._meta.fields:
             if field.name != "id" and field.unique:
-                self.index[field.name] = dict([(getattr(record, field.name), [i]) for i, record in enumerate(self.data)])
+                self.index[field.name] = dict((getattr(record, field.name), [i]) for i, record in enumerate(self.data))
 
         # set common index
         for field in model_obj._meta.fields:
             if field.db_index:
-                pos = self.fields[field.name]
                 all_values = {}
                 for i, record in enumerate(self.data):
-                    key = record[pos]
+                    key = getattr(record, field.name)
                     if key in all_values:
                         all_values[key].append(i)
                     else:
                         all_values[key] = [i]
                 self.index[field.name] = all_values
+
+        # index together
+        for index_together in model_obj._meta.index_together:
+            index_fields = set(index_together)
+            all_values = {}
+            for i, record in enumerate(self.data):
+                keys = (getattr(record, field_name) for field_name in index_fields)
+                all_values[keys] = i
+            index_name = ".".join(index_fields)
+            self.index[index_name] = all_values
 
         # unique together
         for unique_together in model_obj._meta.unique_together:
@@ -127,7 +136,7 @@ class TableData(object):
         else:
             unique_fields = set(kwargs.keys())
             index_name = ".".join(unique_fields)
-            values = [kwargs[field_name] for field_name in unique_fields]
+            values = tuple(kwargs[field_name] for field_name in unique_fields)
 
         if index_name not in self.index:
             raise MudderyError("Only indexed fields can be searched.")

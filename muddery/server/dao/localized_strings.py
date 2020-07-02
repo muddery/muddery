@@ -2,21 +2,15 @@
 Query and deal common tables.
 """
 
+from muddery.server.dao.base_query import BaseQuery
 from muddery.server.dao.worlddata import WorldData
 
 
-class LocalizedStrings(object):
+class LocalizedStrings(BaseQuery):
     """
-    All sentences in dialogues.
+    All localized strings.
     """
     table_name = "localized_strings"
-
-    @classmethod
-    def all(cls):
-        """
-        Get all data.
-        """
-        return WorldData.get_table_all(cls.table_name)
 
     @classmethod
     def get(cls, origin, category=""):

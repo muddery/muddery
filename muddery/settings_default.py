@@ -182,7 +182,7 @@ TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.i18n',
                                'django.contrib.auth.context_processors.auth',
                                'django.core.context_processors.media',
                                'django.core.context_processors.debug',
-                               'muddery.web.utils.general_context.general_context',)
+                               'muddery.server.web.utils.general_context.general_context',)
 
 # Absolute path to the directory that holds file uploads from web apps.
 # Example: "/home/media/media.lawrence.com"
@@ -227,8 +227,8 @@ TEMPLATES = [{
         'DIRS': [
             os.path.join(GAME_DIR, "web", "template_overrides", WEBSITE_TEMPLATE),
             os.path.join(GAME_DIR, "web", "template_overrides"),
-            os.path.join(MUDDERY_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
-            os.path.join(MUDDERY_DIR, "web", "website", "templates"),
+            os.path.join(MUDDERY_DIR, "server", "web", "website", "templates", WEBSITE_TEMPLATE),
+            os.path.join(MUDDERY_DIR, "server", "web", "website", "templates"),
             os.path.join(EVENNIA_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
             os.path.join(EVENNIA_DIR, "web", "website", "templates")],
         'APP_DIRS': True,
@@ -239,7 +239,7 @@ TEMPLATES = [{
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.media',
                 'django.template.context_processors.debug',
-                'muddery.web.utils.general_context.general_context']
+                'muddery.server.web.utils.general_context.general_context']
             }
         }]
 

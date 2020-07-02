@@ -55,17 +55,17 @@ class EventTrigger(object):
             object_key = owner.get_data_key()
 
         # Load events.
-        fields, event_records = EventData.get_object_event(object_key)
-
+        fields = EventData.get_fields()
+        event_records = EventData.get_object_event(object_key)
         for record in event_records:
             event = {}
 
             # Set data.
-            event_action = record[fields["action"]]
-            trigger_type = record[fields["trigger_type"]]
+            event_action = record.action
+            trigger_type = record.trigger_type
 
             for field_name, i in fields.items():
-                event[field_name] = record[i]
+                event[field_name] = getattr(record, field_name)
             event["action"] = event_action
 
             if not trigger_type in self.events:

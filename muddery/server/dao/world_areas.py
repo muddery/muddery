@@ -2,18 +2,11 @@
 Query and deal common tables.
 """
 
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.dao.base_query import BaseQuery
 
 
-class WorldAreas(object):
+class WorldAreas(BaseQuery):
     """
     All areas in the game world.
     """
     table_name = "world_areas"
-
-    @classmethod
-    def all(cls):
-        """
-        Get all data.
-        """
-        return WorldData.get_table_all(cls.table_name)

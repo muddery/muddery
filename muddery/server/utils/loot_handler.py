@@ -26,10 +26,10 @@ class LootHandler(object):
         loot_list = []
         try:
             for loot_record in data:
-                loot_object = {"object": loot_record.serializable_value("object"),
+                loot_object = {"object": loot_record.object,
                                "number": loot_record.number,
                                "odds": loot_record.odds,
-                               "quest": loot_record.serializable_value("quest"),
+                               "quest": loot_record.quest,
                                "condition": loot_record.condition}
                 loot_list.append(loot_object)
         except Exception as e:

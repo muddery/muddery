@@ -2,21 +2,15 @@
 Query and deal common tables.
 """
 
+from muddery.server.dao.base_query import BaseQuery
 from muddery.server.dao.worlddata import WorldData
 
 
-class DialogueSentences(object):
+class DialogueSentences(BaseQuery):
     """
     All sentences in dialogues.
     """
     table_name = "dialogue_sentences"
-
-    @classmethod
-    def all(cls):
-        """
-        Get all data.
-        """
-        return WorldData.get_table_all(cls.table_name)
 
     @classmethod
     def get(cls, dialogue_key):

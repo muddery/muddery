@@ -2,18 +2,11 @@
 Query and deal common tables.
 """
 
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.dao.base_query import BaseQuery
 
 
-class ConditionDict(object):
+class ConditionDict(BaseQuery):
     """
-    All rooms in the world.
+    Descriptions of different conditions.
     """
     table_name = "condition_dict"
-
-    @classmethod
-    def all(cls):
-        """
-        Get a NPC's shops.
-        """
-        return WorldData.get_table_all(cls.table_name)

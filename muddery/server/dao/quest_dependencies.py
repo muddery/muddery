@@ -2,21 +2,15 @@
 Query and deal common tables.
 """
 
+from muddery.server.dao.base_query import BaseQuery
 from muddery.server.dao.worlddata import WorldData
 
 
-class QuestDependencies(object):
+class QuestDependencies(BaseQuery):
     """
     All quest conditions.
     """
     table_name = "quest_dependencies"
-
-    @classmethod
-    def all(cls):
-        """
-        Get all data.
-        """
-        return WorldData.get_table_all(cls.table_name)
 
     @classmethod
     def get(cls, quest_key):

@@ -2,8 +2,8 @@
 Default skills.
 """
 
-from muddery.utils.localized_strings_handler import _
-from muddery.statements.statement_function import StatementFunction
+from muddery.server.utils.localized_strings_handler import _
+from muddery.server.statements.statement_function import StatementFunction
 
 
 class FuncHit(StatementFunction):

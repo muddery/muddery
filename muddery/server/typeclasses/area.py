@@ -39,6 +39,7 @@ class MudderyArea(TYPECLASS("OBJECT")):
         if resource:
             try:
                 resource_info = ImageResource.get(resource)
+                resource_info = resource_info[0]
                 self.background = {"resource": resource_info.resource,
                                    "width": resource_info.image_width,
                                    "height": resource_info.image_height}

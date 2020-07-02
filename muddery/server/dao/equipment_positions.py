@@ -1,13 +1,12 @@
+"""
+Query and deal common tables.
+"""
 
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.dao.base_query import BaseQuery
 
 
-class EquipmentPositions(object):
+class EquipmentPositions(BaseQuery):
     """
     Equipment positions data.
     """
     table_name = "equipment_positions"
-
-    @classmethod
-    def all(cls):
-        return WorldData.get_table_all(cls.table_name)

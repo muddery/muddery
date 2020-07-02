@@ -2,18 +2,11 @@
 Query and deal common tables.
 """
 
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.dao.base_query import BaseQuery
 
 
-class WorldNPCs(object):
+class WorldNPCs(BaseQuery):
     """
     All NPCs whose position is fixed.
     """
     table_name = "world_npcs"
-
-    @classmethod
-    def all(cls):
-        """
-        Get all data.
-        """
-        return WorldData.get_table_all(cls.table_name)

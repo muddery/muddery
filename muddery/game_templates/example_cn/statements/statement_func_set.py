@@ -2,8 +2,8 @@
 Default statement functions.
 """
 
-from muddery.statements.statement_func_set import BaseStatementFuncSet
-import muddery.statements.skill as default_skill
+from muddery.server.statements.statement_func_set import BaseStatementFuncSet
+import muddery.server.statements.skill as default_skill
 import statements.skill as skill
 
 

@@ -60,6 +60,7 @@ class DialogueHandler(object):
         # Get db model
         try:
             dialogue_record = Dialogues.get(dialogue)
+            dialogue_record = dialogue_record[0]
         except Exception as e:
             return
 

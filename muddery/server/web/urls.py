@@ -22,7 +22,7 @@ urlpatterns = [
     url(r'^webclient/(?P<path>.*)$', serve, {'document_root': settings.WEBCLIENT_ROOT}),
 
     # World Editor Web
-    url(r'^editor/(?P<path>.*)$', serve, {'document_root': settings.WORLDDATA_ROOT}),
+    url(r'^editor/(?P<path>.*)$', serve, {'document_root': settings.WORLDEDITOR_ROOT}),
 
     # World Editor API
     url(r'^' + settings.WORLD_EDITOR_API_PATH, PROCESSER.process),

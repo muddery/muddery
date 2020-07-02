@@ -696,7 +696,7 @@ class properties_dict(models.Model):
     Object's custom properties.
     """
     # The key of a typeclass.
-    typeclass = models.CharField(max_length=KEY_LENGTH)
+    typeclass = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # The key of the property.
     property = models.CharField(max_length=KEY_LENGTH)
@@ -748,6 +748,7 @@ class object_properties(models.Model):
         verbose_name = "Object's Property"
         verbose_name_plural = "Object's Properties"
         unique_together = ("object", "level", "property")
+        index_together = [("object", "level")]
 
 
 # ------------------------------------------------------------

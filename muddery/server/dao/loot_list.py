@@ -2,15 +2,14 @@
 Query and deal common tables.
 """
 
+from muddery.server.dao.base_query import BaseQuery
 from muddery.server.dao.worlddata import WorldData
 
 
-class BaseLootList(object):
+class BaseLootList(BaseQuery):
     """
-    Equipment positions data.
+    Object's loot list.
     """
-    table_name = ""
-
     @classmethod
     def get(cls, provider_key):
         """

@@ -8,8 +8,8 @@ creation commands.
 
 """
 
-from muddery.typeclasses.player_character import MudderyPlayerCharacter
-from muddery.utils.localized_strings_handler import _
+from muddery.server.typeclasses.player_character import MudderyPlayerCharacter
+from muddery.server.utils.localized_strings_handler import _
 
 
 class PlayerCharacter(MudderyPlayerCharacter):

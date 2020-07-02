@@ -7,9 +7,9 @@ import time
 import random
 from django.conf import settings
 from evennia.utils import logger
-from muddery.combat.base_combat_handler import CStatus
-from muddery.utils.localized_strings_handler import _
-from muddery.utils.game_settings import GAME_SETTINGS
+from muddery.server.combat.base_combat_handler import CStatus
+from muddery.server.utils.localized_strings_handler import _
+from muddery.server.utils.game_settings import GAME_SETTINGS
 
 class ChooseSkill(object):
     """
