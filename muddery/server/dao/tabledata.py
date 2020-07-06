@@ -84,19 +84,24 @@ class TableData(object):
             index_fields = set(index_together)
             all_values = {}
             for i, record in enumerate(self.data):
-                keys = (getattr(record, field_name) for field_name in index_fields)
-                all_values[keys] = i
+                keys = tuple(getattr(record, field_name) for field_name in index_fields)
+                if keys in all_values:
+                    all_values[keys].append(i)
+                else:
+                    all_values[keys] = [i]
             index_name = ".".join(index_fields)
             self.index[index_name] = all_values
 
         # unique together
         for unique_together in model_obj._meta.unique_together:
             unique_fields = set(unique_together)
-            pos = [self.fields[field_name] for field_name in unique_fields]
             all_values = {}
             for i, record in enumerate(self.data):
-                keys = (record[p] for p in pos)
-                all_values[keys] = i
+                keys = tuple(getattr(record, field_name) for field_name in unique_fields)
+                if keys in all_values:
+                    all_values[keys].append(i)
+                else:
+                    all_values[keys] = [i]
             index_name = ".".join(unique_fields)
             self.index[index_name] = all_values
 

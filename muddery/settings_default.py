@@ -175,6 +175,13 @@ TELNET_ENABLED = False
 # Django web features
 ######################################################################
 
+# While DEBUG is False, show a regular server error page on the web
+# stuff, email the traceback to the people in the ADMINS tuple
+# below. If True, show a detailed traceback for the web
+# browser to display. Note however that this will leak memory when
+# active, so make sure to turn it off for a production server!
+DEBUG = False
+
 # Context processors define context variables, generally for the template
 # system to use.
 TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.i18n',
@@ -222,7 +229,8 @@ STATICFILES_DIRS = (
 )
 
 # We setup the location of the website template as well as the admin site.
-TEMPLATES = [{
+TEMPLATES = [
+    {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(GAME_DIR, "web", "template_overrides", WEBSITE_TEMPLATE),
@@ -239,9 +247,15 @@ TEMPLATES = [{
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.media',
                 'django.template.context_processors.debug',
-                'muddery.server.web.utils.general_context.general_context']
-            }
-        }]
+                "django.contrib.messages.context_processors.messages",
+                "sekizai.context_processors.sekizai",
+                'muddery.server.web.utils.general_context.general_context',
+            ],
+            # While true, show "pretty" error messages for template syntax errors.
+            "debug": DEBUG,
+        },
+    }
+]
 
 
 ######################################################################

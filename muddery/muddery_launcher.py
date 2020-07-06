@@ -47,7 +47,6 @@ def import_local_data():
     system_localized_string_path = os.path.join(system_data_path,
                                                 settings.LOCALIZED_STRINGS_FOLDER,
                                                 settings.LANGUAGE_CODE)
-
     # load data
     importer.import_table_path(system_localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
 
