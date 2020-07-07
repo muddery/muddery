@@ -1179,7 +1179,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             return
 
         current = self.db.current_dialogue
-        
+
         if not current["sentences"]:
             return
 
@@ -1198,7 +1198,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 return
             npc_talking = npc_in_location[0]
 
-        sentences = [DIALOGUE_HANDLER.get_sentence(s[0], s[1]) for s in current["sentence"]]
+        sentences = [DIALOGUE_HANDLER.get_sentence(s[0], s[1]) for s in current["sentences"]]
         dialogue = DIALOGUE_HANDLER.create_output_sentences(sentences, self, npc_talking)
         self.msg({"dialogue": dialogue})
         return
@@ -1259,7 +1259,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             if not self.db.current_dialogue:
                 return
 
-            if (dialogue, sentence) not in self.db.current_dialogue["sentences_all"]:
+            if (dialogue, sentence) not in self.db.current_dialogue["sentences"]:
                 # Can not find specified dialogue in current dialogues.
                 return
 
