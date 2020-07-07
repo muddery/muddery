@@ -4,9 +4,9 @@ Shop goods is the object in shops. They have some special attributes to record g
 """
 
 from evennia.utils import logger
-from muddery.server.utils.builder import build_object, get_object_record
+from muddery.server.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
 
 
 class MudderyShopGoods(TYPECLASS("OBJECT")):
@@ -26,10 +26,6 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
         """
         super(MudderyShopGoods, self).at_object_creation()
 
-        # Set default values.
-        if not self.attributes.has("goods"):
-            self.db.goods = None
-
         self.available = False
 
     def after_data_loaded(self):
@@ -45,12 +41,6 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
         self.goods_key = getattr(self.system, "goods", "")
         self.goods_level = getattr(self.system, "level", 0)
 
-        if not self.shop_key or not self.goods_key:
-            if self.db.goods:
-                self.db.goods.delete()
-                self.db.goods = None
-            return
-
         # set goods information
         self.price = getattr(self.system, "price", 0)
         self.unit_key = getattr(self.system, "unit", "")
@@ -58,35 +48,30 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
         self.condition = getattr(self.system, "condition", "")
 
         # get price unit information
-        unit_record = get_object_record(self.unit_key)
-        if not unit_record:
-            logger.log_errmsg("Can not find %s price unit %s." % (self.goods_key, self.unit_key))
+        try:
+            # Get record.
+            obj_model_name = TYPECLASS("OBJECT").model_name
+            unit_record = WorldData.get_table_data(obj_model_name, key=self.unit_key)
+            unit_record = unit_record[0]
+        except Exception as e:
+            logger.log_errmsg("Can not find %s's price unit %s." % (self.goods_key, self.unit_key))
             return
+
         self.unit_name = unit_record.name
 
-        # load goods object
-        goods = self.db.goods
-        if goods:
-            if goods.get_data_key() == self.goods_key:
-                # Load data.
-                try:
-                    # Load db data.
-                    goods.load_data()
-                except Exception as e:
-                    logger.log_errmsg("%s(%s) can not load data:%s" % (self.goods_key, self.dbref, e))
-            else:
-                goods.set_data_key(self.goods_key, self.goods_level)
-        else:
-            goods = build_object(self.goods_key)
-            if goods:
-                self.db.goods = goods
-            else:
-                logger.log_err("Can not create goods %s." % self.goods_key)
-                return
+        # load goods
+        try:
+            obj_record = WorldData.get_table_data(obj_model_name, key=self.goods_key)
+            obj_record = obj_record[0]
+            goods_models = TYPECLASS_SET.get_class_modeles(obj_record.typeclass)
+            goods_data = WorldData.get_tables_data(goods_models, key=self.goods_key)
+        except Exception as e:
+            logger.log_errmsg("Can not find goods %s." % self.goods_key)
+            return
 
-        self.name = goods.get_name()
-        self.desc = goods.db.desc
-        self.icon = getattr(goods, "icon", None)
+        self.name = goods_data["name"]
+        self.desc = goods_data["desc"]
+        self.icon = goods_data.get("icon", None)
 
         self.available = True
 
@@ -107,8 +92,8 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
             return
 
         # check if can get these objects
-        if not caller.can_get_object(self.db.goods.get_data_key(), self.number):
-            caller.msg({"alert": _("Sorry, you can not take more %s.") % self.db.goods.get_name()})
+        if not caller.can_get_object(self.goods_key, self.number):
+            caller.msg({"alert": _("Sorry, you can not take more %s.") % self.name})
             return
 
         # Reduce price units.
@@ -117,6 +102,6 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
             return
 
         # Give goods.
-        obj_list = [{"object": self.db.goods.get_data_key(),
+        obj_list = [{"object": self.goods_key,
                      "number": self.number}]
         caller.receive_objects(obj_list)

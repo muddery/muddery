@@ -33,21 +33,24 @@ class MudderyShop(TYPECLASS("OBJECT")):
         # set default values
         self.db.owner = None
 
+        if not self.attributes.has("goods"):
+            self.db.goods = {}
+
     def at_object_delete(self):
         """
         Called just before the database object is permanently
         delete()d from the database. If this method returns False,
         deletion is aborted.
 
-        All skills, contents will be removed too.
+        All goods will be removed too.
         """
         result = super(MudderyShop, self).at_object_delete()
         if not result:
             return result
 
-        # delete all contents
-        for content in self.contents:
-            content.delete()
+        # delete all goods
+        for goods in self.db.goods.values():
+            goods.delete()
 
         return True
 
@@ -75,14 +78,13 @@ class MudderyShop(TYPECLASS("OBJECT")):
         goods_keys = set([record.key for record in goods_records])
 
         # search current goods
-        current_goods = set()
-        for item in self.contents:
-            key = item.get_data_key()
+        current_goods = {}
+        for key, obj in self.db.goods.items():
             if key in goods_keys:
-                current_goods.add(key)
+                current_goods[key] = obj
             else:
                 # remove goods that is not in goods_keys
-                item.delete()
+                obj.delete()
 
         # add new goods
         for goods_record in goods_records:
@@ -94,7 +96,9 @@ class MudderyShop(TYPECLASS("OBJECT")):
                     logger.log_errmsg("Can't create goods: %s" % goods_key)
                     continue
 
-                goods_obj.move_to(self, quiet=True)
+                current_goods[goods_key] = goods_obj
+
+        self.db.goods = current_goods
 
     def set_owner(self, owner):
         """
@@ -142,17 +146,17 @@ class MudderyShop(TYPECLASS("OBJECT")):
         goods_list = []
 
         # Get shop goods
-        for item in self.contents:
-            if not item.available:
+        for obj in self.db.goods.values():
+            if not obj.available:
                 continue
 
-            goods = {"dbref": item.dbref,
-                     "name": item.name,
-                     "desc": item.desc,
-                     "number": item.number,
-                     "price": item.price,
-                     "unit": item.unit_name,
-                     "icon": item.icon}
+            goods = {"dbref": obj.dbref,
+                     "name": obj.name,
+                     "desc": obj.desc,
+                     "number": obj.number,
+                     "price": obj.price,
+                     "unit": obj.unit_name,
+                     "icon": obj.icon}
             
             goods_list.append(goods)
 

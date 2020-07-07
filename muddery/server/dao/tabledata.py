@@ -19,7 +19,10 @@ class RecordData(object):
         object.__setattr__(self, "_records", data)
 
     def __getattribute__(self, attr_name):
-        pos = object.__getattribute__(self, "_fields")[attr_name]
+        try:
+            pos = object.__getattribute__(self, "_fields")[attr_name]
+        except KeyError:
+            raise AttributeError
         return object.__getattribute__(self, "_records")[pos]
 
     def __setattr__(self, attr_name, value):

@@ -75,21 +75,25 @@ class WorldData(object):
         return cls.tables[table_name].filter_data(**kwargs)
 
     @classmethod
-    def get_tables_data(cls, tables, **kwargs):
+    def get_tables_data(cls, tables, key):
         """
         Get a record from tables whose key field is the value.
         Only can get one record.
 
         Args:
             tables: (list) tables' name
-            kwargs: (dict) query conditions
+            key: (string) object's key
+
+        Return:
+            (dict) values
         """
-        records = []
+        data = {}
         for table_name in tables:
             if table_name not in cls.tables:
                 cls.load_table(table_name)
 
-            records = cls.tables[table_name].filter_data(**kwargs)
+            fields = cls.tables[table_name].get_fields()
+            records = cls.tables[table_name].filter_data(key=key)
 
             if not records:
                 continue
@@ -97,6 +101,8 @@ class WorldData(object):
             if len(records) > 1:
                 raise MudderyError("Can not solve more than one records from table: %s" % table_name)
 
-            records.append(records[0])
+            record = records[0]
+            for field_name in fields:
+                data[field_name] = getattr(record, field_name)
 
-        return records
+        return data

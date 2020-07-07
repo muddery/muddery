@@ -132,6 +132,16 @@ class TypeclassSet(object):
 
         return self.trigger_dict.get(key, [])
 
+    def get_class_modeles(self, key):
+        """
+        Get a typeclass's models.
+        """
+        cls = self.get(key)
+        if cls:
+            return cls.get_models()
+        else:
+            return []
+
     def get_all_info(self):
         """
         Get all typeclass's information.

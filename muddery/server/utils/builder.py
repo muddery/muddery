@@ -4,46 +4,17 @@ This module handles importing data from csv files and creating the whole game wo
 
 import traceback
 from django.conf import settings
-from django.apps import apps
 from evennia.utils import create, search, logger
 from evennia.comms.models import ChannelDB
 from muddery.server.utils import utils
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
+from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.world_areas import WorldAreas
 from muddery.server.dao.world_rooms import WorldRooms
 from muddery.server.dao.world_exits import WorldExits
 from muddery.server.dao.world_npcs import WorldNPCs
 from muddery.server.dao.world_objects import WorldObjects
-
-
-def get_object_record(obj_key):
-    """
-    Query the object's record.
-
-    Args:
-        obj_key: (string) The key of the object.
-
-    Returns:
-        The object's data record.
-    """
-    record = None
-    model_name = TYPECLASS("OBJECT").model_name
-    try:
-        # Get record.
-        model_obj = apps.get_model(settings.WORLD_DATA_APP, model_name)
-        record = model_obj.objects.get(key=obj_key)
-    except Exception as e:
-        ostring = "Can not get record %s in %s: %s." % (obj_key, model_name, e)
-        print(ostring)
-        print(traceback.print_exc())
-
-    if not record:
-        ostring = "Can not get record %s in %s." % (obj_key, model_name)
-        print(ostring)
-        print(traceback.print_exc())
-
-    return record
 
 
 def build_object(obj_key, level=None, caller=None, reset_location=True):
@@ -60,7 +31,16 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
     record = None
     typeclass_path = None
     try:
-        record = get_object_record(obj_key)
+        model_name = TYPECLASS("OBJECT").model_name
+
+        try:
+            # Get record.
+            record = WorldData.get_table_data(model_name, key=obj_key)
+            record = record[0]
+        except Exception as e:
+            ostring = "Can not get record %s in %s: %s." % (obj_key, model_name, e)
+            print(ostring)
+            print(traceback.print_exc())
 
         # get typeclass model
         typeclass_path = TYPECLASS_SET.get_module(record.typeclass)
@@ -171,7 +151,6 @@ def build_unique_objects(objects_data, type_name, caller=None):
 
     # Create new objects.
     object_model_name = TYPECLASS("OBJECT").model_name
-    object_model = apps.get_model(settings.WORLD_DATA_APP, object_model_name)
     for record in objects_data:
         if not record.key in current_obj_keys:
             # Create new objects.
@@ -181,7 +160,8 @@ def build_unique_objects(objects_data, type_name, caller=None):
                 caller.msg(ostring)
 
             try:
-                object_record = object_model.objects.get(key=record.key)
+                object_record = WorldData.get_table_data(object_model_name, key=record.key)
+                object_record = object_record[0]
                 typeclass_path = TYPECLASS_SET.get_module(object_record.typeclass)
                 obj = create.create_object(typeclass_path, object_record.name)
                 count_create += 1

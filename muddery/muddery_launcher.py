@@ -33,33 +33,13 @@ def import_local_data():
     from muddery.worldeditor.services.data_importer import import_file
 
     # load custom data
-    # custom data file's path
-    custom_data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
-
-    # load all custom data
-    importer.import_data_path(custom_data_path)
-
-    # load system localized strings
-    # system data file's path
-    system_data_path = os.path.join(settings.MUDDERY_DIR, settings.WORLD_DATA_FOLDER)
+    # data file's path
+    data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
+    importer.import_data_path(data_path)
 
     # localized string file's path
-    system_localized_string_path = os.path.join(system_data_path,
-                                                settings.LOCALIZED_STRINGS_FOLDER,
-                                                settings.LANGUAGE_CODE)
-    # load data
-    importer.import_table_path(system_localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
-
-    # custom data file's path
-    custom_localized_string_path = os.path.join(custom_data_path, settings.LOCALIZED_STRINGS_MODEL)
-
-    file_names = glob.glob(custom_localized_string_path + ".*")
-    if file_names:
-        print("Importing %s" % file_names[0])
-        try:
-            import_file(file_names[0], table_name=settings.LOCALIZED_STRINGS_MODEL, clear=False)
-        except Exception as e:
-            print("Import error: %s" % e)
+    localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
+    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
 
 
 def print_info():
