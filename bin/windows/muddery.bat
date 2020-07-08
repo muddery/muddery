@@ -1,1 +1,0 @@
-@"d:\python\env\scripts\python.exe" "d:\python\env\Scripts\muddery_launcher.py" %*
