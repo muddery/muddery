@@ -3,9 +3,8 @@ Event action.
 """
 
 import random
-from django.apps import apps
-from django.conf import settings
 from muddery.server.events.base_interval_action import BaseIntervalAction
+from muddery.server.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 
 
@@ -51,8 +50,7 @@ class ActionGetObjects(BaseIntervalAction):
             times: (number) event triggered times.
         """
         # get action data
-        model_obj = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
-        records = model_obj.objects.filter(event_key=event_key)
+        records = WorldData.get_table_data(self.model_name, event_key=event_key)
 
         # get object list
         obj_list = []

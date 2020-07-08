@@ -8,7 +8,6 @@ BaseObject is an object which can load it's data automatically.
 
 import ast, traceback
 from django.conf import settings
-from django.apps import apps
 from evennia.objects.models import ObjectDB
 from evennia.objects.objects import DefaultObject
 from evennia.utils import logger
@@ -25,6 +24,7 @@ from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.desc_handler import DESC_HANDLER
 from muddery.server.typeclasses.base_typeclass import BaseTypeclass
 from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.object_properties import ObjectProperties
 
 
@@ -227,22 +227,18 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
                 raise MudderyError("No data key.")
 
         for data_model in self.get_models():
-            # Get db model
-            model_obj = apps.get_model(settings.WORLD_DATA_APP, data_model)
-            if not model_obj:
-                logger.log_errmsg("%s can not open model %s" % (key, data_model))
-                continue
-
             # Get data record.
             try:
-                data = model_obj.objects.get(key=key)
+                fields = WorldData.get_fields(data_model)
+                record = WorldData.get_table_data(data_model, key=key)
+                record = record[0]
             except Exception as e:
                 logger.log_errmsg("%s can not find key %s in %s" % (key, key, data_model))
                 continue
 
             # Set data.
-            for field in data._meta.fields:
-                setattr(self.system, field.name, data.serializable_value(field.name))
+            for field_name in fields:
+                setattr(self.system, field_name, getattr(record, field_name))
 
     def load_data(self, level=None, reset_location=True):
         """

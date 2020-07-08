@@ -1113,7 +1113,7 @@ class npc_dialogues(models.Model):
 # ------------------------------------------------------------
 class BaseEventActionData(models.Model):
     # The key of an event.
-    event_key = models.CharField(max_length=KEY_LENGTH)
+    event_key = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     class Meta:
         "Define Django meta options"

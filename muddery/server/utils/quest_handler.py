@@ -2,14 +2,13 @@
 QuestHandler handles a character's quests.
 """
 
-from django.conf import settings
-from django.apps import apps
 from evennia.utils import logger
 from muddery.server.utils.builder import build_object
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.quest_dependencies import QuestDependencies
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.typeclass_set import TYPECLASS
@@ -238,10 +237,9 @@ class QuestHandler(object):
         if not model_name:
             return False
 
-        model_quest = apps.get_model(settings.WORLD_DATA_APP, model_name)
-
         try:
-            record = model_quest.objects.get(key=quest_key)
+            record = WorldData.get_table_data(model_name, key=quest_key)
+            record = record[0]
             return STATEMENT_HANDLER.match_condition(record.condition, self.owner, None)
         except Exception as e:
             logger.log_errmsg("Can't get quest %s's condition: %s" % (quest_key, e))

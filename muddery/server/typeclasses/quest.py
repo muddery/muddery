@@ -6,8 +6,6 @@ in the character. It controls quest's objectives.
 
 """
 
-from django.conf import settings
-from django.apps import apps
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 from muddery.server.utils import defines
@@ -16,6 +14,7 @@ from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.loot_list import QuestLootList
 from muddery.server.dao.quest_objectives import QuestObjectives
 from muddery.server.mappings.typeclass_set import TYPECLASS
@@ -143,10 +142,11 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                     # Get the name of the objective object.
                     object_key = objective["object"]
                     model_name = TYPECLASS("OBJECT").model_name
-                    model = apps.get_model(settings.WORLD_DATA_APP, model_name)
+
                     # Get record.
                     try:
-                        record = model.objects.get(key=object_key)
+                        record = WorldData.get_table_data(model_name, key=object_key)
+                        record = record[0]
                         name = record.name
                     except Exception as e:
                         logger.log_err("Can not find the quest object: %s" % object_key)
@@ -167,11 +167,11 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                     # Get the name of the objective character.
                     object_key = self.objectives[ordinal]["object"]
                     model_name = TYPECLASS("OBJECT").model_name
-                    model = apps.get_model(settings.WORLD_DATA_APP, model_name)
 
                     # Get record.
                     try:
-                        record = model.objects.get(key=object_key)
+                        record = WorldData.get_table_data(model_name, key=object_key)
+                        record = record[0]
                         name = record.name
                     except Exception as e:
                         logger.log_err("Can not find the quest object: %s" % object_key)

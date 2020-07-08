@@ -15,6 +15,6 @@ class QuestDependencies(BaseQuery):
     @classmethod
     def get(cls, quest_key):
         """
-        Get a dialogue by its key.
+        Get a quest dependencies by quest's key.
         """
         return WorldData.get_table_data(cls.table_name, quest=quest_key)

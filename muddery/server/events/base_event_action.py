@@ -58,4 +58,4 @@ class BaseEventAction(object):
         if not self.model_name:
             return
 
-        return WorldData.get_table_data(self.model_name, "event_key", event_key)
+        return WorldData.get_table_data(self.model_name, event_key=event_key)

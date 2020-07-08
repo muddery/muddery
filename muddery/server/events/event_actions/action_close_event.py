@@ -2,9 +2,8 @@
 Event action.
 """
 
-from django.apps import apps
-from django.conf import settings
 from muddery.server.events.base_event_action import BaseEventAction
+from muddery.server.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 
 
@@ -27,8 +26,7 @@ class ActionCloseEvent(BaseEventAction):
             obj: (object) the event object.
         """
         # get action data
-        model_obj = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
-        records = model_obj.objects.filter(event_key=event_key)
+        records = WorldData.get_table_data(self.model_name, event_key=event_key)
 
         for record in records:
             # Close event.

@@ -9,7 +9,6 @@ creation commands.
 """
 
 from django.conf import settings
-from django.apps import apps
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger, search
 from evennia.comms.models import ChannelDB
@@ -23,6 +22,7 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.defines import ConversationType
+from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.default_objects import DefaultObjects
 from muddery.server.mappings.typeclass_set import TYPECLASS
 from muddery.server.utils import defines
@@ -513,8 +513,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 object_record = None
                 try:
                     common_model_name = TYPECLASS("COMMON_OBJECT").model_name
-                    common_model_obj = apps.get_model(settings.WORLD_DATA_APP, common_model_name)
-                    object_record = common_model_obj.objects.get(key=key)
+                    object_record = WorldData.get_table_data(common_model_name, key=key)
+                    object_record = object_record[0]
                 except Exception as e:
                     pass
 
