@@ -10,7 +10,7 @@ from muddery.server.utils.localized_strings_handler import _
 
 class ActionGetObjects(BaseIntervalAction):
     """
-    Attack a target.
+    Get objects.
     """
     key = "ACTION_GET_OBJECTS"
     name = _("Get Objects", category="event_actions")

@@ -9,7 +9,7 @@ from muddery.server.utils.localized_strings_handler import _
 
 class ActionCloseEvent(BaseEventAction):
     """
-    Close an event.
+    Close events.
     """
     key = "ACTION_CLOSE_EVENT"
     name = _("Close an Event", category="event_actions")
@@ -31,4 +31,3 @@ class ActionCloseEvent(BaseEventAction):
         for record in records:
             # Close event.
             character.close_event(record.event)
-            return

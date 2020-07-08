@@ -117,6 +117,7 @@ body {
     background-color: #222;
     font-size: 0.14rem;
     color: #ccc;
+    background: #654;
     margin: 0;
 	-webkit-touch-callout:none;
 	-webkit-user-select:none;
@@ -176,8 +177,9 @@ span.bgdimgray { background-color: #696969;}
 span.bgblack { background-color: black;}
 
 #windows-wrapper {
-    width: 100%;
+    max-width: 100vh;
     height: 100%;
+    margin: 0 auto;
 }
 
 .main-window {
@@ -587,6 +589,8 @@ span.bgblack { background-color: black;}
     background: no-repeat bottom;
     background-image: var(--login-tab-inactivate);
     background-size: 0.6rem 0.33rem;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 #login-window button.tab.activate {

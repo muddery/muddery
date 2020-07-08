@@ -7,9 +7,9 @@ from muddery.server.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 
 
-class ActionLearnSkill(BaseEventAction):
+class ActionAcceptQuest(BaseEventAction):
     """
-    Learn a skill.
+    Accept a quest.
     """
     key = "ACTION_ACCEPT_QUEST"
     name = _("Accept a Quest", category="event_actions")
