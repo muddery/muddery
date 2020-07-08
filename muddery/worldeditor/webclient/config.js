@@ -3,7 +3,7 @@
  */
 
 CONFIG = {
-	api_url: window.location.protocol + "//" + window.location.host + "/worlddata/editor/api/",
+	api_url: window.location.protocol + "//" + window.location.host + "/worldeditor/api/",
 
     // resource's url
     resource_url: window.location.protocol + "//" + window.location.host + "/media/",

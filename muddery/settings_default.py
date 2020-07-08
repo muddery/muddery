@@ -420,7 +420,7 @@ LOCALIZED_STRINGS_FOLDER = "languages"
 LOCALIZED_STRINGS_MODEL = "localized_strings"
 
 # World data API's url path.
-WORLD_EDITOR_API_PATH = "worldeditor/editor/api"
+WORLD_EDITOR_API_PATH = "worldeditor/api"
 
 
 ###################################
