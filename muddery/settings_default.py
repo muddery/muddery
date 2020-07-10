@@ -80,7 +80,7 @@ DATABASES = {
 
 
 # Database's router
-DATABASE_ROUTERS = ['muddery.worlddata.db.database_router.DatabaseAppsRouter']
+DATABASE_ROUTERS = ['muddery.server.database.database_router.DatabaseAppsRouter']
 
 DATABASE_APPS_MAPPING = {
     'gamedata': 'gamedata',
@@ -98,12 +98,6 @@ DATABASE_APPS_MAPPING = {
 # functions it must implement
 COMMAND_PARSER = "muddery.server.conf.cmdparser.cmdparser"
 
-# The handler that outputs errors when using any API-level search
-# (not manager methods). This function should correctly report errors
-# both for command- and object-searches. This allows full control
-# over the error output (it uses SEARCH_MULTIMATCH_TEMPLATE by default).
-# SEARCH_AT_RESULT = "muddery.server.conf.at_search_result"
-
 # An optional module that, if existing, must hold a function
 # named at_initial_setup(). This hook method can be used to customize
 # the server's initial setup sequence (the very first startup of the system).
@@ -119,13 +113,13 @@ AT_SERVER_STARTSTOP_MODULE = "muddery.server.conf.at_server_startstop"
 # plugin_services(application). This module will be called with the main
 # Evennia Server application when the Server is initiated.
 # It will be called last in the startup sequence.
-SERVER_SERVICES_PLUGIN_MODULES = ["muddery.server.conf.server_services_plugins"]
+SERVER_SERVICES_PLUGIN_MODULES = []
 
 # List of one or more module paths to modules containing a function
 # start_plugin_services(application). This module will be called with the
 # main Evennia Portal application when the Portal is initiated.
 # It will be called last in the startup sequence.
-PORTAL_SERVICES_PLUGIN_MODULES = ["muddery.server.conf.portal_services_plugins"]
+PORTAL_SERVICES_PLUGIN_MODULES = []
 
 # Module holding MSSP meta data. This is used by MUD-crawlers to determine
 # what type of game you are running, how many players you have etc.
@@ -136,15 +130,15 @@ WEB_PLUGINS_MODULE = "muddery.server.conf.web_plugins"
 
 # Tuple of modules implementing lock functions. All callable functions
 # inside these modules will be available as lock functions.
-LOCK_FUNC_MODULES = ("evennia.locks.lockfuncs", "muddery.server.conf.lockfuncs",)
+LOCK_FUNC_MODULES = ("evennia.locks.lockfuncs",)
 
 # Module holding handlers for managing incoming data from the client. These
 # will be loaded in order, meaning functions in later modules may overload
 # previous ones if having the same name.
-INPUT_FUNC_MODULES = ["evennia.server.inputfuncs", "muddery.server.conf.inputfuncs"]
+INPUT_FUNC_MODULES = ["evennia.server.inputfuncs"]
 
 # Modules that contain prototypes for use with the spawner mechanism.
-PROTOTYPE_MODULES = ["muddery.world.prototypes"]
+PROTOTYPE_MODULES = []
 
 # Delay to use before sending the evennia.syscmdkeys.CMD_LOGINSTART Command
 # when a new session connects (this defaults the unloggedin-look for showing
@@ -167,8 +161,7 @@ INLINEFUNC_ENABLED = False
 # Only functions defined globally (and not starting with '_') in
 # these modules will be considered valid inlinefuncs. The list
 # is loaded from left-to-right, same-named functions will overload
-INLINEFUNC_MODULES = ["evennia.utils.inlinefuncs",
-                      "muddery.server.conf.inlinefuncs"]
+INLINEFUNC_MODULES = ["evennia.utils.inlinefuncs"]
 
 
 ######################################################################
@@ -182,6 +175,13 @@ TELNET_ENABLED = False
 # Django web features
 ######################################################################
 
+# While DEBUG is False, show a regular server error page on the web
+# stuff, email the traceback to the people in the ADMINS tuple
+# below. If True, show a detailed traceback for the web
+# browser to display. Note however that this will leak memory when
+# active, so make sure to turn it off for a production server!
+DEBUG = False
+
 # Context processors define context variables, generally for the template
 # system to use.
 TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.i18n',
@@ -189,7 +189,7 @@ TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.i18n',
                                'django.contrib.auth.context_processors.auth',
                                'django.core.context_processors.media',
                                'django.core.context_processors.debug',
-                               'muddery.web.utils.general_context.general_context',)
+                               'muddery.server.web.utils.general_context.general_context',)
 
 # Absolute path to the directory that holds file uploads from web apps.
 # Example: "/home/media/media.lawrence.com"
@@ -221,21 +221,22 @@ WORLDEDITOR_ROOT = os.path.join(GAME_DIR, "web", "static", "editor")
 # Directories from which static files will be gathered from.
 STATICFILES_DIRS = (
     os.path.join(GAME_DIR, "web", "static_overrides"),
-    os.path.join(MUDDERY_DIR, "web", "website", "static"),
+    os.path.join(MUDDERY_DIR, "server", "web", "website", "static"),
     ("webclient", os.path.join(GAME_DIR, "web", "webclient_overrides", "webclient")),
-    ("webclient", os.path.join(MUDDERY_DIR, "web", "webclient", "webclient")),
-    ("editor", os.path.join(GAME_DIR, "worlddata", "webclient")),
-    ("editor", os.path.join(MUDDERY_DIR, "worlddata", "webclient")),
+    ("webclient", os.path.join(MUDDERY_DIR, "webclient")),
+    ("editor", os.path.join(GAME_DIR, "worldeditor", "webclient")),
+    ("editor", os.path.join(MUDDERY_DIR, "worldeditor", "webclient")),
 )
 
 # We setup the location of the website template as well as the admin site.
-TEMPLATES = [{
+TEMPLATES = [
+    {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(GAME_DIR, "web", "template_overrides", WEBSITE_TEMPLATE),
             os.path.join(GAME_DIR, "web", "template_overrides"),
-            os.path.join(MUDDERY_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
-            os.path.join(MUDDERY_DIR, "web", "website", "templates"),
+            os.path.join(MUDDERY_DIR, "server", "web", "website", "templates", WEBSITE_TEMPLATE),
+            os.path.join(MUDDERY_DIR, "server", "web", "website", "templates"),
             os.path.join(EVENNIA_DIR, "web", "website", "templates", WEBSITE_TEMPLATE),
             os.path.join(EVENNIA_DIR, "web", "website", "templates")],
         'APP_DIRS': True,
@@ -246,9 +247,15 @@ TEMPLATES = [{
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.media',
                 'django.template.context_processors.debug',
-                'muddery.web.utils.general_context.general_context']
-            }
-        }]
+                "django.contrib.messages.context_processors.messages",
+                "sekizai.context_processors.sekizai",
+                'muddery.server.web.utils.general_context.general_context',
+            ],
+            # While true, show "pretty" error messages for template syntax errors.
+            "debug": DEBUG,
+        },
+    }
+]
 
 
 ######################################################################
@@ -262,56 +269,56 @@ SERVER_SESSION_CLASS = "muddery.server.conf.serversession.ServerSession"
 # immediately entered path fail to find a typeclass. It allows for
 # shorter input strings. They must either base off the game directory
 # or start from the evennia library.
-TYPECLASS_PATHS = ["muddery.typeclasses"]
+TYPECLASS_PATHS = ["muddery.server.typeclasses"]
 
 # Typeclass for account objects (linked to a character) (fallback)
-BASE_ACCOUNT_TYPECLASS = "muddery.typeclasses.accounts.MudderyAccount"
+BASE_ACCOUNT_TYPECLASS = "muddery.server.typeclasses.accounts.MudderyAccount"
 
 # Typeclass for guest account objects (linked to a character)
-BASE_GUEST_TYPECLASS = "muddery.typeclasses.accounts.Guest"
+BASE_GUEST_TYPECLASS = "muddery.server.typeclasses.accounts.Guest"
 
 # Typeclass and base for all objects (fallback)
-BASE_OBJECT_TYPECLASS = "muddery.typeclasses.object.MudderyBaseObject"
+BASE_OBJECT_TYPECLASS = "muddery.server.typeclasses.object.MudderyBaseObject"
 
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.MudderyPlayerCharacter"
+BASE_CHARACTER_TYPECLASS = "muddery.server.typeclasses.player_character.MudderyPlayerCharacter"
 
 # Typeclass for general characters, include NPCs, mobs and player characters.
-BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.typeclasses.character.MudderyCharacter"
+BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.server.typeclasses.character.MudderyCharacter"
 
 # Typeclass for player characters.
-BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.typeclasses.player_character.MudderyPlayerCharacter"
+BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.server.typeclasses.player_character.MudderyPlayerCharacter"
 
 # Typeclass for rooms (fallback)
-BASE_ROOM_TYPECLASS = "muddery.typeclasses.room.MudderyRoom"
+BASE_ROOM_TYPECLASS = "muddery.server.typeclasses.room.MudderyRoom"
 
 # Typeclass for Exit objects (fallback).
-BASE_EXIT_TYPECLASS = "muddery.typeclasses.exit.MudderyExit"
+BASE_EXIT_TYPECLASS = "muddery.server.typeclasses.exit.MudderyExit"
 
 # Typeclass for Channel (fallback).
-BASE_CHANNEL_TYPECLASS = "muddery.typeclasses.channels.MudderyChannel"
+BASE_CHANNEL_TYPECLASS = "muddery.server.typeclasses.channels.MudderyChannel"
 
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.
-BASE_SCRIPT_TYPECLASS = "muddery.typeclasses.scripts.MudderyScript"
+BASE_SCRIPT_TYPECLASS = "muddery.server.typeclasses.scripts.MudderyScript"
 
 # Path of base world data forms.
-PATH_DATA_FORMS_BASE = "muddery.worlddata.forms"
+PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms"
 
 # Path of base request processers.
-PATH_REQUEST_PROCESSERS_BASE = "muddery.worlddata.controllers"
+PATH_REQUEST_PROCESSERS_BASE = "muddery.worldeditor.controllers"
 
 # Path of base typeclasses.
-PATH_TYPECLASSES_BASE = "muddery.typeclasses"
+PATH_TYPECLASSES_BASE = "muddery.server.typeclasses"
 
 # Path of custom typeclasses.
 PATH_TYPECLASSES_CUSTOM = "typeclasses"
 
 # Path of base event actions.
-PATH_EVENT_ACTION_BASE = "muddery.events.event_actions"
+PATH_EVENT_ACTION_BASE = "muddery.server.events.event_actions"
 
 # Path of base quest status.
-PATH_QUEST_STATUS_BASE = "muddery.quests.quest_status"
+PATH_QUEST_STATUS_BASE = "muddery.server.quests.quest_status"
 
 
 ######################################################################
@@ -345,13 +352,13 @@ MAX_NR_CHARACTERS = 3
 ######################################################################
 
 # Action functions set
-ACTION_FUNC_SET = "muddery.statements.default_statement_func_set.ActionFuncSet"
+ACTION_FUNC_SET = "muddery.server.statements.default_statement_func_set.ActionFuncSet"
 
 # Condition functions set
-CONDITION_FUNC_SET = "muddery.statements.default_statement_func_set.ConditionFuncSet"
+CONDITION_FUNC_SET = "muddery.server.statements.default_statement_func_set.ConditionFuncSet"
 
 # Skill functions set
-SKILL_FUNC_SET = "muddery.statements.default_statement_func_set.SkillFuncSet"
+SKILL_FUNC_SET = "muddery.server.statements.default_statement_func_set.SkillFuncSet"
 
 
 ######################################################################
@@ -359,29 +366,35 @@ SKILL_FUNC_SET = "muddery.statements.default_statement_func_set.SkillFuncSet"
 ######################################################################
 
 # Command set used on session before player has logged in
-CMDSET_UNLOGGEDIN = "muddery.commands.default_cmdsets.UnloggedinCmdSet"
+CMDSET_UNLOGGEDIN = "muddery.server.commands.default_cmdsets.UnloggedinCmdSet"
 
 # Command set used on the logged-in session
-CMDSET_SESSION = "muddery.commands.default_cmdsets.SessionCmdSet"
+CMDSET_SESSION = "muddery.server.commands.default_cmdsets.SessionCmdSet"
 
 # Default set for logged in player with characters (fallback)
-CMDSET_CHARACTER = "muddery.commands.default_cmdsets.CharacterCmdSet"
+CMDSET_CHARACTER = "muddery.server.commands.default_cmdsets.CharacterCmdSet"
 
 # Command set for accounts without a character (ooc)
-CMDSET_ACCOUNT = "muddery.commands.default_cmdsets.AccountCmdSet"
+CMDSET_ACCOUNT = "muddery.server.commands.default_cmdsets.AccountCmdSet"
 
 # Command set for players in combat
-CMDSET_COMBAT = "muddery.commands.default_cmdsets.CombatCmdSet"
+CMDSET_COMBAT = "muddery.server.commands.default_cmdsets.CombatCmdSet"
 
 
 ######################################################################
 # Muddery additional data features
 ######################################################################
 # data app name
-ADDITIONAL_DATA_APP = "gamedata"
+GAME_DATA = "gamedata"
+
+# data app name
+WORLD_DATA_APP = "worlddata"
 
 # add data app
-INSTALLED_APPS = INSTALLED_APPS + [ADDITIONAL_DATA_APP,]
+INSTALLED_APPS = INSTALLED_APPS + [GAME_DATA, WORLD_DATA_APP]
+
+# data file's folder under user's game directory.
+WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
 
 
 ######################################################################
@@ -392,13 +405,10 @@ INSTALLED_APPS = INSTALLED_APPS + [ADDITIONAL_DATA_APP,]
 DATA_KEY_CATEGORY = "data_key"
 
 # data app name
-WORLD_DATA_APP = "worlddata"
+WORLD_EDITOR_APP = "worldeditor"
 
 # add data app
-INSTALLED_APPS = INSTALLED_APPS + [WORLD_DATA_APP,]
-
-# data file's folder under user's game directory.
-WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
+INSTALLED_APPS = INSTALLED_APPS + [WORLD_EDITOR_APP, ]
 
 # Character's typeclass key.
 GENERAL_CHARACTER_TYPECLASS_KEY = "CHARACTER"
@@ -410,7 +420,7 @@ LOCALIZED_STRINGS_FOLDER = "languages"
 LOCALIZED_STRINGS_MODEL = "localized_strings"
 
 # World data API's url path.
-WORLD_DATA_API_PATH = "worlddata/editor/api"
+WORLD_EDITOR_API_PATH = "worldeditor/api"
 
 
 ###################################
@@ -435,7 +445,7 @@ DEFUALT_FORM_TEMPLATE = "common_form.html"
 # combat settings
 ###################################
 # Handler of the combat
-NORMAL_COMBAT_HANDLER = "muddery.combat.normal_combat_handler.NormalCombatHandler"
+NORMAL_COMBAT_HANDLER = "muddery.server.combat.normal_combat_handler.NormalCombatHandler"
 
 AUTO_COMBAT_TIMEOUT = 60
 
@@ -443,5 +453,5 @@ AUTO_COMBAT_TIMEOUT = 60
 ###################################
 # AI modules
 ###################################
-AI_CHOOSE_SKILL = "muddery.ai.choose_skill.ChooseSkill"
+AI_CHOOSE_SKILL = "muddery.server.ai.choose_skill.ChooseSkill"
 

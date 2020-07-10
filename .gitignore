@@ -47,6 +47,7 @@ nosetests.xml
 .idea
 
 # Windows files generated during setup
+muddery.bat
 evennia.bat
 twistd.bat
 
