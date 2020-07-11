@@ -2,7 +2,7 @@
 This model translates default strings into localized strings.
 """
 
-from muddery.server.dao.condition_dict import ConditionDict
+from muddery.server.dao.condition_dict import ConditionDesc
 
 
 class DescHandler(object):
@@ -29,7 +29,7 @@ class DescHandler(object):
 
         # Load localized string model.
         try:
-            for record in ConditionDict.all():
+            for record in ConditionDesc.all():
                 # Add db fields to dict.
                 if record.key not in self.dict:
                     self.dict[record.key] = []

@@ -17,6 +17,30 @@ from muddery.server.dao.world_npcs import WorldNPCs
 from muddery.server.dao.world_objects import WorldObjects
 
 
+def get_object_record(obj_key):
+    """
+    Query the object's record.
+
+    Args:
+        obj_key: (string) The key of the object.
+
+    Returns:
+        The object's data record.
+    """
+    record = None
+    model_name = TYPECLASS("OBJECT").model_name
+    try:
+        # Get record.
+        record = WorldData.get_table_data(model_name, key=obj_key)
+        record = record[0]
+    except Exception as e:
+        ostring = "Can not get record %s in %s: %s." % (obj_key, model_name, e)
+        print(ostring)
+        print(traceback.print_exc())
+
+    return record
+
+
 def build_object(obj_key, level=None, caller=None, reset_location=True):
     """
     Build objects of a model.
