@@ -244,10 +244,14 @@ class TypedObject(SharedMemoryModel):
             except Exception:
                 log_trace()
                 try:
-                    self.__class__ = class_from_module(self.__defaultclasspath__)
+                    self.__class__ = class_from_module(self.__settingsclasspath__)
                 except Exception:
                     log_trace()
-                    self.__dbclass__ = self._meta.concrete_model or self.__class__
+                    try:
+                        self.__class__ = class_from_module(self.__defaultclasspath__)
+                    except Exception:
+                        log_trace()
+                        self.__class__ = self._meta.concrete_model or self.__class__
         else:
             self.db_typeclass_path = "%s.%s" % (self.__module__, self.__class__.__name__)
         # important to put this at the end since _meta is based on the set __class__

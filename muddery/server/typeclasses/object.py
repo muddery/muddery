@@ -210,30 +210,53 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         # call data_key hook
         self.after_data_key_changed()
 
-    def load_system_data(self, key):
+    def load_base_data(self, base_model, key):
         """
         Get object's system data from database.
 
         Args:
+            base_model: (String) base data's table name.
             key: (String) object's data key.
 
         Returns:
             None
         """
-        # Get model and key names.
-        if not key:
-            key = self.get_data_key()
-            if not key:
-                raise MudderyError("No data key.")
+        # Get data record.
+        try:
+            fields = WorldData.get_fields(base_model)
+            record = WorldData.get_table_data(base_model, key=key)
+            record = record[0]
+        except Exception as e:
+            logger.log_errmsg("Can not find key %s in %s" % (key, base_model))
+            return
 
+        # Set data.
+        for field_name in fields:
+            setattr(self.system, field_name, getattr(record, field_name))
+
+    def load_system_data(self, base_model, key):
+        """
+        Get object's system data from database except base data.
+
+        Args:
+            base_model: (String) base data's table name.
+            key: (String) object's data key.
+
+        Returns:
+            None
+        """
+        # Get models.
         for data_model in self.get_models():
+            if data_model == base_model:
+                continue
+
             # Get data record.
             try:
                 fields = WorldData.get_fields(data_model)
                 record = WorldData.get_table_data(data_model, key=key)
                 record = record[0]
             except Exception as e:
-                logger.log_errmsg("%s can not find key %s in %s" % (key, key, data_model))
+                logger.log_errmsg("Can not find key %s in %s" % (key, data_model))
                 continue
 
             # Set data.
@@ -242,11 +265,14 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
 
     def load_data(self, level=None, reset_location=True):
         """
-        Set data to the object."
+        Set data to the object.
         """
         key = self.get_data_key()
         if key:
-            self.load_system_data(key)
+            base_model = TYPECLASS("OBJECT").model_name
+
+            # Get the object's base data
+            self.load_base_data(base_model, key)
 
             # reset typeclass
             typeclass = getattr(self.system, "typeclass", "")
@@ -255,9 +281,11 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             else:
                 logger.log_errmsg("%s does not have a typeclass." % key)
 
+            # Load system data except base data.
+            self.load_system_data(base_model, key)
+
             # Load custom properties.
             if level is None:
-                level = 0
                 if self.attributes.has("level"):
                     level = self.db.level
                 else:
