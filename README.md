@@ -1,7 +1,8 @@
 # Intro
 Muddery is an online text game (like MUD) framework in Python. It is licensed under 3-clause BSD license. Muddery bases on [Evennia](https://github.com/evennia/evennia) which is a MUD/MU* creation system.
 
-Our website is http://www.muddery.org.
+Our chinese website is http://www.muddery.org.
+（欢迎访问中文网站：http://www.muddery.org）
 
 
 #Features
@@ -20,7 +21,7 @@ Muddery is still under construction. It will have following features.
 1. Install Python3.7+ and GIT. Start a Console/Terminal.
 1. `cd` to some place you want to do your development. 
 1. `git clone https://github.com/muddery/muddery`
-1. `virtualenv mudenv`
+1. `python -m venv mudenv`
 1. `source mudenv/bin/activate` (Linux, Mac) or `mudenv\Scripts\activate` (Windows)
 1. `pip install -e muddery`
 1. `muddery --init mygame`
