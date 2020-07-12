@@ -385,13 +385,13 @@ CMDSET_COMBAT = "muddery.server.commands.default_cmdsets.CombatCmdSet"
 # Muddery additional data features
 ######################################################################
 # data app name
-GAME_DATA = "gamedata"
+GAME_DATA_APP = "gamedata"
 
 # data app name
 WORLD_DATA_APP = "worlddata"
 
 # add data app
-INSTALLED_APPS = INSTALLED_APPS + [GAME_DATA, WORLD_DATA_APP]
+INSTALLED_APPS = INSTALLED_APPS + [GAME_DATA_APP, WORLD_DATA_APP]
 
 # data file's folder under user's game directory.
 WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
