@@ -477,31 +477,29 @@ class CmdUse(BaseCommand):
         caller = self.caller
 
         if not caller.is_alive():
-            caller.msg({"alert":_("You are died.")})
+            caller.msg({"alert": _("You are died.")})
             return
 
         if not self.args:
-            caller.msg({"alert":_("You should use something.")})
+            caller.msg({"alert": _("You should use something.")})
             return
 
-        obj = caller.search_dbref(self.args, location=caller)
-        if not obj:
-            # If the caller does not have this object.
-            caller.msg({"alert":_("You don't have this object.")})
-            return
+        obj_dbref = self.args
+        print("obj_dbref: %s" % obj_dbref)
 
         result = ""
         try:
             # Use the object and get the result.
-            result = caller.use_object(obj)
+            result = caller.use_object(obj_dbref)
+            print("result: %s" % result)
         except Exception as e:
-            ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
+            ostring = "Can not use %s: %s" % (obj_dbref, e)
             logger.log_tracemsg(ostring)
 
         # Send result to the player.
         if not result:
             result = _("No result.")
-        caller.msg({"alert":result})
+        caller.msg({"alert": result})
 
 
 #------------------------------------------------------------
@@ -576,21 +574,17 @@ class CmdEquip(BaseCommand):
             caller.msg({"alert": _("You should equip something.")})
             return
 
-        obj = caller.search_dbref(self.args, location=caller)
-        if not obj:
-            # If the caller does not have this equipment.
-            caller.msg({"alert": _("You don't have this equipment.")})
-            return
+        dbref = self.args
 
         try:
             # equip
-            caller.equip_object(obj)
+            caller.equip_object(dbref)
         except MudderyError as e:
             caller.msg({"alert": str(e)})
             return
         except Exception as e:
             caller.msg({"alert": _("Can not use this equipment.")})
-            logger.log_tracemsg("Can not use equipment %s: %s" % (obj.get_data_key(), e))
+            logger.log_tracemsg("Can not use equipment %s: %s" % (dbref, e))
             return
 
         # Send lastest status to the player.
@@ -624,21 +618,17 @@ class CmdTakeOff(BaseCommand):
             caller.msg({"alert":_("You should take off something.")})
             return
 
-        obj = caller.search_dbref(self.args, location=caller)
-        if not obj:
-            # If the caller does not have this equipment.
-            caller.msg({"alert":_("You don't have this equipment.")})
-            return
+        dbref = self.args
 
         try:
             # Take off the equipment.
-            caller.take_off_equipment(obj)
+            caller.take_off_equipment(dbref)
         except MudderyError as e:
             caller.msg({"alert": str(e)})
             return
         except Exception as e:
             caller.msg({"alert": _("Can not take off this equipment.")})
-            logger.log_tracemsg("Can not take off %s: %s" % (obj.get_data_key(), e))
+            logger.log_tracemsg("Can not take off %s: %s" % (dbref, e))
             return
 
         # Send lastest status to the player.

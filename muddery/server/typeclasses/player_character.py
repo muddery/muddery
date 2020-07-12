@@ -113,34 +113,6 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                                                            to_none,
                                                            move_hooks)
 
-    def at_object_receive(self, moved_obj, source_location, **kwargs):
-        """
-        Called after an object has been moved into this object.
-        
-        Args:
-        moved_obj (Object): The object moved into this one
-        source_location (Object): Where `moved_object` came from.
-        
-        """
-        super(MudderyPlayerCharacter, self).at_object_receive(moved_obj, source_location)
-
-        # send latest inventory data to player
-        self.msg({"inventory": self.return_inventory()})
-    
-    def at_object_left(self, moved_obj, target_location):
-        """
-        Called after an object has been removed from this object.
-        
-        Args:
-        moved_obj (Object): The object leaving
-        target_location (Object): Where `moved_obj` is going.
-        
-        """
-        super(MudderyPlayerCharacter, self).at_object_left(moved_obj, target_location)
-        
-        # send latest inventory data to player
-        self.msg({"inventory": self.return_inventory()})
-
     def at_before_move(self, destination, **kwargs):
         """
         Called just before starting to move this object to
@@ -482,16 +454,16 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         objects = []           # objects that have been accepted
 
         # check what the character has now
-        inventory = {}
-        for item in self.contents:
+        current_inventory = {}
+        for item in self.db.inventory:
             key = item.get_data_key()
-            if key in inventory:
+            if key in current_inventory:
                 # if the character has more than one item of the same kind,
                 # get the smallest stack.
-                if inventory[key].db.number > item.db.number:
-                    inventory[key] = item
+                if current_inventory[key].db.number > item.db.number:
+                    current_inventory[key] = item
             else:
-                inventory[key] = item
+                current_inventory[key] = item
 
         for obj in obj_list:
             key = obj["object"]
@@ -506,7 +478,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
             if number == 0:
                 # it is an empty object
-                if key in inventory:
+                if key in current_inventory:
                     # already has this object
                     continue
 
@@ -534,26 +506,24 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     name = new_obj.get_name()
                     icon = new_obj.icon
 
-                # move the new object to the character
-                if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
-                    new_obj.delete()
-                    reject = _("Can not get %s.") % name
+                # move the new object to the inventory
+                self.db.inventory.append(new_obj)
             else:
                 # common number
                 # if already has this kind of object
-                if key in inventory:
+                if key in current_inventory:
                     # add to current object
-                    name = inventory[key].name
-                    icon = inventory[key].icon
-                    unique = inventory[key].unique
+                    name = current_inventory[key].name
+                    icon = current_inventory[key].icon
+                    unique = current_inventory[key].unique
 
                     add = number
-                    if add > inventory[key].max_stack - inventory[key].db.number:
-                        add = inventory[key].max_stack - inventory[key].db.number
+                    if add > current_inventory[key].max_stack - current_inventory[key].db.number:
+                        add = current_inventory[key].max_stack - current_inventory[key].db.number
 
                     if add > 0:
                         # increase stack number
-                        inventory[key].increase_num(add)
+                        current_inventory[key].increase_num(add)
                         number -= add
                         accepted += add
 
@@ -574,11 +544,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     icon = new_obj.icon
                     unique = new_obj.unique
 
-                    # move the new object to the character
-                    if not new_obj.move_to(self, quiet=True, emit_to_obj=self):
-                        new_obj.delete()
-                        reject = _("Can not get %s.") % name
-                        break
+                    # move the new object to the inventory
+                    self.db.inventory.append(new_obj)
 
                     # Get the number that actually added.
                     add = number
@@ -662,19 +629,23 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         return False
 
-    def use_object(self, obj, number=1):
+    def use_object(self, obj_dbref, number=1):
         """
         Use an object.
 
         Args:
-            obj: (object) object to use
+            obj_dbref: (string) object' dbref
             number: (int) number to use
 
         Returns:
             result: (string) the description of the result
         """
+        obj = None
+        for item in self.db.inventory:
+            if item.dbref == obj_dbref:
+                obj = item
         if not obj:
-            return _("Can not find this object.")
+            raise MudderyError(_("Can not find this object."))
 
         if obj.db.number < number:
             return _("Not enough number.")
@@ -685,6 +656,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             if used > 0:
                 # remove used object
                 self.remove_object(obj.get_data_key(), used)
+
+            self.show_inventory()
             return result
         except Exception as e:
             ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
@@ -724,9 +697,9 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Returns:
             boolean: success
         """
+        # get total number
         objects = self.search_inventory(obj_key)
 
-        # get total number
         sum = 0
         for obj in objects:
             obj_num = obj.get_number()
@@ -738,7 +711,14 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # remove objects
         to_remove = number
         try:
-            for obj in objects:
+            i = 0
+            while i < len(self.db.inventory):
+                obj = self.db.inventory[i]
+                if obj.get_data_key() != obj_key:
+                    i += 1
+                    continue
+
+                deleted = False
                 obj_num = obj.get_number()
                 if obj_num > 0:
                     if obj_num >= to_remove:
@@ -754,10 +734,16 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                             # if it is an equipment, take off it first
                             if getattr(obj, "equipped", False):
                                 self.take_off_equipment(obj)
-                            obj.delete()
+                            self.db.inventory[i].delete()
+                            del self.db.inventory[i]
+                            deleted = True
 
                 if to_remove <= 0:
                     break
+
+                if not deleted:
+                    i += 1
+
         except Exception as e:
             logger.log_tracemsg("Can not remove object %s: %s" % (obj_key, e))
             return False
@@ -771,26 +757,18 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         return True
 
-    def search_inventory(self, obj_key):
-        """
-        Search specified object in the inventory.
-        """
-        result = [item for item in self.contents if item.get_data_key() == obj_key]
-        return result
-
     def show_inventory(self):
         """
         Send inventory data to player.
         """
-        inv = self.return_inventory()
-        self.msg({"inventory": inv})
+        self.msg({"inventory": self.return_inventory()})
 
     def return_inventory(self):
         """
         Get inventory's data.
         """
         inv = []
-        for item in self.contents:
+        for item in self.db.inventory:
             info = {"dbref": item.dbref,        # item's dbref
                     "name": item.name,          # item's name
                     "number": item.db.number,   # item's number
@@ -845,7 +823,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             info = None
             if self.db.equipments[position]:
                 dbref = self.db.equipments[position]
-                for obj in self.contents:
+                for obj in self.db.inventory:
                     if obj.dbref == dbref:
                         info = {"dbref": obj.dbref,
                                 "name": obj.name,
@@ -855,28 +833,30 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         return equipments
 
-    def equip_object(self, obj):
+    def equip_object(self, obj_dbref):
         """
         Equip an object.
-        args: obj(object): the equipment object.
+        args: obj_dbref(string): the equipment object's dbref.
         """
-        if obj.location != self:
+        obj = None
+        for item in self.db.inventory:
+            if item.dbref == obj_dbref:
+                obj = item
+        if not obj:
             raise MudderyError(_("Can not find this equipment."))
 
-        type = obj.type
         position = obj.position
-
         if position not in self.db.equipments:
             raise MudderyError(_("Can not equip it on this position."))
 
-        if not EQUIP_TYPE_HANDLER.can_equip(self.db.career, type):
+        if not EQUIP_TYPE_HANDLER.can_equip(self.db.career, obj.type):
             raise MudderyError(_("Can not use this equipment."))
 
         # Take off old equipment
         if self.db.equipments[position]:
             dbref = self.db.equipments[position]
 
-            for content in self.contents:
+            for content in self.db.inventory:
                 if content.dbref == dbref:
                     content.equipped = False
 
@@ -900,7 +880,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         Take off an object from position.
         """
-        if not position in self.db.equipments:
+        if position not in self.db.equipments:
             raise MudderyError(_("Can not find this equipment."))
 
         if not self.db.equipments[position]:
@@ -909,10 +889,9 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # Set object's attribute 'equipped' to False
         dbref = self.db.equipments[position]
 
-        for obj in self.contents:
+        for obj in self.db.inventory:
             if obj.dbref == dbref:
                 obj.equipped = False
-                find = True
 
         self.db.equipments[position] = None
 
@@ -924,12 +903,18 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                    "inventory": self.return_inventory()}
         self.msg(message)
 
-    def take_off_equipment(self, equipment):
+    def take_off_equipment(self, obj_dbref):
         """
         Take off an equipment.
-        args: equipment(object): the equipment object.
+        args: obj_dbref(string): the equipment object's dbref.
         """
-        if equipment.location != self:
+        equipment = None
+        for item in self.db.inventory:
+            if item.dbref == obj_dbref:
+                equipment = item
+                break
+
+        if not equipment:
             raise MudderyError(_("Can not find this equipment."))
 
         if equipment.position in self.db.equipments:

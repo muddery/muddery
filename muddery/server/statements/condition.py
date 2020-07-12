@@ -102,8 +102,4 @@ class FuncHasObject(StatementFunction):
             return False
 
         obj_key = self.args[0]
-
-        for item in self.caller.contents:
-            if item.get_data_key() == obj_key:
-                return True
-        return False
+        return self.caller.have_object(obj_key)

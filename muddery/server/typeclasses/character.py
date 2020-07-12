@@ -103,6 +103,10 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         if not self.attributes.has("team"):
             self.db.team = 0
 
+        # init inventory
+        if not self.attributes.has("inventory"):
+            self.db.inventory = []
+
         # init equipments
         if not self.attributes.has("equipments"):
             self.db.equipments = {}
@@ -159,6 +163,10 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # delete all skills
         for skill in self.db.skills.values():
             skill.delete()
+
+        # delete all objects in the inventory
+        for obj in self.db.inventory:
+            obj.delete()
 
         # delete all contents
         for content in self.contents:
@@ -290,9 +298,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             if equipments[position]:
                 equipped.add(equipments[position])
 
-        for content in self.contents:
-            if content.dbref in equipped:
-                content.equipped = True
+        for obj in self.db.inventory:
+            if obj.dbref in equipped:
+                obj.equipped = True
 
     def refresh_properties(self):
         """
@@ -428,8 +436,14 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Search specified object in the inventory.
         """
-        result = [item for item in self.contents if item.get_data_key() == obj_key]
+        result = [item for item in self.db.inventory if item.get_data_key() == obj_key]
         return result
+
+    def have_object(self, obj_key):
+        """
+        Check specified object in the inventory.
+        """
+        return len(self.search_inventory(obj_key)) > 0
 
     def set_equips(self):
         """
@@ -442,9 +456,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             if equipments[position]:
                 equipped.add(equipments[position])
 
-        for content in self.contents:
-            if content.dbref in equipped:
-                content.equipped = True
+        for obj in self.db.inventory:
+            if obj.dbref in equipped:
+                obj.equipped = True
 
         # set character's attributes
         self.refresh_properties()
@@ -457,9 +471,9 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         equipped = set([equip_id for equip_id in self.db.equipments.values() if equip_id])
 
         # add equipment's attributes
-        for content in self.contents:
-            if content.dbref in equipped:
-                content.equip_to(self)
+        for obj in self.db.inventory:
+            if obj.dbref in equipped:
+                obj.equip_to(self)
 
     def load_default_skills(self):
         """
