@@ -17,6 +17,7 @@ from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.events.event_trigger import EventTrigger
 from muddery.server.utils.data_field_handler import DataFieldHandler
 from muddery.server.utils.properties_handler import PropertiesHandler
+from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.utils import utils
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.localized_strings_handler import _
@@ -48,10 +49,10 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
     # @property system stores object's system data.
     def __system_get(self):
         """
-        A non-attr_obj store (ndb: NonDataBase). Everything stored
-        to this is guaranteed to be cleared when a server is shutdown.
+        A system_data store. Everything stored to this is from the
+        world data. It will be reset every time when the object init .
         Syntax is same as for the _get_db_holder() method and
-        property, e.g. obj.ndb.attr = value etc.
+        property, e.g. obj.system.attr = value etc.
         """
         try:
             return self._system_holder
@@ -79,8 +80,9 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
     # @property custom stores object's custom data.
     def __prop_get(self):
         """
-        A non-attr_obj store (ndb: NonDataBase). Everything stored
-        to this is guaranteed to be cleared when a server is shutdown.
+        A properties_obj store. Everything stored to this is
+        from the custom properties in the world data. . It will
+        be reset every time when the object init.
         Syntax is same as for the _get_db_holder() method and
         property, e.g. obj.ndb.attr = value etc.
         """
@@ -103,6 +105,37 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         raise Exception("Cannot delete the custom properties object!")
     prop = property(__prop_get, __prop_set, __prop_del)
 
+    @lazy_property
+    def states_handler(self):
+        return ObjectStatesHandler(self)
+
+    # @property state stores object's running state.
+    def __state_get(self):
+        """
+        A non-attr_obj store (ndb: NonDataBase). Everything stored
+        to this is guaranteed to be cleared when a server is shutdown.
+        Syntax is same as for the _get_db_holder() method and
+        property, e.g. obj.ndb.attr = value etc.
+        """
+        try:
+            return self._states_holder
+        except AttributeError:
+            self._states_holder = DbHolder(self, "states_data", manager_name='states_handler')
+            return self._states_holder
+
+    # @state.setter
+    def __state_set(self, value):
+        "Stop accidentally replacing the ndb object"
+        string = "Cannot assign directly to ndb object! "
+        string += "Use self.state.name=value instead."
+        raise Exception(string)
+
+    # @state.deleter
+    def __state_del(self):
+        "Stop accidental deletion."
+        raise Exception("Cannot delete the state object!")
+    state = property(__state_get, __state_set, __state_del)
+
     def at_object_creation(self):
         """
         Called once, when this object is first created. This is the
@@ -117,6 +150,15 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         self.action = None
         self.condition = None
         self.icon = None
+
+    def at_object_delete(self):
+        """
+        Called just before the database object is permanently
+        delete()d from the database. If this method returns False,
+        deletion is aborted.
+
+        All skills, contents will be removed too.
+        """
 
     def at_init(self):
         """
@@ -257,13 +299,12 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
 
             # Load custom properties.
             if level is None:
-                level = 0
-                if self.attributes.has("level"):
-                    level = self.db.level
+                if self.states_handler.has("level"):
+                    level = self.state.level
                 else:
                     # Use default level.
                     level = getattr(self.system, "level", 0)
-                    self.db.level = level
+                    self.state.level = level
 
             self.load_custom_properties(level)
 
@@ -281,7 +322,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         # Get object level.
         if level is None:
-            level = self.db.level
+            level = self.state.level
 
         # Load values from db.
         values = {}
@@ -367,10 +408,10 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         Returns:
             None
         """
-        if self.db.level == level:
+        if self.state.level == level:
             return
 
-        self.db.level = level
+        self.state.level = level
         self.load_custom_properties(level)
 
     def set_typeclass(self, typeclass_key):
@@ -400,6 +441,9 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         if typeclass_cls.path != self.typeclass_path:
             logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_data_key(), typeclass_cls.path))
             return
+
+        # set the state handler to the new typeclass
+        self.states_handler = ObjectStatesHandler(self)
 
     def set_name(self, name):
         """

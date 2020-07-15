@@ -37,7 +37,7 @@ def to_string(value):
     elif issubclass(type(value), ChannelDB):
         str_value = json.dumps((value.id, "ChannelDB"))
     else:
-        raise MudderyError(ERR.server_error, "The object could not be stored.")
+        raise MudderyError(ERR.server_error, "The object can not store %s of %s." % (value, type(value)))
 
     return str_value
 
@@ -45,18 +45,18 @@ def to_string(value):
 def from_string(str_value):
     # unpack a value from a string.
     try:
-        json_value, data_type = json.dumps(str_value)
+        json_value, data_type = json.loads(str_value)
         if data_type in ("str", "int", "float", "bool", "bytes"):
             value = eval(data_type)(json_value)
         elif data_type in ("ObjectDB", "ScriptDB", "AccountDB", "ChannelDB"):
             model = eval(data_type)
             value = model.objects.get(id=json_value)
         elif data_type in ("dict", "OrderedDict"):
-            value = eval(data_type)((from_string(key), from_string(item) for key, item in json_value))
+            value = eval(data_type)((from_string(key), from_string(item)) for key, item in json_value)
         else:
             value = eval(data_type)(from_string(item) for item in json_value)
     except Exception as e:
-        raise MudderyError(ERR.server_error, "The object could not be loaded.")
+        raise MudderyError(ERR.server_error, "The object can not load %s." % str_value)
 
     return value
 
@@ -72,24 +72,77 @@ class BaseAttributesCache(object):
 
     def set(self, obj_id, key, value):
         """
+        Set an attribute.
+
         Args:
             obj_id: (number) object's id.
             key: (string) attribute's key.
             value: (any) attribute's value.
         """
         str_value = to_string(value)
-        record = {
-            obj_id: obj_id,
-            key: key,
-            value: str_value,
-        }
-        data = self.model(**record)
-        data.full_clean()
-        data.save()
+        records = self.model.objects.filter(obj_id=obj_id, key=key)
+        if len(records) == 0:
+            record = {
+                "obj_id": obj_id,
+                "key": key,
+                "value": str_value,
+            }
+            data = self.model(**record)
+            data.full_clean()
+            data.save()
+        else:
+            records.update(value=str_value)
+        
+    def has(self, obj_id, key):
+        """
+        Check if the attribute exists.
+
+        Args:
+            obj_id: (number) object's id.
+            key: (string) attribute's key.
+        """
+        records = self.model.objects.filter(obj_id=obj_id, key=key)
+        return len(records) != 0
 
     def get(self, obj_id, key):
+        """
+        Get the value of an attribute.
+
+        Args:
+            obj_id: (number) object's id.
+            key: (string) attribute's key.
+        """
         records = self.model.objects.filter(obj_id=obj_id, key=key)
         if len(records) == 0:
             return None
 
         return from_string(records[0].value)
+
+    def get_obj(self, obj_id):
+        """
+        Get values of an object.
+
+        Args:
+            obj_id: (number) object's id.
+        """
+        records = self.model.objects.filter(obj_id=obj_id)
+        return dict((r.key, from_string(r.value)) for r in records)
+
+    def remove(self, obj_id, key):
+        """
+        Remove an attribute of an object.
+
+        Args:
+            obj_id: (number) object's id.
+            key: (string) attribute's key.
+        """
+        self.model.objects.filter(obj_id=obj_id, key=key).delete()
+
+    def remove_obj(self, obj_id):
+        """
+        Remove an object's all attributes.
+
+        Args:
+            obj_id: (number) object's id.
+        """
+        self.model.objects.filter(obj_id=obj_id).delete()

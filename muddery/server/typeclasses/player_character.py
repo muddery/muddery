@@ -71,7 +71,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         # Set default data.
         if not self.attributes.has("nickname"):
-            self.db.nickname = ""
+            self.state.nickname = ""
         if not self.attributes.has("unlocked_exits"):
             self.db.unlocked_exits = set()
         if not self.attributes.has("revealed_map"):
@@ -235,14 +235,14 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         Set player character's nickname.
         """
-        self.db.nickname = nickname
+        self.state.nickname = nickname
 
     def get_name(self):
         """
         Get player character's name.
         """
         # Use nick name instead of normal name.
-        return self.db.nickname
+        return self.state.nickname
 
     def get_available_commands(self, caller):
         """
@@ -798,7 +798,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         status = {}
         status["level"] = {"name": _("LEVEL"),
-                           "value": self.db.level}
+                           "value": self.state.level}
 
         for key, info in self.get_properties_info().items():
             status[key] = {"name": info["name"],
@@ -1287,7 +1287,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         super(MudderyPlayerCharacter, self).level_up()
 
         # notify the player
-        self.msg({"msg": _("{C%s upgraded to level %s.{n") % (self.get_name(), self.db.level)})
+        self.msg({"msg": _("{C%s upgraded to level %s.{n") % (self.get_name(), self.state.level)})
 
     def get_message(self, caller, message):
         """

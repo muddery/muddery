@@ -180,7 +180,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         # Get object level.
         if level is None:
-            level = self.db.level
+            level = self.state.level
 
         # Load values from db.
         data_key = self.get_data_key()
@@ -218,8 +218,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         super(MudderyCharacter, self).after_data_loaded()
 
         # get level
-        if not self.db.level:
-            self.db.level = getattr(self.system, "level", 1)
+        if not self.state.level:
+            self.state.level = getattr(self.system, "level", 1)
 
         # friendly
         self.friendly = getattr(self.system, "friendly", 0)
@@ -762,7 +762,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        self.attack_temp_target(self.target.get_data_key(), self.target.db.level, desc)
+        self.attack_temp_target(self.target.get_data_key(), self.target.state.level, desc)
 
     def attack_temp_target(self, target_key, target_level=0, desc=""):
         """
@@ -782,7 +782,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             obj = search_obj_data_key(target_key)
             if obj:
                 obj = obj[0]
-                target_level = obj.db.level
+                target_level = obj.state.level
 
         # Create a target.
         target = build_object(target_key, target_level, reset_location=False)
@@ -956,7 +956,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        self.set_level(self.db.level + 1)
+        self.set_level(self.state.level + 1)
 
     def show_status(self):
         """
