@@ -7,15 +7,17 @@ import os
 import sys
 import shutil
 import configparser
+from pathlib import Path
 from subprocess import check_output, CalledProcessError, STDOUT
 from evennia.server import evennia_launcher
 from muddery.launcher import configs
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # Functions
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
+
 
 def muddery_version():
     """
@@ -78,8 +80,10 @@ def create_settings_file(gamedir, setting_dict=None):
         settings_string = f.read()
 
     # tweak the settings
-    default_setting_dict = {"EVENNIA_SETTINGS_DEFAULT": os.path.join(evennia_launcher.EVENNIA_LIB, "settings_default.py"),
-                            "MUDDERY_SETTINGS_DEFAULT": os.path.join(configs.MUDDERY_LIB, "settings_default.py"),
+    evennia_settings_file = Path(os.path.join(evennia_launcher.EVENNIA_LIB, "settings_default.py")).as_posix()
+    muddery_settings_file = Path(os.path.join(configs.MUDDERY_LIB, "settings_default.py")).as_posix()
+    default_setting_dict = {"EVENNIA_SETTINGS_DEFAULT": evennia_settings_file,
+                            "MUDDERY_SETTINGS_DEFAULT": muddery_settings_file,
                             "ALLOWED_HOSTS": "['*']",
                             "WEBSERVER_PORTS": "[(8000, 5001)]",
                             "WEBSOCKET_CLIENT_PORT": "8001",
