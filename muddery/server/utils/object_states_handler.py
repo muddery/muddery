@@ -6,10 +6,8 @@ Attributes are also used to implement Nicks. This module also contains
 the Attribute- and NickHandlers as well as the `NAttributeHandler`,
 which is a non-db version of Attributes.
 
-
 """
-import re
-import fnmatch
+
 import weakref
 
 from django.apps import apps
@@ -34,13 +32,16 @@ class ObjectStatesHandler(object):
     """
     def __init__(self, obj):
         """Initialize handler."""
-        self.obj_id = obj.id
-        try:
+        self.obj = weakref.proxy(obj)
+        self.states = obj.states
+
+        if self.states:
+            self.obj_id = obj.id
+
             apps.get_model(settings.GAME_DATA_APP, obj.model_name)
             self.model_name = obj.model_name
-        except LookupError as e:
-            self.model_name = settings.DEFAULT_OBJECT_RUNTIME_TABLE
-        self.cache = BaseAttributesCache(self.model_name)
+
+            self.cache = BaseAttributesCache(self.model_name)
 
     def has(self, key):
         """
@@ -52,6 +53,9 @@ class ObjectStatesHandler(object):
         Returns:
             has_attribute (bool): If the Attribute exists on this object or not.
         """
+        if key not in self.states:
+            return super(type(self.obj), self.obj).state.has(key)
+
         return self.cache.has(self.obj_id, key=key)
 
     def get(self, key):
@@ -69,6 +73,9 @@ class ObjectStatesHandler(object):
                 was found matching `key`.
 
         """
+        if key not in self.states:
+            return super(type(self.obj), self.obj).state.get(key)
+
         return self.cache.get(self.obj_id, key)
 
     def add(self, key, value):
@@ -80,6 +87,9 @@ class ObjectStatesHandler(object):
             value (any or str): The value of the Attribute. If
                 `strattr` keyword is set, this *must* be a string.
         """
+        if key not in self.states:
+            return super(type(self.obj), self.obj).state.add(key, value)
+
         self.cache.set(self.obj_id, key, value)
 
     def remove(self, key):
@@ -97,12 +107,25 @@ class ObjectStatesHandler(object):
             If neither key nor category is given, this acts as clear().
 
         """
+        if key not in self.states:
+            return super(type(self.obj), self.obj).state.remove(key)
+
         self.cache.remove(self.obj_id, key)
 
     def clear(self):
         """
         Remove all Attributes on this object.
         """
+        self._clear(self.obj_id)
+
+    def _clear(self, obj_id):
+        """
+        Remove all Attributes on this object recursively.
+
+        Args:
+            obj_id (number): object's record id.
+        """
+        super(type(self.obj), self.obj).state._clear(obj_id)
         self.cache.remove_obj(self.obj_id)
 
     def all(self):
@@ -110,3 +133,18 @@ class ObjectStatesHandler(object):
         Get all attributes from an object.
         """
         return self.cache.get_obj(self.obj_id)
+
+    def _all(self, obj_id):
+        """
+        Get all attributes from an object recursively.
+
+        Args:
+            obj_id (number): object's record id.
+
+        Return:
+            (dict): object's attributes.
+        """
+        attributes = super(type(self.obj), self.obj).state._all(obj_id)
+        attributes.update(self.cache.get_obj(self.obj_id))
+
+        return attributes
