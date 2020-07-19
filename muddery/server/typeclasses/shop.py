@@ -30,11 +30,8 @@ class MudderyShop(TYPECLASS("OBJECT")):
         """
         super(MudderyShop, self).at_object_creation()
 
-        # set default values
-        self.db.owner = None
-
         if not self.attributes.has("goods"):
-            self.db.goods = {}
+            self.state.goods = {}
 
     def at_object_delete(self):
         """
@@ -49,7 +46,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
             return result
 
         # delete all goods
-        for goods in self.db.goods.values():
+        for goods in self.state.goods.values():
             goods.delete()
 
         return True
@@ -79,7 +76,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
 
         # search current goods
         current_goods = {}
-        for key, obj in self.db.goods.items():
+        for key, obj in self.state.goods.items():
             if key in goods_keys:
                 current_goods[key] = obj
             else:
@@ -98,16 +95,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
 
                 current_goods[goods_key] = goods_obj
 
-        self.db.goods = current_goods
-
-    def set_owner(self, owner):
-        """
-        Set the owner of the shop.
-
-        :param owner:
-        :return:
-        """
-        self.db.owner = owner
+        self.state.goods = current_goods
 
     def show_shop(self, caller):
         """
@@ -126,13 +114,9 @@ class MudderyShop(TYPECLASS("OBJECT")):
         info = {
             "dbref": self.dbref,
             "name": self.get_name(),
-            "desc": self.db.desc
+            "desc": self.db.desc,
+            "icon": self.icon
         }
-
-        icon = self.icon
-        if not icon and self.db.owner:
-            icon = self.db.owner.icon
-        info["icon"] = icon
 
         goods_list = self.return_shop_goods()
         info["goods"] = goods_list
@@ -146,7 +130,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
         goods_list = []
 
         # Get shop goods
-        for obj in self.db.goods.values():
+        for obj in self.state.goods.values():
             if not obj.available:
                 continue
 

@@ -6,6 +6,9 @@ MudderyObject is an object which can load it's data automatically.
 
 """
 
+from evennia.utils.utils import lazy_property
+from evennia.typeclasses.models import DbHolder
+from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.dao.properties_dict import PropertiesDict
 
 
@@ -60,3 +63,31 @@ class BaseTypeclass(object):
                                                              "mutable": record.mutable,}
 
         return cls._all_properties_
+
+    @lazy_property
+    def states_handler(self):
+        return ObjectStatesHandler(self)
+
+    # @property state stores object's running state.
+    def __state_get(self):
+        """
+        A non-attr_obj store (ndb: NonDataBase). Everything stored
+        to this is guaranteed to be cleared when a server is shutdown.
+        Syntax is same as for the _get_db_holder() method and
+        property, e.g. obj.ndb.attr = value etc.
+        """
+        return self.states_handler
+
+    # @state.setter
+    def __state_set(self, value):
+        "Stop accidentally replacing the ndb object"
+        string = "Cannot assign directly to ndb object! "
+        string += "Use self.state.name=value instead."
+        raise Exception(string)
+
+    # @state.deleter
+    def __state_del(self):
+        "Stop accidental deletion."
+        raise Exception("Cannot delete the state object!")
+
+    state = property(__state_get, __state_set, __state_del)

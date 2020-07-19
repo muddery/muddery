@@ -29,8 +29,8 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         super(MudderyCommonObject, self).at_object_creation()
 
         # set default number
-        if not self.attributes.has("number"):
-            self.db.number = 0
+        if not self.states_handler.has("number"):
+            self.state.number = 0
 
     def after_data_loaded(self):
         """
@@ -44,11 +44,27 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         self.can_remove = getattr(self.system, "can_remove", True)
         self.can_discard = getattr(self.system, "can_discard", True)
 
+    def set_owner(self, owner):
+        """
+        Set the object's owner.
+
+        Args:
+            owner (Object): the owner object.
+        """
+        self.state.set("owner", owner.id)
+
+    def get_owner(self):
+        """
+        Return:
+            (integer): owner's id
+        """
+        return self.state.get("owner", None)
+
     def get_number(self):
         """
         Get object's number.
         """
-        return self.db.number
+        return self.state.number
 
     def increase_num(self, number):
         """
@@ -60,13 +76,13 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         if number < 0:
             raise MudderyError("%s can not increase a negative nubmer." % self.get_data_key())
 
-        if self.max_stack == 1 and self.db.number == 1:
+        if self.max_stack == 1 and self.state.number == 1:
             raise MudderyError("%s can not stack." % self.get_data_key())
 
-        if self.db.number + number > self.max_stack:
+        if self.state.number + number > self.max_stack:
             raise MudderyError("%s over stack." % self.get_data_key())
         
-        self.db.number += number
+        self.state.number += number
         return
 
     def decrease_num(self, number):
@@ -79,10 +95,10 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         if number < 0:
             raise MudderyError("%s can not decrease a negative nubmer." % self.get_data_key())
 
-        if self.db.number < number:
+        if self.state.number < number:
             raise MudderyError("%s's number will below zero." % self.get_data_key())
         
-        self.db.number -= number
+        self.state.number -= number
         return
 
     def get_appearance(self, caller):
@@ -93,7 +109,7 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         # Get name, description and available commands.
         info = super(MudderyCommonObject, self).get_appearance(caller)
 
-        info["number"] = self.db.number
+        info["number"] = self.state.number
         info["can_remove"] = self.can_remove
         return info
 
@@ -103,7 +119,7 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         commands = []
-        if self.db.number > 0:
+        if self.state.number > 0:
             if self.location and self.can_discard:
                 commands.append({
                     "name": _("Discard"),
@@ -158,8 +174,8 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
             raise ValueError("Number should be above zero.")
 
         used = number
-        if used > self.db.number:
-            used = self.db.number
+        if used > self.state.number:
+            used = self.state.number
 
         increments = {}
         for key, value in self.custom_properties_handler.all(True):
@@ -187,7 +203,7 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
         """
         commands = []
 
-        if self.db.number > 0:
+        if self.state.number > 0:
             commands.append({"name": _("Use"), "cmd": "use", "args": self.dbref})
 
         commands.extend(super(MudderyFood, self).get_available_commands(caller))
@@ -259,7 +275,7 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
         """
         commands = []
 
-        if self.db.number > 0:
+        if self.state.number > 0:
             if getattr(self, "equipped", False):
                 commands.append({
                     "name": _("Take Off"),
@@ -299,7 +315,7 @@ class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         commands = []
-        if self.db.number > 0:
+        if self.state.number > 0:
             commands.append({"name": _("Use"), "cmd": "use", "args": self.dbref})
 
         commands.extend(super(MudderySkillBook, self).get_available_commands(caller))

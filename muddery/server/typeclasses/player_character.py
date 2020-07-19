@@ -70,16 +70,16 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         super(MudderyPlayerCharacter, self).at_object_creation()
 
         # Set default data.
-        if not self.attributes.has("nickname"):
+        if not self.states_handler.has("nickname"):
             self.state.nickname = ""
-        if not self.attributes.has("unlocked_exits"):
-            self.db.unlocked_exits = set()
-        if not self.attributes.has("revealed_map"):
-            self.db.revealed_map = set()
+        if not self.states_handler.has("unlocked_exits"):
+            self.state.unlocked_exits = set()
+        if not self.states_handler.has("revealed_map"):
+            self.state.revealed_map = set()
 
         # set custom attributes
-        if not self.attributes.has("attributes"):
-            self.db.attributes = {}
+        if not self.states_handler.has("attributes"):
+            self.state.attributes = {}
         
     def after_data_loaded(self):
         """
@@ -315,7 +315,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         rooms = {}
         exits = {}
 
-        for room_key in self.db.revealed_map:
+        for room_key in self.state.revealed_map:
             # get room's information
             room = utils.search_obj_data_key(room_key)
             if room:
@@ -373,9 +373,9 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             }
             """
             reveal_map = None
-            if not location_key in self.db.revealed_map:
+            if not location_key in self.state.revealed_map:
                 # reveal map
-                self.db.revealed_map.add(self.location.get_data_key())
+                self.state.revealed_map.add(self.location.get_data_key())
 
                 rooms = {location_key: {"name": self.location.get_name(),
                                         "icon": self.location.icon,
@@ -455,12 +455,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         # check what the character has now
         current_inventory = {}
-        for item in self.db.inventory:
+        for item in self.state.inventory:
             key = item.get_data_key()
             if key in current_inventory:
                 # if the character has more than one item of the same kind,
                 # get the smallest stack.
-                if current_inventory[key].db.number > item.db.number:
+                if current_inventory[key].state.number > item.state.number:
                     current_inventory[key] = item
             else:
                 current_inventory[key] = item
@@ -507,7 +507,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     icon = new_obj.icon
 
                 # move the new object to the inventory
-                self.db.inventory.append(new_obj)
+                self.state.inventory.append(new_obj)
             else:
                 # common number
                 # if already has this kind of object
@@ -518,8 +518,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     unique = current_inventory[key].unique
 
                     add = number
-                    if add > current_inventory[key].max_stack - current_inventory[key].db.number:
-                        add = current_inventory[key].max_stack - current_inventory[key].db.number
+                    if add > current_inventory[key].max_stack - current_inventory[key].state.number:
+                        add = current_inventory[key].max_stack - current_inventory[key].state.number
 
                     if add > 0:
                         # increase stack number
@@ -545,7 +545,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     unique = new_obj.unique
 
                     # move the new object to the inventory
-                    self.db.inventory.append(new_obj)
+                    self.state.inventory.append(new_obj)
 
                     # Get the number that actually added.
                     add = number
@@ -641,13 +641,13 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             result: (string) the description of the result
         """
         obj = None
-        for item in self.db.inventory:
+        for item in self.state.inventory:
             if item.dbref == obj_dbref:
                 obj = item
         if not obj:
             raise MudderyError(_("Can not find this object."))
 
-        if obj.db.number < number:
+        if obj.state.number < number:
             return _("Not enough number.")
 
         # take effect
@@ -712,8 +712,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         to_remove = number
         try:
             i = 0
-            while i < len(self.db.inventory):
-                obj = self.db.inventory[i]
+            while i < len(self.state.inventory):
+                obj = self.state.inventory[i]
                 if obj.get_data_key() != obj_key:
                     i += 1
                     continue
@@ -734,8 +734,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                             # if it is an equipment, take off it first
                             if getattr(obj, "equipped", False):
                                 self.take_off_equipment(obj)
-                            self.db.inventory[i].delete()
-                            del self.db.inventory[i]
+                            self.state.inventory[i].delete()
+                            del self.state.inventory[i]
                             deleted = True
 
                 if to_remove <= 0:
@@ -768,10 +768,10 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Get inventory's data.
         """
         inv = []
-        for item in self.db.inventory:
+        for item in self.state.inventory:
             info = {"dbref": item.dbref,        # item's dbref
                     "name": item.name,          # item's name
-                    "number": item.db.number,   # item's number
+                    "number": item.state.number,   # item's number
                     "desc": item.db.desc,       # item's desc
                     "can_remove": item.can_remove,
                     "icon": getattr(item, "icon", None)}  # item's icon
@@ -818,12 +818,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Get equipments' data.
         """
         equipments = {}
-        for position in self.db.equipments:
+        for position in self.state.equipments:
             # in order of positions
             info = None
-            if self.db.equipments[position]:
-                dbref = self.db.equipments[position]
-                for obj in self.db.inventory:
+            if self.state.equipments[position]:
+                dbref = self.state.equipments[position]
+                for obj in self.state.inventory:
                     if obj.dbref == dbref:
                         info = {"dbref": obj.dbref,
                                 "name": obj.name,
@@ -839,29 +839,29 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         args: obj_dbref(string): the equipment object's dbref.
         """
         obj = None
-        for item in self.db.inventory:
+        for item in self.state.inventory:
             if item.dbref == obj_dbref:
                 obj = item
         if not obj:
             raise MudderyError(_("Can not find this equipment."))
 
         position = obj.position
-        if position not in self.db.equipments:
+        if position not in self.state.equipments:
             raise MudderyError(_("Can not equip it on this position."))
 
-        if not EQUIP_TYPE_HANDLER.can_equip(self.db.career, obj.type):
+        if not EQUIP_TYPE_HANDLER.can_equip(self.state.career, obj.type):
             raise MudderyError(_("Can not use this equipment."))
 
         # Take off old equipment
-        if self.db.equipments[position]:
-            dbref = self.db.equipments[position]
+        if self.state.equipments[position]:
+            dbref = self.state.equipments[position]
 
-            for content in self.db.inventory:
+            for content in self.state.inventory:
                 if content.dbref == dbref:
                     content.equipped = False
 
         # Put on new equipment, store object's dbref.
-        self.db.equipments[position] = obj.dbref
+        self.state.equipments[position] = obj.dbref
         
         # Set object's attribute 'equipped' to True
         obj.equipped = True
@@ -880,20 +880,20 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         Take off an object from position.
         """
-        if position not in self.db.equipments:
+        if position not in self.state.equipments:
             raise MudderyError(_("Can not find this equipment."))
 
-        if not self.db.equipments[position]:
+        if not self.state.equipments[position]:
             raise MudderyError(_("Can not find this equipment."))
 
         # Set object's attribute 'equipped' to False
-        dbref = self.db.equipments[position]
+        dbref = self.state.equipments[position]
 
-        for obj in self.db.inventory:
+        for obj in self.state.inventory:
             if obj.dbref == dbref:
                 obj.equipped = False
 
-        self.db.equipments[position] = None
+        self.state.equipments[position] = None
 
         # reset character's attributes
         self.refresh_properties()
@@ -909,7 +909,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         args: obj_dbref(string): the equipment object's dbref.
         """
         equipment = None
-        for item in self.db.inventory:
+        for item in self.state.inventory:
             if item.dbref == obj_dbref:
                 equipment = item
                 break
@@ -917,8 +917,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         if not equipment:
             raise MudderyError(_("Can not find this equipment."))
 
-        if equipment.position in self.db.equipments:
-            self.db.equipments[equipment.position] = None
+        if equipment.position in self.state.equipments:
+            self.state.equipments[equipment.position] = None
         
         # Set object's attribute 'equipped' to False
         equipment.equipped = False
@@ -943,14 +943,14 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             self.msg({"msg": _("Can not open this exit.")})
             return False
 
-        self.db.unlocked_exits.add(exit_key)
+        self.state.unlocked_exits.add(exit_key)
         return True
 
     def is_exit_unlocked(self, exit_key):
         """
         Whether the exit is unlocked.
         """
-        return exit_key in self.db.unlocked_exits
+        return exit_key in self.state.unlocked_exits
 
     def show_skills(self):
         """
@@ -965,7 +965,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         skills = []
 
-        for key, skill in self.db.skills.items():
+        for key, skill in self.state.skills.items():
             skills.append(skill.get_appearance(self))
 
         return skills
@@ -1130,7 +1130,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         if self.location:
             location_key = self.location.get_data_key()
 
-        self.db.current_dialogue = {"sentences": sentences,
+        self.state.current_dialogue = {"sentences": sentences,
                                     "npc": npc_key,
                                     "location": location_key}
 
@@ -1143,7 +1143,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Returns:
             None
         """
-        self.db.current_dialogue = None
+        self.state.current_dialogue = None
         return
 
     def resume_last_dialogue(self):
@@ -1157,10 +1157,10 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             # Can not auto resume dialogues.
             return
 
-        if not self.db.current_dialogue:
+        if not self.state.current_dialogue:
             return
 
-        current = self.db.current_dialogue
+        current = self.state.current_dialogue
 
         if not current["sentences"]:
             return
@@ -1238,10 +1238,10 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         if GAME_SETTINGS.get("auto_resume_dialogues"):
             # Check current dialogue.
-            if not self.db.current_dialogue:
+            if not self.state.current_dialogue:
                 return
 
-            if (dialogue, sentence) not in self.db.current_dialogue["sentences"]:
+            if (dialogue, sentence) not in self.state.current_dialogue["sentences"]:
                 # Can not find specified dialogue in current dialogues.
                 return
 

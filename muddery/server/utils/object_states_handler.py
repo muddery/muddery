@@ -34,6 +34,15 @@ class ObjectStatesHandler(object):
     """
     def __init__(self, obj):
         """Initialize handler."""
+        self.obj_id = None
+        self.model_name = None
+        self.cache = None
+        self.reset(obj)
+
+    def reset(self, obj):
+        """
+        Reset the owner object.
+        """
         self.obj_id = obj.id
         try:
             apps.get_model(settings.GAME_DATA_APP, obj.model_name)
@@ -54,22 +63,23 @@ class ObjectStatesHandler(object):
         """
         return self.cache.has(self.obj_id, key=key)
 
-    def get(self, key):
+    def get(self, key, **kwargs):
         """
         Get the Attribute.
 
         Args:
             key (str): the attribute identifier.
+            default (any or none): default value.
 
         Returns:
             result (any): The value matches the key.
 
         Raises:
             AttributeError: If `raise_exception` is set and no matching Attribute
-                was found matching `key`.
+                was found matching `key` and no default value set.
 
         """
-        return self.cache.get(self.obj_id, key)
+        return self.cache.get(self.obj_id, key, **kwargs)
 
     def add(self, key, value):
         """

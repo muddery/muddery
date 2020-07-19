@@ -39,16 +39,16 @@ class MudderyQuest(TYPECLASS("OBJECT")):
         """
         super(MudderyQuest, self).at_object_creation()
 
-        if not self.attributes.has("owner"):
-            self.db.owner = None
-        if not self.attributes.has("accomplished"):
-            self.db.accomplished = {}
+        if not self.states_handler.has("owner"):
+            self.state.owner = None
+        if not self.states_handler.has("accomplished"):
+            self.state.accomplished = {}
 
     def set_owner(self, owner):
         """
         Set the owner of the skill.
         """
-        self.db.owner = owner
+        self.state.owner = owner
 
     def after_data_loaded(self):
         """
@@ -75,7 +75,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                          "desc": obj_record.desc}
             self.objectives[obj_record.ordinal] = objective
 
-            accomplished = self.db.accomplished.get(key, 0)
+            accomplished = self.state.accomplished.get(key, 0)
             if accomplished < obj_record.number:
                 if not objective_type in self.not_accomplished:
                     self.not_accomplished[objective_type] = [obj_record.ordinal]
@@ -120,7 +120,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
             else:
                 # Or make a desc by other data.
                 obj_num = objective["number"]
-                accomplished = self.db.accomplished.get(ordinal, 0)
+                accomplished = self.state.accomplished.get(ordinal, 0)
                 
                 if objective["type"] == defines.OBJECTIVE_TALK:
                     # talking
@@ -193,7 +193,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
         """
         for ordinal in self.objectives:
             obj_num = self.objectives[ordinal]["number"]
-            accomplished = self.db.accomplished.get(ordinal, 0)
+            accomplished = self.state.accomplished.get(ordinal, 0)
     
             if accomplished < obj_num:
                 return False
@@ -204,7 +204,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
         """
         Turn in a quest, do its action.
         """
-        owner = self.db.owner
+        owner = self.state.owner
 
         # get rewards
         obj_list = self.loot_handler.get_obj_list(owner)
@@ -254,11 +254,11 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                 status_changed = True
 
                 # add accomplished number
-                accomplished = self.db.accomplished.get(ordinal, 0)
+                accomplished = self.state.accomplished.get(ordinal, 0)
                 accomplished += number
-                self.db.accomplished[ordinal] = accomplished
+                self.state.accomplished[ordinal] = accomplished
 
-                if self.db.accomplished[ordinal] >= self.objectives[ordinal]["number"]:
+                if self.state.accomplished[ordinal] >= self.objectives[ordinal]["number"]:
                     # if this objectives is accomplished, remove it
                     index -= 1
                     del(self.not_accomplished[type][index])

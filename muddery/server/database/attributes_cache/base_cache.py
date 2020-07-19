@@ -104,17 +104,25 @@ class BaseAttributesCache(object):
         records = self.model.objects.filter(obj_id=obj_id, key=key)
         return len(records) != 0
 
-    def get(self, obj_id, key):
+    def get(self, obj_id, key, **kwargs):
         """
         Get the value of an attribute.
 
         Args:
             obj_id: (number) object's id.
             key: (string) attribute's key.
+            default: (any or none) default value.
+
+        Raises:
+            AttributeError: If `raise_exception` is set and no matching Attribute
+                was found matching `key` and no default value set.
         """
         records = self.model.objects.filter(obj_id=obj_id, key=key)
         if len(records) == 0:
-            return None
+            try:
+                return kwargs["default"]
+            except KeyError:
+                raise AttributeError
 
         return from_string(records[0].value)
 

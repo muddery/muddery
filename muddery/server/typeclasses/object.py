@@ -17,7 +17,6 @@ from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.events.event_trigger import EventTrigger
 from muddery.server.utils.data_field_handler import DataFieldHandler
 from muddery.server.utils.properties_handler import PropertiesHandler
-from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.utils import utils
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.localized_strings_handler import _
@@ -105,37 +104,6 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         raise Exception("Cannot delete the custom properties object!")
     prop = property(__prop_get, __prop_set, __prop_del)
 
-    @lazy_property
-    def states_handler(self):
-        return ObjectStatesHandler(self)
-
-    # @property state stores object's running state.
-    def __state_get(self):
-        """
-        A non-attr_obj store (ndb: NonDataBase). Everything stored
-        to this is guaranteed to be cleared when a server is shutdown.
-        Syntax is same as for the _get_db_holder() method and
-        property, e.g. obj.ndb.attr = value etc.
-        """
-        try:
-            return self._states_holder
-        except AttributeError:
-            self._states_holder = DbHolder(self, "states_data", manager_name='states_handler')
-            return self._states_holder
-
-    # @state.setter
-    def __state_set(self, value):
-        "Stop accidentally replacing the ndb object"
-        string = "Cannot assign directly to ndb object! "
-        string += "Use self.state.name=value instead."
-        raise Exception(string)
-
-    # @state.deleter
-    def __state_del(self):
-        "Stop accidental deletion."
-        raise Exception("Cannot delete the state object!")
-    state = property(__state_get, __state_set, __state_del)
-
     def at_object_creation(self):
         """
         Called once, when this object is first created. This is the
@@ -159,6 +127,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
 
         All skills, contents will be removed too.
         """
+        self.states_handler.clear()
 
     def at_init(self):
         """
@@ -443,7 +412,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
             return
 
         # set the state handler to the new typeclass
-        self.states_handler = ObjectStatesHandler(self)
+        self.states_handler.reset(self)
 
     def set_name(self, name):
         """

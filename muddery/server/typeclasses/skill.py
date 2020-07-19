@@ -44,16 +44,16 @@ class MudderySkill(TYPECLASS("OBJECT")):
         """
         super(MudderySkill, self).at_object_creation()
 
-        self.owner = None
-        self.owner_dbref = None
+        self._owner = None
+        self._is_default = False
 
         # set status
-        if not self.attributes.has("owner"):
-            self.db.owner_dbref = None
-        if not self.attributes.has("cd_finish_time"):
-            self.db.cd_finish_time = 0
-        if not self.attributes.has("is_default"):
-            self.db.is_default = False
+        if not self.states_handler.has("owner"):
+            self.state.owner_dbref = None
+        if not self.states_handler.has("cd_finish_time"):
+            self.state.cd_finish_time = 0
+        if not self.states_handler.has("is_default"):
+            self.state.is_default = False
 
     def at_init(self):
         """
@@ -61,10 +61,12 @@ class MudderySkill(TYPECLASS("OBJECT")):
         """
         super(MudderySkill, self).at_init()
 
-        self.owner = None
-        self.owner_dbref = self.db.owner_dbref
-        if self.owner_dbref:
-            self.owner = self.search_dbref(self.owner_dbref)
+        self._owner = None
+        owner_dbref = self.state.owner_dbref
+        if owner_dbref:
+            self._owner = self.search_dbref(owner_dbref)
+
+        self._is_default = self.state.is_default
 
     def set_default(self, is_default):
         """
@@ -75,7 +77,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
         Args:
             is_default: (boolean) if the is default or not.
         """
-        self.db.is_default = is_default
+        self.state.is_default = is_default
 
     def is_default(self):
         """
@@ -84,7 +86,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
         Returns:
             (boolean) is default or not
         """
-        return self.db.is_default
+        return self._is_default
 
     def after_data_loaded(self):
         """
@@ -131,15 +133,14 @@ class MudderySkill(TYPECLASS("OBJECT")):
         Returns:
             None
         """
-        self.owner = owner
-        self.owner_dbref = owner.dbref
-        self.db.owner_dbref = owner.dbref
+        self._owner = owner
+        self.state.owner_dbref = owner.dbref
     
         if not self.passive:
             # Set skill cd. Add gcd to new the skill.
             gcd = GAME_SETTINGS.get("global_cd")
             if gcd > 0:
-                self.db.cd_finish_time = time.time() + gcd
+                self.state.cd_finish_time = time.time() + gcd
 
     def cast_skill(self, target):
         """
@@ -160,15 +161,17 @@ class MudderySkill(TYPECLASS("OBJECT")):
 
             # set message
             skill_cast = {
-                "caller": self.owner_dbref,
                 "skill": self.get_data_key(),
                 "main_type": self.main_type,
                 "sub_type": self.sub_type,
-                "cast": self.cast_message(target),
-                "status": {
-                    self.owner.dbref: self.owner.get_combat_status(),
-                }
+                "cast": self.cast_message(target)
             }
+
+            if self._owner:
+                skill_cast["caller"] = self._owner.dbref
+                skill_cast["status"] = {
+                    self._owner.dbref: self._owner.get_combat_status(),
+                }
 
             if target:
                 skill_cast["target"] = target.dbref
@@ -188,10 +191,10 @@ class MudderySkill(TYPECLASS("OBJECT")):
             # set cd
             time_now = time.time()
             if self.cd > 0:
-                self.db.cd_finish_time = time_now + self.cd
+                self.state.cd_finish_time = time_now + self.cd
 
         # call skill function
-        return STATEMENT_HANDLER.do_skill(self.function, self.owner, target)
+        return STATEMENT_HANDLER.do_skill(self.function, self._owner, target)
 
     def check_available(self):
         """
@@ -229,8 +232,9 @@ class MudderySkill(TYPECLASS("OBJECT")):
         If this skill is cooling down.
         """
         if self.cd > 0:
-            if self.db.cd_finish_time:
-                if time.time() < self.db.cd_finish_time:
+            cd_finish_time = self.state.cd_finish_time
+            if cd_finish_time:
+                if time.time() < cd_finish_time:
                     return True
         return False
 
@@ -241,7 +245,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
         Returns:
             (float) Remain CD in seconds.
         """
-        remain_cd = self.db.cd_finish_time - time.time()
+        remain_cd = self.state.cd_finish_time - time.time()
         if remain_cd < 0:
             remain_cd = 0
         return remain_cd
@@ -254,8 +258,8 @@ class MudderySkill(TYPECLASS("OBJECT")):
         target_name = ""
         message = ""
 
-        if self.owner:
-            caller_name = self.owner.get_name()
+        if self._owner:
+            caller_name = self._owner.get_name()
 
         if target:
             target_name = target.get_name()
