@@ -30,7 +30,6 @@ def import_local_data():
     """
     from django.conf import settings
     from muddery.worldeditor.services import importer
-    from muddery.worldeditor.services.data_importer import import_file
 
     # load custom data
     # data file's path
@@ -40,6 +39,61 @@ def import_local_data():
     # localized string file's path
     localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
     importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
+
+
+def create_superuser(username, password):
+    """
+    Create the superuser's account.
+    """
+    from evennia.accounts.models import AccountDB
+    AccountDB.objects.create_superuser(username, '', password)
+
+
+def create_database():
+    """
+    Create the game's database.
+    """
+    # make migrations
+    try:
+        django_args = ["makemigrations", "gamedata"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        raise
+
+    try:
+        django_args = ["makemigrations", "worlddata"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        raise
+
+    # migrate the database
+    try:
+        django_args = ["migrate"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+
+        django_args = ["migrate", "gamedata"]
+        django_kwargs = {"database": "gamedata"}
+        django.core.management.call_command(*django_args, **django_kwargs)
+
+        django_args = ["migrate", "worlddata"]
+        django_kwargs = {"database": "worlddata"}
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        raise
+
+    # import worlddata
+    try:
+        print("Importing local data.")
+        import_local_data()
+    except Exception as e:
+        traceback.print_exc()
+        print("Import local data error: %s" % e)
 
 
 def print_info():
@@ -77,6 +131,73 @@ def print_info():
     print("\n" + top_border + "\n" + info + '\n' + border)
 
 
+def create_and_start(game_name, username, password, template=None, port=None):
+    """
+    Create a new game and start it.
+
+    Args:
+        game_name (string): game dir's name.
+        username (string): superuser's name.
+        password (string): superuser's password.
+        template (string): game template's name.
+        port (number): network's port.
+    """
+    try:
+        gamedir = os.path.abspath(os.path.join(configs.CURRENT_DIR, game_name))
+        utils.create_game_directory(gamedir, template, port)
+
+        os.chdir(gamedir)
+        evennia_launcher.GAMEDIR = gamedir
+        evennia_launcher.init_game_directory(gamedir, check_db=False)
+    except:
+        print("Create game dir error.")
+        raise Exception("Create game dir error.")
+
+    try:
+        create_database()
+    except:
+        print("Create database error.")
+        raise Exception("Create database error.")
+
+    # create superuser
+    try:
+        create_superuser(username, password)
+        print("Superuser created.")
+    except Exception as e:
+        print("Could not create superuser.")
+        raise Exception("Could not create superuser.")
+
+    # start the server
+    try:
+        utils.check_gamedir(gamedir)
+        evennia_launcher.set_gamedir(gamedir)
+    except Exception as e:
+        traceback.print_exc()
+        print("Set game dir error: %s" % e)
+        raise Exception("Set game dir error.")
+
+    # pass-through to evennia
+    sys_argv = sys.argv
+    try:
+        sys.argv = ["muddery", "start"]
+        evennia_launcher.main()
+    except Exception as e:
+        traceback.print_exc()
+        raise Exception("Startup error.")
+
+    sys.argv = sys_argv
+
+    # Collect static files.
+    django_args = ["collectstatic"]
+    django_kwargs = {"verbosity": 0,
+                     "interactive": False}
+    try:
+        django.core.management.call_command(*django_args, **django_kwargs)
+        print("\nStatic file collected.")
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+    return
 
 def main():
     """
@@ -125,7 +246,10 @@ def main():
     parser.add_argument(
         '--loaddata', action='store_true', dest='loaddata', default=False,
         help="Load local data from the worlddata folder.")
-
+    parser.add_argument(
+        '--port', '-p', nargs=1, action='store', dest='port',
+        metavar="<N>",
+        help="Set game's network ports when init the game, recommend to use ports above 10000.")
     parser.add_argument(
         "operation", nargs='?', default="noop",
         help=configs.ARG_OPTIONS)
@@ -152,54 +276,30 @@ def main():
         if len(args.init) > 1:
             template = args.init[1]
 
+        port = None
+        if args.port:
+            try:
+                port = int(args.port[0])
+            except:
+                print("Port must be a number.")
+                sys.exit(-1)
+
         gamedir = os.path.abspath(os.path.join(configs.CURRENT_DIR, game_name))
-        utils.create_game_directory(gamedir, template)
+        utils.create_game_directory(gamedir, template, port)
 
         os.chdir(gamedir)
         evennia_launcher.GAMEDIR = gamedir
         evennia_launcher.init_game_directory(gamedir, check_db=False)
 
-        # make migrations
         try:
-            django_args = ["makemigrations", "gamedata"]
-            django_kwargs = {}
-            django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError as exc:
-            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+            create_database()
+        except:
+            sys.exit(-1)
 
-        try:
-            django_args = ["makemigrations", "worlddata"]
-            django_kwargs = {}
-            django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError as exc:
-            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-        # migrate the database
-        try:
-            django_args = ["migrate"]
-            django_kwargs = {}
-            django.core.management.call_command(*django_args, **django_kwargs)
-
-            django_args = ["migrate", "gamedata"]
-            django_kwargs = {"database": "gamedata"}
-            django.core.management.call_command(*django_args, **django_kwargs)
-
-            django_args = ["migrate", "worlddata"]
-            django_kwargs = {"database": "worlddata"}
-            django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError as exc:
-            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-            
-        # import worlddata
-        try:
-            print("Importing local data.")
-            import_local_data()
-        except Exception as e:
-            traceback.print_exc()
-            print("Import local data error: %s" % e)
-        
         print(configs.CREATED_NEW_GAMEDIR.format(gamedir=args.init[0],
-                                                 settings_path=os.path.join(args.init[0], configs.SETTINGS_PATH)))
+                                                 settings_path=os.path.join(args.init[0], configs.SETTINGS_PATH),
+                                                 port=port if port else 8000))
+
         sys.exit()
     elif args.upgrade is not None:
         utils.check_gamedir(configs.CURRENT_DIR)

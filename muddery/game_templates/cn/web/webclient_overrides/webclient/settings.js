@@ -3,12 +3,12 @@ var settings = {
     // default values
 
     // websocket's url
-    wsurl: "ws://" + window.location.hostname + ":8001",
+    wsurl: {WEBSOCKET_HOST},
 
     csessid: false,
         
     // resource's url
-    resource_url: window.location.protocol + "//" + window.location.host + "/media/",
+    resource_url: {RESOURCE_HOST},
 
     // default language
     default_language: "zh-cn",

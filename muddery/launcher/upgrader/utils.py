@@ -69,22 +69,6 @@ def get_temp_dir_name(game_dir):
     return temp_dir
 
 
-def create_game(game_dir, game_template, setting_dict):
-    """
-    Create a new game dir.
-
-    Args:
-        game_dir: (string)game's dir
-
-    Returns:
-        None
-    """
-    launcher_utils.create_game_directory(game_dir, game_template, setting_dict)
-
-    os.chdir(game_dir)
-    evennia_launcher.init_game_directory(game_dir, check_db=False)
-
-
 def copy_path(src_dir, dest_dir, path):
     """
     Copy a file from the source dir to the destination dir.

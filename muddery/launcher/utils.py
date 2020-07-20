@@ -103,6 +103,37 @@ def create_settings_file(gamedir, setting_dict=None):
         f.write(settings_string)
 
 
+def create_webclient_settings(gamedir, setting_dict=None):
+    """
+    Uses the template settings file to build a working
+    webclient settings file.
+
+    Args:
+        gamedir: (string) game root's path
+        setting_dict: (dict)preset settings.
+    """
+    settings_path = os.path.join(gamedir, "web", "webclient_overrides", "webclient", "settings.js")
+    with open(settings_path, 'r') as f:
+        settings_string = f.read()
+
+    # tweak the settings
+    default_setting_dict = {
+        "WEBSOCKET_HOST": "'ws://' + window.location.hostname + ':8001'",
+        "RESOURCE_HOST": "window.location.protocol + '//' + window.location.host + '/media/'",
+    }
+
+    if setting_dict:
+        merged_setting_dict = dict(default_setting_dict, **setting_dict)
+    else:
+        merged_setting_dict = default_setting_dict
+
+    # modify the settings
+    settings_string = settings_string.format(**merged_setting_dict)
+
+    with open(settings_path, 'w') as f:
+        f.write(settings_string)
+
+
 def copy_tree(source, destination):
     """
     copy file tree
@@ -127,7 +158,7 @@ def copy_tree(source, destination):
             print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
                 
 
-def create_game_directory(gamedir, template, setting_dict=None):
+def create_game_directory(gamedir, template, port=None):
     """
     Initialize a new game directory named dirname
     at the current path. This means copying the
@@ -135,7 +166,7 @@ def create_game_directory(gamedir, template, setting_dict=None):
     """
     if os.path.exists(gamedir):
         print("Cannot create new Muddery game dir: '%s' already exists." % gamedir)
-        sys.exit()
+        sys.exit(-1)
 
     template_dir = ""
     if template:
@@ -148,7 +179,7 @@ def create_game_directory(gamedir, template, setting_dict=None):
                 if os.path.isdir(full_path):
                     print("  %s" % dir)
             print("")
-            sys.exit()
+            sys.exit(-1)
 
     # copy default template directory
     default_template = os.path.join(configs.GAME_TEMPLATES, configs.DEFAULT_TEMPLATE)
@@ -161,7 +192,22 @@ def create_game_directory(gamedir, template, setting_dict=None):
         copy_tree(template_dir, gamedir)
 
     # pre-build settings file in the new gamedir
-    create_settings_file(gamedir, setting_dict)
+    setting_py_dict = None
+    if port:
+        setting_py_dict = {
+            "WEBSERVER_PORTS": "[(%s, %s)]" % (port, port + 3),
+            "WEBSOCKET_CLIENT_PORT": "%s" % (port + 1),
+            "AMP_PORT": "%s" % (port + 2),
+        }
+
+    create_settings_file(gamedir, setting_py_dict)
+
+    setting_js_dict = None
+    if port:
+        setting_js_dict = {
+            "WEBSOCKET_HOST": "'ws://' + window.location.hostname + ':%s'" % (port + 1),
+        }
+    create_webclient_settings(gamedir, setting_js_dict)
 
 
 def show_version_info(about=False):

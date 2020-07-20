@@ -50,7 +50,7 @@ CREATED_NEW_GAMEDIR = \
     This starts the server for the first time. Make sure to create
     a superuser when asked for it. You should now be able to (by
     default) connect to your server by pointing your web browser to
-    http://localhost:8000.
+    http://localhost:{port}.
     """
 
 CMDLINE_HELP = \
