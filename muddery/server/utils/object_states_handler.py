@@ -39,14 +39,12 @@ class ObjectStatesHandler(object):
         Reset the owner object.
         """
         self.obj = weakref.proxy(obj)
+        self.obj_id = obj.id
         self.states = obj.states
 
         if self.states:
-            self.obj_id = obj.id
-
             apps.get_model(settings.GAME_DATA_APP, obj.model_name)
             self.model_name = obj.model_name
-
             self.cache = BaseAttributesCache(self.model_name)
         else:
             self.obj_id = None
@@ -63,7 +61,7 @@ class ObjectStatesHandler(object):
         Returns:
             has_attribute (bool): If the Attribute exists on this object or not.
         """
-        if key not in self.states:
+        if self.states != "all" and key not in self.states:
             return super(type(self.obj), self.obj).state.has(key)
 
         return self.cache.has(self.obj_id, key=key)
@@ -84,10 +82,10 @@ class ObjectStatesHandler(object):
                 was found matching `key` and no default value set.
 
         """
-        if key not in self.states:
-            return super(type(self.obj), self.obj).state.get(key)
+        if self.states != "all" and key not in self.states:
+            return super(type(self.obj), self.obj).state.get(key, **kwargs)
 
-        return self.cache.get(self.obj_id, key)
+        return self.cache.get(self.obj_id, key, **kwargs)
 
     def add(self, key, value):
         """
@@ -98,7 +96,7 @@ class ObjectStatesHandler(object):
             value (any or str): The value of the Attribute. If
                 `strattr` keyword is set, this *must* be a string.
         """
-        if key not in self.states:
+        if self.states != "all" and key not in self.states:
             return super(type(self.obj), self.obj).state.add(key, value)
 
         self.cache.set(self.obj_id, key, value)
@@ -118,8 +116,8 @@ class ObjectStatesHandler(object):
             If neither key nor category is given, this acts as clear().
 
         """
-        if key not in self.states:
-            return super(type(self.obj), self.obj).state.remove(key)
+        if self.states != "all" and key not in self.states:
+            return super(type(self.obj), self.obj).state.add(key)
 
         self.cache.remove(self.obj_id, key)
 
@@ -127,7 +125,7 @@ class ObjectStatesHandler(object):
         """
         Remove all Attributes on this object.
         """
-        self._clear(self.obj_id)
+        self.cache.remove_obj(self.obj_id)
 
     def _clear(self, obj_id):
         """
@@ -136,14 +134,16 @@ class ObjectStatesHandler(object):
         Args:
             obj_id (number): object's record id.
         """
-        super(type(self.obj), self.obj).state._clear(obj_id)
+        if self.states != "all":
+            super(type(self.obj), self.obj).state._clear(obj_id)
+
         self.cache.remove_obj(self.obj_id)
 
     def all(self):
         """
         Get all attributes from an object.
         """
-        return self.cache.get_obj(self.obj_id)
+        return self._all(self.obj_id)
 
     def _all(self, obj_id):
         """
@@ -155,7 +155,11 @@ class ObjectStatesHandler(object):
         Return:
             (dict): object's attributes.
         """
-        attributes = super(type(self.obj), self.obj).state._all(obj_id)
+        if self.states != "all":
+            attributes = super(type(self.obj), self.obj).state._all(obj_id)
+        else:
+            attributes = {}
+
         attributes.update(self.cache.get_obj(self.obj_id))
 
         return attributes
