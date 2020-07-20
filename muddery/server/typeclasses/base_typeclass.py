@@ -19,7 +19,12 @@ class BaseTypeclass(object):
     typeclass_key = ""
     typeclass_name = ""
     typeclass_desc = ""
+
+    # object's data model
     model_name = ""
+
+    # objects states
+    states = set()
 
     @classmethod
     def get_models(cls):
