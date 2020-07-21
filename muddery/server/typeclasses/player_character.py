@@ -1071,6 +1071,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # show status
         self.show_status()
 
+        self.show_location()
+
     def die(self, killers):
         """
         This character is killed. Move it to it's home.

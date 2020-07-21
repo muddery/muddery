@@ -949,3 +949,11 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Show character's status.
         """
         pass
+
+    def get_name(self):
+        name = super(MudderyCharacter, self).get_name()
+
+        if not self.is_alive():
+            name += _(" [DEAD]")
+
+        return name
