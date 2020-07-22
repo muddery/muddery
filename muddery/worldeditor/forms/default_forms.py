@@ -566,8 +566,7 @@ class QuestObjectivesForm(forms.ModelForm):
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['quest'] = forms.ChoiceField(choices=choices)
 
-        objects = QUEST_OBJECTIVE_SET.all()
-        choices = [(obj, obj) for obj in objects]
+        choices = QUEST_OBJECTIVE_SET.choice_all()
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
