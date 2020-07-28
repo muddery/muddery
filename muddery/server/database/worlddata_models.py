@@ -950,6 +950,10 @@ class event_data(models.Model):
     # The odds of this event.
     odds = models.FloatField(blank=True, default=1.0)
 
+    # Can trigger another event after this one.
+    # If multiple is False, no more events will be triggered.
+    multiple = models.BooleanField(blank=True, default=True)
+
     # the condition to enable this event
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 

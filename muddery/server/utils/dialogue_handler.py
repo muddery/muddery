@@ -46,6 +46,9 @@ class DialogueHandler(object):
     def load_cache(self, dialogue):
         """
         To reduce database accesses, add a cache.
+
+        Args:
+            dialogue (string): dialogue's key
         """
         if not dialogue:
             return
@@ -82,23 +85,28 @@ class DialogueHandler(object):
             data["dependencies"].append({"quest": dependency.dependency,
                                          "type": dependency.type})
 
+        # get events and quests
+        event_trigger = EventTrigger(None, dialogue)
+        data["event"] = event_trigger
+
+        events = event_trigger.get_events()
+        provide_quest = []
+        finish_quest = []
+        if defines.EVENT_TRIGGER_DIALOGUE in events:
+            for event_info in events[defines.EVENT_TRIGGER_DIALOGUE]:
+                if event_info["action"] == "ACTION_ACCEPT_QUEST":
+                    action = EVENT_ACTION_SET.get(event_info["action"])
+                    provide_quest.extend(action.get_quests(event_info["key"]))
+                elif event_info["action"] == "ACTION_TURN_IN_QUEST":
+                    action = EVENT_ACTION_SET.get(event_info["action"])
+                    finish_quest.extend(action.get_quests(event_info["key"]))
+
+        data["provide_quest"] = provide_quest
+        data["finish_quest"] = finish_quest
+
         data["sentences"] = []
         for sentence in sentences:
             speaker_model = self.speaker_escape.sub(self.escape_fun, sentence.speaker)
-
-            # get events and quests
-            event_trigger = EventTrigger(None, sentence.key)
-            events = event_trigger.get_events()
-            provide_quest = []
-            finish_quest = []
-            if defines.EVENT_TRIGGER_SENTENCE in events:
-                for event_info in events[defines.EVENT_TRIGGER_SENTENCE]:
-                    if event_info["action"] == "ACTION_ACCEPT_QUEST":
-                        action = EVENT_ACTION_SET.get(event_info["action"])
-                        provide_quest.extend(action.get_quests(event_info["key"]))
-                    elif event_info["action"] == "ACTION_TURN_IN_QUEST":
-                        action = EVENT_ACTION_SET.get(event_info["action"])
-                        finish_quest.extend(action.get_quests(event_info["key"]))
 
             data["sentences"].append({"key": sentence.key,
                                       "dialogue": dialogue,
@@ -106,9 +114,6 @@ class DialogueHandler(object):
                                       "speaker_model": speaker_model,
                                       "icon": sentence.icon,
                                       "content": sentence.content,
-                                      "event": event_trigger,
-                                      "provide_quest": provide_quest,
-                                      "finish_quest": finish_quest,
                                       "can_close": self.can_close_dialogue})
 
         # sort sentences by ordinal
@@ -129,6 +134,9 @@ class DialogueHandler(object):
     def get_dialogue(self, dialogue):
         """
         Get specified dialogue.
+
+        Args:
+            dialogue (string): dialogue's key
         """
         if not dialogue:
             return
@@ -377,23 +385,28 @@ class DialogueHandler(object):
         if not sentence:
             return
 
-        # do dialogue's event
-        if sentence["event"]:
-            sentence["event"].at_sentence(caller, npc)
-
         if sentence["is_last"]:
             # last sentence
-            self.finish_dialogue(caller, dialogue)
+            self.finish_dialogue(caller, npc, dialogue)
 
-    def finish_dialogue(self, caller, dialogue):
+    def finish_dialogue(self, caller, npc, dialogue):
         """
         A dialogue finished, do it's action.
         args:
-            caller(object): the dialogue caller
-            dialogue(string): dialogue's key
+            caller (object): the dialogue caller
+            npc (object): the dialogue's NPC, can be None
+            dialogue (string): dialogue's key
         """
         if not caller:
             return
+
+        dlg = self.get_dialogue(dialogue)
+        if not dlg:
+            return
+
+        # do dialogue's event
+        if dlg["event"]:
+            dlg["event"].at_dialogue(caller, npc)
 
         caller.quest_handler.at_objective(defines.OBJECTIVE_TALK, dialogue)
 
@@ -412,10 +425,10 @@ class DialogueHandler(object):
         finish_quest = False
 
         if not caller:
-            return (provide_quest, finish_quest)
+            return provide_quest, finish_quest
 
         if not npc:
-            return (provide_quest, finish_quest)
+            return provide_quest, finish_quest
 
         # get npc's default dialogues
         for dlg_key in npc.dialogues:
@@ -432,7 +445,7 @@ class DialogueHandler(object):
                 if provide_quest:
                     break
 
-        return (provide_quest, finish_quest)
+        return provide_quest, finish_quest
 
     def dialogue_have_quest(self, caller, npc, dialogue):
         """
@@ -444,10 +457,10 @@ class DialogueHandler(object):
         # check if the dialogue is available
         npc_dlg = self.get_dialogue(dialogue)
         if not npc_dlg:
-            return (provide_quest, finish_quest)
+            return provide_quest, finish_quest
 
         if not STATEMENT_HANDLER.match_condition(npc_dlg["condition"], caller, npc):
-            return (provide_quest, finish_quest)
+            return provide_quest, finish_quest
 
         match = True
         for dep in npc_dlg["dependencies"]:
@@ -456,20 +469,19 @@ class DialogueHandler(object):
                 match = False
                 break
         if not match:
-            return (provide_quest, finish_quest)
+            return provide_quest, finish_quest
 
         # find quests in its sentences
-        for sen in npc_dlg["sentences"]:
-            for quest_key in sen["finish_quest"]:
-                if caller.quest_handler.is_accomplished(quest_key):
-                    finish_quest = True
-                    return (provide_quest, finish_quest)
+        for quest_key in npc_dlg["finish_quest"]:
+            if caller.quest_handler.is_accomplished(quest_key):
+                finish_quest = True
+                return provide_quest, finish_quest
 
-            if not provide_quest and sen["provide_quest"]:
-                for quest_key in sen["provide_quest"]:
-                    if caller.quest_handler.can_provide(quest_key):
-                        provide_quest = True
-                        return (provide_quest, finish_quest)
+        if not provide_quest and npc_dlg["provide_quest"]:
+            for quest_key in npc_dlg["provide_quest"]:
+                if caller.quest_handler.can_provide(quest_key):
+                    provide_quest = True
+                    return provide_quest, finish_quest
 
         for dlg_key in npc_dlg["nexts"]:
             # get next dialogue
@@ -485,8 +497,8 @@ class DialogueHandler(object):
                 if provide_quest:
                     break
 
-        return (provide_quest, finish_quest)
+        return provide_quest, finish_quest
 
 
-# main dialoguehandler
+# main dialogue handler
 DIALOGUE_HANDLER = DialogueHandler()

@@ -181,11 +181,17 @@ service = {
      *  Args:
      *      object_key: (string) the object's key.
      */
-    queryEventTriggers: function(typeclass_key, callback_success, callback_failed, context) {
+    queryObjectEventTriggers: function(typeclass_key, callback_success, callback_failed, context) {
         var args = {
             typeclass: typeclass_key
         };
-        this.sendRequest("query_event_triggers", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_object_event_triggers", "", args, callback_success, callback_failed, context);
+    },
+
+    /*  Query all events of dialogues.
+     */
+    queryDialogueEventTriggers: function(callback_success, callback_failed, context) {
+        this.sendRequest("query_dialogue_event_triggers", "", {}, callback_success, callback_failed, context);
     },
 
     /*  Query all events of the object.

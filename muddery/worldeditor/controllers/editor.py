@@ -254,14 +254,14 @@ class DeleteObjectLevelProperties(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryEventTriggers(BaseRequestProcesser):
+class QueryObjectEventTriggers(BaseRequestProcesser):
     """
     Query all event triggers of the given typeclass.
 
     Args:
         typeclass: (string) the object's typeclass.
     """
-    path = "query_event_triggers"
+    path = "query_object_event_triggers"
     name = ""
 
     def func(self, args, request):
@@ -270,7 +270,19 @@ class QueryEventTriggers(BaseRequestProcesser):
 
         typeclass = args["typeclass"]
 
-        data = data_query.query_event_triggers(typeclass)
+        data = data_query.query_object_event_triggers(typeclass)
+        return success_response(data)
+
+
+class QueryDialogueEventTriggers(BaseRequestProcesser):
+    """
+    Query all event triggers of dialogues.
+    """
+    path = "query_dialogue_event_triggers"
+    name = ""
+
+    def func(self, args, request):
+        data = data_query.query_dialogue_event_triggers()
         return success_response(data)
 
 

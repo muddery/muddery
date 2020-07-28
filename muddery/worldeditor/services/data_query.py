@@ -17,6 +17,7 @@ from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
 from muddery.server.mappings.typeclass_set import TYPECLASS_SET, TYPECLASS
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
+from muddery.server.utils import defines
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
 
@@ -184,7 +185,7 @@ def query_object_level_properties(object_key, level):
     return fields
 
 
-def query_event_triggers(typeclass_key):
+def query_object_event_triggers(typeclass_key):
     """
     Query all event triggers of the given typeclass.
 
@@ -192,6 +193,13 @@ def query_event_triggers(typeclass_key):
         typeclass_key: (string) the object's typeclass_key.
     """
     return TYPECLASS_SET.get_trigger_types(typeclass_key)
+
+
+def query_dialogue_event_triggers():
+    """
+    Query all event triggers of dialogues.
+    """
+    return [defines.EVENT_TRIGGER_DIALOGUE]
 
 
 def query_object_events(object_key):

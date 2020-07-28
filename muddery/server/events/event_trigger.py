@@ -39,8 +39,8 @@ class EventTrigger(object):
             "name": _("On Traverse An Exit", category="event_triggers")
         },
         # when a character finishes a dialogue sentence. trigger_obj: sentence_id
-        defines.EVENT_TRIGGER_SENTENCE: {
-            "name": _("On Finish a Sentence", category="event_triggers")
+        defines.EVENT_TRIGGER_DIALOGUE: {
+            "name": _("On Finish a Dialogue", category="event_triggers")
         }
     }
 
@@ -66,6 +66,7 @@ class EventTrigger(object):
 
             for field_name, i in fields.items():
                 event[field_name] = getattr(record, field_name)
+
             event["action"] = event_action
 
             if not trigger_type in self.events:
@@ -141,12 +142,19 @@ class EventTrigger(object):
 
         rand = random.random()
         for event in candidates:
-            if rand < event["odds"]:
-                func = EVENT_ACTION_SET.func(event["action"])
-                if func:
-                    func(event["key"], character, obj)
-                return True
-            rand -= event["odds"]
+            if event["multiple"]:
+                if rand < event["odds"]:
+                    func = EVENT_ACTION_SET.func(event["action"])
+                    if func:
+                        func(event["key"], character, obj)
+                rand = random.random()
+            else:
+                if rand < event["odds"]:
+                    func = EVENT_ACTION_SET.func(event["action"])
+                    if func:
+                        func(event["key"], character, obj)
+                    return
+                rand -= event["odds"]
 
     #########################
     #
@@ -192,8 +200,9 @@ class EventTrigger(object):
         triggered = self.trigger(defines.EVENT_TRIGGER_TRAVERSE, character, self.owner)
         return not triggered
 
-    def at_sentence(self, character, obj):
+    def at_dialogue(self, character, obj):
         """
-        Called when a character finishes a dialogue sentence.
+        Called when a character finishes a dialogue.
         """
-        triggered = self.trigger(defines.EVENT_TRIGGER_SENTENCE, character, obj)
+        triggered = self.trigger(defines.EVENT_TRIGGER_DIALOGUE, character, obj)
+        return not triggered
