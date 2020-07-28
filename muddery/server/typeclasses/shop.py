@@ -112,16 +112,22 @@ class MudderyShop(TYPECLASS("OBJECT")):
     def show_shop(self, caller):
         """
         Send shop data to the caller.
+
+        Args:
+            caller (obj): the custom
         """
         if not caller:
             return
 
-        info = self.return_shop_info()
+        info = self.return_shop_info(caller)
         caller.msg({"shop": info})
 
-    def return_shop_info(self):
+    def return_shop_info(self, caller):
         """
         Get shop information.
+
+        Args:
+            caller (obj): the custom
         """
         info = {
             "dbref": self.dbref,
@@ -134,20 +140,23 @@ class MudderyShop(TYPECLASS("OBJECT")):
             icon = self.db.owner.icon
         info["icon"] = icon
 
-        goods_list = self.return_shop_goods()
+        goods_list = self.return_shop_goods(caller)
         info["goods"] = goods_list
             
         return info
                 
-    def return_shop_goods(self):
+    def return_shop_goods(self, caller):
         """
         Get shop's information.
+
+        Args:
+            caller (obj): the custom
         """
         goods_list = []
 
         # Get shop goods
         for obj in self.db.goods.values():
-            if not obj.available:
+            if not obj.is_available(caller):
                 continue
 
             goods = {"dbref": obj.dbref,

@@ -74,6 +74,18 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
         self.icon = goods_data.get("icon", None)
 
         self.available = True
+        
+    def is_available(self, caller):
+        """
+        Is it available to the customer.
+
+        Args:
+            caller (obj): the customer.
+        """
+        if not self.available:
+            return False
+
+        return self.is_visible(caller)
 
     def sell_to(self, caller):
         """
