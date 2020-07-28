@@ -1510,6 +1510,14 @@ span.bgblack { background-color: black;}
     -webkit-box-sizing: border-box;
 }
 
+#skills-window .skill-item:nth-child(odd) {
+    float: left;
+}
+
+#skills-window .skill-item:nth-child(even) {
+    float: right;
+}
+
 #skills-window .skill-item .icon {
     position: relative;
     float: left;
