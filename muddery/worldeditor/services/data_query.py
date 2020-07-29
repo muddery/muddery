@@ -3,6 +3,7 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import ast
+from django.db import connection
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
@@ -384,3 +385,14 @@ def query_map(area_key):
     }
 
     return data
+
+
+def query_dialogues_table():
+    """
+    Query dialogues.
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM worlddata_npc_dialogues")
+        row = cursor.fetchone()
+
+    return row

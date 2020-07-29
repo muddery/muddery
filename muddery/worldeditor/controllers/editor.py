@@ -857,6 +857,21 @@ class QueryTables(BaseRequestProcesser):
         return success_response(data)
 
 
+class QueryDiallguesTable(BaseRequestProcesser):
+    """
+    Query all records of dialogues.
+
+    Args:
+        None.
+    """
+    path = "query_dialogues_table"
+    name = ""
+
+    def func(self, args, request):
+        data = data_query.query_dialogues_table()
+        return success_response(data)
+
+
 class ApplyChanges(BaseRequestProcesser):
     """
     Query all tables' names.

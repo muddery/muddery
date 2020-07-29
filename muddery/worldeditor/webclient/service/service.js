@@ -401,6 +401,10 @@ service = {
         this.sendRequest("query_object_level_properties", "", args, callback_success, callback_failed, context);
     },
 
+    queryDialoguesTable: function(callback_success, callback_failed, context) {
+        this.sendRequest("query_dialogues_table", "", args, callback_success, callback_failed, context);
+    },
+
     saveObjectLevelProperties: function(obj_key, level, values, callback_success, callback_failed, context) {
         var args = {
             obj_key: obj_key,

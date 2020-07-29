@@ -62,8 +62,8 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
         """
         dialogues = NPCDialogues.get(self.get_data_key())
 
-        self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.default]
-        self.dialogues = [dialogue.dialogue for dialogue in dialogues if not dialogue.default]
+        self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and dialogue.default]
+        self.dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and not dialogue.default]
 
     def load_shops(self):
         """
