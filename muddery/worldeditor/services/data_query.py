@@ -3,7 +3,8 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import ast
-from django.db import connection
+from django.conf import settings
+from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
@@ -21,6 +22,7 @@ from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.utils import defines
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
+from worlddata import models
 
 
 def query_all_typeclasses():
@@ -391,8 +393,62 @@ def query_dialogues_table():
     """
     Query dialogues.
     """
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM worlddata_npc_dialogues")
-        row = cursor.fetchone()
+    cursor = connections[settings.WORLD_DATA_APP].cursor()
+    query = "SELECT T1.*, T2.key event, T5.name npc_name, T5.npc npc_key \
+                FROM (worlddata_dialogues T1 LEFT JOIN \
+                (SELECT * FROM worlddata_event_data GROUP BY trigger_obj) T2 ON \
+                T1.key=T2.trigger_obj AND T2.trigger_type='EVENT_TRIGGER_DIALOGUE') \
+                LEFT JOIN (SELECT * FROM worlddata_npc_dialogues T3 JOIN worlddata_objects T4 ON \
+                T3.npc=T4.key) T5 ON T1.key=T5.dialogue"
+    cursor.execute(query)
 
-    return row
+    fields = query_fields("dialogues")
+    # add event and npc fields
+    fields.append({
+        "default": "",
+        "editable": False,
+        "help_text": _("Has event.", "help_text"),
+        "label": _("event", "field"),
+        "name": "event",
+        "type": "BooleanField",
+    })
+
+    fields.append({
+        "default": "",
+        "editable": False,
+        "help_text": _("Dialogue's NPC.", "help_text"),
+        "label": _("NPC", "field"),
+        "name": "npc",
+        "type": "CharField",
+    })
+
+    columns = [col[0] for col in cursor.description]
+    key_column = columns.index("key")
+
+    # get records
+    rows = []
+    record = cursor.fetchone()
+    while record is not None:
+        if len(rows) > 0 and record[key_column] == rows[-1][key_column]:
+            rows[-1][-2] += "," + record[-2] + "(" + record[-1] + ")"
+        else:
+            row = list(record)
+            if not row[-3]:
+                row[-3] = ""
+            else:
+                row[-3] = True
+
+            if not row[-2]:
+                row[-2] = ""
+            if row[-1]:
+                row[-2] += "(" + row[-1] + ")"
+
+            rows.append(row)
+        record = cursor.fetchone()
+
+    table = {
+        "fields": fields,
+        "records": rows,
+    }
+
+    return table
