@@ -205,13 +205,6 @@ service = {
         this.sendRequest("query_object_events", "", args, callback_success, callback_failed, context);
     },
 
-    queryDialogueSentences: function(dialogue_key, callback_success, callback_failed, context) {
-        var args = {
-            dialogue: dialogue_key
-        };
-        this.sendRequest("query_dialogue_sentences", "", args, callback_success, callback_failed, context);
-    },
-
     /*  Query all forms of the event action.
      *  Args:
      *      action: (string) action's type.
