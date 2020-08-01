@@ -116,7 +116,7 @@ MudderyService.prototype = {
     },
     
     // dialogue
-    finishDialogue: function(dialogue, sentence, npc) {
+    finishDialogue: function(dialogue, npc) {
         var args = {"dialogue": dialogue,
                     "npc": npc};
         Evennia.msg("text", this.cmdString("finish_dialogue", args));

@@ -797,7 +797,7 @@ MudderyPopupDialogue.prototype.onObjMovedOut = function(dbref) {
 /*
  * Set dialogue's data.
  */
-MudderyPopupDialogue.prototype.setDialogue = function(dialogue, escapes) {
+MudderyPopupDialogue.prototype.setDialogue = function(dialogue) {
     this.d_index = 0;
     this.s_index = 0;
 
@@ -811,6 +811,7 @@ MudderyPopupDialogue.prototype.setDialogue = function(dialogue, escapes) {
     this.target = dialogue.target;
 
     this.dialogues = dialogue.dialogues;
+    var escapes = core.data_handler.getEscapes();
     for (var i = 0; i < this.dialogues.length; i++) {
         this.parseDialogue(this.dialogues[i], this.target, escapes);
     }
@@ -939,7 +940,10 @@ MudderyPopupDialogue.prototype.parseDialogue = function(dialogue, target, escape
 
         if (new_line) {
             // parse icon
-            if (!icon) {
+            if (icon) {
+                icon = settings.resource_url + icon;
+            }
+            else {
                 // use speaker's icon
                 if (speaker == "%p") {
                     icon = settings.resource_url + core.data_handler.character_icon;
