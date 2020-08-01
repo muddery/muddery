@@ -104,7 +104,7 @@ ObjectEditor.prototype.onAddEvent = function(e) {
         return;
     }
 
-    var editor = "event";
+    var editor = "object_event";
     var record = "";
     var args = {
         trigger: controller.obj_key,
@@ -116,7 +116,7 @@ ObjectEditor.prototype.onAddEvent = function(e) {
 ObjectEditor.prototype.onEditEvent = function(e) {
     var record_id = $(this).attr("data-record-id");
     if (record_id) {
-        var editor = "event";
+        var editor = "object_event";
         var args = {
             trigger: controller.obj_key,
              typeclass: controller.obj_typeclass,
@@ -279,9 +279,9 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
     }
 
     // Query events.
-    service.queryEventTriggers(controller.obj_typeclass,
-                               controller.queryEventTriggersSuccess,
-                               controller.failedCallback);
+    service.queryObjectEventTriggers(controller.obj_typeclass,
+                                     controller.queryEventTriggersSuccess,
+                                     controller.failedCallback);
 
     service.queryObjectEvents(controller.obj_key,
                               controller.queryEventTableSuccess,

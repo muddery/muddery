@@ -229,6 +229,12 @@ controller = {
         if (editor_type == "event") {
             url = "event_editor.html?table=" + table_name;
         }
+        else if (editor_type == "object_event") {
+            url = "object_event_editor.html?table=" + table_name;
+        }
+        else if (editor_type == "dialogue_event") {
+            url = "dialogue_event_editor.html?table=" + table_name;
+        }
         else if (editor_type == "event_action") {
             url = "event_action_editor.html?table=" + table_name;
         }

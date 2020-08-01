@@ -950,6 +950,10 @@ class event_data(models.Model):
     # The odds of this event.
     odds = models.FloatField(blank=True, default=1.0)
 
+    # Can trigger another event after this one.
+    # If multiple is False, no more events will be triggered.
+    multiple = models.BooleanField(blank=True, default=True)
+
     # the condition to enable this event
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 
@@ -980,6 +984,9 @@ class dialogues(models.Model):
 
     # condition to show this dialogue
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    # dialogue's content
+    content = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1042,41 +1049,6 @@ class dialogue_relations(models.Model):
         app_label = "worlddata"
         verbose_name = "Dialogue Relation"
         verbose_name_plural = "Dialogue Relations"
-
-
-# ------------------------------------------------------------
-#
-# store dialogue sentences
-#
-# ------------------------------------------------------------
-class dialogue_sentences(models.Model):
-    "Store dialogue sentences."
-
-    # sentence's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a dialogue.
-    # dialogue's key
-    dialogue = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # sentence's ordinal
-    ordinal = models.IntegerField()
-
-    # sentence's speaker
-    speaker = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # speaker's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    # sentence's content
-    content = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Dialogue Sentence"
-        verbose_name_plural = "Dialogue Sentences"
 
 
 # ------------------------------------------------------------

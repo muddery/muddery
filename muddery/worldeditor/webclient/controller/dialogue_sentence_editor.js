@@ -4,8 +4,6 @@
  */
 DialogueSentencesEditor = function() {
 	CommonEditor.call(this);
-
-    this.event_key = "";
 }
 
 DialogueSentencesEditor.prototype = prototype(CommonEditor.prototype);

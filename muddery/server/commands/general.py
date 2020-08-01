@@ -361,15 +361,15 @@ class CmdDialogue(BaseCommand):
 
     Usage:
         {"cmd":"dialogue",
-         "args":{"npc":<npc's dbref>,
-                 "dialogue":<current dialogue>,
-                 "sentence":<current sentence>}
+         "args":{"dialogue":<current dialogue>,
+                 "npc":<npc's dbref>,
+                }
         }
 
     Dialogue and sentence refer to the current sentence. This command finishes
     current sentence and get next sentences.
     """
-    key = "dialogue"
+    key = "finish_dialogue"
     locks = "cmd:all()"
     help_cateogory = "General"
 
@@ -381,31 +381,21 @@ class CmdDialogue(BaseCommand):
             caller.msg({"alert":_("You should talk to someone.")})
             return
 
-        npc = None
-        if "npc" in self.args:
-            if self.args["npc"]:
-                # get NPC
-                npc = caller.search_dbref(self.args["npc"], location=caller.location)
-                if not npc:
-                    caller.msg({"msg": _("Can not find it.")})
-                    return
-
-        # Get the current sentence.
-        dialogue = ""
-        sentence = 0
-
-        have_current_dlg = False
-        try:
-            dialogue = self.args["dialogue"]
-            sentence = int(self.args["sentence"])
-            have_current_dlg = True
-        except Exception as e:
-            pass
-
-        if not have_current_dlg:
+        # Get the dialogue.
+        if "dialogue" not in self.args:
+            caller.msg({"alert": _("You should say something.")})
             return
+        dlg_key = self.args["dialogue"]
 
-        caller.continue_dialogue(npc, dialogue, sentence)
+        npc = None
+        if "npc" in self.args and self.args["npc"]:
+            # get NPC
+            npc = caller.search_dbref(self.args["npc"], location=caller.location)
+            if not npc:
+                caller.msg({"msg": _("Can not find it.")})
+                return
+
+        caller.finish_dialogue(dlg_key, npc)
 
 
 #------------------------------------------------------------

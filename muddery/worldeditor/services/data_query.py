@@ -3,6 +3,8 @@ Battle commands. They only can be used when a character is in a combat.
 """
 
 import ast
+from django.conf import settings
+from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from muddery.server.utils.game_settings import GAME_SETTINGS
@@ -11,14 +13,15 @@ from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
 from muddery.worldeditor.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
 from muddery.worldeditor.dao.world_exits_mapper import WORLD_EXITS_MAPPER
 from muddery.worldeditor.dao import general_query_mapper, model_mapper
-from muddery.worldeditor.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
 from muddery.worldeditor.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
 from muddery.server.mappings.typeclass_set import TYPECLASS_SET, TYPECLASS
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
+from muddery.server.utils import defines
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
+from worlddata import models
 
 
 def query_all_typeclasses():
@@ -184,7 +187,7 @@ def query_object_level_properties(object_key, level):
     return fields
 
 
-def query_event_triggers(typeclass_key):
+def query_object_event_triggers(typeclass_key):
     """
     Query all event triggers of the given typeclass.
 
@@ -192,6 +195,13 @@ def query_event_triggers(typeclass_key):
         typeclass_key: (string) the object's typeclass_key.
     """
     return TYPECLASS_SET.get_trigger_types(typeclass_key)
+
+
+def query_dialogue_event_triggers():
+    """
+    Query all event triggers of dialogues.
+    """
+    return [defines.EVENT_TRIGGER_DIALOGUE]
 
 
 def query_object_events(object_key):
@@ -259,27 +269,6 @@ def query_event_action_data(action_type, event_key):
         pass
 
     return record
-
-
-def query_dialogue_sentences(dialogue_key):
-    """
-    Query a dialogue's sentences.
-
-    Args:
-        dialogue_key: (string) dialogue's key
-    """
-    fields = query_fields(DIALOGUE_SENTENCES.model_name)
-    records = DIALOGUE_SENTENCES.filter(dialogue_key)
-    rows = []
-    for record in records:
-        line = [str(record.serializable_value(field["name"])) for field in fields]
-        rows.append(line)
-
-    table = {
-        "fields": fields,
-        "records": rows,
-    }
-    return table
 
 
 def query_typeclass_table(typeclass_key):
@@ -376,3 +365,68 @@ def query_map(area_key):
     }
 
     return data
+
+
+def query_dialogues_table():
+    """
+    Query dialogues.
+    """
+    cursor = connections[settings.WORLD_DATA_APP].cursor()
+    query = "SELECT T1.*, T2.key event, T5.name npc_name, T5.npc npc_key \
+                FROM (worlddata_dialogues T1 LEFT JOIN \
+                (SELECT * FROM worlddata_event_data GROUP BY trigger_obj) T2 ON \
+                T1.key=T2.trigger_obj AND T2.trigger_type='EVENT_TRIGGER_DIALOGUE') \
+                LEFT JOIN (SELECT * FROM worlddata_npc_dialogues T3 JOIN worlddata_objects T4 ON \
+                T3.npc=T4.key) T5 ON T1.key=T5.dialogue"
+    cursor.execute(query)
+
+    fields = query_fields("dialogues")
+    # add event and npc fields
+    fields.append({
+        "default": "",
+        "editable": False,
+        "help_text": _("Has event.", "help_text"),
+        "label": _("event", "field"),
+        "name": "event",
+        "type": "BooleanField",
+    })
+
+    fields.append({
+        "default": "",
+        "editable": False,
+        "help_text": _("Dialogue's NPC.", "help_text"),
+        "label": _("NPC", "field"),
+        "name": "npc",
+        "type": "CharField",
+    })
+
+    columns = [col[0] for col in cursor.description]
+    key_column = columns.index("key")
+
+    # get records
+    rows = []
+    record = cursor.fetchone()
+    while record is not None:
+        if len(rows) > 0 and record[key_column] == rows[-1][key_column]:
+            rows[-1][-2] += "," + record[-2] + "(" + record[-1] + ")"
+        else:
+            row = list(record)
+            if not row[-3]:
+                row[-3] = ""
+            else:
+                row[-3] = True
+
+            if not row[-2]:
+                row[-2] = ""
+            if row[-1]:
+                row[-2] += "(" + row[-1] + ")"
+
+            rows.append(row)
+        record = cursor.fetchone()
+
+    table = {
+        "fields": fields,
+        "records": rows,
+    }
+
+    return table

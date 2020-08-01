@@ -30,7 +30,7 @@ EVENT_TRIGGER_ARRIVE = "EVENT_TRIGGER_ARRIVE"       # at attriving a room. objec
 EVENT_TRIGGER_KILL = "EVENT_TRIGGER_KILL"           # caller kills one. object: dead_one_id
 EVENT_TRIGGER_DIE = "EVENT_TRIGGER_DIE"             # caller die. object: killer_id
 EVENT_TRIGGER_TRAVERSE = "EVENT_TRIGGER_TRAVERSE"   # before traverse an exit. object: exit_id
-EVENT_TRIGGER_SENTENCE = "EVENT_TRIGGER_SENTENCE"   # called when a character finishes a dialogue sentence.
+EVENT_TRIGGER_DIALOGUE = "EVENT_TRIGGER_DIALOGUE"   # called when a character finishes a dialogue sentence.
 
 # event types
 EVENT_NONE = ""

@@ -17,7 +17,6 @@ EventEditor = function() {
 
     this.event_key = "";
     this.trigger_obj = "";
-    this.trigger_typeclass = "";
 
     // Action's data.
     this.action_type = "";
@@ -33,7 +32,6 @@ EventEditor.prototype.constructor = EventEditor;
 
 EventEditor.prototype.init = function() {
     this.trigger_obj = utils.getQueryString("trigger");
-    this.trigger_typeclass = utils.getQueryString("typeclass");
     CommonEditor.prototype.init.call(this);
 }
 
@@ -188,13 +186,6 @@ EventEditor.prototype.queryFormSuccess = function(data) {
     }
 
     CommonEditor.prototype.queryFormSuccess.call(this, data);
-}
-
-EventEditor.prototype.queryAreasSuccess = function(data) {
-    controller.areas = data;
-
-    // Query available event trigger types.
-    service.queryEventTriggers(controller.trigger_typeclass, controller.queryEventTriggersSuccess, controller.failedCallback);
 }
 
 EventEditor.prototype.queryEventTriggersSuccess = function(data) {

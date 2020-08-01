@@ -44,7 +44,7 @@ class ActionDialogue(BaseEventAction):
                     if npc:
                         npc = npc[0]
 
-                character.show_dialogue(npc, record.dialogue)
+                character.show_dialogue(record.dialogue, npc)
                 return
 
             rand -= record.odds
