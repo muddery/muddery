@@ -104,8 +104,6 @@ DIALOGUE_QUEST_DEPENDENCIES = CommonMapper("dialogue_quest_dependencies")
 
 DIALOGUE_RELATIONS = CommonMapper("dialogue_relations")
 
-DIALOGUE_SENTENCES = CommonMapper("dialogue_sentences")
-
 NPC_DIALOGUES = CommonMapper("npc_dialogues")
 
 CONDITION_DESC = CommonMapper("condition_desc")

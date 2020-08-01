@@ -140,6 +140,7 @@ class EventTrigger(object):
                          if not character.is_event_closed(e["key"]) and
                              STATEMENT_HANDLER.match_condition(e["condition"], character, obj)]
 
+        triggered = False
         rand = random.random()
         for event in candidates:
             if event["multiple"]:
@@ -147,14 +148,18 @@ class EventTrigger(object):
                     func = EVENT_ACTION_SET.func(event["action"])
                     if func:
                         func(event["key"], character, obj)
+                    triggered = True
                 rand = random.random()
             else:
                 if rand < event["odds"]:
                     func = EVENT_ACTION_SET.func(event["action"])
                     if func:
                         func(event["key"], character, obj)
-                    return
+                    triggered = True
+                    break
                 rand -= event["odds"]
+
+        return triggered
 
     #########################
     #

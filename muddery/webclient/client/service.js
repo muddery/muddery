@@ -116,11 +116,10 @@ MudderyService.prototype = {
     },
     
     // dialogue
-    doDialogue: function(dialogue, sentence, npc) {
+    finishDialogue: function(dialogue, sentence, npc) {
         var args = {"dialogue": dialogue,
-                    "sentence": sentence,
                     "npc": npc};
-        Evennia.msg("text", this.cmdString("dialogue", args));
+        Evennia.msg("text", this.cmdString("finish_dialogue", args));
     },
     
     // logout

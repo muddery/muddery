@@ -350,26 +350,6 @@ class QueryEventActionForm(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryDialogueSentences(BaseRequestProcesser):
-    """
-    Query a dialogue's sentences.
-
-    Args:
-        key: (string) dialogue's key
-    """
-    path = "query_dialogue_sentences"
-    name = ""
-
-    def func(self, args, request):
-        if 'dialogue' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing arguments.')
-
-        dialogue_key = args["dialogue"]
-
-        data = data_query.query_dialogue_sentences(dialogue_key)
-        return success_response(data)
-
-
 class QueryForm(BaseRequestProcesser):
     """
     Query a form of a record of a table.

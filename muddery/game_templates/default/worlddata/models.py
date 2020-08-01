@@ -382,16 +382,6 @@ class dialogue_relations(BaseModels.dialogue_relations):
 
 # ------------------------------------------------------------
 #
-# store dialogue sentences
-#
-# ------------------------------------------------------------
-class dialogue_sentences(BaseModels.dialogue_sentences):
-    "Store dialogue sentences."
-    pass
-
-
-# ------------------------------------------------------------
-#
 # store npc's dialogue
 #
 # ------------------------------------------------------------

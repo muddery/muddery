@@ -13,7 +13,6 @@ from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
 from muddery.worldeditor.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
 from muddery.worldeditor.dao.world_exits_mapper import WORLD_EXITS_MAPPER
 from muddery.worldeditor.dao import general_query_mapper, model_mapper
-from muddery.worldeditor.dao.dialogue_sentences_mapper import DIALOGUE_SENTENCES
 from muddery.worldeditor.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
@@ -270,27 +269,6 @@ def query_event_action_data(action_type, event_key):
         pass
 
     return record
-
-
-def query_dialogue_sentences(dialogue_key):
-    """
-    Query a dialogue's sentences.
-
-    Args:
-        dialogue_key: (string) dialogue's key
-    """
-    fields = query_fields(DIALOGUE_SENTENCES.model_name)
-    records = DIALOGUE_SENTENCES.filter(dialogue_key)
-    rows = []
-    for record in records:
-        line = [str(record.serializable_value(field["name"])) for field in fields]
-        rows.append(line)
-
-    table = {
-        "fields": fields,
-        "records": rows,
-    }
-    return table
 
 
 def query_typeclass_table(typeclass_key):
