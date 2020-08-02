@@ -1087,8 +1087,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.msg({"msg": _("You died.")})
 
         if self.reborn_time > 0:
-            self.msg({"msg": _("You will be reborn at {C%(p)s{n in {C%(s)s{n seconds.") %
-                             {'p': self.home.get_name(), 's': self.reborn_time}})
+            self.msg({"msg": _("You will be reborn in {C%(s)s{n seconds.") % {'s': self.reborn_time}})
 
     def reborn(self):
         """
@@ -1096,12 +1095,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         # Reborn at its home.
         home = None
-        if not home:
-            default_home_key = GAME_SETTINGS.get("default_player_home_key")
-            if default_home_key:
-                rooms = utils.search_obj_data_key(default_home_key)
-                if rooms:
-                    home = rooms[0]
+        default_home_key = GAME_SETTINGS.get("default_player_home_key")
+        if default_home_key:
+            rooms = utils.search_obj_data_key(default_home_key)
+            if rooms:
+                home = rooms[0]
 
         if not home:
             rooms = search.search_object(settings.DEFAULT_HOME)
@@ -1113,9 +1111,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         # Recover properties.
         self.recover()
-
         self.show_status()
-        self.msg({"msg": _("You are reborn at {C%s{n.") % self.home.get_name()})
+
+        if home:
+            self.msg({"msg": _("You are reborn at {C%s{n.") % home.get_name()})
+        else:
+            self.msg({"msg": _("You are reborn.")})
 
     def save_current_dialogues(self, dialogues, npc):
         """
