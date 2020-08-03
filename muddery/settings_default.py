@@ -36,6 +36,18 @@ HTTP_LOG_FILE = os.path.join(LOG_DIR, 'http_requests.log')
 # This setting is no use any more, so set it to blank.
 WEBSOCKET_CLIENT_URL = ""
 
+# How long time (in seconds) a user may idle before being logged
+# out. This can be set as big as desired. A user may avoid being
+# thrown off by sending the empty system command 'idle' to the server
+# at regular intervals. Set <=0 to deactivate idle timeout completely.
+IDLE_TIMEOUT = 60
+
+# Determine how many commands per second a given Session is allowed
+# to send to the Portal via a connected protocol. Too high rate will
+# drop the command and echo a warning. Note that this will also cap
+# OOB messages so don't set it too low if you expect a lot of events
+# from the client! To turn the limiter off, set to <= 0.
+MAX_COMMAND_RATE = 20
 
 ######################################################################
 # Evennia Database config
@@ -339,12 +351,12 @@ PATH_QUEST_STATUS_BASE = "muddery.server.quests.quest_status"
 #      character (disconnects multiplets)
 #  3 - like mode 2, except multiple sessions can puppet one character, each
 #      session getting the same data.
-MULTISESSION_MODE = 2
+MULTISESSION_MODE = 0
 
 # The maximum number of characters allowed for MULTISESSION_MODE 2,3. This is
 # checked by the default ooc char-creation command. Forced to 1 for
 # MULTISESSION_MODE 0 and 1.
-MAX_NR_CHARACTERS = 3
+MAX_NR_CHARACTERS = 1
 
 
 ######################################################################

@@ -5,6 +5,7 @@ Sessionhandler for portal sessions
 
 import time
 from collections import deque, namedtuple
+from autobahn.exception import Disconnected
 from twisted.internet import reactor
 from django.conf import settings
 from evennia.server.sessionhandler import SessionHandler, PCONN, PDISCONN, PCONNSYNC, PDISCONNALL
@@ -452,6 +453,9 @@ class PortalSessionHandler(SessionHandler):
                     # - avoids hiding AttributeErrors in the call.
                     try:
                         getattr(session, funcname)(*cmdargs, **cmdkwargs)
+                    except Disconnected:
+                        log_trace()
+                        self.disconnect(session)
                     except Exception:
                         log_trace()
                 else:
@@ -459,6 +463,9 @@ class PortalSessionHandler(SessionHandler):
                         # note that send_default always takes cmdname
                         # as arg too.
                         session.send_default(cmdname, *cmdargs, **cmdkwargs)
+                    except Disconnected:
+                        log_trace()
+                        self.disconnect(session)
                     except Exception:
                         log_trace()
 

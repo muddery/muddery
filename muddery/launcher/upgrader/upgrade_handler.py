@@ -6,6 +6,7 @@ import os, traceback
 import muddery
 from muddery.launcher.upgrader import utils
 from muddery.launcher.upgrader import upgrader_0_6_0
+from muddery.launcher.upgrader import upgrader_0_6_1
 from muddery.launcher import utils as launcher_utils
 from muddery.server.utils.exception import MudderyError, ERR
 
@@ -20,6 +21,7 @@ class UpgradeHandler(object):
         """
         self.upgrader_list = []
         self.upgrader_list.append(upgrader_0_6_0.Upgrader())
+        self.upgrader_list.append(upgrader_0_6_1.Upgrader())
 
     def upgrade_game(self, game_dir, template, muddery_lib):
         # Get first two version numbers.
