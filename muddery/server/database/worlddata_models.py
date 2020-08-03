@@ -1299,6 +1299,12 @@ class action_get_objects(BaseEventActionData):
     # The odds to get these objects. ([0.0, 1.0])
     odds = models.FloatField(blank=True, default=0)
 
+    # Can get another object after this one.
+    multiple = models.BooleanField(blank=True, default=True)
+
+    # This message will be sent to the character when get objects.
+    message = models.TextField(blank=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True
