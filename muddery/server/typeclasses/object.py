@@ -343,7 +343,6 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
                 # Set default mutable properties to prop.
                 if not self.custom_properties_handler.has(key):
                     default = info["default"]
-                    value = ""
                     if self.custom_properties_handler.has(default):
                         # User another property'a value
                         value = self.custom_properties_handler.get(default)

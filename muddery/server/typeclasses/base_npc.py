@@ -132,10 +132,11 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
         """
         status = None
         opponents = None
+        rewards = None
         if self.ndb.combat_handler:
             result = self.ndb.combat_handler.get_combat_result(self)
             if result:
-                status, opponents = result
+                status, opponents, rewards = result
 
         if not self.is_temp:
             if status == defines.COMBAT_LOSE:

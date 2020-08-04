@@ -33,6 +33,8 @@ class FuncHit(StatementFunction):
         if not self.obj:
             return
 
+        target_name = self.obj.get_name()
+
         # calculate the damage
         damage = float(self.caller.prop.attack) / (self.caller.prop.attack + self.obj.prop.defence) * self.caller.prop.attack
         damage = round(damage * effect)
@@ -42,5 +44,5 @@ class FuncHit(StatementFunction):
         changes = self.obj.change_properties(increments)
 
         # send skill result
-        return _("Hit %s by %d points.") % (self.obj.get_name(), int(-changes["hp"]))
+        return _("Hit %s by %d points.") % (target_name, int(-changes["hp"]))
 

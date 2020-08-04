@@ -119,6 +119,8 @@ class FuncHit(StatementFunction):
         if not self.obj:
             return
 
+        target_name = self.obj.get_name()
+
         # calculate the damage
         # damage = float(self.caller.attack) / (self.caller.attack + self.obj.defence) * self.caller.attack
         damage = round(effect)
@@ -128,7 +130,7 @@ class FuncHit(StatementFunction):
         changes = self.obj.change_properties(increments)
 
         # send skill result
-        return _("Hit %s by %d points.") % (self.obj.get_name(), int(-changes["hp"]))
+        return _("Hit %s by %d points.") % (target_name, int(-changes["hp"]))
 
 
 class FuncIncreaseMaxHP(StatementFunction):

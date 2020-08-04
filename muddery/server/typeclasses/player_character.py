@@ -90,7 +90,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.available_channels = {}
 
         # refresh data
-        self.refresh_properties()
+        self.refresh_properties(True)
 
         # if it is dead, reborn at init.
         if not self.is_alive():
@@ -887,7 +887,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         obj.equipped = True
 
         # reset character's attributes
-        self.refresh_properties()
+        self.refresh_properties(True)
 
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),
@@ -917,7 +917,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.db.equipments[position] = None
 
         # reset character's attributes
-        self.refresh_properties()
+        self.refresh_properties(True)
 
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),
@@ -939,7 +939,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         equipment.equipped = False
 
         # reset character's attributes
-        self.refresh_properties()
+        self.refresh_properties(True)
 
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),
@@ -994,21 +994,19 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         combat_handler = getattr(self.ndb, "combat_handler", None)
         if combat_handler:
-            # show combat infomation
-            combat_handler.show_combat(self)
+            if not combat_handler.is_finished():
+                # show combat infomation
+                combat_handler.show_combat(self)
+            else:
+                self.leave_combat()
 
-            if combat_handler.is_finished():
-                result = combat_handler.get_combat_result(self)
-                if result:
-                    # result: (result, opponents)
-                    self.combat_result(result[0], result[1])
-
-    def combat_result(self, result, opponents=None):
+    def combat_result(self, result, opponents=None, rewards=None):
         """
         Set the combat result.
 
         :param result: defines.COMBAT_WIN, defines.COMBAT_LOSE, or defines.COMBAT_DRAW
         :param opponents: combat opponents
+        :param rewards: combat rewards
         """
         if result == defines.COMBAT_LOSE:
             self.msg({"combat_finish": {"lose": True}})
@@ -1018,21 +1016,14 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             self.msg({"combat_finish": {"escaped": True}})
         elif result == defines.COMBAT_WIN:
             # get rewards
-            exp = 0
-            loots = []
-            for opponent in opponents:
-                exp += opponent.provide_exp(self)
-                obj_list = opponent.loot_handler.get_obj_list(self)
-                if obj_list:
-                    loots.extend(obj_list)
-
+            exp = rewards["exp"]
             if exp:
                 self.add_exp(exp)
 
             # give objects to winner
             get_objects = []
-            if loots:
-                get_objects = self.receive_objects(loots, mute=True)
+            if rewards["loots"]:
+                get_objects = self.receive_objects(rewards["loots"], mute=True)
 
             self.msg({
                 "combat_finish": {
@@ -1048,10 +1039,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         status = None
         opponents = None
+        rewards = None
         if self.ndb.combat_handler:
-            result = self.ndb.combat_handler.get_combat_result(self)
+            result = self.ndb.combat_handler.get_combat_result(self.dbref)
             if result:
-                status, opponents = result
+                status, opponents, rewards = result
 
         # trigger events
         if status == defines.COMBAT_WIN:

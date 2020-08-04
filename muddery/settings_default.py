@@ -351,12 +351,12 @@ PATH_QUEST_STATUS_BASE = "muddery.server.quests.quest_status"
 #      character (disconnects multiplets)
 #  3 - like mode 2, except multiple sessions can puppet one character, each
 #      session getting the same data.
-MULTISESSION_MODE = 0
+MULTISESSION_MODE = 2
 
 # The maximum number of characters allowed for MULTISESSION_MODE 2,3. This is
 # checked by the default ooc char-creation command. Forced to 1 for
 # MULTISESSION_MODE 0 and 1.
-MAX_NR_CHARACTERS = 1
+MAX_NR_CHARACTERS = 3
 
 
 ######################################################################
