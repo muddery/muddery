@@ -34,11 +34,11 @@ def import_local_data():
     # load custom data
     # data file's path
     data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
-    importer.import_data_path(data_path)
+    importer.import_data_path(data_path, clear=False, except_errors=True)
 
     # localized string file's path
     localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
-    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL)
+    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
 
 
 def create_superuser(username, password):
@@ -179,6 +179,9 @@ def main():
         '--loaddata', action='store_true', dest='loaddata', default=False,
         help="Load local data from the worlddata folder.")
     parser.add_argument(
+        '--migrate', action='store_true', dest='migrate', default=False,
+        help="Migrate databases to new version.")
+    parser.add_argument(
         '--port', '-p', nargs=1, action='store', dest='port',
         metavar="<N>",
         help="Set game's network ports when init the game, recommend to use ports above 10000.")
@@ -285,6 +288,51 @@ def main():
         except Exception as e:
             traceback.print_exc()
             print("Import local data error: %s" % e)
+
+        sys.exit()
+    elif args.migrate:
+        print("Migrating databases.")
+
+        gamedir = os.path.abspath(configs.CURRENT_DIR)
+        os.chdir(gamedir)
+        evennia_launcher.init_game_directory(gamedir, check_db=False)
+
+        # make migrations
+        django_args = ["makemigrations", "gamedata"]
+        django_kwargs = {}
+        try:
+            django.core.management.call_command(*django_args, **django_kwargs)
+        except django.core.management.base.CommandError as exc:
+            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+        django_args = ["makemigrations", "worlddata"]
+        django_kwargs = {}
+        try:
+            django.core.management.call_command(*django_args, **django_kwargs)
+        except django.core.management.base.CommandError as exc:
+            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+        # migrate the database
+        django_args = ["migrate"]
+        django_kwargs = {}
+        try:
+            django.core.management.call_command(*django_args, **django_kwargs)
+        except django.core.management.base.CommandError as exc:
+            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+        django_args = ["migrate", "gamedata"]
+        django_kwargs = {"database": "gamedata"}
+        try:
+            django.core.management.call_command(*django_args, **django_kwargs)
+        except django.core.management.base.CommandError as exc:
+            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+        django_args = ["migrate", "worlddata"]
+        django_kwargs = {"database": "worlddata"}
+        try:
+            django.core.management.call_command(*django_args, **django_kwargs)
+        except django.core.management.base.CommandError as exc:
+            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
         sys.exit()
 
