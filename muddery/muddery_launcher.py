@@ -41,6 +41,25 @@ def import_local_data():
     importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
 
 
+def import_system_data():
+    """
+    Import all local data files to models.
+    """
+    from django.conf import settings
+    from muddery.worldeditor.services import importer
+
+    # load system default data
+    default_template = os.path.join(configs.GAME_TEMPLATES, configs.DEFAULT_TEMPLATE)
+
+    # data file's path
+    data_path = os.path.join(default_template, settings.WORLD_DATA_FOLDER)
+    importer.import_data_path(data_path, clear=False, except_errors=True)
+
+    # localized string file's path
+    localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
+    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
+
+
 def create_superuser(username, password):
     """
     Create the superuser's account.
@@ -179,6 +198,9 @@ def main():
         '--loaddata', action='store_true', dest='loaddata', default=False,
         help="Load local data from the worlddata folder.")
     parser.add_argument(
+        '--sysdata', action='store_true', dest='sysdata', default=False,
+        help="Load system default data.")
+    parser.add_argument(
         '--migrate', action='store_true', dest='migrate', default=False,
         help="Migrate databases to new version.")
     parser.add_argument(
@@ -257,30 +279,7 @@ def main():
         gamedir = os.path.abspath(configs.CURRENT_DIR)
         os.chdir(gamedir)
         evennia_launcher.init_game_directory(gamedir, check_db=False)
-            
-        # make migrations
-        django_args = ["makemigrations", "worlddata"]
-        django_kwargs = {}
-        try:
-            django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError as exc:
-            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
 
-        # migrate the database
-        django_args = ["migrate"]
-        django_kwargs = {}
-        try:
-            django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError as exc:
-            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-
-        django_args = ["migrate", "worlddata"]
-        django_kwargs = {"database": "worlddata"}
-        try:
-            django.core.management.call_command(*django_args, **django_kwargs)
-        except django.core.management.base.CommandError as exc:
-            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
-            
         # load local data
         try:
             import_local_data()
@@ -288,6 +287,22 @@ def main():
         except Exception as e:
             traceback.print_exc()
             print("Import local data error: %s" % e)
+
+        sys.exit()
+    elif args.sysdata:
+        print("Importing system data.")
+
+        gamedir = os.path.abspath(configs.CURRENT_DIR)
+        os.chdir(gamedir)
+        evennia_launcher.init_game_directory(gamedir, check_db=False)
+
+        # load local data
+        try:
+            import_system_data()
+            print("Import system data success.")
+        except Exception as e:
+            traceback.print_exc()
+            print("Import system data error: %s" % e)
 
         sys.exit()
     elif args.migrate:
