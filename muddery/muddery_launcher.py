@@ -158,35 +158,20 @@ def main():
     # set up argument parser
 
     parser = ArgumentParser(description=configs.CMDLINE_HELP, formatter_class=argparse.RawTextHelpFormatter)
+
     parser.add_argument(
-        '--gamedir', nargs=1, action='store', dest='altgamedir',
-        metavar="<path>",
-        help="location of gamedir (default: current location)")
-    parser.add_argument(
-        '--init', nargs='+', action='store', dest="init", metavar="<gamename> [template name]",
+        '--init',
+        nargs='+',
+        action='store',
+        dest="init",
+        metavar="<gamename> [template name]",
         help="creates a new gamedir 'name' at current location (from optional template).")
     parser.add_argument(
-        '--log', '-l', action='store_true', dest='tail_log', default=False,
-        help="tail the portal and server logfiles and print to stdout")
-    parser.add_argument(
-        '--list', nargs='+', action='store', dest='listsetting', metavar="all|<key>",
-        help=("list settings, use 'all' to list all available keys"))
-    parser.add_argument(
-        '--settings', nargs=1, action='store', dest='altsettings',
-        default=None, metavar="<path>",
-        help=("start evennia with alternative settings file from\n"
-              " gamedir/server/conf/. (default is settings.py)"))
-    parser.add_argument(
-        '--initsettings', action='store_true', dest="initsettings",
+        '--log', '-l',
+        action='store_true',
+        dest='tail_log',
         default=False,
-        help="create a new, empty settings file as\n gamedir/server/conf/settings.py")
-    parser.add_argument(
-        '--profiler', action='store_true', dest='profiler', default=False,
-        help="start given server component under the Python profiler")
-    parser.add_argument(
-        '--dummyrunner', nargs=1, action='store', dest='dummyrunner',
-        metavar="<N>",
-        help="test a server by connecting <N> dummy accounts to it")
+        help="tail the portal and server logfiles and print to stdout")
     parser.add_argument(
         '-v', '--version', action='store_true',
         dest='show_version', default=False,
@@ -355,9 +340,6 @@ def main():
         # show the version info
         print(utils.show_version_info(option == "help"))
         sys.exit()
-
-    if args.altsettings:
-        evennia_launcher.main()
 
     if option != "noop":
         # check current game's version
