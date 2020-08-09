@@ -6,7 +6,6 @@ import os
 import django.core.management
 from evennia.server.evennia_launcher import init_game_directory
 from muddery.launcher.upgrader.base_upgrader import BaseUpgrader
-from muddery.muddery_launcher import import_local_data
 
 
 class Upgrader(BaseUpgrader):

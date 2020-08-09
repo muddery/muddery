@@ -7,8 +7,10 @@ import os
 import sys
 import shutil
 import configparser
+import traceback
 from pathlib import Path
 from subprocess import check_output, CalledProcessError, STDOUT
+import django.core.management
 from evennia.server import evennia_launcher
 from muddery.launcher import configs
 
@@ -299,3 +301,129 @@ def get_game_config(path):
             num_list[i] = int(ver)
 
     return tuple(num_list), game_template
+
+
+def import_local_data():
+    """
+    Import all local data files to models.
+    """
+    from django.conf import settings
+    from muddery.worldeditor.services import importer
+
+    # load custom data
+    # data file's path
+    data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
+    importer.import_data_path(data_path, clear=False, except_errors=True)
+
+    # localized string file's path
+    localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
+    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
+
+
+def import_system_data():
+    """
+    Import all local data files to models.
+    """
+    from django.conf import settings
+    from muddery.worldeditor.services import importer
+
+    # load system default data
+    default_template = os.path.join(configs.GAME_TEMPLATES, configs.DEFAULT_TEMPLATE)
+
+    # data file's path
+    data_path = os.path.join(default_template, settings.WORLD_DATA_FOLDER)
+    importer.import_data_path(data_path, clear=False, except_errors=True)
+
+    # localized string file's path
+    localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
+    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
+
+
+def create_superuser(username, password):
+    """
+    Create the superuser's account.
+    """
+    from evennia.accounts.models import AccountDB
+    AccountDB.objects.create_superuser(username, '', password)
+
+
+def create_database():
+    """
+    Create the game's database.
+    """
+    # make migrations
+    try:
+        django_args = ["makemigrations", "gamedata"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        raise
+
+    try:
+        django_args = ["makemigrations", "worlddata"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        raise
+
+    # migrate the database
+    try:
+        django_args = ["migrate"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+
+        django_args = ["migrate", "gamedata"]
+        django_kwargs = {"database": "gamedata"}
+        django.core.management.call_command(*django_args, **django_kwargs)
+
+        django_args = ["migrate", "worlddata"]
+        django_kwargs = {"database": "worlddata"}
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        raise
+
+    # import worlddata
+    try:
+        print("Importing local data.")
+        import_local_data()
+    except Exception as e:
+        traceback.print_exc()
+        print("Import local data error: %s" % e)
+
+
+def print_info():
+    """
+    Format info dicts from the Portal/Server for display
+
+    """
+    from django.conf import settings
+
+    ind = " " * 8
+    info = {
+        "servername": settings.GAME_SERVERNAME,
+        "version": muddery_version(),
+        "status": ""
+    }
+
+    def _prepare_dict(dct):
+        out = {}
+        for key, value in dct.items():
+            if isinstance(value, list):
+                value = "\n{}".format(ind).join(str(val) for val in value)
+            out[key] = value
+        return out
+
+    def _strip_empty_lines(string):
+        return "\n".join(line for line in string.split("\n") if line.strip())
+
+    # Print server info.
+    sdict = _prepare_dict(info)
+    info = _strip_empty_lines(configs.SERVER_INFO.format(**sdict))
+
+    maxwidth = max(len(line) for line in info.split("\n"))
+    top_border = "-" * (maxwidth - 11) + " Muddery " + "---"
+    border = "-" * (maxwidth + 1)
+    print("\n" + top_border + "\n" + info + '\n' + border)
