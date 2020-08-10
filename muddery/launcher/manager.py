@@ -171,6 +171,29 @@ def show_version(about=False):
     print(utils.show_version_info(about))
 
 
+def create_superuser(username, password):
+    """
+    Create the superuser's account.
+    """
+    from evennia.accounts.models import AccountDB
+    AccountDB.objects.create_superuser(username, '', password)
+
+
+def collect_static():
+    """
+    Collect static web files.
+    :return:
+    """
+    django_args = ["collectstatic"]
+    django_kwargs = {"verbosity": 0,
+                     "interactive": False}
+    try:
+        django.core.management.call_command(*django_args, **django_kwargs)
+        print("\nStatic file collected.")
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+
+
 def run_evennia(option):
     """
     Run Evennia's launcher.
@@ -202,14 +225,16 @@ def run_evennia(option):
 
     if option == "start":
         # Collect static files.
-        django_args = ["collectstatic"]
-        django_kwargs = {"verbosity": 0,
-                         "interactive": False}
-        try:
-            django.core.management.call_command(*django_args, **django_kwargs)
-            print("\nStatic file collected.")
-        except django.core.management.base.CommandError as exc:
-            print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        collect_static()
 
         utils.print_info()
 
+
+def start(game_dir):
+    """
+    Start the game.
+    :return:
+    """
+    evennia_launcher.init_game_directory(game_dir, check_db=True)
+    evennia_launcher.error_check_python_modules()
+    evennia_launcher.start_evennia()
