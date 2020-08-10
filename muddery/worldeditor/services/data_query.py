@@ -372,12 +372,14 @@ def query_dialogues_table():
     Query dialogues.
     """
     cursor = connections[settings.WORLD_DATA_APP].cursor()
-    query = "SELECT T1.*, T2.key event, T5.name npc_name, T5.npc npc_key \
-                FROM (worlddata_dialogues T1 LEFT JOIN \
-                (SELECT * FROM worlddata_event_data GROUP BY trigger_obj) T2 ON \
-                T1.key=T2.trigger_obj AND T2.trigger_type='EVENT_TRIGGER_DIALOGUE') \
-                LEFT JOIN (SELECT * FROM worlddata_npc_dialogues T3 JOIN worlddata_objects T4 ON \
-                T3.npc=T4.key) T5 ON T1.key=T5.dialogue"
+    query = "SELECT T1.*, T2.key event, T5.name npc_name, T5.npc npc_key " \
+                "FROM (worlddata_dialogues T1 LEFT JOIN " \
+                    "(SELECT T6.key, T6.trigger_obj FROM worlddata_event_data T6 " \
+                         "WHERE T6.trigger_type='EVENT_TRIGGER_DIALOGUE' GROUP BY trigger_obj) T2 " \
+                    "ON T1.key=T2.trigger_obj) " \
+                "LEFT JOIN (SELECT T3.npc, T3.dialogue, T4.name FROM worlddata_npc_dialogues T3 " \
+                    "JOIN worlddata_objects T4 ON T3.npc=T4.key) T5 " \
+                "ON T1.key=T5.dialogue"
     cursor.execute(query)
 
     fields = query_fields("dialogues")
