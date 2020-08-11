@@ -100,7 +100,7 @@ ERROR_NO_GAMEDIR = \
 
 NEED_UPGRADE = \
     """
-    Your game's version {version} is too old. Please run:
+    Your game's version is too old. Please run:
 
         muddery --upgrade
 

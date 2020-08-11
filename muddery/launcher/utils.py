@@ -167,8 +167,7 @@ def create_game_directory(gamedir, template, port=None):
     template directory from muddery's root.
     """
     if os.path.exists(gamedir):
-        print("Cannot create new Muddery game dir: '%s' already exists." % gamedir)
-        sys.exit(-1)
+        raise Exception("Cannot create new Muddery game dir: '%s' already exists." % gamedir)
 
     template_dir = ""
     if template:
@@ -181,7 +180,7 @@ def create_game_directory(gamedir, template, port=None):
                 if os.path.isdir(full_path):
                     print("  %s" % dir)
             print("")
-            sys.exit(-1)
+            raise Exception()
 
     # copy default template directory
     default_template = os.path.join(configs.GAME_TEMPLATES, configs.DEFAULT_TEMPLATE)
@@ -235,10 +234,23 @@ def check_gamedir(path):
     """
     settings_path = os.path.join(path, "server", "conf", "settings.py")
     if os.path.isfile(settings_path):
-        return
+        return True
 
     print(configs.ERROR_NO_GAMEDIR)
-    sys.exit()
+    return False
+
+
+def check_version():
+    # check current game's version
+    if not check_gamedir(configs.CURRENT_DIR):
+        return False
+
+    from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
+    game_ver, game_template = get_game_config(configs.CURRENT_DIR)
+    if UPGRADE_HANDLER.can_upgrade(game_ver):
+        return False
+
+    return True
 
 
 def create_config_file(game_dir, template):

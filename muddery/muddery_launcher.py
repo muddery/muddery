@@ -109,7 +109,11 @@ def main():
                 print("Port must be a number.")
                 sys.exit(-1)
 
-        manager.init_game(game_name, template, port)
+        try:
+            manager.init_game(game_name, template, port)
+        except Exception as e:
+            print(e)
+            sys.exit(-1)
         sys.exit()
 
     elif args.upgrade is not None:
@@ -117,19 +121,35 @@ def main():
         if args.upgrade:
             template = args.upgrade
 
-        manager.upgrade_game(template)
+        try:
+            manager.upgrade_game(template)
+        except Exception as e:
+            print(e)
+            sys.exit(-1)
         sys.exit()
 
     elif args.loaddata:
-        manager.load_game_data()
+        try:
+            manager.load_game_data()
+        except Exception as e:
+            print(e)
+            sys.exit(-1)
         sys.exit()
 
     elif args.sysdata:
-        manager.load_system_data()
+        try:
+            manager.load_system_data()
+        except Exception as e:
+            print(e)
+            sys.exit(-1)
         sys.exit()
 
     elif args.migrate:
-        manager.migrate_database()
+        try:
+            manager.migrate_database()
+        except Exception as e:
+            print(e)
+            sys.exit(-1)
         sys.exit()
 
     if args.show_version:
@@ -138,10 +158,16 @@ def main():
         sys.exit()
 
     if option != "noop":
-        manager.run_evennia(option)
+        try:
+            manager.run_evennia(option)
+        except Exception as e:
+            print(e)
+            sys.exit(-1)
+        sys.exit()
     else:
         # no input; print muddery info
         manager.print_about()
+        sys.exit()
 
 
 if __name__ == '__main__':

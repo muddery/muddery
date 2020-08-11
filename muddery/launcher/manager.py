@@ -43,8 +43,7 @@ def init_game(game_name, template=None, port=None):
         utils.create_database()
     except Exception as e:
         traceback.print_exc()
-        print("Create database error: %s" % e)
-        return
+        raise
 
     print(configs.CREATED_NEW_GAMEDIR.format(gamedir=game_name,
                                              settings_path=os.path.join(game_name, configs.SETTINGS_PATH),
@@ -58,15 +57,12 @@ def upgrade_game(template=None):
     :param template: game template's name
     :return:
     """
-    utils.check_gamedir(configs.CURRENT_DIR)
+    if not utils.check_gamedir(configs.CURRENT_DIR):
+        raise Exception
 
-    try:
-        from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
-
-        gamedir = os.path.abspath(configs.CURRENT_DIR)
-        UPGRADE_HANDLER.upgrade_game(gamedir, template, configs.MUDDERY_LIB)
-    except Exception as e:
-        print("Upgrade failed: %s" % e)
+    from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
+    gamedir = os.path.abspath(configs.CURRENT_DIR)
+    UPGRADE_HANDLER.upgrade_game(gamedir, template, configs.MUDDERY_LIB)
 
 
 def load_game_data():
@@ -87,7 +83,7 @@ def load_game_data():
         print("Import local data success.")
     except Exception as e:
         traceback.print_exc()
-        print("Import local data error: %s" % e)
+        raise
 
 
 def load_system_data():
@@ -108,7 +104,7 @@ def load_system_data():
         print("Import system data success.")
     except Exception as e:
         traceback.print_exc()
-        print("Import system data error: %s" % e)
+        raise
 
 
 def migrate_database():
@@ -201,27 +197,18 @@ def run_evennia(option):
     :param option: command line's option args
     :return:
     """
-    # check current game's version
-    try:
-        utils.check_gamedir(configs.CURRENT_DIR)
-        evennia_launcher.set_gamedir(configs.CURRENT_DIR)
+    if not utils.check_version():
+        print(configs.NEED_UPGRADE)
+        raise Exception
 
-        from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
-        game_ver, game_template = utils.get_game_config(configs.CURRENT_DIR)
-        if UPGRADE_HANDLER.can_upgrade(game_ver):
-            ver_str = ".".join([str(v) for v in game_ver])
-            print(configs.NEED_UPGRADE.format(version=ver_str))
-            return
-    except Exception as e:
-        traceback.print_exc()
-        print("Check upgrade error: %s" % e)
-        return
+    evennia_launcher.set_gamedir(configs.CURRENT_DIR)
 
     # pass-through to evennia
     try:
         evennia_launcher.main()
     except Exception as e:
         traceback.print_exc()
+        raise
 
     if option == "start":
         # Collect static files.
