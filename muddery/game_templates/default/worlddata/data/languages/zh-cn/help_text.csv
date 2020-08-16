@@ -195,7 +195,7 @@ help_action_get_objects,"number","获取物品的数量。"
 help_action_get_objects,"odds","获取物品的概率，从 0.0 到 1.0。"
 help_action_get_objects,"multiple","可多次获得的物品，在获得了一个之后可以继续获得同一事件下的其他物品。
 不可多次获得的物品，获得了一个之后就不会获得后续物品。"
-help_action_get_objects,"message","描述信息的 %s 代表获取物品的数量，信息中必须有且只能有一个 %s。"
+help_action_get_objects,"message","描述信息中用 %s 代表获取物品的数量，要显示单个 % 需要用 %% 表示。"
 help_condition_desc,"key","物体标识"
 help_condition_desc,"condition","显示描述信息所要满足的条件。"
 help_condition_desc,"desc","描述信息。"

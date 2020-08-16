@@ -79,9 +79,12 @@ class ActionGetObjects(BaseIntervalAction):
                 message += ", "
 
             template = msg_template[item["key"]]
-            try:
-                message += template % item["number"]
-            except:
+            if template:
+                try:
+                    message += template % item["number"]
+                except:
+                    message += template
+            else:
                 message += _("Get") + " " + item["name"] + " " + str(item["number"])
 
         if message:
