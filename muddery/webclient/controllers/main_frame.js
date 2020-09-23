@@ -65,7 +65,8 @@ MudderyMainFrame.prototype.showGetObjects = function(objects) {
                     mud.scene_window.displayMsg(core.trans("You got:"));
                     first = false;
                 }
-                mud.scene_window.displayMsg(objects[i]["name"] + ": " + objects[i]["number"]);
+                var name = core.text2html.parseHtml(objects[i]["name"]);
+                mud.scene_window.displayMsg(name + ": " + objects[i]["number"]);
             }
 		}
 	}
@@ -703,7 +704,7 @@ MudderyPopupGetObjects.prototype.setObjects = function(objects) {
 
         $("<span>")
             .addClass("name")
-            .text(obj["name"])
+            .html(core.text2html.parseHtml(obj["name"]))
             .appendTo(item);
 
         if (obj["number"] != 1) {
