@@ -1125,11 +1125,9 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         if self.location:
             location_key = self.location.get_data_key()
 
-        self.state.current_dialogue = {
-            "dialogues": dialogues,
-            "npc": npc_key,
-            "location": location_key
-        }
+        self.state.current_dialogue = {"dialogues": dialogues,
+                                       "npc": npc_key,
+                                       "location": location_key}
 
         return
 

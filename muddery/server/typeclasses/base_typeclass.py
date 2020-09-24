@@ -23,9 +23,6 @@ class BaseTypeclass(object):
     # object's data model
     model_name = ""
 
-    # objects states
-    states = set()
-
     @classmethod
     def get_models(cls):
         """

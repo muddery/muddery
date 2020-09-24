@@ -104,7 +104,7 @@ class BaseAttributesCache(object):
         records = self.model.objects.filter(obj_id=obj_id, key=key)
         return len(records) != 0
 
-    def get(self, obj_id, key, **kwargs):
+    def get(self, obj_id, key, *wargs):
         """
         Get the value of an attribute.
 
@@ -119,9 +119,9 @@ class BaseAttributesCache(object):
         """
         records = self.model.objects.filter(obj_id=obj_id, key=key)
         if len(records) == 0:
-            try:
-                return kwargs["default"]
-            except KeyError:
+            if len(wargs) > 0:
+                return wargs[0]
+            else:
                 raise AttributeError
 
         return from_string(records[0].value)
