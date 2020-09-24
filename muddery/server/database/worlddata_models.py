@@ -12,6 +12,7 @@ TYPECLASS_LENGTH = 80
 POSITION_LENGTH = 80
 VALUE_LENGTH = 80
 CONDITION_LENGTH = 255
+TEXT_CONTENT_LENGTH = 512
 
 re_attribute_key = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 
@@ -923,6 +924,7 @@ class quest_dependencies(models.Model):
         app_label = "worlddata"
         verbose_name = "Quest Dependency"
         verbose_name_plural = "Quest Dependency"
+        unique_together = ("quest", "dependency", "type")
 
 
 # ------------------------------------------------------------
@@ -941,7 +943,7 @@ class event_data(models.Model):
 
     # The type of the event trigger.
     # event's trigger
-    trigger_type = models.CharField(max_length=KEY_LENGTH)
+    trigger_type = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # The type of an event action.
     # event's action
@@ -949,6 +951,10 @@ class event_data(models.Model):
 
     # The odds of this event.
     odds = models.FloatField(blank=True, default=1.0)
+
+    # Can trigger another event after this one.
+    # If multiple is False, no more events will be triggered.
+    multiple = models.BooleanField(blank=True, default=True)
 
     # the condition to enable this event
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
@@ -959,6 +965,7 @@ class event_data(models.Model):
         app_label = "worlddata"
         verbose_name = "Event"
         verbose_name_plural = "Events"
+        index_together = [("trigger_obj", "trigger_type")]
 
     def __unicode__(self):
         return self.key
@@ -980,6 +987,9 @@ class dialogues(models.Model):
 
     # condition to show this dialogue
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    # dialogue's content
+    content = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1018,6 +1028,7 @@ class dialogue_quest_dependencies(models.Model):
         app_label = "worlddata"
         verbose_name = "Dialogue Quest Dependency"
         verbose_name_plural = "Dialogue Quest Dependencies"
+        unique_together = ("dialogue", "dependency", "type")
 
 
 # ------------------------------------------------------------
@@ -1042,41 +1053,7 @@ class dialogue_relations(models.Model):
         app_label = "worlddata"
         verbose_name = "Dialogue Relation"
         verbose_name_plural = "Dialogue Relations"
-
-
-# ------------------------------------------------------------
-#
-# store dialogue sentences
-#
-# ------------------------------------------------------------
-class dialogue_sentences(models.Model):
-    "Store dialogue sentences."
-
-    # sentence's key
-    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
-
-    # The key of a dialogue.
-    # dialogue's key
-    dialogue = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # sentence's ordinal
-    ordinal = models.IntegerField()
-
-    # sentence's speaker
-    speaker = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # speaker's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    # sentence's content
-    content = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Dialogue Sentence"
-        verbose_name_plural = "Dialogue Sentences"
+        unique_together = ("dialogue", "next_dlg")
 
 
 # ------------------------------------------------------------
@@ -1104,6 +1081,7 @@ class npc_dialogues(models.Model):
         app_label = "worlddata"
         verbose_name = "NPC Dialogue"
         verbose_name_plural = "NPC Dialogues"
+        unique_together = ("npc", "dialogue")
 
 
 # ------------------------------------------------------------
@@ -1149,6 +1127,7 @@ class action_attack(BaseEventActionData):
         app_label = "worlddata"
         verbose_name = "Event Mob"
         verbose_name_plural = "Event Mobs"
+        unique_together = ("event_key", "mob", "level")
 
 
 # ------------------------------------------------------------
@@ -1176,6 +1155,7 @@ class action_dialogue(BaseEventActionData):
         app_label = "worlddata"
         verbose_name = "Event Dialogues"
         verbose_name_plural = "Event Dialogues"
+        unique_together = ("event_key", "dialogue", "npc")
 
 
 # ------------------------------------------------------------
@@ -1196,6 +1176,7 @@ class action_learn_skill(BaseEventActionData):
         app_label = "worlddata"
         verbose_name = "Action Learn Skill"
         verbose_name_plural = "Action Learn Skills"
+        unique_together = ("event_key", "skill")
 
 
 # ------------------------------------------------------------
@@ -1216,6 +1197,7 @@ class action_accept_quest(BaseEventActionData):
         app_label = "worlddata"
         verbose_name = "Action Accept Quest"
         verbose_name_plural = "Action Accept Quests"
+        unique_together = ("event_key", "quest")
 
 
 # ------------------------------------------------------------
@@ -1236,6 +1218,7 @@ class action_turn_in_quest(BaseEventActionData):
         app_label = "worlddata"
         verbose_name = "Action Turn in Quest"
         verbose_name_plural = "Action Turn in Quests"
+        unique_together = ("event_key", "quest")
 
 
 # ------------------------------------------------------------
@@ -1255,6 +1238,7 @@ class action_close_event(BaseEventActionData):
         app_label = "worlddata"
         verbose_name = "Event Close"
         verbose_name_plural = "Event Closes"
+        unique_together = ("event_key", "event")
 
 
 # ------------------------------------------------------------
@@ -1267,7 +1251,7 @@ class action_message(BaseEventActionData):
     The Action to send a message to the character.
     """
     # Messages.
-    message = models.TextField(blank=True)
+    message = models.CharField(max_length=TEXT_CONTENT_LENGTH, blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -1275,6 +1259,7 @@ class action_message(BaseEventActionData):
         app_label = "worlddata"
         verbose_name = "Event Message"
         verbose_name_plural = "Event Messages"
+        unique_together = ("event_key", "message")
 
 
 # ------------------------------------------------------------
@@ -1286,14 +1271,14 @@ class action_room_interval(BaseEventActionData):
     """
     The action to trigger other actions at interval.
     """
+    # The event action's key.
+    action = models.CharField(max_length=KEY_LENGTH)
+
     # Repeat interval in seconds.
     interval = models.PositiveIntegerField(blank=True, default=0)
 
     # Can trigger events when the character is offline.
     offline = models.BooleanField(blank=True, default=False)
-
-    # The event action.
-    action = models.CharField(max_length=KEY_LENGTH)
 
     # This message will be sent to the character when the interval begins.
     begin_message = models.TextField(blank=True)
@@ -1307,6 +1292,7 @@ class action_room_interval(BaseEventActionData):
         app_label = "worlddata"
         verbose_name = "Event Room Interval"
         verbose_name_plural = "Event Room Intervals"
+        unique_together = ("event_key", "action")
 
 
 # ------------------------------------------------------------
@@ -1327,12 +1313,19 @@ class action_get_objects(BaseEventActionData):
     # The odds to get these objects. ([0.0, 1.0])
     odds = models.FloatField(blank=True, default=0)
 
+    # Can get another object after this one.
+    multiple = models.BooleanField(blank=True, default=True)
+
+    # This message will be sent to the character when get objects.
+    message = models.TextField(blank=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
         verbose_name = "Event Get Object"
         verbose_name_plural = "Event Get Objects"
+        unique_together = ("event_key", "object")
 
 
 # ------------------------------------------------------------
@@ -1376,7 +1369,7 @@ class localized_strings(models.Model):
     category = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # the origin words
-    origin = models.TextField()
+    origin = models.CharField(max_length=TEXT_CONTENT_LENGTH, blank=True)
 
     # translated worlds
     local = models.TextField(blank=True)

@@ -157,6 +157,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
         if not_available:
             skill_cast = {"cast": not_available}
         else:
+            case_message = self.cast_message(target)
             results = self.do_skill(target)
 
             # set message
@@ -164,7 +165,10 @@ class MudderySkill(TYPECLASS("OBJECT")):
                 "skill": self.get_data_key(),
                 "main_type": self.main_type,
                 "sub_type": self.sub_type,
-                "cast": self.cast_message(target)
+                "cast": case_message,
+                "status": {
+                    self.owner.dbref: self.owner.get_combat_status(),
+                }
             }
 
             if self._owner:

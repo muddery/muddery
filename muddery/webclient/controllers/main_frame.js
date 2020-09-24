@@ -65,7 +65,8 @@ MudderyMainFrame.prototype.showGetObjects = function(objects) {
                     mud.scene_window.displayMsg(core.trans("You got:"));
                     first = false;
                 }
-                mud.scene_window.displayMsg(objects[i]["name"] + ": " + objects[i]["number"]);
+                var name = core.text2html.parseHtml(objects[i]["name"]);
+                mud.scene_window.displayMsg(name + ": " + objects[i]["number"]);
             }
 		}
 	}
@@ -288,6 +289,7 @@ MudderyMainFrame.prototype.onLogout = function(data) {
 MudderyMainFrame.prototype.onPuppet = function(data) {
     core.data_handler.character_dbref = data["dbref"];
     core.data_handler.character_name = data["name"];
+    core.data_handler.character_icon = data["icon"];
 
     mud.scene_window.clear();
     mud.scene_window.setInfo(data["name"], data["icon"]);
@@ -702,7 +704,7 @@ MudderyPopupGetObjects.prototype.setObjects = function(objects) {
 
         $("<span>")
             .addClass("name")
-            .text(obj["name"])
+            .html(core.text2html.parseHtml(obj["name"]))
             .appendTo(item);
 
         if (obj["number"] != 1) {
@@ -727,8 +729,10 @@ MudderyPopupGetObjects.prototype.setObjects = function(objects) {
 MudderyPopupDialogue = function(el) {
 	BaseController.call(this, el);
 
-    this.sentences = [];
-	this.target = null;
+    this.dialogues = [];
+    this.d_index = 0;       // current dialogue's index
+    this.s_index = 0;       // current sentence's index
+	this.target = {};
 }
 
 MudderyPopupDialogue.prototype = prototype(BaseController.prototype);
@@ -739,6 +743,7 @@ MudderyPopupDialogue.prototype.constructor = MudderyPopupDialogue;
  */
 MudderyPopupDialogue.prototype.bindEvents = function() {
     this.onClick(".button-close", this.onClose);
+    this.onClick(".div-dialogue", ".select", this.onSelect);
     this.onClick(".popup-footer", ".button-next", this.onNext);
 }
 
@@ -752,14 +757,31 @@ MudderyPopupDialogue.prototype.onClose = function(element) {
 }
 
 /*
+ * Event when select a dialogue.
+ */
+MudderyPopupDialogue.prototype.onSelect = function(element) {
+    this.d_index = this.select(element).data("dialogue");
+    this.gotoNext();
+}
+
+/*
  * Event when clicks the next button.
  */
 MudderyPopupDialogue.prototype.onNext = function(element) {
-	var dialogue = this.sentences[0]["dialogue"];
-	var sentence = this.sentences[0]["sentence"];
-	var npc = this.sentences[0]["npc"];
-	if (dialogue) {
-		core.service.doDialogue(dialogue, sentence, npc);
+    this.gotoNext();
+}
+
+/*
+ * Goto next sentence.
+ */
+MudderyPopupDialogue.prototype.gotoNext = function() {
+    if (this.s_index + 1 < this.dialogues[this.d_index].sentences.length) {
+        // Display next sentence.
+        this.s_index += 1;
+        this.displaySentence(this.dialogues[this.d_index].sentences[this.s_index]);
+    }
+    else {
+		core.service.finishDialogue(this.dialogues[this.d_index].key, this.target.dbref? this.target.dbref: "");
 	}
 }
 
@@ -767,7 +789,7 @@ MudderyPopupDialogue.prototype.onNext = function(element) {
  * Event when objects moved out from the current place.
  */
 MudderyPopupDialogue.prototype.onObjMovedOut = function(dbref) {
-    if (dbref == this.target) {
+    if (this.target && this.target.dbref == dbref) {
         this.onClose();
         return;
     }
@@ -776,38 +798,56 @@ MudderyPopupDialogue.prototype.onObjMovedOut = function(dbref) {
 /*
  * Set dialogue's data.
  */
-MudderyPopupDialogue.prototype.setDialogue = function(sentences, escapes) {
-    this.sentences = sentences;
-    if (!sentences || sentences.length == 0) {
+MudderyPopupDialogue.prototype.setDialogue = function(dialogue) {
+    this.d_index = 0;
+    this.s_index = 0;
+
+    if (!dialogue || dialogue.dialogues.length == 0) {
+        this.dialogues = [];
+        this.target = {};
         this.onClose();
         return;
     }
 
-	this.target = sentences[0]["npc"];
+    this.target = dialogue.target;
 
+    this.dialogues = dialogue.dialogues;
+    var escapes = core.data_handler.getEscapes();
+    for (var i = 0; i < this.dialogues.length; i++) {
+        this.parseDialogue(this.dialogues[i], this.target, escapes);
+    }
+
+    /*
 	if (sentences[0]["can_close"]) {
 		this.select(".button-close").show();
 	}
 	else {
 		this.select(".button-close").hide();
 	}
+    */
 
-	// speaker
-	var speaker = core.text2html.parseHtml(sentences[0]["speaker"]);
-	if (!speaker) {
-		// placeholder
-		speaker = "&nbsp;";
-	}
-	this.select(".header-text").html(speaker);
+    // set content
+    if (this.dialogues.length == 1 && this.dialogues[0].sentences.length > 0) {
+        // Only one dialogue.
+        this.displaySentence(this.dialogues[0].sentences[0]);
+    }
+    else {
+        this.chooseDialogue(this.dialogues);
+    }
+}
 
-	// add icon
-	if (sentences["icon"]) {
-		this.select(".img-icon").attr("src", settings.resource_url + sentences[0]["icon"]);
-		this.select(".div-icon").show();
-	}
-	else {
-		this.select(".div-icon").hide();
-	}
+MudderyPopupDialogue.prototype.displaySentence = function(sentence) {
+    // set speaker and icon
+    this.select(".header-text").html(sentence.speaker);
+
+    // add icon
+    if (sentence.icon) {
+        this.select(".img-icon").attr("src", sentence.icon);
+        this.select(".div-icon").show();
+    }
+    else {
+        this.select(".div-icon").hide();
+    }
 
 	// set contents and buttons
     var container = this.select(".div-dialogue");
@@ -815,41 +855,152 @@ MudderyPopupDialogue.prototype.setDialogue = function(sentences, escapes) {
     var footer = this.select(".popup-footer");
     footer.empty();
 
-    if (sentences.length == 1) {
-        // Only one sentence.
-        var dlg = sentences[0];
+    container.html(sentence.content);
 
-        var content = core.text2html.parseHtml(dlg["content"]);
-        content = core.text_escape.parse(content, escapes);
-        container.html(content);
-
-        $("<button>").attr("type", "button")
-            .addClass("popup-button button-next button-short")
-            .html(core.trans("Next"))
-            .appendTo(footer);
-    }
-    else {
-        for (var i = 0; i < sentences.length; i++) {
-            var dlg = sentences[i];
-
-            var content = core.text2html.parseHtml(dlg["content"]);
-            content = core.text_escape.parse(content, escapes);
-
-            $("<p>")
-                .html(content)
-                .appendTo(container);
-        }
-
-        $("<button>").attr("type", "button")
-            .addClass("popup-button button-short")
-            .html(core.trans("Select One"))
-            .appendTo(footer);
-    }
+    $("<button>").attr("type", "button")
+        .addClass("popup-button button-next button-short")
+        .html(core.trans("Next"))
+        .appendTo(footer);
 }
 
+MudderyPopupDialogue.prototype.chooseDialogue = function(dialogues) {
+    // set speaker and icon
+    for (var i = 0; i < dialogues.length; i++) {
+        if (dialogues[i].sentences.length > 0) {
+            var sentence = dialogues[i].sentences[0];
+            this.select(".header-text").html(sentence.speaker);
+
+            // add icon
+            if (sentence.icon) {
+                this.select(".img-icon").attr("src", sentence.icon);
+                this.select(".div-icon").show();
+            }
+            else {
+                this.select(".div-icon").hide();
+            }
+
+            break;
+        }
+    }
+
+	// set contents and buttons
+    var container = this.select(".div-dialogue");
+    container.empty();
+    var footer = this.select(".popup-footer");
+    footer.empty();
+
+    for (var i = 0; i < this.dialogues.length; i++) {
+        // Select one dialogue.
+        $("<p>")
+            .addClass("select")
+            .data("dialogue", i)
+            .html(this.dialogues[i].sentences[0].content)
+            .appendTo(container);
+    }
+
+    $("<button>").attr("type", "button")
+        .addClass("popup-button button-short")
+        .html(core.trans("Select One"))
+        .appendTo(footer);
+}
+
+MudderyPopupDialogue.prototype.parseDialogue = function(dialogue, target, escapes) {
+    // parse sentences
+    var lines = dialogue.content.split(/[(\r\n)\r\n]+/);
+    var sentences = [];
+
+    var speaker = "";
+    var icon = "";
+    var content = "";
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var new_line = false;
+
+        if (line.length > 1 && line[0] == "[") {
+            var end = line.indexOf("]");
+            if (end > 0) {
+                new_line = true;
+                speaker = "";
+                icon = "";
+
+                // get speaker
+                speaker = line.substring(1, end);
+                line = line.substring(end + 1);
+
+                // get icon
+                if (line[0] == "[") {
+                    end = line.indexOf("]");
+                    if (end > 0) {
+                        icon = line.substring(1, end);
+                        line = line.substring(end + 1);
+                    }
+                }
+            }
+        }
+
+        if (new_line) {
+            // parse icon
+            if (icon) {
+                icon = settings.resource_url + icon;
+            }
+            else {
+                // use speaker's icon
+                if (speaker == "%p") {
+                    icon = settings.resource_url + core.data_handler.character_icon;
+                }
+                else if (speaker == "%t") {
+                    if (target.icon) {
+                        icon = settings.resource_url + target.icon;
+                    }
+                    else {
+                        icon = "";
+                    }
+                }
+            }
+
+            // parse speaker
+            // %p is the player
+            // %t is the target
+            if (speaker == "%p") {
+                speaker = core.data_handler.character_name;
+            }
+            else if (speaker == "%t") {
+                if (target.name) {
+                    speaker = target.name;
+                }
+                else {
+                    speaker = "";
+                }
+            }
+            else if (speaker) {
+                speaker = core.text2html.parseHtml(speaker);
+            }
+            else {
+                speaker = "&nbsp;";
+            }
+
+            line = core.text2html.parseHtml(line);
+            line = core.text_escape.parse(line, escapes);
+            sentences.push({
+                speaker: speaker,
+                icon: icon,
+                content: line,
+            });
+        }
+        else if (sentences.length > 0) {
+            // Add to the last sentence.
+            line = core.text2html.parseHtml(line);
+            line = core.text_escape.parse(line, escapes);
+            sentences[sentences.length - 1].content += "<br>" + line;
+        }
+    }
+
+    dialogue.sentences = sentences;
+}
 
 MudderyPopupDialogue.prototype.hasDialogue = function() {
-    return (this.sentences && this.sentences.length > 0);
+    return (this.dialogues && this.dialogues.length > 0);
 }
 
 

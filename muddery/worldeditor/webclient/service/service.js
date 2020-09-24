@@ -181,11 +181,17 @@ service = {
      *  Args:
      *      object_key: (string) the object's key.
      */
-    queryEventTriggers: function(typeclass_key, callback_success, callback_failed, context) {
+    queryObjectEventTriggers: function(typeclass_key, callback_success, callback_failed, context) {
         var args = {
             typeclass: typeclass_key
         };
-        this.sendRequest("query_event_triggers", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_object_event_triggers", "", args, callback_success, callback_failed, context);
+    },
+
+    /*  Query all events of dialogues.
+     */
+    queryDialogueEventTriggers: function(callback_success, callback_failed, context) {
+        this.sendRequest("query_dialogue_event_triggers", "", {}, callback_success, callback_failed, context);
     },
 
     /*  Query all events of the object.
@@ -197,13 +203,6 @@ service = {
             object: object_key
         };
         this.sendRequest("query_object_events", "", args, callback_success, callback_failed, context);
-    },
-
-    queryDialogueSentences: function(dialogue_key, callback_success, callback_failed, context) {
-        var args = {
-            dialogue: dialogue_key
-        };
-        this.sendRequest("query_dialogue_sentences", "", args, callback_success, callback_failed, context);
     },
 
     /*  Query all forms of the event action.
@@ -393,6 +392,10 @@ service = {
             level: level
         };
         this.sendRequest("query_object_level_properties", "", args, callback_success, callback_failed, context);
+    },
+
+    queryDialoguesTable: function(callback_success, callback_failed, context) {
+        this.sendRequest("query_dialogues_table", "", {}, callback_success, callback_failed, context);
     },
 
     saveObjectLevelProperties: function(obj_key, level, values, callback_success, callback_failed, context) {

@@ -7,15 +7,19 @@ import os
 import sys
 import shutil
 import configparser
+import traceback
+from pathlib import Path
 from subprocess import check_output, CalledProcessError, STDOUT
+import django.core.management
 from evennia.server import evennia_launcher
 from muddery.launcher import configs
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 # Functions
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
+
 
 def muddery_version():
     """
@@ -78,14 +82,47 @@ def create_settings_file(gamedir, setting_dict=None):
         settings_string = f.read()
 
     # tweak the settings
-    default_setting_dict = {"EVENNIA_SETTINGS_DEFAULT": os.path.join(evennia_launcher.EVENNIA_LIB, "settings_default.py"),
-                            "MUDDERY_SETTINGS_DEFAULT": os.path.join(configs.MUDDERY_LIB, "settings_default.py"),
+    evennia_settings_file = Path(os.path.join(evennia_launcher.EVENNIA_LIB, "settings_default.py")).as_posix()
+    muddery_settings_file = Path(os.path.join(configs.MUDDERY_LIB, "settings_default.py")).as_posix()
+    default_setting_dict = {"EVENNIA_SETTINGS_DEFAULT": evennia_settings_file,
+                            "MUDDERY_SETTINGS_DEFAULT": muddery_settings_file,
                             "ALLOWED_HOSTS": "['*']",
                             "WEBSERVER_PORTS": "[(8000, 5001)]",
                             "WEBSOCKET_CLIENT_PORT": "8001",
                             "AMP_PORT": "5000",
                             "LANGUAGE_CODE": "'en-us'",
                             "SECRET_KEY":"'%s'" % create_secret_key()}
+
+    if setting_dict:
+        merged_setting_dict = dict(default_setting_dict, **setting_dict)
+    else:
+        merged_setting_dict = default_setting_dict
+
+    # modify the settings
+    settings_string = settings_string.format(**merged_setting_dict)
+
+    with open(settings_path, 'w') as f:
+        f.write(settings_string)
+
+
+def create_webclient_settings(gamedir, setting_dict=None):
+    """
+    Uses the template settings file to build a working
+    webclient settings file.
+
+    Args:
+        gamedir: (string) game root's path
+        setting_dict: (dict)preset settings.
+    """
+    settings_path = os.path.join(gamedir, "web", "webclient_overrides", "webclient", "settings.js")
+    with open(settings_path, 'r') as f:
+        settings_string = f.read()
+
+    # tweak the settings
+    default_setting_dict = {
+        "WEBSOCKET_HOST": "'ws://' + window.location.hostname + ':8001'",
+        "RESOURCE_HOST": "window.location.protocol + '//' + window.location.host + '/media/'",
+    }
 
     if setting_dict:
         merged_setting_dict = dict(default_setting_dict, **setting_dict)
@@ -123,15 +160,14 @@ def copy_tree(source, destination):
             print("Can not copy file:%s to %s for %s." % (srcname, dstname, e))
                 
 
-def create_game_directory(gamedir, template, setting_dict=None):
+def create_game_directory(gamedir, template, port=None):
     """
     Initialize a new game directory named dirname
     at the current path. This means copying the
     template directory from muddery's root.
     """
     if os.path.exists(gamedir):
-        print("Cannot create new Muddery game dir: '%s' already exists." % gamedir)
-        sys.exit()
+        raise Exception("Cannot create new Muddery game dir: '%s' already exists." % gamedir)
 
     template_dir = ""
     if template:
@@ -144,7 +180,7 @@ def create_game_directory(gamedir, template, setting_dict=None):
                 if os.path.isdir(full_path):
                     print("  %s" % dir)
             print("")
-            sys.exit()
+            raise Exception()
 
     # copy default template directory
     default_template = os.path.join(configs.GAME_TEMPLATES, configs.DEFAULT_TEMPLATE)
@@ -157,7 +193,22 @@ def create_game_directory(gamedir, template, setting_dict=None):
         copy_tree(template_dir, gamedir)
 
     # pre-build settings file in the new gamedir
-    create_settings_file(gamedir, setting_dict)
+    setting_py_dict = None
+    if port:
+        setting_py_dict = {
+            "WEBSERVER_PORTS": "[(%s, %s)]" % (port, port + 3),
+            "WEBSOCKET_CLIENT_PORT": "%s" % (port + 1),
+            "AMP_PORT": "%s" % (port + 2),
+        }
+
+    create_settings_file(gamedir, setting_py_dict)
+
+    setting_js_dict = None
+    if port:
+        setting_js_dict = {
+            "WEBSOCKET_HOST": "'ws://' + window.location.hostname + ':%s'" % (port + 1),
+        }
+    create_webclient_settings(gamedir, setting_js_dict)
 
 
 def show_version_info(about=False):
@@ -183,10 +234,23 @@ def check_gamedir(path):
     """
     settings_path = os.path.join(path, "server", "conf", "settings.py")
     if os.path.isfile(settings_path):
-        return
+        return True
 
     print(configs.ERROR_NO_GAMEDIR)
-    sys.exit()
+    return False
+
+
+def check_version():
+    # check current game's version
+    if not check_gamedir(configs.CURRENT_DIR):
+        return False
+
+    from muddery.launcher.upgrader.upgrade_handler import UPGRADE_HANDLER
+    game_ver, game_template = get_game_config(configs.CURRENT_DIR)
+    if UPGRADE_HANDLER.can_upgrade(game_ver):
+        return False
+
+    return True
 
 
 def create_config_file(game_dir, template):
@@ -249,3 +313,129 @@ def get_game_config(path):
             num_list[i] = int(ver)
 
     return tuple(num_list), game_template
+
+
+def import_local_data():
+    """
+    Import all local data files to models.
+    """
+    from django.conf import settings
+    from muddery.worldeditor.services import importer
+
+    # load custom data
+    # data file's path
+    data_path = os.path.join(settings.GAME_DIR, settings.WORLD_DATA_FOLDER)
+    importer.import_data_path(data_path, clear=False, except_errors=True)
+
+    # localized string file's path
+    localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
+    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
+
+
+def import_system_data():
+    """
+    Import all local data files to models.
+    """
+    from django.conf import settings
+    from muddery.worldeditor.services import importer
+
+    # load system default data
+    default_template = os.path.join(configs.GAME_TEMPLATES, configs.DEFAULT_TEMPLATE)
+
+    # data file's path
+    data_path = os.path.join(default_template, settings.WORLD_DATA_FOLDER)
+    importer.import_data_path(data_path, clear=False, except_errors=True)
+
+    # localized string file's path
+    localized_string_path = os.path.join(data_path, settings.LOCALIZED_STRINGS_FOLDER, settings.LANGUAGE_CODE)
+    importer.import_table_path(localized_string_path, settings.LOCALIZED_STRINGS_MODEL, clear=False, except_errors=True)
+
+
+def create_superuser(username, password):
+    """
+    Create the superuser's account.
+    """
+    from evennia.accounts.models import AccountDB
+    AccountDB.objects.create_superuser(username, '', password)
+
+
+def create_database():
+    """
+    Create the game's database.
+    """
+    # make migrations
+    try:
+        django_args = ["makemigrations", "gamedata"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        raise
+
+    try:
+        django_args = ["makemigrations", "worlddata"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        raise
+
+    # migrate the database
+    try:
+        django_args = ["migrate"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+
+        django_args = ["migrate", "gamedata"]
+        django_kwargs = {"database": "gamedata"}
+        django.core.management.call_command(*django_args, **django_kwargs)
+
+        django_args = ["migrate", "worlddata"]
+        django_kwargs = {"database": "worlddata"}
+        django.core.management.call_command(*django_args, **django_kwargs)
+    except django.core.management.base.CommandError as exc:
+        print(configs.ERROR_INPUT.format(traceback=exc, args=django_args, kwargs=django_kwargs))
+        raise
+
+    # import worlddata
+    try:
+        print("Importing local data.")
+        import_local_data()
+    except Exception as e:
+        traceback.print_exc()
+        print("Import local data error: %s" % e)
+
+
+def print_info():
+    """
+    Format info dicts from the Portal/Server for display
+
+    """
+    from django.conf import settings
+
+    ind = " " * 8
+    info = {
+        "servername": settings.GAME_SERVERNAME,
+        "version": muddery_version(),
+        "status": ""
+    }
+
+    def _prepare_dict(dct):
+        out = {}
+        for key, value in dct.items():
+            if isinstance(value, list):
+                value = "\n{}".format(ind).join(str(val) for val in value)
+            out[key] = value
+        return out
+
+    def _strip_empty_lines(string):
+        return "\n".join(line for line in string.split("\n") if line.strip())
+
+    # Print server info.
+    sdict = _prepare_dict(info)
+    info = _strip_empty_lines(configs.SERVER_INFO.format(**sdict))
+
+    maxwidth = max(len(line) for line in info.split("\n"))
+    top_border = "-" * (maxwidth - 11) + " Muddery " + "---"
+    border = "-" * (maxwidth + 1)
+    print("\n" + top_border + "\n" + info + '\n' + border)

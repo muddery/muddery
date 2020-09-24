@@ -6,7 +6,7 @@ twisted >= 19.2.1, < 20.0.0
 pytz
 django-sekizai
 inflect
-autobahn >= 17.9.3
+autobahn >= 20.2.1
 model_mommy
 
 # testing and development

@@ -34,21 +34,6 @@
         <!-- Insert a slogan here if you want -->
         {{game_slogan}}			&nbsp;
         </div>
-
-        <br class="doNotDisplay doNotPrint" />
-
-        <div class="headerLinks">
-          <span class="doNotDisplay">Tools:</span>
-          {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}">Log Out &laquo;</a>
-            <span class="doNotDisplay">|</span>
-            Logged in as {{user.username}} &laquo;
-          {% else %}
-            <a href="{% url 'login' %}">Log In &laquo;</a>
-            <span class="doNotDisplay">|</span>
-            <a href="{% url 'to_be_implemented' %}">Register &laquo;</a>
-          {% endif %}
-        </div>
       </div>
 
       <div class="subHeader">

@@ -16,6 +16,7 @@
     --popup-box-back: url(../img/popup_box_back.png);
     --popup-object-back: url(../img/popup_object_back.png);
     --popup-dialogue-back: url(../img/popup_object_back.png);
+    --popup-dialogue-select-icon: url(../img/popup_dialogue_select_icon.png);
     --popup-goods-back: url(../img/popup_goods_back.png);
     --popup-goods-icon: url(../img/icon_default_middle.png);
 
@@ -431,11 +432,30 @@ span.bgblack { background-color: black;}
     background-image: var(--popup-dialogue-back);
 }
 
+#popup-dialogue .div-icon {
+    text-align: center;
+}
+
+#popup-dialogue .img-icon {
+    width: 0.4rem;
+    height: 0.4rem;
+    margin: 0 auto;
+}
+
+#popup-dialogue p.select {
+    border-radius: 0.05rem;
+    padding: 0.05rem 0.1rem 0.05rem 0.2rem;
+    background: no-repeat 0.05rem 0.1rem;
+    background-color: #fff;
+    background-image: var(--popup-dialogue-select-icon);
+    background-size: 0.1rem 0.1rem;
+}
+
+/* popup get object */
 #popup-get-objects .popup-body>p {
     margin: 0.05rem;
 }
 
-/* popup get object */
 #popup-get-objects .obj-icon {
     width: 0.3rem;
     height: 0.3rem;
@@ -1508,6 +1528,14 @@ span.bgblack { background-color: black;}
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
+}
+
+#skills-window .skill-item:nth-child(odd) {
+    float: left;
+}
+
+#skills-window .skill-item:nth-child(even) {
+    float: right;
 }
 
 #skills-window .skill-item .icon {

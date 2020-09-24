@@ -196,10 +196,12 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         super(MudderyCharacter, self).after_data_loaded()
 
         # get level
+        initial = False
         level = self.state.get("level", 0)
         if not level:
             level = getattr(self.system, "level", 1)
             self.state.set("level", level)
+            initial = True
 
         # friendly
         self.friendly = getattr(self.system, "friendly", 0)
@@ -235,7 +237,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         self.load_default_objects()
 
         # refresh the character's properties.
-        self.refresh_properties()
+        self.refresh_properties(not initial)
 
     def set_level(self, level):
         """
@@ -247,7 +249,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             None
         """
         super(MudderyCharacter, self).set_level(level)
-        self.refresh_properties()
+        self.refresh_properties(False)
 
     def reset_equip_positions(self):
         """
@@ -283,10 +285,16 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             if obj.id in equipped:
                 obj.equipped = True
 
-    def refresh_properties(self):
+    def refresh_properties(self, keep_values):
         """
         Refresh character's final properties.
+
+        Args:
+            keep_values (boolean): mutable values keep last values.
         """
+        if keep_values:
+            last_properties = {key: value for key, value in self.custom_properties_handler.all(True)}
+
         # Load body properties.
         for key, value in self.body_properties_handler.all(True):
             self.custom_properties_handler.add(key, value)
@@ -296,6 +304,27 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         # load passive skills
         self.cast_passive_skills()
+
+        if keep_values:
+            for key, info in self.get_properties_info().items():
+                if info["mutable"]:
+                    value = last_properties[key]
+
+                    # check limits
+                    max_key = "max_" + key
+                    if self.custom_properties_handler.has(max_key):
+                        max_value = getattr(self.prop, max_key)
+                        if value > max_value:
+                            value = max_value
+
+                    min_key = "min_" + key
+                    if self.custom_properties_handler.has(min_key):
+                        min_value = getattr(self.prop, min_key)
+                        if value < min_value:
+                            value = min_value
+
+                    # Set the value.
+                    setattr(self.prop, key, value)
 
     @classmethod
     def get_event_trigger_types(cls):
@@ -339,7 +368,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             (dict) values that actually changed.
         """
         changes = {}
-        properties_info = self.get_properties_info()
 
         for key, increment in increments.items():
             changes[key] = 0
@@ -384,7 +412,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             (dict) values that actually set.
         """
         actual = {}
-        properties_info = self.get_properties_info()
 
         for key, value in values.items():
             actual[key] = 0
@@ -399,7 +426,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
                 if value > max_value:
                     value = max_value
 
-            # Default minimum value is 0.
             min_key = "min_" + key
             if self.custom_properties_handler.has(min_key):
                 min_value = getattr(self.prop, min_key)
@@ -523,7 +549,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         # If it is a passive skill, player's status may change.
         if skill_obj.passive:
-            self.refresh_properties()
+            self.refresh_properties(True)
 
         # Notify the player
         if not silent and self.has_account:
@@ -772,12 +798,13 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         return bool(self.ndb.combat_handler)
 
-    def combat_result(self, result, opponents=None):
+    def combat_result(self, result, opponents=None, rewards=None):
         """
         Set the combat result.
 
         :param result: defines.COMBAT_WIN, defines.COMBAT_LOSE, or defines.COMBAT_DRAW
         :param opponents: combat opponents
+        :param rewards: combat rewards
         """
         pass
 
@@ -933,3 +960,11 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Show character's status.
         """
         pass
+
+    def get_name(self):
+        name = super(MudderyCharacter, self).get_name()
+
+        if not self.is_alive():
+            name += _(" [DEAD]")
+
+        return name

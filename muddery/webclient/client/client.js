@@ -25,7 +25,7 @@ MudderyClient.prototype = {
         Evennia.emitter.on("connection_open", this.onConnectionOpen);
         //Evennia.emitter.on("connection_error", onSilence);
 
-        // set an idle timer to send idle every 3 minutes,
+        // set an idle timer to send idle every 30 seconds,
         // to avoid proxy servers timing out on us
         setInterval(function() {
             // Connect to server
@@ -33,7 +33,7 @@ MudderyClient.prototype = {
                 Evennia.msg("text", ["idle"], {});
             }
         },
-        60000*3
+        30000
         );
 
         if (Evennia.state() == WebSocket.CLOSED) {
@@ -177,7 +177,7 @@ MudderyClient.prototype = {
         			}
                 }
                 else if (key == "dialogue") {
-                    mud.popup_dialogue.setDialogue(data[key], core.data_handler.getEscapes());
+                    mud.popup_dialogue.setDialogue(data[key]);
                     if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(mud.combat_window)) {
                         mud.popup_dialogue.show();
                     }

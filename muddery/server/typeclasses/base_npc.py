@@ -61,8 +61,8 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
         """
         dialogues = NPCDialogues.get(self.get_data_key())
 
-        self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.default]
-        self.dialogues = [dialogue.dialogue for dialogue in dialogues if not dialogue.default]
+        self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and dialogue.default]
+        self.dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and not dialogue.default]
 
     def load_shops(self):
         """
@@ -136,10 +136,11 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
         """
         status = None
         opponents = None
+        rewards = None
         if self.ndb.combat_handler:
             result = self.ndb.combat_handler.get_combat_result(self)
             if result:
-                status, opponents = result
+                status, opponents, rewards = result
 
         if not self.is_temp:
             if status == defines.COMBAT_LOSE:

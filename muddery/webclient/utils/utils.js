@@ -111,6 +111,7 @@ MudderyDataHandler = function() {
 MudderyDataHandler.prototype = {
     character_dbref: "",
     character_name: "",
+    character_icon: "",
     character_level: 0,
     current_target: "",
     name_list: {},

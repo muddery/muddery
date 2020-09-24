@@ -91,12 +91,14 @@ def unzip_resources_all(fp):
         shutil.rmtree(temp_path)
 
 
-def import_data_path(path, clear=True):
+def import_data_path(path, clear=True, except_errors=False):
     """
     Import data from path.
 
     Args:
         path: (string) data path.
+        clear: (boolean) clear old data.
+        except_errors: (boolean) except error records and load other records.
     """
 
     # import tables one by one
@@ -108,14 +110,20 @@ def import_data_path(path, clear=True):
         if file_names:
             print("Importing %s" % file_names[0])
             try:
-                import_file(file_names[0], table_name=table_name, clear=clear)
+                import_file(file_names[0], table_name=table_name, clear=clear, except_errors=except_errors)
             except Exception as e:
                 print("Import error: %s" % e)
 
 
-def import_table_path(path, table_name, clear=True):
+def import_table_path(path, table_name, clear=True, except_errors=False):
     """
     Import a table's data from a path.
+
+    Args:
+        path: (string) data path.
+        table_name: (string) table's name.
+        clear: (boolean) clear old data.
+        except_errors: (boolean) except error records and load other records.
     """
     # clear old data
     model = model_mapper.get_model(table_name)
@@ -136,6 +144,6 @@ def import_table_path(path, table_name, clear=True):
 
         print("Importing %s" % file_name)
         try:
-            import_file(file_name, table_name=table_name, clear=False)
+            import_file(file_name, table_name=table_name, clear=False, except_errors=except_errors)
         except Exception as e:
             print("Import error: %s" % e)

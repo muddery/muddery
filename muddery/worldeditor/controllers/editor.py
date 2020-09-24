@@ -12,6 +12,7 @@ from muddery.server.utils.builder import build_all
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao import general_query_mapper
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
+from muddery.server.dao.worlddata import WorldData
 
 
 class QueryAllTypeclasses(BaseRequestProcesser):
@@ -253,14 +254,14 @@ class DeleteObjectLevelProperties(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryEventTriggers(BaseRequestProcesser):
+class QueryObjectEventTriggers(BaseRequestProcesser):
     """
     Query all event triggers of the given typeclass.
 
     Args:
         typeclass: (string) the object's typeclass.
     """
-    path = "query_event_triggers"
+    path = "query_object_event_triggers"
     name = ""
 
     def func(self, args, request):
@@ -269,7 +270,19 @@ class QueryEventTriggers(BaseRequestProcesser):
 
         typeclass = args["typeclass"]
 
-        data = data_query.query_event_triggers(typeclass)
+        data = data_query.query_object_event_triggers(typeclass)
+        return success_response(data)
+
+
+class QueryDialogueEventTriggers(BaseRequestProcesser):
+    """
+    Query all event triggers of dialogues.
+    """
+    path = "query_dialogue_event_triggers"
+    name = ""
+
+    def func(self, args, request):
+        data = data_query.query_dialogue_event_triggers()
         return success_response(data)
 
 
@@ -334,26 +347,6 @@ class QueryEventActionForm(BaseRequestProcesser):
         event_key = args["event"]
 
         data = data_edit.query_event_action_forms(action_type, event_key)
-        return success_response(data)
-
-
-class QueryDialogueSentences(BaseRequestProcesser):
-    """
-    Query a dialogue's sentences.
-
-    Args:
-        key: (string) dialogue's key
-    """
-    path = "query_dialogue_sentences"
-    name = ""
-
-    def func(self, args, request):
-        if 'dialogue' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing arguments.')
-
-        dialogue_key = args["dialogue"]
-
-        data = data_query.query_dialogue_sentences(dialogue_key)
         return success_response(data)
 
 
@@ -844,6 +837,21 @@ class QueryTables(BaseRequestProcesser):
         return success_response(data)
 
 
+class QueryDiallguesTable(BaseRequestProcesser):
+    """
+    Query all records of dialogues.
+
+    Args:
+        None.
+    """
+    path = "query_dialogues_table"
+    name = ""
+
+    def func(self, args, request):
+        data = data_query.query_dialogues_table()
+        return success_response(data)
+
+
 class ApplyChanges(BaseRequestProcesser):
     """
     Query all tables' names.
@@ -861,6 +869,9 @@ class ApplyChanges(BaseRequestProcesser):
 
             # reload localized strings
             # LOCALIZED_STRINGS_HANDLER.reload()
+
+            # reload data
+            WorldData.reload()
 
             # rebuild the world
             build_all()

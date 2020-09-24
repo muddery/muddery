@@ -566,8 +566,7 @@ class QuestObjectivesForm(forms.ModelForm):
         choices = [(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects]
         self.fields['quest'] = forms.ChoiceField(choices=choices)
 
-        objects = QUEST_OBJECTIVE_SET.all()
-        choices = [(obj, obj) for obj in objects]
+        choices = QUEST_OBJECTIVE_SET.choice_all()
         self.fields['type'] = forms.ChoiceField(choices=choices)
 
         localize_form_fields(self)
@@ -852,32 +851,6 @@ class DialogueRelationsForm(forms.ModelForm):
 
     class Meta:
         model = CM.DIALOGUE_RELATIONS.model
-        fields = '__all__'
-
-
-class DialogueSentencesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(DialogueSentencesForm, self).__init__(*args, **kwargs)
-
-        objects = CM.DIALOGUES.objects.all()
-        choices = [(obj.key, obj.name + " (" + obj.key + ")") for obj in objects]
-        self.fields['dialogue'] = forms.ChoiceField(choices=choices)
-
-        # dialogue's icon
-        self.fields['icon'] = ImageField(image_type="icon", required=False)
-
-        localize_form_fields(self)
-
-    def clean(self):
-        cleaned_data = super(DialogueSentencesForm, self).clean()
-
-        # check object's key
-        key = cleaned_data["key"]
-        if not key:
-            cleaned_data["key"] = generate_key(self)
-
-    class Meta:
-        model = CM.DIALOGUE_SENTENCES.model
         fields = '__all__'
 
 

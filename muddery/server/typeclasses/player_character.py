@@ -90,7 +90,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.available_channels = {}
 
         # refresh data
-        self.refresh_properties()
+        self.refresh_properties(True)
 
         # if it is dead, reborn at init.
         if not self.is_alive():
@@ -867,7 +867,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         obj.equipped = True
 
         # reset character's attributes
-        self.refresh_properties()
+        self.refresh_properties(True)
 
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),
@@ -896,7 +896,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.state.equipments[position] = None
 
         # reset character's attributes
-        self.refresh_properties()
+        self.refresh_properties(True)
 
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),
@@ -924,7 +924,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         equipment.equipped = False
 
         # reset character's attributes
-        self.refresh_properties()
+        self.refresh_properties(True)
 
         message = {"status": self.return_status(),
                    "equipments": self.return_equipments(),
@@ -979,21 +979,19 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         combat_handler = getattr(self.ndb, "combat_handler", None)
         if combat_handler:
-            # show combat infomation
-            combat_handler.show_combat(self)
+            if not combat_handler.is_finished():
+                # show combat infomation
+                combat_handler.show_combat(self)
+            else:
+                self.leave_combat()
 
-            if combat_handler.is_finished():
-                result = combat_handler.get_combat_result(self)
-                if result:
-                    # result: (result, opponents)
-                    self.combat_result(result[0], result[1])
-
-    def combat_result(self, result, opponents=None):
+    def combat_result(self, result, opponents=None, rewards=None):
         """
         Set the combat result.
 
         :param result: defines.COMBAT_WIN, defines.COMBAT_LOSE, or defines.COMBAT_DRAW
         :param opponents: combat opponents
+        :param rewards: combat rewards
         """
         if result == defines.COMBAT_LOSE:
             self.msg({"combat_finish": {"lose": True}})
@@ -1003,21 +1001,14 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             self.msg({"combat_finish": {"escaped": True}})
         elif result == defines.COMBAT_WIN:
             # get rewards
-            exp = 0
-            loots = []
-            for opponent in opponents:
-                exp += opponent.provide_exp(self)
-                obj_list = opponent.loot_handler.get_obj_list(self)
-                if obj_list:
-                    loots.extend(obj_list)
-
+            exp = rewards["exp"]
             if exp:
                 self.add_exp(exp)
 
             # give objects to winner
             get_objects = []
-            if loots:
-                get_objects = self.receive_objects(loots, mute=True)
+            if rewards["loots"]:
+                get_objects = self.receive_objects(rewards["loots"], mute=True)
 
             self.msg({
                 "combat_finish": {
@@ -1033,10 +1024,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         status = None
         opponents = None
+        rewards = None
         if self.ndb.combat_handler:
-            result = self.ndb.combat_handler.get_combat_result(self)
+            result = self.ndb.combat_handler.get_combat_result(self.dbref)
             if result:
-                status, opponents = result
+                status, opponents, rewards = result
 
         # trigger events
         if status == defines.COMBAT_WIN:
@@ -1056,6 +1048,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # show status
         self.show_status()
 
+        self.show_location()
+
     def die(self, killers):
         """
         This character is killed. Move it to it's home.
@@ -1070,8 +1064,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         self.msg({"msg": _("You died.")})
 
         if self.reborn_time > 0:
-            self.msg({"msg": _("You will be reborn at {C%(p)s{n in {C%(s)s{n seconds.") %
-                             {'p': self.home.get_name(), 's': self.reborn_time}})
+            self.msg({"msg": _("You will be reborn in {C%(s)s{n seconds.") % {'s': self.reborn_time}})
 
     def reborn(self):
         """
@@ -1079,12 +1072,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         # Reborn at its home.
         home = None
-        if not home:
-            default_home_key = GAME_SETTINGS.get("default_player_home_key")
-            if default_home_key:
-                rooms = utils.search_obj_data_key(default_home_key)
-                if rooms:
-                    home = rooms[0]
+        default_home_key = GAME_SETTINGS.get("default_player_home_key")
+        if default_home_key:
+            rooms = utils.search_obj_data_key(default_home_key)
+            if rooms:
+                home = rooms[0]
 
         if not home:
             rooms = search.search_object(settings.DEFAULT_HOME)
@@ -1096,16 +1088,19 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         # Recover properties.
         self.recover()
-
         self.show_status()
-        self.msg({"msg": _("You are reborn at {C%s{n.") % self.home.get_name()})
 
-    def save_current_dialogue(self, dialogue, npc):
+        if home:
+            self.msg({"msg": _("You are reborn at {C%s{n.") % home.get_name()})
+        else:
+            self.msg({"msg": _("You are reborn.")})
+
+    def save_current_dialogues(self, dialogues, npc):
         """
         Save player's current dialogues.
 
         Args:
-            dialogue: the current dialogue
+            dialogues: the current dialogues
             npc: NPC whom the player is talking to.
 
         Returns:
@@ -1115,12 +1110,12 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             # Can not auto resume dialogues.
             return
 
-        if not dialogue:
+        if not dialogues:
             self.clear_current_dialogue()
             return
 
-        # Save dialogue's id and sentence's ordinal.
-        sentences = [(d["dialogue"], d["sentence"]) for d in dialogue]
+        # Save the dialogue's id.
+        dialogues = [d["dialogue"] for d in dialogues]
 
         npc_key = None
         if npc:
@@ -1130,9 +1125,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         if self.location:
             location_key = self.location.get_data_key()
 
-        self.state.current_dialogue = {"sentences": sentences,
-                                    "npc": npc_key,
-                                    "location": location_key}
+        self.state.current_dialogue = {
+            "dialogues": dialogues,
+            "npc": npc_key,
+            "location": location_key
+        }
 
         return
 
@@ -1162,7 +1159,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         current = self.state.current_dialogue
 
-        if not current["sentences"]:
+        if not current["dialogues"]:
             return
 
         # Check dialogue's location
@@ -1180,9 +1177,9 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 return
             npc_talking = npc_in_location[0]
 
-        sentences = [DIALOGUE_HANDLER.get_sentence(s[0], s[1]) for s in current["sentences"]]
-        dialogue = DIALOGUE_HANDLER.create_output_sentences(sentences, self, npc_talking)
-        self.msg({"dialogue": dialogue})
+        dialogues = [DIALOGUE_HANDLER.get_dialogue(d) for d in current["dialogues"]]
+        dialogues = DIALOGUE_HANDLER.create_output_sentences(dialogues, self, npc_talking)
+        self.msg({"dialogue": dialogues})
         return
 
     def talk_to_npc(self, npc):
@@ -1198,40 +1195,37 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # Set caller's target.
         self.set_target(npc)
 
-        # Get NPC's sentences_list.
-        sentences = DIALOGUE_HANDLER.get_npc_sentences(self, npc)
+        # Get NPC's dialogue list.
+        dialogues = DIALOGUE_HANDLER.get_npc_dialogues(self, npc)
         
-        self.save_current_dialogue(sentences, npc)
-        self.msg({"dialogue": sentences})
+        self.save_current_dialogues(dialogues, npc)
+        self.msg({"dialogue": dialogues})
 
-    def show_dialogue(self, npc, dialogue):
+    def show_dialogue(self, dlg_key, npc):
         """
         Show a dialogue.
 
         Args:
+            dlg_key: dialogue's key.
             npc: (optional) NPC's object.
-            dialogue: dialogue's key.
 
         Returns:
             None
         """
         # Get next sentences_list.
-        sentences = DIALOGUE_HANDLER.get_dialogue_sentences(self,
-                                                            npc,
-                                                            dialogue)
+        dialogue = DIALOGUE_HANDLER.get_dialogues_by_key(dlg_key, npc)
 
         # Send the dialogue to the player.
-        self.save_current_dialogue(sentences, npc)
-        self.msg({"dialogue": sentences})
+        self.save_current_dialogues(dialogue, npc)
+        self.msg({"dialogue": dialogue})
 
-    def continue_dialogue(self, npc, dialogue, sentence):
+    def finish_dialogue(self, dlg_key, npc):
         """
         Continue current dialogue.
 
         Args:
+            dlg_key: current dialogue's key.
             npc: (optional) NPC's object.
-            dialogue: current dialogue's key.
-            sentence: current sentence's ordinal.
 
         Returns:
             None
@@ -1241,27 +1235,24 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             if not self.state.current_dialogue:
                 return
 
-            if (dialogue, sentence) not in self.state.current_dialogue["sentences"]:
+            if dlg_key not in self.state.current_dialogue["dialogue"]:
                 # Can not find specified dialogue in current dialogues.
                 return
 
         try:
-            # Finish current sentence
-            DIALOGUE_HANDLER.finish_sentence(self, npc, dialogue, sentence)
+            # Finish current dialogue
+            DIALOGUE_HANDLER.finish_dialogue(dlg_key, self, npc)
         except Exception as e:
-            ostring = "Can not finish sentence %s-%s: %s" % (dialogue, sentence, e)
+            ostring = "Can not finish dialogue %s: %s" % (dlg_key, e)
             logger.log_tracemsg(ostring)
 
-        # Get next sentences.
-        sentences = DIALOGUE_HANDLER.get_next_sentences(self,
-                                                        npc,
-                                                        dialogue,
-                                                        sentence)
+        # Get next dialogue.
+        next_dialogues = DIALOGUE_HANDLER.get_next_dialogues(dlg_key, self, npc)
 
         # Send dialogues_list to the player.
-        self.save_current_dialogue(sentences, npc)
-        self.msg({"dialogue": sentences})
-        if not sentences:
+        self.save_current_dialogues(next_dialogues, npc)
+        self.msg({"dialogue": next_dialogues})
+        if not next_dialogues:
             # dialogue finished, refresh surroundings
             self.show_location()            
 

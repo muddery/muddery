@@ -54,20 +54,38 @@ class ActionGetObjects(BaseIntervalAction):
 
         # get object list
         obj_list = []
+        msg_template = {}
+        rand = random.random()
         for record in records:
-            rand = random.random()
-            if rand < record.odds:
-                obj_list.append({"object": record.object,
-                                 "number": record.number * times})
+            if record.multiple:
+                if rand < record.odds:
+                    msg_template[record.object] = record.message
+                    obj_list.append({"object": record.object,
+                                     "number": record.number * times})
+                rand = random.random()
+            else:
+                if rand < record.odds:
+                    msg_template[record.object] = record.message
+                    obj_list.append({"object": record.object,
+                                     "number": record.number * times})
+                    break
+                rand -= record.odds
 
         objects = character.receive_objects(obj_list, mute=True)
 
-        accepted = ""
+        message = ""
         for item in objects:
-            if accepted:
-                accepted += ", "
-            accepted += item["name"] + " " + str(item["number"])
+            if message:
+                message += ", "
 
-        if accepted:
-            message = _("Get") + " " + accepted
+            template = msg_template[item["key"]]
+            if template:
+                try:
+                    message += template % item["number"]
+                except:
+                    message += template
+            else:
+                message += _("Get") + " " + item["name"] + " " + str(item["number"])
+
+        if message:
             character.msg(message)

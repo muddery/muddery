@@ -18,7 +18,10 @@ from enum import Enum
 from twisted.internet import reactor
 from django.conf import settings
 from evennia import DefaultScript
+from evennia.utils import logger
 from muddery.server.utils import defines
+from muddery.server.dao.worlddata import WorldData
+from muddery.server.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
 
 
 class CStatus(Enum):
@@ -56,6 +59,9 @@ class BaseCombatHandler(DefaultScript):
         self.finished = False
         self.winners = {}
         self.losers = {}
+
+        # combat rewards
+        self.rewards = {}
 
         self.timeout = 0
         self.timer = None
@@ -208,7 +214,10 @@ class BaseCombatHandler(DefaultScript):
         for char in self.characters.values():
             char["status"] = CStatus.FINISHED
 
-        self.set_combat_results(self.winners, self.losers)
+        # calculate combat rewards
+        self.rewards = self.calc_combat_rewards(self.winners, self.losers)
+
+        self.notify_combat_results(self.winners, self.losers)
 
     def escape_combat(self, caller):
         """
@@ -270,7 +279,65 @@ class BaseCombatHandler(DefaultScript):
         for char in self.characters.values():
             char["char"].combat_result(defines.COMBAT_DRAW)
 
-    def set_combat_results(self, winners, losers):
+    def calc_combat_rewards(self, winners, losers):
+        """
+        Called when the character wins the combat.
+
+        Args:
+            winners: (List) all combat winners.
+            losers: (List) all combat losers.
+
+        Returns:
+            (dict) reward dict
+        """
+        rewards = {}
+        for winner in winners:
+            winner_char = self.characters[winner]["char"]
+            exp = 0
+            loots = []
+            for loser in losers:
+                loser_char = self.characters[loser]["char"]
+                exp += loser_char.provide_exp(self)
+                obj_list = loser_char.loot_handler.get_obj_list(winner_char)
+                if obj_list:
+                    loots.extend(obj_list)
+
+            obj_list = []
+            if loots:
+                obj_model_name = TYPECLASS("OBJECT").model_name
+
+                for obj_info in loots:
+                    try:
+                        obj_record = WorldData.get_table_data(obj_model_name, key=obj_info["object"])
+                        obj_record = obj_record[0]
+                        goods_models = TYPECLASS_SET.get_class_modeles(obj_record.typeclass)
+                        goods_data = WorldData.get_tables_data(goods_models, key=obj_info["object"])
+
+                        obj_list.append({
+                            "object": obj_info["object"],
+                            "number": obj_info["number"],
+                            "name": goods_data["name"],
+                            "icon": goods_data.get("icon", None),
+                            "reject": "",
+                        })
+                    except Exception as e:
+                        logger.log_errmsg("Can not loot object %s." % obj_info["object"])
+                        pass
+
+            rewards[winner] = {
+                "exp": exp,
+                "loots": obj_list,
+            }
+
+        return rewards
+
+    def get_combat_rewards(self, char_dbref):
+        """
+        Get a character's combat rewards.
+        """
+        return self.rewards.get(char_dbref, None)
+
+    def notify_combat_results(self, winners, losers):
         """
         Called when the character wins the combat.
 
@@ -281,11 +348,11 @@ class BaseCombatHandler(DefaultScript):
         Returns:
             None
         """
-        for character in winners.values():
-            character.combat_result(defines.COMBAT_WIN, losers.values())
+        for char in winners.values():
+            char.combat_result(defines.COMBAT_WIN, losers.values(), self.get_combat_rewards(char.dbref))
 
-        for character in losers.values():
-            character.combat_result(defines.COMBAT_LOSE, winners.values())
+        for char in losers.values():
+            char.combat_result(defines.COMBAT_LOSE, winners.values())
 
     def get_appearance(self):
         """
@@ -316,30 +383,30 @@ class BaseCombatHandler(DefaultScript):
         """
         return self.finished
 
-    def get_combat_result(self, character):
+    def get_combat_result(self, char_dbref):
         """
         Get a character's combat result.
 
-        :param character: character object
+        :param char_dbref: character's dbref
         :return:
         """
         if not self.finished:
             return
 
-        if character.dbref not in self.characters:
+        if char_dbref not in self.characters:
             return
 
-        if self.characters[character.dbref]:
-            status = self.characters[character.dbref]["status"]
+        if self.characters[char_dbref]:
+            status = self.characters[char_dbref]["status"]
 
             if status == CStatus.ESCAPED:
-                return defines.COMBAT_ESCAPED, None
+                return defines.COMBAT_ESCAPED, None, None
             elif status == CStatus.FINISHED or status == CStatus.LEFT:
-                if character.dbref in self.winners:
-                    return defines.COMBAT_WIN, self.losers.values()
-                elif character.dbref in self.losers:
-                    return defines.COMBAT_LOSE, self.winners.values()
+                if char_dbref in self.winners:
+                    return defines.COMBAT_WIN, self.losers.values(), self.get_combat_rewards(char_dbref)
+                elif char_dbref in self.losers:
+                    return defines.COMBAT_LOSE, self.winners.values(), None
                 else:
-                    return defines.COMBAT_DRAW, None
+                    return defines.COMBAT_DRAW, None, None
             else:
-                return defines.COMBAT_DRAW, None
+                return defines.COMBAT_DRAW, None, None

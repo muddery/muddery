@@ -12,16 +12,18 @@ from muddery.worldeditor.utils import readers
 from muddery.server.utils.exception import MudderyError, ERR
 
 
-def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs):
+def import_file(fullname, file_type=None, table_name=None, clear=True, except_errors=False, **kwargs):
     """
     Import data from a data file to the db model
 
     Args:
         fullname: (string) file's full name
+        file_type: (string) set file's type. If it's None, get the file's type from filename.
         table_name: (string) the type of the file. If it's None, the function will get
                    the file type from the extension name of the file.
+        clear: (boolean) clear old data.
+        except_errors: (boolean) except error records and load other records.
     """
-
     def get_field_types(model_obj, field_names):
         """
         Get field types by field names.
@@ -138,8 +140,14 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
 
                 record = parse_record(titles, field_types, values)
                 data = model_obj(**record)
-                data.full_clean()
-                data.save()
+                try:
+                    data.full_clean()
+                    data.save()
+                except ValidationError as e:
+                    if except_errors:
+                        print(parse_error(e, model_obj.__name__, line))
+                    else:
+                        raise
                 line += 1
 
         except StopIteration:
@@ -188,15 +196,12 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
             if field:
                 err_message += "[" + field + "] "
             for item in error_list:
-                print("item.message: %s" % item.message)
-                print("item.params: %s" % item.params)
                 if item.params:
                     err_message += item.message % item.params + "  "
                 else:
                     err_message += item.message + "  "
             count += 1
         return "%s (model: %s, line: %s)" % (err_message, model_name, line)
-
 
     # separate name and ext name
     (filename, ext_name) = os.path.splitext(fullname)
@@ -224,4 +229,3 @@ def import_file(fullname, file_type=None, table_name=None, clear=True, **kwargs)
 
     logger.log_infomsg("Importing %s" % table_name)
     import_data(model_obj, reader)
-
