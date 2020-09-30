@@ -484,6 +484,7 @@ class CmdUse(BaseCommand):
         try:
             # Use the object and get the result.
             result = caller.use_object(obj)
+            caller.show_location()
         except Exception as e:
             ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
             logger.log_tracemsg(ostring)
@@ -491,7 +492,8 @@ class CmdUse(BaseCommand):
         # Send result to the player.
         if not result:
             result = _("No result.")
-        caller.msg({"alert":result})
+
+        caller.msg({"alert": result})
 
 
 #------------------------------------------------------------
@@ -534,6 +536,7 @@ class CmdDiscard(BaseCommand):
         # remove used object
         try:
             caller.remove_object(obj.get_data_key(), 1)
+            caller.show_location()
         except Exception as e:
             caller.msg({"alert": _("Can not discard this object.")})
             logger.log_tracemsg("Can not discard object %s: %s" % (obj.get_data_key(), e))

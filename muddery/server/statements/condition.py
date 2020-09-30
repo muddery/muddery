@@ -107,3 +107,195 @@ class FuncHasObject(StatementFunction):
             if item.get_data_key() == obj_key:
                 return True
         return False
+
+
+class FuncObjectsEqual(StatementFunction):
+    """
+    If the caller has objects equal to the number.
+
+    Args:
+        args[0]: (string) object's key
+        args[1]: (number) object's number
+
+    Returns:
+        boolean result
+    """
+
+    key = "obj_equal"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args or len(self.args) < 1:
+            return False
+
+        obj_key = self.args[0]
+        number = self.args[1]
+
+        total = 0
+        for item in self.caller.contents:
+            if item.get_data_key() == obj_key:
+                total += item.get_number()
+        return total == number
+
+
+class FuncObjectsMoreThan(StatementFunction):
+    """
+    If the caller has objects more than the number.
+
+    Args:
+        args[0]: (string) object's key
+        args[1]: (number) object's number
+
+    Returns:
+        boolean result
+    """
+
+    key = "obj_more_than"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        obj_key = self.args[0]
+        number = self.args[1]
+
+        total = 0
+        for item in self.caller.contents:
+            if item.get_data_key() == obj_key:
+                total += item.get_number()
+        return total > number
+
+
+class FuncObjectsLessThan(StatementFunction):
+    """
+    If the caller has objects less than the number.
+
+    Args:
+        args[0]: (string) object's key
+        args[1]: (number) object's number
+
+    Returns:
+        boolean result
+    """
+
+    key = "obj_less_than"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        obj_key = self.args[0]
+        number = self.args[1]
+
+        total = 0
+        for item in self.caller.contents:
+            if item.get_data_key() == obj_key:
+                total += item.get_number()
+        return total < number
+
+
+class FuncSkillMoreThan(StatementFunction):
+    """
+    If the skill's level more than the number.
+
+    Args:
+        args[0]: (string) skill's key
+        args[1]: (number) level
+
+    Returns:
+        boolean result
+    """
+
+    key = "skill_more_than"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        skill_key = self.args[0]
+        level = self.args[1]
+
+        if skill_key not in self.caller.db.skills:
+            return False
+
+        skill = self.caller.db.skills[skill_key]
+        return skill.level > level
+
+
+class FuncAttributeMoreThan(StatementFunction):
+    """
+    If the caller's attribute more than the number.
+
+    Args:
+        args[0]: (string) attribute's key
+        args[1]: (number) number
+
+    Returns:
+        boolean result
+    """
+
+    key = "attr_more_than"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        attr_key = self.args[0]
+        number = self.args[1]
+
+        if not self.caller.custom_properties_handler.has(attr_key):
+            return False
+
+        value = getattr(self.caller.prop, attr_key)
+        return value > number
+
+
+class FuncAttributeLessThan(StatementFunction):
+    """
+    If the caller's attribute less than the number.
+
+    Args:
+        args[0]: (string) attribute's key
+        args[1]: (number) number
+
+    Returns:
+        boolean result
+    """
+
+    key = "attr_less_than"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        attr_key = self.args[0]
+        number = self.args[1]
+
+        if not self.caller.custom_properties_handler.has(attr_key):
+            return False
+
+        value = getattr(self.caller.prop, attr_key)
+        return value < number

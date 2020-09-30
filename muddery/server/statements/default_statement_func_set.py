@@ -42,6 +42,12 @@ class ConditionFuncSet(BaseStatementFuncSet):
         self.add(condition.FuncCanProvideQuest)
         self.add(condition.FuncIsQuestFinished)
         self.add(condition.FuncHasObject)
+        self.add(condition.FuncObjectsEqual)
+        self.add(condition.FuncObjectsMoreThan)
+        self.add(condition.FuncObjectsLessThan)
+        self.add(condition.FuncSkillMoreThan)
+        self.add(condition.FuncAttributeMoreThan)
+        self.add(condition.FuncAttributeLessThan)
 
         self.add(attribute.FuncGetAttr)
         self.add(attribute.FuncHasAttr)
