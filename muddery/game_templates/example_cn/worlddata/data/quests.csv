@@ -1,6 +1,6 @@
-key,condition,action
-quest_find_survivor,,
-quest_find_guardhouse_key,,
-quest_find_binder,,
-quest_find_screws,,
-quest_kill_robots,,
+key,exp,condition,action
+quest_find_survivor,0,,
+quest_find_guardhouse_key,10,,
+quest_find_binder,10,,
+quest_find_screws,10,,
+quest_kill_robots,10,,
