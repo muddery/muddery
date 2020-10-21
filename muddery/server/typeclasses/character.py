@@ -166,6 +166,13 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         
         return True
 
+    def after_creation(self):
+        """
+        Called once, after the object is created by Muddery.
+        """
+        # refresh the character's properties.
+        self.refresh_properties(False)
+
     def load_custom_properties(self, level):
         """
         Load body properties from db. Body properties do no include mutable properties.
@@ -210,10 +217,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         super(MudderyCharacter, self).after_data_loaded()
 
         # get level
-        initial = False
         if not self.db.level:
             self.db.level = getattr(self.system, "level", 1)
-            initial = True
 
         # friendly
         self.friendly = getattr(self.system, "friendly", 0)
@@ -249,7 +254,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         self.load_default_objects()
 
         # refresh the character's properties.
-        self.refresh_properties(not initial)
+        self.refresh_properties(True)
 
     def set_level(self, level):
         """

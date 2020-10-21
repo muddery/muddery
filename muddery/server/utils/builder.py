@@ -97,6 +97,7 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
     try:
         # Set data info.
         obj.set_data_key(record.key, level, reset_location=reset_location)
+        obj.after_creation()
     except Exception as e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
         print(ostring)
@@ -188,6 +189,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
                 object_record = object_record[0]
                 typeclass_path = TYPECLASS_SET.get_module(object_record.typeclass)
                 obj = create.create_object(typeclass_path, object_record.name)
+                obj.after_creation()
                 count_create += 1
             except Exception as e:
                 ostring = "Can not create obj %s: %s" % (record.key, e)
@@ -366,6 +368,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
 
     # set character info
     new_character.set_data_key(character_key, level)
+    new_character.after_creation()
 
     # set playable character list
     new_player.db._playable_characters.append(new_character)
