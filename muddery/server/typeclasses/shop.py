@@ -30,8 +30,11 @@ class MudderyShop(TYPECLASS("OBJECT")):
         """
         super(MudderyShop, self).at_object_creation()
 
-        if not self.attributes.has("goods"):
+        if not self.states_handler.has("goods"):
             self.state.goods = {}
+
+        if not self.states_handler.has("owner"):
+            self.state.owner = None
 
     def at_object_delete(self):
         """
@@ -51,14 +54,14 @@ class MudderyShop(TYPECLASS("OBJECT")):
 
         return True
 
-    def after_data_loaded(self):
+    def after_data_loaded(self, level):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderyShop, self).after_data_loaded()
+        super(MudderyShop, self).after_data_loaded(level)
 
         # load shop goods
         self.load_goods()
@@ -97,6 +100,15 @@ class MudderyShop(TYPECLASS("OBJECT")):
 
         self.state.goods = current_goods
 
+    def set_owner(self, owner):
+        """
+        Set the owner of the shop.
+
+        :param owner:
+        :return:
+        """
+        self.state.owner = owner
+
     def show_shop(self, caller):
         """
         Send shop data to the caller.
@@ -124,8 +136,8 @@ class MudderyShop(TYPECLASS("OBJECT")):
         }
 
         icon = self.icon
-        if not icon and self.db.owner:
-            icon = self.db.owner.icon
+        if not icon and self.state.owner:
+            icon = self.state.owner.icon
         info["icon"] = icon
 
         goods_list = self.return_shop_goods(caller)

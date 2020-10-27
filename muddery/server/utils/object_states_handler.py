@@ -32,18 +32,10 @@ class ObjectStatesHandler(object):
     """
     def __init__(self, obj):
         """Initialize handler."""
-        self.reset(obj)
-
-    def reset(self, obj):
-        """
-        Reset the owner object.
-        """
         self.obj = weakref.proxy(obj)
         self.obj_id = obj.id
 
-        apps.get_model(settings.GAME_DATA_APP, obj.model_name)
-        self.model_name = obj.model_name
-        self.cache = BaseAttributesCache(self.model_name)
+        self.cache = BaseAttributesCache()
 
     def has(self, key):
         """
@@ -57,7 +49,7 @@ class ObjectStatesHandler(object):
         """
         return self.cache.has(self.obj_id, key=key)
 
-    def get(self, key, default=None):
+    def load(self, key, default=None):
         """
         Get the Attribute.
 
@@ -73,9 +65,9 @@ class ObjectStatesHandler(object):
                 was found matching `key` and no default value set.
 
         """
-        return self.cache.get(self.obj_id, key, default)
+        return self.cache.load(self.obj_id, key, default)
 
-    def add(self, key, value):
+    def save(self, key, value):
         """
         Add attribute to object.
 
@@ -84,9 +76,9 @@ class ObjectStatesHandler(object):
             value (any or str): The value of the Attribute. If
                 `strattr` keyword is set, this *must* be a string.
         """
-        self.cache.set(self.obj_id, key, value)
+        self.cache.save(self.obj_id, key, value)
 
-    def remove(self, key):
+    def delete(self, key):
         """
         Remove an attribute from object.
 
@@ -101,37 +93,16 @@ class ObjectStatesHandler(object):
             If neither key nor category is given, this acts as clear().
 
         """
-        self.cache.remove(self.obj_id, key)
+        self.cache.delete(self.obj_id, key)
 
     def clear(self):
         """
         Remove all Attributes on this object.
         """
-        self._clear(self.obj_id)
-
-    def _clear(self, obj_id):
-        """
-        Remove all Attributes on this object recursively.
-
-        Args:
-            obj_id (number): object's record id.
-        """
-        self.cache.remove_obj(obj_id)
+        self.cache.remove_obj(self.obj_id)
 
     def all(self):
         """
         Get all attributes from an object.
         """
-        return self._all(self.obj_id)
-
-    def _all(self, obj_id):
-        """
-        Get all attributes from an object recursively.
-
-        Args:
-            obj_id (number): object's record id.
-
-        Return:
-            (dict): object's attributes.
-        """
-        return self.cache.get_obj(obj_id)
+        return self.cache.get_obj(self.obj_id)

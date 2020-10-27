@@ -32,11 +32,11 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         if not self.states_handler.has("number"):
             self.state.number = 0
 
-    def after_data_loaded(self):
+    def after_data_loaded(self, level):
         """
         Initial this object.
         """
-        super(MudderyCommonObject, self).after_data_loaded()
+        super(MudderyCommonObject, self).after_data_loaded(level)
 
         # set object stack info
         self.max_stack = getattr(self.system, "max_stack", 1)
@@ -64,7 +64,7 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         """
         Get object's number.
         """
-        return self.state.number
+        return self.state.get("number", 0)
 
     def increase_num(self, number):
         """
@@ -220,11 +220,11 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
     typeclass_name = _("Equipment", "typeclasses")
     model_name = "equipments"
 
-    def after_data_loaded(self):
+    def after_data_loaded(self, level):
         """
         Load equipments data.
         """
-        super(MudderyEquipment, self).after_data_loaded()
+        super(MudderyEquipment, self).after_data_loaded(level)
 
         self.type = getattr(self.system, "type", "")
         self.position = getattr(self.system, "position", "")

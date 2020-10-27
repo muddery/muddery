@@ -136,16 +136,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         
         # stop auto casting
         self.stop_auto_combat_skill()
-        
-        # delete all skills
-        skills = self.state.get("skills", {})
-        for skill in skills:
-            skill.delete()
-
-        # delete all objects in the inventory
-        inventory = self.state.get("inventory", [])
-        for obj in inventory:
-            obj.delete()
 
         result = super(MudderyCharacter, self).at_object_delete()
         if not result:
@@ -189,18 +179,17 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # Set default mutable custom properties.
         self.set_mutable_custom_properties()
 
-    def after_data_loaded(self):
+    def after_data_loaded(self, level):
         """
         Init the character.
         """
-        super(MudderyCharacter, self).after_data_loaded()
+        super(MudderyCharacter, self).after_data_loaded(level)
 
         # get level
         initial = False
-        level = self.state.get("level", 0)
         if not level:
             level = getattr(self.system, "level", 1)
-            self.state.set("level", level)
+            self.state.add("level", level)
             initial = True
 
         # friendly

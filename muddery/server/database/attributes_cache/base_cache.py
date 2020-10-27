@@ -61,16 +61,37 @@ def from_string(str_value):
     return value
 
 
+def delete_string(str_value):
+    # delete the string's object
+    try:
+        json_value, data_type = json.loads(str_value)
+        if data_type in ("ObjectDB", "ScriptDB", "AccountDB", "ChannelDB"):
+            model = eval(data_type)
+            value = model.objects.get(id=json_value)
+            value.delete()
+        elif data_type in ("dict", "OrderedDict"):
+            for value in json_value.values():
+                delete_string(value)
+        else:
+            for item in json_value:
+                delete_string(item)
+    except Exception as e:
+        raise MudderyError(ERR.server_error, "Can not delete object %s." % str_value)
+
+    return
+
+
 class BaseAttributesCache(object):
     """
     Object's attributes cache.
     """
+    model_name = "object_status"
 
-    def __init__(self, model_name):
+    def __init__(self):
         # db model
-        self.model = apps.get_model(settings.GAME_DATA_APP, model_name)
+        self.model = apps.get_model(settings.GAME_DATA_APP, self.model_name)
 
-    def set(self, obj_id, key, value):
+    def save(self, obj_id, key, value):
         """
         Set an attribute.
 
@@ -104,7 +125,7 @@ class BaseAttributesCache(object):
         records = self.model.objects.filter(obj_id=obj_id, key=key)
         return len(records) != 0
 
-    def get(self, obj_id, key, *wargs):
+    def load(self, obj_id, key, *wargs):
         """
         Get the value of an attribute.
 
@@ -126,6 +147,19 @@ class BaseAttributesCache(object):
 
         return from_string(records[0].value)
 
+    def delete(self, obj_id, key):
+        """
+        delete an attribute of an object.
+
+        Args:
+            obj_id: (number) object's id.
+            key: (string) attribute's key.
+        """
+        records = self.model.objects.filter(obj_id=obj_id, key=key)
+        if len(records) > 0:
+            delete_string(records[0].value)
+            records.delete()
+
     def get_obj(self, obj_id):
         """
         Get values of an object.
@@ -136,16 +170,6 @@ class BaseAttributesCache(object):
         records = self.model.objects.filter(obj_id=obj_id)
         return dict((r.key, from_string(r.value)) for r in records)
 
-    def remove(self, obj_id, key):
-        """
-        Remove an attribute of an object.
-
-        Args:
-            obj_id: (number) object's id.
-            key: (string) attribute's key.
-        """
-        self.model.objects.filter(obj_id=obj_id, key=key).delete()
-
     def remove_obj(self, obj_id):
         """
         Remove an object's all attributes.
@@ -153,4 +177,8 @@ class BaseAttributesCache(object):
         Args:
             obj_id: (number) object's id.
         """
-        self.model.objects.filter(obj_id=obj_id).delete()
+        records = self.model.objects.filter(obj_id=obj_id).delete()
+        for record in records:
+            delete_string(record.value)
+
+        records.delete()

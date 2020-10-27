@@ -40,14 +40,14 @@ class MudderyExit(TYPECLASS("OBJECT"), DefaultExit):
     typeclass_name = _("Exit", "typeclasses")
     model_name = "world_exits"
 
-    def after_data_loaded(self):
+    def after_data_loaded(self, level):
         """
         Load exit data.
 
         Returns:
             None
         """
-        super(MudderyExit, self).after_data_loaded()
+        super(MudderyExit, self).after_data_loaded(level)
 
         # set exit's destination
         self.set_obj_destination(getattr(self.system, "destination", None))

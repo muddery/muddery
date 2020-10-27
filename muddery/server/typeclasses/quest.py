@@ -50,11 +50,11 @@ class MudderyQuest(TYPECLASS("OBJECT")):
         """
         self.state.owner = owner
 
-    def after_data_loaded(self):
+    def after_data_loaded(self, level):
         """
         Load quest's data from db.
         """
-        super(MudderyQuest, self).after_data_loaded()
+        super(MudderyQuest, self).after_data_loaded(level)
 
         self.objectives = {}
         self.not_accomplished = {}

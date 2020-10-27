@@ -42,11 +42,11 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
         self.position = None
         self.background = None
 
-    def after_data_loaded(self):
+    def after_data_loaded(self, level):
         """
         Set data_info to the object.
         """
-        super(MudderyRoom, self).after_data_loaded()
+        super(MudderyRoom, self).after_data_loaded(level)
         
         self.peaceful = getattr(self.system, "peaceful", False)
 

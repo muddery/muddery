@@ -306,7 +306,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
 
             self.load_custom_properties(level)
 
-        self.after_data_loaded()
+        self.after_data_loaded(level)
 
         if not self.location and reset_location:
             self.set_location(getattr(self.system, "location", ""))
@@ -371,7 +371,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         pass
 
-    def after_data_loaded(self):
+    def after_data_loaded(self, level):
         """
         Called after self.data_loaded().
         """        
@@ -395,6 +395,13 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         if hasattr(self.system, "location"):
             self.set_location(self.system.location)
+
+    def get_level(self):
+        """
+        Get the object's level.
+        :return: (number) level
+        """
+        return self.state.get("level", 0)
 
     def set_level(self, level):
         """
@@ -438,9 +445,6 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         if typeclass_cls.path != self.typeclass_path:
             logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_data_key(), typeclass_cls.path))
             return
-
-        # set the state handler to the new typeclass
-        self.states_handler.reset(self)
 
     def set_name(self, name):
         """

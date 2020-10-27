@@ -28,13 +28,15 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
 
         self.available = False
 
-    def after_data_loaded(self):
+    def after_data_loaded(self, level):
         """
         Load goods data.
 
         Returns:
             None
         """
+        super(MudderyShopGoods, self).after_data_loaded(level)
+
         self.available = False
 
         self.shop_key = getattr(self.system, "shop", "")

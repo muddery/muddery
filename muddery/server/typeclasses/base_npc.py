@@ -37,11 +37,11 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
         """
         super(MudderyBaseNPC, self).at_object_creation()
 
-    def after_data_loaded(self):
+    def after_data_loaded(self, level):
         """
         Init the character.
         """
-        super(MudderyBaseNPC, self).after_data_loaded()
+        super(MudderyBaseNPC, self).after_data_loaded(level)
 
         # Character can auto fight.
         self.auto_fight = True
@@ -70,32 +70,36 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
         """
         # shops records
         shop_records = NPCShops.get(self.get_data_key())
-
         shop_keys = set([record.shop for record in shop_records])
 
         # NPC's shop
-        shops = self.state.get("shops", {})
+        self.shops = self.state.load("shops", {})
+        changed = False
 
         # remove old shops
-        for shop_key in shops:
+        for shop_key in self.shops:
             if shop_key not in shop_keys:
                 # remove this shop
-                shops[shop_key].delete()
-                del shops[shop_key]
+                self.shops[shop_key].delete()
+                del self.shops[shop_key]
+                changed = True
 
         # add new shop
         for shop_record in shop_records:
             shop_key = shop_record.shop
-            if shop_key not in shops:
+            if shop_key not in self.shops:
                 # Create shop object.
                 shop_obj = build_object(shop_key)
                 if not shop_obj:
                     logger.log_errmsg("Can't create shop: %s" % shop_key)
                     continue
 
-                shops[shop_key] = shop_obj
+                self.shops[shop_key] = shop_obj
+                shop_obj.set_owner(self)
+                changed = True
 
-        self.state.set("shops", shops)
+        if changed:
+            self.state.save("shops", self.shops)
 
     def get_available_commands(self, caller):
         """
@@ -108,8 +112,7 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
                 commands.append({"name": _("Talk"), "cmd": "talk", "args": self.dbref})
 
             # Add shops.
-            shops = self.state.get("shops", {})
-            for shop_obj in shops:
+            for shop_obj in self.shops:
                 if not shop_obj.is_visible(caller):
                     continue
 
