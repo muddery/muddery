@@ -195,7 +195,7 @@ class StatementHandler(object):
             # do condition
             result = eval(exec_string)
         except Exception as e:
-            logger.log_errmsg("Exec function error: %s %s" % (function, repr(e)))
+            logger.log_errmsg("Exec condition error: %s %s" % (condition, repr(e)))
             traceback.print_exc()
             return False
 

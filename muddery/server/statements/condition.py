@@ -109,7 +109,7 @@ class FuncHasObject(StatementFunction):
         return False
 
 
-class FuncObjectsEqual(StatementFunction):
+class FuncObjectsEqualTo(StatementFunction):
     """
     If the caller has objects equal to the number.
 
@@ -121,7 +121,7 @@ class FuncObjectsEqual(StatementFunction):
         boolean result
     """
 
-    key = "obj_equal"
+    key = "obj_equal_to"
     const = True
 
     def func(self):
@@ -205,6 +205,38 @@ class FuncObjectsLessThan(StatementFunction):
         return total < number
 
 
+class FuncSkillEqualTo(StatementFunction):
+    """
+    If the skill's level equals to the number.
+
+    Args:
+        args[0]: (string) skill's key
+        args[1]: (number) level
+
+    Returns:
+        boolean result
+    """
+
+    key = "skill_equal_to"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        skill_key = self.args[0]
+        level = self.args[1]
+
+        if skill_key not in self.caller.db.skills:
+            return False
+
+        skill = self.caller.db.skills[skill_key]
+        return skill.level == level
+
+
 class FuncSkillMoreThan(StatementFunction):
     """
     If the skill's level more than the number.
@@ -235,6 +267,70 @@ class FuncSkillMoreThan(StatementFunction):
 
         skill = self.caller.db.skills[skill_key]
         return skill.level > level
+
+
+class FuncSkillLessThan(StatementFunction):
+    """
+    If the skill's level less than the number.
+
+    Args:
+        args[0]: (string) skill's key
+        args[1]: (number) level
+
+    Returns:
+        boolean result
+    """
+
+    key = "skill_less_than"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        skill_key = self.args[0]
+        level = self.args[1]
+
+        if skill_key not in self.caller.db.skills:
+            return False
+
+        skill = self.caller.db.skills[skill_key]
+        return skill.level < level
+
+
+class FuncAttributeEqualTo(StatementFunction):
+    """
+    If the caller's attribute equals to the number.
+
+    Args:
+        args[0]: (string) attribute's key
+        args[1]: (number) number
+
+    Returns:
+        boolean result
+    """
+
+    key = "attr_equal_to"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        attr_key = self.args[0]
+        number = self.args[1]
+
+        if not self.caller.custom_properties_handler.has(attr_key):
+            return False
+
+        value = getattr(self.caller.prop, attr_key)
+        return value == number
 
 
 class FuncAttributeMoreThan(StatementFunction):
