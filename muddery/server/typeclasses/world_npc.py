@@ -20,11 +20,11 @@ class MudderyWorldNPC(TYPECLASS("BASE_NPC")):
     typeclass_name = _("World NPC", "typeclasses")
     model_name = "world_npcs"
 
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Init the character.
         """
-        super(MudderyWorldNPC, self).after_data_loaded(level)
+        super(MudderyWorldNPC, self).after_data_loaded()
 
         # if it is dead, reborn at init.
         if not self.is_alive():

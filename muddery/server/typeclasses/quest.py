@@ -33,28 +33,17 @@ class MudderyQuest(TYPECLASS("OBJECT")):
     def loot_handler(self):
         return LootHandler(self, QuestLootList.get(self.get_data_key()))
 
-    def at_object_creation(self):
-        """
-        Set accomplished objectives to empty.
-        """
-        super(MudderyQuest, self).at_object_creation()
-
-        if not self.states_handler.has("owner"):
-            self.state.owner = None
-        if not self.states_handler.has("accomplished"):
-            self.state.accomplished = {}
-
     def set_owner(self, owner):
         """
         Set the owner of the skill.
         """
-        self.state.owner = owner
+        self.state.save("owner", owner)
 
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Load quest's data from db.
         """
-        super(MudderyQuest, self).after_data_loaded(level)
+        super(MudderyQuest, self).after_data_loaded()
 
         self.objectives = {}
         self.not_accomplished = {}
@@ -65,6 +54,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
 
         # Get objectives.
         obj_records = QuestObjectives.get(key)
+        all_accomplished = self.state.load("accomplished", {})
 
         for obj_record in obj_records:
             objective_type = obj_record.type
@@ -75,7 +65,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                          "desc": obj_record.desc}
             self.objectives[obj_record.ordinal] = objective
 
-            accomplished = self.state.accomplished.get(key, 0)
+            accomplished = all_accomplished.get(key, 0)
             if accomplished < obj_record.number:
                 if not objective_type in self.not_accomplished:
                     self.not_accomplished[objective_type] = [obj_record.ordinal]
@@ -108,6 +98,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
         Set desc to an objective can hide the details of the objective.
         """
         output = []
+        all_accomplished = self.state.load("accomplished", {})
 
         for ordinal, objective in self.objectives.items():
             desc = objective["desc"]
@@ -120,7 +111,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
             else:
                 # Or make a desc by other data.
                 obj_num = objective["number"]
-                accomplished = self.state.accomplished.get(ordinal, 0)
+                accomplished = all_accomplished.get(ordinal, 0)
                 
                 if objective["type"] == defines.OBJECTIVE_TALK:
                     # talking
@@ -191,9 +182,11 @@ class MudderyQuest(TYPECLASS("OBJECT")):
         """
         All objectives of this quest are accomplished.
         """
+        all_accomplished = self.state.load("accomplished", {})
+
         for ordinal in self.objectives:
             obj_num = self.objectives[ordinal]["number"]
-            accomplished = self.state.accomplished.get(ordinal, 0)
+            accomplished = all_accomplished.get(ordinal, 0)
     
             if accomplished < obj_num:
                 return False
@@ -204,7 +197,9 @@ class MudderyQuest(TYPECLASS("OBJECT")):
         """
         Turn in a quest, do its action.
         """
-        owner = self.state.owner
+        owner = self.state.load("owner", None)
+        if not owner:
+            return
 
         # get rewards
         obj_list = self.loot_handler.get_obj_list(owner)
@@ -244,6 +239,9 @@ class MudderyQuest(TYPECLASS("OBJECT")):
         status_changed = False
         index = 0
 
+        all_accomplished = self.state.load("accomplished", {})
+        changed = False
+
         # search all object objectives
         while index < len(self.not_accomplished[type]):
             ordinal = self.not_accomplished[type][index]
@@ -254,11 +252,12 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                 status_changed = True
 
                 # add accomplished number
-                accomplished = self.state.accomplished.get(ordinal, 0)
+                accomplished = all_accomplished.get(ordinal, 0)
                 accomplished += number
-                self.state.accomplished[ordinal] = accomplished
+                all_accomplished[ordinal] = accomplished
+                changed = True
 
-                if self.state.accomplished[ordinal] >= self.objectives[ordinal]["number"]:
+                if all_accomplished[ordinal] >= self.objectives[ordinal]["number"]:
                     # if this objectives is accomplished, remove it
                     index -= 1
                     del(self.not_accomplished[type][index])
@@ -267,6 +266,9 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                         # if all objectives are accomplished
                         del(self.not_accomplished[type])
                         break
-                                                                                
+
+        if changed:
+            self.state.save("accomplished", all_accomplished)
+
         return status_changed
 

@@ -21,11 +21,11 @@ class MudderyLockedExit(TYPECLASS("EXIT")):
     typeclass_name = _("Locked Exit", "typeclasses")
     model_name = "exit_locks"
 
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Set data_info to the object."
         """
-        super(MudderyLockedExit, self).after_data_loaded(level)
+        super(MudderyLockedExit, self).after_data_loaded()
 
         self.unlock_condition = getattr(self.system, "unlock_condition", "")
         self.unlock_verb = getattr(self.system, "unlock_verb", "")

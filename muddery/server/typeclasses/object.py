@@ -297,16 +297,15 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
 
             # Load custom properties.
             if level is None:
-                if self.states_handler.has("level"):
-                    level = self.state.level
-                else:
+                level = self.state.load("level", None)
+                if level is None:
                     # Use default level.
                     level = getattr(self.system, "level", 0)
-                    self.state.level = level
+                    self.state.save("level", level)
 
             self.load_custom_properties(level)
 
-        self.after_data_loaded(level)
+        self.after_data_loaded()
 
         if not self.location and reset_location:
             self.set_location(getattr(self.system, "location", ""))
@@ -318,10 +317,6 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         Load custom properties.
         """
-        # Get object level.
-        if level is None:
-            level = self.state.level
-
         # Load values from db.
         values = {}
         for record in ObjectProperties.get_properties(self.get_data_key(), level):
@@ -371,7 +366,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         pass
 
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Called after self.data_loaded().
         """        
@@ -401,7 +396,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         Get the object's level.
         :return: (number) level
         """
-        return self.state.get("level", 0)
+        return self.state.load("level", 0)
 
     def set_level(self, level):
         """
@@ -412,10 +407,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         Returns:
             None
         """
-        if self.state.level == level:
-            return
-
-        self.state.level = level
+        self.state.save("level", level)
         self.load_custom_properties(level)
 
     def set_typeclass(self, typeclass_key):

@@ -37,11 +37,11 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
         """
         super(MudderyBaseNPC, self).at_object_creation()
 
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Init the character.
         """
-        super(MudderyBaseNPC, self).after_data_loaded(level)
+        super(MudderyBaseNPC, self).after_data_loaded()
 
         # Character can auto fight.
         self.auto_fight = True
@@ -77,14 +77,15 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
         changed = False
 
         # remove old shops
-        for shop_key in self.shops:
-            if shop_key not in shop_keys:
+        diff = set(self.shops.keys()) - shop_keys
+        if len(diff) > 0:
+            changed = True
+            for shop_key in diff:
                 # remove this shop
                 self.shops[shop_key].delete()
                 del self.shops[shop_key]
-                changed = True
 
-        # add new shop
+        # add new shops
         for shop_record in shop_records:
             shop_key = shop_record.shop
             if shop_key not in self.shops:
@@ -95,7 +96,6 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
                     continue
 
                 self.shops[shop_key] = shop_obj
-                shop_obj.set_owner(self)
                 changed = True
 
         if changed:

@@ -91,6 +91,18 @@ class BaseAttributesCache(object):
         # db model
         self.model = apps.get_model(settings.GAME_DATA_APP, self.model_name)
 
+    def lock(self, obj_id, key):
+        """
+        Lock the data.
+        """
+        pass
+
+    def release(self, obj_id, key):
+        """
+        Release the data.
+        """
+        pass
+
     def save(self, obj_id, key, value):
         """
         Set an attribute.

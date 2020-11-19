@@ -22,21 +22,11 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
     typeclass_name = _("Common Object", "typeclasses")
     model_name = "common_objects"
 
-    def at_object_creation(self):
-        """
-        Set default values.
-        """
-        super(MudderyCommonObject, self).at_object_creation()
-
-        # set default number
-        if not self.states_handler.has("number"):
-            self.state.number = 0
-
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Initial this object.
         """
-        super(MudderyCommonObject, self).after_data_loaded(level)
+        super(MudderyCommonObject, self).after_data_loaded()
 
         # set object stack info
         self.max_stack = getattr(self.system, "max_stack", 1)
@@ -44,62 +34,40 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         self.can_remove = getattr(self.system, "can_remove", True)
         self.can_discard = getattr(self.system, "can_discard", True)
 
-    def set_owner(self, owner):
-        """
-        Set the object's owner.
-
-        Args:
-            owner (Object): the owner object.
-        """
-        self.state.set("owner", owner.id)
-
-    def get_owner(self):
-        """
-        Return:
-            (integer): owner's id
-        """
-        return self.state.get("owner", None)
-
-    def get_number(self):
-        """
-        Get object's number.
-        """
-        return self.state.get("number", 0)
-
-    def increase_num(self, number):
-        """
-        Increase object's number.
-        """
-        if number == 0:
-            return
-        
-        if number < 0:
-            raise MudderyError("%s can not increase a negative nubmer." % self.get_data_key())
-
-        if self.max_stack == 1 and self.state.number == 1:
-            raise MudderyError("%s can not stack." % self.get_data_key())
-
-        if self.state.number + number > self.max_stack:
-            raise MudderyError("%s over stack." % self.get_data_key())
-        
-        self.state.number += number
-        return
-
-    def decrease_num(self, number):
-        """
-        Decrease object's number.
-        """
-        if number == 0:
-            return
-
-        if number < 0:
-            raise MudderyError("%s can not decrease a negative nubmer." % self.get_data_key())
-
-        if self.state.number < number:
-            raise MudderyError("%s's number will below zero." % self.get_data_key())
-        
-        self.state.number -= number
-        return
+#    def increase_num(self, number):
+#        """
+#        Increase object's number.
+#        """
+#        if number == 0:
+#            return
+#
+#        if number < 0:
+#            raise MudderyError("%s can not increase a negative nubmer." % self.get_data_key())#
+#
+#        if self.max_stack == 1 and self.state.number == 1:
+#            raise MudderyError("%s can not stack." % self.get_data_key())
+#
+#        if self.state.number + number > self.max_stack:
+#            raise MudderyError("%s over stack." % self.get_data_key())
+#
+#        self.state.number += number
+#        return
+#
+#    def decrease_num(self, number):
+#        """
+#        Decrease object's number.
+#        """
+#        if number == 0:
+#            return
+#
+#        if number < 0:
+#            raise MudderyError("%s can not decrease a negative nubmer." % self.get_data_key())
+#
+#        if self.state.number < number:
+#            raise MudderyError("%s's number will below zero." % self.get_data_key())
+#
+#        self.state.number -= number
+#        return
 
     def get_appearance(self, caller):
         """
@@ -109,7 +77,6 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         # Get name, description and available commands.
         info = super(MudderyCommonObject, self).get_appearance(caller)
 
-        info["number"] = self.state.number
         info["can_remove"] = self.can_remove
         return info
 
@@ -119,30 +86,26 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         "args" must be a string without ' and ", usually it is self.dbref.
         """
         commands = []
-        if self.state.number > 0:
-            if self.location and self.can_discard:
-                commands.append({
-                    "name": _("Discard"),
-                    "cmd": "discard",
-                    "args": self.dbref,
-                    "confirm": _("Discard this object?"),
-                })
+        if self.can_discard:
+            commands.append({
+                "name": _("Discard"),
+                "cmd": "discard",
+                "args": self.dbref,
+                "confirm": _("Discard this object?"),
+            })
         return commands
 
-    def take_effect(self, user, number):
+    def take_effect(self, user):
         """
         Use this object.
 
         Args:
             user: (object) the object who uses this
-            number: (int) the number of the object to use
 
         Returns:
-            (result, number):
-                result: (string) a description of the result
-                number: (int) actually used number
+            result: (string) a description of the result
         """
-        return _("No effect."), 0
+        return _("No effect.")
 
 
 class MudderyFood(TYPECLASS("COMMON_OBJECT")):
@@ -154,33 +117,23 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
     typeclass_name = _("Food", "typeclasses")
     model_name = "foods"
 
-    def take_effect(self, user, number):
+    def take_effect(self, user):
         """
         Use this object.
 
         Args:
             user: (object) the object who uses this
-            number: (int) the number of the object to use
 
         Returns:
-            (result, number):
-                result: (string) a description of the result
-                number: (int) actually used number
+            result: (string) a description of the result
         """
         if not user:
             raise ValueError("User should not be None.")
 
-        if number <= 0:
-            raise ValueError("Number should be above zero.")
-
-        used = number
-        if used > self.state.number:
-            used = self.state.number
-
         increments = {}
         for key, value in self.custom_properties_handler.all(True):
             if value:
-                increments[key] = value * used
+                increments[key] = value
 
         changes = user.change_properties(increments)
         user.show_status()
@@ -194,18 +147,14 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
                 signal = '+' if changes[key] >= 0 else ''
                 results.append("%s %s%s" % (attribute_info["name"], signal, changes[key]))
 
-        return ", ".join(results), used
+        return ", ".join(results)
 
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        commands = []
-
-        if self.state.number > 0:
-            commands.append({"name": _("Use"), "cmd": "use", "args": self.dbref})
-
+        commands = [{"name": _("Use"), "cmd": "use", "args": self.dbref}]
         commands.extend(super(MudderyFood, self).get_available_commands(caller))
 
         return commands
@@ -220,11 +169,11 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
     typeclass_name = _("Equipment", "typeclasses")
     model_name = "equipments"
 
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Load equipments data.
         """
-        super(MudderyEquipment, self).after_data_loaded(level)
+        super(MudderyEquipment, self).after_data_loaded()
 
         self.type = getattr(self.system, "type", "")
         self.position = getattr(self.system, "position", "")
@@ -275,28 +224,27 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
         """
         commands = []
 
-        if self.state.number > 0:
-            if getattr(self, "equipped", False):
-                commands.append({
-                    "name": _("Take Off"),
-                    "cmd": "takeoff",
-                    "args": self.dbref,
-                })
-            else:
-                commands.append({
-                    "name": _("Equip"),
-                    "cmd": "equip",
-                    "args": self.dbref
-                })
+        if getattr(self, "equipped", False):
+            commands.append({
+                "name": _("Take Off"),
+                "cmd": "takeoff",
+                "args": self.dbref,
+            })
+        else:
+            commands.append({
+                "name": _("Equip"),
+                "cmd": "equip",
+                "args": self.dbref
+            })
 
-                # Can not discard when equipped
-                if self.location and self.can_discard:
-                    commands.append({
-                        "name": _("Discard"),
-                        "cmd": "discard",
-                        "args": self.dbref,
-                        "confirm": _("Discard this object?"),
-                    })
+            # Can not discard when equipped
+            if self.location and self.can_discard:
+                commands.append({
+                    "name": _("Discard"),
+                    "cmd": "discard",
+                    "args": self.dbref,
+                    "confirm": _("Discard this object?"),
+                })
 
         return commands
 
@@ -314,26 +262,20 @@ class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        commands = []
-        if self.state.number > 0:
-            commands.append({"name": _("Use"), "cmd": "use", "args": self.dbref})
-
+        commands = [{"name": _("Use"), "cmd": "use", "args": self.dbref}]
         commands.extend(super(MudderySkillBook, self).get_available_commands(caller))
 
         return commands
 
-    def take_effect(self, user, number):
+    def take_effect(self, user):
         """
         Use this object.
 
         Args:
             user: (object) the object who uses this
-            number: (int) the number of the object to use
 
         Returns:
-            (result, number):
-                result: (string) a description of the result
-                number: (int) actually used number
+            result: (string) a description of the result
         """
         if not user:
             raise ValueError("User should not be None.")

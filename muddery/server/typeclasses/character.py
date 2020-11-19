@@ -105,9 +105,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         super(MudderyCharacter, self).at_object_creation()
 
-        # init equipments
-        self.reset_equip_positions()
-        
         # skill's gcd
         self.skill_gcd = GAME_SETTINGS.get("global_cd")
         self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
@@ -148,7 +145,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         # Get object level.
         if level is None:
-            level = self.state.get("level")
+            level = self.get_level()
 
         # Load values from db.
         data_key = self.get_data_key()
@@ -179,18 +176,11 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # Set default mutable custom properties.
         self.set_mutable_custom_properties()
 
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Init the character.
         """
-        super(MudderyCharacter, self).after_data_loaded(level)
-
-        # get level
-        initial = False
-        if not level:
-            level = getattr(self.system, "level", 1)
-            self.state.add("level", level)
-            initial = True
+        super(MudderyCharacter, self).after_data_loaded()
 
         # friendly
         self.friendly = getattr(self.system, "friendly", 0)
@@ -226,7 +216,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         self.load_default_objects()
 
         # refresh the character's properties.
-        self.refresh_properties(not initial)
+        self.refresh_properties(True)
 
     def set_level(self, level):
         """
@@ -246,11 +236,12 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        positions = []
+        # get equipment's position
+        positions = [r.key for r in EquipmentPositions.all()]
 
-        equipments = self.state.get("equipments", {})
+        equipments = self.state.load("equipments", {})
         changed = False
-        for position in equipments:
+        for position in list(equipments.keys()):
             if position not in positions:
                 changed = True
                 del equipments[position]
@@ -262,17 +253,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         if changed:
             self.state.set("equipments", equipments)
-
-        # reset equipments status
-        equipped = set()
-        for position in equipments:
-            if equipments[position]:
-                equipped.add(equipments[position])
-
-        inventory = self.state.get("inventory", [])
-        for obj in inventory:
-            if obj.id in equipped:
-                obj.equipped = True
 
     def refresh_properties(self, keep_values):
         """
@@ -330,11 +310,10 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Args:
             event_key: (string) event's key
         """
-
         # set closed events
-        closed_events = self.state.get("closed_events", set())
+        closed_events = self.state.load("closed_events", set())
         closed_events.add(event_key)
-        self.state.set("closed_events", closed_events)
+        self.state.save("closed_events", closed_events)
 
     def is_event_closed(self, event_key):
         """
@@ -343,7 +322,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Args:
             event_key: (string) event's key
         """
-        closed_events = self.state.get("closed_events", set())
+        closed_events = self.state.load("closed_events", set())
         return event_key in closed_events
 
     def change_properties(self, increments):
@@ -437,8 +416,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Search specified object in the inventory.
         """
-        inventory = self.state.get("inventory", [])
-        result = [item for item in inventory if item.get_data_key() == obj_key]
+        inventory = self.state.load("inventory", [])
+        result = [item["key"] for item in inventory if item["key"] == obj_key]
         return result
 
     def have_object(self, obj_key):
@@ -452,13 +431,14 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Add equipment's attributes to the character
         """
         # find equipments
-        equipments = self.state.get("equipments", {})
+        equipments = self.state.load("equipments", {})
         equipped = set([equip_id for equip_id in equipments.values() if equip_id])
 
         # add equipment's attributes
-        for obj in self.state.inventory:
-            if obj.dbref in equipped:
-                obj.equip_to(self)
+        inventory = self.state.load("inventory", [])
+        for item in inventory:
+            if item["obj"].dbref in equipped:
+                item["obj"].equip_to(self)
 
     def load_default_skills(self):
         """
@@ -469,17 +449,25 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         default_skill_ids = set([record.skill for record in skill_records])
 
         # remove old default skills
-        for key, skill in self.state.skills.items():
+        skills = self.state.load("skills", {})
+        changed = False
+        for key in list(skills.keys()):
+            skill = skills[key]
             if not skill:
-                del self.state.skills[key]
+                del skills[key]
+                changed = True
             elif skill.is_default() and key not in default_skill_ids:
                 # remove this skill
                 skill.delete()
                 del self.state.skills[key]
+                changed = True
+
+        if changed:
+            self.state.save("skills", skills)
 
         # add new default skills
         for skill_record in skill_records:
-            if skill_record.skill not in self.state.skills:
+            if skill_record.skill not in skills:
                 self.learn_skill(skill_record.skill, True, True)
 
     def load_default_objects(self):
@@ -518,7 +506,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             (boolean) learned skill
         """
-        if skill_key in self.state.skills:
+        skills = self.state.load("skills", {})
+        if skill_key in skills:
             self.msg({"msg": _("You have already learned this skill.")})
             return False
 
@@ -534,7 +523,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         # Store new skill.
         skill_obj.set_owner(self)
-        self.state.skills[skill_key] = skill_obj
+        skills[skill_key] = skill_obj
+        self.state.save("skills", skills)
 
         # If it is a passive skill, player's status may change.
         if skill_obj.passive:
@@ -562,11 +552,12 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             self.msg({"skill_cast": {"cast": _("Global cooling down!")}})
             return
 
-        if skill_key not in self.state.skills:
+        skills = self.state.load("skills", {})
+        if skill_key not in skills:
             self.msg({"skill_cast": {"cast": _("You do not have this skill.")}})
             return
 
-        skill = self.state.skills[skill_key]
+        skill = skills[skill_key]
         cast_result = skill.cast_skill(target)
         if not cast_result:
             return
@@ -623,7 +614,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         Cast all passive skills.
         """
-        for skill in self.state.skills.values():
+        skills = self.state.load("skills", {})
+        for skill in skills.values():
             if skill.passive:
                 skill.cast_skill(self)
                 
@@ -747,7 +739,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        self.attack_temp_target(self.target.get_data_key(), self.target.state.level, desc)
+        self.attack_temp_target(self.target.get_data_key(), self.target.get_level(), desc)
 
     def attack_temp_target(self, target_key, target_level=0, desc=""):
         """
@@ -767,7 +759,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             obj = search_obj_data_key(target_key)
             if obj:
                 obj = obj[0]
-                target_level = obj.state.level
+                target_level = obj.get_level()
 
         # Create a target.
         target = build_object(target_key, target_level, reset_location=False)
@@ -828,7 +820,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        self.state.set("team", team_id)
+        self.state.save("team", team_id)
 
     def get_team(self):
         """
@@ -837,7 +829,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             team id
         """
-        return self.state.get("team", 0)
+        return self.state.load("team", 0)
 
     def is_alive(self):
         """
@@ -900,7 +892,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             (list) available commands for combat
         """
         commands = []
-        for key, skill in self.state.skills.items():
+        skills = self.state.load("skills", {})
+        for key, skill in skills.items():
             if skill.passive:
                 # exclude passive skills
                 continue
@@ -942,7 +935,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        self.set_level(self.state.level + 1)
+        level = self.get_level()
+        self.set_level(level + 1)
 
     def show_status(self):
         """

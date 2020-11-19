@@ -27,11 +27,11 @@ class MudderyArea(TYPECLASS("OBJECT")):
         super(MudderyArea, self).at_object_creation()
         self.background = None
 
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Set data_info to the object.
         """
-        super(MudderyArea, self).after_data_loaded(level)
+        super(MudderyArea, self).after_data_loaded()
 
         # get background
         self.background = None

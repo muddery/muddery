@@ -88,14 +88,14 @@ class MudderySkill(TYPECLASS("OBJECT")):
         """
         return self._is_default
 
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderySkill, self).after_data_loaded(level)
+        super(MudderySkill, self).after_data_loaded()
 
         # set data
         self.function = getattr(self.system, "function", "")

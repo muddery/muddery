@@ -30,12 +30,6 @@ class MudderyShop(TYPECLASS("OBJECT")):
         """
         super(MudderyShop, self).at_object_creation()
 
-        if not self.states_handler.has("goods"):
-            self.state.goods = {}
-
-        if not self.states_handler.has("owner"):
-            self.state.owner = None
-
     def at_object_delete(self):
         """
         Called just before the database object is permanently
@@ -49,19 +43,19 @@ class MudderyShop(TYPECLASS("OBJECT")):
             return result
 
         # delete all goods
-        for goods in self.state.goods.values():
+        for goods in self.goods.values():
             goods.delete()
 
         return True
 
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderyShop, self).after_data_loaded(level)
+        super(MudderyShop, self).after_data_loaded()
 
         # load shop goods
         self.load_goods()
@@ -77,37 +71,34 @@ class MudderyShop(TYPECLASS("OBJECT")):
 
         goods_keys = set([record.key for record in goods_records])
 
-        # search current goods
-        current_goods = {}
-        for key, obj in self.state.goods.items():
-            if key in goods_keys:
-                current_goods[key] = obj
-            else:
+        # current goods
+        self.goods = self.state.load("goods", {})
+        changed = False
+
+        # remove old goods
+        diff = set(self.goods.keys()) - goods_keys
+        if len(diff) > 0:
+            changed = True
+            for goods_key in diff:
                 # remove goods that is not in goods_keys
-                obj.delete()
+                self.goods[goods_key].delete()
+                del self.goods[goods_key]
 
         # add new goods
         for goods_record in goods_records:
             goods_key = goods_record.key
-            if goods_key not in current_goods:
+            if goods_key not in self.goods:
                 # Create shop_goods object.
                 goods_obj = build_object(goods_key)
                 if not goods_obj:
                     logger.log_errmsg("Can't create goods: %s" % goods_key)
                     continue
 
-                current_goods[goods_key] = goods_obj
+                self.goods[goods_key] = goods_obj
+                changed = True
 
-        self.state.goods = current_goods
-
-    def set_owner(self, owner):
-        """
-        Set the owner of the shop.
-
-        :param owner:
-        :return:
-        """
-        self.state.owner = owner
+        if changed:
+            self.state.save("goods", self.goods)
 
     def show_shop(self, caller):
         """
@@ -133,12 +124,8 @@ class MudderyShop(TYPECLASS("OBJECT")):
             "dbref": self.dbref,
             "name": self.get_name(),
             "desc": self.db.desc,
+            "icon": self.icon,
         }
-
-        icon = self.icon
-        if not icon and self.state.owner:
-            icon = self.state.owner.icon
-        info["icon"] = icon
 
         goods_list = self.return_shop_goods(caller)
         info["goods"] = goods_list
@@ -155,7 +142,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
         goods_list = []
 
         # Get shop goods
-        for obj in self.state.goods.values():
+        for obj in self.goods.values():
             if not obj.is_available(caller):
                 continue
 

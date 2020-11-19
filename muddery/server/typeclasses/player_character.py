@@ -69,10 +69,10 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         super(MudderyPlayerCharacter, self).at_object_creation()
         
-    def after_data_loaded(self, level):
+    def after_data_loaded(self):
         """
         """
-        super(MudderyPlayerCharacter, self).after_data_loaded(level)
+        super(MudderyPlayerCharacter, self).after_data_loaded()
 
         self.solo_mode = GAME_SETTINGS.get("solo_mode")
         self.available_channels = {}
@@ -223,14 +223,14 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         Set player character's nickname.
         """
-        self.state.set("nickname", nickname)
+        self.state.save("nickname", nickname)
 
     def get_name(self):
         """
         Get player character's name.
         """
         # Use nick name instead of normal name.
-        return self.state.get("nickname", "")
+        return self.state.load("nickname", "")
 
     def get_available_commands(self, caller):
         """
@@ -303,7 +303,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         rooms = {}
         exits = {}
 
-        revealed_map = self.state.get("revealed_map", set())
+        revealed_map = self.state.load("revealed_map", set())
         for room_key in revealed_map:
             # get room's information
             room = utils.search_obj_data_key(room_key)
@@ -361,11 +361,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                           ...}
             }
             """
-            revealed_map = self.state.get("revealed_map", set())
+            revealed_map = self.state.load("revealed_map", set())
             if not location_key in revealed_map:
                 # reveal map
                 revealed_map.add(self.location.get_data_key())
-                self.state.set("revealed_map", revealed_map)
+                self.state.save("revealed_map", revealed_map)
 
                 rooms = {location_key: {"name": self.location.get_name(),
                                         "icon": self.location.icon,
@@ -445,7 +445,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         # check what the character has now
         current_inventory = {}
-        state_inventory = self.state.get("inventory", [])
+        changed = False
+        state_inventory = self.state.load("inventory", [])
         for item in state_inventory:
             key = item.get_data_key()
             if key in current_inventory:
@@ -499,6 +500,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
                 # move the new object to the inventory
                 state_inventory.append(new_obj)
+                changed = True
             else:
                 # common number
                 # if already has this kind of object
@@ -537,6 +539,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
                     # move the new object to the inventory
                     state_inventory.append(new_obj)
+                    changed = True
 
                     # Get the number that actually added.
                     add = number
@@ -558,7 +561,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 "reject": reject,
             })
 
-        self.state.set("inventory", state_inventory)
+        if changed:
+            self.state.save("inventory", state_inventory)
 
         if not mute:
             # Send results to the player.
@@ -634,7 +638,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             result: (string) the description of the result
         """
         obj = None
-        inventory = self.state.get("inventory", [])
+        inventory = self.state.load("inventory", [])
         for item in inventory:
             if item.dbref == obj_dbref:
                 obj = item
@@ -706,7 +710,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         to_remove = number
         try:
             i = 0
-            inventory = self.state.get("inventory", [])
+            inventory = self.state.load("inventory", [])
             while i < len(inventory):
                 obj = inventory[i]
                 if obj.get_data_key() != obj_key:
@@ -763,7 +767,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Get inventory's data.
         """
         inv = []
-        inventory = self.state.get("inventory", [])
+        inventory = self.state.load("inventory", [])
         for item in inventory:
             info = {"dbref": item.dbref,        # item's dbref
                     "name": item.name,          # item's name
@@ -814,8 +818,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Get equipments' data.
         """
         equipments = {}
-        state_equipments = self.state.get("equipments", {})
-        state_inventory = self.state.get("inventory", [])
+        state_equipments = self.state.load("equipments", {})
+        state_inventory = self.state.load("inventory", [])
         for position in state_equipments:
             # in order of positions
             info = None
@@ -836,8 +840,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Equip an object.
         args: obj_dbref(string): the equipment object's dbref.
         """
-        inventory = self.state.get("inventory", [])
-        equipments = self.state.get("equipments", {})
+        inventory = self.state.load("inventory", [])
+        equipments = self.state.load("equipments", {})
 
         obj = None
         for item in inventory:
@@ -860,7 +864,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         # Put on new equipment, store object's dbref.
         equipments[position] = obj.dbref
-        self.state.set("equipments", equipments)
+        self.state.save("equipments", equipments)
         
         # Set object's attribute 'equipped' to True
         obj.equipped = True
@@ -879,7 +883,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         Take off an object from position.
         """
-        equipments = self.state.get("equipments", {})
+        equipments = self.state.load("equipments", {})
         if position not in equipments:
             raise MudderyError(_("Can not find this equipment."))
 
@@ -889,12 +893,13 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # Set object's attribute 'equipped' to False
         dbref = equipments[position]
 
-        for obj in self.state.inventory:
+        inventory = self.state.load("inventory")
+        for obj in inventory:
             if obj.dbref == dbref:
                 obj.equipped = False
 
         equipments[position] = None
-        self.state.set("equipments", equipments)
+        self.state.save("equipments", equipments)
 
         # reset character's attributes
         self.refresh_properties(True)
@@ -909,8 +914,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Take off an equipment.
         args: obj_dbref(string): the equipment object's dbref.
         """
-        inventory = self.state.get("inventory", [])
-        equipments = self.state.get("equipments", {})
+        inventory = self.state.load("inventory", [])
+        equipments = self.state.load("equipments", {})
 
         equipment = None
         for item in inventory:
@@ -923,7 +928,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         if equipment.position in equipments:
             equipments[equipment.position] = None
-            self.state.set("equipments", equipments)
+            self.state.save("equipments", equipments)
         
         # Set object's attribute 'equipped' to False
         equipment.equipped = False
@@ -948,16 +953,16 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             self.msg({"msg": _("Can not open this exit.")})
             return False
 
-        unlocked_exits = self.state.get("unlocked_exits", set())
+        unlocked_exits = self.state.load("unlocked_exits", set())
         unlocked_exits.add(exit_key)
-        self.state.set("unlocked_exits", unlocked_exits)
+        self.state.save("unlocked_exits", unlocked_exits)
         return True
 
     def is_exit_unlocked(self, exit_key):
         """
         Whether the exit is unlocked.
         """
-        unlocked_exits = self.state.get("unlocked_exits", set())
+        unlocked_exits = self.state.load("unlocked_exits", set())
         return exit_key in unlocked_exits
 
     def show_skills(self):
@@ -973,7 +978,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         skills = []
 
-        for key, skill in self.state.skills.items():
+        skills = self.state.load("skills", {})
+        for key, skill in skills:
             skills.append(skill.get_appearance(self))
 
         return skills
@@ -1133,10 +1139,10 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         if self.location:
             location_key = self.location.get_data_key()
 
-        self.state.current_dialogue = {"dialogues": dialogues,
-                                       "npc": npc_key,
-                                       "location": location_key}
-
+        current_dialogue = {"dialogues": dialogues,
+                            "npc": npc_key,
+                            "location": location_key}
+        self.state.save("current_dialogue", current_dialogue)
         return
 
     def clear_current_dialogue(self):
@@ -1146,7 +1152,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Returns:
             None
         """
-        self.state.current_dialogue = None
+        self.state.save("current_dialogue", None)
         return
 
     def resume_last_dialogue(self):
@@ -1160,30 +1166,29 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             # Can not auto resume dialogues.
             return
 
-        if not self.state.current_dialogue:
+        current_dialogue = self.state.load("current_dialogue")
+        if not current_dialogue:
             return
 
-        current = self.state.current_dialogue
-
-        if not current["dialogues"]:
+        if not current_dialogue["dialogues"]:
             return
 
         # Check dialogue's location
-        if self.location.get_data_key() != current["location"]:
+        if self.location.get_data_key() != current_dialogue["location"]:
             # If player's location has changed, return.
             return
 
         # Check npc.
         npc_talking = None
-        if current["npc"]:
-            npc_list = utils.search_obj_data_key(current["npc"])
+        if current_dialogue["npc"]:
+            npc_list = utils.search_obj_data_key(current_dialogue["npc"])
             npc_in_location = [npc for npc in npc_list if npc.location == self.location]
             if not npc_in_location:
                 # If the NPC has left it's location, return.
                 return
             npc_talking = npc_in_location[0]
 
-        dialogues = [DIALOGUE_HANDLER.get_dialogue(d) for d in current["dialogues"]]
+        dialogues = [DIALOGUE_HANDLER.get_dialogue(d) for d in current_dialogue["dialogues"]]
         dialogues = DIALOGUE_HANDLER.create_output_sentences(dialogues, self, npc_talking)
         self.msg({"dialogue": dialogues})
         return
@@ -1238,10 +1243,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         """
         if GAME_SETTINGS.get("auto_resume_dialogues"):
             # Check current dialogue.
-            if not self.state.current_dialogue:
+            current_dialogue = self.state.load("current_dialogue", None)
+            if not current_dialogue:
                 return
 
-            if dlg_key not in self.state.current_dialogue["dialogue"]:
+            if dlg_key not in current_dialogue["dialogue"]:
                 # Can not find specified dialogue in current dialogues.
                 return
 
@@ -1284,7 +1290,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         super(MudderyPlayerCharacter, self).level_up()
 
         # notify the player
-        self.msg({"msg": _("{C%s upgraded to level %s.{n") % (self.get_name(), self.state.level)})
+        self.msg({"msg": _("{C%s upgraded to level %s.{n") % (self.get_name(), self.get_level())})
 
     def get_message(self, caller, message):
         """
