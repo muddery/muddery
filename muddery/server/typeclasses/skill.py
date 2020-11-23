@@ -47,14 +47,6 @@ class MudderySkill(TYPECLASS("OBJECT")):
         self._owner = None
         self._is_default = False
 
-        # set status
-        if not self.states_handler.has("owner"):
-            self.state.owner_dbref = None
-        if not self.states_handler.has("cd_finish_time"):
-            self.state.cd_finish_time = 0
-        if not self.states_handler.has("is_default"):
-            self.state.is_default = False
-
     def at_init(self):
         """
         Load the skill's data.
@@ -62,11 +54,11 @@ class MudderySkill(TYPECLASS("OBJECT")):
         super(MudderySkill, self).at_init()
 
         self._owner = None
-        owner_dbref = self.state.owner_dbref
+        owner_dbref = self.state.load("owner_dbref", "")
         if owner_dbref:
             self._owner = self.search_dbref(owner_dbref)
 
-        self._is_default = self.state.is_default
+        self._is_default = self.state.load("is_default", False)
 
     def set_default(self, is_default):
         """
@@ -77,7 +69,8 @@ class MudderySkill(TYPECLASS("OBJECT")):
         Args:
             is_default: (boolean) if the is default or not.
         """
-        self.state.is_default = is_default
+        self._is_default = is_default
+        self.state.save("is_default", is_default)
 
     def is_default(self):
         """
@@ -134,13 +127,13 @@ class MudderySkill(TYPECLASS("OBJECT")):
             None
         """
         self._owner = owner
-        self.state.owner_dbref = owner.dbref
+        self.state.save("owner_dbref", owner.dbref)
     
         if not self.passive:
             # Set skill cd. Add gcd to new the skill.
             gcd = GAME_SETTINGS.get("global_cd")
             if gcd > 0:
-                self.state.cd_finish_time = time.time() + gcd
+                self.state.save("cd_finish_time", time.time() + gcd)
 
     def cast_skill(self, target):
         """
@@ -166,9 +159,6 @@ class MudderySkill(TYPECLASS("OBJECT")):
                 "main_type": self.main_type,
                 "sub_type": self.sub_type,
                 "cast": case_message,
-                "status": {
-                    self.owner.dbref: self.owner.get_combat_status(),
-                }
             }
 
             if self._owner:
@@ -195,7 +185,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
             # set cd
             time_now = time.time()
             if self.cd > 0:
-                self.state.cd_finish_time = time_now + self.cd
+                self.state.save("cd_finish_time", time_now + self.cd)
 
         # call skill function
         return STATEMENT_HANDLER.do_skill(self.function, self._owner, target)
@@ -236,7 +226,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
         If this skill is cooling down.
         """
         if self.cd > 0:
-            cd_finish_time = self.state.cd_finish_time
+            cd_finish_time = self.state.load("cd_finish_time", 0)
             if cd_finish_time:
                 if time.time() < cd_finish_time:
                     return True
@@ -249,7 +239,8 @@ class MudderySkill(TYPECLASS("OBJECT")):
         Returns:
             (float) Remain CD in seconds.
         """
-        remain_cd = self.state.cd_finish_time - time.time()
+        cd_finish_time = self.state.load("cd_finish_time", 0)
+        remain_cd = cd_finish_time - time.time()
         if remain_cd < 0:
             remain_cd = 0
         return remain_cd

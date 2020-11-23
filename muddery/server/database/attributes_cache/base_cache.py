@@ -125,7 +125,30 @@ class BaseAttributesCache(object):
             data.save()
         else:
             records.update(value=str_value)
-        
+
+    def saves(self, obj_id, value_dict):
+        """
+        Set an attribute.
+
+        Args:
+            obj_id: (number) object's id.
+            value_dict: (dict) a dict of key-values.
+        """
+        for key, value in value_dict.items():
+            str_value = to_string(value)
+            records = self.model.objects.filter(obj_id=obj_id, key=key)
+            if len(records) == 0:
+                record = {
+                    "obj_id": obj_id,
+                    "key": key,
+                    "value": str_value,
+                }
+                data = self.model(**record)
+                data.full_clean()
+                data.save()
+            else:
+                records.update(value=str_value)
+
     def has(self, obj_id, key):
         """
         Check if the attribute exists.
