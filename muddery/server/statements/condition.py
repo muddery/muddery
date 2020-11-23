@@ -5,6 +5,56 @@ Condition statements return a boolean value. They can be used in conditional sta
 from muddery.server.statements.statement_function import StatementFunction
 
 
+class FuncIsQuestAccepted(StatementFunction):
+    """
+    If the caller has accepted or finished the quest
+
+    Args:
+        args[0]: (string) quest's key
+
+    Returns:
+        boolean result
+    """
+
+    key = "is_quest_accepted"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        quest_key = self.args[0]
+        return self.caller.quest_handler.is_finished(quest_key) or self.caller.quest_handler.is_in_progress(quest_key)
+
+
+class FuncIsQuestAccomplished(StatementFunction):
+    """
+    If the caller has accepted or finished the quest
+
+    Args:
+        args[0]: (string) quest's key
+
+    Returns:
+        boolean result
+    """
+
+    key = "is_quest_accomplished"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        quest_key = self.args[0]
+        return self.caller.quest_handler.is_accomplished(quest_key)
+
+
 class FuncIsQuestInProgress(StatementFunction):
     """
     If the caller is doing specified quest.
