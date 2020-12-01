@@ -13,11 +13,11 @@ just overloads its hooks to have it perform its function.
 """
 
 from evennia.scripts.scripts import DefaultScript
-from muddery.server.typeclasses.base_typeclass import BaseTypeclass
+from muddery.server.bricks.base_brick import BaseBrick
 from muddery.server.utils.localized_strings_handler import _
 
 
-class MudderyScript(BaseTypeclass, DefaultScript):
+class MudderyScript(BaseBrick, DefaultScript):
     """
     A script type is customized by redefining some or all of its hook
     methods and variables.
@@ -90,8 +90,8 @@ class MudderyScript(BaseTypeclass, DefaultScript):
       at_server_shutdown() - called at a full server shutdown.
 
     """
-    typeclass_key = "SCRIPT"
-    typeclass_name = _("Script", "typeclasses")
+    brick_key = "SCRIPT"
+    brick_name = _("Script", "bricks")
     model_name = ""
 
     def at_stop(self):

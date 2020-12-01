@@ -13,7 +13,7 @@ just overloads its hooks to have it perform its function.
 """
 
 import time
-from muddery.server.typeclasses.scripts import MudderyScript
+from muddery.server.bricks.scripts import MudderyScript
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.dao.worlddata import WorldData
 

@@ -17,15 +17,15 @@ from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.loot_list import QuestLootList
 from muddery.server.dao.quest_objectives import QuestObjectives
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import BRICK
 
 
-class MudderyQuest(TYPECLASS("OBJECT")):
+class MudderyQuest(BRICK("OBJECT")):
     """
     This class controls quest's objectives. Hooks are called when a character doing some things.
     """
-    typeclass_key = "QUEST"
-    typeclass_name = _("Quest", "typeclasses")
+    brick_key = "QUEST"
+    brick_name = _("Quest", "bricks")
     model_name = "quests"
 
     # initialize loot handler in a lazy fashion
@@ -132,7 +132,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                     
                     # Get the name of the objective object.
                     object_key = objective["object"]
-                    model_name = TYPECLASS("OBJECT").model_name
+                    model_name = BRICK("OBJECT").model_name
 
                     # Get record.
                     try:
@@ -157,7 +157,7 @@ class MudderyQuest(TYPECLASS("OBJECT")):
 
                     # Get the name of the objective character.
                     object_key = self.objectives[ordinal]["object"]
-                    model_name = TYPECLASS("OBJECT").model_name
+                    model_name = BRICK("OBJECT").model_name
 
                     # Get record.
                     try:

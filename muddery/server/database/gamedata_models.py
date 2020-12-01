@@ -14,6 +14,9 @@ class BaseAttributes(models.Model):
     Game's basic settings.
     NOTE: Only uses the first record!
     """
+    # object's type
+    obj_type = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
     # object's id
     obj_id = models.PositiveIntegerField(db_index=True)
 
@@ -29,4 +32,4 @@ class BaseAttributes(models.Model):
         app_label = "gamedata"
         verbose_name = "Object Attribute"
         verbose_name_plural = "Object Attributes"
-        unique_together = ("obj_id", "key")
+        unique_together = ("obj_type", "obj_id", "key")

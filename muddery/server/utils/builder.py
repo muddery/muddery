@@ -8,7 +8,7 @@ from evennia.utils import create, search, logger
 from evennia.comms.models import ChannelDB
 from muddery.server.utils import utils
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
+from muddery.server.mappings.brick_set import TYPECLASS, TYPECLASS_SET
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.world_areas import WorldAreas
 from muddery.server.dao.world_rooms import WorldRooms

@@ -21,7 +21,7 @@ from evennia import DefaultScript
 from evennia.utils import logger
 from muddery.server.utils import defines
 from muddery.server.dao.worlddata import WorldData
-from muddery.server.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
+from muddery.server.mappings.brick_set import TYPECLASS, TYPECLASS_SET
 
 
 class CStatus(Enum):

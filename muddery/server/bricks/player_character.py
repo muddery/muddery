@@ -24,11 +24,11 @@ from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.defines import ConversationType
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.default_objects import DefaultObjects
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import BRICK
 from muddery.server.utils import defines
 
 
-class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
+class MudderyPlayerCharacter(BRICK("CHARACTER")):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:
@@ -47,8 +47,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     has connected" message echoed to the room
 
     """
-    typeclass_key = "PLAYER_CHARACTER"
-    typeclass_name = _("Player Character", "typeclasses")
+    brick_key = "PLAYER_CHARACTER"
+    brick_name = _("Player Character", "bricks")
     model_name = "player_characters"
 
     # initialize all handlers in a lazy fashion
@@ -409,8 +409,14 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         # add new default objects
         obj_list = []
+        inventory = self.state.load("inventory")
         for object_record in object_records:
-            if not self.search_inventory(object_record.object):
+            found = False
+            for item in inventory:
+                if object_record.object == item["key"]:
+                    found = True
+                    break
+            if not found:
                 obj_list.append({
                     "object": object_record.object,
                     "level": object_record.level,
@@ -448,11 +454,11 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         changed = False
         state_inventory = self.state.load("inventory", [])
         for item in state_inventory:
-            key = item.get_data_key()
+            key = item["key"]
             if key in current_inventory:
                 # if the character has more than one item of the same kind,
                 # get the smallest stack.
-                if current_inventory[key].get_number() > item.get_number():
+                if current_inventory[key]["number"] > item["number"]:
                     current_inventory[key] = item
             else:
                 current_inventory[key] = item
@@ -466,24 +472,23 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             number = available
             accepted = 0
             reject = False
-            unique = False
+
+            object_record = None
+            try:
+                common_model_name = BRICK("COMMON_OBJECT").model_name
+                object_record = WorldData.get_table_data(common_model_name, key=key)
+                object_record = object_record[0]
+            except Exception as e:
+                pass
+
+            if not object_record:
+                # can not find object's data record
+                continue
 
             if number == 0:
                 # it is an empty object
                 if key in current_inventory:
                     # already has this object
-                    continue
-
-                object_record = None
-                try:
-                    common_model_name = TYPECLASS("COMMON_OBJECT").model_name
-                    object_record = WorldData.get_table_data(common_model_name, key=key)
-                    object_record = object_record[0]
-                except Exception as e:
-                    pass
-
-                if not object_record:
-                    # can not find object's data record
                     continue
 
                 if object_record.can_remove:
@@ -492,37 +497,35 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
                 # create a new content
                 new_obj = build_object(key, level=level)
-                if not new_obj:
-                    reject = _("Can not get %s.") % key
+                if new_obj:
+                    # move the new object to the inventory
+                    state_inventory.append({
+                        "key": key,
+                        "dbref": new_obj.dbref,
+                        "obj": new_obj,
+                        "number": number,
+                    })
+                    changed = True
                 else:
-                    name = new_obj.get_name()
-                    icon = new_obj.icon
+                    reject = _("Can not get %s.") % key
 
-                # move the new object to the inventory
-                state_inventory.append(new_obj)
-                changed = True
             else:
                 # common number
                 # if already has this kind of object
                 if key in current_inventory:
-                    # add to current object
-                    name = current_inventory[key].name
-                    icon = current_inventory[key].icon
-                    unique = current_inventory[key].unique
-
                     add = number
-                    if add > current_inventory[key].max_stack - current_inventory[key].get_number():
-                        add = current_inventory[key].max_stack - current_inventory[key].get_number()
+                    if add > object_record.max_stack - current_inventory[key]["number"]:
+                        add = object_record.max_stack - current_inventory[key]["number"]
 
                     if add > 0:
                         # increase stack number
-                        current_inventory[key].increase_num(add)
+                        current_inventory[key]["number"] += add
                         number -= add
                         accepted += add
 
                 # if does not have this kind of object, or stack is full
                 while number > 0:
-                    if unique:
+                    if object_record.unique:
                         # can not have more than one unique objects
                         reject = _("Can not get more %s.") % name
                         break
@@ -533,30 +536,27 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                         reject = _("Can not get %s.") % name
                         break
 
-                    name = new_obj.get_name()
-                    icon = new_obj.icon
-                    unique = new_obj.unique
-
-                    # move the new object to the inventory
-                    state_inventory.append(new_obj)
-                    changed = True
-
                     # Get the number that actually added.
                     add = number
-                    if add > new_obj.max_stack:
-                        add = new_obj.max_stack
+                    if add > object_record.max_stack:
+                        add = object_record.max_stack
 
-                    if add <= 0:
-                        break
+                    # move the new object to the inventory
+                    state_inventory.append({
+                        "key": key,
+                        "dbref": new_obj.dbref,
+                        "obj": new_obj,
+                        "number": add,
+                    })
+                    changed = True
 
-                    new_obj.increase_num(add)
                     number -= add
                     accepted += add
 
             objects.append({
-                "key": key,
-                "name": name,
-                "icon": icon,
+                "key": object_record.key,
+                "name": object_record.name,
+                "icon": object_record.icon,
                 "number": accepted,
                 "reject": reject,
             })
@@ -587,13 +587,13 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Returns:
             int: object number
         """
-        objects = self.search_inventory(obj_key)
+        inventory = self.state.load("inventory")
 
         # get total number
         sum = 0
-        for obj in objects:
-            obj_num = obj.get_number()
-            sum += obj_num
+        for item in inventory:
+            if obj_key == item["key"]:
+                sum += item["number"]
 
         return sum
 
@@ -612,7 +612,8 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             If the character does not have this object, the return will be always true,
             despite of the number!
         """
-        objects = self.search_inventory(obj_key)
+        inventory = self.state.load("inventory")
+
 
         if not objects:
             return True
@@ -637,28 +638,29 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         Returns:
             result: (string) the description of the result
         """
-        obj = None
+        item = None
         inventory = self.state.load("inventory", [])
-        for item in inventory:
-            if item.dbref == obj_dbref:
-                obj = item
-        if not obj:
+        for i in inventory:
+            if i["obj"].dbref == obj_dbref:
+                item = i["obj"]
+                break
+        if not item:
             raise MudderyError(_("Can not find this object."))
 
-        if obj.get_number() < number:
+        if item["number"] < number:
             return _("Not enough number.")
 
         # take effect
         try:
-            result, used = obj.take_effect(self, number)
+            result, used = item["obj"].take_effect(self, number)
             if used > 0:
                 # remove used object
-                self.remove_object(obj.get_data_key(), used)
+                self.remove_object(item["obj"].get_data_key(), used)
 
             self.show_inventory()
             return result
         except Exception as e:
-            ostring = "Can not use %s: %s" % (obj.get_data_key(), e)
+            ostring = "Can not use %s: %s" % (item["obj"].get_data_key(), e)
             logger.log_tracemsg(ostring)
 
         return _("No effect.")

@@ -7,17 +7,17 @@ The DialogueHandler maintains a pool of dialogues.
 
 from evennia.utils import logger
 from muddery.server.utils.builder import build_object
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import BRICK
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.dao.shop_goods import ShopGoods
 
 
-class MudderyShop(TYPECLASS("OBJECT")):
+class MudderyShop(BRICK("OBJECT")):
     """
     A shop.
     """
-    typeclass_key = "SHOP"
-    typeclass_name = _("Shop", "typeclasses")
+    brick_key = "SHOP"
+    brick_name = _("Shop", "bricks")
     model_name = "shops"
 
     def at_object_creation(self):

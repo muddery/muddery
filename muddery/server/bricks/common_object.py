@@ -4,11 +4,11 @@ CommonObject is the object that players can put into their inventory.
 """
 
 from muddery.server.utils.exception import MudderyError
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import BRICK
 from muddery.server.utils.localized_strings_handler import _
 
 
-class MudderyCommonObject(TYPECLASS("OBJECT")):
+class MudderyCommonObject(BRICK("OBJECT")):
     """
     This is a common object. Players can put it in their inventories.
     
@@ -18,8 +18,8 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
     It has two additional properties: max_stack(int) and unique(bool). They decide the number
     of the object that a player can put in his inventory.
     """
-    typeclass_key = "COMMON_OBJECT"
-    typeclass_name = _("Common Object", "typeclasses")
+    brick_key = "COMMON_OBJECT"
+    brick_name = _("Common Object", "bricks")
     model_name = "common_objects"
 
     def after_data_loaded(self):
@@ -108,13 +108,13 @@ class MudderyCommonObject(TYPECLASS("OBJECT")):
         return _("No effect.")
 
 
-class MudderyFood(TYPECLASS("COMMON_OBJECT")):
+class MudderyFood(BRICK("COMMON_OBJECT")):
     """
     This is a food. Players can use it to change their properties, such as hp, mp,
     strength, etc.
     """
-    typeclass_key = "FOOD"
-    typeclass_name = _("Food", "typeclasses")
+    brick_key = "FOOD"
+    brick_name = _("Food", "bricks")
     model_name = "foods"
 
     def take_effect(self, user):
@@ -160,13 +160,13 @@ class MudderyFood(TYPECLASS("COMMON_OBJECT")):
         return commands
 
 
-class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
+class MudderyEquipment(BRICK("COMMON_OBJECT")):
     """
     This is a equipment. Players can equip it to change their properties, such as attack, defence,
     etc.
     """
-    typeclass_key = "EQUIPMENT"
-    typeclass_name = _("Equipment", "typeclasses")
+    brick_key = "EQUIPMENT"
+    brick_name = _("Equipment", "bricks")
     model_name = "equipments"
 
     def after_data_loaded(self):
@@ -249,12 +249,12 @@ class MudderyEquipment(TYPECLASS("COMMON_OBJECT")):
         return commands
 
 
-class MudderySkillBook(TYPECLASS("COMMON_OBJECT")):
+class MudderySkillBook(BRICK("COMMON_OBJECT")):
     """
     This is a skill book. Players can use it to learn a new skill.
     """
-    typeclass_key = "SKILL_BOOK"
-    typeclass_name = _("Skill Book", "typeclasses")
+    brick_key = "SKILL_BOOK"
+    brick_name = _("Skill Book", "bricks")
     model_name = "skill_books"
 
     def get_available_commands(self, caller):

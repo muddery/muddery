@@ -17,7 +17,7 @@ from evennia import create_script
 from evennia.typeclasses.models import DbHolder
 from evennia.utils import logger, search
 from evennia.utils.utils import lazy_property, class_from_module
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import BRICK
 from muddery.server.dao.equipment_positions import EquipmentPositions
 from muddery.server.dao.loot_list import CharacterLootList
 from muddery.server.dao.object_properties import ObjectProperties
@@ -32,7 +32,7 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import delete_object
 
 
-class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
+class MudderyCharacter(BRICK("OBJECT"), DefaultCharacter):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:
@@ -57,8 +57,8 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         equipments
         closed_events
     """
-    typeclass_key = "CHARACTER"
-    typeclass_name = _("Character", "typeclasses")
+    brick_key = "CHARACTER"
+    brick_name = _("Character", "bricks")
     model_name = "characters"
 
     # initialize loot handler in a lazy fashion

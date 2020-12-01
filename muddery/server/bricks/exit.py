@@ -10,10 +10,10 @@ for allowing Characters to traverse the exit to its destination.
 from evennia.objects.objects import DefaultExit
 from muddery.server.utils import defines
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import BRICK
 
 
-class MudderyExit(TYPECLASS("OBJECT"), DefaultExit):
+class MudderyExit(BRICK("OBJECT"), DefaultExit):
     """
     Exits are connectors between rooms. Exits are normal Objects except
     they defines the `destination` property. It also does work in the
@@ -36,8 +36,8 @@ class MudderyExit(TYPECLASS("OBJECT"), DefaultExit):
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
     """
-    typeclass_key = "EXIT"
-    typeclass_name = _("Exit", "typeclasses")
+    brick_key = "EXIT"
+    brick_name = _("Exit", "bricks")
     model_name = "world_exits"
 
     def after_data_loaded(self):

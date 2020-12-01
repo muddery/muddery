@@ -22,18 +22,18 @@ from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.desc_handler import DESC_HANDLER
-from muddery.server.typeclasses.base_typeclass import BaseTypeclass
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.bricks.base_brick import BaseBrick
+from muddery.server.mappings.brick_set import BRICK
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.object_properties import ObjectProperties
 
 
-class MudderyBaseObject(BaseTypeclass, DefaultObject):
+class MudderyBaseObject(BaseBrick, DefaultObject):
     """
     This object loads attributes from world data on init automatically.
     """
-    typeclass_key = "OBJECT"
-    typeclass_name = _("Object", "typeclasses")
+    brick_key = "OBJECT"
+    brick_name = _("Object", "bricks")
     model_name = "objects"
 
     # initialize all handlers in a lazy fashion
@@ -103,6 +103,14 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         "Stop accidental deletion."
         raise Exception("Cannot delete the custom properties object!")
     prop = property(__prop_get, __prop_set, __prop_del)
+
+    def get_id(self):
+        """
+        Get the object's id.
+
+        :return: (number) object's id
+        """
+        return self.id
 
     def at_object_creation(self):
         """
@@ -280,7 +288,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         key = self.get_data_key()
         if key:
-            base_model = TYPECLASS("OBJECT").model_name
+            base_model = BRICK("OBJECT").model_name
 
             # Get the object's base data
             self.load_base_data(base_model, key)
@@ -410,16 +418,16 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         self.state.save("level", level)
         self.load_custom_properties(level)
 
-    def set_typeclass(self, typeclass_key):
+    def set_typeclass(self, brick_key):
         """
         Set object's typeclass.
         
         Args:
-            typeclass_key: (string) Typeclass's key.
+            brick_key: (string) Typeclass's key.
         """
-        typeclass_cls = TYPECLASS(typeclass_key)
+        typeclass_cls = BRICK(brick_key)
         if not typeclass_cls:
-            logger.log_errmsg("Can not get %s's typeclass: %s." % (self.get_data_key(), typeclass_key))
+            logger.log_errmsg("Can not get %s's typeclass: %s." % (self.get_data_key(), brick_key))
             return
         
         if type(self) == typeclass_cls:

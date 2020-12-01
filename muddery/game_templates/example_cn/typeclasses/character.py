@@ -10,7 +10,7 @@ creation commands.
 
 import traceback
 from evennia.utils import logger
-from muddery.server.typeclasses.character import MudderyCharacter
+from muddery.server.bricks.character import MudderyCharacter
 
 
 class Character(MudderyCharacter):

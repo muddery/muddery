@@ -12,13 +12,13 @@ from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.dao.properties_dict import PropertiesDict
 
 
-class BaseTypeclass(object):
+class BaseBrick(object):
     """
-    This base typeclass.
+    The base brick.
     """
-    typeclass_key = ""
-    typeclass_name = ""
-    typeclass_desc = ""
+    brick_key = ""
+    brick_name = ""
+    brick_desc = ""
 
     # object's data model
     model_name = ""
@@ -26,14 +26,14 @@ class BaseTypeclass(object):
     @classmethod
     def get_models(cls):
         """
-        Get this typeclass's models.
+        Get this brick's models.
         """
         if "_all_models_" not in cls.__dict__:
             cls._all_models_ = []
 
-            if cls.typeclass_key:
+            if cls.brick_key:
                 if not cls.model_name:
-                    raise ValueError("%s's model name is empty." % cls.typeclass_key)
+                    raise ValueError("%s's model name is empty." % cls.brick_key)
 
                 for c in cls.__bases__:
                     if hasattr(c, "get_models"):
@@ -52,12 +52,12 @@ class BaseTypeclass(object):
         if "_all_properties_" not in cls.__dict__:
             cls._all_properties_ = {}
 
-            if cls.typeclass_key:
+            if cls.brick_key:
                 for c in cls.__bases__:
                     if hasattr(c, "get_properties_info"):
                         cls._all_properties_.update(c.get_properties_info())
 
-                records = PropertiesDict.get_properties(cls.typeclass_key)
+                records = PropertiesDict.get_properties(cls.brick_key)
                 for record in records:
                     cls._all_properties_[record.property] = {"name": record.name,
                                                              "desc": record.desc,
@@ -68,7 +68,7 @@ class BaseTypeclass(object):
 
     @lazy_property
     def states_handler(self):
-        return ObjectStatesHandler(self)
+        return ObjectStatesHandler(self.get_type(), self.get_id())
 
     # @property state stores object's running state.
     def __state_get(self):
@@ -93,3 +93,19 @@ class BaseTypeclass(object):
         raise Exception("Cannot delete the state object!")
 
     state = property(__state_get, __state_set, __state_del)
+
+    def get_type(self):
+        """
+        Get the object's type.
+
+        :return: (string) object's type
+        """
+        return self.brick_key
+
+    def get_id(self):
+        """
+        Get the object's id.
+
+        :return: (number) object's id
+        """
+        return 0

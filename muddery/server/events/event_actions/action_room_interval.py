@@ -6,7 +6,7 @@ from evennia import create_script
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.typeclasses.script_room_interval import ScriptRoomInterval
+from muddery.server.bricks.script_room_interval import ScriptRoomInterval
 
 
 class ActionRoomInterval(BaseEventAction):

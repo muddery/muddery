@@ -5,7 +5,7 @@ Query and deal common tables.
 from django.apps import apps
 from django.conf import settings
 from django.db import connections
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import TYPECLASS
 from muddery.server.utils.exception import MudderyError, ERR
 
 

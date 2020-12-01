@@ -6,16 +6,16 @@ Shop goods is the object in shops. They have some special attributes to record g
 from evennia.utils import logger
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
+from muddery.server.mappings.brick_set import BRICK, BRICK_SET
 
 
-class MudderyShopGoods(TYPECLASS("OBJECT")):
+class MudderyShopGoods(BRICK("OBJECT")):
     """
     This is a shop goods. Shops show these objects to players. It contains a common object
     to sell and additional shop information.
     """
-    typeclass_key = "SHOP_GOODS"
-    typeclass_name = _("Goods", "typeclasses")
+    brick_key = "SHOP_GOODS"
+    brick_name = _("Goods", "bricks")
     model_name = "shop_goods"
 
     def at_object_creation(self):
@@ -52,7 +52,7 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
         # get price unit information
         try:
             # Get record.
-            obj_model_name = TYPECLASS("OBJECT").model_name
+            obj_model_name = BRICK("OBJECT").model_name
             unit_record = WorldData.get_table_data(obj_model_name, key=self.unit_key)
             unit_record = unit_record[0]
         except Exception as e:
@@ -65,7 +65,7 @@ class MudderyShopGoods(TYPECLASS("OBJECT")):
         try:
             obj_record = WorldData.get_table_data(obj_model_name, key=self.goods_key)
             obj_record = obj_record[0]
-            goods_models = TYPECLASS_SET.get_class_modeles(obj_record.typeclass)
+            goods_models = BRICK_SET.get_class_modeles(obj_record.typeclass)
             goods_data = WorldData.get_tables_data(goods_models, key=self.goods_key)
         except Exception as e:
             logger.log_errmsg("Can not find goods %s." % self.goods_key)

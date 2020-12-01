@@ -11,22 +11,22 @@ creation commands.
 from evennia.utils import logger
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import BRICK
 from muddery.server.dao.npc_dialogues import NPCDialogues
 from muddery.server.dao.npc_shops import NPCShops
 from muddery.server.utils import defines
 from muddery.server.utils.localized_strings_handler import _
 
 
-class MudderyBaseNPC(TYPECLASS("CHARACTER")):
+class MudderyBaseNPC(BRICK("CHARACTER")):
     """
     The character not controlled by players.
 
     States:
         shops
     """
-    typeclass_key = "BASE_NPC"
-    typeclass_name = _("Base None Player Character", "typeclasses")
+    brick_key = "BASE_NPC"
+    brick_name = _("Base None Player Character", "bricks")
     model_name = "base_npcs"
 
     def at_object_creation(self):

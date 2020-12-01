@@ -16,7 +16,7 @@ from muddery.worldeditor.dao import general_query_mapper, model_mapper
 from muddery.worldeditor.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
-from muddery.server.mappings.typeclass_set import TYPECLASS_SET, TYPECLASS
+from muddery.server.mappings.brick_set import TYPECLASS_SET, TYPECLASS
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.utils import defines
 from muddery.server.utils.exception import MudderyError, ERR

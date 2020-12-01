@@ -10,15 +10,15 @@ import time, re
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import BRICK
 
 
-class MudderySkill(TYPECLASS("OBJECT")):
+class MudderySkill(BRICK("OBJECT")):
     """
     A skill of the character.
     """
-    typeclass_key = "SKILL"
-    typeclass_name = _("Skill", "typeclasses")
+    brick_key = "SKILL"
+    brick_name = _("Skill", "bricks")
     model_name = "skills"
 
     msg_escape = re.compile(r'%[%|n|c|t]')

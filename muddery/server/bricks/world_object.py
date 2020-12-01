@@ -6,11 +6,11 @@ MudderyObject is an object which can load it's data automatically.
 
 """
 
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import BRICK
 from muddery.server.utils.localized_strings_handler import _
 
 
-class MudderyWorldObject(TYPECLASS("OBJECT")):
-    typeclass_key = "WORLD_OBJECT"
-    typeclass_name = _("World Object", "typeclasses")
+class MudderyWorldObject(BRICK("OBJECT")):
+    brick_key = "WORLD_OBJECT"
+    brick_name = _("World Object", "bricks")
     model_name = "world_objects"

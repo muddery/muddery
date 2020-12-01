@@ -10,9 +10,9 @@ from evennia.utils.utils import class_from_module
 from muddery.server.utils.utils import get_module_path
 
 
-class TypeclassSet(object):
+class BrickSet(object):
     """
-    All available typeclasses.
+    All available classes.
     """
     def __init__(self):
         self.module_dict = {}
@@ -21,16 +21,16 @@ class TypeclassSet(object):
 
         self.all_loaded = False
         self.match_class = re.compile(r'^class\s+(\w+)\s*.*$')
-        self.match_key = re.compile(r""" {4}typeclass_key\s*=\s*("|')(.+)("|')\s*$""")
+        self.match_key = re.compile(r""" {4}brick_key\s*=\s*("|')(.+)("|')\s*$""")
 
-    def load_files(self, typeclass_path):
+    def load_files(self, brick_path):
         """
         Get typeclasses' file path.
         """
-        if not typeclass_path:
+        if not brick_path:
             return
 
-        module = import_module(typeclass_path)
+        module = import_module(brick_path)
         base_path = module.__path__
         if not base_path:
             return
@@ -54,7 +54,7 @@ class TypeclassSet(object):
                             if match:
                                 key_name = match.group(2)
 
-                                module_path = typeclass_path
+                                module_path = brick_path
                                 if base_path == root:
                                     module_path += "." + name + "." + class_name
                                 else:
@@ -178,7 +178,7 @@ class TypeclassSet(object):
         return info
 
 
-TYPECLASS_SET = TypeclassSet()
-TYPECLASS = TYPECLASS_SET.get
-TYPECLASS_SET.load_files(settings.PATH_TYPECLASSES_BASE)
-TYPECLASS_SET.load_files(settings.PATH_TYPECLASSES_CUSTOM)
+BRICK_SET = BrickSet()
+BRICK = BRICK_SET.get
+BRICK_SET.load_files(settings.PATH_BRICKS_BASE)
+BRICK_SET.load_files(settings.PATH_BRICKS_CUSTOM)

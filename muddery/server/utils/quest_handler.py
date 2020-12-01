@@ -12,7 +12,7 @@ from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.quest_dependencies import QuestDependencies
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import TYPECLASS
 
 
 class QuestHandler(object):

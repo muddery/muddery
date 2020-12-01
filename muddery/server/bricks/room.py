@@ -12,12 +12,12 @@ from evennia.objects.objects import DefaultRoom
 from muddery.server.utils import defines
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.dao.image_resource import ImageResource
-from muddery.server.mappings.typeclass_set import TYPECLASS
+from muddery.server.mappings.brick_set import BRICK
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.localized_strings_handler import _
 
 
-class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
+class MudderyRoom(BRICK("OBJECT"), DefaultRoom):
     """
     Rooms are like any Object, except their location is None
     (which is default). They also use basetype_setup() to
@@ -27,8 +27,8 @@ class MudderyRoom(TYPECLASS("OBJECT"), DefaultRoom):
     See examples/object.py for a list of
     properties and methods available on all Objects.
     """
-    typeclass_key = "ROOM"
-    typeclass_name = _("Room", "typeclasses")
+    brick_key = "ROOM"
+    brick_name = _("Room", "bricks")
     model_name = "world_rooms"
 
     def at_object_creation(self):

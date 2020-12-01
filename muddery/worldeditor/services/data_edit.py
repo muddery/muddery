@@ -10,7 +10,7 @@ from muddery.worldeditor.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS
 from muddery.worldeditor.dao.system_data_mapper import SYSTEM_DATA
 from muddery.worldeditor.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.worldeditor.mappings.form_set import FORM_SET
-from muddery.server.mappings.typeclass_set import TYPECLASS, TYPECLASS_SET
+from muddery.server.mappings.brick_set import TYPECLASS, TYPECLASS_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
