@@ -189,7 +189,6 @@ def build_unique_objects(objects_data, type_name, caller=None):
                 object_record = object_record[0]
                 typeclass_path = TYPECLASS_SET.get_module(object_record.typeclass)
                 obj = create.create_object(typeclass_path, object_record.name)
-                obj.after_creation()
                 count_create += 1
             except Exception as e:
                 ostring = "Can not create obj %s: %s" % (record.key, e)
@@ -201,6 +200,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
 
             try:
                 obj.set_data_key(record.key)
+                obj.after_creation()
                 utils.set_obj_unique_type(obj, type_name)
             except Exception as e:
                 ostring = "Can not set data info to obj %s: %s" % (record.key, e)
