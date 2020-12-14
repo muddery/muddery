@@ -38,16 +38,21 @@ class ConditionFuncSet(BaseStatementFuncSet):
         """
         Load statement functions here.
         """
+        self.add(condition.FuncIsQuestAccepted)
+        self.add(condition.FuncIsQuestAccomplished)
         self.add(condition.FuncIsQuestInProgress)
         self.add(condition.FuncCanProvideQuest)
         self.add(condition.FuncIsQuestFinished)
+
         self.add(condition.FuncHasObject)
         self.add(condition.FuncObjectsEqualTo)
         self.add(condition.FuncObjectsMoreThan)
         self.add(condition.FuncObjectsLessThan)
+
         self.add(condition.FuncSkillEqualTo)
         self.add(condition.FuncSkillMoreThan)
         self.add(condition.FuncSkillLessThan)
+
         self.add(condition.FuncAttributeEqualTo)
         self.add(condition.FuncAttributeMoreThan)
         self.add(condition.FuncAttributeLessThan)
