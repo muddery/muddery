@@ -28,6 +28,18 @@ class game_settings(BaseModels.game_settings):
 
 # ------------------------------------------------------------
 #
+# Honour combat's settings
+#
+# ------------------------------------------------------------
+class honour_settings(BaseModels.honour_settings):
+    """
+    Honour combat's settings
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
 # all objects
 #
 # ------------------------------------------------------------

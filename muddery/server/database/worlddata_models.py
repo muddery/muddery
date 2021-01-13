@@ -107,6 +107,36 @@ class game_settings(models.Model):
 
 
 # ------------------------------------------------------------
+#
+# Game's basic settings.
+#
+# ------------------------------------------------------------
+class honour_settings(models.Model):
+    """
+    honour combat's settings.
+    NOTE: Only uses the first record!
+    """
+    # The minimum level that a player can attend a honour combat.
+    min_honour_level = models.PositiveIntegerField(blank=True, default=1)
+
+    # The number of top honour players that a player can see.
+    top_rankings_number = models.PositiveIntegerField(blank=True, default=10)
+
+    # The number of neighbor players on the honour list that a player can see.
+    nearest_rankings_number = models.PositiveIntegerField(blank=True, default=10)
+
+    # The number of neighbor players on the honour list that a player can fight.
+    honour_opponents_number = models.PositiveIntegerField(blank=True, default=100)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Honour Setting"
+        verbose_name_plural = "Honour Settings"
+
+
+# ------------------------------------------------------------
 # Object's base
 # ------------------------------------------------------------
 class BaseObjects(models.Model):

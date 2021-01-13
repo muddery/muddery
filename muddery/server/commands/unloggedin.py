@@ -18,6 +18,7 @@ from muddery.server.utils.builder import create_player, create_character
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.dao.equipment_positions import EquipmentPositions
+from muddery.server.dao.honour_settings import HonourSettings
 
 
 # limit symbol import for API
@@ -516,6 +517,7 @@ class CmdUnconnectedLoginStart(BaseCommand):
         "Show the connect screen."
         game_name = GAME_SETTINGS.get("game_name")
         connection_screen = GAME_SETTINGS.get("connection_screen")
+        honour_settings = HonourSettings.get_first_data()
         records = EquipmentPositions.all()
         equipment_pos = [{
             "key": r.key,
@@ -526,5 +528,6 @@ class CmdUnconnectedLoginStart(BaseCommand):
         self.caller.msg({
             "game_name": game_name,
             "conn_screen": connection_screen,
-            "equipment_pos": equipment_pos,}
-        )
+            "equipment_pos": equipment_pos,
+            "min_honour_level": honour_settings.min_honour_level,
+        })

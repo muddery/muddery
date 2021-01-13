@@ -6,6 +6,7 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 """
 
 import math
+import random
 from django.conf import settings
 from evennia.utils import logger
 from evennia import create_script
@@ -15,6 +16,9 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.utils import search_obj_data_key
 from muddery.server.utils.defines import ConversationType
+from muddery.server.utils.match_queue_handler import MATCH_QUEUE_HANDLER
+from muddery.server.dao.honours_mapper import HONOURS_MAPPER
+from muddery.server.dao.honour_settings import HonourSettings
 
 
 class CmdLook(BaseCommand):
@@ -790,6 +794,190 @@ class CmdAttack(BaseCommand):
         
         caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name())
         target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name())
+
+
+# ------------------------------------------------------------
+# Make a match.
+# ------------------------------------------------------------
+class CmdMakeMatch(BaseCommand):
+    """
+    Make a match between the caller and a proper opponent.
+
+    Usage:
+    {"cmd": "make_match",
+     "args": None
+    }
+    """
+    key = "make_match"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+
+        honour_settings = HonourSettings.get_first_data()
+        if caller.db.level < honour_settings.min_honour_level:
+            caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
+            return
+
+        try:
+            # getcandidates
+            char_list = HONOURS_MAPPER.get_characters(caller, honour_settings.honour_opponents_number)
+            characters = [caller.search_dbref("#%s" % char_id) for char_id in char_list]
+            candidates = [char for char in characters if char and not char.is_in_combat()]
+            if candidates:
+                match = random.choice(candidates)
+                # create a new combat handler
+                chandler = create_script(settings.HONOUR_COMBAT_HANDLER)
+                # set combat team and desc
+                chandler.set_combat({1: [match], 2: [caller]}, _("Fight of Honour"), settings.AUTO_COMBAT_TIMEOUT)
+            else:
+                caller.msg({"alert": _("Can not make match.")})
+        except Exception as e:
+            logger.log_err("Find match error: %s" % e)
+            caller.msg({"alert": _("Can not make match.")})
+
+
+# ------------------------------------------------------------
+# Queue up for an honour combat.
+# ------------------------------------------------------------
+class CmdQueueUpCombat(BaseCommand):
+    """
+    Queue up to make a match between the caller and a proper opponent.
+
+    Usage:
+    {"cmd": "queue_up_combat",
+     "args": None
+    }
+    """
+    key = "queue_up_combat"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+        caller = self.caller
+        if not caller:
+            return
+
+        honour_settings = HonourSettings.get_first_data()
+        if caller.db.level < honour_settings.min_honour_level:
+            caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
+            return
+
+        MATCH_QUEUE_HANDLER.add(caller)
+
+
+# ------------------------------------------------------------
+# Queue up for an honour combat.
+# ------------------------------------------------------------
+class CmdQuitCombatQueue(BaseCommand):
+    """
+    Quit the combat queue.
+
+    Usage:
+    {"cmd": "quit_combat_queue",
+     "args": None
+    }
+    """
+    key = "quit_combat_queue"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+
+        MATCH_QUEUE_HANDLER.remove(caller)
+
+
+# ------------------------------------------------------------
+# Confirm an honour combat.
+# ------------------------------------------------------------
+class CmdConfirmCombat(BaseCommand):
+    """
+    Confirm an honour combat.
+
+    Usage:
+    {"cmd": "confirm_combat",
+     "args": None
+    }
+    """
+    key = "confirm_combat"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+
+        MATCH_QUEUE_HANDLER.confirm(caller)
+
+
+# ------------------------------------------------------------
+# Reject an honour combat.
+# ------------------------------------------------------------
+class CmdRejectCombat(BaseCommand):
+    """
+    Reject an honour combat queue.
+
+    Usage:
+    {"cmd": "reject_combat",
+     "args": None
+    }
+    """
+    key = "reject_combat"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+
+        MATCH_QUEUE_HANDLER.reject(caller)
+
+
+# ------------------------------------------------------------
+# Show top rankings
+# ------------------------------------------------------------
+class CmdGetRankings(BaseCommand):
+    """
+    Get top ranking characters.
+
+    Usage:
+        {"cmd": "get_rankings",
+         "args": None
+        }
+    """
+    key = "get_rankings"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        """
+        Get characters rankings.
+
+        Returns:
+            None
+        """
+        caller = self.caller
+        if not caller:
+            return
+
+        caller.show_rankings()
 
 
 #------------------------------------------------------------

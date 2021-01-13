@@ -16,12 +16,24 @@ class system_data(BaseModels.system_data):
 
 # ------------------------------------------------------------
 #
-# game's basic settings
+# Game's basic settings
 #
 # ------------------------------------------------------------
 class game_settings(BaseModels.game_settings):
     """
     Game's basic settings.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# Honour combat's settings
+#
+# ------------------------------------------------------------
+class honour_settings(BaseModels.honour_settings):
+    """
+    Honour combat's settings
     """
     pass
 

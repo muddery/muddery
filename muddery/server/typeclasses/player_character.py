@@ -23,9 +23,12 @@ from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.defines import ConversationType
 from muddery.server.dao.worlddata import WorldData
+from muddery.server.dao.honour_settings import HonourSettings
 from muddery.server.dao.default_objects import DefaultObjects
 from muddery.server.mappings.typeclass_set import TYPECLASS
 from muddery.server.utils import defines
+from muddery.server.dao.honours_mapper import HONOURS_MAPPER
+from muddery.server.utils.match_queue_handler import MATCH_QUEUE_HANDLER
 
 
 class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
@@ -243,7 +246,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                           "name": self.get_name()}
                 self.location.msg_contents({"player_offline":change}, exclude=self)
 
-        #MATCH_QUEUE_HANDLER.remove(self)
+        MATCH_QUEUE_HANDLER.remove(self)
 
     def get_data_key(self, default=""):
         """
@@ -1041,7 +1044,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         opponents = None
         rewards = None
         if self.ndb.combat_handler:
-            result = self.ndb.combat_handler.get_combat_result(self.dbref)
+            result = self.ndb.combat_handler.get_combat_result(self.id)
             if result:
                 status, opponents, rewards = result
 
@@ -1324,3 +1327,21 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         
         self.quest_handler.remove_all()
         return True
+
+    def show_rankings(self):
+        """
+        Show character's rankings.
+        """
+        honour_settings = HonourSettings.get_first_data()
+        top_rankings = HONOURS_MAPPER.get_top_rankings(honour_settings.top_rankings_number)
+        nearest_rankings = HONOURS_MAPPER.get_nearest_rankings(self, honour_settings.nearest_rankings_number)
+
+        rankings = top_rankings
+        rankings.extend([char_id for char_id in nearest_rankings if char_id not in top_rankings])
+
+        characters = [self.search_dbref("#%s" % char_id) for char_id in rankings]
+        data = [{"name": char.get_name(),
+                 "dbref": char.dbref,
+                 "ranking": HONOURS_MAPPER.get_ranking(char),
+                 "honour": HONOURS_MAPPER.get_honour(char)} for char in characters]
+        self.msg({"rankings": data})

@@ -145,7 +145,6 @@ An "emitter" object must have a function
                 cmdmap[cmdid] = callback;
             }
             this.connection.msg(data);
-
         },
 
         // Evennia -> Client.
@@ -278,6 +277,7 @@ An "emitter" object must have a function
 
         var msg = function(data) {
             // send data across the wire. Make sure to json it.
+            console.log("Send: " + JSON.stringify(data));
             websocket.send(JSON.stringify(data));
         };
 

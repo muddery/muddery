@@ -86,7 +86,7 @@ MudderyUtils.prototype = {
     },
 
     time_to_string: function(time) {
-        if (time < 0) {
+        if (!time || time < 0) {
             return "--";
         }
 
@@ -117,6 +117,8 @@ MudderyDataHandler.prototype = {
     name_list: {},
     dialogues_list: [],
     skill_cd_time: {},
+	queue_waiting_begin: 0,
+	queue_interval_id: 0,
 
     getEscapes: function() {
         return {"$PLAYER_NAME": this.character_name};

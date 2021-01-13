@@ -33,6 +33,7 @@
     --title-icon-back: url(../img/icon_back_large.png);
     --title-hp-back: url(../img/hp_back.png);
     --title-hp-bar: url(../img/hp_bar.png);
+    --title-waiting-bar: url(../img/waiting_back.png);
 
     --main-background: url(../img/main_background.png);
     --main-bottom-bar: url(../img/main_bottom_bar.png);
@@ -73,6 +74,12 @@
     --quest-item-back: url(../img/quest_item_back.png);
     --quest-info-back: url(../img/info_back.png);
     --quest-item-button: url(../img/button_small.png);
+
+    --honour-background: url(../img/main_background.png);
+    --honour-title-bar: url(../img/status_title_bar.png);
+    --rank-item-back: url(../img/rank_item.png);
+    --honour-action-back: url(../img/info_back.png);
+    --honour-button: url(../img/button_small.png);
 
     --map-background: url(../img/main_background.png);
     --map-title-bar: url(../img/status_title_bar.png);
@@ -923,6 +930,26 @@ span.bgblack { background-color: black;}
     font-weight: 700;
     vertical-align: text-bottom;
 }
+
+.title-bar .waiting {
+    position: absolute;
+    width: 1.02rem;
+    height: 0.08rem;
+    line-height: 0.08rem;
+    padding: 0 0.06rem 0 0.3rem;
+    right: 0;
+    top: 0.4rem;
+    font-size: 0.08rem;
+    font-weight: 700;
+    color: #555;
+    background: no-repeat center;
+    background-image: var(--title-waiting-bar);
+    background-size: 100% 100%;
+}
+
+.title-bar .waiting>span {
+    margin: 0 0.02rem;
+}
 /************* prompt bar end *************/
 
 /************* scene window begin *************/
@@ -1280,6 +1307,7 @@ span.bgblack { background-color: black;}
 #inventory-window,
 #skills-window,
 #quests-window,
+#honour-window,
 #shop-window,
 #map-window {
     position: relative;
@@ -1293,6 +1321,7 @@ span.bgblack { background-color: black;}
 #inventory-window .title-bar,
 #skills-window .title-bar,
 #quests-window .title-bar,
+#honour-window .title-bar,
 #shop-window .title-bar,
 #map-window .title-bar {
     position: relative;
@@ -1310,10 +1339,11 @@ span.bgblack { background-color: black;}
 
 #inventory-window .inventory-block,
 #skills-window .skills-block,
-#quests-window .quests-block {
+#quests-window .quests-block,
+#honour-window .rank-block {
     width: 100%;
     height: 100%;
-    padding: 0.1rem 0.1rem 2.9rem 0.1rem;
+    padding: 0.1rem 0.1rem 1.9rem 0.1rem;
     text-align: center;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -1322,7 +1352,8 @@ span.bgblack { background-color: black;}
 
 #inventory-window .inventory-list,
 #skills-window .skills-list,
-#quests-window .quests-list {
+#quests-window .quests-list,
+#honour-window .rank-list {
     width: 100%;
     height: 100%;
     margin: 0 auto;
@@ -1349,7 +1380,8 @@ span.bgblack { background-color: black;}
 
 #inventory-window .item-info-block,
 #skills-window .skill-info-block,
-#quests-window .quest-info-block {
+#quests-window .quest-info-block,
+#honour-window .action-block {
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -1367,7 +1399,8 @@ span.bgblack { background-color: black;}
 }
 
 #inventory-window .item-info-left,
-#skills-window .skill-info-left {
+#skills-window .skill-info-left,
+#honour-window .action-block-left {
     float: left;
     width: 0.8rem;
     height: 100%;
@@ -1381,7 +1414,8 @@ span.bgblack { background-color: black;}
 }
 
 #inventory-window .item-info-right,
-#skills-window .skill-info-right {
+#skills-window .skill-info-right,
+#honour-window .action-block-right {
     height: 100%;
     padding: 0.1rem;
     margin-left: 0.8rem;
@@ -1394,7 +1428,8 @@ span.bgblack { background-color: black;}
 
 #inventory-window .item-info .button,
 #skills-window .skill-info .button,
-#quests-window .quest-info .button {
+#quests-window .quest-info .button,
+#honour-window .action-block .button {
     width: 0.6rem;
     height: 0.3rem;
     line-height: 0.3rem;
@@ -1679,6 +1714,89 @@ span.bgblack { background-color: black;}
 /************* quests window end *************/
 
 
+/************* honour window begin *************/
+#honour-window {
+    background-image: var(--honour-background);
+}
+
+#honour-window .title-bar {
+    background-image: var(--honour-title-bar);
+}
+
+#honour-window .rank-item {
+    width: 2.8rem;
+    height: 0.4rem;
+    padding: 0.05rem 0.15rem;
+    margin: 0.05rem auto;
+    line-height: 0.3rem;
+    vertical-align: middle;
+    background-image: var(--rank-item-back);
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#honour-window .rank-item .ranking {
+    font-size: 0.18rem;
+    font-weight: 700;
+    color: #b40;
+}
+
+#honour-window .rank-item .name {
+    font-size: 0.18rem;
+    font-weight: 700;
+    color: #555;
+    margin: 0.2rem;
+}
+
+#honour-window .rank-item .honour {
+    font-size: 0.18rem;
+    font-weight: 700;
+    color: #658;
+    float: right;
+}
+
+#honour-window .action-block {
+    padding: 0.1rem;
+    height: 1.4rem;
+    background-image: var(--honour-action-back);
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#honour-window .action-block .button {
+    background-image: var(--honour-button);
+    margin-top: 0.1rem;
+    text-align: center;
+}
+
+#honour-window .waiting {
+    float: left;
+    height: 100%;
+}
+
+#honour-window .ave-waiting,
+#honour-window .queue-waiting {
+    margin-top: 0.05rem;
+    text-align: left
+}
+
+#honour-window .ave-waiting>span {
+    margin: 0 0.04rem;
+    font-weight: 700;
+    color: #222;
+}
+
+#honour-window .queue-waiting>span {
+    margin: 0 0.04rem;
+    font-weight: 400;
+    color: #444;
+}
+/************* honour window end *************/
+
+
 /************* map window begin *************/
 #map-window {
     background-image: var(--map-background);
@@ -1809,6 +1927,11 @@ span.bgblack { background-color: black;}
     background: no-repeat center;
     background-image: var(--combat-character-icon);
     background-size: 100% 100%;
+}
+
+#combat-window .combat-time {
+    font-size: 0.14rem;
+    color: #fff;
 }
 
 #combat-window .icon-img {

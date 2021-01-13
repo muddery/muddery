@@ -61,6 +61,13 @@ class WorldData(object):
         return cls.tables[table_name].all_data()
 
     @classmethod
+    def get_first_data(cls, table_name):
+        if table_name not in cls.tables:
+            cls.load_table(table_name)
+
+        return cls.tables[table_name].first()
+
+    @classmethod
     def get_table_data(cls, table_name, **kwargs):
         """
         Get records from a table whose key field is the value.

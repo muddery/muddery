@@ -88,6 +88,25 @@
                 </div>
             </div>
 
+            <!-- popup confirm combat window -->
+            <div id="popup-confirm-combat" class="popup-window hidden">
+                <div class="popup-box">
+                    <div class="popup-header">
+                        <button type="button" class="button-close"></button>
+                        <span class="header-text">确认战斗</span>
+                    </div>
+                    <div class="popup-body">
+                        <div class="confirm-body"></div>
+                        <div class="confirm-time"></div>
+                    </div>
+                    <div class="popup-footer">
+                        <button type="button" class="popup-button button-cancel button-short red">取消</button>
+                        <button type="button" class="popup-button button-ok button-short">确定</button>
+                        <button type="button" class="popup-button button-finish button-short hidden">确定</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- popup goods window -->
             <div id="popup-goods" class="popup-window hidden">
                 <div class="popup-box">
@@ -249,6 +268,10 @@
                             <div class="hp">
                                 <div class="hp-bar"></div>
                                 <div class="hp-number"></div>
+                            </div>
+                            <div class="waiting" style="display: none;">
+                                <span>匹配中</span>
+                                <span class="waiting-time"></span>
                             </div>
                         </div>
                         <div class="scene-contents">
@@ -448,6 +471,34 @@
                         </div>
                     </div>
 
+                    <div id="honour-window" class="game-content-window hidden">
+                        <div class="title-bar">
+                            <span class="header-text">荣誉</span>
+                        </div>
+                        <div class="rank-block">
+                            <div class="rank-list">
+                            </div>
+                        </div>
+                        <div class="action-block">
+                            <div class="action-block-queue">
+                                <div class="button button-queue">开始匹配</div>
+                            </div>
+                            <div class="action-block-waiting" style="display: none;">
+                                <div class="waiting">
+                                    <div class="ave-waiting">
+                                        <span>平均等待时间</span>
+                                        <span class="ave-waiting-time"></span>
+                                    </div>
+                                    <div class="queue-waiting">
+                                        <span>匹配中</span>
+                                        <span class="queue-waiting-time"></span>
+                                    </div>
+                                </div>
+                                <div class="button button-quit">退出匹配</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="shop-window" class="game-content-window hidden">
                         <div class="shop">
                             <div class="title-bar">
@@ -519,6 +570,9 @@
                         </li>
                         <li>
                             <button type="button" class="button-quests button-short">任务</button>
+                        </li>
+                        <li>
+                            <button type="button" class="button-honour button-short">荣誉</button>
                         </li>
                     </ul>
                     <div class="button-map tab-bar-button">地图</div>
