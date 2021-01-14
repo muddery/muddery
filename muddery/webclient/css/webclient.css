@@ -1752,7 +1752,7 @@ span.bgblack { background-color: black;}
 
 #honour-window .rank-item .honour {
     font-size: 0.18rem;
-    font-weight: 700;
+    font-weight: 400;
     color: #658;
     float: right;
 }

@@ -2397,10 +2397,6 @@ MudderyScene.prototype.setExitsMap = function(exits, room_name) {
     }
 
     this.drawExitPaths(exits);
-
-    // set height
-    var height = this.select(".exits-table").height();
-    this.select(".exits-block").height(height);
 }
 
 /*
@@ -3417,7 +3413,7 @@ MudderyHonour.prototype.setRankings = function(rankings) {
         // Ranking
         $("<span>")
             .addClass("ranking")
-            .text(data["ranking"])
+            .text("No. " + data["ranking"])
             .appendTo(item);
 
         // Name
