@@ -19,6 +19,7 @@ from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.match_queue_handler import MATCH_QUEUE_HANDLER
 from muddery.server.dao.honours_mapper import HONOURS_MAPPER
 from muddery.server.dao.honour_settings import HonourSettings
+from muddery.server.utils.defines import CombatType
 
 
 class CmdLook(BaseCommand):
@@ -790,7 +791,12 @@ class CmdAttack(BaseCommand):
         chandler = create_script(settings.NORMAL_COMBAT_HANDLER)
         
         # set combat team and desc
-        chandler.set_combat({1: [target], 2:[caller]}, "", 0)
+        chandler.set_combat(
+            combat_type=CombatType.NORMAL,
+            teams={1: [target], 2:[caller]},
+            desc="",
+            timeout=0
+        )
         
         caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name())
         target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name())
@@ -834,7 +840,12 @@ class CmdMakeMatch(BaseCommand):
                 # create a new combat handler
                 chandler = create_script(settings.HONOUR_COMBAT_HANDLER)
                 # set combat team and desc
-                chandler.set_combat({1: [match], 2: [caller]}, _("Fight of Honour"), settings.AUTO_COMBAT_TIMEOUT)
+                chandler.set_combat(
+                    combat_type=CombatType.HONOUR,
+                    teams={1: [match], 2: [caller]},
+                    desc=_("Fight of Honour"),
+                    timeout=settings.AUTO_COMBAT_TIMEOUT
+                )
             else:
                 caller.msg({"alert": _("Can not make match.")})
         except Exception as e:

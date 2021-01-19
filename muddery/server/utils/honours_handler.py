@@ -15,15 +15,20 @@ class HonoursHandler(object):
         Set combat winner's honour.
         """
         total_losers = 0
-        for char in losers:
-            total_losers += HONOURS_MAPPER.get_honour_by_id(char, 0)
-        average_losers = total_losers / len(losers)
+        average_losers = 0
+        if losers:
+            for char in losers:
+                total_losers += HONOURS_MAPPER.get_honour_by_id(char, 0)
+            average_losers = total_losers / len(losers)
         
         total_winners = 0
-        for char in winners:
-            total_winners += HONOURS_MAPPER.get_honour_by_id(char, 0)
-        average_winners = total_winners / len(winners)
-        
+        average_winners = 0
+        if winners:
+            for char in winners:
+                total_winners += HONOURS_MAPPER.get_honour_by_id(char, 0)
+            average_winners = total_winners / len(winners)
+
+        honour_changes = {}
         total_honours = {}
         for char in winners:
             # Calculate the change of the honour.
@@ -44,6 +49,7 @@ class HonoursHandler(object):
             value = self_honour + change
             if value < 0:
                 value = 0
+            honour_changes[char] = value - self_honour
             total_honours[char] = value
 
         for char in losers:
@@ -65,10 +71,13 @@ class HonoursHandler(object):
             value = self_honour - change
             if value < 0:
                 value = 0
+            honour_changes[char] = value - self_honour
             total_honours[char] = value
 
         # Set new honours.
         HONOURS_MAPPER.set_honours(total_honours)
+
+        return honour_changes
 
                 
 # main honours handler

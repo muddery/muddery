@@ -21,12 +21,13 @@ from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
+from muddery.server.utils import defines
 from muddery.server.utils.defines import ConversationType
+from muddery.server.utils.defines import CombatType
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.honour_settings import HonourSettings
 from muddery.server.dao.default_objects import DefaultObjects
 from muddery.server.mappings.typeclass_set import TYPECLASS
-from muddery.server.utils import defines
 from muddery.server.dao.honours_mapper import HONOURS_MAPPER
 from muddery.server.utils.match_queue_handler import MATCH_QUEUE_HANDLER
 
@@ -1003,38 +1004,38 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             else:
                 self.leave_combat()
 
-    def combat_result(self, result, opponents=None, rewards=None):
+    def combat_result(self, combat_type, result, opponents=None, rewards=None):
         """
         Set the combat result.
 
+        :param combat_type: combat's type
         :param result: defines.COMBAT_WIN, defines.COMBAT_LOSE, or defines.COMBAT_DRAW
         :param opponents: combat opponents
         :param rewards: combat rewards
         """
-        if result == defines.COMBAT_LOSE:
-            self.msg({"combat_finish": {"lose": True}})
-        elif result == defines.COMBAT_DRAW:
-            self.msg({"combat_finish": {"draw": True}})
-        elif result == defines.COMBAT_ESCAPED:
-            self.msg({"combat_finish": {"escaped": True}})
-        elif result == defines.COMBAT_WIN:
-            # get rewards
-            exp = rewards["exp"]
-            if exp:
+        combat_result = {
+            "type": combat_type.value,
+            "result": result,
+            "rewards": {},
+        }
+
+        # get rewards
+        if rewards:
+            if "exp" in rewards and rewards["exp"]:
+                exp = rewards["exp"]
                 self.add_exp(exp)
+                combat_result["rewards"]["exp"] = exp
 
             # give objects to winner
-            get_objects = []
-            if rewards["loots"]:
+            if "loots" in rewards and rewards["loots"]:
                 get_objects = self.receive_objects(rewards["loots"], mute=True)
+                combat_result["rewards"]["get_objects"] = get_objects
 
-            self.msg({
-                "combat_finish": {
-                    "win": True,
-                    "exp": exp,
-                    "get_objects": get_objects
-                }
-            })
+            # honours
+            if "honour" in rewards and rewards["honour"]:
+                combat_result["rewards"]["honour"] = rewards["honour"]
+
+        self.msg({"combat_finish": combat_result})
 
     def leave_combat(self):
         """
@@ -1048,18 +1049,26 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             if result:
                 status, opponents, rewards = result
 
-        # trigger events
-        if status == defines.COMBAT_WIN:
-            for opponent in opponents:
-                opponent.event.at_character_kill(self)
-                opponent.event.at_character_die()
+        combat_type = self.ndb.combat_handler.get_combat_type()
 
-            # call quest handler
-            for opponent in opponents:
-                self.quest_handler.at_objective(defines.OBJECTIVE_KILL, opponent.get_data_key())
+        if combat_type == CombatType.NORMAL:
+            # normal combat
+            # trigger events
+            if status == defines.COMBAT_WIN:
+                for opponent in opponents:
+                    opponent.event.at_character_kill(self)
+                    opponent.event.at_character_die()
 
-        elif status == defines.COMBAT_LOSE:
-            self.die(opponents)
+                # call quest handler
+                for opponent in opponents:
+                    self.quest_handler.at_objective(defines.OBJECTIVE_KILL, opponent.get_data_key())
+            elif status == defines.COMBAT_LOSE:
+                self.die(opponents)
+        elif combat_type == CombatType.HONOUR:
+            if status == defines.COMBAT_WIN:
+                self.honour_win()
+            elif status == defines.COMBAT_LOSE:
+                self.honour_lose()
 
         super(MudderyPlayerCharacter, self).leave_combat()
 
@@ -1083,6 +1092,22 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         if self.reborn_time > 0:
             self.msg({"msg": _("You will be reborn in {C%(s)s{n seconds.") % {'s': self.reborn_time}})
+
+    def honour_win(self):
+        """
+        The character win in an honour combat.
+        """
+        # Recover properties.
+        self.recover()
+        self.show_status()
+
+    def honour_lose(self):
+        """
+        The character lost in an honour combat.
+        """
+        # Recover properties.
+        self.recover()
+        self.show_status()
 
     def reborn(self):
         """

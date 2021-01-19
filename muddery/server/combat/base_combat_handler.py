@@ -47,12 +47,12 @@ class BaseCombatHandler(DefaultScript):
         self.persistent = False
 
         """
-        store all combatants
-        {
-            "status": character's status
-            "char": character's object
-        }
-        """
+       store all combatants
+       {
+           "status": character's status
+           "char": character's object
+       }
+       """
         self.characters = {}
 
         # if battle is finished
@@ -90,15 +90,17 @@ class BaseCombatHandler(DefaultScript):
 
         self.set_combat_draw()
 
-    def set_combat(self, teams, desc, timeout):
+    def set_combat(self, combat_type, teams, desc, timeout):
         """
         Add combatant to handler
 
         Args:
+            combat_type: (string) combat's type
             teams: (dict) {<team id>: [<characters>]}
             desc: (string) combat's description
             timeout: (int) Total combat time in seconds. Zero means no limit.
         """
+        self.combat_type = combat_type
         self.desc = desc
         self.timeout = timeout
 
@@ -198,18 +200,7 @@ class BaseCombatHandler(DefaultScript):
             self.timer.cancel()
 
         # get winners and losers
-        winner_team = None
-        for char in self.characters.values():
-            if char["status"] == CStatus.ACTIVE:
-                character = char["char"]
-                if character.is_alive():
-                    winner_team = character.get_team()
-                    break
-
-        self.winners = {char_id: char["char"] for char_id, char in self.characters.items()
-                        if char["status"] == CStatus.ACTIVE and char["char"].get_team() == winner_team}
-        self.losers = {char_id: char["char"] for char_id, char in self.characters.items()
-                       if char["status"] == CStatus.ACTIVE and char["char"].get_team() != winner_team}
+        self.winners, self.losers = self.calc_winners()
 
         for char in self.characters.values():
             char["status"] = CStatus.FINISHED
@@ -231,11 +222,7 @@ class BaseCombatHandler(DefaultScript):
         """
         if caller and caller.id in self.characters:
             self.characters[caller.id]["status"] = CStatus.ESCAPED
-            caller.combat_result(defines.COMBAT_ESCAPED)
-
-            if self.can_finish():
-                # if there is only one team left, kill this handler
-                self.finish()
+            caller.combat_result(self.combat_type, defines.COMBAT_ESCAPED)
 
     def leave_combat(self, character):
         """
@@ -277,7 +264,25 @@ class BaseCombatHandler(DefaultScript):
             None.
         """
         for char in self.characters.values():
-            char["char"].combat_result(defines.COMBAT_DRAW)
+            char["char"].combat_result(self.combat_type, defines.COMBAT_DRAW)
+
+    def calc_winners(self):
+        """
+        Calculate combat winners and losers.
+        """
+        winner_team = None
+        for char in self.characters.values():
+            if char["status"] == CStatus.ACTIVE:
+                character = char["char"]
+                if character.is_alive():
+                    winner_team = character.get_team()
+                    break
+
+        winners = {char_id: char["char"] for char_id, char in self.characters.items()
+                    if char["status"] == CStatus.ACTIVE and char["char"].get_team() == winner_team}
+        losers = {char_id: char["char"] for char_id, char in self.characters.items()
+                    if char["status"] == CStatus.ACTIVE and char["char"].get_team() != winner_team}
+        return winners, losers
 
     def calc_combat_rewards(self, winners, losers):
         """
@@ -348,10 +353,10 @@ class BaseCombatHandler(DefaultScript):
             None
         """
         for char_id, char in winners.items():
-            char.combat_result(defines.COMBAT_WIN, losers.values(), self.get_combat_rewards(char_id))
+            char.combat_result(self.combat_type, defines.COMBAT_WIN, losers.values(), self.get_combat_rewards(char_id))
 
         for char_id, char in losers.items():
-            char.combat_result(defines.COMBAT_LOSE, winners.values())
+            char.combat_result(self.combat_type, defines.COMBAT_LOSE, winners.values())
 
     def get_appearance(self):
         """
@@ -381,6 +386,12 @@ class BaseCombatHandler(DefaultScript):
         :return: combat finished or not.
         """
         return self.finished
+
+    def get_combat_type(self):
+        """
+        Get the combat's type.
+        """
+        return self.combat_type
 
     def get_combat_result(self, char_id):
         """

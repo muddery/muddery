@@ -242,9 +242,9 @@ MudderyMainFrame.prototype.objMovedOut = function(obj) {
 /*
  *  The player is in a combat queue.
  */
-MudderyMainFrame.prototype.inCombatQueue = function(ave_time) {
-    mud.scene_window.inCombatQueue(ave_time);
-    mud.honour_window.inCombatQueue(ave_time);
+MudderyMainFrame.prototype.inCombatQueue = function() {
+    mud.scene_window.inCombatQueue();
+    mud.honour_window.inCombatQueue();
 
 	core.data_handler.queue_waiting_begin = new Date().getTime();
 	var refreshWaitingTime = function() {
@@ -2064,11 +2064,10 @@ MudderyScene.prototype.setStatus = function(status) {
 /*
  *  The player is in a combat queue.
  */
-MudderyScene.prototype.inCombatQueue = function(ave_time) {
-    this.title_bar.inCombatQueue(ave_time);
+MudderyScene.prototype.inCombatQueue = function() {
+    this.title_bar.inCombatQueue();
 
-    var msg = core.trans("You are in queue now. Average waiting time is ") +
-              core.utils.time_to_string(ave_time) + core.trans(".")
+    var msg = core.trans("You are in waiting queue.");
     this.displayMessage(msg);
 }
 
@@ -3433,10 +3432,9 @@ MudderyHonour.prototype.setRankings = function(rankings) {
 /*
  * The player is in a combat queue.
  */
-MudderyHonour.prototype.inCombatQueue = function(ave_time) {
+MudderyHonour.prototype.inCombatQueue = function() {
     this.select(".action-block-queue").hide();
     this.select(".action-block-waiting").show();
-    this.select(".ave-waiting-time").text(core.utils.time_to_string(ave_time));
 }
 
 /*
@@ -4174,7 +4172,7 @@ MudderyCombat.prototype.leaveCombat = function() {
 /*
  * The combat has finished.
  */
-MudderyCombat.prototype.combatFinish = function(result) {
+MudderyCombat.prototype.combatFinish = function(data) {
 	this.combat_finished = true;
 	if (this.interval_id != null) {
 		window.clearInterval(this.interval_id);
@@ -4182,7 +4180,7 @@ MudderyCombat.prototype.combatFinish = function(result) {
 	}
 
     this.combat_result.reset();
-	this.combat_result.setResult(result);
+	this.combat_result.setResult(data["type"], data["result"], data["rewards"]);
 	this.combat_result.show();
 }
 
@@ -4232,6 +4230,8 @@ MudderyCombatResult.prototype.constructor = MudderyCombatResult;
 MudderyCombatResult.prototype.reset = function(skill_cd_time) {
 	// Clear combat results.
     this.select(".result-header").empty();
+    this.select(".result-honour-block").hide();
+    this.select(".result-honour").empty();
     this.select(".result-exp-block").hide();
     this.select(".result-exp").empty();
     this.select(".result-accepted").hide();
@@ -4259,34 +4259,48 @@ MudderyCombatResult.prototype.onClose = function(element) {
 /*
  * Set result data.
  */
-MudderyCombatResult.prototype.setResult = function(result) {
+MudderyCombatResult.prototype.setResult = function(type, result, rewards) {
 	if (!result) {
 		return;
 	}
 
 	var header = "";
-	if ("escaped" in result) {
+	if (result == "COMBAT_ESCAPED") {
 	   header = core.trans("Escaped !");
 	}
-	else if ("win" in result) {
+	else if (result == "COMBAT_WIN") {
 		header = core.trans("You win !");
 	}
-	else if ("lose" in result) {
+	else if (result == "COMBAT_LOSE") {
 		header = core.trans("You lost !");
 	}
-	else if ("draw" in result) {
+	else if (result == "COMBAT_DRAW") {
 		header = core.trans("Draw !");
 	}
 
 	this.select(".header-text").text(header);
 
-    if ("exp" in result) {
-        this.setGetExp(result["exp"]);
-    }
+    if (rewards) {
+        if ("honour" in rewards) {
+            this.setGetHonour(rewards["honour"]);
+        }
 
-    if ("get_objects" in result) {
-    	this.setGetObjects(result["get_objects"]);
+        if ("exp" in rewards) {
+            this.setGetExp(rewards["exp"]);
+        }
+
+        if ("get_objects" in rewards) {
+            this.setGetObjects(rewards["get_objects"]);
+        }
     }
+}
+
+/*
+ * Set the honours that the player get.
+ */
+MudderyCombatResult.prototype.setGetHonour = function(exp) {
+	this.select(".result-honour").text(exp);
+	this.select(".result-honour-block").show();
 }
 
 /*

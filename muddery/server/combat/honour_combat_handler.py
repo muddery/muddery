@@ -3,7 +3,9 @@ Combat handler.
 """
 
 from muddery.server.combat.base_combat_handler import BaseCombatHandler
+from muddery.server.combat.base_combat_handler import CStatus
 from muddery.server.utils.honours_handler import HONOURS_HANDLER
+from muddery.server.utils import defines
 
 
 class HonourCombatHandler(BaseCombatHandler):
@@ -36,17 +38,6 @@ class HonourCombatHandler(BaseCombatHandler):
         # send messages in order
         character.msg({"combat_commands": character.get_combat_commands()})
 
-    def finish(self):
-        """
-        Finish a combat. Send results to players, and kill all failed characters.
-        """
-        for char in self.characters.values():
-            # Stop auto cast skills
-            character = char["char"]
-            character.stop_auto_combat_skill()
-
-        super(HonourCombatHandler, self).finish()
-
     def calc_combat_rewards(self, winners, losers):
         """
         Called when the character wins the combat.
@@ -58,10 +49,17 @@ class HonourCombatHandler(BaseCombatHandler):
         Returns:
             None
         """
-        rewards = super(HonourCombatHandler, self).calc_combat_rewards(winners, losers)
+        # add escaped characters to losers list
+        all_losers = {char_id: char["char"] for char_id, char in self.characters.items() if char_id not in winners}
+        rewards = super(HonourCombatHandler, self).calc_combat_rewards(winners, all_losers)
 
         # set honour
-        HONOURS_HANDLER.set_honours(winners, losers)
+        honour_changes = HONOURS_HANDLER.set_honours(winners, all_losers)
+        for char_id in self.characters:
+            if char_id not in rewards:
+                rewards[char_id] = {}
+            rewards[char_id]["honour"] = honour_changes[char_id] if char_id in honour_changes else 0
+
         for char in self.characters.values():
             character = char["char"]
             character.show_rankings()

@@ -126,7 +126,16 @@ class honour_settings(models.Model):
     nearest_rankings_number = models.PositiveIntegerField(blank=True, default=10)
 
     # The number of neighbor players on the honour list that a player can fight.
-    honour_opponents_number = models.PositiveIntegerField(blank=True, default=100)
+    # honour_opponents_number = models.PositiveIntegerField(blank=True, default=100)
+
+    # The maximum honour difference that the characters can match. 0 means no limits.
+    max_honour_diff = models.PositiveIntegerField(blank=True, default=0)
+
+    # The prepare time before starting a match. In seconds.
+    preparing_time = models.PositiveIntegerField(blank=True, default=10)
+
+    # The minimum time between two matches.
+    match_interval = models.PositiveIntegerField(blank=True, default=10)
 
     class Meta:
         "Define Django meta options"
