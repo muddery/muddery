@@ -120,6 +120,13 @@ class TableData(object):
         """
         return self.data
 
+    def first(self):
+        """
+        Get the first record.
+        """
+        if len(self.data) > 0:
+            return self.data[0]
+
     def get_data(self, record):
         """
         Get data by record's id.

@@ -30,6 +30,7 @@ from muddery.server.utils.utils import search_obj_data_key
 from muddery.server.utils.data_field_handler import DataFieldHandler
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import delete_object
+from muddery.server.utils.defines import CombatType
 
 
 class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
@@ -599,7 +600,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             return
 
         skill = self.db.skills[skill_key]
-        cast_result = skill.cast_skill(target)
+        cast_result = skill.cast(target)
         if not cast_result:
             return
 
@@ -633,6 +634,13 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         return
 
+    def cast_combat_skill(self, skill_key, target):
+        """
+        Cast a skill in combat.
+        """
+        if self.is_in_combat():
+            self.ndb.combat_handler.prepare_skill(skill_key, self, target)
+
     def auto_cast_skill(self):
         """
         Cast a new skill automatically.
@@ -649,15 +657,22 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         result = self.ai_choose_skill.choose(self)
         if result:
             skill, target = result
-            self.ndb.combat_handler.prepare_skill(skill, self, target)
-            
+            self.cast_combat_skill(skill, target)
+
+    def is_auto_cast_skill(self):
+        """
+        If the character is casting skills automatically.
+        """
+        # auto cast skill
+        return self.auto_cast_loop and self.auto_cast_loop.running
+
     def cast_passive_skills(self):
         """
         Cast all passive skills.
         """
         for skill in self.db.skills.values():
             if skill.passive:
-                skill.cast_skill(self)
+                skill.cast(self)
                 
     def start_auto_combat_skill(self):
         """
@@ -739,7 +754,12 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         chandler = create_script(settings.NORMAL_COMBAT_HANDLER)
                         
         # set combat team and desc
-        chandler.set_combat({1: [target], 2: [self]}, desc, 0)
+        chandler.set_combat(
+            combat_type=CombatType.NORMAL,
+            teams={1: [target], 2: [self]},
+            desc=desc,
+            timeout=0
+        )
 
         return True
 
@@ -819,10 +839,11 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         return bool(self.ndb.combat_handler)
 
-    def combat_result(self, result, opponents=None, rewards=None):
+    def combat_result(self, combat_type, result, opponents=None, rewards=None):
         """
         Set the combat result.
 
+        :param combat_type: combat's type
         :param result: defines.COMBAT_WIN, defines.COMBAT_LOSE, or defines.COMBAT_DRAW
         :param opponents: combat opponents
         :param rewards: combat rewards

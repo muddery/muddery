@@ -49,6 +49,7 @@ BaseController.prototype.show = function() {
     this.el.show();
     this.el.parents().show();
 	this.resetSize();
+	this.onShow();
 }
 
 /*
@@ -75,6 +76,12 @@ BaseController.prototype.visible = function() {
  * Set element's size.
  */
 BaseController.prototype.resetSize = function() {
+}
+
+/*
+ * Called when the controller shows.
+ */
+BaseController.prototype.onShow = function() {
 }
 
 /*

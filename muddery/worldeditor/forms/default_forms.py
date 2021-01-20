@@ -74,6 +74,19 @@ class GameSettingsForm(forms.ModelForm):
         form_template = "common_form.html"
 
 
+class HonourSettingsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(HonourSettingsForm, self).__init__(*args, **kwargs)
+
+        localize_form_fields(self)
+
+    class Meta:
+        model = CM.HONOUR_SETTINGS.model
+        fields = '__all__'
+        list_template = "common_list.html"
+        form_template = "common_form.html"
+
+
 class EquipmentTypesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EquipmentTypesForm, self).__init__(*args, **kwargs)
