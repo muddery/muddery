@@ -98,7 +98,7 @@ def load_system_data():
     os.chdir(gamedir)
     evennia_launcher.init_game_directory(gamedir, check_db=False)
 
-    # load local data
+    # load system data
     try:
         utils.import_system_data()
         print("Import system data success.")
