@@ -29,7 +29,7 @@ from muddery.server.dao.honour_settings import HonourSettings
 from muddery.server.dao.default_objects import DefaultObjects
 from muddery.server.mappings.typeclass_set import TYPECLASS
 from muddery.server.dao.honours_mapper import HONOURS_MAPPER
-from muddery.server.utils.match_queue_handler import MATCH_QUEUE_HANDLER
+from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
 
 
 class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
@@ -247,7 +247,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                           "name": self.get_name()}
                 self.location.msg_contents({"player_offline":change}, exclude=self)
 
-        MATCH_QUEUE_HANDLER.remove(self)
+        MATCH_COMBAT_HANDLER.remove(self)
 
     def get_data_key(self, default=""):
         """
@@ -988,6 +988,16 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             skills.append(skill.get_appearance(self))
 
         return skills
+
+    def prepare_combat_skill(self, skill_key, target):
+        """
+        Cast a skill in combat.
+        """
+        # auto cast skill
+        if self.auto_cast_loop and self.auto_cast_loop.running:
+            return
+
+        self.ndb.combat_handler.prepare_skill(skill_key, self, target)
 
     def resume_combat(self):
         """

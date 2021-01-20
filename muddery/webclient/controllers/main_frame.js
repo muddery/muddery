@@ -1685,7 +1685,6 @@ MudderyPassword.prototype.clearValues = function() {
 }
 
 
-
 /******************************************
  *
  * Main Game Window
@@ -3049,6 +3048,14 @@ MudderySkills.prototype.onCommand = function(element) {
 }
 
 /*
+ * Confirm the command.
+ */
+MudderySkills.prototype.confirmCommand = function(data) {
+	var index = data;
+    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+}
+
+/*
  * Set skills' data.
  */
 MudderySkills.prototype.setSkills = function(skills) {
@@ -3205,6 +3212,14 @@ MudderyQuests.prototype.onCommand = function(element) {
                                     buttons);
 		}
 	}
+}
+
+/*
+ * Confirm the command.
+ */
+MudderyQuests.prototype.confirmCommand = function(data) {
+	var index = data;
+    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 }
 
 /*
@@ -3805,7 +3820,7 @@ MudderyCombat.prototype.onCombatSkill = function(element) {
 		}
 	}
 
-	core.service.doCastSkill(key, this.target, true);
+	core.service.castCombatSkill(key, this.target);
 }
 
 /*

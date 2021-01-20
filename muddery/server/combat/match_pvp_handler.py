@@ -17,7 +17,7 @@ from muddery.server.utils.defines import CombatType
 from muddery.server.dao.honour_settings import HonourSettings
 
 
-class MatchQueueHandler(object):
+class MatchPVPHandler(object):
     """
     This model translates default strings into localized strings.
     """
@@ -258,4 +258,4 @@ class MatchQueueHandler(object):
 
 
 # main handler
-MATCH_QUEUE_HANDLER = MatchQueueHandler()
+MATCH_COMBAT_HANDLER = MatchPVPHandler()

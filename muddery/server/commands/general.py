@@ -16,7 +16,7 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.utils import search_obj_data_key
 from muddery.server.utils.defines import ConversationType
-from muddery.server.utils.match_queue_handler import MATCH_QUEUE_HANDLER
+from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
 from muddery.server.dao.honours_mapper import HONOURS_MAPPER
 from muddery.server.dao.honour_settings import HonourSettings
 from muddery.server.utils.defines import CombatType
@@ -653,20 +653,23 @@ class CmdCastSkill(BaseCommand):
     Cast a skill when the caller is not in combat.
 
     Usage:
-        {"cmd":"castskill",
-         "args":<skill's key>}
+        {
+            "cmd": "cast_skill",
+            "args": <skill's key>,
         }
         
         or:
 
-        {"cmd":"castskill",
-         "args":{"skill":<skill's key>,
-                 "target":<skill's target>,
-                 "combat":<cast in combat>}
+        {
+            "cmd": "cast_skill",
+            "args":{
+                "skill":< skill's key>,
+                "target": <skill's target>,
+            }
         }
     
     """
-    key = "castskill"
+    key = "cast_skill"
     locks = "cmd:all()"
     help_cateogory = "General"
 
@@ -679,42 +682,108 @@ class CmdCastSkill(BaseCommand):
             caller.msg({"alert":_("You are died.")})
             return
 
+        if caller.is_in_combat():
+            caller.msg({"alert": _("You can not cast this skill in a combat.")})
+            return
+
         if not args:
             caller.msg({"alert":_("You should select a skill to cast.")})
             return
 
-        # find skill
+        # get skill and target
         skill_key = None
         target = None
+        if isinstance(args, str):
+            # If the args is a skill's key.
+            skill_key = args
+        else:
+            # If the args is skill's key and target.
+            if "skill" not in args:
+                caller.msg({"alert":_("You should select a skill to cast.")})
+                return
+            skill_key = args["skill"]
 
+            # Get target
+            if "target" in args:
+                target = caller.search_dbref(args["target"])
+
+        try:
+            caller.cast_skill(skill_key, target)
+        except Exception as e:
+            caller.msg({"alert":_("Can not cast this skill.")})
+            logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
+            return
+
+
+# ------------------------------------------------------------
+# cast a skill in combat
+# ------------------------------------------------------------
+
+class CmdCastCombatSkill(BaseCommand):
+    """
+    Cast a skill when the caller is in combat.
+
+    Usage:
+        {
+            "cmd": "cast_combat_skill",
+            "args": <skill's key>,
+        }
+
+        or:
+
+        {
+            "cmd": "cast_combat_skill",
+            "args":
+                {
+                    "skill": <skill's key>,
+                    "target": <skill's target>,
+            }
+        }
+
+    """
+    key = "cast_combat_skill"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Cast a skill in a combat."
+        caller = self.caller
+        args = self.args
+
+        if not caller.is_alive():
+            caller.msg({"alert": _("You are died.")})
+            return
+
+        if not caller.is_in_combat():
+            caller.msg({"alert": _("You can only cast this skill in a combat.")})
+            return
+
+        if not args:
+            caller.msg({"alert": _("You should select a skill to cast.")})
+            return
+
+        # get skill and target
+        skill_key = None
+        target = None
         if isinstance(args, str):
             # If the args is a skill's key.
             skill_key = args
         else:
             # If the args is skill's key and target.
             if not "skill" in args:
-                caller.msg({"alert":_("You should select a skill to cast.")})
+                caller.msg({"alert": _("You should select a skill to cast.")})
                 return
             skill_key = args["skill"]
 
-            # Check combat
-            if "combat" in args:
-                if args["combat"]:
-                    # must be in a combat
-                    if not caller.is_in_combat():
-                        return
             # Get target
             if "target" in args:
                 target = caller.search_dbref(args["target"])
 
         try:
-            # Prepare to cast this skill.
-            if caller.is_in_combat():
-                caller.ndb.combat_handler.prepare_skill(skill_key, caller, target)
-            else:
-                caller.cast_skill(skill_key, target)
+            # cast this skill.
+            caller.prepare_combat_skill(skill_key, target)
         except Exception as e:
-            caller.msg({"alert":_("Can not cast this skill.")})
+            caller.msg({"alert": _("Can not cast this skill.")})
             logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
             return
 
@@ -803,57 +872,6 @@ class CmdAttack(BaseCommand):
 
 
 # ------------------------------------------------------------
-# Make a match.
-# ------------------------------------------------------------
-class CmdMakeMatch(BaseCommand):
-    """
-    Make a match between the caller and a proper opponent.
-
-    Usage:
-    {"cmd": "make_match",
-     "args": None
-    }
-    """
-    key = "make_match"
-    locks = "cmd:all()"
-    help_category = "General"
-
-    def func(self):
-        "Handle command"
-
-        caller = self.caller
-        if not caller:
-            return
-
-        honour_settings = HonourSettings.get_first_data()
-        if caller.db.level < honour_settings.min_honour_level:
-            caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
-            return
-
-        try:
-            # getcandidates
-            char_list = HONOURS_MAPPER.get_characters(caller, honour_settings.honour_opponents_number)
-            characters = [caller.search_dbref("#%s" % char_id) for char_id in char_list]
-            candidates = [char for char in characters if char and not char.is_in_combat()]
-            if candidates:
-                match = random.choice(candidates)
-                # create a new combat handler
-                chandler = create_script(settings.HONOUR_COMBAT_HANDLER)
-                # set combat team and desc
-                chandler.set_combat(
-                    combat_type=CombatType.HONOUR,
-                    teams={1: [match], 2: [caller]},
-                    desc=_("Fight of Honour"),
-                    timeout=settings.AUTO_COMBAT_TIMEOUT
-                )
-            else:
-                caller.msg({"alert": _("Can not make match.")})
-        except Exception as e:
-            logger.log_err("Find match error: %s" % e)
-            caller.msg({"alert": _("Can not make match.")})
-
-
-# ------------------------------------------------------------
 # Queue up for an honour combat.
 # ------------------------------------------------------------
 class CmdQueueUpCombat(BaseCommand):
@@ -880,7 +898,7 @@ class CmdQueueUpCombat(BaseCommand):
             caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
             return
 
-        MATCH_QUEUE_HANDLER.add(caller)
+        MATCH_COMBAT_HANDLER.add(caller)
 
 
 # ------------------------------------------------------------
@@ -906,7 +924,7 @@ class CmdQuitCombatQueue(BaseCommand):
         if not caller:
             return
 
-        MATCH_QUEUE_HANDLER.remove(caller)
+        MATCH_COMBAT_HANDLER.remove(caller)
 
 
 # ------------------------------------------------------------
@@ -932,7 +950,7 @@ class CmdConfirmCombat(BaseCommand):
         if not caller:
             return
 
-        MATCH_QUEUE_HANDLER.confirm(caller)
+        MATCH_COMBAT_HANDLER.confirm(caller)
 
 
 # ------------------------------------------------------------
@@ -958,7 +976,7 @@ class CmdRejectCombat(BaseCommand):
         if not caller:
             return
 
-        MATCH_QUEUE_HANDLER.reject(caller)
+        MATCH_COMBAT_HANDLER.reject(caller)
 
 
 # ------------------------------------------------------------

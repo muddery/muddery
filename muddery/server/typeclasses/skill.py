@@ -118,7 +118,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
         if self.passive:
             return []
 
-        commands = [{"name": _("Cast"), "cmd": "castskill", "args": self.get_data_key()}]
+        commands = [{"name": _("Cast"), "cmd": "cast_skill", "args": self.get_data_key()}]
         return commands
 
     def set_owner(self, owner):
@@ -141,7 +141,7 @@ class MudderySkill(TYPECLASS("OBJECT")):
             if gcd > 0:
                 self.db.cd_finish_time = time.time() + gcd
 
-    def cast_skill(self, target):
+    def cast(self, target):
         """
         Cast this skill.
 

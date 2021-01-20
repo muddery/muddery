@@ -58,10 +58,6 @@ def at_server_start():
     from muddery.server.dao.honours_mapper import HONOURS_MAPPER
     HONOURS_MAPPER.reload()
 
-    # honour combat match handler
-    from muddery.server.utils.match_queue_handler import MATCH_QUEUE_HANDLER
-    MATCH_QUEUE_HANDLER.reset()
-
 
 def at_server_stop():
     """

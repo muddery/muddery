@@ -600,7 +600,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             return
 
         skill = self.db.skills[skill_key]
-        cast_result = skill.cast_skill(target)
+        cast_result = skill.cast(target)
         if not cast_result:
             return
 
@@ -658,7 +658,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         """
         for skill in self.db.skills.values():
             if skill.passive:
-                skill.cast_skill(self)
+                skill.cast(self)
                 
     def start_auto_combat_skill(self):
         """
