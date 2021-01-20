@@ -989,16 +989,6 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         return skills
 
-    def prepare_combat_skill(self, skill_key, target):
-        """
-        Cast a skill in combat.
-        """
-        # auto cast skill
-        if self.auto_cast_loop and self.auto_cast_loop.running:
-            return
-
-        self.ndb.combat_handler.prepare_skill(skill_key, self, target)
-
     def resume_combat(self):
         """
         Resume unfinished combat.

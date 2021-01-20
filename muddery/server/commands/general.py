@@ -758,6 +758,10 @@ class CmdCastCombatSkill(BaseCommand):
             caller.msg({"alert": _("You can only cast this skill in a combat.")})
             return
 
+        if not caller.is_auto_cast_skill():
+            caller.msg({"alert": _("You can not cast skills manually.")})
+            return
+
         if not args:
             caller.msg({"alert": _("You should select a skill to cast.")})
             return
@@ -781,7 +785,7 @@ class CmdCastCombatSkill(BaseCommand):
 
         try:
             # cast this skill.
-            caller.prepare_combat_skill(skill_key, target)
+            caller.cast_combat_skill(skill_key, target)
         except Exception as e:
             caller.msg({"alert": _("Can not cast this skill.")})
             logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))

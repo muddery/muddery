@@ -44,6 +44,7 @@ category,origin,local
 ,"You should select a target.","你需要指定一个目标。"
 ,"You can not cast this skill in a combat.","你不能在战斗中使用这个技能。"
 ,"You can only cast this skill in a combat.","你只能在战斗中使用这个技能。"
+,"You can not cast skills manually.","你不能手动施放技能。"
 ,"You are in another combat.","你在另一场战斗中。"
 ,"You are not in combat!","你不在战斗中！"
 ,"%s is in another combat.","%s在另一场战斗中。"

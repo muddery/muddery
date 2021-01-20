@@ -14,11 +14,11 @@ class Upgrader(BaseUpgrader):
     Upgrade a game dir to a specified version.
     """
     # Can upgrade the game of version between from_version and to_version.
-    # from min version 0.6.1 (include this version)
+    # from min version 0.6.2 (include this version)
     from_min_version = (0, 6, 2)
 
-    # from max version 0.6.2 (not include this version)
-    from_max_version = (0, 6, 3)
+    # from max version 0.6.4 (not include this version)
+    from_max_version = (0, 6, 4)
 
     target_version = None
     
@@ -42,6 +42,14 @@ class Upgrader(BaseUpgrader):
 
         django_args = ["migrate", "worlddata"]
         django_kwargs = {"database": "worlddata"}
+        django.core.management.call_command(*django_args, **django_kwargs)
+
+        django_args = ["makemigrations", "gamedata"]
+        django_kwargs = {}
+        django.core.management.call_command(*django_args, **django_kwargs)
+
+        django_args = ["migrate", "gamedata"]
+        django_kwargs = {"database": "gamedata"}
         django.core.management.call_command(*django_args, **django_kwargs)
 
     def upgrade_data(self, data_path, game_template, muddery_lib):

@@ -634,6 +634,13 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         return
 
+    def cast_combat_skill(self, skill_key, target):
+        """
+        Cast a skill in combat.
+        """
+        if self.is_in_combat():
+            self.ndb.combat_handler.prepare_skill(skill_key, self, target)
+
     def auto_cast_skill(self):
         """
         Cast a new skill automatically.
@@ -650,8 +657,15 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         result = self.ai_choose_skill.choose(self)
         if result:
             skill, target = result
-            self.ndb.combat_handler.prepare_skill(skill, self, target)
-            
+            self.cast_combat_skill(skill, target)
+
+    def is_auto_cast_skill(self):
+        """
+        If the character is casting skills automatically.
+        """
+        # auto cast skill
+        return self.auto_cast_loop and self.auto_cast_loop.running
+
     def cast_passive_skills(self):
         """
         Cast all passive skills.
