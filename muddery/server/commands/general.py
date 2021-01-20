@@ -758,7 +758,7 @@ class CmdCastCombatSkill(BaseCommand):
             caller.msg({"alert": _("You can only cast this skill in a combat.")})
             return
 
-        if not caller.is_auto_cast_skill():
+        if caller.is_auto_cast_skill():
             caller.msg({"alert": _("You can not cast skills manually.")})
             return
 
