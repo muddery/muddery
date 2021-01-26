@@ -959,9 +959,20 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                    "inventory": self.return_inventory()}
         self.msg(message)
 
+    def lock_exit(self, exit):
+        """
+        Lock an exit. Remove the exit's key from the character's unlock list.
+        """
+        exit_key = exit.get_data_key()
+        if not self.is_exit_unlocked(exit_key):
+            return
+
+        self.db.unlocked_exits.remove(exit_key)
+        print(self.db.unlocked_exits)
+
     def unlock_exit(self, exit):
         """
-        Unlock an exit. Add exit's key to character's unlock list.
+        Unlock an exit. Add the exit's key to the character's unlock list.
         """
         exit_key = exit.get_data_key()
         if self.is_exit_unlocked(exit_key):

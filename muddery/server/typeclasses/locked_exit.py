@@ -31,6 +31,7 @@ class MudderyLockedExit(TYPECLASS("EXIT")):
         self.unlock_verb = getattr(self.system, "unlock_verb", "")
         self.locked_desc = getattr(self.system, "locked_desc", "")
         self.auto_unlock = getattr(self.system, "auto_unlock", False)
+        self.unlock_forever = getattr(self.system, "unlock_forever", True)
 
     def at_before_traverse(self, traversing_object):
         """
@@ -51,15 +52,20 @@ class MudderyLockedExit(TYPECLASS("EXIT")):
         if not super(MudderyLockedExit, self).at_before_traverse(traversing_object):
             return False
 
-        # Only can pass exits which have already unlockde.
+        # Only can pass exits which have already been unlocked.
         if traversing_object.is_exit_unlocked(self.get_data_key()):
+            print("unlock_forever: %s" % self.unlock_forever)
+            if not self.unlock_forever:
+                # lock the exit again
+                traversing_object.lock_exit(self)
             return True
-            
-        if self.auto_unlock:
-            if self.can_unlock(traversing_object):
-                # Automatically unlock the exit when a character looking at it.
+
+        if self.auto_unlock and self.can_unlock(traversing_object):
+            # Can unlock the exit automatically.
+            if self.unlock_forever:
+                # Unlock it.
                 traversing_object.unlock_exit(self)
-                return True
+            return True
 
         # Show the object's appearance.
         appearance = self.get_appearance(traversing_object)
@@ -86,8 +92,9 @@ class MudderyLockedExit(TYPECLASS("EXIT")):
         can_unlock = self.can_unlock(caller)
 
         if self.auto_unlock and can_unlock:
-            # Automatically unlock the exit when a character looking at it.
-            caller.unlock_exit(self)
+            if self.unlock_forever:
+                # Automatically unlock the exit when a character looking at it.
+                caller.unlock_exit(self)
             
             # If is unlocked, use common appearance.
             return super(MudderyLockedExit, self).get_appearance(caller)
