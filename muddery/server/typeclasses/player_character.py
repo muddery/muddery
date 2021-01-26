@@ -84,7 +84,16 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # set custom attributes
         if not self.attributes.has("attributes"):
             self.db.attributes = {}
-        
+
+    def at_object_delete(self):
+        """
+        called just before deleting an object.
+        """
+        # remove the character's honour
+        HONOURS_MAPPER.remove_honour(self.id)
+
+        return super(MudderyPlayerCharacter, self).at_object_delete()
+
     def after_data_loaded(self):
         """
         """
@@ -1368,5 +1377,5 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         data = [{"name": char.get_name(),
                  "dbref": char.dbref,
                  "ranking": HONOURS_MAPPER.get_ranking(char),
-                 "honour": HONOURS_MAPPER.get_honour(char)} for char in characters]
+                 "honour": HONOURS_MAPPER.get_honour(char)} for char in characters if char]
         self.msg({"rankings": data})
