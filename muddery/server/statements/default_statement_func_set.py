@@ -49,6 +49,7 @@ class ConditionFuncSet(BaseStatementFuncSet):
         self.add(condition.FuncObjectsMoreThan)
         self.add(condition.FuncObjectsLessThan)
 
+        self.add(condition.FuncHasSkill)
         self.add(condition.FuncSkillEqualTo)
         self.add(condition.FuncSkillMoreThan)
         self.add(condition.FuncSkillLessThan)

@@ -255,6 +255,32 @@ class FuncObjectsLessThan(StatementFunction):
         return total < number
 
 
+class FuncHasSkill(StatementFunction):
+    """
+    If the caller has specified object.
+
+    Args:
+        args[0]: (string) skill's key
+
+    Returns:
+        boolean result
+    """
+
+    key = "has_skill"
+    const = True
+
+    def func(self):
+        """
+        Implement the function.
+        """
+        if not self.args:
+            return False
+
+        skill_key = self.args[0]
+
+        return skill_key in self.caller.db.skills
+
+
 class FuncSkillEqualTo(StatementFunction):
     """
     If the skill's level equals to the number.
