@@ -53,32 +53,73 @@ class ActionGetObjects(BaseIntervalAction):
         records = WorldData.get_table_data(self.model_name, event_key=event_key)
 
         # get object list
-        obj_list = []
-        msg_template = {}
-        rand = random.random()
-        for record in records:
-            if record.multiple:
-                if rand < record.odds:
-                    msg_template[record.object] = record.message
-                    obj_list.append({"object": record.object,
-                                     "number": record.number * times})
+        objects_dict = {}
+        if times <= 100:
+            # Trigger the event only one time.
+            for i in range(times):
                 rand = random.random()
-            else:
-                if rand < record.odds:
-                    msg_template[record.object] = record.message
-                    obj_list.append({"object": record.object,
-                                     "number": record.number * times})
-                    break
-                rand -= record.odds
+                for record in records:
+                    if record.multiple:
+                        if rand < record.odds:
+                            if record.object not in objects_dict:
+                                objects_dict[record.object] = {
+                                    "message": record.message,
+                                    "number": record.number,
+                                }
+                            else:
+                                objects_dict[record.object]["number"] += record.number
+                        rand = random.random()
+                    else:
+                        if rand < record.odds:
+                            if record.object not in objects_dict:
+                                objects_dict[record.object] = {
+                                    "message": record.message,
+                                    "number": record.number,
+                                }
+                            else:
+                                objects_dict[record.object]["number"] += record.number
+                            break
+                        rand -= record.odds
+        else:
+            # If the number of times is too large, simplify the calculation.
+            remain_odds = 1.0
+            for record in records:
+                if record.multiple:
+                    # using normal distribution to simulate binomial distribution
+                    rand = random.normalvariate(record.odds * times, record.odds * times * (1 - record.odds))
+                    number = round(rand * remain_odds)
+                    if number > 0:
+                        if record.object not in objects_dict:
+                            objects_dict[record.object] = {
+                                "message": record.message,
+                                "number": number,
+                            }
+                        else:
+                            objects_dict[record.object]["number"] += number
+                else:
+                    odds = record.odds
+                    if odds > remain_odds:
+                        odds = remain_odds
+                    remain_odds -= odds
+                    number = round(random.normalvariate(odds * times, odds * times * (1 - odds)))
+                    if number > 0:
+                        if record.object not in objects_dict:
+                            objects_dict[record.object] = {
+                                "message": record.message,
+                                "number": number,
+                            }
+                        else:
+                            objects_dict[record.object]["number"] += number
 
-        objects = character.receive_objects(obj_list, mute=True)
+        obj_list = [{"object": obj, "number": info["number"]} for obj, info in objects_dict.items()]
+        get_objects = character.receive_objects(obj_list, mute=True)
 
         message = ""
-        for item in objects:
+        for item in get_objects:
             if message:
                 message += ", "
 
-            template = msg_template[item["key"]]
+            template = objects_dict[item["key"]]["message"]
             if template:
                 try:
                     message += template % item["number"]
