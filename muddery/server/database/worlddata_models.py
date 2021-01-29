@@ -553,6 +553,9 @@ class exit_locks(BaseObjects):
     # if the exit can be unlocked automatically
     auto_unlock = models.BooleanField(blank=True, default=False)
 
+    # when a character unlocked an exit, the exit is unlocked for this character forever.
+    unlock_forever = models.BooleanField(blank=True, default=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True

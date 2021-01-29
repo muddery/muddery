@@ -73,7 +73,18 @@ class MudderyPlayerCharacter(BRICK("CHARACTER")):
             
         """
         super(MudderyPlayerCharacter, self).at_object_creation()
-        
+
+
+    def at_object_delete(self):
+        """
+        called just before deleting an object.
+        """
+        # remove the character's honour
+        HONOURS_MAPPER.remove_honour(self.id)
+
+        return super(MudderyPlayerCharacter, self).at_object_delete()
+
+
     def after_data_loaded(self):
         """
         """
@@ -948,9 +959,20 @@ class MudderyPlayerCharacter(BRICK("CHARACTER")):
                    "inventory": self.return_inventory()}
         self.msg(message)
 
+    def lock_exit(self, exit):
+        """
+        Lock an exit. Remove the exit's key from the character's unlock list.
+        """
+        exit_key = exit.get_data_key()
+        if not self.is_exit_unlocked(exit_key):
+            return
+
+        self.db.unlocked_exits.remove(exit_key)
+        print(self.db.unlocked_exits)
+
     def unlock_exit(self, exit):
         """
-        Unlock an exit. Add exit's key to character's unlock list.
+        Unlock an exit. Add the exit's key to the character's unlock list.
         """
         exit_key = exit.get_data_key()
         if self.is_exit_unlocked(exit_key):
@@ -1370,5 +1392,5 @@ class MudderyPlayerCharacter(BRICK("CHARACTER")):
         data = [{"name": char.get_name(),
                  "dbref": char.dbref,
                  "ranking": HONOURS_MAPPER.get_ranking(char),
-                 "honour": HONOURS_MAPPER.get_honour(char)} for char in characters]
+                 "honour": HONOURS_MAPPER.get_honour(char)} for char in characters if char]
         self.msg({"rankings": data})

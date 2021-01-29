@@ -88,18 +88,18 @@ class HonoursMapper(object):
         """
         return self.get_honour_by_id(character.id, default)
 
-    def get_honour_by_id(self, character_id, default=None):
+    def get_honour_by_id(self, char_id, default=None):
         """
         Get a character's honour.
         
         Args:
-            character_id: (string) A character's id.
+            char_id: (string) A character's id.
             
         Return:
             number: Character's honour.
         """
         try:
-            return self.honours[character_id]["honour"]
+            return self.honours[char_id]["honour"]
         except Exception as e:
             if default is not None:
                 return default
@@ -213,13 +213,13 @@ class HonoursMapper(object):
         else:
             print("Can not set character's honours")
             
-    def remove_honour(self, character):
+    def remove_honour(self, char_id):
         """
         Remove a character's honour.
         """
         try:
-            self.objects.get(character=character.id).delete()
-            del self.honours[character.id]
+            self.objects.get(character=char_id).delete()
+            del self.honours[char_id]
             self.make_rankings()
         except Exception as e:
             print("Can not remove character's honour: %s" % e)
