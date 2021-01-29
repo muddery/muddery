@@ -463,6 +463,10 @@ DEFUALT_FORM_TEMPLATE = "common_form.html"
 # Handler of the combat
 NORMAL_COMBAT_HANDLER = "muddery.server.combat.normal_combat_handler.NormalCombatHandler"
 
+HONOUR_COMBAT_HANDLER = "muddery.server.combat.honour_combat_handler.HonourCombatHandler"
+
+#HONOUR_COMBAT_HANDLER = "muddery.server.combat.honour_auto_combat_handler.HonourAutoCombatHandler"
+
 AUTO_COMBAT_TIMEOUT = 60
 
 

@@ -33,3 +33,25 @@ class BaseAttributes(models.Model):
         verbose_name = "Object Attribute"
         verbose_name_plural = "Object Attributes"
         unique_together = ("obj_type", "obj_id", "key")
+
+
+# ------------------------------------------------------------
+#
+# character's honour
+#
+# ------------------------------------------------------------
+class honours(models.Model):
+    "All character's honours."
+
+    # character's database id
+    character = models.IntegerField(unique=True)
+
+    # character's honour. special character's honour is -1, such as the superuser.
+    honour = models.IntegerField(blank=True, default=-1, db_index=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Honour"
+        verbose_name_plural = "Honours"

@@ -141,7 +141,7 @@ class MudderyBaseNPC(BRICK("CHARACTER")):
         opponents = None
         rewards = None
         if self.ndb.combat_handler:
-            result = self.ndb.combat_handler.get_combat_result(self)
+            result = self.ndb.combat_handler.get_combat_result(self.id)
             if result:
                 status, opponents, rewards = result
 

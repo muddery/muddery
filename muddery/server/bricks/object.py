@@ -157,6 +157,12 @@ class MudderyBaseObject(BaseBrick, DefaultObject):
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded() which is called
         # after load_data().
+
+    def after_creation(self):
+        """
+        Called once, after the object is created by Muddery.
+        """
+        pass
     
     def at_post_unpuppet(self, player, session=None, **kwargs):
         """

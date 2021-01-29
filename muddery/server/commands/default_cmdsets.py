@@ -52,7 +52,11 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdShopping())
         self.add(general.CmdBuy())
         self.add(general.CmdSay())
-        self.add(general.CmdTest())
+        self.add(general.CmdQueueUpCombat())
+        self.add(general.CmdQuitCombatQueue())
+        self.add(general.CmdConfirmCombat())
+        self.add(general.CmdRejectCombat())
+        self.add(general.CmdGetRankings())
 
         # Add empty login commands to the normal cmdset to
         # avoid showing wrong cmd messages.
@@ -60,6 +64,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdCreate())
         self.add(general.CmdCreateConnect())
 
+        # Command for test.
+        self.add(general.CmdTest())
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """
@@ -139,6 +145,6 @@ class CombatCmdSet(CmdSet):
 
     def at_cmdset_creation(self):
         self.add(general.CmdLook())
-        self.add(general.CmdCastSkill())
+        self.add(general.CmdCastCombatSkill())
         self.add(combat.CmdCombatInfo())
         self.add(combat.CmdLeaveCombat())

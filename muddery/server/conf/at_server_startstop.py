@@ -54,6 +54,10 @@ def at_server_start():
     from muddery.server.utils.desc_handler import DESC_HANDLER
     DESC_HANDLER.reload()
 
+    # load honours
+    from muddery.server.dao.honours_mapper import HONOURS_MAPPER
+    HONOURS_MAPPER.reload()
+
 
 def at_server_stop():
     """

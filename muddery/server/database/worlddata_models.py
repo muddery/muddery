@@ -12,7 +12,7 @@ TYPECLASS_LENGTH = 80
 POSITION_LENGTH = 80
 VALUE_LENGTH = 80
 CONDITION_LENGTH = 255
-TEXT_CONTENT_LENGTH = 512
+TEXT_CONTENT_LENGTH = 255
 
 re_attribute_key = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 
@@ -104,6 +104,45 @@ class game_settings(models.Model):
         app_label = "worlddata"
         verbose_name = "Game Setting"
         verbose_name_plural = "Game Settings"
+
+
+# ------------------------------------------------------------
+#
+# Game's basic settings.
+#
+# ------------------------------------------------------------
+class honour_settings(models.Model):
+    """
+    honour combat's settings.
+    NOTE: Only uses the first record!
+    """
+    # The minimum level that a player can attend a honour combat.
+    min_honour_level = models.PositiveIntegerField(blank=True, default=1)
+
+    # The number of top honour players that a player can see.
+    top_rankings_number = models.PositiveIntegerField(blank=True, default=10)
+
+    # The number of neighbor players on the honour list that a player can see.
+    nearest_rankings_number = models.PositiveIntegerField(blank=True, default=10)
+
+    # The number of neighbor players on the honour list that a player can fight.
+    # honour_opponents_number = models.PositiveIntegerField(blank=True, default=100)
+
+    # The maximum honour difference that the characters can match. 0 means no limits.
+    max_honour_diff = models.PositiveIntegerField(blank=True, default=0)
+
+    # The prepare time before starting a match. In seconds.
+    preparing_time = models.PositiveIntegerField(blank=True, default=10)
+
+    # The minimum time between two matches.
+    match_interval = models.PositiveIntegerField(blank=True, default=10)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Honour Setting"
+        verbose_name_plural = "Honour Settings"
 
 
 # ------------------------------------------------------------

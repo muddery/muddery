@@ -48,6 +48,7 @@ MudderyMain.prototype.loadFrame = function() {
     mud.inventory_window = new MudderyInventory($("#inventory-window"));
     mud.skills_window = new MudderySkills($("#skills-window"));
     mud.quests_window = new MudderyQuests($("#quests-window"));
+    mud.honour_window = new MudderyHonour($("#honour-window"));
     mud.map_window = new MudderyMap($("#map-window"));
     mud.shop_window = new MudderyShop($("#shop-window"));
     mud.combat_window = new MudderyCombat($("#combat-window"));
@@ -57,6 +58,7 @@ MudderyMain.prototype.loadFrame = function() {
     mud.popup_object = new MudderyPopupObject($("#popup-object"));
     mud.popup_get_objects = new MudderyPopupGetObjects($("#popup-get-objects"));
     mud.popup_dialogue = new MudderyPopupDialogue($("#popup-dialogue"));
+    mud.popup_confirm_combat = new MudderyPopupConfirmCombat($("#popup-confirm-combat"));
     mud.popup_input_command = new MudderyPopupInputCommand($("#popup-input-command"));
 }
 

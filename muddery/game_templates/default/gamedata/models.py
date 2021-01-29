@@ -1,13 +1,25 @@
 
-from muddery.server.database.gamedata_models import BaseAttributes
+from muddery.server.database import gamedata_models as BaseModels
 
 
-class object_attributes(BaseAttributes):
+# ------------------------------------------------------------
+#
+# The game's runtime data.
+#
+# ------------------------------------------------------------
+class honours(BaseModels.honours):
+    """
+    Character's honour data.
+    """
+    pass
+
+
+class object_attributes(BaseModels.BaseAttributes):
     """
     Default table of object attributes.
     """
     pass
 
 
-class player_characters(BaseAttributes):
+class player_characters(BaseModels.BaseAttributes):
     pass

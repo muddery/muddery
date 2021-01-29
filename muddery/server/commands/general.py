@@ -6,6 +6,7 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 """
 
 import math
+import random
 from django.conf import settings
 from evennia.utils import logger
 from evennia import create_script
@@ -15,6 +16,10 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.utils import search_obj_data_key
 from muddery.server.utils.defines import ConversationType
+from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
+from muddery.server.dao.honours_mapper import HONOURS_MAPPER
+from muddery.server.dao.honour_settings import HonourSettings
+from muddery.server.utils.defines import CombatType
 
 
 class CmdLook(BaseCommand):
@@ -481,7 +486,7 @@ class CmdUse(BaseCommand):
         try:
             # Use the object and get the result.
             result = caller.use_object(obj_dbref)
-            print("result: %s" % result)
+            caller.show_location()
         except Exception as e:
             ostring = "Can not use %s: %s" % (obj_dbref, e)
             logger.log_tracemsg(ostring)
@@ -489,6 +494,7 @@ class CmdUse(BaseCommand):
         # Send result to the player.
         if not result:
             result = _("No result.")
+
         caller.msg({"alert": result})
 
 
@@ -532,6 +538,7 @@ class CmdDiscard(BaseCommand):
         # remove used object
         try:
             caller.remove_object(obj.get_data_key(), 1)
+            caller.show_location()
         except Exception as e:
             caller.msg({"alert": _("Can not discard this object.")})
             logger.log_tracemsg("Can not discard object %s: %s" % (obj.get_data_key(), e))
@@ -635,20 +642,23 @@ class CmdCastSkill(BaseCommand):
     Cast a skill when the caller is not in combat.
 
     Usage:
-        {"cmd":"castskill",
-         "args":<skill's key>}
+        {
+            "cmd": "cast_skill",
+            "args": <skill's key>,
         }
         
         or:
 
-        {"cmd":"castskill",
-         "args":{"skill":<skill's key>,
-                 "target":<skill's target>,
-                 "combat":<cast in combat>}
+        {
+            "cmd": "cast_skill",
+            "args":{
+                "skill":< skill's key>,
+                "target": <skill's target>,
+            }
         }
     
     """
-    key = "castskill"
+    key = "cast_skill"
     locks = "cmd:all()"
     help_cateogory = "General"
 
@@ -661,42 +671,112 @@ class CmdCastSkill(BaseCommand):
             caller.msg({"alert":_("You are died.")})
             return
 
+        if caller.is_in_combat():
+            caller.msg({"alert": _("You can not cast this skill in a combat.")})
+            return
+
         if not args:
             caller.msg({"alert":_("You should select a skill to cast.")})
             return
 
-        # find skill
+        # get skill and target
         skill_key = None
         target = None
+        if isinstance(args, str):
+            # If the args is a skill's key.
+            skill_key = args
+        else:
+            # If the args is skill's key and target.
+            if "skill" not in args:
+                caller.msg({"alert":_("You should select a skill to cast.")})
+                return
+            skill_key = args["skill"]
 
+            # Get target
+            if "target" in args:
+                target = caller.search_dbref(args["target"])
+
+        try:
+            caller.cast_skill(skill_key, target)
+        except Exception as e:
+            caller.msg({"alert":_("Can not cast this skill.")})
+            logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
+            return
+
+
+# ------------------------------------------------------------
+# cast a skill in combat
+# ------------------------------------------------------------
+
+class CmdCastCombatSkill(BaseCommand):
+    """
+    Cast a skill when the caller is in combat.
+
+    Usage:
+        {
+            "cmd": "cast_combat_skill",
+            "args": <skill's key>,
+        }
+
+        or:
+
+        {
+            "cmd": "cast_combat_skill",
+            "args":
+                {
+                    "skill": <skill's key>,
+                    "target": <skill's target>,
+            }
+        }
+
+    """
+    key = "cast_combat_skill"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Cast a skill in a combat."
+        caller = self.caller
+        args = self.args
+
+        if not caller.is_alive():
+            caller.msg({"alert": _("You are died.")})
+            return
+
+        if not caller.is_in_combat():
+            caller.msg({"alert": _("You can only cast this skill in a combat.")})
+            return
+
+        if caller.is_auto_cast_skill():
+            caller.msg({"alert": _("You can not cast skills manually.")})
+            return
+
+        if not args:
+            caller.msg({"alert": _("You should select a skill to cast.")})
+            return
+
+        # get skill and target
+        skill_key = None
+        target = None
         if isinstance(args, str):
             # If the args is a skill's key.
             skill_key = args
         else:
             # If the args is skill's key and target.
             if not "skill" in args:
-                caller.msg({"alert":_("You should select a skill to cast.")})
+                caller.msg({"alert": _("You should select a skill to cast.")})
                 return
             skill_key = args["skill"]
 
-            # Check combat
-            if "combat" in args:
-                if args["combat"]:
-                    # must be in a combat
-                    if not caller.is_in_combat():
-                        return
             # Get target
             if "target" in args:
                 target = caller.search_dbref(args["target"])
 
         try:
-            # Prepare to cast this skill.
-            if caller.is_in_combat():
-                caller.ndb.combat_handler.prepare_skill(skill_key, caller, target)
-            else:
-                caller.cast_skill(skill_key, target)
+            # cast this skill.
+            caller.cast_combat_skill(skill_key, target)
         except Exception as e:
-            caller.msg({"alert":_("Can not cast this skill.")})
+            caller.msg({"alert": _("Can not cast this skill.")})
             logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
             return
 
@@ -773,10 +853,153 @@ class CmdAttack(BaseCommand):
         chandler = create_script(settings.NORMAL_COMBAT_HANDLER)
         
         # set combat team and desc
-        chandler.set_combat({1: [target], 2:[caller]}, "", 0)
+        chandler.set_combat(
+            combat_type=CombatType.NORMAL,
+            teams={1: [target], 2:[caller]},
+            desc="",
+            timeout=0
+        )
         
         caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name())
         target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name())
+
+
+# ------------------------------------------------------------
+# Queue up for an honour combat.
+# ------------------------------------------------------------
+class CmdQueueUpCombat(BaseCommand):
+    """
+    Queue up to make a match between the caller and a proper opponent.
+
+    Usage:
+    {"cmd": "queue_up_combat",
+     "args": None
+    }
+    """
+    key = "queue_up_combat"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+        caller = self.caller
+        if not caller:
+            return
+
+        honour_settings = HonourSettings.get_first_data()
+        if caller.db.level < honour_settings.min_honour_level:
+            caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
+            return
+
+        MATCH_COMBAT_HANDLER.add(caller)
+
+
+# ------------------------------------------------------------
+# Queue up for an honour combat.
+# ------------------------------------------------------------
+class CmdQuitCombatQueue(BaseCommand):
+    """
+    Quit the combat queue.
+
+    Usage:
+    {"cmd": "quit_combat_queue",
+     "args": None
+    }
+    """
+    key = "quit_combat_queue"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+
+        MATCH_COMBAT_HANDLER.remove(caller)
+
+
+# ------------------------------------------------------------
+# Confirm an honour combat.
+# ------------------------------------------------------------
+class CmdConfirmCombat(BaseCommand):
+    """
+    Confirm an honour combat.
+
+    Usage:
+    {"cmd": "confirm_combat",
+     "args": None
+    }
+    """
+    key = "confirm_combat"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+
+        MATCH_COMBAT_HANDLER.confirm(caller)
+
+
+# ------------------------------------------------------------
+# Reject an honour combat.
+# ------------------------------------------------------------
+class CmdRejectCombat(BaseCommand):
+    """
+    Reject an honour combat queue.
+
+    Usage:
+    {"cmd": "reject_combat",
+     "args": None
+    }
+    """
+    key = "reject_combat"
+    locks = "cmd:all()"
+    help_category = "General"
+
+    def func(self):
+        "Handle command"
+
+        caller = self.caller
+        if not caller:
+            return
+
+        MATCH_COMBAT_HANDLER.reject(caller)
+
+
+# ------------------------------------------------------------
+# Show top rankings
+# ------------------------------------------------------------
+class CmdGetRankings(BaseCommand):
+    """
+    Get top ranking characters.
+
+    Usage:
+        {"cmd": "get_rankings",
+         "args": None
+        }
+    """
+    key = "get_rankings"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        """
+        Get characters rankings.
+
+        Returns:
+            None
+        """
+        caller = self.caller
+        if not caller:
+            return
+
+        caller.show_rankings()
 
 
 #------------------------------------------------------------

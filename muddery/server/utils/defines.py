@@ -48,3 +48,8 @@ class ConversationType(Enum):
     PRIVATE = "PRIVATE"
     LOCAL = "LOCAL"
     CHANNEL = "CHANNEL"
+
+
+class CombatType(Enum):
+    NORMAL = "NORMAL"
+    HONOUR = "HONOUR"

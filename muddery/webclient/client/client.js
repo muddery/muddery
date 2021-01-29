@@ -116,11 +116,11 @@ MudderyClient.prototype = {
             try {
                 var log_data = {}
                 log_data[key] = data[key];
-                console.log(JSON.stringify(log_data));
+                console.log("Received: " + JSON.stringify(log_data));
 
                 if (key == "msg") {
                 	var msg = core.text2html.parseHtml(data[key]);
-                    mud.scene_window.displayMsg(msg);
+                    mud.scene_window.displayMessage(msg);
                 }
                 else if (key == "alert") {
               		mud.main_frame.popupMessage(core.trans("Alert"), data[key]);
@@ -145,6 +145,9 @@ MudderyClient.prototype = {
                 }
                 else if (key == "conn_screen") {
                     mud.login_window.setConnScreen(data[key]);
+                }
+                else if (key == "min_honour_level") {
+                    mud.honour_window.setMinHonourLevel(data[key]);
                 }
                 else if (key == "look_around") {
                     mud.scene_window.setScene(data[key]);
@@ -275,6 +278,21 @@ MudderyClient.prototype = {
                 }
                 else if (key == "shop") {
                     mud.game_window.showShop(data[key]);
+                }
+                else if (key == "rankings") {
+                	mud.honour_window.setRankings(data[key]);
+                }
+                else if (key == "in_combat_queue") {
+                    mud.main_frame.inCombatQueue(data[key]);
+                }
+                else if (key == "left_combat_queue") {
+                    mud.main_frame.leftCombatQueue(data[key]);
+                }
+                else if (key == "prepare_match") {
+                	mud.main_frame.prepareMatch(data[key]);
+                }
+                else if (key == "match_rejected") {
+                	mud.main_frame.matchRejected(data[key]);
                 }
                 else {
                     mud.scene_window.displayMessage(data[key]);

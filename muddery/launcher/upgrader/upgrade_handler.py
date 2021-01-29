@@ -30,10 +30,6 @@ class UpgradeHandler(object):
         if not os.path.exists(game_dir):
             print("\nCan not find dir '%s'.\n" % game_dir)
             return
-            
-        if self.is_running(game_dir):
-            print("\nThe game is still running, stop it first.\n")
-            return
 
         # Get game config
         game_ver, game_template = launcher_utils.get_game_config(game_dir)
@@ -100,15 +96,6 @@ class UpgradeHandler(object):
 
         except Exception as e:
             print("\nUpgrade failed: %s\n" % e)
-
-    def is_running(self, game_dir):
-        """
-        Check whether the game server is running.
-        """
-        server_pidfile = os.path.join(game_dir, "server", "server.pid")
-        portal_pidfile = os.path.join(game_dir, "server", "portal.pid")
-        
-        return os.path.exists(server_pidfile) or os.path.exists(portal_pidfile)
 
     def get_upgrader(self, game_ver):
         """

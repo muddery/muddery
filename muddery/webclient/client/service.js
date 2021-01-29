@@ -23,11 +23,21 @@ MudderyService.prototype = {
         Evennia.msg("text", this.cmdString(cmd, args, context));
     },
     
-    doCastSkill: function(skill, target, combat) {
-        var cmd = "castskill";
-        var args = {"skill": skill,
-                    "target": target,
-                    "combat": combat};
+    castSkill: function(skill, target) {
+        var cmd = "cast_skill";
+        var args = {
+            "skill": skill,
+            "target": target,
+        };
+        Evennia.msg("text", this.cmdString(cmd, args));
+    },
+
+    castCombatSkill: function(skill, target) {
+        var cmd = "cast_combat_skill";
+        var args = {
+            "skill": skill,
+            "target": target,
+        };
         Evennia.msg("text", this.cmdString(cmd, args));
     },
 

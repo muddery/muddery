@@ -47,12 +47,12 @@ class BaseCombatHandler(DefaultScript):
         self.persistent = False
 
         """
-        store all combatants
-        {
-            "status": character's status
-            "char": character's object
-        }
-        """
+       store all combatants
+       {
+           "status": character's status
+           "char": character's object
+       }
+       """
         self.characters = {}
 
         # if battle is finished
@@ -90,15 +90,17 @@ class BaseCombatHandler(DefaultScript):
 
         self.set_combat_draw()
 
-    def set_combat(self, teams, desc, timeout):
+    def set_combat(self, combat_type, teams, desc, timeout):
         """
         Add combatant to handler
 
         Args:
+            combat_type: (string) combat's type
             teams: (dict) {<team id>: [<characters>]}
             desc: (string) combat's description
             timeout: (int) Total combat time in seconds. Zero means no limit.
         """
+        self.combat_type = combat_type
         self.desc = desc
         self.timeout = timeout
 
@@ -107,7 +109,7 @@ class BaseCombatHandler(DefaultScript):
             for character in teams[team]:
                 character.set_team(team)
 
-                self.characters[character.dbref] = {
+                self.characters[character.id] = {
                     "char": character,
                     "status":  CStatus.JOINED,
                 }
@@ -198,18 +200,7 @@ class BaseCombatHandler(DefaultScript):
             self.timer.cancel()
 
         # get winners and losers
-        winner_team = None
-        for char in self.characters.values():
-            if char["status"] == CStatus.ACTIVE:
-                character = char["char"]
-                if character.is_alive():
-                    winner_team = character.get_team()
-                    break
-
-        self.winners = {dbref: char["char"] for dbref, char in self.characters.items()
-                        if char["status"] == CStatus.ACTIVE and char["char"].get_team() == winner_team}
-        self.losers = {dbref: char["char"] for dbref, char in self.characters.items()
-                       if char["status"] == CStatus.ACTIVE and char["char"].get_team() != winner_team}
+        self.winners, self.losers = self.calc_winners()
 
         for char in self.characters.values():
             char["status"] = CStatus.FINISHED
@@ -229,13 +220,9 @@ class BaseCombatHandler(DefaultScript):
         Returns:
             None
         """
-        if caller and caller.dbref in self.characters:
-            self.characters[caller.dbref]["status"] = CStatus.ESCAPED
-            caller.combat_result(defines.COMBAT_ESCAPED)
-
-            if self.can_finish():
-                # if there is only one team left, kill this handler
-                self.finish()
+        if caller and caller.id in self.characters:
+            self.characters[caller.id]["status"] = CStatus.ESCAPED
+            caller.combat_result(self.combat_type, defines.COMBAT_ESCAPED)
 
     def leave_combat(self, character):
         """
@@ -243,10 +230,10 @@ class BaseCombatHandler(DefaultScript):
 
         :param character: character object
         """
-        if character.dbref in self.characters:
-            if self.characters[character.dbref]["status"] == CStatus.LEFT:
+        if character.id in self.characters:
+            if self.characters[character.id]["status"] == CStatus.LEFT:
                 return
-            self.characters[character.dbref]["status"] = CStatus.LEFT
+            self.characters[character.id]["status"] = CStatus.LEFT
 
         all_player_left = True
         for char in self.characters.values():
@@ -277,22 +264,39 @@ class BaseCombatHandler(DefaultScript):
             None.
         """
         for char in self.characters.values():
-            char["char"].combat_result(defines.COMBAT_DRAW)
+            char["char"].combat_result(self.combat_type, defines.COMBAT_DRAW)
+
+    def calc_winners(self):
+        """
+        Calculate combat winners and losers.
+        """
+        winner_team = None
+        for char in self.characters.values():
+            if char["status"] == CStatus.ACTIVE:
+                character = char["char"]
+                if character.is_alive():
+                    winner_team = character.get_team()
+                    break
+
+        winners = {char_id: char["char"] for char_id, char in self.characters.items()
+                    if char["status"] == CStatus.ACTIVE and char["char"].get_team() == winner_team}
+        losers = {char_id: char["char"] for char_id, char in self.characters.items()
+                    if char["status"] == CStatus.ACTIVE and char["char"].get_team() != winner_team}
+        return winners, losers
 
     def calc_combat_rewards(self, winners, losers):
         """
         Called when the character wins the combat.
 
         Args:
-            winners: (List) all combat winners.
-            losers: (List) all combat losers.
+            winners: (dict) all combat winners.
+            losers: (dict) all combat losers.
 
         Returns:
             (dict) reward dict
         """
         rewards = {}
-        for winner in winners:
-            winner_char = self.characters[winner]["char"]
+        for winner_id, winner_char in winners.items():
             exp = 0
             loots = []
             for loser in losers:
@@ -324,18 +328,18 @@ class BaseCombatHandler(DefaultScript):
                         logger.log_errmsg("Can not loot object %s." % obj_info["object"])
                         pass
 
-            rewards[winner] = {
+            rewards[winner_id] = {
                 "exp": exp,
                 "loots": obj_list,
             }
 
         return rewards
 
-    def get_combat_rewards(self, char_dbref):
+    def get_combat_rewards(self, char_id):
         """
         Get a character's combat rewards.
         """
-        return self.rewards.get(char_dbref, None)
+        return self.rewards.get(char_id, None)
 
     def notify_combat_results(self, winners, losers):
         """
@@ -348,11 +352,11 @@ class BaseCombatHandler(DefaultScript):
         Returns:
             None
         """
-        for char in winners.values():
-            char.combat_result(defines.COMBAT_WIN, losers.values(), self.get_combat_rewards(char.dbref))
+        for char_id, char in winners.items():
+            char.combat_result(self.combat_type, defines.COMBAT_WIN, losers.values(), self.get_combat_rewards(char_id))
 
-        for char in losers.values():
-            char.combat_result(defines.COMBAT_LOSE, winners.values())
+        for char_id, char in losers.items():
+            char.combat_result(self.combat_type, defines.COMBAT_LOSE, winners.values())
 
     def get_appearance(self):
         """
@@ -383,28 +387,34 @@ class BaseCombatHandler(DefaultScript):
         """
         return self.finished
 
-    def get_combat_result(self, char_dbref):
+    def get_combat_type(self):
+        """
+        Get the combat's type.
+        """
+        return self.combat_type
+
+    def get_combat_result(self, char_id):
         """
         Get a character's combat result.
 
-        :param char_dbref: character's dbref
+        :param char_id: character's db id
         :return:
         """
         if not self.finished:
             return
 
-        if char_dbref not in self.characters:
+        if char_id not in self.characters:
             return
 
-        if self.characters[char_dbref]:
-            status = self.characters[char_dbref]["status"]
+        if self.characters[char_id]:
+            status = self.characters[char_id]["status"]
 
             if status == CStatus.ESCAPED:
                 return defines.COMBAT_ESCAPED, None, None
             elif status == CStatus.FINISHED or status == CStatus.LEFT:
-                if char_dbref in self.winners:
-                    return defines.COMBAT_WIN, self.losers.values(), self.get_combat_rewards(char_dbref)
-                elif char_dbref in self.losers:
+                if char_id in self.winners:
+                    return defines.COMBAT_WIN, self.losers.values(), self.get_combat_rewards(char_id)
+                elif char_id in self.losers:
                     return defines.COMBAT_LOSE, self.winners.values(), None
                 else:
                     return defines.COMBAT_DRAW, None, None
