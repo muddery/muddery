@@ -477,6 +477,9 @@ class skills(BaseObjects):
 class quests(BaseObjects):
     "Store all quests."
 
+    # experience that the character get
+    exp = models.PositiveIntegerField(blank=True, default=0)
+
     # the condition to accept this quest.
     condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
 

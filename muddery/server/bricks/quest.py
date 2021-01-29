@@ -207,6 +207,11 @@ class MudderyQuest(BRICK("OBJECT")):
             # give objects to winner
             owner.receive_objects(obj_list)
 
+        # get exp
+        exp = getattr(self.system, "exp", 0)
+        if exp:
+            owner.add_exp(exp)
+
         # do quest's action
         action = getattr(self.system, "action", None)
         if action:
