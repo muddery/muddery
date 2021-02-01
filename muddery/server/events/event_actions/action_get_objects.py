@@ -3,6 +3,7 @@ Event action.
 """
 
 import random
+import math
 from muddery.server.events.base_interval_action import BaseIntervalAction
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
@@ -86,7 +87,9 @@ class ActionGetObjects(BaseIntervalAction):
             for record in records:
                 if record.multiple:
                     # using normal distribution to simulate binomial distribution
-                    rand = random.normalvariate(record.odds * times, record.odds * times * (1 - record.odds))
+                    mean = record.odds * times
+                    standard_deviation = math.sqrt(record.odds * times * (1 - record.odds))
+                    rand = random.normalvariate(mean, standard_deviation)
                     number = round(rand * remain_odds)
                     if number > 0:
                         if record.object not in objects_dict:
@@ -101,7 +104,9 @@ class ActionGetObjects(BaseIntervalAction):
                     if odds > remain_odds:
                         odds = remain_odds
                     remain_odds -= odds
-                    number = round(random.normalvariate(odds * times, odds * times * (1 - odds)))
+                    mean = odds * times
+                    standard_deviation = math.sqrt(odds * times * (1 - odds))
+                    number = round(random.normalvariate(mean, standard_deviation))
                     if number > 0:
                         if record.object not in objects_dict:
                             objects_dict[record.object] = {
