@@ -10,7 +10,7 @@ from evennia.utils.utils import class_from_module
 from muddery.server.utils.utils import get_module_path
 
 
-class BrickSet(object):
+class ElementSet(object):
     """
     All available classes.
     """
@@ -21,16 +21,16 @@ class BrickSet(object):
 
         self.all_loaded = False
         self.match_class = re.compile(r'^class\s+(\w+)\s*.*$')
-        self.match_key = re.compile(r""" {4}brick_key\s*=\s*("|')(.+)("|')\s*$""")
+        self.match_key = re.compile(r""" {4}element_key\s*=\s*("|')(.+)("|')\s*$""")
 
-    def load_files(self, brick_path):
+    def load_files(self, component_path):
         """
-        Get typeclasses' file path.
+        Get elements' file path.
         """
-        if not brick_path:
+        if not component_path:
             return
 
-        module = import_module(brick_path)
+        module = import_module(component_path)
         base_path = module.__path__
         if not base_path:
             return
@@ -54,7 +54,7 @@ class BrickSet(object):
                             if match:
                                 key_name = match.group(2)
 
-                                module_path = brick_path
+                                module_path = component_path
                                 if base_path == root:
                                     module_path += "." + name + "." + class_name
                                 else:
@@ -69,7 +69,7 @@ class BrickSet(object):
 
     def load_classes(self):
         """
-        Add all typeclasses from the typeclass path.
+        Add all elements from the typeclass path.
 
         To prevent loop import, call this method later.
         """
@@ -178,7 +178,7 @@ class BrickSet(object):
         return info
 
 
-BRICK_SET = BrickSet()
-BRICK = BRICK_SET.get
-BRICK_SET.load_files(settings.PATH_BRICKS_BASE)
-BRICK_SET.load_files(settings.PATH_BRICKS_CUSTOM)
+ELEMENT_SET = ElementSet()
+ELEMENT = ELEMENT_SET.get
+ELEMENT_SET.load_files(settings.PATH_COMPONENT_BASE)
+ELEMENT_SET.load_files(settings.PATH_COMPONENT_CUSTOM)

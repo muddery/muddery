@@ -27,13 +27,13 @@ from muddery.server.utils.defines import CombatType
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.honour_settings import HonourSettings
 from muddery.server.dao.default_objects import DefaultObjects
-from muddery.server.mappings.brick_set import BRICK
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils import defines
 from muddery.server.dao.honours_mapper import HONOURS_MAPPER
 from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
 
 
-class MudderyPlayerCharacter(BRICK("CHARACTER")):
+class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:
@@ -52,8 +52,8 @@ class MudderyPlayerCharacter(BRICK("CHARACTER")):
                     has connected" message echoed to the room
 
     """
-    brick_key = "PLAYER_CHARACTER"
-    brick_name = _("Player Character", "bricks")
+    element_key = "PLAYER_CHARACTER"
+    element_name = _("Player Character", "elements")
     model_name = "player_characters"
 
     # initialize all handlers in a lazy fashion
@@ -491,7 +491,7 @@ class MudderyPlayerCharacter(BRICK("CHARACTER")):
 
             object_record = None
             try:
-                common_model_name = BRICK("COMMON_OBJECT").model_name
+                common_model_name = ELEMENT("COMMON_OBJECT").model_name
                 object_record = WorldData.get_table_data(common_model_name, key=key)
                 object_record = object_record[0]
             except Exception as e:

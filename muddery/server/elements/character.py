@@ -17,7 +17,7 @@ from evennia import create_script
 from evennia.typeclasses.models import DbHolder
 from evennia.utils import logger, search
 from evennia.utils.utils import lazy_property, class_from_module
-from muddery.server.mappings.brick_set import BRICK
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.dao.equipment_positions import EquipmentPositions
 from muddery.server.dao.loot_list import CharacterLootList
 from muddery.server.dao.object_properties import ObjectProperties
@@ -33,7 +33,7 @@ from muddery.server.utils.builder import delete_object
 from muddery.server.utils.defines import CombatType
 
 
-class MudderyCharacter(BRICK("OBJECT"), DefaultCharacter):
+class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
     """
     The Character defaults to implementing some of its hook methods with the
     following standard functionality:
@@ -58,8 +58,8 @@ class MudderyCharacter(BRICK("OBJECT"), DefaultCharacter):
         equipments
         closed_events
     """
-    brick_key = "CHARACTER"
-    brick_name = _("Character", "bricks")
+    element_key = "CHARACTER"
+    element_name = _("Character", "elements")
     model_name = "characters"
 
     # initialize loot handler in a lazy fashion
@@ -712,7 +712,7 @@ class MudderyCharacter(BRICK("OBJECT"), DefaultCharacter):
             logger.log_errmsg("Can not find the target.")
             return False
 
-        if not target.is_typeclass(BRICK(settings.GENERAL_CHARACTER_TYPECLASS_KEY), exact=False):
+        if not target.is_typeclass(ELEMENT(settings.GENERAL_CHARACTER_TYPECLASS_KEY), exact=False):
             # Target is not a character.
             logger.log_errmsg("Can not attack the target %s." % target.dbref)
             return False

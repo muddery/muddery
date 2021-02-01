@@ -12,7 +12,7 @@ from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.quest_dependencies import QuestDependencies
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
-from muddery.server.mappings.brick_set import TYPECLASS
+from muddery.server.mappings.element_set import ELEMENT
 
 
 class QuestHandler(object):
@@ -248,7 +248,7 @@ class QuestHandler(object):
             (boolean) result
         """
         # Get quest's record.
-        model_name = TYPECLASS("QUEST").model_name
+        model_name = ELEMENT("QUEST").model_name
         if not model_name:
             return False
 

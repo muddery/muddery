@@ -6,7 +6,7 @@ actions of a skill.
 
 """
 
-from muddery.server.bricks.skill import MudderySkill
+from muddery.server.elements.skill import MudderySkill
 from muddery.server.utils.localized_strings_handler import _
 
 

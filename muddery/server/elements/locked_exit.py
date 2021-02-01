@@ -9,16 +9,16 @@ for allowing Characters to traverse the exit to its destination.
 
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.mappings.brick_set import BRICK
+from muddery.server.mappings.element_set import ELEMENT
 
 
-class MudderyLockedExit(BRICK("EXIT")):
+class MudderyLockedExit(ELEMENT("EXIT")):
     """
     Characters must unlock these exits to pass it.
     The view and commands of locked exits are different from unlocked exits.
     """
-    brick_key = "LOCKED_EXIT"
-    brick_name = _("Locked Exit", "bricks")
+    element_key = "LOCKED_EXIT"
+    element_name = _("Locked Exit", "elements")
     model_name = "exit_locks"
 
     def after_data_loaded(self):

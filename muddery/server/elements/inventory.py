@@ -11,22 +11,22 @@ creation commands.
 from django.conf import settings
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger, search
-from muddery.server.bricks.base_brick import BaseBrick
+from muddery.server.elements.base_component import BaseComponent
 from muddery.server.utils import utils
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.dao.worlddata import WorldData
-from muddery.server.mappings.brick_set import BRICK
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils import defines
 
 
-class MudderyInventory(BaseBrick):
+class MudderyInventory(BaseComponent):
     """
     The character's inventory.
     """
-    brick_key = "INVENTORY"
-    brick_name = _("Inventory", "bricks")
+    element_key = "INVENTORY"
+    element_name = _("Inventory", "elements")
 
     def __init__(self, owner):
         """
@@ -117,7 +117,7 @@ class MudderyInventory(BaseBrick):
 
             object_record = None
             try:
-                common_model_name = BRICK("COMMON_OBJECT").model_name
+                common_model_name = ELEMENT("COMMON_OBJECT").model_name
                 object_record = WorldData.get_table_data(common_model_name, key=key)
                 object_record = object_record[0]
             except Exception as e:
@@ -239,7 +239,7 @@ class MudderyInventory(BaseBrick):
         """
         object_record = None
         try:
-            common_model_name = BRICK("COMMON_OBJECT").model_name
+            common_model_name = ELEMENT("COMMON_OBJECT").model_name
             object_record = WorldData.get_table_data(common_model_name, key=obj_key)
             object_record = object_record[0]
         except Exception as e:

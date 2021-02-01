@@ -10,7 +10,7 @@ from muddery.worldeditor.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS
 from muddery.worldeditor.dao.system_data_mapper import SYSTEM_DATA
 from muddery.worldeditor.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.worldeditor.mappings.form_set import FORM_SET
-from muddery.server.mappings.brick_set import TYPECLASS, TYPECLASS_SET
+from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
@@ -136,21 +136,21 @@ def query_object_form(base_typeclass, obj_typeclass, obj_key):
                         or use base typeclass as object's typeclass.
         obj_key: (string) object's key. If it is empty, query an empty form.
     """
-    candidate_typeclasses = TYPECLASS_SET.get_group(base_typeclass)
+    candidate_typeclasses = ELEMENT_SET.get_group(base_typeclass)
     if not candidate_typeclasses:
         raise MudderyError(ERR.no_table, "Can not find typeclass: %s" % base_typeclass)
 
     if not obj_typeclass:
         if obj_key:
             # Get typeclass from the object's record
-            table_name = TYPECLASS("OBJECT").model_name
+            table_name = ELEMENT("OBJECT").model_name
             record = general_query_mapper.get_record_by_key(table_name, obj_key)
             obj_typeclass = record.typeclass
         else:
             # Or use the base typeclass
             obj_typeclass = base_typeclass
 
-    typeclass = TYPECLASS_SET.get(obj_typeclass)
+    typeclass = ELEMENT_SET.get(obj_typeclass)
     if not typeclass:
         raise MudderyError(ERR.no_table, "Can not find typeclass: %s" % obj_typeclass)
     table_names = typeclass.get_models()
@@ -165,7 +165,7 @@ def query_object_form(base_typeclass, obj_typeclass, obj_key):
         forms.append({"table": table_name,
                       "fields": object_form})
 
-    # add typeclasses
+    # add elements
     if len(forms) > 0:
         for field in forms[0]["fields"]:
             if field["name"] == "typeclass":
@@ -299,11 +299,11 @@ def delete_object(obj_key, base_typeclass=None):
     Delete an object from all tables under the base typeclass.
     """
     if not base_typeclass:
-        table_name = TYPECLASS("OBJECT").model_name
+        table_name = ELEMENT("OBJECT").model_name
         record = general_query_mapper.get_record_by_key(table_name, obj_key)
         base_typeclass = record.typeclass
 
-    typeclasses = TYPECLASS_SET.get_group(base_typeclass)
+    typeclasses = ELEMENT_SET.get_group(base_typeclass)
     tables = set()
     for key, value in typeclasses.items():
         tables.update(value.get_models())
@@ -355,25 +355,25 @@ def update_object_key(typeclass_key, old_key, new_key):
         new_key: (string) object's new key
     """
     # The object's key has changed.
-    typeclass = TYPECLASS(typeclass_key)
-    if issubclass(typeclass, TYPECLASS("AREA")):
+    typeclass = ELEMENT(typeclass_key)
+    if issubclass(typeclass, ELEMENT("AREA")):
         # Update relative room's location.
-        model_name = TYPECLASS("ROOM").model_name
+        model_name = ELEMENT("ROOM").model_name
         if model_name:
             general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)
-    elif issubclass(typeclass, TYPECLASS("ROOM")):
+    elif issubclass(typeclass, ELEMENT("ROOM")):
         # Update relative exit's location.
-        model_name = TYPECLASS("EXIT").model_name
+        model_name = ELEMENT("EXIT").model_name
         if model_name:
             general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)
             general_query_mapper.filter_records(model_name, destination=old_key).update(destination=new_key)
 
         # Update relative world object's location.
-        model_name = TYPECLASS("WORLD_OBJECT").model_name
+        model_name = ELEMENT("WORLD_OBJECT").model_name
         if model_name:
             general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)
 
         # Update relative world NPC's location.
-        model_name = TYPECLASS("WORLD_NPC").model_name
+        model_name = ELEMENT("WORLD_NPC").model_name
         if model_name:
             general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)

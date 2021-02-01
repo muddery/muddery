@@ -285,38 +285,38 @@ SERVER_SESSION_CLASS = "muddery.server.conf.serversession.ServerSession"
 # immediately entered path fail to find a typeclass. It allows for
 # shorter input strings. They must either base off the game directory
 # or start from the evennia library.
-TYPECLASS_PATHS = ["muddery.server.typeclasses"]
+TYPECLASS_PATHS = ["muddery.server.elements"]
 
 # Typeclass for account objects (linked to a character) (fallback)
-BASE_ACCOUNT_TYPECLASS = "muddery.server.typeclasses.accounts.MudderyAccount"
+BASE_ACCOUNT_TYPECLASS = "muddery.server.elements.accounts.MudderyAccount"
 
 # Typeclass for guest account objects (linked to a character)
-BASE_GUEST_TYPECLASS = "muddery.server.typeclasses.accounts.Guest"
+BASE_GUEST_TYPECLASS = "muddery.server.elements.accounts.Guest"
 
 # Typeclass and base for all objects (fallback)
-BASE_OBJECT_TYPECLASS = "muddery.server.typeclasses.object.MudderyBaseObject"
+BASE_OBJECT_TYPECLASS = "muddery.server.elements.object.MudderyBaseObject"
 
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "muddery.server.typeclasses.player_character.MudderyPlayerCharacter"
+BASE_CHARACTER_TYPECLASS = "muddery.server.elements.player_character.MudderyPlayerCharacter"
 
 # Typeclass for general characters, include NPCs, mobs and player characters.
-BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.server.typeclasses.character.MudderyCharacter"
+BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.server.elements.character.MudderyCharacter"
 
 # Typeclass for player characters.
-BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.server.typeclasses.player_character.MudderyPlayerCharacter"
+BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.server.elements.player_character.MudderyPlayerCharacter"
 
 # Typeclass for rooms (fallback)
-BASE_ROOM_TYPECLASS = "muddery.server.typeclasses.room.MudderyRoom"
+BASE_ROOM_TYPECLASS = "muddery.server.elements.room.MudderyRoom"
 
 # Typeclass for Exit objects (fallback).
-BASE_EXIT_TYPECLASS = "muddery.server.typeclasses.exit.MudderyExit"
+BASE_EXIT_TYPECLASS = "muddery.server.elements.exit.MudderyExit"
 
 # Typeclass for Channel (fallback).
-BASE_CHANNEL_TYPECLASS = "muddery.server.typeclasses.channels.MudderyChannel"
+BASE_CHANNEL_TYPECLASS = "muddery.server.elements.channels.MudderyChannel"
 
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.
-BASE_SCRIPT_TYPECLASS = "muddery.server.typeclasses.scripts.MudderyScript"
+BASE_SCRIPT_TYPECLASS = "muddery.server.elements.scripts.MudderyScript"
 
 # Path of base world data forms.
 PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms"
@@ -324,11 +324,11 @@ PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms"
 # Path of base request processers.
 PATH_REQUEST_PROCESSERS_BASE = "muddery.worldeditor.controllers"
 
-# Path of base typeclasses.
-PATH_TYPECLASSES_BASE = "muddery.server.typeclasses"
+# Path of base elements.
+PATH_COMPONENT_BASE = "muddery.server.elements"
 
-# Path of custom typeclasses.
-PATH_TYPECLASSES_CUSTOM = "typeclasses"
+# Path of custom elements.
+PATH_COMPONENT_CUSTOM = "elements"
 
 # Path of base event actions.
 PATH_EVENT_ACTION_BASE = "muddery.server.events.event_actions"

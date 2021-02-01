@@ -10,7 +10,7 @@ from muddery.server.utils.utils import classes_in_path
 
 class FormSet(object):
     """
-    All available typeclasses.
+    All available elements.
     """
     def __init__(self):
         self.dict = {}

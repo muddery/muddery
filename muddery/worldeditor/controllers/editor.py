@@ -17,7 +17,7 @@ from muddery.server.dao.worlddata import WorldData
 
 class QueryAllTypeclasses(BaseRequestProcesser):
     """
-    Query all typeclasses.
+    Query all elements.
 
     Args:
         None.

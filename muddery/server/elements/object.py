@@ -22,18 +22,18 @@ from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.desc_handler import DESC_HANDLER
-from muddery.server.bricks.base_brick import BaseBrick
-from muddery.server.mappings.brick_set import BRICK
+from muddery.server.elements.base_component import BaseComponent
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.object_properties import ObjectProperties
 
 
-class MudderyBaseObject(BaseBrick, DefaultObject):
+class MudderyBaseObject(BaseComponent, DefaultObject):
     """
     This object loads attributes from world data on init automatically.
     """
-    brick_key = "OBJECT"
-    brick_name = _("Object", "bricks")
+    element_key = "OBJECT"
+    element_name = _("Object", "elements")
     model_name = "objects"
 
     # initialize all handlers in a lazy fashion
@@ -294,7 +294,7 @@ class MudderyBaseObject(BaseBrick, DefaultObject):
         """
         key = self.get_data_key()
         if key:
-            base_model = BRICK("OBJECT").model_name
+            base_model = ELEMENT("OBJECT").model_name
 
             # Get the object's base data
             self.load_base_data(base_model, key)
@@ -424,16 +424,16 @@ class MudderyBaseObject(BaseBrick, DefaultObject):
         self.state.save("level", level)
         self.load_custom_properties(level)
 
-    def set_typeclass(self, brick_key):
+    def set_typeclass(self, element_key):
         """
         Set object's typeclass.
         
         Args:
-            brick_key: (string) Typeclass's key.
+            element_key: (string) Typeclass's key.
         """
-        typeclass_cls = BRICK(brick_key)
+        typeclass_cls = ELEMENT(element_key)
         if not typeclass_cls:
-            logger.log_errmsg("Can not get %s's typeclass: %s." % (self.get_data_key(), brick_key))
+            logger.log_errmsg("Can not get %s's typeclass: %s." % (self.get_data_key(), element_key))
             return
         
         if type(self) == typeclass_cls:

@@ -5,18 +5,18 @@ CommonObject is the object that players can put into their inventory.
 
 from evennia.utils.utils import lazy_property
 from muddery.server.utils.loot_handler import LootHandler
-from muddery.server.mappings.brick_set import BRICK
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.dao.loot_list import CreatorLootList
 
 
-class MudderyObjectCreator(BRICK("WORLD_OBJECT")):
+class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):
     """
     This object loads attributes from world data on init automatically.
     """
-    brick_key = "WORLD_OBJECT_CREATOR"
-    brick_name = _("Object Creator", "bricks")
+    element_key = "WORLD_OBJECT_CREATOR"
+    element_name = _("Object Creator", "elements")
     model_name = "object_creators"
 
     # initialize loot handler in a lazy fashion

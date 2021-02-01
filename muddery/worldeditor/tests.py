@@ -32,7 +32,7 @@ class TestEditor(TestCase):
         response = self.client.get('/worlddata/editor/defines/class_categories/form.html')
         self.failUnlessEqual(response.status_code, 200)
         
-        response = self.client.get('/worlddata/editor/defines/typeclasses/form.html')
+        response = self.client.get('/worlddata/editor/defines/elements/form.html')
         self.failUnlessEqual(response.status_code, 200)
         
         response = self.client.get('/worlddata/editor/defines/equipment_types/form.html')

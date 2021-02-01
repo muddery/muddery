@@ -8,16 +8,16 @@ creation commands.
 
 """
 
-from muddery.server.mappings.brick_set import BRICK
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
 
 
-class MudderyWorldNPC(BRICK("BASE_NPC")):
+class MudderyWorldNPC(ELEMENT("BASE_NPC")):
     """
     The character not controlled by players.
     """
-    brick_key = "WORLD_NPC"
-    brick_name = _("World NPC", "bricks")
+    element_key = "WORLD_NPC"
+    element_name = _("World NPC", "elements")
     model_name = "world_npcs"
 
     def after_data_loaded(self):

@@ -5,7 +5,7 @@ Query and deal common tables.
 from django.apps import apps
 from django.conf import settings
 from django.db import connections
-from muddery.server.mappings.brick_set import TYPECLASS
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.exception import MudderyError, ERR
 
 
@@ -14,10 +14,10 @@ class WorldExitsMapper(object):
     Dialogue relations.
     """
     def __init__(self):
-        self.model_name = TYPECLASS("EXIT").model_name
+        self.model_name = ELEMENT("EXIT").model_name
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
-        self.object_model_name = TYPECLASS("OBJECT").model_name
+        self.object_model_name = ELEMENT("OBJECT").model_name
 
     def exits_of_rooms(self, rooms):
         """

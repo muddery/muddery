@@ -16,7 +16,7 @@ from muddery.worldeditor.dao import general_query_mapper, model_mapper
 from muddery.worldeditor.dao.object_properties_mapper import OBJECT_PROPERTIES
 from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
-from muddery.server.mappings.brick_set import TYPECLASS_SET, TYPECLASS
+from muddery.server.mappings.element_set import ELEMENT_SET, ELEMENT
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.utils import defines
 from muddery.server.utils.exception import MudderyError, ERR
@@ -26,9 +26,9 @@ from worlddata import models
 
 def query_all_typeclasses():
     """
-    Query all typeclasses.
+    Query all elements.
     """
-    return TYPECLASS_SET.get_all_info()
+    return ELEMENT_SET.get_all_info()
 
 
 def query_areas():
@@ -84,7 +84,7 @@ def query_object_properties(typeclass_key, object_key):
                    "label": _("Level"),
                    "help_text": _("Properties's level.")})
 
-    properties_info = TYPECLASS(typeclass_key).get_properties_info()
+    properties_info = ELEMENT(typeclass_key).get_properties_info()
     for key, info in properties_info.items():
         if info["mutable"]:
             continue
@@ -156,11 +156,11 @@ def query_object_level_properties(object_key, level):
     })
 
     # Get typeclass from the object's record
-    table_name = TYPECLASS("OBJECT").model_name
+    table_name = ELEMENT("OBJECT").model_name
     record = general_query_mapper.get_record_by_key(table_name, object_key)
     obj_typeclass = record.typeclass
 
-    properties_info = TYPECLASS(obj_typeclass).get_properties_info()
+    properties_info = ELEMENT(obj_typeclass).get_properties_info()
 
     # Get properties.
     data = {}
@@ -194,7 +194,7 @@ def query_object_event_triggers(typeclass_key):
     Args:
         typeclass_key: (string) the object's typeclass_key.
     """
-    return TYPECLASS_SET.get_trigger_types(typeclass_key)
+    return ELEMENT_SET.get_trigger_types(typeclass_key)
 
 
 def query_dialogue_event_triggers():
@@ -278,7 +278,7 @@ def query_typeclass_table(typeclass_key):
     Args:
         typeclass_key: (string) typeclass's key.
     """
-    typeclass_cls = TYPECLASS(typeclass_key)
+    typeclass_cls = ELEMENT(typeclass_key)
     if not typeclass_cls:
         raise MudderyError(ERR.no_table, "Can not find typeclass %s" % typeclass_key)
 

@@ -21,7 +21,7 @@ from evennia import DefaultScript
 from evennia.utils import logger
 from muddery.server.utils import defines
 from muddery.server.dao.worlddata import WorldData
-from muddery.server.mappings.brick_set import TYPECLASS, TYPECLASS_SET
+from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 
 
 class CStatus(Enum):
@@ -308,13 +308,13 @@ class BaseCombatHandler(DefaultScript):
 
             obj_list = []
             if loots:
-                obj_model_name = TYPECLASS("OBJECT").model_name
+                obj_model_name = ELEMENT("OBJECT").model_name
 
                 for obj_info in loots:
                     try:
                         obj_record = WorldData.get_table_data(obj_model_name, key=obj_info["object"])
                         obj_record = obj_record[0]
-                        goods_models = TYPECLASS_SET.get_class_modeles(obj_record.typeclass)
+                        goods_models = ELEMENT_SET.get_class_modeles(obj_record.typeclass)
                         goods_data = WorldData.get_tables_data(goods_models, key=obj_info["object"])
 
                         obj_list.append({

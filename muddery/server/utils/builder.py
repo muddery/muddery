@@ -8,7 +8,7 @@ from evennia.utils import create, search, logger
 from evennia.comms.models import ChannelDB
 from muddery.server.utils import utils
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.mappings.brick_set import TYPECLASS, TYPECLASS_SET
+from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.world_areas import WorldAreas
 from muddery.server.dao.world_rooms import WorldRooms
@@ -28,7 +28,7 @@ def get_object_record(obj_key):
         The object's data record.
     """
     record = None
-    model_name = TYPECLASS("OBJECT").model_name
+    model_name = ELEMENT("OBJECT").model_name
     try:
         # Get record.
         record = WorldData.get_table_data(model_name, key=obj_key)
@@ -55,7 +55,7 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
     record = None
     typeclass_path = None
     try:
-        model_name = TYPECLASS("OBJECT").model_name
+        model_name = ELEMENT("OBJECT").model_name
 
         try:
             # Get record.
@@ -67,7 +67,7 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
             print(traceback.print_exc())
 
         # get typeclass model
-        typeclass_path = TYPECLASS_SET.get_module(record.typeclass)
+        typeclass_path = ELEMENT_SET.get_module(record.typeclass)
     except Exception as e:
         ostring = "Can not get typeclass of %s: %s." % (obj_key, e)
         print(ostring)
@@ -175,7 +175,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
         current_obj_keys.add(obj_key)
 
     # Create new objects.
-    object_model_name = TYPECLASS("OBJECT").model_name
+    object_model_name = ELEMENT("OBJECT").model_name
     for record in objects_data:
         if not record.key in current_obj_keys:
             # Create new objects.
@@ -187,7 +187,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
             try:
                 object_record = WorldData.get_table_data(object_model_name, key=record.key)
                 object_record = object_record[0]
-                typeclass_path = TYPECLASS_SET.get_module(object_record.typeclass)
+                typeclass_path = ELEMENT_SET.get_module(object_record.typeclass)
                 obj = create.create_object(typeclass_path, object_record.name)
                 count_create += 1
             except Exception as e:

@@ -6,16 +6,16 @@ Shop goods is the object in shops. They have some special attributes to record g
 from evennia.utils import logger
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.mappings.brick_set import BRICK, BRICK_SET
+from muddery.server.mappings.element_set import ELEMENT, BRICK_SET
 
 
-class MudderyShopGoods(BRICK("OBJECT")):
+class MudderyShopGoods(ELEMENT("OBJECT")):
     """
     This is a shop goods. Shops show these objects to players. It contains a common object
     to sell and additional shop information.
     """
-    brick_key = "SHOP_GOODS"
-    brick_name = _("Goods", "bricks")
+    element_key = "SHOP_GOODS"
+    element_name = _("Goods", "elements")
     model_name = "shop_goods"
 
     def at_object_creation(self):
@@ -52,7 +52,7 @@ class MudderyShopGoods(BRICK("OBJECT")):
         # get price unit information
         try:
             # Get record.
-            obj_model_name = BRICK("OBJECT").model_name
+            obj_model_name = ELEMENT("OBJECT").model_name
             unit_record = WorldData.get_table_data(obj_model_name, key=self.unit_key)
             unit_record = unit_record[0]
         except Exception as e:

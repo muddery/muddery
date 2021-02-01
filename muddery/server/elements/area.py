@@ -6,17 +6,17 @@ Areas are compose the whole map. Rooms are belongs to areas.
 """
 
 from evennia.utils import logger
-from muddery.server.mappings.brick_set import BRICK
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.dao.image_resource import ImageResource
 
 
-class MudderyArea(BRICK("OBJECT")):
+class MudderyArea(ELEMENT("OBJECT")):
     """
     Areas are compose the whole map. Rooms are belongs to areas.
     """
-    brick_key = "AREA"
-    brick_name = _("Area", "bricks")
+    element_key = "AREA"
+    element_name = _("Area", "elements")
     model_name = "world_areas"
 
     def at_object_creation(self):

@@ -8,7 +8,7 @@ creation commands.
 
 """
 
-from muddery.server.bricks.player_character import MudderyPlayerCharacter
+from muddery.server.elements.player_character import MudderyPlayerCharacter
 from muddery.server.utils.localized_strings_handler import _
 
 
