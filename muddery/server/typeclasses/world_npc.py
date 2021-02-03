@@ -28,5 +28,5 @@ class MudderyWorldNPC(TYPECLASS("BASE_NPC")):
 
         # if it is dead, reborn at init.
         if not self.is_alive():
-            if not self.is_temp and self.reborn_time > 0:
+            if not self.db.is_combat_instance and self.reborn_time > 0:
                 self.reborn()

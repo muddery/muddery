@@ -41,10 +41,6 @@ MudderyService.prototype = {
         Evennia.msg("text", this.cmdString(cmd, args));
     },
 
-    leaveCombat: function() {
-        Evennia.msg("text", this.cmdString("leave_combat", ""));
-    },
-
     doQuickLogin: function(playername) {
         var args = {"playername" : playername};
         Evennia.msg("text", this.cmdString("quick_login", args));

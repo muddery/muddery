@@ -2085,6 +2085,13 @@ MudderyScene.prototype.leftCombatQueue = function() {
 }
 
 /*
+ * Refresh the scene window.
+ */
+MudderyScene.prototype.refresh = function() {
+    this.setScene(this.scene);
+}
+
+/*
  * Set the scene's data.
  */
 MudderyScene.prototype.setScene = function(scene) {
@@ -4181,7 +4188,12 @@ MudderyCombat.prototype.leaveCombat = function() {
 		window.clearInterval(this.interval_id);
 		this.interval_id = null;
 	}
+
     mud.main_frame.popWindow(this);
+    mud.scene_window.refresh();
+    if (mud.popup_dialogue.hasDialogue()) {
+        mud.popup_dialogue.show();
+    }
 }
 
 /*
@@ -4267,7 +4279,6 @@ MudderyCombatResult.prototype.bindEvents = function() {
  */
 MudderyCombatResult.prototype.onClose = function(element) {
 	// close popup box
-    core.service.leaveCombat();
     mud.combat_window.leaveCombat();
 }
 

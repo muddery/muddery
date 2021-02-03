@@ -32,7 +32,6 @@ class CStatus(Enum):
     ACTIVE = 2
     FINISHED = 3
     ESCAPED = 4
-    LEFT = 5
 
 
 class BaseCombatHandler(DefaultScript):
@@ -78,6 +77,12 @@ class BaseCombatHandler(DefaultScript):
         if self.timer and self.timer.active():
             self.timer.cancel()
 
+        if not self.finished:
+            self.set_combat_draw()
+
+        for char in self.characters.values():
+            char["char"].leave_combat()
+
     def at_timeout(self):
         """
         Combat timeout.
@@ -85,10 +90,8 @@ class BaseCombatHandler(DefaultScript):
         Returns:
             None.
         """
-        if self.finished:
-            return
-
-        self.set_combat_draw()
+        if not self.finished:
+            self.set_combat_draw()
 
     def set_combat(self, combat_type, teams, desc, timeout):
         """
@@ -194,6 +197,9 @@ class BaseCombatHandler(DefaultScript):
         """
         Finish a combat. Send results to players, and kill all failed characters.
         """
+        if self.finished:
+            return
+
         self.finished = True
 
         if self.timer and self.timer.active():
@@ -210,6 +216,8 @@ class BaseCombatHandler(DefaultScript):
 
         self.notify_combat_results(self.winners, self.losers)
 
+        self.stop()
+
     def escape_combat(self, caller):
         """
         Character escaped.
@@ -223,33 +231,6 @@ class BaseCombatHandler(DefaultScript):
         if caller and caller.id in self.characters:
             self.characters[caller.id]["status"] = CStatus.ESCAPED
             caller.combat_result(self.combat_type, defines.COMBAT_ESCAPED)
-
-    def leave_combat(self, character):
-        """
-        Remove combatant from handler.
-
-        :param character: character object
-        """
-        if character.id in self.characters:
-            if self.characters[character.id]["status"] == CStatus.LEFT:
-                return
-            self.characters[character.id]["status"] = CStatus.LEFT
-
-        all_player_left = True
-        for char in self.characters.values():
-            if char["status"] != CStatus.LEFT and\
-               char["char"].is_typeclass(settings.BASE_PLAYER_CHARACTER_TYPECLASS, exact=False):
-                all_player_left = False
-                break
-
-        if all_player_left:
-            # There is no player character in combat.
-            for char in self.characters.values():
-                if char["status"] != CStatus.LEFT:
-                    char["status"] = CStatus.LEFT
-                    char["char"].leave_combat()
-
-            self.stop()
 
     def msg_all(self, message):
         "Send message to all combatants"
@@ -411,7 +392,7 @@ class BaseCombatHandler(DefaultScript):
 
             if status == CStatus.ESCAPED:
                 return defines.COMBAT_ESCAPED, None, None
-            elif status == CStatus.FINISHED or status == CStatus.LEFT:
+            elif status == CStatus.FINISHED:
                 if char_id in self.winners:
                     return defines.COMBAT_WIN, self.losers.values(), self.get_combat_rewards(char_id)
                 elif char_id in self.losers:

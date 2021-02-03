@@ -123,7 +123,11 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # set closed events
         if not self.attributes.has("closed_events"):
             self.db.closed_events = set()
-        
+
+        # A combat instance only exists in a combat, it will be deleted after the combat finished.
+        if not self.attributes.has("is_combat_instance"):
+            self.db.is_combat_instance = False
+
         # skill's gcd
         self.skill_gcd = GAME_SETTINGS.get("global_cd")
         self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
@@ -134,9 +138,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         
         self.target = None
         self.reborn_time = 0
-        
-        # A temporary character will be deleted after the combat finished.
-        self.is_temp = False
 
     def at_object_delete(self):
         """
@@ -242,9 +243,6 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         # set reborn time
         self.reborn_time = getattr(self.system, "reborn_time", 0)
 
-        # A temporary character will be deleted after the combat finished.
-        self.is_temp = False
-
         # update equipment positions
         self.reset_equip_positions()
 
@@ -256,6 +254,16 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
 
         # refresh the character's properties.
         self.refresh_properties(True)
+
+    def set_location(self, location):
+        """
+        Set object's location.
+        """
+        if self.db.is_combat_instance:
+            # A combat instance only exists in a combat, so it should not be set to a room.
+            return
+
+        super(MudderyCharacter, self).set_location(location)
 
     def set_level(self, level):
         """
@@ -827,8 +835,15 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
             logger.log_errmsg("Can not create the target %s." % target_key)
             return False
 
-        target.is_temp = True
+        target.set_combat_instance(True)
         return self.attack_target(target, desc)
+
+    def set_combat_instance(self, is_combat_instance):
+        """
+        Set this character as a combat instance.
+        A combat instance only exists in a combat, it will be deleted after the combat finished.
+        """
+        self.db.is_combat_instance = is_combat_instance
 
     def is_in_combat(self):
         """
@@ -858,18 +873,11 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         self.cmdset.delete(settings.CMDSET_COMBAT)
 
         if self.ndb.combat_handler:
-            self.ndb.combat_handler.leave_combat(self)
             del self.ndb.combat_handler
 
-        if self.is_temp:
-            # delete template character and notify its location
-            location = self.location
-
+        if self.db.is_combat_instance:
+            # delete this character
             delete_object(self.dbref)
-            if location:
-                for content in location.contents:
-                    if content.has_account:
-                        content.show_location()
 
     def set_team(self, team_id):
         """
@@ -911,7 +919,7 @@ class MudderyCharacter(TYPECLASS("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        if not self.is_temp and self.reborn_time > 0:
+        if not self.db.is_combat_instance and self.reborn_time > 0:
             # Set reborn timer.
             self.defer = deferLater(reactor, self.reborn_time, self.reborn)
 

@@ -107,7 +107,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         # if it is dead, reborn at init.
         if not self.is_alive():
-            if not self.is_temp and self.reborn_time > 0:
+            if not self.db.is_combat_instance and self.reborn_time > 0:
                 self.reborn()
 
     def move_to(self, destination, quiet=False,
@@ -1057,24 +1057,10 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
 
         self.msg({"combat_finish": combat_result})
 
-    def leave_combat(self):
-        """
-        Leave the current combat.
-        """
-        status = None
-        opponents = None
-        rewards = None
-        if self.ndb.combat_handler:
-            result = self.ndb.combat_handler.get_combat_result(self.id)
-            if result:
-                status, opponents, rewards = result
-
-        combat_type = self.ndb.combat_handler.get_combat_type()
-
         if combat_type == CombatType.NORMAL:
             # normal combat
             # trigger events
-            if status == defines.COMBAT_WIN:
+            if result == defines.COMBAT_WIN:
                 for opponent in opponents:
                     opponent.event.at_character_kill(self)
                     opponent.event.at_character_die()
@@ -1082,19 +1068,16 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                 # call quest handler
                 for opponent in opponents:
                     self.quest_handler.at_objective(defines.OBJECTIVE_KILL, opponent.get_data_key())
-            elif status == defines.COMBAT_LOSE:
+            elif result == defines.COMBAT_LOSE:
                 self.die(opponents)
         elif combat_type == CombatType.HONOUR:
-            if status == defines.COMBAT_WIN:
+            if result == defines.COMBAT_WIN:
                 self.honour_win()
-            elif status == defines.COMBAT_LOSE:
+            elif result == defines.COMBAT_LOSE:
                 self.honour_lose()
-
-        super(MudderyPlayerCharacter, self).leave_combat()
 
         # show status
         self.show_status()
-
         self.show_location()
 
     def die(self, killers):

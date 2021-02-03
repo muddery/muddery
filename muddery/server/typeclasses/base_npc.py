@@ -138,12 +138,13 @@ class MudderyBaseNPC(TYPECLASS("CHARACTER")):
             if result:
                 status, opponents, rewards = result
 
-        if not self.is_temp:
+        if not self.db.is_combat_instance:
             if status == defines.COMBAT_LOSE:
                 self.die(opponents)
 
-        super(MudderyBaseNPC, self).leave_combat()
+            super(MudderyBaseNPC, self).leave_combat()
 
-        if not self.is_temp:
             if status != defines.COMBAT_LOSE:
                 self.recover()
+        else:
+            super(MudderyBaseNPC, self).leave_combat()
