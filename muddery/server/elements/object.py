@@ -22,13 +22,13 @@ from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.desc_handler import DESC_HANDLER
-from muddery.server.elements.base_component import BaseComponent
+from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.dao.object_properties import ObjectProperties
 
 
-class MudderyBaseObject(BaseComponent, DefaultObject):
+class MudderyBaseObject(BaseElement, DefaultObject):
     """
     This object loads attributes from world data on init automatically.
     """
@@ -135,7 +135,12 @@ class MudderyBaseObject(BaseComponent, DefaultObject):
 
         All skills, contents will be removed too.
         """
+        result = super(MudderyBaseObject, self).at_object_delete()
+        if not result:
+            return result
+
         self.states_handler.clear()
+        return True
 
     def at_init(self):
         """
@@ -517,7 +522,7 @@ class MudderyBaseObject(BaseComponent, DefaultObject):
         Args:
         desc: (string) Description.
         """
-        self.db.desc = desc
+        self.desc = desc
 
     def set_obj_destination(self, destination):
         """
@@ -565,6 +570,13 @@ class MudderyBaseObject(BaseComponent, DefaultObject):
             None
         """
         self.icon = getattr(self.system, "icon", None)
+
+    def get_icon(self):
+        """
+        Get object's icon.
+        :return:
+        """
+        return self.icon
 
     def get_data_key(self, default=""):
         """
@@ -614,12 +626,13 @@ class MudderyBaseObject(BaseComponent, DefaultObject):
         """
         This returns object's descriptions on different conditions.
         """
-        desc_conditions = DESC_HANDLER.get(self.get_data_key())
-        if desc_conditions:
-            for item in desc_conditions:
-                if STATEMENT_HANDLER.match_condition(item["condition"], caller, self):
-                    return item["desc"]
-        return self.db.desc
+        if caller:
+            desc_conditions = DESC_HANDLER.get(self.get_data_key())
+            if desc_conditions:
+                for item in desc_conditions:
+                    if STATEMENT_HANDLER.match_condition(item["condition"], caller, self):
+                        return item["desc"]
+        return self.desc
         
     def get_available_commands(self, caller):
         """

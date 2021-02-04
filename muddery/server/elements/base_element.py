@@ -12,7 +12,7 @@ from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.dao.properties_dict import PropertiesDict
 
 
-class BaseComponent(object):
+class BaseElement(object):
     """
     The base brick.
     """
@@ -68,7 +68,7 @@ class BaseComponent(object):
 
     @lazy_property
     def states_handler(self):
-        return ObjectStatesHandler(self.get_type(), self.get_id())
+        return ObjectStatesHandler(self)
 
     # @property state stores object's running state.
     def __state_get(self):

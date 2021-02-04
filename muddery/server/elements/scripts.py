@@ -13,11 +13,11 @@ just overloads its hooks to have it perform its function.
 """
 
 from evennia.scripts.scripts import DefaultScript
-from muddery.server.elements.base_component import BaseComponent
+from muddery.server.elements.base_element import BaseElement
 from muddery.server.utils.localized_strings_handler import _
 
 
-class MudderyScript(BaseComponent, DefaultScript):
+class MudderyScript(BaseElement, DefaultScript):
     """
     A script type is customized by redefining some or all of its hook
     methods and variables.

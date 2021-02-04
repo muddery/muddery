@@ -77,12 +77,24 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
     def at_object_delete(self):
         """
-        called just before deleting an object.
+        Called just before the database object is permanently
+        delete()d from the database. If this method returns False,
+        deletion is aborted.
+
+        All skills, contents will be removed too.
         """
+        result = super(MudderyPlayerCharacter, self).at_object_delete()
+        if not result:
+            return result
+
         # remove the character's honour
         HONOURS_MAPPER.remove_honour(self.id)
 
-        return super(MudderyPlayerCharacter, self).at_object_delete()
+        # remove quests
+        self.quest_handler.remove_all()
+
+        return True
+
 
 
     def after_data_loaded(self):
@@ -425,7 +437,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         # add new default objects
         obj_list = []
-        inventory = self.state.load("inventory")
+        inventory = self.state.load("inventory", [])
         for object_record in object_records:
             found = False
             for item in inventory:
@@ -483,16 +495,14 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             key = obj["object"]
             level = obj.get("level")
             available = obj["number"]
-            name = ""
-            icon = ""
             number = available
             accepted = 0
             reject = False
 
             object_record = None
             try:
-                common_model_name = ELEMENT("COMMON_OBJECT").model_name
-                object_record = WorldData.get_table_data(common_model_name, key=key)
+                common_models = ELEMENT("COMMON_OBJECT").get_models()
+                object_record = WorldData.get_tables_data(common_models, key=key)
                 object_record = object_record[0]
             except Exception as e:
                 pass
@@ -543,13 +553,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 while number > 0:
                     if object_record.unique:
                         # can not have more than one unique objects
-                        reject = _("Can not get more %s.") % name
+                        reject = _("Can not get more %s.") % object_record.name
                         break
 
                     # create a new content
                     new_obj = build_object(key, level=level)
                     if not new_obj:
-                        reject = _("Can not get %s.") % name
+                        reject = _("Can not get %s.") % object_record.name
                         break
 
                     # Get the number that actually added.
@@ -603,7 +613,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             int: object number
         """
-        inventory = self.state.load("inventory")
+        inventory = self.state.load("inventory", [])
 
         # get total number
         sum = 0
@@ -787,19 +797,22 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         inv = []
         inventory = self.state.load("inventory", [])
         for item in inventory:
-            info = {"dbref": item.dbref,        # item's dbref
-                    "name": item.name,          # item's name
-                    "number": item.get_number(),   # item's number
-                    "desc": item.db.desc,       # item's desc
-                    "can_remove": item.can_remove,
-                    "icon": getattr(item, "icon", None)}  # item's icon
-            
+            obj = item["obj"]
+            info = {
+                "dbref": item["dbref"],             # item's dbref
+                "number": item["number"],           # item's number
+                "name": obj.get_name(),             # item's name
+                "desc": obj.get_desc(self),         # item's desc
+                "can_remove": obj.can_remove,
+                "icon": obj.get_icon(),             # item's icon
+            }
+
             if getattr(item, "equipped", False):
                 info["equipped"] = item.equipped
             inv.append(info)
 
         # sort by created time
-        inv.sort(key=lambda x:x["dbref"])
+        inv.sort(key=lambda x: x["dbref"])
 
         return inv
 
@@ -1005,13 +1018,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Get skills' data.
         """
-        skills = []
+        skills_list = []
 
         skills = self.state.load("skills", {})
-        for key, skill in skills:
-            skills.append(skill.get_appearance(self))
+        for key, skill in skills.items():
+            skills_list.append(skill.get_appearance(self))
 
-        return skills
+        return skills_list
 
     def resume_combat(self):
         """
@@ -1361,21 +1374,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         }
         self.msg({"conversation": output})
         caller.msg({"conversation": output})
-
-    def at_object_delete(self):
-        """
-        Called just before the database object is permanently
-        delete()d from the database. If this method returns False,
-        deletion is aborted.
-
-        All skills, contents will be removed too.
-        """
-        result = super(MudderyPlayerCharacter, self).at_object_delete()
-        if not result:
-            return result
-        
-        self.quest_handler.remove_all()
-        return True
 
     def show_rankings(self):
         """

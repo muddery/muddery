@@ -13,7 +13,7 @@ import weakref
 from django.apps import apps
 from django.conf import settings
 
-from muddery.server.database.attributes_cache.base_cache import BaseAttributesCache
+from muddery.server.database.attributes_cache.cache_none import CacheNone
 
 
 # -------------------------------------------------------------
@@ -35,7 +35,7 @@ class ObjectStatesHandler(object):
         self.obj = weakref.proxy(obj)
         self.obj_id = obj.id
 
-        self.cache = BaseAttributesCache()
+        self.cache = CacheNone("object_status")
 
     def has(self, key):
         """
@@ -76,6 +76,7 @@ class ObjectStatesHandler(object):
             value (any or str): The value of the Attribute. If
                 `strattr` keyword is set, this *must* be a string.
         """
+        print("object states save: %s %s" % (key, value))
         self.cache.save(self.obj_id, key, value)
 
     def delete(self, key):

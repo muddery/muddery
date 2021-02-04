@@ -4,7 +4,7 @@ Load and cache all worlddata.
 
 from django.conf import settings
 from django.apps import apps
-from muddery.server.dao.tabledata import TableData
+from muddery.server.dao.tabledata import TableData, RecordData
 from muddery.server.utils.exception import MudderyError
 
 
@@ -94,7 +94,8 @@ class WorldData(object):
         Return:
             (dict) values
         """
-        data = {}
+        all_fields = {}
+        row_data = []
         for table_name in tables:
             if table_name not in cls.tables:
                 cls.load_table(table_name)
@@ -103,13 +104,15 @@ class WorldData(object):
             records = cls.tables[table_name].filter_data(key=key)
 
             if not records:
-                continue
-
-            if len(records) > 1:
+                for field_name in fields:
+                    all_fields[field_name] = len(row_data)
+                    row_data.append(None)
+            elif len(records) > 1:
                 raise MudderyError("Can not solve more than one records from table: %s" % table_name)
+            else:
+                record = records[0]
+                for field_name in fields:
+                    all_fields[field_name] = len(row_data)
+                    row_data.append(getattr(record, field_name))
 
-            record = records[0]
-            for field_name in fields:
-                data[field_name] = getattr(record, field_name)
-
-        return data
+        return RecordData(all_fields, row_data)

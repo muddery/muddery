@@ -36,7 +36,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        current_quests = self.owner.state.get("current_quests", {})
+        current_quests = self.owner.state.load("current_quests", {})
         if quest_key in current_quests:
             return
 
@@ -47,7 +47,7 @@ class QuestHandler(object):
 
         new_quest.set_owner(self.owner)
         current_quests[quest_key] = new_quest
-        self.owner.state.set("current_quests", current_quests)
+        self.owner.state.save("current_quests", current_quests)
 
         self.owner.msg({"msg": _("Accepted quest {C%s{n.") % new_quest.get_name()})
         self.show_quests()
@@ -59,10 +59,10 @@ class QuestHandler(object):
         
         It will be called when quests' owner will be deleted.
         """
-        current_quests = self.owner.state.get("current_quests", {})
+        current_quests = self.owner.state.load("current_quests", {})
         for quest_key in current_quests:
             current_quests[quest_key].delete()
-        self.owner.state.set("current_quests", {})
+        self.owner.state.save("current_quests", {})
 
     def give_up(self, quest_key):
         """
@@ -78,18 +78,18 @@ class QuestHandler(object):
             logger.log_tracemsg("Can not give up quests.")
             raise MudderyError(_("Can not give up this quest."))
 
-        current_quests = self.owner.state.get("current_quests", {})
+        current_quests = self.owner.state.load("current_quests", {})
         if quest_key not in current_quests:
             raise MudderyError(_("Can not find this quest."))
 
         current_quests[quest_key].delete()
         del(current_quests[quest_key])
-        self.owner.state.set("current_quests", current_quests)
+        self.owner.state.save("current_quests", current_quests)
 
-        finished_quests = self.owner.state.get("finished_quests", {})
+        finished_quests = self.owner.state.load("finished_quests", {})
         if quest_key in finished_quests:
             finished_quests.remove(quest_key)
-            self.owner.state.set("finished_quests", finished_quests)
+            self.owner.state.save("finished_quests", finished_quests)
 
         self.show_quests()
 
@@ -103,7 +103,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        current_quests = self.owner.state.get("current_quests", {})
+        current_quests = self.owner.state.load("current_quests", {})
         if quest_key not in current_quests:
             return
 
@@ -119,11 +119,11 @@ class QuestHandler(object):
         # Delete the quest.
         current_quests[quest_key].delete()
         del (current_quests[quest_key])
-        self.owner.state.set("current_quests", current_quests)
+        self.owner.state.save("current_quests", current_quests)
 
-        finished_quests = self.owner.state.get("finished_quests", {})
+        finished_quests = self.owner.state.load("finished_quests", {})
         finished_quests.add(quest_key)
-        self.owner.state.set("finished_quests", finished_quests)
+        self.owner.state.save("finished_quests", finished_quests)
 
         self.owner.msg({"msg": _("Turned in quest {C%s{n.") % name})
         self.show_quests()
@@ -134,7 +134,7 @@ class QuestHandler(object):
         Get all quests that their objectives are accomplished.
         """
         quests = set()
-        current_quests = self.owner.state.get("current_quests", {})
+        current_quests = self.owner.state.load("current_quests", {})
         for quest in current_quests:
             if current_quests[quest].is_accomplished():
                 quests.add(quest)
@@ -151,7 +151,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        current_quests = self.owner.state.get("current_quests", {})
+        current_quests = self.owner.state.load("current_quests", {})
         if quest_key not in current_quests:
             return False
 
@@ -167,7 +167,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        current_quests = self.owner.state.get("current_quests", {})
+        current_quests = self.owner.state.load("current_quests", {})
         if quest_key not in current_quests:
             return False
         return not current_quests[quest_key].is_accomplished()
@@ -182,7 +182,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        finished_quests = self.owner.state.get("finished_quests", {})
+        finished_quests = self.owner.state.load("finished_quests", {})
         return quest_key in finished_quests
 
     def is_in_progress(self, quest_key):
@@ -195,7 +195,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        current_quests = self.owner.state.get("current_quests", {})
+        current_quests = self.owner.state.load("current_quests", {})
         return quest_key in current_quests
 
     def can_provide(self, quest_key):
@@ -272,7 +272,7 @@ class QuestHandler(object):
         Get quests' data.
         """
         quests = []
-        current_quests = self.owner.state.get("current_quests", {})
+        current_quests = self.owner.state.load("current_quests", {})
         for quest in current_quests.values():
             info = {"dbref": quest.dbref,
                     "name": quest.name,
@@ -297,7 +297,7 @@ class QuestHandler(object):
             None
         """
         status_changed = False
-        current_quests = self.owner.state.get("current_quests", {})
+        current_quests = self.owner.state.load("current_quests", {})
         for quest in current_quests.values():
             if quest.at_objective(object_type, object_key, number):
                 status_changed = True

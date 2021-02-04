@@ -2,7 +2,7 @@
 Object's attributes cache.
 """
 
-import json
+import json, traceback
 from collections import OrderedDict, deque
 from django.apps import apps
 from django.conf import settings
@@ -16,12 +16,15 @@ from muddery.server.utils.exception import MudderyError, ERR
 def to_string(value):
     # pack a value to a string.
     data_type = type(value)
-    if data_type in (str, int, float, bool, bytes):
+    if value is None:
+        # inner types
+        str_value = json.dumps((value, data_type.__name__))
+    elif data_type in {str, int, float, bool, bytes}:
         # inner types
         str_value = json.dumps((value, data_type.__name__))
     elif hasattr(value, "__iter__"):
         # iterable value
-        if data_type in (dict, OrderedDict):
+        if data_type in {dict, OrderedDict}:
             str_value = json.dumps((dict((to_string(key), to_string(obj)) for key, obj in value.items()), data_type.__name__))
         else:
             try:
@@ -37,6 +40,7 @@ def to_string(value):
     elif issubclass(type(value), ChannelDB):
         str_value = json.dumps((value.id, "ChannelDB"))
     else:
+        print("to_string: %s %s" % (value, type(value)))
         raise MudderyError(ERR.server_error, "The object can not store %s of %s." % (value, type(value)))
 
     return str_value
@@ -46,16 +50,20 @@ def from_string(str_value):
     # unpack a value from a string.
     try:
         json_value, data_type = json.loads(str_value)
-        if data_type in ("str", "int", "float", "bool", "bytes"):
+        if data_type == "NoneType":
+            value = None
+        elif data_type in {"str", "int", "float", "bool", "bytes"}:
             value = eval(data_type)(json_value)
-        elif data_type in ("ObjectDB", "ScriptDB", "AccountDB", "ChannelDB"):
+        elif data_type in {"ObjectDB", "ScriptDB", "AccountDB", "ChannelDB"}:
             model = eval(data_type)
             value = model.objects.get(id=json_value)
-        elif data_type in ("dict", "OrderedDict"):
-            value = eval(data_type)((from_string(key), from_string(item)) for key, item in json_value)
+        elif data_type in {"dict", "OrderedDict"}:
+            value = eval(data_type)((from_string(key), from_string(item)) for key, item in json_value.items())
         else:
             value = eval(data_type)(from_string(item) for item in json_value)
     except Exception as e:
+        print("from_string: %s" % str_value)
+        print("json_value, data_type: %s %s" % (json_value, data_type))
         raise MudderyError(ERR.server_error, "The object can not load %s." % str_value)
 
     return value
@@ -65,7 +73,11 @@ def delete_string(str_value):
     # delete the string's object
     try:
         json_value, data_type = json.loads(str_value)
-        if data_type in ("ObjectDB", "ScriptDB", "AccountDB", "ChannelDB"):
+        if data_type == "NoneType":
+            pass
+        elif data_type in {"str", "int", "float", "bool", "bytes"}:
+            pass
+        elif data_type in ("ObjectDB", "ScriptDB", "AccountDB", "ChannelDB"):
             model = eval(data_type)
             value = model.objects.get(id=json_value)
             value.delete()
@@ -76,7 +88,10 @@ def delete_string(str_value):
             for item in json_value:
                 delete_string(item)
     except Exception as e:
-        raise MudderyError(ERR.server_error, "Can not delete object %s." % str_value)
+        print("delete_string: %s" % str_value)
+        print("json_value, data_type: %s %s" % (json_value, data_type))
+        traceback.print_exc()
+        raise MudderyError(ERR.server_error, "Can not delete object %s: %s" % (str_value, e))
 
     return
 
@@ -85,10 +100,9 @@ class BaseAttributesCache(object):
     """
     Object's attributes cache.
     """
-    model_name = "object_status"
-
-    def __init__(self):
+    def __init__(self, model_name):
         # db model
+        self.model_name = model_name
         self.model = apps.get_model(settings.GAME_DATA_APP, self.model_name)
 
     def lock(self, obj_id, key):
@@ -160,14 +174,14 @@ class BaseAttributesCache(object):
         records = self.model.objects.filter(obj_id=obj_id, key=key)
         return len(records) != 0
 
-    def load(self, obj_id, key, *wargs):
+    def load(self, obj_id, key, *args):
         """
         Get the value of an attribute.
 
         Args:
             obj_id: (number) object's id.
             key: (string) attribute's key.
-            default: (any or none) default value.
+            args: (any or none) default value.
 
         Raises:
             AttributeError: If `raise_exception` is set and no matching Attribute
@@ -175,8 +189,8 @@ class BaseAttributesCache(object):
         """
         records = self.model.objects.filter(obj_id=obj_id, key=key)
         if len(records) == 0:
-            if len(wargs) > 0:
-                return wargs[0]
+            if len(args) > 0:
+                return args[0]
             else:
                 raise AttributeError
 
@@ -212,7 +226,7 @@ class BaseAttributesCache(object):
         Args:
             obj_id: (number) object's id.
         """
-        records = self.model.objects.filter(obj_id=obj_id).delete()
+        records = self.model.objects.filter(obj_id=obj_id)
         for record in records:
             delete_string(record.value)
 

@@ -265,7 +265,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
                 equipments[position] = None
 
         if changed:
-            self.state.set("equipments", equipments)
+            self.state.save("equipments", equipments)
 
     def refresh_properties(self, keep_values):
         """

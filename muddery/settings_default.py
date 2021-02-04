@@ -288,10 +288,10 @@ SERVER_SESSION_CLASS = "muddery.server.conf.serversession.ServerSession"
 TYPECLASS_PATHS = ["muddery.server.elements"]
 
 # Typeclass for account objects (linked to a character) (fallback)
-BASE_ACCOUNT_TYPECLASS = "muddery.server.elements.accounts.MudderyAccount"
+BASE_ACCOUNT_TYPECLASS = "muddery.server.typeclasses.accounts.MudderyAccount"
 
 # Typeclass for guest account objects (linked to a character)
-BASE_GUEST_TYPECLASS = "muddery.server.elements.accounts.Guest"
+BASE_GUEST_TYPECLASS = "muddery.server.typeclasses.accounts.Guest"
 
 # Typeclass and base for all objects (fallback)
 BASE_OBJECT_TYPECLASS = "muddery.server.elements.object.MudderyBaseObject"
@@ -312,7 +312,7 @@ BASE_ROOM_TYPECLASS = "muddery.server.elements.room.MudderyRoom"
 BASE_EXIT_TYPECLASS = "muddery.server.elements.exit.MudderyExit"
 
 # Typeclass for Channel (fallback).
-BASE_CHANNEL_TYPECLASS = "muddery.server.elements.channels.MudderyChannel"
+BASE_CHANNEL_TYPECLASS = "muddery.server.typeclasses.channels.MudderyChannel"
 
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.

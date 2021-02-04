@@ -6,17 +6,13 @@ KEY_LENGTH = 255
 
 # ------------------------------------------------------------
 #
-# Game object's runtime attributes.
+# The base of runtime attributes.
 #
 # ------------------------------------------------------------
 class BaseAttributes(models.Model):
     """
-    Game's basic settings.
-    NOTE: Only uses the first record!
+    Object's runtime attributes.
     """
-    # object's type
-    obj_type = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
     # object's id
     obj_id = models.PositiveIntegerField(db_index=True)
 
@@ -32,7 +28,23 @@ class BaseAttributes(models.Model):
         app_label = "gamedata"
         verbose_name = "Object Attribute"
         verbose_name_plural = "Object Attributes"
-        unique_together = ("obj_type", "obj_id", "key")
+        unique_together = ("obj_id", "key")
+
+
+# ------------------------------------------------------------
+#
+# Game object's runtime attributes.
+#
+# ------------------------------------------------------------
+class object_status(BaseAttributes):
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Object Runtime Status"
+        verbose_name_plural = "Object Runtime Status"
+        unique_together = ("obj_id", "key")
 
 
 # ------------------------------------------------------------

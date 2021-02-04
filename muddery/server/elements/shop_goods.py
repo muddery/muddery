@@ -6,7 +6,7 @@ Shop goods is the object in shops. They have some special attributes to record g
 from evennia.utils import logger
 from muddery.server.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.mappings.element_set import ELEMENT, BRICK_SET
+from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 
 
 class MudderyShopGoods(ELEMENT("OBJECT")):
@@ -65,15 +65,15 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
         try:
             obj_record = WorldData.get_table_data(obj_model_name, key=self.goods_key)
             obj_record = obj_record[0]
-            goods_models = BRICK_SET.get_class_modeles(obj_record.typeclass)
+            goods_models = ELEMENT_SET.get_class_modeles(obj_record.typeclass)
             goods_data = WorldData.get_tables_data(goods_models, key=self.goods_key)
         except Exception as e:
             logger.log_errmsg("Can not find goods %s." % self.goods_key)
             return
 
-        self.name = goods_data["name"]
-        self.desc = goods_data["desc"]
-        self.icon = goods_data.get("icon", None)
+        self.name = goods_data.name
+        self.desc = goods_data.desc
+        self.icon = goods_data.icon
 
         self.available = True
         

@@ -221,6 +221,8 @@ class HonoursMapper(object):
             self.objects.get(character=char_id).delete()
             del self.honours[char_id]
             self.make_rankings()
+        except self.honour_model.DoesNotExist:
+            pass
         except Exception as e:
             print("Can not remove character's honour: %s" % e)
             

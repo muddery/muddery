@@ -11,7 +11,7 @@ creation commands.
 from django.conf import settings
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger, search
-from muddery.server.elements.base_component import BaseComponent
+from muddery.server.elements.base_element import BaseElement
 from muddery.server.utils import utils
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.exception import MudderyError, ERR
@@ -21,7 +21,7 @@ from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils import defines
 
 
-class MudderyInventory(BaseComponent):
+class MudderyInventory(BaseElement):
     """
     The character's inventory.
     """

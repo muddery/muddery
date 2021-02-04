@@ -318,10 +318,10 @@ class BaseCombatHandler(DefaultScript):
                         goods_data = WorldData.get_tables_data(goods_models, key=obj_info["object"])
 
                         obj_list.append({
-                            "object": obj_info["object"],
-                            "number": obj_info["number"],
-                            "name": goods_data["name"],
-                            "icon": goods_data.get("icon", None),
+                            "object": obj_info.object,
+                            "number": obj_info.number,
+                            "name": goods_data.name,
+                            "icon": goods_data.icon,
                             "reject": "",
                         })
                     except Exception as e:

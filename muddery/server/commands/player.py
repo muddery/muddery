@@ -313,7 +313,7 @@ class CmdCharDelete(BaseCommand):
             deleted = delobj.delete()
 
             if not deleted:
-                session.msg({"alert":_("Can not delete this character.")})
+                session.msg({"alert": _("Can not delete this character.")})
                 return
 
             player.db._playable_characters = new_characters
