@@ -33,12 +33,6 @@ class MudderyQuest(ELEMENT("OBJECT")):
     def loot_handler(self):
         return LootHandler(self, QuestLootList.get(self.get_data_key()))
 
-    def set_owner(self, owner):
-        """
-        Set the owner of the skill.
-        """
-        self.state.save("owner", owner)
-
     def after_data_loaded(self):
         """
         Load quest's data from db.
@@ -193,29 +187,28 @@ class MudderyQuest(ELEMENT("OBJECT")):
 
         return True
 
-    def turn_in(self):
+    def turn_in(self, caller):
         """
         Turn in a quest, do its action.
         """
-        owner = self.state.load("owner", None)
-        if not owner:
+        if not caller:
             return
 
         # get rewards
-        obj_list = self.loot_handler.get_obj_list(owner)
+        obj_list = self.loot_handler.get_obj_list(caller)
         if obj_list:
             # give objects to winner
-            owner.receive_objects(obj_list)
+            caller.receive_objects(obj_list)
 
         # get exp
         exp = getattr(self.system, "exp", 0)
         if exp:
-            owner.add_exp(exp)
+            caller.add_exp(exp)
 
         # do quest's action
         action = getattr(self.system, "action", None)
         if action:
-            STATEMENT_HANDLER.do_action(action, owner, None)
+            STATEMENT_HANDLER.do_action(action, caller, None)
 
         # remove objective objects
         obj_list = []
@@ -224,7 +217,7 @@ class MudderyQuest(ELEMENT("OBJECT")):
                 obj_list.append({"object": self.objectives[ordinal]["object"],
                                  "number": self.objectives[ordinal]["number"]})
         if obj_list:
-            owner.remove_objects(obj_list)
+            caller.remove_objects(obj_list)
 
     def at_objective(self, type, object_key, number=1):
         """

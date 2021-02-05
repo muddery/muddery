@@ -69,5 +69,6 @@ obj_guardhouse_key,钥匙,COMMON_OBJECT,钥匙圈上扣着一串铜质的钥匙�
 obj_binder,绷带,COMMON_OBJECT,一卷绷带，还没拆封过，可以帮助止血。
 obj_screw,螺丝,COMMON_OBJECT,一颗螺丝，能派什么用处呢？
 player,玩家,PLAYER_CHARACTER,这是玩家。
+staff,管理员,STAFF_CHARACTER,这是管理员。
 robot_mob_A,机器人A,COMMON_NPC,这是个A型机器人。
 robot_mob_B,机器人B,COMMON_NPC,这是个B型机器人。

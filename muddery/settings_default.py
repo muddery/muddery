@@ -325,10 +325,10 @@ PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms"
 PATH_REQUEST_PROCESSERS_BASE = "muddery.worldeditor.controllers"
 
 # Path of base elements.
-PATH_COMPONENT_BASE = "muddery.server.elements"
+PATH_ELEMENTS_BASE = "muddery.server.elements"
 
 # Path of custom elements.
-PATH_COMPONENT_CUSTOM = "elements"
+PATH_ELEMENTS_CUSTOM = "elements"
 
 # Path of base event actions.
 PATH_EVENT_ACTION_BASE = "muddery.server.events.event_actions"

@@ -67,6 +67,7 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
             obj_record = obj_record[0]
             goods_models = ELEMENT_SET.get_class_modeles(obj_record.typeclass)
             goods_data = WorldData.get_tables_data(goods_models, key=self.goods_key)
+            goods_data = goods_data[0]
         except Exception as e:
             logger.log_errmsg("Can not find goods %s." % self.goods_key)
             return

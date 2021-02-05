@@ -238,7 +238,7 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
             })
 
             # Can not discard when equipped
-            if self.location and self.can_discard:
+            if self.can_discard:
                 commands.append({
                     "name": _("Discard"),
                     "cmd": "discard",

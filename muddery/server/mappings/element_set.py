@@ -180,5 +180,5 @@ class ElementSet(object):
 
 ELEMENT_SET = ElementSet()
 ELEMENT = ELEMENT_SET.get
-ELEMENT_SET.load_files(settings.PATH_COMPONENT_BASE)
-ELEMENT_SET.load_files(settings.PATH_COMPONENT_CUSTOM)
+ELEMENT_SET.load_files(settings.PATH_ELEMENTS_BASE)
+ELEMENT_SET.load_files(settings.PATH_ELEMENTS_CUSTOM)

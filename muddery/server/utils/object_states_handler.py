@@ -76,7 +76,6 @@ class ObjectStatesHandler(object):
             value (any or str): The value of the Attribute. If
                 `strattr` keyword is set, this *must* be a string.
         """
-        print("object states save: %s %s" % (key, value))
         self.cache.save(self.obj_id, key, value)
 
     def delete(self, key):

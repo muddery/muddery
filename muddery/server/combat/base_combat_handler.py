@@ -316,6 +316,7 @@ class BaseCombatHandler(DefaultScript):
                         obj_record = obj_record[0]
                         goods_models = ELEMENT_SET.get_class_modeles(obj_record.typeclass)
                         goods_data = WorldData.get_tables_data(goods_models, key=obj_info["object"])
+                        goods_data = goods_data[0]
 
                         obj_list.append({
                             "object": obj_info.object,

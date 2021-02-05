@@ -118,6 +118,38 @@ class CmdInventory(BaseCommand):
         self.caller.msg({"inventory":inv})
 
 
+class CmdInventoryObject(BaseCommand):
+    """
+    look at an object in the inventory
+
+    Usage:
+        {"cmd":"inventory_obj",
+         "args":<object's dbref>
+        }
+
+    Observes your location or objects in your vicinity.
+    """
+    key = "inventory_obj"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Handle the looking.
+        """
+        caller = self.caller
+        args = self.args
+
+        if not args:
+            caller.msg({"alert": _("You should select something in your inventory.")})
+            return
+
+        appearance = caller.return_inventory_object(args)
+        if appearance:
+            caller.msg({"inventory_obj": appearance}, context=self.context)
+        else:
+            caller.msg({"alert": _("Can not find it in your inventory.")})
+
+
 #------------------------------------------------------------
 # Say something in the room.
 #------------------------------------------------------------
@@ -480,7 +512,6 @@ class CmdUse(BaseCommand):
             return
 
         obj_dbref = self.args
-        print("obj_dbref: %s" % obj_dbref)
 
         result = ""
         try:
@@ -529,19 +560,14 @@ class CmdDiscard(BaseCommand):
             caller.msg({"alert":_("You should discard something.")})
             return
 
-        obj = caller.search_dbref(self.args, location=caller)
-        if not obj:
-            # If the caller does not have this object.
-            caller.msg({"alert":_("You don't have this object.")})
-            return
-
-        # remove used object
+        # remove object
         try:
-            caller.remove_object(obj.get_data_key(), 1)
+            caller.remove_object_by_dbref(self.args)
             caller.show_location()
         except Exception as e:
+            # If the caller does not have this object.
             caller.msg({"alert": _("Can not discard this object.")})
-            logger.log_tracemsg("Can not discard object %s: %s" % (obj.get_data_key(), e))
+            logger.log_tracemsg("Can not discard object %s: %s" % (self.args, e))
             return
 
 

@@ -11,6 +11,7 @@ from muddery.server.combat.base_combat_handler import CStatus
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 
+
 class ChooseSkill(object):
     """
     Choose a skill and the skill's target.
@@ -28,8 +29,9 @@ class ChooseSkill(object):
         combat = caller.ndb.combat_handler
         if not combat:
             return
-        
-        skills = [caller.db.skills[skill] for skill in caller.db.skills if caller.db.skills[skill].is_available(passive=False)]
+
+        all_skills = caller.get_skills()
+        skills = [skill for skill in all_skills.values() if skill.is_available(passive=False)]
         if not skills:
             return
 

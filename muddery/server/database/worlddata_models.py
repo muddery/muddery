@@ -98,6 +98,10 @@ class game_settings(models.Model):
     # Default character of players.
     default_player_character_key = models.CharField(max_length=KEY_LENGTH, blank=True)
 
+    # The key of a character.
+    # Default character of staffs.
+    default_staff_character_key = models.CharField(max_length=KEY_LENGTH, blank=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True

@@ -54,7 +54,6 @@ class MudderyLockedExit(ELEMENT("EXIT")):
 
         # Only can pass exits which have already been unlocked.
         if traversing_object.is_exit_unlocked(self.get_data_key()):
-            print("unlock_forever: %s" % self.unlock_forever)
             if not self.unlock_forever:
                 # lock the exit again
                 traversing_object.lock_exit(self)

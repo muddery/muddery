@@ -110,6 +110,10 @@ MudderyService.prototype = {
         Evennia.msg("text", this.cmdString("look", dbref, context));
     },
 
+    inventoryObject: function(dbref, context) {
+        Evennia.msg("text", this.cmdString("inventory_obj", dbref, context));
+    },
+
     // go to
     doGoto : function(dbref) {
         Evennia.msg("text", this.cmdString("goto", dbref));

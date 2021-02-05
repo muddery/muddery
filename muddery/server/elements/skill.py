@@ -44,19 +44,18 @@ class MudderySkill(ELEMENT("OBJECT")):
         """
         super(MudderySkill, self).at_object_creation()
 
-        self._owner = None
         self._is_default = False
+
+        # Set skill cd. Add gcd to new the skill.
+        gcd = GAME_SETTINGS.get("global_cd")
+        if gcd > 0:
+            self.state.save("cd_finish_time", time.time() + gcd)
 
     def at_init(self):
         """
         Load the skill's data.
         """
         super(MudderySkill, self).at_init()
-
-        self._owner = None
-        owner_dbref = self.state.load("owner_dbref", "")
-        if owner_dbref:
-            self._owner = self.search_dbref(owner_dbref)
 
         self._is_default = self.state.load("is_default", False)
 
@@ -116,26 +115,7 @@ class MudderySkill(ELEMENT("OBJECT")):
         commands = [{"name": _("Cast"), "cmd": "cast_skill", "args": self.get_data_key()}]
         return commands
 
-    def set_owner(self, owner):
-        """
-        Set the owner of the skill.
-
-        Args:
-            owner: (object) skill's owner
-
-        Returns:
-            None
-        """
-        self._owner = owner
-        self.state.save("owner_dbref", owner.dbref)
-    
-        if not self.passive:
-            # Set skill cd. Add gcd to new the skill.
-            gcd = GAME_SETTINGS.get("global_cd")
-            if gcd > 0:
-                self.state.save("cd_finish_time", time.time() + gcd)
-
-    def cast(self, target):
+    def cast(self, caller, target):
         """
         Cast this skill.
 
@@ -150,8 +130,8 @@ class MudderySkill(ELEMENT("OBJECT")):
         if not_available:
             skill_cast = {"cast": not_available}
         else:
-            case_message = self.cast_message(target)
-            results = self.do_skill(target)
+            case_message = self.cast_message(caller, target)
+            results = self.do_skill(caller, target)
 
             # set message
             skill_cast = {
@@ -161,10 +141,10 @@ class MudderySkill(ELEMENT("OBJECT")):
                 "cast": case_message,
             }
 
-            if self._owner:
-                skill_cast["caller"] = self._owner.dbref
+            if caller:
+                skill_cast["caller"] = caller.dbref
                 skill_cast["status"] = {
-                    self._owner.dbref: self._owner.get_combat_status(),
+                    caller.dbref: caller.get_combat_status(),
                 }
 
             if target:
@@ -176,7 +156,7 @@ class MudderySkill(ELEMENT("OBJECT")):
 
         return skill_cast
         
-    def do_skill(self, target):
+    def do_skill(self, caller, target):
         """
         Do this skill.
         """
@@ -188,7 +168,7 @@ class MudderySkill(ELEMENT("OBJECT")):
                 self.state.save("cd_finish_time", time_now + self.cd)
 
         # call skill function
-        return STATEMENT_HANDLER.do_skill(self.function, self._owner, target)
+        return STATEMENT_HANDLER.do_skill(self.function, caller, target)
 
     def check_available(self):
         """
@@ -245,7 +225,7 @@ class MudderySkill(ELEMENT("OBJECT")):
             remain_cd = 0
         return remain_cd
 
-    def cast_message(self, target):
+    def cast_message(self, caller, target):
         """
         Create skill's result message.
         """
@@ -253,8 +233,8 @@ class MudderySkill(ELEMENT("OBJECT")):
         target_name = ""
         message = ""
 
-        if self._owner:
-            caller_name = self._owner.get_name()
+        if caller:
+            caller_name = caller.get_name()
 
         if target:
             target_name = target.get_name()

@@ -2869,7 +2869,7 @@ MudderyInventory.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.inventory.length) {
         this.item_selected = this.inventory[index].dbref;
-        core.service.look(this.item_selected, "inventory");
+        core.service.inventoryObject(this.item_selected, "inventory");
     }
 }
 

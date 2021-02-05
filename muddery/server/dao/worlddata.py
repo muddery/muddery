@@ -92,7 +92,7 @@ class WorldData(object):
             key: (string) object's key
 
         Return:
-            (dict) values
+            (list) records
         """
         all_fields = {}
         row_data = []
@@ -115,4 +115,4 @@ class WorldData(object):
                     all_fields[field_name] = len(row_data)
                     row_data.append(getattr(record, field_name))
 
-        return RecordData(all_fields, row_data)
+        return [RecordData(all_fields, row_data)]

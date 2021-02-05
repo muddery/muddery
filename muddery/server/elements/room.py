@@ -165,28 +165,29 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
             if not cont.is_visible(caller):
                 continue
 
-            type = self.get_surrounding_type(cont)
-            if type:
+            cont_type = self.get_surrounding_type(cont)
+            if cont_type:
                 appearance = {}
 
-                if type == "npcs":
+                if cont_type == "npcs":
                     # add quest status
                     if hasattr(cont, "have_quest"):
                         provide_quest, complete_quest = cont.have_quest(caller)
                         appearance["provide_quest"] = provide_quest
                         appearance["complete_quest"] = complete_quest
-                elif type == "offlines":
+                elif cont_type == "offlines":
                     continue
 
                 appearance["dbref"] = cont.dbref
                 appearance["name"] = cont.get_name()
                 appearance["key"] = cont.get_data_key()
                 
-                info[type].append(appearance)
+                info[cont_type].append(appearance)
 
         return info
 
-    def get_surrounding_type(self, obj):
+    @classmethod
+    def get_surrounding_type(cls, obj):
         """
         Get surrounding's view type.
         """

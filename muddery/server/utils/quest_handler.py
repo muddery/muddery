@@ -45,7 +45,6 @@ class QuestHandler(object):
         if not new_quest:
             return
 
-        new_quest.set_owner(self.owner)
         current_quests[quest_key] = new_quest
         self.owner.state.save("current_quests", current_quests)
 
@@ -114,7 +113,7 @@ class QuestHandler(object):
         name = current_quests[quest_key].get_name()
 
         # Call turn in function in the quest.
-        current_quests[quest_key].turn_in()
+        current_quests[quest_key].turn_in(self.owner)
 
         # Delete the quest.
         current_quests[quest_key].delete()

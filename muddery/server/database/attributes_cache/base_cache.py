@@ -40,7 +40,6 @@ def to_string(value):
     elif issubclass(type(value), ChannelDB):
         str_value = json.dumps((value.id, "ChannelDB"))
     else:
-        print("to_string: %s %s" % (value, type(value)))
         raise MudderyError(ERR.server_error, "The object can not store %s of %s." % (value, type(value)))
 
     return str_value
@@ -62,8 +61,6 @@ def from_string(str_value):
         else:
             value = eval(data_type)(from_string(item) for item in json_value)
     except Exception as e:
-        print("from_string: %s" % str_value)
-        print("json_value, data_type: %s %s" % (json_value, data_type))
         raise MudderyError(ERR.server_error, "The object can not load %s." % str_value)
 
     return value
@@ -88,8 +85,6 @@ def delete_string(str_value):
             for item in json_value:
                 delete_string(item)
     except Exception as e:
-        print("delete_string: %s" % str_value)
-        print("json_value, data_type: %s %s" % (json_value, data_type))
         traceback.print_exc()
         raise MudderyError(ERR.server_error, "Can not delete object %s: %s" % (str_value, e))
 

@@ -425,19 +425,19 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         return {}
 
-    def search_inventory(self, obj_key):
+    def inventory_object_number(self, obj_key):
         """
         Search specified object in the inventory.
         """
         inventory = self.state.load("inventory", [])
-        result = [item["key"] for item in inventory if item["key"] == obj_key]
-        return result
+        objects = [item["number"] for item in inventory if item["key"] == obj_key]
+        return sum(objects)
 
-    def have_object(self, obj_key):
+    def has_object(self, obj_key):
         """
         Check specified object in the inventory.
         """
-        return len(self.search_inventory(obj_key)) > 0
+        return self.inventory_object_number(obj_key) > 0
 
     def wear_equipments(self):
         """
@@ -506,7 +506,28 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
     # Skill methods.
     #
     ########################################
-    
+
+    def get_skills(self):
+        """
+        Get all skills.
+        :return:
+        """
+        skills = self.state.load("skills", {})
+        return skills
+
+    def get_skill(self, key):
+        """
+        Get all skills.
+
+        :arg
+        key: (string) skill's key
+
+        :return:
+        skill object
+        """
+        skills = self.state.load("skills", {})
+        return skills.get(key, None)
+
     def learn_skill(self, skill_key, is_default, silent):
         """
         Learn a new skill.
@@ -535,7 +556,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             skill_obj.set_default(is_default)
 
         # Store new skill.
-        skill_obj.set_owner(self)
         skills[skill_key] = skill_obj
         self.state.save("skills", skills)
 
@@ -571,7 +591,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             return
 
         skill = skills[skill_key]
-        cast_result = skill.cast(target)
+        cast_result = skill.cast(self, target)
         if not cast_result:
             return
 
@@ -644,7 +664,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         skills = self.state.load("skills", {})
         for skill in skills.values():
             if skill.passive:
-                skill.cast(self)
+                skill.cast(self, self)
                 
     def start_auto_combat_skill(self):
         """

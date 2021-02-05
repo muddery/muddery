@@ -25,6 +25,7 @@ LIMBO_DESC = "Welcome to your new {wMuddery{n-based game! " +\
              "Visit http://www.muddery.org if you need help, " +\
              "want to contribute, report issues or just join the community."
 
+
 def at_initial_setup():
     """
     Build up the default world and set default locations.
@@ -66,9 +67,8 @@ def at_initial_setup():
                 superuser.move_to(start_location, quiet=True)
 
             # set superuser's data
-            superuser.set_data_key(GAME_SETTINGS.get("default_player_character_key"), 1)
+            superuser.set_data_key(GAME_SETTINGS.get("default_staff_character_key"), 1)
             superuser.set_nickname("superuser")
-
             print("Set superuser.")
 
     except Exception as e:

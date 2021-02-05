@@ -25,9 +25,11 @@ class HonoursMapper(object):
         self.rankings = []
 
         for record in self.objects.all():
-            self.honours[record.character] = {"honour": record.honour,
-                                              "place": 0,
-                                              "ranking": 0}
+            self.honours[record.character] = {
+                "honour": record.honour,
+                "place": 0,
+                "ranking": 0
+            }
         self.make_rankings()
 
     def make_rankings(self):
@@ -162,9 +164,11 @@ class HonoursMapper(object):
             record.character = char_id
             record.honour = honour
             record.save()
-            self.honours[char_id] = {"honour": honour,
-                                     "place": 0,
-                                     "ranking": 0}
+            self.honours[char_id] = {
+                "honour": honour,
+                "place": 0,
+                "ranking": 0
+            }
             self.make_rankings()
         except Exception as e:
             print("Can not create character's honour: %s" % e)

@@ -52,4 +52,3 @@ class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):
         Loot objects.
         """
         self.loot_handler.loot(caller)
-

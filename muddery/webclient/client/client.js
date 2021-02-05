@@ -165,10 +165,7 @@ MudderyClient.prototype = {
                     mud.main_frame.playerOffline(data[key]);
                 }
                 else if (key == "look_obj") {
-                    if (context == "inventory") {
-                        mud.inventory_window.showObject(data[key]);
-                    }
-                    else if (context == "skills") {
+                    if (context == "skills") {
                         mud.skills_window.showSkill(data[key]);
                     }
                     else if (context == "quests") {
@@ -178,6 +175,9 @@ MudderyClient.prototype = {
         			    mud.popup_object.setObject(data[key]);
         			    mud.popup_object.show();
         			}
+                }
+                else if (key == "inventory_obj") {
+                    mud.inventory_window.showObject(data[key]);
                 }
                 else if (key == "dialogue") {
                     mud.popup_dialogue.setDialogue(data[key]);
