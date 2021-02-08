@@ -23,7 +23,7 @@ class ChooseSkill(object):
             return
         
         all_skills = caller.get_skills()
-        skills = [skill for skill in all_skills.values() if skill.is_available(passive=False)]
+        skills = [skill for skill in all_skills.values() if skill.is_available(caller, passive=False)]
         if not skills:
             return
 

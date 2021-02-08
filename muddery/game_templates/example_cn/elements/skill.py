@@ -14,39 +14,39 @@ class Skill(MudderySkill):
     """
     A skill of the character.
     """
-    typeclass_key = "SKILL"
+    element_key = "SKILL"
 
-    def do_skill(self, target):
+    def do_skill(self, caller, target):
         """
         Do this skill.
         """
         if not self.passive:
             # set mp
-            self.owner.prop.mp -= self.prop.mp
+            caller.prop.mp -= self.prop.mp
 
-        return super(Skill, self).do_skill(target)
+        return super(Skill, self).do_skill(caller, target)
 
-    def check_available(self):
+    def get_available_message(self, caller):
         """
         Check this skill.
 
         Args:
-            passive: (boolean) cast a passive skill.
+            caller: (object) the one who cast the skill.
 
         Returns:
             message: (string) If the skill is not available, returns a string of reason.
                      If the skill is available, return "".
         """
-        message = super(Skill, self).check_available()
+        message = super(Skill, self).get_available_message(caller)
         if message:
             return message
             
-        if self.owner.prop.mp < self.prop.mp:
+        if caller.prop.mp < self.prop.mp:
             return _("Not enough mana to cast {c%s{n!") % self.get_name()
 
         return ""
 
-    def is_available(self, passive):
+    def is_available(self, caller, passive):
         """
         If this skill is available.
 
@@ -56,11 +56,11 @@ class Skill(MudderySkill):
         Returns:
             (boolean) available or not.
         """
-        result = super(Skill, self).is_available(passive)
+        result = super(Skill, self).is_available(caller, passive)
         if not result:
             return result
             
-        if self.owner.prop.mp < self.prop.mp:
+        if caller.prop.mp < self.prop.mp:
             return False
 
         return True

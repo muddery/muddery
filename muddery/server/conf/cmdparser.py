@@ -25,6 +25,7 @@ your settings file:
 import json
 from evennia.utils import logger
 import evennia.commands.cmdparser as evennia_cmdparser
+from evennia.objects.objects import DefaultObject
 
 
 CMD_LOGINSTART = "__unloggedin_look_command"
@@ -51,7 +52,11 @@ def cmdparser(raw_string, cmdset, caller, match_index=None):
 
     """
     # Parse JSON formated command.
-    logger.log_infomsg("Receive command, %s: %s" % (caller, raw_string))
+    if isinstance(caller, DefaultObject):
+        name = "%s[%s]" % (caller, caller.dbref)
+    else:
+        name = "%s" % caller
+    logger.log_infomsg("Receive command, %s: %s" % (name, raw_string))
 
     try:
         data = json.loads(raw_string)

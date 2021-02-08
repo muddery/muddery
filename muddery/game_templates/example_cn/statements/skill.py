@@ -22,7 +22,7 @@ class FuncHit(StatementFunction):
     def func(self):
         """
         Implement the function.
-        """        
+        """
         if not self.args:
             return
 

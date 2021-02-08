@@ -222,6 +222,10 @@ class player_characters(BaseModels.player_characters):
     pass
 
 
+class staff_characters(BaseModels.staff_characters):
+    pass
+
+
 # ------------------------------------------------------------
 #
 # store common characters

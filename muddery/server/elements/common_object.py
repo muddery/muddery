@@ -95,7 +95,7 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
             })
         return commands
 
-    def take_effect(self, user):
+    def take_effect(self, user, number):
         """
         Use this object.
 
@@ -105,7 +105,7 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
         Returns:
             result: (string) a description of the result
         """
-        return _("No effect.")
+        return _("No effect."), 0
 
 
 class MudderyFood(ELEMENT("COMMON_OBJECT")):
@@ -117,7 +117,7 @@ class MudderyFood(ELEMENT("COMMON_OBJECT")):
     element_name = _("Food", "elements")
     model_name = "foods"
 
-    def take_effect(self, user):
+    def take_effect(self, user, number):
         """
         Use this object.
 
@@ -133,7 +133,7 @@ class MudderyFood(ELEMENT("COMMON_OBJECT")):
         increments = {}
         for key, value in self.custom_properties_handler.all(True):
             if value:
-                increments[key] = value
+                increments[key] = value * number
 
         changes = user.change_properties(increments)
         user.show_status()
@@ -147,7 +147,7 @@ class MudderyFood(ELEMENT("COMMON_OBJECT")):
                 signal = '+' if changes[key] >= 0 else ''
                 results.append("%s %s%s" % (attribute_info["name"], signal, changes[key]))
 
-        return ", ".join(results)
+        return ", ".join(results), number
 
     def get_available_commands(self, caller):
         """
@@ -267,7 +267,7 @@ class MudderySkillBook(ELEMENT("COMMON_OBJECT")):
 
         return commands
 
-    def take_effect(self, user):
+    def take_effect(self, user, number):
         """
         Use this object.
 

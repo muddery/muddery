@@ -569,7 +569,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         Returns:
             None
         """
-        self.icon = getattr(self.system, "icon", None)
+        self.icon = icon_key
 
     def get_icon(self):
         """

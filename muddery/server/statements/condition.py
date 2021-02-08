@@ -180,7 +180,7 @@ class FuncObjectsEqualTo(StatementFunction):
         obj_key = self.args[0]
         number = self.args[1]
 
-        total = self.caller.inventory_object_number(obj_key)
+        total = self.caller.total_object_number(obj_key)
         return total == number
 
 
@@ -209,7 +209,7 @@ class FuncObjectsMoreThan(StatementFunction):
         obj_key = self.args[0]
         number = self.args[1]
 
-        total = self.caller.inventory_object_number(obj_key)
+        total = self.caller.total_object_number(obj_key)
         return total > number
 
 
@@ -238,7 +238,7 @@ class FuncObjectsLessThan(StatementFunction):
         obj_key = self.args[0]
         number = self.args[1]
 
-        total = self.caller.inventory_object_number(obj_key)
+        total = self.caller.total_object_number(obj_key)
         return total < number
 
 

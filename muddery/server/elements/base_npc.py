@@ -101,6 +101,11 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         if changed:
             self.state.save("shops", self.shops)
 
+        # if the shop has no icon, set the NPC's icon to the shop.
+        for key, obj in self.shops.items():
+            if not obj.icon:
+                obj.set_icon(self.icon)
+
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
@@ -112,14 +117,14 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
                 commands.append({"name": _("Talk"), "cmd": "talk", "args": self.dbref})
 
             # Add shops.
-            for shop_obj in self.shops:
-                if not shop_obj.is_visible(caller):
+            for key, obj in self.shops.items():
+                if not obj.is_visible(caller):
                     continue
 
-                verb = shop_obj.verb
+                verb = obj.verb
                 if not verb:
-                    verb = shop_obj.get_name()
-                commands.append({"name": verb, "cmd": "shopping", "args": shop_obj.dbref})
+                    verb = obj.get_name()
+                commands.append({"name": verb, "cmd": "shopping", "args": obj.dbref})
 
             if self.friendly <= 0:
                 commands.append({"name": _("Attack"), "cmd": "attack", "args": self.dbref})

@@ -426,8 +426,8 @@ WORLD_EDITOR_APP = "worldeditor"
 # add data app
 INSTALLED_APPS = INSTALLED_APPS + [WORLD_EDITOR_APP, ]
 
-# Character's typeclass key.
-GENERAL_CHARACTER_TYPECLASS_KEY = "CHARACTER"
+# Character's element key.
+GENERAL_CHARACTER_ELEMENT_KEY = "CHARACTER"
 
 # Localized string data's folder.
 LOCALIZED_STRINGS_FOLDER = "languages"

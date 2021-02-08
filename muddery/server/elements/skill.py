@@ -126,7 +126,7 @@ class MudderySkill(ELEMENT("OBJECT")):
             skill_cast: (dict) skill's result
         """
         skill_cast = {}
-        not_available = self.check_available()
+        not_available = self.get_available_message(caller)
         if not_available:
             skill_cast = {"cast": not_available}
         else:
@@ -170,7 +170,7 @@ class MudderySkill(ELEMENT("OBJECT")):
         # call skill function
         return STATEMENT_HANDLER.do_skill(self.function, caller, target)
 
-    def check_available(self):
+    def get_available_message(self, caller):
         """
         Check this skill.
 
@@ -183,7 +183,7 @@ class MudderySkill(ELEMENT("OBJECT")):
 
         return ""
 
-    def is_available(self, passive):
+    def is_available(self, caller, passive):
         """
         If this skill is available.
 

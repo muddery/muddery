@@ -433,6 +433,17 @@ class player_characters(BaseObjects):
         verbose_name_plural = "Player Characters"
 
 
+class staff_characters(BaseObjects):
+    "Staff's character."
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Staff Character"
+        verbose_name_plural = "Staff Characters"
+
+
 class shops(BaseObjects):
     "Store all shops."
 

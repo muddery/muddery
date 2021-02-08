@@ -250,22 +250,23 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             None
         """
         # get equipment's position
-        positions = [r.key for r in EquipmentPositions.all()]
+        positions = set([r.key for r in EquipmentPositions.all()])
 
+        inventory = self.state.load("inventory", [])
         equipments = self.state.load("equipments", {})
-        changed = False
-        for position in list(equipments.keys()):
-            if position not in positions:
-                changed = True
-                del equipments[position]
 
-        for position in positions:
-            if position not in equipments:
+        changed = False
+        for pos in list(equipments.keys()):
+            if pos not in positions:
+                inventory.append(equipments[pos])
+                del equipments[pos]
                 changed = True
-                equipments[position] = None
 
         if changed:
-            self.state.save("equipments", equipments)
+            # Save changes.
+            with self.state.atomic():
+                self.state.save("equipments", equipments)
+                self.state.save("inventory", inventory)
 
     def refresh_properties(self, keep_values):
         """
@@ -425,19 +426,26 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         return {}
 
-    def inventory_object_number(self, obj_key):
+    def total_object_number(self, obj_key):
         """
         Search specified object in the inventory.
         """
         inventory = self.state.load("inventory", [])
+        equipments = self.state.load("equipments", {})
+
         objects = [item["number"] for item in inventory if item["key"] == obj_key]
-        return sum(objects)
+        total = sum(objects)
+        for item in equipments.values():
+            if item["key"] == obj_key:
+                total += 1
+
+        return total
 
     def has_object(self, obj_key):
         """
         Check specified object in the inventory.
         """
-        return self.inventory_object_number(obj_key) > 0
+        return self.total_object_number(obj_key) > 0
 
     def wear_equipments(self):
         """
@@ -445,13 +453,10 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         # find equipments
         equipments = self.state.load("equipments", {})
-        equipped = set([equip_id for equip_id in equipments.values() if equip_id])
 
         # add equipment's attributes
-        inventory = self.state.load("inventory", [])
-        for item in inventory:
-            if item["obj"].dbref in equipped:
-                item["obj"].equip_to(self)
+        for item in equipments.values():
+            item["obj"].equip_to(self)
 
     def load_default_skills(self):
         """
@@ -732,7 +737,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             logger.log_errmsg("Can not find the target.")
             return False
 
-        if not target.is_typeclass(ELEMENT(settings.GENERAL_CHARACTER_TYPECLASS_KEY), exact=False):
+        if not target.is_typeclass(ELEMENT(settings.GENERAL_CHARACTER_ELEMENT_KEY), exact=False):
             # Target is not a character.
             logger.log_errmsg("Can not attack the target %s." % target.dbref)
             return False

@@ -100,18 +100,6 @@ class BaseAttributesCache(object):
         self.model_name = model_name
         self.model = apps.get_model(settings.GAME_DATA_APP, self.model_name)
 
-    def lock(self, obj_id, key):
-        """
-        Lock the data.
-        """
-        pass
-
-    def release(self, obj_id, key):
-        """
-        Release the data.
-        """
-        pass
-
     def save(self, obj_id, key, value):
         """
         Set an attribute.
@@ -226,3 +214,21 @@ class BaseAttributesCache(object):
             delete_string(record.value)
 
         records.delete()
+
+    def transaction(self):
+        """
+        Begin a transaction.
+        """
+        pass
+
+    def commit(self):
+        """
+        Commit a transaction.
+        """
+        pass
+
+    def rollback(self):
+        """
+        Rollback a transaction.
+        """
+        pass

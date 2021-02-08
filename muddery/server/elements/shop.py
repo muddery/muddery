@@ -123,7 +123,7 @@ class MudderyShop(ELEMENT("OBJECT")):
         info = {
             "dbref": self.dbref,
             "name": self.get_name(),
-            "desc": self.db.desc,
+            "desc": self.get_desc(caller),
             "icon": self.icon,
         }
 
@@ -146,13 +146,15 @@ class MudderyShop(ELEMENT("OBJECT")):
             if not obj.is_available(caller):
                 continue
 
-            goods = {"dbref": obj.dbref,
-                     "name": obj.name,
-                     "desc": obj.desc,
-                     "number": obj.number,
-                     "price": obj.price,
-                     "unit": obj.unit_name,
-                     "icon": obj.icon}
+            goods = {
+                "dbref": obj.dbref,
+                "name": obj.name,
+                "desc": obj.desc,
+                "number": obj.number,
+                "price": obj.price,
+                "unit": obj.unit_name,
+                "icon": obj.icon
+            }
             
             goods_list.append(goods)
 

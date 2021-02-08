@@ -120,7 +120,7 @@ class QuestHandler(object):
         del (current_quests[quest_key])
         self.owner.state.save("current_quests", current_quests)
 
-        finished_quests = self.owner.state.load("finished_quests", {})
+        finished_quests = self.owner.state.load("finished_quests", set())
         finished_quests.add(quest_key)
         self.owner.state.save("finished_quests", finished_quests)
 
@@ -181,7 +181,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        finished_quests = self.owner.state.load("finished_quests", {})
+        finished_quests = self.owner.state.load("finished_quests", set())
         return quest_key in finished_quests
 
     def is_in_progress(self, quest_key):

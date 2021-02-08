@@ -12,9 +12,8 @@ import weakref
 
 from django.apps import apps
 from django.conf import settings
-
 from muddery.server.database.attributes_cache.cache_none import CacheNone
-
+from muddery.server.database.attributes_cache.atomic import Atomic
 
 # -------------------------------------------------------------
 #
@@ -106,3 +105,9 @@ class ObjectStatesHandler(object):
         Get all attributes from an object.
         """
         return self.cache.get_obj(self.obj_id)
+
+    def atomic(self):
+        """
+        Begin a transaction.
+        """
+        return Atomic(self.cache)

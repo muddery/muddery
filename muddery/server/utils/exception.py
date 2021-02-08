@@ -65,3 +65,5 @@ class ERR(object):
     can_not_upgrade = 10015
 
     server_error = 10016
+
+    inventory_error = 10017

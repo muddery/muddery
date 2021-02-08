@@ -2927,7 +2927,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
     }
 
     if (has_selected_item) {
-        core.service.look(this.item_selected, "inventory");
+        core.service.inventoryObject(this.item_selected, "inventory");
     }
     else {
         this.item_selected = null;

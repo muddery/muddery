@@ -156,18 +156,18 @@ class ElementSet(object):
             bases = cls.__bases__
             parent_key = ""
             while not parent_key:
-                has_typeclass_key = False
+                has_element_key = False
                 for base in bases:
-                    if hasattr(base, "typeclass_key") and base.typeclass_key:
-                        has_typeclass_key = True
+                    if hasattr(base, "element_key") and base.element_key:
+                        has_element_key = True
 
-                        if base.typeclass_key != cls.typeclass_key:
-                            parent_key = base.typeclass_key
+                        if base.element_key != cls.element_key:
+                            parent_key = base.element_key
                         else:
                             bases = base.__bases__
                         break
 
-                if not has_typeclass_key:
+                if not has_element_key:
                     break
 
             info[key] = {
