@@ -123,8 +123,9 @@ class CmdInventoryObject(BaseCommand):
     look at an object in the inventory
 
     Usage:
-        {"cmd":"inventory_obj",
-         "args":<object's dbref>
+        {
+            "cmd": "inventory_obj",
+            "args": <object's dbref>
         }
 
     Observes your location or objects in your vicinity.
@@ -148,6 +149,39 @@ class CmdInventoryObject(BaseCommand):
             caller.msg({"inventory_obj": appearance}, context=self.context)
         else:
             caller.msg({"alert": _("Can not find it in your inventory.")})
+
+
+class CmdEquipmentsObject(BaseCommand):
+    """
+    look at an object in the equipments
+
+    Usage:
+        {
+            "cmd": "equipments_obj",
+            "args": <object's dbref>
+        }
+
+    Observes your location or objects in your vicinity.
+    """
+    key = "equipments_obj"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Handle the looking.
+        """
+        caller = self.caller
+        args = self.args
+
+        if not args:
+            caller.msg({"alert": _("You should select something in your equipments.")})
+            return
+
+        appearance = caller.return_equipments_object(args)
+        if appearance:
+            caller.msg({"equipments_obj": appearance}, context=self.context)
+        else:
+            caller.msg({"alert": _("Can not find it in your equipments.")})
 
 
 #------------------------------------------------------------

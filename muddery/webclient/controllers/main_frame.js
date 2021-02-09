@@ -168,10 +168,9 @@ MudderyMainFrame.prototype.setStatus = function(status) {
  *  Set the player's status in combat.
  */
 MudderyMainFrame.prototype.setCombatStatus = function(status) {
-	mud.scene_window.setStatus(status);
+	mud.scene_window.setCombatStatus(status);
     mud.char_data_window.setCombatStatus(status);
 }
-
 
 /*
  * The player has prepared the honour match.
@@ -1940,6 +1939,17 @@ MudderyScene.prototype.bindEvents = function() {
 }
 
 /*
+ * Show the window.
+ */
+MudderyScene.prototype.show = function() {
+	BaseController.prototype.show.call(this);
+
+	var message_list = this.select(".message-list");
+    message_list.stop(true);
+    message_list.scrollTop(message_list[0].scrollHeight);
+}
+
+/*
  * On click a command.
  */
 MudderyScene.prototype.onCommand = function(element) {
@@ -2058,6 +2068,13 @@ MudderyScene.prototype.setInfo = function(name, icon) {
  */
 MudderyScene.prototype.setStatus = function(status) {
     this.title_bar.setStatus(status);
+}
+
+/*
+ * Set character's status in a combat.
+ */
+MudderyScene.prototype.setCombatStatus = function(status) {
+    this.title_bar.setCombatStatus(status);
 }
 
 /*
@@ -2536,6 +2553,29 @@ MudderyTitleBar.prototype.setStatus = function(status) {
 }
 
 /*
+ * Set character's status in a combat.
+ */
+MudderyTitleBar.prototype.setCombatStatus = function(status) {
+    if ("level" in status) {
+	    this.select(".level")
+	        .text(core.trans("Lv ") + status["level"])
+	        .show();
+	}
+	else {
+	    this.select(".level").hide();
+	}
+
+    if ("hp" in status && "max_hp" in status) {
+        this.select(".hp-bar").width(this.full_hp_width * status["hp"] / status["max_hp"]);
+		this.select(".hp-number").text(status["hp"] + "/" + status["max_hp"]);
+		this.select(".hp").show();
+    }
+    else {
+        this.select(".hp").hide();
+    }
+}
+
+/*
  * The player is in a combat queue.
  */
 MudderyTitleBar.prototype.inCombatQueue = function() {
@@ -2566,9 +2606,11 @@ MudderyTitleBar.prototype.leftCombatQueue = function() {
  * Derive from the base class.
  */
 MudderyCharData = function(el) {
-    this.equipment_pos = {};
-
 	BaseController.call(this, el);
+
+    this.equipment_pos = {};
+	this.item_selected = null;
+	this.buttons = [];
 }
 
 MudderyCharData.prototype = prototype(BaseController.prototype);
@@ -2579,30 +2621,31 @@ MudderyCharData.prototype.constructor = MudderyCharData;
  * Bind events.
  */
 MudderyCharData.prototype.bindEvents = function() {
-	this.onClick("#info_box_equipment", "a", this.onLook);
+    this.onClick(".equipments", this.onClickBody);
+    this.onClick(".equipments .equipment-block", this.onClickEquipment);
+    this.onClick(".item-info", ".button", this.onCommand);
 }
 
 /*
  * Event when clicks the object link.
  */
-MudderyCharData.prototype.onLook = function(element) {
-    var dbref = $(element).data("dbref");
-    core.service.doLook(dbref);
+MudderyCharData.prototype.onClickBody = function(element) {
+    this.showStatus();
 }
 
 /*
  * Set player's basic data.
  */
 MudderyCharData.prototype.setInfo = function(name, icon) {
-    this.select(".name").text(name);
+    this.select(".title-bar .name").text(name);
     if (icon) {
         var url = settings.resource_url + icon;
-        this.select(".icon")
+        this.select(".title-bar .icon")
             .attr("src", url)
             .show();
     }
     else {
-        this.select(".icon").hide();
+        this.select(".title-bar .icon").hide();
     }
 }
 
@@ -2726,6 +2769,7 @@ MudderyCharData.prototype.setEquipmentPos = function(equipment_pos) {
  * Set player's equipments.
  */
 MudderyCharData.prototype.setEquipments = function(equipments) {
+    var has_selected_item = false;
     for (var pos in this.equipment_pos) {
         var equip = equipments[pos];
         var icon_url = "";
@@ -2754,15 +2798,131 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
             block.find(".name")
                 .html(name)
                 .show();
+
+            block.data("dbref", equip["dbref"]);
+
+            if (equip["dbref"] == this.item_selected) {
+                has_selected_item = true;
+        }
         }
         else {
             block.find(".icon").hide();
             block.find(".name").hide();
             block.find(".position-name").show();
+
+            block.data("dbref", "");
         }
+    }
+
+    if (has_selected_item) {
+        core.service.equipmentsObject(this.item_selected);
+    }
+    else {
+        this.item_selected = null;
+        this.select(".item-info").hide();
+        this.select(".data-table").show();
     }
 }
 
+/*
+ * On click the equipment block
+ */
+MudderyCharData.prototype.onClickEquipment = function(target, event) {
+    event.stopPropagation();
+
+    var dbref = $(target).data("dbref");
+    if (dbref) {
+        mud.char_data_window.item_selected = dbref;
+        core.service.equipmentsObject(dbref);
+    }
+    else {
+        this.showStatus();
+    }
+}
+
+/*
+ * Event when clicks a command button.
+ */
+MudderyCharData.prototype.onCommand = function(element) {
+	var index = $(element).data("index");
+	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
+	    if (!this.buttons[index]["confirm"]) {
+		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+		}
+		else {
+		    var self = this;
+			var buttons = [
+                {
+                    "name": core.trans("Cancel")
+                },
+                {
+                    "name": core.trans("Confirm"),
+                    "callback": function(data) {
+                        self.confirmCommand(data);
+                    },
+                    "data": index,
+                }
+            ];
+            mud.main_frame.popupMessage(
+                core.trans("Warning"),
+                this.buttons[index]["confirm"],
+                buttons
+            );
+		}
+	}
+}
+
+/*
+ * Confirm the command.
+ */
+MudderyCharData.prototype.confirmCommand = function(data) {
+	var index = data;
+    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+}
+
+/*
+ * Show status view.
+ */
+MudderyCharData.prototype.showStatus = function(data) {
+    this.item_selected = null;
+    this.select(".item-info").hide();
+    this.select(".data-table").show();
+}
+
+/*
+ * Show the equipment's information.
+ */
+MudderyCharData.prototype.showEquipment = function(obj) {
+    this.select(".item-info .icon-image").attr("src", settings.resource_url + obj["icon"]);
+    this.select(".item-info .name").html(core.text2html.parseHtml(obj["name"]));
+
+    // number
+    if (obj["number"] != 1 || !obj["can_remove"]) {
+        this.select(".item-info .number")
+            .html("&times;" + obj["number"])
+            .show();
+    }
+    else {
+        this.select(".item-info .number").hide();
+    }
+
+    this.select(".item-info .desc").html(core.text2html.parseHtml(obj["desc"]));
+
+    // buttons
+    this.buttons = obj["cmds"];
+    var container = this.select(".item-info-left .buttons");
+    container.children().remove();
+    for (var i = 0; i < obj.cmds.length; i++) {
+        $("<div>")
+            .addClass("button")
+            .data("index", i)
+            .text(obj.cmds[i].name)
+            .appendTo(container);
+    }
+
+    this.select(".item-info").show();
+    this.select(".data-table").hide();
+}
 
 /******************************************
  *
@@ -2904,14 +3064,6 @@ MudderyInventory.prototype.setInventory = function(inventory) {
             .addClass("name")
             .html(name)
             .appendTo(item);
-
-        // Equipped
-        if ("equipped" in obj && obj["equipped"]) {
-            $("<div>")
-                .addClass("equipped")
-                .text(core.trans("EQ"))
-                .appendTo(item);
-        }
 
         // number
         if (obj["number"] != 1 || !obj["can_remove"]) {

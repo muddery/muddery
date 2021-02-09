@@ -206,45 +206,25 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
                 value += getattr(user.prop, key)
                 setattr(user.prop, key, value)
 
-    def get_appearance(self, caller):
-        """
-        This is a convenient hook for a 'look'
-        command to call.
-        """
-        # Get name, description and available commands.
-        info = super(MudderyEquipment, self).get_appearance(caller)
-
-        info["equipped"] = getattr(self, "equipped", False)
-        return info
-
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        commands = []
+        commands = [{
+            "name": _("Equip"),
+            "cmd": "equip",
+            "args": self.dbref
+        }]
 
-        if getattr(self, "equipped", False):
+        # Can not discard when equipped
+        if self.can_discard:
             commands.append({
-                "name": _("Take Off"),
-                "cmd": "takeoff",
+                "name": _("Discard"),
+                "cmd": "discard",
                 "args": self.dbref,
+                "confirm": _("Discard this object?"),
             })
-        else:
-            commands.append({
-                "name": _("Equip"),
-                "cmd": "equip",
-                "args": self.dbref
-            })
-
-            # Can not discard when equipped
-            if self.can_discard:
-                commands.append({
-                    "name": _("Discard"),
-                    "cmd": "discard",
-                    "args": self.dbref,
-                    "confirm": _("Discard this object?"),
-                })
 
         return commands
 

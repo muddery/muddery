@@ -856,9 +856,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 "can_remove": obj.can_remove,
                 "icon": obj.get_icon(),             # item's icon
             }
-
-            if getattr(item, "equipped", False):
-                info["equipped"] = item.equipped
             inv.append(info)
 
         # sort by created time
@@ -876,6 +873,28 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             if item["dbref"] == dbref:
                 appearance = item["obj"].get_appearance(self)
                 appearance["number"] = item["number"]
+                return appearance
+
+    def return_equipments_object(self, dbref):
+        """
+        Get equipments data.
+        """
+        equipments = self.state.load("equipments", [])
+
+        for pos, item in equipments.items():
+            if item["dbref"] == dbref:
+                appearance = item["obj"].get_appearance(self)
+
+                appearance["number"] = item["number"]
+
+                commands = [c for c in appearance["cmds"] if c["cmd"] != "equip" and c["cmd"] != "discard"]
+                commands.append({
+                    "name": _("Take Off"),
+                    "cmd": "takeoff",
+                    "args": dbref,
+                })
+                appearance["cmds"] = commands
+
                 return appearance
 
     def show_status(self):

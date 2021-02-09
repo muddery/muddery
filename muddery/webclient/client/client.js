@@ -179,6 +179,9 @@ MudderyClient.prototype = {
                 else if (key == "inventory_obj") {
                     mud.inventory_window.showObject(data[key]);
                 }
+                else if (key == "equipments_obj") {
+                    mud.char_data_window.showEquipment(data[key]);
+                }
                 else if (key == "dialogue") {
                     mud.popup_dialogue.setDialogue(data[key]);
                     if (mud.popup_dialogue.hasDialogue() && !mud.main_frame.isWindowShow(mud.combat_window)) {

@@ -319,14 +319,14 @@ class BaseCombatHandler(DefaultScript):
                         goods_data = goods_data[0]
 
                         obj_list.append({
-                            "object": obj_info.object,
-                            "number": obj_info.number,
+                            "object": obj_info["object"],
+                            "number": obj_info["number"],
                             "name": goods_data.name,
                             "icon": goods_data.icon,
                             "reject": "",
                         })
                     except Exception as e:
-                        logger.log_errmsg("Can not loot object %s." % obj_info["object"])
+                        logger.log_errmsg("Can not loot object %s: %s." % (obj_info["object"], e))
                         pass
 
             rewards[winner_id] = {
