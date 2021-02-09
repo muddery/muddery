@@ -58,6 +58,9 @@ class ScriptRoomInterval(DefaultScript):
         """
         Called every time the script is started.
         """
+        if not self.obj.has_account:
+            return
+
         # The script will be unpaused when the server restarts. So pause it if the character is no online now.
         if self.db.begin_message:
             if self.obj:
@@ -79,6 +82,10 @@ class ScriptRoomInterval(DefaultScript):
         """
         Trigger events.
         """
+        if not self.obj.has_account:
+            self.pause()
+            return
+
         if not self.obj.location:
             # The character's location is empty (maybe just login).
             return

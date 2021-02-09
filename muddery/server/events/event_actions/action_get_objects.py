@@ -90,7 +90,7 @@ class ActionGetObjects(BaseIntervalAction):
                     mean = record.odds * times
                     standard_deviation = math.sqrt(record.odds * times * (1 - record.odds))
                     rand = random.normalvariate(mean, standard_deviation)
-                    number = round(rand * remain_odds)
+                    number = round(rand * remain_odds) * record.number
                     if number > 0:
                         if record.object not in objects_dict:
                             objects_dict[record.object] = {
@@ -106,7 +106,7 @@ class ActionGetObjects(BaseIntervalAction):
                     remain_odds -= odds
                     mean = odds * times
                     standard_deviation = math.sqrt(odds * times * (1 - odds))
-                    number = round(random.normalvariate(mean, standard_deviation))
+                    number = round(random.normalvariate(mean, standard_deviation)) * record.number
                     if number > 0:
                         if record.object not in objects_dict:
                             objects_dict[record.object] = {
