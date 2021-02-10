@@ -717,7 +717,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             result, used = item["obj"].take_effect(self, number)
             if used > 0:
                 # remove used object
-                self.remove_object(item["key"], used, True)
+                self.remove_object_by_dbref(obj_dbref, used, True)
 
             self.show_inventory()
             return result
@@ -727,7 +727,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return _("No effect.")
 
-    def remove_object_by_dbref(self, dbref, mute=False):
+    def remove_object_dbref_all(self, dbref, mute=False):
         """
         Remove an object by its dbref.
 
@@ -738,11 +738,43 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         inventory = self.state.load("inventory", [])
         for item in inventory:
             if item["dbref"] == dbref:
-                inventory.remove(item)
-                self.state.save("inventory", inventory)
+                item["number"] = 0
+                if item["obj"].can_remove:
+                    item["obj"].delete()
+                    inventory.remove(item)
 
+                self.state.save("inventory", inventory)
                 if not mute:
                     self.show_inventory()
+
+                return
+
+        raise(MudderyError(_("Can not remove this object.")))
+
+    def remove_object_by_dbref(self, dbref, number, mute=False):
+        """
+        Remove an object by its dbref.
+
+        :param dbref:
+        :param mute:
+        :return:
+        """
+        inventory = self.state.load("inventory", [])
+        for item in inventory:
+            if item["dbref"] == dbref:
+                obj_num = item["number"]
+                if obj_num > 0:
+                    if obj_num >= number:
+                        item["number"] -= number
+                    else:
+                        item["number"] = 0
+                        if item["obj"].can_remove:
+                            item["obj"].delete()
+                            inventory.remove(item)
+
+                    self.state.save("inventory", inventory)
+                    if not mute:
+                        self.show_inventory()
 
                 return
 
@@ -760,9 +792,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             boolean: success
         """
-        with self.state.atomic():
-            for item in obj_list:
-                self.remove_object(item["object"], item["number"], True)
+        for item in obj_list:
+            self.remove_object(item["object"], item["number"], True)
 
         if not mute:
             self.show_inventory()
@@ -833,6 +864,22 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if not mute:
             self.show_inventory()
 
+    def exchange_objects(self, remove_list, receive_list, mute=False):
+        """
+        Exchange some objects to other objects.
+
+        :param remove_list:
+        :param receive_list:
+        :param mute:
+        :return:
+        """
+        with self.state.atomic():
+            self.remove_objects(remove_list, True)
+            self.receive_objects(receive_list, True)
+
+        if not mute:
+            self.show_inventory()
+
     def show_inventory(self):
         """
         Send inventory data to player.
@@ -859,7 +906,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             inv.append(info)
 
         # sort by created time
-        inv.sort(key=lambda x: x["dbref"])
+        # inv.sort(key=lambda x: x["dbref"])
 
         return inv
 

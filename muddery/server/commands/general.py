@@ -596,7 +596,7 @@ class CmdDiscard(BaseCommand):
 
         # remove object
         try:
-            caller.remove_object_by_dbref(self.args)
+            caller.remove_object_dbref_all(self.args)
             caller.show_location()
         except Exception as e:
             # If the caller does not have this object.

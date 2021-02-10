@@ -111,12 +111,24 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
             caller.msg({"alert": _("Sorry, you can not take more %s.") % self.name})
             return
 
-        # Reduce price units.
-        if not caller.remove_object(self.unit_key, self.price):
-            caller.msg({"alert": _("Sorry, %s is not enough.") % self.unit_name})
-            return
+        remove_list = [
+            {
+                "object": self.unit_key,
+                "number": self.price
+            }
+        ]
+        receive_list = [
+            {
+                "object": self.goods_key,
+                "number": self.number
+            }
+        ]
 
-        # Give goods.
-        obj_list = [{"object": self.goods_key,
-                     "number": self.number}]
-        caller.receive_objects(obj_list)
+        try:
+            # Reduce price units and give goods.
+            caller.exchange_objects(remove_list, receive_list)
+        except Exception as e:
+            logger.log_errmsg("Can not buy goods %s: %s" % (self.goods_key, e))
+            caller.msg({"alert": _("Sorry, you can not buy %s.") % self.name})
+
+        return

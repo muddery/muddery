@@ -1695,6 +1695,7 @@ MudderyPassword.prototype.clearValues = function() {
  */
 MudderyGame = function(el) {
 	BaseController.call(this, el);
+	this.current_window = null;
 }
 
 MudderyGame.prototype = prototype(BaseController.prototype);
@@ -1725,9 +1726,21 @@ MudderyGame.prototype.bindEvents = function() {
 }
 
 /*
+ * Show the window.
+ */
+MudderyGame.prototype.show = function() {
+	BaseController.prototype.show.call(this);
+
+	if (this.current_window) {
+	    this.current_window.show();
+	}
+}
+
+/*
  * Show a window.
  */
 MudderyGame.prototype.showWindow = function(win_controller) {
+    this.current_window = win_controller;
     this.select(".contents>div").hide();
     win_controller.show();
 }
