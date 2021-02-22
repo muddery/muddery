@@ -27,11 +27,11 @@ class MudderyLockedExit(ELEMENT("EXIT")):
         """
         super(MudderyLockedExit, self).after_data_loaded()
 
-        self.unlock_condition = getattr(self.system, "unlock_condition", "")
-        self.unlock_verb = getattr(self.system, "unlock_verb", "")
-        self.locked_desc = getattr(self.system, "locked_desc", "")
-        self.auto_unlock = getattr(self.system, "auto_unlock", False)
-        self.unlock_forever = getattr(self.system, "unlock_forever", True)
+        self.unlock_condition = self.data.unlock_condition
+        self.unlock_verb = self.data.unlock_verb
+        self.locked_desc = self.data.locked_desc
+        self.auto_unlock = self.data.auto_unlock
+        self.unlock_forever = self.data.unlock_forever
 
     def at_before_traverse(self, traversing_object):
         """

@@ -39,15 +39,15 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
 
         self.available = False
 
-        self.shop_key = getattr(self.system, "shop", "")
-        self.goods_key = getattr(self.system, "goods", "")
-        self.goods_level = getattr(self.system, "level", 0)
+        self.shop_key = self.data.shop
+        self.goods_key = self.data.goods
+        self.goods_level = self.data.level if self.data.level else 0
 
         # set goods information
-        self.price = getattr(self.system, "price", 0)
-        self.unit_key = getattr(self.system, "unit", "")
-        self.number = getattr(self.system, "number", 0)
-        self.condition = getattr(self.system, "condition", "")
+        self.price = self.data.price if self.data.price else 0
+        self.unit_key = self.data.unit
+        self.number = self.data.number if self.data.number else 0
+        self.condition = self.data.condition
 
         # get price unit information
         try:

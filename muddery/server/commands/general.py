@@ -947,7 +947,7 @@ class CmdQueueUpCombat(BaseCommand):
             return
 
         honour_settings = HonourSettings.get_first_data()
-        if caller.db.level < honour_settings.min_honour_level:
+        if caller.get_level() < honour_settings.min_honour_level:
             caller.msg({"alert": _("You need to reach level %s." % honour_settings.min_honour_level)})
             return
 

@@ -156,10 +156,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             level = self.get_level()
 
         # Load values from db.
-        data_key = self.get_data_key()
-        clone = getattr(self.system, "clone", None)
-        if clone:
-            data_key = self.system.clone
+        data_key = self.data.clone if self.data.clone else self.get_data_key()
 
         values = {}
         for record in ObjectProperties.get_properties(data_key, level):
@@ -196,7 +193,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             self.state.save("level", 1)
 
         # friendly
-        self.friendly = getattr(self.system, "friendly", 0)
+        self.friendly = self.data.friendly if self.data.friendly else 0
         
         # skill's ai
         ai_choose_skill_class = class_from_module(settings.AI_CHOOSE_SKILL)
@@ -214,7 +211,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         self.target = None
 
         # set reborn time
-        self.reborn_time = getattr(self.system, "reborn_time", 0)
+        self.reborn_time = self.data.reborn_time if self.data.reborn_time else 0
 
         # A temporary character will be deleted after the combat finished.
         self.is_temp = False
@@ -919,7 +916,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         # Reborn at its home.
         home = None
         if not home:
-            home_key = self.system.location
+            home_key = self.data.location
             if home_key:
                 rooms = utils.search_obj_data_key(home_key)
                 if rooms:

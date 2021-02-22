@@ -429,9 +429,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Load character's default objects.
         """
         # get character's model name
-        model_name = getattr(self.system, "model", None)
-        if not model_name:
-            model_name = self.get_data_key()
+        model_name = self.data.model if self.data.model else self.get_data_key()
         
         # default objects
         object_records = DefaultObjects.get(model_name)

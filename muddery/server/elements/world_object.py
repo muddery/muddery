@@ -14,3 +14,19 @@ class MudderyWorldObject(ELEMENT("OBJECT")):
     element_key = "WORLD_OBJECT"
     element_name = _("World Object", "elements")
     model_name = "world_objects"
+
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        "args" must be a string without ' and ", usually it is self.dbref.
+        """
+        commands = super(MudderyWorldObject, self).get_available_commands(caller)
+
+        if self.data.action:
+            commands.append({
+                "name": self.data.action,
+                "cmd": "action",
+                "args": self.dbref
+            })
+
+        return commands

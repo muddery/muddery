@@ -15,7 +15,7 @@ from evennia.utils.utils import make_iter, is_iter, lazy_property
 from evennia.typeclasses.models import DbHolder
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.events.event_trigger import EventTrigger
-from muddery.server.utils.data_field_handler import DataFieldHandler
+from muddery.server.utils.data_field_handler import DataFieldHandler, DataHolder
 from muddery.server.utils.properties_handler import PropertiesHandler
 from muddery.server.utils import utils
 from muddery.server.utils.exception import MudderyError
@@ -42,11 +42,11 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         return EventTrigger(self)
 
     @lazy_property
-    def system_data_handler(self):
+    def data_field_handler(self):
         return DataFieldHandler(self)
 
-    # @property system stores object's system data.
-    def __system_get(self):
+    # @property system stores object's data.
+    def __data_get(self):
         """
         A system_data store. Everything stored to this is from the
         world data. It will be reset every time when the object init .
@@ -54,23 +54,22 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         property, e.g. obj.system.attr = value etc.
         """
         try:
-            return self._system_holder
+            return self._data_holder
         except AttributeError:
-            self._system_holder = DbHolder(self, "system_data", manager_name='system_data_handler')
-            return self._system_holder
+            self._data_holder = DataHolder(self, "system_data", manager_name='data_field_handler')
+            return self._data_holder
 
-    # @system.setter
-    def __system_set(self, value):
+    # @data.setter
+    def __data_set(self, value):
         "Stop accidentally replacing the ndb object"
-        string = "Cannot assign directly to ndb object! "
-        string += "Use self.system.name=value instead."
+        string = "Cannot assign directly to data object! "
         raise Exception(string)
 
-    # @system.deleter
-    def __system_del(self):
+    # @data.deleter
+    def __data_del(self):
         "Stop accidental deletion."
         raise Exception("Cannot delete the system data object!")
-    system = property(__system_get, __system_set, __system_del)
+    data = property(__data_get, __data_set, __data_del)
 
     @lazy_property
     def custom_properties_handler(self):
@@ -262,7 +261,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
 
         # Set data.
         for field_name in fields:
-            setattr(self.system, field_name, getattr(record, field_name))
+            self.data_field_handler.add(field_name, getattr(record, field_name))
 
     def load_system_data(self, base_model, key):
         """
@@ -291,7 +290,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
 
             # Set data.
             for field_name in fields:
-                setattr(self.system, field_name, getattr(record, field_name))
+                self.data_field_handler.add(field_name, getattr(record, field_name))
 
     def load_data(self, level=None, reset_location=True):
         """
@@ -305,7 +304,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
             self.load_base_data(base_model, key)
 
             # reset typeclass
-            typeclass = getattr(self.system, "typeclass", "")
+            typeclass = self.data.typeclass
             if typeclass:
                 self.set_typeclass(typeclass)
             else:
@@ -319,7 +318,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
                 level = self.state.load("level", None)
                 if level is None:
                     # Use default level.
-                    level = getattr(self.system, "level", 0)
+                    level = self.data.level if self.data.level else 0
                     self.state.save("level", level)
 
             self.load_custom_properties(level)
@@ -327,7 +326,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         self.after_data_loaded()
 
         if not self.location and reset_location:
-            self.set_location(getattr(self.system, "location", ""))
+            self.set_location(self.data.location)
 
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded().
@@ -389,16 +388,8 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         """
         Called after self.data_loaded().
         """        
-        self.set_name(getattr(self.system, "name", ""))
-
-        self.set_desc(getattr(self.system, "desc", ""))
-
-        self.condition = getattr(self.system, "condition", "")
-        
-        self.action = getattr(self.system, "action", "")
-
-        # set icon
-        self.set_icon(getattr(self.system, "icon", ""))
+        self.set_name(self.data.name)
+        self.set_desc(self.data.desc)
 
     def reset_location(self):
         """
@@ -407,8 +398,8 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         Returns:
             None
         """
-        if hasattr(self.system, "location"):
-            self.set_location(self.system.location)
+        if hasattr(self.data, "location"):
+            self.set_location(self.data.location)
 
     def get_level(self):
         """
@@ -597,10 +588,10 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         Return:
             boolean: visible
         """
-        if not self.condition:
+        if not hasattr(self.data, "condition") or not self.data.condition:
             return True
 
-        return STATEMENT_HANDLER.match_condition(self.condition, caller, self)
+        return STATEMENT_HANDLER.match_condition(self.data.condition, caller, self)
 
     def get_surroundings(self, caller):
         """
@@ -639,10 +630,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        commands = []
-        if self.action:
-            commands = [{"name":self.action, "cmd":"action", "args":self.dbref}]
-        return commands
+        return []
 
     @classmethod
     def get_event_trigger_types(cls):

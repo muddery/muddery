@@ -35,7 +35,7 @@ class MudderyArea(ELEMENT("OBJECT")):
 
         # get background
         self.background = None
-        resource = getattr(self.system, "background", None)
+        resource = self.data.background
         if resource:
             try:
                 resource_info = ImageResource.get(resource)

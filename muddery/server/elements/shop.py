@@ -60,7 +60,7 @@ class MudderyShop(ELEMENT("OBJECT")):
         # load shop goods
         self.load_goods()
         
-        self.verb = getattr(self.system, "verb", None)
+        self.verb = self.data.verb
 
     def load_goods(self):
         """

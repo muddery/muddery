@@ -29,10 +29,10 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
         super(MudderyCommonObject, self).after_data_loaded()
 
         # set object stack info
-        self.max_stack = getattr(self.system, "max_stack", 1)
-        self.unique = getattr(self.system, "unique", False)
-        self.can_remove = getattr(self.system, "can_remove", True)
-        self.can_discard = getattr(self.system, "can_discard", True)
+        self.max_stack = self.data.max_stack if self.data.max_stack else 1
+        self.unique = self.data.unique
+        self.can_remove = self.data.can_remove
+        self.can_discard = self.data.can_discard
 
 #    def increase_num(self, number):
 #        """
@@ -175,8 +175,8 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
         """
         super(MudderyEquipment, self).after_data_loaded()
 
-        self.type = getattr(self.system, "type", "")
-        self.position = getattr(self.system, "position", "")
+        self.type = self.data.type
+        self.position = self.data.position
 
     def equip_to(self, user):
         """
@@ -260,7 +260,7 @@ class MudderySkillBook(ELEMENT("COMMON_OBJECT")):
         if not user:
             raise ValueError("User should not be None.")
 
-        skill_key = getattr(self.system, "skill", None)
+        skill_key = self.data.skill
         if not skill_key:
             return _("No effect."), 0
 

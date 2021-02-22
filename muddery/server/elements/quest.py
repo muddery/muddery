@@ -201,12 +201,12 @@ class MudderyQuest(ELEMENT("OBJECT")):
             caller.receive_objects(obj_list)
 
         # get exp
-        exp = getattr(self.system, "exp", 0)
+        exp = self.data.exp
         if exp:
             caller.add_exp(exp)
 
         # do quest's action
-        action = getattr(self.system, "action", None)
+        action = self.data.action
         if action:
             STATEMENT_HANDLER.do_action(action, caller, None)
 
