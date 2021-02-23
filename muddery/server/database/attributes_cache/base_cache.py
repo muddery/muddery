@@ -125,7 +125,7 @@ class BaseAttributesCache(object):
 
     def saves(self, obj_id, value_dict):
         """
-        Set an attribute.
+        Set attributes.
 
         Args:
             obj_id: (number) object's id.
@@ -192,7 +192,7 @@ class BaseAttributesCache(object):
             delete_string(records[0].value)
             records.delete()
 
-    def get_obj(self, obj_id):
+    def get_obj_data(self, obj_id):
         """
         Get values of an object.
 

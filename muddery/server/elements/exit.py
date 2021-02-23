@@ -8,7 +8,9 @@ for allowing Characters to traverse the exit to its destination.
 """
 
 from evennia.objects.objects import DefaultExit
+from evennia.utils import logger
 from muddery.server.utils import defines
+from muddery.server.utils import utils
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT
 
@@ -50,10 +52,10 @@ class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
         super(MudderyExit, self).after_data_loaded()
 
         # set exit's destination
-        self.set_obj_destination(self.data.destination)
+        self.set_obj_destination(self.const.destination)
 
         # set action verb
-        self.verb = self.data.verb if self.data.verb else _("GOTO")
+        self.verb = self.const.verb if self.const.verb else _("GOTO")
 
     def at_before_traverse(self, traversing_object):
         """
@@ -91,6 +93,45 @@ class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
 
         """
         traversing_object.msg({"alert": "You cannot go there."})
+
+    def set_obj_destination(self, destination):
+        """
+        Set object's destination
+
+        Args:
+        destination: (string) Destination's name. Must be the key of data info.
+        """
+        if not destination:
+            # remove destination
+            self.destination = destination
+            return
+
+        # set new destination
+        destination_obj = None
+
+        if destination:
+            # If has destination, search destination object.
+            destination_obj = utils.search_obj_data_key(destination)
+
+        if not destination_obj:
+            logger.log_errmsg("%s can't find destination %s!" % (self.get_data_key(), destination))
+            return
+
+        destination_obj = destination_obj[0]
+
+        if self.destination == destination_obj:
+            # No change.
+            return
+
+        if self == destination_obj:
+            # Can't set destination to itself.
+            logger.log_errmsg("%s can't set destination to itself!" % self.get_data_key())
+            return
+
+        self.destination = destination_obj
+
+        if self.destination:
+            self.flush_from_cache()
 
     @classmethod
     def get_event_trigger_types(cls):

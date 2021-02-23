@@ -22,9 +22,9 @@ class MudderyWorldObject(ELEMENT("OBJECT")):
         """
         commands = super(MudderyWorldObject, self).get_available_commands(caller)
 
-        if self.data.action:
+        if self.const.action:
             commands.append({
-                "name": self.data.action,
+                "name": self.const.action,
                 "cmd": "action",
                 "args": self.dbref
             })

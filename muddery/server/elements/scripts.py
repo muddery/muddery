@@ -104,4 +104,4 @@ class MudderyScript(BaseElement, DefaultScript):
                 overriding the call (unused by default).
 
         """
-        self.states_handler.clear()
+        self.states.clear()

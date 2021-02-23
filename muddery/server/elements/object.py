@@ -15,8 +15,6 @@ from evennia.utils.utils import make_iter, is_iter, lazy_property
 from evennia.typeclasses.models import DbHolder
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.events.event_trigger import EventTrigger
-from muddery.server.utils.data_field_handler import DataFieldHandler, DataHolder
-from muddery.server.utils.properties_handler import PropertiesHandler
 from muddery.server.utils import utils
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.localized_strings_handler import _
@@ -40,68 +38,6 @@ class MudderyBaseObject(BaseElement, DefaultObject):
     @lazy_property
     def event(self):
         return EventTrigger(self)
-
-    @lazy_property
-    def data_field_handler(self):
-        return DataFieldHandler(self)
-
-    # @property system stores object's data.
-    def __data_get(self):
-        """
-        A system_data store. Everything stored to this is from the
-        world data. It will be reset every time when the object init .
-        Syntax is same as for the _get_db_holder() method and
-        property, e.g. obj.system.attr = value etc.
-        """
-        try:
-            return self._data_holder
-        except AttributeError:
-            self._data_holder = DataHolder(self, "system_data", manager_name='data_field_handler')
-            return self._data_holder
-
-    # @data.setter
-    def __data_set(self, value):
-        "Stop accidentally replacing the ndb object"
-        string = "Cannot assign directly to data object! "
-        raise Exception(string)
-
-    # @data.deleter
-    def __data_del(self):
-        "Stop accidental deletion."
-        raise Exception("Cannot delete the system data object!")
-    data = property(__data_get, __data_set, __data_del)
-
-    @lazy_property
-    def custom_properties_handler(self):
-        return PropertiesHandler(self)
-
-    # @property custom stores object's custom data.
-    def __prop_get(self):
-        """
-        A properties_obj store. Everything stored to this is
-        from the custom properties in the world data. . It will
-        be reset every time when the object init.
-        Syntax is same as for the _get_db_holder() method and
-        property, e.g. obj.ndb.attr = value etc.
-        """
-        try:
-            return self._custom_holder
-        except AttributeError:
-            self._custom_holder = DbHolder(self, "custom_properties", manager_name='custom_properties_handler')
-            return self._custom_holder
-
-    # @prop.setter
-    def __prop_set(self, value):
-        "Stop accidentally replacing the ndb object"
-        string = "Cannot assign directly to ndb object! "
-        string += "Use self.prop.name=value instead."
-        raise Exception(string)
-
-    # @prop.deleter
-    def __prop_del(self):
-        "Stop accidental deletion."
-        raise Exception("Cannot delete the custom properties object!")
-    prop = property(__prop_get, __prop_set, __prop_del)
 
     def get_id(self):
         """
@@ -138,7 +74,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         if not result:
             return result
 
-        self.states_handler.clear()
+        self.states.clear()
         return True
 
     def at_init(self):
@@ -147,10 +83,6 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         """
         super(MudderyBaseObject, self).at_init()
 
-        self.condition = None
-        self.action = None
-        self.icon = None
-        
         try:
             # Load db data.
             self.load_data()
@@ -261,7 +193,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
 
         # Set data.
         for field_name in fields:
-            self.data_field_handler.add(field_name, getattr(record, field_name))
+            self.const_data_handler.add(field_name, getattr(record, field_name))
 
     def load_system_data(self, base_model, key):
         """
@@ -290,7 +222,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
 
             # Set data.
             for field_name in fields:
-                self.data_field_handler.add(field_name, getattr(record, field_name))
+                self.const_data_handler.add(field_name, getattr(record, field_name))
 
     def load_data(self, level=None, reset_location=True):
         """
@@ -304,7 +236,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
             self.load_base_data(base_model, key)
 
             # reset typeclass
-            typeclass = self.data.typeclass
+            typeclass = self.const.typeclass
             if typeclass:
                 self.set_typeclass(typeclass)
             else:
@@ -315,23 +247,27 @@ class MudderyBaseObject(BaseElement, DefaultObject):
 
             # Load custom properties.
             if level is None:
-                level = self.state.load("level", None)
+                level = self.states.load("level", None)
                 if level is None:
                     # Use default level.
-                    level = self.data.level if self.data.level else 0
-                    self.state.save("level", level)
+                    level = 0
+                    if self.const_data_handler.has("level") and self.const.level:
+                        level = self.const.level
+                    self.states.save("level", level)
 
-            self.load_custom_properties(level)
+            self.load_custom_data(level)
+
+        self.set_default_data()
 
         self.after_data_loaded()
 
         if not self.location and reset_location:
-            self.set_location(self.data.location)
+            self.set_location(self.const.location)
 
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded().
 
-    def load_custom_properties(self, level):
+    def load_custom_data(self, level):
         """
         Load custom properties.
         """
@@ -353,30 +289,28 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         # Set values.
         for key, info in self.get_properties_info().items():
             if not info["mutable"]:
-                self.custom_properties_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
-
-        # Set default mutable custom properties.
-        self.set_mutable_custom_properties()
-
-    def set_mutable_custom_properties(self):
-        """
-        Set default mutable custom properties.
-        """
-        for key, info in self.get_properties_info().items():
-            if info["mutable"]:
+                self.const_data_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
+            else:
                 # Set default mutable properties to prop.
-                if not self.custom_properties_handler.has(key):
-                    default = info["default"]
-                    if self.custom_properties_handler.has(default):
-                        # User another property'a value
-                        value = self.custom_properties_handler.get(default)
-                    else:
-                        try:
-                            value = ast.literal_eval(default)
-                        except (SyntaxError, ValueError) as e:
-                            # treat as a raw string
-                            value = default
-                    self.custom_properties_handler.add(key, value)
+                if not self.states.has(key):
+                    self.states.save(key, self.get_custom_data_value(info["default"]))
+
+    def get_custom_data_value(self, data):
+        """
+        Get a custom data's value
+        :param value:
+        :return:
+        """
+        if self.const_data_handler.has(data):
+            # User another property'a value
+            value = self.const_data_handler.get(data)
+        else:
+            try:
+                value = ast.literal_eval(data)
+            except (SyntaxError, ValueError) as e:
+                # treat as a raw string
+                value = data
+        return value
 
     def after_data_key_changed(self):
         """
@@ -384,12 +318,32 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         """
         pass
 
+    def set_default_data(self):
+        """
+        Set default data.
+        """
+        if not self.const_data_handler.has("name"):
+            self.const_data_handler.add("name", "")
+
+        if not self.const_data_handler.has("desc"):
+            self.const_data_handler.add("desc", "")
+
+        if not self.const_data_handler.has("condition"):
+            self.const_data_handler.add("condition", None)
+
+        if not self.const_data_handler.has("icon"):
+            self.const_data_handler.add("icon", None)
+
+        if not self.const_data_handler.has("location"):
+            self.const_data_handler.add("location", None)
+
     def after_data_loaded(self):
         """
         Called after self.data_loaded().
         """        
-        self.set_name(self.data.name)
-        self.set_desc(self.data.desc)
+        self.set_name(self.const.name)
+        self.set_desc(self.const.desc)
+        self.set_icon(self.const.icon)
 
     def reset_location(self):
         """
@@ -398,15 +352,14 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         Returns:
             None
         """
-        if hasattr(self.data, "location"):
-            self.set_location(self.data.location)
+        self.set_location(self.const.location)
 
     def get_level(self):
         """
         Get the object's level.
         :return: (number) level
         """
-        return self.state.load("level", 0)
+        return self.states.load("level", 0)
 
     def set_level(self, level):
         """
@@ -417,8 +370,8 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         Returns:
             None
         """
-        self.state.save("level", level)
-        self.load_custom_properties(level)
+        self.states.save("level", level)
+        self.load_custom_data(level)
 
     def set_typeclass(self, element_key):
         """
@@ -466,9 +419,6 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         # aliases
         #self.at_cmdset_get(force_init=True)
 
-        if self.destination:
-            self.flush_from_cache()
-
     def get_name(self):
         """
         Get player character's name.
@@ -515,42 +465,6 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         """
         self.desc = desc
 
-    def set_obj_destination(self, destination):
-        """
-        Set object's destination
-        
-        Args:
-        destination: (string) Destination's name. Must be the key of data info.
-        """
-        if not destination:
-            # remove destination
-            self.destination = destination
-            return
-
-        # set new destination
-        destination_obj = None
-    
-        if destination:
-            # If has destination, search destination object.
-            destination_obj = utils.search_obj_data_key(destination)
-        
-        if not destination_obj:
-            logger.log_errmsg("%s can't find destination %s!" % (self.get_data_key(), destination))
-            return
-        
-        destination_obj = destination_obj[0]
-    
-        if self.destination == destination_obj:
-            # No change.
-            return
-
-        if self == destination_obj:
-            # Can't set destination to itself.
-            logger.log_errmsg("%s can't set destination to itself!" % self.get_data_key())
-            return
-    
-        self.destination = destination_obj
-
     def set_icon(self, icon_key):
         """
         Set object's icon.
@@ -588,10 +502,10 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         Return:
             boolean: visible
         """
-        if not hasattr(self.data, "condition") or not self.data.condition:
+        if not hasattr(self.data, "condition") or not self.const.condition:
             return True
 
-        return STATEMENT_HANDLER.match_condition(self.data.condition, caller, self)
+        return STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)
 
     def get_surroundings(self, caller):
         """

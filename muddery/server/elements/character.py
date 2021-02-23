@@ -14,7 +14,6 @@ from twisted.internet.task import deferLater
 from django.conf import settings
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
-from evennia.typeclasses.models import DbHolder
 from evennia.utils import logger, search
 from evennia.utils.utils import lazy_property, class_from_module
 from muddery.server.mappings.element_set import ELEMENT
@@ -27,7 +26,7 @@ from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils import defines, utils
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.utils import search_obj_data_key
-from muddery.server.utils.data_field_handler import DataFieldHandler
+from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import delete_object
 from muddery.server.utils.defines import CombatType
@@ -68,7 +67,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         return LootHandler(self, CharacterLootList.get(self.get_data_key()))
 
     @lazy_property
-    def body_properties_handler(self):
+    def body_data_handler(self):
         return DataFieldHandler(self)
 
     # @property body stores character's body properties before using equipments and skills.
@@ -82,7 +81,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         try:
             return self._body_holder
         except AttributeError:
-            self._body_holder = DbHolder(self, "body_properties", manager_name='body_properties_handler')
+            self._body_holder = ConstDataHolder(self, "body_properties", manager_name='body_data_handler')
             return self._body_holder
 
     # @body.setter
@@ -147,7 +146,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         # refresh the character's properties.
         self.refresh_properties(False)
 
-    def load_custom_properties(self, level):
+    def load_custom_data(self, level):
         """
         Load body properties from db. Body properties do no include mutable properties.
         """
@@ -156,7 +155,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             level = self.get_level()
 
         # Load values from db.
-        data_key = self.data.clone if self.data.clone else self.get_data_key()
+        data_key = self.const.clone if self.const.clone else self.get_data_key()
 
         values = {}
         for record in ObjectProperties.get_properties(data_key, level):
@@ -175,11 +174,12 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         # Set body values.
         for key, info in self.get_properties_info().items():
             if not info["mutable"]:
-                self.custom_properties_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
-                self.body_properties_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
-
-        # Set default mutable custom properties.
-        self.set_mutable_custom_properties()
+                self.const_data_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
+                self.body_data_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
+            else:
+                # Set default mutable properties to prop.
+                if not self.states.has(key):
+                    self.states.save(key, self.get_custom_data_value(info["default"]))
 
     def after_data_loaded(self):
         """
@@ -188,12 +188,12 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         super(MudderyCharacter, self).after_data_loaded()
 
         # get level
-        level = self.state.load("level")
+        level = self.states.load("level")
         if not level:
-            self.state.save("level", 1)
+            self.states.save("level", 1)
 
         # friendly
-        self.friendly = self.data.friendly if self.data.friendly else 0
+        self.friendly = self.const.friendly if self.const.friendly else 0
         
         # skill's ai
         ai_choose_skill_class = class_from_module(settings.AI_CHOOSE_SKILL)
@@ -211,7 +211,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         self.target = None
 
         # set reborn time
-        self.reborn_time = self.data.reborn_time if self.data.reborn_time else 0
+        self.reborn_time = self.const.reborn_time if self.const.reborn_time else 0
 
         # A temporary character will be deleted after the combat finished.
         self.is_temp = False
@@ -249,8 +249,8 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         # get equipment's position
         positions = set([r.key for r in EquipmentPositions.all()])
 
-        inventory = self.state.load("inventory", [])
-        equipments = self.state.load("equipments", {})
+        inventory = self.states.load("inventory", [])
+        equipments = self.states.load("equipments", {})
 
         changed = False
         for pos in list(equipments.keys()):
@@ -261,9 +261,9 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
 
         if changed:
             # Save changes.
-            with self.state.atomic():
-                self.state.save("equipments", equipments)
-                self.state.save("inventory", inventory)
+            with self.states.atomic():
+                self.states.save("equipments", equipments)
+                self.states.save("inventory", inventory)
 
     def refresh_properties(self, keep_values):
         """
@@ -273,11 +273,11 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             keep_values (boolean): mutable values keep last values.
         """
         if keep_values:
-            last_properties = {key: value for key, value in self.custom_properties_handler.all(True)}
+            last_properties = self.states.all()
 
         # Load body properties.
-        for key, value in self.body_properties_handler.all(True):
-            self.custom_properties_handler.add(key, value)
+        for key, value in self.body_data_handler.all().items():
+            self.const_data_handler.add(key, value)
 
         # load equips
         self.wear_equipments()
@@ -292,19 +292,19 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
 
                     # check limits
                     max_key = "max_" + key
-                    if self.custom_properties_handler.has(max_key):
-                        max_value = getattr(self.prop, max_key)
+                    if self.const_data_handler.has(max_key):
+                        max_value = self.const_data_handler.get(max_key)
                         if value > max_value:
                             value = max_value
 
                     min_key = "min_" + key
-                    if self.custom_properties_handler.has(min_key):
-                        min_value = getattr(self.prop, min_key)
+                    if self.const_data_handler.has(min_key):
+                        min_value = self.const_data_handler.get(min_key)
                         if value < min_value:
                             value = min_value
 
                     # Set the value.
-                    setattr(self.prop, key, value)
+                    self.const_data_handler.add(key, value)
 
     @classmethod
     def get_event_trigger_types(cls):
@@ -322,9 +322,9 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             event_key: (string) event's key
         """
         # set closed events
-        closed_events = self.state.load("closed_events", set())
+        closed_events = self.states.load("closed_events", set())
         closed_events.add(event_key)
-        self.state.save("closed_events", closed_events)
+        self.states.save("closed_events", closed_events)
 
     def is_event_closed(self, event_key):
         """
@@ -333,7 +333,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Args:
             event_key: (string) event's key
         """
-        closed_events = self.state.load("closed_events", set())
+        closed_events = self.states.load("closed_events", set())
         return event_key in closed_events
 
     def change_properties(self, increments):
@@ -347,37 +347,45 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             (dict) values that actually changed.
         """
         changes = {}
+        values = {}
 
         for key, increment in increments.items():
             changes[key] = 0
 
-            if not self.custom_properties_handler.has(key):
+            if not self.states.has(key):
                 continue
 
-            origin_value = getattr(self.prop, key)
+            origin_value = self.states.load(key)
             
             # check limits
+            max_value = None
             max_key = "max_" + key
-            if self.custom_properties_handler.has(max_key):
-                max_value = getattr(self.prop, max_key)
+            if self.states.has(max_key):
+                max_value = self.states.load(max_key)
+            elif self.const_data_handler.has(max_key):
+                max_value = self.const_data_handler.get(max_key)
+
+            if max_value is not None:
                 if origin_value + increment > max_value:
                     increment = max_value - origin_value
 
             # Default minimum value is 0.
             min_value = 0
             min_key = "min_" + key
-            if self.custom_properties_handler.has(min_key):
-                min_value = getattr(self.prop, min_key)
+            if self.states.has(min_key):
+                min_value = self.states.load(min_key)
+            elif self.const_data_handler.has(min_key):
+                min_value = self.const_data_handler.get(min_key)
 
             if origin_value + increment < min_value:
                 increment = min_value - origin_value
 
             # Set the value.
             if increment != 0:
-                value = origin_value + increment
-                self.custom_properties_handler.add(key, value)
+                values[key] = origin_value + increment
                 changes[key] = increment
 
+        self.states.saves(values)
         return changes
 
     def set_properties(self, values):
@@ -395,26 +403,35 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         for key, value in values.items():
             actual[key] = 0
 
-            if not self.custom_properties_handler.has(key):
+            if not self.const_data_handler.has(key):
                 continue
 
             # check limits
+            max_value = None
             max_key = "max_" + key
-            if self.custom_properties_handler.has(max_key):
+            if self.states.has(max_key):
+                max_value = self.states.load(max_key)
+            elif self.const_data_handler.has(max_key):
                 max_value = getattr(self.prop, max_key)
+
+            if max_value is not None:
                 if value > max_value:
                     value = max_value
 
+            min_value = 0
             min_key = "min_" + key
-            if self.custom_properties_handler.has(min_key):
+            if self.states.has(min_key):
+                min_value = self.states.load(min_key)
+            elif self.const_data_handler.has(min_key):
                 min_value = getattr(self.prop, min_key)
-                if value < min_value:
-                    value = min_value
+
+            if value < min_value:
+                value = min_value
 
             # Set the value.
-            setattr(self.prop, key, value)
             actual[key] = value
 
+        self.states.saves(values)
         return actual
 
     def get_combat_status(self):
@@ -427,8 +444,8 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         Search specified object in the inventory.
         """
-        inventory = self.state.load("inventory", [])
-        equipments = self.state.load("equipments", {})
+        inventory = self.states.load("inventory", [])
+        equipments = self.states.load("equipments", {})
 
         objects = [item["number"] for item in inventory if item["key"] == obj_key]
         total = sum(objects)
@@ -449,7 +466,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Add equipment's attributes to the character
         """
         # find equipments
-        equipments = self.state.load("equipments", {})
+        equipments = self.states.load("equipments", {})
 
         # add equipment's attributes
         for item in equipments.values():
@@ -464,7 +481,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         default_skill_ids = set([record.skill for record in skill_records])
 
         # remove old default skills
-        skills = self.state.load("skills", {})
+        skills = self.states.load("skills", {})
         changed = False
         for key in list(skills.keys()):
             skill = skills[key]
@@ -474,11 +491,11 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             elif skill.is_default() and key not in default_skill_ids:
                 # remove this skill
                 skill.delete()
-                del self.state.skills[key]
+                del self.states.skills[key]
                 changed = True
 
         if changed:
-            self.state.save("skills", skills)
+            self.states.save("skills", skills)
 
         # add new default skills
         for skill_record in skill_records:
@@ -514,7 +531,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Get all skills.
         :return:
         """
-        skills = self.state.load("skills", {})
+        skills = self.states.load("skills", {})
         return skills
 
     def get_skill(self, key):
@@ -527,7 +544,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         :return:
         skill object
         """
-        skills = self.state.load("skills", {})
+        skills = self.states.load("skills", {})
         return skills.get(key, None)
 
     def learn_skill(self, skill_key, is_default, silent):
@@ -542,7 +559,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Returns:
             (boolean) learned skill
         """
-        skills = self.state.load("skills", {})
+        skills = self.states.load("skills", {})
         if skill_key in skills:
             self.msg({"msg": _("You have already learned this skill.")})
             return False
@@ -559,7 +576,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
 
         # Store new skill.
         skills[skill_key] = skill_obj
-        self.state.save("skills", skills)
+        self.states.save("skills", skills)
 
         # If it is a passive skill, player's status may change.
         if skill_obj.passive:
@@ -587,7 +604,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             self.msg({"skill_cast": {"cast": _("Global cooling down!")}})
             return
 
-        skills = self.state.load("skills", {})
+        skills = self.states.load("skills", {})
         if skill_key not in skills:
             self.msg({"skill_cast": {"cast": _("You do not have this skill.")}})
             return
@@ -663,7 +680,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         Cast all passive skills.
         """
-        skills = self.state.load("skills", {})
+        skills = self.states.load("skills", {})
         for skill in skills.values():
             if skill.passive:
                 skill.cast(self, self)
@@ -875,7 +892,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        self.state.save("team", team_id)
+        self.states.save("team", team_id)
 
     def get_team(self):
         """
@@ -884,7 +901,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Returns:
             team id
         """
-        return self.state.load("team", 0)
+        return self.states.load("team", 0)
 
     def is_alive(self):
         """
@@ -916,7 +933,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         # Reborn at its home.
         home = None
         if not home:
-            home_key = self.data.location
+            home_key = self.const.location
             if home_key:
                 rooms = utils.search_obj_data_key(home_key)
                 if rooms:
@@ -947,7 +964,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             (list) available commands for combat
         """
         commands = []
-        skills = self.state.load("skills", {})
+        skills = self.states.load("skills", {})
         for key, skill in skills.items():
             if skill.passive:
                 # exclude passive skills

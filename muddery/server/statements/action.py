@@ -191,7 +191,7 @@ class FuncFightTarget(StatementFunction):
         if self.args:
             desc = self.args[0]
 
-        return self.caller.attack_temp_target(self.obj.get_data_key(), self.obj.state.level, desc)
+        return self.caller.attack_temp_target(self.obj.get_data_key(), self.obj.get_level(), desc)
         
         
 class FuncKillCaller(StatementFunction):

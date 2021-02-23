@@ -48,7 +48,7 @@ class MudderyQuest(ELEMENT("OBJECT")):
 
         # Get objectives.
         obj_records = QuestObjectives.get(key)
-        all_accomplished = self.state.load("accomplished", {})
+        all_accomplished = self.states.load("accomplished", {})
 
         for obj_record in obj_records:
             objective_type = obj_record.type
@@ -92,7 +92,7 @@ class MudderyQuest(ELEMENT("OBJECT")):
         Set desc to an objective can hide the details of the objective.
         """
         output = []
-        all_accomplished = self.state.load("accomplished", {})
+        all_accomplished = self.states.load("accomplished", {})
 
         for ordinal, objective in self.objectives.items():
             desc = objective["desc"]
@@ -176,7 +176,7 @@ class MudderyQuest(ELEMENT("OBJECT")):
         """
         All objectives of this quest are accomplished.
         """
-        all_accomplished = self.state.load("accomplished", {})
+        all_accomplished = self.states.load("accomplished", {})
 
         for ordinal in self.objectives:
             obj_num = self.objectives[ordinal]["number"]
@@ -201,12 +201,12 @@ class MudderyQuest(ELEMENT("OBJECT")):
             caller.receive_objects(obj_list)
 
         # get exp
-        exp = self.data.exp
+        exp = self.const.exp
         if exp:
             caller.add_exp(exp)
 
         # do quest's action
-        action = self.data.action
+        action = self.const.action
         if action:
             STATEMENT_HANDLER.do_action(action, caller, None)
 
@@ -237,7 +237,7 @@ class MudderyQuest(ELEMENT("OBJECT")):
         status_changed = False
         index = 0
 
-        all_accomplished = self.state.load("accomplished", {})
+        all_accomplished = self.states.load("accomplished", {})
         changed = False
 
         # search all object objectives
@@ -266,7 +266,7 @@ class MudderyQuest(ELEMENT("OBJECT")):
                         break
 
         if changed:
-            self.state.save("accomplished", all_accomplished)
+            self.states.save("accomplished", all_accomplished)
 
         return status_changed
 

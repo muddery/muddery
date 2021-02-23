@@ -73,7 +73,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         shop_keys = set([record.shop for record in shop_records])
 
         # NPC's shop
-        self.shops = self.state.load("shops", {})
+        self.shops = self.states.load("shops", {})
         changed = False
 
         # remove old shops
@@ -99,7 +99,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
                 changed = True
 
         if changed:
-            self.state.save("shops", self.shops)
+            self.states.save("shops", self.shops)
 
         # if the shop has no icon, set the NPC's icon to the shop.
         for key, obj in self.shops.items():

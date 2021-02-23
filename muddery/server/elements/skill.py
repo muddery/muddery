@@ -49,7 +49,7 @@ class MudderySkill(ELEMENT("OBJECT")):
         # Set skill cd. Add gcd to new the skill.
         gcd = GAME_SETTINGS.get("global_cd")
         if gcd > 0:
-            self.state.save("cd_finish_time", time.time() + gcd)
+            self.states.save("cd_finish_time", time.time() + gcd)
 
     def at_init(self):
         """
@@ -57,7 +57,7 @@ class MudderySkill(ELEMENT("OBJECT")):
         """
         super(MudderySkill, self).at_init()
 
-        self._is_default = self.state.load("is_default", False)
+        self._is_default = self.states.load("is_default", False)
 
     def set_default(self, is_default):
         """
@@ -69,7 +69,7 @@ class MudderySkill(ELEMENT("OBJECT")):
             is_default: (boolean) if the is default or not.
         """
         self._is_default = is_default
-        self.state.save("is_default", is_default)
+        self.states.save("is_default", is_default)
 
     def is_default(self):
         """
@@ -90,13 +90,13 @@ class MudderySkill(ELEMENT("OBJECT")):
         super(MudderySkill, self).after_data_loaded()
 
         # set data
-        self.function = self.data.function
-        self.cd = self.data.cd if self.data.cd else 0
-        self.passive = self.data.passive if self.data.passive else False
-        self.main_type = self.data.main_type
-        self.sub_type = self.data.sub_type
+        self.function = self.const.function
+        self.cd = self.const.cd if self.const.cd else 0
+        self.passive = self.const.passive if self.const.passive else False
+        self.main_type = self.const.main_type
+        self.sub_type = self.const.sub_type
         
-        message_model = self.data.message
+        message_model = self.const.message
         self.message_model = self.msg_escape.sub(self.escape_fun, message_model)
 
     def get_available_commands(self, caller):
@@ -165,7 +165,7 @@ class MudderySkill(ELEMENT("OBJECT")):
             # set cd
             time_now = time.time()
             if self.cd > 0:
-                self.state.save("cd_finish_time", time_now + self.cd)
+                self.states.save("cd_finish_time", time_now + self.cd)
 
         # call skill function
         return STATEMENT_HANDLER.do_skill(self.function, caller, target)
@@ -206,7 +206,7 @@ class MudderySkill(ELEMENT("OBJECT")):
         If this skill is cooling down.
         """
         if self.cd > 0:
-            cd_finish_time = self.state.load("cd_finish_time", 0)
+            cd_finish_time = self.states.load("cd_finish_time", 0)
             if cd_finish_time:
                 if time.time() < cd_finish_time:
                     return True
@@ -219,7 +219,7 @@ class MudderySkill(ELEMENT("OBJECT")):
         Returns:
             (float) Remain CD in seconds.
         """
-        cd_finish_time = self.state.load("cd_finish_time", 0)
+        cd_finish_time = self.states.load("cd_finish_time", 0)
         remain_cd = cd_finish_time - time.time()
         if remain_cd < 0:
             remain_cd = 0

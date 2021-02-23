@@ -39,15 +39,15 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
 
         self.available = False
 
-        self.shop_key = self.data.shop
-        self.goods_key = self.data.goods
-        self.goods_level = self.data.level if self.data.level else 0
+        self.shop_key = self.const.shop
+        self.goods_key = self.const.goods
+        self.goods_level = self.const.level if self.const.level else 0
 
         # set goods information
-        self.price = self.data.price if self.data.price else 0
-        self.unit_key = self.data.unit
-        self.number = self.data.number if self.data.number else 0
-        self.condition = self.data.condition
+        self.price = self.const.price if self.const.price else 0
+        self.unit_key = self.const.unit
+        self.number = self.const.number if self.const.number else 0
+        self.condition = self.const.condition
 
         # get price unit information
         try:

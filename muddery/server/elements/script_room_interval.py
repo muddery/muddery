@@ -26,9 +26,9 @@ class ScriptRoomInterval(MudderyScript):
         """
         Load the script's data.
         """
-        self.event_key = self.state.load("event_key", "")
-        self.action = self.state.load("action", "")
-        self.room = self.state.load("room", "")
+        self.event_key = self.states.load("event_key", "")
+        self.action = self.states.load("action", "")
+        self.room = self.states.load("room", "")
 
         self.offline = False
         self.begin_message = ""
@@ -53,7 +53,7 @@ class ScriptRoomInterval(MudderyScript):
         self.event_key = event_key
         self.action = action
 
-        self.state.saves({
+        self.states.saves({
             "room": room,
             "event_key": event_key,
             "action": action,
@@ -78,12 +78,12 @@ class ScriptRoomInterval(MudderyScript):
 
         # Offline intervals.
         if self.offline:
-            last_time = self.state.load("last_trigger_time", 0)
+            last_time = self.states.load("last_trigger_time", 0)
             if last_time:
                 current_time = time.time()
                 times = int((current_time - last_time) / self.interval)
                 if times > 0:
-                    self.state.save("last_trigger_time", current_time)
+                    self.states.save("last_trigger_time", current_time)
                     action = EVENT_ACTION_SET.get(self.action)
                     if action and hasattr(action, "offline_func"):
                         action.offline_func(self.event_key, self.obj, self.room, times)
@@ -103,7 +103,7 @@ class ScriptRoomInterval(MudderyScript):
 
         # Do actions.
         if self.offline:
-            self.state.save("last_trigger_time", time.time())
+            self.states.save("last_trigger_time", time.time())
         func = EVENT_ACTION_SET.func(self.action)
         if func:
             func(self.event_key, self.obj, self.room)

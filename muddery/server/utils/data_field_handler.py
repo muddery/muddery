@@ -66,7 +66,7 @@ class DataFieldHandler(object):
         """
         self._store = {}
 
-    def all(self, return_tuples=False):
+    def all(self):
         """
         List the contents of the handler.
 
@@ -80,12 +80,26 @@ class DataFieldHandler(object):
                 setting of `return_tuples`.
 
         """
-        if return_tuples:
-            return [(key, value) for (key, value) in self._store.items()]
-        return [key for key in self._store]
+        return self._store
 
 
 class DataHolder(object):
+    "Holder for allowing property access of read only attributes"
+    def __init__(self, obj, name, manager_name):
+        object.__setattr__(self, name, object.__getattribute__(obj, manager_name))
+        object.__setattr__(self, "name", name)
+
+    def __getattribute__(self, attrname):
+        return object.__getattribute__(self, object.__getattribute__(self, "name")).get(attrname)
+
+    def __setattr__(self, attrname, value):
+        object.__getattribute__(self, object.__getattribute__(self, "name")).add(attrname, value)
+
+    def __delattr__(self, attrname):
+        raise Exception("Cannot delete attributes!")
+
+
+class ConstDataHolder(object):
     "Holder for allowing property access of read only attributes"
     def __init__(self, obj, name, manager_name):
         object.__setattr__(self, name, object.__getattribute__(obj, manager_name))

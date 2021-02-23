@@ -29,10 +29,10 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
         super(MudderyCommonObject, self).after_data_loaded()
 
         # set object stack info
-        self.max_stack = self.data.max_stack if self.data.max_stack else 1
-        self.unique = self.data.unique
-        self.can_remove = self.data.can_remove
-        self.can_discard = self.data.can_discard
+        self.max_stack = self.const.max_stack if self.const.max_stack else 1
+        self.unique = self.const.unique
+        self.can_remove = self.const.can_remove
+        self.can_discard = self.const.can_discard
 
 #    def increase_num(self, number):
 #        """
@@ -44,13 +44,13 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
 #        if number < 0:
 #            raise MudderyError("%s can not increase a negative nubmer." % self.get_data_key())#
 #
-#        if self.max_stack == 1 and self.state.number == 1:
+#        if self.max_stack == 1 and self.states.number == 1:
 #            raise MudderyError("%s can not stack." % self.get_data_key())
 #
-#        if self.state.number + number > self.max_stack:
+#        if self.states.number + number > self.max_stack:
 #            raise MudderyError("%s over stack." % self.get_data_key())
 #
-#        self.state.number += number
+#        self.states.number += number
 #        return
 #
 #    def decrease_num(self, number):
@@ -63,10 +63,10 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
 #        if number < 0:
 #            raise MudderyError("%s can not decrease a negative nubmer." % self.get_data_key())
 #
-#        if self.state.number < number:
+#        if self.states.number < number:
 #            raise MudderyError("%s's number will below zero." % self.get_data_key())
 #
-#        self.state.number -= number
+#        self.states.number -= number
 #        return
 
     def get_appearance(self, caller):
@@ -175,8 +175,8 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
         """
         super(MudderyEquipment, self).after_data_loaded()
 
-        self.type = self.data.type
-        self.position = self.data.position
+        self.type = self.const.type
+        self.position = self.const.position
 
     def equip_to(self, user):
         """
@@ -260,7 +260,7 @@ class MudderySkillBook(ELEMENT("COMMON_OBJECT")):
         if not user:
             raise ValueError("User should not be None.")
 
-        skill_key = self.data.skill
+        skill_key = self.const.skill
         if not skill_key:
             return _("No effect."), 0
 

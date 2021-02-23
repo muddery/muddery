@@ -21,10 +21,10 @@ from muddery.server.database.attributes_cache.atomic import Atomic
 #
 # -------------------------------------------------------------
 
+
 #
 # Handlers making use of the Attribute model
 #
-
 class ObjectStatesHandler(object):
     """
     Handler for adding Attributes to the object.
@@ -77,6 +77,12 @@ class ObjectStatesHandler(object):
         """
         self.cache.save(self.obj_id, key, value)
 
+    def saves(self, obj_id, value_dict):
+        """
+        Set attributes.
+        """
+        self.cache.saves(self.obj_id, value_dict)
+
     def delete(self, key):
         """
         Remove an attribute from object.
@@ -104,7 +110,7 @@ class ObjectStatesHandler(object):
         """
         Get all attributes from an object.
         """
-        return self.cache.get_obj(self.obj_id)
+        return self.cache.get_obj_data(self.obj_id)
 
     def atomic(self):
         """

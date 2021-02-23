@@ -49,7 +49,7 @@ class MudderyInventory(BaseElement):
         """
         Load character's default objects.
         """
-        contents = self.state.load("contents")
+        contents = self.states.load("contents")
         append_list = []
         for obj in object_list:
             found = False
@@ -94,7 +94,7 @@ class MudderyInventory(BaseElement):
         # check what the character has now
         current_contents = {}
         changed = False
-        new_contents = self.state.load("contents", [])
+        new_contents = self.states.load("contents", [])
         for item in new_contents:
             key = item["key"]
             if key in current_contents:
@@ -204,7 +204,7 @@ class MudderyInventory(BaseElement):
             })
 
         if changed:
-            self.state.save("inventory", new_contents)
+            self.states.save("inventory", new_contents)
 
         return objects
 
@@ -217,7 +217,7 @@ class MudderyInventory(BaseElement):
         Returns:
             int: object number
         """
-        contents = self.state.load("contents")
+        contents = self.states.load("contents")
 
         # get total number
         return sum([item["number"] for item in contents if item["key"] == obj_key])
@@ -248,7 +248,7 @@ class MudderyInventory(BaseElement):
         if not object_record.unique:
             return True
 
-        contents = self.state.load("contents")
+        contents = self.states.load("contents")
         if not contents:
             return True
 
@@ -282,7 +282,7 @@ class MudderyInventory(BaseElement):
         Returns:
             boolean: success
         """
-        contents = self.state.load("contents")
+        contents = self.states.load("contents")
         for obj in obj_list:
             # get total number
             total = sum([item["number"] for item in contents if item["key"] == obj["object"]])
@@ -343,7 +343,7 @@ class MudderyInventory(BaseElement):
         Get inventory's data.
         """
         inv = []
-        inventory = self.state.load("inventory", [])
+        inventory = self.states.load("inventory", [])
         for item in inventory:
             info = {"dbref": item.dbref,        # item's dbref
                     "name": item.name,          # item's name

@@ -252,14 +252,14 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Set player character's nickname.
         """
-        self.state.save("nickname", nickname)
+        self.states.save("nickname", nickname)
 
     def get_name(self):
         """
         Get player character's name.
         """
         # Use nick name instead of normal name.
-        return self.state.load("nickname", "")
+        return self.states.load("nickname", "")
 
     def get_available_commands(self, caller):
         """
@@ -332,7 +332,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         rooms = {}
         exits = {}
 
-        revealed_map = self.state.load("revealed_map", set())
+        revealed_map = self.states.load("revealed_map", set())
         for room_key in revealed_map:
             # get room's information
             room = utils.search_obj_data_key(room_key)
@@ -390,11 +390,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                           ...}
             }
             """
-            revealed_map = self.state.load("revealed_map", set())
+            revealed_map = self.states.load("revealed_map", set())
             if not location_key in revealed_map:
                 # reveal map
                 revealed_map.add(self.location.get_data_key())
-                self.state.save("revealed_map", revealed_map)
+                self.states.save("revealed_map", revealed_map)
 
                 rooms = {location_key: {"name": self.location.get_name(),
                                         "icon": self.location.icon,
@@ -428,15 +428,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Load character's default objects.
         """
-        # get character's model name
-        model_name = self.data.model if self.data.model else self.get_data_key()
-        
         # default objects
-        object_records = DefaultObjects.get(model_name)
+        object_records = DefaultObjects.get(self.get_data_key())
 
         # add new default objects
         obj_list = []
-        inventory = self.state.load("inventory", [])
+        inventory = self.states.load("inventory", [])
         for object_record in object_records:
             found = False
             for item in inventory:
@@ -478,7 +475,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         # check what the character has now
         changed = False
-        inventory = self.state.load("inventory", [])
+        inventory = self.states.load("inventory", [])
 
         for obj in obj_list:
             key = obj["object"]
@@ -621,7 +618,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             })
 
         if changed:
-            self.state.save("inventory", inventory)
+            self.states.save("inventory", inventory)
 
         if not mute:
             # Send results to the player.
@@ -646,7 +643,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             int: object number
         """
-        inventory = self.state.load("inventory", [])
+        inventory = self.states.load("inventory", [])
 
         # get total number
         total = sum([item["number"] for item in inventory if obj_key == item["key"]])
@@ -699,7 +696,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             result: (string) the description of the result
         """
         item = None
-        inventory = self.state.load("inventory", [])
+        inventory = self.states.load("inventory", [])
         for value in inventory:
             if value["dbref"] == obj_dbref:
                 item = value
@@ -733,7 +730,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :param mute:
         :return:
         """
-        inventory = self.state.load("inventory", [])
+        inventory = self.states.load("inventory", [])
         for item in inventory:
             if item["dbref"] == dbref:
                 item["number"] = 0
@@ -741,7 +738,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     item["obj"].delete()
                     inventory.remove(item)
 
-                self.state.save("inventory", inventory)
+                self.states.save("inventory", inventory)
                 if not mute:
                     self.show_inventory()
 
@@ -757,7 +754,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :param mute:
         :return:
         """
-        inventory = self.state.load("inventory", [])
+        inventory = self.states.load("inventory", [])
         for item in inventory:
             if item["dbref"] == dbref:
                 obj_num = item["number"]
@@ -770,7 +767,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                             item["obj"].delete()
                             inventory.remove(item)
 
-                    self.state.save("inventory", inventory)
+                    self.states.save("inventory", inventory)
                     if not mute:
                         self.show_inventory()
 
@@ -809,7 +806,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             boolean: success
         """
         # Count objects in the inventory.
-        inventory = self.state.load("inventory", [])
+        inventory = self.states.load("inventory", [])
         total = sum([item["number"] for item in inventory if obj_key == item["key"]])
         if total < number:
             raise (MudderyError(_("Can not remove this object.")))
@@ -857,7 +854,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             raise (MudderyError(_("Can not remove this object.")))
 
         # Save the inventory.
-        self.state.save("inventory", inventory)
+        self.states.save("inventory", inventory)
 
         if not mute:
             self.show_inventory()
@@ -871,7 +868,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :param mute:
         :return:
         """
-        with self.state.atomic():
+        with self.states.atomic():
             self.remove_objects(remove_list, True)
             self.receive_objects(receive_list, True)
 
@@ -889,7 +886,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Get inventory's data.
         """
         inv = []
-        inventory = self.state.load("inventory", [])
+        inventory = self.states.load("inventory", [])
 
         for item in inventory:
             obj = item["obj"]
@@ -912,7 +909,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Get inventory's data.
         """
-        inventory = self.state.load("inventory", [])
+        inventory = self.states.load("inventory", [])
 
         for item in inventory:
             if item["dbref"] == dbref:
@@ -924,7 +921,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Get equipments data.
         """
-        equipments = self.state.load("equipments", [])
+        equipments = self.states.load("equipments", [])
 
         for pos, item in equipments.items():
             if item["dbref"] == dbref:
@@ -958,8 +955,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                            "value": self.get_level()}
 
         for key, info in self.get_properties_info().items():
-            status[key] = {"name": info["name"],
-                           "value": getattr(self.prop, key)}
+            if not info["mutable"]:
+                status[key] = {"name": info["name"],
+                               "value": self.const_data_handler.get(key)}
+            else:
+                status[key] = {"name": info["name"],
+                               "value": self.states.load(key)}
 
         return status
 
@@ -976,7 +977,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Get equipments' data.
         """
         info = {}
-        equipments = self.state.load("equipments", {})
+        equipments = self.states.load("equipments", {})
 
         for pos, item in equipments.items():
             # in order of positions
@@ -996,8 +997,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Equip an object.
         args: obj_dbref(string): the equipment object's dbref.
         """
-        inventory = self.state.load("inventory", [])
-        equipments = self.state.load("equipments", {})
+        inventory = self.states.load("inventory", [])
+        equipments = self.states.load("equipments", {})
 
         index = None
         item = None
@@ -1025,9 +1026,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         del inventory[index]
 
         # Save changes.
-        with self.state.atomic():
-            self.state.save("equipments", equipments)
-            self.state.save("inventory", inventory)
+        with self.states.atomic():
+            self.states.save("equipments", equipments)
+            self.states.save("inventory", inventory)
 
         # reset character's attributes
         self.refresh_properties(True)
@@ -1046,8 +1047,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Take off an equipment.
         args: obj_dbref(string): the equipment object's dbref.
         """
-        inventory = self.state.load("inventory", [])
-        equipments = self.state.load("equipments", {})
+        inventory = self.states.load("inventory", [])
+        equipments = self.states.load("equipments", {})
 
         pos = None
         item = None
@@ -1064,9 +1065,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         del equipments[pos]
 
         # Save changes.
-        with self.state.atomic():
-            self.state.save("equipments", equipments)
-            self.state.save("inventory", inventory)
+        with self.states.atomic():
+            self.states.save("equipments", equipments)
+            self.states.save("inventory", inventory)
 
         # reset character's attributes
         self.refresh_properties(True)
@@ -1100,16 +1101,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             self.msg({"msg": _("Can not open this exit.")})
             return False
 
-        unlocked_exits = self.state.load("unlocked_exits", set())
+        unlocked_exits = self.states.load("unlocked_exits", set())
         unlocked_exits.add(exit_key)
-        self.state.save("unlocked_exits", unlocked_exits)
+        self.states.save("unlocked_exits", unlocked_exits)
         return True
 
     def is_exit_unlocked(self, exit_key):
         """
         Whether the exit is unlocked.
         """
-        unlocked_exits = self.state.load("unlocked_exits", set())
+        unlocked_exits = self.states.load("unlocked_exits", set())
         return exit_key in unlocked_exits
 
     def show_skills(self):
@@ -1125,7 +1126,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         skills_list = []
 
-        skills = self.state.load("skills", {})
+        skills = self.states.load("skills", {})
         for key, skill in skills.items():
             skills_list.append(skill.get_appearance(self))
 
@@ -1313,7 +1314,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         current_dialogue = {"dialogues": dialogues,
                             "npc": npc_key,
                             "location": location_key}
-        self.state.save("current_dialogue", current_dialogue)
+        self.states.save("current_dialogue", current_dialogue)
         return
 
     def clear_current_dialogue(self):
@@ -1323,7 +1324,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             None
         """
-        self.state.save("current_dialogue", None)
+        self.states.save("current_dialogue", None)
         return
 
     def resume_last_dialogue(self):
@@ -1337,7 +1338,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             # Can not auto resume dialogues.
             return
 
-        current_dialogue = self.state.load("current_dialogue")
+        current_dialogue = self.states.load("current_dialogue")
         if not current_dialogue:
             return
 
@@ -1414,7 +1415,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         if GAME_SETTINGS.get("auto_resume_dialogues"):
             # Check current dialogue.
-            current_dialogue = self.state.load("current_dialogue", None)
+            current_dialogue = self.states.load("current_dialogue", None)
             if not current_dialogue:
                 return
 

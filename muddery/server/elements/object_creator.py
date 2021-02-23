@@ -31,8 +31,8 @@ class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):
         super(MudderyObjectCreator, self).after_data_loaded()
 
         # Load creator info.
-        self.loot_verb = self.data.loot_verb if self.data.loot_verb else _("Loot")
-        self.loot_condition = self.data.loot_condition
+        self.loot_verb = self.const.loot_verb if self.const.loot_verb else _("Loot")
+        self.loot_condition = self.const.loot_condition
 
     def get_available_commands(self, caller):
         """

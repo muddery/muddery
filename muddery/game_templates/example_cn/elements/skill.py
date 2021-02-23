@@ -22,7 +22,10 @@ class Skill(MudderySkill):
         """
         if not self.passive:
             # set mp
-            caller.prop.mp -= self.prop.mp
+            mp = caller.states.load("mp")
+            new_mp = mp - self.const.mp
+            if new_mp != mp:
+                caller.states.save("mp", new_mp)
 
         return super(Skill, self).do_skill(caller, target)
 
@@ -41,7 +44,7 @@ class Skill(MudderySkill):
         if message:
             return message
             
-        if caller.prop.mp < self.prop.mp:
+        if caller.states.load("mp") < self.const.mp:
             return _("Not enough mana to cast {c%s{n!") % self.get_name()
 
         return ""
@@ -60,7 +63,7 @@ class Skill(MudderySkill):
         if not result:
             return result
             
-        if caller.prop.mp < self.prop.mp:
+        if caller.states.load("mp") < self.const.mp:
             return False
 
         return True
@@ -72,6 +75,6 @@ class Skill(MudderySkill):
         """
         info = super(Skill, self).get_appearance(caller)
         
-        info["mp"] = self.prop.mp
+        info["mp"] = self.states.load("mp")
 
         return info

@@ -48,12 +48,12 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         """
         super(MudderyRoom, self).after_data_loaded()
         
-        self.peaceful = self.data.peaceful
+        self.peaceful = self.const.peaceful
 
         self.position = None
         try:
             # set position
-            position = self.data.position
+            position = self.const.position
             if position:
                 self.position = ast.literal_eval(position)
         except Exception as e:
@@ -61,7 +61,7 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
 
         # get background
         self.background = None
-        resource = self.data.background
+        resource = self.const.background
         if resource:
             try:
                 resource_info = ImageResource.get(resource)
@@ -115,6 +115,21 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
                     "name": moved_obj.get_name()
                 }
                 self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
+
+    def set_default_data(self):
+        """
+        Set default data.
+        """
+        super(MudderyRoom, self).set_default_data()
+
+        if not self.const_data_handler.has("peaceful"):
+            self.const_data_handler.add("peaceful", False)
+
+        if not self.const_data_handler.has("position"):
+            self.const_data_handler.add("position", False)
+
+        if not self.const_data_handler.has("background"):
+            self.const_data_handler.add("background", False)
 
     def get_appearance(self, caller):
         """

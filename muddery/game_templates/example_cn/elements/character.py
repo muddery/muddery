@@ -28,8 +28,8 @@ class Character(MudderyCharacter):
         
         # Recover hp and mp.
         values = {
-            "hp": self.prop.max_hp,
-            "mp": self.prop.max_mp
+            "hp": self.const.max_hp,
+            "mp": self.const.max_mp
         }
         self.set_properties(values)
         
@@ -53,10 +53,10 @@ class Character(MudderyCharacter):
         # get name, description and available commands.
         info = super(Character, self).get_appearance(caller)
 
-        info["max_hp"] = self.prop.max_hp
-        info["hp"] = self.prop.hp
-        info["max_mp"] = self.prop.max_mp
-        info["mp"] = self.prop.mp
+        info["max_hp"] = self.const.max_hp
+        info["hp"] = self.states.load("hp")
+        info["max_mp"] = self.const.max_mp
+        info["mp"] = self.states.load("mp")
 
         return info
 
@@ -66,10 +66,10 @@ class Character(MudderyCharacter):
         """
         status = super(Character, self).get_combat_status()
 
-        status["max_hp"] = self.prop.max_hp
-        status["hp"] = self.prop.hp
-        status["max_mp"] = self.prop.max_mp
-        status["mp"] = self.prop.mp
+        status["max_hp"] = self.const.max_hp
+        status["hp"] = self.states.load("hp")
+        status["max_mp"] = self.const.max_mp
+        status["mp"] = self.states.load("mp")
 
         return status
 
@@ -80,7 +80,7 @@ class Character(MudderyCharacter):
         Returns:
             (boolean) the character is alive or not
         """
-        return round(self.prop.hp) > 0
+        return round(self.states.load("hp")) > 0
 
     def provide_exp(self, killer):
         """
@@ -91,7 +91,7 @@ class Character(MudderyCharacter):
         Returns:
             (int) experience give to the killer
         """
-        return self.prop.give_exp
+        return self.const.give_exp
 
     def add_exp(self, exp):
         """
@@ -104,13 +104,18 @@ class Character(MudderyCharacter):
         """
         super(Character, self).add_exp(exp)
 
-        self.prop.exp += exp
-        while self.prop.exp >= self.prop.max_exp:
-            if self.prop.max_exp > 0:
+        current_exp = self.states.load("exp")
+        new_exp = current_exp + exp
+        while current_exp >= self.const.max_exp:
+            if self.const.max_exp > 0:
                 # can upgrade
-                self.prop.exp -= self.prop.max_exp
+                new_exp -= self.const.max_exp
+                if new_exp != current_exp:
+                    self.states.save("exp", new_exp)
                 self.level_up()
             else:
                 # can not upgrade
-                self.prop.exp = 0
+                new_exp = 0
+                if new_exp != current_exp:
+                    self.states.save("exp", new_exp)
                 break

@@ -7,7 +7,7 @@ MudderyObject is an object which can load it's data automatically.
 """
 
 from evennia.utils.utils import lazy_property
-from evennia.typeclasses.models import DbHolder
+from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.dao.properties_dict import PropertiesDict
 
@@ -67,32 +67,38 @@ class BaseElement(object):
         return cls._all_properties_
 
     @lazy_property
-    def states_handler(self):
-        return ObjectStatesHandler(self)
+    def const_data_handler(self):
+        return DataFieldHandler(self)
 
-    # @property state stores object's running state.
-    def __state_get(self):
+    # @property system stores object's data.
+    def __const_get(self):
         """
-        A non-attr_obj store (ndb: NonDataBase). Everything stored
-        to this is guaranteed to be cleared when a server is shutdown.
+        A system_data store. Everything stored to this is from the
+        world data. It will be reset every time when the object init .
         Syntax is same as for the _get_db_holder() method and
-        property, e.g. obj.ndb.attr = value etc.
+        property, e.g. obj.system.attr = value etc.
         """
-        return self.states_handler
+        try:
+            return self._const_data_holder
+        except AttributeError:
+            self._const_data_holder = ConstDataHolder(self, "system_data", manager_name='const_data_handler')
+            return self._const_data_holder
 
-    # @state.setter
-    def __state_set(self, value):
+    # @data.setter
+    def __const_set(self, value):
         "Stop accidentally replacing the ndb object"
-        string = "Cannot assign directly to ndb object! "
-        string += "Use self.state.name=value instead."
+        string = "Cannot assign directly to data object! "
         raise Exception(string)
 
-    # @state.deleter
-    def __state_del(self):
+    # @data.deleter
+    def __const_del(self):
         "Stop accidental deletion."
-        raise Exception("Cannot delete the state object!")
+        raise Exception("Cannot delete the system data object!")
+    const = property(__const_get, __const_set, __const_del)
 
-    state = property(__state_get, __state_set, __state_del)
+    @lazy_property
+    def states(self):
+        return ObjectStatesHandler(self)
 
     def get_type(self):
         """

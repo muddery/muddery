@@ -60,7 +60,7 @@ class MudderyShop(ELEMENT("OBJECT")):
         # load shop goods
         self.load_goods()
         
-        self.verb = self.data.verb
+        self.verb = self.const.verb
 
     def load_goods(self):
         """
@@ -72,7 +72,7 @@ class MudderyShop(ELEMENT("OBJECT")):
         goods_keys = set([record.key for record in goods_records])
 
         # current goods
-        self.goods = self.state.load("goods", {})
+        self.goods = self.states.load("goods", {})
         changed = False
 
         # remove old goods
@@ -98,7 +98,7 @@ class MudderyShop(ELEMENT("OBJECT")):
                 changed = True
 
         if changed:
-            self.state.save("goods", self.goods)
+            self.states.save("goods", self.goods)
 
     def show_shop(self, caller):
         """
