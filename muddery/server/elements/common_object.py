@@ -130,12 +130,36 @@ class MudderyFood(ELEMENT("COMMON_OBJECT")):
         if not user:
             raise ValueError("User should not be None.")
 
-        increments = {}
-        for key, value in self.custom_properties_handler.all(True):
-            if value:
-                increments[key] = value * number
+        if not number:
+            return
 
-        changes = user.change_properties(increments)
+        values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items() if
+                        not info["mutable"]}
+        values_merge.update(self.states.all())
+
+        changes = {}
+        new_states = {}
+        for key, increment in values_merge.items():
+            if not increment:
+                continue
+
+            increment *= number
+
+            if user.states.has(key):
+                current_value = user.states.load(key)
+                new_value = user.validate_property(key, current_value + increment)
+                changes[key] = new_value - current_value
+                if new_value != current_value:
+                    new_states[key] = new_value
+            elif user.const_data_handler.has(key):
+                current_value = user.const_data_handler.get(key)
+                new_value = user.validate_property(key, current_value + increment)
+                changes[key] = new_value - current_value
+                user.const_data_handler.add(key, new_value)
+
+        if new_states:
+            user.states.saves(new_states)
+
         user.show_status()
 
         results = []
@@ -197,14 +221,31 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
         if not user:
             return
 
-        for key, value in self.custom_properties_handler.all(True):
-            if not value:
+        values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items() if
+                        not info["mutable"]}
+        values_merge.update(self.states.all())
+        print("values_merge: %s" % values_merge)
+
+        changes = {}
+        new_states = {}
+        for key, increment in values_merge.items():
+            if not increment:
                 continue
 
-            # Add values to the user's final properties.
-            if user.custom_properties_handler.has(key):
-                value += getattr(user.prop, key)
-                setattr(user.prop, key, value)
+            if user.states.has(key):
+                current_value = user.states.load(key)
+                new_value = user.validate_property(key, current_value + increment)
+                changes[key] = new_value - current_value
+                if new_value != current_value:
+                    new_states[key] = new_value
+            elif user.const_data_handler.has(key):
+                current_value = user.const_data_handler.get(key)
+                new_value = user.validate_property(key, current_value + increment)
+                changes[key] = new_value - current_value
+                user.const_data_handler.add(key, new_value)
+
+        if new_states:
+            user.states.saves(new_states)
 
     def get_available_commands(self, caller):
         """

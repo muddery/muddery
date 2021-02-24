@@ -502,7 +502,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         Return:
             boolean: visible
         """
-        if not hasattr(self.data, "condition") or not self.const.condition:
+        if not self.const.condition:
             return True
 
         return STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)
@@ -736,3 +736,37 @@ class MudderyBaseObject(BaseElement, DefaultObject):
 
         destination.msg_contents(string.format(**mapping), exclude=(self, ))
 
+    def validate_property(self, key, value):
+        """
+        Check a property's value limit, return a validated value.
+
+        Args:
+            key: (string) values's key.
+            value: (number) the value
+
+        Return:
+            (number) validated values.
+        """
+        # check limits
+        max_value = None
+        max_key = "max_" + key
+        if self.states.has(max_key):
+            max_value = self.states.load(max_key)
+        elif self.const_data_handler.has(max_key):
+            max_value = self.const_data_handler.get(max_key)
+
+        if max_value is not None:
+            if value > max_value:
+                value = max_value
+
+        min_value = 0
+        min_key = "min_" + key
+        if self.states.has(min_key):
+            min_value = self.states.load(min_key)
+        elif self.const_data_handler.has(min_key):
+            min_value = self.const_data_handler.get(min_key)
+
+        if value < min_value:
+            value = min_value
+
+        return value

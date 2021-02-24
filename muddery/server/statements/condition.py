@@ -363,10 +363,13 @@ class FuncAttributeEqualTo(StatementFunction):
         attr_key = self.args[0]
         number = self.args[1]
 
-        if not self.caller.custom_properties_handler.has(attr_key):
-            return False
+        if self.caller.states.has(attr_key):
+            value = self.caller.states.get(attr_key)
+        elif self.caller.const_data_handler.has(attr_key):
+            value = self.caller.const_data_handler.get(attr_key)
+        else:
+            return
 
-        value = getattr(self.caller.prop, attr_key)
         return value == number
 
 
@@ -395,10 +398,13 @@ class FuncAttributeMoreThan(StatementFunction):
         attr_key = self.args[0]
         number = self.args[1]
 
-        if not self.caller.custom_properties_handler.has(attr_key):
-            return False
+        if self.caller.states.has(attr_key):
+            value = self.caller.states.get(attr_key)
+        elif self.caller.const_data_handler.has(attr_key):
+            value = self.caller.const_data_handler.get(attr_key)
+        else:
+            return
 
-        value = getattr(self.caller.prop, attr_key)
         return value > number
 
 
@@ -427,8 +433,11 @@ class FuncAttributeLessThan(StatementFunction):
         attr_key = self.args[0]
         number = self.args[1]
 
-        if not self.caller.custom_properties_handler.has(attr_key):
-            return False
+        if self.caller.states.has(attr_key):
+            value = self.caller.states.get(attr_key)
+        elif self.caller.const_data_handler.has(attr_key):
+            value = self.caller.const_data_handler.get(attr_key)
+        else:
+            return
 
-        value = getattr(self.caller.prop, attr_key)
         return value < number

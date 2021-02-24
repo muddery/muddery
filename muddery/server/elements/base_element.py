@@ -47,7 +47,7 @@ class BaseElement(object):
     @classmethod
     def get_properties_info(cls):
         """
-        Get this typeclass's models.
+        Get object's custom properties.
         """
         if "_all_properties_" not in cls.__dict__:
             cls._all_properties_ = {}

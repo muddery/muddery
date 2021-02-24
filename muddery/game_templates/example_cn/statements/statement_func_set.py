@@ -16,7 +16,7 @@ class SkillFuncSet(BaseStatementFuncSet):
         Load statement functions here.
         """
         self.add(default_skill.FuncEscape)
-        self.add(default_skill.FuncHeal)
-        self.add(default_skill.FuncIncreaseMaxHP)
-        
+
+        self.add(skill.FuncHeal)
+        self.add(skill.FuncIncreaseMaxHP)
         self.add(skill.FuncHit)

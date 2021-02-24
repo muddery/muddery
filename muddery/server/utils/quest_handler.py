@@ -122,7 +122,7 @@ class QuestHandler(object):
 
         finished_quests = self.owner.states.load("finished_quests", set())
         finished_quests.add(quest_key)
-        self.owner.statessave("finished_quests", finished_quests)
+        self.owner.states.save("finished_quests", finished_quests)
 
         self.owner.msg({"msg": _("Turned in quest {C%s{n.") % name})
         self.show_quests()

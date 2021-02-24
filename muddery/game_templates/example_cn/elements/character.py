@@ -31,7 +31,7 @@ class Character(MudderyCharacter):
             "hp": self.const.max_hp,
             "mp": self.const.max_mp
         }
-        self.set_properties(values)
+        self.states.saves(values)
         
     def level_up(self):
         """

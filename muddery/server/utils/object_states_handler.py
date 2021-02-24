@@ -77,7 +77,7 @@ class ObjectStatesHandler(object):
         """
         self.cache.save(self.obj_id, key, value)
 
-    def saves(self, obj_id, value_dict):
+    def saves(self, value_dict):
         """
         Set attributes.
         """

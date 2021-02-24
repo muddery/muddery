@@ -40,10 +40,12 @@ class ChooseSkill(object):
         # teammates = [c for c in characters if c.get_team() == team]
         opponents = [c["char"] for c in chars if c["status"] == CStatus.ACTIVE and c["char"].get_team() != team]
 
-        if caller.prop.hp < caller.prop.max_hp / 2:
+        hp = caller.states.load("hp")
+        max_hp = caller.const.max_hp
+        if hp < max_hp / 2:
             # heal self
             heal_skills = [skill for skill in skills if skill.main_type == cls.type_heal]
-            if not heal_skills and caller.prop.hp < caller.prop.max_hp / 4:
+            if not heal_skills and hp < max_hp / 4:
                 heal_skills = [skill for skill in skills if skill.sub_type == cls.type_heal]
                 
             if heal_skills:
@@ -61,7 +63,7 @@ class ChooseSkill(object):
                 skill = random.choice(attack_skills)
 
                 # find the lowest hp
-                sorted_opponents = sorted(opponents, key=lambda t:t.prop.hp)
+                sorted_opponents = sorted(opponents, key=lambda t: t.states.load("hp"))
                 target = sorted_opponents[0]
                 return skill.get_data_key(), target
 
