@@ -2,7 +2,7 @@
 Set the game's configuration.
 """
 
-from muddery.server.dao.game_settings import GameSettings as GameSettingsData
+from muddery.server.database.dao.game_settings import GameSettings as GameSettingsData
 
 
 class GameSettings(object):

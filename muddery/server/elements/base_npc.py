@@ -12,8 +12,8 @@ from evennia.utils import logger
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.dao.npc_dialogues import NPCDialogues
-from muddery.server.dao.npc_shops import NPCShops
+from muddery.server.database.dao.npc_dialogues import NPCDialogues
+from muddery.server.database.dao.npc_shops import NPCShops
 from muddery.server.utils import defines
 from muddery.server.utils.localized_strings_handler import _
 

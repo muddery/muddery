@@ -9,8 +9,8 @@ from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.dao.worlddata import WorldData
-from muddery.server.dao.quest_dependencies import QuestDependencies
+from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.dao.quest_dependencies import QuestDependencies
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.element_set import ELEMENT
 

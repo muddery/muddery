@@ -8,7 +8,7 @@ from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.dao.loot_list import CreatorLootList
+from muddery.server.database.dao.loot_list import CreatorLootList
 
 
 class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):

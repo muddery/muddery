@@ -12,18 +12,16 @@ from evennia.objects.models import ObjectDB
 from evennia.objects.objects import DefaultObject
 from evennia.utils import logger
 from evennia.utils.utils import make_iter, is_iter, lazy_property
-from evennia.typeclasses.models import DbHolder
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.events.event_trigger import EventTrigger
 from muddery.server.utils import utils
-from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.desc_handler import DESC_HANDLER
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.dao.worlddata import WorldData
-from muddery.server.dao.object_properties import ObjectProperties
+from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.dao.object_properties import ObjectProperties
 
 
 class MudderyBaseObject(BaseElement, DefaultObject):

@@ -12,8 +12,8 @@ import weakref
 
 from django.apps import apps
 from django.conf import settings
-from muddery.server.database.attributes_cache.cache_none import CacheNone
-from muddery.server.database.attributes_cache.atomic import Atomic
+from muddery.server.database.storage.memory_cache import MemoryCache
+from muddery.server.database.storage.atomic import Atomic
 
 # -------------------------------------------------------------
 #
@@ -34,7 +34,7 @@ class ObjectStatesHandler(object):
         self.obj = weakref.proxy(obj)
         self.obj_id = obj.id
 
-        self.cache = CacheNone("object_status")
+        self.cache = MemoryCache("object_status")
 
     def has(self, key):
         """
@@ -110,7 +110,7 @@ class ObjectStatesHandler(object):
         """
         Get all attributes from an object.
         """
-        return self.cache.get_obj_data(self.obj_id)
+        return self.cache.load_obj(self.obj_id)
 
     def atomic(self):
         """

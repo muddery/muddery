@@ -2,8 +2,8 @@
 Query and deal common tables.
 """
 
-from muddery.server.dao.base_query import BaseQuery
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.database.dao.base_query import BaseQuery
+from muddery.server.database.dao.worlddata import WorldData
 
 
 class ImageResource(BaseQuery):

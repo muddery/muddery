@@ -4,7 +4,7 @@ Shop goods is the object in shops. They have some special attributes to record g
 """
 
 from evennia.utils import logger
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.database.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 

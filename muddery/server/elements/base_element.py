@@ -9,7 +9,7 @@ MudderyObject is an object which can load it's data automatically.
 from evennia.utils.utils import lazy_property
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
-from muddery.server.dao.properties_dict import PropertiesDict
+from muddery.server.database.dao.properties_dict import PropertiesDict
 
 
 class BaseElement(object):

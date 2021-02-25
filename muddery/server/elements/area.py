@@ -8,7 +8,7 @@ Areas are compose the whole map. Rooms are belongs to areas.
 from evennia.utils import logger
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.dao.image_resource import ImageResource
+from muddery.server.database.dao.image_resource import ImageResource
 
 
 class MudderyArea(ELEMENT("OBJECT")):

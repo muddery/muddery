@@ -2,20 +2,20 @@
 Query and deal common tables.
 """
 
-from muddery.server.dao.base_query import BaseQuery
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.database.dao.base_query import BaseQuery
+from muddery.server.database.dao.worlddata import WorldData
 
 
-class DefaultSkills(object):
+class DefaultObjects(BaseQuery):
     """
-    Character's default skills.
+    Character's default objects.
     """
-    table_name = "default_skills"
+    table_name = "default_objects"
 
     @classmethod
     def get(cls, character):
         """
-        Get character's default skills.
+        Get character's default objects.
 
         Args:
             character: (string) character's key.

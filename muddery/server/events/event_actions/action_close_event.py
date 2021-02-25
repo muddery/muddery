@@ -3,7 +3,7 @@ Event action.
 """
 
 from muddery.server.events.base_event_action import BaseEventAction
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.database.dao.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 
 

@@ -8,13 +8,12 @@ import math
 from django.conf import settings
 from twisted.internet import reactor
 from twisted.internet import task
-from evennia.utils import logger
 from evennia import create_script
 from evennia.utils.search import search_object
-from muddery.server.dao.honours_mapper import HONOURS_MAPPER
+from muddery.server.database.dao.honours_mapper import HONOURS_MAPPER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import CombatType
-from muddery.server.dao.honour_settings import HonourSettings
+from muddery.server.database.dao.honour_settings import HonourSettings
 
 
 class MatchPVPHandler(object):

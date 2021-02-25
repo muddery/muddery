@@ -14,9 +14,9 @@ from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.dao.worlddata import WorldData
-from muddery.server.dao.loot_list import QuestLootList
-from muddery.server.dao.quest_objectives import QuestObjectives
+from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.dao.loot_list import QuestLootList
+from muddery.server.database.dao.quest_objectives import QuestObjectives
 from muddery.server.mappings.element_set import ELEMENT
 
 

@@ -6,7 +6,6 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 """
 
 import math
-import random
 from django.conf import settings
 from evennia.utils import logger
 from evennia import create_script
@@ -17,8 +16,7 @@ from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.utils import search_obj_data_key
 from muddery.server.utils.defines import ConversationType
 from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
-from muddery.server.dao.honours_mapper import HONOURS_MAPPER
-from muddery.server.dao.honour_settings import HonourSettings
+from muddery.server.database.dao.honour_settings import HonourSettings
 from muddery.server.utils.defines import CombatType
 
 

@@ -2,7 +2,7 @@
 Query and deal common tables.
 """
 
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.database.dao.worlddata import WorldData
 
 
 class BaseQuery(object):

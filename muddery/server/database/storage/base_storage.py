@@ -91,9 +91,9 @@ def delete_string(str_value):
     return
 
 
-class BaseAttributesCache(object):
+class BaseStorage(object):
     """
-    Object's attributes cache.
+    The storage of object attributes.
     """
     def __init__(self, model_name):
         # db model
@@ -192,7 +192,7 @@ class BaseAttributesCache(object):
             delete_string(records[0].value)
             records.delete()
 
-    def get_obj_data(self, obj_id):
+    def load_obj(self, obj_id):
         """
         Get values of an object.
 
@@ -200,7 +200,7 @@ class BaseAttributesCache(object):
             obj_id: (number) object's id.
         """
         records = self.model.objects.filter(obj_id=obj_id)
-        return dict((r.key, from_string(r.value)) for r in records)
+        return {r.key: from_string(r.value) for r in records}
 
     def remove_obj(self, obj_id):
         """

@@ -6,7 +6,7 @@ import random
 from django.conf import settings
 from muddery.server.utils import defines
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.dao.event_data import EventData
+from muddery.server.database.dao.event_data import EventData
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.elements.script_room_interval import ScriptRoomInterval
 from muddery.server.utils.localized_strings_handler import _

@@ -15,7 +15,7 @@ just overloads its hooks to have it perform its function.
 import time
 from muddery.server.elements.scripts import MudderyScript
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.database.dao.worlddata import WorldData
 
 
 class ScriptRoomInterval(MudderyScript):

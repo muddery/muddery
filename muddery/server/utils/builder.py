@@ -9,12 +9,12 @@ from evennia.comms.models import ChannelDB
 from muddery.server.utils import utils
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
-from muddery.server.dao.worlddata import WorldData
-from muddery.server.dao.world_areas import WorldAreas
-from muddery.server.dao.world_rooms import WorldRooms
-from muddery.server.dao.world_exits import WorldExits
-from muddery.server.dao.world_npcs import WorldNPCs
-from muddery.server.dao.world_objects import WorldObjects
+from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.dao.world_areas import WorldAreas
+from muddery.server.database.dao.world_rooms import WorldRooms
+from muddery.server.database.dao.world_exits import WorldExits
+from muddery.server.database.dao.world_npcs import WorldNPCs
+from muddery.server.database.dao.world_objects import WorldObjects
 
 
 def get_object_record(obj_key):

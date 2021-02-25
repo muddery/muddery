@@ -14,7 +14,6 @@ does what you expect it to.
 
 """
 
-import os
 from django.conf import settings
 from evennia.utils import search
 from muddery.server.utils import builder
@@ -33,7 +32,7 @@ def at_initial_setup():
 
     try:
         # load data
-        from muddery.server.dao.worlddata import WorldData
+        from muddery.server.database.dao.worlddata import WorldData
         WorldData.reload()
         print("Reload world data.")
 

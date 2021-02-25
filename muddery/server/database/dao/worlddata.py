@@ -4,7 +4,7 @@ Load and cache all worlddata.
 
 from django.conf import settings
 from django.apps import apps
-from muddery.server.dao.tabledata import TableData, RecordData
+from muddery.server.database.dao.tabledata import TableData, RecordData
 from muddery.server.utils.exception import MudderyError
 
 

@@ -10,9 +10,9 @@ import os, re, inspect
 from importlib import import_module
 from pkgutil import iter_modules
 from django.conf import settings
-from evennia.utils import search, logger
+from evennia.utils import search
 from muddery.launcher import configs
-from muddery.server.dao.localized_strings import LocalizedStrings
+from muddery.server.database.dao.localized_strings import LocalizedStrings
 
 
 def get_muddery_version():

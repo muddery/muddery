@@ -11,7 +11,7 @@ from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
 from muddery.server.utils import defines
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.dao.image_resource import ImageResource
+from muddery.server.database.dao.image_resource import ImageResource
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.localized_strings_handler import _

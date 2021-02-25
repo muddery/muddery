@@ -9,7 +9,7 @@ from evennia.utils import logger
 from muddery.server.utils.builder import build_object
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.dao.shop_goods import ShopGoods
+from muddery.server.database.dao.shop_goods import ShopGoods
 
 
 class MudderyShop(ELEMENT("OBJECT")):

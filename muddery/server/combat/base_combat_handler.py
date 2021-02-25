@@ -20,7 +20,7 @@ from django.conf import settings
 from evennia import DefaultScript
 from evennia.utils import logger
 from muddery.server.utils import defines
-from muddery.server.dao.worlddata import WorldData
+from muddery.server.database.dao.worlddata import WorldData
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 
 
