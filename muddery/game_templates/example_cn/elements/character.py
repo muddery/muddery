@@ -106,16 +106,15 @@ class Character(MudderyCharacter):
 
         current_exp = self.states.load("exp")
         new_exp = current_exp + exp
-        while current_exp >= self.const.max_exp:
+        while new_exp >= self.const.max_exp:
             if self.const.max_exp > 0:
                 # can upgrade
                 new_exp -= self.const.max_exp
-                if new_exp != current_exp:
-                    self.states.save("exp", new_exp)
                 self.level_up()
             else:
                 # can not upgrade
                 new_exp = 0
-                if new_exp != current_exp:
-                    self.states.save("exp", new_exp)
                 break
+
+        if new_exp != current_exp:
+            self.states.save("exp", new_exp)

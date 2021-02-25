@@ -759,7 +759,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             if item["dbref"] == dbref:
                 obj_num = item["number"]
                 if obj_num > 0:
-                    if obj_num >= number:
+                    if obj_num > number:
                         item["number"] -= number
                     else:
                         item["number"] = 0

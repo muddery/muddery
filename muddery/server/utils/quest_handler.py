@@ -126,6 +126,7 @@ class QuestHandler(object):
 
         self.owner.msg({"msg": _("Turned in quest {C%s{n.") % name})
         self.show_quests()
+        self.owner.show_status()
         self.owner.show_location()
 
     def get_accomplished_quests(self):
