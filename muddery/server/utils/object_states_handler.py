@@ -29,12 +29,11 @@ class ObjectStatesHandler(object):
     """
     Handler for adding Attributes to the object.
     """
+    cache = MemoryCache("object_status")
+
     def __init__(self, obj):
         """Initialize handler."""
-        self.obj = weakref.proxy(obj)
         self.obj_id = obj.id
-
-        self.cache = MemoryCache("object_status")
 
     def has(self, key):
         """

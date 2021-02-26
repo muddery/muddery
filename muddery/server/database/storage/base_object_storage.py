@@ -91,7 +91,7 @@ def delete_string(str_value):
     return
 
 
-class BaseStorage(object):
+class BaseObjectStorage(object):
     """
     The storage of object attributes.
     """

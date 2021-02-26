@@ -2,10 +2,10 @@
 Object's attributes cache.
 """
 
-from muddery.server.database.storage.base_storage import BaseStorage, to_string
+from muddery.server.database.storage.base_object_storage import BaseObjectStorage
 
 
-class MemoryCache(BaseStorage):
+class MemoryCache(BaseObjectStorage):
     """
     Store attributes in db and using memory cache.
     """
