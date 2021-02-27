@@ -14,9 +14,9 @@ from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.database.dao.worlddata import WorldData
-from muddery.server.database.dao.loot_list import QuestLootList
-from muddery.server.database.dao.quest_objectives import QuestObjectives
+from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.database.worlddata.loot_list import QuestLootList
+from muddery.server.database.worlddata.quest_objectives import QuestObjectives
 from muddery.server.mappings.element_set import ELEMENT
 
 
@@ -24,14 +24,14 @@ class MudderyQuest(ELEMENT("OBJECT")):
     """
     This class controls quest's objectives. Hooks are called when a character doing some things.
     """
-    element_key = "QUEST"
+    element_type = "QUEST"
     element_name = _("Quest", "elements")
     model_name = "quests"
 
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, QuestLootList.get(self.get_data_key()))
+        return LootHandler(self, QuestLootList.get(self.get_object_key()))
 
     def after_data_loaded(self):
         """
@@ -42,7 +42,7 @@ class MudderyQuest(ELEMENT("OBJECT")):
         self.objectives = {}
         self.not_accomplished = {}
         
-        key = self.get_data_key()
+        key = self.get_object_key()
         if not key:
             return
 
@@ -83,7 +83,7 @@ class MudderyQuest(ELEMENT("OBJECT")):
         """
         commands = []
         if GAME_SETTINGS.get("can_give_up_quests"):
-            commands.append({"name": _("Give Up"), "cmd": "giveup_quest", "args": self.get_data_key()})
+            commands.append({"name": _("Give Up"), "cmd": "giveup_quest", "args": self.get_object_key()})
         return commands
 
     def return_objectives(self):

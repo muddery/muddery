@@ -1,4 +1,4 @@
-typeclass,property,name,mutable,default,desc
+element_type,property,name,mutable,default,desc
 CHARACTER,max_hp,最大生命,0,1,角色的最大生命值。
 CHARACTER,hp,生命,1,max_hp,角色的生命值。
 CHARACTER,max_mp,最大法力,0,1,角色的最大法力值。

@@ -17,7 +17,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
     Characters must unlock these exits to pass it.
     The view and commands of locked exits are different from unlocked exits.
     """
-    element_key = "LOCKED_EXIT"
+    element_type = "LOCKED_EXIT"
     element_name = _("Locked Exit", "elements")
     model_name = "exit_locks"
 
@@ -53,7 +53,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
             return False
 
         # Only can pass exits which have already been unlocked.
-        if traversing_object.is_exit_unlocked(self.get_data_key()):
+        if traversing_object.is_exit_unlocked(self.get_object_key()):
             if not self.unlock_forever:
                 # lock the exit again
                 traversing_object.lock_exit(self)
@@ -84,7 +84,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
         command to call.
         """
         # Get name and description.
-        if caller.is_exit_unlocked(self.get_data_key()):
+        if caller.is_exit_unlocked(self.get_object_key()):
             # If is unlocked, use common appearance.
             return super(MudderyLockedExit, self).get_appearance(caller)
 
@@ -118,7 +118,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.dbref.
         """
-        if caller.is_exit_unlocked(self.get_data_key()):
+        if caller.is_exit_unlocked(self.get_object_key()):
             # If is unlocked, use common commands.
             return super(MudderyLockedExit, self).get_available_commands(caller)
 

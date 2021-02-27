@@ -6,7 +6,7 @@ import random
 from django.conf import settings
 from muddery.server.utils import defines
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.database.dao.event_data import EventData
+from muddery.server.database.worlddata.event_data import EventData
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.elements.script_room_interval import ScriptRoomInterval
 from muddery.server.utils.localized_strings_handler import _
@@ -52,7 +52,7 @@ class EventTrigger(object):
         self.events = {}
 
         if not object_key:
-            object_key = owner.get_data_key()
+            object_key = owner.get_object_key()
 
         # Load events.
         fields = EventData.get_fields()
@@ -178,7 +178,7 @@ class EventTrigger(object):
         # Remove room interval actions.
         scripts = character.scripts.all()
         for script in scripts:
-            if script.is_typeclass(ScriptRoomInterval, exact=False):
+            if script.is_element("SCRIPT_ROOM_INTERVAL"):
                 script.stop()
 
     def at_character_die(self):

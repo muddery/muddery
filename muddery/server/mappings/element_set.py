@@ -17,11 +17,10 @@ class ElementSet(object):
     def __init__(self):
         self.module_dict = {}
         self.class_dict = {}
-        self.trigger_dict = {}
 
         self.all_loaded = False
         self.match_class = re.compile(r'^class\s+(\w+)\s*.*$')
-        self.match_key = re.compile(r""" {4}element_key\s*=\s*("|')(.+)("|')\s*$""")
+        self.match_key = re.compile(r""" {4}element_type\s*=\s*("|')(.+)("|')\s*$""")
 
     def load_files(self, component_path):
         """
@@ -62,14 +61,14 @@ class ElementSet(object):
                                     module_path += "." + relative_path + "." + name + "." + class_name
 
                                 if key_name in self.module_dict:
-                                    logger.log_infomsg("Typeclass %s is replaced by %s." % (key_name, module_path))
+                                    logger.log_infomsg("Element %s is replaced by %s." % (key_name, module_path))
 
                                 self.module_dict[key_name] = module_path
                                 class_name = ""
 
     def load_classes(self):
         """
-        Add all elements from the typeclass path.
+        Add all elements from the element_type path.
 
         To prevent loop import, call this method later.
         """
@@ -81,13 +80,12 @@ class ElementSet(object):
                 continue
             cls = class_from_module(self.module_dict[key])
             self.class_dict[key] = cls
-            self.trigger_dict[key] = cls.get_event_trigger_types()
 
         self.all_loaded = True
 
     def get(self, key):
         """
-        Get a typeclass recursively.
+        Get a element_type recursively.
         """
         if key in self.class_dict:
             return self.class_dict[key]
@@ -95,46 +93,37 @@ class ElementSet(object):
             cls = class_from_module(self.module_dict[key])
             if key in self.class_dict:
                 if self.class_dict[key] != cls:
-                    logger.log_infomsg("Typeclass %s is replaced by %s." % (key, cls))
+                    logger.log_infomsg("Element %s is replaced by %s." % (key, cls))
 
             self.class_dict[key] = cls
-            self.trigger_dict[key] = cls.get_event_trigger_types()
             return cls
 
-        logger.log_errmsg("Can not find typeclass key: %s." % key)
+        logger.log_errmsg("Can not find element type: %s." % key)
 
     def get_module(self, key):
         """
-        Get a typeclass's module path.
+        Get a element_type's module path.
         """
         return self.module_dict.get(key, None)
 
     def get_group(self, group_key):
         """
-        Get a typeclass and its all children.
+        Get a element_type and its all children.
         """
         self.load_classes()
 
         cls = self.class_dict[group_key]
-        typeclasses = {group_key: cls}
+        element_types = {group_key: cls}
 
         for key in self.class_dict:
             if issubclass(self.class_dict[key], cls):
-                typeclasses[key] = self.class_dict[key]
+                element_types[key] = self.class_dict[key]
 
-        return typeclasses
-
-    def get_trigger_types(self, key):
-        """
-        Get a typeclass's trigger types.
-        """
-        self.load_classes()
-
-        return self.trigger_dict.get(key, [])
+        return element_types
 
     def get_class_modeles(self, key):
         """
-        Get a typeclass's models.
+        Get an element type's models.
         """
         cls = self.get(key)
         if cls:
@@ -144,35 +133,35 @@ class ElementSet(object):
 
     def get_all_info(self):
         """
-        Get all typeclass's information.
+        Get all element type's information.
 
-        Return: (dict) all typeclass's information.
+        Return: (dict) all element type's information.
         """
         self.load_classes()
 
         info = {}
         for key, cls in self.class_dict.items():
-            # Get the class's parent which has another typeclass name.
+            # Get the class's parent which has another element name.
             bases = cls.__bases__
-            parent_key = ""
-            while not parent_key:
-                has_element_key = False
+            parent_type = ""
+            while not parent_type:
+                has_element_type = False
                 for base in bases:
-                    if hasattr(base, "element_key") and base.element_key:
-                        has_element_key = True
+                    if hasattr(base, "element_type") and base.element_type:
+                        has_element_type = True
 
-                        if base.element_key != cls.element_key:
-                            parent_key = base.element_key
+                        if base.element_type != cls.element_type:
+                            parent_type = base.element_type
                         else:
                             bases = base.__bases__
                         break
 
-                if not has_element_key:
+                if not has_element_type:
                     break
 
             info[key] = {
-                "name": cls.typeclass_name,
-                "parent": parent_key
+                "name": cls.element_name,
+                "parent": parent_type
             }
 
         return info

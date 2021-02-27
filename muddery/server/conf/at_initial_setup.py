@@ -32,7 +32,7 @@ def at_initial_setup():
 
     try:
         # load data
-        from muddery.server.database.dao.worlddata import WorldData
+        from muddery.server.database.worlddata.worlddata import WorldData
         WorldData.reload()
         print("Reload world data.")
 
@@ -66,7 +66,7 @@ def at_initial_setup():
                 superuser.move_to(start_location, quiet=True)
 
             # set superuser's data
-            superuser.set_data_key(GAME_SETTINGS.get("default_staff_character_key"), 1)
+            superuser.set_object_key(GAME_SETTINGS.get("default_staff_character_key"), 1)
             superuser.set_nickname("superuser")
             print("Set superuser.")
 

@@ -17,8 +17,8 @@ from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.builder import create_player, create_character
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.database.dao.equipment_positions import EquipmentPositions
-from muddery.server.database.dao.honour_settings import HonourSettings
+from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
+from muddery.server.database.worlddata.honour_settings import HonourSettings
 
 
 # limit symbol import for API

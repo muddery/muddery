@@ -12,8 +12,8 @@ from evennia.utils import logger
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.database.dao.npc_dialogues import NPCDialogues
-from muddery.server.database.dao.npc_shops import NPCShops
+from muddery.server.database.worlddata.npc_dialogues import NPCDialogues
+from muddery.server.database.worlddata.npc_shops import NPCShops
 from muddery.server.utils import defines
 from muddery.server.utils.localized_strings_handler import _
 
@@ -25,7 +25,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
     States:
         shops
     """
-    element_key = "BASE_NPC"
+    element_type = "BASE_NPC"
     element_name = _("Base None Player Character", "elements")
     model_name = "base_npcs"
 
@@ -59,7 +59,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         """
         Load dialogues.
         """
-        dialogues = NPCDialogues.get(self.get_data_key())
+        dialogues = NPCDialogues.get(self.get_object_key())
 
         self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and dialogue.default]
         self.dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and not dialogue.default]
@@ -69,7 +69,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         Load character's shop.
         """
         # shops records
-        shop_records = NPCShops.get(self.get_data_key())
+        shop_records = NPCShops.get(self.get_object_key())
         shop_keys = set([record.shop for record in shop_records])
 
         # NPC's shop

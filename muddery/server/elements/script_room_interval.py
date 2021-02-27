@@ -13,15 +13,20 @@ just overloads its hooks to have it perform its function.
 """
 
 import time
-from muddery.server.elements.scripts import MudderyScript
+from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.utils.localized_strings_handler import _
 
 
-class ScriptRoomInterval(MudderyScript):
+class ScriptRoomInterval(ELEMENT("SCRIPT")):
     """
     This script triggers an event in a room at intervals.
     """
+    element_type = "SCRIPT_ROOM_INTERVAL"
+    element_name = _("Script Room Interval", "elements")
+    model_name = ""
+
     def at_init(self):
         """
         Load the script's data.

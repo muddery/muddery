@@ -10,10 +10,10 @@ from twisted.internet import reactor
 from twisted.internet import task
 from evennia import create_script
 from evennia.utils.search import search_object
-from muddery.server.database.dao.honours_mapper import HONOURS_MAPPER
+from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import CombatType
-from muddery.server.database.dao.honour_settings import HonourSettings
+from muddery.server.database.worlddata.honour_settings import HonourSettings
 
 
 class MatchPVPHandler(object):

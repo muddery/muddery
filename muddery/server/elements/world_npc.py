@@ -16,7 +16,7 @@ class MudderyWorldNPC(ELEMENT("BASE_NPC")):
     """
     The character not controlled by players.
     """
-    element_key = "WORLD_NPC"
+    element_type = "WORLD_NPC"
     element_name = _("World NPC", "elements")
     model_name = "world_npcs"
 

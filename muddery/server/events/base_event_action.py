@@ -4,7 +4,7 @@ Event action's base class.
 
 from django.apps import apps
 from django.conf import settings
-from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.worlddata.worlddata import WorldData
 
 
 class BaseEventAction(object):

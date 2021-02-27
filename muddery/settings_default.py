@@ -318,6 +318,22 @@ BASE_CHANNEL_TYPECLASS = "muddery.server.typeclasses.channels.MudderyChannel"
 # but create custom variations of scripts on a per-case basis instead.
 BASE_SCRIPT_TYPECLASS = "muddery.server.elements.scripts.MudderyScript"
 
+# Element type for general characters, include NPCs, mobs and player characters.
+CHARACTER_ELEMENT_TYPE = "CHARACTER"
+
+# Element type for player characters.
+PLAYER_CHARACTER_ELEMENT_TYPE = "PLAYER_CHARACTER"
+
+# Element type for rooms.
+ROOM_ELEMENT_TYPE = "ROOM"
+
+# Element type for Exit objects.
+EXIT_ELEMENT_TYPE = "EXIT"
+
+# Typeclass for Scripts (fallback). You usually don't need to change this
+# but create custom variations of scripts on a per-case basis instead.
+SCRIPT_ELEMENT_TYPE = "SCRIPT"
+
 # Path of base world data forms.
 PATH_DATA_FORMS_BASE = "muddery.worldeditor.forms"
 
@@ -417,17 +433,11 @@ WORLD_DATA_FOLDER = os.path.join("worlddata", "data")
 # World data features
 ######################################################################
 
-# attribute's category for data info
-DATA_KEY_CATEGORY = "data_key"
-
 # data app name
 WORLD_EDITOR_APP = "worldeditor"
 
 # add data app
 INSTALLED_APPS = INSTALLED_APPS + [WORLD_EDITOR_APP, ]
-
-# Character's element key.
-GENERAL_CHARACTER_ELEMENT_KEY = "CHARACTER"
 
 # Localized string data's folder.
 LOCALIZED_STRINGS_FOLDER = "languages"

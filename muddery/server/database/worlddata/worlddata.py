@@ -4,7 +4,7 @@ Load and cache all worlddata.
 
 from django.conf import settings
 from django.apps import apps
-from muddery.server.database.dao.tabledata import TableData, RecordData
+from muddery.server.database.storage.memory_table import MemoryTable, RecordData
 from muddery.server.utils.exception import MudderyError
 
 
@@ -32,7 +32,7 @@ class WorldData(object):
         all_models = config.get_models()
         for model_obj in all_models:
             name = model_obj.__name__
-            cls.tables[name] = TableData(name)
+            cls.tables[name] = MemoryTable(settings.WORLD_DATA_APP, name)
 
     @classmethod
     def load_table(cls, table_name):
@@ -42,7 +42,7 @@ class WorldData(object):
         try:
             model_obj = apps.get_model(settings.WORLD_DATA_APP, table_name)
             name = model_obj.__name__
-            cls.tables[name] = TableData(name)
+            cls.tables[name] = MemoryTable(settings.WORLD_DATA_APP, name)
         except Exception as e:
             raise MudderyError("Can not load table %s: %s" % (table_name, e))
 
@@ -51,14 +51,14 @@ class WorldData(object):
         if table_name not in cls.tables:
             cls.load_table(table_name)
 
-        return cls.tables[table_name].get_fields()
+        return cls.tables[table_name].fields()
 
     @classmethod
     def get_table_all(cls, table_name):
         if table_name not in cls.tables:
             cls.load_table(table_name)
 
-        return cls.tables[table_name].all_data()
+        return cls.tables[table_name].all()
 
     @classmethod
     def get_first_data(cls, table_name):
@@ -79,7 +79,7 @@ class WorldData(object):
         if table_name not in cls.tables:
             cls.load_table(table_name)
 
-        return cls.tables[table_name].filter_data(**kwargs)
+        return cls.tables[table_name].filter(**kwargs)
 
     @classmethod
     def get_tables_data(cls, tables, key):
@@ -100,8 +100,8 @@ class WorldData(object):
             if table_name not in cls.tables:
                 cls.load_table(table_name)
 
-            fields = cls.tables[table_name].get_fields()
-            records = cls.tables[table_name].filter_data(key=key)
+            fields = cls.tables[table_name].fields()
+            records = cls.tables[table_name].filter(key=key)
 
             if not records:
                 for field_name in fields:

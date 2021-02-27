@@ -11,7 +11,7 @@ from evennia.utils import logger
 from evennia.objects.objects import DefaultRoom
 from muddery.server.utils import defines
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.database.dao.image_resource import ImageResource
+from muddery.server.database.worlddata.image_resource import ImageResource
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.localized_strings_handler import _
@@ -27,7 +27,7 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
     See examples/object.py for a list of
     properties and methods available on all Objects.
     """
-    element_key = "ROOM"
+    element_type = "ROOM"
     element_name = _("Room", "elements")
     model_name = "world_rooms"
 
@@ -153,8 +153,10 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         exits = {}
         for cont in self.contents:
             if cont.destination:
-                exits[cont.get_data_key()] = {"from": self.get_data_key(),
-                                              "to": cont.destination.get_data_key()}
+                exits[cont.get_object_key()] = {
+                    "from": self.get_object_key(),
+                    "to": cont.destination.get_object_key()
+                }
         return exits
 
     def get_surroundings(self, caller):
@@ -195,7 +197,7 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
 
                 appearance["dbref"] = cont.dbref
                 appearance["name"] = cont.get_name()
-                appearance["key"] = cont.get_data_key()
+                appearance["key"] = cont.get_object_key()
                 
                 info[cont_type].append(appearance)
 
@@ -208,8 +210,8 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         """
         if obj.destination:
             return "exits"
-        elif obj.is_typeclass(settings.BASE_GENERAL_CHARACTER_TYPECLASS, exact=False):
-            if obj.is_typeclass(settings.BASE_PLAYER_CHARACTER_TYPECLASS, exact=False):
+        elif obj.is_element(settings.CHARACTER_ELEMENT_TYPE):
+            if obj.is_element(settings.PLAYER_CHARACTER_ELEMENT_TYPE):
                 if obj.has_account:
                     return "players"
                 else:

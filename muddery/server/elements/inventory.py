@@ -13,7 +13,7 @@ from muddery.server.elements.base_element import BaseElement
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.mappings.element_set import ELEMENT
 
 
@@ -21,7 +21,7 @@ class MudderyInventory(BaseElement):
     """
     The character's inventory.
     """
-    element_key = "INVENTORY"
+    element_type = "INVENTORY"
     element_name = _("Inventory", "elements")
 
     def __init__(self, owner):
@@ -29,7 +29,7 @@ class MudderyInventory(BaseElement):
         Load the inventory and set its owner.
         :param owner: (object) the owner's object
         """
-        self.owner_key = owner.get_data_key()
+        self.owner_key = owner.get_object_key()
         self.owner_dbref = owner.dbref
         self.id = owner.get_id()
 

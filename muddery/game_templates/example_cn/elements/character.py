@@ -18,7 +18,7 @@ class Character(MudderyCharacter):
     Custom character class.
 
     """
-    element_key = "CHARACTER"
+    element_type = "CHARACTER"
 
     def recover(self):
         """

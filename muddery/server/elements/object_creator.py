@@ -8,21 +8,21 @@ from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
-from muddery.server.database.dao.loot_list import CreatorLootList
+from muddery.server.database.worlddata.loot_list import CreatorLootList
 
 
 class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):
     """
     This object loads attributes from world data on init automatically.
     """
-    element_key = "WORLD_OBJECT_CREATOR"
+    element_type = "WORLD_OBJECT_CREATOR"
     element_name = _("Object Creator", "elements")
     model_name = "object_creators"
 
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, CreatorLootList.get(self.get_data_key()))
+        return LootHandler(self, CreatorLootList.get(self.get_object_key()))
 
     def after_data_loaded(self):
         """

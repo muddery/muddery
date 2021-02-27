@@ -20,7 +20,7 @@ from django.conf import settings
 from evennia import DefaultScript
 from evennia.utils import logger
 from muddery.server.utils import defines
-from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 
 
@@ -238,7 +238,7 @@ class BaseCombatHandler(DefaultScript):
         all_player_left = True
         for char in self.characters.values():
             if char["status"] != CStatus.LEFT and\
-               char["char"].is_typeclass(settings.BASE_PLAYER_CHARACTER_TYPECLASS, exact=False):
+               char["char"].is_element(settings.CHARACTER_ELEMENT_TYPE):
                 all_player_left = False
                 break
 
@@ -314,7 +314,7 @@ class BaseCombatHandler(DefaultScript):
                     try:
                         obj_record = WorldData.get_table_data(obj_model_name, key=obj_info["object"])
                         obj_record = obj_record[0]
-                        goods_models = ELEMENT_SET.get_class_modeles(obj_record.typeclass)
+                        goods_models = ELEMENT_SET.get_class_modeles(obj_record.element_type)
                         goods_data = WorldData.get_tables_data(goods_models, key=obj_info["object"])
                         goods_data = goods_data[0]
 

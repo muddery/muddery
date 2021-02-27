@@ -7,17 +7,18 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 
 import math
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from evennia import create_script
 from evennia.comms.models import ChannelDB
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
-from muddery.server.utils.utils import search_obj_data_key
+from muddery.server.utils.utils import get_object_by_key
 from muddery.server.utils.defines import ConversationType
-from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
-from muddery.server.database.dao.honour_settings import HonourSettings
 from muddery.server.utils.defines import CombatType
+from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
+from muddery.server.database.worlddata.honour_settings import HonourSettings
 
 
 class CmdLook(BaseCommand):
@@ -226,11 +227,12 @@ class CmdSay(BaseCommand):
         try:
             if target_type == ConversationType.CHANNEL.value:
                 obj = ChannelDB.objects.filter(db_key=target)
+                obj = obj[0]
             elif target_type == ConversationType.LOCAL.value:
-                obj = search_obj_data_key(target)
+                obj = get_object_by_key(target)
             elif target_type == ConversationType.PRIVATE.value:
                 obj = caller.search_dbref(target)
-            obj = obj[0]
+                obj = obj[0]
         except Exception as e:
             ostring = "Can not find %s %s: %s" % (target_type, target, e)
             logger.log_tracemsg(ostring)
@@ -345,11 +347,11 @@ class CmdGoto(BaseCommand):
 
                 from_room = caller.location
                 for e in exits:
-                    exit_obj = search_obj_data_key(e)
-                    if not exit_obj:
+                    try:
+                        exit_obj = get_object_by_key(e)
+                    except ObjectDoesNotExist:
                         continue
 
-                    exit_obj = exit_obj[0]
                     to_room = exit_obj.destination
                     degree = self.get_degree(from_room, to_room)
                     direction = self.get_direction(degree)
@@ -460,9 +462,6 @@ class CmdDialogue(BaseCommand):
         if "npc" in self.args and self.args["npc"]:
             # get NPC
             npc = caller.search_dbref(self.args["npc"], location=caller.location)
-            if not npc:
-                caller.msg({"msg": _("Can not find it.")})
-                return
 
         caller.finish_dialogue(dlg_key, npc)
 
@@ -505,7 +504,7 @@ class CmdLoot(BaseCommand):
             # do loot
             obj.loot(caller)
         except Exception as e:
-            ostring = "Can not loot %s: %s" % (obj.get_data_key(), e)
+            ostring = "Can not loot %s: %s" % (obj.get_object_key(), e)
             logger.log_tracemsg(ostring)
             
         caller.show_location()
@@ -1221,7 +1220,7 @@ class CmdBuy(BaseCommand):
             goods.sell_to(caller)
         except Exception as e:
             caller.msg({"alert":_("Can not buy this goods.")})
-            logger.log_err("Can not buy %s: %s" % (goods.get_data_key(), e))
+            logger.log_err("Can not buy %s: %s" % (goods.get_object_key(), e))
             return
 
 

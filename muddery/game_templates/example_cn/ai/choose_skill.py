@@ -51,7 +51,7 @@ class ChooseSkill(object):
             if heal_skills:
                 skill = random.choice(heal_skills)
                 target = caller
-                return skill.get_data_key(), target
+                return skill.get_object_key(), target
         
         if opponents:
             # attack opponents
@@ -65,6 +65,6 @@ class ChooseSkill(object):
                 # find the lowest hp
                 sorted_opponents = sorted(opponents, key=lambda t: t.states.load("hp"))
                 target = sorted_opponents[0]
-                return skill.get_data_key(), target
+                return skill.get_object_key(), target
 
         return

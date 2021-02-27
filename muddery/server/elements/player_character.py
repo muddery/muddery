@@ -9,6 +9,7 @@ creation commands.
 """
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger, search
 from evennia.comms.models import ChannelDB
@@ -22,13 +23,14 @@ from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.defines import CombatType
-from muddery.server.database.dao.worlddata import WorldData
-from muddery.server.database.dao.honour_settings import HonourSettings
-from muddery.server.database.dao.default_objects import DefaultObjects
+from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.database.worlddata.honour_settings import HonourSettings
+from muddery.server.database.worlddata.default_objects import DefaultObjects
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils import defines
-from muddery.server.database.dao.honours_mapper import HONOURS_MAPPER
-from muddery.server.database.dao.equipment_positions import EquipmentPositions
+from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
+from muddery.server.database.gamedata.player_character import PLAYER_CHARACTER
+from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
 
 
@@ -51,7 +53,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     has connected" message echoed to the room
 
     """
-    element_key = "PLAYER_CHARACTER"
+    element_type = "PLAYER_CHARACTER"
     element_name = _("Player Character", "elements")
     model_name = "player_characters"
 
@@ -231,33 +233,27 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         MATCH_COMBAT_HANDLER.remove(self)
 
-    def get_data_key(self, default=""):
+    def get_object_key(self):
         """
-        Get data's key.
-
-        Args:
-            default: (string) default value if can not find the data key.
+        Get the object's key.
         """
-        key = self.attributes.get(key="key", category=settings.DATA_KEY_CATEGORY, strattr=True)
-        if not key:
-            key = default
-        if not key:
-            key = GAME_SETTINGS.get("default_player_character_key")
+        if not hasattr(self, "object_key"):
+            self.object_key = GAME_SETTINGS.get("default_player_character_key")
 
-        return key
+        return self.object_key
 
     def set_nickname(self, nickname):
         """
         Set player character's nickname.
         """
-        self.states.save("nickname", nickname)
+        PLAYER_CHARACTER.add(self.id, nickname)
 
     def get_name(self):
         """
         Get player character's name.
         """
         # Use nick name instead of normal name.
-        return self.states.load("nickname", "")
+        return PLAYER_CHARACTER.get_nickname(self.id)
 
     def get_available_commands(self, caller):
         """
@@ -333,29 +329,32 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         revealed_map = self.states.load("revealed_map", set())
         for room_key in revealed_map:
             # get room's information
-            room = utils.search_obj_data_key(room_key)
-            if room:
-                room = room[0]
+            try:
+                room = utils.get_object_by_key(room_key)
                 rooms[room_key] = {"name": room.get_name(),
                                    "icon": room.icon,
-                                   "area": room.location and room.location.get_data_key(),
+                                   "area": room.location and room.location.get_object_key(),
                                    "pos": room.position}
-
                 new_exits = room.get_exits()
                 if new_exits:
                     exits.update(new_exits)
+            except ObjectDoesNotExist:
+                pass
 
         for path in exits.values():
             # add room's neighbours
             if not path["to"] in rooms:
-                neighbour = utils.search_obj_data_key(path["to"])
-                if neighbour:
-                    neighbour = neighbour[0]                    
-                    rooms[neighbour.get_data_key()] = {"name": neighbour.get_name(),
-                                                       "icon": neighbour.icon,
-                                                       "area": neighbour.location and neighbour.location.get_data_key(),
-                                                       "pos": neighbour.position}
-                    
+                try:
+                    neighbour = utils.get_object_by_key(path["to"])
+                    rooms[neighbour.get_object_key()] = {
+                        "name": neighbour.get_name(),
+                        "icon": neighbour.icon,
+                        "area": neighbour.location and neighbour.location.get_object_key(),
+                        "pos": neighbour.position
+                    }
+                except ObjectDoesNotExist:
+                    pass
+
         return {"rooms": rooms, "exits": exits}
 
     def show_location(self):
@@ -363,7 +362,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         show character's location
         """
         if self.location:
-            location_key = self.location.get_data_key()
+            location_key = self.location.get_object_key()
             area = self.location.location and self.location.location.get_appearance(self)
 
             msg = {"current_location": {"key": location_key,
@@ -391,27 +390,33 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             revealed_map = self.states.load("revealed_map", set())
             if not location_key in revealed_map:
                 # reveal map
-                revealed_map.add(self.location.get_data_key())
+                revealed_map.add(self.location.get_object_key())
                 self.states.save("revealed_map", revealed_map)
 
-                rooms = {location_key: {"name": self.location.get_name(),
-                                        "icon": self.location.icon,
-                                        "area": self.location.location and self.location.location.get_data_key(),
-                                        "pos": self.location.position}}
+                rooms = {
+                    location_key: {
+                        "name": self.location.get_name(),
+                        "icon": self.location.icon,
+                        "area": self.location.location and self.location.location.get_object_key(),
+                        "pos": self.location.position
+                    }
+                }
 
                 exits = self.location.get_exits()
 
                 for path in exits.values():
                     # add room's neighbours
                     if not path["to"] in rooms:
-                        neighbour = utils.search_obj_data_key(path["to"])
-                        if neighbour:
-                            neighbour = neighbour[0]
-
-                            rooms[neighbour.get_data_key()] = {"name": neighbour.get_name(),
-                                                               "icon": neighbour.icon,
-                                                               "area": neighbour.location and neighbour.location.get_data_key(),
-                                                               "pos": neighbour.position}
+                        try:
+                            neighbour = utils.get_object_by_key(path["to"])
+                            rooms[neighbour.get_object_key()] = {
+                                "name": neighbour.get_name(),
+                                "icon": neighbour.icon,
+                                "area": neighbour.location and neighbour.location.get_object_key(),
+                                "pos": neighbour.position
+                            }
+                        except ObjectDoesNotExist:
+                            pass
                     
                 msg["reveal_map"] = {"rooms": rooms, "exits": exits}
 
@@ -427,7 +432,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Load character's default objects.
         """
         # default objects
-        object_records = DefaultObjects.get(self.get_data_key())
+        object_records = DefaultObjects.get(self.get_object_key())
 
         # add new default objects
         obj_list = []
@@ -1081,7 +1086,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Lock an exit. Remove the exit's key from the character's unlock list.
         """
-        exit_key = exit.get_data_key()
+        exit_key = exit.get_object_key()
         if not self.is_exit_unlocked(exit_key):
             return
 
@@ -1091,7 +1096,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Unlock an exit. Add the exit's key to the character's unlock list.
         """
-        exit_key = exit.get_data_key()
+        exit_key = exit.get_object_key()
         if self.is_exit_unlocked(exit_key):
             return True
 
@@ -1202,7 +1207,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
                 # call quest handler
                 for opponent in opponents:
-                    self.quest_handler.at_objective(defines.OBJECTIVE_KILL, opponent.get_data_key())
+                    self.quest_handler.at_objective(defines.OBJECTIVE_KILL, opponent.get_object_key())
             elif status == defines.COMBAT_LOSE:
                 self.die(opponents)
         elif combat_type == CombatType.HONOUR:
@@ -1258,9 +1263,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         home = None
         default_home_key = GAME_SETTINGS.get("default_player_home_key")
         if default_home_key:
-            rooms = utils.search_obj_data_key(default_home_key)
-            if rooms:
-                home = rooms[0]
+            try:
+                home = utils.get_object_by_key(default_home_key)
+            except ObjectDoesNotExist:
+                pass;
 
         if not home:
             rooms = search.search_object(settings.DEFAULT_HOME)
@@ -1303,11 +1309,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         npc_key = None
         if npc:
-            npc_key = npc.get_data_key()
+            npc_key = npc.get_object_key()
 
         location_key = None
         if self.location:
-            location_key = self.location.get_data_key()
+            location_key = self.location.get_object_key()
 
         current_dialogue = {"dialogues": dialogues,
                             "npc": npc_key,
@@ -1344,19 +1350,21 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             return
 
         # Check dialogue's location
-        if self.location.get_data_key() != current_dialogue["location"]:
+        if self.location.get_object_key() != current_dialogue["location"]:
             # If player's location has changed, return.
             return
 
         # Check npc.
         npc_talking = None
         if current_dialogue["npc"]:
-            npc_list = utils.search_obj_data_key(current_dialogue["npc"])
-            npc_in_location = [npc for npc in npc_list if npc.location == self.location]
-            if not npc_in_location:
-                # If the NPC has left it's location, return.
+            try:
+                npc = utils.get_object_by_key(current_dialogue["npc"])
+                if npc.location == self.location:
+                    npc_talking = npc
+                else:
+                    return
+            except ObjectDoesNotExist:
                 return
-            npc_talking = npc_in_location[0]
 
         dialogues = [DIALOGUE_HANDLER.get_dialogue(d) for d in current_dialogue["dialogues"]]
         dialogues = DIALOGUE_HANDLER.create_output_sentences(dialogues, self, npc_talking)

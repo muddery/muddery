@@ -9,14 +9,14 @@ from evennia.utils import logger
 from muddery.server.utils.builder import build_object
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.database.dao.shop_goods import ShopGoods
+from muddery.server.database.worlddata.shop_goods import ShopGoods
 
 
 class MudderyShop(ELEMENT("OBJECT")):
     """
     A shop.
     """
-    element_key = "SHOP"
+    element_type = "SHOP"
     element_name = _("Shop", "elements")
     model_name = "shops"
 
@@ -25,7 +25,7 @@ class MudderyShop(ELEMENT("OBJECT")):
         Called once, when this object is first created. This is the
         normal hook to overload for most object types.
 
-        It will be called when swap its typeclass, so it must keep
+        It will be called when swap its element_type, so it must keep
         old values.
         """
         super(MudderyShop, self).at_object_creation()
@@ -67,7 +67,7 @@ class MudderyShop(ELEMENT("OBJECT")):
         Load shop goods.
         """
         # shops records
-        goods_records = ShopGoods.get(self.get_data_key())
+        goods_records = ShopGoods.get(self.get_object_key())
 
         goods_keys = set([record.key for record in goods_records])
 

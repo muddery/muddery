@@ -14,7 +14,7 @@ class Skill(MudderySkill):
     """
     A skill of the character.
     """
-    element_key = "SKILL"
+    element_type = "SKILL"
 
     def do_skill(self, caller, target):
         """

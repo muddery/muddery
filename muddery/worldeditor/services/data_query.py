@@ -194,7 +194,10 @@ def query_object_event_triggers(typeclass_key):
     Args:
         typeclass_key: (string) the object's typeclass_key.
     """
-    return ELEMENT_SET.get_trigger_types(typeclass_key)
+    try:
+        return ELEMENT(typeclass_key).get_event_trigger_types()
+    except Exception as e:
+        return []
 
 
 def query_dialogue_event_triggers():

@@ -2,15 +2,15 @@
 Query and deal common tables.
 """
 
-from muddery.server.database.dao.base_query import BaseQuery
-from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.worlddata.base_query import BaseQuery
+from muddery.server.database.worlddata.worlddata import WorldData
 
 
-class HonourSettings(BaseQuery):
+class GameSettings(BaseQuery):
     """
     Game setting data.
     """
-    table_name = "honour_settings"
+    table_name = "game_settings"
 
     @classmethod
     def get_fields(cls):

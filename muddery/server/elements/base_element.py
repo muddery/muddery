@@ -9,14 +9,15 @@ MudderyObject is an object which can load it's data automatically.
 from evennia.utils.utils import lazy_property
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
-from muddery.server.database.dao.properties_dict import PropertiesDict
+from muddery.server.database.worlddata.properties_dict import PropertiesDict
+from muddery.server.mappings.element_set import ELEMENT
 
 
 class BaseElement(object):
     """
     The base brick.
     """
-    element_key = ""
+    element_type = ""
     element_name = ""
     brick_desc = ""
 
@@ -31,9 +32,9 @@ class BaseElement(object):
         if "_all_models_" not in cls.__dict__:
             cls._all_models_ = []
 
-            if cls.element_key:
+            if cls.element_type:
                 if not cls.model_name:
-                    raise ValueError("%s's model name is empty." % cls.element_key)
+                    raise ValueError("%s's model name is empty." % cls.element_type)
 
                 for c in cls.__bases__:
                     if hasattr(c, "get_models"):
@@ -52,12 +53,12 @@ class BaseElement(object):
         if "_all_properties_" not in cls.__dict__:
             cls._all_properties_ = {}
 
-            if cls.element_key:
+            if cls.element_type:
                 for c in cls.__bases__:
                     if hasattr(c, "get_properties_info"):
                         cls._all_properties_.update(c.get_properties_info())
 
-                records = PropertiesDict.get_properties(cls.element_key)
+                records = PropertiesDict.get_properties(cls.element_type)
                 for record in records:
                     cls._all_properties_[record.property] = {"name": record.name,
                                                              "desc": record.desc,
@@ -106,7 +107,7 @@ class BaseElement(object):
 
         :return: (string) object's type
         """
-        return self.element_key
+        return self.element_type
 
     def get_id(self):
         """
@@ -115,3 +116,11 @@ class BaseElement(object):
         :return: (number) object's id
         """
         return 0
+
+    def is_element(self, element_type):
+        """
+        Is a subclass of the element type.
+        :param element_type:
+        :return:
+        """
+        return isinstance(self, ELEMENT(element_type))

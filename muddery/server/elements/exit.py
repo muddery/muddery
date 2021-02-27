@@ -7,6 +7,7 @@ for allowing Characters to traverse the exit to its destination.
 
 """
 
+from django.core.exceptions import ObjectDoesNotExist
 from evennia.objects.objects import DefaultExit
 from evennia.utils import logger
 from muddery.server.utils import defines
@@ -38,7 +39,7 @@ class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
     """
-    element_key = "EXIT"
+    element_type = "EXIT"
     element_name = _("Exit", "elements")
     model_name = "world_exits"
 
@@ -103,21 +104,16 @@ class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
         """
         if not destination:
             # remove destination
-            self.destination = destination
+            self.destination = None
             return
 
         # set new destination
-        destination_obj = None
-
-        if destination:
+        try:
             # If has destination, search destination object.
-            destination_obj = utils.search_obj_data_key(destination)
-
-        if not destination_obj:
-            logger.log_errmsg("%s can't find destination %s!" % (self.get_data_key(), destination))
+            destination_obj = utils.get_object_by_key(destination)
+        except ObjectDoesNotExist:
+            logger.log_errmsg("%s can't find destination %s!" % (self.get_object_key(), destination))
             return
-
-        destination_obj = destination_obj[0]
 
         if self.destination == destination_obj:
             # No change.
@@ -125,7 +121,7 @@ class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
 
         if self == destination_obj:
             # Can't set destination to itself.
-            logger.log_errmsg("%s can't set destination to itself!" % self.get_data_key())
+            logger.log_errmsg("%s can't set destination to itself!" % self.get_object_key())
             return
 
         self.destination = destination_obj

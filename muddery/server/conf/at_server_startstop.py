@@ -23,7 +23,7 @@ def at_server_start():
     how it was shut down.
     """
     # load data
-    from muddery.server.database.dao.worlddata import WorldData
+    from muddery.server.database.worlddata.worlddata import WorldData
     WorldData.reload()
 
     # reset settings
@@ -55,7 +55,7 @@ def at_server_start():
     DESC_HANDLER.reload()
 
     # load honours
-    from muddery.server.database.dao.honours_mapper import HONOURS_MAPPER
+    from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
     HONOURS_MAPPER.reload()
 
 

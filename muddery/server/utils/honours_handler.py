@@ -2,7 +2,7 @@
 This model translates default strings into localized strings.
 """
 
-from muddery.server.database.dao.honours_mapper import HONOURS_MAPPER
+from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
 
 
 class HonoursHandler(object):

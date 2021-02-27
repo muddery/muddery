@@ -30,7 +30,7 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
                     has connected" message echoed to the room
 
     """
-    element_key = "STAFF_CHARACTER"
+    element_type = "STAFF_CHARACTER"
     element_name = _("Staff Character", "elements")
     model_name = "staff_characters"
 
@@ -43,17 +43,14 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
         """
         return False
 
-    def get_data_key(self, default=""):
+    def get_object_key(self):
         """
         Get data's key.
 
         Args:
             default: (string) default value if can not find the data key.
         """
-        key = self.attributes.get(key="key", category=settings.DATA_KEY_CATEGORY, strattr=True)
-        if not key:
-            key = default
-        if not key:
-            key = GAME_SETTINGS.get("default_player_character_key")
+        if not self.object_key:
+            self.object_key = GAME_SETTINGS.get("default_player_character_key")
 
-        return key
+        return self.object_key

@@ -2,7 +2,7 @@
 This model translates default strings into localized strings.
 """
 
-from muddery.server.database.dao.localized_strings import LocalizedStrings
+from muddery.server.database.worlddata.localized_strings import LocalizedStrings
 
 
 class LocalizedStringsHandler(object):

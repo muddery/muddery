@@ -12,7 +12,7 @@ from muddery.server.utils.builder import build_all
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao import general_query_mapper
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.worlddata.worlddata import WorldData
 
 
 class QueryAllTypeclasses(BaseRequestProcesser):

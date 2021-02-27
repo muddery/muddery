@@ -10,9 +10,12 @@ import os, re, inspect
 from importlib import import_module
 from pkgutil import iter_modules
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import search
 from muddery.launcher import configs
-from muddery.server.database.dao.localized_strings import LocalizedStrings
+from muddery.server.database.gamedata.object_keys import OBJECT_KEYS
+from muddery.server.database.worlddata.localized_strings import LocalizedStrings
 
 
 def get_muddery_version():
@@ -21,82 +24,36 @@ def get_muddery_version():
     """
     import muddery
     return muddery.__version__
+
+
+def get_object_by_key(object_key):
+    """
+    Search objects by its key.
+
+    Args:
+        object_key: (string) object's key.
+    """
+    object_id = OBJECT_KEYS.get_object_id(object_key)
+    if object_id:
+        return get_object_by_id(object_id)
+
+    raise ObjectDoesNotExist
     
 
-def set_obj_data_key(obj, key):
+def get_object_by_id(object_id):
     """
-    Set data key. Put it info into an object's attributes.
-            
-    Args:
-        obj: (object) object to be set
-        key: (string) key of the data.
-    """
-    obj.attributes.add("key", key, category=settings.DATA_KEY_CATEGORY, strattr=True)
-
-
-def search_obj_data_key(key):
-    """
-    Search objects which have the given key.
+    Search objects by its id.
 
     Args:
-        key: (string) Data's key.
+        object_id: (number) object's id.
     """
-    if not key:
-        return None
+    object_db_model = ContentType.objects.get(app_label="objects", model="objectdb").model_class()
+    try:
+        return object_db_model.objects.get(id=object_id)
+    except ObjectDoesNotExist:
+        OBJECT_KEYS.remove(object_id)
 
-    return search.search_object_attribute(key="key", strvalue=key, category=settings.DATA_KEY_CATEGORY)
-    
-    
-def search_db_data_type(key, value, typeclass):
-    """
-    Search objects of the given typeclass which have the given value.
-    """
-    objs = search.search_object_attribute(key=key, value=value)
-    return [obj for obj in objs if obj.is_typeclass(typeclass, exact=False)]
-
-
-def set_obj_unique_type(obj, type):
-    """
-    Set unique object's type.
-
-    Args:
-        obj: (object) object to be set
-        type: (string) unique object's type.
-    """
-    obj.attributes.add("type", type, category=settings.DATA_KEY_CATEGORY, strattr=True)
-
-
-def search_obj_unique_type(type):
-    """
-    Search objects which have the given unique type.
-
-    Args:
-        type: (string) unique object's type.
-    """
-    obj = search.search_object_attribute(key="type", strvalue=type, category=settings.DATA_KEY_CATEGORY)
-    return obj
-
-
-def is_child(child, parent):
-    """
-    Check if the child class is inherited from the parent.
-
-    Args:
-        child: child class
-        parent: parent class
-
-    Returns:
-        boolean
-    """
-    for base in child.__bases__:
-        if base is parent:
-            return True
-
-    for base in child.__bases__:
-        if is_child(base, parent):
-            return True
-
-    return False
+    raise ObjectDoesNotExist
 
 
 def file_iterator(file, erase=False, chunk_size=512):

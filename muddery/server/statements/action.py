@@ -2,7 +2,8 @@
 Actions are used to do somethings.
 """
 
-from muddery.server.utils import utils
+from django.core.exceptions import ObjectDoesNotExist
+from muddery.server.utils.utils import get_object_by_key
 from muddery.server.statements.statement_function import StatementFunction
 
 
@@ -122,10 +123,10 @@ class FuncTeleportTo(StatementFunction):
             return False
 
         room_key = self.args[0]
-        destination = utils.search_obj_data_key(room_key)
-        if not destination:
-            return
-        destination = destination[0]
+        try:
+            destination = get_object_by_key(room_key)
+        except ObjectDoesNotExist:
+            return False
 
         return self.caller.move_to(destination)
 
@@ -191,7 +192,7 @@ class FuncFightTarget(StatementFunction):
         if self.args:
             desc = self.args[0]
 
-        return self.caller.attack_temp_target(self.obj.get_data_key(), self.obj.get_level(), desc)
+        return self.caller.attack_temp_target(self.obj.get_object_key(), self.obj.get_level(), desc)
         
         
 class FuncKillCaller(StatementFunction):

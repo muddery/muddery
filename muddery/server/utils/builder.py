@@ -4,17 +4,19 @@ This module handles importing data from csv files and creating the whole game wo
 
 import traceback
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import create, search, logger
 from evennia.comms.models import ChannelDB
 from muddery.server.utils import utils
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
-from muddery.server.database.dao.worlddata import WorldData
-from muddery.server.database.dao.world_areas import WorldAreas
-from muddery.server.database.dao.world_rooms import WorldRooms
-from muddery.server.database.dao.world_exits import WorldExits
-from muddery.server.database.dao.world_npcs import WorldNPCs
-from muddery.server.database.dao.world_objects import WorldObjects
+from muddery.server.database.gamedata.object_keys import OBJECT_KEYS
+from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.database.worlddata.world_areas import WorldAreas
+from muddery.server.database.worlddata.world_rooms import WorldRooms
+from muddery.server.database.worlddata.world_exits import WorldExits
+from muddery.server.database.worlddata.world_npcs import WorldNPCs
+from muddery.server.database.worlddata.world_objects import WorldObjects
 
 
 def get_object_record(obj_key):
@@ -53,7 +55,7 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
 
     # Get object's information
     record = None
-    typeclass_path = None
+    class_path = None
     try:
         model_name = ELEMENT("OBJECT").model_name
 
@@ -66,15 +68,15 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
             print(ostring)
             print(traceback.print_exc())
 
-        # get typeclass model
-        typeclass_path = ELEMENT_SET.get_module(record.typeclass)
+        # get element model
+        class_path = ELEMENT_SET.get_module(record.element_type)
     except Exception as e:
-        ostring = "Can not get typeclass of %s: %s." % (obj_key, e)
+        ostring = "Can not get the element type of %s: %s." % (obj_key, e)
         print(ostring)
         print(traceback.print_exc())
         pass
 
-    if not record or not typeclass_path:
+    if not record or not class_path:
         ostring = "Can not find the data of %s." % obj_key
         print(ostring)
         print(traceback.print_exc())
@@ -85,7 +87,7 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
     # Create object.
     try:
         name = getattr(record, "name", "")
-        obj = create.create_object(typeclass_path, name)
+        obj = create.create_object(class_path, name)
     except Exception as e:
         ostring = "Can not create obj %s: %s" % (obj_key, e)
         print(ostring)
@@ -96,7 +98,7 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
 
     try:
         # Set data info.
-        obj.set_data_key(record.key, level, reset_location=reset_location)
+        obj.set_object_key(record.key, level, reset_location=reset_location)
         obj.after_creation()
     except Exception as e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
@@ -121,7 +123,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
     new_obj_keys = set(record.key for record in objects_data)
 
     # current objects
-    current_objs = utils.search_obj_unique_type(type_name)
+    current_objs = OBJECT_KEYS.get_unique_objects(type_name)
 
     # remove objects
     count_remove = 0
@@ -129,50 +131,40 @@ def build_unique_objects(objects_data, type_name, caller=None):
     count_create = 0
     current_obj_keys = set()
 
-    for obj in current_objs:
-        obj_key = obj.get_data_key()
-
-        if obj_key in current_obj_keys:
-            # This object is duplcated.
-            ostring = "Deleting %s" % obj_key
-            print(ostring)
-            if caller:
-                caller.msg(ostring)
-
-            # If default home will be removed, set default home to the Limbo.
-            if obj.dbref == settings.DEFAULT_HOME:
-                settings.DEFAULT_HOME = "#2"
-            obj.delete()
-            count_remove += 1
-            continue
-
-        if not obj_key in new_obj_keys:
-            # This object should be removed
-            ostring = "Deleting %s" % obj_key
-            print(ostring)
-            if caller:
-                caller.msg(ostring)
-
-            # If default home will be removed, set default home to the Limbo.
-            if obj.dbref == settings.DEFAULT_HOME:
-                settings.DEFAULT_HOME = "#2"
-            obj.delete()
-            count_remove += 1
-            continue
-
+    for obj_id, obj_key in current_objs.items():
         try:
-            # set data
-            obj.load_data()
-            # put obj to its default location
-            obj.reset_location()
+            obj = utils.get_object_by_id(obj_id)
         except Exception as e:
-            ostring = "%s can not load data:%s" % (obj.dbref, e)
+            logger.log_err("Can not get object: %s %s" % (obj_id, obj_key))
+            continue
+
+        if (obj_key in current_obj_keys) or (obj_key not in new_obj_keys):
+            # This object is duplicated or should be remove.
+            ostring = "Deleting %s" % obj_key
             print(ostring)
-            print(traceback.print_exc())
             if caller:
                 caller.msg(ostring)
 
-        current_obj_keys.add(obj_key)
+            # If default home will be removed, set default home to the Limbo.
+            if ("#%s" % obj_id) == settings.DEFAULT_HOME:
+                settings.DEFAULT_HOME = "#2"
+
+            obj.delete()
+            count_remove += 1
+        else:
+            try:
+                # set data
+                obj.load_data()
+                # put obj to its default location
+                obj.reset_location()
+            except Exception as e:
+                ostring = "%s can not load data:%s" % (obj.dbref, e)
+                print(ostring)
+                print(traceback.print_exc())
+                if caller:
+                    caller.msg(ostring)
+
+            current_obj_keys.add(obj_key)
 
     # Create new objects.
     object_model_name = ELEMENT("OBJECT").model_name
@@ -187,8 +179,8 @@ def build_unique_objects(objects_data, type_name, caller=None):
             try:
                 object_record = WorldData.get_table_data(object_model_name, key=record.key)
                 object_record = object_record[0]
-                typeclass_path = ELEMENT_SET.get_module(object_record.typeclass)
-                obj = create.create_object(typeclass_path, object_record.name)
+                class_path = ELEMENT_SET.get_module(object_record.element_type)
+                obj = create.create_object(class_path, object_record.name)
                 count_create += 1
             except Exception as e:
                 ostring = "Can not create obj %s: %s" % (record.key, e)
@@ -199,9 +191,8 @@ def build_unique_objects(objects_data, type_name, caller=None):
                 continue
 
             try:
-                obj.set_data_key(record.key)
+                obj.set_object_key(record.key, type_name)
                 obj.after_creation()
-                utils.set_obj_unique_type(obj, type_name)
             except Exception as e:
                 ostring = "Can not set data info to obj %s: %s" % (record.key, e)
                 print(ostring)
@@ -261,13 +252,13 @@ def reset_default_locations():
             print(traceback.print_exc())
 
     if default_home_key:
-        # If get default_home_key.
-        default_home = utils.search_obj_data_key(default_home_key)
-        if default_home:
-            # Set default home.
-            settings.DEFAULT_HOME = default_home[0].dbref
+        try:
+            default_home = utils.get_object_by_key(default_home_key)
+            settings.DEFAULT_HOME = default_home.dbref
             print("settings.DEFAULT_HOME set to: %s" % settings.DEFAULT_HOME)
-    
+        except Exception as e:
+            print("Can not find default_home: %s" % e)
+
     # Set start location.
     start_location_key = GAME_SETTINGS.get("start_location_key")
     if not start_location_key:
@@ -283,10 +274,12 @@ def reset_default_locations():
 
     if start_location_key:
         # If get start_location_key.
-        start_location = utils.search_obj_data_key(start_location_key)
-        if start_location:
-            settings.START_LOCATION = start_location[0].dbref
+        try:
+            start_location = utils.get_object_by_key(start_location_key)
+            settings.START_LOCATION = start_location.dbref
             print("settings.START_LOCATION set to: %s" % settings.START_LOCATION)
+        except Exception as e:
+            print("Can not find start_location: %s" % e)
 
 
 def delete_object(obj_dbref):
@@ -344,9 +337,10 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
     if not home:
         default_home_key = GAME_SETTINGS.get("default_player_home_key")
         if default_home_key:
-            rooms = utils.search_obj_data_key(default_home_key)
-            if rooms:
-                home = rooms[0]
+            try:
+                home = utils.get_object_by_key(default_home_key)
+            except ObjectDoesNotExist:
+                pass
 
     if not home:
         rooms = search.search_object(settings.DEFAULT_HOME)
@@ -358,8 +352,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
         try:
             start_location_key = GAME_SETTINGS.get("start_location_key")
             if start_location_key:
-                rooms = utils.search_obj_data_key(start_location_key)
-                location = rooms[0]
+                location = utils.get_object_by_key(start_location_key)
         except:
             pass
 
@@ -367,7 +360,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
                                          home=home, permissions=permissions)
 
     # set character info
-    new_character.set_data_key(character_key, level)
+    new_character.set_object_key(character_key, level)
     new_character.after_creation()
 
     # set playable character list

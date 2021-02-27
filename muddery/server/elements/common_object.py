@@ -18,7 +18,7 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
     It has two additional properties: max_stack(int) and unique(bool). They decide the number
     of the object that a player can put in his inventory.
     """
-    element_key = "COMMON_OBJECT"
+    element_type = "COMMON_OBJECT"
     element_name = _("Common Object", "elements")
     model_name = "common_objects"
 
@@ -113,7 +113,7 @@ class MudderyFood(ELEMENT("COMMON_OBJECT")):
     This is a food. Players can use it to change their properties, such as hp, mp,
     strength, etc.
     """
-    element_key = "FOOD"
+    element_type = "FOOD"
     element_name = _("Food", "elements")
     model_name = "foods"
 
@@ -189,7 +189,7 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
     This is a equipment. Players can equip it to change their properties, such as attack, defence,
     etc.
     """
-    element_key = "EQUIPMENT"
+    element_type = "EQUIPMENT"
     element_name = _("Equipment", "elements")
     model_name = "equipments"
 
@@ -224,7 +224,6 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
         values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items() if
                         not info["mutable"]}
         values_merge.update(self.states.all())
-        print("values_merge: %s" % values_merge)
 
         changes = {}
         new_states = {}
@@ -274,7 +273,7 @@ class MudderySkillBook(ELEMENT("COMMON_OBJECT")):
     """
     This is a skill book. Players can use it to learn a new skill.
     """
-    element_key = "SKILL_BOOK"
+    element_type = "SKILL_BOOK"
     element_name = _("Skill Book", "elements")
     model_name = "skill_books"
 

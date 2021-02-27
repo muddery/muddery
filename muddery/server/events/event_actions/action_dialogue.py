@@ -3,8 +3,9 @@ Event action.
 """
 
 import random
+from django.core.exceptions import ObjectDoesNotExist
 from muddery.server.events.base_event_action import BaseEventAction
-from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils import utils
 from muddery.server.utils.localized_strings_handler import _
 
@@ -40,9 +41,10 @@ class ActionDialogue(BaseEventAction):
                 # Make dialogue.
                 npc = None
                 if record.npc:
-                    npc = utils.search_obj_data_key(record.npc)
-                    if npc:
-                        npc = npc[0]
+                    try:
+                        npc = utils.get_object_by_key(record.npc)
+                    except ObjectDoesNotExist:
+                        pass
 
                 character.show_dialogue(record.dialogue, npc)
                 return

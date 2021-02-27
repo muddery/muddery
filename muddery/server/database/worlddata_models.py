@@ -172,8 +172,8 @@ class objects(BaseObjects):
     """
     All objects.
     """
-    # object's typeclass
-    typeclass = models.CharField(max_length=KEY_LENGTH)
+    # object's element type
+    element_type = models.CharField(max_length=KEY_LENGTH)
 
     # object's name
     name = models.CharField(max_length=NAME_LENGTH, blank=True)
@@ -756,8 +756,8 @@ class properties_dict(models.Model):
     """
     Object's custom properties.
     """
-    # The key of a typeclass.
-    typeclass = models.CharField(max_length=KEY_LENGTH, db_index=True)
+    # The key of a element type.
+    element_type = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # The key of the property.
     property = models.CharField(max_length=KEY_LENGTH)
@@ -780,7 +780,7 @@ class properties_dict(models.Model):
         app_label = "worlddata"
         verbose_name = "Properties Dict"
         verbose_name_plural = "Properties Dict"
-        unique_together = ("typeclass", "property")
+        unique_together = ("element_type", "property")
 
 
 # ------------------------------------------------------------

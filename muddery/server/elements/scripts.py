@@ -90,7 +90,7 @@ class MudderyScript(BaseElement, DefaultScript):
       at_server_shutdown() - called at a full server shutdown.
 
     """
-    element_key = "SCRIPT"
+    element_type = "SCRIPT"
     element_name = _("Script", "elements")
     model_name = ""
 

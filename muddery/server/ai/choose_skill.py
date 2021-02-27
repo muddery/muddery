@@ -34,4 +34,4 @@ class ChooseSkill(object):
 
         skill = random.choice(skills)
         target = random.choice(opponents)
-        return skill.get_data_key(), target
+        return skill.get_object_key(), target

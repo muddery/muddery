@@ -2,6 +2,30 @@
 from django.db import models
 
 KEY_LENGTH = 255
+NAME_LENGTH = 80
+
+
+# ------------------------------------------------------------
+#
+# Set object's key.
+#
+# ------------------------------------------------------------
+class object_keys(models.Model):
+    # object's id
+    object_id = models.PositiveIntegerField(unique=True)
+
+    # object's key
+    object_key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # world unique object's type
+    unique_type = models.CharField(max_length=KEY_LENGTH, blank=True, null=True, db_index=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Object Key"
+        verbose_name_plural = "Object Keys"
 
 
 # ------------------------------------------------------------
@@ -45,6 +69,28 @@ class object_status(BaseAttributes):
         verbose_name = "Object Runtime Status"
         verbose_name_plural = "Object Runtime Status"
         unique_together = ("obj_id", "key")
+
+
+# ------------------------------------------------------------
+#
+# player character's data
+#
+# ------------------------------------------------------------
+class player_character(models.Model):
+    "Player character's data."
+
+    # character's database id
+    object_id = models.PositiveIntegerField(unique=True)
+
+    # character's nickname
+    nickname = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Player Character"
+        verbose_name_plural = "Player Characters"
 
 
 # ------------------------------------------------------------

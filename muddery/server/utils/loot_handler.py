@@ -33,7 +33,7 @@ class LootHandler(object):
                                "condition": loot_record.condition}
                 loot_list.append(loot_object)
         except Exception as e:
-            logger.log_errmsg("Can't load loot info %s: %s" % (self.owner.get_data_key(), e))
+            logger.log_errmsg("Can't load loot info %s: %s" % (self.owner.get_object_key(), e))
 
         self.loot_list = loot_list
 

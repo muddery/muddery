@@ -11,7 +11,7 @@ from muddery.server.utils.localized_strings_handler import _
 
 
 class MudderyWorldObject(ELEMENT("OBJECT")):
-    element_key = "WORLD_OBJECT"
+    element_type = "WORLD_OBJECT"
     element_name = _("World Object", "elements")
     model_name = "world_objects"
 

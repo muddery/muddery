@@ -7,7 +7,7 @@ BaseObject is an object which can load it's data automatically.
 """
 
 import ast, traceback
-from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from evennia.objects.models import ObjectDB
 from evennia.objects.objects import DefaultObject
 from evennia.utils import logger
@@ -20,15 +20,16 @@ from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.desc_handler import DESC_HANDLER
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.database.dao.worlddata import WorldData
-from muddery.server.database.dao.object_properties import ObjectProperties
+from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.database.worlddata.object_properties import ObjectProperties
+from muddery.server.database.gamedata.object_keys import OBJECT_KEYS
 
 
 class MudderyBaseObject(BaseElement, DefaultObject):
     """
     This object loads attributes from world data on init automatically.
     """
-    element_key = "OBJECT"
+    element_type = "OBJECT"
     element_name = _("Object", "elements")
     model_name = "objects"
 
@@ -50,7 +51,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         Called once, when this object is first created. This is the
         normal hook to overload for most object types.
         
-        It will be called when swap its typeclass, so it must keep
+        It will be called when swap its element_type, so it must keep
         old values.
         """
         super(MudderyBaseObject, self).at_object_creation()
@@ -68,11 +69,13 @@ class MudderyBaseObject(BaseElement, DefaultObject):
 
         All skills, contents will be removed too.
         """
-        result = super(MudderyBaseObject, self).at_object_delete()
-        if not result:
-            return result
+        success = super(MudderyBaseObject, self).at_object_delete()
+        if not success:
+            return success
 
+        OBJECT_KEYS.remove(self.id)
         self.states.clear()
+
         return True
 
     def at_init(self):
@@ -83,10 +86,11 @@ class MudderyBaseObject(BaseElement, DefaultObject):
 
         try:
             # Load db data.
+            self.object_key = OBJECT_KEYS.get_key(self.id)
             self.load_data()
         except Exception as e:
             traceback.print_exc()
-            logger.log_errmsg("%s(%s) can not load data:%s" % (self.get_data_key(), self.dbref, e))
+            logger.log_errmsg("%s(%s) can not load data:%s" % (self.get_object_key(), self.dbref, e))
             
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded() which is called
@@ -146,7 +150,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         """
         pass
 
-    def set_data_key(self, key, level=None, reset_location=True):
+    def set_object_key(self, key, unique_type=None, level=None, reset_location=True):
         """
         Set data_info's model and key. It puts info into attributes.
             
@@ -156,7 +160,8 @@ class MudderyBaseObject(BaseElement, DefaultObject):
             reset_location: (boolean) reset the object to its default location.
         """
         # Save data info's key and model
-        utils.set_obj_data_key(self, key)
+        OBJECT_KEYS.add(self.id, key, unique_type)
+        self.object_key = key
         
         # Load data.
         try:
@@ -167,7 +172,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
             logger.log_errmsg("%s(%s) can not load data:%s" % (key, self.dbref, e))
 
         # call data_key hook
-        self.after_data_key_changed()
+        self.after_object_key_changed()
 
     def load_base_data(self, base_model, key):
         """
@@ -226,22 +231,20 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         """
         Set data to the object.
         """
-        key = self.get_data_key()
-        if key:
+        if self.object_key:
             base_model = ELEMENT("OBJECT").model_name
 
             # Get the object's base data
-            self.load_base_data(base_model, key)
+            self.load_base_data(base_model, self.object_key)
 
-            # reset typeclass
-            typeclass = self.const.typeclass
-            if typeclass:
-                self.set_typeclass(typeclass)
+            # reset element type
+            if self.const.element_type:
+                self.set_element_type(self.const.element_type)
             else:
-                logger.log_errmsg("%s does not have a typeclass." % key)
+                logger.log_errmsg("%s does not have element type." % self.const.element_type)
 
             # Load system data except base data.
-            self.load_system_data(base_model, key)
+            self.load_system_data(base_model, self.object_key)
 
             # Load custom properties.
             if level is None:
@@ -271,7 +274,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         """
         # Load values from db.
         values = {}
-        for record in ObjectProperties.get_properties(self.get_data_key(), level):
+        for record in ObjectProperties.get_properties(self.get_object_key(), level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":
@@ -310,9 +313,9 @@ class MudderyBaseObject(BaseElement, DefaultObject):
                 value = data
         return value
 
-    def after_data_key_changed(self):
+    def after_object_key_changed(self):
         """
-        Called at data_key changed.
+        Called at the object_key changed.
         """
         pass
 
@@ -371,32 +374,26 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         self.states.save("level", level)
         self.load_custom_data(level)
 
-    def set_typeclass(self, element_key):
+    def set_element_type(self, element_type):
         """
-        Set object's typeclass.
+        Set object's type.
         
         Args:
-            element_key: (string) Typeclass's key.
+            element_key: (string) Element's key.
         """
-        typeclass_cls = ELEMENT(element_key)
-        if not typeclass_cls:
-            logger.log_errmsg("Can not get %s's typeclass: %s." % (self.get_data_key(), element_key))
+        new_class = ELEMENT(element_type)
+        if not new_class:
+            logger.log_errmsg("Can not get %s's element type: %s." % (self.get_object_key(), element_type))
             return
         
-        if type(self) == typeclass_cls:
+        if type(self) == new_class:
             # No change.
             return
 
-        if not hasattr(self, 'swap_typeclass'):
-            logger.log_errmsg("%s cannot have a type at all!" % self.get_data_key())
-            return
-
-        # Set new typeclass.
-        # It will call target typeclass's at_object_creation hook.
-        # You should prevent at_object_creation rewrite current attributes.
-        self.swap_typeclass(typeclass_cls, clean_attributes=False)
-        if typeclass_cls.path != self.typeclass_path:
-            logger.log_errmsg("%s's typeclass %s is wrong!" % (self.get_data_key(), typeclass_cls.path))
+        # Set new class.
+        self.__class__ = new_class
+        if self.element_type != element_type:
+            logger.log_errmsg("%s's element type %s is wrong!" % (self.get_object_key(), element_type))
             return
 
     def set_name(self, name):
@@ -434,13 +431,11 @@ class MudderyBaseObject(BaseElement, DefaultObject):
     
         if location:
             # If has location, search location object.
-            location_obj = utils.search_obj_data_key(location)
-
-            if not location_obj:
-                logger.log_errmsg("%s can't find location %s!" % (self.get_data_key(), location))
+            try:
+                location_obj = utils.get_object_by_key(location)
+            except ObjectDoesNotExist:
+                logger.log_errmsg("%s can't find location %s!" % (self.get_object_key(), location))
                 return
-        
-            location_obj = location_obj[0]
     
         if self.location == location_obj:
             # No change.
@@ -448,7 +443,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
 
         if self == location_obj:
             # Can't set location to itself.
-            logger.log_errmsg("%s can't teleport itself to itself!" % self.get_data_key())
+            logger.log_errmsg("%s can't teleport itself to itself!" % self.get_object_key())
             return
     
         # try the teleport
@@ -481,17 +476,14 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         """
         return self.icon
 
-    def get_data_key(self, default=""):
+    def get_object_key(self):
         """
-        Get data's key.
+        Get this object's element key.
 
         Args:
             default: (string) default value if can not find the data key.
         """
-        key = self.attributes.get(key="key", category=settings.DATA_KEY_CATEGORY, strattr=True)
-        if not key:
-            key = default
-        return key
+        return self.object_key
 
     def is_visible(self, caller):
         """
@@ -530,7 +522,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         This returns object's descriptions on different conditions.
         """
         if caller:
-            desc_conditions = DESC_HANDLER.get(self.get_data_key())
+            desc_conditions = DESC_HANDLER.get(self.get_object_key())
             if desc_conditions:
                 for item in desc_conditions:
                     if STATEMENT_HANDLER.match_condition(item["condition"], caller, self):

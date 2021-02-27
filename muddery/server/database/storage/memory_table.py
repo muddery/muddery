@@ -2,7 +2,6 @@
 Load and cache all worlddata.
 """
 
-from django.conf import settings
 from django.apps import apps
 from muddery.server.utils.exception import MudderyError
 
@@ -32,49 +31,49 @@ class RecordData(object):
         raise Exception("Cannot delete record attributes!")
 
 
-class TableData(object):
+class MemoryTable(object):
     """
     Load and cache a table's data.
     """
 
-    def __init__(self, table_name):
+    def __init__(self, data_app, table_name):
+        self.records_app = data_app
         self.table_name = table_name
+        self.model = apps.get_model(self.records_app, self.table_name)
 
-        self.data = []
-        self.fields = {}
-        self.index = {}
-        # index: {field's value: recode's index}
+        self.records = []
+        self.table_fields = {}
+        self.index = {}     # index: {field's value: recode's index}
         self.reload()
 
     def clear(self):
-        self.data = []
-        self.fields = {}
+        self.records = []
+        self.table_fields = {}
         self.index = {}
 
     def reload(self):
         self.clear()
 
-        model_obj = apps.get_model(settings.WORLD_DATA_APP, self.table_name)
-        fields = [field.name for field in model_obj._meta.fields]
+        fields = [field.name for field in self.model._meta.fields]
         for i, field_name in enumerate(fields):
-            self.fields[field_name] = i
+            self.table_fields[field_name] = i
 
         # load records
-        records = model_obj.objects.all()
+        records = self.model.objects.all()
         for record in records:
             row_data = [record.serializable_value(field_name) for field_name in fields]
-            self.data.append(RecordData(self.fields, row_data))
+            self.records.append(RecordData(self.table_fields, row_data))
 
         # set unique index
-        for field in model_obj._meta.fields:
+        for field in self.model._meta.fields:
             if field.name != "id" and field.unique:
-                self.index[field.name] = dict((getattr(record, field.name), [i]) for i, record in enumerate(self.data))
+                self.index[field.name] = dict((getattr(record, field.name), [i]) for i, record in enumerate(self.records))
 
         # set common index
-        for field in model_obj._meta.fields:
+        for field in self.model._meta.fields:
             if field.db_index:
                 all_values = {}
-                for i, record in enumerate(self.data):
+                for i, record in enumerate(self.records):
                     key = getattr(record, field.name)
                     if key in all_values:
                         all_values[key].append(i)
@@ -83,10 +82,10 @@ class TableData(object):
                 self.index[field.name] = all_values
 
         # index together
-        for index_together in model_obj._meta.index_together:
+        for index_together in self.model._meta.index_together:
             index_fields = set(index_together)
             all_values = {}
-            for i, record in enumerate(self.data):
+            for i, record in enumerate(self.records):
                 keys = tuple(getattr(record, field_name) for field_name in index_fields)
                 if keys in all_values:
                     all_values[keys].append(i)
@@ -96,10 +95,10 @@ class TableData(object):
             self.index[index_name] = all_values
 
         # unique together
-        for unique_together in model_obj._meta.unique_together:
+        for unique_together in self.model._meta.unique_together:
             unique_fields = set(unique_together)
             all_values = {}
-            for i, record in enumerate(self.data):
+            for i, record in enumerate(self.records):
                 keys = tuple(getattr(record, field_name) for field_name in unique_fields)
                 if keys in all_values:
                     all_values[keys].append(i)
@@ -108,33 +107,33 @@ class TableData(object):
             index_name = ".".join(unique_fields)
             self.index[index_name] = all_values
 
-    def get_fields(self):
+    def fields(self):
         """
         Get table fields.
         """
-        return self.fields
+        return self.table_fields
 
-    def all_data(self):
+    def all(self):
         """
         Get all data.
         """
-        return self.data
+        return [record for i, record in enumerate(self.records)]
 
     def first(self):
         """
         Get the first record.
         """
-        if len(self.data) > 0:
-            return self.data[0]
+        if len(self.records) > 0:
+            return self.records[0]
 
-    def get_data(self, record):
+    def get(self, record_id):
         """
         Get data by record's id.
         """
-        if 0 <= record < len(self.data):
-            return self.data[record]
+        if 0 <= record_id < len(self.records):
+            return self.records[record_id]
 
-    def filter_data(self, **kwargs):
+    def filter(self, **kwargs):
         """
         Filter data by record's value. Fields must have index. If filter multi fields, put them in a tuple.
 
@@ -142,7 +141,7 @@ class TableData(object):
             kwargs: (dict) query conditions
         """
         if len(kwargs) == 0:
-            return self.all_data()
+            return self.all()
 
         if len(kwargs) == 1:
             keys = list(kwargs.keys())
@@ -158,6 +157,6 @@ class TableData(object):
 
         index = self.index[index_name]
         if values in index:
-            return [self.data[i] for i in index[values]]
+            return [self.records[i] for i in index[values]]
         else:
             return []

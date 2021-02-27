@@ -4,7 +4,7 @@ Event action.
 
 from evennia import create_script
 from muddery.server.events.base_event_action import BaseEventAction
-from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.elements.script_room_interval import ScriptRoomInterval
 

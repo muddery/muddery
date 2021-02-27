@@ -9,9 +9,9 @@ from muddery.server.utils import defines
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.server.database.dao.dialogues import Dialogues
-from muddery.server.database.dao.dialogue_relations import DialogueRelations
-from muddery.server.database.dao.dialogue_quests import DialogueQuests
+from muddery.server.database.worlddata.dialogues import Dialogues
+from muddery.server.database.worlddata.dialogue_relations import DialogueRelations
+from muddery.server.database.worlddata.dialogue_quests import DialogueQuests
 from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.events.event_trigger import EventTrigger
 

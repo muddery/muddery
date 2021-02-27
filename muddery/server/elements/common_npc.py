@@ -16,6 +16,6 @@ class MudderyCommonNPC(ELEMENT("BASE_NPC")):
     """
     The character not controlled by players.
     """
-    element_key = "COMMON_NPC"
+    element_type = "COMMON_NPC"
     element_name = _("Common NPC", "elements")
     model_name = "common_npcs"

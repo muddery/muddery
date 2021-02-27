@@ -4,7 +4,7 @@ Shop goods is the object in shops. They have some special attributes to record g
 """
 
 from evennia.utils import logger
-from muddery.server.database.dao.worlddata import WorldData
+from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 
@@ -14,7 +14,7 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
     This is a shop goods. Shops show these objects to players. It contains a common object
     to sell and additional shop information.
     """
-    element_key = "SHOP_GOODS"
+    element_type = "SHOP_GOODS"
     element_name = _("Goods", "elements")
     model_name = "shop_goods"
 
@@ -65,7 +65,7 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
         try:
             obj_record = WorldData.get_table_data(obj_model_name, key=self.goods_key)
             obj_record = obj_record[0]
-            goods_models = ELEMENT_SET.get_class_modeles(obj_record.typeclass)
+            goods_models = ELEMENT_SET.get_class_modeles(obj_record.element_type)
             goods_data = WorldData.get_tables_data(goods_models, key=self.goods_key)
             goods_data = goods_data[0]
         except Exception as e:

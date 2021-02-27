@@ -31,4 +31,4 @@ class PlayerCharacter(MudderyPlayerCharacter):
                     has connected" message echoed to the room
 
     """
-    element_key = "PLAYER_CHARACTER"
+    element_type = "PLAYER_CHARACTER"

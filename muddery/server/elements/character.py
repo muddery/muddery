@@ -12,20 +12,21 @@ import time, ast
 from twisted.internet import reactor, task
 from twisted.internet.task import deferLater
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.utils import logger, search
 from evennia.utils.utils import lazy_property, class_from_module
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.database.dao.equipment_positions import EquipmentPositions
-from muddery.server.database.dao.loot_list import CharacterLootList
-from muddery.server.database.dao.object_properties import ObjectProperties
-from muddery.server.database.dao.default_skills import DefaultSkills
+from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
+from muddery.server.database.worlddata.loot_list import CharacterLootList
+from muddery.server.database.worlddata.object_properties import ObjectProperties
+from muddery.server.database.worlddata.default_skills import DefaultSkills
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils import defines, utils
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.utils.utils import search_obj_data_key
+from muddery.server.utils.utils import get_object_by_key
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import delete_object
@@ -57,14 +58,14 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         equipments
         closed_events
     """
-    element_key = "CHARACTER"
+    element_type = "CHARACTER"
     element_name = _("Character", "elements")
     model_name = "characters"
 
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, CharacterLootList.get(self.get_data_key()))
+        return LootHandler(self, CharacterLootList.get(self.get_object_key()))
 
     @lazy_property
     def body_data_handler(self):
@@ -155,10 +156,10 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             level = self.get_level()
 
         # Load values from db.
-        data_key = self.const.clone if self.const.clone else self.get_data_key()
+        object_key = self.const.clone if self.const.clone else self.get_object_key()
 
         values = {}
-        for record in ObjectProperties.get_properties(data_key, level):
+        for record in ObjectProperties.get_properties(object_key, level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":
@@ -379,7 +380,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Load character's default skills.
         """
         # default skills
-        skill_records = DefaultSkills.get(self.get_data_key())
+        skill_records = DefaultSkills.get(self.get_object_key())
         default_skill_ids = set([record.skill for record in skill_records])
 
         # remove old default skills
@@ -653,7 +654,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             logger.log_errmsg("Can not find the target.")
             return False
 
-        if not target.is_typeclass(ELEMENT(settings.GENERAL_CHARACTER_ELEMENT_KEY), exact=False):
+        if not target.is_element(settings.CHARACTER_ELEMENT_TYPE):
             # Target is not a character.
             logger.log_errmsg("Can not attack the target %s." % target.dbref)
             return False
@@ -712,7 +713,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        self.attack_temp_target(self.target.get_data_key(), self.target.get_level(), desc)
+        self.attack_temp_target(self.target.get_object_key(), self.target.get_level(), desc)
 
     def attack_temp_target(self, target_key, target_level=0, desc=""):
         """
@@ -729,10 +730,11 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         if target_level == 0:
             # Find the target and get its level.
-            obj = search_obj_data_key(target_key)
-            if obj:
-                obj = obj[0]
+            try:
+                obj = get_object_by_key(target_key)
                 target_level = obj.get_level()
+            except ObjectDoesNotExist:
+                pass
 
         # Create a target.
         target = build_object(target_key, target_level, reset_location=False)
@@ -837,9 +839,10 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         if not home:
             home_key = self.const.location
             if home_key:
-                rooms = utils.search_obj_data_key(home_key)
-                if rooms:
-                    home = rooms[0]
+                try:
+                    home = get_object_by_key(home_key)
+                except ObjectDoesNotExist:
+                    pass
 
         if not home:
             rooms = search.search_object(settings.DEFAULT_HOME)

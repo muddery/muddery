@@ -17,7 +17,7 @@ class MudderySkill(ELEMENT("OBJECT")):
     """
     A skill of the character.
     """
-    element_key = "SKILL"
+    element_type = "SKILL"
     element_name = _("Skill", "elements")
     model_name = "skills"
 
@@ -112,7 +112,7 @@ class MudderySkill(ELEMENT("OBJECT")):
         if self.passive:
             return []
 
-        commands = [{"name": _("Cast"), "cmd": "cast_skill", "args": self.get_data_key()}]
+        commands = [{"name": _("Cast"), "cmd": "cast_skill", "args": self.get_object_key()}]
         return commands
 
     def cast(self, caller, target):
@@ -135,7 +135,7 @@ class MudderySkill(ELEMENT("OBJECT")):
 
             # set message
             skill_cast = {
-                "skill": self.get_data_key(),
+                "skill": self.get_object_key(),
                 "main_type": self.main_type,
                 "sub_type": self.sub_type,
                 "cast": case_message,
