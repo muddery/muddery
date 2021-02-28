@@ -92,6 +92,9 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
         # remove the character's honour
         HONOURS_MAPPER.remove_honour(self.id)
 
+        # remove all quests
+        self.quest_handler.remove_all()
+
         return super(MudderyPlayerCharacter, self).at_object_delete()
 
     def after_data_loaded(self):
