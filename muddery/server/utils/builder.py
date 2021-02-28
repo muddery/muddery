@@ -370,10 +370,6 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
     new_character.locks.add("puppet:id(%i) or pid(%i) or perm(Immortals) or pperm(Immortals)" %
                             (new_character.id, new_player.id))
 
-    # If no description is set, set a default description
-    if not new_character.db.desc:
-        new_character.db.desc = "This is a Player."
-
     # Add nickname
     if not nickname:
         nickname = character_key

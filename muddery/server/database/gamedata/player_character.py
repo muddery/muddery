@@ -10,7 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 class PlayerCharacter(object):
     """
-    The storage of player character data.
+    The storage of player character's basic data.
     """
     def __init__(self, model_name):
         self.model_name = model_name
@@ -25,7 +25,7 @@ class PlayerCharacter(object):
             }
             self.nicknames[record.nickname] = record.object_id
 
-    def add(self, object_id, nickname):
+    def add(self, object_id, nickname=""):
         """
         Store an object's key.
         :param object_id:
@@ -48,6 +48,16 @@ class PlayerCharacter(object):
             self.nicknames[nickname] = object_id
         except Exception as e:
             print("Can not add %s's nickname: %s" % (object_id, nickname))
+
+    def update_nickname(self, object_id, nickname):
+        """
+        Update a character's nickname.
+        :param object_id:
+        :param nickname:
+        :return:
+        """
+        self.model.objects.filter(object_id=object_id).update(nickname=nickname)
+        self.records[object_id]["nickname"] = nickname
 
     def remove(self, object_id):
         """
@@ -91,4 +101,4 @@ class PlayerCharacter(object):
             return None
 
 
-PLAYER_CHARACTER = PlayerCharacter("player_character")
+PLAYER_CHARACTER_DATA = PlayerCharacter("player_character")

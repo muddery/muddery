@@ -83,7 +83,7 @@ class player_character(models.Model):
     object_id = models.PositiveIntegerField(unique=True)
 
     # character's nickname
-    nickname = models.CharField(max_length=KEY_LENGTH, unique=True)
+    nickname = models.CharField(max_length=KEY_LENGTH)
 
     class Meta:
         "Define Django meta options"

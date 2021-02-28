@@ -193,22 +193,3 @@ class FuncFightTarget(StatementFunction):
             desc = self.args[0]
 
         return self.caller.attack_temp_target(self.obj.get_object_key(), self.obj.get_level(), desc)
-        
-        
-class FuncKillCaller(StatementFunction):
-    """
-    Kill the caller.
-
-    Returns:
-        (boolean) killed
-    """
-    key = "kill_caller"
-    const = False
-
-    def func(self):
-        """
-        Implement the function.
-        """
-        self.caller.db.hp = 0
-        self.caller.die(None)
-        return True

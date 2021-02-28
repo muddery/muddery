@@ -12,7 +12,7 @@ from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils import utils
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
-from muddery.server.database.gamedata.player_character import PLAYER_CHARACTER
+from muddery.server.database.gamedata.player_character import PLAYER_CHARACTER_DATA
 
 
 MAX_NR_CHARACTERS = settings.MAX_NR_CHARACTERS
@@ -252,7 +252,7 @@ class CmdCharCreate(BaseCommand):
             session.msg({"alert":_("You may only create a maximum of %i characters.") % charmax})
             return
 
-        if PLAYER_CHARACTER.get_object_id(nickname):
+        if PLAYER_CHARACTER_DATA.get_object_id(nickname):
             # check if this name already exists.
             session.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
             return

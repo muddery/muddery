@@ -27,7 +27,6 @@ class ActionFuncSet(BaseStatementFuncSet):
         self.add(action.FuncTeleportTo)
         self.add(action.FuncFightMob)
         self.add(action.FuncFightTarget)
-        self.add(action.FuncKillCaller)
 
 
 class ConditionFuncSet(BaseStatementFuncSet):

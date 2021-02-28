@@ -66,15 +66,3 @@ class HonourCombatHandler(BaseCombatHandler):
             character.show_status()
 
         return rewards
-
-    def _cleanup_character(self, character):
-        """
-        Remove character from handler and clean
-        it of the back-reference and cmdset
-        """
-        super(HonourCombatHandler, self)._cleanup_character(character)
-
-        # Recover all hp.
-        character.db.hp = character.max_hp
-        if character.has_account:
-            character.show_status()

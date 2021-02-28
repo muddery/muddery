@@ -367,19 +367,9 @@ class CmdGoto(BaseCommand):
 
         if obj:
             # goto this exit
-            if obj.access(self.caller, 'traverse'):
-                # we may traverse the exit.
-                # MudderyLockedExit handles locks in at_before_traverse().
-                if obj.at_before_traverse(self.caller):
-                    obj.at_traverse(caller, obj.destination)
-            else:
-                # exit is locked
-                if obj.db.err_traverse:
-                    # if exit has a better error message, let's use it.
-                    caller.msg({"alert": self.obj.db.err_traverse})
-                else:
-                    # No shorthand error message. Call hook.
-                    obj.at_failed_traverse(caller)
+            # MudderyLockedExit handles locks in at_before_traverse().
+            if obj.at_before_traverse(self.caller):
+                obj.at_traverse(caller, obj.destination)
         else:
             # Can not find exit.
             caller.msg({"alert": _("Can not go there.")})

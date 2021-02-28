@@ -6,7 +6,6 @@ Data are arbitrary data stored in worlddata tables. They are read only.
 from builtins import object
 import weakref
 
-
 class DataFieldHandler(object):
     """
     This handler manages read only data from db.

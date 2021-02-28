@@ -29,7 +29,7 @@ from muddery.server.database.worlddata.default_objects import DefaultObjects
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils import defines
 from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
-from muddery.server.database.gamedata.player_character import PLAYER_CHARACTER
+from muddery.server.database.gamedata.player_character import PLAYER_CHARACTER_DATA
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
 
@@ -75,6 +75,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         super(MudderyPlayerCharacter, self).at_object_creation()
 
+        PLAYER_CHARACTER_DATA.add(self.id)
+
     def at_object_delete(self):
         """
         Called just before the database object is permanently
@@ -89,6 +91,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         # remove the character's honour
         HONOURS_MAPPER.remove_honour(self.id)
+
+        # remove the character's data
+        PLAYER_CHARACTER_DATA.remove(self.id)
 
         # remove quests
         self.quest_handler.remove_all()
@@ -246,14 +251,14 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         Set player character's nickname.
         """
-        PLAYER_CHARACTER.add(self.id, nickname)
+        PLAYER_CHARACTER_DATA.update_nickname(self.id, nickname)
 
     def get_name(self):
         """
         Get player character's name.
         """
         # Use nick name instead of normal name.
-        return PLAYER_CHARACTER.get_nickname(self.id)
+        return PLAYER_CHARACTER_DATA.get_nickname(self.id)
 
     def get_available_commands(self, caller):
         """
@@ -1087,24 +1092,26 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Lock an exit. Remove the exit's key from the character's unlock list.
         """
         exit_key = exit.get_object_key()
-        if not self.is_exit_unlocked(exit_key):
+        unlocked_exits = self.states.load("unlocked_exits", set())
+        if exit_key not in unlocked_exits:
             return
 
-        self.db.unlocked_exits.remove(exit_key)
+        unlocked_exits.remove(exit_key)
+        self.states.save("unlocked_exits", unlocked_exits)
 
     def unlock_exit(self, exit):
         """
         Unlock an exit. Add the exit's key to the character's unlock list.
         """
         exit_key = exit.get_object_key()
-        if self.is_exit_unlocked(exit_key):
+        unlocked_exits = self.states.load("unlocked_exits", set())
+        if exit_key in unlocked_exits:
             return True
 
         if not exit.can_unlock(self):
             self.msg({"msg": _("Can not open this exit.")})
             return False
 
-        unlocked_exits = self.states.load("unlocked_exits", set())
         unlocked_exits.add(exit_key)
         self.states.save("unlocked_exits", unlocked_exits)
         return True

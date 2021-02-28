@@ -184,7 +184,7 @@ class HonoursMapper(object):
         try:
             record = self.objects.filter(character=char_id)
             if record:
-                record.update(honour = honour)
+                record.update(honour=honour)
                 self.honours[char_id]["honour"] = honour
             else:
                 self.create_honour(char_id, honour)

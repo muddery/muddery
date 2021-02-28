@@ -276,7 +276,7 @@ class QuestHandler(object):
         for quest in current_quests.values():
             info = {"dbref": quest.dbref,
                     "name": quest.name,
-                    "desc": quest.db.desc,
+                    "desc": quest.get_desc(self.owner),
                     "objectives": quest.return_objectives(),
                     "accomplished": quest.is_accomplished()}
             quests.append(info)
