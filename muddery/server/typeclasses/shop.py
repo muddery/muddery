@@ -132,7 +132,7 @@ class MudderyShop(TYPECLASS("OBJECT")):
         info = {
             "dbref": self.dbref,
             "name": self.get_name(),
-            "desc": self.db.desc
+            "desc": self.get_desc(caller),
         }
 
         icon = self.icon

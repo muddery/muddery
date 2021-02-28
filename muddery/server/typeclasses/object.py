@@ -127,6 +127,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         self.condition = None
         self.action = None
         self.icon = None
+        self.desc = ""
         
         try:
             # Load db data.
@@ -499,7 +500,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         Args:
         desc: (string) Description.
         """
-        self.db.desc = desc
+        self.desc = desc
 
     def set_obj_destination(self, destination):
         """
@@ -596,12 +597,13 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         """
         This returns object's descriptions on different conditions.
         """
-        desc_conditions = DESC_HANDLER.get(self.get_data_key())
-        if desc_conditions:
-            for item in desc_conditions:
-                if STATEMENT_HANDLER.match_condition(item["condition"], caller, self):
-                    return item["desc"]
-        return self.db.desc
+        if caller:
+            desc_conditions = DESC_HANDLER.get(self.get_data_key())
+            if desc_conditions:
+                for item in desc_conditions:
+                    if STATEMENT_HANDLER.match_condition(item["condition"], caller, self):
+                        return item["desc"]
+        return self.desc
         
     def get_available_commands(self, caller):
         """

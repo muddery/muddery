@@ -807,7 +807,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
             info = {"dbref": item.dbref,        # item's dbref
                     "name": item.name,          # item's name
                     "number": item.db.number,   # item's number
-                    "desc": item.db.desc,       # item's desc
+                    "desc": item.get_desc(self),       # item's desc
                     "can_remove": item.can_remove,
                     "icon": getattr(item, "icon", None)}  # item's icon
             
@@ -862,7 +862,7 @@ class MudderyPlayerCharacter(TYPECLASS("CHARACTER")):
                     if obj.dbref == dbref:
                         info = {"dbref": obj.dbref,
                                 "name": obj.name,
-                                "desc": obj.db.desc,
+                                "desc": obj.get_desc(self),
                                 "icon": obj.icon,}
             equipments[position] = info
 

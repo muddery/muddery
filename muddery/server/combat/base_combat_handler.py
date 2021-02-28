@@ -74,14 +74,15 @@ class BaseCombatHandler(DefaultScript):
 
     def at_stop(self):
         "Called just before the script is stopped/destroyed."
-        if self.timer and self.timer.active():
+        if hasattr(self, "timer") and self.timer and self.timer.active():
             self.timer.cancel()
 
-        if not self.finished:
+        if hasattr(self, "finished") and not self.finished:
             self.set_combat_draw()
 
-        for char in self.characters.values():
-            char["char"].leave_combat()
+        if hasattr(self, "characters"):
+            for char in self.characters.values():
+                char["char"].leave_combat()
 
     def at_timeout(self):
         """
