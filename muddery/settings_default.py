@@ -99,6 +99,9 @@ DATABASE_APPS_MAPPING = {
     'worlddata': 'worlddata',
 }
 
+# Cache all Attributes, Tags, Nicks, Aliases.
+TYPECLASS_FULL_CACHE = True
+
 ######################################################################
 # Evennia pluggable modules
 ######################################################################
