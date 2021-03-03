@@ -444,58 +444,6 @@ class staff_characters(BaseObjects):
         verbose_name_plural = "Staff Characters"
 
 
-class shops(BaseObjects):
-    "Store all shops."
-
-    # the verb to open the shop
-    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # condition of the shop
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # shop's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Shop"
-        verbose_name_plural = "Shops"
-
-
-class shop_goods(BaseObjects):
-    "All goods that sold in shops."
-
-    # shop's key
-    shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # the key of objects to sell
-    goods = models.CharField(max_length=KEY_LENGTH)
-
-    # goods level
-    level = models.PositiveIntegerField(blank=True, default=0)
-
-    # number of shop goods
-    number = models.PositiveIntegerField(blank=True, default=1)
-
-    # the price of the goods
-    price = models.PositiveIntegerField(blank=True, default=1)
-
-    # the unit of the goods price
-    unit = models.CharField(max_length=KEY_LENGTH)
-
-    # visible condition of the goods
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Shop Object"
-        verbose_name_plural = "Shop Objects"
-
-
 class skills(BaseObjects):
     "Store all skills."
 
@@ -526,26 +474,6 @@ class skills(BaseObjects):
         app_label = "worlddata"
         verbose_name = "Skill"
         verbose_name_plural = "Skills"
-
-
-class quests(BaseObjects):
-    "Store all quests."
-
-    # experience that the character get
-    exp = models.PositiveIntegerField(blank=True, default=0)
-
-    # the condition to accept this quest.
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    # will do this action after a quest completed
-    action = models.TextField(blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Quest"
-        verbose_name_plural = "Quests"
 
 
 # ------------------------------------------------------------
@@ -602,6 +530,66 @@ class object_creators(BaseObjects):
         app_label = "worlddata"
         verbose_name = "Object Creator"
         verbose_name_plural = "Object Creators"
+
+
+class shops(models.Model):
+    "Store all shops."
+    # shop's key
+    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # shop's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # shop's description
+    desc = models.TextField(blank=True)
+
+    # the verb to open the shop
+    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # condition of the shop
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    # shop's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Shop"
+        verbose_name_plural = "Shops"
+
+
+class shop_goods(models.Model):
+    "All goods that sold in shops."
+
+    # shop's key
+    shop = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # the key of objects to sell
+    goods = models.CharField(max_length=KEY_LENGTH)
+
+    # goods level
+    level = models.PositiveIntegerField(blank=True, default=0)
+
+    # number of shop goods
+    number = models.PositiveIntegerField(blank=True, default=1)
+
+    # the price of the goods
+    price = models.PositiveIntegerField(blank=True, default=1)
+
+    # the unit of the goods price
+    unit = models.CharField(max_length=KEY_LENGTH)
+
+    # visible condition of the goods
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Shop Goods"
+        verbose_name_plural = "Shop Goods"
 
 
 # ------------------------------------------------------------
@@ -921,6 +909,34 @@ class default_skills(models.Model):
         unique_together = ("character", "skill")
 
 
+class quests(models.Model):
+    "Store all quests."
+    # quest's key
+    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # quest's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # quest's description for display
+    desc = models.TextField(blank=True)
+
+    # experience that the character get
+    exp = models.PositiveIntegerField(blank=True, default=0)
+
+    # the condition to accept this quest.
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    # will do this action after a quest completed
+    action = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Quest"
+        verbose_name_plural = "Quests"
+
+
 # ------------------------------------------------------------
 #
 # store quest objectives
@@ -932,9 +948,6 @@ class quest_objectives(models.Model):
     # The key of a quest.
     # quest's key
     quest = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # objective's ordinal
-    ordinal = models.IntegerField(blank=True, default=0)
 
     # The key of an objetive type.
     # objective's type
@@ -955,7 +968,7 @@ class quest_objectives(models.Model):
         app_label = "worlddata"
         verbose_name = "Quest Objective"
         verbose_name_plural = "Quest Objectives"
-        unique_together = ("quest", "ordinal")
+        unique_together = ("quest", "type", "object")
 
 
 # ------------------------------------------------------------

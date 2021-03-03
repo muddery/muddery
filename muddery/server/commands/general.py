@@ -1152,8 +1152,12 @@ class CmdShopping(BaseCommand):
     Open a shop.
 
     Usage:
-        {"cmd":"shopping",
-         "args":<shop's dbref>
+        {
+            "cmd":"shopping",
+            "args": {
+                npc: <npc's dbref>,
+                shop: <shop's key>,
+            }
         }
     """
     key = "shopping"
@@ -1163,17 +1167,21 @@ class CmdShopping(BaseCommand):
     def func(self):
         "Do shopping."
         caller = self.caller
+        args = self.args
 
-        if not self.args:
-            caller.msg({"alert":_("You should shopping in someplace.")})
+        if not args or "npc" not in args or "shop" not in args:
+            caller.msg({"alert": _("You should shopping in someplace.")})
             return
 
-        shop = caller.search_dbref(self.args)
-        if not shop:
-            caller.msg({"alert":_("Can not find this shop.")})
+        npc_dbref = args["npc"]
+        shop_key = args["shop"]
+
+        npc = caller.search_dbref(npc_dbref)
+        if not npc:
+            caller.msg({"alert": _("Can not find this NPC.")})
             return
 
-        shop.show_shop(caller)
+        caller.msg({"shop": npc.get_shop_info(shop_key, caller)})
 
 
 #------------------------------------------------------------
@@ -1184,8 +1192,13 @@ class CmdBuy(BaseCommand):
     Buy a goods.
 
     Usage:
-        {"cmd":"buy",
-         "args":<goods' dbref>}
+        {
+            "cmd": "buy",
+            "args": {
+                "npc": <npc's dbref>,
+                "shop": <shop's key>,
+                "goods": <goods' index>,
+            }
         }
     """
     key = "buy"
@@ -1195,23 +1208,65 @@ class CmdBuy(BaseCommand):
     def func(self):
         "Buy a goods."
         caller = self.caller
+        args = self.args
 
-        if not self.args:
-            caller.msg({"alert":_("You should buy something.")})
+        if not args or "npc" not in args or "shop" not in args or "goods" not in args:
+            caller.msg({"alert": _("You should buy something.")})
             return
 
-        goods = caller.search_dbref(self.args)
-        if not goods:
-            caller.msg({"alert":_("Can not find this goods.")})
+        npc = caller.search_dbref(args["npc"])
+        if not npc:
+            caller.msg({"alert": _("Can not find this NPC.")})
             return
+
+        shop = args["shop"]
+        goods = args["goods"]
 
         # buy goods
         try:
-            goods.sell_to(caller)
+            npc.sell_goods(shop, int(goods), caller)
         except Exception as e:
-            caller.msg({"alert":_("Can not buy this goods.")})
-            logger.log_err("Can not buy %s: %s" % (goods.get_object_key(), e))
+            import traceback
+            traceback.print_exc()
+            caller.msg({"alert": _("Can not buy this goods.")})
+            logger.log_err("Can not buy %s %s %s: %s" % (args["npc"], shop, goods, e))
             return
+
+
+class CmdQueryQuest(BaseCommand):
+    """
+    Query a quest's detail information.
+
+    Usage:
+        {
+            "cmd": "look",
+            "args": {
+                "key": <quest's key>
+            }
+        }
+
+    Observes your location or objects in your vicinity.
+    """
+    key = "query_quest"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Handle the looking.
+        """
+        caller = self.caller
+        args = self.args
+
+        if not args or "key" not in args:
+            caller.msg({"alert": _("Can not find it.")})
+            return
+
+        quest_key = args["key"]
+
+        try:
+            caller.msg({"quest_info": caller.get_quest_info(quest_key)})
+        except Exception as e:
+            logger.log_err("Can not get %s's quest %s." % (caller.id, quest_key))
 
 
 #------------------------------------------------------------

@@ -6,11 +6,13 @@ MudderyObject is an object which can load it's data automatically.
 
 """
 
+from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.database.worlddata.properties_dict import PropertiesDict
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.database.worlddata.worlddata import WorldData
 
 
 class BaseElement(object):
@@ -23,6 +25,10 @@ class BaseElement(object):
 
     # object's data model
     model_name = ""
+
+    def __init__(self, *agrs, **wargs):
+        super(BaseElement, self).__init__(*agrs, **wargs)
+        self.element_key = ""
 
     @classmethod
     def get_models(cls):
@@ -124,3 +130,59 @@ class BaseElement(object):
         :return:
         """
         return isinstance(self, ELEMENT(element_type))
+
+    def set_element_key(self, key):
+        """
+        Set element data's key.
+
+        Args:
+            key: (string) Key of the data.
+        """
+        self.element_key = key
+
+        if self.model_name:
+            # Load data.
+            try:
+                # Load db data.
+                self.load_data(self.model_name, key)
+            except Exception as e:
+                logger.log_errmsg("%s %s can not load data:%s" % (self.model_name, key, e))
+
+        self.after_data_loaded()
+
+    def load_data(self, model, key):
+        """
+        Get object's data from database.
+
+        Args:
+            model: (String) data's table name.
+            key: (String) object's data key.
+
+        Returns:
+            None
+        """
+        # Get data record.
+        try:
+            fields = WorldData.get_fields(model)
+            record = WorldData.get_table_data(model, key=key)
+            record = record[0]
+        except Exception as e:
+            logger.log_errmsg("Can not find key %s in %s" % (key, model))
+            return
+
+        # Set data.
+        for field_name in fields:
+            self.const_data_handler.add(field_name, getattr(record, field_name))
+
+    def after_data_loaded(self):
+        """
+        Called after self.load_data().
+        """
+        pass
+
+    def get_element_key(self):
+        """
+        Get element key.
+        :return:
+        """
+        return self.element_key

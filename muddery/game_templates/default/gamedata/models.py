@@ -27,7 +27,31 @@ class object_status(BaseModels.object_status):
 # ------------------------------------------------------------
 class player_character(BaseModels.player_character):
     """
-    Character's honour data.
+    Character's data.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# player character's quests
+#
+# ------------------------------------------------------------
+class character_quests(BaseModels.character_quests):
+    """
+    Character's quests.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# player character's quests
+#
+# ------------------------------------------------------------
+class quest_objectives(BaseModels.quest_objectives):
+    """
+    Quests' objectives.
     """
     pass
 

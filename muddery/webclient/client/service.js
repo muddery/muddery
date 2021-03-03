@@ -129,8 +129,12 @@ MudderyService.prototype = {
     },
     
     // buy something
-    buyGoods: function(dbref) {
-    	Evennia.msg("text", this.cmdString("buy", dbref));
+    buyGoods: function(npc, shop, goods) {
+    	Evennia.msg("text", this.cmdString("buy", {
+    	    npc: npc,
+    	    shop: shop,
+    	    goods: goods,
+    	}));
     },
     
     // dialogue
@@ -196,6 +200,13 @@ MudderyService.prototype = {
     // get character rankings
     getRankings: function() {
     	Evennia.msg("text", this.cmdString("get_rankings", ""));
+    },
+
+    // query the quest's detail information
+    // args:
+    //     key: (string) a quest's key
+    queryQuest: function(key) {
+        Evennia.msg("text", this.cmdString("query_quest", {key: key}));
     },
     
     // do test

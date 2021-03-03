@@ -3344,8 +3344,9 @@ MudderyQuests.prototype.bindEvents = function() {
 MudderyQuests.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.quests.length) {
-        var dbref = this.quests[index].dbref;
-        core.service.look(dbref, "quests");
+        var key = this.quests[index].key;
+        this.item_selected = key;
+        core.service.queryQuest(key);
     }
 }
 
@@ -3361,20 +3362,20 @@ MudderyQuests.prototype.onCommand = function(element) {
 		else {
 		    var self = this;
 			var buttons = [
-            {
-                "name": core.trans("Cancel")
-            },
-            {
-                "name": core.trans("Confirm"),
-                "callback": function(data) {
-                    self.confirmCommand(data);
+                {
+                    "name": core.trans("Cancel")
                 },
-                "data": index,
-            }
-        ];
-        mud.main_frame.popupMessage(core.trans("Warning"),
-                                    this.buttons[index]["confirm"],
-                                    buttons);
+                {
+                    "name": core.trans("Confirm"),
+                    "callback": function(data) {
+                        self.confirmCommand(data);
+                    },
+                    "data": index,
+                }
+            ];
+            mud.main_frame.popupMessage(core.trans("Warning"),
+                                        this.buttons[index]["confirm"],
+                                        buttons);
 		}
 	}
 }
@@ -3439,13 +3440,13 @@ MudderyQuests.prototype.setQuests = function(quests) {
             }
         }
 
-        if (obj["dbref"] == this.item_selected) {
+        if (obj["key"] == this.item_selected) {
             has_selected_item = true;
         }
     }
 
     if (has_selected_item) {
-        core.service.look(this.item_selected, "quests");
+        core.service.queryQuest(this.item_selected);
     }
     else {
         this.item_selected = null;
@@ -4583,7 +4584,7 @@ MudderyShop.prototype.onClickGoods = function(element) {
     if (index < this.goods.length) {
         var goods = this.goods[index];
         this.goods_detail.reset();
-        this.goods_detail.setGoods(goods);
+        this.goods_detail.setGoods(this.npc, this.key, goods);
         this.goods_detail.show();
     }
 }
@@ -4602,6 +4603,8 @@ MudderyShop.prototype.reset = function() {
  * Set shop's goods.
  */
 MudderyShop.prototype.setShop = function(data) {
+    this.npc = data["npc"];
+    this.key = data["key"];
     var name = data["name"];
     var icon = data["icon"];
     var desc = data["desc"];
@@ -4710,7 +4713,7 @@ MudderyGoodsDetail.prototype.onClose = function(element) {
  */
 MudderyGoodsDetail.prototype.onBuy = function(element) {
     if (this.goods) {
-        core.service.buyGoods(this.goods["dbref"]);
+        core.service.buyGoods(this.npc, this.shop, this.goods["index"]);
     }
 
     // close this window
@@ -4730,7 +4733,9 @@ MudderyGoodsDetail.prototype.reset = function() {
 /*
  * Show goods to the player.
  */
-MudderyGoodsDetail.prototype.setGoods = function(goods) {
+MudderyGoodsDetail.prototype.setGoods = function(npc, shop, goods) {
+    this.npc = npc;
+    this.shop = shop;
     this.goods = goods;
 
     // icon

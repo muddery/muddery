@@ -107,6 +107,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         self.solo_mode = GAME_SETTINGS.get("solo_mode")
         self.available_channels = {}
+        self.current_dialogues = set()
 
         # refresh data
         self.refresh_properties(True)
@@ -154,6 +155,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # trigger event
         if self.has_account:
             self.location.event.at_character_move_in(self)
+            self.quest_handler.at_objective(defines.OBJECTIVE_ARRIVE, self.location.get_object_key())
 
     def at_post_puppet(self):
         """
@@ -487,7 +489,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         for obj in obj_list:
             key = obj["object"]
-            level = obj.get("level")
+            level = obj.get("level", 0)
             available = obj["number"]
             number = available
             accepted = 0
@@ -1292,50 +1294,27 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         else:
             self.msg({"msg": _("You are reborn.")})
 
-    def save_current_dialogues(self, dialogues, npc):
+    def save_current_dialogues(self, current_dialogue):
         """
         Save player's current dialogues.
 
         Args:
-            dialogues: the current dialogues
-            npc: NPC whom the player is talking to.
+            current_dialogue: current dialogues
 
         Returns:
             None
         """
+        # Save the dialogue's key.
+        if current_dialogue:
+            self.current_dialogues = set([d["key"] for d in current_dialogue["dialogues"]])
+        else:
+            self.current_dialogues = set()
+
         if not GAME_SETTINGS.get("auto_resume_dialogues"):
             # Can not auto resume dialogues.
             return
 
-        if not dialogues:
-            self.clear_current_dialogue()
-            return
-
-        # Save the dialogue's id.
-        dialogues = [d["dialogue"] for d in dialogues]
-
-        npc_key = None
-        if npc:
-            npc_key = npc.get_object_key()
-
-        location_key = None
-        if self.location:
-            location_key = self.location.get_object_key()
-
-        current_dialogue = {"dialogues": dialogues,
-                            "npc": npc_key,
-                            "location": location_key}
-        self.states.save("current_dialogue", current_dialogue)
-        return
-
-    def clear_current_dialogue(self):
-        """
-        Clear player's current dialogues.
-
-        Returns:
-            None
-        """
-        self.states.save("current_dialogue", None)
+        self.states.save("current_dialogue", current_dialogue if current_dialogue else None)
         return
 
     def resume_last_dialogue(self):
@@ -1353,30 +1332,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if not current_dialogue:
             return
 
-        if not current_dialogue["dialogues"]:
-            return
-
-        # Check dialogue's location
-        if self.location.get_object_key() != current_dialogue["location"]:
-            # If player's location has changed, return.
-            return
-
-        # Check npc.
-        npc_talking = None
-        if current_dialogue["npc"]:
-            try:
-                npc = utils.get_object_by_key(current_dialogue["npc"])
-                if npc.location == self.location:
-                    npc_talking = npc
-                else:
-                    return
-            except ObjectDoesNotExist:
-                return
-
-        dialogues = [DIALOGUE_HANDLER.get_dialogue(d) for d in current_dialogue["dialogues"]]
-        dialogues = DIALOGUE_HANDLER.create_output_sentences(dialogues, self, npc_talking)
-        self.msg({"dialogue": dialogues})
+        self.msg({"dialogue": current_dialogue})
         return
+
 
     def talk_to_npc(self, npc):
         """
@@ -1394,7 +1352,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # Get NPC's dialogue list.
         dialogues = DIALOGUE_HANDLER.get_npc_dialogues(self, npc)
         
-        self.save_current_dialogues(dialogues, npc)
+        self.save_current_dialogues(dialogues)
         self.msg({"dialogue": dialogues})
 
     def show_dialogue(self, dlg_key, npc):
@@ -1412,7 +1370,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         dialogue = DIALOGUE_HANDLER.get_dialogues_by_key(dlg_key, npc)
 
         # Send the dialogue to the player.
-        self.save_current_dialogues(dialogue, npc)
+        self.save_current_dialogues(dialogue)
         self.msg({"dialogue": dialogue})
 
     def finish_dialogue(self, dlg_key, npc):
@@ -1426,15 +1384,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             None
         """
-        if GAME_SETTINGS.get("auto_resume_dialogues"):
-            # Check current dialogue.
-            current_dialogue = self.states.load("current_dialogue", None)
-            if not current_dialogue:
-                return
-
-            if dlg_key not in current_dialogue["dialogue"]:
-                # Can not find specified dialogue in current dialogues.
-                return
+        if dlg_key not in self.current_dialogues:
+            logger.log_err("Not in current dialogues: %s" % dlg_key)
+            return
 
         try:
             # Finish current dialogue
@@ -1447,7 +1399,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         next_dialogues = DIALOGUE_HANDLER.get_next_dialogues(dlg_key, self, npc)
 
         # Send dialogues_list to the player.
-        self.save_current_dialogues(next_dialogues, npc)
+        self.save_current_dialogues(next_dialogues)
         self.msg({"dialogue": next_dialogues})
         if not next_dialogues:
             # dialogue finished, refresh surroundings
@@ -1511,3 +1463,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                  "ranking": HONOURS_MAPPER.get_ranking(char),
                  "honour": HONOURS_MAPPER.get_honour(char)} for char in characters if char]
         self.msg({"rankings": data})
+
+    def get_quest_info(self, quest_key):
+        """
+        Get a quest's detail information.
+        :param quest_key:
+        :return:
+        """
+        return self.quest_handler.get_quest_info(quest_key)

@@ -160,9 +160,10 @@ class HonoursMapper(object):
             honour: character's honour
         """
         try:
-            record = self.honour_model()
-            record.character = char_id
-            record.honour = honour
+            record = self.honour_model(
+                character=char_id,
+                honour=honour
+            )
             record.save()
             self.honours[char_id] = {
                 "honour": honour,

@@ -6,6 +6,7 @@ Store object's element key data in memory.
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from evennia.utils import logger
 
 
 class PlayerCharacter(object):
@@ -37,9 +38,10 @@ class PlayerCharacter(object):
                 return
 
         try:
-            record = self.model()
-            record.object_id = object_id
-            record.nickname = nickname
+            record = self.model(
+                object_id=object_id,
+                nickname=nickname
+            )
             record.save()
 
             self.records[object_id] = {
@@ -47,7 +49,7 @@ class PlayerCharacter(object):
             }
             self.nicknames[nickname] = object_id
         except Exception as e:
-            print("Can not add %s's nickname: %s" % (object_id, nickname))
+            logger.log_err("Can not add %s's nickname: %s" % (object_id, nickname))
 
     def update_nickname(self, object_id, nickname):
         """
@@ -76,7 +78,7 @@ class PlayerCharacter(object):
         except ObjectDoesNotExist:
             pass
         except Exception as e:
-            print("Can not remove object's element key: %s %s" % (object_id, e))
+            logger.log_err("Can not remove object's element key: %s %s" % (object_id, e))
 
     def get_nickname(self, object_id):
         """

@@ -247,7 +247,10 @@ class BaseCombatHandler(DefaultScript):
             for char in self.characters.values():
                 if char["status"] != CStatus.LEFT:
                     char["status"] = CStatus.LEFT
-                    char["char"].leave_combat()
+                    try:
+                        char["char"].leave_combat()
+                    except Exception as e:
+                        logger.log_err("Leave combat error: %s" % e)
 
             self.stop()
 

@@ -359,12 +359,8 @@ class DialogueHandler(object):
             provide_quest = (provide_quest or provide)
             finish_quest = (finish_quest or finish)
 
-            if finish_quest:
+            if finish_quest or provide_quest:
                 break
-
-            if not caller.quest_handler.get_accomplished_quests():
-                if provide_quest:
-                    break
 
         return provide_quest, finish_quest
 
@@ -411,12 +407,8 @@ class DialogueHandler(object):
             provide_quest = (provide_quest or provide)
             finish_quest = (finish_quest or finish)
 
-            if finish_quest:
+            if finish_quest or provide_quest:
                 break
-
-            if not caller.quest_handler.get_accomplished_quests():
-                if provide_quest:
-                    break
 
         return provide_quest, finish_quest
 

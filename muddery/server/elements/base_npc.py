@@ -73,38 +73,39 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         shop_keys = set([record.shop for record in shop_records])
 
         # NPC's shop
-        self.shops = self.states.load("shops", {})
-        changed = False
+        self.shops = {}
+        for key in shop_keys:
+            shop = ELEMENT("SHOP")()
+            shop.set_element_key(key)
+            shop.set_owner(self)
+            self.shops[key] = shop
 
-        # remove old shops
-        diff = set(self.shops.keys()) - shop_keys
-        if len(diff) > 0:
-            changed = True
-            for shop_key in diff:
-                # remove this shop
-                self.shops[shop_key].delete()
-                del self.shops[shop_key]
+    def get_shop_info(self, shop_key, caller):
+        """
+        Show shop's information to the player.
+        :param shop_key:
+        :param caller:
+        :return:
+        """
+        if shop_key not in self.shops:
+            return None
 
-        # add new shops
-        for shop_record in shop_records:
-            shop_key = shop_record.shop
-            if shop_key not in self.shops:
-                # Create shop object.
-                shop_obj = build_object(shop_key)
-                if not shop_obj:
-                    logger.log_errmsg("Can't create shop: %s" % shop_key)
-                    continue
+        shop_info = self.shops[shop_key].get_info(caller)
+        shop_info["npc"] = self.dbref
+        return shop_info
 
-                self.shops[shop_key] = shop_obj
-                changed = True
+    def sell_goods(self, shop_key, goods_index, caller):
+        """
+        Sell goods to the caller.
+        :param shop_key:
+        :param goods_index:
+        :param caller:
+        :return:
+        """
+        if shop_key not in self.shops:
+            return None
 
-        if changed:
-            self.states.save("shops", self.shops)
-
-        # if the shop has no icon, set the NPC's icon to the shop.
-        for key, obj in self.shops.items():
-            if not obj.icon:
-                obj.set_icon(self.icon)
+        self.shops[shop_key].sell_goods(goods_index, caller)
 
     def get_available_commands(self, caller):
         """
@@ -118,13 +119,18 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
 
             # Add shops.
             for key, obj in self.shops.items():
-                if not obj.is_visible(caller):
+                if not obj.is_available(caller):
                     continue
 
-                verb = obj.verb
-                if not verb:
-                    verb = obj.get_name()
-                commands.append({"name": verb, "cmd": "shopping", "args": obj.dbref})
+                verb = obj.get_verb()
+                commands.append({
+                    "name": verb,
+                    "cmd": "shopping",
+                    "args": {
+                        "npc": self.dbref,
+                        "shop": obj.get_element_key(),
+                    }
+                })
 
             if self.friendly <= 0:
                 commands.append({"name": _("Attack"), "cmd": "attack", "args": self.dbref})

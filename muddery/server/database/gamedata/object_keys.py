@@ -6,6 +6,7 @@ Store object's element key data in memory.
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from evennia.utils import logger
 
 
 class ObjectKeys(object):
@@ -43,10 +44,11 @@ class ObjectKeys(object):
                 return
 
         try:
-            record = self.model()
-            record.object_id = object_id
-            record.object_key = object_key
-            record.unique_type = unique_type
+            record = self.model(
+                object_id=object_id,
+                object_key=object_key,
+                unique_type=unique_type
+            )
             record.save()
 
             self.records[object_id] = {
@@ -58,7 +60,7 @@ class ObjectKeys(object):
                 self.unique_objects[record.unique_type] = {}
             self.unique_objects[record.unique_type][object_id] = object_key
         except Exception as e:
-            print("Can not add %s %s's element key: %s" % (object_id, object_key, e))
+            logger.log_err("Can not add %s %s's element key: %s" % (object_id, object_key, e))
 
     def remove(self, object_id):
         """
@@ -79,7 +81,7 @@ class ObjectKeys(object):
         except ObjectDoesNotExist:
             pass
         except Exception as e:
-            print("Can not remove object's element key: %s %s" % (object_id, e))
+            logger.log_err("Can not remove object's element key: %s %s" % (object_id, e))
 
     def get_key(self, object_id):
         """

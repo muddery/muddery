@@ -95,6 +95,66 @@ class player_character(models.Model):
 
 # ------------------------------------------------------------
 #
+# player character's quests
+#
+# ------------------------------------------------------------
+class character_quests(models.Model):
+    "Player character's quests."
+
+    # character's id
+    character_id = models.PositiveIntegerField(db_index=True)
+
+    # quest's key
+    quest = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # quest is finished
+    finished = models.BooleanField(blank=True, default=False, db_index=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Quest"
+        verbose_name_plural = "Quests"
+        unique_together = ("character_id", "quest")
+
+
+# ------------------------------------------------------------
+#
+# quest objectives
+#
+# ------------------------------------------------------------
+class quest_objectives(models.Model):
+    "Quests' objectives."
+
+    # character's id
+    character_id = models.PositiveIntegerField(db_index=True)
+
+    # quest's key
+    quest = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # The key of an objetive type.
+    # objective's type
+    objective_type = models.CharField(max_length=KEY_LENGTH)
+
+    # relative object's key
+    object_key = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # objective's progress
+    progress = models.PositiveIntegerField(blank=True, default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Quest Objective"
+        verbose_name_plural = "Quest Objectives"
+        unique_together = ("character_id", "quest", "objective_type", "object_key")
+        index_together = [("character_id", "quest")]
+
+
+# ------------------------------------------------------------
+#
 # character's honour
 #
 # ------------------------------------------------------------

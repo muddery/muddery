@@ -7,9 +7,11 @@ from evennia.utils import logger
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
+from muddery.server.elements.base_element import BaseElement
+from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 
 
-class MudderyShopGoods(ELEMENT("OBJECT")):
+class MudderyShopGoods(BaseElement):
     """
     This is a shop goods. Shops show these objects to players. It contains a common object
     to sell and additional shop information.
@@ -18,66 +20,52 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
     element_name = _("Goods", "elements")
     model_name = "shop_goods"
 
-    def at_object_creation(self):
+    def set_data(self, data):
         """
-        Called once, when this object is first created. This is the
-        normal hook to overload for most object types.
+        Set goods' data.
 
+        Args:
+            data: (record) goods's data.
         """
-        super(MudderyShopGoods, self).at_object_creation()
-
         self.available = False
 
-    def after_data_loaded(self):
-        """
-        Load goods data.
+        # load goods record
+        obj_model_name = ELEMENT("OBJECT").model_name
 
-        Returns:
-            None
-        """
-        super(MudderyShopGoods, self).after_data_loaded()
+        try:
+            obj_record = WorldData.get_table_data(obj_model_name, key=data.goods)
+            obj_record = obj_record[0]
+            obj_models = ELEMENT_SET.get_class_modeles(obj_record.element_type)
+            obj_data = WorldData.get_tables_data(obj_models, key=data.goods)
+            obj_data = obj_data[0]
+        except Exception as e:
+            logger.log_errmsg("Can not find goods %s." % data.goods)
+            return
 
-        self.available = False
-
-        self.shop_key = self.const.shop
-        self.goods_key = self.const.goods
-        self.goods_level = self.const.level if self.const.level else 0
-
-        # set goods information
-        self.price = self.const.price if self.const.price else 0
-        self.unit_key = self.const.unit
-        self.number = self.const.number if self.const.number else 0
-        self.condition = self.const.condition
+        self.obj_key = data.goods
+        self.obj_name = obj_data.name
+        self.obj_desc = obj_data.desc
+        self.obj_icon = obj_data.icon
 
         # get price unit information
         try:
             # Get record.
-            obj_model_name = ELEMENT("OBJECT").model_name
-            unit_record = WorldData.get_table_data(obj_model_name, key=self.unit_key)
+            unit_record = WorldData.get_table_data(obj_model_name, key=data.unit)
             unit_record = unit_record[0]
         except Exception as e:
-            logger.log_errmsg("Can not find %s's price unit %s." % (self.goods_key, self.unit_key))
+            logger.log_errmsg("Can not find price unit %s." % data.unit)
             return
 
+        self.unit_key = data.unit
         self.unit_name = unit_record.name
 
-        # load goods
-        try:
-            obj_record = WorldData.get_table_data(obj_model_name, key=self.goods_key)
-            obj_record = obj_record[0]
-            goods_models = ELEMENT_SET.get_class_modeles(obj_record.element_type)
-            goods_data = WorldData.get_tables_data(goods_models, key=self.goods_key)
-            goods_data = goods_data[0]
-        except Exception as e:
-            logger.log_errmsg("Can not find goods %s." % self.goods_key)
-            return
-
-        self.name = goods_data.name
-        self.desc = goods_data.desc
-        self.icon = goods_data.icon
+        self.level = data.level
+        self.number = data.number
+        self.price = data.price
+        self.condition = data.condition
 
         self.available = True
-        
+
     def is_available(self, caller):
         """
         Is it available to the customer.
@@ -88,7 +76,27 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
         if not self.available:
             return False
 
-        return self.is_visible(caller)
+        return STATEMENT_HANDLER.match_condition(self.condition, caller, None)
+
+    def get_info(self, caller):
+        """
+        Get the goods' info.
+
+        :param caller:
+        :return:
+        """
+        info = {
+            "obj": self.obj_key,
+            "level": self.level,
+            "name": self.obj_name,
+            "desc": self.obj_desc,
+            "number": self.number,
+            "price": self.price,
+            "unit": self.unit_name,
+            "icon": self.obj_icon
+        }
+
+        return info
 
     def sell_to(self, caller):
         """
@@ -107,8 +115,8 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
             return
 
         # check if can get these objects
-        if not caller.can_get_object(self.goods_key, self.number):
-            caller.msg({"alert": _("Sorry, you can not take more %s.") % self.name})
+        if not caller.can_get_object(self.obj_key, self.number):
+            caller.msg({"alert": _("Sorry, you can not take more %s.") % self.obj_name})
             return
 
         remove_list = [
@@ -119,16 +127,13 @@ class MudderyShopGoods(ELEMENT("OBJECT")):
         ]
         receive_list = [
             {
-                "object": self.goods_key,
-                "number": self.number
+                "object": self.obj_key,
+                "level": self.level,
+                "number": self.number,
             }
         ]
 
-        try:
-            # Reduce price units and give goods.
-            caller.exchange_objects(remove_list, receive_list)
-        except Exception as e:
-            logger.log_errmsg("Can not buy goods %s: %s" % (self.goods_key, e))
-            caller.msg({"alert": _("Sorry, you can not buy %s.") % self.name})
+        # Reduce price units and give goods.
+        caller.exchange_objects(remove_list, receive_list)
 
         return

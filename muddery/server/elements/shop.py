@@ -6,47 +6,20 @@ The DialogueHandler maintains a pool of dialogues.
 """
 
 from evennia.utils import logger
-from muddery.server.utils.builder import build_object
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
+from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.shop_goods import ShopGoods
+from muddery.server.elements.base_element import BaseElement
 
 
-class MudderyShop(ELEMENT("OBJECT")):
+class MudderyShop(BaseElement):
     """
     A shop.
     """
     element_type = "SHOP"
     element_name = _("Shop", "elements")
     model_name = "shops"
-
-    def at_object_creation(self):
-        """
-        Called once, when this object is first created. This is the
-        normal hook to overload for most object types.
-
-        It will be called when swap its element_type, so it must keep
-        old values.
-        """
-        super(MudderyShop, self).at_object_creation()
-
-    def at_object_delete(self):
-        """
-        Called just before the database object is permanently
-        delete()d from the database. If this method returns False,
-        deletion is aborted.
-
-        All goods will be removed too.
-        """
-        result = super(MudderyShop, self).at_object_delete()
-        if not result:
-            return result
-
-        # delete all goods
-        for goods in self.goods.values():
-            goods.delete()
-
-        return True
 
     def after_data_loaded(self):
         """
@@ -59,61 +32,30 @@ class MudderyShop(ELEMENT("OBJECT")):
 
         # load shop goods
         self.load_goods()
-        
-        self.verb = self.const.verb
+
+    def set_owner(self, owner):
+        """
+        Set the shop's owner.
+        :param owner:
+        :return:
+        """
+        if owner:
+            if not self.const.icon:
+                self.const_data_handler.add("icon", owner.get_icon())
 
     def load_goods(self):
         """
         Load shop goods.
+        :return:
         """
-        # shops records
-        goods_records = ShopGoods.get(self.get_object_key())
+        goods_data = ShopGoods.get_by_shop(self.element_key)
+        self.goods = []
+        for item in goods_data:
+            goods = ELEMENT("SHOP_GOODS")()
+            goods.set_data(item)
+            self.goods.append(goods)
 
-        goods_keys = set([record.key for record in goods_records])
-
-        # current goods
-        self.goods = self.states.load("goods", {})
-        changed = False
-
-        # remove old goods
-        diff = set(self.goods.keys()) - goods_keys
-        if len(diff) > 0:
-            changed = True
-            for goods_key in diff:
-                # remove goods that is not in goods_keys
-                self.goods[goods_key].delete()
-                del self.goods[goods_key]
-
-        # add new goods
-        for goods_record in goods_records:
-            goods_key = goods_record.key
-            if goods_key not in self.goods:
-                # Create shop_goods object.
-                goods_obj = build_object(goods_key)
-                if not goods_obj:
-                    logger.log_errmsg("Can't create goods: %s" % goods_key)
-                    continue
-
-                self.goods[goods_key] = goods_obj
-                changed = True
-
-        if changed:
-            self.states.save("goods", self.goods)
-
-    def show_shop(self, caller):
-        """
-        Send shop data to the caller.
-
-        Args:
-            caller (obj): the custom
-        """
-        if not caller:
-            return
-
-        info = self.return_shop_info(caller)
-        caller.msg({"shop": info})
-
-    def return_shop_info(self, caller):
+    def get_info(self, caller):
         """
         Get shop information.
 
@@ -121,41 +63,45 @@ class MudderyShop(ELEMENT("OBJECT")):
             caller (obj): the custom
         """
         info = {
-            "dbref": self.dbref,
-            "name": self.get_name(),
-            "desc": self.get_desc(caller),
-            "icon": self.icon,
+            "key": self.element_key,
+            "name": self.const.name,
+            "desc": self.const.desc,
+            "icon": self.const.icon,
+            "goods": [],
         }
 
-        goods_list = self.return_shop_goods(caller)
-        info["goods"] = goods_list
-            
+        for index, item in enumerate(self.goods):
+            if item.is_available(caller):
+                goods = item.get_info(caller)
+                goods["index"] = index
+                info["goods"].append(goods)
+
         return info
-                
-    def return_shop_goods(self, caller):
+
+    def get_verb(self):
         """
-        Get shop's information.
+        Get the action name of opening the shop.
+        :return:
+        """
+        return self.const.verb if self.const.verb else self.const.name
+
+    def is_available(self, caller):
+        """
+        Is it available to the customer.
 
         Args:
-            caller (obj): the custom
+            caller (obj): the customer.
         """
-        goods_list = []
+        if not self.const.condition:
+            return True
 
-        # Get shop goods
-        for obj in self.goods.values():
-            if not obj.is_available(caller):
-                continue
+        return STATEMENT_HANDLER.match_condition(self.const.condition, caller, None)
 
-            goods = {
-                "dbref": obj.dbref,
-                "name": obj.name,
-                "desc": obj.desc,
-                "number": obj.number,
-                "price": obj.price,
-                "unit": obj.unit_name,
-                "icon": obj.icon
-            }
-            
-            goods_list.append(goods)
-
-        return goods_list
+    def sell_goods(self, goods_index, caller):
+        """
+        Sell goods to the caller.
+        :param goods_index:
+        :param caller:
+        :return:
+        """
+        self.goods[goods_index].sell_to(caller)

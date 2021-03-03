@@ -34,41 +34,6 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
         self.can_remove = self.const.can_remove
         self.can_discard = self.const.can_discard
 
-#    def increase_num(self, number):
-#        """
-#        Increase object's number.
-#        """
-#        if number == 0:
-#            return
-#
-#        if number < 0:
-#            raise MudderyError("%s can not increase a negative nubmer." % self.get_data_key())#
-#
-#        if self.max_stack == 1 and self.states.number == 1:
-#            raise MudderyError("%s can not stack." % self.get_data_key())
-#
-#        if self.states.number + number > self.max_stack:
-#            raise MudderyError("%s over stack." % self.get_data_key())
-#
-#        self.states.number += number
-#        return
-#
-#    def decrease_num(self, number):
-#        """
-#        Decrease object's number.
-#        """
-#        if number == 0:
-#            return
-#
-#        if number < 0:
-#            raise MudderyError("%s can not decrease a negative nubmer." % self.get_data_key())
-#
-#        if self.states.number < number:
-#            raise MudderyError("%s's number will below zero." % self.get_data_key())
-#
-#        self.states.number -= number
-#        return
-
     def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'

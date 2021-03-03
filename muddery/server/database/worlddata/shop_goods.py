@@ -13,7 +13,7 @@ class ShopGoods(BaseQuery):
     table_name = "shop_goods"
 
     @classmethod
-    def get(cls, shop):
+    def get_by_shop(cls, shop):
         """
         Get properties by element_type's name.
         """

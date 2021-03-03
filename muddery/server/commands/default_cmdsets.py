@@ -59,6 +59,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdConfirmCombat())
         self.add(general.CmdRejectCombat())
         self.add(general.CmdGetRankings())
+        self.add(general.CmdQueryQuest())
 
         # Add empty login commands to the normal cmdset to
         # avoid showing wrong cmd messages.
