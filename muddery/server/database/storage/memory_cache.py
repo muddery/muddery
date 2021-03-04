@@ -2,7 +2,7 @@
 Object's attributes cache.
 """
 
-from muddery.server.database.storage.base_object_storage import BaseObjectStorage
+from muddery.server.database.gamedata.object_storage import BaseObjectStorage
 
 
 class MemoryCache(BaseObjectStorage):

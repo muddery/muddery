@@ -11,6 +11,7 @@ from evennia.comms.models import ChannelDB
 from evennia.objects.models import ObjectDB
 from evennia.scripts.models import ScriptDB
 from muddery.server.utils.exception import MudderyError, ERR
+from muddery.server.database.storage.kv_table import KeyValueTable
 
 
 def to_string(value):
@@ -47,6 +48,9 @@ def to_string(value):
 
 def from_string(str_value):
     # unpack a value from a string.
+    if str_value is None:
+        return None
+
     try:
         json_value, data_type = json.loads(str_value)
         if data_type == "NoneType":
@@ -91,14 +95,13 @@ def delete_string(str_value):
     return
 
 
-class BaseObjectStorage(object):
+class ObjectStorage(object):
     """
     The storage of object attributes.
     """
-    def __init__(self, model_name):
+    def __init__(self, model_name, obj_id_column=None):
         # db model
-        self.model_name = model_name
-        self.model = apps.get_model(settings.GAME_DATA_APP, self.model_name)
+        self.storage = KeyValueTable(model_name, obj_id_column)
 
     def save(self, obj_id, key, value):
         """
@@ -110,18 +113,7 @@ class BaseObjectStorage(object):
             value: (any) attribute's value.
         """
         str_value = to_string(value)
-        records = self.model.objects.filter(obj_id=obj_id, key=key)
-        if len(records) == 0:
-            record = {
-                "obj_id": obj_id,
-                "key": key,
-                "value": str_value,
-            }
-            data = self.model(**record)
-            data.full_clean()
-            data.save()
-        else:
-            records.update(value=str_value)
+        self.storage.save(obj_id, key, str_value)
 
     def saves(self, obj_id, value_dict):
         """
@@ -131,20 +123,8 @@ class BaseObjectStorage(object):
             obj_id: (number) object's id.
             value_dict: (dict) a dict of key-values.
         """
-        for key, value in value_dict.items():
-            str_value = to_string(value)
-            records = self.model.objects.filter(obj_id=obj_id, key=key)
-            if len(records) == 0:
-                record = {
-                    "obj_id": obj_id,
-                    "key": key,
-                    "value": str_value,
-                }
-                data = self.model(**record)
-                data.full_clean()
-                data.save()
-            else:
-                records.update(value=str_value)
+        str_value_dict = {key: to_string(value) for key, value in value_dict.items()}
+        self.storage.saves(obj_id, str_value_dict)
 
     def has(self, obj_id, key):
         """
@@ -154,30 +134,39 @@ class BaseObjectStorage(object):
             obj_id: (number) object's id.
             key: (string) attribute's key.
         """
-        records = self.model.objects.filter(obj_id=obj_id, key=key)
-        return len(records) != 0
+        return self.storage.has(obj_id, key)
 
-    def load(self, obj_id, key, *args):
+    def load(self, obj_id, key, *default):
         """
         Get the value of an attribute.
 
         Args:
             obj_id: (number) object's id.
             key: (string) attribute's key.
-            args: (any or none) default value.
+            default: (any or none) default value.
 
         Raises:
             AttributeError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
         """
-        records = self.model.objects.filter(obj_id=obj_id, key=key)
-        if len(records) == 0:
-            if len(args) > 0:
-                return args[0]
+        try:
+            value = self.storage.load(obj_id, key)
+            return from_string(value)
+        except AttributeError as e:
+            if len(default) > 0:
+                return default[0]
             else:
-                raise AttributeError
+                raise e
 
-        return from_string(records[0].value)
+    def load_obj(self, obj_id):
+        """
+        Get values of an object.
+
+        Args:
+            obj_id: (number) object's id.
+        """
+        values = self.storage.load_category(obj_id)
+        return {key: from_string(value) for key, value in values.items()}
 
     def delete(self, obj_id, key):
         """
@@ -187,20 +176,9 @@ class BaseObjectStorage(object):
             obj_id: (number) object's id.
             key: (string) attribute's key.
         """
-        records = self.model.objects.filter(obj_id=obj_id, key=key)
-        if len(records) > 0:
-            delete_string(records[0].value)
-            records.delete()
-
-    def load_obj(self, obj_id):
-        """
-        Get values of an object.
-
-        Args:
-            obj_id: (number) object's id.
-        """
-        records = self.model.objects.filter(obj_id=obj_id)
-        return {r.key: from_string(r.value) for r in records}
+        values = self.storage.delete(obj_id, key)
+        for value in values:
+            delete_string(value)
 
     def remove_obj(self, obj_id):
         """
@@ -209,26 +187,12 @@ class BaseObjectStorage(object):
         Args:
             obj_id: (number) object's id.
         """
-        records = self.model.objects.filter(obj_id=obj_id)
-        for record in records:
-            delete_string(record.value)
+        values = self.storage.delete_category(obj_id)
+        for value in values:
+            delete_string(value)
 
-        records.delete()
-
-    def transaction(self):
+    def atomic(self):
         """
-        Begin a transaction.
+        Guarantee the atomic execution of a given block.
         """
-        pass
-
-    def commit(self):
-        """
-        Commit a transaction.
-        """
-        pass
-
-    def rollback(self):
-        """
-        Rollback a transaction.
-        """
-        pass
+        return self.storage.atomic()

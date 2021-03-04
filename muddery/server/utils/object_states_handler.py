@@ -8,12 +8,7 @@ which is a non-db version of Attributes.
 
 """
 
-import weakref
-
-from django.apps import apps
-from django.conf import settings
-from muddery.server.database.storage.memory_cache import MemoryCache
-from muddery.server.database.storage.atomic import Atomic
+from muddery.server.database.gamedata.object_storage import ObjectStorage
 
 # -------------------------------------------------------------
 #
@@ -29,7 +24,7 @@ class ObjectStatesHandler(object):
     """
     Handler for adding Attributes to the object.
     """
-    cache = MemoryCache("object_status")
+    storage = ObjectStorage("object_status", "obj_id")
 
     def __init__(self, obj):
         """Initialize handler."""
@@ -45,7 +40,7 @@ class ObjectStatesHandler(object):
         Returns:
             has_attribute (bool): If the Attribute exists on this object or not.
         """
-        return self.cache.has(self.obj_id, key=key)
+        return self.storage.has(self.obj_id, key=key)
 
     def load(self, key, default=None):
         """
@@ -63,7 +58,7 @@ class ObjectStatesHandler(object):
                 was found matching `key` and no default value set.
 
         """
-        return self.cache.load(self.obj_id, key, default)
+        return self.storage.load(self.obj_id, key, default)
 
     def save(self, key, value):
         """
@@ -74,13 +69,13 @@ class ObjectStatesHandler(object):
             value (any or str): The value of the Attribute. If
                 `strattr` keyword is set, this *must* be a string.
         """
-        self.cache.save(self.obj_id, key, value)
+        self.storage.save(self.obj_id, key, value)
 
     def saves(self, value_dict):
         """
         Set attributes.
         """
-        self.cache.saves(self.obj_id, value_dict)
+        self.storage.saves(self.obj_id, value_dict)
 
     def delete(self, key):
         """
@@ -97,22 +92,22 @@ class ObjectStatesHandler(object):
             If neither key nor category is given, this acts as clear().
 
         """
-        self.cache.delete(self.obj_id, key)
+        self.storage.delete(self.obj_id, key)
 
     def clear(self):
         """
         Remove all Attributes on this object.
         """
-        self.cache.remove_obj(self.obj_id)
+        self.storage.remove_obj(self.obj_id)
 
     def all(self):
         """
         Get all attributes from an object.
         """
-        return self.cache.load_obj(self.obj_id)
+        return self.storage.load_obj(self.obj_id)
 
     def atomic(self):
         """
         Begin a transaction.
         """
-        return Atomic(self.cache)
+        return self.storage.atomic()
