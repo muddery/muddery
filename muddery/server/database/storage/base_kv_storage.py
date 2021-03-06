@@ -1,5 +1,5 @@
 """
-Object's attributes cache.
+The base class of key value storage.
 """
 
 
@@ -30,7 +30,9 @@ class BaseKeyValueStorage(object):
             category: (string, int) the category of data.
             value_dict: (dict) a dict of key-values.
         """
-        pass
+        with self.atomic():
+            for key, value in value_dict.items():
+                self.save(category, key, value)
 
     def has(self, category, key):
         """

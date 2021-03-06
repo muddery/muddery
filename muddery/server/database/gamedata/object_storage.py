@@ -11,7 +11,7 @@ from evennia.comms.models import ChannelDB
 from evennia.objects.models import ObjectDB
 from evennia.scripts.models import ScriptDB
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.database.storage.kv_table import KeyValueTable
+from muddery.server.database.storage.kv_table_write_back import KeyValueWriteBackTable
 
 
 def to_string(value):
@@ -101,7 +101,7 @@ class ObjectStorage(object):
     """
     def __init__(self, model_name, obj_id_column=None):
         # db model
-        self.storage = KeyValueTable(model_name, obj_id_column)
+        self.storage = KeyValueWriteBackTable(model_name, obj_id_column)
 
     def save(self, obj_id, key, value):
         """

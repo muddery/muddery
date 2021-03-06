@@ -1,24 +1,23 @@
 """
-Key value storage in relational database.
+Key value storage in relational database with write back memory cache.
 """
 
 from django.apps import apps
 from django.conf import settings
 from django.db.transaction import atomic
-from muddery.server.database.storage.base_kv_storage import BaseKeyValueStorage
+from muddery.server.database.storage.kv_table import KeyValueTable
 from muddery.server.utils.exception import MudderyError, ERR
 
 
-class KeyValueTable(BaseKeyValueStorage):
+class KeyValueWriteBackTable(KeyValueTable):
     """
     The storage of object attributes.
     """
     def __init__(self, model_name, category_column=None):
-        super(KeyValueTable, self).__init__(model_name)
+        super(KeyValueWriteBackTable, self).__init__(model_name, category_column)
 
-        # db model
-        self.model = apps.get_model(settings.GAME_DATA_APP, self.model_name)
-        self.category_column = "category" if category_column is None else category_column
+        # memory cache
+        self.cache = {}
 
     def save(self, category, key, value):
         """
@@ -29,13 +28,9 @@ class KeyValueTable(BaseKeyValueStorage):
             key: (string) the key.
             value: (any) data.
         """
-        self.model.objects.update_or_create(**{
-            self.category_column: category,
-            "key": key,
-            "defaults": {
-                "value": value,
-            }
-        })
+        self.check_category_cache(category)
+        self.cache[category][key] = value
+        super(KeyValueWriteBackTable, self).save(category, key, value)
 
     def has(self, category, key):
         """
@@ -45,10 +40,8 @@ class KeyValueTable(BaseKeyValueStorage):
             category: (string) the category of data.
             key: (string) attribute's key.
         """
-        return self.model.objects.filter(**{
-            self.category_column: category,
-            "key": key,
-        }).count() > 0
+        self.check_category_cache(category)
+        return key in self.cache[category]
 
     def load(self, category, key, *default):
         """
@@ -63,13 +56,10 @@ class KeyValueTable(BaseKeyValueStorage):
             AttributeError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
         """
+        self.check_category_cache(category)
         try:
-            record = self.model.objects.get(**{
-                self.category_column: category,
-                "key": key,
-            })
-            return record.value
-        except:
+            return self.cache[category][key]
+        except KeyError:
             if len(default) > 0:
                 return default[0]
             else:
@@ -82,12 +72,8 @@ class KeyValueTable(BaseKeyValueStorage):
         Args:
             category: (string) category's name.
         """
-        records = self.model.objects.filter(**{
-            self.category_column: category,
-        })
-        return {
-            r.key: r.value for r in records
-        }
+        self.check_category_cache(category)
+        return self.cache[category]
 
     def delete(self, category, key):
         """
@@ -100,13 +86,10 @@ class KeyValueTable(BaseKeyValueStorage):
         Return:
             (list): deleted values
         """
-        records = self.model.objects.filter(**{
-            self.category_column: category,
-            "key": key,
-        })
-        values = [r.value for r in records]
-        records.delete()
-        return values
+        try:
+            del self.cache[category][key]
+        finally:
+            super(KeyValueWriteBackTable, self).delete(category, key)
 
     def delete_category(self, category):
         """
@@ -118,15 +101,22 @@ class KeyValueTable(BaseKeyValueStorage):
         Return:
             (list): deleted values
         """
-        records = self.model.objects.filter(**{
-            self.category_column: category,
-        })
-        values = [r.value for r in records]
-        records.delete()
-        return values
+        try:
+            del self.cache[category]
+        finally:
+            super(KeyValueWriteBackTable, self).delete_category(category)
 
     def atomic(self):
         """
         Guarantee the atomic execution of a given block.
         """
         return atomic()
+
+    def check_category_cache(self, category):
+        """
+        Load a category's data from db if have not loaded this category.
+        :param category:
+        :return:
+        """
+        if category not in self.cache:
+            self.cache[category] = super(KeyValueWriteBackTable, self).load_category(category)
