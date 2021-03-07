@@ -95,6 +95,38 @@ class player_character(models.Model):
 
 # ------------------------------------------------------------
 #
+# player character's skills
+#
+# ------------------------------------------------------------
+class character_skills(models.Model):
+    "Player character's skills."
+
+    # character's id
+    character_id = models.PositiveIntegerField(db_index=True)
+
+    # skill's key
+    skill = models.CharField(max_length=KEY_LENGTH)
+
+    # skill's level
+    level = models.PositiveIntegerField(default=0)
+
+    # is default skill
+    is_default = models.BooleanField(default=False)
+
+    # CD's finish time
+    cd_time = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Character Skill"
+        verbose_name_plural = "Character Skills"
+        unique_together = ("character_id", "skill")
+
+
+# ------------------------------------------------------------
+#
 # player character's quests
 #
 # ------------------------------------------------------------
@@ -108,7 +140,7 @@ class character_quests(models.Model):
     quest = models.CharField(max_length=KEY_LENGTH, db_index=True)
 
     # quest is finished
-    finished = models.BooleanField(blank=True, default=False, db_index=True)
+    finished = models.BooleanField(default=False, db_index=True)
 
     class Meta:
         "Define Django meta options"

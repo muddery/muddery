@@ -24,7 +24,7 @@ class ObjectStatesHandler(object):
     """
     Handler for adding Attributes to the object.
     """
-    storage = ObjectStorage("object_status", "obj_id")
+    storage = ObjectStorage("object_status", "obj_id", "key", "value")
 
     def __init__(self, obj):
         """Initialize handler."""
@@ -75,7 +75,7 @@ class ObjectStatesHandler(object):
         """
         Set attributes.
         """
-        self.storage.saves(self.obj_id, value_dict)
+        self.storage.save_keys(self.obj_id, value_dict)
 
     def delete(self, key):
         """

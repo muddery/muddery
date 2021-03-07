@@ -22,17 +22,40 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def saves(self, category, value_dict):
+    def save_keys(self, category, values_dict):
         """
-        Set attributes.
+        Set attributes to multiple keys.
 
         Args:
             category: (string, int) the category of data.
-            value_dict: (dict) a dict of key-values.
+            values_dict: (dict) a dict of key-values.
         """
         with self.atomic():
-            for key, value in value_dict.items():
+            for key, value in values_dict.items():
                 self.save(category, key, value)
+
+    def save_dict(self, category, key, value_dict):
+        """
+        Save a dict to the key.
+
+        Args:
+            category: (string, int) the category of data.
+            key: (string) attribute's key.
+            value_dict: (dict) attribute's value.
+        """
+        pass
+
+    def save_keys_dict(self, category, values_dict):
+        """
+        Save dicts to multiple keys.
+
+        Args:
+            category: (string, int) the category of data.
+            values_dict: (dict) a dict of key-values.
+        """
+        with self.atomic():
+            for key, value in values_dict.items():
+                self.save_dict(category, key, value)
 
     def has(self, category, key):
         """
@@ -56,6 +79,30 @@ class BaseKeyValueStorage(object):
         Raises:
             AttributeError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
+        """
+        pass
+
+    def load_dict(self, category, key, *default):
+        """
+        Get a dict of values of a key.
+
+        Args:
+            category: (string) the category of data.
+            key: (string) data's key.
+            default: (any or none) default value.
+
+        Raises:
+            AttributeError: If `raise_exception` is set and no matching Attribute
+                was found matching `key` and no default value set.
+        """
+        pass
+
+    def load_category_dict(self, category):
+        """
+        Get all dicts of a category.
+
+        Args:
+            category: (string) category's name.
         """
         pass
 

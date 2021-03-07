@@ -17,6 +17,7 @@ from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.utils import logger, search
 from evennia.utils.utils import lazy_property, class_from_module
+from evennia.objects.models import ObjectDB
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.database.worlddata.loot_list import CharacterLootList
@@ -135,6 +136,10 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         # stop auto casting
         self.stop_auto_combat_skill()
 
+        # delete skills
+        for skill in self.skills.values():
+            skill.delete()
+
         result = super(MudderyCharacter, self).at_object_delete()
         if not result:
             return result
@@ -221,10 +226,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         self.reset_equip_positions()
 
         # load default skills
-        self.load_default_skills()
-
-        # load default objects
-        self.load_default_objects()
+        self.load_skills()
 
         # refresh the character's properties.
         self.refresh_properties(True)
@@ -375,41 +377,36 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         for item in equipments.values():
             item["obj"].equip_to(self)
 
-    def load_default_skills(self):
+    def load_skills(self):
         """
-        Load character's default skills.
+        Load character's skills.
         """
+        self.skills = {}
+
         # default skills
         skill_records = DefaultSkills.get(self.get_object_key())
-        default_skill_ids = set([record.skill for record in skill_records])
+        for record in skill_records:
+            # Create skill object.
+            skill_obj = build_object(skill_key)
+            if not skill_obj:
+                self.msg({"msg": _("Can not learn this skill.")})
+                return False
 
-        # remove old default skills
-        skills = self.states.load("skills", {})
-        changed = False
-        for key in list(skills.keys()):
-            skill = skills[key]
-            if not skill:
-                del skills[key]
-                changed = True
-            elif skill.is_default() and key not in default_skill_ids:
-                # remove this skill
-                skill.delete()
-                del self.states.skills[key]
-                changed = True
+            # set default
+            if is_default:
+                skill_obj.set_default(is_default)
 
-        if changed:
-            self.states.save("skills", skills)
+            # Store new skill.
+            self.skills[skill_key] = skill_obj
+            self.states.save("skills", {
+                key: {
+                    "id": skill.id,
+                } for key, skill in self.skills.items()
+            })
 
-        # add new default skills
-        for skill_record in skill_records:
-            if skill_record.skill not in skills:
-                self.learn_skill(skill_record.skill, True, True)
-
-    def load_default_objects(self):
-        """
-        Load character's default objects.
-        """
-        pass
+            # If it is a passive skill, player's status may change.
+            if skill_obj.passive:
+                self.refresh_properties(True)
 
     def at_after_move(self, source_location, **kwargs):
         """
@@ -434,8 +431,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Get all skills.
         :return:
         """
-        skills = self.states.load("skills", {})
-        return skills
+        return self.skills
 
     def get_skill(self, key):
         """
@@ -447,51 +443,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         :return:
         skill object
         """
-        skills = self.states.load("skills", {})
-        return skills.get(key, None)
-
-    def learn_skill(self, skill_key, is_default, silent):
-        """
-        Learn a new skill.
-
-        Args:
-            skill_key: (string) skill's key
-            is_default: (boolean) if it is a default skill
-            silent: (boolean) do not show messages to the player
-
-        Returns:
-            (boolean) learned skill
-        """
-        skills = self.states.load("skills", {})
-        if skill_key in skills:
-            self.msg({"msg": _("You have already learned this skill.")})
-            return False
-
-        # Create skill object.
-        skill_obj = build_object(skill_key)
-        if not skill_obj:
-            self.msg({"msg": _("Can not learn this skill.")})
-            return False
-
-        # set default
-        if is_default:
-            skill_obj.set_default(is_default)
-
-        # Store new skill.
-        skills[skill_key] = skill_obj
-        self.states.save("skills", skills)
-
-        # If it is a passive skill, player's status may change.
-        if skill_obj.passive:
-            self.refresh_properties(True)
-
-        # Notify the player
-        if not silent and self.has_account:
-            self.show_status()
-            self.show_skills()
-            self.msg({"msg": _("You learned skill {C%s{n.") % skill_obj.get_name()})
-
-        return True
+        return self.skills.get(key, None)
 
     def cast_skill(self, skill_key, target):
         """
@@ -507,12 +459,11 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             self.msg({"skill_cast": {"cast": _("Global cooling down!")}})
             return
 
-        skills = self.states.load("skills", {})
-        if skill_key not in skills:
+        if skill_key not in self.skills:
             self.msg({"skill_cast": {"cast": _("You do not have this skill.")}})
             return
 
-        skill = skills[skill_key]
+        skill = self.skills[skill_key]
         cast_result = skill.cast(self, target)
         if not cast_result:
             return
@@ -583,8 +534,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         Cast all passive skills.
         """
-        skills = self.states.load("skills", {})
-        for skill in skills.values():
+        for skill in self.skills.values():
             if skill.passive:
                 skill.cast(self, self)
                 
@@ -869,8 +819,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             (list) available commands for combat
         """
         commands = []
-        skills = self.states.load("skills", {})
-        for key, skill in skills.items():
+        for key, skill in self.skills.items():
             if skill.passive:
                 # exclude passive skills
                 continue

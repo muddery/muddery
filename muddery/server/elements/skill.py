@@ -11,9 +11,10 @@ from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.elements.base_element import BaseElement
 
 
-class MudderySkill(ELEMENT("OBJECT")):
+class MudderySkill(BaseElement):
     """
     A skill of the character.
     """
@@ -34,6 +35,10 @@ class MudderySkill(ELEMENT("OBJECT")):
             return char
         else:
             return "%(" + char + ")s"
+
+    def __init__(self, *agrs, **wargs):
+        super(MudderySkill, self).__init__(*agrs, **wargs)
+        self.cd_finish_time = 0
 
     def at_object_creation(self):
         """

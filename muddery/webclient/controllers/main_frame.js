@@ -2812,9 +2812,9 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
                 .html(name)
                 .show();
 
-            block.data("dbref", equip["dbref"]);
+            block.data("id", equip["id"]);
 
-            if (equip["dbref"] == this.item_selected) {
+            if (equip["id"] == this.item_selected) {
                 has_selected_item = true;
         }
         }
@@ -2823,7 +2823,7 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
             block.find(".name").hide();
             block.find(".position-name").show();
 
-            block.data("dbref", "");
+            block.data("id", "");
         }
     }
 
@@ -2843,10 +2843,10 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
 MudderyCharData.prototype.onClickEquipment = function(target, event) {
     event.stopPropagation();
 
-    var dbref = $(target).data("dbref");
-    if (dbref) {
-        mud.char_data_window.item_selected = dbref;
-        core.service.equipmentsObject(dbref);
+    var obj_id = $(target).data("id");
+    if (obj_id) {
+        mud.char_data_window.item_selected = obj_id;
+        core.service.equipmentsObject(obj_id);
     }
     else {
         this.showStatus();
@@ -3041,7 +3041,7 @@ MudderyInventory.prototype.resetSize = function() {
 MudderyInventory.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.inventory.length) {
-        this.item_selected = this.inventory[index].dbref;
+        this.item_selected = this.inventory[index].id;
         core.service.inventoryObject(this.item_selected, "inventory");
     }
 }
@@ -3086,7 +3086,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
                 .appendTo(item);
         }
 
-        if (obj["dbref"] == this.item_selected) {
+        if (obj["id"] == this.item_selected) {
             has_selected_item = true;
         }
     }
@@ -3177,8 +3177,8 @@ MudderySkills.prototype.bindEvents = function() {
 MudderySkills.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.skills.length) {
-        var dbref = this.skills[index].dbref;
-        core.service.look(dbref, "skills");
+        var skill_id = this.skills[index].id;
+        core.service.look(skill_id, "skills");
     }
 }
 
@@ -3267,7 +3267,7 @@ MudderySkills.prototype.setSkills = function(skills) {
                 .appendTo(info);
         }
 
-        if (obj["dbref"] == this.item_selected) {
+        if (obj["id"] == this.item_selected) {
             has_selected_item = true;
         }
     }

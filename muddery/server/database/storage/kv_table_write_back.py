@@ -13,8 +13,8 @@ class KeyValueWriteBackTable(KeyValueTable):
     """
     The storage of object attributes.
     """
-    def __init__(self, model_name, category_column=None):
-        super(KeyValueWriteBackTable, self).__init__(model_name, category_column)
+    def __init__(self, model_name, category_field, key_field, default_value_field=None):
+        super(KeyValueWriteBackTable, self).__init__(model_name, category_field, key_field, default_value_field)
 
         # memory cache
         self.cache = {}
@@ -29,8 +29,23 @@ class KeyValueWriteBackTable(KeyValueTable):
             value: (any) data.
         """
         self.check_category_cache(category)
-        self.cache[category][key] = value
+        self.cache[category][key] = {
+            self.default_value_field: value
+        }
         super(KeyValueWriteBackTable, self).save(category, key, value)
+
+    def save_dict(self, category, key, value_dict):
+        """
+        Set a set of values.
+
+        Args:
+            category: (string) the category of data.
+            key: (string) the key.
+            value_dict: (dict) data.
+        """
+        self.check_category_cache(category)
+        self.cache[category][key] = value_dict
+        super(KeyValueWriteBackTable, self).save_dict(category, key, value_dict)
 
     def has(self, category, key):
         """
@@ -46,6 +61,28 @@ class KeyValueWriteBackTable(KeyValueTable):
     def load(self, category, key, *default):
         """
         Get the value of a key.
+
+        Args:
+            category: (string) the category of data.
+            key: (string) data's key.
+            default: (any or none) default value.
+
+        Raises:
+            AttributeError: If `raise_exception` is set and no matching Attribute
+                was found matching `key` and no default value set.
+        """
+        self.check_category_cache(category)
+        try:
+            return self.cache[category][key][self.default_value_field]
+        except KeyError:
+            if len(default) > 0:
+                return default[0]
+            else:
+                raise AttributeError
+
+    def load_dict(self, category, key, *default):
+        """
+        Get a dict of values of a key.
 
         Args:
             category: (string) the category of data.
@@ -84,12 +121,12 @@ class KeyValueWriteBackTable(KeyValueTable):
             key: (string) attribute's key.
 
         Return:
-            (list): deleted values
+            (dict): deleted values
         """
         try:
             del self.cache[category][key]
         finally:
-            super(KeyValueWriteBackTable, self).delete(category, key)
+            return super(KeyValueWriteBackTable, self).delete(category, key)
 
     def delete_category(self, category):
         """
@@ -99,12 +136,12 @@ class KeyValueWriteBackTable(KeyValueTable):
             category: (string) the category of data.
 
         Return:
-            (list): deleted values
+            (dict): deleted values
         """
         try:
             del self.cache[category]
         finally:
-            super(KeyValueWriteBackTable, self).delete_category(category)
+            return super(KeyValueWriteBackTable, self).delete_category(category)
 
     def atomic(self):
         """
@@ -120,3 +157,5 @@ class KeyValueWriteBackTable(KeyValueTable):
         """
         if category not in self.cache:
             self.cache[category] = super(KeyValueWriteBackTable, self).load_category(category)
+
+        print(self.cache)
