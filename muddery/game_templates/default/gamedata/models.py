@@ -34,6 +34,18 @@ class player_character(BaseModels.player_character):
 
 # ------------------------------------------------------------
 #
+# player character's skills
+#
+# ------------------------------------------------------------
+class character_skills(BaseModels.character_skills):
+    """
+    Character's skills.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
 # player character's quests
 #
 # ------------------------------------------------------------

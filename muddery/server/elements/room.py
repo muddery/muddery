@@ -89,7 +89,7 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
             if type:
                 change = {
                     "type": type,
-                    "dbref": moved_obj.dbref,
+                    "id": moved_obj.get_id(),
                     "name": moved_obj.get_name()
                 }
                 self.msg_contents({"obj_moved_in": change}, exclude=moved_obj)
@@ -111,7 +111,7 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
             if type:
                 change = {
                     "type": type,
-                    "dbref": moved_obj.dbref,
+                    "id": moved_obj.get_id(),
                     "name": moved_obj.get_name()
                 }
                 self.msg_contents({"obj_moved_out": change}, exclude=moved_obj)
@@ -195,7 +195,7 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
                 elif cont_type == "offlines":
                     continue
 
-                appearance["dbref"] = cont.dbref
+                appearance["id"] = cont.get_id()
                 appearance["name"] = cont.get_name()
                 appearance["key"] = cont.get_object_key()
                 
@@ -238,7 +238,7 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         output = {
             "type": ConversationType.LOCAL.value,
             "channel": self.get_name(),
-            "from_dbref": caller.dbref,
+            "from_id": caller.get_id(),
             "from_name": caller.get_name(),
             "msg": message
         }

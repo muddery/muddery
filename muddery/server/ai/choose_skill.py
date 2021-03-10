@@ -3,7 +3,7 @@ Skill handler handles a character's skills.
 
 """
 
-import random
+import random, time
 from muddery.server.combat.base_combat_handler import CStatus
 
 
@@ -17,13 +17,12 @@ class ChooseSkill(object):
         """
         if not caller:
             return
-        
+
         combat = caller.ndb.combat_handler
         if not combat:
             return
-        
-        all_skills = caller.get_skills()
-        skills = [skill for skill in all_skills.values() if skill.is_available(caller, passive=False)]
+
+        skills = caller.get_available_skills()
         if not skills:
             return
 
@@ -34,4 +33,4 @@ class ChooseSkill(object):
 
         skill = random.choice(skills)
         target = random.choice(opponents)
-        return skill.get_object_key(), target
+        return skill.get_element_key(), target

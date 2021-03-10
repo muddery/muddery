@@ -18,7 +18,7 @@ class MudderyWorldObject(ELEMENT("OBJECT")):
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
-        "args" must be a string without ' and ", usually it is self.dbref.
+        "args" must be a string without ' and ", usually it is self.id.
         """
         commands = super(MudderyWorldObject, self).get_available_commands(caller)
 
@@ -26,7 +26,7 @@ class MudderyWorldObject(ELEMENT("OBJECT")):
             commands.append({
                 "name": self.const.action,
                 "cmd": "action",
-                "args": self.dbref
+                "args": self.get_id()
             })
 
         return commands

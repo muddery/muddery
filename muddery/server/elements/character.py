@@ -8,7 +8,7 @@ creation commands.
 
 """
 
-import time, ast
+import time
 from twisted.internet import reactor, task
 from twisted.internet.task import deferLater
 from django.conf import settings
@@ -19,16 +19,13 @@ from evennia.utils import logger, search
 from evennia.utils.utils import lazy_property, class_from_module
 from evennia.objects.models import ObjectDB
 from muddery.server.mappings.element_set import ELEMENT
-from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.database.worlddata.loot_list import CharacterLootList
-from muddery.server.database.worlddata.object_properties import ObjectProperties
 from muddery.server.database.worlddata.default_skills import DefaultSkills
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils import defines, utils
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.utils import get_object_by_key
-from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import delete_object
 from muddery.server.utils.defines import CombatType
@@ -51,13 +48,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
     at_pre_puppet - just before Player re-connects, retrieves the character's
                     old location and puts it back on the grid with a "charname
                     has connected" message echoed to the room
-
-    States:
-        skills
-        inventory
-        level
-        equipments
-        closed_events
     """
     element_type = "CHARACTER"
     element_name = _("Character", "elements")
@@ -67,37 +57,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
     @lazy_property
     def loot_handler(self):
         return LootHandler(self, CharacterLootList.get(self.get_object_key()))
-
-    @lazy_property
-    def body_data_handler(self):
-        return DataFieldHandler(self)
-
-    # @property body stores character's body properties before using equipments and skills.
-    def __body_get(self):
-        """
-        A non-attr_obj store (ndb: NonDataBase). Everything stored
-        to this is guaranteed to be cleared when a server is shutdown.
-        Syntax is same as for the _get_db_holder() method and
-        property, e.g. obj.ndb.attr = value etc.
-        """
-        try:
-            return self._body_holder
-        except AttributeError:
-            self._body_holder = ConstDataHolder(self, "body_properties", manager_name='body_data_handler')
-            return self._body_holder
-
-    # @body.setter
-    def __body_set(self, value):
-        "Stop accidentally replacing the ndb object"
-        string = "Cannot assign directly to ndb object! "
-        string += "Use self.body.name=value instead."
-        raise Exception(string)
-
-    # @body.deleter
-    def __body_del(self):
-        "Stop accidental deletion."
-        raise Exception("Cannot delete the body object!")
-    body = property(__body_get, __body_set, __body_del)
 
     def at_object_creation(self):
         """
@@ -136,56 +95,10 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         # stop auto casting
         self.stop_auto_combat_skill()
 
-        # delete skills
-        for skill in self.skills.values():
-            skill.delete()
-
         result = super(MudderyCharacter, self).at_object_delete()
         if not result:
             return result
         return True
-
-    def after_creation(self):
-        """
-        Called once, after the object is created by Muddery.
-        """
-        # refresh the character's properties.
-        self.refresh_properties(False)
-
-    def load_custom_data(self, level):
-        """
-        Load body properties from db. Body properties do no include mutable properties.
-        """
-        # Get object level.
-        if level is None:
-            level = self.get_level()
-
-        # Load values from db.
-        object_key = self.const.clone if self.const.clone else self.get_object_key()
-
-        values = {}
-        for record in ObjectProperties.get_properties(object_key, level):
-            key = record.property
-            serializable_value = record.value
-            if serializable_value == "":
-                value = None
-            else:
-                try:
-                    value = ast.literal_eval(serializable_value)
-                except (SyntaxError, ValueError) as e:
-                    # treat as a raw string
-                    value = serializable_value
-            values[key] = value
-
-        # Set body values.
-        for key, info in self.get_properties_info().items():
-            if not info["mutable"]:
-                self.const_data_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
-                self.body_data_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
-            else:
-                # Set default mutable properties to prop.
-                if not self.states.has(key):
-                    self.states.save(key, self.get_custom_data_value(info["default"]))
 
     def after_data_loaded(self):
         """
@@ -208,7 +121,9 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         # skill's gcd
         self.skill_gcd = GAME_SETTINGS.get("global_cd")
         self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
-        self.gcd_finish_time = 0
+
+        time_now = time.time()
+        self.gcd_finish_time = time_now + self.skill_gcd
         
         # loop for auto cast skills
         self.auto_cast_loop = None
@@ -222,92 +137,8 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         # A temporary character will be deleted after the combat finished.
         self.is_temp = False
 
-        # update equipment positions
-        self.reset_equip_positions()
-
         # load default skills
         self.load_skills()
-
-        # refresh the character's properties.
-        self.refresh_properties(True)
-
-    def set_level(self, level):
-        """
-        Set object's level.
-        Args:
-            level: object's new level
-
-        Returns:
-            None
-        """
-        super(MudderyCharacter, self).set_level(level)
-        self.refresh_properties(False)
-
-    def reset_equip_positions(self):
-        """
-        Reset equipment's position data.
-        Returns:
-            None
-        """
-        # get equipment's position
-        positions = set([r.key for r in EquipmentPositions.all()])
-
-        inventory = self.states.load("inventory", [])
-        equipments = self.states.load("equipments", {})
-
-        changed = False
-        for pos in list(equipments.keys()):
-            if pos not in positions:
-                inventory.append(equipments[pos])
-                del equipments[pos]
-                changed = True
-
-        if changed:
-            # Save changes.
-            with self.states.atomic():
-                self.states.save("equipments", equipments)
-                self.states.save("inventory", inventory)
-
-    def refresh_properties(self, keep_values):
-        """
-        Refresh character's final properties.
-
-        Args:
-            keep_values (boolean): mutable values keep last values.
-        """
-        if keep_values:
-            last_properties = self.states.all()
-
-        # Load body properties.
-        for key, value in self.body_data_handler.all().items():
-            self.const_data_handler.add(key, value)
-
-        # load equips
-        self.wear_equipments()
-
-        # load passive skills
-        self.cast_passive_skills()
-
-        if keep_values:
-            for key, info in self.get_properties_info().items():
-                if info["mutable"]:
-                    value = last_properties[key]
-
-                    # check limits
-                    max_key = "max_" + key
-                    if self.const_data_handler.has(max_key):
-                        max_value = self.const_data_handler.get(max_key)
-                        if value > max_value:
-                            value = max_value
-
-                    min_key = "min_" + key
-                    if self.const_data_handler.has(min_key):
-                        min_value = self.const_data_handler.get(min_key)
-                        if value < min_value:
-                            value = min_value
-
-                    # Set the value.
-                    self.const_data_handler.add(key, value)
 
     @classmethod
     def get_event_trigger_types(cls):
@@ -345,38 +176,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         return {}
 
-    def total_object_number(self, obj_key):
-        """
-        Search specified object in the inventory.
-        """
-        inventory = self.states.load("inventory", [])
-        equipments = self.states.load("equipments", {})
-
-        objects = [item["number"] for item in inventory if item["key"] == obj_key]
-        total = sum(objects)
-        for item in equipments.values():
-            if item["key"] == obj_key:
-                total += 1
-
-        return total
-
-    def has_object(self, obj_key):
-        """
-        Check specified object in the inventory.
-        """
-        return self.total_object_number(obj_key) > 0
-
-    def wear_equipments(self):
-        """
-        Add equipment's attributes to the character
-        """
-        # find equipments
-        equipments = self.states.load("equipments", {})
-
-        # add equipment's attributes
-        for item in equipments.values():
-            item["obj"].equip_to(self)
-
     def load_skills(self):
         """
         Load character's skills.
@@ -384,29 +183,23 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         self.skills = {}
 
         # default skills
-        skill_records = DefaultSkills.get(self.get_object_key())
-        for record in skill_records:
-            # Create skill object.
-            skill_obj = build_object(skill_key)
-            if not skill_obj:
-                self.msg({"msg": _("Can not learn this skill.")})
-                return False
-
-            # set default
-            if is_default:
-                skill_obj.set_default(is_default)
+        default_skills = DefaultSkills.get(self.get_object_key())
+        for item in default_skills:
+            key = item.skill
+            try:
+                # Create skill object.
+                skill_obj = ELEMENT("SKILL")()
+                skill_obj.set_element_key(key)
+                skill_obj.set_level(item.level)
+            except Exception as e:
+                logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e), e))
+                continue
 
             # Store new skill.
-            self.skills[skill_key] = skill_obj
-            self.states.save("skills", {
-                key: {
-                    "id": skill.id,
-                } for key, skill in self.skills.items()
-            })
-
-            # If it is a passive skill, player's status may change.
-            if skill_obj.passive:
-                self.refresh_properties(True)
+            self.skills[key] = {
+                "obj": skill_obj,
+                "cd_finish": 0,
+            }
 
     def at_after_move(self, source_location, **kwargs):
         """
@@ -433,6 +226,20 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         return self.skills
 
+    def get_available_skills(self):
+        """
+        Get current available skills of a character.
+        :param caller:
+        :return: skills
+        """
+        time_now = time.time()
+        if time_now < self.gcd_finish_time:
+            return
+
+        skills = [skill["obj"] for skill in self.skills.values() if time_now >= skill["cd_finish"] and
+                  skill["obj"].is_available(self, passive=False)]
+        return skills
+
     def get_skill(self, key):
         """
         Get all skills.
@@ -453,29 +260,27 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             skill_key: (string) skill's key.
             target: (object) skill's target.
         """
-        time_now = time.time()
-        if time_now < self.gcd_finish_time:
-            # In GCD.
-            self.msg({"skill_cast": {"cast": _("Global cooling down!")}})
-            return
-
-        if skill_key not in self.skills:
-            self.msg({"skill_cast": {"cast": _("You do not have this skill.")}})
-            return
-
         skill = self.skills[skill_key]
-        cast_result = skill.cast(self, target)
-        if not cast_result:
+        time_now = time.time()
+        if time_now < self.gcd_finish_time and time_now < skill["cd_finish"]:
+            # In cd.
             return
+
+        skill_obj = skill["obj"]
+
+        cast_result = skill_obj.cast(self, target)
 
         if self.skill_gcd > 0:
             # set GCD
             self.gcd_finish_time = time_now + self.skill_gcd
 
+        # save cd finish time
+        self.skills[skill_key]["cd_finish"] = time_now + skill_obj.get_cd()
+
         skill_cd = {
             "skill_cd": {
                 "skill": skill_key,  # skill's key
-                "cd": skill.cd,  # skill's cd
+                "cd": skill_obj.get_cd(),  # skill's cd
                 "gcd": self.skill_gcd
             }
         }
@@ -535,8 +340,8 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Cast all passive skills.
         """
         for skill in self.skills.values():
-            if skill.passive:
-                skill.cast(self, self)
+            if skill["obj"].is_passive():
+                skill["obj"].cast(self, self)
                 
     def start_auto_combat_skill(self):
         """
@@ -596,7 +401,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         if self.is_in_combat():
             # already in battle
-            logger.log_errmsg("%s is already in battle." % self.dbref)
+            logger.log_errmsg("%s is already in battle." % self.get_id())
             return False
 
         # search target
@@ -606,12 +411,12 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
 
         if not target.is_element(settings.CHARACTER_ELEMENT_TYPE):
             # Target is not a character.
-            logger.log_errmsg("Can not attack the target %s." % target.dbref)
+            logger.log_errmsg("Can not attack the target %s." % target.get_id())
             return False
 
         if target.is_in_combat():
             # obj is already in battle
-            logger.log_errmsg("%s is already in battle." % target.dbref)
+            logger.log_errmsg("%s is already in battle." % target.get_id())
             return False
 
         # create a new combat handler
@@ -639,18 +444,18 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         self.attack_target(self.target, desc)
 
-    def attack_target_dbref(self, target_dbref, desc=""):
+    def attack_target_by_id(self, target_id, desc=""):
         """
-        Attack a target by dbref.
+        Attack a target by id.
 
         Args:
-            target_dbref: (string) the dbref of the target.
+            target_id: (int) the it of the target.
             desc: (string) string to describe this attack
 
         Returns:
             None
         """
-        target = self.search_dbref(target_dbref)
+        target = utils.get_object_by_id(target_id)
         self.attack_target(target, desc)
 
     def attack_temp_current_target(self, desc=""):
@@ -730,7 +535,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             # delete template character and notify its location
             location = self.location
 
-            delete_object(self.dbref)
+            delete_object(self.get_id())
             if location:
                 for content in location.contents:
                     if content.has_account:
@@ -820,13 +625,15 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         commands = []
         for key, skill in self.skills.items():
-            if skill.passive:
+            if skill["obj"].is_passive():
                 # exclude passive skills
                 continue
 
-            command = {"name": skill.get_name(),
-                       "key": key,
-                       "icon": getattr(skill, "icon", None)}
+            command = {
+                "key": key,
+                "name": skill["obj"].get_name(),
+                "icon": skill["obj"].get_icon(),
+            }
 
             commands.append(command)
 

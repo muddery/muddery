@@ -114,7 +114,7 @@ class character_skills(models.Model):
     is_default = models.BooleanField(default=False)
 
     # CD's finish time
-    cd_time = models.PositiveIntegerField(default=0)
+    cd_finish = models.PositiveIntegerField(default=0)
 
     class Meta:
         "Define Django meta options"

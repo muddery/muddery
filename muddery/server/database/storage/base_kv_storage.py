@@ -82,14 +82,14 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def load_dict(self, category, key, *default):
+    def load_dict(self, category, key, **default):
         """
         Get a dict of values of a key.
 
         Args:
             category: (string) the category of data.
             key: (string) data's key.
-            default: (any or none) default value.
+            default: (dict or none) default value.
 
         Raises:
             AttributeError: If `raise_exception` is set and no matching Attribute

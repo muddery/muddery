@@ -80,14 +80,14 @@ class KeyValueWriteBackTable(KeyValueTable):
             else:
                 raise AttributeError
 
-    def load_dict(self, category, key, *default):
+    def load_dict(self, category, key, **default):
         """
         Get a dict of values of a key.
 
         Args:
             category: (string) the category of data.
             key: (string) data's key.
-            default: (any or none) default value.
+            default: (dict or none) default value.
 
         Raises:
             AttributeError: If `raise_exception` is set and no matching Attribute
@@ -97,8 +97,8 @@ class KeyValueWriteBackTable(KeyValueTable):
         try:
             return self.cache[category][key]
         except KeyError:
-            if len(default) > 0:
-                return default[0]
+            if default is not None:
+                return default
             else:
                 raise AttributeError
 

@@ -172,7 +172,7 @@ class DialogueHandler(object):
             
         return {
             "target": {
-                "dbref": npc.dbref,
+                "id": npc.get_id(),
                 "name": npc.get_name(),
                 "icon": getattr(npc, "icon", None),
             },
@@ -193,7 +193,7 @@ class DialogueHandler(object):
         target = {}
         if npc:
             target = {
-                "dbref": npc.dbref,
+                "id": npc.get_id(),
                 "name": npc.get_name(),
                 "icon": getattr(npc, "icon", None),
             }
@@ -231,7 +231,7 @@ class DialogueHandler(object):
         target = {}
         if npc:
             target = {
-                "dbref": npc.dbref,
+                "id": npc.get_id(),
                 "name": npc.get_name(),
                 "icon": getattr(npc, "icon", None),
             }

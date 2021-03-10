@@ -90,14 +90,14 @@ MudderyService.prototype = {
     },
 
     // delete a character
-    deleteCharacter: function(dbref) {
-        var args = {"dbref": dbref};
+    deleteCharacter: function(obj_id) {
+        var args = {"id": obj_id};
 		Evennia.msg("text", this.cmdString("char_delete", args));
     },
     
     // puppet a character
-    puppetCharacter: function(dbref) {
-    	Evennia.msg("text", this.cmdString("puppet", dbref));
+    puppetCharacter: function(obj_id) {
+    	Evennia.msg("text", this.cmdString("puppet", obj_id));
     },
     
     // unpuppet current character
@@ -106,8 +106,8 @@ MudderyService.prototype = {
     },
     
     // look
-    look: function(dbref, context) {
-        Evennia.msg("text", this.cmdString("look", dbref, context));
+    look: function(odj_id, context) {
+        Evennia.msg("text", this.cmdString("look", odj_id, context));
     },
 
     inventoryObject: function(obj_id, context) {
@@ -119,13 +119,13 @@ MudderyService.prototype = {
     },
 
     // go to
-    doGoto : function(dbref) {
-        Evennia.msg("text", this.cmdString("goto", dbref));
+    doGoto : function(odj_id) {
+        Evennia.msg("text", this.cmdString("goto", odj_id));
     },
     
     // talk
-    doTalk : function(dbref) {
-        Evennia.msg("text", this.cmdString("talk", dbref));
+    doTalk : function(odj_id) {
+        Evennia.msg("text", this.cmdString("talk", odj_id));
     },
     
     // buy something
@@ -208,7 +208,14 @@ MudderyService.prototype = {
     queryQuest: function(key) {
         Evennia.msg("text", this.cmdString("query_quest", {key: key}));
     },
-    
+
+    // query the skill's detail information
+    // args:
+    //     key: (string) a skill's key
+    querySkill: function(key) {
+        Evennia.msg("text", this.cmdString("query_skill", {key: key}));
+    },
+
     // do test
     doTest: function() {
         // test codes

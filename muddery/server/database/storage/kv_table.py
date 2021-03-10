@@ -95,14 +95,14 @@ class KeyValueTable(BaseKeyValueStorage):
             else:
                 raise AttributeError
 
-    def load_dict(self, category, key, *default):
+    def load_dict(self, category, key, **default):
         """
         Get a dict of values of a key.
 
         Args:
             category: (string) the category of data.
             key: (string) data's key.
-            default: (any or none) default value.
+            default: (dict or none) default value.
 
         Raises:
             AttributeError: If `raise_exception` is set and no matching Attribute
@@ -115,8 +115,8 @@ class KeyValueTable(BaseKeyValueStorage):
             })
             return {name: record.serializable_value(name) for name in self.fields}
         except:
-            if len(default) > 0:
-                return default[0]
+            if default is not None:
+                return default
             else:
                 raise AttributeError
 
@@ -130,7 +130,9 @@ class KeyValueTable(BaseKeyValueStorage):
         records = self.model.objects.filter(**{
             self.category_field: category,
         })
-        return {r.key: r.serializable_value(self.default_value_field) for r in records}
+        return {
+            r.serializable_value(self.key_field): r.serializable_value(self.default_value_field) for r in records
+        }
 
     def load_category_dict(self, category):
         """
@@ -142,7 +144,11 @@ class KeyValueTable(BaseKeyValueStorage):
         records = self.model.objects.filter(**{
             self.category_field: category,
         })
-        return {r.key: {name: r.serializable_value(name) for name in self.fields} for r in records}
+        return {
+            r.serializable_value(self.key_field): {
+                name: r.serializable_value(name) for name in self.fields
+            } for r in records
+        }
 
     def delete(self, category, key):
         """

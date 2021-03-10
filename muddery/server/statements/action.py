@@ -29,7 +29,12 @@ class FuncLearnSkill(StatementFunction):
             return False
 
         skill_key = self.args[0]
-        return self.caller.learn_skill(skill_key, False, False)
+        skill_level = self.args[1] if len(self.args) > 1 else 0
+        try:
+            self.caller.learn_skill(skill_key, skill_level, False)
+            return True
+        except:
+            return False
 
 
 class FuncGiveObject(StatementFunction):

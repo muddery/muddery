@@ -108,10 +108,6 @@ MudderyMainFrame.prototype.showCombat = function(combat) {
  * Cast a combat skill.
  */
 MudderyMainFrame.prototype.setSkillCast = function(result) {
-    if ("status" in result && core.data_handler.character_dbref in result["status"]) {
-        this.setCombatStatus(result["status"][core.data_handler.character_dbref])
-    }
-
 	if (mud.combat_window.isCombatFinished()) {
 	    var message = "";
 		if ("cast" in result && result["cast"]) {
@@ -123,9 +119,16 @@ MudderyMainFrame.prototype.setSkillCast = function(result) {
 		if (message) {
 			mud.scene_window.displayMessage(message);
 		}
+
+		if ("status" in result && core.data_handler.character_id in result["status"]) {
+            this.setStatus(result["status"][core.data_handler.character_id]);
+        }
 	}
 	else {
 		mud.combat_window.setSkillCast(result);
+        if ("status" in result && core.data_handler.character_id in result["status"]) {
+            this.setCombatStatus(result["status"][core.data_handler.character_id])
+        }
 	}
 }
 
@@ -184,7 +187,7 @@ MudderyMainFrame.prototype.prepareMatch = function(data) {
  * The player has rejected the honour match.
  */
 MudderyMainFrame.prototype.matchRejected = function(character_id) {
-	if ("#" + character_id != core.data_handler.character_dbref) {
+	if (character_id != core.data_handler.character_id) {
 		mud.popup_confirm_combat.opponentReject();
 	}
 }
@@ -226,12 +229,12 @@ MudderyMainFrame.prototype.objMovedIn = function(obj) {
 MudderyMainFrame.prototype.objMovedOut = function(obj) {
 	// If the player is talking to it, close the dialog window.
 	if (mud.popup_dialogue.visible()) {
-		mud.popup_dialogue.onObjMovedOut(obj["dbref"]);
+		mud.popup_dialogue.onObjMovedOut(obj["id"]);
 	}
         
 	// If the player is looking to it, close the look window.
 	if (mud.popup_object.visible()) {
-		mud.popup_object.onObjMovedOut(obj["dbref"]);
+		mud.popup_object.onObjMovedOut(obj["id"]);
 	}
 
 	// remove objects from scene
@@ -335,7 +338,7 @@ MudderyMainFrame.prototype.onLogout = function(data) {
  * Event when the player puppets a character.
  */
 MudderyMainFrame.prototype.onPuppet = function(data) {
-    core.data_handler.character_dbref = data["dbref"];
+    core.data_handler.character_id = data["id"];
     core.data_handler.character_name = data["name"];
     core.data_handler.character_icon = data["icon"];
 
@@ -645,12 +648,12 @@ MudderyPopupObject.prototype.onCommand = function(element) {
 /*
  * Event when an object moved out from the current place.
  */
-MudderyPopupObject.prototype.onObjMovedOut = function(dbref) {
+MudderyPopupObject.prototype.onObjMovedOut = function(odj_id) {
     if (!this.object) {
         return;
     }
 
-    if (dbref == this.object["dbref"]) {
+    if (odj_id == this.object["id"]) {
 		this.onClose();
 	}
 }
@@ -831,15 +834,15 @@ MudderyPopupDialogue.prototype.gotoNext = function() {
         this.displaySentence(this.dialogues[this.d_index].sentences[this.s_index]);
     }
     else {
-		core.service.finishDialogue(this.dialogues[this.d_index].key, this.target.dbref? this.target.dbref: "");
+		core.service.finishDialogue(this.dialogues[this.d_index].key, this.target.id? this.target.id: "");
 	}
 }
 
 /*
  * Event when objects moved out from the current place.
  */
-MudderyPopupDialogue.prototype.onObjMovedOut = function(dbref) {
-    if (this.target && this.target.dbref == dbref) {
+MudderyPopupDialogue.prototype.onObjMovedOut = function(obj_id) {
+    if (this.target && this.target.id == obj_id) {
         this.onClose();
         return;
     }
@@ -1477,7 +1480,7 @@ MudderySelectChar.prototype.onLogout = function(element) {
  */
 MudderySelectChar.prototype.onSelectCharacter = function(element) {
     var index = this.select(element).data("index");
-    core.service.puppetCharacter(this.characters[index]["dbref"]);
+    core.service.puppetCharacter(this.characters[index]["id"]);
 }
 
 /*
@@ -1495,7 +1498,7 @@ MudderySelectChar.prototype.onDeleteCharacter = function(element, event) {
 	    {
 	        "name": core.trans("Confirm"),
 	        "callback": this.confirmDelete,
-	        "data": this.characters[index]["dbref"]
+	        "data": this.characters[index]["id"]
 	    }
 	];
 	mud.main_frame.popupMessage(core.trans("Warning"),
@@ -1507,8 +1510,8 @@ MudderySelectChar.prototype.onDeleteCharacter = function(element, event) {
  * Confirm deleting a character.
  */
 MudderySelectChar.prototype.confirmDelete = function(data) {
-	var dbref = data;
-    core.service.deleteCharacter(dbref);
+	var obj_id = data;
+    core.service.deleteCharacter(obj_id);
 }
 
 /*
@@ -1977,9 +1980,8 @@ MudderyScene.prototype.onCommand = function(element) {
  */
 MudderyScene.prototype.onObject = function(element) {
     var index = $(element).data("index");
-    var dbref = this.scene["things"][index]["dbref"];
-    dbref = dbref.slice(1);
-    core.service.look(dbref, "scene");
+    var obj_id = this.scene["things"][index]["id"];
+    core.service.look(obj_id, "scene");
 }
 
 /*
@@ -1987,9 +1989,8 @@ MudderyScene.prototype.onObject = function(element) {
  */
 MudderyScene.prototype.onNPC = function(element) {
     var index = $(element).data("index");
-    var dbref = this.scene["npcs"][index]["dbref"];
-    dbref = dbref.slice(1);
-    core.service.look(dbref, "scene");
+    var obj_id = this.scene["npcs"][index]["id"];
+    core.service.look(obj_id, "scene");
 }
 
 /*
@@ -1997,9 +1998,8 @@ MudderyScene.prototype.onNPC = function(element) {
  */
 MudderyScene.prototype.onPlayer = function(element) {
     var index = $(element).data("index");
-    var dbref = this.scene["players"][index]["dbref"];
-    dbref = dbref.slice(1);
-    core.service.look(dbref, "scene");
+    var obj_id = this.scene["players"][index]["id"];
+    core.service.look(obj_id, "scene");
 }
 
 /*
@@ -2007,9 +2007,8 @@ MudderyScene.prototype.onPlayer = function(element) {
  */
 MudderyScene.prototype.onExit = function(element) {
     var index = $(element).data("index");
-    var dbref = this.scene["exits"][index]["dbref"];
-    dbref = dbref.slice(1);
-    core.service.doGoto(dbref);
+    var obj_id = this.scene["exits"][index]["id"];
+    core.service.doGoto(obj_id);
 }
 
 /*
@@ -2291,7 +2290,7 @@ MudderyScene.prototype.removeObject = function(obj) {
 
     var index = -1;
     for (var i = 0; i < this.scene[type].length; i++) {
-        if (this.scene[type][i]["dbref"] == obj["dbref"]) {
+        if (this.scene[type][i]["id"] == obj["id"]) {
             this.scene[type].splice(i, 1);
             index = i;
             break;
@@ -2333,7 +2332,7 @@ MudderyScene.prototype.addPlayer = function(player) {
  * Remove a player from this scene.
  */
 MudderyScene.prototype.removePlayer = function(player) {
-    this.select("#scene_obj_" + player["dbref"].slice(1)).remove();
+    this.select("#scene_obj_" + player["id"]).remove();
 
 	if (this.select("#scene_players_container>:not(.template)").length == 0) {
 	    // No other players.
@@ -3177,8 +3176,8 @@ MudderySkills.prototype.bindEvents = function() {
 MudderySkills.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.skills.length) {
-        var skill_id = this.skills[index].id;
-        core.service.look(skill_id, "skills");
+        this.item_selected = this.skills[index].key;
+        core.service.querySkill(this.item_selected);
     }
 }
 
@@ -3267,13 +3266,13 @@ MudderySkills.prototype.setSkills = function(skills) {
                 .appendTo(info);
         }
 
-        if (obj["id"] == this.item_selected) {
+        if (obj["key"] == this.item_selected) {
             has_selected_item = true;
         }
     }
 
     if (has_selected_item) {
-        core.service.look(this.item_selected, "skills");
+        core.service.querySkill(this.item_selected);
     }
     else {
         this.item_selected = null;
@@ -3912,7 +3911,7 @@ MudderyCombat = function(el) {
 
     this.combat_result = new MudderyCombatResult(this.select(".combat-result"));
 
-	this.self_dbref = "";
+	this.self_id = "";
 	this.target = "";
 	this.interval_id = null;
 	this.timeout = 0;
@@ -3992,7 +3991,7 @@ MudderyCombat.prototype.onCombatSkill = function(element) {
 /*
  * Reset the combat box.
  */
-MudderyCombat.prototype.reset = function(skill_cd_time) {
+MudderyCombat.prototype.reset = function() {
 	this.select(".desc").empty();
 	this.select(".game-time").empty();
 
@@ -4005,7 +4004,7 @@ MudderyCombat.prototype.reset = function(skill_cd_time) {
 	// Remove skill buttons that are not template.
 	this.select(".buttons").empty();
 
-	this.self_dbref = "";
+	this.self_id = "";
 	this.target = "";
 	this.combat_finished = true;
 	this.skill_cd_time = core.data_handler.skill_cd_time;
@@ -4036,17 +4035,17 @@ MudderyCombat.prototype.setInfo = function(name, icon) {
 /*
  * Set combat data.
  */
-MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbref) {
+MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_id) {
 	if (!this.combat_finished) {
 		return;
 	}
 	this.combat_finished = false;
 
-	this.self_dbref = self_dbref;
+	this.self_id = self_id;
 
 	var self_team = "";
 	for (var i in characters) {
-		if (characters[i]["dbref"] == self_dbref) {
+		if (characters[i]["id"] == self_id) {
 			self_team = characters[i]["team"];
 		}
 	}
@@ -4080,12 +4079,12 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbr
 	var status = {};
 	for (var i in characters) {
 		var character = characters[i];
-		var dbref = character["dbref"];
-		status[dbref] = character;
+		var obj_id = character["id"];
+		status[obj_id] = character;
 
 		var item = $("<div>")
-            .attr("id", "combat-char-" + dbref.slice(1))
-        	.data("dbref", character["dbref"]);
+            .attr("id", "combat-char-" + obj_id)
+        	.data("obj_id", character["id"]);
 
         var hp = $("<div>")
             .addClass("character-hp")
@@ -4111,7 +4110,7 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbr
 		    .text(character["name"])
 		    .appendTo(item);
 
-		if (this.self_dbref == dbref) {
+		if (this.self_id == obj_id) {
 		    this.select(".title-bar>.name").text(character["name"]);
 		}
 
@@ -4127,7 +4126,7 @@ MudderyCombat.prototype.setCombat = function(desc, timeout, characters, self_dbr
 
 			if (!this.target) {
 				// Set default target.
-				this.target = character["dbref"];
+				this.target = character["id"];
 			}
 		}
 
@@ -4200,7 +4199,7 @@ MudderyCombat.prototype.setSkillCast = function(data) {
 		if (data["skill"] == "skill_normal_hit" ||
 			data["skill"] == "skill_dunt") {
 
-			var caller = $('#combat-char-' + data["caller"].slice(1));
+			var caller = $('#combat-char-' + data["caller"]);
 			if (caller.hasClass("teammate")) {
 				caller.animate({left: '50%'}, 100);
 				caller.animate({left: '12%'}, 100);
@@ -4215,7 +4214,7 @@ MudderyCombat.prototype.setSkillCast = function(data) {
 		}
 		else if (data["skill"] == "skill_escape") {
 			if (data["data"] == 1) {
-				var item_id = "#combat-char-" + data["target"].slice(1) + ".status";
+				var item_id = "#combat-char-" + data["target"] + ".status";
 				$(item_id).text(core.trans("Escaped"));
 			}
 		}
@@ -4260,10 +4259,10 @@ MudderyCombat.prototype.displayMessage = function(msg) {
  */
 MudderyCombat.prototype.updateStatus = function(status) {
 	for (var key in status) {
-		var hp_bar = "#combat-char-" + key.slice(1) + " .character-hp-bar";
+		var hp_bar = "#combat-char-" + key + " .character-hp-bar";
 		$(hp_bar).width(this.character_hp_width * status[key]["hp"] / status[key]["max_hp"]);
 
-		if (this.self_dbref == key) {
+		if (this.self_id == key) {
 		    this.select(".hp-bar").width(this.full_hp_width * status[key]["hp"] / status[key]["max_hp"]);
 		    this.select(".hp-number").text(status[key]["hp"] + "/" + status[key]["max_hp"]);
 		}
@@ -4885,7 +4884,7 @@ MudderyConversation.prototype.getMessage = function(message) {
 
 	var prefix = "";
     if (message["type"] == "PRIVATE") {
-	    if (message["from_dbref"] == core.data_handler.character_dbref) {
+	    if (message["from_id"] == core.data_handler.character_id) {
 	        prefix = core.trans("TO[") + message["channel"] + "]";
 	    }
 	    else {

@@ -48,14 +48,14 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
-        "args" must be a string without ' and ", usually it is self.dbref.
+        "args" must be a string without ' and ", usually it is self.id.
         """
         commands = []
         if self.can_discard:
             commands.append({
                 "name": _("Discard"),
                 "cmd": "discard",
-                "args": self.dbref,
+                "args": self.get_id(),
                 "confirm": _("Discard this object?"),
             })
         return commands
@@ -141,9 +141,9 @@ class MudderyFood(ELEMENT("COMMON_OBJECT")):
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
-        "args" must be a string without ' and ", usually it is self.dbref.
+        "args" must be a string without ' and ", usually it is self.id.
         """
-        commands = [{"name": _("Use"), "cmd": "use", "args": self.dbref}]
+        commands = [{"name": _("Use"), "cmd": "use", "args": self.get_id()}]
         commands.extend(super(MudderyFood, self).get_available_commands(caller))
 
         return commands
@@ -214,12 +214,12 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
-        "args" must be a string without ' and ", usually it is self.dbref.
+        "args" must be a string without ' and ", usually it is self.id.
         """
         commands = [{
             "name": _("Equip"),
             "cmd": "equip",
-            "args": self.dbref
+            "args": self.get_id()
         }]
 
         # Can not discard when equipped
@@ -227,7 +227,7 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
             commands.append({
                 "name": _("Discard"),
                 "cmd": "discard",
-                "args": self.dbref,
+                "args": self.get_id(),
                 "confirm": _("Discard this object?"),
             })
 
@@ -245,9 +245,9 @@ class MudderySkillBook(ELEMENT("COMMON_OBJECT")):
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
-        "args" must be a string without ' and ", usually it is self.dbref.
+        "args" must be a string without ' and ", usually it is self.id.
         """
-        commands = [{"name": _("Use"), "cmd": "use", "args": self.dbref}]
+        commands = [{"name": _("Use"), "cmd": "use", "args": self.get_id()}]
         commands.extend(super(MudderySkillBook, self).get_available_commands(caller))
 
         return commands
@@ -266,11 +266,13 @@ class MudderySkillBook(ELEMENT("COMMON_OBJECT")):
             raise ValueError("User should not be None.")
 
         skill_key = self.const.skill
+        skill_level = self.const.level
         if not skill_key:
             return _("No effect."), 0
 
-        if user.learn_skill(skill_key, False, False):
+        try:
+            user.learn_skill(skill_key, skill_level, False)
             return _("You learned skill."), 1
-        else:
+        except:
             return _("No effect."), 0
 

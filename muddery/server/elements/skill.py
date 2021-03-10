@@ -36,55 +36,6 @@ class MudderySkill(BaseElement):
         else:
             return "%(" + char + ")s"
 
-    def __init__(self, *agrs, **wargs):
-        super(MudderySkill, self).__init__(*agrs, **wargs)
-        self.cd_finish_time = 0
-
-    def at_object_creation(self):
-        """
-        Set default values.
-
-        Returns:
-            None
-        """
-        super(MudderySkill, self).at_object_creation()
-
-        self._is_default = False
-
-        # Set skill cd. Add gcd to new the skill.
-        gcd = GAME_SETTINGS.get("global_cd")
-        if gcd > 0:
-            self.states.save("cd_finish_time", time.time() + gcd)
-
-    def at_init(self):
-        """
-        Load the skill's data.
-        """
-        super(MudderySkill, self).at_init()
-
-        self._is_default = self.states.load("is_default", False)
-
-    def set_default(self, is_default):
-        """
-        Set this skill as the character's default skill.
-        When skills in table default_skills changes, character's relative skills
-        will change too.
-
-        Args:
-            is_default: (boolean) if the is default or not.
-        """
-        self._is_default = is_default
-        self.states.save("is_default", is_default)
-
-    def is_default(self):
-        """
-        Check if this skill is the character's default skill.
-
-        Returns:
-            (boolean) is default or not
-        """
-        return self._is_default
-
     def after_data_loaded(self):
         """
         Set data_info to the object.
@@ -117,7 +68,7 @@ class MudderySkill(BaseElement):
         if self.passive:
             return []
 
-        commands = [{"name": _("Cast"), "cmd": "cast_skill", "args": self.get_object_key()}]
+        commands = [{"name": _("Cast"), "cmd": "cast_skill", "args": self.get_element_key()}]
         return commands
 
     def cast(self, caller, target):
@@ -130,34 +81,29 @@ class MudderySkill(BaseElement):
         Returns:
             skill_cast: (dict) skill's result
         """
-        skill_cast = {}
-        not_available = self.get_available_message(caller)
-        if not_available:
-            skill_cast = {"cast": not_available}
-        else:
-            case_message = self.cast_message(caller, target)
-            results = self.do_skill(caller, target)
+        case_message = self.cast_message(caller, target)
+        results = self.do_skill(caller, target)
 
-            # set message
-            skill_cast = {
-                "skill": self.get_object_key(),
-                "main_type": self.main_type,
-                "sub_type": self.sub_type,
-                "cast": case_message,
+        # set message
+        skill_cast = {
+            "skill": self.get_element_key(),
+            "main_type": self.main_type,
+            "sub_type": self.sub_type,
+            "cast": case_message,
+        }
+
+        if caller:
+            skill_cast["caller"] = caller.get_id()
+            skill_cast["status"] = {
+                caller.get_id(): caller.get_combat_status(),
             }
 
-            if caller:
-                skill_cast["caller"] = caller.dbref
-                skill_cast["status"] = {
-                    caller.dbref: caller.get_combat_status(),
-                }
+        if target:
+            skill_cast["target"] = target.get_id()
+            skill_cast["status"][target.get_id()] = target.get_combat_status()
 
-            if target:
-                skill_cast["target"] = target.dbref
-                skill_cast["status"][target.dbref] = target.get_combat_status()
-
-            if results:
-                skill_cast["result"] = " ".join(results)
+        if results:
+            skill_cast["result"] = " ".join(results)
 
         return skill_cast
         
@@ -165,28 +111,8 @@ class MudderySkill(BaseElement):
         """
         Do this skill.
         """
-        # set cd
-        if not self.passive:
-            # set cd
-            time_now = time.time()
-            if self.cd > 0:
-                self.states.save("cd_finish_time", time_now + self.cd)
-
         # call skill function
         return STATEMENT_HANDLER.do_skill(self.function, caller, target)
-
-    def get_available_message(self, caller):
-        """
-        Check this skill.
-
-        Returns:
-            message: (string) If the skill is not available, returns a string of reason.
-                     If the skill is available, return "".
-        """
-        if self.is_cooling_down():
-            return _("{C%s{n is not ready yet!") % self.get_name()
-
-        return ""
 
     def is_available(self, caller, passive):
         """
@@ -201,34 +127,7 @@ class MudderySkill(BaseElement):
         if not passive and self.passive:
             return False
 
-        if self.is_cooling_down():
-            return False
-
         return True
-
-    def is_cooling_down(self):
-        """
-        If this skill is cooling down.
-        """
-        if self.cd > 0:
-            cd_finish_time = self.states.load("cd_finish_time", 0)
-            if cd_finish_time:
-                if time.time() < cd_finish_time:
-                    return True
-        return False
-
-    def get_remain_cd(self):
-        """
-        Get skill's CD.
-
-        Returns:
-            (float) Remain CD in seconds.
-        """
-        cd_finish_time = self.states.load("cd_finish_time", 0)
-        remain_cd = cd_finish_time - time.time()
-        if remain_cd < 0:
-            remain_cd = 0
-        return remain_cd
 
     def cast_message(self, caller, target):
         """
@@ -245,21 +144,64 @@ class MudderySkill(BaseElement):
             target_name = target.get_name()
 
         if self.message_model:
-            values = {"n": self.name,
+            values = {"n": self.get_name(),
                       "c": caller_name,
                       "t": target_name}
             message = self.message_model % values
 
         return message
 
+    def is_passive(self):
+        """
+        Is a passive skill.
+        :return:
+        """
+        return self.passive
+
+    def get_name(self):
+        """
+        Get skill's name.
+        :return:
+        """
+        return self.const.name
+
+    def get_desc(self):
+        """
+        Get skill's name.
+        :return:
+        """
+        return self.const.desc
+
+    def get_cd(self):
+        """
+        Get this skill's CD
+        :return:
+        """
+        if self.passive:
+            return 0
+
+        return self.cd
+
+    def get_icon(self):
+        """
+        Get this skill's icon.
+        :return:
+        """
+        return self.const.icon
+
     def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
-        info = super(MudderySkill, self).get_appearance(caller)
-        
-        info["passive"] = self.passive
-        info["cd_remain"] = self.get_remain_cd()
+        info = {
+            "key": self.const.key,
+            "name": self.get_name(),
+            "desc": self.get_desc(),
+            "cmds": self.get_available_commands(caller),
+            "icon": self.get_icon(),
+            "passive": self.is_passive(),
+            "cd": self.get_cd(),
+        }
 
         return info

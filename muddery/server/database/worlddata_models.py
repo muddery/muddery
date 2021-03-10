@@ -330,6 +330,9 @@ class skill_books(BaseObjects):
     # skill's key
     skill = models.CharField(max_length=KEY_LENGTH)
 
+    # skill's level
+    level = models.PositiveIntegerField(blank=True, default=0)
+
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -444,38 +447,6 @@ class staff_characters(BaseObjects):
         verbose_name_plural = "Staff Characters"
 
 
-class skills(BaseObjects):
-    "Store all skills."
-
-    # skill's message when casting
-    message = models.TextField(blank=True)
-
-    # skill's cd
-    cd = models.FloatField(blank=True, default=0)
-
-    # if it is a passive skill
-    passive = models.BooleanField(blank=True, default=False)
-
-    # skill function's name
-    function = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    # skill's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    # skill's main type, used in autocasting skills.
-    main_type = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    # skill's sub type, used in autocasting skills.
-    sub_type = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Skill"
-        verbose_name_plural = "Skills"
-
-
 # ------------------------------------------------------------
 #
 # exit lock's additional data
@@ -530,6 +501,47 @@ class object_creators(BaseObjects):
         app_label = "worlddata"
         verbose_name = "Object Creator"
         verbose_name_plural = "Object Creators"
+
+
+class skills(models.Model):
+    "Store all skills."
+
+    # shop's key
+    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # shop's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # shop's description
+    desc = models.TextField(blank=True)
+
+    # skill's message when casting
+    message = models.TextField(blank=True)
+
+    # skill's cd
+    cd = models.FloatField(blank=True, default=0)
+
+    # if it is a passive skill
+    passive = models.BooleanField(blank=True, default=False)
+
+    # skill function's name
+    function = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # skill's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # skill's main type, used in autocasting skills.
+    main_type = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    # skill's sub type, used in autocasting skills.
+    sub_type = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Skill"
+        verbose_name_plural = "Skills"
 
 
 class shops(models.Model):
@@ -900,6 +912,9 @@ class default_skills(models.Model):
     # skill's key
     skill = models.CharField(max_length=KEY_LENGTH)
 
+    # skill's level
+    level = models.PositiveIntegerField(blank=True, default=0)
+
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -1242,6 +1257,9 @@ class action_learn_skill(BaseEventActionData):
     # The key of a skill.
     # skill's key
     skill = models.CharField(max_length=KEY_LENGTH)
+
+    # skill's level
+    level = models.PositiveIntegerField(blank=True, default=0)
 
     class Meta:
         "Define Django meta options"

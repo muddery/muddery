@@ -74,6 +74,10 @@ class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
             before it is even started.
 
         """
+        if traversing_object.location != self.location:
+            # not in the same room
+            return False
+
         # trigger event
         if traversing_object.has_account:
             return self.event.at_character_traverse(traversing_object)
@@ -150,8 +154,12 @@ class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
-        "args" must be a string without ' and ", usually it is self.dbref.
+        "args" must be a string without ' and ", usually it is self.id.
         """
-        commands = [{"name":self.verb, "cmd":"goto", "args":self.dbref}]
+        commands = [{
+            "name": self.verb,
+            "cmd": "goto",
+            "args": self.get_id()
+        }]
         return commands
 

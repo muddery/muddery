@@ -6,6 +6,7 @@ MudderyObject is an object which can load it's data automatically.
 
 """
 
+import ast
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
@@ -13,6 +14,7 @@ from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.database.worlddata.properties_dict import PropertiesDict
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.worlddata import WorldData
+from muddery.server.database.worlddata.object_properties import ObjectProperties
 
 
 class BaseElement(object):
@@ -29,6 +31,7 @@ class BaseElement(object):
     def __init__(self, *agrs, **wargs):
         super(BaseElement, self).__init__(*agrs, **wargs)
         self.element_key = ""
+        self.level = 0
 
     @classmethod
     def get_models(cls):
@@ -115,14 +118,6 @@ class BaseElement(object):
         """
         return self.element_type
 
-    def get_id(self):
-        """
-        Get the object's id.
-
-        :return: (number) object's id
-        """
-        return 0
-
     def is_element(self, element_type):
         """
         Is a subclass of the element type.
@@ -173,6 +168,35 @@ class BaseElement(object):
         # Set data.
         for field_name in fields:
             self.const_data_handler.add(field_name, getattr(record, field_name))
+
+    def set_level(self, level):
+        """
+        Set element's level.
+        :param level:
+        :return:
+        """
+        self.level = level
+        self.load_custom_level_data(level)
+
+    def load_custom_level_data(self, level):
+        # Get custom data.
+        values = {}
+        for record in ObjectProperties.get_properties(self.element_key, level):
+            key = record.property
+            serializable_value = record.value
+            if serializable_value == "":
+                value = None
+            else:
+                try:
+                    value = ast.literal_eval(serializable_value)
+                except (SyntaxError, ValueError) as e:
+                    # treat as a raw string
+                    value = serializable_value
+            values[key] = value
+
+        # Set values.
+        for key, info in self.get_properties_info().items():
+            self.const_data_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
 
     def after_data_loaded(self):
         """

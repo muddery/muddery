@@ -75,6 +75,6 @@ class Skill(MudderySkill):
         """
         info = super(Skill, self).get_appearance(caller)
         
-        info["mp"] = self.states.load("mp")
+        info["mp"] = self.const.mp
 
         return info

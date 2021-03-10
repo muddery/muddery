@@ -90,7 +90,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
             self.load_data()
         except Exception as e:
             traceback.print_exc()
-            logger.log_errmsg("%s(%s) can not load data:%s" % (self.get_object_key(), self.dbref, e))
+            logger.log_errmsg("%s(%s) can not load data:%s" % (self.get_object_key(), self.get_id(), e))
             
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded() which is called
@@ -146,7 +146,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         Args:
         moved_obj (Object): The object leaving
         target_location (Object): Where `moved_obj` is going.
-        
+
         """
         pass
 
@@ -169,7 +169,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
             self.load_data(level, reset_location=reset_location)
         except Exception as e:
             traceback.print_exc()
-            logger.log_errmsg("%s(%s) can not load data:%s" % (key, self.dbref, e))
+            logger.log_errmsg("%s(%s) can not load data:%s" % (key, self.get_id(), e))
 
         # call data_key hook
         self.after_object_key_changed()
@@ -510,7 +510,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         command to call.
         """
         # Get name, description and available commands.
-        info = {"dbref": self.dbref,
+        info = {"id": self.get_id(),
                 "name": self.get_name(),
                 "desc": self.get_desc(caller),
                 "cmds": self.get_available_commands(caller),
@@ -532,7 +532,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
-        "args" must be a string without ' and ", usually it is self.dbref.
+        "args" must be a string without ' and ", usually it is self.id.
         """
         return []
 
@@ -579,6 +579,9 @@ class MudderyBaseObject(BaseElement, DefaultObject):
                                                         
         # relay to session(s)
         sessions = make_iter(session) if session else self.sessions.all()
+        if sessions:
+            logger.log_info("Send message, %s: %s" % (self.id, text))
+
         for session in sessions:
             session.msg(text=text, **kwargs)
 
@@ -604,28 +607,6 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         :param message: content.
         """
         pass
-
-    def search_dbref(self, dbref, location=None):
-        """
-        Search as an object by its dbref.
-
-        Args:
-            dbref: (string)dbref.
-
-        Returns:
-            The object or None.
-        """
-        match = ObjectDB.objects.dbref_search(dbref)
-
-        if match and location:
-            # match the location
-            if is_iter(location):
-                if not [l for l in location if match.location == l]:
-                    match = None
-            elif match.location != location:
-                match = None
-
-        return match
 
     def announce_move_from(self, destination, msg=None, mapping=None, **kwargs):
         """

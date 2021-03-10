@@ -158,7 +158,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
                 # put obj to its default location
                 obj.reset_location()
             except Exception as e:
-                ostring = "%s can not load data:%s" % (obj.dbref, e)
+                ostring = "%s can not load data:%s" % (obj.get_id(), e)
                 print(ostring)
                 print(traceback.print_exc())
                 if caller:
@@ -282,17 +282,21 @@ def reset_default_locations():
             print("Can not find start_location: %s" % e)
 
 
-def delete_object(obj_dbref):
+def delete_object(obj_id):
     # helper function for deleting a single object
-    obj = search.search_object(obj_dbref)
-    if not obj:
-        ostring = "Can not find object %s." % obj_dbref
-        print(ostring)
+    try:
+        obj = utils.get_object_by_id(obj_id)
 
-    # do the deletion
-    okay = obj[0].delete()
-    if not okay:
-        ostring = "Can not delete %s." % obj_dbref
+        # do the deletion
+        okay = obj[0].delete()
+        if not okay:
+            ostring = "Can not delete %s." % obj_id
+            print(ostring)
+    except ObjectDoesNotExist:
+        ostring = "Can not find object %s." % obj_id
+        print(ostring)
+    except Exception as e:
+        ostring = "Can not delete object %s: %s %s." % (obj_id, type(e), e)
         print(ostring)
 
 

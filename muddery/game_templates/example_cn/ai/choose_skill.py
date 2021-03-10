@@ -3,13 +3,8 @@ Skill handler handles a character's skills.
 
 """
 
-import time
 import random
-from django.conf import settings
-from evennia.utils import logger
 from muddery.server.combat.base_combat_handler import CStatus
-from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.game_settings import GAME_SETTINGS
 
 
 class ChooseSkill(object):
@@ -30,8 +25,7 @@ class ChooseSkill(object):
         if not combat:
             return
 
-        all_skills = caller.get_skills()
-        skills = [skill for skill in all_skills.values() if skill.is_available(caller, passive=False)]
+        skills = caller.get_available_skills()
         if not skills:
             return
 
@@ -51,7 +45,7 @@ class ChooseSkill(object):
             if heal_skills:
                 skill = random.choice(heal_skills)
                 target = caller
-                return skill.get_object_key(), target
+                return skill.get_element_key(), target
         
         if opponents:
             # attack opponents
@@ -65,6 +59,6 @@ class ChooseSkill(object):
                 # find the lowest hp
                 sorted_opponents = sorted(opponents, key=lambda t: t.states.load("hp"))
                 target = sorted_opponents[0]
-                return skill.get_object_key(), target
+                return skill.get_element_key(), target
 
         return

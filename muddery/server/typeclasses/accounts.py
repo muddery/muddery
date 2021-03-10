@@ -120,7 +120,7 @@ class MudderyAccount(DefaultAccount):
         if session:
             session.msg(logged_in={})
 
-            char_all = [{"name": char.get_name(), "dbref": char.dbref} for char in self.db._playable_characters]
+            char_all = [{"name": char.get_name(), "id": char.get_id()} for char in self.db._playable_characters]
             session.msg({"char_all": char_all,
                          "max_char": settings.MAX_NR_CHARACTERS})
 
@@ -128,7 +128,7 @@ class MudderyAccount(DefaultAccount):
         """
         Get this player's all playable characters.
         """
-        char_all = [{"name": char.get_name(), "dbref": char.dbref} for char in self.db._playable_characters]
+        char_all = [{"name": char.get_name(), "id": char.get_id()} for char in self.db._playable_characters]
         return char_all
 
     def msg(self, text=None, from_obj=None, session=None, options=None, **kwargs):

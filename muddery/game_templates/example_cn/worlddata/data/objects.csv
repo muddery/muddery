@@ -48,11 +48,6 @@ exit_gate_fountain,喷水池,EXIT,前往喷水池。
 area_intro,起始界面,AREA,
 area_hole,未知区域,AREA,
 area_park,公园,AREA,
-skill_normal_hit,普通攻击,SKILL,攻击敌人，伤害一般。
-skill_normal_heal,普通治疗,SKILL,治疗自己，效果一般。
-skill_normal_hp,强壮体魄,SKILL,被动技能，提升最大生命值。
-skill_dunt,重击,SKILL,攻击敌人，造成大量伤害。
-skill_escape,逃跑,SKILL,逃之夭夭。
 book_dunt,重击之术,SKILL_BOOK,"记录了重击之术的奥秘。使用之后可以学会重击技能。"
 food_bread,面包,FOOD,面包可以帮你恢复少许生命。
 food_apple,苹果,FOOD,苹果可以帮你恢复少许能量。

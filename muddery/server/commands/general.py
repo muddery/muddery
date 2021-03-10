@@ -14,7 +14,7 @@ from evennia.comms.models import ChannelDB
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
-from muddery.server.utils.utils import get_object_by_key
+from muddery.server.utils.utils import get_object_by_key, get_object_by_id
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.defines import CombatType
 from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
@@ -27,7 +27,7 @@ class CmdLook(BaseCommand):
 
     Usage:
         {"cmd":"look",
-         "args":<object's dbref>
+         "args":<object's id>
         }
 
     Observes your location or objects in your vicinity.
@@ -48,7 +48,13 @@ class CmdLook(BaseCommand):
 
         if args:
             # Use search to handle duplicate/nonexistant results.
-            looking_at_obj = caller.search_dbref(args)
+            try:
+                obj_id = int(args)
+            except:
+                caller.msg({"alert": _("Can not find it.")})
+                return
+
+            looking_at_obj = get_object_by_id(obj_id)
             if not looking_at_obj:
                 caller.msg({"alert": _("Can not find it.")})
                 return
@@ -124,7 +130,7 @@ class CmdInventoryObject(BaseCommand):
     Usage:
         {
             "cmd": "inventory_obj",
-            "args": <object's dbref>
+            "args": <object's id>
         }
 
     Observes your location or objects in your vicinity.
@@ -157,7 +163,7 @@ class CmdEquipmentsObject(BaseCommand):
     Usage:
         {
             "cmd": "equipments_obj",
-            "args": <object's dbref>
+            "args": <object's id>
         }
 
     Observes your location or objects in your vicinity.
@@ -192,7 +198,7 @@ class CmdSay(BaseCommand):
 
     Usage:
         {"cmd":"say",
-         "args":{"target": <target's dbref>,
+         "args":{"target": <target's id>,
                  "msg": <message>
         }
 
@@ -231,8 +237,7 @@ class CmdSay(BaseCommand):
             elif target_type == ConversationType.LOCAL.value:
                 obj = get_object_by_key(target)
             elif target_type == ConversationType.PRIVATE.value:
-                obj = caller.search_dbref(target)
-                obj = obj[0]
+                obj = get_object_by_id(int(target))
         except Exception as e:
             ostring = "Can not find %s %s: %s" % (target_type, target, e)
             logger.log_tracemsg(ostring)
@@ -254,7 +259,7 @@ class CmdGoto(BaseCommand):
 
     Usage:
         {"cmd":"goto",
-         "args": <exit's dbref> or <direction (n, s, w, e, ne, nw, sw, se)>
+         "args": <exit's id> or <direction (n, s, w, e, ne, nw, sw, se)>
         }
 
     Tranvese an exit, go to the destination of the exit.
@@ -263,7 +268,6 @@ class CmdGoto(BaseCommand):
     locks = "cmd:all()"
     help_cateogory = "General"
 
-
     def get_degree(self, from_room, to_room):
         # get the direction's degree of the exit
         # from 0 to 360
@@ -271,7 +275,7 @@ class CmdGoto(BaseCommand):
         from_area = from_room.location
         to_area = to_room.location
 
-        if from_area.dbref != to_area.dbref:
+        if from_area.get_id() != to_area.get_id():
             return
 
         from_pos = from_room.position
@@ -334,9 +338,10 @@ class CmdGoto(BaseCommand):
             caller.msg({"alert":_("Should appoint an exit to go.")})
             return
 
-        obj = caller.search_dbref(self.args, location=caller.location)
-
-        if not obj:
+        obj = None
+        try:
+            obj = get_object_by_id(int(self.args))
+        except:
             # try to goto direction
             target = self.args.strip().lower()
 
@@ -386,7 +391,7 @@ class CmdTalk(BaseCommand):
 
     Usage:
         {"cmd":"talk",
-         "args":<NPC's dbref>
+         "args":<NPC's id>
         }
 
     Begin a talk with an NPC. Show all available dialogues of this NPC.
@@ -403,8 +408,10 @@ class CmdTalk(BaseCommand):
             caller.msg({"alert":_("You should talk to someone.")})
             return
 
-        npc = caller.search_dbref(self.args, location=caller.location)
-        if not npc:
+        try:
+            obj_id = int(self.args)
+            npc = get_object_by_id(obj_id)
+        except:
             # Can not find the NPC in the caller's location.
             caller.msg({"alert":_("Can not find the one to talk.")})
             return
@@ -423,7 +430,7 @@ class CmdDialogue(BaseCommand):
     Usage:
         {"cmd":"dialogue",
          "args":{"dialogue":<current dialogue>,
-                 "npc":<npc's dbref>,
+                 "npc":<npc's id>,
                 }
         }
 
@@ -448,10 +455,12 @@ class CmdDialogue(BaseCommand):
             return
         dlg_key = self.args["dialogue"]
 
-        npc = None
-        if "npc" in self.args and self.args["npc"]:
+        try:
             # get NPC
-            npc = caller.search_dbref(self.args["npc"], location=caller.location)
+            obj_id = int(self.args["npc"])
+            npc = get_object_by_id(obj_id)
+        except:
+            npc = None
 
         caller.finish_dialogue(dlg_key, npc)
 
@@ -466,7 +475,7 @@ class CmdLoot(BaseCommand):
 
     Usage:
         {"cmd":"loot",
-         "args":<object's dbref>
+         "args":<object's id>
         }
 
     This command pick out random objects from the loot list and give
@@ -484,10 +493,16 @@ class CmdLoot(BaseCommand):
             caller.msg({"alert":_("You should loot something.")})
             return
 
-        obj = caller.search_dbref(self.args, location=caller.location)
-        if not obj:
+        try:
+            obj_id = int(self.args)
+            obj = get_object_by_id(obj_id)
+        except:
             # Can not find the specified object.
             caller.msg({"alert":_("Can not find the object to loot.")})
+            return
+
+        if obj.location != caller.location:
+            caller.msg({"alert": _("Can not loot it.")})
             return
 
         try:
@@ -510,7 +525,7 @@ class CmdUse(BaseCommand):
 
     Usage:
         {"cmd":"use",
-         "args":<object's dbref>
+         "args":<object's id>
         }
 
     Call caller's use_object function with specified object.
@@ -532,15 +547,14 @@ class CmdUse(BaseCommand):
             caller.msg({"alert": _("You should use something.")})
             return
 
-        obj_dbref = self.args
-
         result = ""
         try:
             # Use the object and get the result.
-            result = caller.use_object(obj_dbref)
+            obj_id = int(self.args)
+            result = caller.use_object(obj_id)
             caller.show_location()
         except Exception as e:
-            ostring = "Can not use %s: %s" % (obj_dbref, e)
+            ostring = "Can not use %s: %s" % (self.args, e)
             logger.log_tracemsg(ostring)
 
         # Send result to the player.
@@ -560,7 +574,7 @@ class CmdDiscard(BaseCommand):
 
     Usage:
         {"cmd":"discard",
-         "args":<object's dbref>
+         "args":<object's id>
         }
 
     Call caller's remove_objects function with specified object.
@@ -583,7 +597,7 @@ class CmdDiscard(BaseCommand):
 
         # remove object
         try:
-            caller.remove_object_dbref_all(self.args)
+            caller.remove_object_id_all(int(self.args))
             caller.show_location()
         except Exception as e:
             # If the caller does not have this object.
@@ -602,7 +616,7 @@ class CmdEquip(BaseCommand):
 
     Usage:
         {"cmd":"equip",
-         "args":<object's dbref>
+         "args":<object's id>
         }
     Put on an equipment and add its attributes to the character.
     """
@@ -618,17 +632,12 @@ class CmdEquip(BaseCommand):
             caller.msg({"alert": _("You should equip something.")})
             return
 
-        dbref = self.args
-
         try:
             # equip
-            caller.equip_object(dbref)
-        except MudderyError as e:
-            caller.msg({"alert": str(e)})
-            return
+            caller.equip_object(int(self.args))
         except Exception as e:
             caller.msg({"alert": _("Can not use this equipment.")})
-            logger.log_tracemsg("Can not use equipment %s: %s" % (dbref, e))
+            logger.log_tracemsg("Can not use equipment %s: %s" % (self.args, e))
             return
 
         # Send lastest status to the player.
@@ -646,7 +655,7 @@ class CmdTakeOff(BaseCommand):
 
     Usage:
         {"cmd":"takeoff",
-         "args":<object's dbref>
+         "args":<object's id>
         }
     Take off an equipment and remove its attributes from the character.
     """
@@ -662,17 +671,16 @@ class CmdTakeOff(BaseCommand):
             caller.msg({"alert":_("You should take off something.")})
             return
 
-        dbref = self.args
-
         try:
             # Take off the equipment.
-            caller.take_off_equipment(dbref)
+            obj_id = int(self.args)
+            caller.take_off_equipment(obj_id)
         except MudderyError as e:
             caller.msg({"alert": str(e)})
             return
         except Exception as e:
             caller.msg({"alert": _("Can not take off this equipment.")})
-            logger.log_tracemsg("Can not take off %s: %s" % (dbref, e))
+            logger.log_tracemsg("Can not take off %s: %s" % (self.args, e))
             return
 
         # Send lastest status to the player.
@@ -740,8 +748,10 @@ class CmdCastSkill(BaseCommand):
             skill_key = args["skill"]
 
             # Get target
-            if "target" in args:
-                target = caller.search_dbref(args["target"])
+            try:
+                target = get_object_by_id(int(args["target"]))
+            except:
+                target = None
 
         try:
             caller.cast_skill(skill_key, target)
@@ -816,8 +826,10 @@ class CmdCastCombatSkill(BaseCommand):
             skill_key = args["skill"]
 
             # Get target
-            if "target" in args:
-                target = caller.search_dbref(args["target"])
+            try:
+                target = get_object_by_id(int(args["target"]))
+            except:
+                target = None
 
         try:
             # cast this skill.
@@ -837,7 +849,7 @@ class CmdAttack(BaseCommand):
 
     Usage:
         {"cmd":"attack",
-         "args":<object's dbref>}
+         "args":<object's id>}
         }
 
     This will initiate a combat with the target. If the target is
@@ -862,8 +874,9 @@ class CmdAttack(BaseCommand):
             caller.msg({"alert":_("You should select a target.")})
             return
 
-        target = caller.search_dbref(self.args)
-        if not target:
+        try:
+            target = get_object_by_id(int(self.args))
+        except:
             caller.msg({"alert":_("You should select a target.")})
             return
 
@@ -1107,7 +1120,7 @@ class CmdUnlockExit(BaseCommand):
 
     Usage:
         {"cmd":"unlock_exit",
-         "args":<object's dbref>
+         "args":<object's id>
         }
     A character must unlock a LockedExit before tranvese it.
     """
@@ -1123,8 +1136,9 @@ class CmdUnlockExit(BaseCommand):
             caller.msg({"alert":_("You should unlock something.")})
             return
 
-        obj = caller.search_dbref(self.args, location=caller.location)
-        if not obj:
+        try:
+            obj = get_object_by_id(int(self.args))
+        except:
             caller.msg({"alert":_("Can not find this exit.")})
             return
 
@@ -1155,7 +1169,7 @@ class CmdShopping(BaseCommand):
         {
             "cmd":"shopping",
             "args": {
-                npc: <npc's dbref>,
+                npc: <npc's id>,
                 shop: <shop's key>,
             }
         }
@@ -1173,11 +1187,11 @@ class CmdShopping(BaseCommand):
             caller.msg({"alert": _("You should shopping in someplace.")})
             return
 
-        npc_dbref = args["npc"]
         shop_key = args["shop"]
 
-        npc = caller.search_dbref(npc_dbref)
-        if not npc:
+        try:
+            npc = get_object_by_id(int(args["npc"]))
+        except:
             caller.msg({"alert": _("Can not find this NPC.")})
             return
 
@@ -1195,7 +1209,7 @@ class CmdBuy(BaseCommand):
         {
             "cmd": "buy",
             "args": {
-                "npc": <npc's dbref>,
+                "npc": <npc's id>,
                 "shop": <shop's key>,
                 "goods": <goods' index>,
             }
@@ -1214,8 +1228,9 @@ class CmdBuy(BaseCommand):
             caller.msg({"alert": _("You should buy something.")})
             return
 
-        npc = caller.search_dbref(args["npc"])
-        if not npc:
+        try:
+            npc = get_object_by_id(int(args["npc"]))
+        except:
             caller.msg({"alert": _("Can not find this NPC.")})
             return
 
@@ -1239,7 +1254,7 @@ class CmdQueryQuest(BaseCommand):
 
     Usage:
         {
-            "cmd": "look",
+            "cmd": "query_quest",
             "args": {
                 "key": <quest's key>
             }
@@ -1267,6 +1282,42 @@ class CmdQueryQuest(BaseCommand):
             caller.msg({"quest_info": caller.get_quest_info(quest_key)})
         except Exception as e:
             logger.log_err("Can not get %s's quest %s." % (caller.id, quest_key))
+
+
+class CmdQuerySkill(BaseCommand):
+    """
+    Query a skill's detail information.
+
+    Usage:
+        {
+            "cmd": "query_skill",
+            "args": {
+                "key": <skill's key>
+            }
+        }
+
+    Observes your location or objects in your vicinity.
+    """
+    key = "query_skill"
+    locks = "cmd:all()"
+
+    def func(self):
+        """
+        Handle the looking.
+        """
+        caller = self.caller
+        args = self.args
+
+        if not args or "key" not in args:
+            caller.msg({"alert": _("Can not find it.")})
+            return
+
+        skill_key = args["key"]
+
+        try:
+            caller.msg({"skill_info": caller.get_skill_info(skill_key)})
+        except Exception as e:
+            logger.log_err("Can not get %s's skill %s." % (caller.id, skill_key))
 
 
 #------------------------------------------------------------

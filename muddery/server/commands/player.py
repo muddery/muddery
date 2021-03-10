@@ -9,7 +9,7 @@ from django.conf import settings
 from evennia.utils import search, logger
 from evennia.utils.utils import make_iter
 from muddery.server.commands.base_command import BaseCommand
-from muddery.server.utils import utils
+from muddery.server.utils.utils import get_object_by_key, get_object_by_id
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
 from muddery.server.database.gamedata.player_character import PLAYER_CHARACTER_DATA
@@ -118,7 +118,7 @@ class CmdPuppet(BaseCommand):
 
     Usage:
         {"cmd":"puppet",
-         "args":<object's dbref>
+         "args":<object's id>
         }
 
     Puppet a given Character.
@@ -146,11 +146,15 @@ class CmdPuppet(BaseCommand):
         new_character = None
         if args:
             # search for a matching character
-            new_character = [char for char in search.object_search(args) if char.access(player, "puppet")]
-            if not new_character:
+            try:
+                new_character = get_object_by_id(int(args))
+            except:
+                session.msg({"alert": _("That is not a valid character choice.")})
+                return
+
+            if not new_character.access(player, "puppet"):
                 session.msg({"alert":_("That is not a valid character choice.")})
                 return
-            new_character = new_character[0]
         else: 
             # Puppet last character.
             new_character = player.db._last_puppet
@@ -277,7 +281,7 @@ class CmdCharDelete(BaseCommand):
 
     Usage:
         {"cmd":"char_delete",
-         "args":{"dbref": <character's dbref>}
+         "args":{"id": <character's id>}
         }
 
     Permanently deletes one of your characters.
@@ -295,10 +299,10 @@ class CmdCharDelete(BaseCommand):
             self.msg({"alert":_("Please select a character")})
             return
 
-        dbref = args["dbref"]
+        obj_id = args["id"]
 
         # use the playable_characters list to search
-        match = [char for char in make_iter(player.db._playable_characters) if char.dbref == dbref]
+        match = [char for char in make_iter(player.db._playable_characters) if char.get_id() == obj_id]
         if not match:
             session.msg({"alert":_("You have no such character to delete.")})
             return
@@ -329,7 +333,7 @@ class CmdCharDeleteWithPW(BaseCommand):
 
     Usage:
         {"cmd":"char_delete",
-         "args":{"dbref": <character's dbref>,
+         "args":{"id": <character's id>,
                  "password": <player's password>}
         }
 
@@ -348,7 +352,7 @@ class CmdCharDeleteWithPW(BaseCommand):
             self.msg({"alert":_("Please select a character")})
             return
             
-        dbref = args["dbref"]
+        obj_id = args["id"]
         password = args["password"]
             
         check = player.check_password(password)
@@ -358,7 +362,7 @@ class CmdCharDeleteWithPW(BaseCommand):
             return
 
         # use the playable_characters list to search
-        match = [char for char in make_iter(player.db._playable_characters) if char.dbref == dbref]
+        match = [char for char in make_iter(player.db._playable_characters) if char.get_id() == obj_id]
         if not match:
             session.msg({"alert":_("You have no such character to delete.")})
             return

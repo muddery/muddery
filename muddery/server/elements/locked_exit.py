@@ -104,9 +104,9 @@ class MudderyLockedExit(ELEMENT("EXIT")):
             verb = self.unlock_verb
             if not verb:
                 verb = _("Unlock")
-            cmds = [{"name": verb, "cmd": "unlock_exit", "args": self.dbref}]
+            cmds = [{"name": verb, "cmd": "unlock_exit", "args": self.get_id()}]
         
-        info = {"dbref": self.dbref,
+        info = {"id": self.get_id(),
                 "name": self.name,
                 "desc": self.locked_desc,
                 "cmds": cmds}
@@ -116,7 +116,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
     def get_available_commands(self, caller):
         """
         This returns a list of available commands.
-        "args" must be a string without ' and ", usually it is self.dbref.
+        "args" must be a string without ' and ", usually it is self.id.
         """
         if caller.is_exit_unlocked(self.get_object_key()):
             # If is unlocked, use common commands.
@@ -129,7 +129,7 @@ class MudderyLockedExit(ELEMENT("EXIT")):
             verb = self.unlock_verb
             if not verb:
                 verb = _("Unlock")
-            cmds = [{"name": verb, "cmd": "unlock", "args": self.dbref}]
+            cmds = [{"name": verb, "cmd": "unlock", "args": self.get_id()}]
 
         return cmds
 
