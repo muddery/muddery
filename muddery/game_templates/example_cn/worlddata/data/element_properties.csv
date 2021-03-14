@@ -1,0 +1,6 @@
+element,key,level,property,value
+SKILL,skill_normal_hit,,mp,0
+SKILL,skill_normal_heal,,mp,10
+SKILL,skill_normal_hp,,mp,0
+SKILL,skill_dunt,,mp,10
+SKILL,skill_escape,,mp,0

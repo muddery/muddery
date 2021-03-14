@@ -189,8 +189,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             try:
                 # Create skill object.
                 skill_obj = ELEMENT("SKILL")()
-                skill_obj.set_element_key(key)
-                skill_obj.set_level(item.level)
+                skill_obj.set_element_key(key, item.level)
             except Exception as e:
                 logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e), e))
                 continue

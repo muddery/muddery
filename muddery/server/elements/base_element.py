@@ -14,7 +14,7 @@ from muddery.server.utils.object_states_handler import ObjectStatesHandler
 from muddery.server.database.worlddata.properties_dict import PropertiesDict
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.database.worlddata.object_properties import ObjectProperties
+from muddery.server.database.worlddata.element_properties import ElementProperties
 
 
 class BaseElement(object):
@@ -31,7 +31,7 @@ class BaseElement(object):
     def __init__(self, *agrs, **wargs):
         super(BaseElement, self).__init__(*agrs, **wargs)
         self.element_key = ""
-        self.level = 0
+        self.level = None
 
     @classmethod
     def get_models(cls):
@@ -126,12 +126,13 @@ class BaseElement(object):
         """
         return isinstance(self, ELEMENT(element_type))
 
-    def set_element_key(self, key):
+    def set_element_key(self, key, level=None):
         """
         Set element data's key.
 
         Args:
-            key: (string) Key of the data.
+            key: (string) the key of the data.
+            level: (int) element's level.
         """
         self.element_key = key
 
@@ -142,6 +143,8 @@ class BaseElement(object):
                 self.load_data(self.model_name, key)
             except Exception as e:
                 logger.log_errmsg("%s %s can not load data:%s" % (self.model_name, key, e))
+
+        self.set_level(level)
 
         self.after_data_loaded()
 
@@ -181,7 +184,7 @@ class BaseElement(object):
     def load_custom_level_data(self, level):
         # Get custom data.
         values = {}
-        for record in ObjectProperties.get_properties(self.element_key, level):
+        for record in ElementProperties.get_properties(self.element_type, self.element_key, level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":

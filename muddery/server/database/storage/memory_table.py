@@ -156,6 +156,7 @@ class MemoryTable(object):
             raise MudderyError("Only indexed fields can be searched.")
 
         index = self.index[index_name]
+
         if values in index:
             return [self.records[i] for i in index[values]]
         else:

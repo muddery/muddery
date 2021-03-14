@@ -108,7 +108,7 @@ class character_skills(models.Model):
     skill = models.CharField(max_length=KEY_LENGTH)
 
     # skill's level
-    level = models.PositiveIntegerField(default=0)
+    level = models.PositiveIntegerField(null=True)
 
     # is default skill
     is_default = models.BooleanField(default=False)

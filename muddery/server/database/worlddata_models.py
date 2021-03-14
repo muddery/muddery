@@ -331,7 +331,7 @@ class skill_books(BaseObjects):
     skill = models.CharField(max_length=KEY_LENGTH)
 
     # skill's level
-    level = models.PositiveIntegerField(blank=True, default=0)
+    level = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         "Define Django meta options"
@@ -814,6 +814,38 @@ class object_properties(models.Model):
 
 # ------------------------------------------------------------
 #
+# element's custom properties
+#
+# ------------------------------------------------------------
+class element_properties(models.Model):
+    "Store element's custom properties."
+    # The type of an element.
+    element = models.CharField(max_length=KEY_LENGTH)
+
+    # The key of an element.
+    key = models.CharField(max_length=KEY_LENGTH)
+
+    # The level of the element.
+    level = models.PositiveIntegerField(blank=True, null=True)
+
+    # The key of the property.
+    property = models.CharField(max_length=KEY_LENGTH)
+
+    # The value of the property.
+    value = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Element's Property"
+        verbose_name_plural = "Element's Properties"
+        unique_together = ("element", "key", "level", "property")
+        index_together = [("element", "key", "level")]
+
+
+# ------------------------------------------------------------
+#
 # character's default objects
 #
 # ------------------------------------------------------------
@@ -913,7 +945,7 @@ class default_skills(models.Model):
     skill = models.CharField(max_length=KEY_LENGTH)
 
     # skill's level
-    level = models.PositiveIntegerField(blank=True, default=0)
+    level = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         "Define Django meta options"
@@ -1259,7 +1291,7 @@ class action_learn_skill(BaseEventActionData):
     skill = models.CharField(max_length=KEY_LENGTH)
 
     # skill's level
-    level = models.PositiveIntegerField(blank=True, default=0)
+    level = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         "Define Django meta options"

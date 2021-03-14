@@ -200,6 +200,16 @@ class object_properties(BaseModels.object_properties):
     pass
 
 
+# ------------------------------------------------------------
+#
+# Element's custom properties
+#
+# ------------------------------------------------------------
+class element_properties(BaseModels.element_properties):
+    "Store object's custom properties."
+    pass
+
+
 #------------------------------------------------------------
 #
 # store all npcs

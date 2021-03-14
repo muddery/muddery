@@ -162,7 +162,9 @@ MudderyMainFrame.prototype.doClosePopupBox = function() {
  *  Set the player's status.
  */
 MudderyMainFrame.prototype.setStatus = function(status) {
-	core.data_handler.character_level = status["level"]["value"];
+    if ("level" in status) {
+	    core.data_handler.character_level = status["level"]["value"];
+	}
 	mud.scene_window.setStatus(status);
 	mud.char_data_window.setStatus(status);
 }

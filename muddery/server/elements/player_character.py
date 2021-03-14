@@ -1364,8 +1364,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             try:
                 # Create skill object.
                 skill_obj = ELEMENT("SKILL")()
-                skill_obj.set_element_key(key)
-                skill_obj.set_level(item["level"])
+                skill_obj.set_element_key(key, item["level"])
             except Exception as e:
                 logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e), e))
                 continue
@@ -1383,8 +1382,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 try:
                     # Create skill object.
                     skill_obj = ELEMENT("SKILL")()
-                    skill_obj.set_element_key(key)
-                    skill_obj.set_level(item.level)
+                    skill_obj.set_element_key(key, item.level)
                 except Exception as e:
                     logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e), e))
                     continue
@@ -1421,8 +1419,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         try:
             # Create skill object.
             skill_obj = ELEMENT("SKILL")()
-            skill_obj.set_element_key(skill_key)
-            skill_obj.set_level(level)
+            skill_obj.set_element_key(skill_key, level)
         except Exception as e:
             logger.log_err("Can not learn skill %s: (%s) %s" % (skill_key, type(e), e))
             self.msg({"msg": _("Can not learn this skill.")})
@@ -1437,7 +1434,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # save skill
         CHARACTER_SKILLS.save(self.id, skill_key, {
             "level": level,
-            "is_default": True,
+            "is_default": False,
             "cd_finish": 0,
         })
 
