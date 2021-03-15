@@ -7,6 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
+from muddery.server.utils import utils
 
 
 class ObjectKeys(object):
@@ -14,24 +15,22 @@ class ObjectKeys(object):
     The storage of object keys.
     """
     def __init__(self, model_name):
-        self.model_name = model_name
-        self.model = apps.get_model(settings.GAME_DATA_APP, model_name)
-        self.records = {}
+        storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
+        self.storage = storage_class(model_name, "", "object_id")
+
+        # load data
         self.key_object = {}
         self.unique_objects = {}
 
-        # load data
-        for record in self.model.objects.all():
-            self.records[record.object_id] = {
-                "key": record.object_key,
-                "type": record.unique_type,
-            }
-            self.key_object[record.object_key] = record.object_id
-            if record.unique_type not in self.unique_objects:
-                self.unique_objects[record.unique_type] = {}
-            self.unique_objects[record.unique_type][record.object_id] = record.object_key
+        all_data = self.storage.load_category_dict("")
+        for object_id, info in all_data.items():
+            self.key_object[info["object_key"]] = object_id
+            if info["unique_type"]:
+                if info["unique_type"] not in self.unique_objects:
+                    self.unique_objects[info["unique_type"]] = {}
+                self.unique_objects[info["unique_type"]][object_id] = info["object_key"]
 
-    def add(self, object_id, object_key, unique_type=None):
+    def save(self, object_id, object_key, unique_type=None):
         """
         Store an object's key.
         :param object_id:
@@ -39,49 +38,24 @@ class ObjectKeys(object):
         :param unique_type:
         :return:
         """
-        if object_id in self.records:
-            if self.records[object_id]["key"] == object_key and self.records[object_id]["type"] == unique_type:
-                return
+        self.storage.save_dict("", object_id, {
+            "object_key": object_key,
+            "unique_type": unique_type
+        })
 
-        try:
-            record = self.model(
-                object_id=object_id,
-                object_key=object_key,
-                unique_type=unique_type
-            )
-            record.save()
+        self.key_object[object_key] = object_id
+        if unique_type:
+            if unique_type not in self.unique_objects:
+                self.unique_objects[unique_type] = {}
+            self.unique_objects[unique_type][object_id] = object_key
 
-            self.records[object_id] = {
-                "key": object_key,
-                "type": unique_type,
-            }
-            self.key_object[object_key] = object_id
-            if record.unique_type not in self.unique_objects:
-                self.unique_objects[record.unique_type] = {}
-            self.unique_objects[record.unique_type][object_id] = object_key
-        except Exception as e:
-            logger.log_err("Can not add %s %s's element key: %s" % (object_id, object_key, e))
-
-    def remove(self, object_id):
+    def delete(self, object_id):
         """
-        Remove an object.
+        Delete an object.
         :param object_id:
         :return:
         """
-        if object_id not in self.records:
-            return
-
-        try:
-            self.model.objects.get(object_id=object_id).delete()
-            key = self.records[object_id]["key"]
-            unique_type = self.records[object_id]["type"]
-            del self.records[object_id]
-            del self.key_object[key]
-            del self.unique_objects[unique_type][object_id]
-        except ObjectDoesNotExist:
-            pass
-        except Exception as e:
-            logger.log_err("Can not remove object's element key: %s %s" % (object_id, e))
+        self.storage.delete("", object_id)
 
     def get_key(self, object_id):
         """
@@ -90,7 +64,8 @@ class ObjectKeys(object):
         :return:
         """
         try:
-            return self.records[object_id]["key"]
+            info = self.storage.load_dict("", object_id)
+            return info["object_key"]
         except KeyError:
             return None
 

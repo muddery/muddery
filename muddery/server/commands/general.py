@@ -14,7 +14,7 @@ from evennia.comms.models import ChannelDB
 from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError
-from muddery.server.utils.utils import get_object_by_key, get_object_by_id
+from muddery.server.utils.search import get_object_by_key, get_object_by_id
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.defines import CombatType
 from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER

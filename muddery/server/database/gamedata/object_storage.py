@@ -6,9 +6,8 @@ import json, traceback
 from collections import OrderedDict, deque
 from django.apps import apps
 from django.conf import settings
+from muddery.server.utils import utils
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.database.storage.kv_table import KeyValueTable
-from muddery.server.database.storage.kv_table_write_back import KeyValueWriteBackTable
 
 
 def to_string(value):
@@ -62,7 +61,8 @@ class ObjectStorage(object):
     """
     def __init__(self, model_name, obj_id_column, key_field, default_value_field=None):
         # db model
-        self.storage = KeyValueTable(model_name, obj_id_column, key_field, default_value_field)
+        storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
+        self.storage = storage_class(model_name, obj_id_column, key_field, default_value_field)
 
     def save(self, obj_id, key, value):
         """

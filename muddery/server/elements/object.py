@@ -14,7 +14,7 @@ from evennia.utils import logger
 from evennia.utils.utils import make_iter, is_iter, lazy_property
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.events.event_trigger import EventTrigger
-from muddery.server.utils import utils
+from muddery.server.utils import search
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.desc_handler import DESC_HANDLER
@@ -73,7 +73,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         if not success:
             return success
 
-        OBJECT_KEYS.remove(self.id)
+        OBJECT_KEYS.delete(self.id)
         self.states.clear()
 
         return True
@@ -160,7 +160,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
             reset_location: (boolean) reset the object to its default location.
         """
         # Save data info's key and model
-        OBJECT_KEYS.add(self.id, key, unique_type)
+        OBJECT_KEYS.save(self.id, key, unique_type)
         self.object_key = key
         
         # Load data.
@@ -432,7 +432,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         if location:
             # If has location, search location object.
             try:
-                location_obj = utils.get_object_by_key(location)
+                location_obj = search.get_object_by_key(location)
             except ObjectDoesNotExist:
                 logger.log_errmsg("%s can't find location %s!" % (self.get_object_key(), location))
                 return

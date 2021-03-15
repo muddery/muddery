@@ -6,7 +6,7 @@ import random
 from django.core.exceptions import ObjectDoesNotExist
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.utils import utils
+from muddery.server.utils import search
 from muddery.server.utils.localized_strings_handler import _
 
 
@@ -42,7 +42,7 @@ class ActionDialogue(BaseEventAction):
                 npc = None
                 if record.npc:
                     try:
-                        npc = utils.get_object_by_key(record.npc)
+                        npc = search.get_object_by_key(record.npc)
                     except ObjectDoesNotExist:
                         pass
 

@@ -12,10 +12,10 @@ import ast
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils.utils import lazy_property
-from evennia.utils import logger, search
+from evennia.utils import logger
 from evennia.comms.models import ChannelDB
 from evennia.objects.models import ObjectDB
-from muddery.server.utils import utils
+from muddery.server.utils import search
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.quest_handler import QuestHandler
 from muddery.server.utils.statement_attribute_handler import StatementAttributeHandler
@@ -485,7 +485,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         for room_key in revealed_map:
             # get room's information
             try:
-                room = utils.get_object_by_key(room_key)
+                room = search.get_object_by_key(room_key)
                 rooms[room_key] = {"name": room.get_name(),
                                    "icon": room.icon,
                                    "area": room.location and room.location.get_object_key(),
@@ -500,7 +500,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             # add room's neighbours
             if not path["to"] in rooms:
                 try:
-                    neighbour = utils.get_object_by_key(path["to"])
+                    neighbour = search.get_object_by_key(path["to"])
                     rooms[neighbour.get_object_key()] = {
                         "name": neighbour.get_name(),
                         "icon": neighbour.icon,
@@ -589,7 +589,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     # add room's neighbours
                     if not path["to"] in rooms:
                         try:
-                            neighbour = utils.get_object_by_key(path["to"])
+                            neighbour = search.get_object_by_key(path["to"])
                             rooms[neighbour.get_object_key()] = {
                                 "name": neighbour.get_name(),
                                 "icon": neighbour.icon,
@@ -1617,7 +1617,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         default_home_key = GAME_SETTINGS.get("default_player_home_key")
         if default_home_key:
             try:
-                home = utils.get_object_by_key(default_home_key)
+                home = search.get_object_by_key(default_home_key)
             except ObjectDoesNotExist:
                 pass;
 
@@ -1801,7 +1801,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         rankings = top_rankings
         rankings.extend([char_id for char_id in nearest_rankings if char_id not in top_rankings])
 
-        characters = [utils.get_object_by_id(char_id) for char_id in rankings]
+        characters = [search.get_object_by_id(char_id) for char_id in rankings]
         data = [{"name": char.get_name(),
                  "id": char.get_id(),
                  "ranking": HONOURS_MAPPER.get_ranking(char),

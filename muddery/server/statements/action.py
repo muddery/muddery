@@ -3,7 +3,7 @@ Actions are used to do somethings.
 """
 
 from django.core.exceptions import ObjectDoesNotExist
-from muddery.server.utils.utils import get_object_by_key
+from muddery.server.utils.search import get_object_by_key
 from muddery.server.statements.statement_function import StatementFunction
 
 

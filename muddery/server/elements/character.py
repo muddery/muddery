@@ -15,7 +15,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
-from evennia.utils import logger, search
+from evennia.utils import logger
 from evennia.utils.utils import lazy_property, class_from_module
 from evennia.objects.models import ObjectDB
 from muddery.server.mappings.element_set import ELEMENT
@@ -23,9 +23,9 @@ from muddery.server.database.worlddata.loot_list import CharacterLootList
 from muddery.server.database.worlddata.default_skills import DefaultSkills
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.loot_handler import LootHandler
-from muddery.server.utils import defines, utils
+from muddery.server.utils import defines, search
 from muddery.server.utils.game_settings import GAME_SETTINGS
-from muddery.server.utils.utils import get_object_by_key
+from muddery.server.utils.search import get_object_by_key
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import delete_object
 from muddery.server.utils.defines import CombatType
@@ -457,7 +457,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Returns:
             None
         """
-        target = utils.get_object_by_id(target_id)
+        target = search.get_object_by_id(target_id)
         self.attack_target(target, desc)
 
     def attack_temp_current_target(self, desc=""):

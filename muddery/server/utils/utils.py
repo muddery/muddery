@@ -10,11 +10,7 @@ import os, re, inspect
 import importlib
 from pkgutil import iter_modules
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils import search
 from muddery.launcher import configs
-from muddery.server.database.gamedata.object_keys import OBJECT_KEYS
 from muddery.server.database.worlddata.localized_strings import LocalizedStrings
 
 
@@ -24,36 +20,6 @@ def get_muddery_version():
     """
     import muddery
     return muddery.__version__
-
-
-def get_object_by_key(object_key):
-    """
-    Search objects by its key.
-
-    Args:
-        object_key: (string) object's key.
-    """
-    object_id = OBJECT_KEYS.get_object_id(object_key)
-    if object_id:
-        return get_object_by_id(object_id)
-
-    raise ObjectDoesNotExist
-    
-
-def get_object_by_id(object_id):
-    """
-    Search objects by its id.
-
-    Args:
-        object_id: (number) object's id.
-    """
-    object_db_model = ContentType.objects.get(app_label="objects", model="objectdb").model_class()
-    try:
-        return object_db_model.objects.get(id=object_id)
-    except ObjectDoesNotExist:
-        OBJECT_KEYS.remove(object_id)
-
-    raise ObjectDoesNotExist
 
 
 def file_iterator(file, erase=False, chunk_size=512):
@@ -279,6 +245,7 @@ def classes_in_path(path, cls):
         for name, obj in vars(module).items():
             if inspect.isclass(obj) and issubclass(obj, cls) and obj is not cls:
                 yield obj
+
 
 def get_module_path(path):
     """

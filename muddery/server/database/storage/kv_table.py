@@ -51,11 +51,14 @@ class KeyValueTable(BaseKeyValueStorage):
             key: (string) the key.
             value_dict: (dict) data.
         """
-        self.model.objects.update_or_create(**{
-            self.category_field: category,
+        data = {
             self.key_field: key,
             "defaults": value_dict
-        })
+        }
+        if self.category_field:
+            data[self.category_field] = category
+
+        self.model.objects.update_or_create(**data)
 
     def has(self, category, key):
         """
@@ -65,6 +68,12 @@ class KeyValueTable(BaseKeyValueStorage):
             category: (string) the category of data.
             key: (string) attribute's key.
         """
+        query = {
+            self.key_field: key,
+        }
+        if self.category_field:
+            query[self.category_field] = category
+
         return self.model.objects.filter(**{
             self.category_field: category,
             self.key_field: key,
@@ -83,11 +92,14 @@ class KeyValueTable(BaseKeyValueStorage):
             AttributeError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
         """
+        query = {
+            self.key_field: key,
+        }
+        if self.category_field:
+            query[self.category_field] = category
+
         try:
-            record = self.model.objects.get(**{
-                self.category_field: category,
-                self.key_field: key,
-            })
+            record = self.model.objects.get(**query)
             return record.serializable_value(self.default_value_field)
         except:
             if len(default) > 0:
@@ -108,11 +120,14 @@ class KeyValueTable(BaseKeyValueStorage):
             AttributeError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
         """
+        query = {
+            self.key_field: key,
+        }
+        if self.category_field:
+            query[self.category_field] = category
+
         try:
-            record = self.model.objects.get(**{
-                self.category_field: category,
-                self.key_field: key,
-            })
+            record = self.model.objects.get(**query)
             return {name: record.serializable_value(name) for name in self.fields}
         except:
             if default is not None:
@@ -127,9 +142,13 @@ class KeyValueTable(BaseKeyValueStorage):
         Args:
             category: (string) category's name.
         """
-        records = self.model.objects.filter(**{
-            self.category_field: category,
-        })
+        if self.category_field:
+            records = self.model.objects.filter(**{
+                self.category_field: category,
+            })
+        else:
+            records = self.model.objects.all()
+
         return {
             r.serializable_value(self.key_field): r.serializable_value(self.default_value_field) for r in records
         }
@@ -141,9 +160,13 @@ class KeyValueTable(BaseKeyValueStorage):
         Args:
             category: (string) category's name.
         """
-        records = self.model.objects.filter(**{
-            self.category_field: category,
-        })
+        if self.category_field:
+            records = self.model.objects.filter(**{
+                self.category_field: category,
+            })
+        else:
+            records = self.model.objects.all()
+
         return {
             r.serializable_value(self.key_field): {
                 name: r.serializable_value(name) for name in self.fields
@@ -161,10 +184,13 @@ class KeyValueTable(BaseKeyValueStorage):
         Return:
             (list): deleted values
         """
-        self.model.objects.filter(**{
-            self.category_field: category,
+        query = {
             self.key_field: key,
-        }).delete()
+        }
+        if self.category_field:
+            query[self.category_field] = category
+
+        self.model.objects.filter(**query).delete()
 
     def delete_category(self, category):
         """
@@ -176,9 +202,12 @@ class KeyValueTable(BaseKeyValueStorage):
         Return:
             (list): deleted values
         """
-        self.model.objects.filter(**{
-            self.category_field: category,
-        }).delete()
+        if self.category_field:
+            self.model.objects.filter(**{
+                self.category_field: category,
+            }).delete()
+        else:
+            self.model.objects.all().delete()
 
     def atomic(self):
         """

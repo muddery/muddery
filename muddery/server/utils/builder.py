@@ -5,9 +5,9 @@ This module handles importing data from csv files and creating the whole game wo
 import traceback
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from evennia.utils import create, search, logger
+from evennia.utils import create, logger
 from evennia.comms.models import ChannelDB
-from muddery.server.utils import utils
+from muddery.server.utils import search
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.database.gamedata.object_keys import OBJECT_KEYS
@@ -133,7 +133,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
 
     for obj_id, obj_key in current_objs.items():
         try:
-            obj = utils.get_object_by_id(obj_id)
+            obj = search.get_object_by_id(obj_id)
         except Exception as e:
             logger.log_err("Can not get object: %s %s" % (obj_id, obj_key))
             continue
@@ -253,7 +253,7 @@ def reset_default_locations():
 
     if default_home_key:
         try:
-            default_home = utils.get_object_by_key(default_home_key)
+            default_home = search.get_object_by_key(default_home_key)
             settings.DEFAULT_HOME = default_home.dbref
             print("settings.DEFAULT_HOME set to: %s" % settings.DEFAULT_HOME)
         except Exception as e:
@@ -275,7 +275,7 @@ def reset_default_locations():
     if start_location_key:
         # If get start_location_key.
         try:
-            start_location = utils.get_object_by_key(start_location_key)
+            start_location = search.get_object_by_key(start_location_key)
             settings.START_LOCATION = start_location.dbref
             print("settings.START_LOCATION set to: %s" % settings.START_LOCATION)
         except Exception as e:
@@ -285,7 +285,7 @@ def reset_default_locations():
 def delete_object(obj_id):
     # helper function for deleting a single object
     try:
-        obj = utils.get_object_by_id(obj_id)
+        obj = search.get_object_by_id(obj_id)
 
         # do the deletion
         okay = obj[0].delete()
@@ -342,7 +342,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
         default_home_key = GAME_SETTINGS.get("default_player_home_key")
         if default_home_key:
             try:
-                home = utils.get_object_by_key(default_home_key)
+                home = search.get_object_by_key(default_home_key)
             except ObjectDoesNotExist:
                 pass
 
@@ -356,7 +356,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
         try:
             start_location_key = GAME_SETTINGS.get("start_location_key")
             if start_location_key:
-                location = utils.get_object_by_key(start_location_key)
+                location = search.get_object_by_key(start_location_key)
         except:
             pass
 

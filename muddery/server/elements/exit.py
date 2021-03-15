@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from evennia.objects.objects import DefaultExit
 from evennia.utils import logger
 from muddery.server.utils import defines
-from muddery.server.utils import utils
+from muddery.server.utils import search
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT
 
@@ -114,7 +114,7 @@ class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
         # set new destination
         try:
             # If has destination, search destination object.
-            destination_obj = utils.get_object_by_key(destination)
+            destination_obj = search.get_object_by_key(destination)
         except ObjectDoesNotExist:
             logger.log_errmsg("%s can't find destination %s!" % (self.get_object_key(), destination))
             return

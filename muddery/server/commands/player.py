@@ -6,10 +6,10 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 
 import re
 from django.conf import settings
-from evennia.utils import search, logger
+from evennia.utils import logger
 from evennia.utils.utils import make_iter
 from muddery.server.commands.base_command import BaseCommand
-from muddery.server.utils.utils import get_object_by_key, get_object_by_id
+from muddery.server.utils.search import get_object_by_key, get_object_by_id
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
 from muddery.server.database.gamedata.player_character import PLAYER_CHARACTER_DATA
