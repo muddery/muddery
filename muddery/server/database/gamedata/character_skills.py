@@ -3,12 +3,9 @@ Characters' skills.
 """
 
 import json, traceback
-from collections import OrderedDict, deque
-from django.apps import apps
 from django.conf import settings
+from muddery.server.utils import utils
 from muddery.server.utils.exception import MudderyError, ERR
-from muddery.server.database.storage.kv_table import KeyValueTable
-from muddery.server.database.storage.kv_table_write_back import KeyValueWriteBackTable
 
 
 class CharacterSkills(object):
@@ -17,9 +14,8 @@ class CharacterSkills(object):
     """
     def __init__(self, model_name):
         # db model
-        self.model_name = model_name
-        self.model = apps.get_model(settings.GAME_DATA_APP, model_name)
-        self.storage = KeyValueTable(model_name, "character_id", "skill")
+        storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
+        self.storage = storage_class(model_name, "character_id", "skill")
 
     def save(self, character_id, skill_key, data):
         """

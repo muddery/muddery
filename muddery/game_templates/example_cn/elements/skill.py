@@ -29,26 +29,6 @@ class Skill(MudderySkill):
 
         return super(Skill, self).do_skill(caller, target)
 
-    def get_available_message(self, caller):
-        """
-        Check this skill.
-
-        Args:
-            caller: (object) the one who cast the skill.
-
-        Returns:
-            message: (string) If the skill is not available, returns a string of reason.
-                     If the skill is available, return "".
-        """
-        message = super(Skill, self).get_available_message(caller)
-        if message:
-            return message
-            
-        if caller.states.load("mp") < self.const.mp:
-            return _("Not enough mana to cast {c%s{n!") % self.get_name()
-
-        return ""
-
     def is_available(self, caller, passive):
         """
         If this skill is available.
@@ -67,6 +47,13 @@ class Skill(MudderySkill):
             return False
 
         return True
+
+    def get_mp(self):
+        """
+        Get skill's mp.
+        :return:
+        """
+        return self.const.mp
 
     def get_appearance(self, caller):
         """

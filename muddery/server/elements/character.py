@@ -259,13 +259,16 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             skill_key: (string) skill's key.
             target: (object) skill's target.
         """
-        skill = self.skills[skill_key]
-        time_now = time.time()
-        if time_now < self.gcd_finish_time and time_now < skill["cd_finish"]:
-            # In cd.
+        skill_info = self.skills[skill_key]
+        skill_obj = skill_info["obj"]
+
+        if not skill_obj.is_available(self, False):
             return
 
-        skill_obj = skill["obj"]
+        time_now = time.time()
+        if time_now < self.gcd_finish_time and time_now < skill_info["cd_finish"]:
+            # In cd.
+            return
 
         cast_result = skill_obj.cast(self, target)
 

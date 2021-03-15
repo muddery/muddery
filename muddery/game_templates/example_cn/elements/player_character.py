@@ -32,3 +32,20 @@ class PlayerCharacter(MudderyPlayerCharacter):
 
     """
     element_type = "PLAYER_CHARACTER"
+
+    def cast_skill(self, skill_key, target):
+        """
+        Cast a skill.
+
+        Args:
+            skill_key: (string) skill's key.
+            target: (object) skill's target.
+        """
+        skill_obj = self.skills[skill_key]["obj"]
+        skill_mp = skill_obj.get_mp()
+        mp = self.states.load("mp")
+        if mp < skill_mp:
+            self.msg({"msg": _("Not enough mana to cast {b%s{n!") % skill_obj.get_name()})
+            return
+
+        super(PlayerCharacter, self).cast_skill(skill_key, target)

@@ -122,7 +122,7 @@ class KeyValueTable(BaseKeyValueStorage):
 
     def load_category(self, category):
         """
-        Get all values of a category.
+        Get all default field's values of a category.
 
         Args:
             category: (string) category's name.

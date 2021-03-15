@@ -19,21 +19,6 @@ class KeyValueWriteBackTable(KeyValueTable):
         # memory cache
         self.cache = {}
 
-    def save(self, category, key, value):
-        """
-        Set a value.
-
-        Args:
-            category: (string) the category of data.
-            key: (string) the key.
-            value: (any) data.
-        """
-        self.check_category_cache(category)
-        self.cache[category][key] = {
-            self.default_value_field: value
-        }
-        super(KeyValueWriteBackTable, self).save(category, key, value)
-
     def save_dict(self, category, key, value_dict):
         """
         Set a set of values.
@@ -44,7 +29,10 @@ class KeyValueWriteBackTable(KeyValueTable):
             value_dict: (dict) data.
         """
         self.check_category_cache(category)
-        self.cache[category][key] = value_dict
+        if key in self.cache[category]:
+            self.cache[category][key].update(value_dict)
+        else:
+            self.cache[category][key] = value_dict
         super(KeyValueWriteBackTable, self).save_dict(category, key, value_dict)
 
     def has(self, category, key):
@@ -104,7 +92,19 @@ class KeyValueWriteBackTable(KeyValueTable):
 
     def load_category(self, category):
         """
-        Get all values of a category.
+        Get all default field's values of a category.
+
+        Args:
+            category: (string) category's name.
+        """
+        self.check_category_cache(category)
+        return {
+            key: values[self.default_value_field] for key, values in self.cache[category].items()
+        }
+
+    def load_category_dict(self, category):
+        """
+        Get all dicts of a category.
 
         Args:
             category: (string) category's name.
@@ -156,6 +156,4 @@ class KeyValueWriteBackTable(KeyValueTable):
         :return:
         """
         if category not in self.cache:
-            self.cache[category] = super(KeyValueWriteBackTable, self).load_category(category)
-
-        print(self.cache)
+            self.cache[category] = super(KeyValueWriteBackTable, self).load_category_dict(category)

@@ -1476,6 +1476,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             skill_key: (string) skill's key.
             target: (object) skill's target.
         """
+        if not self.skills[skill_key]["obj"].is_available(self, False):
+            return
+
         last_cd_finish = self.skills[skill_key]["cd_finish"]
         result = super(MudderyPlayerCharacter, self).cast_skill(skill_key, target)
         cd_finish = self.skills[skill_key]["cd_finish"]

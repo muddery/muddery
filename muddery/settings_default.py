@@ -99,6 +99,9 @@ DATABASE_APPS_MAPPING = {
     'worlddata': 'worlddata',
 }
 
+# Database Access Object
+DATABASE_ACCESS_OBJECT = 'muddery.server.database.storage.kv_table_write_back.KeyValueWriteBackTable'
+
 # Object's default runtime table. If a typeclass's own runtime table does
 # not exist, will use this table instead.
 DEFAULT_OBJECT_RUNTIME_TABLE = "object_attributes"

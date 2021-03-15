@@ -7,7 +7,7 @@ be of use when designing your own game.
 """
 
 import os, re, inspect
-from importlib import import_module
+import importlib
 from pkgutil import iter_modules
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -233,6 +233,19 @@ def all_unlocalized_js_strings(filter):
     return strings
 
 
+def class_from_path(path):
+    """
+    Get a class from its path
+    :param path:
+    :return:
+    """
+    class_path, class_name = path.rsplit(".", 1)
+
+    mod = importlib.import_module(class_path)
+    cls = getattr(mod, class_name)
+    return cls
+
+
 def load_modules(path):
     """
     Load all modules ans sub modules in the path.
@@ -241,14 +254,14 @@ def load_modules(path):
         path: (string) modules' path
     """
     modules = []
-    m = import_module(path)
+    m = importlib.import_module(path)
     if hasattr(m, '__path__'):
         for _, subpath, ispkg in iter_modules(m.__path__):
             fullpath = path + '.' + subpath
             if ispkg:
                 modules += load_modules(fullpath)
             else:
-                modules.append(import_module(fullpath))
+                modules.append(importlib.import_module(fullpath))
 
     return modules
 

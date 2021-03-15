@@ -108,6 +108,10 @@ MudderyMainFrame.prototype.showCombat = function(combat) {
  * Cast a combat skill.
  */
 MudderyMainFrame.prototype.setSkillCast = function(result) {
+    if ("status" in result && core.data_handler.character_id in result["status"]) {
+        this.setSkillStatus(result["status"][core.data_handler.character_id]);
+    }
+
 	if (mud.combat_window.isCombatFinished()) {
 	    var message = "";
 		if ("cast" in result && result["cast"]) {
@@ -118,17 +122,17 @@ MudderyMainFrame.prototype.setSkillCast = function(result) {
 		}
 		if (message) {
 			mud.scene_window.displayMessage(message);
-		}
-
-		if ("status" in result && core.data_handler.character_id in result["status"]) {
-            this.setStatus(result["status"][core.data_handler.character_id]);
         }
+
+        if ("result" in result && result["result"]) {
+            this.popupMessage(
+                core.trans("Alert"),
+                result["result"]
+            );
+		}
 	}
 	else {
 		mud.combat_window.setSkillCast(result);
-        if ("status" in result && core.data_handler.character_id in result["status"]) {
-            this.setCombatStatus(result["status"][core.data_handler.character_id])
-        }
 	}
 }
 
@@ -172,9 +176,9 @@ MudderyMainFrame.prototype.setStatus = function(status) {
 /*
  *  Set the player's status in combat.
  */
-MudderyMainFrame.prototype.setCombatStatus = function(status) {
-	mud.scene_window.setCombatStatus(status);
-    mud.char_data_window.setCombatStatus(status);
+MudderyMainFrame.prototype.setSkillStatus = function(status) {
+	mud.scene_window.setSkillStatus(status);
+    mud.char_data_window.setSkillStatus(status);
 }
 
 /*
@@ -542,9 +546,7 @@ MudderyPopupMessage.prototype.bindEvents = function() {
 MudderyPopupMessage.prototype.onClose = function(element) {
     this.buttons = [];
     this.el.hide();
-    this.select(".header-text").empty();
-	this.select(".popup-body").empty();
-	this.select(".popup-buttons").empty();
+    this.clear();
 }
 
 /*
@@ -572,6 +574,8 @@ MudderyPopupMessage.prototype.onCommand = function(element) {
  * Set message's data.
  */
 MudderyPopupMessage.prototype.setMessage = function(header, content, buttons) {
+    this.clear();
+
 	if (!buttons) {
 		buttons = [{"name": core.trans("OK"),
 					"callback": null}];
@@ -594,6 +598,15 @@ MudderyPopupMessage.prototype.setMessage = function(header, content, buttons) {
 	}
 }
 
+
+/*
+ * Clear the dialogue.
+ */
+MudderyPopupMessage.prototype.clear = function() {
+    this.select(".header-text").empty();
+	this.select(".popup-body").empty();
+	this.select(".popup-buttons").empty();
+}
 
 /******************************************
  *
@@ -2087,8 +2100,8 @@ MudderyScene.prototype.setStatus = function(status) {
 /*
  * Set character's status in a combat.
  */
-MudderyScene.prototype.setCombatStatus = function(status) {
-    this.title_bar.setCombatStatus(status);
+MudderyScene.prototype.setSkillStatus = function(status) {
+    this.title_bar.setSkillStatus(status);
 }
 
 /*
@@ -2569,7 +2582,7 @@ MudderyTitleBar.prototype.setStatus = function(status) {
 /*
  * Set character's status in a combat.
  */
-MudderyTitleBar.prototype.setCombatStatus = function(status) {
+MudderyTitleBar.prototype.setSkillStatus = function(status) {
     if ("level" in status) {
 	    this.select(".level")
 	        .text(core.trans("Lv ") + status["level"])
@@ -2680,8 +2693,6 @@ MudderyCharData.prototype.setStatus = function(status) {
             }
         }
 
-        var item = $("<td>");
-
         var value = status[key]["value"];
         if (value == null || typeof(value) == "undefined") {
             value = "--";
@@ -2703,8 +2714,16 @@ MudderyCharData.prototype.setStatus = function(status) {
             value = value + "/" + max_value;
         }
 
-        item.text(status[key]["name"] + ": " + value);
-        row.append(item);
+        var item = $("<td>")
+            .attr("id", "info_" + key)
+            .text(status[key]["name"] + ": ");
+
+        var attr_value = $("<span>")
+            .addClass("attr_value")
+            .text(value)
+            .appendTo(item);
+
+        item.appendTo(row);
 
         if (row.children().length == 2) {
             // add a new row
@@ -2722,7 +2741,7 @@ MudderyCharData.prototype.setStatus = function(status) {
 /*
  * Set player character's information in combat.
  */
-MudderyCharData.prototype.setCombatStatus = function(status) {
+MudderyCharData.prototype.setSkillStatus = function(status) {
     for (var key in status) {
         if (key.substring(0, 4) == "max_") {
             var relative_key = key.substring(4);
