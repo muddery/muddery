@@ -98,7 +98,7 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
 
     try:
         # Set data info.
-        obj.set_object_key(record.key, level, reset_location=reset_location)
+        obj.set_object_key(record.key, level=level, reset_location=reset_location)
         obj.after_creation()
     except Exception as e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
@@ -191,7 +191,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
                 continue
 
             try:
-                obj.set_object_key(record.key, type_name)
+                obj.set_object_key(record.key, unique_type=type_name)
                 obj.after_creation()
             except Exception as e:
                 ostring = "Can not set data info to obj %s: %s" % (record.key, e)
@@ -288,7 +288,7 @@ def delete_object(obj_id):
         obj = search.get_object_by_id(obj_id)
 
         # do the deletion
-        okay = obj[0].delete()
+        okay = obj.delete()
         if not okay:
             ostring = "Can not delete %s." % obj_id
             print(ostring)
@@ -364,7 +364,7 @@ def create_character(new_player, nickname, permissions=None, character_key=None,
                                          home=home, permissions=permissions)
 
     # set character info
-    new_character.set_object_key(character_key, level)
+    new_character.set_object_key(character_key, level=level)
     new_character.after_creation()
 
     # set playable character list

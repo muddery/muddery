@@ -1569,7 +1569,12 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             elif status == defines.COMBAT_LOSE:
                 self.honour_lose()
 
-        super(MudderyPlayerCharacter, self).leave_combat()
+        # remove combat commands
+        self.cmdset.delete(settings.CMDSET_COMBAT)
+
+        if self.ndb.combat_handler:
+            self.ndb.combat_handler.leave_combat(self)
+            del self.ndb.combat_handler
 
         # show status
         self.show_status()

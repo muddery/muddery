@@ -144,9 +144,9 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         """
         return DIALOGUE_HANDLER.have_quest(caller, self)
 
-    def leave_combat(self):
+    def remove_from_combat(self):
         """
-        Leave the current combat.
+        Removed from the current combat.
         """
         status = None
         opponents = None
@@ -160,7 +160,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
             if status == defines.COMBAT_LOSE:
                 self.die(opponents)
 
-        super(MudderyBaseNPC, self).leave_combat()
+        super(MudderyBaseNPC, self).remove_from_combat()
 
         if not self.is_temp:
             if status != defines.COMBAT_LOSE:

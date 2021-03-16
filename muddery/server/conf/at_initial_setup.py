@@ -66,7 +66,7 @@ def at_initial_setup():
                 superuser.move_to(start_location, quiet=True)
 
             # set superuser's data
-            superuser.set_object_key(GAME_SETTINGS.get("default_staff_character_key"), 1)
+            superuser.set_object_key(GAME_SETTINGS.get("default_staff_character_key"), level=1)
             superuser.set_nickname("superuser")
             print("Set superuser.")
 

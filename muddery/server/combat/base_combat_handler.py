@@ -238,7 +238,7 @@ class BaseCombatHandler(DefaultScript):
         all_player_left = True
         for char in self.characters.values():
             if char["status"] != CStatus.LEFT and\
-               char["char"].is_element(settings.CHARACTER_ELEMENT_TYPE):
+               char["char"].is_element(settings.PLAYER_CHARACTER_ELEMENT_TYPE):
                 all_player_left = False
                 break
 
@@ -248,7 +248,7 @@ class BaseCombatHandler(DefaultScript):
                 if char["status"] != CStatus.LEFT:
                     char["status"] = CStatus.LEFT
                     try:
-                        char["char"].leave_combat()
+                        char["char"].remove_from_combat()
                     except Exception as e:
                         logger.log_err("Leave combat error: %s" % e)
 

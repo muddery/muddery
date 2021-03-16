@@ -88,10 +88,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
 
         All skills, contents will be removed too.
         """
-        # leave combat
-        if self.ndb.combat_handler:
-            self.ndb.combat_handler.leave_combat(self)
-        
         # stop auto casting
         self.stop_auto_combat_skill()
 
@@ -522,7 +518,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         pass
 
-    def leave_combat(self):
+    def remove_from_combat(self):
         """
         Leave the current combat.
         """
@@ -530,7 +526,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         self.cmdset.delete(settings.CMDSET_COMBAT)
 
         if self.ndb.combat_handler:
-            self.ndb.combat_handler.leave_combat(self)
             del self.ndb.combat_handler
 
         if self.is_temp:
