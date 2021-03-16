@@ -7,6 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
+from muddery.server.utils import utils
 
 
 class QuestObjectives(object):
@@ -14,26 +15,8 @@ class QuestObjectives(object):
     The storage of all character's quest's objectives.
     """
     def __init__(self, model_name):
-        self.model_name = model_name
-        self.model = apps.get_model(settings.GAME_DATA_APP, model_name)
-        self.characters = {}
-
-        # load data
-        for record in self.model.objects.all():
-            if record.character_id not in self.characters:
-                self.characters[record.character_id] = {}
-            if record.quest not in self.characters[record.character_id]:
-                self.characters[record.character_id][record.quest] = {}
-
-            self.characters[record.character_id][record.quest][(record.objective_type, record.object_key)] = record.progress
-
-    def get_character(self, character_id):
-        """
-        Get a character's quest objectives.
-        :param character_id:
-        :return:
-        """
-        return self.characters.get(character_id, {}).copy()
+        storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
+        self.storage = storage_class(model_name, "character_quest", "objective", "progress")
 
     def get_character_quest(self, character_id, quest):
         """
@@ -42,10 +25,8 @@ class QuestObjectives(object):
         :param quest: (string) quest's key
         :return:
         """
-        try:
-            return self.characters[character_id][quest].copy()
-        except KeyError:
-            return {}
+        character_quest = "%s:%s" % (character_id, quest)
+        return self.storage.load_category(character_quest)
 
     def save_progress(self, character_id, quest, objective_type, object_key, progress):
         """
@@ -57,29 +38,23 @@ class QuestObjectives(object):
         :param progress:
         :return:
         """
-        try:
-            records = self.model.objects.filter(character_id=character_id, quest=quest, objective_type=objective_type,
-                                                object_key=object_key)
-            if records:
-                records.update(progress=progress)
-            else:
-                record = self.model(
-                    character_id=character_id,
-                    quest=quest,
-                    objective_type=objective_type,
-                    object_key=object_key,
-                    progress=progress
-                )
-                record.save()
+        character_quest = "%s:%s" % (character_id, quest)
+        objective = "%s:%s" % (objective_type, object_key)
+        self.storage.save(character_quest, objective, progress)
 
-            if character_id not in self.characters:
-                self.characters[character_id] = {}
-            if quest not in self.characters[character_id]:
-                self.characters[character_id][quest] = {}
-            self.characters[character_id][quest][(objective_type, object_key)] = progress
-        except Exception:
-            logger.log_err("Can not save objective: %s %s %s %s %s" % (character_id, quest, objective_type, object_key,
-                                                                       progress))
+    def get_progress(self, character_id, quest, objective_type, object_key, *default):
+        """
+        Save new progress.
+        :param character_id:
+        :param quest:
+        :param objective_type:
+        :param object_key:
+        :param progress:
+        :return:
+        """
+        character_quest = "%s:%s" % (character_id, quest)
+        objective = "%s:%s" % (objective_type, object_key)
+        return self.storage.load(character_quest, objective, *default)
 
     def remove(self, character_id, quest):
         """
@@ -89,7 +64,8 @@ class QuestObjectives(object):
         :param quest: (string) quest's key
         :return:
         """
-        self.model.objects.filter(character_id=character_id, quest=quest).delete()
+        character_quest = "%s:%s" % (character_id, quest)
+        self.storage.delete_category(character_quest)
 
 
 QUEST_OBJECTIVES_DATA = QuestObjectives("quest_objectives")

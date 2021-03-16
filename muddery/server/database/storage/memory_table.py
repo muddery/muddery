@@ -133,24 +133,24 @@ class MemoryTable(object):
         if 0 <= record_id < len(self.records):
             return self.records[record_id]
 
-    def filter(self, **kwargs):
+    def filter(self, **conditions):
         """
         Filter data by record's value. Fields must have index. If filter multi fields, put them in a tuple.
 
         Args:
             kwargs: (dict) query conditions
         """
-        if len(kwargs) == 0:
+        if len(conditions) == 0:
             return self.all()
 
-        if len(kwargs) == 1:
-            keys = list(kwargs.keys())
+        if len(conditions) == 1:
+            keys = list(conditions.keys())
             index_name = keys[0]
-            values = kwargs[index_name]
+            values = conditions[index_name]
         else:
-            unique_fields = set(kwargs.keys())
+            unique_fields = set(conditions.keys())
             index_name = ".".join(unique_fields)
-            values = tuple(kwargs[field_name] for field_name in unique_fields)
+            values = tuple(conditions[field_name] for field_name in unique_fields)
 
         if index_name not in self.index:
             raise MudderyError("Only indexed fields can be searched.")

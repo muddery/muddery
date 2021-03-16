@@ -256,10 +256,13 @@ class CmdCharCreate(BaseCommand):
             session.msg({"alert":_("You may only create a maximum of %i characters.") % charmax})
             return
 
-        if PLAYER_CHARACTER_DATA.get_object_id(nickname):
+        try:
+            PLAYER_CHARACTER_DATA.get_object_id(nickname)
             # check if this name already exists.
             session.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
             return
+        except:
+            pass
 
         try:
             create_character(player, name)

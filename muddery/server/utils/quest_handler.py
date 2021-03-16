@@ -34,6 +34,7 @@ class QuestHandler(object):
         :return:
         """
         self.quests = CHARACTER_QUESTS_DATA.get_character(self.owner.id)
+        print("self.quests: %s" % self.quests)
         for key in self.quests:
             if not self.quests[key]["finished"]:
                 self.create_quest(key)

@@ -11,6 +11,28 @@ class BaseKeyValueStorage(object):
         # db model
         self.model_name = model_name
 
+    def add(self, category, key, value):
+        """
+        Add a new attribute. If the key already exists, raise an exception.
+
+        Args:
+            category: (string, int) the category of data.
+            key: (string) attribute's key.
+            value: (string) attribute's value.
+        """
+        pass
+
+    def add_dict(self, category, key, value_dict):
+        """
+        Add a new dict to the key. If the key already exists, raise an exception.
+
+        Args:
+            category: (string, int) the category of data.
+            key: (string) attribute's key.
+            value_dict: (dict) attribute's value.
+        """
+        pass
+
     def save(self, category, key, value):
         """
         Set an attribute.
@@ -21,18 +43,6 @@ class BaseKeyValueStorage(object):
             value: (string) attribute's value.
         """
         pass
-
-    def save_keys(self, category, values_dict):
-        """
-        Set attributes to multiple keys.
-
-        Args:
-            category: (string, int) the category of data.
-            values_dict: (dict) a dict of key-values.
-        """
-        with self.atomic():
-            for key, value in values_dict.items():
-                self.save(category, key, value)
 
     def save_dict(self, category, key, value_dict):
         """
@@ -45,18 +55,6 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def save_keys_dict(self, category, values_dict):
-        """
-        Save dicts to multiple keys.
-
-        Args:
-            category: (string, int) the category of data.
-            values_dict: (dict) a dict of key-values.
-        """
-        with self.atomic():
-            for key, value in values_dict.items():
-                self.save_dict(category, key, value)
-
     def has(self, category, key):
         """
         Check if the attribute exists.
@@ -67,14 +65,14 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def load(self, category, key, *args):
+    def load(self, category, key, *default):
         """
         Get the value of an attribute.
 
         Args:
             category: (string, int) the category of data.
             key: (string) attribute's key.
-            args: (any or none) default value.
+            default: (any or none) default value.
 
         Raises:
             AttributeError: If `raise_exception` is set and no matching Attribute
@@ -113,6 +111,15 @@ class BaseKeyValueStorage(object):
         Args:
             category: (string, int) the category of data.
             key: (string) attribute's key.
+        """
+        pass
+
+    def delete_category(self, category):
+        """
+        Remove all values of a category.
+
+        Args:
+            category: (string) the category of data.
         """
         pass
 

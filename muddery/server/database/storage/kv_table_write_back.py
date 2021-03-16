@@ -4,6 +4,7 @@ Key value storage in relational database with write back memory cache.
 
 from django.apps import apps
 from django.conf import settings
+from django.db import IntegrityError
 from django.db.transaction import atomic
 from muddery.server.database.storage.kv_table import KeyValueTable
 from muddery.server.utils.exception import MudderyError, ERR
@@ -18,6 +19,22 @@ class KeyValueWriteBackTable(KeyValueTable):
 
         # memory cache
         self.cache = {}
+
+    def add_dict(self, category, key, value_dict):
+        """
+        Set a set of values.
+
+        Args:
+            category: (string) the category of data.
+            key: (string) the key.
+            value_dict: (dict) data.
+        """
+        self.check_category_cache(category)
+        if key in self.cache[category]:
+            raise IntegrityError("Duplicate key %s." % key)
+        self.cache[category][key] = value_dict
+
+        super(KeyValueWriteBackTable, self).add_dict(category, key, value_dict)
 
     def save_dict(self, category, key, value_dict):
         """
@@ -83,7 +100,7 @@ class KeyValueWriteBackTable(KeyValueTable):
         """
         self.check_category_cache(category)
         try:
-            return self.cache[category][key]
+            return self.cache[category][key].copy()
         except KeyError:
             if default is not None:
                 return default
@@ -110,7 +127,7 @@ class KeyValueWriteBackTable(KeyValueTable):
             category: (string) category's name.
         """
         self.check_category_cache(category)
-        return self.cache[category]
+        return self.cache[category].copy()
 
     def delete(self, category, key):
         """

@@ -84,8 +84,9 @@ class ObjectStorage(object):
             obj_id: (number) object's id.
             value_dict: (dict) a dict of key-values.
         """
-        to_save = {key: to_string(value) for key, value in value_dict.items()}
-        self.storage.save_keys(obj_id, to_save)
+        with self.storage.atomic():
+            for key, value in value_dict.items():
+                self.storage.save(obj_id, key, to_string(value))
 
     def has(self, obj_id, key):
         """

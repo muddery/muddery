@@ -31,6 +31,35 @@ class KeyValueTable(BaseKeyValueStorage):
         self.key_field = key_field
         self.default_value_field = default_value_field
 
+    def add(self, category, key, value):
+        """
+        Add a new attribute. If the key already exists, raise an exception.
+
+        Args:
+            category: (string) the category of data.
+            key: (string) the key.
+            value: (any) data.
+        """
+        self.add_dict(category, key, {self.default_value_field: value})
+
+    def add_dict(self, category, key, value_dict):
+        """
+        Add a new dict to the key. If the key already exists, raise an exception.
+
+        Args:
+            category: (string) the category of data.
+            key: (string) the key.
+            value_dict: (dict) data.
+        """
+        data = {
+            self.key_field: key,
+        }
+        data.update(value_dict)
+        if self.category_field:
+            data[self.category_field] = category
+
+        self.model.objects.create(**data)
+
     def save(self, category, key, value):
         """
         Set a value to the default value field.
@@ -180,9 +209,6 @@ class KeyValueTable(BaseKeyValueStorage):
         Args:
             category: (string) the category of data.
             key: (string) attribute's key.
-
-        Return:
-            (list): deleted values
         """
         query = {
             self.key_field: key,
@@ -198,9 +224,6 @@ class KeyValueTable(BaseKeyValueStorage):
 
         Args:
             category: (string) the category of data.
-
-        Return:
-            (list): deleted values
         """
         if self.category_field:
             self.model.objects.filter(**{

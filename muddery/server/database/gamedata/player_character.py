@@ -7,6 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
+from muddery.server.utils import utils
 
 
 class PlayerCharacter(object):
@@ -14,17 +15,11 @@ class PlayerCharacter(object):
     The storage of player character's basic data.
     """
     def __init__(self, model_name):
-        self.model_name = model_name
-        self.model = apps.get_model(settings.GAME_DATA_APP, model_name)
-        self.records = {}
-        self.nicknames = {}
+        storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
+        self.storage = storage_class(model_name, "", "object_id")
 
-        # load data
-        for record in self.model.objects.all():
-            self.records[record.object_id] = {
-                "nickname": record.nickname,
-            }
-            self.nicknames[record.nickname] = record.object_id
+        all_data = self.storage.load_category_dict("")
+        self.nicknames = {item["nickname"]: key for key, item in all_data.items()}
 
     def add(self, object_id, nickname=""):
         """
@@ -33,23 +28,9 @@ class PlayerCharacter(object):
         :param nickname:
         :return:
         """
-        if object_id in self.records:
-            if self.records["nickname"] == nickname:
-                return
-
-        try:
-            record = self.model(
-                object_id=object_id,
-                nickname=nickname
-            )
-            record.save()
-
-            self.records[object_id] = {
-                "nickname": record.nickname,
-            }
+        self.storage.add_dict("", object_id, {"nickname": nickname})
+        if nickname:
             self.nicknames[nickname] = object_id
-        except Exception as e:
-            logger.log_err("Can not add %s's nickname: %s" % (object_id, nickname))
 
     def update_nickname(self, object_id, nickname):
         """
@@ -58,8 +39,12 @@ class PlayerCharacter(object):
         :param nickname:
         :return:
         """
-        self.model.objects.filter(object_id=object_id).update(nickname=nickname)
-        self.records[object_id]["nickname"] = nickname
+        current_info = self.storage.load_dict("", object_id)
+        self.storage.save_dict("", object_id, {"nickname": nickname})
+
+        if current_info["nickname"]:
+            del self.nicknames[current_info["nickname"]]
+        self.nicknames[nickname] = object_id
 
     def remove(self, object_id):
         """
@@ -67,18 +52,11 @@ class PlayerCharacter(object):
         :param object_id:
         :return:
         """
-        if not object_id in self.records:
-            return
+        current_info = self.storage.load_dict("", object_id)
+        self.storage.delete("", object_id)
 
-        try:
-            self.model.objects.get(object_id=object_id).delete()
-            nickname = self.records[object_id]["nickname"]
-            del self.records[object_id]
-            del self.nicknames[nickname]
-        except ObjectDoesNotExist:
-            pass
-        except Exception as e:
-            logger.log_err("Can not remove object's element key: %s %s" % (object_id, e))
+        if current_info["nickname"]:
+            del self.nicknames[current_info["nickname"]]
 
     def get_nickname(self, object_id):
         """
@@ -86,10 +64,8 @@ class PlayerCharacter(object):
         :param object_id:
         :return:
         """
-        try:
-            return self.records[object_id]["nickname"]
-        except KeyError:
-            return None
+        info = self.storage.load_dict("", object_id)
+        return info["nickname"]
 
     def get_object_id(self, nickname):
         """
@@ -97,10 +73,7 @@ class PlayerCharacter(object):
         :param key:
         :return:
         """
-        try:
-            return self.nicknames[nickname]
-        except KeyError:
-            return None
+        return self.nicknames[nickname]
 
 
 PLAYER_CHARACTER_DATA = PlayerCharacter("player_character")
