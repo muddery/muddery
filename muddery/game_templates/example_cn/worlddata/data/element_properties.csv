@@ -4,3 +4,6 @@ SKILL,skill_normal_heal,,mp,10
 SKILL,skill_normal_hp,,mp,0
 SKILL,skill_dunt,,mp,10
 SKILL,skill_escape,,mp,0
+EQUIPMENT,weapon_wood_stick,,attack,10
+FOOD,food_bread,,hp,10
+FOOD,food_apple,,mp,10

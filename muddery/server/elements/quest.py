@@ -128,7 +128,7 @@ class MudderyQuest(BaseElement):
                     
                     # Get the name of the objective object.
                     object_key = item["object"]
-                    model_name = ELEMENT("OBJECT").model_name
+                    model_name = ELEMENT("COMMON_OBJECT").model_name
 
                     # Get record.
                     try:
@@ -214,7 +214,7 @@ class MudderyQuest(BaseElement):
         for item in self.objectives.values():
             if item["type"] == defines.OBJECTIVE_OBJECT:
                 obj_list.append({
-                    "object": item["object"],
+                    "object_key": item["object"],
                     "number": item["number"]
                 })
         if obj_list:

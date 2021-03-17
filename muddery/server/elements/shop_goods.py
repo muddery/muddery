@@ -30,7 +30,7 @@ class MudderyShopGoods(BaseElement):
         self.available = False
 
         # load goods record
-        obj_model_name = ELEMENT("OBJECT").model_name
+        obj_model_name = ELEMENT("COMMON_OBJECT").model_name
 
         try:
             obj_record = WorldData.get_table_data(obj_model_name, key=data.goods)

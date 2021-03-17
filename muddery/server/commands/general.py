@@ -130,7 +130,7 @@ class CmdInventoryObject(BaseCommand):
     Usage:
         {
             "cmd": "inventory_obj",
-            "args": <object's id>
+            "args": <inventory's position>
         }
 
     Observes your location or objects in your vicinity.
@@ -543,15 +543,15 @@ class CmdUse(BaseCommand):
             caller.msg({"alert": _("You are died.")})
             return
 
-        if not self.args:
+        if not self.args or "position" not in self.args:
             caller.msg({"alert": _("You should use something.")})
             return
+        position = self.args["position"]
 
         result = ""
         try:
             # Use the object and get the result.
-            obj_id = int(self.args)
-            result = caller.use_object(obj_id)
+            result = caller.use_object(int(position))
             caller.show_location()
         except Exception as e:
             ostring = "Can not use %s: %s" % (self.args, e)
@@ -574,7 +574,8 @@ class CmdDiscard(BaseCommand):
 
     Usage:
         {"cmd":"discard",
-         "args":<object's id>
+         "args": {
+            position: <object's position in the inventory>
         }
 
     Call caller's remove_objects function with specified object.
@@ -591,13 +592,14 @@ class CmdDiscard(BaseCommand):
             caller.msg({"alert":_("You are died.")})
             return
 
-        if not self.args:
+        if not self.args or "position" not in self.args:
             caller.msg({"alert":_("You should discard something.")})
             return
+        position = self.args["position"]
 
         # remove object
         try:
-            caller.remove_object_id_all(int(self.args))
+            caller.remove_object_position_all(int(position))
             caller.show_location()
         except Exception as e:
             # If the caller does not have this object.
@@ -628,13 +630,14 @@ class CmdEquip(BaseCommand):
         "Put on an equipment."
         caller = self.caller
 
-        if not self.args:
+        if not self.args or "position" not in self.args:
             caller.msg({"alert": _("You should equip something.")})
             return
+        position = self.args["position"]
 
         try:
             # equip
-            caller.equip_object(int(self.args))
+            caller.equip_object(int(position))
         except Exception as e:
             caller.msg({"alert": _("Can not use this equipment.")})
             logger.log_tracemsg("Can not use equipment %s: %s" % (self.args, e))

@@ -3000,9 +3000,11 @@ MudderyInventory.prototype.reset = function() {
  */
 MudderyInventory.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
-	if ("cmd" in this.buttons[index] && "args" in this.buttons[index]) {
+	if ("cmd" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+	        var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
+	        args["position"] = this.item_selected;
+		    core.service.sendCommandLink(this.buttons[index]["cmd"], args);
 		}
 		else {
 		    var self = this;
@@ -3030,7 +3032,9 @@ MudderyInventory.prototype.onCommand = function(element) {
  */
 MudderyInventory.prototype.confirmCommand = function(data) {
 	var index = data;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+	var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
+	args["position"] = this.item_selected;
+    core.service.sendCommandLink(this.buttons[index]["cmd"], args);
 }
 
 /*
@@ -3061,8 +3065,7 @@ MudderyInventory.prototype.resetSize = function() {
 MudderyInventory.prototype.onSelect = function(element) {
     var index = $(element).data("index");
     if (index < this.inventory.length) {
-        this.item_selected = this.inventory[index].id;
-        core.service.inventoryObject(this.item_selected, "inventory");
+        core.service.inventoryObject(this.inventory[index]["position"], "inventory");
     }
 }
 
@@ -3106,7 +3109,7 @@ MudderyInventory.prototype.setInventory = function(inventory) {
                 .appendTo(item);
         }
 
-        if (obj["id"] == this.item_selected) {
+        if (this.item_selected && this.item_selected == obj["position"]) {
             has_selected_item = true;
         }
     }
@@ -3125,7 +3128,6 @@ MudderyInventory.prototype.setInventory = function(inventory) {
  */
 MudderyInventory.prototype.showObject = function(obj) {
     this.select(".item-info .icon-image").attr("src", settings.resource_url + obj["icon"]);
-
     this.select(".item-info .name").html(core.text2html.parseHtml(obj["name"]));
 
     // number
@@ -3136,14 +3138,6 @@ MudderyInventory.prototype.showObject = function(obj) {
     }
     else {
         this.select(".item-info .number").hide();
-    }
-
-    // Equipped
-    if ("equipped" in obj && obj["equipped"]) {
-        this.select(".item-info .equipped").show();
-    }
-    else {
-        this.select(".item-info .equipped").hide();
     }
 
     this.select(".item-info .desc").html(core.text2html.parseHtml(obj["desc"]));
@@ -3159,6 +3153,8 @@ MudderyInventory.prototype.showObject = function(obj) {
             .text(obj.cmds[i].name)
             .appendTo(container);
     }
+
+    this.item_selected = obj["position"];
 
     this.select(".item-info").show();
 }

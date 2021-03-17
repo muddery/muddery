@@ -110,8 +110,8 @@ MudderyService.prototype = {
         Evennia.msg("text", this.cmdString("look", odj_id, context));
     },
 
-    inventoryObject: function(obj_id, context) {
-        Evennia.msg("text", this.cmdString("inventory_obj", obj_id, context));
+    inventoryObject: function(position, context) {
+        Evennia.msg("text", this.cmdString("inventory_obj", position, context));
     },
 
     equipmentsObject: function(obj_id, context) {

@@ -290,6 +290,15 @@ class world_objects(BaseObjects):
 class common_objects(BaseObjects):
     "Store all common objects."
 
+    # object's element type
+    element_type = models.CharField(max_length=KEY_LENGTH)
+
+    # object's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # object's description for display
+    desc = models.TextField(blank=True)
+
     # the max number of this object in one pile, must above 1
     max_stack = models.PositiveIntegerField(blank=True, default=1)
 

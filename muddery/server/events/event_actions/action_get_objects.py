@@ -66,7 +66,7 @@ class ActionGetObjects(BaseIntervalAction):
             else:
                 if rand < record.odds:
                     msg_template[record.object] = record.message
-                    obj_list.append({"object": record.object,
+                    obj_list.append({"object_key": record.object,
                                      "number": record.number * times})
                     break
                 rand -= record.odds

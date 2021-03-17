@@ -140,7 +140,18 @@ class BaseElement(object):
             # Load data.
             try:
                 # Load db data.
-                self.load_data(self.model_name, key)
+                base_model = self.model_name
+                self.load_base_data(base_model, key)
+
+                # reset element type
+                if self.const_data_handler.has("element_type"):
+                    if self.const.element_type:
+                        self.set_element_type(self.const.element_type)
+                    else:
+                        logger.log_errmsg("%s does not have element type." % key)
+
+                # Load extend data.
+                self.load_extend_data(base_model, key)
             except Exception as e:
                 logger.log_errmsg("%s %s can not load data:%s" % (self.model_name, key, e))
 
@@ -148,7 +159,7 @@ class BaseElement(object):
 
         self.after_data_loaded()
 
-    def load_data(self, model, key):
+    def load_base_data(self, model, key):
         """
         Get object's data from database.
 
@@ -171,6 +182,57 @@ class BaseElement(object):
         # Set data.
         for field_name in fields:
             self.const_data_handler.add(field_name, getattr(record, field_name))
+
+    def load_extend_data(self, base_model, key):
+        """
+        Get object's extend data from database except base data.
+
+        Args:
+            base_model: (String) base data's table name.
+            key: (String) object's data key.
+
+        Returns:
+            None
+        """
+        # Get models.
+        for data_model in self.get_models():
+            if data_model == base_model:
+                continue
+
+            # Get data record.
+            try:
+                fields = WorldData.get_fields(data_model)
+                record = WorldData.get_table_data(data_model, key=key)
+                record = record[0]
+            except Exception as e:
+                logger.log_errmsg("Can not find key %s in %s" % (key, data_model))
+                continue
+
+            # Set data.
+            for field_name in fields:
+                self.const_data_handler.add(field_name, getattr(record, field_name))
+
+    def set_element_type(self, element_type):
+        """
+        Set object's type.
+
+        Args:
+            element_type: (string) Element's type.
+        """
+        new_class = ELEMENT(element_type)
+        if not new_class:
+            logger.log_errmsg("Can not get the element type: %s." % element_type)
+            return
+
+        if type(self) == new_class:
+            # No change.
+            return
+
+        # Set new class.
+        self.__class__ = new_class
+        if self.element_type != element_type:
+            logger.log_errmsg("Element type %s is wrong!" % element_type)
+            return
 
     def set_level(self, level):
         """

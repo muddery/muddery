@@ -26,7 +26,7 @@ class LootHandler(object):
         loot_list = []
         try:
             for loot_record in data:
-                loot_object = {"object": loot_record.object,
+                loot_object = {"object_key": loot_record.object,
                                "number": loot_record.number,
                                "odds": loot_record.odds,
                                "quest": loot_record.quest,

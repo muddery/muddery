@@ -95,6 +95,38 @@ class player_character(models.Model):
 
 # ------------------------------------------------------------
 #
+# player character's inventory
+#
+# ------------------------------------------------------------
+class character_inventory(models.Model):
+    "Player character's inventory."
+
+    # character's id
+    character_id = models.PositiveIntegerField(db_index=True)
+
+    # position in the inventory
+    position = models.PositiveIntegerField()
+
+    # object's key
+    object_key = models.CharField(max_length=KEY_LENGTH)
+
+    # object's number
+    number = models.PositiveIntegerField(default=0)
+
+    # object's level
+    level = models.PositiveIntegerField(null=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Character's Inventory"
+        verbose_name_plural = "Character's Inventories"
+        unique_together = ("character_id", "position")
+
+
+# ------------------------------------------------------------
+#
 # player character's skills
 #
 # ------------------------------------------------------------

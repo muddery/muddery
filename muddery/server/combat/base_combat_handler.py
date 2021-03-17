@@ -311,25 +311,25 @@ class BaseCombatHandler(DefaultScript):
 
             obj_list = []
             if loots:
-                obj_model_name = ELEMENT("OBJECT").model_name
+                obj_model_name = ELEMENT("COMMON_OBJECT").model_name
 
                 for obj_info in loots:
                     try:
-                        obj_record = WorldData.get_table_data(obj_model_name, key=obj_info["object"])
+                        obj_record = WorldData.get_table_data(obj_model_name, key=obj_info["object_key"])
                         obj_record = obj_record[0]
                         goods_models = ELEMENT_SET.get_class_modeles(obj_record.element_type)
-                        goods_data = WorldData.get_tables_data(goods_models, key=obj_info["object"])
+                        goods_data = WorldData.get_tables_data(goods_models, key=obj_info["object_key"])
                         goods_data = goods_data[0]
 
                         obj_list.append({
-                            "object": obj_info["object"],
+                            "object_key": obj_info["object_key"],
                             "number": obj_info["number"],
                             "name": goods_data.name,
                             "icon": goods_data.icon,
                             "reject": "",
                         })
                     except Exception as e:
-                        logger.log_errmsg("Can not loot object %s: %s." % (obj_info["object"], e))
+                        logger.log_errmsg("Can not loot object %s: %s." % (obj_info["object_key"], e))
                         pass
 
             rewards[winner_id] = {

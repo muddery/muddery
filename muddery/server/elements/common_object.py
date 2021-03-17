@@ -5,10 +5,11 @@ CommonObject is the object that players can put into their inventory.
 
 from muddery.server.utils.exception import MudderyError
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.elements.base_element import BaseElement
 from muddery.server.utils.localized_strings_handler import _
 
 
-class MudderyCommonObject(ELEMENT("OBJECT")):
+class MudderyCommonObject(BaseElement):
     """
     This is a common object. Players can put it in their inventories.
     
@@ -22,17 +23,26 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
     element_name = _("Common Object", "elements")
     model_name = "common_objects"
 
-    def after_data_loaded(self):
+    def get_name(self):
         """
-        Initial this object.
+        Get the element's name.
+        :return:
         """
-        super(MudderyCommonObject, self).after_data_loaded()
+        return self.const.name
 
-        # set object stack info
-        self.max_stack = self.const.max_stack if self.const.max_stack else 1
-        self.unique = self.const.unique
-        self.can_remove = self.const.can_remove
-        self.can_discard = self.const.can_discard
+    def get_desc(self):
+        """
+        Get the element's description.
+        :return:
+        """
+        return self.const.desc
+
+    def get_icon(self):
+        """
+        Get the element's icon.
+        :return:
+        """
+        return self.const.icon
 
     def get_appearance(self, caller):
         """
@@ -40,9 +50,13 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
         command to call.
         """
         # Get name, description and available commands.
-        info = super(MudderyCommonObject, self).get_appearance(caller)
-
-        info["can_remove"] = self.can_remove
+        info = {
+            "name": self.get_name(),
+            "desc": self.get_desc(),
+            "icon": self.get_icon(),
+            "cmds": self.get_available_commands(caller),
+            "can_remove": self.const.can_remove,
+        }
         return info
 
     def get_available_commands(self, caller):
@@ -51,11 +65,10 @@ class MudderyCommonObject(ELEMENT("OBJECT")):
         "args" must be a string without ' and ", usually it is self.id.
         """
         commands = []
-        if self.can_discard:
+        if self.const.can_discard:
             commands.append({
                 "name": _("Discard"),
                 "cmd": "discard",
-                "args": self.get_id(),
                 "confirm": _("Discard this object?"),
             })
         return commands
@@ -100,7 +113,6 @@ class MudderyFood(ELEMENT("COMMON_OBJECT")):
 
         values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items() if
                         not info["mutable"]}
-        values_merge.update(self.states.all())
 
         changes = {}
         new_states = {}
@@ -143,7 +155,10 @@ class MudderyFood(ELEMENT("COMMON_OBJECT")):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
         """
-        commands = [{"name": _("Use"), "cmd": "use", "args": self.get_id()}]
+        commands = [{
+            "name": _("Use"),
+            "cmd": "use",
+        }]
         commands.extend(super(MudderyFood, self).get_available_commands(caller))
 
         return commands
@@ -188,7 +203,6 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
 
         values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items() if
                         not info["mutable"]}
-        values_merge.update(self.states.all())
 
         changes = {}
         new_states = {}
@@ -219,15 +233,13 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
         commands = [{
             "name": _("Equip"),
             "cmd": "equip",
-            "args": self.get_id()
         }]
 
         # Can not discard when equipped
-        if self.can_discard:
+        if self.const.can_discard:
             commands.append({
                 "name": _("Discard"),
                 "cmd": "discard",
-                "args": self.get_id(),
                 "confirm": _("Discard this object?"),
             })
 
@@ -247,7 +259,10 @@ class MudderySkillBook(ELEMENT("COMMON_OBJECT")):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
         """
-        commands = [{"name": _("Use"), "cmd": "use", "args": self.get_id()}]
+        commands = [{
+            "name": _("Use"),
+            "cmd": "use",
+        }]
         commands.extend(super(MudderySkillBook, self).get_available_commands(caller))
 
         return commands

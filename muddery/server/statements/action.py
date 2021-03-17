@@ -66,7 +66,7 @@ class FuncGiveObject(StatementFunction):
         if len(self.args) > 1:
             number = self.args[1]
 
-        obj_list = [{"object": obj_key,
+        obj_list = [{"object_key": obj_key,
                      "number": number}]
 
         objects = self.caller.receive_objects(obj_list)

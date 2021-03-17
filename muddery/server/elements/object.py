@@ -237,12 +237,6 @@ class MudderyBaseObject(BaseElement, DefaultObject):
             # Get the object's base data
             self.load_base_data(base_model, self.object_key)
 
-            # reset element type
-            if self.const.element_type:
-                self.set_element_type(self.const.element_type)
-            else:
-                logger.log_errmsg("%s does not have element type." % self.const.element_type)
-
             # Load system data except base data.
             self.load_system_data(base_model, self.object_key)
 
@@ -373,28 +367,6 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         """
         self.states.save("level", level)
         self.load_custom_data(level)
-
-    def set_element_type(self, element_type):
-        """
-        Set object's type.
-        
-        Args:
-            element_key: (string) Element's key.
-        """
-        new_class = ELEMENT(element_type)
-        if not new_class:
-            logger.log_errmsg("Can not get %s's element type: %s." % (self.get_object_key(), element_type))
-            return
-        
-        if type(self) == new_class:
-            # No change.
-            return
-
-        # Set new class.
-        self.__class__ = new_class
-        if self.element_type != element_type:
-            logger.log_errmsg("%s's element type %s is wrong!" % (self.get_object_key(), element_type))
-            return
 
     def set_name(self, name):
         """

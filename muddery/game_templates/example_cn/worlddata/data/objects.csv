@@ -48,14 +48,6 @@ exit_gate_fountain,喷水池,EXIT,前往喷水池。
 area_intro,起始界面,AREA,
 area_hole,未知区域,AREA,
 area_park,公园,AREA,
-book_dunt,重击之术,SKILL_BOOK,"记录了重击之术的奥秘。使用之后可以学会重击技能。"
-food_bread,面包,FOOD,面包可以帮你恢复少许生命。
-food_apple,苹果,FOOD,苹果可以帮你恢复少许能量。
-weapon_wood_stick,木棍,EQUIPMENT,这条木棍不粗，但感觉挺结实的。
-obj_money,金钱,COMMON_OBJECT,有钱能使鬼推磨。
-obj_guardhouse_key,钥匙,COMMON_OBJECT,钥匙圈上扣着一串铜质的钥匙，它们是用来开什么门的呢？
-obj_binder,绷带,COMMON_OBJECT,一卷绷带，还没拆封过，可以帮助止血。
-obj_screw,螺丝,COMMON_OBJECT,一颗螺丝，能派什么用处呢？
 player,玩家,PLAYER_CHARACTER,这是玩家。
 staff,管理员,STAFF_CHARACTER,这是管理员。
 robot_mob_A,机器人A,COMMON_NPC,这是个A型机器人。
