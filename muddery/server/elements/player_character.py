@@ -1114,7 +1114,17 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
                 appearance = item["obj"].get_appearance(self)
                 appearance["number"] = item["number"]
-                appearance["position"] = position
+
+                # add a discard command
+                if item["obj"].can_discard():
+                    appearance["cmds"].append({
+                        "name": _("Discard"),
+                        "cmd": "discard",
+                        "confirm": _("Discard this object?"),
+                        "args": {
+                            "position": position
+                        }
+                    })
                 return appearance
 
     def return_equipments_object(self, obj_id):

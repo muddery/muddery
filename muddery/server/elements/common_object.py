@@ -64,14 +64,7 @@ class MudderyCommonObject(BaseElement):
         This returns a list of available commands.
         "args" must be a string without ' and ", usually it is self.id.
         """
-        commands = []
-        if self.const.can_discard:
-            commands.append({
-                "name": _("Discard"),
-                "cmd": "discard",
-                "confirm": _("Discard this object?"),
-            })
-        return commands
+        return []
 
     def take_effect(self, user, number):
         """
@@ -84,6 +77,16 @@ class MudderyCommonObject(BaseElement):
             result: (string) a description of the result
         """
         return _("No effect."), 0
+
+    def can_discard(self):
+        """
+        Can discard this object from the inventory. Default is True.
+        :return:
+        """
+        if self.const_data_handler.has("can_discard"):
+            return self.const.can_discard
+
+        return True
 
 
 class MudderyFood(ELEMENT("COMMON_OBJECT")):
@@ -234,14 +237,7 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
             "name": _("Equip"),
             "cmd": "equip",
         }]
-
-        # Can not discard when equipped
-        if self.const.can_discard:
-            commands.append({
-                "name": _("Discard"),
-                "cmd": "discard",
-                "confirm": _("Discard this object?"),
-            })
+        commands.extend(super(MudderyEquipment, self).get_available_commands(caller))
 
         return commands
 

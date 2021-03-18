@@ -3002,9 +3002,7 @@ MudderyInventory.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-	        var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
-	        args["position"] = this.item_selected;
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], args);
+		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 		}
 		else {
 		    var self = this;
@@ -3032,9 +3030,7 @@ MudderyInventory.prototype.onCommand = function(element) {
  */
 MudderyInventory.prototype.confirmCommand = function(data) {
 	var index = data;
-	var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
-	args["position"] = this.item_selected;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], args);
+    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
 }
 
 /*
