@@ -127,6 +127,35 @@ class character_inventory(models.Model):
 
 # ------------------------------------------------------------
 #
+# player character's equipments
+#
+# ------------------------------------------------------------
+class character_equipments(models.Model):
+    "Player character's equipments."
+
+    # character's id
+    character_id = models.PositiveIntegerField(db_index=True)
+
+    # the position to put on equipments
+    position = models.CharField(max_length=KEY_LENGTH)
+
+    # object's key
+    object_key = models.CharField(max_length=KEY_LENGTH)
+
+    # object's level
+    level = models.PositiveIntegerField(null=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Character's Equipment"
+        verbose_name_plural = "Character's Equipment"
+        unique_together = ("character_id", "position")
+
+
+# ------------------------------------------------------------
+#
 # player character's skills
 #
 # ------------------------------------------------------------

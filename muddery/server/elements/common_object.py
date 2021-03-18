@@ -176,14 +176,12 @@ class MudderyEquipment(ELEMENT("COMMON_OBJECT")):
     element_name = _("Equipment", "elements")
     model_name = "equipments"
 
-    def after_data_loaded(self):
+    def get_body_position(self):
         """
-        Load equipments data.
+        Get the body position to equip this equipment.
+        :return:
         """
-        super(MudderyEquipment, self).after_data_loaded()
-
-        self.type = self.const.type
-        self.position = self.const.position
+        return self.const.position
 
     def equip_to(self, user):
         """

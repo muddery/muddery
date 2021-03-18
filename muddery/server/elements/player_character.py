@@ -34,6 +34,7 @@ from muddery.server.utils import defines
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
 from muddery.server.database.gamedata.character_inventory import CHARACTER_INVENTORY_DATA
+from muddery.server.database.gamedata.character_equipments import CHARACTER_EQUIPMENTS_DATA
 from muddery.server.database.gamedata.player_character import PLAYER_CHARACTER_DATA
 from muddery.server.database.gamedata.character_skills import CHARACTER_SKILLS
 from muddery.server.database.worlddata.object_properties import ObjectProperties
@@ -139,8 +140,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         CHARACTER_INVENTORY_DATA.remove_character(self.id)
 
         # delete equipments
-        for pos, item in self.equipments.items():
-            item["obj"].delete()
+        CHARACTER_EQUIPMENTS_DATA.remove_character(self.id)
 
         # remove the character's honour
         HONOURS_MAPPER.remove_honour(self.id)
@@ -519,7 +519,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         objects = [item["number"] for item in self.inventory if item["object_key"] == obj_key]
         total = sum(objects)
         for item in self.equipments.values():
-            if item["key"] == obj_key:
+            if item["object_key"] == obj_key:
                 total += 1
 
         return total
@@ -611,6 +611,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
     def load_inventory(self):
         """
         Load character's default objects.
+
+        inventory: [
+            {
+                "position": position in the inventory,
+                "object_key": object's key,
+                "number": object's number,
+                "level": object's level,
+                "obj": object's instance,
+            }
+        ]
         """
         inventory = CHARACTER_INVENTORY_DATA.get_character(self.id)
         self.inventory = [{"position": pos, **inventory[pos]} for pos in sorted(inventory)]
@@ -635,6 +645,22 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         if obj_list:
             self.receive_objects(obj_list, mute=True)
+
+    def receive_object(self, object_key, number, level, mute=False):
+        """
+        Add an object to the inventory.
+        :param object_key:
+        :param number:
+        :param level:
+        :param mute:
+        :return:
+        """
+        obj_list = [{
+            "object_key": object_key,
+            "number": number,
+            "level": level
+        }]
+        return self.receive_objects(obj_list, mute)
 
     def receive_objects(self, obj_list, mute=False):
         """
@@ -817,18 +843,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 self.quest_handler.at_objective(defines.OBJECTIVE_OBJECT, item["key"], item["number"])
 
         return objects
-
-    def save_equipments(self):
-        """
-        Save equipments's data to db.
-        :return:
-        """
-        self.states.save("equipments", {
-            pos: {
-                "key": item["key"],
-                "id": item["id"],
-            } for pos, item in self.equipments.items()
-        })
 
     def can_get_object(self, obj_key, number):
         """
@@ -1114,6 +1128,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
                 appearance = item["obj"].get_appearance(self)
                 appearance["number"] = item["number"]
+                appearance["position"] = position
 
                 # add a discard command
                 if item["obj"].can_discard():
@@ -1121,31 +1136,28 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                         "name": _("Discard"),
                         "cmd": "discard",
                         "confirm": _("Discard this object?"),
-                        "args": {
-                            "position": position
-                        }
                     })
                 return appearance
 
-    def return_equipments_object(self, obj_id):
+    def return_equipments_object(self, position):
         """
         Get equipments data.
         """
-        for pos, item in self.equipments.items():
-            if item["id"] == obj_id:
-                appearance = item["obj"].get_appearance(self)
+        if position in self.equipments:
+            appearance = self.equipments[position]["obj"].get_appearance(self)
 
-                appearance["number"] = item["number"]
+            # add a take off command, remove equip command
+            commands = [c for c in appearance["cmds"] if c["cmd"] != "equip"]
+            commands.append({
+                "name": _("Take Off"),
+                "cmd": "takeoff",
+                "args": {
+                    "position": position
+                },
+            })
+            appearance["cmds"] = commands
 
-                commands = [c for c in appearance["cmds"] if c["cmd"] != "equip" and c["cmd"] != "discard"]
-                commands.append({
-                    "name": _("Take Off"),
-                    "cmd": "takeoff",
-                    "args": obj_id,
-                })
-                appearance["cmds"] = commands
-
-                return appearance
+            return appearance
 
     def show_status(self):
         """
@@ -1175,30 +1187,32 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
     def load_equipments(self):
         """
         Reset equipment's position data.
+
+        equipments: {
+            position on the body: {
+                "object_key": object's key,
+                "level": object's level,
+                "obj": object's instance,
+            }
+        }
         Returns:
             None
         """
-        self.equipments = self.states.load("equipments", {})
-        for pos, item in self.equipments.items():
-            item["obj"] = ObjectDB.objects.get(id=item["id"])
+        self.equipments = CHARACTER_EQUIPMENTS_DATA.get_character(self.id)
 
         # get equipment's position
         positions = set([r.key for r in EquipmentPositions.all()])
 
-        changed = False
         for pos in list(self.equipments.keys()):
-            if pos not in positions:
+            if pos in positions:
+                # create an instance of the equipment
                 item = self.equipments[pos]
-                item["number"] = 1
-                self.inventory.append(item)
-                del self.equipments[pos]
-                changed = True
-
-        if changed:
-            # Save changes.
-            with self.states.atomic():
-                self.save_inventory()
-                self.save_equipments()
+                new_obj = ELEMENT("COMMON_OBJECT")()
+                new_obj.set_element_key(item["object_key"], item["level"])
+                item["obj"] = new_obj
+            else:
+                # the position has been removed, take off the equipment.
+                self.take_off_equipment(pos, mute=True, refresh=False)
 
     def show_equipments(self):
         """
@@ -1214,54 +1228,51 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         info = {}
         for pos, item in self.equipments.items():
-            # in order of positions
-            if item:
-                obj = item["obj"]
-                info[pos] = {
-                    "id": item["id"],
-                    "name": obj.get_name(),
-                    "desc": obj.get_desc(self),
-                    "icon": obj.get_icon(),
-                }
+            # order by positions
+            obj = item["obj"]
+            info[pos] = {
+                "key": item["object_key"],
+                "name": obj.get_name(),
+                "desc": obj.get_desc(),
+                "icon": obj.get_icon(),
+            }
 
         return info
 
-    def equip_object(self, obj_id):
+    def equip_object(self, position):
         """
         Equip an object.
-        args: obj_id(int): the equipment object's id.
+        args: position: (int) position in the inventory
         """
-        index = None
         item = None
-        for i, value in enumerate(self.inventory):
-            if value["id"] == obj_id:
-                index = i
+        for value in self.inventory:
+            if value["position"] == position:
                 item = value
                 break
-
-        if index is None:
+        if item is None:
             raise MudderyError(_("Can not find this equipment."))
 
-        pos = item["obj"].position
+        body_position = item["obj"].get_body_position()
         available_positions = set([r.key for r in EquipmentPositions.all()])
-        if pos not in available_positions:
+        if body_position not in available_positions:
             raise MudderyError(_("Can not equip it on this position."))
 
         # Take off old equipment
-        if pos in self.equipments and self.equipments[pos]:
-            item = self.equipments[pos]
-            item["number"] = 1
-            self.inventory.append(item)
-            self.equipments[pos] = None
+        if body_position in self.equipments:
+            self.take_off_equipment(body_position, mute=True, refresh=False)
 
         # Put on new equipment.
-        self.equipments[pos] = item
-        del self.inventory[index]
+        if "obj" not in item or not item["obj"]:
+            # create an instance of the equipment
+            new_obj = ELEMENT("COMMON_OBJECT")()
+            new_obj.set_element_key(item["object_key"], item["level"])
+            item["obj"] = new_obj
 
-        # Save changes.
-        with self.states.atomic():
-            self.save_equipments()
-            self.save_inventory()
+        CHARACTER_EQUIPMENTS_DATA.add(self.id, body_position, item["object_key"], item["level"])
+        self.equipments[body_position] = item
+
+        # Remove from the inventory
+        self.remove_object_by_position(position, 1, True)
 
         # reset character's attributes
         self.refresh_properties(True)
@@ -1275,40 +1286,31 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return
 
-    def take_off_equipment(self, obj_id):
+    def take_off_equipment(self, body_position, mute=False, refresh=True):
         """
         Take off an equipment.
-        args: obj_id(int): the equipment object's id.
+        args:
+            position: (string) a position on the body.
         """
-        pos = None
-        item = None
-        for key, value in self.equipments.items():
-            if value["id"] == obj_id:
-                pos = key
-                item = value
-                item["number"] = 1
-                break
-
-        if pos is None:
+        if body_position not in self.equipments:
             raise MudderyError(_("Can not find this equipment."))
 
-        self.inventory.append(item)
-        del self.equipments[pos]
+        item = self.equipments[body_position]
+        self.receive_object(item["object_key"], 1, item["level"], True)
+        CHARACTER_EQUIPMENTS_DATA.remove_equipment(self.id, body_position)
+        del self.equipments[body_position]
 
-        # Save changes.
-        with self.states.atomic():
-            self.states.save("equipments", self.equipments)
-            self.save_inventory()
+        if refresh:
+            # reset character's attributes
+            self.refresh_properties(True)
 
-        # reset character's attributes
-        self.refresh_properties(True)
-
-        message = {
-            "status": self.return_status(),
-            "equipments": self.return_equipments(),
-            "inventory": self.return_inventory()
-        }
-        self.msg(message)
+        if not mute:
+            message = {
+                "status": self.return_status(),
+                "equipments": self.return_equipments(),
+                "inventory": self.return_inventory()
+            }
+            self.msg(message)
 
     def lock_exit(self, exit):
         """

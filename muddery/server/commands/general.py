@@ -670,14 +670,14 @@ class CmdTakeOff(BaseCommand):
         "Take off an equipment."
         caller = self.caller
 
-        if not self.args:
+        if not self.args or "position" not in self.args:
             caller.msg({"alert":_("You should take off something.")})
             return
+        position = self.args["position"]
 
         try:
             # Take off the equipment.
-            obj_id = int(self.args)
-            caller.take_off_equipment(obj_id)
+            caller.take_off_equipment(position)
         except MudderyError as e:
             caller.msg({"alert": str(e)})
             return

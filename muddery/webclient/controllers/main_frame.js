@@ -2636,6 +2636,7 @@ MudderyCharData = function(el) {
 	BaseController.call(this, el);
 
     this.equipment_pos = {};
+    this.equipments = {};
 	this.item_selected = null;
 	this.buttons = [];
 }
@@ -2789,6 +2790,7 @@ MudderyCharData.prototype.setEquipmentPos = function(equipment_pos) {
 
     for (var pos in this.equipment_pos) {
         var block = this.select(".equipments .equipment-" + pos.toLowerCase());
+        block.data("position", pos);
         block.find(".position-name")
             .text(this.equipment_pos[pos].name)
             .show();
@@ -2802,6 +2804,7 @@ MudderyCharData.prototype.setEquipmentPos = function(equipment_pos) {
  * Set player's equipments.
  */
 MudderyCharData.prototype.setEquipments = function(equipments) {
+    this.equipments = equipments;
     var has_selected_item = false;
     for (var pos in this.equipment_pos) {
         var equip = equipments[pos];
@@ -2832,18 +2835,14 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
                 .html(name)
                 .show();
 
-            block.data("id", equip["id"]);
-
-            if (equip["id"] == this.item_selected) {
+            if (this.item_selected && this.item_selected == pos) {
                 has_selected_item = true;
-        }
+            }
         }
         else {
             block.find(".icon").hide();
             block.find(".name").hide();
             block.find(".position-name").show();
-
-            block.data("id", "");
         }
     }
 
@@ -2863,10 +2862,10 @@ MudderyCharData.prototype.setEquipments = function(equipments) {
 MudderyCharData.prototype.onClickEquipment = function(target, event) {
     event.stopPropagation();
 
-    var obj_id = $(target).data("id");
-    if (obj_id) {
-        mud.char_data_window.item_selected = obj_id;
-        core.service.equipmentsObject(obj_id);
+    var position = $(target).data("position");
+    if (position && position in this.equipments) {
+        mud.char_data_window.item_selected = position;
+        core.service.equipmentsObject(position);
     }
     else {
         this.showStatus();
@@ -2928,17 +2927,6 @@ MudderyCharData.prototype.showStatus = function(data) {
 MudderyCharData.prototype.showEquipment = function(obj) {
     this.select(".item-info .icon-image").attr("src", settings.resource_url + obj["icon"]);
     this.select(".item-info .name").html(core.text2html.parseHtml(obj["name"]));
-
-    // number
-    if (obj["number"] != 1 || !obj["can_remove"]) {
-        this.select(".item-info .number")
-            .html("&times;" + obj["number"])
-            .show();
-    }
-    else {
-        this.select(".item-info .number").hide();
-    }
-
     this.select(".item-info .desc").html(core.text2html.parseHtml(obj["desc"]));
 
     // buttons
@@ -3002,7 +2990,9 @@ MudderyInventory.prototype.onCommand = function(element) {
 	var index = $(element).data("index");
 	if ("cmd" in this.buttons[index]) {
 	    if (!this.buttons[index]["confirm"]) {
-		    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+	        var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
+	        args["position"] = this.item_selected;
+		    core.service.sendCommandLink(this.buttons[index]["cmd"], args);
 		}
 		else {
 		    var self = this;
@@ -3030,7 +3020,9 @@ MudderyInventory.prototype.onCommand = function(element) {
  */
 MudderyInventory.prototype.confirmCommand = function(data) {
 	var index = data;
-    core.service.sendCommandLink(this.buttons[index]["cmd"], this.buttons[index]["args"]);
+	var args = this.buttons[index]["args"]? this.buttons[index]["args"]: {};
+	args["position"] = this.item_selected;
+    core.service.sendCommandLink(this.buttons[index]["cmd"], args);
 }
 
 /*

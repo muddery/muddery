@@ -46,6 +46,18 @@ class character_inventory(BaseModels.character_inventory):
 
 # ------------------------------------------------------------
 #
+# player character's equipments
+#
+# ------------------------------------------------------------
+class character_equipments(BaseModels.character_equipments):
+    """
+    Character's inventory.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
 # player character's skills
 #
 # ------------------------------------------------------------
