@@ -12,6 +12,7 @@ from evennia.objects.objects import DefaultRoom
 from muddery.server.utils import defines
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.database.worlddata.image_resource import ImageResource
+from muddery.server.database.worlddata.world_exits import WorldExits
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.localized_strings_handler import _
@@ -42,6 +43,8 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         self.position = None
         self.background = None
 
+        self.exit_list = {}
+
     def after_data_loaded(self):
         """
         Set data_info to the object.
@@ -71,6 +74,69 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
                                    "height": resource_info.image_height}
             except Exception as e:
                 logger.log_tracemsg("Load background %s error: %s" % (resource, e))
+
+        # load exits
+        self.load_exits()
+
+    def load_exits(self):
+        """
+        Load exits in this room.
+
+        :return:
+        """
+        records = WorldExits.get(self.get_object_key())
+        self.exit_list = {}
+        for record in records:
+            new_obj = ELEMENT("EXIT")()
+            new_obj.set_element_key(record.key)
+            new_obj.set_location(self)
+
+            self.exit_list[record.key] = {
+                "location": record.location,
+                "destination": record.destination,
+                "verb": record.verb,
+                "condition": record.condition,
+                "obj": new_obj,
+            }
+
+    def traverse(self, caller, exit_key):
+        """
+        A character is going to traverse an exit.
+        :param character:
+        :param exit_key:
+        :return:
+        """
+        if exit_key not in self.exit_list:
+            caller.msg({"msg": _("Can not go there.")})
+            return
+
+        exit_obj = self.exit_list[exit_key]["obj"]
+        exit_obj.traverse(caller)
+
+    def can_unlock_exit(self, caller, exit_key):
+        """
+        Unlock an exit. Add the exit's key to the character's unlock list.
+        """
+        if exit_key not in self.exit_list:
+            caller.msg({"msg": _("Can not unlock this exit.")})
+            return False
+
+        exit_obj = self.exit_list[exit_key]["obj"]
+        if not exit_obj.can_unlock(caller):
+            self.msg({"msg": _("Can not unlock this exit.")})
+            return False
+
+        return True
+
+    def get_exit_appearance(self, caller, exit_key):
+        """
+        Get the appearance of an exit.
+        :param caller:
+        :param exit_key:
+        :return:
+        """
+        exit_obj = self.exit_list[exit_key]["obj"]
+        return exit_obj.get_appearance(caller)
 
     def at_object_receive(self, moved_obj, source_location, **kwargs):
         """
@@ -151,11 +217,11 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         Get this room's exits.
         """
         exits = {}
-        for cont in self.contents:
-            if cont.destination:
-                exits[cont.get_object_key()] = {
-                    "from": self.get_object_key(),
-                    "to": cont.destination.get_object_key()
+        for key, item in self.exit_list.items():
+            if item["destination"]:
+                exits[key] = {
+                    "from": item["location"],
+                    "to": item["destination"],
                 }
         return exits
 
@@ -165,11 +231,12 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         command to call.
         """
         # get name, description, commands and all objects in it
-        info = {"exits": [],
-                "npcs": [],
-                "things": [],
-                "players": [],
-                "offlines": []}
+        info = {
+            "npcs": [],
+            "things": [],
+            "players": [],
+            "offlines": []
+        }
 
         visible = (cont for cont in self.contents if cont != caller and
                    cont.access(caller, "view"))
@@ -200,6 +267,8 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
                 appearance["key"] = cont.get_object_key()
                 
                 info[cont_type].append(appearance)
+
+        info["exits"] = [item["obj"].get_appearance(caller) for key, item in self.exit_list.items()]
 
         return info
 

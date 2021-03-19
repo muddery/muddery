@@ -2022,8 +2022,8 @@ MudderyScene.prototype.onPlayer = function(element) {
  */
 MudderyScene.prototype.onExit = function(element) {
     var index = $(element).data("index");
-    var obj_id = this.scene["exits"][index]["id"];
-    core.service.doGoto(obj_id);
+    var obj_id = this.scene["exits"][index]["key"];
+    core.service.traverse(obj_id);
 }
 
 /*

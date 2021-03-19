@@ -23,7 +23,6 @@ class BaseElement(object):
     """
     element_type = ""
     element_name = ""
-    brick_desc = ""
 
     # object's data model
     model_name = ""
@@ -69,10 +68,12 @@ class BaseElement(object):
 
                 records = PropertiesDict.get_properties(cls.element_type)
                 for record in records:
-                    cls._all_properties_[record.property] = {"name": record.name,
-                                                             "desc": record.desc,
-                                                             "default": record.default,
-                                                             "mutable": record.mutable,}
+                    cls._all_properties_[record.property] = {
+                        "name": record.name,
+                        "desc": record.desc,
+                        "default": record.default,
+                        "mutable": record.mutable,
+                    }
 
         return cls._all_properties_
 

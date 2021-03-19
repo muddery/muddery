@@ -250,135 +250,37 @@ class CmdSay(BaseCommand):
 
 
 #------------------------------------------------------------
-# goto exit
+# traverse an exit
 #------------------------------------------------------------
 
-class CmdGoto(BaseCommand):
+class CmdTraverse(BaseCommand):
     """
     tranvese an exit
 
-    Usage:
-        {"cmd":"goto",
-         "args": <exit's id> or <direction (n, s, w, e, ne, nw, sw, se)>
-        }
+    Usage: {
+        "cmd": "traverse",
+        "args": <exit's key>
+    }
 
     Tranvese an exit, go to the destination of the exit.
     """
-    key = "goto"
+    key = "traverse"
     locks = "cmd:all()"
     help_cateogory = "General"
-
-    def get_degree(self, from_room, to_room):
-        # get the direction's degree of the exit
-        # from 0 to 360
-
-        from_area = from_room.location
-        to_area = to_room.location
-
-        if from_area.get_id() != to_area.get_id():
-            return
-
-        from_pos = from_room.position
-        to_pos = to_room.position
-
-        if not from_pos or not to_pos:
-            return
-
-        dx = to_pos[0] - from_pos[0]
-        dy = to_pos[1] - from_pos[1]
-        degree = 0
-        if dx == 0:
-            if dy < 0:
-                degree = 90
-            elif dy > 0:
-                degree = 270
-        else:
-            degree = math.atan(-dy / dx) / math.pi * 180
-            if dx < 0:
-                degree += 180
-
-        return degree
-
-    def get_direction(self, degree):
-        if degree is None:
-            return
-
-        direction = ""
-        degree = degree - math.floor(degree / 360) * 360
-        if degree < 22.5:
-            direction = "e"
-        elif degree < 67.5:
-            direction = "ne"
-        elif degree < 112.5:
-            direction = "n"
-        elif degree < 157.5:
-            direction = "nw"
-        elif degree < 202.5:
-            direction = "w"
-        elif degree < 247.5:
-            direction = "sw"
-        elif degree < 292.5:
-            direction = "s"
-        elif degree < 337.5:
-            direction = "se"
-        elif degree < 360:
-            direction = "e"
-
-        return direction
 
     def func(self):
         "Move caller to the exit."
         caller = self.caller
 
         if not caller.is_alive():
-            caller.msg({"alert":_("You are died.")})
+            caller.msg({"alert": _("You are died.")})
             return
 
         if not self.args:
-            caller.msg({"alert":_("Should appoint an exit to go.")})
+            caller.msg({"alert": _("Should appoint an exit to go.")})
             return
 
-        obj = None
-        try:
-            obj = get_object_by_id(int(self.args))
-        except:
-            # try to goto direction
-            target = self.args.strip().lower()
-
-            if target in {"n", "s", "w", "e", "ne", "nw", "sw", "se"}:
-                # get exits in directions
-                exits = caller.location.get_exits()
-                candidate_exits = []
-
-                from_room = caller.location
-                for e in exits:
-                    try:
-                        exit_obj = get_object_by_key(e)
-                    except ObjectDoesNotExist:
-                        continue
-
-                    to_room = exit_obj.destination
-                    degree = self.get_degree(from_room, to_room)
-                    direction = self.get_direction(degree)
-                    if direction == target:
-                        candidate_exits.append(exit_obj)
-
-                if len(candidate_exits) == 1:
-                    obj = candidate_exits[0]
-                elif len(candidate_exits) > 1:
-                    # There is more than one exit in that direction.
-                    caller.msg({"alert": _("There is more than one exit in that direction.")})
-                    return
-
-        if obj:
-            # goto this exit
-            # MudderyLockedExit handles locks in at_before_traverse().
-            if obj.at_before_traverse(self.caller):
-                obj.at_traverse(caller, obj.destination)
-        else:
-            # Can not find exit.
-            caller.msg({"alert": _("Can not go there.")})
-        return
+        self.caller.traverse(self.args)
 
 
 #------------------------------------------------------------
@@ -1136,29 +1038,20 @@ class CmdUnlockExit(BaseCommand):
         caller = self.caller
 
         if not self.args:
-            caller.msg({"alert":_("You should unlock something.")})
+            caller.msg({"alert": _("You should unlock something.")})
             return
 
-        try:
-            obj = get_object_by_id(int(self.args))
-        except:
-            caller.msg({"alert":_("Can not find this exit.")})
-            return
+        exit_key = self.args
 
         try:
             # Unlock the exit.
-            if not caller.unlock_exit(obj):
-                caller.msg({"alert":_("Can not open this exit.") % obj.name})
+            if not caller.unlock_exit(exit_key):
+                caller.msg({"alert": _("Can not open this exit.")})
                 return
         except Exception as e:
             caller.msg({"alert": _("Can not open this exit.")})
-            logger.log_tracemsg("Can not open exit %s: %s" % (obj.name, e))
+            logger.log_tracemsg("Can not open exit %s: %s" % (exit_key, e))
             return
-
-        # The exit may have different appearance after unlocking.
-        # Send the lastest appearance to the caller.
-        appearance = obj.get_appearance(caller)
-        caller.msg({"look_obj": appearance})
 
 
 #------------------------------------------------------------

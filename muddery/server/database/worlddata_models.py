@@ -237,32 +237,6 @@ class world_rooms(BaseObjects):
         verbose_name_plural = "Rooms"
 
 
-class world_exits(BaseObjects):
-    "Defines all unique exits."
-
-    # the action verb to enter the exit (optional)
-    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
-
-    # The key of a world room.
-    # The exit's location, it must be a room.
-    # Players can see and enter an exit from this room.
-    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # The key of a world room.
-    # The exits's destination.
-    destination = models.CharField(max_length=KEY_LENGTH, db_index=True)
-
-    # the condition to show the exit
-    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Exit"
-        verbose_name_plural = "Exits"
-
-
 class world_objects(BaseObjects):
     "Store all unique objects."
 
@@ -458,6 +432,46 @@ class staff_characters(BaseObjects):
 
 # ------------------------------------------------------------
 #
+# exits connecting between rooms.
+#
+# ------------------------------------------------------------
+class world_exits(models.Model):
+    "Defines all unique exits."
+
+    # object's key
+    key = models.CharField(max_length=KEY_LENGTH, unique=True, blank=True)
+
+    # object's element type
+    element_type = models.CharField(max_length=KEY_LENGTH)
+
+    # The exit's name.
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # The key of a world room.
+    # The exit's location, it must be a room.
+    # Players can see and enter an exit from this room.
+    location = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # The key of a world room.
+    # The exits's destination.
+    destination = models.CharField(max_length=KEY_LENGTH)
+
+    # the action verb to enter the exit (optional)
+    verb = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # the condition to show the exit
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Exit"
+        verbose_name_plural = "Exits"
+
+
+# ------------------------------------------------------------
+#
 # exit lock's additional data
 #
 # ------------------------------------------------------------
@@ -472,6 +486,9 @@ class exit_locks(BaseObjects):
 
     # description when locked
     locked_desc = models.TextField(blank=True)
+
+    # description when unlocked
+    unlocked_desc = models.TextField(blank=True)
 
     # if the exit can be unlocked automatically
     auto_unlock = models.BooleanField(blank=True, default=False)

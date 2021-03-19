@@ -211,6 +211,14 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 if not self.states.has(key):
                     self.states.save(key, self.get_custom_data_value(info["default"]))
 
+    def traverse(self, exit_key):
+        """
+        Traverse an exit.
+        :param exit_key: (string) an exit's key.
+        :return:
+        """
+        self.location.traverse(self, exit_key)
+
     def move_to(self, destination, quiet=False,
                 emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True, **kwargs):
         """
@@ -1312,11 +1320,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             }
             self.msg(message)
 
-    def lock_exit(self, exit):
+    def lock_exit(self, exit_key):
         """
         Lock an exit. Remove the exit's key from the character's unlock list.
         """
-        exit_key = exit.get_object_key()
         unlocked_exits = self.states.load("unlocked_exits", set())
         if exit_key not in unlocked_exits:
             return
@@ -1324,24 +1331,26 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         unlocked_exits.remove(exit_key)
         self.states.save("unlocked_exits", unlocked_exits)
 
-    def unlock_exit(self, exit):
+    def unlock_exit(self, exit_key):
         """
         Unlock an exit. Add the exit's key to the character's unlock list.
         """
-        if exit.location != self.location:
-            return False
-
-        exit_key = exit.get_object_key()
         unlocked_exits = self.states.load("unlocked_exits", set())
         if exit_key in unlocked_exits:
             return True
 
-        if not exit.can_unlock(self):
+        if not self.location.can_unlock_exit(self, exit_key):
             self.msg({"msg": _("Can not open this exit.")})
             return False
 
         unlocked_exits.add(exit_key)
         self.states.save("unlocked_exits", unlocked_exits)
+
+        # The exit may have different appearance after unlocking.
+        # Send the lastest appearance to the caller.
+        appearance = self.location.get_exit_appearance(self, exit_key)
+        self.msg({"look_obj": appearance})
+
         return True
 
     def is_exit_unlocked(self, exit_key):

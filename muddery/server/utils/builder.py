@@ -222,9 +222,6 @@ def build_all(caller=None):
     build_unique_objects(WorldRooms.all(), "world_rooms", caller)
     reset_default_locations()
 
-    # Build exits.
-    build_unique_objects(WorldExits.all(), "world_exits", caller)
-
     # Build objects.
     build_unique_objects(WorldObjects.all(), "world_objects", caller)
 

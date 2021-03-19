@@ -119,8 +119,8 @@ MudderyService.prototype = {
     },
 
     // go to
-    doGoto : function(odj_id) {
-        Evennia.msg("text", this.cmdString("goto", odj_id));
+    traverse : function(exit_key) {
+        Evennia.msg("text", this.cmdString("traverse", exit_key));
     },
     
     // talk

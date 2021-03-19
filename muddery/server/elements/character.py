@@ -17,7 +17,6 @@ from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property, class_from_module
-from evennia.objects.models import ObjectDB
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.loot_list import CharacterLootList
 from muddery.server.database.worlddata.default_skills import DefaultSkills

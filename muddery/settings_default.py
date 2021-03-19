@@ -312,7 +312,7 @@ BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.server.elements.player_character.Mudd
 BASE_ROOM_TYPECLASS = "muddery.server.elements.room.MudderyRoom"
 
 # Typeclass for Exit objects (fallback).
-BASE_EXIT_TYPECLASS = "muddery.server.elements.exit.MudderyExit"
+BASE_EXIT_TYPECLASS = "evennia.objects.objects.DefaultExit"
 
 # Typeclass for Channel (fallback).
 BASE_CHANNEL_TYPECLASS = "muddery.server.typeclasses.channels.MudderyChannel"

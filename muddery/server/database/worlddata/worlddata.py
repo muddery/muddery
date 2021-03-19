@@ -68,18 +68,18 @@ class WorldData(object):
         return cls.tables[table_name].first()
 
     @classmethod
-    def get_table_data(cls, table_name, **kwargs):
+    def get_table_data(cls, table_name, **condition):
         """
-        Get records from a table whose key field is the value.
+        Get records from a table whose fields matches the condition.
 
         Args:
             table_name: (string) table's name
-            kwargs: (dict) query conditions
+            condition: (dict) query conditions
         """
         if table_name not in cls.tables:
             cls.load_table(table_name)
 
-        return cls.tables[table_name].filter(**kwargs)
+        return cls.tables[table_name].filter(**condition)
 
     @classmethod
     def get_tables_data(cls, tables, key):

@@ -38,7 +38,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdLook())
         self.add(general.CmdInventoryObject())
         self.add(general.CmdEquipmentsObject())
-        self.add(general.CmdGoto())
+        self.add(general.CmdTraverse())
         self.add(general.CmdInventory())
         self.add(general.CmdTalk())
         self.add(general.CmdDialogue())

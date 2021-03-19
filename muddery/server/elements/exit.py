@@ -7,6 +7,7 @@ for allowing Characters to traverse the exit to its destination.
 
 """
 
+import weakref
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.objects.objects import DefaultExit
 from evennia.utils import logger
@@ -14,34 +15,33 @@ from muddery.server.utils import defines
 from muddery.server.utils import search
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.elements.base_element import BaseElement
 
 
-class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
+class MudderyExit(BaseElement):
     """
-    Exits are connectors between rooms. Exits are normal Objects except
-    they defines the `destination` property. It also does work in the
-    following methods:
-
-     basetype_setup() - sets default exit locks (to change, use `at_object_creation` instead).
-     at_cmdset_get(**kwargs) - this is called when the cmdset is accessed and should
-                              rebuild the Exit cmdset along with a command matching the name
-                              of the Exit object. Conventionally, a kwarg `force_init`
-                              should force a rebuild of the cmdset, this is triggered
-                              by the `@alias` command when aliases are changed.
-     at_failed_traverse() - gives a default error message ("You cannot
-                            go there") if exit traversal fails and an
-                            attribute `err_traverse` is not defined.
-
-    Relevant hooks to overload (compared to other types of Objects):
-        at_before_traverse(traveller) - called just before traversing.
-        at_after_traverse(traveller, source_loc) - called just after traversing.
-        at_failed_traverse(traveller) - called if traversal failed for some reason. Will
-                                        not be called if the attribute `err_traverse` is
-                                        defined, in which case that will simply be echoed.
+    Exits are connectors between rooms.
     """
     element_type = "EXIT"
     element_name = _("Exit", "elements")
     model_name = "world_exits"
+
+    def traverse(self, character):
+        """
+        Traverse to the destination.
+
+        :param character:
+        :return:
+        """
+        if not self.can_traverse(character):
+            character.msg({"msg": _("You can not pass.")})
+            return
+
+        if not self.destination_obj:
+            self.destination_obj = weakref.ref(search.get_object_by_key(self.const.destination))
+
+        if not character.move_to(self.destination_obj()):
+            character.msg({"msg": _("You can not go there.")})
 
     def after_data_loaded(self):
         """
@@ -52,104 +52,62 @@ class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
         """
         super(MudderyExit, self).after_data_loaded()
 
+        self.location_obj = None
+
         # set exit's destination
-        self.set_obj_destination(self.const.destination)
+        # The destination room may not be created at the time when this exit is created, so get the object later.
+        self.destination_obj = None
 
-        # set action verb
-        self.verb = self.const.verb if self.const.verb else _("GOTO")
-
-    def at_before_traverse(self, traversing_object):
+    def set_location(self, location_obj):
         """
-        Called just before an object uses this object to traverse to
-        another object (i.e. this object is a type of Exit)
-
-        Args:
-            traversing_object (Object): The object traversing us.
-
-        Notes:
-            The target destination should normally be available as
-            `self.destination`.
-            
-            If this method returns False/None, the traverse is cancelled
-            before it is even started.
-
+        Set the exit's location room.
+        :param location_obj:
+        :return:
         """
-        if traversing_object.location != self.location:
-            # not in the same room
-            return False
+        self.location_obj = weakref.ref(location_obj)
 
-        # trigger event
-        if traversing_object.has_account:
-            return self.event.at_character_traverse(traversing_object)
-        
+    def can_traverse(self, character):
+        """
+        If the character can traverse the exit return True else False.
+
+        :param character:
+        :return:
+        """
         return True
-
-    def at_failed_traverse(self, traversing_object, **kwargs):
-        """
-        Overloads the default hook to implement a simple default error message.
-
-        Args:
-            traversing_object (Object): The object that failed traversing us.
-
-        Notes:
-            Using the default exits, this hook will not be called if an
-            Attribute `err_traverse` is defined - this will in that case be
-            read for an error string instead.
-
-        """
-        traversing_object.msg({"alert": "You cannot go there."})
-
-    def set_obj_destination(self, destination):
-        """
-        Set object's destination
-
-        Args:
-        destination: (string) Destination's name. Must be the key of data info.
-        """
-        if not destination:
-            # remove destination
-            self.destination = None
-            return
-
-        # set new destination
-        try:
-            # If has destination, search destination object.
-            destination_obj = search.get_object_by_key(destination)
-        except ObjectDoesNotExist:
-            logger.log_errmsg("%s can't find destination %s!" % (self.get_object_key(), destination))
-            return
-
-        if self.destination == destination_obj:
-            # No change.
-            return
-
-        if self == destination_obj:
-            # Can't set destination to itself.
-            logger.log_errmsg("%s can't set destination to itself!" % self.get_object_key())
-            return
-
-        self.destination = destination_obj
-
-        if self.destination:
-            self.flush_from_cache()
-
-    @classmethod
-    def get_event_trigger_types(cls):
-        """
-        Get an object's available event triggers.
-        """
-        return [defines.EVENT_TRIGGER_TRAVERSE]
 
     def get_name(self):
         """
         Get exit's name.
         """
-        if self.name:
-            return self.name
-        elif self.destination:
-            return self.destination.get_name()
+        if self.const.name:
+            return self.const.name
+        elif self.const.destination:
+            if not self.destination_obj:
+                self.destination_obj = weakref.ref(search.get_object_by_key(self.const.destination))
+            return self.destination_obj().get_name()
         else:
-            return ""
+            return _("Exit")
+
+    def get_desc(self, caller):
+        """
+        Get the exit's description.
+        :param caller:
+        :return:
+        """
+        return _("This is an exit")
+
+    def get_appearance(self, caller):
+        """
+        Get the appearance of the exit.
+        :param caller:
+        :return:
+        """
+        return {
+            "key": self.get_element_key(),
+            "name": self.get_name(),
+            "desc": self.get_desc(caller),
+            "cmds": self.get_available_commands(caller),
+        }
 
     def get_available_commands(self, caller):
         """
@@ -157,9 +115,8 @@ class MudderyExit(ELEMENT("OBJECT"), DefaultExit):
         "args" must be a string without ' and ", usually it is self.id.
         """
         commands = [{
-            "name": self.verb,
-            "cmd": "goto",
-            "args": self.get_id()
+            "name": self.const.verb if self.const.verb else _("GOTO"),
+            "cmd": "traverse",
+            "args": self.get_element_key()
         }]
         return commands
-
