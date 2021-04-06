@@ -125,8 +125,19 @@ class MudderyQuest(TYPECLASS("OBJECT")):
                 if objective["type"] == defines.OBJECTIVE_TALK:
                     # talking
                     target = _("Talk to")
-                    name = DIALOGUE_HANDLER.get_npc_name(objective["object"])
-        
+
+                    # Get the NPC's name.
+                    name = ""
+                    model_name = TYPECLASS("OBJECT").model_name
+
+                    # Get record.
+                    try:
+                        record = WorldData.get_table_data(model_name, key=objective["object"])
+                        record = record[0]
+                        name = record.name
+                    except Exception as e:
+                        logger.log_err("Can not find the quest object: %s" % objective["object"])
+
                     output.append({
                         "ordinal": ordinal,
                         "target": target,

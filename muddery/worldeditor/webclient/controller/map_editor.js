@@ -65,6 +65,7 @@ MapEditor.prototype.bindEvents = function() {
     $("#edit-area").on("click", this.onEditArea);
 
     $("#map-image").on("load", this.onImageLoad);
+    $("#map-image").on("error", this.onImageError);
 
     // Set girds.
     $("#use-grid").on("change", this.onUseGridChange);
@@ -176,6 +177,13 @@ MapEditor.prototype.onImageLoad = function() {
         controller.area_height = image.naturalHeight;
     }
 
+    controller.setBackgroundSize(controller.area_width, controller.area_height);
+}
+
+/*
+ * On loading the map's background failed.
+ */
+MapEditor.prototype.onImageError = function() {
     controller.setBackgroundSize(controller.area_width, controller.area_height);
 }
 
