@@ -24,8 +24,8 @@ class FuncEscape(StatementFunction):
         """
         Implement the function.
         """
-        combat_handler = self.caller.ndb.combat_handler
-        if not combat_handler:
+        combat = self.caller.get_combat()
+        if not combat:
             # caller is not in combat.
             return
 
@@ -40,5 +40,5 @@ class FuncEscape(StatementFunction):
             # escape failed
             return _("Failed.")
 
-        combat_handler.escape_combat(self.caller)
+        combat.escape_combat(self.caller)
         return _("Succeeded!")

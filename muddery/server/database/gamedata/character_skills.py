@@ -19,7 +19,7 @@ class CharacterSkills(object):
 
     def save(self, character_id, skill_key, data):
         """
-        Set an attribute.
+        Set a skill.
 
         Args:
             character_id: (number) character's id.

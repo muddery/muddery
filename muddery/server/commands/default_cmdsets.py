@@ -62,6 +62,10 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(general.CmdQueryQuest())
         self.add(general.CmdQuerySkill())
 
+        self.add(combat.CmdCastCombatSkill())
+        self.add(combat.CmdCombatInfo())
+        self.add(combat.CmdLeaveCombat())
+
         # Add empty login commands to the normal cmdset to
         # avoid showing wrong cmd messages.
         self.add(general.CmdConnect())
@@ -135,20 +139,3 @@ class SessionCmdSet(default_cmds.SessionCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
-
-
-class CombatCmdSet(CmdSet):
-    """
-    When players are in combat, the combat cmdset will replace the normal cmdset.
-    The normal cmdset will be recoverd when the combat is over.
-    """
-    key = "combat_cmdset"
-    mergetype = "Replace"
-    priority = 10 
-    no_exits = True
-
-    def at_cmdset_creation(self):
-        self.add(general.CmdLook())
-        self.add(general.CmdCastCombatSkill())
-        self.add(combat.CmdCombatInfo())
-        self.add(combat.CmdLeaveCombat())

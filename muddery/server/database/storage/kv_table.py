@@ -5,6 +5,7 @@ Key value storage in relational database.
 from django.apps import apps
 from django.conf import settings
 from django.forms.models import model_to_dict
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.transaction import atomic
 from muddery.server.database.storage.base_kv_storage import BaseKeyValueStorage
 from muddery.server.utils.exception import MudderyError, ERR
@@ -129,12 +130,13 @@ class KeyValueTable(BaseKeyValueStorage):
 
         try:
             record = self.model.objects.get(**query)
-            return record.serializable_value(self.default_value_field)
-        except:
+        except ObjectDoesNotExist:
             if len(default) > 0:
                 return default[0]
             else:
                 raise AttributeError
+
+        return record.serializable_value(self.default_value_field)
 
     def load_dict(self, category, key, **default):
         """
@@ -157,12 +159,13 @@ class KeyValueTable(BaseKeyValueStorage):
 
         try:
             record = self.model.objects.get(**query)
-            return {name: record.serializable_value(name) for name in self.fields}
-        except:
+        except ObjectDoesNotExist:
             if default is not None:
                 return default
             else:
                 raise AttributeError
+
+        return {name: record.serializable_value(name) for name in self.fields}
 
     def load_category(self, category):
         """

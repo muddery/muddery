@@ -72,15 +72,18 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': ''
-        },
+    },
     'gamedata': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(GAME_DIR, "server", "gamedata.db3"),
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
-        'PORT': ''
-        },
+        'PORT': '',
+        'OPTIONS': {
+            'timeout': 20,      # solve the sqlite's problem of database is locked.
+        }
+    },
     'worlddata': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(GAME_DIR, "server", "worlddata.db3"),
@@ -88,8 +91,8 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': ''
-        }}
-
+    }
+}
 
 # Database's router
 DATABASE_ROUTERS = ['muddery.server.database.database_router.DatabaseAppsRouter']
@@ -474,9 +477,9 @@ DEFUALT_FORM_TEMPLATE = "common_form.html"
 # combat settings
 ###################################
 # Handler of the combat
-NORMAL_COMBAT_HANDLER = "muddery.server.combat.normal_combat_handler.NormalCombatHandler"
+NORMAL_COMBAT_HANDLER = "muddery.server.combat.combat_runner.normal_combat.NormalCombat"
 
-HONOUR_COMBAT_HANDLER = "muddery.server.combat.honour_combat_handler.HonourCombatHandler"
+HONOUR_COMBAT_HANDLER = "muddery.server.combat.combat_runner.honour_combat.HonourCombat"
 
 #HONOUR_COMBAT_HANDLER = "muddery.server.combat.honour_auto_combat_handler.HonourAutoCombatHandler"
 

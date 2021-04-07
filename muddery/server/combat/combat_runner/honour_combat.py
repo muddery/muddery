@@ -2,17 +2,15 @@
 Combat handler.
 """
 
-from muddery.server.combat.base_combat_handler import BaseCombatHandler
-from muddery.server.combat.base_combat_handler import CStatus
+from muddery.server.combat.combat_runner.base_combat import BaseCombat
 from muddery.server.utils.honours_handler import HONOURS_HANDLER
-from muddery.server.utils import defines
 
 
-class HonourCombatHandler(BaseCombatHandler):
+class HonourCombat(BaseCombat):
     """
     This implements the honour combat handler.
     """
-    def at_server_shutdown(self):
+    def __del__(self):
         """
         This hook is called whenever the server is shutting down fully
         (i.e. not for a restart).
@@ -22,7 +20,7 @@ class HonourCombatHandler(BaseCombatHandler):
             character = char["char"]
             character.stop_auto_combat_skill()
 
-        super(HonourCombatHandler, self).at_server_shutdown()
+        super(HonourCombat, self).at_server_shutdown()
 
     def show_combat(self, character):
         """
@@ -33,7 +31,7 @@ class HonourCombatHandler(BaseCombatHandler):
         Returns:
             None
         """
-        super(HonourCombatHandler, self).show_combat(character)
+        super(HonourCombat, self).show_combat(character)
 
         # send messages in order
         character.msg({"combat_commands": character.get_combat_commands()})
@@ -51,7 +49,7 @@ class HonourCombatHandler(BaseCombatHandler):
         """
         # add escaped characters to losers list
         all_losers = {char_id: char["char"] for char_id, char in self.characters.items() if char_id not in winners}
-        rewards = super(HonourCombatHandler, self).calc_combat_rewards(winners, all_losers)
+        rewards = super(HonourCombat, self).calc_combat_rewards(winners, all_losers)
 
         # set honour
         honour_changes = HONOURS_HANDLER.set_honours(winners, all_losers)

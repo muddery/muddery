@@ -15,9 +15,10 @@ The life of a combat:
 """
 
 from enum import Enum
-from twisted.internet import reactor
+import time
+import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
 from django.conf import settings
-from evennia import DefaultScript
 from evennia.utils import logger
 from muddery.server.utils import defines
 from muddery.server.database.worlddata.worlddata import WorldData
@@ -35,24 +36,12 @@ class CStatus(Enum):
     LEFT = 5
 
 
-class BaseCombatHandler(DefaultScript):
+class BaseCombat(object):
     """
     This implements the combat handler.
     """
-    # standard Script hooks
-    def at_script_creation(self):
-        "Called when script is first created"
-        self.desc = "handles combat"
-        self.interval = 0  # keep running until the battle ends
-        self.persistent = False
-
-        """
-       store all combatants
-       {
-           "status": character's status
-           "char": character's object
-       }
-       """
+    # set initial values
+    def __init__(self):
         self.characters = {}
 
         # if battle is finished
@@ -64,19 +53,12 @@ class BaseCombatHandler(DefaultScript):
         self.rewards = {}
 
         self.timeout = 0
-        self.timer = None
+        self.scheduler = None
 
-    def at_server_shutdown(self):
-        """
-        This hook is called whenever the server is shutting down fully
-        (i.e. not for a restart).
-        """
-        self.stop()
-
-    def at_stop(self):
-        "Called just before the script is stopped/destroyed."
-        if self.timer and self.timer.active():
-            self.timer.cancel()
+    def __del__(self):
+        # When the combat is finished.
+        if self.scheduler:
+            self.scheduler.stop()
 
     def at_timeout(self):
         """
@@ -90,16 +72,19 @@ class BaseCombatHandler(DefaultScript):
 
         self.set_combat_draw()
 
-    def set_combat(self, combat_type, teams, desc, timeout):
+    def set_combat(self, handler, combat_id, combat_type, teams, desc, timeout):
         """
         Add combatant to handler
 
         Args:
+            combat_id: (int) combat's id
             combat_type: (string) combat's type
             teams: (dict) {<team id>: [<characters>]}
             desc: (string) combat's description
             timeout: (int) Total combat time in seconds. Zero means no limit.
         """
+        self.handler = handler
+        self.combat_id = combat_id
         self.combat_type = combat_type
         self.desc = desc
         self.timeout = timeout
@@ -107,10 +92,9 @@ class BaseCombatHandler(DefaultScript):
         # Add teams.
         for team in teams:
             for character in teams[team]:
-                character.set_team(team)
-
                 self.characters[character.id] = {
                     "char": character,
+                    "team": team,
                     "status":  CStatus.JOINED,
                 }
 
@@ -119,25 +103,31 @@ class BaseCombatHandler(DefaultScript):
             character = char["char"]
 
             # add the combat handler
-            character.ndb.combat_handler = self
-
-            # Change the command set.
-            character.cmdset.add(settings.CMDSET_COMBAT)
+            character.join_combat(combat_id)
 
             if character.has_account:
                 self.show_combat(character)
 
-        self.start_combat()
-
-        if self.timeout:
-            self.timer = reactor.callLater(self.timeout, self.at_timeout)
-
-    def start_combat(self):
+    def start(self):
         """
         Start a combat, make all NPCs to cast skills automatically.
         """
+        if self.timeout:
+            # Set finish time.
+            finish_time = datetime.datetime.fromtimestamp(time.time() + self.timeout)
+            self.scheduler = BackgroundScheduler()
+            self.scheduler.add_job(self.at_timeout, "date", run_date=finish_time)
+            self.scheduler.start()
+
         for char in self.characters.values():
             char["status"] = CStatus.ACTIVE
+
+    def stop(self):
+        """
+        Stop this combat.
+        :return:
+        """
+        self.handler.remove_combat(self.combat_id)
 
     def show_combat(self, character):
         """
@@ -183,7 +173,7 @@ class BaseCombatHandler(DefaultScript):
             if char["status"] == CStatus.ACTIVE:
                 character = char["char"]
                 if character.is_alive():
-                    teams.add(character.get_team())
+                    teams.add(char["team"])
                     if len(teams) > 1:
                         # More than one team has alive characters.
                         return False
@@ -196,8 +186,9 @@ class BaseCombatHandler(DefaultScript):
         """
         self.finished = True
 
-        if self.timer and self.timer.active():
-            self.timer.cancel()
+        if self.scheduler:
+            self.scheduler.stop()
+            self.scheduler = None
 
         # get winners and losers
         self.winners, self.losers = self.calc_winners()
@@ -278,13 +269,13 @@ class BaseCombatHandler(DefaultScript):
             if char["status"] == CStatus.ACTIVE:
                 character = char["char"]
                 if character.is_alive():
-                    winner_team = character.get_team()
+                    winner_team = char["team"]
                     break
 
         winners = {char_id: char["char"] for char_id, char in self.characters.items()
-                    if char["status"] == CStatus.ACTIVE and char["char"].get_team() == winner_team}
+                    if char["status"] == CStatus.ACTIVE and char["team"] == winner_team}
         losers = {char_id: char["char"] for char_id, char in self.characters.items()
-                    if char["status"] == CStatus.ACTIVE and char["char"].get_team() != winner_team}
+                    if char["status"] == CStatus.ACTIVE and char["team"] != winner_team}
         return winners, losers
 
     def calc_combat_rewards(self, winners, losers):
@@ -373,7 +364,7 @@ class BaseCombatHandler(DefaultScript):
         for char in self.characters.values():
             character = char["char"]
             info = character.get_appearance(self)
-            info["team"] = character.get_team()
+            info["team"] = char["team"]
 
             appearance["characters"].append(info)
 
@@ -384,6 +375,21 @@ class BaseCombatHandler(DefaultScript):
         Get all characters in combat.
         """
         return self.characters.values()
+
+    def get_opponents(self, character_id):
+        """
+        Get a character' opponents.
+        :param character_id:
+        :return:
+        """
+        if character_id not in self.characters:
+            return []
+
+        team = self.characters[character_id]["team"]
+
+        # teammates = [c for c in characters if c.get_team() == team]
+        opponents = [c["char"] for c in self.characters.values() if c["status"] == CStatus.ACTIVE and c["team"] != team]
+        return opponents
 
     def is_finished(self):
         """

@@ -151,8 +151,10 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         status = None
         opponents = None
         rewards = None
-        if self.ndb.combat_handler:
-            result = self.ndb.combat_handler.get_combat_result(self.id)
+
+        combat = self.get_combat()
+        if combat:
+            result = combat.get_combat_result(self.id)
             if result:
                 status, opponents, rewards = result
 

@@ -14,9 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia.comms.models import ChannelDB
-from evennia.objects.models import ObjectDB
 from muddery.server.utils import search
-from muddery.server.utils.builder import build_object
 from muddery.server.utils.quest_handler import QuestHandler
 from muddery.server.utils.statement_attribute_handler import StatementAttributeHandler
 from muddery.server.utils.exception import MudderyError
@@ -29,17 +27,20 @@ from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.default_skills import DefaultSkills
 from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.database.worlddata.default_objects import DefaultObjects
+from muddery.server.database.worlddata.object_properties import ObjectProperties
+from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils import defines
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
+from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
 from muddery.server.database.gamedata.character_inventory import CHARACTER_INVENTORY_DATA
 from muddery.server.database.gamedata.character_equipments import CHARACTER_EQUIPMENTS_DATA
 from muddery.server.database.gamedata.player_character import PLAYER_CHARACTER_DATA
 from muddery.server.database.gamedata.character_skills import CHARACTER_SKILLS
-from muddery.server.database.worlddata.object_properties import ObjectProperties
-from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
-from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
+from muddery.server.database.gamedata.character_combat import CHARACTER_COMBAT
+
+from muddery.server.combat.match_pvp import MATCH_COMBAT_HANDLER
 
 
 class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
@@ -175,6 +176,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if not self.is_alive():
             if not self.is_temp and self.reborn_time > 0:
                 self.reborn()
+
+        # load combat id
+        self.combat_id = CHARACTER_COMBAT.load(self.id, None)
 
     def load_custom_data(self, level):
         """
@@ -1507,6 +1511,32 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         return result
 
+    def join_combat(self, combat_id):
+        """
+        The character joins a combat.
+
+        :param combat_id: (int) combat's id.
+        :return:
+        """
+        super(MudderyPlayerCharacter, self).join_combat(combat_id)
+        CHARACTER_COMBAT.save(self.id, combat_id)
+
+    def get_combat(self):
+        """
+        Get the character's combat. If the character is not in combat, return None.
+        :return:
+        """
+        if self.combat_id is None:
+            return None
+
+        combat = COMBAT_HANDLER.get_combat(self.combat_id)
+        if combat is None:
+            # Combat is finished.
+            self.combat_id = None
+            CHARACTER_COMBAT.remove(self.id)
+
+        return combat
+
     def resume_combat(self):
         """
         Resume unfinished combat.
@@ -1514,11 +1544,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             None
         """
-        combat_handler = getattr(self.ndb, "combat_handler", None)
-        if combat_handler:
-            if not combat_handler.is_finished():
+        combat = self.get_combat()
+        if combat:
+            if not combat.is_finished():
                 # show combat infomation
-                combat_handler.show_combat(self)
+                combat.show_combat(self)
             else:
                 self.leave_combat()
 
@@ -1562,12 +1592,16 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         status = None
         opponents = None
         rewards = None
-        if self.ndb.combat_handler:
-            result = self.ndb.combat_handler.get_combat_result(self.id)
-            if result:
-                status, opponents, rewards = result
 
-        combat_type = self.ndb.combat_handler.get_combat_type()
+        combat = self.get_combat()
+        if not combat:
+            return
+
+        result = combat.get_combat_result(self.id)
+        if result:
+            status, opponents, rewards = result
+
+        combat_type = combat.get_combat_type()
 
         if combat_type == CombatType.NORMAL:
             # normal combat
@@ -1588,12 +1622,8 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             elif status == defines.COMBAT_LOSE:
                 self.honour_lose()
 
-        # remove combat commands
-        self.cmdset.delete(settings.CMDSET_COMBAT)
-
-        if self.ndb.combat_handler:
-            self.ndb.combat_handler.leave_combat(self)
-            del self.ndb.combat_handler
+        combat.leave_combat(self)
+        self.combat_id = None
 
         # show status
         self.show_status()

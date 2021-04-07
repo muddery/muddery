@@ -5,9 +5,7 @@ This is adapt from evennia/evennia/commands/default/general.py.
 The licence of Evennia can be found in evennia/LICENSE.txt.
 """
 
-import math
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from evennia.utils import logger
 from evennia import create_script
 from evennia.comms.models import ChannelDB
@@ -17,7 +15,8 @@ from muddery.server.utils.exception import MudderyError
 from muddery.server.utils.search import get_object_by_key, get_object_by_id
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.defines import CombatType
-from muddery.server.combat.match_pvp_handler import MATCH_COMBAT_HANDLER
+from muddery.server.combat.combat_handler import COMBAT_HANDLER
+from muddery.server.combat.match_pvp import MATCH_COMBAT_HANDLER
 from muddery.server.database.worlddata.honour_settings import HonourSettings
 
 
@@ -78,8 +77,9 @@ class CmdLook(BaseCommand):
             # Clear caller's target.
             caller.clear_target()
             caller.show_location()
-            
-            if caller.is_in_combat():
+
+            combat = caller.get_combat()
+            if combat:
                 # If the caller is in combat, add combat info.
                 # This happens when a player is in combat and he logout and login again.
 
@@ -87,7 +87,8 @@ class CmdLook(BaseCommand):
                 caller.msg({"joined_combat": True})
                 
                 # Send combat infos.
-                appearance = caller.ndb.combat_handler.get_appearance()
+
+                appearance = combat.get_appearance()
                 message = {"combat_info": appearance,
                            "combat_commands": caller.get_combat_commands()}
                 caller.msg(message)
@@ -666,85 +667,6 @@ class CmdCastSkill(BaseCommand):
             return
 
 
-# ------------------------------------------------------------
-# cast a skill in combat
-# ------------------------------------------------------------
-
-class CmdCastCombatSkill(BaseCommand):
-    """
-    Cast a skill when the caller is in combat.
-
-    Usage:
-        {
-            "cmd": "cast_combat_skill",
-            "args": <skill's key>,
-        }
-
-        or:
-
-        {
-            "cmd": "cast_combat_skill",
-            "args":
-                {
-                    "skill": <skill's key>,
-                    "target": <skill's target>,
-            }
-        }
-
-    """
-    key = "cast_combat_skill"
-    locks = "cmd:all()"
-    help_cateogory = "General"
-
-    def func(self):
-        "Cast a skill in a combat."
-        caller = self.caller
-        args = self.args
-
-        if not caller.is_alive():
-            caller.msg({"alert": _("You are died.")})
-            return
-
-        if not caller.is_in_combat():
-            caller.msg({"alert": _("You can only cast this skill in a combat.")})
-            return
-
-        if caller.is_auto_cast_skill():
-            caller.msg({"alert": _("You can not cast skills manually.")})
-            return
-
-        if not args:
-            caller.msg({"alert": _("You should select a skill to cast.")})
-            return
-
-        # get skill and target
-        skill_key = None
-        target = None
-        if isinstance(args, str):
-            # If the args is a skill's key.
-            skill_key = args
-        else:
-            # If the args is skill's key and target.
-            if not "skill" in args:
-                caller.msg({"alert": _("You should select a skill to cast.")})
-                return
-            skill_key = args["skill"]
-
-            # Get target
-            try:
-                target = get_object_by_id(int(args["target"]))
-            except:
-                target = None
-
-        try:
-            # cast this skill.
-            caller.cast_combat_skill(skill_key, target)
-        except Exception as e:
-            caller.msg({"alert": _("Can not cast this skill.")})
-            logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))
-            return
-
-
 #------------------------------------------------------------
 # attack a character
 #------------------------------------------------------------
@@ -815,16 +737,17 @@ class CmdAttack(BaseCommand):
             return
 
         # create a new combat handler
-        chandler = create_script(settings.NORMAL_COMBAT_HANDLER)
-        
-        # set combat team and desc
-        chandler.set_combat(
-            combat_type=CombatType.NORMAL,
-            teams={1: [target], 2:[caller]},
-            desc="",
-            timeout=0
-        )
-        
+        try:
+            COMBAT_HANDLER.create_combat(
+                combat_type=CombatType.NORMAL,
+                teams={1: [target], 2: [caller]},
+                desc="",
+                timeout=0
+            )
+        except Exception as e:
+            logger.log_err("Can not create combat: [%s] %s" % (type(e), e))
+            caller.msg(_("You can not attack %s.") % target.get_name())
+
         caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name())
         target.msg(_("{R%s{n is attacking you! You are in combat.") % caller.get_name())
 

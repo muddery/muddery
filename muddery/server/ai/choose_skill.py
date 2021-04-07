@@ -3,8 +3,8 @@ Skill handler handles a character's skills.
 
 """
 
-import random, time
-from muddery.server.combat.base_combat_handler import CStatus
+import random
+from muddery.server.combat.combat_runner.base_combat import CStatus
 
 
 class ChooseSkill(object):
@@ -18,7 +18,7 @@ class ChooseSkill(object):
         if not caller:
             return
 
-        combat = caller.ndb.combat_handler
+        combat = caller.get_combat()
         if not combat:
             return
 
@@ -26,10 +26,7 @@ class ChooseSkill(object):
         if not skills:
             return
 
-        team = caller.get_team()
-        chars = combat.get_combat_characters()
-        # teammates = [c for c in characters if c.get_team() == team]
-        opponents = [c["char"] for c in chars if c["status"] == CStatus.ACTIVE and c["char"].get_team() != team]
+        opponents = combat.get_opponents(caller.id)
 
         skill = random.choice(skills)
         target = random.choice(opponents)

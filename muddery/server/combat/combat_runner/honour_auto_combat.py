@@ -2,10 +2,10 @@
 Combat handler.
 """
 
-from muddery.server.combat.honour_combat_handler import HonourCombatHandler
+from muddery.server.combat.combat_runner.honour_combat import HonourCombat
 
 
-class HonourAutoCombatHandler(HonourCombatHandler):
+class HonourAutoCombat(HonourCombat):
     """
     This implements the honour combat handler.
     """
@@ -13,7 +13,7 @@ class HonourAutoCombatHandler(HonourCombatHandler):
         """
         Start a combat, make all NPCs to cast skills automatically.
         """
-        super(HonourAutoCombatHandler, self).start_combat()
+        super(HonourAutoCombat, self).start_combat()
 
         # All characters auto cast skills.
         for char in self.characters.values():
@@ -28,4 +28,4 @@ class HonourAutoCombatHandler(HonourCombatHandler):
             character = char["char"]
             character.stop_auto_combat_skill()
 
-        super(HonourAutoCombatHandler, self).finish()
+        super(HonourAutoCombat, self).finish()

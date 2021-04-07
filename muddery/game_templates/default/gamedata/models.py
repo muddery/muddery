@@ -70,6 +70,18 @@ class character_skills(BaseModels.character_skills):
 
 # ------------------------------------------------------------
 #
+# player character's combat
+#
+# ------------------------------------------------------------
+class character_combat(BaseModels.character_combat):
+    """
+    Character's skills.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
 # player character's quests
 #
 # ------------------------------------------------------------

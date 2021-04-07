@@ -188,6 +188,28 @@ class character_skills(models.Model):
 
 # ------------------------------------------------------------
 #
+# player character's combat information
+#
+# ------------------------------------------------------------
+class character_combat(models.Model):
+    "Player character's combat."
+
+    # character's id
+    character_id = models.PositiveIntegerField(unique=True)
+
+    # combat's id
+    combat = models.PositiveIntegerField()
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Character Combat"
+        verbose_name_plural = "Character Combats"
+
+
+# ------------------------------------------------------------
+#
 # player character's quests
 #
 # ------------------------------------------------------------

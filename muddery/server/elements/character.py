@@ -8,15 +8,15 @@ creation commands.
 
 """
 
-import time
-from twisted.internet import reactor, task
-from twisted.internet.task import deferLater
+import time, datetime, traceback
+from apscheduler.schedulers.background import BackgroundScheduler
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.objects.objects import DefaultCharacter
 from evennia import create_script
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property, class_from_module
+from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.loot_list import CharacterLootList
 from muddery.server.database.worlddata.default_skills import DefaultSkills
@@ -52,10 +52,20 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
     element_name = _("Character", "elements")
     model_name = "characters"
 
+    skill_scheduler_id = "skill"
+    reborn_scheduler_id = "reborn"
+
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
         return LootHandler(self, CharacterLootList.get(self.get_object_key()))
+
+    def get_scheduler(self):
+        # get the apscheduler
+        if not self.scheduler:
+            self.scheduler = BackgroundScheduler()
+            self.scheduler.start()
+        return self.scheduler
 
     def at_object_creation(self):
         """
@@ -69,9 +79,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         self.skill_gcd = GAME_SETTINGS.get("global_cd")
         self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
         self.gcd_finish_time = 0
-        
-        # loop for auto cast skills
-        self.auto_cast_loop = None
         
         self.target = None
         self.reborn_time = 0
@@ -119,9 +126,8 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
 
         time_now = time.time()
         self.gcd_finish_time = time_now + self.skill_gcd
-        
-        # loop for auto cast skills
-        self.auto_cast_loop = None
+
+        self.scheduler = None
 
         # clear target
         self.target = None
@@ -134,6 +140,8 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
 
         # load default skills
         self.load_skills()
+
+        self.combat_id = None
 
     @classmethod
     def get_event_trigger_types(cls):
@@ -289,8 +297,9 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         self.msg(skill_cd)
 
         # send skill result to the player's location
-        if self.is_in_combat():
-            self.ndb.combat_handler.msg_all(skill_result)
+        combat = self.get_combat()
+        if combat:
+            combat.msg_all(skill_result)
         else:
             if self.location:
                 # send skill result to its location
@@ -304,8 +313,11 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         Cast a skill in combat.
         """
-        if self.is_in_combat():
-            self.ndb.combat_handler.prepare_skill(skill_key, self, target)
+        combat = self.get_combat()
+        if combat:
+            combat.prepare_skill(skill_key, self, target)
+        else:
+            logger.log_err("Character %s is not in combat." % self.id)
 
     def auto_cast_skill(self):
         """
@@ -329,8 +341,8 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         If the character is casting skills automatically.
         """
-        # auto cast skill
-        return self.auto_cast_loop and self.auto_cast_loop.running
+        scheduler = self.get_scheduler()
+        return scheduler.get_job(self.skill_scheduler_id) is not None
 
     def cast_passive_skills(self):
         """
@@ -344,22 +356,27 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         Start auto cast skill.
         """
-        if self.auto_cast_loop and self.auto_cast_loop.running:
-            return
-
         # Cast a skill immediately
         # self.auto_cast_skill()
 
         # Set timer of auto cast.
-        self.auto_cast_loop = task.LoopingCall(self.auto_cast_skill)
-        self.auto_cast_loop.start(self.auto_cast_skill_cd)
+        scheduler = self.get_scheduler()
+        if scheduler.get_job(self.skill_scheduler_id):
+            # auto cast job already exists
+            return
+
+        scheduler.add_job(self.auto_cast_skill, "interval", seconds=self.auto_cast_skill_cd, id=self.skill_scheduler_id)
 
     def stop_auto_combat_skill(self):
         """
         Stop auto cast skill.
         """
-        if hasattr(self, "auto_cast_loop") and self.auto_cast_loop and self.auto_cast_loop.running:
-            self.auto_cast_loop.stop()
+        scheduler = self.get_scheduler()
+        if not scheduler.get_job(self.skill_scheduler_id):
+            # auto cast job already removed
+            return
+
+        scheduler.remove_job(self.skill_scheduler_id)
 
 
     ########################################
@@ -417,15 +434,16 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             return False
 
         # create a new combat handler
-        chandler = create_script(settings.NORMAL_COMBAT_HANDLER)
-                        
-        # set combat team and desc
-        chandler.set_combat(
-            combat_type=CombatType.NORMAL,
-            teams={1: [target], 2: [self]},
-            desc=desc,
-            timeout=0
-        )
+        try:
+            COMBAT_HANDLER.create_combat(
+                combat_type=CombatType.NORMAL,
+                teams={1: [target], 2: [self]},
+                desc=desc,
+                timeout=0
+            )
+        except Exception as e:
+            logger.log_err("Can not create combat: [%s] %s" % (type(e), e))
+            self.msg(_("You can not attack %s.") % target.get_name())
 
         return True
 
@@ -497,6 +515,15 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         target.is_temp = True
         return self.attack_target(target, desc)
 
+    def join_combat(self, combat_id):
+        """
+        The character joins a combat.
+
+        :param combat_id: (int) combat's id.
+        :return:
+        """
+        self.combat_id = combat_id
+
     def is_in_combat(self):
         """
         Check if the character is in combat.
@@ -504,7 +531,22 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Returns:
             (boolean) is in combat or not
         """
-        return bool(self.ndb.combat_handler)
+        return self.combat_id is not None
+
+    def get_combat(self):
+        """
+        Get the character's combat. If the character is not in combat, return None.
+        :return:
+        """
+        if not hasattr(self, "combat_id") or self.combat_id is None:
+            return None
+
+        combat = COMBAT_HANDLER.get_combat(self.combat_id)
+        if combat is None:
+            # Combat is finished.
+            self.combat_id = None
+
+        return combat
 
     def combat_result(self, combat_type, result, opponents=None, rewards=None):
         """
@@ -521,11 +563,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         Leave the current combat.
         """
-        # remove combat commands
-        self.cmdset.delete(settings.CMDSET_COMBAT)
-
-        if self.ndb.combat_handler:
-            del self.ndb.combat_handler
+        self.combat_id = None
 
         if self.is_temp:
             # delete template character and notify its location
@@ -536,27 +574,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
                 for content in location.contents:
                     if content.has_account:
                         content.show_location()
-
-    def set_team(self, team_id):
-        """
-        Set character's team id in combat.
-
-        Args:
-            team_id: team's id
-
-        Returns:
-            None
-        """
-        self.states.save("team", team_id)
-
-    def get_team(self):
-        """
-        Get character's team id in combat.
-
-        Returns:
-            team id
-        """
-        return self.states.load("team", 0)
 
     def is_alive(self):
         """
@@ -579,7 +596,9 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         if not self.is_temp and self.reborn_time > 0:
             # Set reborn timer.
-            self.defer = deferLater(reactor, self.reborn_time, self.reborn)
+            reborn_time = datetime.datetime.fromtimestamp(time.time() + self.reborn_time)
+            scheduler = self.get_scheduler()
+            scheduler.add_job(self.reborn, "date", run_date=reborn_time, id=self.reborn_scheduler_id)
 
     def reborn(self):
         """
