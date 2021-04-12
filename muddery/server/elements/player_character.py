@@ -706,7 +706,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             reject = False
 
             try:
-                common_models = ELEMENT("COMMON_OBJECT").get_models()
+                common_models = ELEMENT("POCKET_OBJECT").get_models()
                 object_record = WorldData.get_tables_data(common_models, key=object_key)
                 object_record = object_record[0]
             except Exception as e:
@@ -872,7 +872,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             despite of the number!
         """
         try:
-            common_models = ELEMENT("COMMON_OBJECT").get_models()
+            common_models = ELEMENT("POCKET_OBJECT").get_models()
             object_record = WorldData.get_tables_data(common_models, key=obj_key)
             object_record = object_record[0]
         except Exception as e:
@@ -915,7 +915,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # take effect
         try:
             if "obj" not in item or not item["obj"]:
-                new_obj = ELEMENT("COMMON_OBJECT")()
+                new_obj = ELEMENT("POCKET_OBJECT")()
                 new_obj.set_element_key(item["object_key"], item["level"])
                 item["obj"] = new_obj
 
@@ -942,7 +942,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         for index, item in enumerate(self.inventory):
             if item["position"] == position:
-                common_models = ELEMENT("COMMON_OBJECT").get_models()
+                common_models = ELEMENT("POCKET_OBJECT").get_models()
                 object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
                 object_record = object_record[0]
 
@@ -976,7 +976,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                         CHARACTER_INVENTORY_DATA.set_dict(self.id, position, {"number": obj_num - number})
                         item["number"] = obj_num - number
                     else:
-                        common_models = ELEMENT("COMMON_OBJECT").get_models()
+                        common_models = ELEMENT("POCKET_OBJECT").get_models()
                         object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
                         object_record = object_record[0]
 
@@ -1049,7 +1049,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                         to_remove = 0
                     else:
                         # Remove this object.
-                        common_models = ELEMENT("COMMON_OBJECT").get_models()
+                        common_models = ELEMENT("POCKET_OBJECT").get_models()
                         object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
                         object_record = object_record[0]
 
@@ -1108,7 +1108,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         inv = []
 
-        common_models = ELEMENT("COMMON_OBJECT").get_models()
+        common_models = ELEMENT("POCKET_OBJECT").get_models()
         for item in self.inventory:
             object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
             object_record = object_record[0]
@@ -1134,7 +1134,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         for item in self.inventory:
             if item["position"] == position:
                 if "obj" not in item or not item["obj"]:
-                    new_obj = ELEMENT("COMMON_OBJECT")()
+                    new_obj = ELEMENT("POCKET_OBJECT")()
                     new_obj.set_element_key(item["object_key"], item["level"])
                     item["obj"] = new_obj
 
@@ -1219,7 +1219,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             if pos in positions:
                 # create an instance of the equipment
                 item = self.equipments[pos]
-                new_obj = ELEMENT("COMMON_OBJECT")()
+                new_obj = ELEMENT("POCKET_OBJECT")()
                 new_obj.set_element_key(item["object_key"], item["level"])
                 item["obj"] = new_obj
             else:
@@ -1276,7 +1276,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # Put on new equipment.
         if "obj" not in item or not item["obj"]:
             # create an instance of the equipment
-            new_obj = ELEMENT("COMMON_OBJECT")()
+            new_obj = ELEMENT("POCKET_OBJECT")()
             new_obj.set_element_key(item["object_key"], item["level"])
             item["obj"] = new_obj
 

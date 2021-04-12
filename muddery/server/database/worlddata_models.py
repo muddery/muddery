@@ -271,6 +271,20 @@ class common_objects(BaseObjects):
     # object's description for display
     desc = models.TextField(blank=True)
 
+    # object's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Common Object"
+        verbose_name_plural = "Common Objects"
+
+
+class pocket_objects(BaseObjects):
+    "Store all pocket objects."
+
     # the max number of this object in one pile, must above 1
     max_stack = models.PositiveIntegerField(blank=True, default=1)
 
@@ -283,15 +297,12 @@ class common_objects(BaseObjects):
     # if this object can discard
     can_discard = models.BooleanField(blank=True, default=True)
 
-    # object's icon resource
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
-
     class Meta:
         "Define Django meta options"
         abstract = True
         app_label = "worlddata"
-        verbose_name = "Common Object"
-        verbose_name_plural = "Common Objects"
+        verbose_name = "Pocket Object"
+        verbose_name_plural = "Pocket Objects"
 
 
 class foods(BaseObjects):

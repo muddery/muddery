@@ -102,17 +102,16 @@ class WorldData(object):
 
             fields = cls.tables[table_name].fields()
             records = cls.tables[table_name].filter(key=key)
+            field_pos = dict(zip(fields, range(len(row_data), len(row_data) + len(fields))))
 
             if not records:
-                for field_name in fields:
-                    all_fields[field_name] = len(row_data)
-                    row_data.append(None)
+                all_fields.update(field_pos)
+                row_data.extend([None] * len(fields))
             elif len(records) > 1:
                 raise MudderyError("Can not solve more than one records from table: %s" % table_name)
             else:
                 record = records[0]
-                for field_name in fields:
-                    all_fields[field_name] = len(row_data)
-                    row_data.append(getattr(record, field_name))
+                all_fields.update(field_pos)
+                row_data.extend([getattr(record, field_name) for field_name in fields])
 
         return [RecordData(all_fields, row_data)]

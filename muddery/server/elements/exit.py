@@ -8,9 +8,6 @@ for allowing Characters to traverse the exit to its destination.
 """
 
 import weakref
-from django.core.exceptions import ObjectDoesNotExist
-from evennia.objects.objects import DefaultExit
-from evennia.utils import logger
 from muddery.server.utils import defines
 from muddery.server.utils import search
 from muddery.server.utils.localized_strings_handler import _

@@ -130,6 +130,16 @@ class common_objects(BaseModels.common_objects):
 
 # ------------------------------------------------------------
 #
+# store all pocket objects
+#
+# ------------------------------------------------------------
+class pocket_objects(BaseModels.pocket_objects):
+    "Store all common objects."
+    pass
+
+
+# ------------------------------------------------------------
+#
 # store all foods
 #
 # ------------------------------------------------------------

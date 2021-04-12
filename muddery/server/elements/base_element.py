@@ -33,17 +33,31 @@ class BaseElement(object):
         self.level = None
 
     @classmethod
+    def get_base_model(cls):
+        """
+        Get this element's root base class's model.
+        """
+        if "_base_model_" not in cls.__dict__:
+            cls._base_model_ = cls.model_name
+
+            if cls.element_type:
+                for c in cls.__bases__:
+                    if hasattr(c, "get_base_model"):
+                        base_model = c.get_base_model()
+                        if base_model:
+                            cls._base_model_ = base_model
+
+        return cls._base_model_
+
+    @classmethod
     def get_models(cls):
         """
-        Get this brick's models.
+        Get this element and all its base class's models.
         """
         if "_all_models_" not in cls.__dict__:
             cls._all_models_ = []
 
             if cls.element_type:
-                if not cls.model_name:
-                    raise ValueError("%s's model name is empty." % cls.element_type)
-
                 for c in cls.__bases__:
                     if hasattr(c, "get_models"):
                         cls._all_models_.extend(c.get_models())
@@ -137,24 +151,23 @@ class BaseElement(object):
         """
         self.element_key = key
 
-        if self.model_name:
-            # Load data.
-            try:
-                # Load db data.
-                base_model = self.model_name
-                self.load_base_data(base_model, key)
+        # Load data.
+        try:
+            # Load db data.
+            base_model = self.get_base_model()
+            self.load_base_data(base_model, key)
 
-                # reset element type
-                if self.const_data_handler.has("element_type"):
-                    if self.const.element_type:
-                        self.set_element_type(self.const.element_type)
-                    else:
-                        logger.log_errmsg("%s does not have element type." % key)
+            # reset element type
+            if self.const_data_handler.has("element_type"):
+                if self.const.element_type:
+                    self.set_element_type(self.const.element_type)
+                else:
+                    logger.log_errmsg("%s does not have element type." % key)
 
-                # Load extend data.
-                self.load_extend_data(base_model, key)
-            except Exception as e:
-                logger.log_errmsg("%s %s can not load data:%s" % (self.model_name, key, e))
+            # Load extend data.
+            self.load_extend_data(base_model, key)
+        except Exception as e:
+            logger.log_errmsg("%s %s can not load data:%s" % (self.model_name, key, e))
 
         self.set_level(level)
 
