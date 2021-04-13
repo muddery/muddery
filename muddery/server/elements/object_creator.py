@@ -22,7 +22,7 @@ class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, CreatorLootList.get(self.get_object_key()))
+        return LootHandler(self, CreatorLootList.get(self.get_element_key()))
 
     def after_data_loaded(self):
         """
@@ -42,7 +42,7 @@ class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):
         if not STATEMENT_HANDLER.match_condition(self.loot_condition, caller, self):
             return []
 
-        commands = [{"name": self.loot_verb, "cmd": "loot", "args": self.get_id()}]
+        commands = [{"name": self.loot_verb, "cmd": "loot", "args": self.get_element_key()}]
         return commands
 
     def loot(self, caller):

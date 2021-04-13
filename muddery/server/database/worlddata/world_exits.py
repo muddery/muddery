@@ -13,7 +13,7 @@ class WorldExits(BaseQuery):
     table_name = "world_exits"
 
     @classmethod
-    def get(cls, location):
+    def get_location(cls, location):
         """
         Get a room's exits.
         """

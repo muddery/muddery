@@ -251,9 +251,49 @@ class CmdSay(BaseCommand):
 
 
 #------------------------------------------------------------
+# look at an object in the room
+#------------------------------------------------------------
+class CmdLookRoomObj(BaseCommand):
+    """
+    look at an object in the room
+
+    Usage: {
+        "cmd": "look_room_obj",
+        "args": <object's key>
+    }
+
+    Tranvese an exit, go to the destination of the exit.
+    """
+    key = "look_room_obj"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        "Move caller to the exit."
+        caller = self.caller
+
+        if not caller.is_alive():
+            caller.msg({"alert": _("You are died.")})
+            return
+
+        if not self.args:
+            caller.msg({"alert": _("Should appoint an exit to go.")})
+            return
+
+        try:
+            room = self.caller.get_location()
+            obj = room.get_object(self.args)
+        except Exception as e:
+            caller.msg({"alert": _("Can not find the object.")})
+            return
+
+        appearance = obj.get_appearance(caller)
+        caller.msg({"look_obj": appearance})
+
+
+#------------------------------------------------------------
 # traverse an exit
 #------------------------------------------------------------
-
 class CmdTraverse(BaseCommand):
     """
     tranvese an exit
@@ -281,21 +321,27 @@ class CmdTraverse(BaseCommand):
             caller.msg({"alert": _("Should appoint an exit to go.")})
             return
 
-        self.caller.traverse(self.args)
+        try:
+            room = self.caller.get_location()
+            exit = room.get_exit(self.args)
+        except:
+            caller.msg({"alert": _("Can not find the exit.")})
+            return
+
+        exit.traverse(caller)
 
 
 #------------------------------------------------------------
 # talk to npc
 #------------------------------------------------------------
-
 class CmdTalk(BaseCommand):
     """
     Talk to an NPC.
 
-    Usage:
-        {"cmd":"talk",
-         "args":<NPC's id>
-        }
+    Usage: {
+        "cmd": "talk",
+        "args": <NPC's id>
+    }
 
     Begin a talk with an NPC. Show all available dialogues of this NPC.
     """
@@ -371,15 +417,14 @@ class CmdDialogue(BaseCommand):
 #------------------------------------------------------------
 # loot objects
 #------------------------------------------------------------
-
 class CmdLoot(BaseCommand):
     """
     Loot from a specified object.
 
-    Usage:
-        {"cmd":"loot",
-         "args":<object's id>
-        }
+    Usage: {
+        "cmd": "loot",
+        "args": <object's key>
+    }
 
     This command pick out random objects from the loot list and give
     them to the character.
@@ -397,15 +442,10 @@ class CmdLoot(BaseCommand):
             return
 
         try:
-            obj_id = int(self.args)
-            obj = get_object_by_id(obj_id)
+            room = self.caller.get_location()
+            obj = room.get_object(self.args)
         except:
-            # Can not find the specified object.
-            caller.msg({"alert":_("Can not find the object to loot.")})
-            return
-
-        if obj.location != caller.location:
-            caller.msg({"alert": _("Can not loot it.")})
+            caller.msg({"alert": _("Can not find the object.")})
             return
 
         try:
@@ -1060,8 +1100,6 @@ class CmdBuy(BaseCommand):
         try:
             npc.sell_goods(shop, int(goods), caller)
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             caller.msg({"alert": _("Can not buy this goods.")})
             logger.log_err("Can not buy %s %s %s: %s" % (args["npc"], shop, goods, e))
             return

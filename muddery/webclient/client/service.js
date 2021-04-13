@@ -118,6 +118,11 @@ MudderyService.prototype = {
         Evennia.msg("text", this.cmdString("equipments_obj", obj_id, context));
     },
 
+    // look at an object in the room
+    look_room_obj: function(object_key) {
+        Evennia.msg("text", this.cmdString("look_room_obj", object_key));
+    },
+
     // go to
     traverse : function(exit_key) {
         Evennia.msg("text", this.cmdString("traverse", exit_key));

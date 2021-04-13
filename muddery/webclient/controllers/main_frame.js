@@ -1995,8 +1995,8 @@ MudderyScene.prototype.onCommand = function(element) {
  */
 MudderyScene.prototype.onObject = function(element) {
     var index = $(element).data("index");
-    var obj_id = this.scene["things"][index]["id"];
-    core.service.look(obj_id, "scene");
+    var object_key = this.scene["objects"][index]["key"];
+    core.service.look_room_obj(object_key);
 }
 
 /*
@@ -2022,8 +2022,8 @@ MudderyScene.prototype.onPlayer = function(element) {
  */
 MudderyScene.prototype.onExit = function(element) {
     var index = $(element).data("index");
-    var obj_id = this.scene["exits"][index]["key"];
-    core.service.traverse(obj_id);
+    var exit_key = this.scene["exits"][index]["key"];
+    core.service.traverse(exit_key);
 }
 
 /*
@@ -2164,15 +2164,15 @@ MudderyScene.prototype.setScene = function(scene) {
     // set objects
     var objects = this.select(".scene-objects");
     var has_objects = false;
-    if (!("things" in scene)) {
-        scene["things"] = [];
+    if (!("objects" in scene)) {
+        scene["objects"] = [];
     }
-    if (scene["things"].length > 0) {
-        for (var i = 0; i < scene["things"].length; i++) {
+    if (scene["objects"].length > 0) {
+        for (var i = 0; i < scene["objects"].length; i++) {
             $("<div>")
                 .addClass("scene-button object-button object")
                 .data("index", i)
-                .text(scene["things"][i]["name"])
+                .text(scene["objects"][i]["name"])
                 .appendTo(objects);
         }
         has_objects = true;
@@ -2260,7 +2260,7 @@ MudderyScene.prototype.addObject = function(obj) {
         return;
     }
 
-    if (obj["type"] == "thing") {
+    if (obj["type"] == "objects") {
         var objects = this.select(".scene-objects");
         $("<div>")
             .addClass("scene-button object-button object")
@@ -2317,7 +2317,7 @@ MudderyScene.prototype.removeObject = function(obj) {
 
     // Remove the object button.
     var item_list = [];
-    if (obj["type"] == "thing") {
+    if (obj["type"] == "objects") {
         item_list = this.select(".scene-objects .object");
     }
     else if (obj["type"] == "npcs") {

@@ -7,3 +7,9 @@ weapon_wood_stick,木棍,EQUIPMENT,这条木棍不粗，但感觉挺结实的。
 food_bread,面包,FOOD,面包可以帮你恢复少许生命。,image/icon/bread.png
 food_apple,苹果,FOOD,苹果可以帮你恢复少许能量。,image/icon/apple.png
 book_dunt,重击之术,SKILL_BOOK,"记录了重击之术的奥秘。使用之后可以学会重击技能。",image/icon/dunt.png
+object_alley_box_01,木箱,WORLD_OBJECT,一个空的木箱，里面什么都没有。,
+object_colorfulworld_hole,电缆井,WORLD_OBJECT,这是我掉进去过的电缆井，我可不想再进去了！,
+creator_alley_pile,杂物堆,WORLD_OBJECT_CREATOR,在小巷的尽头杂乱地堆着一些木棍和木板。,
+creator_street_body,尸体,WORLD_OBJECT_CREATOR,这个人身穿着保安制服，面朝下躺着，周围流了很多血，他的身体冰凉，应该已经死了。,
+creator_storeroom_box,纸箱,WORLD_OBJECT_CREATOR,一个纸箱，好像是放食品的。,
+creator_photo_studio_box,小箱子,WORLD_OBJECT_CREATOR,一个小箱子，像是医药箱。,

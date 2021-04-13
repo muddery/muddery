@@ -215,6 +215,13 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         pass
 
+    def get_location(self):
+        """
+        Get the character's location room.
+        :return:
+        """
+        return self.location
+
     ########################################
     #
     # Skill methods.

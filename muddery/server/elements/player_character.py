@@ -215,14 +215,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 if not self.states.has(key):
                     self.states.save(key, self.get_custom_data_value(info["default"]))
 
-    def traverse(self, exit_key):
-        """
-        Traverse an exit.
-        :param exit_key: (string) an exit's key.
-        :return:
-        """
-        self.location.traverse(self, exit_key)
-
     def move_to(self, destination, quiet=False,
                 emit_to_obj=None, use_destination=True, to_none=False, move_hooks=True, **kwargs):
         """

@@ -48,6 +48,7 @@ class MudderyCommonObject(BaseElement):
             "name": self.get_name(),
             "desc": self.get_desc(),
             "icon": self.get_icon(),
+            "key": self.get_element_key(),
             "cmds": self.get_available_commands(caller),
         }
         return info

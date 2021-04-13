@@ -13,6 +13,7 @@ from muddery.server.utils import defines
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.database.worlddata.image_resource import ImageResource
 from muddery.server.database.worlddata.world_exits import WorldExits
+from muddery.server.database.worlddata.world_objects import WorldObjects
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.defines import ConversationType
 from muddery.server.utils.localized_strings_handler import _
@@ -44,6 +45,7 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         self.background = None
 
         self.exit_list = {}
+        self.object_list = {}
 
     def after_data_loaded(self):
         """
@@ -78,40 +80,62 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         # load exits
         self.load_exits()
 
+        # load objects
+        self.load_objects()
+
     def load_exits(self):
         """
         Load exits in this room.
 
         :return:
         """
-        records = WorldExits.get(self.get_object_key())
+        records = WorldExits.get_location(self.get_object_key())
         self.exit_list = {}
         for record in records:
             new_obj = ELEMENT("EXIT")()
             new_obj.set_element_key(record.key)
-            new_obj.set_location(self)
 
             self.exit_list[record.key] = {
-                "location": record.location,
                 "destination": record.destination,
                 "verb": record.verb,
                 "condition": record.condition,
                 "obj": new_obj,
             }
 
-    def traverse(self, caller, exit_key):
+    def load_objects(self):
         """
-        A character is going to traverse an exit.
-        :param character:
+        Load objects in this room.
+
+        :return:
+        """
+        records = WorldObjects.get_location(self.get_object_key())
+        self.object_list = {}
+        for record in records:
+            new_obj = ELEMENT("WORLD_OBJECT")()
+            new_obj.set_element_key(record.key)
+
+            self.object_list[record.key] = {
+                "condition": record.condition,
+                "obj": new_obj,
+            }
+
+    def get_object(self, object_key):
+        """
+        Get an object in the room.
+
+        :param object_key:
+        :return:
+        """
+        return self.object_list[object_key]["obj"]
+
+    def get_exit(self, exit_key):
+        """
+        Get an exit in the room.
+
         :param exit_key:
         :return:
         """
-        if exit_key not in self.exit_list:
-            caller.msg({"msg": _("Can not go there.")})
-            return
-
-        exit_obj = self.exit_list[exit_key]["obj"]
-        exit_obj.traverse(caller)
+        return self.exit_list[exit_key]["obj"]
 
     def can_unlock_exit(self, caller, exit_key):
         """
@@ -220,7 +244,7 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         for key, item in self.exit_list.items():
             if item["destination"]:
                 exits[key] = {
-                    "from": item["location"],
+                    "from": self.get_object_key(),
                     "to": item["destination"],
                 }
         return exits
@@ -233,13 +257,11 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         # get name, description, commands and all objects in it
         info = {
             "npcs": [],
-            "things": [],
             "players": [],
             "offlines": []
         }
 
-        visible = (cont for cont in self.contents if cont != caller and
-                   cont.access(caller, "view"))
+        visible = (cont for cont in self.contents if cont != caller)
 
         if GAME_SETTINGS.get("solo_mode"):
             visible = (cont for cont in visible if not cont.has_account)
@@ -268,7 +290,10 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
                 
                 info[cont_type].append(appearance)
 
-        info["exits"] = [item["obj"].get_appearance(caller) for key, item in self.exit_list.items()]
+        info["exits"] = [item["obj"].get_appearance(caller) for key, item in self.exit_list.items()
+                         if item["obj"].is_visible(caller)]
+        info["objects"] = [item["obj"].get_appearance(caller) for key, item in self.object_list.items()
+                           if item["obj"].is_visible(caller)]
 
         return info
 
@@ -277,9 +302,7 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
         """
         Get surrounding's view type.
         """
-        if obj.destination:
-            return "exits"
-        elif obj.is_element(settings.CHARACTER_ELEMENT_TYPE):
+        if obj.is_element(settings.CHARACTER_ELEMENT_TYPE):
             if obj.is_element(settings.PLAYER_CHARACTER_ELEMENT_TYPE):
                 if obj.has_account:
                     return "players"
@@ -287,8 +310,6 @@ class MudderyRoom(ELEMENT("OBJECT"), DefaultRoom):
                     return "offlines"
             else:
                 return "npcs"
-        else:
-            return "things"
 
     @classmethod
     def get_event_trigger_types(cls):

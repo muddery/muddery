@@ -13,6 +13,7 @@ from muddery.server.utils import search
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.elements.base_element import BaseElement
+from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 
 
 class MudderyExit(BaseElement):
@@ -22,6 +23,18 @@ class MudderyExit(BaseElement):
     element_type = "EXIT"
     element_name = _("Exit", "elements")
     model_name = "world_exits"
+
+    def is_visible(self, caller):
+        """
+        If this object is visible to the caller.
+
+        Return:
+            boolean: visible
+        """
+        if not self.const.condition:
+            return True
+
+        return STATEMENT_HANDLER.match_condition(self.const.condition, caller, self)
 
     def traverse(self, character):
         """
@@ -49,19 +62,9 @@ class MudderyExit(BaseElement):
         """
         super(MudderyExit, self).after_data_loaded()
 
-        self.location_obj = None
-
         # set exit's destination
         # The destination room may not be created at the time when this exit is created, so get the object later.
         self.destination_obj = None
-
-    def set_location(self, location_obj):
-        """
-        Set the exit's location room.
-        :param location_obj:
-        :return:
-        """
-        self.location_obj = weakref.ref(location_obj)
 
     def can_traverse(self, character):
         """
