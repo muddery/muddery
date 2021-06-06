@@ -17,6 +17,9 @@ from muddery.server.database.worlddata.world_rooms import WorldRooms
 from muddery.server.database.worlddata.world_exits import WorldExits
 from muddery.server.database.worlddata.world_npcs import WorldNPCs
 from muddery.server.database.worlddata.world_objects import WorldObjects
+from muddery.server.database.gamedata.player_character import PlayerCharacter
+from muddery.server.database.gamedata.system_data import SystemData
+from muddery.server.database.gamedata.character_location import CharacterLocation
 
 
 def get_object_record(obj_key):
@@ -38,7 +41,7 @@ def get_object_record(obj_key):
     except Exception as e:
         ostring = "Can not get record %s in %s: %s." % (obj_key, model_name, e)
         print(ostring)
-        print(traceback.print_exc())
+        traceback.print_exc()
 
     return record
 
@@ -66,20 +69,20 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
         except Exception as e:
             ostring = "Can not get record %s in %s: %s." % (obj_key, model_name, e)
             print(ostring)
-            print(traceback.print_exc())
+            traceback.print_exc()
 
         # get element model
         class_path = ELEMENT_SET.get_module(record.element_type)
     except Exception as e:
         ostring = "Can not get the element type of %s: %s." % (obj_key, e)
         print(ostring)
-        print(traceback.print_exc())
+        traceback.print_exc()
         pass
 
     if not record or not class_path:
         ostring = "Can not find the data of %s." % obj_key
         print(ostring)
-        print(traceback.print_exc())
+        traceback.print_exc()
         if caller:
             caller.msg(ostring)
         return
@@ -91,7 +94,7 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
     except Exception as e:
         ostring = "Can not create obj %s: %s" % (obj_key, e)
         print(ostring)
-        print(traceback.print_exc())
+        traceback.print_exc()
         if caller:
             caller.msg(ostring)
         return
@@ -99,11 +102,10 @@ def build_object(obj_key, level=None, caller=None, reset_location=True):
     try:
         # Set data info.
         obj.set_object_key(record.key, level=level, reset_location=reset_location)
-        obj.after_creation()
     except Exception as e:
         ostring = "Can not set data info to obj %s: %s" % (obj_key, e)
         print(ostring)
-        print(traceback.print_exc())
+        traceback.print_exc()
         if caller:
             caller.msg(ostring)
         return
@@ -160,7 +162,7 @@ def build_unique_objects(objects_data, type_name, caller=None):
             except Exception as e:
                 ostring = "%s can not load data:%s" % (obj.get_id(), e)
                 print(ostring)
-                print(traceback.print_exc())
+                traceback.print_exc()
                 if caller:
                     caller.msg(ostring)
 
@@ -185,18 +187,17 @@ def build_unique_objects(objects_data, type_name, caller=None):
             except Exception as e:
                 ostring = "Can not create obj %s: %s" % (record.key, e)
                 print(ostring)
-                print(traceback.print_exc())
+                traceback.print_exc()
                 if caller:
                     caller.msg(ostring)
                 continue
 
             try:
                 obj.set_object_key(record.key, unique_type=type_name)
-                obj.after_creation()
             except Exception as e:
                 ostring = "Can not set data info to obj %s: %s" % (record.key, e)
                 print(ostring)
-                print(traceback.print_exc())
+                traceback.print_exc()
                 if caller:
                     caller.msg(ostring)
                 continue
@@ -222,12 +223,6 @@ def build_all(caller=None):
     build_unique_objects(WorldRooms.all(), "world_rooms", caller)
     reset_default_locations()
 
-    # Build objects.
-    build_unique_objects(WorldObjects.all(), "world_objects", caller)
-
-    # Build NPCs.
-    build_unique_objects(WorldNPCs.all(), "world_npcs", caller)
-
 
 def reset_default_locations():
     """
@@ -246,7 +241,7 @@ def reset_default_locations():
         except Exception as e:
             ostring = "Can not find default_home_key: %s" % e
             print(ostring)
-            print(traceback.print_exc())
+            traceback.print_exc()
 
     if default_home_key:
         try:
@@ -254,7 +249,7 @@ def reset_default_locations():
             settings.DEFAULT_HOME = default_home.dbref
             print("settings.DEFAULT_HOME set to: %s" % settings.DEFAULT_HOME)
         except Exception as e:
-            print("Can not find default_home: %s" % e)
+            print("Can not find default_home %s: (%s)%s" % (default_home_key, type(e), e))
 
     # Set start location.
     start_location_key = GAME_SETTINGS.get("start_location_key")
@@ -267,7 +262,7 @@ def reset_default_locations():
         except Exception as e:
             ostring = "Can not find start_location_key: %s" % e
             print(ostring)
-            print(traceback.print_exc())
+            traceback.print_exc()
 
     if start_location_key:
         # If get start_location_key.
@@ -321,63 +316,50 @@ def create_player(playername, password, permissions=None, typeclass=None):
     return new_player
     
 
-def create_character(new_player, nickname, permissions=None, character_key=None,
-                     level=1, typeclass=None, location=None, home=None):
+def create_character(new_player, nickname, character_key=None,
+                     level=1, element_type=None, location_key=None, home_key=None):
     """
     Helper function, creates a character based on a player's name.
     """
     if not character_key:
         character_key = GAME_SETTINGS.get("default_player_character_key")
 
-    if not typeclass:
-        typeclass = settings.BASE_PLAYER_CHARACTER_TYPECLASS
-        
-    if not permissions:
-        permissions = settings.PERMISSION_ACCOUNT_DEFAULT
-    
-    if not home:
-        default_home_key = GAME_SETTINGS.get("default_player_home_key")
-        if default_home_key:
-            try:
-                home = search.get_object_by_key(default_home_key)
-            except ObjectDoesNotExist:
-                pass
+    if not element_type:
+        element_type = settings.PLAYER_CHARACTER_ELEMENT_TYPE
 
-    if not home:
-        rooms = search.search_object(settings.DEFAULT_HOME)
-        if rooms:
-            home = rooms[0]
+    new_character = ELEMENT(element_type)()
 
-    if not location:
-        location = home
-        try:
-            start_location_key = GAME_SETTINGS.get("start_location_key")
-            if start_location_key:
-                location = search.get_object_by_key(start_location_key)
-        except:
-            pass
+    # set player's account id
+    new_character.set_account_id(new_player.id)
 
-    new_character = create.create_object(typeclass, key=new_player.key, location=location,
-                                         home=home, permissions=permissions)
+    # Get a new player character id.
+    char_db_id = SystemData.load("last_player_character_id", 0)
+    char_db_id += 1
+    SystemData.save("last_player_character_id", char_db_id)
+    new_character.set_db_id(char_db_id)
 
-    # set character info
-    new_character.set_object_key(character_key, level=level)
-    new_character.after_creation()
+    # set location
+    if not location_key:
+        location_key = GAME_SETTINGS.get("start_location_key")
+        if not location_key:
+            location_key = GAME_SETTINGS.get("default_player_home_key")
+            if not location_key:
+                location_key = settings.DEFAULT_HOME
 
-    # set playable character list
-    new_player.db._playable_characters.append(new_character)
-
-    # allow only the character itself and the player to puppet this character (and Immortals).
-    new_character.locks.add("puppet:id(%i) or pid(%i) or perm(Immortals) or pperm(Immortals)" %
-                            (new_character.id, new_player.id))
+    CharacterLocation.save(char_db_id, location_key)
 
     # Add nickname
     if not nickname:
         nickname = character_key
+
+    # save data
+    PlayerCharacter.add(new_player.id, char_db_id, nickname, level)
+
+    # set nickname
     new_character.set_nickname(nickname)
-        
-    # We need to set this to have @ic auto-connect to this character
-    new_player.db._last_puppet = new_character
-    
+
+    # set character info
+    new_character.setup_element(character_key, level=level, first_time=True)
+
     return new_character
 

@@ -355,6 +355,18 @@ class equipments(BaseObjects):
 class characters(BaseObjects):
     "Store common characters."
 
+    # object's element type
+    element_type = models.CharField(max_length=KEY_LENGTH)
+
+    # object's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # object's description for display
+    desc = models.TextField(blank=True)
+
+    # object's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
     # Character's level.
     level = models.PositiveIntegerField(blank=True, default=1)
 
@@ -363,9 +375,6 @@ class characters(BaseObjects):
 
     # Friendly of this character.
     friendly = models.IntegerField(blank=True, default=0)
-
-    # Character's icon resource.
-    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # Clone another character's custom properties if this character's data is empty.
     clone = models.CharField(max_length=KEY_LENGTH, blank=True)
@@ -376,29 +385,6 @@ class characters(BaseObjects):
         app_label = "worlddata"
         verbose_name = "Common Character List"
         verbose_name_plural = "Common Character List"
-
-
-class base_npcs(BaseObjects):
-    "The base of all NPCs."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Base NPC"
-        verbose_name_plural = "Base NPCs"
-
-
-class common_npcs(BaseObjects):
-    "Common NPCs."
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Common NPC"
-        verbose_name_plural = "Common NPCs"
-
 
 class world_npcs(BaseObjects):
     "Store all NPCs."
@@ -617,7 +603,7 @@ class shop_goods(models.Model):
     goods = models.CharField(max_length=KEY_LENGTH)
 
     # goods level
-    level = models.PositiveIntegerField(blank=True, default=0)
+    level = models.PositiveIntegerField(blank=True, null=True)
 
     # number of shop goods
     number = models.PositiveIntegerField(blank=True, default=1)
@@ -800,14 +786,11 @@ class properties_dict(models.Model):
     # The name of the property.
     name = models.CharField(max_length=NAME_LENGTH)
 
-    # Whether this property will be changed or not.
-    mutable = models.BooleanField(blank=True, default=False)
+    # The description of the property.
+    desc = models.TextField(blank=True)
 
     # Default value.
     default = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    # The description of the property.
-    desc = models.TextField(blank=True)
 
     class Meta:
         "Define Django meta options"
@@ -845,6 +828,36 @@ class object_properties(models.Model):
         verbose_name_plural = "Object's Properties"
         unique_together = ("object", "level", "property")
         index_together = [("object", "level")]
+
+
+# ------------------------------------------------------------
+#
+# Character's mutable states.
+# These states can change in the game.
+#
+# ------------------------------------------------------------
+class character_states_dict(models.Model):
+    """
+    Character's mutable states.
+    """
+    # The key of the state.
+    key = models.CharField(max_length=KEY_LENGTH, unique=True)
+
+    # The name of the property.
+    name = models.CharField(max_length=NAME_LENGTH)
+
+    # Default value.
+    default = models.CharField(max_length=VALUE_LENGTH, blank=True)
+
+    # The description of the property.
+    desc = models.TextField(blank=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "worlddata"
+        verbose_name = "Character States Dict"
+        verbose_name_plural = "Character States Dict"
 
 
 # ------------------------------------------------------------

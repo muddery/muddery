@@ -22,7 +22,7 @@ class CharacterEquipments(object):
         :param character_id:
         :return:
         """
-        return self.storage.load_category_dict(character_id)
+        return self.storage.load_category(character_id, {})
 
     def get_equipment(self, character_id, position):
         """
@@ -31,7 +31,7 @@ class CharacterEquipments(object):
         :param position: (string) position on the body
         :return:
         """
-        return self.storage.load_dict(character_id, position)
+        return self.storage.load(character_id, position)
 
     def add(self, character_id, position, object_key, level):
         """
@@ -40,7 +40,7 @@ class CharacterEquipments(object):
         :param object_key:
         :return:
         """
-        self.storage.add_dict(character_id, position, {
+        self.storage.add(character_id, position, {
             "object_key": object_key,
             "level": level,
         })
@@ -54,7 +54,7 @@ class CharacterEquipments(object):
         :param values:
         :return:
         """
-        self.storage.save_dict(character_id, position, {
+        self.storage.save(character_id, position, {
             "object_key": object_key,
             "level": level,
         })

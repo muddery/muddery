@@ -5,6 +5,21 @@ KEY_LENGTH = 255
 NAME_LENGTH = 80
 
 
+class system_data(models.Model):
+    """
+    Store system data. Only use the first record.
+    """
+    # The last id of player characters.
+    last_player_character_id = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "System Data"
+        verbose_name_plural = "System Data"
+
+
 # ------------------------------------------------------------
 #
 # Set object's key.
@@ -60,7 +75,7 @@ class BaseAttributes(models.Model):
 # Game object's runtime attributes.
 #
 # ------------------------------------------------------------
-class object_status(BaseAttributes):
+class object_states(BaseAttributes):
 
     class Meta:
         "Define Django meta options"
@@ -78,12 +93,17 @@ class object_status(BaseAttributes):
 # ------------------------------------------------------------
 class player_character(models.Model):
     "Player character's data."
+    # player's account id
+    account_id = models.PositiveIntegerField(db_index=True)
 
-    # character's database id
-    object_id = models.PositiveIntegerField(unique=True)
+    # playable character's id
+    char_id = models.PositiveIntegerField(unique=True)
 
     # character's nickname
     nickname = models.CharField(max_length=KEY_LENGTH)
+
+    # character's level
+    level = models.PositiveIntegerField(default=0)
 
     class Meta:
         "Define Django meta options"
@@ -91,6 +111,28 @@ class player_character(models.Model):
         app_label = "gamedata"
         verbose_name = "Player Character"
         verbose_name_plural = "Player Characters"
+
+
+# ------------------------------------------------------------
+#
+# player character's location
+#
+# ------------------------------------------------------------
+class character_location(models.Model):
+    "player character's location"
+
+    # player character's id
+    char_id = models.PositiveIntegerField(unique=True)
+
+    # location (room's key)
+    location = models.CharField(max_length=KEY_LENGTH)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Player Location"
+        verbose_name_plural = "Players Location"
 
 
 # ------------------------------------------------------------

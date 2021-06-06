@@ -65,11 +65,6 @@ def at_initial_setup():
                 start_location = start_location[0]
                 superuser.move_to(start_location, quiet=True)
 
-            # set superuser's data
-            superuser.set_object_key(GAME_SETTINGS.get("default_staff_character_key"), level=1)
-            superuser.set_nickname("superuser")
-            print("Set superuser.")
-
     except Exception as e:
         ostring = "Can't set initial data: %s" % e
         print(ostring)

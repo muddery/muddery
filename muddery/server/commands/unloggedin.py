@@ -298,8 +298,16 @@ class CmdUnconnectedConnect(BaseCommand):
             #   player.at_first_login()  # only once, for player-centric setup
             #   player.at_pre_login()
             #   player.at_post_login(session=session)
-            session.msg({"login":{"name": playername, "dbref": player.dbref}})
             session.sessionhandler.login(session, player)
+
+            char_all = player.get_all_characters()
+            session.msg({
+                "login": {
+                    "name": playername,
+                    "dbref": player.dbref,
+                },
+                "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
+            })
 
 
 class CmdUnconnectedConnectT(BaseCommand):

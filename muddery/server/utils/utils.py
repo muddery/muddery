@@ -261,3 +261,9 @@ def get_module_path(path):
     else:
         return name
 
+
+def is_player(element):
+    """
+    If the element is a player character, return True.
+    """
+    return element.is_element(settings.PLAYER_CHARACTER_ELEMENT_TYPE)

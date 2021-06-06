@@ -153,7 +153,7 @@ class MemoryTable(object):
             values = tuple(conditions[field_name] for field_name in unique_fields)
 
         if index_name not in self.index:
-            raise MudderyError("Only indexed fields can be searched.")
+            raise MudderyError("Only indexed fields can be searched, can not find %s" % index_name)
 
         index = self.index[index_name]
 

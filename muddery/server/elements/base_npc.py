@@ -27,27 +27,16 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
     """
     element_type = "BASE_NPC"
     element_name = _("Base None Player Character", "elements")
-    model_name = "base_npcs"
+    model_name = ""
 
-    def at_object_creation(self):
-        """
-        Called once, when this object is first created. This is the
-        normal hook to overload for most object types.
-
-        """
-        super(MudderyBaseNPC, self).at_object_creation()
-
-    def after_data_loaded(self):
+    def at_element_setup(self, first_time):
         """
         Init the character.
         """
-        super(MudderyBaseNPC, self).after_data_loaded()
+        super(MudderyBaseNPC, self).at_element_setup(first_time)
 
         # Character can auto fight.
         self.auto_fight = True
-
-        # set home
-        self.home = self.location
 
         # load dialogues.
         self.load_dialogues()
@@ -59,7 +48,7 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         """
         Load dialogues.
         """
-        dialogues = NPCDialogues.get(self.get_object_key())
+        dialogues = NPCDialogues.get(self.get_element_key())
 
         self.default_dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and dialogue.default]
         self.dialogues = [dialogue.dialogue for dialogue in dialogues if dialogue.dialogue and not dialogue.default]
@@ -69,16 +58,30 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         Load character's shop.
         """
         # shops records
-        shop_records = NPCShops.get(self.get_object_key())
+        shop_records = NPCShops.get(self.get_element_key())
         shop_keys = set([record.shop for record in shop_records])
 
         # NPC's shop
         self.shops = {}
         for key in shop_keys:
             shop = ELEMENT("SHOP")()
-            shop.set_element_key(key)
+            shop.setup_element(key)
             shop.set_owner(self)
             self.shops[key] = shop
+
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        info = super(MudderyBaseNPC, self).get_appearance(caller)
+
+        # quest mark
+        provide_quest, complete_quest = self.have_quest(caller)
+        info["provide_quest"] = provide_quest
+        info["complete_quest"] = complete_quest
+
+        return info
 
     def get_shop_info(self, shop_key, caller):
         """

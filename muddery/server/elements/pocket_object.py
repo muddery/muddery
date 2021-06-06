@@ -110,8 +110,7 @@ class MudderyFood(ELEMENT("POCKET_OBJECT")):
         if not number:
             return
 
-        values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items() if
-                        not info["mutable"]}
+        values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items()}
 
         changes = {}
         new_states = {}
@@ -198,8 +197,7 @@ class MudderyEquipment(ELEMENT("POCKET_OBJECT")):
         if not user:
             return
 
-        values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items() if
-                        not info["mutable"]}
+        values_merge = {key: self.const_data_handler.get(key) for key, info in self.get_properties_info().items()}
 
         changes = {}
         new_states = {}

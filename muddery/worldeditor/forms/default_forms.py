@@ -382,26 +382,6 @@ class CharactersForm(ObjectsForm):
         fields = '__all__'
 
 
-class BaseNPCsForm(ObjectsForm):
-    def __init__(self, *args, **kwargs):
-        super(BaseNPCsForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.BASE_NPCS.model
-        fields = '__all__'
-
-
-class CommonNPCsForm(ObjectsForm):
-    def __init__(self, *args, **kwargs):
-        super(CommonNPCsForm, self).__init__(*args, **kwargs)
-        localize_form_fields(self)
-
-    class Meta:
-        model = CM.COMMON_NPCS.model
-        fields = '__all__'
-
-
 class PlayerCharactersForm(ObjectsForm):
     def __init__(self, *args, **kwargs):
         super(PlayerCharactersForm, self).__init__(*args, **kwargs)

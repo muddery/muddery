@@ -4,7 +4,7 @@ The licence of Evennia can be found in evennia/LICENSE.txt.
 
 """
 
-import re
+import re, traceback
 from django.conf import settings
 from evennia.utils import logger
 from evennia.utils.utils import make_iter
@@ -12,7 +12,7 @@ from muddery.server.commands.base_command import BaseCommand
 from muddery.server.utils.search import get_object_by_key, get_object_by_id
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
-from muddery.server.database.gamedata.player_character import PLAYER_CHARACTER_DATA
+from muddery.server.database.gamedata.player_character import PlayerCharacter
 
 
 MAX_NR_CHARACTERS = settings.MAX_NR_CHARACTERS
@@ -141,32 +141,22 @@ class CmdPuppet(BaseCommand):
         session = self.session
         player = self.account
         args = self.args
+        if not args:
+            session.msg({"alert": _("That is not a valid character choice.")})
+            return
 
-        # Find the character to puppet.
-        new_character = None
-        if args:
-            # search for a matching character
-            try:
-                new_character = get_object_by_id(int(args))
-            except:
-                session.msg({"alert": _("That is not a valid character choice.")})
-                return
-
-            if not new_character.access(player, "puppet"):
-                session.msg({"alert":_("That is not a valid character choice.")})
-                return
-        else: 
-            # Puppet last character.
-            new_character = player.db._last_puppet
-            if not new_character:
-                session.msg({"alert":_("You should puppet a character.")})
-                return
+        char_id = args
+        char_all = player.get_all_characters()
+        if char_id not in char_all:
+            print("not in")
+            session.msg({"alert": _("That is not a valid character choice.")})
+            return
 
         try:
-            player.puppet_object(session, new_character)
-            player.db._last_puppet = new_character
-        except RuntimeError as exc:
-            session.msg({"alert":_("{RYou cannot become {C%s{n: %s") % (new_character.name, exc)})
+            player.puppet_object(session, char_id)
+        except Exception as e:
+            traceback.print_exc()
+            session.msg({"alert": _("That is not a valid character choice.")})
 
 
 class CmdUnpuppet(BaseCommand):
@@ -257,7 +247,7 @@ class CmdCharCreate(BaseCommand):
             return
 
         try:
-            PLAYER_CHARACTER_DATA.get_object_id(nickname)
+            PlayerCharacter.get_char_id(nickname)
             # check if this name already exists.
             session.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
             return
@@ -273,9 +263,12 @@ class CmdCharCreate(BaseCommand):
             session.msg({"alert":_("There was an error creating the Player: %s" % e)})
             logger.log_trace()
             return
-            
-        session.msg({"char_created": True,
-                     "char_all": player.get_all_characters()})
+
+        char_all = player.get_all_characters()
+        session.msg({
+            "char_created": True,
+            "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
+        })
 
 
 class CmdCharDelete(BaseCommand):
@@ -302,32 +295,22 @@ class CmdCharDelete(BaseCommand):
             self.msg({"alert":_("Please select a character")})
             return
 
-        obj_id = args["id"]
+        char_id = args["id"]
 
         # use the playable_characters list to search
-        match = [char for char in make_iter(player.db._playable_characters) if char.get_id() == obj_id]
-        if not match:
-            session.msg({"alert":_("You have no such character to delete.")})
+        characters = PlayerCharacter.get_account_characters(player.id)
+        if not characters or char_id not in characters:
+            session.msg({"alert": _("You have no such character to delete.")})
             return
-        elif len(match) > 1:
-            session.msg({"alert":_("Aborting - there are two characters with the same name. Ask an admin to delete the right one.")})
-            return
-        else: # one match
-            delobj = match[0]
 
-            # get new playable characters
-            new_characters = [char for char in player.db._playable_characters if char != delobj]
+        # Todo: delete all character data.
+        PlayerCharacter.remove_character(player.id, char_id)
 
-            # remove object
-            deleted = delobj.delete()
-
-            if not deleted:
-                session.msg({"alert": _("Can not delete this character.")})
-                return
-
-            player.db._playable_characters = new_characters
-            session.msg({"char_deleted": True,
-                         "char_all": player.get_all_characters()})
+        char_all = PlayerCharacter.get_account_characters(player.id)
+        session.msg({
+            "char_deleted": True,
+            "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
+        })
 
 
 class CmdCharDeleteWithPW(BaseCommand):
@@ -384,10 +367,12 @@ class CmdCharDeleteWithPW(BaseCommand):
             if not deleted:
                 session.msg({"alert":_("Can not delete this character.")})
                 return
-            
-            player.db._playable_characters = new_characters
-            session.msg({"char_deleted": True,
-                         "char_all": player.get_all_characters()})
+
+            char_all = player.get_all_characters()
+            session.msg({
+                "char_created": True,
+                "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
+            })
 
 
 class CmdCharAll(BaseCommand):
@@ -408,4 +393,7 @@ class CmdCharAll(BaseCommand):
         player = self.account
         session = self.session
         
-        session.msg({"char_all": player.get_all_characters()})
+        char_all = player.get_all_characters()
+        session.msg({
+            "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
+        })

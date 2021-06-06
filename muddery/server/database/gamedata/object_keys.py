@@ -3,6 +3,7 @@
 Store object's element key data in memory.
 """
 
+import traceback
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -22,13 +23,16 @@ class ObjectKeys(object):
         self.key_object = {}
         self.unique_objects = {}
 
-        all_data = self.storage.load_category_dict("")
-        for object_id, info in all_data.items():
-            self.key_object[info["object_key"]] = object_id
-            if info["unique_type"]:
-                if info["unique_type"] not in self.unique_objects:
-                    self.unique_objects[info["unique_type"]] = {}
-                self.unique_objects[info["unique_type"]][object_id] = info["object_key"]
+        try:
+            all_data = self.storage.load_category("", {})
+            for object_id, info in all_data.items():
+                self.key_object[info["object_key"]] = object_id
+                if info["unique_type"]:
+                    if info["unique_type"] not in self.unique_objects:
+                        self.unique_objects[info["unique_type"]] = {}
+                    self.unique_objects[info["unique_type"]][object_id] = info["object_key"]
+        except KeyError:
+            pass
 
     def save(self, object_id, object_key, unique_type=None):
         """
@@ -38,7 +42,7 @@ class ObjectKeys(object):
         :param unique_type:
         :return:
         """
-        self.storage.save_dict("", object_id, {
+        self.storage.save("", object_id, {
             "object_key": object_key,
             "unique_type": unique_type
         })
@@ -55,6 +59,7 @@ class ObjectKeys(object):
         :param object_id:
         :return:
         """
+        traceback.print_stack()
         self.storage.delete("", object_id)
 
     def get_key(self, object_id):
@@ -64,7 +69,7 @@ class ObjectKeys(object):
         :return:
         """
         try:
-            info = self.storage.load_dict("", object_id)
+            info = self.storage.load("", object_id)
             return info["object_key"]
         except KeyError:
             return None

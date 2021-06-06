@@ -21,14 +21,14 @@ class MudderyShop(BaseElement):
     element_name = _("Shop", "elements")
     model_name = "shops"
 
-    def after_data_loaded(self):
+    def at_element_setup(self, first_time):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderyShop, self).after_data_loaded()
+        super(MudderyShop, self).at_element_setup(first_time)
 
         # load shop goods
         self.load_goods()

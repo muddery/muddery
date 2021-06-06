@@ -43,14 +43,34 @@ class MudderyStaffCharacter(ELEMENT("PLAYER_CHARACTER")):
         """
         return False
 
-    def get_object_key(self):
+    def at_post_puppet(self):
         """
-        Get data's key.
+        Called just after puppeting has been completed and all
+        Player<->Object links have been established.
 
-        Args:
-            default: (string) default value if can not find the data key.
         """
-        if not self.object_key:
-            self.object_key = GAME_SETTINGS.get("default_player_character_key")
+        self.available_channels = self.get_available_channels()
 
-        return self.object_key
+        # Send puppet info to the client first.
+        output = {
+            "id": self.get_id(),
+            "name": self.get_name(),
+            "icon": getattr(self, "icon", None),
+            "allow_commands": True,
+        }
+
+        self.msg({"puppet": output})
+
+        # send character's data to player
+        message = {
+            "status": self.return_status(),
+            "equipments": self.return_equipments(),
+            "inventory": self.return_inventory(),
+            "skills": self.return_skills(),
+            "quests": self.quest_handler.return_quests(),
+            "revealed_map": self.get_revealed_map(),
+            "channels": self.available_channels
+        }
+        self.msg(message)
+
+        self.show_location()

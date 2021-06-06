@@ -18,4 +18,4 @@ class MudderyCommonNPC(ELEMENT("BASE_NPC")):
     """
     element_type = "COMMON_NPC"
     element_name = _("Common NPC", "elements")
-    model_name = "common_npcs"
+    model_name = ""

@@ -33,10 +33,6 @@ EQUIPMENTS = ObjectsMapper("equipments")
 
 CHARACTERS = ObjectsMapper("characters")
 
-BASE_NPCS = ObjectsMapper("base_npcs")
-
-COMMON_NPCS = ObjectsMapper("common_npcs")
-
 PLAYER_CHARACTERS = ObjectsMapper("player_characters")
 
 SHOPS = ObjectsMapper("shops")

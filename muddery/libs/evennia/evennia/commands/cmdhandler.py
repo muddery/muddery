@@ -639,12 +639,14 @@ def cmdhandler(
             # post-command hook
             yield cmd.at_post_cmd()
 
-            if cmd.save_for_next:
-                # store a reference to this command, possibly
-                # accessible by the next command.
-                caller.ndb.last_cmd = yield copy(cmd)
-            else:
-                caller.ndb.last_cmd = None
+            """
+           if cmd.save_for_next:
+               # store a reference to this command, possibly
+               # accessible by the next command.
+               caller.ndb.last_cmd = yield copy(cmd)
+           else:
+               caller.ndb.last_cmd = None
+           """
 
             # return result to the deferred
             returnValue(ret)

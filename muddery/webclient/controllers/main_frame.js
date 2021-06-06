@@ -2005,7 +2005,7 @@ MudderyScene.prototype.onObject = function(element) {
 MudderyScene.prototype.onNPC = function(element) {
     var index = $(element).data("index");
     var obj_id = this.scene["npcs"][index]["id"];
-    core.service.look(obj_id, "scene");
+    core.service.look_room_char(obj_id);
 }
 
 /*
@@ -2014,7 +2014,7 @@ MudderyScene.prototype.onNPC = function(element) {
 MudderyScene.prototype.onPlayer = function(element) {
     var index = $(element).data("index");
     var obj_id = this.scene["players"][index]["id"];
-    core.service.look(obj_id, "scene");
+    core.service.look_room_char(obj_id);
 }
 
 /*

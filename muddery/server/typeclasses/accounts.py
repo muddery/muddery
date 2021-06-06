@@ -22,10 +22,17 @@ several more options for customizing the Guest account system.
 
 """
 
+import traceback
 from django.conf import settings
 from evennia.utils import logger
 from evennia import DefaultAccount, DefaultGuest
 from evennia.utils.utils import make_iter
+from muddery.server.utils import search
+from muddery.server.database.gamedata.player_character import PlayerCharacter
+from muddery.server.database.gamedata.character_location import CharacterLocation
+from muddery.server.mappings.element_set import ELEMENT
+from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.utils.localized_strings_handler import _
 
 
 class MudderyAccount(DefaultAccount):
@@ -128,8 +135,7 @@ class MudderyAccount(DefaultAccount):
         """
         Get this player's all playable characters.
         """
-        char_all = [{"name": char.get_name(), "id": char.get_id()} for char in self.db._playable_characters]
-        return char_all
+        return PlayerCharacter.get_account_characters(self.id)
 
     def msg(self, text=None, from_obj=None, session=None, options=None, **kwargs):
         """
@@ -172,6 +178,94 @@ class MudderyAccount(DefaultAccount):
         sessions = make_iter(session) if session else self.sessions.all()
         for session in sessions:
             session.data_out(text=text, **kwargs)
+
+    def puppet_object(self, session, char_id):
+        """
+        Use the given session to control (puppet) the given object (usually
+        a Character type).
+
+        Args:
+            session (Session): session to use for puppeting
+            char_id (Int): the character's id
+
+        Raises:
+            RuntimeError: If puppeting is not possible, the
+                `exception.msg` will contain the reason.
+        """
+        # safety checks
+        if not char_id:
+            raise RuntimeError("Object not found")
+        if not session:
+            raise RuntimeError("Session not found")
+
+        current_obj = self.get_puppet(session)
+        if current_obj and current_obj.get_id == char_id:
+            # already puppeting this object
+            self.msg("You are already puppeting this object.")
+            return
+
+        # do the puppeting
+        if session.puppet:
+            # cleanly unpuppet eventual previous object puppeted by this session
+            self.unpuppet_object(session)
+        # if we get to this point the character is ready to puppet or it
+        # was left with a lingering account/session reference from an unclean
+        # server kill or similar
+
+        # Find the character to puppet.
+        try:
+            new_char = ELEMENT(settings.PLAYER_CHARACTER_ELEMENT_TYPE)()
+            new_char.set_db_id(char_id)
+
+            # do the connection
+            new_char.set_account_id(self.id)
+            new_char.set_session(session)
+
+            character_key = GAME_SETTINGS.get("default_player_character_key")
+            new_char.setup_element(character_key)
+        except:
+            traceback.print_exc()
+            session.msg({"alert": _("That is not a valid character choice.")})
+            return
+
+        # Set location
+        try:
+            location_key = CharacterLocation.load(char_id)
+            location = search.get_object_by_key(location_key)
+            new_char.set_location(location)
+        except KeyError:
+            pass
+
+        session.puid = char_id
+        session.puppet = new_char
+
+        # final hook
+        new_char.at_post_puppet()
+
+    def unpuppet_object(self, session):
+        """
+        Disengage control over an object.
+
+        Args:
+            session (Session or list): The session or a list of
+                sessions to disengage from their puppets.
+
+        Raises:
+            RuntimeError With message about error.
+
+        """
+        for session in make_iter(session):
+            obj = session.puppet
+            if obj:
+                # do the disconnect, but only if we are the last session to puppet
+                obj.at_pre_unpuppet()
+                obj.set_session(None)
+                # obj.at_post_unpuppet(self, session=session)
+
+            # Just to be sure we're always clear.
+            session.puppet = None
+            session.puid = None
+
 
 class Guest(DefaultGuest):
     """

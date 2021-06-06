@@ -2,6 +2,10 @@
 from muddery.server.database import gamedata_models as BaseModels
 
 
+class system_data(BaseModels.system_data):
+    pass
+
+
 # ------------------------------------------------------------
 #
 # Object's element key.
@@ -16,7 +20,7 @@ class object_keys(BaseModels.object_keys):
 # Game object's runtime attributes.
 #
 # ------------------------------------------------------------
-class object_status(BaseModels.object_status):
+class object_states(BaseModels.object_states):
     pass
 
 
@@ -28,6 +32,18 @@ class object_status(BaseModels.object_status):
 class player_character(BaseModels.player_character):
     """
     Character's data.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# player character's location
+#
+# ------------------------------------------------------------
+class character_location(BaseModels.character_location):
+    """
+    Character's location.
     """
     pass
 

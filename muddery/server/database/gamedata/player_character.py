@@ -14,66 +14,100 @@ class PlayerCharacter(object):
     """
     The storage of player character's basic data.
     """
-    def __init__(self, model_name):
-        storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-        self.storage = storage_class(model_name, "", "object_id")
+    # data storage
+    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
+    storage = storage_class("player_character", "account_id", "char_id")
 
-        all_data = self.storage.load_category_dict("")
-        self.nicknames = {item["nickname"]: key for key, item in all_data.items()}
+    nicknames = {item["nickname"]: key for account, data in storage.all().items() for key, item in data.items()}
 
-    def add(self, object_id, nickname=""):
+    @classmethod
+    def add(cls, account_id, char_id, nickname="", level=1):
         """
-        Store an object's key.
-        :param object_id:
+        Add a new player character.
+        :param char_id:
         :param nickname:
         :return:
         """
-        self.storage.add_dict("", object_id, {"nickname": nickname})
+        cls.storage.add(account_id, char_id, {
+            "nickname": nickname,
+            "level": level,
+        })
         if nickname:
-            self.nicknames[nickname] = object_id
+            cls.nicknames[nickname] = char_id
 
-    def update_nickname(self, object_id, nickname):
+    @classmethod
+    def set_nickname(cls, account_id, char_id, nickname):
         """
         Update a character's nickname.
-        :param object_id:
+        :param char_id:
         :param nickname:
         :return:
         """
-        current_info = self.storage.load_dict("", object_id)
-        self.storage.save_dict("", object_id, {"nickname": nickname})
+        current_data = cls.storage.load(account_id, char_id, None)
+        cls.storage.save(account_id, char_id, {"nickname": nickname})
 
-        if current_info["nickname"]:
-            del self.nicknames[current_info["nickname"]]
-        self.nicknames[nickname] = object_id
+        if current_data and current_data["nickname"]:
+            del cls.nicknames[current_data["nickname"]]
+        cls.nicknames[nickname] = char_id
 
-    def remove(self, object_id):
+    @classmethod
+    def remove_character(cls, account_id, char_id):
         """
         Remove an object.
-        :param object_id:
+        :param char_id:
         :return:
         """
-        current_info = self.storage.load_dict("", object_id)
-        self.storage.delete("", object_id)
+        current_info = cls.storage.load(account_id, char_id)
+        cls.storage.delete(account_id, char_id)
 
         if current_info["nickname"]:
-            del self.nicknames[current_info["nickname"]]
+            del cls.nicknames[current_info["nickname"]]
 
-    def get_nickname(self, object_id):
+    @classmethod
+    def get_account_characters(cls, account_id):
         """
-        Get a player character's nickname.
-        :param object_id:
+        Get all characters of an account.
+        :param account_id:
         :return:
         """
-        info = self.storage.load_dict("", object_id)
-        return info["nickname"]
+        data = cls.storage.load_category(account_id, {})
+        return data
 
-    def get_object_id(self, nickname):
+    @classmethod
+    def get_nickname(cls, account_id, char_id):
+        """
+        Get a player character's nickname.
+        :param char_id:
+        :return:
+        """
+        data = cls.storage.load(account_id, char_id)
+        return data["nickname"]
+
+    @classmethod
+    def get_char_id(cls, nickname):
         """
         Get an player character's id by its nickname.
         :param key:
         :return:
         """
-        return self.nicknames[nickname]
+        return cls.nicknames[nickname]
 
+    @classmethod
+    def set_level(cls, account_id, char_id, level):
+        """
+        Set a character's level data.
+        :param char_id:
+        :param nickname:
+        :return:
+        """
+        cls.storage.save(account_id, char_id, {"level": level})
 
-PLAYER_CHARACTER_DATA = PlayerCharacter("player_character")
+    @classmethod
+    def get_level(cls, account_id, char_id):
+        """
+        Get a player character's level.
+        :param char_id:
+        :return:
+        """
+        data = cls.storage.load(account_id, char_id)
+        return data["level"]

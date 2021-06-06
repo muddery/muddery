@@ -65,13 +65,10 @@ SECRET_KEY = {SECRET_KEY}
 ######################################################################
 
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "elements.player_character.PlayerCharacter"
+BASE_CHARACTER_TYPECLASS = "evennia.objects.objects.DefaultCharacter"
 
 # Typeclass for general characters, include NPCs, mobs and player characters.
 BASE_GENERAL_CHARACTER_TYPECLASS = "elements.character.Character"
-
-# Typeclass for player characters.
-BASE_PLAYER_CHARACTER_TYPECLASS = "elements.player_character.PlayerCharacter"
 
 # Path of custom elements.
 PATH_TYPECLASSES_CUSTOM = "elements"

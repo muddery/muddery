@@ -26,7 +26,7 @@ class QuestObjectives(object):
         :return:
         """
         character_quest = "%s:%s" % (character_id, quest)
-        return self.storage.load_category(character_quest)
+        return self.storage.load_category(character_quest, {})
 
     def save_progress(self, character_id, quest, objective_type, object_key, progress):
         """

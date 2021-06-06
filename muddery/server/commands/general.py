@@ -4,6 +4,7 @@ General Character commands usually availabe to all characters
 This is adapt from evennia/evennia/commands/default/general.py.
 The licence of Evennia can be found in evennia/LICENSE.txt.
 """
+import traceback
 
 from django.conf import settings
 from evennia.utils import logger
@@ -261,15 +262,12 @@ class CmdLookRoomObj(BaseCommand):
         "cmd": "look_room_obj",
         "args": <object's key>
     }
-
-    Tranvese an exit, go to the destination of the exit.
     """
     key = "look_room_obj"
     locks = "cmd:all()"
     help_cateogory = "General"
 
     def func(self):
-        "Move caller to the exit."
         caller = self.caller
 
         if not caller.is_alive():
@@ -277,12 +275,51 @@ class CmdLookRoomObj(BaseCommand):
             return
 
         if not self.args:
-            caller.msg({"alert": _("Should appoint an exit to go.")})
+            caller.msg({"alert": _("You should appoint an object.")})
             return
 
         try:
             room = self.caller.get_location()
             obj = room.get_object(self.args)
+        except Exception as e:
+            caller.msg({"alert": _("Can not find the object.")})
+            return
+
+        appearance = obj.get_appearance(caller)
+        caller.msg({"look_obj": appearance})
+
+
+#------------------------------------------------------------
+# look at a character in the room
+#------------------------------------------------------------
+class CmdLookRoomChar(BaseCommand):
+    """
+    look at a character in the room
+
+    Usage: {
+        "cmd": "look_room_char",
+        "args": <character's id>
+    }
+    """
+    key = "look_room_char"
+    locks = "cmd:all()"
+    help_cateogory = "General"
+
+    def func(self):
+        caller = self.caller
+
+        if not caller.is_alive():
+            caller.msg({"alert": _("You are died.")})
+            return
+
+        if not self.args:
+            caller.msg({"alert": _("You should appoint a character.")})
+            return
+
+        try:
+            char_id = int(self.args)
+            room = self.caller.get_location()
+            obj = room.get_character(char_id)
         except Exception as e:
             caller.msg({"alert": _("Can not find the object.")})
             return
@@ -358,8 +395,9 @@ class CmdTalk(BaseCommand):
             return
 
         try:
-            obj_id = int(self.args)
-            npc = get_object_by_id(obj_id)
+            npc_id = int(self.args)
+            room = self.caller.get_location()
+            npc = room.get_character(npc_id)
         except:
             # Can not find the NPC in the caller's location.
             caller.msg({"alert":_("Can not find the one to talk.")})
@@ -393,21 +431,23 @@ class CmdDialogue(BaseCommand):
     def func(self):
         "Continue a dialogue."
         caller = self.caller
+        args = self.args
 
-        if not self.args:
+        if not args:
             caller.msg({"alert":_("You should talk to someone.")})
             return
 
         # Get the dialogue.
-        if "dialogue" not in self.args:
+        if "dialogue" not in args:
             caller.msg({"alert": _("You should say something.")})
             return
-        dlg_key = self.args["dialogue"]
+        dlg_key = args["dialogue"]
 
         try:
             # get NPC
-            obj_id = int(self.args["npc"])
-            npc = get_object_by_id(obj_id)
+            npc_id = int(args["npc"])
+            room = caller.get_location()
+            npc = room.get_character(npc_id)
         except:
             npc = None
 
@@ -452,7 +492,7 @@ class CmdLoot(BaseCommand):
             # do loot
             obj.loot(caller)
         except Exception as e:
-            ostring = "Can not loot %s: %s" % (obj.get_object_key(), e)
+            ostring = "Can not loot %s: %s" % (obj.get_element_key(), e)
             logger.log_tracemsg(ostring)
             
         caller.show_location()
@@ -695,7 +735,9 @@ class CmdCastSkill(BaseCommand):
 
             # Get target
             try:
-                target = get_object_by_id(int(args["target"]))
+                target_id = int(args["target"])
+                room = caller.get_location()
+                target = room.get_character(target_id)
             except:
                 target = None
 
@@ -730,6 +772,8 @@ class CmdAttack(BaseCommand):
         "Handle command"
 
         caller = self.caller
+        args = self.args
+
         if not caller:
             return
 
@@ -737,20 +781,21 @@ class CmdAttack(BaseCommand):
             caller.msg({"alert":_("You are died.")})
             return
 
-        if not self.args:
+        if not args:
             caller.msg({"alert":_("You should select a target.")})
             return
 
         try:
-            target = get_object_by_id(int(self.args))
+            target_id = int(args)
+            room = caller.get_location()
+            target = room.get_character(target_id)
         except:
-            caller.msg({"alert":_("You should select a target.")})
+            caller.msg({"alert": _("You should select a target.")})
             return
 
         if not caller.location or caller.location.peaceful:
-            if target.has_account:
-                caller.msg({"alert":_("You can not attack in this place.")})
-                return
+            caller.msg({"alert": _("You can not attack in this place.")})
+            return
 
         if not target.is_alive():
             caller.msg({"alert": _("%s is died." % target.get_name())})
@@ -1049,7 +1094,9 @@ class CmdShopping(BaseCommand):
         shop_key = args["shop"]
 
         try:
-            npc = get_object_by_id(int(args["npc"]))
+            npc_id = int(args["npc"])
+            room = caller.get_location()
+            npc = room.get_character(npc_id)
         except:
             caller.msg({"alert": _("Can not find this NPC.")})
             return
@@ -1088,7 +1135,9 @@ class CmdBuy(BaseCommand):
             return
 
         try:
-            npc = get_object_by_id(int(args["npc"]))
+            npc_id = int(args["npc"])
+            room = self.caller.get_location()
+            npc = room.get_character(npc_id)
         except:
             caller.msg({"alert": _("Can not find this NPC.")})
             return
@@ -1100,6 +1149,7 @@ class CmdBuy(BaseCommand):
         try:
             npc.sell_goods(shop, int(goods), caller)
         except Exception as e:
+            traceback.print_exc()
             caller.msg({"alert": _("Can not buy this goods.")})
             logger.log_err("Can not buy %s %s %s: %s" % (args["npc"], shop, goods, e))
             return

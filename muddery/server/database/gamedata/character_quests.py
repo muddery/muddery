@@ -22,7 +22,7 @@ class CharacterQuests(object):
         :param character_id:
         :return:
         """
-        return self.storage.load_category_dict(character_id)
+        return self.storage.load_category(character_id, {})
 
     def get_quest(self, character_id, quest):
         """
@@ -31,7 +31,7 @@ class CharacterQuests(object):
         :param quest: (string) quest's key
         :return:
         """
-        return self.storage.load_dict(character_id, quest)
+        return self.storage.load(character_id, quest)
 
     def add(self, character_id, quest):
         """
@@ -40,7 +40,7 @@ class CharacterQuests(object):
         :param quest:
         :return:
         """
-        self.storage.add_dict(character_id, quest, {"finished": False})
+        self.storage.add(character_id, quest, {"finished": False})
 
     def set(self, character_id, quest, values):
         """
@@ -51,7 +51,7 @@ class CharacterQuests(object):
         :param values:
         :return:
         """
-        self.storage.save_dict(character_id, quest, values)
+        self.storage.save(character_id, quest, values)
 
     def remove_character(self, character_id):
         """

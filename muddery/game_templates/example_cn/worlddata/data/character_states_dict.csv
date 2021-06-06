@@ -1,0 +1,4 @@
+element_type,key,name,default,desc
+CHARACTER,hp,生命,max_hp,角色的生命值。
+CHARACTER,mp,法力,max_mp,角色的法力值。
+CHARACTER,exp,经验,0,角色的经验值。

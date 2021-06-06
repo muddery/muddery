@@ -23,6 +23,8 @@ from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.object_properties import ObjectProperties
 from muddery.server.database.gamedata.object_keys import OBJECT_KEYS
+from muddery.server.utils.object_states_handler import ObjectStatesHandler
+from muddery.server.database.gamedata.object_storage import MemoryObjectStorage
 
 
 class MudderyBaseObject(BaseElement, DefaultObject):
@@ -37,6 +39,10 @@ class MudderyBaseObject(BaseElement, DefaultObject):
     @lazy_property
     def event(self):
         return EventTrigger(self)
+
+    @lazy_property
+    def states(self):
+        return ObjectStatesHandler(self, MemoryObjectStorage)
 
     def get_id(self):
         """
@@ -89,19 +95,12 @@ class MudderyBaseObject(BaseElement, DefaultObject):
             self.object_key = OBJECT_KEYS.get_key(self.id)
             self.load_data()
         except Exception as e:
-            traceback.print_exc()
-            logger.log_errmsg("%s(%s) can not load data:%s" % (self.get_object_key(), self.get_id(), e))
+            logger.log_errmsg("ID %s can not load data: (%s)%s" % (self.get_id(), type(e), e))
             
         # This object's class may be changed after load_data(), so do not add
         # codes here. You can add codes in after_data_loaded() which is called
         # after load_data().
 
-    def after_creation(self):
-        """
-        Called once, after the object is created by Muddery.
-        """
-        pass
-    
     def at_post_unpuppet(self, player, session=None, **kwargs):
         """
         We stove away the character when the player goes ooc/logs off,
@@ -283,12 +282,7 @@ class MudderyBaseObject(BaseElement, DefaultObject):
 
         # Set values.
         for key, info in self.get_properties_info().items():
-            if not info["mutable"]:
-                self.const_data_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
-            else:
-                # Set default mutable properties to prop.
-                if not self.states.has(key):
-                    self.states.save(key, self.get_custom_data_value(info["default"]))
+            self.const_data_handler.add(key, values.get(key, ast.literal_eval(info["default"])))
 
     def get_custom_data_value(self, data):
         """

@@ -39,8 +39,6 @@ class MudderyQuest(BaseElement):
         """
         Load a character's quest's data from db.
         """
-        super(MudderyQuest, self).after_data_loaded()
-
         self.character_id = character_id
         self.objectives = {}
 
@@ -152,7 +150,7 @@ class MudderyQuest(BaseElement):
 
                     # Get the name of the objective character.
                     object_key = item["object"]
-                    model_name = ELEMENT("OBJECT").model_name
+                    model_name = ELEMENT("CHARACTER").model_name
 
                     # Get record.
                     try:

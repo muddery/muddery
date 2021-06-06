@@ -23,6 +23,7 @@ from evennia.utils import logger
 from muddery.server.utils import defines
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
+from muddery.server.utils import utils
 
 
 class CStatus(Enum):
@@ -39,6 +40,16 @@ class CStatus(Enum):
 class BaseCombat(object):
     """
     This implements the combat handler.
+
+    properties:
+        characters: {
+            "char_id": {
+                "char": character's object,
+                "team": team's id,
+                "status": character's combat status,
+            }
+        }
+
     """
     # set initial values
     def __init__(self):
@@ -92,7 +103,7 @@ class BaseCombat(object):
         # Add teams.
         for team in teams:
             for character in teams[team]:
-                self.characters[character.id] = {
+                self.characters[character.get_id()] = {
                     "char": character,
                     "team": team,
                     "status":  CStatus.JOINED,
@@ -105,7 +116,7 @@ class BaseCombat(object):
             # add the combat handler
             character.join_combat(combat_id)
 
-            if character.has_account:
+            if utils.is_player(character):
                 self.show_combat(character)
 
     def start(self):
@@ -144,12 +155,22 @@ class BaseCombat(object):
         # send messages in order
         character.msg({"combat_info": self.get_appearance()})
 
-    def prepare_skill(self, skill_key, caller, target):
+    def prepare_skill(self, skill_key, caller, target_id):
         """
         Cast a skill.
+
+        :arg
+            skill_key: (string) skill's key
+            caller: (obj) the skill's caller's object
+            target_id: (int) target's id
         """
         if self.finished:
             return
+
+        # get target's object
+        target = None
+        if target_id and target_id in self.characters:
+            target = self.characters[target_id]["char"]
 
         if caller:
             caller.cast_skill(skill_key, target)

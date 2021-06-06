@@ -197,4 +197,4 @@ class FuncFightTarget(StatementFunction):
         if self.args:
             desc = self.args[0]
 
-        return self.caller.attack_temp_target(self.obj.get_object_key(), self.obj.get_level(), desc)
+        return self.caller.attack_temp_target(self.obj.get_element_key(), self.obj.get_level(), desc)

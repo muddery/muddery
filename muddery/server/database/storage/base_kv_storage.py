@@ -7,10 +7,6 @@ class BaseKeyValueStorage(object):
     """
     The storage of key-values.
     """
-    def __init__(self, model_name):
-        # db model
-        self.model_name = model_name
-
     def add(self, category, key, value):
         """
         Add a new attribute. If the key already exists, raise an exception.
@@ -19,17 +15,6 @@ class BaseKeyValueStorage(object):
             category: (string, int) the category of data.
             key: (string) attribute's key.
             value: (string) attribute's value.
-        """
-        pass
-
-    def add_dict(self, category, key, value_dict):
-        """
-        Add a new dict to the key. If the key already exists, raise an exception.
-
-        Args:
-            category: (string, int) the category of data.
-            key: (string) attribute's key.
-            value_dict: (dict) attribute's value.
         """
         pass
 
@@ -44,17 +29,6 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def save_dict(self, category, key, value_dict):
-        """
-        Save a dict to the key.
-
-        Args:
-            category: (string, int) the category of data.
-            key: (string) attribute's key.
-            value_dict: (dict) attribute's value.
-        """
-        pass
-
     def has(self, category, key):
         """
         Check if the attribute exists.
@@ -62,6 +36,13 @@ class BaseKeyValueStorage(object):
         Args:
             category: (string, int) the category of data.
             key: (string) attribute's key.
+        """
+        pass
+
+    def all(self):
+        """
+        Get all data.
+        :return:
         """
         pass
 
@@ -75,29 +56,14 @@ class BaseKeyValueStorage(object):
             default: (any or none) default value.
 
         Raises:
-            AttributeError: If `raise_exception` is set and no matching Attribute
+            KeyError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
         """
         pass
 
-    def load_dict(self, category, key, **default):
+    def load_category(self, category):
         """
-        Get a dict of values of a key.
-
-        Args:
-            category: (string) the category of data.
-            key: (string) data's key.
-            default: (dict or none) default value.
-
-        Raises:
-            AttributeError: If `raise_exception` is set and no matching Attribute
-                was found matching `key` and no default value set.
-        """
-        pass
-
-    def load_category_dict(self, category):
-        """
-        Get all dicts of a category.
+        Get all a category's data.
 
         Args:
             category: (string) category's name.

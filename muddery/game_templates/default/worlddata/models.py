@@ -212,19 +212,22 @@ class object_properties(BaseModels.object_properties):
 
 # ------------------------------------------------------------
 #
+# Character's mutable states.
+# These states can change in the game.
+#
+# ------------------------------------------------------------
+class character_states_dict(BaseModels.character_states_dict):
+    "Character's mutable states."
+    pass
+
+
+# ------------------------------------------------------------
+#
 # store all npcs
 #
 # ------------------------------------------------------------
 class world_npcs(BaseModels.world_npcs):
     "Store all unique objects."
-    pass
-
-
-class base_npcs(BaseModels.base_npcs):
-    pass
-
-
-class common_npcs(BaseModels.common_npcs):
     pass
 
 

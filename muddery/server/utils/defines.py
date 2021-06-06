@@ -24,14 +24,6 @@ OBJECTIVE_ARRIVE = "OBJECTIVE_ARRIVE"       # arrive a room, object: room_id
 OBJECTIVE_OBJECT = "OBJECTIVE_OBJECT"       # get some objects, object: object_id
 OBJECTIVE_KILL = "OBJECTIVE_KILL"           # kill some characters, object: character_id
 
-# event trigger types
-EVENT_TRIGGER_NONE = 0
-EVENT_TRIGGER_ARRIVE = "EVENT_TRIGGER_ARRIVE"       # at attriving a room. object: room_id
-EVENT_TRIGGER_KILL = "EVENT_TRIGGER_KILL"           # caller kills one. object: dead_one_id
-EVENT_TRIGGER_DIE = "EVENT_TRIGGER_DIE"             # caller die. object: killer_id
-EVENT_TRIGGER_TRAVERSE = "EVENT_TRIGGER_TRAVERSE"   # before traverse an exit. object: exit_id
-EVENT_TRIGGER_DIALOGUE = "EVENT_TRIGGER_DIALOGUE"   # called when a character finishes a dialogue sentence.
-
 # event types
 EVENT_NONE = ""
 EVENT_ATTACK = "EVENT_ATTACK"               # event to begin a combat
@@ -42,6 +34,15 @@ COMBAT_WIN = "COMBAT_WIN"                   # win the combat
 COMBAT_LOSE = "COMBAT_LOSE"                 # lose the combat
 COMBAT_DRAW = "COMBAT_DRAW"                 # no one wins the combat
 COMBAT_ESCAPED = "COMBAT_ESCAPED"             # escaped from the combat
+
+
+class EventType(Enum):
+    # event trigger types
+    EVENT_TRIGGER_ARRIVE = "EVENT_TRIGGER_ARRIVE"       # at attriving a room. object: room_id
+    EVENT_TRIGGER_KILL = "EVENT_TRIGGER_KILL"           # caller kills one. object: dead_one_id
+    EVENT_TRIGGER_DIE = "EVENT_TRIGGER_DIE"             # caller die. object: killer_id
+    EVENT_TRIGGER_TRAVERSE = "EVENT_TRIGGER_TRAVERSE"   # before traverse an exit. object: exit_id
+    EVENT_TRIGGER_DIALOGUE = "EVENT_TRIGGER_DIALOGUE"   # called when a character finishes a dialogue sentence.
 
 
 class ConversationType(Enum):

@@ -33,7 +33,7 @@ class QuestHandler(object):
         Load character's quests.
         :return:
         """
-        self.quests = CHARACTER_QUESTS_DATA.get_character(self.owner.id)
+        self.quests = CHARACTER_QUESTS_DATA.get_character(self.owner.get_db_id())
         for key in self.quests:
             if not self.quests[key]["finished"]:
                 self.create_quest(key)
@@ -48,13 +48,13 @@ class QuestHandler(object):
         Returns:
             None
         """
-        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.id)
+        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.get_db_id())
         if quest_key in all_quests:
             return
 
         # Create quest object.
         quest = self.create_quest(quest_key)
-        CHARACTER_QUESTS_DATA.add(self.owner.id, quest_key)
+        CHARACTER_QUESTS_DATA.add(self.owner.get_db_id(), quest_key)
 
         self.owner.msg({"msg": _("Accepted quest {C%s{n.") % quest.get_name()})
         self.show_quests()
@@ -67,7 +67,7 @@ class QuestHandler(object):
         It will be called when quests' owner will be deleted.
         """
         self.quests = {}
-        CHARACTER_QUESTS_DATA.remove_character(self.owner.id)
+        CHARACTER_QUESTS_DATA.remove_character(self.owner.get_db_id())
 
     def give_up(self, quest_key):
         """
@@ -83,11 +83,11 @@ class QuestHandler(object):
             logger.log_tracemsg("Can not give up quests.")
             raise MudderyError(_("Can not give up this quest."))
 
-        quest = CHARACTER_QUESTS_DATA.get_quest(self.owner.id, quest_key)
+        quest = CHARACTER_QUESTS_DATA.get_quest(self.owner.get_db_id(), quest_key)
         if not quest or quest["finished"]:
             raise MudderyError("Can not find this quest.")
 
-        CHARACTER_QUESTS_DATA.remove_quest(self.owner.id, quest_key)
+        CHARACTER_QUESTS_DATA.remove_quest(self.owner.get_db_id(), quest_key)
         if quest_key in self.quests:
             del self.quests[quest_key]
 
@@ -103,7 +103,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        quest_info = CHARACTER_QUESTS_DATA.get_quest(self.owner.id, quest_key)
+        quest_info = CHARACTER_QUESTS_DATA.get_quest(self.owner.get_db_id(), quest_key)
         if not quest_info or quest_info["finished"]:
             raise MudderyError("Can not find this quest.")
 
@@ -113,7 +113,7 @@ class QuestHandler(object):
 
         # Call turn in function in the quest.
         quest.turn_in(self.owner)
-        CHARACTER_QUESTS_DATA.set(self.owner.id, quest_key, {"finished": True})
+        CHARACTER_QUESTS_DATA.set(self.owner.get_db_id(), quest_key, {"finished": True})
 
         # Get quest's name.
         name = quest.get_name()
@@ -163,7 +163,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.id)
+        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.get_db_id())
         if quest_key not in all_quests:
             return False
 
@@ -179,7 +179,7 @@ class QuestHandler(object):
         Returns:
             None
         """
-        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.id)
+        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.get_db_id())
         if quest_key not in all_quests:
             return False
 
@@ -263,7 +263,7 @@ class QuestHandler(object):
         """
         quests_info = []
 
-        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.id)
+        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.get_db_id())
         for quest_key, info in all_quests.items():
             if info["finished"]:
                 continue
@@ -287,7 +287,7 @@ class QuestHandler(object):
             None
         """
         status_changed = False
-        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.id)
+        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.get_db_id())
         for quest_key, info in all_quests.items():
             if info["finished"]:
                 continue
@@ -309,8 +309,8 @@ class QuestHandler(object):
         :return:
         """
         quest = ELEMENT("QUEST")()
-        quest.set_element_key(quest_key)
-        quest.set_character(self.owner.id)
+        quest.setup_element(quest_key)
+        quest.set_character(self.owner.get_db_id())
         self.quests[quest_key] = {
             "obj": quest
         }
@@ -336,9 +336,9 @@ class QuestHandler(object):
         :param quest_key:
         :return:
         """
-        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.id)
+        all_quests = CHARACTER_QUESTS_DATA.get_character(self.owner.get_db_id())
         if all_quests[quest_key]["finished"]:
-            logger.log_err("%s's quest %s is finished." % (self.owner.id, quest_key))
+            logger.log_err("%s's quest %s is finished." % (self.owner.get_db_id(), quest_key))
             return
 
         quest = self.get_quest(quest_key)

@@ -303,13 +303,10 @@ BASE_GUEST_TYPECLASS = "muddery.server.typeclasses.accounts.Guest"
 BASE_OBJECT_TYPECLASS = "muddery.server.elements.object.MudderyBaseObject"
 
 # Typeclass for character objects linked to a player (fallback)
-BASE_CHARACTER_TYPECLASS = "muddery.server.elements.player_character.MudderyPlayerCharacter"
+BASE_CHARACTER_TYPECLASS = "evennia.objects.objects.DefaultCharacter"
 
 # Typeclass for general characters, include NPCs, mobs and player characters.
 BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.server.elements.character.MudderyCharacter"
-
-# Typeclass for player characters.
-BASE_PLAYER_CHARACTER_TYPECLASS = "muddery.server.elements.player_character.MudderyPlayerCharacter"
 
 # Typeclass for rooms (fallback)
 BASE_ROOM_TYPECLASS = "muddery.server.elements.room.MudderyRoom"
@@ -329,6 +326,9 @@ CHARACTER_ELEMENT_TYPE = "CHARACTER"
 
 # Element type for player characters.
 PLAYER_CHARACTER_ELEMENT_TYPE = "PLAYER_CHARACTER"
+
+# Element type for player characters.
+STAFF_CHARACTER_ELEMENT_TYPE = "STAFF_CHARACTER"
 
 # Element type for rooms.
 ROOM_ELEMENT_TYPE = "ROOM"
@@ -490,4 +490,3 @@ AUTO_COMBAT_TIMEOUT = 60
 # AI modules
 ###################################
 AI_CHOOSE_SKILL = "muddery.server.ai.choose_skill.ChooseSkill"
-

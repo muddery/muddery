@@ -14,13 +14,6 @@ room_gate_gate,游乐园大门,ROOM,从喷泉旁绕过，远远地就能看到�
 room_village_gate,度假村大门,ROOM,前往度假村的道路上散落着不少杂物，还有一些衣服和鞋子。度假村的大门被撞到在地上，离大门不远处拦起了一道路障，有不少机器人在看守。从度假村方向远远传来了一些吵闹和哭喊声，哪里发生了什么事？
 room_village_squar,小树林,ROOM,躲在小树林中向度假村望去，可以看到广场上有一群人被机器人看押着。看来有不少游客被关押到这里。
 room_colorfulworld_to_piratebay,道路,ROOM,这条路连接着海盗湾和缤纷天地。,,,,
-npc_wu,保安,WORLD_NPC,"这个人身材高大，但身上受了伤，活动有些不灵活。"
-npc_stranger,陌生人,WORLD_NPC,"这个人身材高大，体格强健，双手紧握着拳头，眼睛紧紧地盯着你，时刻会向你扑过来。"
-npc_doll,人偶,WORLD_NPC,"这个人偶斜靠在墙上，一双大眼睛好像正在盯着你看。你越瞧它越不爽，真想打它一顿！"
 area_intro,起始界面,AREA,
 area_hole,未知区域,AREA,
 area_park,公园,AREA,
-player,玩家,PLAYER_CHARACTER,这是玩家。
-staff,管理员,STAFF_CHARACTER,这是管理员。
-robot_mob_A,机器人A,COMMON_NPC,这是个A型机器人。
-robot_mob_B,机器人B,COMMON_NPC,这是个B型机器人。

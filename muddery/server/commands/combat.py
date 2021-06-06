@@ -130,17 +130,16 @@ class CmdCastCombatSkill(BaseCommand):
             if not "skill" in args:
                 caller.msg({"alert": _("You should select a skill to cast.")})
                 return
+
             skill_key = args["skill"]
 
             # Get target
-            try:
-                target = get_object_by_id(int(args["target"]))
-            except:
-                target = None
+            if "target" in args:
+                target_id = int(args["target"])
 
         try:
             # cast this skill.
-            caller.cast_combat_skill(skill_key, target)
+            caller.cast_combat_skill(skill_key, target_id)
         except Exception as e:
             caller.msg({"alert": _("Can not cast this skill.")})
             logger.log_tracemsg("Can not cast skill %s: %s" % (skill_key, e))

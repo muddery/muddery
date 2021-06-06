@@ -8,8 +8,6 @@ which is a non-db version of Attributes.
 
 """
 
-from muddery.server.database.gamedata.object_storage import ObjectStorage
-
 # -------------------------------------------------------------
 #
 #   Attributes
@@ -24,11 +22,10 @@ class ObjectStatesHandler(object):
     """
     Handler for adding Attributes to the object.
     """
-    storage = ObjectStorage("object_status", "obj_id", "key", "value")
-
-    def __init__(self, obj):
+    def __init__(self, obj_id, storage):
         """Initialize handler."""
-        self.obj_id = obj.id
+        self.obj_id = obj_id
+        self.storage = storage
 
     def has(self, key):
         """
@@ -54,7 +51,7 @@ class ObjectStatesHandler(object):
             result (any): The value matches the key.
 
         Raises:
-            AttributeError: If `raise_exception` is set and no matching Attribute
+            KeyError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
 
         """
@@ -85,7 +82,7 @@ class ObjectStatesHandler(object):
             key (str ): An Attribute key to remove keys.
 
         Raises:
-            AttributeError: If `raise_exception` is set and no matching Attribute
+            KeyError: If `raise_exception` is set and no matching Attribute
                 was found matching `key`.
 
         Notes:

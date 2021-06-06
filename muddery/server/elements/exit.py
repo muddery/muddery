@@ -6,8 +6,9 @@ set and has a single command defined on itself with the same name as its key,
 for allowing Characters to traverse the exit to its destination.
 
 """
-
+import traceback
 import weakref
+from evennia.utils import logger
 from muddery.server.utils import defines
 from muddery.server.utils import search
 from muddery.server.utils.localized_strings_handler import _
@@ -23,6 +24,14 @@ class MudderyExit(BaseElement):
     element_type = "EXIT"
     element_name = _("Exit", "elements")
     model_name = "world_exits"
+
+    def __init__(self):
+        """
+        Initial the object.
+        """
+        super(MudderyExit, self).__init__()
+
+        self.destination_obj = None
 
     def is_visible(self, caller):
         """
@@ -50,21 +59,12 @@ class MudderyExit(BaseElement):
         if not self.destination_obj:
             self.destination_obj = weakref.ref(search.get_object_by_key(self.const.destination))
 
-        if not character.move_to(self.destination_obj()):
+        try:
+            character.set_location(self.destination_obj())
+        except Exception as e:
+            traceback.print_exc()
+            logger.log_err("%s cannot set location: (%s)%s." % (character.get_id(), type(e), e))
             character.msg({"msg": _("You can not go there.")})
-
-    def after_data_loaded(self):
-        """
-        Load exit data.
-
-        Returns:
-            None
-        """
-        super(MudderyExit, self).after_data_loaded()
-
-        # set exit's destination
-        # The destination room may not be created at the time when this exit is created, so get the object later.
-        self.destination_obj = None
 
     def can_traverse(self, character):
         """

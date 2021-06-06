@@ -18,7 +18,7 @@ from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
 from muddery.server.mappings.element_set import ELEMENT_SET, ELEMENT
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
-from muddery.server.utils import defines
+from muddery.server.utils.defines import EventType
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
 from worlddata import models
@@ -204,7 +204,7 @@ def query_dialogue_event_triggers():
     """
     Query all event triggers of dialogues.
     """
-    return [defines.EVENT_TRIGGER_DIALOGUE]
+    return [EventType.EVENT_TRIGGER_DIALOGUE]
 
 
 def query_object_events(object_key):

@@ -22,7 +22,7 @@ class CharacterInventory(object):
         :param character_id:
         :return:
         """
-        return self.storage.load_category_dict(character_id)
+        return self.storage.load_category(character_id, {})
 
     def get_object(self, character_id, position):
         """
@@ -31,7 +31,7 @@ class CharacterInventory(object):
         :param position: (int) position in the inventory
         :return:
         """
-        return self.storage.load_dict(character_id, position)
+        return self.storage.load(character_id, position)
 
     def add(self, character_id, position, object_key, number, level):
         """
@@ -40,7 +40,7 @@ class CharacterInventory(object):
         :param object_key:
         :return:
         """
-        self.storage.add_dict(character_id, position, {
+        self.storage.add(character_id, position, {
             "object_key": object_key,
             "number": number,
             "level": level,
@@ -55,7 +55,7 @@ class CharacterInventory(object):
         :param values:
         :return:
         """
-        self.storage.save_dict(character_id, position, {
+        self.storage.save(character_id, position, {
             "object_key": object_key,
             "number": number,
             "level": level,
@@ -70,7 +70,7 @@ class CharacterInventory(object):
         :param values:
         :return:
         """
-        self.storage.save_dict(character_id, position, values)
+        self.storage.save(character_id, position, values)
 
     def remove_character(self, character_id):
         """

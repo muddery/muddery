@@ -1,2 +1,2 @@
 shop,goods,number,level,price,unit,condition
-shop_fruits,food_apple,2,0,5,obj_money,
+shop_fruits,food_apple,2,,5,obj_money,

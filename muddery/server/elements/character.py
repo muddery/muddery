@@ -8,57 +8,106 @@ creation commands.
 
 """
 
-import time, datetime, traceback
+import time, datetime, traceback, ast
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from evennia.objects.objects import DefaultCharacter
-from evennia import create_script
 from evennia.utils import logger
 from evennia.utils.utils import lazy_property, class_from_module
+from muddery.server.elements.base_element import BaseElement
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.loot_list import CharacterLootList
 from muddery.server.database.worlddata.default_skills import DefaultSkills
+from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
+from muddery.server.database.gamedata.object_storage import DBObjectStorage
 from muddery.server.utils.builder import build_object
 from muddery.server.utils.loot_handler import LootHandler
-from muddery.server.utils import defines, search
+from muddery.server.utils import search
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.utils.search import get_object_by_key
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.utils.builder import delete_object
-from muddery.server.utils.defines import CombatType
+from muddery.server.utils.defines import CombatType, EventType
+from muddery.server.utils.object_states_handler import ObjectStatesHandler
+from muddery.server.database.gamedata.object_storage import MemoryObjectStorage
 
 
-class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
+CHARACTER_LAST_ID = 0
+
+
+class MudderyCharacter(BaseElement):
     """
-    The Character defaults to implementing some of its hook methods with the
-    following standard functionality:
-
-    at_basetype_setup - always assigns the DefaultCmdSet to this object type
-                    (important!)sets locks so character cannot be picked up
-                    and its commands only be called by itself, not anyone else.
-                    (to change things, use at_object_creation() instead)
-    at_after_move - launches the "look" command
-    at_post_puppet(player) -  when Player disconnects from the Character, we
-                    store the current location, so the "unconnected" character
-                    object does not need to stay on grid but can be given a
-                    None-location while offline.
-    at_pre_puppet - just before Player re-connects, retrieves the character's
-                    old location and puts it back on the grid with a "charname
-                    has connected" message echoed to the room
+    Characters can move in rooms.
     """
     element_type = "CHARACTER"
     element_name = _("Character", "elements")
     model_name = "characters"
 
+    last_id = 0
+
     skill_scheduler_id = "skill"
     reborn_scheduler_id = "reborn"
+
+    @lazy_property
+    def states(self):
+        return ObjectStatesHandler(self.get_id(), MemoryObjectStorage)
+
+    @staticmethod
+    def generate_id():
+        """
+        Generate an id.
+        :return:
+        """
+        global CHARACTER_LAST_ID
+        CHARACTER_LAST_ID += 1
+        return CHARACTER_LAST_ID
+
+    def __init__(self):
+        """
+        Initial the object.
+        """
+        super(MudderyCharacter, self).__init__()
+
+        self.set_id(self.generate_id())
+
+        self.location = None
+        self.scheduler = None
+
+        # character's skills
+        # self.skills = {
+        #    skill's key: {
+        #       "obj": skill's object,
+        #       "cd_finish": skill's cd time,
+        #    }
+        # }
+        self.skills = {}
+
+    def __del__(self):
+        """
+        Called when this object is deleted from the memory.
+        :return:
+        """
+        # stop auto casting
+        self.stop_auto_combat_skill()
 
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, CharacterLootList.get(self.get_object_key()))
+        return LootHandler(self, CharacterLootList.get(self.get_element_key()))
+
+    def set_id(self, char_id):
+        """
+        Set the character's id.
+        """
+        self.id = char_id
+
+    def get_id(self):
+        """
+        Get the character's id.
+        :return:
+        """
+        return self.id
 
     def get_scheduler(self):
         # get the apscheduler
@@ -67,55 +116,20 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
             self.scheduler.start()
         return self.scheduler
 
-    def at_object_creation(self):
+    def at_element_setup(self, first_time):
         """
-        Called once, when this object is first created. This is the
-        normal hook to overload for most object types.
-            
+        Called when the object is loaded and initialized.
+
         """
-        super(MudderyCharacter, self).at_object_creation()
+        super(MudderyCharacter, self).at_element_setup(first_time)
 
-        # skill's gcd
-        self.skill_gcd = GAME_SETTINGS.get("global_cd")
-        self.auto_cast_skill_cd = GAME_SETTINGS.get("auto_cast_skill_cd")
-        self.gcd_finish_time = 0
-        
-        self.target = None
-        self.reborn_time = 0
-        
-        # A temporary character will be deleted after the combat finished.
-        self.is_temp = False
-
-    def at_object_delete(self):
-        """
-        Called just before the database object is permanently
-        delete()d from the database. If this method returns False,
-        deletion is aborted.
-
-        All skills, contents will be removed too.
-        """
-        # stop auto casting
-        self.stop_auto_combat_skill()
-
-        result = super(MudderyCharacter, self).at_object_delete()
-        if not result:
-            return result
-        return True
-
-    def after_data_loaded(self):
-        """
-        Init the character.
-        """
-        super(MudderyCharacter, self).after_data_loaded()
-
-        # get level
-        level = self.states.load("level")
-        if not level:
-            self.states.save("level", 1)
+        self.set_name(self.const.name)
+        self.set_desc(self.const.desc)
+        self.set_icon(self.const.icon)
 
         # friendly
         self.friendly = self.const.friendly if self.const.friendly else 0
-        
+
         # skill's ai
         ai_choose_skill_class = class_from_module(settings.AI_CHOOSE_SKILL)
         self.ai_choose_skill = ai_choose_skill_class()
@@ -127,51 +141,160 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         time_now = time.time()
         self.gcd_finish_time = time_now + self.skill_gcd
 
-        self.scheduler = None
-
         # clear target
         self.target = None
 
         # set reborn time
         self.reborn_time = self.const.reborn_time if self.const.reborn_time else 0
 
-        # A temporary character will be deleted after the combat finished.
-        self.is_temp = False
+        self.combat_id = None
 
         # load default skills
         self.load_skills()
 
-        self.combat_id = None
+    def after_element_setup(self, first_time):
+        """
+        Called after the element is setting up.
+
+        :arg
+            first_time: (bool) the first time to setup the element.
+        """
+        super(MudderyCharacter, self).after_element_setup(first_time)
+
+        self.refresh_states(not first_time)
+
+    def refresh_states(self, keep_states):
+        """
+        Refresh character's states.
+
+        Args:
+            keep_states (boolean): states values keep last values.
+        """
+        # set states
+        records = CharacterStatesDict.all()
+        for record in records:
+            if keep_states and self.states.has(record.key):
+                # Do not change existent states.
+                continue
+
+            # set new states
+            if self.const_data_handler.has(record.default):
+                # the value of another const
+                value = self.const_data_handler.get(record.default)
+            else:
+                try:
+                    value = ast.literal_eval(record.default)
+                except (SyntaxError, ValueError) as e:
+                    # treat as a raw string
+                    value = record.default
+
+            # set the value.
+            self.states.save(record.key, value)
+
+    def set_level(self, level):
+        """
+        Set element's level.
+        :param level:
+        :return:
+        """
+        self.level = level
+        self.load_custom_level_data(level)
+
+        self.refresh_states(True)
+
+    def set_name(self, name):
+        """
+        Set object's name.
+
+        Args:
+        name: (string) Name of the object.
+        """
+        self.name = name
+
+    def get_name(self):
+        """
+        Get player character's name.
+        """
+        name = self.name
+        if not self.is_alive():
+            name += _(" [DEAD]")
+
+        return name
+
+    def set_desc(self, desc):
+        """
+        Set object's description.
+
+        Args:
+        desc: (string) Description.
+        """
+        self.desc = desc
+
+    def get_desc(self):
+        """
+        Get the element's description.
+        :return:
+        """
+        return self.desc
+
+    def set_icon(self, icon_key):
+        """
+        Set object's icon.
+        Args:
+            icon_key: (String)icon's resource key.
+
+        Returns:
+            None
+        """
+        self.icon = icon_key
+
+    def get_icon(self):
+        """
+        Get object's icon.
+        :return:
+        """
+        return self.icon
+
+    def is_visible(self, caller):
+        """
+        If this object is visible to the caller.
+
+        Return:
+            boolean: visible
+        """
+        return True
+
+    def get_appearance(self, caller):
+        """
+        This is a convenient hook for a 'look'
+        command to call.
+        """
+        info = {
+            "id": self.get_id(),
+            "name": self.get_name(),
+            "desc": self.get_desc(),
+            "icon": self.get_icon(),
+            "key": self.get_element_key(),
+            "cmds": self.get_available_commands(caller),
+        }
+        return info
+
+    def get_available_commands(self, caller):
+        """
+        This returns a list of available commands.
+        "args" must be a string without ' and ", usually it is self.id.
+        """
+        return []
 
     @classmethod
     def get_event_trigger_types(cls):
         """
         Get an object's available event triggers.
         """
-        return [defines.EVENT_TRIGGER_KILL,
-                defines.EVENT_TRIGGER_DIE]
-
-    def close_event(self, event_key):
-        """
-        If an event is closed, it will never be triggered.
-
-        Args:
-            event_key: (string) event's key
-        """
-        # set closed events
-        closed_events = self.states.load("closed_events", set())
-        closed_events.add(event_key)
-        self.states.save("closed_events", closed_events)
-
-    def is_event_closed(self, event_key):
-        """
-        Return True If this event is closed.
-
-        Args:
-            event_key: (string) event's key
-        """
-        closed_events = self.states.load("closed_events", set())
-        return event_key in closed_events
+        return [
+            EventType.EVENT_TRIGGER_KILL,
+            EventType.EVENT_TRIGGER_DIE
+        ]
 
     def get_combat_status(self):
         """
@@ -186,13 +309,13 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         self.skills = {}
 
         # default skills
-        default_skills = DefaultSkills.get(self.get_object_key())
+        default_skills = DefaultSkills.get(self.get_element_key())
         for item in default_skills:
             key = item.skill
             try:
                 # Create skill object.
                 skill_obj = ELEMENT("SKILL")()
-                skill_obj.set_element_key(key, item.level)
+                skill_obj.setup_element(key, item.level)
             except Exception as e:
                 logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e), e))
                 continue
@@ -203,17 +326,19 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
                 "cd_finish": 0,
             }
 
-    def at_after_move(self, source_location, **kwargs):
+    def set_location(self, location):
         """
-        Called after move has completed, regardless of quiet mode or
-        not.  Allows changes to the object due to the location it is
-        now in.
-
-        Args:
-            source_location : (Object) Where we came from. This may be `None`.
-
+        Set the character's location(room).
+        :param location: a room
+        :return:
         """
-        pass
+        if self.location:
+            self.location.at_character_leave(self)
+
+        self.location = location
+
+        if self.location:
+            self.location.at_character_arrive(self)
 
     def get_location(self):
         """
@@ -221,6 +346,14 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         :return:
         """
         return self.location
+
+    def msg(self, content):
+        """
+        Send a message to the character's player if it has.
+        :param content:
+        :return:
+        """
+        pass
 
     ########################################
     #
@@ -316,13 +449,13 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
 
         return
 
-    def cast_combat_skill(self, skill_key, target):
+    def cast_combat_skill(self, skill_key, target_id):
         """
         Cast a skill in combat.
         """
         combat = self.get_combat()
         if combat:
-            combat.prepare_skill(skill_key, self, target)
+            combat.prepare_skill(skill_key, self, target_id)
         else:
             logger.log_err("Character %s is not in combat." % self.id)
 
@@ -350,14 +483,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         scheduler = self.get_scheduler()
         return scheduler.get_job(self.skill_scheduler_id) is not None
-
-    def cast_passive_skills(self):
-        """
-        Cast all passive skills.
-        """
-        for skill in self.skills.values():
-            if skill["obj"].is_passive():
-                skill["obj"].cast(self, self)
                 
     def start_auto_combat_skill(self):
         """
@@ -454,18 +579,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
 
         return True
 
-    def attack_current_target(self, desc=""):
-        """
-        Attack current target.
-
-        Args:
-            desc: (string) string to describe this attack
-
-        Returns:
-            None
-        """
-        self.attack_target(self.target, desc)
-
     def attack_target_by_id(self, target_id, desc=""):
         """
         Attack a target by id.
@@ -480,19 +593,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         target = search.get_object_by_id(target_id)
         self.attack_target(target, desc)
 
-    def attack_temp_current_target(self, desc=""):
-        """
-        Attack current target's temporary clone object.
-
-        Args:
-            desc: (string) string to describe this attack
-
-        Returns:
-            None
-        """
-        self.attack_temp_target(self.target.get_object_key(), self.target.get_level(), desc)
-
-    def attack_temp_target(self, target_key, target_level=0, desc=""):
+    def attack_temp_target(self, target_key, target_level, desc=""):
         """
         Attack a temporary clone of a target. This creates a new character object for attack.
         The origin target will not be affected.
@@ -505,21 +606,13 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         Returns:
             (boolean) fight begins
         """
-        if target_level == 0:
-            # Find the target and get its level.
-            try:
-                obj = get_object_by_key(target_key)
-                target_level = obj.get_level()
-            except ObjectDoesNotExist:
-                pass
-
         # Create a target.
-        target = build_object(target_key, target_level, reset_location=False)
+        target = ELEMENT("COMMON_NPC")()
+        target.setup_element(target_key, level=target_level, first_time=True, temp=True)
         if not target:
             logger.log_errmsg("Can not create the target %s." % target_key)
             return False
 
-        target.is_temp = True
         return self.attack_target(target, desc)
 
     def join_combat(self, combat_id):
@@ -572,16 +665,6 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         self.combat_id = None
 
-        if self.is_temp:
-            # delete template character and notify its location
-            location = self.location
-
-            delete_object(self.get_id())
-            if location:
-                for content in location.contents:
-                    if content.has_account:
-                        content.show_location()
-
     def is_alive(self):
         """
         Check if the character is alive.
@@ -611,15 +694,18 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         Reborn after being killed.
         """
-        # Reborn at its home.
+        # Recover properties.
+        self.recover()
+
+        # Reborn at its default location.
         home = None
-        if not home:
-            home_key = self.const.location
-            if home_key:
-                try:
-                    home = get_object_by_key(home_key)
-                except ObjectDoesNotExist:
-                    pass
+
+        location_key = self.const.location
+        if location_key:
+            try:
+                home = get_object_by_key(location_key)
+            except ObjectDoesNotExist:
+                pass
 
         if not home:
             rooms = search.search_object(settings.DEFAULT_HOME)
@@ -627,10 +713,7 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
                 home = rooms[0]
 
         if home:
-            self.move_to(home, quiet=True)
-
-        # Recover properties.
-        self.recover()
+            self.set_location(home)
 
     def recover(self):
         """
@@ -683,26 +766,43 @@ class MudderyCharacter(ELEMENT("OBJECT"), DefaultCharacter):
         """
         pass
 
-    def level_up(self):
-        """
-        Upgrade level.
-
-        Returns:
-            None
-        """
-        level = self.get_level()
-        self.set_level(level + 1)
-
     def show_status(self):
         """
         Show character's status.
         """
         pass
 
-    def get_name(self):
-        name = super(MudderyCharacter, self).get_name()
+    def validate_property(self, key, value):
+        """
+        Check a property's value limit, return a validated value.
 
-        if not self.is_alive():
-            name += _(" [DEAD]")
+        Args:
+            key: (string) values's key.
+            value: (number) the value
 
-        return name
+        Return:
+            (number) validated values.
+        """
+        # check limits
+        max_value = None
+        max_key = "max_" + key
+        if self.states.has(max_key):
+            max_value = self.states.load(max_key)
+        elif self.const_data_handler.has(max_key):
+            max_value = self.const_data_handler.get(max_key)
+
+        if max_value is not None:
+            if value > max_value:
+                value = max_value
+
+        min_value = 0
+        min_key = "min_" + key
+        if self.states.has(min_key):
+            min_value = self.states.load(min_key)
+        elif self.const_data_handler.has(min_key):
+            min_value = self.const_data_handler.get(min_key)
+
+        if value < min_value:
+            value = min_value
+
+        return value

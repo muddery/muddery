@@ -109,7 +109,7 @@ class MudderyShopGoods(BaseElement):
 
         """
         # check price
-        unit_number = caller.get_object_number(self.unit_key)
+        unit_number = caller.total_object_number(self.unit_key)
         if unit_number < self.price:
             caller.msg({"alert": _("Sorry, %s is not enough.") % self.unit_name})
             return
@@ -121,19 +121,20 @@ class MudderyShopGoods(BaseElement):
 
         remove_list = [
             {
-                "object": self.unit_key,
+                "object_key": self.unit_key,
                 "number": self.price
             }
         ]
         receive_list = [
             {
-                "object": self.obj_key,
+                "object_key": self.obj_key,
                 "level": self.level,
                 "number": self.number,
             }
         ]
 
         # Reduce price units and give goods.
-        caller.exchange_objects(remove_list, receive_list)
+        caller.exchange_objects(remove_list, receive_list, show=True)
+        caller.msg({"alert": _("Purchase successful!")})
 
         return

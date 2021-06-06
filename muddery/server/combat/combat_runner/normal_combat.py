@@ -3,6 +3,7 @@ Combat handler.
 """
 
 from muddery.server.combat.combat_runner.base_combat import BaseCombat
+from muddery.server.utils import utils
 
 
 class NormalCombat(BaseCombat):
@@ -17,7 +18,7 @@ class NormalCombat(BaseCombat):
 
         for char in self.characters.values():
             character = char["char"]
-            if not character.account:
+            if not utils.is_player(character):
                 # Monsters auto cast skills
                 character.start_auto_combat_skill()
 

@@ -26,7 +26,7 @@ class CharacterSkills(object):
             skill_key: (string) skill's key.
             data: (dict) data to save.
         """
-        self.storage.save_dict(character_id, skill_key, data)
+        self.storage.save(character_id, skill_key, data)
 
     def has(self, character_id, skill_key):
         """
@@ -48,10 +48,10 @@ class CharacterSkills(object):
             default: (any or none) default value.
 
         Raises:
-            AttributeError: If `raise_exception` is set and no matching Attribute
+            KeyError: If `raise_exception` is set and no matching Attribute
                 was found matching `key` and no default value set.
         """
-        return self.storage.load_dict(character_id, skill_key, **default)
+        return self.storage.load(character_id, skill_key, **default)
 
     def load_character(self, character_id):
         """
@@ -60,7 +60,7 @@ class CharacterSkills(object):
         Args:
             character_id: (number) character's id.
         """
-        return self.storage.load_category_dict(character_id)
+        return self.storage.load_category(character_id, {})
 
     def delete(self, character_id, skill_key):
         """

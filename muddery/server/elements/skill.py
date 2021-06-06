@@ -6,7 +6,7 @@ actions of a skill.
 
 """
 
-import time, re
+import time, re, traceback
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
@@ -36,14 +36,14 @@ class MudderySkill(BaseElement):
         else:
             return "%(" + char + ")s"
 
-    def after_data_loaded(self):
+    def at_element_setup(self, first_time):
         """
         Set data_info to the object.
 
         Returns:
             None
         """
-        super(MudderySkill, self).after_data_loaded()
+        super(MudderySkill, self).at_element_setup(first_time)
 
         # set data
         self.function = self.const.function
@@ -82,6 +82,8 @@ class MudderySkill(BaseElement):
             skill_cast: (dict) skill's result
         """
         case_message = self.cast_message(caller, target)
+
+        # traceback.print_stack()
         results = self.do_skill(caller, target)
 
         # set message
