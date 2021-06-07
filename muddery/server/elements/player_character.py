@@ -409,13 +409,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         self.show_location()
 
-        # notify its location
-        if not self.solo_mode:
-            if self.location:
-                change = {"id": self.get_id(),
-                          "name": self.get_name()}
-                self.location.msg_contents({"player_online": change}, exclude=[self])
-
         self.resume_last_dialogue()
 
         self.resume_combat()
@@ -438,9 +431,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if not self.solo_mode:
             # notify its location
             if self.location:
-                change = {"id": self.get_id(),
-                          "name": self.get_name()}
-                self.location.msg_contents({"player_offline":change}, exclude=self)
+                self.location.at_character_leave(self)
 
         MATCH_COMBAT_HANDLER.remove(self)
 

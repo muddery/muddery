@@ -185,19 +185,15 @@ class CmdUnpuppet(BaseCommand):
         player = self.account
         session = self.session
 
-        old_char = player.get_puppet(session)
-        if not old_char:
-            return
-
-        player.db._last_puppet = old_char
-
         # disconnect
         try:
             player.unpuppet_object(session)
             session.msg({"unpuppet": True})
-        except RuntimeError as exc:
-            session.msg({"alert":_("{RCould not unpuppet from {C%s{n: %s" % (old_char, exc))})
-            
+        except RuntimeError as e:
+            session.msg({"alert":_("Could not unpuppet: %s" % e)})
+        except Exception as e:
+            logger.log_errmsg("Could not unpuppet: %s" % e)
+
 
 class CmdCharCreate(BaseCommand):
     """

@@ -2253,6 +2253,23 @@ MudderyScene.prototype.addObject = function(obj) {
     // set object
     var index = 0;
     if (obj["type"] in this.scene) {
+        if (obj["type"] == "npcs" ||　obj["type"] == "players") {
+            for (var item in this.scene[obj["type"]]) {
+                if (item["id"] == obj["id"]) {
+                    // already has this character
+                    return;
+                }
+            }
+        }
+        else {
+            for (var item in this.scene[obj["type"]]) {
+                if (item["key"] == obj["key"]) {
+                    // already has this object
+                    return;
+                }
+            }
+        }
+
         index = this.scene[obj["type"]].length;
         this.scene[obj["type"]].push(obj)
     }

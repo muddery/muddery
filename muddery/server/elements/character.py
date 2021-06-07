@@ -443,7 +443,7 @@ class MudderyCharacter(BaseElement):
         else:
             if self.location:
                 # send skill result to its location
-                self.location.msg_contents(skill_result)
+                self.location.msg_characters(skill_result)
             else:
                 self.msg(skill_result)
 

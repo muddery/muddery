@@ -83,10 +83,11 @@ class MemoryTable(object):
 
         # index together
         for index_together in self.model._meta.index_together:
-            index_fields = set(index_together)
+            set_fields = index_together
+            index_fields = sorted(set_fields)
             all_values = {}
             for i, record in enumerate(self.records):
-                keys = tuple(getattr(record, field_name) for field_name in index_fields)
+                keys = tuple(getattr(record, field_name) for field_name in set_fields)
                 if keys in all_values:
                     all_values[keys].append(i)
                 else:
@@ -96,10 +97,11 @@ class MemoryTable(object):
 
         # unique together
         for unique_together in self.model._meta.unique_together:
-            unique_fields = set(unique_together)
+            set_fields = unique_together
+            unique_fields = sorted(set_fields)
             all_values = {}
             for i, record in enumerate(self.records):
-                keys = tuple(getattr(record, field_name) for field_name in unique_fields)
+                keys = tuple(getattr(record, field_name) for field_name in set_fields)
                 if keys in all_values:
                     all_values[keys].append(i)
                 else:
@@ -148,12 +150,12 @@ class MemoryTable(object):
             index_name = keys[0]
             values = conditions[index_name]
         else:
-            unique_fields = set(conditions.keys())
+            unique_fields = sorted(set(conditions.keys()))
             index_name = ".".join(unique_fields)
             values = tuple(conditions[field_name] for field_name in unique_fields)
 
         if index_name not in self.index:
-            raise MudderyError("Only indexed fields can be searched, can not find %s" % index_name)
+            raise MudderyError("Only indexed fields can be searched, can not find %s's %s" % (self.table_name, index_name))
 
         index = self.index[index_name]
 

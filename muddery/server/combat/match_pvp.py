@@ -83,7 +83,7 @@ class MatchPVPHandler(object):
         """
         Add a character to the queue.
         """
-        character_id = character.id
+        character_id = character.get_db_id()
 
         if character_id in self.waiting_queue:
             return
@@ -103,7 +103,7 @@ class MatchPVPHandler(object):
         """
         Remove a character from the queue.
         """
-        character_id = character.id
+        character_id = character.get_db_id()
 
         if character_id in self.waiting_queue:
             self.waiting_queue.remove(character_id)

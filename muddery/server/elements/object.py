@@ -101,29 +101,6 @@ class MudderyBaseObject(BaseElement, DefaultObject):
         # codes here. You can add codes in after_data_loaded() which is called
         # after load_data().
 
-    def at_post_unpuppet(self, player, session=None, **kwargs):
-        """
-        We stove away the character when the player goes ooc/logs off,
-        otherwise the character object will remain in the room also
-        after the player logged off ("headless", so to say).
-
-        Args:
-            player (Player): The player object that just disconnected
-                from this object.
-            session (Session): Session controlling the connection that
-                just disconnected.
-        """
-        if not self.sessions.count():
-            # only remove this char from grid if no sessions control it anymore.
-            if self.location: # have to check, in case of multiple connections closing
-                if not GAME_SETTINGS.get("solo_mode"):
-                    # Notify other players in this location.
-                    self.location.msg_contents("%s has left the game." % self.name, exclude=[self])
-
-                # Save last location.
-                self.db.prelogout_location = self.location
-                self.location = None
-
     def at_object_receive(self, moved_obj, source_location, **kwargs):
         """
         Called after an object has been moved into this object.
