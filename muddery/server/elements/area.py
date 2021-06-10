@@ -6,12 +6,15 @@ Areas are compose the whole map. Rooms are belongs to areas.
 """
 
 from evennia.utils import logger
+from muddery.server.elements.base_element import BaseElement
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.database.worlddata.image_resource import ImageResource
+from muddery.server.database.worlddata.world_rooms import WorldRooms
+from muddery.server.database.worlddata.worlddata import WorldData
 
 
-class MudderyArea(ELEMENT("OBJECT")):
+class MudderyArea(BaseElement):
     """
     Areas are compose the whole map. Rooms are belongs to areas.
     """
@@ -19,21 +22,28 @@ class MudderyArea(ELEMENT("OBJECT")):
     element_name = _("Area", "elements")
     model_name = "world_areas"
 
-    def at_object_creation(self):
+    def __init__(self):
         """
-        Called once, when this object is first created. This is the
-        normal hook to overload for most object types.
+        Init the element.
         """
-        super(MudderyArea, self).at_object_creation()
+        super(MudderyArea, self).__init__()
+
+        self.name = None
+        self.desc = None
+        self.icon = None
         self.background = None
+        self.all_rooms = {}
 
-    def after_data_loaded(self):
+    def at_element_setup(self, first_time):
         """
-        Set data_info to the object.
+        Init the character.
         """
-        super(MudderyArea, self).after_data_loaded()
+        super(MudderyArea, self).at_element_setup(first_time)
 
-        # get background
+        self.set_name(self.const.name)
+        self.set_desc(self.const.desc)
+        self.set_icon(self.const.icon)
+
         self.background = None
         resource = self.const.background
         if resource:
@@ -46,15 +56,94 @@ class MudderyArea(ELEMENT("OBJECT")):
             except Exception as e:
                 logger.log_tracemsg("Load background %s error: %s" % (resource, e))
 
+        # load rooms in this area
+        self.load_rooms()
+
     def get_appearance(self, caller):
         """
         This is a convenient hook for a 'look'
         command to call.
         """
-        info = super(MudderyArea, self).get_appearance(caller)
-
-        # add background
-        info["background"] = getattr(self, "background", None)
+        info = {
+            "key": self.get_element_key(),
+            "name": self.get_name(),
+            "desc": self.get_desc(),
+            "icon": self.get_icon(),
+            "background": self.background,
+        }
         
         return info
 
+    def set_name(self, name):
+        """
+        Set object's name.
+
+        Args:
+        name: (string) Name of the object.
+        """
+        self.name = name
+
+    def get_name(self):
+        """
+        Get player character's name.
+        """
+        return self.name
+
+    def set_desc(self, desc):
+        """
+        Set object's description.
+
+        Args:
+        desc: (string) Description.
+        """
+        self.desc = desc
+
+    def get_desc(self):
+        """
+        Get the element's description.
+        :return:
+        """
+        return self.desc
+
+    def set_icon(self, icon_key):
+        """
+        Set object's icon.
+        Args:
+            icon_key: (String)icon's resource key.
+
+        Returns:
+            None
+        """
+        self.icon = icon_key
+
+    def get_icon(self):
+        """
+        Get object's icon.
+        :return:
+        """
+        return self.icon
+
+    def load_rooms(self):
+        """
+        Load all rooms in this area.
+
+        :return:
+        """
+        records = WorldRooms.all()
+        models = ELEMENT("ROOM").get_models()
+        self.all_rooms = {}
+        for record in records:
+            tables_data = WorldData.get_tables_data(models, record.key)
+            tables_data = tables_data[0]
+
+            new_obj = ELEMENT("ROOM")()
+            new_obj.setup_element(tables_data.key)
+
+            self.all_rooms[new_obj.get_element_key()] = new_obj
+
+    def get_rooms_key(self):
+        """
+        Get keys of all rooms in this area.
+        :return:
+        """
+        return self.all_rooms.keys()

@@ -9,7 +9,6 @@ creation commands.
 """
 
 from evennia.utils import logger
-from muddery.server.utils.builder import build_object
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.npc_dialogues import NPCDialogues

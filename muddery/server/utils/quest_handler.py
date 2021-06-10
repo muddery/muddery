@@ -4,7 +4,6 @@ QuestHandler handles a character's quests.
 
 import weakref
 from evennia.utils import logger
-from muddery.server.utils.builder import build_object
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.exception import MudderyError

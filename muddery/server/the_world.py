@@ -1,0 +1,2 @@
+
+WORLD = None

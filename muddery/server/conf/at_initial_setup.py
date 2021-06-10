@@ -40,31 +40,6 @@ def at_initial_setup():
         GAME_SETTINGS.reset()
         print("Reset game settings.")
 
-        # build world
-        builder.build_all()
-        print("Builder build all.")
-
-        # set limbo's desc
-        limbo_obj = search.search_object("#2", exact=True)
-        if limbo_obj:
-            limbo_obj[0].db.desc = LIMBO_DESC
-            limbo_obj[0].position = None
-        print("Set limbo object.")
-
-        # set default locations
-        builder.reset_default_locations()
-        print("Set default locations.")
-
-        superuser = search.search_object("#1", exact=True)
-        if superuser:
-            superuser = superuser[0]
-
-            # move the superuser to the start location
-            start_location = search.search_object(settings.START_LOCATION, exact=True)
-            if start_location:
-                start_location = start_location[0]
-                superuser.move_to(start_location, quiet=True)
-
     except Exception as e:
         ostring = "Can't set initial data: %s" % e
         print(ostring)

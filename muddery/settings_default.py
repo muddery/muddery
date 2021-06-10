@@ -300,16 +300,13 @@ BASE_ACCOUNT_TYPECLASS = "muddery.server.typeclasses.accounts.MudderyAccount"
 BASE_GUEST_TYPECLASS = "muddery.server.typeclasses.accounts.Guest"
 
 # Typeclass and base for all objects (fallback)
-BASE_OBJECT_TYPECLASS = "muddery.server.elements.object.MudderyBaseObject"
+BASE_OBJECT_TYPECLASS = "evennia.objects.objects.DefaultObject"
 
 # Typeclass for character objects linked to a player (fallback)
 BASE_CHARACTER_TYPECLASS = "evennia.objects.objects.DefaultCharacter"
 
-# Typeclass for general characters, include NPCs, mobs and player characters.
-BASE_GENERAL_CHARACTER_TYPECLASS = "muddery.server.elements.character.MudderyCharacter"
-
 # Typeclass for rooms (fallback)
-BASE_ROOM_TYPECLASS = "muddery.server.elements.room.MudderyRoom"
+BASE_ROOM_TYPECLASS = "evennia.objects.objects.DefaultRoom"
 
 # Typeclass for Exit objects (fallback).
 BASE_EXIT_TYPECLASS = "evennia.objects.objects.DefaultExit"
@@ -319,7 +316,7 @@ BASE_CHANNEL_TYPECLASS = "muddery.server.typeclasses.channels.MudderyChannel"
 
 # Typeclass for Scripts (fallback). You usually don't need to change this
 # but create custom variations of scripts on a per-case basis instead.
-BASE_SCRIPT_TYPECLASS = "muddery.server.elements.scripts.MudderyScript"
+BASE_SCRIPT_TYPECLASS = "evennia.scripts.scripts.DefaultScript"
 
 # Element type for general characters, include NPCs, mobs and player characters.
 CHARACTER_ELEMENT_TYPE = "CHARACTER"

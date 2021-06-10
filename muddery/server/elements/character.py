@@ -22,7 +22,6 @@ from muddery.server.database.worlddata.loot_list import CharacterLootList
 from muddery.server.database.worlddata.default_skills import DefaultSkills
 from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
 from muddery.server.database.gamedata.object_storage import DBObjectStorage
-from muddery.server.utils.builder import build_object
 from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils import search
 from muddery.server.utils.game_settings import GAME_SETTINGS

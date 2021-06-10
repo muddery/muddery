@@ -191,6 +191,18 @@ class objects(BaseObjects):
 class world_areas(BaseObjects):
     "The game map is composed by areas."
 
+    # area's element type
+    element_type = models.CharField(max_length=KEY_LENGTH)
+
+    # area's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # area's description for display
+    desc = models.TextField(blank=True)
+
+    # area's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
+
     # area's map background image resource
     background = models.CharField(max_length=KEY_LENGTH, blank=True)
 
@@ -211,12 +223,24 @@ class world_areas(BaseObjects):
 class world_rooms(BaseObjects):
     "Defines all unique rooms."
 
-    # players can not fight in peaceful romms
-    peaceful = models.BooleanField(blank=True, default=False)
+    # room's element type
+    element_type = models.CharField(max_length=KEY_LENGTH)
+
+    # room's name
+    name = models.CharField(max_length=NAME_LENGTH, blank=True)
+
+    # room's description for display
+    desc = models.TextField(blank=True)
+
+    # room's icon resource
+    icon = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # The key of a world area.
     # The room's location, it must be a area.
-    location = models.CharField(max_length=KEY_LENGTH, blank=True, db_index=True)
+    area = models.CharField(max_length=KEY_LENGTH, blank=True, db_index=True)
+
+    # players can not fight in peaceful romms
+    peaceful = models.BooleanField(blank=True, default=False)
 
     # room's position which is used in maps
     position = models.CharField(max_length=POSITION_LENGTH, blank=True)
