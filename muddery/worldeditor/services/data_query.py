@@ -13,7 +13,7 @@ from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
 from muddery.worldeditor.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
 from muddery.worldeditor.dao.world_exits_mapper import WORLD_EXITS_MAPPER
 from muddery.worldeditor.dao import general_query_mapper, model_mapper
-from muddery.worldeditor.dao.object_properties_mapper import OBJECT_PROPERTIES
+from muddery.worldeditor.dao.element_properties_mapper import ELEMENT_PROPERTIES
 from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
 from muddery.server.mappings.element_set import ELEMENT_SET, ELEMENT
@@ -104,7 +104,7 @@ def query_object_properties(typeclass_key, object_key):
     # Get rows.
     levels = []
     data = {}
-    records = OBJECT_PROPERTIES.get_properties_all_levels(object_key)
+    records = ELEMENT_PROPERTIES.get_properties_all_levels(object_key)
     for record in records:
         if record.level not in levels:
             levels.append(record.level)
@@ -164,7 +164,7 @@ def query_object_level_properties(object_key, level):
 
     # Get properties.
     data = {}
-    records = OBJECT_PROPERTIES.get_properties(object_key, level)
+    records = ELEMENT_PROPERTIES.get_properties(object_key, level)
     for record in records:
         data[record.property] = record.value
 

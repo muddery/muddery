@@ -44,11 +44,6 @@ class MudderyWorldNPC(ELEMENT("BASE_NPC")):
                 except ObjectDoesNotExist:
                     pass
 
-            if not home:
-                rooms = search.search_object(settings.DEFAULT_HOME)
-                if rooms:
-                    home = rooms[0]
-
             self.set_location(home)
 
     def is_visible(self, caller):

@@ -22,15 +22,6 @@ from muddery.server.database.gamedata.system_data import SystemData
 from muddery.server.database.gamedata.character_location import CharacterLocation
 
 
-def create_the_world():
-    """
-    Create the whole game world.
-    :return:
-    """
-    world = ELEMENT("WORLD")()
-    world.setup_element("")
-
-
 def create_player(playername, password, permissions=None, typeclass=None):
     """
     Helper function, creates a player of the specified typeclass.
@@ -83,7 +74,7 @@ def create_character(new_player, nickname, character_key=None,
         if not location_key:
             location_key = GAME_SETTINGS.get("default_player_home_key")
             if not location_key:
-                location_key = settings.DEFAULT_HOME
+                location_key = ""
 
     CharacterLocation.save(char_db_id, location_key)
 

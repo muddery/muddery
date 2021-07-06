@@ -17,7 +17,8 @@ class WorldRoomsMapper(object):
         self.model_name = ELEMENT("ROOM").model_name
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
-        self.object_model_name = ELEMENT("OBJECT").model_name
+        # self.object_model_name = ELEMENT("OBJECT").model_name
+        self.object_model_name = ""
 
     def rooms_in_area(self, area_key):
         """

@@ -9,12 +9,12 @@ from django.core.exceptions import ValidationError
 from muddery.server.utils.exception import MudderyError, ERR
 
 
-class ObjectPropertiesMapper(object):
+class ElementPropertiesMapper(object):
     """
     Object's properties.
     """
     def __init__(self):
-        self.model_name = "object_properties"
+        self.model_name = "element_properties"
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
 
@@ -74,4 +74,4 @@ class ObjectPropertiesMapper(object):
         return self.objects.filter(object=object, level=level).delete()
 
 
-OBJECT_PROPERTIES = ObjectPropertiesMapper()
+ELEMENT_PROPERTIES = ElementPropertiesMapper()

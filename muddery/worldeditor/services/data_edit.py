@@ -8,7 +8,7 @@ from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.dao import general_query_mapper
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS, WORLD_ROOMS
 from muddery.worldeditor.dao.system_data_mapper import SYSTEM_DATA
-from muddery.worldeditor.dao.object_properties_mapper import OBJECT_PROPERTIES
+from muddery.worldeditor.dao.element_properties_mapper import ELEMENT_PROPERTIES
 from muddery.worldeditor.mappings.form_set import FORM_SET
 from muddery.server.mappings.element_set import ELEMENT, ELEMENT_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
@@ -187,7 +187,7 @@ def save_object_level_properties(object_key, level, values):
         level: (number) object's level.
         values: (dict) values to save.
     """
-    OBJECT_PROPERTIES.add_properties(object_key, level, values)
+    ELEMENT_PROPERTIES.add_properties(object_key, level, values)
 
 
 def delete_object_level_properties(object_key, level):
@@ -198,7 +198,7 @@ def delete_object_level_properties(object_key, level):
         object_key: (string) object' key.
         level: (number) object's level.
     """
-    OBJECT_PROPERTIES.delete_properties(object_key, level)
+    ELEMENT_PROPERTIES.delete_properties(object_key, level)
 
 
 def save_object_form(tables, obj_typeclass, obj_key):

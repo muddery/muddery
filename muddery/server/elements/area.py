@@ -129,7 +129,7 @@ class MudderyArea(BaseElement):
 
         :return:
         """
-        records = WorldRooms.all()
+        records = WorldRooms.get_by_area(self.get_element_key())
         models = ELEMENT("ROOM").get_models()
         self.all_rooms = {}
         for record in records:
@@ -147,3 +147,11 @@ class MudderyArea(BaseElement):
         :return:
         """
         return self.all_rooms.keys()
+
+    def get_room(self, room_key):
+        """
+        Get a room by its key.
+        :param room_key:
+        :return:
+        """
+        return self.all_rooms[room_key]

@@ -8,7 +8,6 @@ from evennia.server.sessionhandler import SESSIONS
 from muddery.worldeditor.services import data_query, data_edit, general_query
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.worldeditor.utils.response import success_response
-from muddery.server.utils.builder import build_all
 from muddery.worldeditor.controllers.base_request_processer import BaseRequestProcesser
 from muddery.worldeditor.dao import general_query_mapper
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
@@ -872,9 +871,6 @@ class ApplyChanges(BaseRequestProcesser):
 
             # reload data
             WorldData.reload()
-
-            # rebuild the world
-            build_all()
 
             # restart the server
             SESSIONS.announce_all("Server restarting ...")

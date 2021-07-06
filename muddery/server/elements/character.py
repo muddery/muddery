@@ -706,11 +706,6 @@ class MudderyCharacter(BaseElement):
             except ObjectDoesNotExist:
                 pass
 
-        if not home:
-            rooms = search.search_object(settings.DEFAULT_HOME)
-            if rooms:
-                home = rooms[0]
-
         if home:
             self.set_location(home)
 

@@ -19,6 +19,7 @@ from muddery.server.utils.defines import CombatType
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.combat.match_pvp import MATCH_COMBAT_HANDLER
 from muddery.server.database.worlddata.honour_settings import HonourSettings
+from muddery.server.server import Server
 
 
 class CmdLook(BaseCommand):
@@ -237,7 +238,7 @@ class CmdSay(BaseCommand):
                 obj = ChannelDB.objects.filter(db_key=target)
                 obj = obj[0]
             elif target_type == ConversationType.LOCAL.value:
-                obj = get_object_by_key(target)
+                obj = Server.world.get_room(target)
             elif target_type == ConversationType.PRIVATE.value:
                 obj = get_object_by_id(int(target))
         except Exception as e:

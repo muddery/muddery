@@ -17,7 +17,8 @@ class WorldExitsMapper(object):
         self.model_name = ELEMENT("EXIT").model_name
         self.model = apps.get_model(settings.WORLD_DATA_APP, self.model_name)
         self.objects = self.model.objects
-        self.object_model_name = ELEMENT("OBJECT").model_name
+        # self.object_model_name = ELEMENT("OBJECT").model_name
+        self.object_model_name = ""
 
     def exits_of_rooms(self, rooms):
         """

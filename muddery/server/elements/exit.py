@@ -9,12 +9,11 @@ for allowing Characters to traverse the exit to its destination.
 import traceback
 import weakref
 from evennia.utils import logger
-from muddery.server.utils import defines
-from muddery.server.utils import search
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.elements.base_element import BaseElement
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
+from muddery.server.server import Server
 
 
 class MudderyExit(BaseElement):
@@ -57,7 +56,7 @@ class MudderyExit(BaseElement):
             return
 
         if not self.destination_obj:
-            self.destination_obj = weakref.ref(search.get_object_by_key(self.const.destination))
+            self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
 
         try:
             character.set_location(self.destination_obj())
@@ -83,7 +82,7 @@ class MudderyExit(BaseElement):
             return self.const.name
         elif self.const.destination:
             if not self.destination_obj:
-                self.destination_obj = weakref.ref(search.get_object_by_key(self.const.destination))
+                self.destination_obj = weakref.ref(Server.world.get_room(self.const.destination))
             return self.destination_obj().get_name()
         else:
             return _("Exit")

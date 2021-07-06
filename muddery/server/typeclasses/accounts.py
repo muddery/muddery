@@ -32,6 +32,7 @@ from muddery.server.database.gamedata.player_character import PlayerCharacter
 from muddery.server.database.gamedata.character_location import CharacterLocation
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.game_settings import GAME_SETTINGS
+from muddery.server.server import Server
 from muddery.server.utils.localized_strings_handler import _
 
 
@@ -231,7 +232,7 @@ class MudderyAccount(DefaultAccount):
         # Set location
         try:
             location_key = CharacterLocation.load(char_id)
-            location = search.get_object_by_key(location_key)
+            location = Server.world.get_room(location_key)
             new_char.set_location(location)
         except KeyError:
             pass

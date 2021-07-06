@@ -6,7 +6,6 @@ from evennia import create_script
 from muddery.server.events.base_event_action import BaseEventAction
 from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils.localized_strings_handler import _
-from muddery.server.elements.script_room_interval import ScriptRoomInterval
 
 
 class ActionRoomInterval(BaseEventAction):
@@ -29,15 +28,3 @@ class ActionRoomInterval(BaseEventAction):
         """
         # get action data
         records = WorldData.get_table_data(self.model_name, event_key=event_key)
-
-        # Add actions.
-        for record in records:
-            script = create_script(ScriptRoomInterval,
-                                   key=event_key,
-                                   interval=record.interval,
-                                   autostart=False,
-                                   start_delay=True,
-                                   persistent=True,
-                                   obj=character)
-            script.set_action(obj, event_key, record.action)
-            script.start()

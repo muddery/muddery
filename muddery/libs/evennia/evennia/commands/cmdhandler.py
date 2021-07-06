@@ -320,6 +320,7 @@ def get_and_merge_cmdsets(caller, session, account, obj, callertype, raw_string)
                     location = obj.location
                 except Exception:
                     location = None
+                location = None
                 if location:
                     # Gather all cmdsets stored on objects in the room and
                     # also in the caller's inventory and the location itself

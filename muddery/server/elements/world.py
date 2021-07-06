@@ -46,14 +46,32 @@ class MudderyWorld(BaseElement):
         # }
         self.room_dict = {}
         for record in records:
-            tables_data = WorldData.get_tables_data(models, record.key)
-            tables_data = tables_data[0]
+            area_data = WorldData.get_tables_data(models, record.key)
+            area_data = area_data[0]
 
-            new_obj = ELEMENT("AREA")()
-            new_obj.setup_element(tables_data.key)
+            new_area = ELEMENT("AREA")()
+            new_area.setup_element(area_data.key)
 
-            self.all_areas[new_obj.get_id()] = new_obj
+            self.all_areas[new_area.get_element_key()] = new_area
 
-            rooms_key = new_obj.get_rooms_key()
+            rooms_key = new_area.get_rooms_key()
             for key in rooms_key:
-                self.room_dict[key] = tables_data.key
+                self.room_dict[key] = area_data.key
+
+    def get_room(self, room_key):
+        """
+        Get a room by its key.
+        :param room_key:
+        :return:
+        """
+        area_key = self.room_dict[room_key]
+        return self.all_areas[area_key].get_room(room_key)
+
+    def get_area_by_room(self, room_key):
+        """
+        Get the room's area.
+        :param room_key:
+        :return:
+        """
+        area_key = self.room_dict[room_key]
+        return self.all_areas[area_key]

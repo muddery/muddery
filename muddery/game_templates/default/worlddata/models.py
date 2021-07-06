@@ -202,16 +202,6 @@ class properties_dict(BaseModels.properties_dict):
 
 # ------------------------------------------------------------
 #
-# Object's custom properties
-#
-# ------------------------------------------------------------
-class object_properties(BaseModels.object_properties):
-    "Store object's custom properties."
-    pass
-
-
-# ------------------------------------------------------------
-#
 # Character's mutable states.
 # These states can change in the game.
 #

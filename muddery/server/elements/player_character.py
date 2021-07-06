@@ -16,7 +16,7 @@ from evennia.commands.cmdsethandler import CmdSetHandler
 from evennia.utils.utils import lazy_property
 from evennia.utils import logger
 from evennia.comms.models import ChannelDB
-from muddery.server.utils import search
+from muddery.server.server import Server
 from muddery.server.utils.quest_handler import QuestHandler
 from muddery.server.utils.statement_attribute_handler import StatementAttributeHandler
 from muddery.server.utils.exception import MudderyError
@@ -29,7 +29,7 @@ from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.default_skills import DefaultSkills
 from muddery.server.database.worlddata.honour_settings import HonourSettings
 from muddery.server.database.worlddata.default_objects import DefaultObjects
-from muddery.server.database.worlddata.object_properties import ObjectProperties
+from muddery.server.database.worlddata.element_properties import ElementProperties
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
 from muddery.server.mappings.element_set import ELEMENT
@@ -310,7 +310,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         element_key = self.const.clone if self.const.clone else self.get_element_key()
 
         values = {}
-        for record in ObjectProperties.get_properties(element_key, level):
+        for record in ElementProperties.get_properties(self.element_type, element_key, level):
             key = record.property
             serializable_value = record.value
             if serializable_value == "":
@@ -363,7 +363,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             self.event.at_character_move_out(self.location)
 
         # save new location
-        location_key = location.get_object_key() if location else ""
+        location_key = location.get_element_key() if location else ""
         CharacterLocation.save(self.get_db_id(), location_key)
 
         super(MudderyPlayerCharacter, self).set_location(location)
@@ -552,10 +552,11 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         for room_key in revealed_map:
             # get room's information
             try:
-                room = search.get_object_by_key(room_key)
+                room = Server.world.get_room(room_key)
+                area = Server.world.get_area_by_room(room_key)
                 rooms[room_key] = {"name": room.get_name(),
                                    "icon": room.icon,
-                                   "area": room.location and room.location.get_object_key(),
+                                   "area": area.get_element_key(),
                                    "pos": room.position}
                 new_exits = room.get_exits()
                 if new_exits:
@@ -567,12 +568,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             # add room's neighbours
             if not path["to"] in rooms:
                 try:
-                    neighbour = search.get_object_by_key(path["to"])
-                    rooms[neighbour.get_object_key()] = {
-                        "name": neighbour.get_name(),
-                        "icon": neighbour.icon,
-                        "area": neighbour.location and neighbour.location.get_object_key(),
-                        "pos": neighbour.position
+                    neighbour_room = Server.world.get_room(path["to"])
+                    neighbour_area = Server.world.get_area_by_room(path["to"])
+                    rooms[neighbour_room.get_element_key()] = {
+                        "name": neighbour_room.get_name(),
+                        "icon": neighbour_room.icon,
+                        "area": neighbour_area.get_element_key(),
+                        "pos": neighbour_room.position
                     }
                 except ObjectDoesNotExist:
                     pass
@@ -612,13 +614,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if not self.location:
             return
 
-        location_key = self.location.get_object_key()
-        area = self.location.location and self.location.location.get_appearance(self)
+        location_key = self.location.get_element_key()
+        area = Server.world.get_area_by_room(location_key)
 
         msg = {
             "current_location": {
                 "key": location_key,
-                "area": area,
+                "area": area.get_appearance(self),
             }
         }
 
@@ -644,14 +646,14 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         revealed_map = self.states.load("revealed_map", set())
         if not location_key in revealed_map:
             # reveal map
-            revealed_map.add(self.location.get_object_key())
+            revealed_map.add(self.location.get_element_key())
             self.states.save("revealed_map", revealed_map)
 
             rooms = {
                 location_key: {
                     "name": self.location.get_name(),
                     "icon": self.location.icon,
-                    "area": self.location.location and self.location.location.get_object_key(),
+                    "area": area.get_element_key(),
                     "pos": self.location.position
                 }
             }
@@ -660,13 +662,15 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
             for path in exits.values():
                 # add room's neighbours
-                if not path["to"] in rooms:
+                neighbour_key = path["to"]
+                if neighbour_key not in rooms:
                     try:
-                        neighbour = search.get_object_by_key(path["to"])
-                        rooms[neighbour.get_object_key()] = {
+                        neighbour = Server.world.get_room(neighbour_key)
+                        neighbour_area = Server.world.get_area_by_room(neighbour_key)
+                        rooms[neighbour_key] = {
                             "name": neighbour.get_name(),
                             "icon": neighbour.icon,
-                            "area": neighbour.location and neighbour.location.get_object_key(),
+                            "area": neighbour_area.get_element_key(),
                             "pos": neighbour.position
                         }
                     except ObjectDoesNotExist:
@@ -1776,14 +1780,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         default_home_key = GAME_SETTINGS.get("default_player_home_key")
         if default_home_key:
             try:
-                home = search.get_object_by_key(default_home_key)
+                home = Server.world.get_room(default_home_key)
             except ObjectDoesNotExist:
                 pass;
-
-        if not home:
-            rooms = search.search_object(settings.DEFAULT_HOME)
-            if rooms:
-                home = rooms[0]
 
         if home:
             self.set_location(home)

@@ -827,35 +827,6 @@ class properties_dict(models.Model):
 
 # ------------------------------------------------------------
 #
-# Object's custom properties
-#
-# ------------------------------------------------------------
-class object_properties(models.Model):
-    "Store object's custom properties."
-    # The key of an object.
-    object = models.CharField(max_length=KEY_LENGTH)
-
-    # The level of the object.
-    level = models.PositiveIntegerField(blank=True, default=0)
-
-    # The key of the property.
-    property = models.CharField(max_length=KEY_LENGTH)
-
-    # The value of the property.
-    value = models.CharField(max_length=VALUE_LENGTH, blank=True)
-
-    class Meta:
-        "Define Django meta options"
-        abstract = True
-        app_label = "worlddata"
-        verbose_name = "Object's Property"
-        verbose_name_plural = "Object's Properties"
-        unique_together = ("object", "level", "property")
-        index_together = [("object", "level")]
-
-
-# ------------------------------------------------------------
-#
 # Character's mutable states.
 # These states can change in the game.
 #

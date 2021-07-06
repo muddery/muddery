@@ -10,7 +10,6 @@ from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.event_data import EventData
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.utils.defines import EventType
-from muddery.server.elements.script_room_interval import ScriptRoomInterval
 from muddery.server.utils.localized_strings_handler import _
 
 
@@ -126,7 +125,7 @@ class EventTrigger(object):
         """
         Called when a character moves in the event handler's owner, usually a room.
         """
-        self.trigger(EventType.EVENT_TRIGGER_ARRIVE, location.get_object_key(), location)
+        self.trigger(EventType.EVENT_TRIGGER_ARRIVE, location.get_element_key(), location)
 
     def at_character_move_out(self, location):
         """
