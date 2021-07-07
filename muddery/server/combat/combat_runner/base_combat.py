@@ -287,12 +287,11 @@ class BaseCombat(object):
         """
         winner_team = None
         for char in self.characters.values():
-            if char["status"] == CStatus.ACTIVE:
-                character = char["char"]
-                if character.is_alive():
-                    winner_team = char["team"]
-                    break
+            if char["status"] == CStatus.ACTIVE and char["char"].is_alive():
+                winner_team = char["team"]
+                break
 
+        # winners and losers do not include escaped characters.
         winners = {char_id: char["char"] for char_id, char in self.characters.items()
                     if char["status"] == CStatus.ACTIVE and char["team"] == winner_team}
         losers = {char_id: char["char"] for char_id, char in self.characters.items()

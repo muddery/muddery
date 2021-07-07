@@ -240,7 +240,7 @@ class CmdSay(BaseCommand):
             elif target_type == ConversationType.LOCAL.value:
                 obj = Server.world.get_room(target)
             elif target_type == ConversationType.PRIVATE.value:
-                obj = get_object_by_id(int(target))
+                obj = Server.world.get_character(int(target))
         except Exception as e:
             ostring = "Can not find %s %s: %s" % (target_type, target, e)
             logger.log_tracemsg(ostring)

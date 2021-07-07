@@ -21,7 +21,7 @@ class KeyValueWriteBackTable(KeyValueTable):
         self.cache = {}
         self.all_cached = False
 
-    def add(self, category, key, value):
+    def add(self, category, key, value=None):
         """
         Add a new attribute. If the key already exists, raise an exception.
 
@@ -41,7 +41,7 @@ class KeyValueWriteBackTable(KeyValueTable):
 
         super(KeyValueWriteBackTable, self).add(category, key, value)
 
-    def save(self, category, key, value):
+    def save(self, category, key, value=None):
         """
         Set a value to the default value field.
 

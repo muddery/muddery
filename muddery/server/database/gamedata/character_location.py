@@ -39,7 +39,7 @@ class CharacterLocation(object):
         return cls.storage.load("", char_id, *default)
 
     @classmethod
-    def remove(cls, char_id):
+    def remove_character(cls, char_id):
         """
         Remove a player character.
 

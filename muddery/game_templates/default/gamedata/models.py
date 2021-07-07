@@ -26,10 +26,22 @@ class object_states(BaseModels.object_states):
 
 # ------------------------------------------------------------
 #
-# player character's data
+# player account's data
 #
 # ------------------------------------------------------------
-class player_character(BaseModels.player_character):
+class account_characters(BaseModels.account_characters):
+    """
+    Character's data.
+    """
+    pass
+
+
+# ------------------------------------------------------------
+#
+# player character's basic information
+#
+# ------------------------------------------------------------
+class character_info(BaseModels.character_info):
     """
     Character's data.
     """

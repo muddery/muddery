@@ -1,8 +1,5 @@
 """
-Area
-
-Areas are compose the whole map. Rooms are belongs to areas.
-
+The World is the base controller of a server. It managers all areas, maps and characters on this server.
 """
 
 from evennia.utils import logger
@@ -19,6 +16,21 @@ class MudderyWorld(BaseElement):
     """
     element_type = "WORLD"
     element_name = _("World", "elements")
+
+    def __init__(self, *agrs, **wargs):
+        super(MudderyWorld, self).__init__(*agrs, **wargs)
+
+        # All areas in this world.
+        # all_areas: {area's key: area's object}
+        self.all_areas = {}
+
+        # All rooms in this world.
+        # room_dict: {room's key: area's key}
+        self.room_dict = {}
+
+        # All characters in this world.
+        # all_characters: {character's db id: character's object
+        self.all_characters = {}
 
     def load_data(self, key, level=None):
         """
@@ -41,7 +53,7 @@ class MudderyWorld(BaseElement):
         models = ELEMENT("AREA").get_models()
         self.all_areas = {}
 
-        # self.all_rooms {
+        # self.room_dict {
         #   room's key: area's key
         # }
         self.room_dict = {}
@@ -75,3 +87,30 @@ class MudderyWorld(BaseElement):
         """
         area_key = self.room_dict[room_key]
         return self.all_areas[area_key]
+
+    def on_char_puppet(self, character):
+        """
+        Called when a player puppet a character.
+
+        :param character:
+        :return:
+        """
+        self.all_characters[character.get_db_id()] = character
+
+    def on_char_unpuppet(self, character):
+        """
+        Called when a player puppet a character.
+
+        :param character:
+        :return:
+        """
+        self.all_characters[character.get_db_id()] = character
+
+    def get_character(self, char_db_id):
+        """
+        Get a character's object by ist db id.
+
+        :param char_db_id:
+        :return:
+        """
+        return self.all_characters[char_db_id]

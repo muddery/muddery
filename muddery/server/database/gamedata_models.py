@@ -88,13 +88,32 @@ class object_states(BaseAttributes):
 
 # ------------------------------------------------------------
 #
-# player character's data
+# player account's characters
 #
 # ------------------------------------------------------------
-class player_character(models.Model):
+class account_characters(models.Model):
     "Player character's data."
     # player's account id
     account_id = models.PositiveIntegerField(db_index=True)
+
+    # playable character's id
+    char_id = models.PositiveIntegerField(unique=True)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Account Character"
+        verbose_name_plural = "Account Characters"
+
+
+# ------------------------------------------------------------
+#
+# player character's basic information
+#
+# ------------------------------------------------------------
+class character_info(models.Model):
+    "player character's basic information"
 
     # playable character's id
     char_id = models.PositiveIntegerField(unique=True)
@@ -109,8 +128,30 @@ class player_character(models.Model):
         "Define Django meta options"
         abstract = True
         app_label = "gamedata"
-        verbose_name = "Player Character"
-        verbose_name_plural = "Player Characters"
+        verbose_name = "Character Info"
+        verbose_name_plural = "Characters Info"
+
+
+# ------------------------------------------------------------
+#
+# player character's info
+#
+# ------------------------------------------------------------
+class character_location(models.Model):
+    "player character's location"
+
+    # player character's id
+    char_id = models.PositiveIntegerField(unique=True)
+
+    # location (room's key)
+    location = models.CharField(max_length=KEY_LENGTH)
+
+    class Meta:
+        "Define Django meta options"
+        abstract = True
+        app_label = "gamedata"
+        verbose_name = "Player Location"
+        verbose_name_plural = "Players Location"
 
 
 # ------------------------------------------------------------

@@ -300,13 +300,12 @@ class CmdUnconnectedConnect(BaseCommand):
             #   player.at_post_login(session=session)
             session.sessionhandler.login(session, player)
 
-            char_all = player.get_all_characters()
             session.msg({
                 "login": {
                     "name": playername,
                     "dbref": player.dbref,
                 },
-                "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
+                "char_all": player.get_all_nicknames()
             })
 
 

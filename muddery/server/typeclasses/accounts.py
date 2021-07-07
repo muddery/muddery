@@ -27,9 +27,15 @@ from django.conf import settings
 from evennia.utils import logger
 from evennia import DefaultAccount, DefaultGuest
 from evennia.utils.utils import make_iter
-from muddery.server.utils import search
-from muddery.server.database.gamedata.player_character import PlayerCharacter
+from muddery.server.database.gamedata.account_characters import AccountCharacters
+from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.database.gamedata.character_location import CharacterLocation
+from muddery.server.database.gamedata.character_inventory import CharacterInventory
+from muddery.server.database.gamedata.character_equipments import CharacterEquipments
+from muddery.server.database.gamedata.character_quests import CharacterQuests
+from muddery.server.database.gamedata.character_skills import CharacterSkills
+from muddery.server.database.gamedata.character_combat import CharacterCombat
+from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.server import Server
@@ -136,7 +142,14 @@ class MudderyAccount(DefaultAccount):
         """
         Get this player's all playable characters.
         """
-        return PlayerCharacter.get_account_characters(self.id)
+        return AccountCharacters.get_account_characters(self.id)
+
+    def get_all_nicknames(self):
+        """
+        Get this player's all playable characters' nicknames.
+        """
+        char_all = self.get_all_characters()
+        return [{"name": CharacterInfo.get_nickname(char_id), "id": char_id} for char_id in char_all]
 
     def msg(self, text=None, from_obj=None, session=None, options=None, **kwargs):
         """
@@ -176,31 +189,32 @@ class MudderyAccount(DefaultAccount):
         kwargs["options"] = options
 
         # session relay
+        logger.log_info("Send message, %s: %s" % (self, text))
         sessions = make_iter(session) if session else self.sessions.all()
         for session in sessions:
             session.data_out(text=text, **kwargs)
 
-    def puppet_object(self, session, char_id):
+    def puppet_object(self, session, char_db_id):
         """
         Use the given session to control (puppet) the given object (usually
         a Character type).
 
         Args:
             session (Session): session to use for puppeting
-            char_id (Int): the character's id
+            char_db_id (Int): the character's db id
 
         Raises:
             RuntimeError: If puppeting is not possible, the
                 `exception.msg` will contain the reason.
         """
         # safety checks
-        if not char_id:
+        if not char_db_id:
             raise RuntimeError("Object not found")
         if not session:
             raise RuntimeError("Session not found")
 
         current_obj = self.get_puppet(session)
-        if current_obj and current_obj.get_id == char_id:
+        if current_obj and current_obj.get_db_id() == char_db_id:
             # already puppeting this object
             self.msg("You are already puppeting this object.")
             return
@@ -216,7 +230,7 @@ class MudderyAccount(DefaultAccount):
         # Find the character to puppet.
         try:
             new_char = ELEMENT(settings.PLAYER_CHARACTER_ELEMENT_TYPE)()
-            new_char.set_db_id(char_id)
+            new_char.set_db_id(char_db_id)
 
             # do the connection
             new_char.set_account_id(self.id)
@@ -231,14 +245,17 @@ class MudderyAccount(DefaultAccount):
 
         # Set location
         try:
-            location_key = CharacterLocation.load(char_id)
+            location_key = CharacterLocation.load(char_db_id)
             location = Server.world.get_room(location_key)
             new_char.set_location(location)
         except KeyError:
             pass
 
-        session.puid = char_id
+        session.puid = char_db_id
         session.puppet = new_char
+
+        # add the character to the world
+        Server.world.on_char_puppet(new_char)
 
         # final hook
         new_char.at_post_puppet()
@@ -258,14 +275,41 @@ class MudderyAccount(DefaultAccount):
         for session in make_iter(session):
             obj = session.puppet
             if obj:
-                # do the disconnect, but only if we are the last session to puppet
                 obj.at_pre_unpuppet()
                 obj.set_session(None)
                 # obj.at_post_unpuppet(self, session=session)
 
+                Server.world.on_char_unpuppet(obj)
+
             # Just to be sure we're always clear.
             session.puppet = None
             session.puid = None
+
+    def delete_character(self, session, char_db_id):
+        """
+        Delete an character.
+
+        :param char_db_id:
+        :return:
+        """
+        # use the playable_characters list to search
+        characters = AccountCharacters.get_account_characters(self.id)
+        if char_db_id not in characters:
+            raise KeyError("Can not find the character.")
+
+        if session.puid == char_db_id:
+            self.unpuppet_object(session)
+
+        # delete all character data.
+        AccountCharacters.remove_character(self.id, char_db_id)
+        CharacterInfo.remove_character(char_db_id)
+        CharacterLocation.remove_character(char_db_id)
+        CharacterInventory.remove_character(char_db_id)
+        CharacterEquipments.remove_character(char_db_id)
+        CharacterQuests.remove_character(char_db_id)
+        CharacterSkills.remove_character(char_db_id)
+        CharacterCombat.remove_character(char_db_id)
+        HONOURS_MAPPER.remove_character(char_db_id)
 
 
 class Guest(DefaultGuest):

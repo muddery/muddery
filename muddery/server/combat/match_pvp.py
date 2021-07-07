@@ -9,11 +9,12 @@ from django.conf import settings
 from twisted.internet import reactor
 from twisted.internet import task
 from evennia import create_script
-from evennia.utils.search import search_object
 from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.defines import CombatType
 from muddery.server.database.worlddata.honour_settings import HonourSettings
+from muddery.server.combat.combat_handler import COMBAT_HANDLER
+from muddery.server.server import Server
 
 
 class MatchPVPHandler(object):
@@ -28,8 +29,18 @@ class MatchPVPHandler(object):
         self.preparing_time = 0
         self.match_interval = 10
 
+        # waiting_queue: a list of character's db id
         self.waiting_queue = deque()
+
+        # preparing:
+        #   character's db id: {
+        #       "time": begin time,
+        #       "opponent": match's opponent,
+        #       "confirmed": confirmed the combat,
+        #       "call_id": waiting caller's id,
+        #   }
         self.preparing = {}
+
         self.loop = None
 
         self.reset()
@@ -47,18 +58,25 @@ class MatchPVPHandler(object):
         """
         # Remove all characters in the waiting queue.
         """
-        for char_id, info in self.preparing.values():
+        for char_db_id, info in self.preparing.values():
             call_id = info["call_id"]
             call_id.cancel()
-            character = search_object("#%s" % char_id)
-            if character:
-                character.msg({"match_rejected": char_id})
+
+            try:
+                character = Server.world.get_character(char_db_id)
+                character.msg({"match_rejected": char_db_id})
+            except Exception:
+                pass
+
         self.preparing.clear()
 
-        for char_id in self.waiting_queue:
-            character = search_object("#%s" % char_id)
-            if character:
+        for char_db_id in self.waiting_queue:
+            try:
+                character = Server.world.get_character(char_db_id)
                 character.msg({"left_combat_queue": ""})
+            except Exception:
+                pass
+
         self.waiting_queue.clear()
 
     def reset(self):
@@ -83,33 +101,29 @@ class MatchPVPHandler(object):
         """
         Add a character to the queue.
         """
-        character_id = character.get_db_id()
+        char_db_id = character.get_db_id()
 
-        if character_id in self.waiting_queue:
+        if char_db_id in self.waiting_queue:
             return
         
-        self.waiting_queue.append(character_id)
+        self.waiting_queue.append(char_db_id)
         character.msg({"in_combat_queue": ""})
-
-    def remove_by_id(self, character_id):
-        """
-        Remove a character from the queue.
-        """
-        character = search_object("#%s" % character_id)
-        if character:
-            self.remove(character[0])
 
     def remove(self, character):
         """
         Remove a character from the queue.
         """
-        character_id = character.get_db_id()
+        char_db_id = character.get_db_id()
 
-        if character_id in self.waiting_queue:
-            self.waiting_queue.remove(character_id)
+        try:
+            self.waiting_queue.remove(char_db_id)
+        except ValueError:
+            pass
 
-        if character_id in self.preparing:
-            del self.preparing[character_id]
+        try:
+            del self.preparing[char_db_id]
+        except KeyError:
+            pass
 
         character.msg({"left_combat_queue": ""})
 
@@ -133,18 +147,23 @@ class MatchPVPHandler(object):
                 if char_id_B in self.preparing:
                     continue
 
-                honour_A = HONOURS_MAPPER.get_honour_by_id(char_id_A, 0)
-                honour_B = HONOURS_MAPPER.get_honour_by_id(char_id_B, 0)
+                honour_A = HONOURS_MAPPER.get_honour(char_id_A, 0)
+                honour_B = HONOURS_MAPPER.get_honour(char_id_B, 0)
 
                 # max_honour_diff means no limits
                 if self.max_honour_diff == 0 or math.fabs(honour_A - honour_B) <= self.max_honour_diff:
                     # can match
-                    character_A = search_object("#%s" % char_id_A)
-                    character_B = search_object("#%s" % char_id_B)
-                    if character_A:
-                        character_A[0].msg({"prepare_match": self.preparing_time})
-                    if character_B:
-                        character_B[0].msg({"prepare_match": self.preparing_time})
+                    try:
+                        character = Server.world.get_character(char_id_A)
+                        character.msg({"prepare_match": self.preparing_time})
+                    except KeyError:
+                        pass
+
+                    try:
+                        character = Server.world.get_character(char_id_B)
+                        character.msg({"prepare_match": self.preparing_time})
+                    except KeyError:
+                        pass
 
                     call_id = reactor.callLater(self.preparing_time, self.fight, (char_id_A, char_id_B))
                     self.preparing[char_id_A] = {
@@ -164,96 +183,167 @@ class MatchPVPHandler(object):
         """
         Confirm an honour combat.
         """
-        character_id = character.id
-        if character_id not in self.preparing:
-            return
-            
-        self.preparing[character_id]["confirmed"] = True
+        char_db_id = character.get_db_id()
+
+        try:
+            self.preparing[char_db_id]["confirmed"] = True
+        except KeyError:
+            pass
 
     def reject(self, character):
         """
         Reject an honour combat.
         """
-        character_id = character.id
-        if character_id not in self.preparing:
+        char_db_id = character.get_db_id()
+        try:
+            info = self.preparing[char_db_id]
+        except KeyError:
             return
 
         # stop the call
-        call_id = self.preparing[character_id]["call_id"]
+        call_id = info["call_id"]
         call_id.cancel()
         
         # remove characters from the preparing queue
-        opponent_id = self.preparing[character_id]["opponent"]
+        del self.preparing[char_db_id]
+        try:
+            character = Server.world.get_character(char_db_id)
+            character.msg({"match_rejected": char_db_id})
+        except KeyError:
+            pass
 
-        character = search_object("#%s" % character_id)
-        if character:
-            character[0].msg({"match_rejected": character_id})
-            del self.preparing[character_id]
+        opponent_db_id = info["opponent"]
+        del self.preparing[opponent_db_id]
+        try:
+            character = Server.world.get_character(opponent_db_id)
+            character.msg({"match_rejected": char_db_id})
+        except KeyError:
+            pass
 
-        opponent = search_object("#%s" % opponent_id)
-        if opponent:
-            opponent[0].msg({"match_rejected": character_id})
-            del self.preparing[opponent_id]
+        self.remove(character)
 
-        self.remove_by_id(character_id)
-
-    def fight(self, opponents):
+    def fight(self, opponents_id):
         """
         Create a combat.
         """
-        confirmed0 = opponents[0] in self.preparing and self.preparing[opponents[0]]["confirmed"]
-        confirmed1 = opponents[1] in self.preparing and self.preparing[opponents[1]]["confirmed"]
+        def remove_by_id(char_db_id):
+            """
+            Remove a character from the queue.
+            """
+            try:
+                self.waiting_queue.remove(char_db_id)
+            except ValueError:
+                pass
+
+            try:
+                del self.preparing[char_db_id]
+            except KeyError:
+                pass
+
+        confirmed0 = opponents_id[0] in self.preparing and self.preparing[opponents_id[0]]["confirmed"]
+        confirmed1 = opponents_id[1] in self.preparing and self.preparing[opponents_id[1]]["confirmed"]
 
         if not confirmed0 and not confirmed1:
-            self.remove_by_id(opponents[0])
-            self.remove_by_id(opponents[1])
+            # Neither characters is confirmed.
+            remove_by_id(opponents_id[0])
+            remove_by_id(opponents_id[1])
 
-            opponent0 = search_object("#%s" % opponents[0])
-            opponent0[0].msg({"match_rejected": opponents[0],
-                              "left_combat_queue": ""})
-            opponent1 = search_object("#%s" % opponents[1])
-            opponent1[0].msg({"match_rejected": opponents[1],
-                              "left_combat_queue": ""})
+            try:
+                character = Server.world.get_character(opponents_id[0])
+                character.msg({
+                    "match_rejected": opponents_id[0],
+                    "left_combat_queue": "",
+                })
+            except KeyError:
+                pass
+
+            try:
+                character = Server.world.get_character(opponents_id[1])
+                character.msg({
+                    "match_rejected": opponents_id[1],
+                    "left_combat_queue": "",
+                })
+            except KeyError:
+                pass
+
         elif not confirmed0:
-            # opponents 0 not confirmed
-            self.remove_by_id(opponents[0])
-            if opponents[1] in self.preparing:
-                del self.preparing[opponents[1]]
+            # Opponents 0 not confirmed.
 
-            opponent0 = search_object("#%s" % opponents[0])
-            opponent0[0].msg({"match_rejected": opponents[0],
-                              "left_combat_queue": ""})
+            # Remove opponent 0.
+            remove_by_id(opponents_id[0])
 
-            opponent1 = search_object("#%s" % opponents[1])
-            opponent1[0].msg({"match_rejected": opponents[0]})
+            try:
+                character = Server.world.get_character(opponents_id[0])
+                character.msg({
+                    "match_rejected": opponents_id[0],
+                    "left_combat_queue": "",
+                })
+            except KeyError:
+                pass
+
+            # Put opponent 1 back to the waiting queue.
+            try:
+                del self.preparing[opponents_id[1]]
+            except KeyError:
+                pass
+
+            try:
+                character = Server.world.get_character(opponents_id[1])
+                character.msg({
+                    "match_rejected": opponents_id[0],
+                })
+            except KeyError:
+                pass
+
         elif not confirmed1:
             # opponents 1 not confirmed
-            self.remove_by_id(opponents[1])
-            if opponents[0] in self.preparing:
-                del self.preparing[opponents[0]]
 
-            opponent1 = search_object("#%s" % opponents[1])
-            opponent1[0].msg({"match_rejected": opponents[1],
-                              "left_combat_queue": ""})
+            # Remove opponent 1.
+            remove_by_id(opponents_id[1])
 
-            opponent0 = search_object("#%s" % opponents[0])
-            opponent0[0].msg({"match_rejected": opponents[1]})
+            try:
+                character = Server.world.get_character(opponents_id[1])
+                character.msg({
+                    "match_rejected": opponents_id[1],
+                    "left_combat_queue": "",
+                })
+            except KeyError:
+                pass
+
+            # Put opponent 0 back to the waiting queue.
+            try:
+                del self.preparing[opponents_id[0]]
+            except KeyError:
+                pass
+
+            try:
+                character = Server.world.get_character(opponents_id[0])
+                character.msg({
+                    "match_rejected": opponents_id[1],
+                })
+            except KeyError:
+                pass
+
         elif confirmed0 and confirmed1:
             # all confirmed
-            opponent0 = search_object("#%s" % opponents[0])
-            opponent1 = search_object("#%s" % opponents[1])
-            # create a new combat handler
-            chandler = create_script(settings.HONOUR_COMBAT_HANDLER)
-            # set combat team and desc
-            chandler.set_combat(
+
+            # create a combat
+            opponent0 = Server.world.get_character(opponents_id[0])
+            opponent1 = Server.world.get_character(opponents_id[1])
+
+            # create a new combat
+            COMBAT_HANDLER.create_combat(
                 combat_type=CombatType.HONOUR,
-                teams={1:[opponent0[0]], 2:[opponent1[0]]},
+                teams={1:[opponent0], 2:[opponent1]},
                 desc=_("Fight of Honour"),
                 timeout=0
             )
 
-            self.remove_by_id(opponents[0])
-            self.remove_by_id(opponents[1])
+            remove_by_id(opponents_id[0])
+            remove_by_id(opponents_id[1])
+
+            opponent0.msg({"left_combat_queue": ""})
+            opponent1.msg({"left_combat_queue": ""})
 
 
 # main handler

@@ -32,16 +32,17 @@ from muddery.server.database.worlddata.default_objects import DefaultObjects
 from muddery.server.database.worlddata.element_properties import ElementProperties
 from muddery.server.database.worlddata.equipment_positions import EquipmentPositions
 from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
+from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils import defines
 from muddery.server.utils.data_field_handler import DataFieldHandler, ConstDataHolder
 from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.database.gamedata.honours_mapper import HONOURS_MAPPER
-from muddery.server.database.gamedata.character_inventory import CHARACTER_INVENTORY_DATA
-from muddery.server.database.gamedata.character_equipments import CHARACTER_EQUIPMENTS_DATA
-from muddery.server.database.gamedata.player_character import PlayerCharacter
-from muddery.server.database.gamedata.character_skills import CHARACTER_SKILLS
-from muddery.server.database.gamedata.character_combat import CHARACTER_COMBAT
+from muddery.server.database.gamedata.character_inventory import CharacterInventory
+from muddery.server.database.gamedata.character_equipments import CharacterEquipments
+from muddery.server.database.gamedata.character_info import CharacterInfo
+from muddery.server.database.gamedata.character_skills import CharacterSkills
+from muddery.server.database.gamedata.character_combat import CharacterCombat
 from muddery.server.database.gamedata.character_location import CharacterLocation
 from muddery.server.combat.match_pvp import MATCH_COMBAT_HANDLER
 from muddery.server.utils.object_states_handler import ObjectStatesHandler
@@ -212,30 +213,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         """
         return self.db_id
 
-    def at_object_delete(self):
-        """
-        Called just before the database object is permanently
-        delete()d from the database. If this method returns False,
-        deletion is aborted.
-        """
-        result = super(MudderyPlayerCharacter, self).at_object_delete()
-        if not result:
-            return result
-
-        # delete inventory objects
-        CHARACTER_INVENTORY_DATA.remove_character(self.get_db_id())
-
-        # delete equipments
-        CHARACTER_EQUIPMENTS_DATA.remove_character(self.get_db_id())
-
-        # remove the character's honour
-        HONOURS_MAPPER.remove_honour(self.get_db_id())
-
-        # remove quests
-        self.quest_handler.remove_all()
-
-        return True
-
     def set_level(self, level):
         """
         Set element's level.
@@ -245,7 +222,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if self.level == level:
             return
 
-        PlayerCharacter.set_level(self.get_account_id(), self.get_db_id(), level)
+        CharacterInfo.set_level(self.get_db_id(), level)
 
         super(MudderyPlayerCharacter, self).set_level(level)
 
@@ -258,7 +235,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             level: (int) element's level.
         """
         if level is None:
-            level = PlayerCharacter.get_level(self.get_account_id(), self.get_db_id())
+            level = CharacterInfo.get_level(self.get_db_id())
 
         super(MudderyPlayerCharacter, self).setup_element(key, level, first_time)
 
@@ -296,7 +273,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 self.reborn()
 
         # load combat id
-        self.combat_id = CHARACTER_COMBAT.load(self.get_db_id(), None)
+        self.combat_id = CharacterCombat.load(self.get_db_id(), None)
 
     def load_custom_level_data(self, level):
         """
@@ -483,20 +460,20 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Get the character's level.
         :return:
         """
-        return PlayerCharacter.get_level(self.get_account_id(), self.get_db_id())
+        return CharacterInfo.get_level(self.get_db_id())
 
     def set_nickname(self, nickname):
         """
         Set player character's nickname.
         """
-        PlayerCharacter.set_nickname(self.get_account_id(), self.get_db_id(), nickname)
+        CharacterInfo.set_nickname(self.get_db_id(), nickname)
 
     def get_name(self):
         """
         Get player character's name.
         """
         # Use nick name instead of normal name.
-        return PlayerCharacter.get_nickname(self.get_account_id(), self.get_db_id())
+        return CharacterInfo.get_nickname(self.get_db_id())
 
     def get_available_commands(self, caller):
         """
@@ -699,7 +676,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             }
         ]
         """
-        inventory = CHARACTER_INVENTORY_DATA.get_character(self.get_db_id())
+        inventory = CharacterInventory.get_character(self.get_db_id())
         self.inventory = [{"position": pos, **inventory[pos]} for pos in sorted(inventory)]
 
         # default objects
@@ -804,7 +781,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     "level": level,
                 }
                 self.inventory.append(new_obj)
-                CHARACTER_INVENTORY_DATA.add(self.get_db_id(), position, object_key, number, level)
+                CharacterInventory.add(self.get_db_id(), position, object_key, number, level)
             else:
                 # common number
                 if object_record.unique:
@@ -820,7 +797,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                         if add > 0:
                             # increase stack number
                             item["number"] = current_number + add
-                            CHARACTER_INVENTORY_DATA.set_dict(self.get_db_id(), item["position"], {"number": current_number + add})
+                            CharacterInventory.set_dict(self.get_db_id(), item["position"], {"number": current_number + add})
                             number -= add
                             accepted += add
                         else:
@@ -844,7 +821,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                             "level": level,
                         }
                         self.inventory.append(new_obj)
-                        CHARACTER_INVENTORY_DATA.add(self.get_db_id(), position, object_key, add, level)
+                        CharacterInventory.add(self.get_db_id(), position, object_key, add, level)
 
                         number -= add
                         accepted += add
@@ -862,7 +839,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                         if add > 0:
                             # increase stack number
                             item["number"] = current_number + add
-                            CHARACTER_INVENTORY_DATA.set_dict(self.get_db_id(), item["position"], {"number": current_number + add})
+                            CharacterInventory.set_dict(self.get_db_id(), item["position"], {"number": current_number + add})
 
                             number -= add
                             accepted += add
@@ -895,7 +872,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                             "level": level,
                         }
                         self.inventory.append(new_obj)
-                        CHARACTER_INVENTORY_DATA.add(self.get_db_id(), position, object_key, add, level)
+                        CharacterInventory.add(self.get_db_id(), position, object_key, add, level)
 
                         number -= add
                         accepted += add
@@ -1014,10 +991,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 object_record = object_record[0]
 
                 if object_record.can_remove:
-                    CHARACTER_INVENTORY_DATA.remove_object(self.get_db_id(), position)
+                    CharacterInventory.remove_object(self.get_db_id(), position)
                     del self.inventory[index]
                 else:
-                    CHARACTER_INVENTORY_DATA.set_dict(self.get_db_id(), position, {"number": 0})
+                    CharacterInventory.set_dict(self.get_db_id(), position, {"number": 0})
                     item["number"] = 0
 
                 if not mute:
@@ -1040,7 +1017,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 obj_num = item["number"]
                 if obj_num > 0:
                     if obj_num > number:
-                        CHARACTER_INVENTORY_DATA.set_dict(self.get_db_id(), position, {"number": obj_num - number})
+                        CharacterInventory.set_dict(self.get_db_id(), position, {"number": obj_num - number})
                         item["number"] = obj_num - number
                     else:
                         common_models = ELEMENT("POCKET_OBJECT").get_models()
@@ -1048,10 +1025,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                         object_record = object_record[0]
 
                         if object_record.can_remove:
-                            CHARACTER_INVENTORY_DATA.remove_object(self.get_db_id(), position)
+                            CharacterInventory.remove_object(self.get_db_id(), position)
                             del self.inventory[index]
                         else:
-                            CHARACTER_INVENTORY_DATA.set_dict(self.get_db_id(), position, {"number": 0})
+                            CharacterInventory.set_dict(self.get_db_id(), position, {"number": 0})
                             item["number"] = 0
 
                     if not mute:
@@ -1111,7 +1088,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 if obj_num > 0:
                     if obj_num > to_remove:
                         # Reduce the object's number.
-                        CHARACTER_INVENTORY_DATA.set_dict(self.get_db_id(), item["position"], {"number": obj_num - to_remove})
+                        CharacterInventory.set_dict(self.get_db_id(), item["position"], {"number": obj_num - to_remove})
                         item["number"] = obj_num - to_remove
                         to_remove = 0
                     else:
@@ -1121,10 +1098,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                         object_record = object_record[0]
 
                         if object_record.can_remove:
-                            CHARACTER_INVENTORY_DATA.remove_object(self.get_db_id(), item["position"])
+                            CharacterInventory.remove_object(self.get_db_id(), item["position"])
                             del self.inventory[index]
                         else:
-                            CHARACTER_INVENTORY_DATA.set_dict(self.get_db_id(), item["position"], {"number": 0})
+                            CharacterInventory.set_dict(self.get_db_id(), item["position"], {"number": 0})
                             item["number"] = 0
 
                         to_remove -= obj_num
@@ -1289,7 +1266,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         Returns:
             None
         """
-        self.equipments = CHARACTER_EQUIPMENTS_DATA.get_character(self.get_db_id())
+        self.equipments = CharacterEquipments.get_character(self.get_db_id())
 
         # get equipment's position
         positions = set([r.key for r in EquipmentPositions.all()])
@@ -1359,7 +1336,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             new_obj.setup_element(item["object_key"], item["level"])
             item["obj"] = new_obj
 
-        CHARACTER_EQUIPMENTS_DATA.add(self.get_db_id(), body_position, item["object_key"], item["level"])
+        CharacterEquipments.add(self.get_db_id(), body_position, item["object_key"], item["level"])
         self.equipments[body_position] = item
 
         # Remove from the inventory
@@ -1388,7 +1365,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         item = self.equipments[body_position]
         self.receive_object(item["object_key"], 1, item["level"], True)
-        CHARACTER_EQUIPMENTS_DATA.remove_equipment(self.get_db_id(), body_position)
+        CharacterEquipments.remove_equipment(self.get_db_id(), body_position)
         del self.equipments[body_position]
 
         if refresh:
@@ -1454,13 +1431,13 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         default_skill_set = set([r.skill for r in default_skills])
 
         # current skills
-        character_skills = CHARACTER_SKILLS.load_character(self.get_db_id())
+        character_skills = CharacterSkills.load_character(self.get_db_id())
 
         for key, item in character_skills.items():
             if item["is_default"]:
                 if key not in default_skill_set:
                     # default skill is deleted, remove it from db
-                    CHARACTER_SKILLS.delete(self.get_db_id(), key)
+                    CharacterSkills.delete(self.get_db_id(), key)
                     continue
 
             try:
@@ -1496,7 +1473,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 }
 
                 # save skill
-                CHARACTER_SKILLS.save(self.get_db_id(), key, {
+                CharacterSkills.save(self.get_db_id(), key, {
                     "level": item.level,
                     "is_default": True,
                     "cd_finish": 0,
@@ -1534,7 +1511,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         }
 
         # save skill
-        CHARACTER_SKILLS.save(self.get_db_id(), skill_key, {
+        CharacterSkills.save(self.get_db_id(), skill_key, {
             "level": level,
             "is_default": False,
             "cd_finish": 0,
@@ -1594,7 +1571,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         cd_finish = self.skills[skill_key]["cd_finish"]
 
         if last_cd_finish != cd_finish:
-            CHARACTER_SKILLS.save(self.get_db_id(), skill_key, {"cd_finish": cd_finish})
+            CharacterSkills.save(self.get_db_id(), skill_key, {"cd_finish": cd_finish})
 
         return result
 
@@ -1628,7 +1605,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         :return:
         """
         super(MudderyPlayerCharacter, self).join_combat(combat_id)
-        CHARACTER_COMBAT.save(self.get_db_id(), combat_id)
+        CharacterCombat.save(self.get_db_id(), combat_id)
 
     def get_combat(self):
         """
@@ -1642,7 +1619,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         if combat is None:
             # Combat is finished.
             self.combat_id = None
-            CHARACTER_COMBAT.remove(self.get_db_id())
+            CharacterCombat.remove_character(self.get_db_id())
 
         return combat
 
@@ -1959,11 +1936,10 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         rankings = top_rankings
         rankings.extend([char_id for char_id in nearest_rankings if char_id not in top_rankings])
 
-        characters = [search.get_object_by_id(char_id) for char_id in rankings]
-        data = [{"name": char.get_name(),
-                 "id": char.get_db_id(),
-                 "ranking": HONOURS_MAPPER.get_ranking(char),
-                 "honour": HONOURS_MAPPER.get_honour(char)} for char in characters if char]
+        data = [{"name": CharacterInfo.get_nickname(char_id),
+                 "id": char_id,
+                 "ranking": HONOURS_MAPPER.get_ranking(char_id),
+                 "honour": HONOURS_MAPPER.get_honour(char_id)} for char_id in rankings]
         self.msg({"rankings": data})
 
     def get_quest_info(self, quest_key):

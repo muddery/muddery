@@ -23,7 +23,7 @@ class MemoryStorage(BaseKeyValueStorage):
         super(MemoryStorage, self).__init__()
         self.storage = {}
 
-    def add(self, category, key, value):
+    def add(self, category, key, value=None):
         """
         Add a new attribute. If the key already exists, raise an exception.
 
@@ -40,7 +40,7 @@ class MemoryStorage(BaseKeyValueStorage):
 
         self.storage[category][key] = value
 
-    def save(self, category, key, value):
+    def save(self, category, key, value=None):
         """
         Set a value to the default value field.
 

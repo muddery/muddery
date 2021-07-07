@@ -46,7 +46,7 @@ class KeyValueTable(BaseKeyValueStorage):
 
         self.fields = [field.name for field in self.model._meta.fields if field.name not in exclude_fields]
 
-    def add(self, category, key, value):
+    def add(self, category, key, value=None):
         """
         Add a new attribute. If the key already exists, raise an exception.
 
@@ -55,7 +55,9 @@ class KeyValueTable(BaseKeyValueStorage):
             key: (string) the key.
             value: (any) data.
         """
-        if self.default_value_field is None:
+        if value is None:
+            data = {}
+        elif self.default_value_field is None:
             data = value
         else:
             data = {self.default_value_field: value}
@@ -68,7 +70,7 @@ class KeyValueTable(BaseKeyValueStorage):
 
         self.model.objects.create(**data)
 
-    def save(self, category, key, value):
+    def save(self, category, key, value=None):
         """
         Set a value to the default value field.
 
@@ -77,7 +79,9 @@ class KeyValueTable(BaseKeyValueStorage):
             key: (string) the key.
             value: (any) data.
         """
-        if self.default_value_field is None:
+        if value is None:
+            data = {}
+        elif self.default_value_field is None:
             data = value
         else:
             data = {self.default_value_field: value}

@@ -12,41 +12,45 @@ class CharacterInventory(object):
     """
     The storage of all objects in characters' inventories.
     """
-    def __init__(self, model_name):
-        storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-        self.storage = storage_class(model_name, "character_id", "position")
+    # data storage
+    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
+    storage = storage_class("character_inventory", "character_id", "position")
 
-    def get_character(self, character_id):
+    @classmethod
+    def get_character(cls, character_id):
         """
         Get a character's inventory.
         :param character_id:
         :return:
         """
-        return self.storage.load_category(character_id, {})
+        return cls.storage.load_category(character_id, {})
 
-    def get_object(self, character_id, position):
+    @classmethod
+    def get_object(cls, character_id, position):
         """
         Get an object's info in the inventory.
         :param character_id: (int) character's id
         :param position: (int) position in the inventory
         :return:
         """
-        return self.storage.load(character_id, position)
+        return cls.storage.load(character_id, position)
 
-    def add(self, character_id, position, object_key, number, level):
+    @classmethod
+    def add(cls, character_id, position, object_key, number, level):
         """
         Add a new object to the inventory.
         :param character_id:
         :param object_key:
         :return:
         """
-        self.storage.add(character_id, position, {
+        cls.storage.add(character_id, position, {
             "object_key": object_key,
             "number": number,
             "level": level,
         })
 
-    def set(self, character_id, position, object_key, number, level):
+    @classmethod
+    def set(cls, character_id, position, object_key, number, level):
         """
         Set a object's data.
 
@@ -55,13 +59,14 @@ class CharacterInventory(object):
         :param values:
         :return:
         """
-        self.storage.save(character_id, position, {
+        cls.storage.save(character_id, position, {
             "object_key": object_key,
             "number": number,
             "level": level,
         })
 
-    def set_dict(self, character_id, position, values):
+    @classmethod
+    def set_dict(cls, character_id, position, values):
         """
         Set a object's data.
 
@@ -70,18 +75,20 @@ class CharacterInventory(object):
         :param values:
         :return:
         """
-        self.storage.save(character_id, position, values)
+        cls.storage.save(character_id, position, values)
 
-    def remove_character(self, character_id):
+    @classmethod
+    def remove_character(cls, character_id):
         """
         Remove a character's all objects.
 
-        :param character_id:
+        :param character_id: character's db id
         :return:
         """
-        self.storage.delete_category(character_id)
+        cls.storage.delete_category(character_id)
 
-    def remove_object(self, character_id, position):
+    @classmethod
+    def remove_object(cls, character_id, position):
         """
         Remove an object.
 
@@ -89,7 +96,4 @@ class CharacterInventory(object):
         :param position: (int) object's position in the inventory
         :return:
         """
-        self.storage.delete(character_id, position)
-
-
-CHARACTER_INVENTORY_DATA = CharacterInventory("character_inventory")
+        cls.storage.delete(character_id, position)

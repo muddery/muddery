@@ -17,7 +17,8 @@ from muddery.server.database.worlddata.world_rooms import WorldRooms
 from muddery.server.database.worlddata.world_exits import WorldExits
 from muddery.server.database.worlddata.world_npcs import WorldNPCs
 from muddery.server.database.worlddata.world_objects import WorldObjects
-from muddery.server.database.gamedata.player_character import PlayerCharacter
+from muddery.server.database.gamedata.account_characters import AccountCharacters
+from muddery.server.database.gamedata.character_info import CharacterInfo
 from muddery.server.database.gamedata.system_data import SystemData
 from muddery.server.database.gamedata.character_location import CharacterLocation
 
@@ -83,7 +84,8 @@ def create_character(new_player, nickname, character_key=None,
         nickname = character_key
 
     # save data
-    PlayerCharacter.add(new_player.id, char_db_id, nickname, level)
+    AccountCharacters.add(new_player.id, char_db_id)
+    CharacterInfo.add(char_db_id, nickname, level)
 
     # set nickname
     new_character.set_nickname(nickname)

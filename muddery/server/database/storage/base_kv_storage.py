@@ -7,7 +7,7 @@ class BaseKeyValueStorage(object):
     """
     The storage of key-values.
     """
-    def add(self, category, key, value):
+    def add(self, category, key, value=None):
         """
         Add a new attribute. If the key already exists, raise an exception.
 
@@ -18,7 +18,7 @@ class BaseKeyValueStorage(object):
         """
         pass
 
-    def save(self, category, key, value):
+    def save(self, category, key, value=None):
         """
         Set an attribute.
 

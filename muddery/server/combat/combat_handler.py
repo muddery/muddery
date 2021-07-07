@@ -1,6 +1,7 @@
 
 from django.conf import settings
 from muddery.server.utils.utils import class_from_path
+from muddery.server.utils.defines import CombatType
 
 
 class CombatHandler(object):
@@ -30,7 +31,11 @@ class CombatHandler(object):
         new_combat_id = self.combat_id
         self.combat_id += 1
 
-        combat = class_from_path(settings.NORMAL_COMBAT_HANDLER)()
+        if combat_type == CombatType.HONOUR:
+            combat = class_from_path(settings.HONOUR_COMBAT_HANDLER)()
+        else:
+            combat = class_from_path(settings.NORMAL_COMBAT_HANDLER)()
+
         combat.set_combat(self, new_combat_id, combat_type, teams, desc, timeout)
         combat.start()
         self.combats[new_combat_id] = combat

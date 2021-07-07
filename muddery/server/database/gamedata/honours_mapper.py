@@ -77,20 +77,8 @@ class HonoursMapper(object):
             return self.honours[character.id]
         except Exception as e:
             print("Can not get character's honour: %s" % e)
-            
-    def get_honour(self, character, default=None):
-        """
-        Get a character's honour.
-        
-        Args:
-            character: (Object) Character object.
-            
-        Return:
-            number: Character's honour.
-        """
-        return self.get_honour_by_id(character.id, default)
 
-    def get_honour_by_id(self, char_id, default=None):
+    def get_honour(self, char_db_id, default=None):
         """
         Get a character's honour.
         
@@ -101,25 +89,25 @@ class HonoursMapper(object):
             number: Character's honour.
         """
         try:
-            return self.honours[char_id]["honour"]
+            return self.honours[char_db_id]["honour"]
         except Exception as e:
             if default is not None:
                 return default
             else:
                 print("Can not get character's honour: %s" % e)
             
-    def get_ranking(self, character):
+    def get_ranking(self, char_db_id):
         """
         Get a character's ranking.
         
         Args:
-            character: (Object) Character object.
+            char_db_id: (int) Character's db id.
             
         Return:
             number: Character's ranking.
         """
         try:
-            return self.honours[character.id]["ranking"]
+            return self.honours[char_db_id]["ranking"]
         except Exception as e:
             print("Can not get character's ranking: %s" % e)
             
@@ -218,13 +206,13 @@ class HonoursMapper(object):
         else:
             print("Can not set character's honours")
             
-    def remove_honour(self, char_id):
+    def remove_character(self, char_db_id):
         """
         Remove a character's honour.
         """
         try:
-            self.objects.get(character=char_id).delete()
-            del self.honours[char_id]
+            self.objects.get(character=char_db_id).delete()
+            del self.honours[char_db_id]
             self.make_rankings()
         except self.honour_model.DoesNotExist:
             pass

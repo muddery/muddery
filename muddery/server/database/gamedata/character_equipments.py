@@ -12,40 +12,44 @@ class CharacterEquipments(object):
     """
     The storage of all objects in characters' equipments.
     """
-    def __init__(self, model_name):
-        storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
-        self.storage = storage_class(model_name, "character_id", "position")
+    # data storage
+    storage_class = utils.class_from_path(settings.DATABASE_ACCESS_OBJECT)
+    storage = storage_class("character_equipments", "character_id", "position")
 
-    def get_character(self, character_id):
+    @classmethod
+    def get_character(cls, character_id):
         """
         Get a character's inventory.
         :param character_id:
         :return:
         """
-        return self.storage.load_category(character_id, {})
+        return cls.storage.load_category(character_id, {})
 
-    def get_equipment(self, character_id, position):
+    @classmethod
+    def get_equipment(cls, character_id, position):
         """
         Get an equipment's info in the inventory.
         :param character_id: (int) character's id
         :param position: (string) position on the body
         :return:
         """
-        return self.storage.load(character_id, position)
+        return cls.storage.load(character_id, position)
 
-    def add(self, character_id, position, object_key, level):
+    @classmethod
+    def add(cls, character_id, position, object_key, level):
         """
         Add a new object to the inventory.
         :param character_id:
         :param object_key:
         :return:
         """
-        self.storage.add(character_id, position, {
+        cls.storage.add(character_id, position, {
             "object_key": object_key,
             "level": level,
         })
 
-    def set(self, character_id, position, object_key, level):
+    @classmethod
+    def set(cls, character_id, position, object_key, level):
         """
         Set a object's data.
 
@@ -54,21 +58,23 @@ class CharacterEquipments(object):
         :param values:
         :return:
         """
-        self.storage.save(character_id, position, {
+        cls.storage.save(character_id, position, {
             "object_key": object_key,
             "level": level,
         })
 
-    def remove_character(self, character_id):
+    @classmethod
+    def remove_character(cls, character_id):
         """
         Remove a character's all equipments.
 
         :param character_id:
         :return:
         """
-        self.storage.delete_category(character_id)
+        cls.storage.delete_category(character_id)
 
-    def remove_equipment(self, character_id, position):
+    @classmethod
+    def remove_equipment(cls, character_id, position):
         """
         Remove an equipment.
 
@@ -76,7 +82,4 @@ class CharacterEquipments(object):
         :param position: (string) position on the body
         :return:
         """
-        self.storage.delete(character_id, position)
-
-
-CHARACTER_EQUIPMENTS_DATA = CharacterEquipments("character_equipments")
+        cls.storage.delete(character_id, position)

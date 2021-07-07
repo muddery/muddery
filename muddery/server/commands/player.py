@@ -9,10 +9,10 @@ from django.conf import settings
 from evennia.utils import logger
 from evennia.utils.utils import make_iter
 from muddery.server.commands.base_command import BaseCommand
-from muddery.server.utils.search import get_object_by_key, get_object_by_id
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.builder import create_character
-from muddery.server.database.gamedata.player_character import PlayerCharacter
+from muddery.server.database.gamedata.account_characters import AccountCharacters
+from muddery.server.database.gamedata.character_info import CharacterInfo
 
 
 MAX_NR_CHARACTERS = settings.MAX_NR_CHARACTERS
@@ -243,7 +243,7 @@ class CmdCharCreate(BaseCommand):
             return
 
         try:
-            PlayerCharacter.get_char_id(nickname)
+            CharacterInfo.get_char_id(nickname)
             # check if this name already exists.
             session.msg({"alert":_("{RA character named '{r%s{R' already exists.{n") % name})
             return
@@ -260,10 +260,9 @@ class CmdCharCreate(BaseCommand):
             logger.log_trace()
             return
 
-        char_all = player.get_all_characters()
         session.msg({
             "char_created": True,
-            "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
+            "char_all": player.get_all_nicknames(),
         })
 
 
@@ -294,19 +293,21 @@ class CmdCharDelete(BaseCommand):
         char_id = args["id"]
 
         # use the playable_characters list to search
-        characters = PlayerCharacter.get_account_characters(player.id)
+        characters = AccountCharacters.get_account_characters(player.id)
         if not characters or char_id not in characters:
             session.msg({"alert": _("You have no such character to delete.")})
             return
 
-        # Todo: delete all character data.
-        PlayerCharacter.remove_character(player.id, char_id)
+        try:
+            player.delete_character(session, char_id)
 
-        char_all = PlayerCharacter.get_account_characters(player.id)
-        session.msg({
-            "char_deleted": True,
-            "char_all": [{"name": data["nickname"], "id": char_id} for char_id, data in char_all.items()],
-        })
+            session.msg({
+                "char_deleted": True,
+                "char_all": player.get_all_nicknames(),
+            })
+        except Exception as e:
+            logger.log_errmsg("Can not delete character %s: %s")
+            session.msg({"alert": _("You can not delete this character.")})
 
 
 class CmdCharDeleteWithPW(BaseCommand):
@@ -353,7 +354,7 @@ class CmdCharDeleteWithPW(BaseCommand):
             return
         else: # one match
             delobj = match[0]
-            
+
             # get new playable characters
             new_characters = [char for char in player.db._playable_characters if char != delobj]
 
