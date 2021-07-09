@@ -22,7 +22,7 @@ class MudderyObjectCreator(ELEMENT("WORLD_OBJECT")):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, CreatorLootList.get(self.get_element_key()))
+        return LootHandler(CreatorLootList.get(self.get_element_key()))
 
     def at_element_setup(self, first_time):
         """

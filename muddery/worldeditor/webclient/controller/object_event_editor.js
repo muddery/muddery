@@ -6,7 +6,6 @@
  * 2. if need query_areas, queryAreas
  * 3. queryEventTriggers
  * 4. queryEventActionForms
- * 5. if the action_type is "ACTION_ROOM_INTERVAL", use queryEventActionForms to query interval actions.
  */
 
 /*

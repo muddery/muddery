@@ -5,6 +5,7 @@ LootHandler handles matters of loots.
 import random
 from evennia.utils import logger
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
+from muddery.server.utils.localized_strings_handler import _
 
 
 class LootHandler(object):
@@ -12,71 +13,124 @@ class LootHandler(object):
     Handles matters of loots.
     """
 
-    def __init__(self, owner, data):
+    def __init__(self, data):
         """
         Initialize handler
         """
-        self.owner = owner
         self.loot_list = []
-
-        if not owner:
-            return
 
         # load loot data
         loot_list = []
         try:
-            for loot_record in data:
-                loot_object = {"object_key": loot_record.object,
-                               "number": loot_record.number,
-                               "odds": loot_record.odds,
-                               "quest": loot_record.quest,
-                               "condition": loot_record.condition}
-                loot_list.append(loot_object)
+            for d in data:
+                loot_list.append({
+                    "object_key": d.object,
+                    "number": d.number,
+                    "odds": d.odds,
+                    "multiple": d.multiple,
+                    "message": d.message,
+                    "quest": d.quest,
+                    "condition": d.condition
+                })
         except Exception as e:
-            logger.log_errmsg("Can't load loot info %s: %s" % (self.owner.get_element_key(), e))
+            logger.log_errmsg("Can't load loot info %s" % e)
 
         self.loot_list = loot_list
 
     def get_obj_list(self, looter):
         """
-        Get a list of objects that dropped.
-        
-        Returns:
-            (list) a list of object's information
+        Get loot objects list.
+
+        :param looter:
+        :param times:
+        :return:
         """
-
-        def can_loot(self, looter, obj):
-            """
-            help function to decide which objects can be looted.
-            """
-            rand = random.random()
-            if obj["odds"] < rand:
-                return False
-
-            if obj["quest"]:
-                if looter.quest_handler:
-                    if not looter.quest_handler.is_not_accomplished(obj["quest"]):
-                        return False
-
-            if not STATEMENT_HANDLER.match_condition(obj["condition"], looter, self.owner):
-                return False
-
-            return True
-
         # Get objects that matches odds and conditions .
-        obj_list = [obj for obj in self.loot_list if can_loot(self, looter, obj)]
+        obj_list = []
+        rand = random.random()
+        for item in self.loot_list:
+            # check quests
+            if item["quest"]:
+                if looter.quest_handler and not looter.quest_handler.is_not_accomplished(item["quest"]):
+                    continue
+
+            # check condition
+            if not STATEMENT_HANDLER.match_condition(item["condition"], looter, None):
+                continue
+
+            if item["multiple"]:
+                if rand < item["odds"]:
+                    obj_list.append({
+                        "object_key": item["object_key"],
+                        "number": item["number"]
+                    })
+                rand = random.random()
+            else:
+                if rand < item["odds"]:
+                    obj_list.append({
+                        "object_key": item["object"],
+                        "number": item["number"]
+                    })
+                    break
+                rand -= item["odds"]
 
         return obj_list
 
-    def loot(self, looter):
+    def loot(self, looter, mute=False, times=1):
         """
         Loot objects.
         """
-        if not looter:
-            return
-
         # Get objects that matches odds and conditions .
-        obj_list = self.get_obj_list(looter)
+        obj_list = []
+        msg_template = {}
+        rand = random.random()
+        for item in self.loot_list:
+            # check quests
+            if item["quest"]:
+                if looter.quest_handler and not looter.quest_handler.is_not_accomplished(item["quest"]):
+                    continue
 
-        # Add objects to the looter.
-        looter.receive_objects(obj_list)
+            # check condition
+            if not STATEMENT_HANDLER.match_condition(item["condition"], looter, None):
+                continue
+
+            if item["multiple"]:
+                if rand < item["odds"]:
+                    msg_template[item["object_key"]] = item["message"]
+                    obj_list.append({
+                        "object_key": item["object_key"],
+                        "number": item["number"] * times
+                    })
+                rand = random.random()
+            else:
+                if rand < item["odds"]:
+                    msg_template[item["object_key"]] = item["message"]
+                    obj_list.append({
+                        "object_key": item["object"],
+                        "number": item["number"] * times
+                    })
+                    break
+                rand -= item["odds"]
+
+        get_objects = looter.receive_objects(obj_list, mute=True)
+
+        if get_objects and not mute:
+            message = ""
+            for item in get_objects:
+                if message:
+                    message += ", "
+
+                template = msg_template[item["key"]]
+                if template:
+                    try:
+                        message += template % item["number"]
+                    except Exception as e:
+                        message += template
+                else:
+                    message += _("Get") + " " + item["name"] + " " + str(item["number"])
+
+            looter.msg({
+                "get_objects": get_objects,
+                "msg": message,
+            })
+

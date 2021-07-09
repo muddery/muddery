@@ -32,8 +32,15 @@ class CreatorLootList(BaseLootList):
     table_name = "creator_loot_list"
 
 
-class QuestLootList(BaseLootList):
+class QuestRewardList(BaseLootList):
     """
-    Object creator's loot list.
+   Quest's rewards list.
     """
     table_name = "quest_reward_list"
+
+
+class RoomProfitList(BaseLootList):
+    """
+    Room's profits list.
+    """
+    table_name = "room_profit_list"

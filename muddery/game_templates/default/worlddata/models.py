@@ -341,6 +341,16 @@ class quest_reward_list(BaseModels.quest_reward_list):
 
 # ------------------------------------------------------------
 #
+# profit room's rewards
+#
+# ------------------------------------------------------------
+class room_profit_list(BaseModels.room_profit_list):
+    "Quest's reward list"
+    pass
+
+
+# ------------------------------------------------------------
+#
 # store quest objectives
 #
 # ------------------------------------------------------------

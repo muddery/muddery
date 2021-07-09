@@ -784,20 +784,6 @@ class ActionMessageForm(forms.ModelForm):
         fields = '__all__'
 
 
-class ActionRoomIntervalForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ActionRoomIntervalForm, self).__init__(*args, **kwargs)
-
-        choices = EVENT_ACTION_SET.choice_repeatedly()
-        self.fields['action'] = forms.ChoiceField(choices=choices)
-
-        localize_form_fields(self)
-
-    class Meta:
-        model = EVENT_ACTION_SET.get("ACTION_ROOM_INTERVAL").model()
-        fields = '__all__'
-
-
 class ActionGetObjectsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ActionGetObjectsForm, self).__init__(*args, **kwargs)

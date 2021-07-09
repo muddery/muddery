@@ -16,7 +16,7 @@ from muddery.server.utils.loot_handler import LootHandler
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.utils.game_settings import GAME_SETTINGS
 from muddery.server.database.worlddata.worlddata import WorldData
-from muddery.server.database.worlddata.loot_list import QuestLootList
+from muddery.server.database.worlddata.loot_list import QuestRewardList
 from muddery.server.database.worlddata.quest_objectives import QuestObjectives
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.elements.base_element import BaseElement
@@ -33,7 +33,7 @@ class MudderyQuest(BaseElement):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, QuestLootList.get(self.element_key))
+        return LootHandler(QuestRewardList.get(self.element_key))
 
     def set_character(self, character_id):
         """

@@ -93,7 +93,7 @@ class MudderyCharacter(BaseElement):
     # initialize loot handler in a lazy fashion
     @lazy_property
     def loot_handler(self):
-        return LootHandler(self, CharacterLootList.get(self.get_element_key()))
+        return LootHandler(CharacterLootList.get(self.get_element_key()))
 
     def set_id(self, char_id):
         """
