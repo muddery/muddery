@@ -21,7 +21,7 @@ class RecordData(object):
         try:
             pos = object.__getattribute__(self, "_fields")[attr_name]
         except KeyError:
-            raise AttributeError
+            raise AttributeError("Can not find field %s." % attr_name)
         return object.__getattribute__(self, "_records")[pos]
 
     def __setattr__(self, attr_name, value):

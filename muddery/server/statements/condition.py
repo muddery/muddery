@@ -32,7 +32,7 @@ class FuncIsQuestAccepted(StatementFunction):
 
 class FuncIsQuestAccomplished(StatementFunction):
     """
-    If the caller has accepted or finished the quest
+    All objectives of this quest are accomplished.
 
     Args:
         args[0]: (string) quest's key

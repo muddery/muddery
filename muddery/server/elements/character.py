@@ -20,6 +20,7 @@ from muddery.server.combat.combat_handler import COMBAT_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.loot_list import CharacterLootList
 from muddery.server.database.worlddata.default_skills import DefaultSkills
+from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.database.worlddata.character_states_dict import CharacterStatesDict
 from muddery.server.database.gamedata.object_storage import DBObjectStorage
 from muddery.server.utils.loot_handler import LootHandler
@@ -309,6 +310,7 @@ class MudderyCharacter(BaseElement):
 
         # default skills
         default_skills = DefaultSkills.get(self.get_element_key())
+
         for item in default_skills:
             key = item.skill
             try:
@@ -316,7 +318,7 @@ class MudderyCharacter(BaseElement):
                 skill_obj = ELEMENT("SKILL")()
                 skill_obj.setup_element(key, item.level)
             except Exception as e:
-                logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e), e))
+                logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e).__name__, e))
                 continue
 
             # Store new skill.
@@ -573,7 +575,7 @@ class MudderyCharacter(BaseElement):
                 timeout=0
             )
         except Exception as e:
-            logger.log_err("Can not create combat: [%s] %s" % (type(e), e))
+            logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
             self.msg(_("You can not attack %s.") % target.get_name())
 
         return True
@@ -606,7 +608,11 @@ class MudderyCharacter(BaseElement):
             (boolean) fight begins
         """
         # Create a target.
-        target = ELEMENT("COMMON_NPC")()
+        base_model = ELEMENT("CHARACTER").get_base_model()
+        table_data = WorldData.get_table_data(base_model, key=target_key)
+        table_data = table_data[0]
+
+        target = ELEMENT(table_data.element_type)()
         target.setup_element(target_key, level=target_level, first_time=True, temp=True)
         if not target:
             logger.log_errmsg("Can not create the target %s." % target_key)

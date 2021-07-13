@@ -62,7 +62,7 @@ class MudderyExit(BaseElement):
             character.set_location(self.destination_obj())
         except Exception as e:
             traceback.print_exc()
-            logger.log_err("%s cannot set location: (%s)%s." % (character.get_id(), type(e), e))
+            logger.log_err("%s cannot set location: (%s)%s." % (character.get_id(), type(e).__name__, e))
             character.msg({"msg": _("You can not go there.")})
 
     def can_traverse(self, character):

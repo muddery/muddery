@@ -831,7 +831,7 @@ class CmdAttack(BaseCommand):
                 timeout=0
             )
         except Exception as e:
-            logger.log_err("Can not create combat: [%s] %s" % (type(e), e))
+            logger.log_err("Can not create combat: [%s] %s" % (type(e).__name__, e))
             caller.msg(_("You can not attack %s.") % target.get_name())
 
         caller.msg(_("You are attacking {R%s{n! You are in combat.") % target.get_name())

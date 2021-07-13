@@ -130,14 +130,15 @@ class MudderyArea(BaseElement):
         :return:
         """
         records = WorldRooms.get_by_area(self.get_element_key())
-        models = ELEMENT("ROOM").get_models()
+        base_model = ELEMENT("ROOM").get_base_model()
+
         self.all_rooms = {}
         for record in records:
-            tables_data = WorldData.get_tables_data(models, record.key)
-            tables_data = tables_data[0]
+            table_data = WorldData.get_table_data(base_model, key=record.key)
+            table_data = table_data[0]
 
-            new_obj = ELEMENT("ROOM")()
-            new_obj.setup_element(tables_data.key)
+            new_obj = ELEMENT(table_data.element_type)()
+            new_obj.setup_element(record.key)
 
             self.all_rooms[new_obj.get_element_key()] = new_obj
 

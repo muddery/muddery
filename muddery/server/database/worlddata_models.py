@@ -270,6 +270,9 @@ class profit_rooms(BaseObjects):
     # This message will be sent to the character when the interval ends.
     end_message = models.TextField(blank=True)
 
+    # the condition for getting profits
+    condition = models.CharField(max_length=CONDITION_LENGTH, blank=True)
+
     class Meta:
         "Define Django meta options"
         abstract = True
@@ -579,10 +582,11 @@ class skills(models.Model):
         app_label = "worlddata"
 
 
-class shops(models.Model):
+class shops(BaseObjects):
     "Store all shops."
-    # shop's key
-    key = models.CharField(max_length=KEY_LENGTH, db_index=True)
+
+    # object's element type
+    element_type = models.CharField(max_length=KEY_LENGTH)
 
     # shop's name
     name = models.CharField(max_length=NAME_LENGTH, blank=True)

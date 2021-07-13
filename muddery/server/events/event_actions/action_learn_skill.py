@@ -36,5 +36,5 @@ class ActionLearnSkill(BaseEventAction):
                 character.learn_skill(record.skill, record.level, False)
             except Exception as e:
                 traceback.print_exc()
-                logger.log_err("Can not learn skill %s %s" % (type(e), e))
+                logger.log_err("Can not learn skill %s %s" % (type(e).__name__, e))
                 pass

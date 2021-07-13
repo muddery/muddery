@@ -124,7 +124,7 @@ class QuestHandler(object):
 
     def is_accomplished(self, quest_key):
         """
-        Whether the character accomplished this quest or not.
+        All objectives of this quest are accomplished.
 
         Args:
             quest_key: (string) quest's key

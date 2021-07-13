@@ -8,11 +8,13 @@ creation commands.
 
 """
 
+import traceback
 from evennia.utils import logger
 from muddery.server.utils.dialogue_handler import DIALOGUE_HANDLER
 from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.database.worlddata.npc_dialogues import NPCDialogues
 from muddery.server.database.worlddata.npc_shops import NPCShops
+from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.utils import defines
 from muddery.server.utils.localized_strings_handler import _
 
@@ -59,14 +61,22 @@ class MudderyBaseNPC(ELEMENT("CHARACTER")):
         # shops records
         shop_records = NPCShops.get(self.get_element_key())
         shop_keys = set([record.shop for record in shop_records])
+        base_model = ELEMENT("SHOP").get_base_model()
 
         # NPC's shop
         self.shops = {}
         for key in shop_keys:
-            shop = ELEMENT("SHOP")()
-            shop.setup_element(key)
-            shop.set_owner(self)
-            self.shops[key] = shop
+            try:
+                table_data = WorldData.get_table_data(base_model, key=key)
+                table_data = table_data[0]
+
+                shop = ELEMENT(table_data.element_type)()
+                shop.setup_element(key)
+                shop.set_owner(self)
+                self.shops[key] = shop
+            except Exception as e:
+                logger.log_errmsg("Can not create shop %s: (%s)%s" % (key, type(e).__name__, e))
+                continue
 
     def get_appearance(self, caller):
         """

@@ -343,12 +343,18 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         location_key = location.get_element_key() if location else ""
         CharacterLocation.save(self.get_db_id(), location_key)
 
-        super(MudderyPlayerCharacter, self).set_location(location)
+        if self.location:
+            self.location.at_character_leave(self)
+
+        self.location = location
 
         # Send new location's data to the character.
         location_name = self.location.name if location else ""
         self.msg({"msg": _("Moved to %s ...") % location_name})
         self.show_location()
+
+        if self.location:
+            self.location.at_character_arrive(self)
 
         # Trigger the arrive event.
         if self.location:
@@ -362,15 +368,6 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         """
         self.available_channels = self.get_available_channels()
-
-        # Send puppet info to the client first.
-        self.msg({
-            "puppet": {
-                "id": self.get_id(),
-                "name": self.get_name(),
-                "icon": getattr(self, "icon", None),
-            }
-        })
 
         # send character's data to player
         message = {
@@ -738,8 +735,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 "reject": reason,
             }]
         """
-        objects = []           # objects that have been accepted
+        common_models = ELEMENT("POCKET_OBJECT").get_models()
 
+        objects = []           # objects that have been accepted
         for obj in obj_list:
             object_key = obj["object_key"]
             level = obj.get("level", None)
@@ -749,9 +747,9 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             reject = False
 
             try:
-                common_models = ELEMENT("POCKET_OBJECT").get_models()
                 object_record = WorldData.get_tables_data(common_models, key=object_key)
                 object_record = object_record[0]
+                element_type = object_record.element_type
             except Exception as e:
                 logger.log_err("Can not find object %s: %s" % (object_key, e))
                 continue
@@ -776,6 +774,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
                 new_obj = {
                     "position": position,
+                    "element_type": element_type,
                     "object_key": object_key,
                     "number": number,
                     "level": level,
@@ -816,6 +815,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
                         new_obj = {
                             "position": position,
+                            "element_type": element_type,
                             "object_key": object_key,
                             "number": add,
                             "level": level,
@@ -867,6 +867,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
                         new_obj = {
                             "position": position,
+                            "element_type": element_type,
                             "object_key": object_key,
                             "number": add,
                             "level": level,
@@ -887,8 +888,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         if not mute:
             # Send results to the player.
-            message = {"get_objects": objects}
-            self.msg(message)
+            self.msg({"get_objects": objects})
 
         if show:
             self.show_inventory()
@@ -959,7 +959,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # take effect
         try:
             if "obj" not in item or not item["obj"]:
-                new_obj = ELEMENT("POCKET_OBJECT")()
+                new_obj = ELEMENT(item["element_type"])()
                 new_obj.setup_element(item["object_key"], item["level"])
                 item["obj"] = new_obj
 
@@ -1178,7 +1178,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         for item in self.inventory:
             if item["position"] == position:
                 if "obj" not in item or not item["obj"]:
-                    new_obj = ELEMENT("POCKET_OBJECT")()
+                    new_obj = ELEMENT(item["element_type"])()
                     new_obj.setup_element(item["object_key"], item["level"])
                     item["obj"] = new_obj
 
@@ -1270,12 +1270,18 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
 
         # get equipment's position
         positions = set([r.key for r in EquipmentPositions.all()])
+        common_models = ELEMENT("POCKET_OBJECT").get_models()
 
         for pos in list(self.equipments.keys()):
             if pos in positions:
                 # create an instance of the equipment
                 item = self.equipments[pos]
-                new_obj = ELEMENT("POCKET_OBJECT")()
+
+                object_record = WorldData.get_tables_data(common_models, key=item["object_key"])
+                object_record = object_record[0]
+                item["element_type"] = object_record.element_type
+
+                new_obj = ELEMENT(item["element_type"])()
                 new_obj.setup_element(item["object_key"], item["level"])
                 item["obj"] = new_obj
             else:
@@ -1332,7 +1338,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
         # Put on new equipment.
         if "obj" not in item or not item["obj"]:
             # create an instance of the equipment
-            new_obj = ELEMENT("POCKET_OBJECT")()
+            new_obj = ELEMENT(item["element_type"])()
             new_obj.setup_element(item["object_key"], item["level"])
             item["obj"] = new_obj
 
@@ -1445,7 +1451,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                 skill_obj = ELEMENT("SKILL")()
                 skill_obj.setup_element(key, item["level"])
             except Exception as e:
-                logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e), e))
+                logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e).__name__, e))
                 continue
 
             # Store new skill.
@@ -1463,7 +1469,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
                     skill_obj = ELEMENT("SKILL")()
                     skill_obj.setup_element(key, item.level)
                 except Exception as e:
-                    logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e), e))
+                    logger.log_err("Can not load skill %s: (%s) %s" % (key, type(e).__name__, e))
                     continue
 
                 # Store new skill.
@@ -1500,7 +1506,7 @@ class MudderyPlayerCharacter(ELEMENT("CHARACTER")):
             skill_obj = ELEMENT("SKILL")()
             skill_obj.setup_element(skill_key, level)
         except Exception as e:
-            logger.log_err("Can not learn skill %s: (%s) %s" % (skill_key, type(e), e))
+            logger.log_err("Can not learn skill %s: (%s) %s" % (skill_key, type(e).__name__, e))
             self.msg({"msg": _("Can not learn this skill.")})
             raise e
 

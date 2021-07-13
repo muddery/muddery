@@ -68,6 +68,16 @@ class world_rooms(BaseModels.world_rooms):
     pass
 
 
+# ------------------------------------------------------------
+#
+# rooms that can give profits to characters in the room.
+#
+# ------------------------------------------------------------
+class profit_rooms(BaseModels.profit_rooms):
+    "rooms that can give profits to characters in the room."
+    pass
+
+
 #------------------------------------------------------------
 #
 # store all exits

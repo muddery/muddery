@@ -10,6 +10,7 @@ from muddery.server.mappings.element_set import ELEMENT
 from muddery.server.utils.localized_strings_handler import _
 from muddery.server.statements.statement_handler import STATEMENT_HANDLER
 from muddery.server.database.worlddata.shop_goods import ShopGoods
+from muddery.server.database.worlddata.worlddata import WorldData
 from muddery.server.elements.base_element import BaseElement
 
 
@@ -49,11 +50,13 @@ class MudderyShop(BaseElement):
         :return:
         """
         goods_data = ShopGoods.get_by_shop(self.element_key)
+
         self.goods = []
         for item in goods_data:
             goods = ELEMENT("SHOP_GOODS")()
             goods.set_data(item)
             self.goods.append(goods)
+
 
     def get_info(self, caller):
         """

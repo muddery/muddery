@@ -30,27 +30,24 @@ class MudderyShopGoods(BaseElement):
         self.available = False
 
         # load goods record
-        obj_model_name = ELEMENT("COMMON_OBJECT").model_name
+        common_models = ELEMENT("COMMON_OBJECT").get_models()
 
         try:
-            obj_record = WorldData.get_table_data(obj_model_name, key=data.goods)
-            obj_record = obj_record[0]
-            obj_models = ELEMENT_SET.get_class_modeles(obj_record.element_type)
-            obj_data = WorldData.get_tables_data(obj_models, key=data.goods)
-            obj_data = obj_data[0]
+            table_data = WorldData.get_tables_data(common_models, key=data.goods)
+            table_data = table_data[0]
         except Exception as e:
             logger.log_errmsg("Can not find goods %s." % data.goods)
             return
 
         self.obj_key = data.goods
-        self.obj_name = obj_data.name
-        self.obj_desc = obj_data.desc
-        self.obj_icon = obj_data.icon
+        self.obj_name = table_data.name
+        self.obj_desc = table_data.desc
+        self.obj_icon = table_data.icon
 
         # get price unit information
         try:
             # Get record.
-            unit_record = WorldData.get_table_data(obj_model_name, key=data.unit)
+            unit_record = WorldData.get_tables_data(common_models, key=data.unit)
             unit_record = unit_record[0]
         except Exception as e:
             logger.log_errmsg("Can not find price unit %s." % data.unit)

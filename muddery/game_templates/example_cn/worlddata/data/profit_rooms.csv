@@ -1,0 +1,2 @@
+key,interval,offline,begin_message,end_message,condition
+room_colorfulworld_printing_room,10,1,"地上散落着一些东西，你开始寻找起来。","你停止寻找，离开了房间。","is_quest_finished(""quest_find_binder"")"

@@ -186,12 +186,9 @@ class BaseElement(object):
             base_model = self.get_base_model()
             self.load_base_data(base_model, key)
 
-            # reset element type
-            if self.const_data_handler.has("element_type"):
-                if self.const.element_type:
-                    self.set_element_type(self.const.element_type)
-                else:
-                    logger.log_errmsg("%s does not have element type." % key)
+            # check element type
+            if self.const_data_handler.has("element_type") and self.const.element_type != self.element_type:
+                logger.log_errmsg("Wrong element type %s: %s" % (key, self.element_type))
 
             # Load extend data.
             self.load_extend_data(base_model, key)
@@ -252,28 +249,6 @@ class BaseElement(object):
             # Set data.
             for field_name in fields:
                 self.const_data_handler.add(field_name, getattr(record, field_name))
-
-    def set_element_type(self, element_type):
-        """
-        Set object's type.
-
-        Args:
-            element_type: (string) Element's type.
-        """
-        new_class = ELEMENT(element_type)
-        if not new_class:
-            logger.log_errmsg("Can not get the element type: %s." % element_type)
-            return
-
-        if type(self) == new_class:
-            # No change.
-            return
-
-        # Set new class.
-        self.__class__ = new_class
-        if self.element_type != element_type:
-            logger.log_errmsg("Element type %s is wrong!" % element_type)
-            return
 
     def set_level(self, level):
         """

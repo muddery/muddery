@@ -3,6 +3,7 @@ obj_money,99999999,1,0,0
 obj_guardhouse_key,1,1,1,1
 obj_binder,1,1,1,1
 obj_screw,5,1,1,1
+obj_badge,99999999,1,1,1
 weapon_wood_stick,1,1,1,1
 food_bread,10,1,1,1
 food_apple,20,1,1,1

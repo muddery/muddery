@@ -3,6 +3,7 @@ obj_money,金钱,POCKET_OBJECT,有钱能使鬼推磨。,image/icon/money.png
 obj_guardhouse_key,钥匙,POCKET_OBJECT,钥匙圈上扣着一串铜质的钥匙，它们是用来开什么门的呢？,image/icon/key.png
 obj_binder,绷带,POCKET_OBJECT,一卷绷带，还没拆封过，可以帮助止血。,image/icon/binder.png
 obj_screw,螺丝,POCKET_OBJECT,一颗螺丝，能派什么用处呢？,image/icon/screw.png
+obj_badge,徽章,POCKET_OBJECT,一枚徽章，不知道有什么用。,image/icon/badge.png
 weapon_wood_stick,木棍,EQUIPMENT,这条木棍不粗，但感觉挺结实的。,image/icon/club.png
 food_bread,面包,FOOD,面包可以帮你恢复少许生命。,image/icon/bread.png
 food_apple,苹果,FOOD,苹果可以帮你恢复少许能量。,image/icon/apple.png

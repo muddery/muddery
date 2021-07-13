@@ -243,6 +243,15 @@ class MudderyAccount(DefaultAccount):
             session.msg({"alert": _("That is not a valid character choice.")})
             return
 
+        # Send puppet info to the client first.
+        self.msg({
+            "puppet": {
+                "id": new_char.get_id(),
+                "name": new_char.get_name(),
+                "icon": getattr(new_char, "icon", None),
+            }
+        })
+
         # Set location
         try:
             location_key = CharacterLocation.load(char_db_id)

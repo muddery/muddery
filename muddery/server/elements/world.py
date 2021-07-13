@@ -50,7 +50,7 @@ class MudderyWorld(BaseElement):
         Load all areas.
         """
         records = WorldAreas.all()
-        models = ELEMENT("AREA").get_models()
+        base_model = ELEMENT("AREA").get_base_model()
         self.all_areas = {}
 
         # self.room_dict {
@@ -58,17 +58,17 @@ class MudderyWorld(BaseElement):
         # }
         self.room_dict = {}
         for record in records:
-            area_data = WorldData.get_tables_data(models, record.key)
-            area_data = area_data[0]
+            table_data = WorldData.get_table_data(base_model, key=record.key)
+            table_data = table_data[0]
 
-            new_area = ELEMENT("AREA")()
-            new_area.setup_element(area_data.key)
+            new_area = ELEMENT(table_data.element_type)()
+            new_area.setup_element(record.key)
 
             self.all_areas[new_area.get_element_key()] = new_area
 
             rooms_key = new_area.get_rooms_key()
             for key in rooms_key:
-                self.room_dict[key] = area_data.key
+                self.room_dict[key] = record.key
 
     def get_room(self, room_key):
         """

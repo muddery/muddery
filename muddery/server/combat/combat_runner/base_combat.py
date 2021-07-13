@@ -322,21 +322,18 @@ class BaseCombat(object):
 
             obj_list = []
             if loots:
-                obj_model_name = ELEMENT("COMMON_OBJECT").model_name
+                common_models = ELEMENT("COMMON_OBJECT").get_models()
 
                 for obj_info in loots:
                     try:
-                        obj_record = WorldData.get_table_data(obj_model_name, key=obj_info["object_key"])
-                        obj_record = obj_record[0]
-                        goods_models = ELEMENT_SET.get_class_modeles(obj_record.element_type)
-                        goods_data = WorldData.get_tables_data(goods_models, key=obj_info["object_key"])
-                        goods_data = goods_data[0]
+                        table_data = WorldData.get_tables_data(common_models, key=obj_info["object_key"])
+                        table_data = table_data[0]
 
                         obj_list.append({
                             "object_key": obj_info["object_key"],
                             "number": obj_info["number"],
-                            "name": goods_data.name,
-                            "icon": goods_data.icon,
+                            "name": table_data.name,
+                            "icon": table_data.icon,
                             "reject": "",
                         })
                     except Exception as e:

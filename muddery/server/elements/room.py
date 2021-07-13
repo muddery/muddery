@@ -50,13 +50,13 @@ class MudderyRoom(BaseElement):
         self.position = None
         self.background = None
 
-        self.all_exit = {}
-        self.all_object = {}
+        self.all_exits = {}
+        self.all_objects = {}
 
         # character_list: {
         #   character's id: character's object
         # }
-        self.all_character = {}
+        self.all_characters = {}
 
     def at_element_setup(self, first_time):
         """
@@ -68,13 +68,13 @@ class MudderyRoom(BaseElement):
         self.set_desc(self.const.desc)
         self.set_icon(self.const.icon)
 
-        self.all_exit = {}
-        self.all_object = {}
+        self.all_exits = {}
+        self.all_objects = {}
 
         # character_list: {
         #   character's id: character's object
         # }
-        self.all_character = {}
+        self.all_characters = {}
 
         self.peaceful = self.const.peaceful
 
@@ -117,15 +117,15 @@ class MudderyRoom(BaseElement):
         """
         records = WorldNPCs.get_location(self.get_element_key())
         models = ELEMENT("WORLD_NPC").get_models()
-        self.all_character = {}
+        self.all_characters = {}
         for record in records:
             tables_data = WorldData.get_tables_data(models, record.key)
             tables_data = tables_data[0]
 
-            new_obj = ELEMENT("WORLD_NPC")()
+            new_obj = ELEMENT(tables_data.element_type)()
             new_obj.setup_element(tables_data.key, level=tables_data.level, first_time=True)
 
-            self.all_character[new_obj.get_id()] = new_obj
+            self.all_characters[new_obj.get_id()] = new_obj
 
     def load_exits(self):
         """
@@ -135,15 +135,15 @@ class MudderyRoom(BaseElement):
         """
         records = WorldExits.get_location(self.get_element_key())
         models = ELEMENT("EXIT").get_models()
-        self.all_exit = {}
+        self.all_exits = {}
         for record in records:
             tables_data = WorldData.get_tables_data(models, record.key)
             tables_data = tables_data[0]
 
-            new_obj = ELEMENT("EXIT")()
+            new_obj = ELEMENT(tables_data.element_type)()
             new_obj.setup_element(tables_data.key)
 
-            self.all_exit[record.key] = {
+            self.all_exits[record.key] = {
                 "destination": tables_data.destination,
                 "verb": tables_data.verb,
                 "condition": tables_data.condition,
@@ -158,15 +158,15 @@ class MudderyRoom(BaseElement):
         """
         records = WorldObjects.get_location(self.get_element_key())
         models = ELEMENT("WORLD_OBJECT").get_models()
-        self.all_object = {}
+        self.all_objects = {}
         for record in records:
             tables_data = WorldData.get_tables_data(models, record.key)
             tables_data = tables_data[0]
 
-            new_obj = ELEMENT("WORLD_OBJECT")()
+            new_obj = ELEMENT(tables_data.element_type)()
             new_obj.setup_element(record.key)
 
-            self.all_object[record.key] = {
+            self.all_objects[record.key] = {
                 "condition": tables_data.condition,
                 "obj": new_obj,
             }
@@ -178,7 +178,7 @@ class MudderyRoom(BaseElement):
         :param char_id:
         :return:
         """
-        return self.all_character[char_id]
+        return self.all_characters[char_id]
 
     def get_object(self, object_key):
         """
@@ -187,7 +187,7 @@ class MudderyRoom(BaseElement):
         :param object_key:
         :return:
         """
-        return self.all_object[object_key]["obj"]
+        return self.all_objects[object_key]["obj"]
 
     def get_exit(self, exit_key):
         """
@@ -196,17 +196,17 @@ class MudderyRoom(BaseElement):
         :param exit_key:
         :return:
         """
-        return self.all_exit[exit_key]["obj"]
+        return self.all_exits[exit_key]["obj"]
 
     def can_unlock_exit(self, caller, exit_key):
         """
         Unlock an exit. Add the exit's key to the character's unlock list.
         """
-        if exit_key not in self.all_exit:
+        if exit_key not in self.all_exits:
             caller.msg({"msg": _("Can not unlock this exit.")})
             return False
 
-        exit_obj = self.all_exit[exit_key]["obj"]
+        exit_obj = self.all_exits[exit_key]["obj"]
         if not exit_obj.can_unlock(caller):
             caller.msg({"msg": _("Can not unlock this exit.")})
             return False
@@ -220,7 +220,7 @@ class MudderyRoom(BaseElement):
         :param exit_key:
         :return:
         """
-        exit_obj = self.all_exit[exit_key]["obj"]
+        exit_obj = self.all_exits[exit_key]["obj"]
         return exit_obj.get_appearance(caller)
 
     def msg_characters(self, msg, exclude=None):
@@ -231,9 +231,9 @@ class MudderyRoom(BaseElement):
         :return:
         """
         if exclude:
-            chars = [char for char_id, char in self.all_character.items() if char_id not in exclude]
+            chars = [char for char_id, char in self.all_characters.items() if char_id not in exclude]
         else:
-            chars = self.all_character.values()
+            chars = self.all_characters.values()
 
         for char in chars:
             char.msg(msg)
@@ -246,7 +246,7 @@ class MudderyRoom(BaseElement):
         character (Object): The character moved into this one
 
         """
-        self.all_character[character.get_id()] = character
+        self.all_characters[character.get_id()] = character
 
         # send surrounding changes to player
         char_is_player = is_player(character)
@@ -267,7 +267,7 @@ class MudderyRoom(BaseElement):
         :return:
         """
         try:
-            del self.all_character[character.get_id()]
+            del self.all_characters[character.get_id()]
         except KeyError:
             pass
 
@@ -352,7 +352,7 @@ class MudderyRoom(BaseElement):
         Get this room's exits.
         """
         exits = {}
-        for key, item in self.all_exit.items():
+        for key, item in self.all_exits.items():
             if item["destination"]:
                 exits[key] = {
                     "from": self.get_element_key(),
@@ -370,14 +370,14 @@ class MudderyRoom(BaseElement):
 
         if not GAME_SETTINGS.get("solo_mode"):
             # Players can not see other players in solo mode.
-            info["players"] = [item.get_appearance(caller) for key, item in self.all_character.items()
+            info["players"] = [item.get_appearance(caller) for key, item in self.all_characters.items()
                                if is_player(item) and item.get_id() != caller.get_id() and item.is_visible(caller)]
 
-        info["npcs"] = [item.get_appearance(caller) for key, item in self.all_character.items()
+        info["npcs"] = [item.get_appearance(caller) for key, item in self.all_characters.items()
                          if not is_player(item) and item.is_visible(caller)]
-        info["exits"] = [item["obj"].get_appearance(caller) for key, item in self.all_exit.items()
+        info["exits"] = [item["obj"].get_appearance(caller) for key, item in self.all_exits.items()
                          if item["obj"].is_visible(caller)]
-        info["objects"] = [item["obj"].get_appearance(caller) for key, item in self.all_object.items()
+        info["objects"] = [item["obj"].get_appearance(caller) for key, item in self.all_objects.items()
                            if item["obj"].is_visible(caller)]
 
         return info

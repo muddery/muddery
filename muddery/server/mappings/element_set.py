@@ -121,7 +121,7 @@ class ElementSet(object):
 
         return element_types
 
-    def get_class_modeles(self, key):
+    def get_class_models(self, key):
         """
         Get an element type's models.
         """
