@@ -117,6 +117,7 @@ class MudderyBaseObject(BaseTypeclass, DefaultObject):
         self.action = None
         self.condition = None
         self.icon = None
+        self.desc = ""
 
     def at_init(self):
         """
