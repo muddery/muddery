@@ -23,6 +23,7 @@ from evennia.utils.picklefield import PickledObjectField
 from evennia.utils.utils import lazy_property, to_str, make_iter, is_iter
 
 _TYPECLASS_AGGRESSIVE_CACHE = settings.TYPECLASS_AGGRESSIVE_CACHE
+_TYPECLASS_FULL_CACHE = settings.TYPECLASS_FULL_CACHE
 
 # -------------------------------------------------------------
 #
@@ -234,12 +235,14 @@ class AttributeHandler(object):
         self._catcache = {}
         # full cache was run on all attributes
         self._cache_complete = False
+        if _TYPECLASS_FULL_CACHE:
+            self._fullcache()
 
     def _query_all(self):
         "Fetch all Attributes on this object"
         query = {
             "%s__id" % self._model: self._objid,
-            "attribute__db_model__iexact": self._model,
+            "attribute__db_model__exact": self._model,
             "attribute__db_attrtype": self._attrtype,
         }
         return [
@@ -312,10 +315,10 @@ class AttributeHandler(object):
             else:
                 query = {
                     "%s__id" % self._model: self._objid,
-                    "attribute__db_model__iexact": self._model,
+                    "attribute__db_model__exact": self._model,
                     "attribute__db_attrtype": self._attrtype,
-                    "attribute__db_key__iexact": key.lower(),
-                    "attribute__db_category__iexact": category.lower() if category else None,
+                    "attribute__db_key__exact": key.lower(),
+                    "attribute__db_category__exact": category.lower() if category else None,
                 }
                 if not self.obj.pk:
                     return []
@@ -343,9 +346,9 @@ class AttributeHandler(object):
                 # we have to query to make this category up-date in the cache
                 query = {
                     "%s__id" % self._model: self._objid,
-                    "attribute__db_model__iexact": self._model,
+                    "attribute__db_model__exact": self._model,
                     "attribute__db_attrtype": self._attrtype,
-                    "attribute__db_category__iexact": category.lower() if category else None,
+                    "attribute__db_category__exact": category.lower() if category else None,
                 }
                 attrs = [
                     conn.attribute

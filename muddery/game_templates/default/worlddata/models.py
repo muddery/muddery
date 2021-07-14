@@ -223,6 +223,16 @@ class character_states_dict(BaseModels.character_states_dict):
 
 # ------------------------------------------------------------
 #
+# Element's custom properties
+#
+# ------------------------------------------------------------
+class element_properties(BaseModels.element_properties):
+    "Store object's custom properties."
+    pass
+
+
+# ------------------------------------------------------------
+#
 # store all npcs
 #
 # ------------------------------------------------------------

@@ -1105,6 +1105,7 @@ span.bgblack { background-color: black;}
     text-align: center;
     color: #333;
     font-size: 0.12rem;
+    white-space: nowrap;
     background: no-repeat center;
     background-image: var(--main-exit-button);
     background-size: 100% 100%;
@@ -1121,6 +1122,7 @@ span.bgblack { background-color: black;}
     color: #fff;
     font-size: 0.12rem;
     font-weight: 700;
+    white-space: nowrap;
     background: no-repeat center;
     background-image: var(--main-exit-center);
     background-size: 100% 100%;

@@ -101,7 +101,7 @@ class MudderyProfitRoom(ELEMENT("ROOM")):
                 if not get_objects:
                     continue
 
-                msg_templates = {item["object_key"]: item["msg_template"] for item in obj_list}
+                msg_templates = {item["object_key"]: item["message"] for item in obj_list}
                 message = ""
                 for item in get_objects:
                     if message:

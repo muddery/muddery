@@ -48,6 +48,7 @@ class ConditionFuncSet(BaseStatementFuncSet):
         self.add(condition.FuncObjectsMoreThan)
         self.add(condition.FuncObjectsLessThan)
 
+        self.add(condition.FuncHasSkill)
         self.add(condition.FuncSkillEqualTo)
         self.add(condition.FuncSkillMoreThan)
         self.add(condition.FuncSkillLessThan)
@@ -74,6 +75,3 @@ class SkillFuncSet(BaseStatementFuncSet):
         Load statement functions here.
         """
         self.add(skill.FuncEscape)
-        self.add(skill.FuncHeal)
-        self.add(skill.FuncHit)
-        self.add(skill.FuncIncreaseMaxHP)

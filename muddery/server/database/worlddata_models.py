@@ -666,7 +666,7 @@ class loot_list(models.Model):
     message = models.TextField(blank=True)
 
     # The key of a quest.
-    # if it is not empty, the player must have this quest, or will not drop
+    # if it is not empty, the player must have this quest but not accomplish this quest.
     quest = models.CharField(max_length=KEY_LENGTH, blank=True)
 
     # condition of the drop

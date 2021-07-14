@@ -57,7 +57,6 @@ class MudderyShop(BaseElement):
             goods.set_data(item)
             self.goods.append(goods)
 
-
     def get_info(self, caller):
         """
         Get shop information.
