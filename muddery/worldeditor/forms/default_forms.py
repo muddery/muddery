@@ -6,6 +6,7 @@ from muddery.server.mappings.quest_status_set import QUEST_STATUS_SET
 from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.mappings.event_trigger_set import EVENT_TRIGGER_SET
 from muddery.worldeditor.dao import common_mappers as CM
+from muddery.worldeditor.dao.general_query_mapper import get_element_base_data
 from muddery.worldeditor.forms.location_field import LocationField
 from muddery.worldeditor.forms.image_field import ImageField
 
@@ -53,17 +54,20 @@ class GameSettingsForm(forms.ModelForm):
         super(GameSettingsForm, self).__init__(*args, **kwargs)
         
         choices = [("", "---------")]
-        objects = CM.WORLD_ROOMS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
-        self.fields['default_home_key'] = forms.ChoiceField(choices=choices, required=False)
+        records = get_element_base_data("ROOM")
+        choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
         self.fields['start_location_key'] = forms.ChoiceField(choices=choices, required=False)
         self.fields['default_player_home_key'] = forms.ChoiceField(choices=choices, required=False)
 
         choices = [("", "---------")]
-        objects = CM.CHARACTERS.all_with_base()
-        choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects
-                            if obj["typeclass"]=="PLAYER_CHARACTER"])
+        records = get_element_base_data("PLAYER_CHARACTER")
+        choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
         self.fields['default_player_character_key'] = forms.ChoiceField(choices=choices, required=False)
+
+        choices = [("", "---------")]
+        records = get_element_base_data("STAFF_CHARACTER")
+        choices.extend([(record.key, record.name + " (" + record.key + ")") for record in records])
+        self.fields['default_staff_character_key'] = forms.ChoiceField(choices=choices, required=False)
 
         localize_form_fields(self)
 

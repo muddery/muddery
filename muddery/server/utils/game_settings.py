@@ -72,7 +72,6 @@ GAME_SETTINGS = GameSettings({
     "can_give_up_quests": True,
     "can_close_dialogue": False,
     "auto_resume_dialogues": True,
-    "default_home_key": "",
     "start_location_key": "",
     "default_player_home_key": "",
     "default_player_character_key": "",

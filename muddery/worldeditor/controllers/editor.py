@@ -14,18 +14,18 @@ from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.database.worlddata.worlddata import WorldData
 
 
-class QueryAllTypeclasses(BaseRequestProcesser):
+class QueryAllElements(BaseRequestProcesser):
     """
     Query all elements.
 
     Args:
         None.
     """
-    path = "query_all_typeclasses"
+    path = "query_all_elements"
     name = ""
 
     def func(self, args, request):
-        data = data_query.query_all_typeclasses()
+        data = data_query.query_all_elements()
         return success_response(data)
 
 
@@ -127,23 +127,23 @@ class QueryAreas(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryTypeclassProperties(BaseRequestProcesser):
+class QueryElementProperties(BaseRequestProcesser):
     """
-    Query a typeclass's properties.
+    Query an element's properties.
 
     Args:
-        typeclass: (string) typeclass's key.
+        element: (string) element's type.
     """
-    path = "query_typeclass_properties"
+    path = "query_element_properties"
     name = ""
 
     def func(self, args, request):
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element".')
 
-        typeclass = args["typeclass"]
+        element_type = args["element"]
 
-        data = data_query.query_typeclass_properties(typeclass)
+        data = data_query.query_element_properties(element_type)
         return success_response(data)
 
 

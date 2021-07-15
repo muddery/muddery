@@ -12,7 +12,7 @@ from muddery.worldeditor.dao import common_mappers as CM
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
 from muddery.worldeditor.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
 from muddery.worldeditor.dao.world_exits_mapper import WORLD_EXITS_MAPPER
-from muddery.worldeditor.dao import general_query_mapper, model_mapper
+from muddery.worldeditor.dao.general_query_mapper import get_record_by_key, get_record, get_all_from_tables, filter_records
 from muddery.worldeditor.dao.element_properties_mapper import ELEMENT_PROPERTIES
 from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
@@ -21,10 +21,9 @@ from muddery.server.mappings.event_action_set import EVENT_ACTION_SET
 from muddery.server.utils.defines import EventType
 from muddery.server.utils.exception import MudderyError, ERR
 from muddery.server.utils.localized_strings_handler import _
-from worlddata import models
 
 
-def query_all_typeclasses():
+def query_all_elements():
     """
     Query all elements.
     """
@@ -49,15 +48,16 @@ def query_areas():
     return areas
 
 
-def query_typeclass_properties(typeclass_key):
+def query_element_properties(element_type):
     """
-    Query a typeclass's properties.
+    Query an element's custom properties.
 
     Args:
-        typeclass_key: (string) typeclass' key.
+        element_type: (string) the element' type
     """
-    fields = query_fields("properties_dict")
-    records = CM.PROPERTIES_DICT.filter(typeclass=typeclass_key)
+    table_name = "properties_dict"
+    fields = query_fields(table_name)
+    records = filter_records(table_name, element_type=element_type)
     rows = []
     for record in records:
         line = [str(record.serializable_value(field["name"])) for field in fields]
@@ -157,7 +157,7 @@ def query_object_level_properties(object_key, level):
 
     # Get typeclass from the object's record
     table_name = ELEMENT("OBJECT").model_name
-    record = general_query_mapper.get_record_by_key(table_name, object_key)
+    record = get_record_by_key(table_name, object_key)
     obj_typeclass = record.typeclass
 
     properties_info = ELEMENT(obj_typeclass).get_properties_info()
@@ -241,7 +241,7 @@ def get_event_data_table(self, event_key):
     fields = query_fields(self.model_name)
     rows = []
 
-    record = general_query_mapper.get_record(self.model_name, event_key=event_key)
+    record = get_record(self.model_name, event_key=event_key)
     line = [str(record.serializable_value(field["name"])) for field in fields]
     rows.append(line)
 
@@ -301,7 +301,7 @@ def query_typeclass_table(typeclass_key):
         fields.extend([field for field in table_fields if field["name"] != "id" and field["name"] != "key"])
 
     # get all tables' data
-    records = general_query_mapper.get_all_from_tables(tables)
+    records = get_all_from_tables(tables)
 
     rows = []
     for record in records:

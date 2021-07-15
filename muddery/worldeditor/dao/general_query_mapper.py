@@ -6,6 +6,7 @@ from django.apps import apps
 from django.conf import settings
 from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
+from muddery.server.mappings.element_set import ELEMENT
 
 
 def get_all_fields(table_name):
@@ -200,3 +201,14 @@ def get_tables_record_by_key(tables, key):
         return dict(zip(columns, record))
     else:
         raise ObjectDoesNotExist
+
+
+def get_element_base_data(element_type):
+    """
+    Query the base data of an element_type.
+
+    :param element_type:
+    :return:
+    """
+    base_model = ELEMENT(element_type).get_base_model()
+    return filter_records(base_model, element_type=element_type)

@@ -89,12 +89,7 @@ CommonTable.prototype.queryTableSuccess = function(data) {
 
 // Parse fields data to table headers.
 CommonTable.prototype.parseFields = function(fields) {
-    var cols = [{
-        field: "operate",
-        title: "Operate",
-        formatter: this.operateButton,
-    }];
-
+    var cols = [];
     for (var i = 0; i < fields.length; i++) {
         cols.push({
             field: fields[i].name,
@@ -102,6 +97,12 @@ CommonTable.prototype.parseFields = function(fields) {
             sortable: true,
         });
     }
+
+    cols.push({
+        field: "operate",
+        title: "",
+        formatter: this.operateButton,
+    });
 
     return cols;
 }

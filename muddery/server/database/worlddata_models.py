@@ -75,13 +75,6 @@ class game_settings(models.Model):
     auto_resume_dialogues = models.BooleanField(blank=True, default=True)
 
     # The key of a world room.
-    # It is the default home location used for all objects. This is used as a
-    # fallback if an object's normal home location is deleted. It is the
-    # key of the room. If it is empty, the home will be set to the first
-    # room in WORLD_ROOMS.
-    default_home_key = models.CharField(max_length=KEY_LENGTH, blank=True)
-
-    # The key of a world room.
     # The start position for new characters. It is the key of the room.
     # If it is empty, the home will be set to the first room in WORLD_ROOMS.
     start_location_key = models.CharField(max_length=KEY_LENGTH, blank=True)

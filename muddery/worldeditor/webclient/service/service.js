@@ -367,15 +367,15 @@ service = {
         this.sendRequest("query_data_file_types", "", {}, callback_success, callback_failed, context);
     },
 
-    queryAllTypeclasses: function(callback_success, callback_failed, context) {
-        this.sendRequest("query_all_typeclasses", "", {}, callback_success, callback_failed, context);
+    queryAllElements: function(callback_success, callback_failed, context) {
+        this.sendRequest("query_all_elements", "", {}, callback_success, callback_failed, context);
     },
 
-    queryTypeclassProperties: function(typeclass, callback_success, callback_failed, context) {
+    queryElementProperties: function(element, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass
+            element: element
         };
-        this.sendRequest("query_typeclass_properties", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_element_properties", "", args, callback_success, callback_failed, context);
     },
 
     queryObjectProperties: function(typeclass, obj_key, callback_success, callback_failed, context) {
