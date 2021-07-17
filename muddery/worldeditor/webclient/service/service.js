@@ -142,11 +142,11 @@ service = {
         this.sendRequest("query_record", "", args, callback_success, callback_failed, context);
     },
 
-    queryTypeclassTable: function(typeclass, callback_success, callback_failed, context) {
+    queryElementTable: function(element_type, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass
+            element: element_type
         };
-        this.sendRequest("query_typeclass_table", "", args, callback_success, callback_failed, context);
+        this.sendRequest("query_element_table", "", args, callback_success, callback_failed, context);
     },
 
     queryForm: function(table_name, record_id, callback_success, callback_failed, context) {
@@ -164,10 +164,10 @@ service = {
         this.sendRequest("query_form_first_record", "", args, callback_success, callback_failed, context);
     },
 
-    queryObjectForm: function(base_typeclass, obj_typeclass, obj_key, callback_success, callback_failed, context) {
+    queryObjectForm: function(base_element_type, obj_element_type, obj_key, callback_success, callback_failed, context) {
         var args = {
-            base_typeclass: base_typeclass,
-            obj_typeclass: obj_typeclass,
+            base_element_type: base_element_type,
+            obj_element_type: obj_element_type,
             obj_key: obj_key
         };
         this.sendRequest("query_object_form", "", args, callback_success, callback_failed, context);
@@ -371,16 +371,16 @@ service = {
         this.sendRequest("query_all_elements", "", {}, callback_success, callback_failed, context);
     },
 
-    queryElementProperties: function(element, callback_success, callback_failed, context) {
+    queryElementProperties: function(element_type, callback_success, callback_failed, context) {
         var args = {
-            element: element
+            element_type: element_type
         };
         this.sendRequest("query_element_properties", "", args, callback_success, callback_failed, context);
     },
 
-    queryObjectProperties: function(typeclass, obj_key, callback_success, callback_failed, context) {
+    queryObjectProperties: function(element_type, obj_key, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass,
+            element_type: element_type,
             obj_key: obj_key
         };
         this.sendRequest("query_object_properties", "", args, callback_success, callback_failed, context);

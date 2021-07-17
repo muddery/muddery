@@ -12,7 +12,7 @@ from muddery.worldeditor.dao import common_mappers as CM
 from muddery.worldeditor.dao.common_mappers import WORLD_AREAS
 from muddery.worldeditor.dao.world_rooms_mapper import WORLD_ROOMS_MAPPER
 from muddery.worldeditor.dao.world_exits_mapper import WORLD_EXITS_MAPPER
-from muddery.worldeditor.dao.general_query_mapper import get_record_by_key, get_record, get_all_from_tables, filter_records
+from muddery.worldeditor.dao.general_query_mapper import get_record_by_key, get_record, get_all_from_tables, filter_records, get_all_records
 from muddery.worldeditor.dao.element_properties_mapper import ELEMENT_PROPERTIES
 from muddery.worldeditor.dao.event_mapper import get_object_event
 from muddery.worldeditor.services.general_query import query_fields
@@ -70,28 +70,32 @@ def query_element_properties(element_type):
     return table
 
 
-def query_object_properties(typeclass_key, object_key):
+def query_object_properties(element_type, object_key):
     """
     Query all properties of the given object.
 
     Args:
-        typeclass_key: (string) typeclass' key.
+        element_type: (string) the object's element type.
         object_key: (string) object' key.
     """
     # Get fields.
     fields = []
-    fields.append({"name": "level",
-                   "label": _("Level"),
-                   "help_text": _("Properties's level.")})
+    fields.append({
+        "name": "level",
+        "label": _("Level"),
+        "help_text": _("Properties's level.")
+    })
 
-    properties_info = ELEMENT(typeclass_key).get_properties_info()
+    properties_info = ELEMENT(element_type).get_properties_info()
     for key, info in properties_info.items():
         if info["mutable"]:
             continue
 
-        fields.append({"name": key,
-                       "label": info["name"],
-                       "help_text": info["desc"]})
+        fields.append({
+            "name": key,
+            "label": info["name"],
+            "help_text": info["desc"]
+        })
 
     if len(fields) == 1:
         # No custom properties.
@@ -228,6 +232,7 @@ def query_object_events(object_key):
 
     return table
 
+
 def get_event_data_table(self, event_key):
     """
     Query all actions of an event.
@@ -274,39 +279,47 @@ def query_event_action_data(action_type, event_key):
     return record
 
 
-def query_typeclass_table(typeclass_key):
+def query_element_table(element_type):
     """
     Query a table of objects of the same typeclass.
 
     Args:
-        typeclass_key: (string) typeclass's key.
+        element_type: (string) element's type
     """
-    typeclass_cls = ELEMENT(typeclass_key)
-    if not typeclass_cls:
-        raise MudderyError(ERR.no_table, "Can not find typeclass %s" % typeclass_key)
+    element_class = ELEMENT(element_type)
+    if not element_class:
+        raise MudderyError(ERR.no_table, "Can not find the element %s" % element_type)
 
     # get all tables' name
-    tables = typeclass_cls.get_models()
+    tables = element_class.get_models()
+    print("tables: %s" % tables)
     if not tables:
-        raise MudderyError(ERR.no_table, "Can not get tables of %s" % typeclass_key)
+        raise MudderyError(ERR.no_table, "Can not get tables of %s" % element_type)
 
     # get all tables' fields
     # add the first table
     table_fields = query_fields(tables[0])
+    print("table_fields: %s" % table_fields)
     fields = [field for field in table_fields if field["name"] != "id"]
 
-    # add other tables
-    for table in tables[1:]:
-        table_fields = query_fields(table)
-        fields.extend([field for field in table_fields if field["name"] != "id" and field["name"] != "key"])
+    if len(tables) == 1:
+        records = get_all_records(tables[0])
+        rows = []
+        for record in records:
+            line = [str(record.serializable_value(field["name"])) for field in fields]
+            rows.append(line)
+    else:
+        # add other tables
+        for table in tables[1:]:
+            table_fields = query_fields(table)
+            fields.extend([field for field in table_fields if field["name"] != "id" and field["name"] != "key"])
 
-    # get all tables' data
-    records = get_all_from_tables(tables)
-
-    rows = []
-    for record in records:
-        line = [str(record[field["name"]]) for field in fields]
-        rows.append(line)
+        # get all tables' data
+        records = get_all_from_tables(tables)
+        rows = []
+        for record in records:
+            line = [str(record[field["name"]]) for field in fields]
+            rows.append(line)
 
     table = {
         "fields": fields,

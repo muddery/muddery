@@ -69,24 +69,24 @@ class QueryTable(BaseRequestProcesser):
         return success_response(data)
 
 
-class QueryTypeclassTable(BaseRequestProcesser):
+class QueryElementTable(BaseRequestProcesser):
     """
     Query a table of objects of the same typeclass.
 
     Args:
         typeclass: (string) typeclass's key.
     """
-    path = "query_typeclass_table"
+    path = "query_element_table"
     name = ""
 
     def func(self, args, request):
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element".')
 
-        typeclass_key = args["typeclass"]
+        element_type = args["element"]
 
         # Query data.
-        data = data_query.query_typeclass_table(typeclass_key)
+        data = data_query.query_element_table(element_type)
         return success_response(data)
 
 
@@ -138,10 +138,10 @@ class QueryElementProperties(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        if 'element' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "element".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
-        element_type = args["element"]
+        element_type = args["element_type"]
 
         data = data_query.query_element_properties(element_type)
         return success_response(data)
@@ -149,26 +149,26 @@ class QueryElementProperties(BaseRequestProcesser):
 
 class QueryObjectProperties(BaseRequestProcesser):
     """
-    Query a typeclass's properties.
+    Query an object's properties.
 
     Args:
-        typeclass: (string) object's typeclass
+        element_type: (string) object's element type
         obj_key: (string) object's key.
     """
     path = "query_object_properties"
     name = ""
 
     def func(self, args, request):
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
         if 'obj_key' not in args:
             raise MudderyError(ERR.missing_args, 'Missing the argument: "obj_key".')
 
-        typeclass_key = args["typeclass"]
+        element_type = args["element_type"]
         obj_key = args["obj_key"]
 
-        data = data_query.query_object_properties(typeclass_key, obj_key)
+        data = data_query.query_object_properties(element_type, obj_key)
         return success_response(data)
 
 
@@ -493,14 +493,14 @@ class QueryObjectForm(BaseRequestProcesser):
         if not args:
             raise MudderyError(ERR.missing_args, 'Missing arguments.')
 
-        if 'base_typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_typeclass".')
+        if 'base_element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "base_element_type".')
 
-        base_typeclass = args["base_typeclass"]
-        obj_typeclass = args.get('obj_typeclass', None)
+        base_element_type = args["base_element_type"]
+        obj_element_type = args.get('obj_element_type', None)
         obj_key = args.get('obj_key', None)
 
-        data = data_edit.query_object_form(base_typeclass, obj_typeclass, obj_key)
+        data = data_edit.query_object_form(base_element_type, obj_element_type, obj_key)
         return success_response(data)
 
 

@@ -126,34 +126,34 @@ def delete_records(table_name, **kwargs):
     general_query_mapper.delete_records(table_name, **kwargs)
 
 
-def query_object_form(base_typeclass, obj_typeclass, obj_key):
+def query_object_form(base_element_type, obj_element_type, obj_key):
     """
     Query all data of an object.
 
     Args:
-        base_typeclass: (string) candidate typeclass group.
-        obj_typeclass: (string, optional) object's typeclass. If it is empty, use the typeclass of the object
-                        or use base typeclass as object's typeclass.
+        base_element_type: (string) the base element of the object.
+        obj_element_type: (string, optional) object's element type. If it is empty, use the element type of the object
+                        or use the base element type.
         obj_key: (string) object's key. If it is empty, query an empty form.
     """
-    candidate_typeclasses = ELEMENT_SET.get_group(base_typeclass)
-    if not candidate_typeclasses:
-        raise MudderyError(ERR.no_table, "Can not find typeclass: %s" % base_typeclass)
+    candidate_element_types = ELEMENT_SET.get_group(base_element_type)
+    if not candidate_element_types:
+        raise MudderyError(ERR.no_table, "Can not find the element: %s" % base_element_type)
 
-    if not obj_typeclass:
+    if not obj_element_type:
         if obj_key:
-            # Get typeclass from the object's record
-            table_name = ELEMENT("OBJECT").model_name
+            # Get the element type from the object's record
+            table_name = ELEMENT(base_element_type).model_name
             record = general_query_mapper.get_record_by_key(table_name, obj_key)
-            obj_typeclass = record.typeclass
+            obj_element_type = record.element_type
         else:
-            # Or use the base typeclass
-            obj_typeclass = base_typeclass
+            # Or use the base element type
+            obj_element_type = base_element_type
 
-    typeclass = ELEMENT_SET.get(obj_typeclass)
-    if not typeclass:
-        raise MudderyError(ERR.no_table, "Can not find typeclass: %s" % obj_typeclass)
-    table_names = typeclass.get_models()
+    element = ELEMENT_SET.get(obj_element_type)
+    if not element:
+        raise MudderyError(ERR.no_table, "Can not get the element: %s" % obj_element_type)
+    table_names = element.get_models()
 
     forms = []
     for table_name in table_names:
@@ -162,17 +162,20 @@ def query_object_form(base_typeclass, obj_typeclass, obj_key):
         else:
             object_form = query_form(table_name)
 
-        forms.append({"table": table_name,
-                      "fields": object_form})
+        forms.append({
+            "table": table_name,
+            "fields": object_form
+        })
 
     # add elements
     if len(forms) > 0:
         for field in forms[0]["fields"]:
-            if field["name"] == "typeclass":
-                # set typeclass to the new value
-                field["value"] = obj_typeclass
+            if field["name"] == "element_type":
+                # set the element type to the new value
+                field["value"] = obj_element_type
                 field["type"] = "Select"
-                field["choices"] = [(key, cls.typeclass_name + " (" + key + ")") for key, cls in candidate_typeclasses.items()]
+                field["choices"] = [(key, element.element_name + " (" + key + ")")
+                                    for key, element in candidate_element_types.items()]
                 break
 
     return forms
@@ -360,7 +363,7 @@ def update_object_key(typeclass_key, old_key, new_key):
         # Update relative room's location.
         model_name = ELEMENT("ROOM").model_name
         if model_name:
-            general_query_mapper.filter_records(model_name, location=old_key).update(location=new_key)
+            general_query_mapper.filter_records(model_name, area=old_key).update(area=new_key)
     elif issubclass(typeclass, ELEMENT("ROOM")):
         # Update relative exit's location.
         model_name = ELEMENT("EXIT").model_name

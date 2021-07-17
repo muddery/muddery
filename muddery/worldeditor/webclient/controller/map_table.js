@@ -10,15 +10,15 @@ MapTable.prototype = prototype(CommonTable.prototype);
 MapTable.prototype.constructor = MapTable;
 
 MapTable.prototype.init = function() {
-    this.typeclass = "AREA";
+    this.element = "AREA";
 
     this.bindEvents();
 
-    service.queryTypeclassTable(this.typeclass, this.queryTableSuccess, this.queryTableFailed);
+    service.queryElementTable(this.element, this.queryTableSuccess, this.queryTableFailed);
 }
 
 MapTable.prototype.refresh = function() {
-    service.queryTypeclassTable(this.typeclass, this.refreshTableSuccess);
+    service.queryElementTable(this.element, this.refreshTableSuccess);
 }
 
 MapTable.prototype.onAdd = function(e) {

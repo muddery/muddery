@@ -5,8 +5,8 @@
 ObjectEditor = function() {
 	CommonEditor.call(this);
 
-    this.base_typeclass = "";
-    this.obj_typeclass = "";
+    this.base_element_type = "";
+    this.obj_element_type = "";
     this.obj_key = "";
     this.table_fields = [];
 
@@ -22,7 +22,7 @@ ObjectEditor.prototype = prototype(CommonEditor.prototype);
 ObjectEditor.prototype.constructor = ObjectEditor;
 
 ObjectEditor.prototype.init = function() {
-    this.base_typeclass = utils.getQueryString("typeclass");
+    this.base_element_type = utils.getQueryString("element_type");
     this.obj_key = utils.getQueryString("object");
     this.no_delete = utils.getQueryString("no_delete");
 
@@ -39,7 +39,7 @@ ObjectEditor.prototype.init = function() {
         $("#delete-record").removeClass("hidden");
     }
 
-    $("#form-name").text(this.base_typeclass);
+    $("#form-name").text(this.base_element_type);
 
     this.bindEvents();
     this.refresh();
@@ -92,10 +92,12 @@ ObjectEditor.prototype.onSave = function() {
 ObjectEditor.prototype.confirmDelete = function(e) {
     window.parent.controller.hideWaiting();
 
-    service.deleteObject(controller.obj_key,
-                         controller.base_typeclass,
-                         controller.deleteSuccess,
-                         controller.failedCallback);
+    service.deleteObject(
+        controller.obj_key,
+        controller.base_element_type,
+        controller.deleteSuccess,
+        controller.failedCallback
+    );
 }
 
 ObjectEditor.prototype.onAddEvent = function(e) {
@@ -108,7 +110,7 @@ ObjectEditor.prototype.onAddEvent = function(e) {
     var record = "";
     var args = {
         trigger: controller.obj_key,
-        typeclass: controller.obj_typeclass,
+        element_type: controller.obj_element_type,
     }
     window.parent.controller.editRecord(editor, controller.event_table, record, args);
 }
@@ -119,7 +121,7 @@ ObjectEditor.prototype.onEditEvent = function(e) {
         var editor = "object_event";
         var args = {
             trigger: controller.obj_key,
-             typeclass: controller.obj_typeclass,
+            element_type: controller.obj_element_type,
         }
         window.parent.controller.editRecord(editor, controller.event_table, record_id, args);
     }
@@ -195,11 +197,13 @@ ObjectEditor.prototype.deletePropertiesSuccess = function(data) {
  ***********************************/
 ObjectEditor.prototype.refresh = function() {
     // Query object form.
-    service.queryObjectForm(this.base_typeclass,
-                            this.obj_typeclass,
-                            this.obj_key,
-                            this.queryFormSuccess,
-                            this.failedCallback);
+    service.queryObjectForm(
+        this.base_element_type,
+        this.obj_element_type,
+        this.obj_key,
+        this.queryFormSuccess,
+        this.failedCallback
+    );
 }
 
 ObjectEditor.prototype.uploadSuccess = function(field_name) {
@@ -229,17 +233,17 @@ ObjectEditor.prototype.uploadSuccess = function(field_name) {
 
 ObjectEditor.prototype.queryFormSuccess = function(data) {
     controller.table_fields = data;
-    controller.obj_typeclass = "";
+    controller.obj_element_type = "";
     controller.obj_key = "";
 
-    // Get object's typeclass.
-    for (var t = 0; t < data.length && !controller.obj_typeclass; t++) {
+    // Get object's element type.
+    for (var t = 0; t < data.length && !controller.obj_element_type; t++) {
         var fields = data[t].fields;
         for (var f = 0; f < fields.length; f++) {
-            if (fields[f].name == "typeclass") {
+            if (fields[f].name == "element_type") {
                 var value = fields[f].value;
                 if (value) {
-                    controller.obj_typeclass = value;
+                    controller.obj_element_type = value;
                 }
                 break;
             }
@@ -279,19 +283,25 @@ ObjectEditor.prototype.queryFormSuccess = function(data) {
     }
 
     // Query events.
-    service.queryObjectEventTriggers(controller.obj_typeclass,
-                                     controller.queryEventTriggersSuccess,
-                                     controller.failedCallback);
+    service.queryObjectEventTriggers(
+        controller.obj_element_type,
+        controller.queryEventTriggersSuccess,
+        controller.failedCallback
+    );
 
-    service.queryObjectEvents(controller.obj_key,
-                              controller.queryEventTableSuccess,
-                              controller.failedCallback);
+    service.queryObjectEvents(
+        controller.obj_key,
+        controller.queryEventTableSuccess,
+        controller.failedCallback
+    );
 
     // Query custom properties.
-    service.queryObjectProperties(controller.obj_typeclass,
-                                  controller.obj_key,
-                                  controller.queryObjectPropertiesSuccess,
-                                  controller.failedCallback);
+    service.queryObjectProperties(
+        controller.obj_element_type,
+        controller.obj_key,
+        controller.queryObjectPropertiesSuccess,
+        controller.failedCallback
+    );
 }
 
 ObjectEditor.prototype.queryEventTriggersSuccess = function(data) {
@@ -417,16 +427,16 @@ ObjectEditor.prototype.setFields = function() {
         }
     }
 
-    container.find(".control-item-typeclass select").on("change", this.onTypeclassChange);
+    container.find(".control-item-element-type select").on("change", this.onElementTypeChanged);
 
     window.parent.controller.setFrameSize();
 }
 
-ObjectEditor.prototype.onTypeclassChange = function(e) {
-    var typeclass = this.value;
+ObjectEditor.prototype.onElementTypeChanged = function(e) {
+    var element_type = this.value;
 
-    if (controller.obj_typeclass != typeclass) {
-        controller.obj_typeclass = typeclass;
+    if (controller.obj_element_type != element_type) {
+        controller.obj_element_type = element_type;
         controller.refresh();
     }
 }
@@ -471,16 +481,18 @@ ObjectEditor.prototype.saveForm = function(callback_success, callback_failed, co
         tables[t].values["key"] = key;
     }
 
-    context["typeclass"] = this.base_typeclass;
+    context["element_type"] = this.base_element_type;
     context["key"] = key;
 
-    service.saveObjectForm(tables,
-                           this.base_typeclass,
-                           this.obj_typeclass,
-                           this.obj_key,
-                           callback_success,
-                           callback_failed,
-                           context);
+    service.saveObjectForm(
+        tables,
+        this.base_element_type,
+        this.obj_element_type,
+        this.obj_key,
+        callback_success,
+        callback_failed,
+        context
+    );
 }
 
 // Parse fields data to table headers.

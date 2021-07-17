@@ -144,7 +144,7 @@ class WorldRoomsForm(ObjectsForm):
         choices = [("", "---------")]
         objects = CM.WORLD_AREAS.all_with_base()
         choices.extend([(obj["key"], obj["name"] + " (" + obj["key"] + ")") for obj in objects])
-        self.fields['location'] = forms.ChoiceField(choices=choices)
+        self.fields['area'] = forms.ChoiceField(choices=choices)
 
         self.fields['icon'] = ImageField(image_type="icon", required=False)
 

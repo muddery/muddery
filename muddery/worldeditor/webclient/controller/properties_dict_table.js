@@ -6,8 +6,7 @@ PropertiesDictTable = function() {
 	CommonTable.call(this);
 
 	this.table_name = "properties_dict";
-
-	this.element = "";
+	this.element_type = "";
 }
 
 PropertiesDictTable.prototype = prototype(CommonTable.prototype);
@@ -17,7 +16,7 @@ PropertiesDictTable.prototype.init = function() {
     this.bindEvents();
 
     service.queryAllElements(this.queryAllElementsSuccess, this.queryTableFailed);
-    service.queryElementProperties(this.element, this.queryTableSuccess);
+    service.queryElementProperties(this.element_type, this.queryTableSuccess);
 }
 
 
@@ -33,9 +32,9 @@ PropertiesDictTable.prototype.bindEvents = function() {
 }
 
 PropertiesDictTable.prototype.onSelectElementChange = function(e) {
-    controller.element = $(this).val();
+    controller.element_type = $(this).val();
 
-    service.queryElementProperties(controller.element, controller.refreshTableSuccess);
+    service.queryElementProperties(controller.element_type, controller.refreshTableSuccess);
 }
 
 PropertiesDictTable.prototype.queryAllElementsSuccess = function(data) {
@@ -91,19 +90,19 @@ PropertiesDictTable.prototype.setTreeLevel = function(source, target, node, leve
 
 PropertiesDictTable.prototype.refresh = function() {
     service.queryElementProperties(
-        this.element,
+        this.element_type,
         this.refreshTableSuccess,
         this.failedCallback
     );
 }
 
 PropertiesDictTable.prototype.onAdd = function(e) {
-    window.parent.controller.editPropertiesDict(controller.element);
+    window.parent.controller.editPropertiesDict(controller.element_type);
 }
 
 PropertiesDictTable.prototype.onEdit = function(e) {
     var record_id = $(this).attr("data-record-id");
     if (record_id) {
-        window.parent.controller.editPropertiesDict(controller.element, record_id);
+        window.parent.controller.editPropertiesDict(controller.element_type, record_id);
     }
 }

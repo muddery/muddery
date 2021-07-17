@@ -265,27 +265,27 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editObject: function(typeclass, object_key, no_delete) {
-        var url = "object_editor.html?typeclass=" + typeclass;
+    editObject: function(element_type, object_key, no_delete) {
+        var url = "object_editor.html?element_type=" + element_type;
 
         var name = "";
         if (object_key) {
-            name = "Edit " + typeclass;
+            name = "Edit " + element_type;
             url += "&object=" + object_key;
             if (no_delete) {
                 url += "&no_delete=1";
             }
         }
         else {
-            name = "Add " + typeclass;
+            name = "Add " + element_type;
         }
 
         controller.pushPage(name, url, null);
     },
 
-    createObject: function(typeclass, field_values) {
-        var url = "object_editor.html?typeclass=" + typeclass;
-        var name = "Add " + typeclass;
+    createObject: function(element_type, field_values) {
+        var url = "object_editor.html?element_type=" + element_type;
+        var name = "Add " + element_type;
 
         controller.pushPage(name, url, field_values);
     },
@@ -304,8 +304,8 @@ controller = {
         controller.pushPage(name, url, null);
     },
 
-    editPropertiesDict: function(typeclass, record_id) {
-        var url = "properties_dict_editor.html?typeclass=" + typeclass;
+    editPropertiesDict: function(element_type, record_id) {
+        var url = "properties_dict_editor.html?element_type=" + element_type;
 
         var name = "";
         if (record_id) {
