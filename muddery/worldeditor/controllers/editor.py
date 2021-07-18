@@ -264,12 +264,12 @@ class QueryObjectEventTriggers(BaseRequestProcesser):
     name = ""
 
     def func(self, args, request):
-        if 'typeclass' not in args:
-            raise MudderyError(ERR.missing_args, 'Missing the argument: "typeclass".')
+        if 'element_type' not in args:
+            raise MudderyError(ERR.missing_args, 'Missing the argument: "element_type".')
 
-        typeclass = args["typeclass"]
+        element_type = args["element_type"]
 
-        data = data_query.query_object_event_triggers(typeclass)
+        data = data_query.query_object_event_triggers(element_type)
         return success_response(data)
 
 

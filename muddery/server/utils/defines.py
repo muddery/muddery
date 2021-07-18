@@ -36,7 +36,7 @@ COMBAT_DRAW = "COMBAT_DRAW"                 # no one wins the combat
 COMBAT_ESCAPED = "COMBAT_ESCAPED"             # escaped from the combat
 
 
-class EventType(Enum):
+class EventType(str, Enum):
     # event trigger types
     EVENT_TRIGGER_ARRIVE = "EVENT_TRIGGER_ARRIVE"       # at attriving a room. object: room_id
     EVENT_TRIGGER_KILL = "EVENT_TRIGGER_KILL"           # caller kills one. object: dead_one_id

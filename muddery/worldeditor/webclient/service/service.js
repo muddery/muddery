@@ -181,9 +181,9 @@ service = {
      *  Args:
      *      object_key: (string) the object's key.
      */
-    queryObjectEventTriggers: function(typeclass_key, callback_success, callback_failed, context) {
+    queryObjectEventTriggers: function(element_type, callback_success, callback_failed, context) {
         var args = {
-            typeclass: typeclass_key
+            element_type: element_type
         };
         this.sendRequest("query_object_event_triggers", "", args, callback_success, callback_failed, context);
     },

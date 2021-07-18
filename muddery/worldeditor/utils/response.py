@@ -29,9 +29,11 @@ def success_response(data=None):
     Args:
         data: respond data.
     """
-    content = json.dumps({"code": 0,
-                          "msg": "success",
-                          "data": data})
+    content = json.dumps({
+        "code": 0,
+        "msg": "success",
+        "data": data,
+    })
     return HttpResponse(content, content_type="application/json")
 
 
@@ -45,9 +47,11 @@ def error_response(code=-1, data=None, msg=None):
         msg: respond mseeage.
         data: respond data.
     """
-    content = json.dumps({"code": code,
-                          "msg": msg,
-                          "data": data})
+    content = json.dumps({
+        "code": code,
+        "msg": msg,
+        "data": data,
+    })
     return HttpResponse(content, content_type="application/json")
 
 

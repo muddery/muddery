@@ -14,14 +14,14 @@
 ObjectEventEditor = function() {
 	EventEditor.call(this);
 
-    this.trigger_typeclass = "";
+    this.trigger_element_type = "";
 }
 
 ObjectEventEditor.prototype = prototype(EventEditor.prototype);
 ObjectEventEditor.prototype.constructor = ObjectEventEditor;
 
 ObjectEventEditor.prototype.init = function() {
-    this.trigger_typeclass = utils.getQueryString("typeclass");
+    this.trigger_element_type = utils.getQueryString("element_type");
     EventEditor.prototype.init.call(this);
 }
 
@@ -29,5 +29,5 @@ ObjectEventEditor.prototype.queryAreasSuccess = function(data) {
     controller.areas = data;
 
     // Query available event trigger types.
-    service.queryObjectEventTriggers(controller.trigger_typeclass, controller.queryEventTriggersSuccess, controller.failedCallback);
+    service.queryObjectEventTriggers(controller.trigger_element_type, controller.queryEventTriggersSuccess, controller.failedCallback);
 }

@@ -191,15 +191,15 @@ def query_object_level_properties(object_key, level):
     return fields
 
 
-def query_object_event_triggers(typeclass_key):
+def query_object_event_triggers(element_type):
     """
-    Query all event triggers of the given typeclass.
+    Query all event triggers of the given element type.
 
     Args:
-        typeclass_key: (string) the object's typeclass_key.
+        element_type: (string) the object's element type.
     """
     try:
-        return ELEMENT(typeclass_key).get_event_trigger_types()
+        return ELEMENT(element_type).get_event_trigger_types()
     except Exception as e:
         return []
 
@@ -292,14 +292,12 @@ def query_element_table(element_type):
 
     # get all tables' name
     tables = element_class.get_models()
-    print("tables: %s" % tables)
     if not tables:
         raise MudderyError(ERR.no_table, "Can not get tables of %s" % element_type)
 
     # get all tables' fields
     # add the first table
     table_fields = query_fields(tables[0])
-    print("table_fields: %s" % table_fields)
     fields = [field for field in table_fields if field["name"] != "id"]
 
     if len(tables) == 1:
